@@ -1,0 +1,118 @@
+<html xmlns='http://www.w3.org/1999/xhtml'>
+    <head> 
+    <link href=\x22css/sb-admin-2.css\x22 rel=\x22stylesheet\x22>
+    <style>
+    body {background-color: #272727;}
+    h1   {color: white;}
+    a    {color: powderblue;}
+    p    {color: white; font-family: sans-serif; margin: auto; font-size: 200%;}
+    input[type=email] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    }
+    </style>
+    
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+
+    
+    <body>
+        <div style="width: 800px">
+        <p id="main">
+        <span id="statusText"></span><br>
+          
+        <form id="myForm" style="visibility: hidden">
+            <input type="email" id="email" placeholder="your email address" required></input><br><br>
+            <button id="reqbutton" style='font-family: Arial, Helvetica, sans-serif; font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>
+                Request invitation
+                </button>
+        </form>
+    </p>
+        <!-- <div id="map"></div> -->
+        </div>
+
+       <script>
+        let mapdiv = document.getElementById('map');
+        let main = document.getElementById('main');
+        function getParameterByName(name, url) {
+            if (!url) {
+                url = window.location.href;
+            }
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+        const params = getParameterByName('rq');
+        console.log("params : " + params);
+        if (params != null && params.length > 4) {
+            document.getElementById("statusText").innerHTML = "Request an invitation to scene " + params;
+            document.getElementById("myForm").style.visibility = "visible";
+        } else {
+            document.getElementById("statusText").innerHTML = "";
+            document.getElementById("myForm").style.visibility = "hidden";
+        }
+        let now = Date.now();
+        let eventCountdownEl = "";
+        let eventDurationEl = "";
+        // let data = JSON.parse(atob(params));
+        // console.log(data);  
+        let button = document.getElementById("reqbutton");
+
+        button.addEventListener("click", (event) => {   
+            event.preventDefault();
+            if (ValidateEmail()) {
+                let data = {};
+                data = {};
+
+
+                data.publicRequest = true;
+                // data.shortID = params;
+                data.short_id = params;
+                data.email = myForm.email.value;
+                console.log("tryna ax permessionz for" + params);
+                axios.post('../share_scene/', data)
+                .then(function (response) {
+                    console.log(response.data);
+                    
+                    if (response.data.toString().toLowerCase().includes("invitations sent")) {
+                        main.innerHTML = "Thanks, an invitation was sent to your email!";
+                    } else {
+                        if (response.data.toString().toLowerCase().includes("not verified")) {
+                            main.innerHTML = "Sorry, that account has not been verified";
+                        } else {
+                            main.innerHTML = "Sorry, an invitation cannot be sent to that address.";
+                        }
+                        
+                    }
+                    document.getElementById("myForm").style.visibility = "hidden";
+                }) //end of main fetch
+                .catch(function (error) {
+                    console.log(error);
+                    main.innerHTML = "Sorry, there was an error";
+                    document.getElementById("myForm").style.visibility = "hidden";
+                });
+            }
+        });
+
+        function ValidateEmail() 
+        {
+        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(myForm.email.value))
+        {
+            return (true)
+        }
+            alert("You have entered an invalid email address!")
+            return (false)
+        }
+
+            
+        </script>
+
+    </body>
+
+</html>

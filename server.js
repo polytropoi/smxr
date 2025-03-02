@@ -15081,7 +15081,26 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
 });
 
 
-app.get('/publicscenes', function (req, res) { //deprecated, see available scenes above...
+app.get('/publicscenes', async (req, res) => {
+  console.log("host is " + req.get('host'));
+
+  var availableScenesResponse = {};
+  var availableScenes = [];
+  availableScenesResponse.availableScenes = availableScenes;
+
+  const shuffleArray = ([...arr]) => {
+      let m = arr.length;
+      while (m) {
+        const i = Math.floor(Math.random() * m--);
+        [arr[m], arr[i]] = [arr[i], arr[m]];
+      }
+      return arr;
+    };
+    const sampleScenes = ([...arr], n = 1) => shuffleArray(arr).slice(0, n);
+
+});
+
+app.get('/publicscenes_old', function (req, res) { //deprecated, see available scenes above...
     console.log("host is " + req.get('host'));
     // if (req.get('host') == "servicemedia.net") {
      
