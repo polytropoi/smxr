@@ -20,13 +20,14 @@ import session from "express-session";
 import validator from "validator"; 
 // import minio from "minio";
 import helmet from "helmet";
-import ObjectID from "bson-objectid";
+// import ObjectID from "bson-objectid";
 // import { MongoDBStore } from "connect-mongodb-session";
 import async from "async";
 import bcrypt from "bcrypt-nodejs";
 import shortid from "shortid";
 import QRCode from "qrcode";
-import { MongoClient } from 'mongodb';
+import { ObjectId } from "mongodb";
+import { RunDataQuery } from "./connect/database.js"; //connection happens here
 
 
 const entities = require("entities");
@@ -55,10 +56,7 @@ app.use(helmet.permittedCrossDomainPolicies());
 app.use(helmet.referrerPolicy());
 app.use(helmet.xssFilter());
 
-    // require('./routes/oculus_routes')(app);
-    // app.cosnfigure(function(){
-        // app.use(bodyParser);
-    // });
+
 
 var stripe = require("stripe")(process.env.STRIPE_KEY);
 
@@ -86,12 +84,14 @@ var oneDay = 86400000;
 
 
 
+
+
 var databaseUrl = process.env.MONGO_URL; //main db connstring
 // console.log(databaseUrl);
 var collections = ["acl", "auth_req", "domains", "apps", "assets", "assetsbundles", "models", "users", "inventories", "inventory_items", "audio_items", "text_items", "audio_item_keys", "image_items", "video_items",
     "obj_items", "paths", "keys", "traffic", "scores", "attributes", "achievements", "activity", "actions", "purchases", "storeitems", "scenes", "groups", "weblinks", "locations", "iap"];
 
-export let db = mongojs(databaseUrl, collections);
+export let db_old = mongojs(databaseUrl, collections);
 
 var store = new MongoDBStore({ //store session info in a separate db with different user, so nice
     uri: process.env.MONGO_SESSIONS_URL,
@@ -192,19 +192,19 @@ var store = new MongoDBStore({ //store session info in a separate db with differ
     server.listen(process.env.PORT || 3000, function() {
         console.log("Express server listening on port 3000");
     });
-    app.set('db', db);
+    app.set('db', db_old);
     app.set('store', store);
     app.set('s3', s3);
 
-    db.scenes.createIndex( { short_id: -1 } );
+    db_old.scenes.createIndex( { short_id: -1 } );
 
     // INCLUDE EXTERNAL ROUTES BELOW
     // var oculus_routes = require('./routes/oculus_routes.cjs');
 
-    // import webxr_routes from './routes/webxr_routes.js';
-    // app.use('/webxr', webxr_routes);  
-    // import landing_routes from './routes/landing_routes.js';
-    // app.use('/landing', landing_routes);  
+    import webxr_routes from './routes/webxr_routes.js';
+    app.use('/webxr', webxr_routes); 
+    import landing_routes from './routes/landing_routes.js';
+    app.use('/landing', landing_routes);  
     // import unity_routes from './routes/unity_routes.js';
     // app.use('/unity', unity_routes);  
     // import gs_routes from './routes/gs_routes.js';
@@ -321,8 +321,9 @@ io.on('connection', function(socket) {
                        room = rm; //set global room value for this socket, since we can only be in one at a time
                        io.to(room).emit('user joined', socket.uname, room);
                     } else {    //maybe do lookup on join? 
-                        var oo_id = ObjectID(payload.userId);
-                        db.users.findOne({_id: oo_id}, function (err, user) {   //check user status
+                        // var oo_id = ObjectID(payload.userId);
+                        var oo_id = new ObjectId(payload.userId);
+                        db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
                             if (err != null) {
                                 socket.on("disconnect", (reason) => {
                                     console.log("closing connection because userlookup failed");
@@ -432,120 +433,120 @@ io.on('connection', function(socket) {
 });
 //*/
 
-function tokenAuthentication(token) { //use for route security?
-    jwt.verify(token, process.env.JWT_SECRET, function (err, payload) {
-        console.log(JSON.stringify(payload));
-        if (payload) {
+// function tokenAuthentication(token) { //use for route security?
+//     jwt.verify(token, process.env.JWT_SECRET, function (err, payload) {
+//         console.log(JSON.stringify(payload));
+//         if (payload) {
            
-            if (payload.userId != null){
-                console.log("gotsa payload.userId : " + payload.userId);
-                var oo_id = ObjectID(payload.userId);
-                db.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-                    if (err != null) {
-                        req.session.error = 'Access denied!';
-                        console.log("token authentication failed! User ID not found");
-                        // res.send('noauth');
-                        return ("no");
-                    } else {
-                        console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-                        if (user.status == "validated") {
-                        // userStatus = "subscriber";
-                        console.log("gotsa subscriber!");
-                        return ("yes");
-                        } else {
-                            req.session.error = 'Access denied!';
-                            console.log("token authentication failed! not a subscriber");
-                            return ("maybe");   
-                        }
-                    }
-                });
-                // next();
-            } else {
-                return ("nope");
-            }
-        } else {
-            return ("nooo");
-        }
-    });
-}
+//             if (payload.userId != null){
+//                 console.log("gotsa payload.userId : " + payload.userId);
+//                 var oo_id = ObjectID(payload.userId);
+//                 db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
+//                     if (err != null) {
+//                         req.session.error = 'Access denied!';
+//                         console.log("token authentication failed! User ID not found");
+//                         // res.send('noauth');
+//                         return ("no");
+//                     } else {
+//                         console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
+//                         if (user.status == "validated") {
+//                         // userStatus = "subscriber";
+//                         console.log("gotsa subscriber!");
+//                         return ("yes");
+//                         } else {
+//                             req.session.error = 'Access denied!';
+//                             console.log("token authentication failed! not a subscriber");
+//                             return ("maybe");   
+//                         }
+//                     }
+//                 });
+//                 // next();
+//             } else {
+//                 return ("nope");
+//             }
+//         } else {
+//             return ("nooo");
+//         }
+//     });
+// }
 
-function checkAuthentication(req) { //maybe needed later?  can just get session info in route
+// function checkAuthentication(req) { //maybe needed later?  can just get session info in route
 
-    if (req.session.user && req.session.user.status == "validated") { //check using session cookie
-        if (requirePayment) { 
-            if (req.session.user.paymentStatus == "ok") {
-                // next();
-                return "payment auth OK " + JSON.stringify(req.session.user);
-            } else {
-                req.session.error = 'Access denied! - payment status not ok';
-                res.send('payment status not OK');
-                return "payment status not OK";       
-            }
-        } else {
-            console.log("authenticated!");
-            // next();
-            return "auth OK";
-        }
-    } else {
-        if (req.headers['x-access-token'] != null) {  //check using json web token
-            var token = req.headers['x-access-token'];
-            console.log("req.headers.token: " + token);
-            jwt.verify(token, process.env.JWT_SECRET, function (err, payload) {
-                    console.log(JSON.stringify(payload));
-                    if (payload) {
-                        // user.findById(payload.userId).then(
-                        //     (doc)=>{
-                        //         req.user=doc;
-                        //         next();
-                        //     }
-                        // )
-                        // console.log("gotsa token payload: " + req.session.user._id + " vs " +  payload.userId);
-                        if (payload.userId != null){
-                            console.log("gotsa payload.userId : " + payload.userId);
-                            var oo_id = ObjectID(payload.userId);
-                            db.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-                                if (err != null) {
-                                    req.session.error = 'Access denied!';
-                                    console.log("token authentication failed! User ID not found");
-                                    // res.send('noauth');
-                                    return "token auth failed, userID not found";
-                                } else {
-                                    console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-                                    if (user.status == "validated") {
-                                    // userStatus = "subscriber";
-                                    console.log("gotsa subscriber!");
-                                    // next();
-                                    return "token auth OK";
-                                    } else {
-                                        req.session.error = 'Access denied!';
-                                        console.log("token authentication failed! not a subscriber");
-                                        // res.send('noauth');
-                                        return "token auth failed";    
-                                    }
-                                }
-                            });
-                            // next();
-                        } else {
-                            req.session.error = 'Access denied!';
-                            console.log("token authentication failed! headers: " + JSON.stringify(req.headers));
-                            // res.send('noauth');
-                            return "token auth failed";
-                        }
-                    } else {
-                        req.session.error = 'Access denied!';
-                        console.log("token authentication failed! headers: " + JSON.stringify(req.headers));
-                        // res.send('noauth');
-                        return "token auth failed";
-                    }
-            });
-        } else {
-            req.session.error = 'Access denied!';
-            console.log("authentication failed! No cookie or token found");
-            // res.send('noauth');
-            return "token auth failed";
-        }
-    }
-}
+//     if (req.session.user && req.session.user.status == "validated") { //check using session cookie
+//         if (requirePayment) { 
+//             if (req.session.user.paymentStatus == "ok") {
+//                 // next();
+//                 return "payment auth OK " + JSON.stringify(req.session.user);
+//             } else {
+//                 req.session.error = 'Access denied! - payment status not ok';
+//                 res.send('payment status not OK');
+//                 return "payment status not OK";       
+//             }
+//         } else {
+//             console.log("authenticated!");
+//             // next();
+//             return "auth OK";
+//         }
+//     } else {
+//         if (req.headers['x-access-token'] != null) {  //check using json web token
+//             var token = req.headers['x-access-token'];
+//             console.log("req.headers.token: " + token);
+//             jwt.verify(token, process.env.JWT_SECRET, function (err, payload) {
+//                     console.log(JSON.stringify(payload));
+//                     if (payload) {
+//                         // user.findById(payload.userId).then(
+//                         //     (doc)=>{
+//                         //         req.user=doc;
+//                         //         next();
+//                         //     }
+//                         // )
+//                         // console.log("gotsa token payload: " + req.session.user._id + " vs " +  payload.userId);
+//                         if (payload.userId != null){
+//                             console.log("gotsa payload.userId : " + payload.userId);
+//                             var oo_id = ObjectID(payload.userId);
+//                             db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
+//                                 if (err != null) {
+//                                     req.session.error = 'Access denied!';
+//                                     console.log("token authentication failed! User ID not found");
+//                                     // res.send('noauth');
+//                                     return "token auth failed, userID not found";
+//                                 } else {
+//                                     console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
+//                                     if (user.status == "validated") {
+//                                     // userStatus = "subscriber";
+//                                     console.log("gotsa subscriber!");
+//                                     // next();
+//                                     return "token auth OK";
+//                                     } else {
+//                                         req.session.error = 'Access denied!';
+//                                         console.log("token authentication failed! not a subscriber");
+//                                         // res.send('noauth');
+//                                         return "token auth failed";    
+//                                     }
+//                                 }
+//                             });
+//                             // next();
+//                         } else {
+//                             req.session.error = 'Access denied!';
+//                             console.log("token authentication failed! headers: " + JSON.stringify(req.headers));
+//                             // res.send('noauth');
+//                             return "token auth failed";
+//                         }
+//                     } else {
+//                         req.session.error = 'Access denied!';
+//                         console.log("token authentication failed! headers: " + JSON.stringify(req.headers));
+//                         // res.send('noauth');
+//                         return "token auth failed";
+//                     }
+//             });
+//         } else {
+//             req.session.error = 'Access denied!';
+//             console.log("authentication failed! No cookie or token found");
+//             // res.send('noauth');
+//             return "token auth failed";
+//         }
+//     }
+// }
 
 
 export function requiredAuthentication(req, res, next) { //primary auth method, used as argument in the routes below
@@ -579,7 +580,7 @@ export function requiredAuthentication(req, res, next) { //primary auth method, 
                         if (payload.userId != null){
                             console.log("gotsa payload.userId : " + payload.userId);
                             var oo_id = ObjectID(payload.userId);
-                            db.users.findOne({_id: oo_id}, function (err, user) {   //check user status
+                            db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
                                 if (err != null) {
                                     req.session.error = 'Access denied!';
                                     console.log("token authentication failed! User ID not found");
@@ -725,7 +726,7 @@ function saveTraffic (req, domain, shortID) {
             params: JSON.stringify(req.params),
            
         }
-        db.traffic.save(data, function (err, saved) {
+        db_old.traffic.save(data, function (err, saved) {
             if ( err || !saved ) {
                 console.log('traffic not saved!' + err);
                 // next();
@@ -750,7 +751,7 @@ function checkAppID(req, res, next) {
     console.log("req.headers: " + JSON.stringify(req.headers));
     if (req.headers.appid) {
         var a_id = ObjectID(req.headers.appid.toString().replace(":", ""));
-        db.apps.findOne({_id: a_id }, function (err, app) {
+        db_old.apps.findOne({_id: a_id }, function (err, app) {
             if (err || !app) {
                 console.log("no app id!");
                 req.session.error = 'Access denied!';
@@ -784,7 +785,7 @@ function amirite (acl_rule, u_id) { //check user id against acl
     // is there such a rule, and is this user id in it's userIDs array?
     //            var u_id = session.user._id;
     console.log("lookin for u_id :" + u_id + " in " + acl_rule);
-    db.acl.findOne({$and: [{acl_rule: acl_rule}, {userIDs: {$in: [u_id]}}]}, function (err, rule) {
+    db_old.acl.findOne({$and: [{acl_rule: acl_rule}, {userIDs: {$in: [u_id]}}]}, function (err, rule) {
         if (err || !rule) {
             //req.session.error = 'Access denied!';
             //res.send('noauth');
@@ -842,7 +843,7 @@ function usercheck (req, res, next) { //gotsta beez the owner of requested resou
     }
 }
 function domainadmin (req, res, next) { //TODO also check acl
-    db.users.findOne({_id: ObjectID(req.session.user._id)}, function (err, user) {
+    db_old.users.findOne({_id: ObjectID(req.session.user._id)}, function (err, user) {
         if (err || !user) {
             res.send("noauth");
         } else {
@@ -864,7 +865,7 @@ function domainadminn (req, res, next) {
     var rule = "domain_admin_" + req.params.domain.toString().replace(":", "");
     console.log("acl rule check " + rule + " vs " + u_id);
     //either admin or domain admin, admin can do everything
-    db.acl.findOne({$or :[{$and: [{acl_rule:rule }, {userIDs: {$in: [u_id]}}]}, {$and: [{acl_rule: "admin"}, {userIDs: {$in: [u_id]}}]}]}, function (err, rule) {
+    db_old.acl.findOne({$or :[{$and: [{acl_rule:rule }, {userIDs: {$in: [u_id]}}]}, {$and: [{acl_rule: "admin"}, {userIDs: {$in: [u_id]}}]}]}, function (err, rule) {
         if (err || !rule) {
             req.session.error = 'Access denied!';
             res.send('noauth');
@@ -892,7 +893,7 @@ function uscene (req, res, next) { //check user id against acl, for scene writin
         next();
     } else if (u_id == req_u_id.toString().replace(":", "")) { //hrm.... dunno why the : needs trimming...
 
-        db.acl.findOne({$and: [{"acl_rule": "write_scene_" + scene_id }, {"userIDs": {$in: [u_id]}}]}, function (err, rule) {
+        db_old.acl.findOne({$and: [{"acl_rule": "write_scene_" + scene_id }, {"userIDs": {$in: [u_id]}}]}, function (err, rule) {
             if (err || !rule) {
                 req.session.error = 'Access denied!';
                 res.send('noauth');
@@ -928,8 +929,8 @@ export function getExtension(filename) {
 }
 
 export function convertStringToObjectID (stringID) {
-    if (ObjectID.isValid(stringID)) {
-        return ObjectID(stringID);
+    if (ObjectId.isValid(stringID)) {
+        return new ObjectId(stringID);
     } else {
         return null;
     }
@@ -947,7 +948,7 @@ export function removeDuplicates(arr){
 }
 
 export function saveActivity (data) {
-    db.activity.save(data, function (err, saved) {
+    db_old.activity.save(data, function (err, saved) {
         if ( err || !saved ) {
             console.log('activity not saved..');
             // res.send("nilch");
@@ -967,7 +968,7 @@ app.post('/create_apikey/', requiredAuthentication, function(req, res){
     console.log("tryna create API Key for " + JSON.stringify(req.body.userID));
     if (uid) {
         var oo_id = ObjectID(uid);
-        db.users.findOne({_id: oo_id}, function (err, user) {  
+        db_old.users.findOne({_id: oo_id}, function (err, user) {  
             if (err || !user) {
             req.session.error = 'Create API Key Failed - user not found ' + uid;
             console.log('Create API Key Failed - user not found ' + uid);
@@ -981,7 +982,7 @@ app.post('/create_apikey/', requiredAuthentication, function(req, res){
                 let timestamp = Date.now();
                 timestamp = parseInt(timestamp);
                 let newkey = "smxr_apikey_" + uid + "_" + timestamp;
-                db.users.update( { _id: oo_id }, { $set: { 
+                db_old.users.update( { _id: oo_id }, { $set: { 
                     apikey: newkey
                 }});
                 res.send("apikey created!");
@@ -1486,7 +1487,7 @@ app.get("/ami-rite-token/:token", function (req, res) {
                         } else {   
                             console.log("gotsa payload.userId : " + payload.userId);
                             var oo_id = ObjectID(payload.userId);
-                            db.users.findOne({_id: oo_id}, function (err, user) {   //check user status
+                            db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
                             if (err != null) {
                                 req.session.error = 'Access denied!';
                                 console.log("token authentication failed! User ID not found");
@@ -1501,7 +1502,7 @@ app.get("/ami-rite-token/:token", function (req, res) {
                                     userData.userName = user.userName;
                                     userData.sceneShortID = payload.shortID;
                                     userData.authLevel = user.authLevel;
-                                    db.scenes.findOne({'short_id': userData.sceneShortID}, function (err, scene) {
+                                    db_old.scenes.findOne({'short_id': userData.sceneShortID}, function (err, scene) {
                                         if (err || !scene) {
                                             userData.sceneShortID = "not found";
                                             
@@ -1551,7 +1552,7 @@ app.get("/ami-rite/:_id", function (req, res) {
             console.log("req.session.user.authLevel :" + req.session.user.authLevel);
             if (req.session.user.userName != "guest" && req.session.user.userName != "subscriber" && req.session.user.authLevel != undefined && req.session.user.authLevel != "noauth") {
                 if (response.auth.includes("admin")) {
-                    db.apps.find({}, function (err, apps) { //TODO lookup which apps user can access in acl
+                    db_old.apps.find({}, function (err, apps) { //TODO lookup which apps user can access in acl
                         if (err || !apps) {
                             console.log("no apps anywhere!?!");
                             res.send("no apps anywhere!?!");
@@ -1560,7 +1561,7 @@ app.get("/ami-rite/:_id", function (req, res) {
                             if (response.auth.includes("domain_admin")) { 
                                 response.apps = apps;
                                 console.log("that there's a domain_admin!");
-                                db.domains.find({}, function (err, domains) { //domain admin sees all
+                                db_old.domains.find({}, function (err, domains) { //domain admin sees all
                                     if (err || !domains) {
                                         res.json(response);
                                     } else {
@@ -1571,7 +1572,7 @@ app.get("/ami-rite/:_id", function (req, res) {
                             } else { //just an admin, check acl
                                 let aclQueryArray = apps.map(AppQuery); //flatten apps array for query
                                 // console.log(aclQueryArray);
-                                db.acl.find({'acl_rule' : { $in: aclQueryArray }, 'userIDs': response.userID}, function (err, rules) {  //look for rules matching the live apps, and where the userID array has this user's ID
+                                db_old.acl.find({'acl_rule' : { $in: aclQueryArray }, 'userIDs': response.userID}, function (err, rules) {  //look for rules matching the live apps, and where the userID array has this user's ID
                                     if (err || !rules) {
                                         console.log("caint find no rules!?!");
                                     } else {
@@ -1722,7 +1723,7 @@ app.post("/logout", requiredAuthentication, function (req, res) {
 // app.post("/logout", checkAppID, requiredAuthentication, function (req, res) {
 app.post("/return_traffic_old", requiredAuthentication, function (req, res) {    
     let trafficDataMod = [];
-    db.traffic.find({}, function (err, trafficdata) {
+    db_old.traffic.find({}, function (err, trafficdata) {
         if (err || !trafficdata) {
             res.send(err);
         } else {
@@ -1750,7 +1751,7 @@ app.post("/return_traffic_old", requiredAuthentication, function (req, res) {
                     }
                     console.log("query: "+ JSON.stringify(dquery));
                     // db.scenes.find({ short_id : { $in : nodupes }}, { short_id: 1, sceneTitle: 1, sceneDomain: 1, sceneAppName: 1, _id: 0 }, function (error, scenes) { //include domains and and app names
-                    db.scenes.find(dquery, { short_id: 1, sceneTitle: 1, sceneDomain: 1, sceneAppName: 1, _id: 0 }, function (error, scenes) { //include domains and and app names
+                    db_old.scenes.find(dquery, { short_id: 1, sceneTitle: 1, sceneDomain: 1, sceneAppName: 1, _id: 0 }, function (error, scenes) { //include domains and and app names
                         if (error || !scenes) {
                             res.send(error);
                         } else {
@@ -1841,7 +1842,7 @@ app.post("/return_traffic", function (req, res) {    //umm, need to limit scope 
         }
     
         // console.log("tryna quyery for " + JSON.stringify(query));
-        db.traffic.find(query, function (err, trafficdata) {
+        db_old.traffic.find(query, function (err, trafficdata) {
             if (err || !trafficdata) {
                 res.send(err);
             } else {
@@ -1869,7 +1870,7 @@ app.post("/authreq_noasync", function (req, res) {
 // async.waterfall([
 //     function (callback) {
     if (req.body.uname == "subscriber") {
-        db.iap.findOne ({receipt : req.body.upass}, function (err, iap) {
+        db_old.iap.findOne ({receipt : req.body.upass}, function (err, iap) {
             if (err || !iap) {
                 console.log("subscriber not found");
                 username = "guest";
@@ -1879,7 +1880,7 @@ app.post("/authreq_noasync", function (req, res) {
             } else {
                 isSubscriber = true;
                 console.log("found subscriber " + iap._id);
-                db.users.findOne({userName : "subscriber"}, function (err, user) {
+                db_old.users.findOne({userName : "subscriber"}, function (err, user) {
                     if (err || !user) {
                         res.end("cain't find nothing!");
                     } else {
@@ -1903,7 +1904,7 @@ app.post("/authreq_noasync", function (req, res) {
     var un_query = {userName: username};
     var em_query = {email: req.body.umail};
 
-    db.users.find(
+    db_old.users.find(
         { $or: [un_query, em_query] }, //mongo-lian "OR" syntax...
         //password: req.body.upass},
         //{password:0},
@@ -1983,7 +1984,7 @@ app.post("/authreq", function (req, res) {
     async.waterfall([
         function (callback) {
             if (req.body.uname == "subscriber") {
-                db.iap.findOne ({receipt : req.body.upass}, function (err, iap) {
+                db_old.iap.findOne ({receipt : req.body.upass}, function (err, iap) {
                     if (err || !iap) {
                         console.log("subscriber not found");
                         // username = "guest";
@@ -2007,7 +2008,7 @@ app.post("/authreq", function (req, res) {
             var un_query = {userName: username};
             var em_query = {email: username};
             console.log("tryna find " + username);
-            db.users.find( {$or: [un_query, em_query] }, function(err, authUser) {
+            db_old.users.find( {$or: [un_query, em_query] }, function(err, authUser) {
 
                     if( err || !authUser) {
                         console.log("user not found");
@@ -2102,12 +2103,12 @@ app.post("/authreq", function (req, res) {
 
 app.get('/traffic/:domain', requiredAuthentication, admin, function (req, res) {
     console.log("tryna get traffic info for " + req.params.domain);
-    db.domains.findOne({"domain": req.params.domain}, function (err, domain) {
+    db_old.domains.findOne({"domain": req.params.domain}, function (err, domain) {
         if (err | !domain) {
             res.send("that ain't no domain");
         } else {
             
-            db.scenes.find( { "sceneDomain": sceneResponse.sceneDomain}, function (err, scenes) {
+            db_old.scenes.find( { "sceneDomain": sceneResponse.sceneDomain}, function (err, scenes) {
                 if (err || !scenes) {
                     console.log("cain't get no domain scenes for " + req.params.domain +  " " + err);
                     res.send("cain't get no domain scenes for " + req.params.domain +  " " + err);
@@ -2201,11 +2202,11 @@ app.get('/validate/:auth_id', function (req, res) {
     console.log("tryna validate...");
     //var u_id = ObjectID(req.params.auth_id);
     var timestamp = Math.round(Date.now() / 1000);
-    db.users.findOne({ validationHash : req.params.auth_id}, function (err, user) {
+    db_old.users.findOne({ validationHash : req.params.auth_id}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
         } else {
-            db.users.update( { _id: user._id }, { $set: { status: 'validated' }});
+            db_old.users.update( { _id: user._id }, { $set: { status: 'validated' }});
             console.log("validated user " + req.params.auth_id);
             // res.send("<h4>Thanks " + user.userName + ", your address has been validated! <a href=\"https://servicemedia.net/#/login\">Click here to login.</a> </h4>");
             res.send("<h4>Thanks " + user.userName + ", your address has been validated! You may now login using the credentials you supplied.  <br><br>To change your password, <a href=\"" + rootHost + "/resetpw.html\">Click here</a> </h4>");
@@ -2234,7 +2235,7 @@ app.post('/stripe_charge', requiredAuthentication, function (req,res) {
 
     // (LATER): When it's time to charge the customer again, retrieve the customer ID.
 
-    db.users.findOne({userName: req.body.uname}, function (err, user) {
+    db_old.users.findOne({userName: req.body.uname}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
         } else {
@@ -2276,10 +2277,10 @@ app.post('/stripe_collect_data', function (req,res) {
         req.body.purchaseTimestamp = purchaseTimestamp;
         req.body.chargeDetails = charge;
 
-        db.users.findOne({email: req.body.stripeEmail }, function (err, user) {
+        db_old.users.findOne({email: req.body.stripeEmail }, function (err, user) {
             if (err || ! user) { //if it's a new user
                 console.log('dinna find that email - new user!');
-                db.purchases.save(req.body, function (err, saved) { //save purchase first
+                db_old.purchases.save(req.body, function (err, saved) { //save purchase first
                     if ( err || !saved ) {
                         console.log('purchase not saved..');
         //                res.send("nilch");
@@ -2296,7 +2297,7 @@ app.post('/stripe_collect_data', function (req,res) {
                         bcrypt.genSalt(10, function(err, salt) {
                         bcrypt.hash(userPass, salt, null, function(err, hash) {
                         var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-                        db.users.save({
+                        db_old.users.save({
                                 type : 'webuser',
                                 status : 'unvalidated',
                                 userName : req.body.stripeEmail,
@@ -2370,7 +2371,7 @@ app.post('/stripe_collect_data', function (req,res) {
 
             } else {
                 console.log("tryna update payment for existing user " + req.body.stripeEmail);
-                db.purchases.save(req.body, function (err, saved) {
+                db_old.purchases.save(req.body, function (err, saved) {
                 if ( err || !saved ) {
                     console.log('purchase not saved..');
                     res.send("nilch");
@@ -2379,7 +2380,7 @@ app.post('/stripe_collect_data', function (req,res) {
                     console.log('new purchase id: ' + item_id);
                     if (item_id != null) {
                         
-                        db.users.update( { email: req.body.stripeEmail }, { $set: { stripeCustomerID: customerID, paymentStatus: "ok", lastPurchaseID : item_id }});
+                        db_old.users.update( { email: req.body.stripeEmail }, { $set: { stripeCustomerID: customerID, paymentStatus: "ok", lastPurchaseID : item_id }});
                     
                         htmlbody = "Thanks for your support, your payment was received! You should be able login as usual.<br>"+
                         "If you need to reset your password, go to " + rootHost + "/#/reset/<br>" + 
@@ -2614,14 +2615,14 @@ app.post('/stripe_collect_data', function (req,res) {
 app.get('/makedomainadmin/:domain/:_id',  checkAppID, requiredAuthentication, admin, function (req, res) {
     console.log(" makedomainadmin req" + req)
     var u_id = ObjectID(req.params._id);
-    db.users.update(
+    db_old.users.update(
         { "_id": u_id },
         {$set: { "authLevel" : "domain_admin_" + req.params.domain }}, function (err, done) {
             if (err | !done) {
                 console.log("proobalert");
                 res.send("proobalert");
             } else {
-                db.acl.update({ acl_rule: "domain_admin_" + req.params.domain }, { $push: { 'userIDs': req.params._id }}, {upsert : true},  function (err, saved) {
+                db_old.acl.update({ acl_rule: "domain_admin_" + req.params.domain }, { $push: { 'userIDs': req.params._id }}, {upsert : true},  function (err, saved) {
                     if (err || !saved) {
                         console.log("prooblemo");
                         res.send('prooblemo');
@@ -2642,7 +2643,7 @@ app.post('/updatedomain/', requiredAuthentication, admin, domainadmin, function 
     req.body.lastUpdateTimestamp = timestamp;
     req.body.lastUpdateUserID = req.session.user._id.toString();
     req.body.lastUpdateUserName = req.session.user.userName;
-    db.domains.update({"_id": ObjectID(req.body._id)},
+    db_old.domains.update({"_id": ObjectID(req.body._id)},
     {$set: {domain: req.body.domain, domainStatus: req.body.domainStatus.toLowerCase()}}, function (err, domain) {
         console.log("tryna update domain " + req.body._id);
     // db.apps.update(req.body,  function (err, app) {
@@ -2662,7 +2663,7 @@ app.post('/createdomain/', requiredAuthentication, admin, domainadmin, function 
     // req.body.appStatus = "active";
     req.body.createdByUserID = req.session.user._id.toString();
     req.body.createdByUserName = req.session.user.userName;
-    db.domains.save(req.body, function (err, domain) {
+    db_old.domains.save(req.body, function (err, domain) {
         if (err | !domain) {
             res.send("no domain for you");
         } else {
@@ -2683,7 +2684,7 @@ app.post('/createdomain/', requiredAuthentication, admin, domainadmin, function 
 // });
 app.post('/allapps/', requiredAuthentication, admin, function (req, res) {
 
-    db.apps.find({}, function (err, apps) { //TODO fetch users for each?  or resources used?
+    db_old.apps.find({}, function (err, apps) { //TODO fetch users for each?  or resources used?
         if (err | !apps) {
             console.log("no apps for admin!?!");
             res.send("no apps for admin - that ain't right!~");
@@ -2696,7 +2697,7 @@ app.post('/allapps/', requiredAuthentication, admin, function (req, res) {
 
 app.post('/remove_app_admin/', requiredAuthentication, domainadmin, function (req, res){
     console.log("tryna remove app admin " + JSON.stringify(req.body));
-    db.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $pull: { 'userIDs': req.body.user_id }}, function (err, saved) {
+    db_old.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $pull: { 'userIDs': req.body.user_id }}, function (err, saved) {
         if (err || !saved) {
             console.log("prooblemo " + err);
             res.send('prooblemo ' + err);
@@ -2710,7 +2711,7 @@ app.post('/remove_app_admin/', requiredAuthentication, domainadmin, function (re
 
 app.post('/add_app_admin/', requiredAuthentication, domainadmin, function (req, res){
     console.log("tryna add app admin " + JSON.stringify(req.body));
-    db.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $push: { 'userIDs': req.body.user_id }}, {upsert : true},  function (err, saved) {
+    db_old.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $push: { 'userIDs': req.body.user_id }}, {upsert : true},  function (err, saved) {
         if (err || !saved) {
             console.log("prooblemo " + err);
             res.send('prooblemo ' + err);
@@ -2723,12 +2724,12 @@ app.post('/add_app_admin/', requiredAuthentication, domainadmin, function (req, 
 }); 
 
 app.post('/createapp/', requiredAuthentication, admin, domainadmin, function (req, res) {
-    db.apps.find({$and: [{"appdomain": req.body.appdomain}, {"appname": req.body.appname}]}, function (err, apps) {
+    db_old.apps.find({$and: [{"appdomain": req.body.appdomain}, {"appname": req.body.appname}]}, function (err, apps) {
         if (!err && (apps == null || apps.length == 0)) {
             req.body.dateCreated = new Date();
             req.body.createdByUserID = req.session.user._id.toString();
             req.body.createdByUserName = req.session.user.userName;
-            db.apps.save(req.body, function (err, app) {
+            db_old.apps.save(req.body, function (err, app) {
                 if (err || !app) {
                     res.send("no app for you" + err);
                 } else {
@@ -2743,7 +2744,7 @@ app.post('/createapp/', requiredAuthentication, admin, domainadmin, function (re
 
 app.post('/updateapp/:appid', requiredAuthentication, admin, function (req, res) {
         console.log("tryna update appid " + req.params.appid + " body: " + JSON.stringify(req.body));
-        db.apps.update({"_id": ObjectID(req.body._id)},
+        db_old.apps.update({"_id": ObjectID(req.body._id)},
         {$set: {appname: req.body.appname, appStatus: req.body.appStatus, appdomain: req.body.appdomain, appunitydomain: req.body.appunitydomain}}, function (err, app) {
             console.log("tryna update app " + req.body._id);
         // db.apps.update(req.body,  function (err, app) {
@@ -2758,7 +2759,7 @@ app.post('/updateapp/:appid', requiredAuthentication, admin, function (req, res)
 app.post('/domain/', requiredAuthentication, domainadmin, function (req, res) {
     // console.log("tryna get domain info for " + req.params.domain);
     let oid = ObjectID(req.body._id);
-    db.domains.findOne({_id: oid}, function (err, domain) {
+    db_old.domains.findOne({_id: oid}, function (err, domain) {
         if (err | !domain) {
             res.send("no domain for you");
         } else {
@@ -2767,7 +2768,7 @@ app.post('/domain/', requiredAuthentication, domainadmin, function (req, res) {
                 const oids = domain.domainPictureIDs.map(item => {
                     return ObjectID(item);
                 })
-                db.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+                db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                     if (err || !pic_items) {
                         console.log("error getting picture items: " + err);
                         res.send("error: " + err);
@@ -2806,11 +2807,11 @@ app.post('/domain/', requiredAuthentication, domainadmin, function (req, res) {
 });
 app.get('/domain/:domain', checkAppID, requiredAuthentication, domainadmin, function (req, res) {
     console.log("tryna get domain info for " + req.params.domain);
-    db.domains.findOne({"domain": req.params.domain}, function (err, domain) {
+    db_old.domains.findOne({"domain": req.params.domain}, function (err, domain) {
         if (err | !domain) {
             res.send("no domain for you");
         } else {
-            db.apps.find({"appdomain": req.params.domain}, function(err,apps) {
+            db_old.apps.find({"appdomain": req.params.domain}, function(err,apps) {
                 if (err || !apps) {
                     console.log("no apps for you!");
                     res.json(domain);
@@ -2825,7 +2826,7 @@ app.get('/domain/:domain', checkAppID, requiredAuthentication, domainadmin, func
 app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
     console.log("tryna get app " + req.params.appID);
     let oid = ObjectID(req.params.appID);
-    db.apps.findOne({_id: oid}, function (err, app) {
+    db_old.apps.findOne({_id: oid}, function (err, app) {
         if (err | !app) {
             res.send("no apps");
         } else {
@@ -2833,7 +2834,7 @@ app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
             let appPictures = [];
             async.waterfall([
                 function (callback) {
-                    db.acl.findOne({acl_rule: "app_admin_" + req.params.appID}, function (err, acl_rule) {
+                    db_old.acl.findOne({acl_rule: "app_admin_" + req.params.appID}, function (err, acl_rule) {
                         if (err || !acl_rule) {
                             callback();
                             //no admins
@@ -2843,7 +2844,7 @@ app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
                             // app_admins = adminIDs;
                             if (IDs.length > 0) {
                                 async.each (IDs, function (ID, acallbackz) {
-                                    db.users.findOne({_id: ObjectID(ID)}, function (err, user) {
+                                    db_old.users.findOne({_id: ObjectID(ID)}, function (err, user) {
                                         if (err || !user) {
                                             //invalid uid?
                                             console.log("bad user ID for app admin!");
@@ -2907,7 +2908,7 @@ app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
                             return ObjectID(item);
                         });
                         console.log("oids " + oids);
-                        db.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+                        db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                             if (err || !pic_items) {
                                 callback();
                                 console.log("error getting picture items: " + err);
@@ -3016,7 +3017,7 @@ app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
 //     }
 // });
 app.get('/domain/:appID', checkAppID, requiredAuthentication, domainadmin, function (req, res) { //redundant? 
-    db.apps.find({"app": req.params.appID}, function (err, app) {
+    db_old.apps.find({"app": req.params.appID}, function (err, app) {
         if (err | !users) {
             res.send("no apps");
         } else {
@@ -3031,7 +3032,7 @@ app.get('/user_details/:uid', requiredAuthentication, domainadmin, function (req
     if (req.session.user.authLevel.toLowerCase().includes("domain") && req.params.uid != null) {
         let uID = ObjectID(req.params.uid);
 
-    db.users.findOne({_id: uID}, function (err, user) {
+    db_old.users.findOne({_id: uID}, function (err, user) {
         if (err || !user) {
             res.send("that user was not found");
         } else {
@@ -3047,7 +3048,7 @@ app.get('/user_details/:uid', requiredAuthentication, domainadmin, function (req
 app.get('/allusers/', requiredAuthentication, admin, function (req, res) { //todo
     console.log("tryna get users");
     if (req.session.user.authLevel.toLowerCase().includes("domain")) {
-    db.users.find({}, function (err, users) {
+    db_old.users.find({}, function (err, users) {
         if (err | !users) {
             res.send("wtf! no users!?!?!");
         } else {
@@ -3061,7 +3062,7 @@ app.get('/allusers/', requiredAuthentication, admin, function (req, res) { //tod
 
 app.get('/alldomains/', requiredAuthentication, admin, function (req, res) {
     console.log("tryna get domains");
-    db.domains.find({}, function (err, users) {
+    db_old.domains.find({}, function (err, users) {
         if (err | !users) {
             res.send("wtf! no domains!?!?!");
         } else {
@@ -3073,9 +3074,9 @@ app.get('/alldomains/', requiredAuthentication, admin, function (req, res) {
 app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) { //rem'd checkAppID, bc profiles can cross app lines
 
     console.log("tryna profile...");
-    var u_id = ObjectID(req.params._id);
+    var u_id = new ObjectId(req.params._id);
     let profileResponse = {};
-    db.users.findOne({"_id": u_id}, function (err, user) {
+    db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
         } else {
@@ -3091,7 +3092,7 @@ app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) 
 
                     function (callback) {
                         // if (user.activitiesID != undefined && user.activitiesID != null) {
-                            db.activities.find({userID: u_id}, function(err, activities){
+                            db_old.activities.find({userID: u_id}, function(err, activities){
                                 if (err || !activities) {
                                     console.log("no activities");
                                     // res.json(profileResponse);
@@ -3146,7 +3147,7 @@ app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) 
 //                         });
 //                     },
                     function (callback) {
-                        db.inventory_items.find({"userID": u_id}, function(err, items){
+                        db_old.inventory_items.find({"userID": u_id}, function(err, items){
                             if (err || !items) {
                                 console.log("no inventory items for user " + req.params._id);
                                 callback(null);
@@ -3157,7 +3158,7 @@ app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) 
                         })
                     },
                     function (callback) {
-                        db.scores.find({"userID": req.params._id}, function (err, scores) {
+                        db_old.scores.find({"userID": req.params._id}, function (err, scores) {
                             if (err || !scores) {
                                 console.log("no scores");
 //                                      res.json(profileResponse);
@@ -3171,7 +3172,7 @@ app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) 
 
                     },
                     function (callback) {
-                        db.purchases.find({"userID": req.params._id}, function (err, purchases) {
+                        db_old.purchases.find({"userID": req.params._id}, function (err, purchases) {
                             if (err || !purchases) {
                                 console.log("no purchases");
 //                                      res.json(profileResponse);
@@ -3223,7 +3224,7 @@ app.get('/inventory/:_id', requiredAuthentication, usercheck, function (req, res
     console.log("tryna get inventory for ... " + req.params._id);
     var u_id = ObjectID(req.params._id);
     let profileResponse = null;
-    db.users.findOne({"_id": u_id}, function (err, user) {
+    db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
         } else {
@@ -3236,7 +3237,7 @@ app.get('/inventory/:_id', requiredAuthentication, usercheck, function (req, res
                 function (callback) {
                     if (user.inventoryID != undefined && user.inventoryID != null) {
                         let a_id = ObjectID(user.inventoryID); 
-                        db.inventories.findOne({"_id": a_id}, function (err, inventory) {
+                        db_old.inventories.findOne({"_id": a_id}, function (err, inventory) {
                             if (err || !inventory) {
                                 console.log("no inventories");
     //                          res.json(profileResponse);
@@ -3272,7 +3273,7 @@ app.get('/inventory/:_id', requiredAuthentication, usercheck, function (req, res
 app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
     if (req.params._id != undefined && req.params._id != null && ObjectID.isValid(req.params._id)) { 
         var u_id = ObjectID(req.params._id);
-        db.inventory_items.find({"userID": u_id}, function (err, items){
+        db_old.inventory_items.find({"userID": u_id}, function (err, items){
             if (err || !items) {
                 res.send("nope");
             } else {
@@ -3288,14 +3289,14 @@ app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
 
 app.post('/update_profile/:_id', requiredAuthentication, function (req, res) { //for end users to change their personal data
     var u_id = ObjectID(req.params.auth_id);
-    db.users.findOne({"_id": u_id}, function (err, user) {
+    db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
 
         } else {
             console.log("users authlevel : " + user.authLevel);
 
-            db.users.update({ _id: o_id }, { $set: {
+            db_old.users.update({ _id: o_id }, { $set: {
                 // authLevel : req.body.authLevel
 //                    profilePic : profilePic
             }});
@@ -3318,7 +3319,7 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
         function (callback) { //check object
             // let sceneInventoryID = scene.sceneInventoryID;
             let o_id = ObjectID(req.body.inventoryObj.objectID);
-            db.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
+            db_old.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
                 if (err || !obj) {
                     console.log("no object found for drop");
                     callback(err);
@@ -3335,12 +3336,12 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
             });
         },  
         function (callback) { //check scene
-            db.scenes.findOne({"short_id": req.body.inScene}, function (err, scene){
+            db_old.scenes.findOne({"short_id": req.body.inScene}, function (err, scene){
                 if (err || !scene) {
                     console.log("error finding scene to dropin! " + err);
                     callback(err);
                 } else {
-                    db.inventory_items.find({$and: [{"sceneID" : scene._id, "objectID": ObjectID(req.body.inventoryObj.objectID)}]}, function (err, items) { //query to get count below
+                    db_old.inventory_items.find({$and: [{"sceneID" : scene._id, "objectID": ObjectID(req.body.inventoryObj.objectID)}]}, function (err, items) { //query to get count below
                         if (err || !items) {
                             console.log("no scene for drop!");
                             callback(err);
@@ -3349,7 +3350,7 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
                             if (items.length > maxperscene) {
                                 callback("maxed per scene!");
                             } else {
-                                db.inventory_items.updateOne({"_id": i_id}, {
+                                db_old.inventory_items.updateOne({"_id": i_id}, {
                                 $unset: {userID: ""}, 
                                 $set: {sceneID : ObjectID(scene._id), location : req.body.inventoryObj.location}
                             }, function (err, saved) { //unset userID and set the sceneID for ownership reference
@@ -3390,7 +3391,7 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
     async.waterfall([
                   
         function (callback) { //check scene
-            db.scenes.findOne({"short_id": req.body.inScene}, function (err, scene) {
+            db_old.scenes.findOne({"short_id": req.body.inScene}, function (err, scene) {
                 if (err || !scene) {
                     console.log("no scene for drop!");
                     callback(err);
@@ -3406,7 +3407,7 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
                 sceneInventoryID = scene.sceneInventoryID;
                 let s_id = ObjectID(scene.sceneInventoryID);
                 // let o_id = ObjectID(req.body.inventoryObj.objectID);
-                db.inventories.findOne({"_id": s_id}, function (err, inventory) {//check for scene inventory record
+                db_old.inventories.findOne({"_id": s_id}, function (err, inventory) {//check for scene inventory record
                     if (err || !inventory) {
                         console.log("no scene inventory?2");
                         callback(err);
@@ -3423,7 +3424,7 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
         function (callback) { //check object
             // let sceneInventoryID = scene.sceneInventoryID;
             let o_id = ObjectID(req.body.inventoryObj.objectID);
-            db.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
+            db_old.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
                 if (err || !obj) {
                     console.log("no object found for drop");
                     callback(err);
@@ -3484,13 +3485,13 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
             console.log("trynna lookup scene invnetory " + sceneInventoryID);
             let s_id = ObjectID(sceneInventoryID);
             let i_obj = req.body.inventoryObj;
-            db.inventories.findOne({'_id': s_id },function (err, inventory){  
+            db_old.inventories.findOne({'_id': s_id },function (err, inventory){  
                 if (err || !inventory) {
                      callback("no drop");
                     
                 } else {
                     // console.log("inventory: " + JSON.stringify(inventory));
-                    db.inventories.update({'_id': s_id }, { $push: { inventoryItems: i_obj }}, {upsert: false}, function (err, saved) { //add to scene inventory
+                    db_old.inventories.update({'_id': s_id }, { $push: { inventoryItems: i_obj }}, {upsert: false}, function (err, saved) { //add to scene inventory
                         if (err || !saved) {
                             console.log("problemo with inventory rm " + err);
                             // res.send("inventory update error " + err);
@@ -3520,14 +3521,14 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
             // });
         },        
         function (callback) {
-            db.inventories.findOne({_id: i_id}, function (err, inventory) { //check for player inventory record
+            db_old.inventories.findOne({_id: i_id}, function (err, inventory) { //check for player inventory record
                 if (err || !inventory) {
                     console.log("error getting user inventory: " + err);
                     callback(err);
                     // res.send("user inventory not found!");
                 } else {
                     console.log("ploayer inventory found with count " + inventory.inventoryItems.length);
-                    db.inventories.update({ "_id": i_id }, { $pull: { inventoryItems: {objectID: req.body.inventoryObj.objectID, timestamp: req.body.inventoryObj.timestamp} }}, function (err, saved) { //remove from player inventory
+                    db_old.inventories.update({ "_id": i_id }, { $pull: { inventoryItems: {objectID: req.body.inventoryObj.objectID, timestamp: req.body.inventoryObj.timestamp} }}, function (err, saved) { //remove from player inventory
                         if (err || !saved) {
                             console.log("problemo with inventory rm " + err);
                             // res.send("inventory update error " + err);
@@ -3545,7 +3546,7 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
                 // console.log(JSON.stringify(req.body.action));
                 var u_id = ObjectID(req.session.user._id);
                 if (req.session.user._id != req.body.userData.userID) {
-                    db.users.findOne({"_id": u_id}, function (err, user) {  
+                    db_old.users.findOne({"_id": u_id}, function (err, user) {  
                         if (err || !user) {
                             console.log("error getting user: " + err);
                             // res.send("bad user4");
@@ -3566,7 +3567,7 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
                                 // actionItem.objectName = req.body.object_item.name;
                                 actionItem.timestamp = timestamp;
                                 actionItem.fromScene = req.body.fromScene;
-                                db.activities.insertOne(actionItem);
+                                db_old.activities.insertOne(actionItem);
                                 // db.activities.update({ _id: a_id }, { $push: { actionItems: actionItem }}, {upsert: false}, function (err, saved) {
                                 //     if (err || !saved) {
                                 //         // res.send('profcblemo ' + err);
@@ -3620,7 +3621,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
             function (callback) {
                 // var u_id = ObjectID(req.session.user._id);
                 if (req.session.user._id != req.body.userData.userID) {
-                    db.users.findOne({"_id": u_id}, function (err, user) {  
+                    db_old.users.findOne({"_id": u_id}, function (err, user) {  
                         if (err || !user) {
                             console.log("error getting user: " + err);
                             callback("baduserdatazz~!");
@@ -3673,7 +3674,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                 if (req.body.fromSceneInventory) { 
                     console.log("tryna lookup scene inventory " + req.body.fromSceneInventory + " sceneID " + req.body.sceneID + " obhjectID " + req.body.object_item._id); //this is sceneID now
                     // let s_id = ObjectID(req.body.fromSceneInventory);
-                    db.inventory_items.findOne({$and: [{"sceneID" : ObjectID(req.body.sceneID), "objectID": ObjectID(req.body.object_item._id)}]}, function (err, item){ //pick one if > 1? by timestamp?
+                    db_old.inventory_items.findOne({$and: [{"sceneID" : ObjectID(req.body.sceneID), "objectID": ObjectID(req.body.object_item._id)}]}, function (err, item){ //pick one if > 1? by timestamp?
                         if (err || !item) {
                             console.log("error getting a sceneID! " + err);
                             callback(null);
@@ -3714,7 +3715,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
             function (callback) {
                 if (sceneInventoryID != null) { //if this isn't null the pickup object came from the scene inventory, so just need to reassign it to user
                     console.log("sceneInventoryID " + sceneInventoryID);
-                    db.inventory_items.updateOne({"_id": sceneInventoryID}, {$unset: {sceneID: ""}, $set: {"userID" : ObjectID(req.body.userData._id)}}, function (err, saved) {
+                    db_old.inventory_items.updateOne({"_id": sceneInventoryID}, {$unset: {sceneID: ""}, $set: {"userID" : ObjectID(req.body.userData._id)}}, function (err, saved) {
                         if (err || !saved) {
                             callback("error switching ownerszsipzt! " + err);
                         } else {
@@ -3728,7 +3729,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                     if (req.body.object_item.maxPerUser != undefined && req.body.object_item.maxPerUser != null && 
                         req.body.object_item.maxPerUser != 0 && req.body.object_item.maxPerUser != "0") {
                         
-                        db.inventory_items.find({$and: [{"userID" : ObjectID(req.body.userData._id), "objectID": ObjectID(req.body.object_item._id)}]}, function (err, items) {
+                        db_old.inventory_items.find({$and: [{"userID" : ObjectID(req.body.userData._id), "objectID": ObjectID(req.body.object_item._id)}]}, function (err, items) {
                             if (err) {
                                 console.log(err);
                                 callback(err);
@@ -3740,7 +3741,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                                         console.log("userCurrentCount: " + items.length + " maxPerUser: " + req.body.object_item.maxPerUser);
                                         callback("maxed!");
                                     } else {
-                                        db.inventory_items.insertOne(inventoryItem, function (err, saved){
+                                        db_old.inventory_items.insertOne(inventoryItem, function (err, saved){
                                             if (err || !saved) {
                                                 callback(err);
                                             } else {
@@ -3752,7 +3753,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                                 
                                 } else {
                                     console.log("tryna add inventory item......");
-                                    db.inventory_items.insertOne(inventoryItem, function (err, saved) {
+                                    db_old.inventory_items.insertOne(inventoryItem, function (err, saved) {
                                         if (err || !saved) {
                                             callback(err);
                                         } else {
@@ -3764,7 +3765,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                             }
                         }); 
                     } else {
-                        db.inventory_items.insertOne(inventoryItem, function (err, saved){
+                        db_old.inventory_items.insertOne(inventoryItem, function (err, saved){
                             if (err || !saved) {
                                 callback(err);
                             } else {
@@ -3844,7 +3845,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
 
     
             function (callback) {
-                db.activities.insertOne(actionItem, function(err, saved){
+                db_old.activities.insertOne(actionItem, function(err, saved){
                     if (err || !saved) {
                         callback(err);
                     } else {
@@ -3979,13 +3980,13 @@ app.post('/update_user/', requiredAuthentication, admin, function (req, res) { /
     // var u_id = ObjectID(req.params.auth_id);
     let o_id = ObjectID(req.body._id);
     if (o_id != null) {
-        db.users.findOne({"_id": o_id}, function (err, user) {
+        db_old.users.findOne({"_id": o_id}, function (err, user) {
             if (err || !user) {
                 console.log("error getting user: " + err);
                 res.send("error: " + err);
             } else {
             
-                db.users.update({ _id: o_id }, { $set: {
+                db_old.users.update({ _id: o_id }, { $set: {
                     authLevel : req.body.authLevel,
                     paymentStatus: req.body.paymentStatus,
                     status: req.body.status,
@@ -4003,7 +4004,7 @@ app.post('/update_user/', requiredAuthentication, admin, function (req, res) { /
 app.post('/update_userassets/', requiredAuthentication, function (req, res) {
     var u_id = req.body.user_id;
     console.log("tryna update userassets for " + u_id);
-    var resp = db.assets.update( { "user_id": u_id }, { $set : req.body}, {upsert: true});
+    var resp = db_old.assets.update( { "user_id": u_id }, { $set : req.body}, {upsert: true});
 
 //    db.people.findAndModify({
 //        query: { name: "Pascal", state: "active", rating: 25 },
@@ -4070,7 +4071,7 @@ app.get('/get_userassets/:_id', requiredAuthentication, usercheck, function (req
     //         }
     //     });
     // } else {
-        db.assets.find({"user_id": req.params._id}, function (err, assets) {
+        db_old.assets.find({"user_id": req.params._id}, function (err, assets) {
             if (err || !assets) {
                 console.log("error getting user assets: " + err);
             } else {
@@ -4083,7 +4084,7 @@ app.get('/get_userassets/:_id', requiredAuthentication, usercheck, function (req
 
 app.get('/get_models/:_id', requiredAuthentication, function (req, res) {
     console.log("tryna get_models for " + req.params._id );
-        db.models.find({"userID": req.params._id}, function (err, models) {
+        db_old.models.find({"userID": req.params._id}, function (err, models) {
             if (err || !models) {
                 console.log("error getting user assets: " + err);
             } else {
@@ -4094,29 +4095,49 @@ app.get('/get_models/:_id', requiredAuthentication, function (req, res) {
     // }
 });
 app.get('/get_model/:_id', requiredAuthentication, function (req, res) {
-    var model_id = ObjectID(req.params._id);
-    console.log("tryna get_models for " + req.params._id );
-        db.models.findOne({"_id": model_id}, function (err, model) {
-            if (err || !model) {
-                console.log("error getting model: " + err);
-                res.send(err);
-            } else {
-                (async () => {
-                    try {
+    var model_id = new ObjectId(req.params._id);
+    console.log("tryna get_model for " + req.params._id );
+      
+    (async () => {
+      try {
+        const query = {"_id": model_id};
+        const model = await RunDataQuery("models", "findOne", query);
+        if (!model) {
+          res.send("no model found!!");
+        } else {
+          try {         
+            model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+            res.send (model);  
+          } catch (e) {
+              res.send(e);
+          }
+        }
+      } catch (e) {
+        res.send(e);
+      }
+
+    })();
+        // db_old.models.findOne(, function (err, model) {
+        //     if (err || !model) {
+        //         console.log("error getting model: " + err);
+        //         res.send(err);
+        //     } else {
+        //         (async () => {
+        //             try {
                         
-                        model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                        res.send (model);
+        //                 model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+        //                 res.send (model);
                     
-                    } catch (e) {
-                        res.send(e);
-                    }
-                })();
+        //             } catch (e) {
+        //                 res.send(e);
+        //             }
+        //         })();
                 // console.log("got user models:" + JSON.stringify(models));
                 // let url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + model.userID + "/gltf/" + model.filename, Expires: 6000});
                 // model.url = url;
                 
-            }
-        });
+        //     }
+        // });
 });
 
 // app.get('/asset_conv/:_id', requiredAuthentication, usercheck, function (req, res) {
@@ -4689,7 +4710,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             if (groupType == ".jpg" || groupType == ".jpeg" || groupType == ".JPG" || groupType == ".png" || groupType == ".PNG") {
                                 console.log("tryna save a jpg at " + tUrl);
                                 
-                                db.image_items.save({   
+                                db_old.image_items.save({   
                                     type : "fromStaging",
                                     userID : item.uid,
                                     userName : req.session.user.userName,
@@ -4761,7 +4782,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                 );
                             } else if (groupType == ".mp3" || groupType == ".MP3" || groupType == ".wav" || groupType == ".ogg" || groupType == ".OGG" || groupType == ".aif" ||  groupType == ".AIFF" || groupType == ".WAV"  )  {
                                 console.log("tryna save an audio " + tUrl);
-                                db.audio_items.save(
+                                db_old.audio_items.save(
                                     {type : "stagedUserAudio",
                                         userID : req.session.user._id.toString(),
                                         username : req.session.user.userName,
@@ -4851,7 +4872,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                 );
                             } else if (groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".mov" || groupType.toLowerCase() == ".webm")  {
                                 console.log("tryna save a video " + tUrl);
-                                db.video_items.save(
+                                db_old.video_items.save(
                                     {
                                         userID : req.session.user._id.toString(),
                                         username : req.session.user.userName,
@@ -4876,7 +4897,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                 );
                             } else if (groupType == ".glb") {
                                 console.log("tryna save a glb " + tUrl);
-                                db.models.save({
+                                db_old.models.save({
                                     userID : req.session.user._id.toString(),
                                     username : req.session.user.userName,
                                     name : ts + "_" + originalName(item.key),
@@ -4901,7 +4922,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             // }
                             } else if (groupType == ".usdz") {
                                 console.log("tryna save a usdz " + tUrl);
-                                db.models.save({
+                                db_old.models.save({
                                     userID : req.session.user._id.toString(),
                                     username : req.session.user.userName,
                                     name : ts + "_" + originalName(item.key),
@@ -4925,7 +4946,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                 // callback(null, null, tUrl); //don't save in db for now
                             } else if (groupType == ".reality") {
                                 console.log("tryna save a .reality file " + tUrl);
-                                db.models.save({
+                                db_old.models.save({
                                     userID : req.session.user._id.toString(),
                                     username : req.session.user.userName,
                                     name : ts + "_" + originalName(item.key),
@@ -5396,7 +5417,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                         // else {
                             // callbk(null); caught in db save below?  
                         if (group.type != undefined && group.type != null) {
-                            db.groups.save(group, function (err, saved) {
+                            db_old.groups.save(group, function (err, saved) {
                                 if ( err || !saved ) {
                                     console.log('group not saved..');
                                     callbk(err);
@@ -5800,12 +5821,12 @@ app.post('/imagetarget_puturl/:_id/:image_id', requiredAuthentication, function 
   
 
     var u_id = ObjectID(req.params._id);
-    db.users.findOne({"_id": u_id}, function (err, user) {
+    db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
             res.send("not a valid user!");
             console.log("error getting user: " + err);
         } else {
-            db.image_items.findOne({_id: ObjectID(req.params.image_id)}, function (err, picture_item) {
+            db_old.image_items.findOne({_id: ObjectID(req.params.image_id)}, function (err, picture_item) {
                 if (err || !picture_item) {
                     res.send("not a valid pic!")
                     console.log("error getting picture items: " + err);
@@ -5904,7 +5925,7 @@ app.post('/stagingputurl/:_id', requiredAuthentication, function (req, res) {
     // }
     console.log("tryna get a puturl for : " + req.body.uid + " contentTYpe : " + cType);
     var u_id = ObjectID(req.params._id);
-    db.users.findOne({"_id": u_id}, function (err, user) {
+    db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
         } else {
@@ -6523,7 +6544,7 @@ app.get('/sharedasset/:assetstring', checkAppID, requiredAuthentication, functio
 
 app.post('/resetcheck', function (req, res) {
     console.log("reset check:" + req.body.hzch);
-    db.users.findOne({"resetHash": req.body.hzch}, function (err, user) {
+    db_old.users.findOne({"resetHash": req.body.hzch}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
             res.send("invalidlink");
@@ -6543,11 +6564,11 @@ app.post('/resetcheck', function (req, res) {
 app.post('/optout/', function (req, res) {
     console.log("tryna optout " + JSON.stringify(req.body));
     var timestamp = Math.round(Date.now() / 1000);
-    db.people.findOne({email: req.body.sentToEmail}, function  (err, person) {
+    db_old.people.findOne({email: req.body.sentToEmail}, function  (err, person) {
         if (err || !person) {
             res.send(err);
         } else {
-            db.people.updateOne( { "email": req.body.sentToEmail }, {$set: {accountStatus : "Email Verified", contactStatus: "Opt Out Global", lastUpdate: timestamp}}, function (err, saved) {
+            db_old.people.updateOne( { "email": req.body.sentToEmail }, {$set: {accountStatus : "Email Verified", contactStatus: "Opt Out Global", lastUpdate: timestamp}}, function (err, saved) {
                 if (err || !saved) {
                     res.send(err);
                 } else {
@@ -6565,7 +6586,7 @@ app.get('/optout_check/:hzch', function (req, res) { //called from /landing/invi
         requestProtocol = 'http';
     }
 
-    db.invitations.findOne({"invitationHash": hash}, function (err, invitation) {
+    db_old.invitations.findOne({"invitationHash": hash}, function (err, invitation) {
         var timestamp = Math.round(Date.now() / 1000);
         if (err || !invitation) {
             console.log("did not find invitation: " + err);
@@ -6591,7 +6612,7 @@ app.get('/invitation_check/:hzch', function (req, res) { //called from /landing/
         requestProtocol = 'http';
     }
 
-    db.invitations.findOne({"invitationHash": hash}, function (err, invitation) {
+    db_old.invitations.findOne({"invitationHash": hash}, function (err, invitation) {
         var timestamp = Math.round(Date.now() / 1000);
         if (err || !invitation) {
             console.log("did not find invitation: " + err);
@@ -6603,7 +6624,7 @@ app.get('/invitation_check/:hzch', function (req, res) { //called from /landing/
             if (timestamp < invitation.invitationTimestamp + 36000) { //expires in 10 hour! //TODO access window start and end timestamps
                 console.log("timestamp checks out!" + JSON.stringify(invitation));
 
-                db.invitations.update ( { "invitationHash": hash }, { $set: { validated: true, pin : pin, pinTimeout: timestamp + 6400} }); 
+                db_old.invitations.update ( { "invitationHash": hash }, { $set: { validated: true, pin : pin, pinTimeout: timestamp + 6400} }); 
                 var response = {};
                 response.short_id = invitation.invitedToSceneShortID;
                 response.ok = "yep";
@@ -6624,7 +6645,7 @@ app.get('/invitation_check/:hzch', function (req, res) { //called from /landing/
                 res.send("expired_"+invitation.invitedToSceneShortID); //send back sceneID, to allow invite request
             }
 
-            db.actions.findOne({"actionType": "Send Email"}, function (err, emailAction) {
+            db_old.actions.findOne({"actionType": "Send Email"}, function (err, emailAction) {
                 if (err || !emailAction) {
                     callback("error getting email action!" + err);
                 } else {
@@ -6639,11 +6660,11 @@ app.get('/invitation_check/:hzch', function (req, res) { //called from /landing/
                     action.targetEmail = invitation.sentToEmail;
                     action.fromScene = invitation.invitedToSceneShortID;
                     // action.data = req.body.sceneShareWithMessage;
-                    db.activities.insertOne(action);
+                    db_old.activities.insertOne(action);
                 } 
             });
             let action = {};
-            db.people.updateOne( { "email": invitation.sentToEmail }, {$set: {accountStatus : "Email Verified", lastUpdate: timestamp}});
+            db_old.people.updateOne( { "email": invitation.sentToEmail }, {$set: {accountStatus : "Email Verified", lastUpdate: timestamp}});
         }
     }); 
 });
@@ -6655,7 +6676,7 @@ app.post('/invitation_req/', function (req,res) {
     req.socket.remoteAddress ||
     req.connection.socket.remoteAddress;
     if (req.body.shortID != undefined && req.body.shortID.length > 4) {
-        db.scenes.findOne({"short_id": req.body.shortID}, function (err, scene) {
+        db_old.scenes.findOne({"short_id": req.body.shortID}, function (err, scene) {
             if (err ||!scene) {
                 res.send("nope");
             } else {
@@ -6670,7 +6691,7 @@ app.post('/invitation_req/', function (req,res) {
                             },
                             function(callback) { //is accountStatus OK?
                                 
-                                db.people.findOne({"email": req.body.email.trim()}, function (err, person) {
+                                db_old.people.findOne({"email": req.body.email.trim()}, function (err, person) {
                                     let action = {};
                                     let ts = Date.now();
                                     if (err) {
@@ -6687,7 +6708,7 @@ app.post('/invitation_req/', function (req,res) {
                                             activities.push(action1);
                                             activities.push(action2); //bc they need to be separate array elements
                 
-                                            db.people.save( { "email": req.body.email.trim()}, { $set: {
+                                            db_old.people.save( { "email": req.body.email.trim()}, { $set: {
                                                 lastUpdate : ts,
                                                 activities : activities,
                                                 accountStatus: 'Not Verified',
@@ -6714,7 +6735,7 @@ app.post('/invitation_req/', function (req,res) {
                                             if (person.contactStatus == undefined) {
                                                 person.contactStatus = "Not Indicated";
                                             }
-                                            db.people.update( { "_id": person._id }, { $set: {
+                                            db_old.people.update( { "_id": person._id }, { $set: {
                                                 lastUpdate : ts,
                                                 activities : person.activities,
                                                 accountStatus: person.accountStatus,
@@ -6744,7 +6765,7 @@ app.post('/invitation_req/', function (req,res) {
                             function (callback) {
                                 // if (person.length > 0) {
                                 // let emailArray = eData;
-                                db.scenes.findOne({short_id: req.body.shortID}, function (err, scene) {
+                                db_old.scenes.findOne({short_id: req.body.shortID}, function (err, scene) {
                                     if (err || !scene) {
                                         console.log("error getting scene for sharing: " + err);
                                         callback(err);
@@ -6753,7 +6774,7 @@ app.post('/invitation_req/', function (req,res) {
                                         let urlHalf = "";
                                         if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
                                             var oo_id = ObjectID(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
-                                            db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                                            db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                                 if (err || !picture_item || picture_item.length == 0) {
                                                     console.log("error getting postcard for availablescenes: 2" + err);
                                                     callback(null, '', eData)
@@ -6938,7 +6959,7 @@ app.post('/invitation_req/', function (req,res) {
                                                     invitationHash: cleanhash,
                                                     invitationTimestamp: timestamp,
                                                 }
-                                                db.invitations.save(invitation, function (err, saved) {
+                                                db_old.invitations.save(invitation, function (err, saved) {
                                                     if ( err || !saved ) {
                                                         console.log('problem saving invitaiton');
                                                     } else {
@@ -7050,7 +7071,7 @@ app.post ('/get_invitations', checkAppID, requiredAuthentication, function (req,
     var query = {$and: [{pin : req.body.pin}, {validated : true}, {accessTimeWindow: {$gt : timestamp}}]};
     console.log("tryna get_invitations: " + JSON.stringify(req.body) + " at timestamp " + timestamp + " with query " + query);
     if (query != null) {
-        db.invitations.find (query, function (err, invitations) {
+        db_old.invitations.find (query, function (err, invitations) {
             // db.invitations.find ({$and: [{sentToEmail : req.body.email}, {validated : true} ]}, function (err, invitations) {
             if (err || !invitations) {
                 console.log("error getting invitations: " + err);
@@ -7068,7 +7089,7 @@ app.post ('/get_invitations', checkAppID, requiredAuthentication, function (req,
 
 app.post('/savepw', function (req, res){
 
-    db.users.findOne({"resetHash": req.body.hzch}, function (err, user) {
+    db_old.users.findOne({"resetHash": req.body.hzch}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
         } else {
@@ -7077,7 +7098,7 @@ app.post('/savepw', function (req, res){
                 // console.log(req.body.password);
                 bcrypt.genSalt(10, function(err, salt) {
                     bcrypt.hash(req.body.password, salt, null, function(err, hash) {
-                        db.users.update( { _id: user._id }, { $set: { resetHash: "", resetTimestamp: timestamp, password: hash}});
+                        db_old.users.update( { _id: user._id }, { $set: { resetHash: "", resetTimestamp: timestamp, password: hash}});
                         res.send("pwsaved");
                     });
                 });
@@ -7104,7 +7125,7 @@ app.post('/resetpw', function (req, res) {
 
     if (validator.isEmail(req.body.email) == true) {
 
-        db.users.findOne({"email": req.body.email}, function (err, user) {
+        db_old.users.findOne({"email": req.body.email}, function (err, user) {
             if (err || !user) {
                 console.log("error getting user: " + err);
                 res.send("email address not found");
@@ -7114,7 +7135,7 @@ app.post('/resetpw', function (req, res) {
                     bcrypt.hash(timestamp.toString(), salt, null, function(err, hash) {
                         // reset = hash;
                         var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-                        db.users.update( { _id: user._id }, { $set: { resetHash: cleanhash, resetTimestamp: timestamp}});
+                        db_old.users.update( { _id: user._id }, { $set: { resetHash: cleanhash, resetTimestamp: timestamp}});
                         var htmlbody = "<h3>" + topName + " Password Reset</h3><hr><br>" +
                             "Click here to reset your password (link expires in 1 hour): </br>" +
                             rootHost + "/main/resetter.html?hzch=" + cleanhash;
@@ -7392,11 +7413,11 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
     async.waterfall([
 
         function(callback) {
-            db.actions.findOne({"actionType": "Send Email"}, function (err, emailAction) {
+            db_old.actions.findOne({"actionType": "Send Email"}, function (err, emailAction) {
                 if (err) {
                     callback("error getting email action!" + err);
                 } else if (!emailAction) {
-                    db.actions.insertOne({"actionType": "Send Email", "actionName": "Send Email"}, function(err, saved) {
+                    db_old.actions.insertOne({"actionType": "Send Email", "actionName": "Send Email"}, function(err, saved) {
                         if (err || !saved) {
                             callback("saving email action error");
                         } else {
@@ -7463,7 +7484,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
             async.each (emailSplit, function (email, callbackz) {
 
                 // db.people.findOne({ $and: [ {userID: uid}, {email: email.trim()} ]}, function(err, person) {
-                db.people.findOne({email: email.toString().trim()}, function(err, person) {
+                db_old.people.findOne({email: email.toString().trim()}, function(err, person) {
                     if (err || !person) {
                         
                         console.log("did not find that person : " + err);
@@ -7481,7 +7502,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                         person.accountStatus = 'Not Verified';
                         person.contactStatus = 'Not Indicated';
                         console.log("fixing to save new person " + JSON.stringify(person));
-                        db.people.save(person, function (err, saved) {
+                        db_old.people.save(person, function (err, saved) {
                         if ( err || !saved ) {
                             console.log('person not saved..');
                             res.end();
@@ -7494,7 +7515,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                                 pursoner.personID = person_id;
                                 pursoner.email = email.toString().trim();
                                 emailsFinal.push(pursoner);
-                                db.users.updateOne( { "_id": ObjectID(uid) }, { $addToSet: {people : person._id}});
+                                db_old.users.updateOne( { "_id": ObjectID(uid) }, { $addToSet: {people : person._id}});
                                 callbackz();
                                 }
                             });
@@ -7519,7 +7540,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             action.fromScene = req.body.short_id;
                             action.data = req.body.sceneShareWithMessage;
                             
-                            db.activities.insertOne(action);
+                            db_old.activities.insertOne(action);
                             // action.sendEmailBlockedBlacklist = ts + "_" + uid+ "_" + req.body.short_id;
                             // person.activities.push(action);
 
@@ -7553,7 +7574,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             action.fromScene = req.body.short_id;
                             action.data = req.body.sceneShareWithMessage;
                             
-                            db.activities.insertOne(action);
+                            db_old.activities.insertOne(action);
                             emailsNotSent.push(person.email);
                             callbackz();
 
@@ -7580,7 +7601,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             action.fromScene = req.body.short_id;
                             action.data = req.body.sceneShareWithMessage;
                             
-                            db.activities.insertOne(action);
+                            db_old.activities.insertOne(action);
                             emailsNotSent.push(person.email);
                             callbackz(); //do not add to emailsFinal!
                         } else {    
@@ -7603,14 +7624,14 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             action.fromScene = req.body.short_id;
                             action.data = req.body.sceneShareWithMessage;
                             
-                            db.activities.insertOne(action);
+                            db_old.activities.insertOne(action);
                             var pursoner = {};
                             console.log('found person id: ' + person._id);
                             pursoner.personID = person._id;
                             pursoner.email = email.toString().trim();
                             emailsFinal.push(pursoner);
                             if (req.session.user) {
-                                db.users.updateOne( { "_id": uid }, { $addToSet: {people : person._id}});
+                                db_old.users.updateOne( { "_id": uid }, { $addToSet: {people : person._id}});
                             }
                             callbackz();
                         }
@@ -7618,11 +7639,11 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                     }
                     //callback won't wait on this, but whatever...
                     if (req.session.user) {
-                        db.users.findOne({"_id": ObjectID(uid)}, function (err, user) {
+                        db_old.users.findOne({"_id": ObjectID(uid)}, function (err, user) {
                             if (err ||!user) {
                                 console.log("HEYWTF! caint find user " +req.session.user._id + " ...call the police!");
                             } else {
-                                db.users.updateOne( { "_id": ObjectID(uid) }, { $addToSet: {people : person._id}}); //addToSet should add array if not present, but prevent dupes (!?)
+                                db_old.users.updateOne( { "_id": ObjectID(uid) }, { $addToSet: {people : person._id}}); //addToSet should add array if not present, but prevent dupes (!?)
                                 
                                 console.log("tryna add a person " + person._id + " to user" + req.session.user._id); //TODO add sentMailTo activity to user action inventory
         
@@ -7652,7 +7673,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
         function (eData, callback) {
             if (eData.length > 0) {
             // let emailArray = eData;
-            db.scenes.findOne({short_id: req.body.short_id}, function (err, scene) {
+            db_old.scenes.findOne({short_id: req.body.short_id}, function (err, scene) {
                 if (err || !scene) {
                     console.log("error getting scene for sharing: " + err);
                     callback(err);
@@ -7677,7 +7698,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             action.fromScene = req.body.short_id;
                             // action.data = req.body.sceneShareWithMessage;
                             
-                            db.activities.insertOne(action);
+                            db_old.activities.insertOne(action);
                             res.send("invitations disallowed for this scene");s
                         } else if (scene.sceneShareWithGroups.toString().toLowerCase().includes("scene people only")) {
                             console.log(JSON.stringify(eData) + " vs " + JSON.stringify(scene.sceneShareWithPeople));
@@ -7692,7 +7713,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                         } else {
                             if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
                                 var oo_id = ObjectID(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
-                                db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                                db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                     if (err || !picture_item || picture_item.length == 0) {
                                         console.log("error getting postcard for availablescenes: 2" + err);
                                         callback(null, '', eData)
@@ -7889,7 +7910,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                                     invitationTimestamp: timestamp,
                                 }
 
-                                db.invitations.save(invitation, function (err, saved) {
+                                db_old.invitations.save(invitation, function (err, saved) {
                                     if ( err || !saved ) {
                                         console.log('problem saving invitaiton');
                                     } else {
@@ -8080,9 +8101,9 @@ app.post('/newuser', requiredAuthentication, admin, function (req, res) {
 
     } else {
 
-        db.users.findOne({userName: req.body.userName}, function(err, existingUserName) { //check if the username already exists
+        db_old.users.findOne({userName: req.body.userName}, function(err, existingUserName) { //check if the username already exists
             if (err || !existingUserName) {  //should combine these queries into an "$or" //but then couldn't respond separately
-                db.users.findOne({email: req.body.userEmail}, function(err, existingUserEmail) { //check if the email already exists
+                db_old.users.findOne({email: req.body.userEmail}, function(err, existingUserEmail) { //check if the email already exists
                     if (err || !existingUserEmail || req.body.userEmail == domainAdminEmail) {
                         console.log('dinna find tha name');
                         var from = adminEmail; //TODO CHANGe!!!!
@@ -8094,7 +8115,7 @@ app.post('/newuser', requiredAuthentication, admin, function (req, res) {
                         bcrypt.genSalt(10, function(err, salt) {
                             bcrypt.hash(req.body.userPass, salt, null, function(err, hash) {
                                 var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-                                db.users.save(
+                                db_old.users.save(
                                     {type : 'baseuser',
                                         status : 'unvalidated',
                                         authLevel : 'base',
@@ -8576,7 +8597,7 @@ app.get('/userpics/:u_id', requiredAuthentication, function (req, res) {
         query = {};
     }
     // db.image_items.find(query).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, picture_items) {
-    db.image_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function(err, picture_items) {
+    db_old.image_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function(err, picture_items) {
 
         if (err || !picture_items) {
             console.log("error getting picture items: " + err);
@@ -8614,7 +8635,7 @@ app.get('/userpics/:u_id', requiredAuthentication, function (req, res) {
 
 app.get('/uservids/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return uservids for: ' + req.params.u_id);
-    db.video_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, video_items) {
+    db_old.video_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, video_items) {
 
         if (err || !video_items) {
             console.log("error getting video items: " + err);
@@ -8669,7 +8690,7 @@ app.post('/return_audiogroups/', function(req, res) {
         function(callback){ 
             if (req.body.triggerGroups != null && req.body.triggerGroups.length > 0) {
                 const group_ids = req.body.triggerGroups.map(item => { return ObjectID(item); });
-                db.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
+                db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
                     if (err || !group_items) {
                         console.log("error getting audiogroup items: " + err);
                         callback(err);
@@ -8690,7 +8711,7 @@ app.post('/return_audiogroups/', function(req, res) {
         function(callback){ 
             if (req.body.ambientGroups != null && req.body.ambientGroups.length > 0) {
                 const group_ids = req.body.ambientGroups.map(item => { return ObjectID(item); });
-                db.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
+                db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
                     if (err || !group_items) {
                         console.log("error getting audiogroup items: " + err);
                         callback(err);
@@ -8710,7 +8731,7 @@ app.post('/return_audiogroups/', function(req, res) {
         function(callback){ 
             if (req.body.primaryGroups != null && req.body.primaryGroups.length > 0) {
                 const group_ids = req.body.primaryGroups.map(item => { return ObjectID(item); });
-                db.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
+                db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
                     if (err || !group_items) {
                         console.log("error getting audiogroup items: " + err);
                         callback(err);
@@ -8730,7 +8751,7 @@ app.post('/return_audiogroups/', function(req, res) {
         function(callback){ 
             if (req.body.objectGroups != null && req.body.objectGroups.length > 0) {
                 const group_ids = req.body.objectGroups.map(item => { return ObjectID(item); });
-                db.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
+                db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
                     if (err || !group_items) {
                         console.log("error getting audiogroup items: " + err);
                         callback(err);
@@ -8768,7 +8789,7 @@ app.post('/return_audiogroups/', function(req, res) {
         function (callback) {
             // console.log("audio IDs: " + audio_IDs);
             const audio_ids = audio_IDs.map(item => { return ObjectID(item); });
-            db.audio_items.find({'_id': { $in: audio_ids}}).toArray(function (err, audio_items) {
+            db_old.audio_items.find({'_id': { $in: audio_ids}}).toArray(function (err, audio_items) {
                 if (err || !audio_items) {
                     console.log("error getting audio items: " + err);
                     callback(err);
@@ -8938,7 +8959,7 @@ app.post('/return_audiogroups/', function(req, res) {
 
 app.get('/usergroups/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return usergroups for: ' + req.params.u_id);
-    db.groups.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, group_items) {
+    db_old.groups.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, group_items) {
         if (err || !group_items) {
             console.log("error getting usergroups items: " + err);
         } else {
@@ -8951,7 +8972,7 @@ app.post('/add_group_item/', requiredAuthentication, function (req, res) { //dun
     console.log(JSON.stringify(req.body));
     var o_id = ObjectID(req.body.group_id);   
     // console.log('groupID requested : ' + req.body.sourceID);
-    db.groups.findOne({ "_id" : o_id}, function(err, group) {
+    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
         if (err || !group) {
             console.log("error getting group: " + err);
         } else {  //TODO check for proper type?
@@ -8969,7 +8990,7 @@ app.post('/add_group_item/', requiredAuthentication, function (req, res) { //dun
             newGroupItem.itemID = req.body.item_id; // ""?s
             newGroupItem.itemIndex = newGroupData.length; // ""?
             newGroupData.push(newGroupItem); // ""?
-            db.groups.update( { "_id": o_id }, { $set: {
+            db_old.groups.update( { "_id": o_id }, { $set: {
                         groupdata : newGroupData, // ""?
                         lastUpdateTimestamp: timestamp,
                         items: newItems
@@ -8990,7 +9011,7 @@ app.post('/remove_group_item/', requiredAuthentication, function (req, res) {
     console.log(JSON.stringify(req.body));
     var o_id = ObjectID(req.body.group_id);   
     // console.log('groupID requested : ' + req.body.sourceID);
-    db.groups.findOne({ "_id" : o_id}, function(err, group) {
+    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
         if (err || !group) {
             console.log("error getting group: " + err);
         } else {
@@ -9031,7 +9052,7 @@ app.post('/remove_group_item/', requiredAuthentication, function (req, res) {
             ],
             function(err, result) { // #last function, close async
                 console.log(JSON.stringify("group:" + newGroupData + " itme: " + newItems));
-                db.groups.update( { "_id": o_id }, { $set: {
+                db_old.groups.update( { "_id": o_id }, { $set: {
                     lastUpdateTimestamp: timestamp,
                     groupdata : newGroupData,
                     items: newItems
@@ -9054,13 +9075,13 @@ app.post('/update_group/:_id', checkAppID, requiredAuthentication, function (req
     console.log(req.params._id);
     var o_id = ObjectID(req.params._id);   
     console.log('group requested : ' + req.body._id);
-    db.groups.findOne({ "_id" : o_id}, function(err, group) {
+    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
         if (err || !group) {
             console.log("error getting group: " + err);
         } else {
             console.log("tryna update group" + req.body._id);
             var timestamp = Math.round(Date.now() / 1000);
-            db.groups.update( { "_id": o_id }, { $set: {
+            db_old.groups.update( { "_id": o_id }, { $set: {
                 lastUpdateTimestamp: timestamp,
                 groupdata : req.body.groupdata,
                 items: req.body.items,
@@ -9075,7 +9096,7 @@ app.post('/updategroup/', requiredAuthentication, function (req, res) {
     // console.log(req.body._id);
     var o_id = ObjectID(req.body._id);   
     console.log('group requested : ' + req.body._id);
-    db.groups.findOne({ "_id" : o_id}, function(err, group) {
+    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
         if (err || !group) {
             console.log("error getting group: " + err);
 
@@ -9100,7 +9121,7 @@ app.post('/updategroup/', requiredAuthentication, function (req, res) {
                 console.log("tryna update with no group data and fix " + JSON.stringify(grupdata));
             }
 
-            db.groups.update( { "_id": o_id }, { $set: {
+            db_old.groups.update( { "_id": o_id }, { $set: {
                 lastUpdateTimestamp: timestamp,
                 tags: req.body.tags,
                 name: req.body.name,
@@ -9152,7 +9173,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
     var pID = req.params.p_id;
     var o_id = ObjectID(pID);
 
-    db.groups.findOne({"_id": o_id}, function(err, group) {
+    db_old.groups.findOne({"_id": o_id}, function(err, group) {
         if (err || !group) {
             console.log("error getting group item: " + err);
         } else {
@@ -9165,7 +9186,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                 }
                 if (group.type.toLowerCase() == "audio") {
                     console.log("tryna get some audiogroup items: " + JSON.stringify(group.items));
-                    db.audio_items.find({'_id': { $in: group.items}}).toArray(function (err, audio_items) {
+                    db_old.audio_items.find({'_id': { $in: group.items}}).toArray(function (err, audio_items) {
                         if (err || !audio_items) {
                             console.log("error getting audio items: " + err);
                         } else {
@@ -9229,7 +9250,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                        
                     });
                 } else if (group.type.toLowerCase() == "video") {
-                    db.video_items.find({'_id': { $in: group.items}}).toArray(function (err, video_items) {
+                    db_old.video_items.find({'_id': { $in: group.items}}).toArray(function (err, video_items) {
                         if (err || !video_items) {
                             console.log("error getting video items: " + err);
                         } else {
@@ -9279,7 +9300,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                       
                     });
                 } else if (group.type.toLowerCase().includes("picture")) {
-                    db.image_items.find({'_id': { $in: group.items}}).toArray(function (err, image_items) {
+                    db_old.image_items.find({'_id': { $in: group.items}}).toArray(function (err, image_items) {
                         if (err || !image_items) {
                             console.log("error getting image items: " + err);
                         } else {
@@ -9330,7 +9351,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
 
             } else if (group.type.toLowerCase() == "location") {
                     console.log("tryna get locations");
-                    db.locations.find({'_id': {$in: group.items}}).toArray(function (err, location_items) {
+                    db_old.locations.find({'_id': {$in: group.items}}).toArray(function (err, location_items) {
                         if (err || !location_items) {
                             console.log("error getting image items: " + err);
                         } else {
@@ -9365,7 +9386,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                     });
                 } else if (group.type.toLowerCase() == "people") {
                     console.log("tryna get people");
-                    db.people.find({'_id': {$in: group.items}}).toArray(function (err, people) {
+                    db_old.people.find({'_id': {$in: group.items}}).toArray(function (err, people) {
                         if (err || !people) {
                             console.log("error getting text items: " + err);
                             res.send("error getting text items: " + err);
@@ -9401,7 +9422,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                     });
                 } else if (group.type.toLowerCase() == "text") {
                     console.log("tryna get texts");
-                    db.text_items.find({'_id': {$in: group.items}}).toArray(function (err, text_items) {
+                    db_old.text_items.find({'_id': {$in: group.items}}).toArray(function (err, text_items) {
                         if (err || !text_items) {
                             console.log("error getting text items: " + err);
                             res.send("error getting text items: " + err);
@@ -9438,7 +9459,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                 } else if (group.type.toLowerCase() == "scenes") {
                     // console.log("tryna get scenes");
                     let scenes = [];
-                    db.scenes.find({'_id': {$in: group.items}}).toArray(function (err, scene_items) {
+                    db_old.scenes.find({'_id': {$in: group.items}}).toArray(function (err, scene_items) {
                         if (err || !scene_items) {
                             console.log("error getting scenes items: " + err);
                             res.send("error getting scenes items: " + err);
@@ -9453,7 +9474,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                                 
                                 if (scene_item.scenePostcards != undefined) {
                                     let scenePostcard = scene_item.scenePostcards[0];
-                                    db.image_items.findOne({'_id': ObjectID(scenePostcard)}, function(err, pic) {
+                                    db_old.image_items.findOne({'_id': ObjectID(scenePostcard)}, function(err, pic) {
                                         if (err || !pic) {
                                             console.log("no postcard found for that id?!");
                                             if (group.groupdata) {
@@ -9594,7 +9615,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                     });    
                 } else if (group.type.toLowerCase() == "object" || group.type.toLowerCase() == "objects") {
                     console.log("tryna get objex");
-                    db.obj_items.find({'_id': {$in: group.items}}).toArray(function (err, obj_items) {
+                    db_old.obj_items.find({'_id': {$in: group.items}}).toArray(function (err, obj_items) {
                         if (err || !obj_items) {
                             console.log("error getting text items: " + err);
                             res.send("error getting text items: " + err);
@@ -9638,7 +9659,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
 
 app.get('/useraudio/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return useraudio for: ' + req.params.u_id);
-    db.audio_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
+    db_old.audio_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
 
         if (err || !audio_items) {
             console.log("error getting picture items: " + err);
@@ -9679,7 +9700,7 @@ app.get('/useraudio/:u_id', requiredAuthentication, function(req, res) {
 
 app.get('/userobjs/:u_id', checkAppID, requiredAuthentication, function(req, res) {
     console.log('tryna return userobjs for: ' + req.params.u_id);
-    db.obj_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, obj_items) {
+    db_old.obj_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, obj_items) {
 
         if (err || !obj_items) {
             console.log("error getting obj items: " + err);
@@ -9696,7 +9717,7 @@ app.get('/userobjs/:u_id', checkAppID, requiredAuthentication, function(req, res
 app.get('/allobjs/:u_id', requiredAuthentication, domainadmin, function(req, res) { //TODO make one route,check auth status
     console.log('tryna return userobjs for: ' + req.params.u_id);
     // if (domainadmin()) {
-    db.obj_items.find({}, function(err, obj_items) {
+    db_old.obj_items.find({}, function(err, obj_items) {
 
         if (err || !obj_items) {
             console.log("error getting obj items: " + err);
@@ -9714,7 +9735,7 @@ app.get('/allobjs/:u_id', requiredAuthentication, domainadmin, function(req, res
 
 app.get('/sceneobjs/:g_id', checkAppID, requiredAuthentication, function(req, res) {
     console.log('tryna return userobjs for: ' + req.params.u_id);
-    db.obj_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, obj_items) {
+    db_old.obj_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, obj_items) {
 
         if (err || !obj_items) {
             console.log("error getting obj items: " + err);
@@ -9763,7 +9784,7 @@ app.post('/newperson', checkAppID, requiredAuthentication, function (req, res) {
     //     textitem.desc = textitem.textstring.substr(0,20) + "...";
     // }
     console.log("fixing to save new person " + JSON.stringify(person));
-    db.people.save(person, function (err, saved) {
+    db_old.people.save(person, function (err, saved) {
         if ( err || !saved ) {
             console.log('person not saved..');
             res.send("nilch");
@@ -9778,7 +9799,7 @@ app.post('/newperson', checkAppID, requiredAuthentication, function (req, res) {
 app.post('/delete_person/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log("tryna delete person: " + req.params._id);
     var o_id = ObjectID(req.params._id);
-    db.people.remove( { "_id" : o_id }, 1 );
+    db_old.people.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
 
@@ -9787,7 +9808,7 @@ app.post('/update_person', requiredAuthentication, function (req, res) {
     console.log("tryna update_person " + JSON.stringify(req.body));
     var o_id = ObjectID(req.body._id);
 //        textitem.userID = req.session.user._id.toString();
-    db.people.update( { "_id": o_id }, { $set: {
+    db_old.people.update( { "_id": o_id }, { $set: {
         accountStatus: req.body.accountStatus,
         contactStatus: req.body.contactStatus,
         // tags: req.body.tags,
@@ -9802,7 +9823,7 @@ app.post('/update_person', requiredAuthentication, function (req, res) {
 app.get('/person_details/:p_id', requiredAuthentication, function(req, res) {
     var o_id = ObjectID(req.params.p_id);
     console.log('tryna return people for: ' + req.params.p_id);
-    db.people.findOne({_id: o_id}, function(err, person) {
+    db_old.people.findOne({_id: o_id}, function(err, person) {
         if (err || !person) {
             console.log("error getting person : " + err);
         } else {
@@ -9814,7 +9835,7 @@ app.get('/person_details/:p_id', requiredAuthentication, function(req, res) {
 
 app.get('/people/:u_id', requiredAuthentication, function(req, res) { //this is people "created by" user
     console.log('tryna return people for: ' + req.params.u_id);
-    db.people.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, people) {
+    db_old.people.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, people) {
         if (err || !people) {
             console.log("error getting people : " + err);
         } else {
@@ -9827,7 +9848,7 @@ app.get('/people/:u_id', requiredAuthentication, function(req, res) { //this is 
 app.get('/allpeople/', requiredAuthentication, admin, function(req, res) {
     console.log('tryna return people for: ' + req.params.u_id);
     if (req.session.user.authLevel.toLowerCase().includes("domain")) {
-    db.people.find({}).sort({otimestamp: -1}).toArray( function(err, people) {
+    db_old.people.find({}).sort({otimestamp: -1}).toArray( function(err, people) {
         if (err || !people) {
             console.log("error getting people : " + err);
         } else {
@@ -9846,13 +9867,13 @@ app.get('/mypeople/:u_id', requiredAuthentication,  function(req, res) {
     
     let oid = ObjectID(req.params.u_id.toString());
     // async.waterfall
-    db.users.findOne({"_id" : oid}, function (err, user) {
+    db_old.users.findOne({"_id" : oid}, function (err, user) {
         if (err || !user) {
             console.log("error getting people : " + err);
             res.send("err findin user for people " + err);
         } else {
             if (user.people != undefined && user.people != null) {
-                db.people.find({"_id": {$in: user.people }}).sort({otimestamp: -1}).toArray( function(errr, people) {
+                db_old.people.find({"_id": {$in: user.people }}).sort({otimestamp: -1}).toArray( function(errr, people) {
                     if (err || !people) {
                         console.log("error getting people : " + errr);
                         res.send("my erroneous people " + errr);
@@ -9873,11 +9894,11 @@ app.get('/mypeople/:u_id', requiredAuthentication,  function(req, res) {
 app.get('/person/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return person for: ' + req.params.p_id);
     var o_id = ObjectID(req.params.p_id);
-    db.people.findOne({_id: o_id}, function(err, person) {
+    db_old.people.findOne({_id: o_id}, function(err, person) {
         if (err || !person) {
             console.log("error getting text_items : " + err);
         } else {
-            db.invitations.find({sentToPersonID: person._id.toString()}, function (err, invitations) {
+            db_old.invitations.find({sentToPersonID: person._id.toString()}, function (err, invitations) {
                 if (err || !invitations) {
                     res.json(person);
                 } else {
@@ -9918,7 +9939,7 @@ app.get('/actions/:u_id', requiredAuthentication, function(req, res) {
     //         }
     //     });
     // } else {
-        db.actions.find({}).sort({otimestamp: -1}).toArray( function(err, action_items) {
+        db_old.actions.find({}).sort({otimestamp: -1}).toArray( function(err, action_items) {
             if (err || !action_items) {
                 console.log("error getting action_items : " + err);
             } else {
@@ -9932,7 +9953,7 @@ app.get('/actions/:u_id', requiredAuthentication, function(req, res) {
 app.get('/action/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return action_items for: ' + req.params.p_id);
     var o_id = ObjectID(req.params.p_id);
-    db.actions.findOne({_id: o_id}, function(err, action_item) {
+    db_old.actions.findOne({_id: o_id}, function(err, action_item) {
         if (err || !action_item) {
             console.log("error getting action_item : " + err);
         } else {
@@ -9947,7 +9968,7 @@ app.post('/update_action/', requiredAuthentication, admin, function (req, res) {
         var o_id = ObjectID(req.body._id);
     //        textitem.userID = req.session.user._id.toString();
         var timestamp = Math.round(Date.now() / 1000);
-        db.actions.update( { "_id": o_id }, { $set: {
+        db_old.actions.update( { "_id": o_id }, { $set: {
             
             tags: req.body.tags,
             actionName: req.body.actionName,
@@ -10006,7 +10027,7 @@ app.post('/newaction', requiredAuthentication, function (req, res) {
     actionitem.createdByUserID = req.session.user._id;
     actionitem.createdByUserName =  req.session.user.userName;
     
-    db.actions.save(actionitem, function (err, saved) {
+    db_old.actions.save(actionitem, function (err, saved) {
         if ( err || !saved ) {
             console.log('action not saved..');
             res.send("action not saved " + err);
@@ -10027,7 +10048,7 @@ app.post('/newtext', requiredAuthentication, function (req, res) {
     textitem.createdByUserID = req.session.user._id;
     textitem.createdByUserName =  req.session.user.userName;
     
-    db.text_items.save(textitem, function (err, saved) {
+    db_old.text_items.save(textitem, function (err, saved) {
         if ( err || !saved ) {
             console.log('text not saved..');
             res.send("text not saved " + err);
@@ -10042,7 +10063,7 @@ app.post('/newtext', requiredAuthentication, function (req, res) {
 app.post('/delete_text/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log("tryna delete text itme: " + req.body._id);
     var o_id = ObjectID(req.body._id);
-    db.text_items.remove( { "_id" : o_id }, 1 );
+    db_old.text_items.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
 
@@ -10052,7 +10073,7 @@ app.post('/updatetext/:_id', requiredAuthentication, function (req, res) {
     var o_id = ObjectID(req.body._id);
 //        textitem.userID = req.session.user._id.toString();
     var timestamp = Math.round(Date.now() / 1000);
-    db.text_items.update( { "_id": o_id }, { $set: {
+    db_old.text_items.update( { "_id": o_id }, { $set: {
         
         tags: req.body.tags,
         title: req.body.title,
@@ -10085,7 +10106,7 @@ app.post('/updatetext/:_id', requiredAuthentication, function (req, res) {
 app.get('/svg/:_id', function(req, res) { 
     console.log('tryna return svg for: ' + req.params._id);
     var o_id = ObjectID(req.params._id);
-    db.text_items.findOne({_id: o_id}, function(err, text_item) {
+    db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
         if (err || !text_item) {
             console.log("error getting text_items : " + err);
         } else {
@@ -10097,7 +10118,7 @@ app.get('/svg/:_id', function(req, res) {
 app.get('/font/:_id', function(req, res) { 
     console.log('tryna return font for: ' + req.params._id);
     var o_id = ObjectID(req.params._id);
-    db.text_items.findOne({_id: o_id}, function(err, text_item) {
+    db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
         if (err || !text_item || text_item.type != "Font") {
             console.log("error getting font text_item : " + err);
             res.send(err);
@@ -10111,7 +10132,7 @@ app.get('/font/:_id', function(req, res) {
 app.get('/usertexts/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return usertexts for: ' + req.params.u_id);
     if (!req.session.user.authLevel.includes("domain")) {
-        db.text_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
+        db_old.text_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
             if (err || !text_items) {
                 console.log("error getting text_items : " + err);
             } else {
@@ -10120,7 +10141,7 @@ app.get('/usertexts/:u_id', requiredAuthentication, function(req, res) {
             }
         });
     } else {
-        db.text_items.find({}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
+        db_old.text_items.find({}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
             if (err || !text_items) {
                 console.log("error getting text_items : " + err);
             } else {
@@ -10134,7 +10155,7 @@ app.get('/usertexts/:u_id', requiredAuthentication, function(req, res) {
 app.get('/usertext/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return usertexts for: ' + req.params.p_id);
     var o_id = ObjectID(req.params.p_id);
-    db.text_items.findOne({_id: o_id}, function(err, text_item) {
+    db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
         if (err || !text_item) {
             console.log("error getting text_items : " + err);
         } else {
@@ -10178,8 +10199,8 @@ app.get('/userpic/:p_id', requiredAuthentication, function(req, res) {
 
     console.log('tryna return userpic : ' + req.params.p_id);
     var pID = req.params.p_id;
-    var o_id = ObjectID(pID);
-    db.image_items.findOne({"_id": o_id}, function(err, picture_item) {
+    var o_id = new ObjectId(pID);
+    db_old.image_items.findOne({"_id": o_id}, function(err, picture_item) {
         if (err || !picture_item) {
             console.log("error getting picture items: " + err);
         } else {
@@ -10290,8 +10311,8 @@ app.get('/hls/:_id', function(req, res) {  //main playback route for hls vids //
     var pID = req.params._id;
     console.log("hls pid " + req.params._id);
     if (ObjectID.isValid(pID)) {
-        var o_id = ObjectID(pID);
-        db.video_items.findOne({"_id": o_id}, function(err, video_item) {
+        var o_id = new ObjectId(pID);
+        db_old.video_items.findOne({"_id": o_id}, function(err, video_item) {
             if (err || !video_item) {
                 console.log("error getting hls video item: " + err);
                 res.send("error getting hls video item: " + err);
@@ -10389,8 +10410,8 @@ app.get('/hls/:_id', function(req, res) {  //main playback route for hls vids //
 app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return uservid : ' + req.params.p_id);
     var pID = req.params.p_id;
-    var o_id = ObjectID(pID);
-    db.video_items.findOne({"_id": o_id}, function(err, video_item) {
+    var o_id = new ObjectId(pID);
+    db_old.video_items.findOne({"_id": o_id}, function(err, video_item) {
         if (err || !video_item) {
             console.log("error getting video items: " + err);
         } else {
@@ -10505,7 +10526,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
     let response = {};
     let objex = [];
     response.objex = objex;
-    db.obj_items.find({"_id": {$in: iids}}, function(err, obj_items) {
+    db_old.obj_items.find({"_id": {$in: iids}}, function(err, obj_items) {
         if (err || !obj_items) {
             console.log("error getting picture items: " + err);
         } else {
@@ -10518,7 +10539,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
                             const oids = obj_item.objectPictureIDs.map(item => {
                                 return ObjectID(item);
                             });
-                            db.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+                            db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                                 if (err || !pic_items) {
                                     console.log("error getting picture items: " + err);
                                     // res.send("error: " + err);
@@ -10559,7 +10580,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
                             const aids = obj_item.actionIDs.map(item => {
                                 return ObjectID(item);
                             });
-                            db.actions.find({_id: {$in: aids }}, function (err, actions) {
+                            db_old.actions.find({_id: {$in: aids }}, function (err, actions) {
                                 if (err || !actions) {
                                     callback(err);
                                 } else {
@@ -10578,7 +10599,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
                         if (oid != null) {
                             console.log("tryna get modelID2 " + oid);
                             let oo_id = ObjectID(oid);
-                            db.models.findOne({"_id": oo_id}, function (err, model) {
+                            db_old.models.findOne({"_id": oo_id}, function (err, model) {
                             if (err || !model) {
                                 console.log("error getting model: " + err);
                                 callback(err);
@@ -10621,7 +10642,7 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
     var pID = req.params.p_id;
     var o_id = ObjectID(pID);
     var childObjects = {};
-    db.obj_items.findOne({"_id": o_id}, function(err, obj_item) {
+    db_old.obj_items.findOne({"_id": o_id}, function(err, obj_item) {
         if (err || !obj_item) {
             console.log("error getting picture items: " + err);
         } else {
@@ -10633,7 +10654,7 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
                         const oids = obj_item.objectPictureIDs.map(item => {
                             return ObjectID(item);
                         });
-                        db.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+                        db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                             if (err || !pic_items) {
                                 console.log("error getting picture items: " + err);
                                 // res.send("error: " + err);
@@ -10675,7 +10696,7 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
                         const aids = obj_item.actionIDs.map(item => {
                             return ObjectID(item);
                         });
-                        db.actions.find({_id: {$in: aids }}, function (err, actions) {
+                        db_old.actions.find({_id: {$in: aids }}, function (err, actions) {
                             if (err || !actions) {
                                 callback(err);
                             } else {
@@ -10694,7 +10715,7 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
                     if (oid != null) {
                         console.log("tryna get modelID2 " + oid);
                         let oo_id = ObjectID(oid);
-                        db.models.findOne({"_id": oo_id}, function (err, model) {
+                        db_old.models.findOne({"_id": oo_id}, function (err, model) {
                         if (err || !model) {
                             console.log("error getting model: " + err);
                             callback(err);
@@ -10790,7 +10811,7 @@ app.get('/audio/:id', requiredAuthentication, function (req, res){ //TODO Authen
     var audioID = req.params.id;
     var o_id = ObjectID(audioID);   
     console.log('audioID requested : ' + audioID);
-    db.audio_items.findOne({ "_id" : o_id}, function(err, audio_item) {
+    db_old.audio_items.findOne({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item) {
             console.log("error getting audio items: " + err);
         } else {
@@ -10799,7 +10820,7 @@ app.get('/audio/:id', requiredAuthentication, function (req, res){ //TODO Authen
                 function(callback){  
                     if (audio_item.textitemID != "") {
                         var t_id = ObjectID(audio_item.textitemID);
-                        db.text_items.findOne({"_id" : t_id}, function (err, text_item) {
+                        db_old.text_items.findOne({"_id" : t_id}, function (err, text_item) {
                             if (err || !text_item) {
                                 console.log("no text for audio item");
                                 callback(null, "error");
@@ -10879,12 +10900,12 @@ app.post('/gen_short_code', checkAppID, requiredAuthentication, function (req, r
     var audioID = req.params.id;
     var o_id = ObjectID(audioID);   
     console.log('audioID requested : ' + audioID);
-    db.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
+    db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item && audio_item.short_id == null) {
             console.log("error getting audio items: " + err);
         } else {
             console.log("tryna update " + req.params.id + " to status " + req.params.item_status);
-            db.audio_items.update( { _id: o_id }, { $set: { item_status: req.params.item_status }});
+            db_old.audio_items.update( { _id: o_id }, { $set: { item_status: req.params.item_status }});
         }
     });
 });
@@ -10894,12 +10915,12 @@ app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res)
 
     var o_id = ObjectID(req.params._id);   
     console.log('audioID requested : ' + req.body._id);
-    db.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
+    db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item) {
             console.log("error getting audio items: " + err);
         } else {
             console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
-            db.audio_items.update( { _id: o_id }, { $set: {
+            db_old.audio_items.update( { _id: o_id }, { $set: {
                 item_status: req.body.item_status,
                 tags: req.body.tags,
                 alt_title: req.body.alt_title,
@@ -11155,7 +11176,7 @@ app.get('/pathinfo',  checkAppID, requiredAuthentication, function (req, res) { 
 
     console.log(req.params._id);
     var o_id = ObjectID(req.params._id);
-    db.paths.find({}, function(err, paths) {
+    db_old.paths.find({}, function(err, paths) {
         if (err || !paths) {
             console.log("cain't get no paths... " + err);
         } else {
@@ -11169,7 +11190,7 @@ app.get('/upaths/:_id',  checkAppID, requiredAuthentication, function (req, res)
 
     console.log("tryna get userpaths: ",req.params._id);
     var o_id = ObjectID(req.params._id);
-    db.paths.find({ "user_id" : req.params._id}, function(err, paths) {
+    db_old.paths.find({ "user_id" : req.params._id}, function(err, paths) {
         if (err || !paths) {
             console.log("cain't get no paths... " + err);
         } else {
@@ -11183,7 +11204,7 @@ app.get('/upath/:u_id/:p_id',  checkAppID, requiredAuthentication, function (req
 
     console.log("tryna get path: ", req.params.p_id);
     var _id = ObjectID(req.params.p_id);
-    db.paths.find({ _id : _id}, function(err, paths) {
+    db_old.paths.find({ _id : _id}, function(err, paths) {
         if (err || !paths) {
             console.log("cain't get no paths... " + err);
         } else {
@@ -11218,7 +11239,7 @@ app.post('/score', checkAppID, requiredAuthentication, function (req, res) {
     scorePost.remoteAddress = req.connection.remoteAddress;
     scorePost.scoreTimestamp = parseInt(req.body.scoreTimestamp);
     console.log("tryna post score: " + JSON.stringify(scorePost));
-    db.scores.save(scorePost, function (err, saved) {
+    db_old.scores.save(scorePost, function (err, saved) {
         if ( err || !saved ) {
             console.log('score not saved..');
             res.send("nilch");
@@ -11238,7 +11259,7 @@ app.get('/scores/:appid/:sceneID/:scoreMode', function (req, res) { //tight
     let scores = {};
     let scoresResponse = {};
 
-    db.scores.find({ $or: [ { appID : appid, sceneID : sceneID, scoreMode: scoreMode }, { appID : appid, altSceneID : sceneID, scoreMode: scoreMode } ] }, function (err, scores) {
+    db_old.scores.find({ $or: [ { appID : appid, sceneID : sceneID, scoreMode: scoreMode }, { appID : appid, altSceneID : sceneID, scoreMode: scoreMode } ] }, function (err, scores) {
         if (err || !scores) {
             res.send("error or no scores found " + err );
         } else {
@@ -11275,7 +11296,7 @@ app.get('/totalscores_aka/:appid', function (req, res) { //does not use userID, 
     async.waterfall([
 
             function (callback) { //get all scores for this app
-                db.scores.find({appID : appid}, function(err, scores) {
+                db_old.scores.find({appID : appid}, function(err, scores) {
                     if (err || !scores) {
                         console.log("cain't get no scores... " + err);
                         callback(err);
@@ -11361,7 +11382,7 @@ app.get('/totalscores/:appid', function (req, res) {
     async.waterfall([
 
             function (callback) { //get all scores for this app
-                db.scores.find({appID : appid}, function(err, scores) {
+                db_old.scores.find({appID : appid}, function(err, scores) {
                     if (err || !scores) {
                         console.log("cain't get no scores... " + err);
                         callback(err);
@@ -11430,7 +11451,7 @@ app.get('/topscores/:appid', function (req, res) { //whynotmakeitpublic
     var appid = req.params.appid.toString().replace(":", "");
     // console.log("tryna get scores for: " + appid);
     // db.scores.find({appID : appid}, { userName: 1, scoreType: 1, aka: 1, scoreTimestamp: 1, scoreInt: 1, _id:0 }, function(err, scores) {
-        db.scores.find({appID : appid}, function(err, scores) {    
+        db_old.scores.find({appID : appid}, function(err, scores) {    
         if (err || !scores) {
             console.log("cain't get no scores... " + err);
         } else {
@@ -11451,7 +11472,7 @@ app.get('/scores/:u_id',  checkAppID, requiredAuthentication, function (req, res
     console.log("tryna get scores for: ", req.params.u_id);
     //var _id = ObjectID(req.params.u_id);
     var appid = req.headers.appid.toString().replace(":", "");
-    db.scores.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, scores) {
+    db_old.scores.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, scores) {
         if (err || !scores) {
             console.log("cain't get no scores... " + err);
         } else {
@@ -11469,7 +11490,7 @@ app.get('/get_available_storeitems/:app_id', checkAppID, requiredAuthentication,
     console.log("tryna get storeitems for: ", req.params.app_id);
     //var _id = ObjectID(req.params.u_id);
     // var appid = req.headers.appid.toString().replace(":", "");
-    db.storeitems.find({appID : req.params.app_id, itemStatus: "Available"}, function(err, storeitems) {
+    db_old.storeitems.find({appID : req.params.app_id, itemStatus: "Available"}, function(err, storeitems) {
         if (err || !storeitems) {
             console.log("cain't get no storeitems... " + err);
         } else {
@@ -11484,7 +11505,7 @@ app.get('/get_available_storeitems/:app_id', checkAppID, requiredAuthentication,
                     const oids = storeitem.storeItemPictureIDs.map(item => {
                         return ObjectID(item);
                     })
-                    db.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+                    db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                         if (err || !pic_items) {
                             callbackz();
                             console.log("error getting picture items: " + err);
@@ -11548,7 +11569,7 @@ app.get('/get_storeitems_all/',  requiredAuthentication, admin, function (req, r
     var _id = ObjectID(req.params.app_id);
 
     // var appid = req.headers.appid.toString().replace(":", "");
-    db.storeitems.find({}, function(err, storeitems) {
+    db_old.storeitems.find({}, function(err, storeitems) {
         if (err || !storeitems) {
             console.log("cain't get no storeitems... " + err);
         } else {
@@ -11568,7 +11589,7 @@ app.get('/get_storeitems_all/',  requiredAuthentication, admin, function (req, r
                     const oids = storeitem.storeItemPictureIDs.map(item => {
                         return ObjectID(item);
                     })
-                    db.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+                    db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                         if (err || !pic_items) {
                             callbackz();
                             console.log("error getting picture items: " + err);
@@ -11631,7 +11652,7 @@ app.get('/get_storeitems/:app_id', requiredAuthentication, admin, function (req,
     var _id = ObjectID(req.params.app_id);
 
     // var appid = req.headers.appid.toString().replace(":", "");
-    db.storeitems.find({appID : _id}, function(err, storeitems) {
+    db_old.storeitems.find({appID : _id}, function(err, storeitems) {
         if (err || !storeitems) {
             console.log("cain't get no storeitems... " + err);
         } else {
@@ -11651,7 +11672,7 @@ app.get('/get_storeitems/:app_id', requiredAuthentication, admin, function (req,
                     const oids = storeitem.storeItemPictureIDs.map(item => {
                         return ObjectID(item);
                     })
-                    db.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+                    db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                         if (err || !pic_items) {
                             callbackz();
                             console.log("error getting picture items: " + err);
@@ -11711,7 +11732,7 @@ app.get('/get_storeitem/:_id',  requiredAuthentication, admin, function (req, re
     console.log("tryna get storeitem: ", req.params._id);
     var item_id = ObjectID(req.params._id);
     // var appid = req.headers.appid.toString().replace(":", "");
-    db.storeitems.findOne({_id : item_id}, function(err, storeitem) {
+    db_old.storeitems.findOne({_id : item_id}, function(err, storeitem) {
         if (err || !storeitem) {
             console.log("cain't get no storeitem... " + err);
         } else {
@@ -11725,7 +11746,7 @@ app.get('/get_storeitem/:_id',  requiredAuthentication, admin, function (req, re
                         const g_oids = storeitem.storeItemSceneGroupIDs.map(item => {
                             return ObjectID(item);
                         });
-                        db.groups.find({_id: {$in: g_oids }}, function (err, groups) {
+                        db_old.groups.find({_id: {$in: g_oids }}, function (err, groups) {
                             if (err || !groups) {
                                 console.log("error getting grupe items: " + err);
                                 callback(err);
@@ -11746,7 +11767,7 @@ app.get('/get_storeitem/:_id',  requiredAuthentication, admin, function (req, re
                         const oids = storeitem.storeItemPictureIDs.map(item => {
                             return ObjectID(item);
                         });
-                        db.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+                        db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                             if (err || !pic_items) {
                                 console.log("error getting picture items: " + err);
                                 // res.send("error: " + err);
@@ -11802,7 +11823,7 @@ app.post('/set_storeitem', checkAppID, requiredAuthentication, admin, function (
     storeitem.createdTimestamp = timestamp;
     storeitem.createdByUserID = req.session.user._id;
     storeitem.createdByUserName = req.session.userName;
-    db.storeitems.save(storeitem, function (err, saved) {
+    db_old.storeitems.save(storeitem, function (err, saved) {
         if ( err || !saved ) {
             console.log('purchaseable not saved..');
             res.send("nilch");
@@ -11882,12 +11903,12 @@ app.post('/update_storeitem/', checkAppID, requiredAuthentication, admin, functi
     console.log("tryna save storeitem : " + JSON.stringify(req.body));
     var o_id = ObjectID(req.body._id);
     var timestamp = Math.round(Date.now() / 1000);
-    db.storeitems.findOne({_id: o_id}, function (err, item) {
+    db_old.storeitems.findOne({_id: o_id}, function (err, item) {
         if ( err || !item) {
             console.log('item not found..');
             res.send("nilch");
         } else {
-            db.storeitems.update( { _id: o_id }, { $set: {
+            db_old.storeitems.update( { _id: o_id }, { $set: {
                 itemName: req.body.itemName,
                 itemDisplayName: req.body.itemDisplayName,
                 itemAltName: req.body.itemAltName,
@@ -11912,7 +11933,7 @@ app.post('/update_storeitem/', checkAppID, requiredAuthentication, admin, functi
 app.post('/delete_storeitem/', requiredAuthentication, admin, function (req, res) {
     console.log("tryna delete key: " + req.body._id);
     var o_id = ObjectID(req.body._id);
-    db.storeitems.remove( { "_id" : o_id }, 1 );
+    db_old.storeitems.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
 
@@ -11921,7 +11942,7 @@ app.post('/purchase', checkAppID, requiredAuthentication, function (req, res) {
 
     var _id = ObjectID(req.body.userID);
     var obody = req.body;
-    db.users.findOne({"_id" : _id}, function (err, user) {
+    db_old.users.findOne({"_id" : _id}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
             res.send("error " + err);
@@ -11940,7 +11961,7 @@ app.post('/purchase', checkAppID, requiredAuthentication, function (req, res) {
                 }).then(function(charge){
                     console.log(JSON.stringify(charge));
                     obody.stripeToken = charge;
-                    db.purchases.save(obody, function (err, saved) {
+                    db_old.purchases.save(obody, function (err, saved) {
                         if ( err || !saved ) {
                             console.log('purchase not saved..');
                             res.send("nilch");
@@ -11965,18 +11986,18 @@ app.post('/testpurchase', checkAppID, requiredAuthentication, function (req, res
     let storeitemID = ObjectID(req.body.storeitemID);
     let obody = req.body;
     
-    db.users.findOne({"_id" : _id}, function (err, user) {// check user
+    db_old.users.findOne({"_id" : _id}, function (err, user) {// check user
         if (err || !user) {
             console.log("error getting user: " + err);
             res.send("error " + err);
         } else {
-            db.storeitems.findOne({"_id" : storeitemID}, function (err, storeitem){ //check store item
+            db_old.storeitems.findOne({"_id" : storeitemID}, function (err, storeitem){ //check store item
                 if (err || !storeitem) {
                     console.log("no store item error " + err);
                     res.send("error " + err);
                 } else {
                     let usertotal = 0;
-                    db.purchases.find({userID: req.body.userID, storeitemID: req.body.storeitemID}, function (err, purchases) { //check user's previous purchases of this item doesn't exceed maxPerUser
+                    db_old.purchases.find({userID: req.body.userID, storeitemID: req.body.storeitemID}, function (err, purchases) { //check user's previous purchases of this item doesn't exceed maxPerUser
                         if (err) {
                             console.log("error! " + err);
                         } else {
@@ -11999,14 +12020,14 @@ app.post('/testpurchase', checkAppID, requiredAuthentication, function (req, res
                                         obody.quantity = 1;
                                     }
                                     // if (obody.quantity < storeitem.maxPerUser) {
-                                    db.purchases.save(obody, function (err, saved) {
+                                    db_old.purchases.save(obody, function (err, saved) {
                                         if ( err || !saved ) {
                                             console.log('purchase not saved..');
                                             res.send("purchase failed");
                                         } else {
                                             var item_id = saved._id.toString();
                                             console.log('new purchase id: ' + item_id);
-                                            db.storeitems.update( { "_id": storeitemID },{ $inc: { totalSold: obody.quantity }});
+                                            db_old.storeitems.update( { "_id": storeitemID },{ $inc: { totalSold: obody.quantity }});
                                             var htmlbody = "Thanks for your Purchase: " + JSON.stringify(saved);
                                             (async () => {
                                                 try {
@@ -12062,7 +12083,7 @@ app.get('/purchases/', requiredAuthentication, admin, function (req, res) { //al
 
     console.log("tryna get all purchases! ");
 
-    db.purchases.find({}, function(err, purchases) {
+    db_old.purchases.find({}, function(err, purchases) {
         if (err || !purchases || purchases == null || purchases.length == 0) {
             console.log("cain't get no purchases... ");
             res.send("no purchases");
@@ -12080,7 +12101,7 @@ app.get('/purchases/:app_id/:u_id',  requiredAuthentication, function (req, res)
     console.log("tryna get purchases for: ", req.params.u_id + " " + req.params.app_id);
     //var _id = ObjectID(req.params.u_id);
     // var appid = req.headers.appid.toString().replace(":", "");
-    db.purchases.find({$and : [{userID : req.params.u_id}, {appID : req.params.app_id}]}, function(err, purchases) {
+    db_old.purchases.find({$and : [{userID : req.params.u_id}, {appID : req.params.app_id}]}, function(err, purchases) {
         if (err || !purchases || purchases == null || purchases.length == 0) {
             console.log("cain't get no purchases... ");
             res.send("no purchases");
@@ -12098,7 +12119,7 @@ app.get('/purchases/:app_id',  checkAppID, requiredAuthentication, function (req
     console.log("tryna get purchases for appid: " + req.params.app_id);
     //var _id = ObjectID(req.params.u_id);
     // var appid = req.headers.appid.toString().replace(":", "");
-    db.purchases.find({appID : req.params.app_id}, function(err, purchases) {
+    db_old.purchases.find({appID : req.params.app_id}, function(err, purchases) {
         if (err || !purchases || purchases == null || purchases.length == 0) {
             console.log("cain't get no purchases... ");
             res.send("no purchases");
@@ -12111,7 +12132,7 @@ app.get('/purchases/:app_id',  checkAppID, requiredAuthentication, function (req
 });
 app.post('/activity', requiredAuthentication, function (req, res) {
     console.log("tryna post activity");
-    db.activity.save(req.body, function (err, saved) {
+    db_old.activity.save(req.body, function (err, saved) {
         if ( err || !saved ) {
             console.log('activity not saved..');
             res.send("nilch");
@@ -12128,7 +12149,7 @@ app.get('/activities/:u_id',  checkAppID, requiredAuthentication, function (req,
     console.log("tryna get activities for: ", req.params.u_id);
     //var _id = ObjectID(req.params.u_id);
     var appid = req.headers.appid.toString().replace(":", "");
-    db.activity.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, activities) {
+    db_old.activity.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, activities) {
         if (err || !activities) {
             console.log("cain't get no activities... " + err);
             res.send(err);
@@ -12154,7 +12175,7 @@ app.get('/activitytotals/:appid', function (req, res) {
     async.waterfall([
 
             function (callback) { //get all scores for this app
-                db.scores.find({appID : appid}, function(err, activities) {
+                db_old.scores.find({appID : appid}, function(err, activities) {
                     if (err || !scores) {
                         console.log("cain't get no scores... " + err);
                         callback(err);
@@ -12217,7 +12238,7 @@ app.get('/activitytotals/:appid', function (req, res) {
 
 app.post('/newpath', checkAppID, requiredAuthentication, function (req, res) {
 
-    db.paths.save(req.body, function (err, saved) {
+    db_old.paths.save(req.body, function (err, saved) {
         if ( err || !saved ) {
             console.log('path not saved..');
             res.send("nilch");
@@ -12236,12 +12257,12 @@ app.post('/update_path/:_id', checkAppID, requiredAuthentication, function (req,
 
     var o_id = ObjectID(req.body._id);   
     console.log('path requested : ' + req.body._id);
-    db.paths.find({ "_id" : o_id}, function(err, path) {
+    db_old.paths.find({ "_id" : o_id}, function(err, path) {
         if (err || !path) {
             console.log("error getting path items: " + err);
         } else {
             console.log("tryna update path " + req.body._id);
-            db.paths.update( { "_id": o_id }, { $set: {
+            db_old.paths.update( { "_id": o_id }, { $set: {
 
                 pathUserID : req.body.user_id,
                 pathNumber : req.body.pathNumber,
@@ -12273,7 +12294,7 @@ app.get('/sceneinfo',  checkAppID, requiredAuthentication, function (req, res) {
 
     console.log(req.params._id);
     var o_id = ObjectID(req.params._id);
-    db.scenes.find({}, function(err, scenes) {
+    db_old.scenes.find({}, function(err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no paths... " + err);
         } else {
@@ -12290,11 +12311,11 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
     // let audiotype
     // console.log('tryna add a scene pic : ' + req.body);
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4: " + err);
         } else {
-            db.groups.findOne({ "_id": g_id}, function (err, group) {
+            db_old.groups.findOne({ "_id": g_id}, function (err, group) {
                 if (err || !group) {
                     console.log("error getting image items 4: " + err);
                 } else {
@@ -12305,7 +12326,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                             console.log("redundant group id");
                         } else {
                             scenePictureGroups.push(req.body.group_id);
-                            db.scenes.update({ "_id": s_id }, { $set: {scenePictureGroups: scenePictureGroups}});
+                            db_old.scenes.update({ "_id": s_id }, { $set: {scenePictureGroups: scenePictureGroups}});
                         }
 
                     } else  if (req.body.grouptype == 'audio') {
@@ -12315,7 +12336,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                             console.log("redundant group id");
                         } else {
                             sceneAudioGroups.push(req.body.group_id);
-                            db.scenes.update({ "_id": s_id }, { $set: {sceneAudioGroups: sceneAudioGroups}});
+                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneAudioGroups: sceneAudioGroups}});
                             
                         }
                     } else  if (req.body.grouptype == 'paudio') {
@@ -12325,7 +12346,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                                 console.log("redundant group id");
                             } else {
                                 scenePrimaryAudioGroups.push(req.body.group_id);
-                                db.scenes.update({ "_id": s_id }, { $set: {scenePrimaryAudioGroups: scenePrimaryAudioGroups}});
+                                db_old.scenes.update({ "_id": s_id }, { $set: {scenePrimaryAudioGroups: scenePrimaryAudioGroups}});
                             }
                     } else  if (req.body.grouptype == 'aaudio') {
                         let sceneAmbientAudioGroups = scene.sceneAmbientAudioGroups || new Array();
@@ -12334,7 +12355,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                             console.log("redundant group id");
                         } else {
                             sceneAmbientAudioGroups.push(req.body.group_id);
-                            db.scenes.update({ "_id": s_id }, { $set: {sceneAmbientAudioGroups: sceneAmbientAudioGroups}});
+                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneAmbientAudioGroups: sceneAmbientAudioGroups}});
                         }
                     } else  if (req.body.grouptype == 'taudio') {
                         let sceneTriggerAudioGroups = scene.sceneTriggerAudioGroups || new Array();
@@ -12343,7 +12364,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                             console.log("redundant group id");
                         } else {
                             sceneTriggerAudioGroups.push(req.body.group_id);
-                            db.scenes.update({ "_id": s_id }, { $set: {sceneTriggerAudioGroups: sceneTriggerAudioGroups}});
+                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneTriggerAudioGroups: sceneTriggerAudioGroups}});
                         }            
                     } else if (req.body.grouptype == 'text') {
                         var sceneTextGroups = scene.sceneTextGroups || new Array();
@@ -12352,7 +12373,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                             console.log("redundant group id");
                         } else {
                             sceneTextGroups.push(req.body.group_id);
-                            db.scenes.update({ "_id": s_id }, { $set: {sceneTextGroups: sceneTextGroups}});
+                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneTextGroups: sceneTextGroups}});
                         }
 
                     } else if (req.body.grouptype == 'object') {
@@ -12362,7 +12383,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                             console.log("redundant group id");
                         } else {
                             sceneObjectGroups.push(req.body.group_id);
-                            db.scenes.update({ "_id": s_id }, { $set: {sceneObjectGroups: sceneObjectGroups}});
+                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneObjectGroups: sceneObjectGroups}});
                         }
 
                     } else if (req.body.grouptype == 'video') {
@@ -12372,7 +12393,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                             console.log("redundant group id");
                         } else {
                             sceneVideoGroups.push(req.body.group_id);
-                            db.scenes.update({ "_id": s_id }, { $set: {sceneVideoGroups: sceneVideoGroups}});
+                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneVideoGroups: sceneVideoGroups}});
                         }
                     } else if (req.body.grouptype == 'location') {
                         var sceneLocationGroups = scene.sceneLocationGroups || new Array();
@@ -12381,7 +12402,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                             console.log("redundant group id");
                         } else {
                             sceneLocationGroups.push(req.body.group_id);
-                            db.scenes.update({ "_id": s_id }, { $set: {sceneLocationGroups: sceneLocationGroups}});
+                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocationGroups: sceneLocationGroups}});
                         }
                     }
                 }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
@@ -12396,7 +12417,7 @@ app.post('/update_scene_location/', requiredAuthentication, function (req, res) 
     // var p_id = ObjectID(req.body.location_id);   
     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4 obj: " + err);
             res.send(err);
@@ -12422,7 +12443,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
         // console.log(JSON.stringify(req.session.user) + " vs " + JSON.stringify(req.body.userData)); 
         if (req.body.userData._id == req.session.user._id) {    
             
-            db.scenes.findOne({ "short_id": req.params.s_id}, function (err, scene) {
+            db_old.scenes.findOne({ "short_id": req.params.s_id}, function (err, scene) {
                 if (err || !scene) {
                     console.log("error getting skeen: " + err);
                     res.send(err);
@@ -12461,7 +12482,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                             (async () => {
                                                 try {
                                                     const status = await PutObject(params.Bucket, params.Key, params.Body);
-                                                    db.models.save({ //add to models collection
+                                                    db_old.models.save({ //add to models collection
                                                         userID : req.session.user._id.toString(),
                                                         username : req.session.user.userName,
                                                         name : timestamp + "_" + file.name,
@@ -12485,7 +12506,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                                 var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
                                                                 // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
                                                                 sceneModels.push(saved._id);
-                                                                db.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}}); //add model to scene
+                                                                db_old.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}}); //add model to scene
                                                                 callbackz();
                                                             }
                                                     });
@@ -12540,7 +12561,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                 hasAlpha = true;
                                             }
 
-                                            db.image_items.save({ //do the db first for this one, bc we needs the _id for naming pattern below(really?)
+                                            db_old.image_items.save({ //do the db first for this one, bc we needs the _id for naming pattern below(really?)
                                                 type : "fromLocalFile",
                                                 userID : req.session.user._id.toString(),
                                                 userName : req.session.user.userName,
@@ -12594,7 +12615,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                                         var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
                                                                         // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
                                                                         scenePictures.push(saved._id);
-                                                                        db.scenes.update({ "_id": s_id }, { $set: {scenePictures: scenePictures}}); //add pictureID to scene
+                                                                        db_old.scenes.update({ "_id": s_id }, { $set: {scenePictures: scenePictures}}); //add pictureID to scene
                                                                         callbackz();
                                                                     })                                                     
                                                                     .catch(function (error) {
@@ -12761,7 +12782,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                     console.log("mods not allowed for " + scene.sceneLocations[i].timestamp)
                                                 } else {
                                                     // console.log("tryna update location item " + JSON.stringify(req.body.locationMods[l]));
-                                                    db.scenes.update(
+                                                    db_old.scenes.update(
                                                         { 'short_id': req.params.s_id, 'sceneLocations.timestamp': tsVar}, 
                                                         { $set: { 'sceneLocations.$' : req.body.locationMods[l]}} //replaces whole object in array, uses positional $ operator https://docs.mongodb.com/manual/tutorial/update-documents/#Updating-The%24positionaloperator
                                                     );
@@ -12787,7 +12808,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                     }
                                                 }
                                             }
-                                            db.scenes.update(
+                                            db_old.scenes.update(
                                                 { 'short_id': req.params.s_id},
                                                 { $push: { 'sceneLocations' : req.body.locationMods[l]} } 
                                             )
@@ -12800,7 +12821,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                             ], //end of async.waterfall
                             function (err, result) { // #last function, close async
                             if (!err) {
-                                 db.scenes.update(
+                                 db_old.scenes.update(
                                 { 'short_id': req.params.s_id},
                                     { $set: query } 
                                 )
@@ -12846,7 +12867,7 @@ app.post('/add_scene_location/', requiredAuthentication, function (req, res) { /
     var p_id = ObjectID(req.body.location_id);   
     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4 obj: " + err);
         } else {
@@ -12856,7 +12877,7 @@ app.post('/add_scene_location/', requiredAuthentication, function (req, res) { /
             //     res.send("duplicates not allowed!")
             // } else {
             
-            db.locations.findOne({ "_id": p_id}, function (err, obj) {
+            db_old.locations.findOne({ "_id": p_id}, function (err, obj) {
                 if (err || !obj) {
                     console.log("error getting obj items 4: " + err);
                 } else {
@@ -12869,7 +12890,7 @@ app.post('/add_scene_location/', requiredAuthentication, function (req, res) { /
                     }
                     // console.log("tryna add sceneLocations: " + sceneLocations);
                     sceneLocs.push(obj);
-                    db.scenes.update({ "_id": s_id }, { $set: {sceneLocations: sceneLocs}});
+                    db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocations: sceneLocs}});
                 }
                 if (err) {
                     res.send(error);
@@ -12888,21 +12909,21 @@ app.post('/add_scene_model/', requiredAuthentication, function (req, res) {
     var p_id = ObjectID(req.body.model_id);   
     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4 obj: " + err);
         } else {
             if (scene.sceneModels != null && scene.sceneModels.indexOf(req.body.model_id) > -1) {
                 res.send("duplicate models not allowed!")
             } else {
-                db.models.findOne({ "_id": p_id}, function (err, model) {
+                db_old.models.findOne({ "_id": p_id}, function (err, model) {
                     if (err || !model) {
                         console.log("error getting model 4: " + err);
                     } else {
                             var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
                             // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
                             sceneModels.push(req.body.model_id);
-                            db.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}
+                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}
                         });
                     }
                     if (err) {
@@ -12922,7 +12943,7 @@ app.post('/add_scene_obj/', requiredAuthentication, function (req, res) {
     var p_id = ObjectID(req.body.obj_id);   
     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4 obj: " + err);
         } else {
@@ -12931,14 +12952,14 @@ app.post('/add_scene_obj/', requiredAuthentication, function (req, res) {
                 //In the array!
                 res.send("duplicates not allowed!")
             } else {
-                db.obj_items.findOne({ "_id": p_id}, function (err, obj) {
+                db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) {
                     if (err || !obj) {
                         console.log("error getting obj items 4: " + err);
                     } else {
                         var sceneObjs = (scene.sceneObjects != undefined && scene.sceneObjects != null && scene.sceneObjects != "") ? scene.sceneObjects : new Array();
                         console.log("XXX sceneObjs: " + sceneObjs);
                         sceneObjs.push(req.body.obj_id);
-                        db.scenes.update({ "_id": s_id }, { $set: {sceneObjects: sceneObjs}
+                        db_old.scenes.update({ "_id": s_id }, { $set: {sceneObjects: sceneObjs}
                         });
                     }
                     if (err) {
@@ -12959,7 +12980,7 @@ app.post('/add_scenelocation_obj/', checkAppID, requiredAuthentication, function
 
     console.log('tryna add a scene location obj : ' + JSON.stringify(req.body));
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting scene location obj: " + err);
         } else {
@@ -12969,7 +12990,7 @@ app.post('/add_scenelocation_obj/', checkAppID, requiredAuthentication, function
                     console.log("tryna find location " + req.body.location_id + " vs " + scene.sceneLocations[i].timestamp);
                     if  (scene.sceneLocations[i].timestamp == req.body.location_id) {
                         console.log("gotsa matching sceneLocation!");
-                        db.obj_items.findOne({ "_id": p_id}, function (err, object) {
+                        db_old.obj_items.findOne({ "_id": p_id}, function (err, object) {
                             if (err || !object) {
                                 console.log("error getting object : " + err);
                                 res.end();
@@ -12979,7 +13000,7 @@ app.post('/add_scenelocation_obj/', checkAppID, requiredAuthentication, function
                                 console.log("truyna push sceene location object id " + req.body.obj_id);
                                 sceneObjs.push(req.body.obj_id);
 
-                                db.scenes.update({ "_id": s_id }, { $set: {sceneLocations: scene.sceneLocations, sceneObjects: sceneObjs}});
+                                db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocations: scene.sceneLocations, sceneObjects: sceneObjs}});
                                 res.send("updated " + new Date());
                             }
 
@@ -13000,11 +13021,11 @@ app.post('/add_scene_vid/', requiredAuthentication, function (req, res) {
     var p_id = ObjectID(req.body.vid_id);   
     console.log('tryna add a scene vid : ' + JSON.stringify(req.body));
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4: " + err);
         } else {
-            db.video_items.findOne({ "_id": p_id}, function (err, vid) {
+            db_old.video_items.findOne({ "_id": p_id}, function (err, vid) {
                 if (err || !vid) {
                     console.log("error getting vid items 4: " + err);
                 } else {
@@ -13016,7 +13037,7 @@ app.post('/add_scene_vid/', requiredAuthentication, function (req, res) {
                     if (sceneVideos.indexOf(req.body.vid_id) == -1 ) {
                         console.log("XXX sceneVids: " + sceneVideos);
                         sceneVideos.push(req.body.vid_id);
-                        db.scenes.update({ "_id": s_id }, { $set: {sceneVideos: sceneVideos}
+                        db_old.scenes.update({ "_id": s_id }, { $set: {sceneVideos: sceneVideos}
 
                         });
                     }
@@ -13032,12 +13053,12 @@ app.post('/add_scene_text_item/', requiredAuthentication, function (req, res) {
     var p_id = ObjectID(req.body.text_id);   
     console.log('tryna add a scene pic : ' + req.body);
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4: " + err);
         } else {
 
-                db.text_items.findOne({ "_id": p_id}, function (err, txt) {
+                db_old.text_items.findOne({ "_id": p_id}, function (err, txt) {
                     if (err || !txt) {
                         console.log("error getting image items 4: " + err);
                         res.send(error);
@@ -13049,7 +13070,7 @@ app.post('/add_scene_text_item/', requiredAuthentication, function (req, res) {
                         if (sceneTextItems.indexOf(req.body.text_id) == -1) { //TODO DO THIS ON THE OTHER ONES!
                             sceneTextItems.push(req.body.text_id);
                             console.log("XXX sceneTexts: " + sceneTextItems);
-                            db.scenes.update({ "_id": s_id }, { $set: {sceneTextItems: sceneTextItems}
+                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneTextItems: sceneTextItems}
                             });
                             res.send("updated " + new Date());
                         } else {
@@ -13072,7 +13093,7 @@ app.post('/scene_text_items/', function (req, res) {
         let moids = req.body.textIDs.map(convertStringToObjectID);
         console.log('tryna add a scene pic : ' + req.body);
 
-        db.text_items.find({_id: {$in: moids }}, function (err, text_items){
+        db_old.text_items.find({_id: {$in: moids }}, function (err, text_items){
             if (err || !text_items) {
                 console.log("error getting text_items: " + err);
                 res.send("error getting text_items" + err);
@@ -13093,11 +13114,11 @@ app.post('/add_scene_pic/', requiredAuthentication, function (req, res) {
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + req.body);
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4: " + err);
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items 4: " + err);
                 } else {
@@ -13108,7 +13129,7 @@ app.post('/add_scene_pic/', requiredAuthentication, function (req, res) {
 
                     console.log("XXX scenePics: " + scenePics);
                     scenePics.push(req.body.pic_id);
-                    db.scenes.update({ "_id": s_id }, { $set: {scenePictures: scenePics}
+                    db_old.scenes.update({ "_id": s_id }, { $set: {scenePictures: scenePics}
 
                     });
                 }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
@@ -13120,12 +13141,12 @@ app.post('/rem_domain_pic/', requiredAuthentication, admin, function (req, res) 
     var s_id = ObjectID(req.body.domain_id);   
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db.apps.findOne({ "_id": s_id}, function (err, item) {
+    db_old.apps.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
             console.log("error getting sceneert 4: " + err);
             res.send("app not found!")
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items for domain: " + err);
                 } else {
@@ -13134,7 +13155,7 @@ app.post('/rem_domain_pic/', requiredAuthentication, admin, function (req, res) 
                     let index = domainPics.indexOf(req.body.pic_id);
                     if ( index != -1 ) {
                         domainPics.splice(index, 1);
-                        db.domains.update({ "_id": s_id }, { $set: {domainPictureIDs: domainPics}});
+                        db_old.domains.update({ "_id": s_id }, { $set: {domainPictureIDs: domainPics}});
                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
                     } else {
                         res.send("that picture is not assigned to this app");
@@ -13149,18 +13170,18 @@ app.post('/add_object_model/', requiredAuthentication, function (req, res) {
     var s_id = ObjectID(req.body.object_id);   
     var p_id = ObjectID(req.body.model_id);   
     console.log('tryna add a object model : ' + JSON.stringify(req.body));
-    db.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
+    db_old.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
         if (err || !item) {
             console.log("error getting object 4: " + err);
             res.send("object not found!")
         } else {
-            db.models.findOne({ "_id": p_id}, function (err, model) { //does model exist
+            db_old.models.findOne({ "_id": p_id}, function (err, model) { //does model exist
                 if (err || !model) {
                     console.log("error getting model for object: " + err);
                     res.send("model for object not found");
                 } else {
                     // console.log("tryna add model info " + JSON.stringify(model));
-                    db.obj_items.update({ "_id": s_id }, { $set: {modelID: model._id, modelName: model.name}}); //update object with model info
+                    db_old.obj_items.update({ "_id": s_id }, { $set: {modelID: model._id, modelName: model.name}}); //update object with model info
                     res.send("updated");
                 }  
             });
@@ -13194,18 +13215,18 @@ app.post('/add_action_model/', requiredAuthentication, function (req, res) { //s
     var s_id = ObjectID(req.body.action_id);   
     var p_id = ObjectID(req.body.model_id);   
     console.log('tryna add an action model : ' + JSON.stringify(req.body));
-    db.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
+    db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
         if (err || !item) {
             console.log("error getting object 4: " + err);
             res.send("object not found!")
         } else {
-            db.models.findOne({ "_id": p_id}, function (err, model) { //does model exist
+            db_old.models.findOne({ "_id": p_id}, function (err, model) { //does model exist
                 if (err || !model) {
                     console.log("error getting model for object: " + err);
                     res.send("model for object not found");
                 } else {
                     // console.log("tryna add model info " + JSON.stringify(model));
-                    db.actions.update({ "_id": s_id }, { $set: {modelID: model._id, modelName: model.name}}); //update object with model info
+                    db_old.actions.update({ "_id": s_id }, { $set: {modelID: model._id, modelName: model.name}}); //update object with model info
                     res.send("updated");
                 }  
             });
@@ -13217,18 +13238,18 @@ app.post('/add_action_object/', requiredAuthentication, function (req, res) { //
     var s_id = ObjectID(req.body.action_id);   
     var p_id = ObjectID(req.body.object_id);   
     console.log('tryna add an action model : ' + JSON.stringify(req.body));
-    db.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
+    db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
         if (err || !item) {
             console.log("error getting action 4: " + err);
             res.send("action not found!")
         } else {
-            db.obj_items.findOne({ "_id": p_id}, function (err, obj) { //does model exist
+            db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) { //does model exist
                 if (err || !obj) {
                     console.log("error getting model for object: " + err);
                     res.send("model for object not found");
                 } else {
                     // console.log("tryna add model info " + JSON.stringify(model));
-                    db.actions.update({ "_id": s_id }, { $set: {objectID: obj._id, objectName: obj.name}}); //update object with object info
+                    db_old.actions.update({ "_id": s_id }, { $set: {objectID: obj._id, objectName: obj.name}}); //update object with object info
                     res.send("updated");
                 }  
             });
@@ -13240,12 +13261,12 @@ app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //sav
     var s_id = ObjectID(req.body.object_id);   
     var a_id = ObjectID(req.body.action_id);   
     console.log('tryna add a object action : ' + JSON.stringify(req.body));
-    db.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
+    db_old.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
         if (err || !item) {
             console.log("error getting object 4 action: " + err);
             res.send("object not found!")
         } else {
-            db.actions.findOne({ "_id": a_id}, function (err, action) { //does action exist
+            db_old.actions.findOne({ "_id": a_id}, function (err, action) { //does action exist
                 if (err || !action) {
                     console.log("error getting action for object: " + err);
                     res.send("action for object not found");
@@ -13253,7 +13274,7 @@ app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //sav
                     
                     
                     if (item.actionIDs == undefined || item.actionIDs.length > 0 || item.actionIDs.indexOf(action._id.toString()) == -1 ) {
-                        db.obj_items.update({ "_id": s_id }, { $push: {actionIDs: action._id.toString()}}, {upsert: false}, function (err, saved) {
+                        db_old.obj_items.update({ "_id": s_id }, { $push: {actionIDs: action._id.toString()}}, {upsert: false}, function (err, saved) {
                             if (err || !saved) {
                                 res.send("error saving action " + err);
                             } else {
@@ -13297,12 +13318,12 @@ app.post('/add_object_pic/', requiredAuthentication, function (req, res) {
     var s_id = ObjectID(req.body.object_id);   
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a object pic : ' + JSON.stringify(req.body));
-    db.obj_items.findOne({ "_id": s_id}, function (err, item) {
+    db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
             console.log("error getting object 4: " + err);
             res.send("object not found!")
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items for object: " + err);
                 } else {
@@ -13312,7 +13333,7 @@ app.post('/add_object_pic/', requiredAuthentication, function (req, res) {
                     }
                     if ( objectPics.indexOf(req.body.pic_id) == -1 ) {
                         objectPics.push(req.body.pic_id);
-                        db.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
+                        db_old.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
                     } else {
                         res.send("that picture is already assigned to this object");
@@ -13326,12 +13347,12 @@ app.post('/rem_object_action/', requiredAuthentication, admin, function (req, re
     var s_id = ObjectID(req.body.object_id);   
     var p_id = ObjectID(req.body.action_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db.obj_items.findOne({ "_id": s_id}, function (err, item) {
+    db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
             console.log("error getting sceneert 4: " + err);
             res.send("app not found!")
         } else {
-            db.actions.findOne({ "_id": p_id}, function (err, action) {
+            db_old.actions.findOne({ "_id": p_id}, function (err, action) {
                 if (err || !action) {
                     console.log("error getting image items for domain: " + err);
                 } else {
@@ -13340,7 +13361,7 @@ app.post('/rem_object_action/', requiredAuthentication, admin, function (req, re
                     let index = actionIDs.indexOf(req.body.action_id);
                     if ( index != -1 ) {
                         actionIDs.splice(index, 1);
-                        db.obj_items.update({ "_id": s_id }, { $set: {actionIDs: actionIDs}});
+                        db_old.obj_items.update({ "_id": s_id }, { $set: {actionIDs: actionIDs}});
                         if (err) {
                             res.send(err);
                             } else {
@@ -13359,12 +13380,12 @@ app.post('/rem_object_pic/', requiredAuthentication, admin, function (req, res) 
     var s_id = ObjectID(req.body.domain_id);   
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db.obj_items.findOne({ "_id": s_id}, function (err, item) {
+    db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
             console.log("error getting sceneert 4: " + err);
             res.send("app not found!")
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items for domain: " + err);
                 } else {
@@ -13373,7 +13394,7 @@ app.post('/rem_object_pic/', requiredAuthentication, admin, function (req, res) 
                     let index = objectPics.indexOf(req.body.pic_id);
                     if ( index != -1 ) {
                         objectPics.splice(index, 1);
-                        db.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
+                        db_old.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
                     } else {
                         res.send("that picture is not assigned to this app");
@@ -13388,12 +13409,12 @@ app.post('/add_domain_pic/', requiredAuthentication, admin, function (req, res) 
     var s_id = ObjectID(req.body.domain_id);   
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a domain pic : ' + JSON.stringify(req.body));
-    db.domains.findOne({ "_id": s_id}, function (err, item) {
+    db_old.domains.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
             console.log("error getting sceneert 4: " + err);
             res.send("domain not found!")
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items for storeitem: " + err);
                 } else {
@@ -13403,7 +13424,7 @@ app.post('/add_domain_pic/', requiredAuthentication, admin, function (req, res) 
                     }
                     if ( domainPics.indexOf(req.body.pic_id) == -1 ) {
                         domainPics.push(req.body.pic_id);
-                        db.domains.update({ "_id": s_id }, { $set: {domainPictureIDs: domainPics}});
+                        db_old.domains.update({ "_id": s_id }, { $set: {domainPictureIDs: domainPics}});
                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
                     } else {
                         res.send("that picture is already assigned to this domain");
@@ -13417,12 +13438,12 @@ app.post('/rem_app_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectID(req.body.app_id);   
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db.apps.findOne({ "_id": s_id}, function (err, item) {
+    db_old.apps.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
             console.log("error getting sceneert 4: " + err);
             res.send("app not found!")
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items for storeitem: " + err);
                 } else {
@@ -13431,7 +13452,7 @@ app.post('/rem_app_pic/', requiredAuthentication, admin, function (req, res) {
                     let index = appPics.indexOf(req.body.pic_id);
                     if ( index != -1 ) {
                         appPics.splice(index, 1);
-                        db.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
+                        db_old.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
                     } else {
                         res.send("that picture is not assigned to this app");
@@ -13446,12 +13467,12 @@ app.post('/add_app_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectID(req.body.app_id);   
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db.apps.findOne({ "_id": s_id}, function (err, item) {
+    db_old.apps.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
             console.log("error getting sceneert 4: " + err);
             res.send("store item not found!")
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items for storeitem: " + err);
                 } else {
@@ -13462,7 +13483,7 @@ app.post('/add_app_pic/', requiredAuthentication, admin, function (req, res) {
                     // console.log("XXX scenePics: " + storeItemPics);
                     if ( appPics.indexOf(req.body.pic_id) == -1 ) {
                         appPics.push(req.body.pic_id);
-                        db.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
+                        db_old.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
                     } else {
                         res.send("that picture is already assigned to this storeitem");
@@ -13476,12 +13497,12 @@ app.post('/rem_storeitem_pic/', checkAppID, requiredAuthentication, function (re
     var s_id = ObjectID(req.body.storeitem_id);   
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
+    db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
         if (err || !storeitem) {
             console.log("error getting sceneert 4: " + err);
             res.send("store item not found!")
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items for storeitem: " + err);
                 } else {
@@ -13490,7 +13511,7 @@ app.post('/rem_storeitem_pic/', checkAppID, requiredAuthentication, function (re
                     let index = storeItemPics.indexOf(req.body.pic_id);
                     if ( index != -1 ) {
                         storeItemPics.splice(index, 1);
-                        db.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
+                        db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
                     } else {
                         res.send("that picture is not assigned to this storeitem");
@@ -13505,12 +13526,12 @@ app.post('/add_storeitem_pic/', checkAppID, requiredAuthentication, function (re
     var s_id = ObjectID(req.body.storeitem_id);   
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
+    db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
         if (err || !storeitem) {
             console.log("error getting sceneert 4: " + err);
             res.send("store item not found!")
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items for storeitem: " + err);
                 } else {
@@ -13521,7 +13542,7 @@ app.post('/add_storeitem_pic/', checkAppID, requiredAuthentication, function (re
                     console.log("XXX scenePics: " + storeItemPics);
                     if ( storeItemPics.indexOf(req.body.pic_id) == -1 ) {
                         storeItemPics.push(req.body.pic_id);
-                        db.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
+                        db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
                     } else {
                         res.send("that picture is already assigned to this storeitem");
@@ -13535,17 +13556,17 @@ app.post('/add_storeitem_obj/', requiredAuthentication, admin, function (req, re
     var s_id = ObjectID(req.body.storeitem_id);   
     var p_id = ObjectID(req.body.obj_id);   
     console.log('tryna add a storeitem obj : ' + JSON.stringify(req.body));
-    db.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
+    db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
         if (err || !storeitem) {
             console.log("error getting sceneert 4: " + err);
             res.send("store item not found!")
         } else {
-            db.obj_items.findOne({ "_id": p_id}, function (err, obj) {
+            db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) {
                 if (err || !obj) {
                     console.log("error getting image items for storeitem: " + err);
                 } else {
         
-                db.storeitems.update({ "_id": s_id }, { $set: {objectID: obj._id, objectName: obj.name}});
+                db_old.storeitems.update({ "_id": s_id }, { $set: {objectID: obj._id, objectName: obj.name}});
                 if (err) {res.send(error)} else {res.send("updated " + new Date())}
 
                 }         
@@ -13557,12 +13578,12 @@ app.post('/add_storeitem_scenegroup/', requiredAuthentication, function (req, re
     var s_id = ObjectID(req.body.storeitem_id);   
     var p_id = ObjectID(req.body.group_id);   
     console.log('tryna add a storeitem scenegroup : ' + JSON.stringify(req.body));
-    db.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
+    db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
         if (err || !storeitem) {
             console.log("error getting sceneert 4: " + err);
             res.send("store item not found!")
         } else {
-            db.groups.findOne({ "_id": p_id}, function (err, group) {
+            db_old.groups.findOne({ "_id": p_id}, function (err, group) {
                 if (err || !group) {
                     console.log("error getting image items for storeitem: " + err);
                 } else {
@@ -13573,7 +13594,7 @@ app.post('/add_storeitem_scenegroup/', requiredAuthentication, function (req, re
                     console.log("updating storeitem sceneGroups: " + storeItemSceneGroups);
                     if ( storeItemSceneGroups.indexOf(req.body.group_id) == -1 ) {
                         storeItemSceneGroups.push(req.body.group_id);
-                        db.storeitems.update({ "_id": s_id }, { $set: {storeItemSceneGroupIDs: storeItemSceneGroups}});
+                        db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemSceneGroupIDs: storeItemSceneGroups}});
                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
                     } else {
                         res.send("that group is already assigned to this storeitem");
@@ -13589,11 +13610,11 @@ app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
     var p_id = ObjectID(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4: " + err);
         } else {
-            db.image_items.findOne({ "_id": p_id}, function (err, pic) {
+            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
                 if (err || !pic) {
                     console.log("error getting image items 4: " + err);
                 } else {
@@ -13603,7 +13624,7 @@ app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
                     }
                     console.log("XXX scenePostcards: " + scenePostcards);
                     scenePostcards.push(req.body.pic_id);
-                    db.scenes.update({ "_id": s_id }, { $set: {scenePostcards: scenePostcards}
+                    db_old.scenes.update({ "_id": s_id }, { $set: {scenePostcards: scenePostcards}
 
                     });
                 }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
@@ -13617,7 +13638,7 @@ app.post('/add_group_item/', checkAppID, requiredAuthentication, function (req, 
     var g_id = ObjectID(req.body.group_id);   
     var timestamp = Math.round(Date.now() / 1000);
     console.log('tryna add a group item : ' + req.body);
-    db.groups.update({ "_id": g_id }, { $push: {items: req.body.item_id} },{ $set: {lastUpdateTimestamp : timestamp} });
+    db_old.groups.update({ "_id": g_id }, { $push: {items: req.body.item_id} },{ $set: {lastUpdateTimestamp : timestamp} });
     res.send("ok");
 
 });
@@ -13629,20 +13650,20 @@ app.post('/add_scene_audio/', requiredAuthentication, function (req, res) {
     var a_id = ObjectID(req.body.audio_id);   
     console.log('tryna import primary audio : ' + req.body);
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting sceneert 4: " + err);
         } else {
-            db.audio_items.findOne({ "_id": a_id}, function (err, audio) {
+            db_old.audio_items.findOne({ "_id": a_id}, function (err, audio) {
                 if (err || !audio) {
                     console.log("error getting audio items 4: " + err);
                 } else {
                     if (req.body.audio_type === "trigger") {
-                        db.scenes.update({ "_id": s_id }, { $set: {sceneTriggerAudioID: req.body.audio_id}});
+                        db_old.scenes.update({ "_id": s_id }, { $set: {sceneTriggerAudioID: req.body.audio_id}});
                     } else if (req.body.audio_type === "ambient") {
-                        db.scenes.update({ "_id": s_id }, { $set: {sceneAmbientAudioID: req.body.audio_id}});
+                        db_old.scenes.update({ "_id": s_id }, { $set: {sceneAmbientAudioID: req.body.audio_id}});
                     } else if (req.body.audio_type === "primary") {
-                        db.scenes.update({ "_id": s_id }, { $set: {scenePrimaryAudioID: req.body.audio_id}});
+                        db_old.scenes.update({ "_id": s_id }, { $set: {scenePrimaryAudioID: req.body.audio_id}});
                     }
 
                 }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
@@ -13657,18 +13678,18 @@ app.post('/import_scene_audio_timed_events/', requiredAuthentication, function (
     var a_id = ObjectID(req.body.audioID);   
     console.log('tryna import scene audio timed e3vents : ' + req.body);
 
-    db.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
         if (err || !scene) {
             console.log("error getting scene for audio timekey import: " + err);
         } else {
-            db.audio_items.findOne({ "_id": a_id}, function (err, audio) {
+            db_old.audio_items.findOne({ "_id": a_id}, function (err, audio) {
                 if (err || !audio) {
                     console.log("error getting audio items 4: " + err);
                 } else {
                     if (audio.timekeys != undefined && audio.timekeys != null && audio.timekeys.length) {
                         let sceneTimedEvents = {};
                         sceneTimedEvents.timekeys = audio.timekeys;
-                        db.scenes.update({ "_id": s_id }, { $set: {sceneTimedEvents: sceneTimedEvents}});
+                        db_old.scenes.update({ "_id": s_id }, { $set: {sceneTimedEvents: sceneTimedEvents}});
                         
                         if (err) {
                             res.send(error);w
@@ -13705,7 +13726,7 @@ app.get('/uscenes/:_id',  requiredAuthentication, usercheck, function (req, res)
     if (req.session.user.authLevel.toLowerCase().includes("domain")) { //domain admins can see everything
         query = {};
     }
-    db.scenes.find(query, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 },  function(err, scenes) {
+    db_old.scenes.find(query, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 },  function(err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no scenes... " + err);
             res.send("noscenes");
@@ -13719,7 +13740,7 @@ app.get('/uscenes/:appid',  requiredAuthentication, usercheck, function (req, re
     var o_id = ObjectID(req.params.appid);
     var scenesResponse = {};
 
-    db.scenes.find({ "user_id" : req.params._id}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1,  sceneShareWithPublic: 1 },  function(err, scenes) {
+    db_old.scenes.find({ "user_id" : req.params._id}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1,  sceneShareWithPublic: 1 },  function(err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no scenes... " + err);
             res.send("noscenes");
@@ -13732,7 +13753,7 @@ app.post('/uscenes/',  requiredAuthentication, usercheck, function (req, res) { 
     console.log("tryna get user scenes: ",req.params._id);
     var o_id = ObjectID(req.params._id);
     var scenesResponse = {};
-    db.scenes.find({ "sceneAppName" : req.body.appName}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 },  function(err, scenes) {
+    db_old.scenes.find({ "sceneAppName" : req.body.appName}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 },  function(err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no scenes... " + err);
             res.send("noscenes");
@@ -13746,7 +13767,7 @@ app.post('/appscenes/',  requiredAuthentication, function (req, res) { //get sce
 
     // var o_id = ObjectID(req.params.appid);
     // var scenesResponse = {};
-    db.scenes.find({ "sceneDomain" : req.body.sceneDomain}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1, sceneStickyness: 1 },  function(err, scenes) {
+    db_old.scenes.find({ "sceneDomain" : req.body.sceneDomain}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1, sceneStickyness: 1 },  function(err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no scenes... " + err);
             res.send("noscenes");
@@ -13778,10 +13799,10 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
     async.waterfall([
         function (callback) {
             console.log("uscene lookup for reqstring " + reqstring);
-            var o_id = ObjectID(reqstring);
+            var o_id = new ObjectId(reqstring);
             // var o_id = new ObjectId.createFromHexString(reqstring);
             // var o_id = ObjectID(req.params.scene_id);
-            db.scenes.find({$or: [{ sceneTitle: reqstring },
+            db_old.scenes.find({$or: [{ sceneTitle: reqstring },
                     { short_id : reqstring },
                     { _id : o_id}]},
                 function (err, sceneData) { //fetch the path info by title TODO: urlsafe string
@@ -13793,7 +13814,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                         if (sceneData[0].scenePictures != undefined) { 
                                 if (sceneData[0].scenePictures.length > 0) {
 {                                   sceneData[0].scenePictures.forEach(function (picture) {
-                                    var p_id = ObjectID(picture); //convert to binary to search by _id beloiw
+                                    var p_id = new ObjectId(picture); //convert to binary to search by _id beloiw
                                     requestedPictureItems.push(p_id); //populate array
                                 });
                             }
@@ -13804,9 +13825,9 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                         //     requestedLocationItems.push(p_id); //populate array
                         // });
                         // requestedAudioItems = [ ObjectID(sceneData[0].sceneTriggerAudioID), ObjectID(sceneData[0].sceneAmbientAudioID), ObjectID(sceneData[0].scenePrimaryAudioID)];
-                        var triggerOID = ObjectID.isValid(sceneData[0].sceneTriggerAudioID) ? ObjectID(sceneData[0].sceneTriggerAudioID) : "";
-                        var ambientOID = ObjectID.isValid(sceneData[0].sceneAmbientAudioID) ? ObjectID(sceneData[0].sceneAmbientAudioID) : "";
-                        var primaryOID = ObjectID.isValid(sceneData[0].scenePrimaryAudioID) ? ObjectID(sceneData[0].scenePrimaryAudioID) : "";
+                        var triggerOID = ObjectId.isValid(sceneData[0].sceneTriggerAudioID) ? new ObjectId(sceneData[0].sceneTriggerAudioID) : "";
+                        var ambientOID = ObjectId.isValid(sceneData[0].sceneAmbientAudioID) ? new ObjectId(sceneData[0].sceneAmbientAudioID) : "";
+                        var primaryOID = ObjectId.isValid(sceneData[0].scenePrimaryAudioID) ? new ObjectId(sceneData[0].scenePrimaryAudioID) : "";
                         requestedAudioItems = [ triggerOID, ambientOID, primaryOID];
                         sceneResponse = sceneData[0];
                         // console.log("sceneScatterOffset is " + sceneResponse.sceneScatterOffset);
@@ -13819,8 +13840,8 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                     let weblinx = [];
                     for (var i = 0; i < sceneResponse.sceneWebLinks.length; i++) {
                         console.log("weblink: " + JSON.stringify(sceneResponse.sceneWebLinks[i]));
-                        if (ObjectID.isValid(sceneResponse.sceneWebLinks[i])) {
-                            db.weblinks.findOne({'_id': ObjectID(sceneResponse.sceneWebLinks[i])}, function (err, weblink) {
+                        if (ObjectId.isValid(sceneResponse.sceneWebLinks[i])) {
+                            db_old.weblinks.findOne({'_id': ObjectId(sceneResponse.sceneWebLinks[i])}, function (err, weblink) {
                                 if (err || !weblink) {
                                     console.log("can't find weblink");
                                 } else {
@@ -13852,7 +13873,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             function (callback) { 
                 if (sceneResponse.sceneVideos != null && sceneResponse.sceneVideos != undefined && sceneResponse.sceneVideos.length > 0) {
                     const moids = sceneResponse.sceneVideos.map(convertStringToObjectID);
-                    db.video_items.find({_id: {$in: moids }}, function (err, video_items){
+                    db_old.video_items.find({_id: {$in: moids }}, function (err, video_items){
                         if (err || !video_items) {
                             console.log("error getting video items: " + err);
                             callback(null);
@@ -13881,7 +13902,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             function (callback) { 
                 if (sceneResponse.sceneTextItems != null && sceneResponse.sceneTextItems != undefined && sceneResponse.sceneTextItems.length > 0) {
                     const moids = sceneResponse.sceneTextItems.map(convertStringToObjectID);
-                    db.text_items.find({_id: {$in: moids }}, function (err, text_items){
+                    db_old.text_items.find({_id: {$in: moids }}, function (err, text_items){
                         if (err || !text_items) {
                             console.log("error getting text items: " + err);
                             callback(null);
@@ -13934,7 +13955,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 };
                 if (allgroups.length > 0) {
                     const moids = allgroups.map(convertStringToObjectID);
-                    db.groups.find({_id: {$in: moids }}, function (err, items){
+                    db_old.groups.find({_id: {$in: moids }}, function (err, items){
                         if (err || !items) {
                             console.log("error getting groupz items: " + err);
                             callback(null);
@@ -13948,7 +13969,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 }
             },
             function (callback) { //fethc audio items
-                db.audio_items.find({_id: {$in: requestedAudioItems }}, function (err, audio_items){
+                db_old.audio_items.find({_id: {$in: requestedAudioItems }}, function (err, audio_items){
                     if (err || !audio_items) {
                         console.log("error getting audio items: " + err);
                         callback(null);
@@ -14012,7 +14033,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             function(audioStuff, callback) { //return the pic items
                 //   console.log("audioStuff ", audioStuff);
                 // console.log("requestedPictureItems:  ", requestedPictureItems);
-                db.image_items.find({_id: {$in: requestedPictureItems }}, function (err, pic_items)
+                db_old.image_items.find({_id: {$in: requestedPictureItems }}, function (err, pic_items)
                 {
                     if (err || !pic_items) {
                         console.log("error getting picture items: " + err);
@@ -14083,8 +14104,8 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 var postcards = [];
                 if (sceneResponse.scenePostcards != null && sceneResponse.scenePostcards.length > 0) {
                     async.each (sceneResponse.scenePostcards, function (postcardID, callbackz) { //nested async-ery!
-                        var oo_id = ObjectID(postcardID);
-                        db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                        var oo_id = new ObjectId(postcardID);
+                        db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                             if (err || !picture_item) {
                                 console.log("error getting postcatd items: " + err);
 //                                        callback(err);
@@ -14145,9 +14166,9 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 //                console.log("sceneObjects : " + JSON.stringify(sceneResponse.sceneObjects));
                 if (sceneResponse.sceneModels != null) {
                     async.each (sceneResponse.sceneModels, function (objID, callbackz) { 
-                        var oo_id = ObjectID(objID);
+                        var oo_id = new ObjectId(objID);
                         // console.log("7798 tryna get sceneModels: " + objID);
-                        db.models.findOne({"_id": oo_id}, function (err, model) {
+                        db_old.models.findOne({"_id": oo_id}, function (err, model) {
                             if (err || !model) {
                                 console.log("error getting model: " + err);
                                 let model = {};
@@ -14189,9 +14210,9 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 // if (sceneResponse.sceneObjectGroups) {
                     if (sceneResponse.sceneObjectGroups != null) {
                         async.each (sceneResponse.sceneObjectGroups, function (objID, callbackz) { //nested async-ery!
-                            var oo_id = ObjectID(objID);
+                            var oo_id = new ObjectId(objID);
                             console.log("tryna get GroupObject: " + objID);
-                            db.groups.findOne({"_id": oo_id}, function (err, group) {
+                            db_old.groups.findOne({"_id": oo_id}, function (err, group) {
                                 if (err || !group) {
                                     console.log("error getting obj items: " + err);
                                     callbackz();
@@ -14227,9 +14248,9 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 //                console.log("sceneObjects : " + JSON.stringify(sceneResponse.sceneObjects));
                 if (sceneResponse.sceneObjects != null) {
                     async.each (sceneResponse.sceneObjects, function (objID, callbackz) { //nested async-ery!
-                        var oo_id = ObjectID(objID);
+                        var oo_id = new ObjectId(objID);
                         // console.log("4573 tryna get sceneObject: " + objID);
-                        db.obj_items.findOne({"_id": oo_id}, function (err, obj_item) {
+                        db_old.obj_items.findOne({"_id": oo_id}, function (err, obj_item) {
                             if (err || !obj_item) {
                                 console.log("error getting obj items: " + err);
                                 callbackz();
@@ -14239,7 +14260,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                                 obj_item.objectGroup = "none";
                                 if (obj_item.childObjectIDs != null && obj_item.childObjectIDs.length > 0) {
                                     var childIDs = obj_item.childObjectIDs.map(convertStringToObjectID); //convert child IDs array to objIDs
-                                    db.obj_items.find({_id : {$in : childIDs}}, function(err, obj_items) {
+                                    db_old.obj_items.find({_id : {$in : childIDs}}, function(err, obj_items) {
                                         if (err || !obj_items) {
                                             console.log("error getting childObject items: " + err);
                                             //res.send("error getting child objects");
@@ -14280,8 +14301,8 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 
                 if ((sceneResponse.userName == null || sceneResponse.userName.length < 1) && (sceneResponse.user_id != null)) {
 
-                    var oo_id = ObjectID(sceneResponse.user_id);
-                    db.users.findOne({_id: oo_id}, function (err, user) {
+                    var oo_id = new ObjectId(sceneResponse.user_id);
+                    db_old.users.findOne({_id: oo_id}, function (err, user) {
                         if (!err || user != null) {
                             console.log("tryna inject usrname: " + user.userName);
                             sceneResponse.userName = user.userName;
@@ -14549,7 +14570,7 @@ app.get('/available_user_scenes/:user_id', requiredAuthentication, function(req,
     //     query = {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]};
     // }
     // db.scenes.find( {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]}, function (err, scenes) {
-        db.scenes.find( query, function (err, scenes) {
+        db_old.scenes.find( query, function (err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no scenes... " + err)
         } else {
@@ -14561,8 +14582,8 @@ app.get('/available_user_scenes/:user_id', requiredAuthentication, function(req,
                     async.waterfall([
                             function (callback) {
                                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
-                                    var oo_id = ObjectID(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
-                                    db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                                    var oo_id = new ObjectId(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
+                                    db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                         if (err || !picture_item) {
                                             console.log("error getting postcard for availablescenes: 2" + err);
                                             cb();
@@ -14611,9 +14632,9 @@ app.get('/available_user_scenes/:user_id', requiredAuthentication, function(req,
                             function (avScene, callback) {
                                 console.log ("tryna get audio " + scene.scenePrimaryAudioID + " for " + JSON.stringify(avScene) );
                                 if (scene.scenePrimaryAudioID != null) {
-                                    var o_id = ObjectID(scene.scenePrimaryAudioID );
+                                    var o_id = new ObjectId(scene.scenePrimaryAudioID );
 
-                                    db.audio_items.findOne({_id: o_id}, function (err, audio_item) {
+                                    db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
                                         if (err || !audio_item) {
                                             console.log("error getting audio items: " + err);
                                             callback(null,err);
@@ -14678,7 +14699,7 @@ app.get('/available_domain_scenes/:domain',  function (req, res) { //public scen
     }
     // db.scenes.find( {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]}, function (err, scenes) {
         console.log("available scene query: "+ JSON.stringify(query));
-        db.scenes.find( query, function (err, scenes) {
+        db_old.scenes.find( query, function (err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no scenes... " + err)
         } else {
@@ -14691,8 +14712,8 @@ app.get('/available_domain_scenes/:domain',  function (req, res) { //public scen
                             function (callback) {
                                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
                                     var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
-                                    var oo_id = ObjectID(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-                                    db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                                    var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                                    db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                         if (err || !picture_item) {
                                             console.log("error getting postcard for availablescenes: 2" + err);
                                             if (req.params.user_id != null && req.params.user_id && req.params.user_id == scene.user_id) { //show incomplete scenes by this user
@@ -14802,9 +14823,9 @@ app.get('/available_domain_scenes/:domain',  function (req, res) { //public scen
                                     // avScene.scenePrimaryAudioStreamURL = scene.scenePrimaryAudioStreamURL; //these tend to fsu on safari
                                 }
                                 if (scene.scenePrimaryAudioID != null && scene.scenePrimaryAudioID != "" && scene.scenePrimaryAudioID.length > 8) {
-                                    var o_id = ObjectID(scene.scenePrimaryAudioID );
+                                    var o_id = new ObjectId(scene.scenePrimaryAudioID );
 
-                                    db.audio_items.findOne({_id: o_id}, function (err, audio_item) {
+                                    db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
                                         if (err || !audio_item) {
                                             console.log("error getting audio items: " + err);
                                             callback(null,err);
@@ -14866,8 +14887,8 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
         function (callback) { //do the user lookup
             console.log("tryna lookup user id " + req.params.user_id);
             if (req.params.user_id != "nilch" && req.params.user_id != "guest" && req.params.user_id != "") {
-                var oo_id = ObjectID(req.params.user_id);
-                db.users.findOne({_id: oo_id}, function (err, user) {   //check user status
+                var oo_id = new ObjectId(req.params.user_id);
+                db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
                     if (err != null) {
                         console.log("error finding user " + req.params.user_id);
                         callback(err);
@@ -14919,7 +14940,7 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
             }
 
             console.log("scene query : " + JSON.stringify(query));
-            db.scenes.find( query, function (err, scenes) {
+            db_old.scenes.find( query, function (err, scenes) {
             if (err || !scenes) {
                 console.log("cain't get no scenes... " + err);
                 calllback(err);
@@ -14933,8 +14954,8 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
                                 function (callback) {
                                     if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
                                         var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
-                                        var oo_id = ObjectID(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-                                        db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                                        var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                                        db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                             if (err || !picture_item) {
                                                 console.log("error getting postcard for availablescenes: 2" + err);
                                                 if (req.params.user_id != null && req.params.user_id && req.params.user_id == scene.user_id) { //show incomplete scenes by this user
@@ -15021,9 +15042,9 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
                             },
                             function (avScene, callback) {
                                 // console.log ("tryna get audio " + scene.scenePrimaryAudioID + " for " + JSON.stringify(avScene) );
-                                if (scene.scenePrimaryAudioID != null && ObjectID.isValid(scene.scenePrimaryAudioID)) {
-                                    var o_id = ObjectID(scene.scenePrimaryAudioID);
-                                    db.audio_items.findOne({_id: o_id}, function (err, audio_item) {
+                                if (scene.scenePrimaryAudioID != null && ObjectId.isValid(scene.scenePrimaryAudioID)) {
+                                    var o_id = new ObjectId(scene.scenePrimaryAudioID);
+                                    db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
                                         if (err || !audio_item) {
                                             console.log("error getting audio items: " + err);
                                             callback(null,err);
@@ -15098,7 +15119,56 @@ app.get('/publicscenes', async (req, res) => {
     };
     const sampleScenes = ([...arr], n = 1) => shuffleArray(arr).slice(0, n);
 
+    const query = {$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}]};
+    // const data = await db.collection("scenes").find({$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}]}).toArray();
+    const data = await RunDataQuery ("scenes","find",query);
+    
+    const scenes = sampleScenes(data,30);
+    console.log("gots public scenes" + scenes.length );
+    for (const scene of scenes) { 
+      if (scene.scenePostcards != null && scene.scenePostcards.length > 0 && scene.scenePostcards[0] != undefined) {
+        let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
+        var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]); //? still confused w/ mongojs driver?
+        const picture_item = await db.collection("image_items").findOne({"_id": oo_id});
+        try {
+          var item_string_filename = JSON.stringify(picture_item.filename);
+          item_string_filename = item_string_filename.replace(/\"/g, "");
+          var item_string_filename_ext = getExtension(item_string_filename);
+          var expiration = new Date();
+          expiration.setMinutes(expiration.getMinutes() + 30);
+          var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+          var halfName = 'half.' + baseName + item_string_filename_ext;
+          var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+          var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+          var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000);
+          // console.log("tyryna get mibno urls... " + urlHalf);
+          var tempOwnerName = "test"
+          var availableScene = {
+              sceneWindowsOK: scene.sceneWindowsOK,
+              sceneAndroidOK: scene.sceneAndroidOK,
+              sceneIosOK: scene.sceneIosOK,
+              sceneDomain: scene.sceneDomain,
+              sceneTitle: scene.sceneTitle,
+              sceneKey: scene.short_id,
+              sceneDescription: scene.sceneDescription,
+              sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+              sceneOwner: tempOwnerName,
+              scenePostcardHalf: urlHalf,
+              scenePostcardQuarter: urlQuarter
+          };
+          availableScenesResponse.availableScenes.push(availableScene);
+          // console.log("pushing available scene " + availableScene.sceneTitle);
+        } catch (e) {
+          // res.send(e);
+          console.log("public scenes error: "+ e);
+        }
+    }
+  }
+  res.send(availableScenesResponse); 
+
 });
+
+
 
 app.get('/publicscenes_old', function (req, res) { //deprecated, see available scenes above...
     console.log("host is " + req.get('host'));
@@ -15121,7 +15191,7 @@ app.get('/publicscenes_old', function (req, res) { //deprecated, see available s
     const sampleScenes = ([...arr], n = 1) => shuffleArray(arr).slice(0, n);
     // query = {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }, { [platformString]: true}]};
     //limit?
-    db.scenes.find({$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}]}).toArray( function (err, scenes) {
+    db_old.scenes.find({$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}]}).toArray( function (err, scenes) {
     // db.scenes.aggregate({$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}, {$sample : {size : 15}}]}, function (err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no publicscenes... " + err);
@@ -15139,8 +15209,8 @@ app.get('/publicscenes_old', function (req, res) { //deprecated, see available s
                         // console.log("count is " + count);
                         // count++;
                         let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
-                        var oo_id = ObjectID(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-                        db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                        var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                        db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 
                             if (err || !picture_item || picture_item.length == 0) {
                                 console.log("error getting picture items: 3" + JSON.stringify(scene.scenePostcards[postcardIndex]));
@@ -15209,7 +15279,7 @@ app.get('/singlescenedata/:scenekey', function (req, res) { //returns a public s
     var sckey = req.params.scenekey;
     availableScenesResponse.availableScenes = availableScenes;
 
-    db.scenes.find({$or: [ { short_id: sckey }, { sceneTitle: sckey } ]}, function (err, scenes) {
+    db_old.scenes.find({$or: [ { short_id: sckey }, { sceneTitle: sckey } ]}, function (err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no scenes... " + err)
             res.send("scene not found");
@@ -15226,8 +15296,8 @@ app.get('/singlescenedata/:scenekey', function (req, res) { //returns a public s
                 postcardIndex = getRandomInt(0, scenes[0].scenePostcards.length - 1);
 //                        db.image_items.find({postcardForScene: scene.short_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function (err, picture_items) {
                 console.log("tryna find postcard: " + scenes[0].scenePostcards[postcardIndex]);
-                var oo_id = ObjectID(scenes[0].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-                db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                var oo_id = new ObjectId(scenes[0].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 
                     if (err || !picture_item || picture_item.length == 0) {
                         console.log("error getting picture items for publicsimple" + JSON.stringify(scenes[0].scenePostcards[postcardIndex]));
@@ -15262,7 +15332,7 @@ app.get('/publicsinglerandom', function (req, res) { //returns a public scene id
     var availableScenes = [];
     availableScenesResponse.availableScenes = availableScenes;
 
-    db.scenes.find({ sceneShareWithPublic: true }, function (err, scenes) {
+    db_old.scenes.find({ sceneShareWithPublic: true }, function (err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no scenes... " + err)
 
@@ -15279,8 +15349,8 @@ app.get('/publicsinglerandom', function (req, res) { //returns a public scene id
                 postcardIndex = getRandomInt(0, scenes[sceneIndex].scenePostcards.length - 1);
 //                        db.image_items.find({postcardForScene: scene.short_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function (err, picture_items) {
                 console.log("tryna find postcard: " + scenes[sceneIndex].scenePostcards[postcardIndex]);
-                var oo_id = ObjectID(scenes[sceneIndex].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-                db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                var oo_id = new ObjectId(scenes[sceneIndex].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 
                     if (err || !picture_item || picture_item.length == 0) {
                         console.log("error getting picture items for publicsimple" + JSON.stringify(scenes[sceneIndex].scenePostcards[postcardIndex]));
@@ -15313,7 +15383,7 @@ app.post('/newlocation', requiredAuthentication, function (req, res) {
     location.userID = req.session.user._id.toString();
     var timestamp = Math.round(Date.now() / 1000);
     location.lastUpdate = timestamp;
-    db.locations.save(location, function (err, saved) {
+    db_old.locations.save(location, function (err, saved) {
         if ( err || !saved ) {
             console.log('location not saved..');
             res.send("nilch");
@@ -15326,7 +15396,7 @@ app.post('/newlocation', requiredAuthentication, function (req, res) {
 });
 app.get('/userlocations/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return userlocations for: ' + req.params.u_id);
-    db.locations.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, location_items) {
+    db_old.locations.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, location_items) {
 
         if (err || !location_items) {
             console.log("error getting userlocation items: " + err);
@@ -15341,8 +15411,8 @@ app.get('/userlocations/:u_id', requiredAuthentication, function(req, res) {
 
 app.post('/delete_location/',  requiredAuthentication, function (req, res) { //weird, post + path
     console.log("tryna delete key: " + req.body._id);
-    var o_id = ObjectID(req.body._id);
-    db.locations.remove( { "_id" : o_id }, 1 );
+    var o_id = new ObjectId(req.body._id);
+    db_old.locations.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
 
@@ -15351,8 +15421,8 @@ app.get('/userlocation/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return location : ' + req.params.p_id);
     var pID = req.params.p_id;
     if (pID != undefined && pID.length > 10) {
-    var o_id = ObjectID(pID);
-    db.locations.findOne({"_id": o_id}, function(err, location) {
+    var o_id = new ObjectId(pID);
+    db_old.locations.findOne({"_id": o_id}, function(err, location) {
         if (err || !location) {
             console.log("error getting location item: " + err);
         } else {
@@ -15368,9 +15438,9 @@ app.get('/userlocation/:p_id', requiredAuthentication, function(req, res) {
 app.post('/update_location/:_id', requiredAuthentication, function (req, res) {
     console.log(JSON.stringify(req.body));
 
-    var o_id = ObjectID(req.body._id);   
+    var o_id = new ObjectId(req.body._id);   
     console.log('location requested : ' + req.body._id);
-    db.locations.findOne({ "_id" : o_id}, function(err, location) {
+    db_old.locations.findOne({ "_id" : o_id}, function(err, location) {
         if (err || !location) {
             console.log("error getting audio items: " + err);
         } else {
@@ -15378,7 +15448,7 @@ app.post('/update_location/:_id', requiredAuthentication, function (req, res) {
             var timestamp = Math.round(Date.now() / 1000);
             location.lastUpdate = timestamp;
             if (location.type.toLowerCase() == "geographic") {
-                db.locations.update( { "_id": o_id }, { $set: {
+                db_old.locations.update( { "_id": o_id }, { $set: {
                     tags: req.body.tags,
                     name: req.body.name,
                     description: req.body.description,
@@ -15389,7 +15459,7 @@ app.post('/update_location/:_id', requiredAuthentication, function (req, res) {
                 res.send("updated");
             }
             if (location.type.toLowerCase() == "worldspace") {
-                db.locations.update( { "_id": o_id }, { $set: {
+                db_old.locations.update( { "_id": o_id }, { $set: {
                     tags: req.body.tags,
                     name: req.body.name,
                     description: req.body.description,
@@ -15415,7 +15485,7 @@ app.post('/newscene', requiredAuthentication, admin, function (req, res) {
     newScene.userName = req.session.user.userName;
     newScene.otimestamp = Math.round(Date.now() / 1000);
     newScene.sceneLocations = [];
-    db.scenes.save(newScene, function (err, saved) {
+    db_old.scenes.save(newScene, function (err, saved) {
         if ( err || !saved ) {
             console.log('scene not saved..');
             res.send("nilch");
@@ -15427,9 +15497,9 @@ app.post('/newscene', requiredAuthentication, admin, function (req, res) {
             tempID = item_id;
             // newShortID = shortId(tempID);
             newShortID = shortid.generate(); //TODO - externalize and check for collisions!
-            var o_id = ObjectID(tempID);
+            var o_id = new ObjectId(tempID);
             console.log(tempID + " = " + newShortID);
-            db.scenes.update( { _id: o_id }, { $set: { short_id: newShortID }});
+            db_old.scenes.update( { _id: o_id }, { $set: { short_id: newShortID }});
 
             // db.acl.save(
             //     { acl_rule: "read_scene_" + saved._id },  function (err, acl) {
@@ -15463,7 +15533,7 @@ app.post('/newgroup', requiredAuthentication, function (req, res) {
     group.lastUpdate = timestamp;
     let items = [];
     group.items = items;
-    db.groups.save(group, function (err, saved) {
+    db_old.groups.save(group, function (err, saved) {
         if ( err || !saved ) {
             // console.log('group not saved..');
             res.send("error " + err );
@@ -15476,27 +15546,27 @@ app.post('/newgroup', requiredAuthentication, function (req, res) {
 });
 
 app.post('/delete_group/', requiredAuthentication, function (req, res) { 
-    var o_id = ObjectID(req.body._id);
-    db.groups.remove( { "_id" : o_id }, 1 );
+    var o_id = new ObjectId(req.body._id);
+    db_old.groups.remove( { "_id" : o_id }, 1 );
     res.send("delback");
 });
 
 app.post('/clone_group/', requiredAuthentication, function (req, res) { 
     console.log("tryna clone group : " + req.body._id);
-    var o_id = ObjectID(req.body._id);
-    db.groups.findOne({ "_id" : o_id}, function(err, group) {
+    var o_id = new ObjectId(req.body._id);
+    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
     if (err || !group) {
         res.send("group not found!");
     } else {
         var clonedgroup = group;
-        clonedgroup._id = new ObjectID(); //better way
+        clonedgroup._id = new new ObjectId(); //better way
         clonedgroup.userID = req.session.user._id.toString();
         clonedgroup.userName = req.session.user.username;
         clonedgroup.name = group.name + " clone";
         var timestamp = Math.round(Date.now() / 1000);
         clonedgroup.lastUpdate = timestamp;
         console.log("new group data " + JSON.stringify(clonedgroup));
-        db.groups.insert(clonedgroup, function (err, saved) {
+        db_old.groups.insert(clonedgroup, function (err, saved) {
             if ( err || !saved ) {
                 // console.log('group not saved..');
                 res.send("error " + err );
@@ -15549,12 +15619,12 @@ app.post('/weblink/', requiredAuthentication, function (req, res) {
     var lurl = "";
     lurl = req.body.link_url;
     
-    db.weblinks.findOne({ link_url : lurl}, function(err, link) {
+    db_old.weblinks.findOne({ link_url : lurl}, function(err, link) {
         if (err) {
             console.log("error getting link items: " + err);
         } else if (!link) {  //hasn't been scraped before
             console.log("no link item found for " + lurl);
-            db.weblinks.save(req.body, function (err, savedlink) {
+            db_old.weblinks.save(req.body, function (err, savedlink) {
                 if (err || !savedlink) {
                     console.log('link not saved..');
                     res.send("nilch");
@@ -15577,7 +15647,7 @@ app.post('/weblink/', requiredAuthentication, function (req, res) {
                             console.log('Success: ' + JSON.stringify(ok));
                             if (ok != null && ok != undefined) {
                                 var dateNow = Date.now();
-                                db.weblinks.update({"_id": savedlink._id}, { $set: {"render_date": dateNow}});
+                                db_old.weblinks.update({"_id": savedlink._id}, { $set: {"render_date": dateNow}});
                             }
                         }, function(err) {
                             console.log('Error: ' + JSON.stringify(err));
@@ -15603,12 +15673,12 @@ app.post('/weblink/', requiredAuthentication, function (req, res) {
                             // console.log('nerp');
                             
                         });
-                        db.scenes.update(
-                            {'_id': ObjectID(req.body.sceneID)},
+                        db_old.scenes.update(
+                            {'_id': new ObjectId(req.body.sceneID)},
                             {$push: { 'sceneWebLinks': savedlink._id.toString() } }
                         );
                         var dateNow = Date.now();
-                        db.weblinks.update({"_id": savedlink._id}, { $set: {"render_date": dateNow}});
+                        db_old.weblinks.update({"_id": savedlink._id}, { $set: {"render_date": dateNow}});
                         res.send("ok");
                     }
                 }
@@ -15655,12 +15725,12 @@ app.post('/weblink/', requiredAuthentication, function (req, res) {
                 })
                 .then(function () {
                 });
-                db.scenes.update(
-                    {'_id': ObjectID(req.body.sceneID)},
+                db_old.scenes.update(
+                    {'_id': new ObjectId(req.body.sceneID)},
                     {$addToSet: { 'sceneWebLinks': link._id.toString() } }
                 );
                 var dateNow = Date.now();
-                db.weblinks.update({"_id": link._id}, { $set: {"render_date": dateNow, "link_title": req.body.link_title}});
+                db_old.weblinks.update({"_id": link._id}, { $set: {"render_date": dateNow, "link_title": req.body.link_title}});
                 res.send("ok");
             
             // }
@@ -15671,9 +15741,9 @@ app.post('/clone_scene', requiredAuthentication, function (req,res) {
 
     console.log("request to clone scene " + JSON.stringify(req.body));
     // res.send("clone, ok!");
-    var o_id = ObjectID(req.body.sceneID);   
+    var o_id = new ObjectId(req.body.sceneID);   
     // console.log('path requested : ' + req.body._id);
-    db.scenes.findOne({ "_id" : o_id}, function(err, scene) {
+    db_old.scenes.findOne({ "_id" : o_id}, function(err, scene) {
         if (err || !scene) {
             res.send("cain't fine no scene with that");
         } else {
@@ -15683,7 +15753,7 @@ app.post('/clone_scene', requiredAuthentication, function (req,res) {
             // newScene.user_id = req.session.user._id.toString();
             // newScene.userName = req.session.user.userName;
             // newScene.otimestamp = Math.round(Date.now() / 1000);
-            db.scenes.save(newScene, function (err, saved) {
+            db_old.scenes.save(newScene, function (err, saved) {
                 if ( err || !saved ) {
                     console.log('scene not saved..');
                     res.send("nilch");
@@ -15696,9 +15766,9 @@ app.post('/clone_scene', requiredAuthentication, function (req,res) {
                     // newShortID = shortId(tempID);
                     let title = scene.sceneTitle + " clone";
                     newShortID = shortid.generate(); //TODO - externalize and check for collisions!
-                    var o_id = ObjectID(item_id);
+                    var o_id = new ObjectId(item_id);
                     // theScene = JSON.parse(JSON.stringify(scene));
-                    db.scenes.update( { _id: o_id }, { $set: {
+                    db_old.scenes.update( { _id: o_id }, { $set: {
                     short_id : newShortID,
                     sceneTitle : title,
 
@@ -15948,9 +16018,9 @@ app.post('/update_scene_locations', checkAppID, requiredAuthentication, function
 //        console.log(JSON.stringify(locationsObj.locations[i]));
 //
 //    }
-    var o_id = ObjectID(req.body._id);
+    var o_id = new ObjectId(req.body._id);
 
-    db.scenes.update({ "_id" : o_id}, { $push: { sceneLocations: { $each: locationsObj.locations } } }, function(err, result) {
+    db_old.scenes.update({ "_id" : o_id}, { $push: { sceneLocations: { $each: locationsObj.locations } } }, function(err, result) {
         if (err || !result) {
             console.log("error updating scene locations: " + err);
         } else {
@@ -15968,9 +16038,9 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
     console.log("update_scene req.header: " + JSON.stringify(req.headers));
     console.log(req.params._id);
     var lastUpdateTimestamp = Date.now();
-    var o_id = ObjectID(req.body._id);   
+    var o_id = new ObjectId(req.body._id);   
     console.log('path requested : ' + req.body._id);
-    db.scenes.findOne({ "_id" : o_id}, function(err, scene) {
+    db_old.scenes.findOne({ "_id" : o_id}, function(err, scene) {
         if (err || !scene) {
             console.log("error getting scene: " + err);
         } else {
@@ -15980,17 +16050,17 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
                 let inventories = {};
                 let inventoryItems = [];
                 inventories.inventoryItems = inventoryItems; 
-                db.inventories.save(inventories, function (err, saved) {
+                db_old.inventories.save(inventories, function (err, saved) {
                 if (err || !saved) {
                     console.log("problemo2 with inventory add " + err); 
                     } else {
                         inventoryID = saved._id;
-                        db.scenes.update( { "_id": o_id }, { $set: { sceneInventoryID : inventoryID }});
+                        db_old.scenes.update( { "_id": o_id }, { $set: { sceneInventoryID : inventoryID }});
                     }
                 });
             }
             console.log("tryna update scene " + req.body._id + " with cameraMode " + JSON.stringify(req.body.sceneCameraMode));
-            db.scenes.update( { "_id": o_id }, { $set: {
+            db_old.scenes.update( { "_id": o_id }, { $set: {
                 sceneDomain : req.body.sceneDomain,
                 sceneAppName : req.body.sceneAppName,
                 sceneSource : req.body.sceneSource,
@@ -16221,7 +16291,7 @@ app.get('/sceneloc/:key', function (req, res){
 
     resObj = {};
 
-    db.scenes.find({ "short_id" : req.params.key}, function(err, scenes) {
+    db_old.scenes.find({ "short_id" : req.params.key}, function(err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no scenes... " + err);
         } else {
@@ -16238,7 +16308,7 @@ app.get('/seq/:_seqID', function (req, res) {
     console.log("tryna get sequence");
     var pathNumbers = [];
     var pathSequence = [];
-    db.paths.find({}, function (err, paths) {
+    db_old.paths.find({}, function (err, paths) {
         if (err || !paths) {
             console.log("no paths found ", err);
         } else {
@@ -16303,7 +16373,7 @@ app.post('/newobj', requiredAuthentication, function (req, res) {
     newobj.userName = req.session.user.userName;
     let timestamp = Math.round(Date.now() / 1000);
     newobj.createdTimestamp = timestamp;
-    db.obj_items.save(newobj, function (err, saved) {
+    db_old.obj_items.save(newobj, function (err, saved) {
         if ( err || !saved ) {
             console.log('object not saved..');
             res.send("nilch");
@@ -16317,8 +16387,8 @@ app.post('/newobj', requiredAuthentication, function (req, res) {
 
 app.post('/delete_obj/', requiredAuthentication, function (req, res) { 
     console.log("tryna delete obj: " + req.body._id);
-    var o_id = ObjectID(req.body._id);
-    db.obj_items.remove( { "_id" : o_id }, 1 );
+    var o_id = new ObjectId(req.body._id);
+    db_old.obj_items.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
 
@@ -16326,9 +16396,9 @@ app.post('/delete_obj/', requiredAuthentication, function (req, res) {
 app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
 
-    var o_id = ObjectID(req.params._id);   
+    var o_id = new ObjectId(req.params._id);   
     console.log('pic requested : ' + req.body._id);
-    db.image_items.findOne({ "_id" : o_id}, function(err, pic_item) {
+    db_old.image_items.findOne({ "_id" : o_id}, function(err, pic_item) {
         if (err || !pic_item) {
             console.log("error getting pic items: " + err);
         } else {
@@ -16342,7 +16412,7 @@ app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
                 if (req.body.isPublic != null) {
                     isPublic = req.body.isPublic;
                 }
-                db.image_items.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
+                db_old.image_items.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
                     tags: req.body.tags,
                     title: req.body.title,
                     isPublic : isPublic,
@@ -16381,9 +16451,9 @@ app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
 app.post('/update_video/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);    
 
-    var o_id = ObjectID(req.params._id);   
+    var o_id = new ObjectId(req.params._id);   
     console.log('video requested : ' + req.body._id);
-    db.video_items.findOne({ "_id" : o_id}, function(err, video_item) {
+    db_old.video_items.findOne({ "_id" : o_id}, function(err, video_item) {
         if (err || !video_item) {
             console.log("error getting pic items: " + err);
         } else {
@@ -16393,7 +16463,7 @@ app.post('/update_video/:_id', requiredAuthentication, function (req, res) {
             if (req.body.isPublic != null) {
                 isPublic = req.body.isPublic;
             }
-            db.video_items.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
+            db_old.video_items.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
                 tags: req.body.tags,
                 timekeys: req.body.timekeys,
                 title: req.body.title,
@@ -16428,9 +16498,9 @@ app.post('/update_video/:_id', requiredAuthentication, function (req, res) {
 app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);    
 
-    var o_id = ObjectID(req.params._id);   
+    var o_id = new ObjectId(req.params._id);   
     console.log('model requested : ' + req.body._id);
-    db.models.findOne({ "_id" : o_id}, function(err, model) {
+    db_old.models.findOne({ "_id" : o_id}, function(err, model) {
         if (err || !model) {
             console.log("error getting pic items: " + err);
         } else {
@@ -16445,7 +16515,7 @@ app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
                 if (req.body.isPublic != null) {
                     isPublic = req.body.isPublic;
                 }
-                db.models.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
+                db_old.models.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
                 tags: req.body.tags,
                 name: req.body.name,
                 isPublic : isPublic,
@@ -16472,10 +16542,10 @@ app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
 
 app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
-    var o_id = ObjectID(req.params._id);   
+    var o_id = new ObjectId(req.params._id);   
     console.log('tryna update obj : ' + req.params._id);
     let timestamp = Math.round(Date.now() / 1000);
-    db.obj_items.find({ "_id" : o_id}, function(err, obj_item) {
+    db_old.obj_items.find({ "_id" : o_id}, function(err, obj_item) {
         if (err || !obj_item) {
             console.log("error getting obj items: " + err);
             res.send(err);
@@ -16483,7 +16553,7 @@ app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
             if (obj_item.userID != req.session.user._id.toString() && !req.session.user.authLevel.toLowerCase().includes("admin")) {
                 res.send("user does not match " + req.session.user.authLevel);
             } else {
-                db.obj_items.update( { _id: o_id }, { $set: { 
+                db_old.obj_items.update( { _id: o_id }, { $set: { 
                     // item_status: req.body.item_status,
                     actionIDs: (req.body.actionIDs != "" && req.body.actionIDs != undefined && req.body.actionIDs != null) ? req.body.actionIDs : [],
                     name: req.body.name,
@@ -16606,9 +16676,9 @@ app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
 
 app.post('/update_audio/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
-    var o_id = ObjectID(req.params._id);   
+    var o_id = new ObjectId(req.params._id);   
     console.log('audioID requested : ' + req.body);
-    db.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
+    db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item) {
             console.log("error getting audio items: " + err);
         } else {
@@ -16620,7 +16690,7 @@ app.post('/update_audio/:_id', requiredAuthentication, function (req, res) {
             }
             if (req.body.clipDuration != null && req.body.clipDuration != undefined)
             req.body.clipDuration = req.body.clipDuration.toString();
-            db.audio_items.update( { _id: o_id }, { $set: { 
+            db_old.audio_items.update( { _id: o_id }, { $set: { 
                 // item_status : req.body.item_status != null ? req.body.item_status : "",
                 tags: req.body.tags,
                 timekeys : req.body.timekeys,
@@ -16648,7 +16718,7 @@ app.post('/update_audio/:_id', requiredAuthentication, function (req, res) {
 
 app.get('/audioitems/:tag', checkAppID, requiredAuthentication, function(req, res) {
     console.log('tryna return playlist: ' + req.params.tag);
-    db.audio.find({tags: req.params.tag, item_status: "public"}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
+    db_old.audio.find({tags: req.params.tag, item_status: "public"}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
         if (err || !audio_items) {
             console.log("error getting audio items: " + err);
 
@@ -16702,9 +16772,9 @@ app.post('/delete_audio/', requiredAuthentication, function (req, res){
 
     console.log('tryna delete audioID : ' + req.body._id);
     var audio_id = req.body._id;
-    var o_id = ObjectID(audio_id);   
+    var o_id = new ObjectId(audio_id);   
 
-    db.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
+    db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item) {
             console.log("error getting picture item: " + err);
         } else {
@@ -16734,7 +16804,7 @@ app.post('/delete_audio/', requiredAuthentication, function (req, res){
                             res.send('Unable to remove Objects ',e);
                         } else {
                             console.log('Removed the objects successfully');
-                            db.audio_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
+                            db_old.audio_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
                             res.send("deleted");
                         }
     
@@ -16766,7 +16836,7 @@ app.post('/delete_audio/', requiredAuthentication, function (req, res){
                     (async () => {
                         try {
                            const status = await DeleteObjects(params.Bucket, params.Delete);
-                           db.audio_items.remove( { "_id" : o_id }, 1 );
+                           db_old.audio_items.remove( { "_id" : o_id }, 1 );
 
                            res.send("files deleted ~" + status);
                             // db.image_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
@@ -16794,19 +16864,21 @@ app.post('/delete_audio/', requiredAuthentication, function (req, res){
 });
 app.post('/delete_model/', requiredAuthentication, function (req, res){
     console.log("tryna delete model: " + req.body);
+    (async () => {
+      try {
+        var pic_id = req.body._id;
+        var o_id = new ObjectId(pic_id);   
 
-    var pic_id = req.body._id;
-    var o_id = ObjectID(pic_id);   
+        const query = { "_id" : o_id};
+        const model = await RunDataQuery("models", "findOne", query);
 
-    db.models.findOne({ "_id" : o_id}, function(err, model) {
-        if (err || !model) {
-            console.log("error getting picture item: " + err);
+        if (!model) {
+            console.log("error getting model not found");
         } else {
             var item_string_filename = model.filename;
             // item_string_filename = item_string_filename.replace(/\"/g, "");
-
             var params = {
-                Bucket: 'servicemedia', // required
+                Bucket: process.env.ROOT_BUCKET_NAME, // required
                 Delete: { // required
                     Objects: [ // required
                         {
@@ -16816,46 +16888,34 @@ app.post('/delete_model/', requiredAuthentication, function (req, res){
                     Quiet: true || false,
                 }
             };
-
-                (async () => {
-                    try {
-                        let status = await DeleteObjects(process.env.ROOT_BUCKET_NAME, params.Delete);
-                        // if (status == "deleted") {
-                            db.models.remove( { "_id" : o_id }, 1 );
-                            res.send("deleted " + status);
-                        // }
-                        
-                    } catch (e) {
-                        res.send(e);
-                    }
-
-                })();
-            // s3.deleteObjects(params, function(err, data) {
-            //     if (err) {
-            //         console.log(err, err.stack);
-            //         res.send(err);
-            //         // an error occurred
-            //     }
-            //     else {
-            //         db.models.remove( { "_id" : o_id }, 1 );
-            //         res.send("delback");
-            //     }
-            // });
-
-        }
-    });
+            try {
+                const status = await DeleteObjects(process.env.ROOT_BUCKET_NAME, params.Delete);
+                const query = { "_id" : o_id };
+                const dbstatus = await RunDataQuery("models", "deleteOne", query);
+                res.send(status + " deleted " + dbstatus);
+                
+            } catch (e) {
+                res.send(e);
+            }
+          }
+      } catch (e) {
+        res.send(e);
+      }
+    })();
 });
+
 app.post('/delete_video/', requiredAuthentication, function (req, res){
     // console.log(req.body);
 
     console.log('tryna delete videoID : ' + req.body._id);
-    var pic_id = req.body._id;
-    var o_id = ObjectID(pic_id);   
+    var vid_id = req.body._id;
+    var o_id = new ObjectId(vid_id);   
 
-    db.video_items.findOne({ "_id" : o_id}, function(err, vid_item) {
-        if (err || !vid_item) {
-            console.log("error getting picture item: " + err);
-        } else {
+    (async () => {
+      try {
+        const query = { "_id" : o_id};
+        const vid_item = await RunDataQuery("image_items", "findOne", query);
+        if (vid_item) {
             var item_string_filename = vid_item.filename;
             item_string_filename = item_string_filename.replace(/\"/g, "");
             var item_string_filename_ext = getExtension(item_string_filename);
@@ -16872,39 +16932,49 @@ app.post('/delete_video/', requiredAuthentication, function (req, res){
                     ],
                     Quiet: true || false,
                 }
-                //MFA: 'STRING_VALUE',
             };
 
-            var listparams = {
-                Bucket: process.env.ROOT_BUCKET_NAME,
-                Prefix: 'users/'+ vid_item.userID + '/video/'+ vid_item._id +'/'
-            }
-            (async () => {
-                try {
-                    const files = await ListObjects(process.env.ROOT_BUCKET_NAME,'users/'+ vid_item.userID + '/video/'+ vid_item._id +'/');
-                    if (files.Contents.length == 0) {
-                        // console.log("no content found");
-                        db.video_items.remove( { "_id" : o_id }, 1 );
-                        console.log("no content found, video_item record deleted");
-                        res.send("deleted video item from db");
-                    } else {
-                        // let response = files.Contents;
-                        files.Contents.forEach(function(content) {
-                            console.log("deleting vid thing " + content.Key);
-                            delete_params.Delete.Objects.push({Key: content.Key}); //add the hls files
-                            
-                        });
-                        // console.log(JSON.stringify(delete_params));
-                        const status = await DeleteObjects(process.env.ROOT_BUCKET_NAME, delete_params);
-                        db.video_items.remove( { "_id" : o_id }, 1 );
-                        console.log("some video things were deleted " + status);
-                        res.send("deleted " + status);
-                    }
-
-                } catch (e) {
-                    res.send(e);
+            // var listparams = {
+            //     Bucket: process.env.ROOT_BUCKET_NAME,
+            //     Prefix: 'users/'+ vid_item.userID + '/video/'+ vid_item._id +'/'
+            // }
+            // (async () => {
+            try {
+                const files = await ListObjects(process.env.ROOT_BUCKET_NAME,'users/'+ vid_item.userID + '/video/'+ vid_item._id +'/');
+                if (files.Contents.length == 0) {
+                    
+                    const query = { "_id" : o_id };
+                    const status = await RunDataQuery("video_items", "deleteOne", query);
+                    console.log("no content found, video_item record deleted " + status);
+                    res.send("deleted video item from db");
+                } else {
+                    // let response = files.Contents;
+                    files.Contents.forEach(function(content) {
+                        console.log("deleting vid thing " + content.Key);
+                        delete_params.Delete.Objects.push({Key: content.Key}); //add the hls files
+                        
+                    });
+                    // console.log(JSON.stringify(delete_params));
+                    const dstatus = await DeleteObjects(process.env.ROOT_BUCKET_NAME, delete_params);
+                    
+                    const query = { "_id" : o_id };
+                    const status = await RunDataQuery("video_items", "deleteOne", query);
+                    console.log("some video things were deleted " + status);
+                    res.send("deleted " + status);
                 }
-            })();
+
+            } catch (e) {
+              res.send(e);
+            }
+          } else {
+            console.log("no video found!");
+            res.send("no video found to delete!");
+          }
+        } catch(e) {
+          res.send(e);
+        }
+      })();
+    });
             // ListObjects
            
 
@@ -16958,160 +17028,118 @@ app.post('/delete_video/', requiredAuthentication, function (req, res){
             // });
             // s3.headObject({bucket: process.env.ROOT_BUCKET_NAME, key})
 
-        }
-    });
-});
-// app.post('/delete_picture/', checkAppID, requiredAuthentication, function (req, res){
-app.post('/delete_picture/', requiredAuthentication, function (req, res){ //TODO check user? or acl? another auth key?
+//         }
+//     });
+// });
+
+app.post('/delete_picture/', requiredAuthentication, function (req, res) { //TODO check user? or acl? another auth key?
     // console.log(req.body);
 
     console.log('tryna delete pictureID : ' + req.body._id);
     var pic_id = req.body._id;
-    var o_id = ObjectID(pic_id);   
+    var o_id = new ObjectId(pic_id);   
 
-    db.image_items.find({ "_id" : o_id}, function(err, pic_item) {
-        if (err || !pic_item || pic_item[0].filename == undefined) {
-            console.log("error getting picture item: " + err);
-        } else {
-            var item_string_filename = pic_item[0].filename;
-            item_string_filename = item_string_filename.replace(/\"/g, "");
-            var item_string_filename_ext = getExtension(item_string_filename);
-            var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-            console.log(baseName);
-            var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-            var halfName = 'half.' + baseName + item_string_filename_ext;
-            var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-            var standardName = 'standard.' + baseName + item_string_filename_ext;
-
-            if (minioClient) {
-                var keys = []
-                keys.push(
-                    "users/" + pic_item[0].userID + "/" + item_string_filename,
-                    "users/" + pic_item[0].userID + "/" + pic_item[0]._id + ".original." + item_string_filename,
-                    "users/" + pic_item[0].userID + "/" + pic_item[0]._id + "." + thumbName,
-                    "users/" + pic_item[0].userID + "/" + pic_item[0]._id + "." + quarterName,
-                    "users/" + pic_item[0].userID + "/" + pic_item[0]._id + "." + halfName,
-                    "users/" + pic_item[0].userID + "/" + pic_item[0]._id + "." + standardName,
-                    "users/" + pic_item[0].userID + "/pictures/" + item_string_filename,
-                    "users/" + pic_item[0].userID + "/pictures/originals/" + pic_item[0]._id + ".original." + item_string_filename,
-                    "users/" + pic_item[0].userID + "/pictures/" + pic_item[0]._id + "." + thumbName,
-                    "users/" + pic_item[0].userID + "/pictures/" + pic_item[0]._id + "." + quarterName,
-                    "users/" + pic_item[0].userID + "/pictures/" + pic_item[0]._id + "." + halfName,
-                    "users/" + pic_item[0].userID + "/pictures/" + pic_item[0]._id + "." + standardName
-                    );
-                minioClient.removeObjects(process.env.ROOT_BUCKET_NAME, keys, function(e) {
-                    if (e) {
-                        console.log('Unable to remove Objects ',e);
-                        res.send('Unable to remove Objects ',e);
-                    } else {
-                        console.log('Removed the objects successfully');
-                        db.image_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
-                        res.send("deleted");
-                    }
-
-                });
+    (async () => {
+      try {
+        const query = { "_id" : o_id};
+        const pic_item = await RunDataQuery("image_items", "findOne", query);
+        if (pic_item) {
+          console.log("tryna delete " + JSON.stringify(pic_item))
+            if (pic_item.filename != undefined) {
+              var item_string_filename = pic_item.filename;
+              item_string_filename = item_string_filename.replace(/\"/g, "");
+              var item_string_filename_ext = getExtension(item_string_filename);
+              var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+              console.log(baseName);
+              var thumbName = 'thumb.' + baseName + item_string_filename_ext;
+              var halfName = 'half.' + baseName + item_string_filename_ext;
+              var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+              var standardName = 'standard.' + baseName + item_string_filename_ext;
+              var params = {
+                Bucket: process.env.ROOT_BUCKET_NAME,// required
+                Delete: { // required
+                    Objects: [ // required
+                        {
+                            Key: "users/" + pic_item.userID + "/" + item_string_filename 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/" + pic_item._id + ".original." + item_string_filename 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/" + pic_item._id + "." + thumbName 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/" + pic_item._id + "." + quarterName 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/" + pic_item._id + "." + halfName 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/" + pic_item._id + "." + standardName 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/pictures/" + item_string_filename 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/pictures/originals/" + pic_item._id + ".original." + item_string_filename 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/pictures/" + pic_item._id + "." + thumbName 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/pictures/" + pic_item._id + "." + quarterName 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/pictures/" + pic_item._id + "." + halfName 
+                        },
+                        {
+                            Key: "users/" + pic_item.userID + "/pictures/" + pic_item._id + "." + standardName 
+                        }
                         
-            } else {
-                
-                // s3.headObject
-                var params = {
-                    Bucket: process.env.ROOT_BUCKET_NAME,// required
-                    Delete: { // required
-                        Objects: [ // required
-                            {
-                                Key: "users/" + pic_item[0].userID + "/" + item_string_filename 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/" + pic_item[0]._id + ".original." + item_string_filename 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/" + pic_item[0]._id + "." + thumbName 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/" + pic_item[0]._id + "." + quarterName 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/" + pic_item[0]._id + "." + halfName 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/" + pic_item[0]._id + "." + standardName 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/pictures/" + item_string_filename 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/pictures/originals/" + pic_item[0]._id + ".original." + item_string_filename 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/pictures/" + pic_item[0]._id + "." + thumbName 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/pictures/" + pic_item[0]._id + "." + quarterName 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/pictures/" + pic_item[0]._id + "." + halfName 
-                            },
-                            {
-                                Key: "users/" + pic_item[0].userID + "/pictures/" + pic_item[0]._id + "." + standardName 
-                            }
-                            // ... more items ...
                         ],
                         Quiet: true || false
                     }
-                    //MFA: 'STRING_VALUE',
                 };
-                console.log("tryna delete picture with params " + JSON.stringify(params));
+                try {
+                  const status = await DeleteObjects(process.env.ROOT_BUCKET_NAME, params.Delete);
+                  console.log("deleting from s3 " + status);
+                  const query = { "_id" : o_id };
+                  const data = await RunDataQuery("image_items", "deleteOne", query);
+                  res.send("deleted pic " + data);
 
-                (async () => {
-                    try {
-                        let status = await DeleteObjects(process.env.ROOT_BUCKET_NAME, params.Delete);
-                        // if (status.Deleted.length) {
-                            db.image_items.remove( { "_id" : o_id }, 1 );
-                            res.send("deleted " + status);
-                        // } else {
-                            // res.send("delete fail!");
-                        
-                        // db.image_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
-                    } catch (e) {
-                        res.send(e);
-                    }
-                })();
-                // s3.deleteObjects(params, function(err, data) {
-                //     if (err) {
-                //         console.log(err, err.stack);
-                //         res.send(err);
-                //     } else {
-                //         console.log("pics delete response " + JSON.stringify(data));
-                //         db.image_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
-                //         res.send("deleted");
-                //     }
-                // });
+                } catch (e) {
+                  res.send(e);
+                }
+              }
             }
+        } catch (e) {
+          res.send(e);
         }
-    });
-});
+    })();
+  });
 
-app.get('/scenepostcard/:short_id', function (req, res) {
-    db.scenes.findOne({short_id: req.params.short_id}, function (err, scene) {
-        if (err || !scene) {
-            // console.log("error getting scene postcard: " + err);
-            res.send("scene not found");
-        } else {
-            if (scene.scenePostcards != null && scene.scenePostcards.length) {
-                let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
-                var oo_id = ObjectID(scene.scenePostcards[postcardIndex]);
-                db.images.findOne({_id: oo_id}, function (err, pic) {
-                    if (err || !pic) {
-                        res.send("no postcard found");
-                    } else {
-                        //return postcard!
-                        res.send(JSON.stringify(pic));
-                    }
-                });
-            }
-        }
-    });
-}); 
+
+// app.get('/scenepostcard/:short_id', function (req, res) {
+//     db_old.scenes.findOne({short_id: req.params.short_id}, function (err, scene) {
+//         if (err || !scene) {
+//             // console.log("error getting scene postcard: " + err);
+//             res.send("scene not found");
+//         } else {
+//             if (scene.scenePostcards != null && scene.scenePostcards.length) {
+//                 let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
+//                 var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]);
+//                 db_old.images.findOne({_id: oo_id}, function (err, pic) {
+//                     if (err || !pic) {
+//                         res.send("no postcard found");
+//                     } else {
+//                         //return postcard!
+//                         res.send(JSON.stringify(pic));
+//                     }
+//                 });
+//             }
+//         }
+//     });
+// }); 
 
 /*
 app.get('/braincheckbucket', function (req, res) {
@@ -17250,40 +17278,40 @@ function Shuffle(o) {
     return o;
 };
 
-function GenerateName () {
-    array1 = [];
-    array2 = [];
-    array3 = [];
-    index1 = -1;
-    index2 = -1;
-    index3 = -1;
-    name1 = "";
-    name2 = "";
-    name3 = "";
-    min = 0;
-    db.lexicons.findOne({name: "nameArrays"}, function (err, items) {
-        if (err || !items) {
-            console.log("error getting scene 5: " + err);
-            return (err);
-        } else {
-            array1 = items.adjectives;
-            array2 = items.colors;
-            array3 = items.animals;
-            // console.log("array 1" + array1);
-            index1 = Math.floor(Math.random() * array1.length);
-            name1 = UppercaseFirst(array1[index1]);
-            index2 = Math.floor(Math.random() * array2.length);
-            name2 = UppercaseFirst(array2[index2]);
-            index3 = Math.floor(Math.random() * array3.length);
-            name3 = UppercaseFirst(array3[index3]);
-            const nameString = name1 + " " + name2 + " " + name3;
-            console.log("fresh name : " +  name1 +" " + name2 +" " + name3);
-            return nameString;
-        }
-    });
+// function GenerateName () {
+//     array1 = [];
+//     array2 = [];
+//     array3 = [];
+//     index1 = -1;
+//     index2 = -1;
+//     index3 = -1;
+//     name1 = "";
+//     name2 = "";
+//     name3 = "";
+//     min = 0;
+//     db_old.lexicons.findOne({name: "nameArrays"}, function (err, items) {
+//         if (err || !items) {
+//             console.log("error getting scene 5: " + err);
+//             return (err);
+//         } else {
+//             array1 = items.adjectives;
+//             array2 = items.colors;
+//             array3 = items.animals;
+//             // console.log("array 1" + array1);
+//             index1 = Math.floor(Math.random() * array1.length);
+//             name1 = UppercaseFirst(array1[index1]);
+//             index2 = Math.floor(Math.random() * array2.length);
+//             name2 = UppercaseFirst(array2[index2]);
+//             index3 = Math.floor(Math.random() * array3.length);
+//             name3 = UppercaseFirst(array3[index3]);
+//             const nameString = name1 + " " + name2 + " " + name3;
+//             console.log("fresh name : " +  name1 +" " + name2 +" " + name3);
+//             return nameString;
+//         }
+//     });
 
    
-};
+// };
 
 function UppercaseFirst(s) {
 // Check for empty string.

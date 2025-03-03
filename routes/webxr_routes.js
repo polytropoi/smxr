@@ -13,7 +13,7 @@ const requireText = require('require-text');
 const { Console } = require("console");
 const minio = require('minio');
 
-import { db } from "../server.js";
+import { db_old as db } from "../server.js";
 // import { s3 } from "../server.js";
 import { ReturnPresignedUrl} from "../server.js";
 

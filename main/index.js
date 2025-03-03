@@ -1323,60 +1323,69 @@
     function deleteItem(type, itemid) { //delete an actual thing, w/ confirm
             let data = [];
             let url = "";
+            let redir = "";
             switch (type) {
             case "model":
                 url = '/delete_model';
                 data = { 
                     _id : itemid
                 };
+                redir = "models";
             break;
             case "object":
                 url = '/delete_object';
                 data = { 
                     _id : itemid
                 };
+                redir = "objects";
             break;        
             case "picture":
                 url = '/delete_picture';
                 data = { 
                     _id : itemid
                 };
+                redir = "pictures";
             break;
             case "video":
                 url = '/delete_video';
                 data = { 
                     _id : itemid
                 };
+                redir = "video";
             break;
             case "audio":
                 url = '/delete_audio';
                 data = { 
                     _id : itemid
                 };
+                redir = "audios";
             break;
             case "storeitem":
                 url = '/delete_storeitem';
                 data = { 
                     _id : itemid
                 };
+                redir = "storeitems";
             break;
             case "location":
                 url = '/delete_location';
                 data = { 
                     _id : itemid
                 };
+                redir = "locations";
             break;
-            case "object":
-                url = '/delete_obj';
-                data = { 
-                    _id : itemid
-                };
-            break;
+            // case "object":
+            //     url = '/delete_obj';
+            //     data = { 
+            //         _id : itemid
+            //     };
+            // break;
             case "group":
                 url = '/delete_group';
                 data = { 
                     _id : itemid
                 };
+                redir = "groups";
             break;
             }
             if (url != "") {
@@ -1392,9 +1401,11 @@
                         .then(function (response) {
                             console.log(response);
                             if (response.data.includes("deleted")) {
-                                window.location.reload();
+                                window.location.assign(window.location.pathname + "?type=" + redir);
                             } else if (response.data.includes("delback")) {
-                                window.history.back();
+                                // window.history.back();
+                                // window.location.pathname + "?type=" + redir;
+                                window.location.assign(window.location.pathname + "?type=" + redir);
                             } else {
                                 $("#topAlert").html(response.data);
                                 $("#topAlert").show();

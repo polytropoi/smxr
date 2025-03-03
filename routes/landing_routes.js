@@ -7,7 +7,7 @@ const express = require("express");
 const landing_router = express.Router();
 const entities = require("entities");
 const async = require('async');
-const ObjectID = require("bson-objectid");
+// const ObjectID = require("bson-objectid");
 const path = require("path");
 const validator = require('validator');
 const jwt = require("jsonwebtoken");
@@ -15,10 +15,11 @@ const requireText = require('require-text');
 const { Console } = require("console");
 const minio = require('minio');
 
-
-import { db } from "../server.js";
+import { ObjectId } from "mongodb";
+// import { db } from "../server.js";
 // import { s3 } from "../server.js";
 import { ReturnPresignedUrl, ReturnObjectMetadata, ReturnObjectExists, CopyObject } from "../server.js";
+import { RunDataQuery } from "../connect/database.js";
 
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
@@ -37,37 +38,7 @@ if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPO
 }
 
 const nonLocalDomains = ["regalrooms.tv", "bishopstudiosaustin.com"]; //TODO you know what! (put this in sceneDomain object)
-// function ReturnPresignedUrlSync (bucket, key, time) {
-//     if (minioClient) {
-//         minioClient.presignedGetObject(bucket, key, time, function(err, presignedUrl) { //use callback version here, can't await?
-//             if (err) {
-//                 console.log(err);
-//                 return "err";
-//             } else {
-//                 return presignedUrl;
-                
-//             }
-//         });
-//     } else {
-//         return s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time});
-//     }
-// }
-// async function ReturnPresignedUrl(bucket, key, time) {
-    
-//     if (minioClient) {
-//         try {
-//             return minioClient.presignedGetObject(bucket, key, time);
-//         } catch (error) {
-//             return error
-//         }
-//     } else {
-//         try {
-//             return s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time}); //returns a promise if called in async function?
-//         } catch (error) {
-//             return error;
-//         } 
-//     }
-// }
+
 
 function getExtension(filename) {
     var i = filename.lastIndexOf('.');
@@ -75,8 +46,8 @@ function getExtension(filename) {
 }
 
 function convertStringToObjectID (stringID) {
-    if (ObjectID.isValid(stringID)) {
-        return ObjectID(stringID);
+    if (ObjectId.isValid(stringID)) {
+        return ObjectId(stringID);
     } else {
         return null;
     }
@@ -113,132 +84,24 @@ console.log(aRgb); //[21, 2, 190]
     return aRgb;
 }
 
-// function ReturnPresignedUrlSync (bucket, key, time) {
-//     if (minioClient) {
-//         minioClient.presignedGetObject(bucket, key, time, function(err, presignedUrl) { //use callback version here, can't await?
-//             if (err) {
-//                 console.log(err);
-//                 return "err";
-//             } else {
-//                 console.log("minio sync url " + presignedUrl)
-//                return presignedUrl;
-                
-//             }
-//         });
-//     } else {
-//         let url = s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time});
-//         console.log("s3 sync url" + url);
-//         return url;
-//     }
-// }
-// async function ReturnPresignedUrl(bucket, key, time) {
-    
-//     if (minioClient) {
-//         try {
-//             return minioClient.presignedGetObject(bucket, key, time);
-//         } catch (error) {
-//             return error
-//         }
-//     } else {
-//         try {
-//             return s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time}); //returns a promise if called in async function?
-//         } catch (error) {
-//             return error;
-//         } 
-//     }
-// }
-// app.post('/create-checkout-session', async (req, res) => {
-//     const session = await stripe.checkout.sessions.create({
-  
-//       line_items: [
-//         {
-//           price_data: {
-//             currency: 'usd',
-//             product_data: {
-//               name: 'super cool immersive rock show',
-//             },
-//             unit_amount: 2000,
-//           },
-//           quantity: 1,
-//         },
-//       ],
-//       mode: 'payment',
-//       success_url: process.env.ROOT_HOST +'/stripe_events',
-//       cancel_url: process.env.ROOT_HOST +'/static/cancel.html',
-//       payment_intent_data: {
-//         metadata: {
-//           product_id: '1000',
-//           product_name: 'super cool immersive rock show!'
-//         }
-//       }
-//     });
-  
-//     res.redirect(303, session.url);
-//   });
-
-
-//   function saveTraffic (req, res, next) {
-//     let timestamp = Date.now();
-
-//     timestamp = parseInt(timestamp);
-//     // console.log("tryna save req" + );
-//     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
-//     // let request = {};
-
-//     var userdata = {
-//         username: req.session.user ? req.session.user.userName : "",
-//         _id: req.session.user ? req.session.user._id : "",
-//         email: req.session.user ? req.session.user.email : "",
-//         status: req.session.user ? req.session.user.status : "",
-//         authlevel: req.session.user ? req.session.user.authLevel : ""
-//     };
-//     // console.log("traffic userdata " + JSON.stringify(userdata));
-//     let data = {
-//             timestamp: timestamp,
-//             baseUrl: req.baseUrl,
-//             headers: JSON.stringify(req.headers),
-//             cookie: JSON.stringify(req.session.cookie),
-//             userdata: userdata,
-//             fresh: req.fresh,
-//             hostname: req.hostname,
-//             ip: req.ip,
-//             referring_ip: ip,
-//             method: req.method,
-//             originalUrl: req.originalUrl,
-//             params: JSON.stringify(req.params),
-           
-//         }
-//         db.traffic.save(data, function (err, saved) {
-//             if ( err || !saved ) {
-//                 console.log('traffic not saved!' + err);
-//                 next();
-                
-//             } else {
-//                 next();
-//                 // var item_id = saved._id.toString();
-//                 // console.log('new traffic id: ' + item_id);
-//             }
-//         });
-//     }
-
-
 function saveTraffic (req, domain, shortID) {
-    let timestamp = Date.now();
+    (async () => {
+        let timestamp = Date.now();
 
-    timestamp = parseInt(timestamp);
-    // console.log("tryna save req" + );
-    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
-    // let request = {};
+        timestamp = parseInt(timestamp);
+        // console.log("tryna save req" + );
+        var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
+        // let request = {};
 
-    var userdata = {
-        username: req.session.user ? req.session.user.userName : "",
-        _id: req.session.user ? req.session.user._id : "",
-        email: req.session.user ? req.session.user.email : "",
-        status: req.session.user ? req.session.user.status : "",
-        authlevel: req.session.user ? req.session.user.authLevel : ""
-    };
-    // console.log("traffic userdata " + JSON.stringify(userdata));
-    let data = {
+        var userdata = {
+            username: req.session.user ? req.session.user.userName : "",
+            _id: req.session.user ? req.session.user._id : "",
+            email: req.session.user ? req.session.user.email : "",
+            status: req.session.user ? req.session.user.status : "",
+            authlevel: req.session.user ? req.session.user.authLevel : ""
+        };
+        // console.log("traffic userdata " + JSON.stringify(userdata));
+        let data = {
             short_id: shortID,
             appdomain: domain,
             timestamp: timestamp,
@@ -255,36 +118,28 @@ function saveTraffic (req, domain, shortID) {
             params: JSON.stringify(req.params),
            
         }
-        db.traffic.save(data, function (err, saved) {
-            if ( err || !saved ) {
-                console.log('traffic not saved!' + err);
-                // next();
-                
-            } else {
-                // next();
-                // var item_id = saved._id.toString();
-                // console.log('new traffic id: ' + item_id);
-            }
-        });
+
+        try {
+            const saved = await RunDataQuery("traffic", "insertOne", data);
+            console.log('new traffic id: ' + saved);
+        } catch (e) {
+            console.log('traffic not saved!' + err);
+        }
+
+        })();
+
+     
     }    
 
 ////////////////////PRIMARY SERVERSIDE LANDING ROUTE///////////////////
-landing_router.get('/:_id', function (req, res) { 
-    // let db = req.app.get('db');
-    // let s3 = req.app.get('s3');
-    // let minioClient = req.app.get('minioClient');
-
-
-
+landing_router.get('/:_id', async (req, res) => { 
+    
     var reqstring = entities.decodeHTML(req.params._id);
     console.log("webxr scene req " + reqstring);
-    if (reqstring != undefined && reqstring != 'undefined' && reqstring != null) {
-    // let authString = checkAuthentication(req);
-    // console.log("referrer: " + req.header.referrer);
-
-    // var audioResponse = {};
-    // var pictureResponse = {};
-    // var postcardResponse = {};
+    if (reqstring == undefined || reqstring == 'undefined' || reqstring == null || reqstring.length < 8) {
+        res.end("nope");
+        return;
+    }
     var sceneResponse = {};
     var requestedPictureItems = [];
     var requestedPictureGroups = [];
@@ -499,7 +354,7 @@ landing_router.get('/:_id', function (req, res) {
     // let googleAdSense = "<script data-ad-client=\x22ca-pub-5450402133525063\x22 async src=\x22https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js\x22></script>";
     let googleAdSense = "";   
     // let metamaskScript = "";
-    let sceneData = "";
+    // let sceneData = "";
     let nftIDs = "";
     let sceneBackground = " background ";
     let skyboxEnvMap = "";
@@ -545,10 +400,11 @@ landing_router.get('/:_id', function (req, res) {
     
 
 
+    const query = {"short_id": reqstring};
+    const sceneData = await RunDataQuery("scenes","findOne",query);
 
-    
-    db.scenes.findOne({"short_id": reqstring}, function (err, sceneData) { 
-            if (err || !sceneData) {
+    // db.scenes.findOne({"short_id": reqstring}, function (err, sceneData) { 
+            if (!sceneData) {
                 console.log("1 error getting scene data: " + err);
                 res.end();
             } else { 
@@ -1229,9 +1085,9 @@ landing_router.get('/:_id', function (req, res) {
                             }
                           
                             if (sceneData.scenePrimaryAudioID != null && sceneData.scenePrimaryAudioID.length > 4) {
-                                var pid = ObjectID(sceneData.scenePrimaryAudioID);
+                                var pid = new ObjectId(sceneData.scenePrimaryAudioID);
                                 // console.log("tryna get [ObjectID(sceneData.scenePrimaryAudioID)]" + ObjectID(sceneData.scenePrimaryAudioID));
-                                requestedAudioItems.push(ObjectID(sceneData.scenePrimaryAudioID));
+                                requestedAudioItems.push(new ObjectId(sceneData.scenePrimaryAudioID));
                                 if (sceneData.scenePrimaryAudioVisualizer) {
                                     
                                     audioVizEntity = "<a-entity id=\x22audiovizzler\x22 position=\x22"+audioLocation+"\x22 data-audio-analyzer=\x22true\x22 data-beat=\x22true\x22></a-entity>";
@@ -1241,13 +1097,13 @@ landing_router.get('/:_id', function (req, res) {
                             if (sceneData.sceneAmbientAudioID != null && sceneData.sceneAmbientAudioID.length > 4) {
                                 // var pid = ObjectID(sceneData.sceneAmbientAudioID);
                                 // console.log("tryna get [ObjectID(sceneData.scenePrimaryAudioID)]" + ObjectID(sceneData.scenePrimaryAudioID));
-                                requestedAudioItems.push(ObjectID(sceneData.sceneAmbientAudioID));
+                                requestedAudioItems.push(new ObjectId(sceneData.sceneAmbientAudioID));
 
                             }
                             if (sceneData.sceneTriggerAudioID != null && sceneData.sceneTriggerAudioID.length > 4) {
-                                // var pid = ObjectID(sceneData.sceneAmbientAudioID);
-                                // console.log("tryna get [ObjectID(sceneData.scenePrimaryAudioID)]" + ObjectID(sceneData.scenePrimaryAudioID));
-                                requestedAudioItems.push(ObjectID(sceneData.sceneTriggerAudioID));
+                                // var pid = new ObjectId(sceneData.sceneAmbientAudioID);
+                                // console.log("tryna get [new ObjectId(sceneData.scenePrimaryAudioID)]" + new ObjectId(sceneData.scenePrimaryAudioID));
+                                requestedAudioItems.push(new ObjectId(sceneData.sceneTriggerAudioID));
 
                             }
                             callback();
@@ -1258,116 +1114,132 @@ landing_router.get('/:_id', function (req, res) {
                     // });
                 },
 
-                function (callback) {
-                    if (particleLocations.length > 0) {
-                        for (let i = 0; i < particleLocations.length; i++) {
-                            let color = "";
-                            let distance = 10;
-                            let mods = "";
-                            if (particleLocations[i].data != null && particleLocations[i].data.length > 3) {
-                                if (particleLocations[i].data.indexOf("~") != -1) {
-                                    let split = particleLocations[i].data.split("~");
-                                    color = split[0];
-                                    distance = split[1];
-                                    // if (split.length > 2) {
-                                    //     if (split[2].toLowerCase().includes("flicker")) {
-                                    //         mods = " mod_flicker ";
-                                    //     }
-                                    // }
-                                } else {
-                                    color = locationLights[i].data;
-                                }
-                            }
-                        }
-                        callback();
-                    } else {
-                        callback();
-                    }
-                },
-                function (callback) {
-                    if (locationLights.length > 0) {
-                        for (let i = 0; i < locationLights.length; i++) {
-                            let color = "";
-                            let distance = 10;
-                            let mods = "";
-                            console.log("gotsa light with data: " + locationLights[i].data);
-                            if (locationLights[i].data != null && locationLights[i].data.length > 0) {
-                                if (locationLights[i].data.indexOf("~") != -1) {
-                                    let split = locationLights[i].data.split("~");
-                                    color = split[0];
-                                    distance = split[1];
-                                    if (split.length > 2) {
-                                        if (split[2].toLowerCase().includes("flicker")) {
-                                            mods = " mod_flicker ";
-                                        }
-                                    }
-                                } else {
-                                    color = locationLights[i].data;
-                                }
-                            }
-                            lightEntities = lightEntities + "<a-light "+mods+" color=\x22" + color + "\x22 position=\x22"+locationLights[i].loc+"\x22 distance=\x22"+distance+"\x22 intensity='5' type='point'></a-light>";
-                        }
-                        callback();
-                    } else {
-                        callback();
-                    }
-                },
-                function (callback) {
-                    if (curvePoints.length > 0) {
-                        for (let i = 0; i < curvePoints.length; i++) {
+                // function (callback) {
+                //     if (particleLocations.length > 0) {
+                //         for (let i = 0; i < particleLocations.length; i++) {
+                //             let color = "";
+                //             let distance = 10;
+                //             let mods = "";
+                //             if (particleLocations[i].data != null && particleLocations[i].data.length > 3) {
+                //                 if (particleLocations[i].data.indexOf("~") != -1) {
+                //                     let split = particleLocations[i].data.split("~");
+                //                     color = split[0];
+                //                     distance = split[1];
+                //                     // if (split.length > 2) {
+                //                     //     if (split[2].toLowerCase().includes("flicker")) {
+                //                     //         mods = " mod_flicker ";
+                //                     //     }
+                //                     // }
+                //                 } else {
+                //                     color = locationLights[i].data;
+                //                 }
+                //             }
+                //         }
+                //         callback();
+                //     } else {
+                //         callback();
+                //     }
+                // },
+                // function (callback) {
+                //     if (locationLights.length > 0) {
+                //         for (let i = 0; i < locationLights.length; i++) {
+                //             let color = "";
+                //             let distance = 10;
+                //             let mods = "";
+                //             console.log("gotsa light with data: " + locationLights[i].data);
+                //             if (locationLights[i].data != null && locationLights[i].data.length > 0) {
+                //                 if (locationLights[i].data.indexOf("~") != -1) {
+                //                     let split = locationLights[i].data.split("~");
+                //                     color = split[0];
+                //                     distance = split[1];
+                //                     if (split.length > 2) {
+                //                         if (split[2].toLowerCase().includes("flicker")) {
+                //                             mods = " mod_flicker ";
+                //                         }
+                //                     }
+                //                 } else {
+                //                     color = locationLights[i].data;
+                //                 }
+                //             }
+                //             lightEntities = lightEntities + "<a-light "+mods+" color=\x22" + color + "\x22 position=\x22"+locationLights[i].loc+"\x22 distance=\x22"+distance+"\x22 intensity='5' type='point'></a-light>";
+                //         }
+                //         callback();
+                //     } else {
+                //         callback();
+                //     }
+                // },
+                // function (callback) {
+                //     if (curvePoints.length > 0) {
+                //         for (let i = 0; i < curvePoints.length; i++) {
                             
-                            curveEntities = curveEntities + "<a-curve-point position=\x22"+curvePoints[i].loc+"\x22></a-curve-point>";
-                        }
-                        callback();
-                    } else {
-                        callback();
-                    }
-                },
-                function (callback) {                
-                    if (locationPlaceholders.length > 0) {
-                        for (let i = 0; i < locationPlaceholders.length; i++) {
-                            // console.log("gotsa placeholder at " + locationPlaceholders[i].x);
-                            // let physics = "mod_physics=\x22body: kinematic; isTrigger: true;\x22";
-                            let physics = "";
-                            // let gltf = "gltf-model=\x22#poi1\x22"
-                            // if (locationPlaceholders[i].markerType.toLowerCase().includes("trigger") || locationPlaceholders[i].markerType.toLowerCase().includes("gate") || locationPlaceholders[i].markerType.toLowerCase().includes("portal")) {
-                            //     physics = "mod_physics=\x22body: kinematic; isTrigger: true;\x22";
-                            // }
-                            placeholderEntities = placeholderEntities + "<a-entity id=\x22"+sceneResponse.short_id+"~cloudmarker~"+locationPlaceholders[i].timestamp+"\x22  "+physics+" class=\x22activeObjexGrab activeObjexRay envMap\x22 cloud_marker=\x22phID: "+
-                            locationPlaceholders[i].phID+"; scale: "+locationPlaceholders[i].markerObjScale+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
-                            locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false;name: "+
-                            locationPlaceholders[i].name+";label: "+locationPlaceholders[i].label+";description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+";timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
-                            skyboxEnvMap+ " position=\x22"+locationPlaceholders[i].x+" "+locationPlaceholders[i].y+ " " +locationPlaceholders[i].z+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></a-entity>";
-                        }
-                        callback();
-                    } else {
-                        callback();
-                    }
-                },
-                function (callback) {
-                    // if (req.session.user) {
-                        db.inventory_items.find({"sceneID": sceneData._id}, function (err, items) {
-                            if (err || ! items) {
-                                console.log("no inventory items!");
-                            } else {
-                                console.log("gots inventory items: " + JSON.stringify(items));
-                                var buff = Buffer.from(JSON.stringify(items)).toString("base64");
-                                inventoryData = "<a-entity mod_scene_inventory id=\x22sceneInventory\x22 data-inventory='"+buff+"'></a-entity>";
-                                callback();
-                            }
-                        });
-                    // } else {
-                    //     callback();
-                    // }
+                //             curveEntities = curveEntities + "<a-curve-point position=\x22"+curvePoints[i].loc+"\x22></a-curve-point>";
+                //         }
+                //         callback();
+                //     } else {
+                //         callback();
+                //     }
+                // },
+                // function (callback) {                
+                //     if (locationPlaceholders.length > 0) {
+                //         for (let i = 0; i < locationPlaceholders.length; i++) {
+                //             // console.log("gotsa placeholder at " + locationPlaceholders[i].x);
+                //             // let physics = "mod_physics=\x22body: kinematic; isTrigger: true;\x22";
+                //             let physics = "";
+                //             // let gltf = "gltf-model=\x22#poi1\x22"
+                //             // if (locationPlaceholders[i].markerType.toLowerCase().includes("trigger") || locationPlaceholders[i].markerType.toLowerCase().includes("gate") || locationPlaceholders[i].markerType.toLowerCase().includes("portal")) {
+                //             //     physics = "mod_physics=\x22body: kinematic; isTrigger: true;\x22";
+                //             // }
+                //             placeholderEntities = placeholderEntities + "<a-entity id=\x22"+sceneResponse.short_id+"~cloudmarker~"+locationPlaceholders[i].timestamp+"\x22  "+physics+" class=\x22activeObjexGrab activeObjexRay envMap\x22 cloud_marker=\x22phID: "+
+                //             locationPlaceholders[i].phID+"; scale: "+locationPlaceholders[i].markerObjScale+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
+                //             locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false;name: "+
+                //             locationPlaceholders[i].name+";label: "+locationPlaceholders[i].label+";description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+";timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
+                //             skyboxEnvMap+ " position=\x22"+locationPlaceholders[i].x+" "+locationPlaceholders[i].y+ " " +locationPlaceholders[i].z+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></a-entity>";
+                //         }
+                //         callback();
+                //     } else {
+                //         callback();
+                //     }
+                // },
+                // function (callback) {
+                //     // if (req.session.user) {
+
+                //         // (async () => {
+                //         //     try {
+                //         //         const query = {"sceneID": sceneData._id};
+                //         //         const data = await RunDataQuery("inventory_items","find",query);
+                //         //         if (data && data.length) {
+                //         //             console.log("gots inventory items: " + JSON.stringify(data));
+                //         //             var buff = Buffer.from(JSON.stringify(data)).toString("base64");
+                //         //             inventoryData = "<a-entity mod_scene_inventory id=\x22sceneInventory\x22 data-inventory='"+buff+"'></a-entity>";
+                //         //         }
+                //         //         callback();
+                //         //     } catch (e) {
+                //         //         console.log("inventory query error " + e);
+                //         //         // callback(e);
+                //         //     }
+                //         // })();
+                //         // db.inventory_items.find({"sceneID": sceneData._id}, function (err, items) {
+                //         //     if (err || ! items) {
+                //         //         console.log("no inventory items!");
+                //         //     } else {
+                //         //         console.log("gots inventory items: " + JSON.stringify(items));
+                //         //         var buff = Buffer.from(JSON.stringify(items)).toString("base64");
+                //         //         inventoryData = "<a-entity mod_scene_inventory id=\x22sceneInventory\x22 data-inventory='"+buff+"'></a-entity>";
+                //         //         callback();
+                //         //     }
+                //         // });
+                //     // } else {
+                //     //     callback();
+                //     // }
                    
-                },
+                // },
             
                 // function (callback) {
                 //     var modelz = [];
                 // //    console.log("sceneModels : " + JSON.stringify(sceneResponse.sceneModels));
                 //     if (sceneResponse.sceneModels != null) {
                 //         async.each (sceneResponse.sceneModels, function (objID, callbackz) { //nested async-ery!
-                //             var oo_id = ObjectID(objID);
+                //             var oo_id = new ObjectId(objID);
                 //             // console.log("13904 tryna get sceneObject: " + objID);
                 //             db.models.findOne({"_id": oo_id}, function (err, model) {
                 //                 if (err || !model) {
@@ -1414,180 +1286,183 @@ landing_router.get('/:_id', function (req, res) {
                 //         callback(null);
                 //     }
                 // }, 
-                function (callback) { //get available scenes for scene links
-                //     var platformString = "";
+
+                // function (callback) { //get available scenes for scene links
+                // //     var platformString = "";
             
-                let query = {$and: [{ "sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
-                console.log("scene query : " + JSON.stringify(query));
-                db.scenes.find( query, function (err, scenes) {
-                if (err || !scenes) {
-                    console.log("cain't get no scenes... " + err);
-                    calllback(err);
-                } else {
-                    console.log("gots " + scenes.length + " scenes");
-                    var availableScenes = [];
-                    availableScenesResponse.availableScenes = availableScenes;
-                        async.each(scenes, function (scene, cb) {
-                            let availableScene = {};
-                            if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
-                                var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
-                                var oo_id = ObjectID(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-                                db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-                                    if (err || !picture_item) {
-                                        console.log("error getting postcard for availablescenes: 2" + err);
-                                        cb(); //no postcards, next...
-                                    } else {
-                                        var item_string_filename = JSON.stringify(picture_item.filename);
-                                        item_string_filename = item_string_filename.replace(/\"/g, "");
-                                        var item_string_filename_ext = getExtension(item_string_filename);
-                                        var expiration = new Date();
-                                        expiration.setMinutes(expiration.getMinutes() + 30);
-                                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                        // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
-                                        // var standardName = 'standard.' + baseName + item_string_filename_ext;
-                                        var halfName = 'half.' + baseName + item_string_filename_ext;
-                                        var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+                // let query = {$and: [{ "sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
+                // console.log("scene query : " + JSON.stringify(query));
+                // db.scenes.find( query, function (err, scenes) {
+                
+                
+                // if (err || !scenes) {
+                //     console.log("cain't get no scenes... " + err);
+                //     calllback(err);
+                // } else {
+                //     console.log("gots " + scenes.length + " scenes");
+                //     var availableScenes = [];
+                //     availableScenesResponse.availableScenes = availableScenes;
+                //         async.each(scenes, function (scene, cb) {
+                //             let availableScene = {};
+                //             if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
+                //                 var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
+                //                 var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                //                 db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+                //                     if (err || !picture_item) {
+                //                         console.log("error getting postcard for availablescenes: 2" + err);
+                //                         cb(); //no postcards, next...
+                //                     } else {
+                //                         var item_string_filename = JSON.stringify(picture_item.filename);
+                //                         item_string_filename = item_string_filename.replace(/\"/g, "");
+                //                         var item_string_filename_ext = getExtension(item_string_filename);
+                //                         var expiration = new Date();
+                //                         expiration.setMinutes(expiration.getMinutes() + 30);
+                //                         var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                //                         // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
+                //                         // var standardName = 'standard.' + baseName + item_string_filename_ext;
+                //                         var halfName = 'half.' + baseName + item_string_filename_ext;
+                //                         var quarterName = 'quarter.' + baseName + item_string_filename_ext;
 
-                                        // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
-                                        // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
-                                        (async () => {
-                                            var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); //just send back thumbnail urls for list
-                                            var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000); //just send back thumbnail urls for list
+                //                         // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
+                //                         // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
+                //                         (async () => {
+                //                             var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); //just send back thumbnail urls for list
+                //                             var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000); //just send back thumbnail urls for list
                                             
-                                            availableScene = {
-                                                sceneTitle: scene.sceneTitle,
-                                                sceneKey: scene.short_id,
-                                                sceneType: scene.sceneType,
-                                                sceneLastUpdate: scene.sceneLastUpdate,
-                                                sceneDescription: scene.sceneDescription,
-                                                sceneKeynote: scene.sceneKeynote,
-                                                sceneAndroidOK: scene.sceneAndroidOK,
-                                                sceneIosOK: scene.sceneIosOK,
-                                                sceneWindowsOK: scene.sceneWindowsOK,
-                                                sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-                                                sceneOwner: scene.userName ? "" : scene.userName,
-                                                scenePostcardQuarter: urlQuarter,
-                                                scenePostcardHalf: urlHalf
-                                            };
-                                            availableScenesResponse.availableScenes.push(availableScene);
+                //                             availableScene = {
+                //                                 sceneTitle: scene.sceneTitle,
+                //                                 sceneKey: scene.short_id,
+                //                                 sceneType: scene.sceneType,
+                //                                 sceneLastUpdate: scene.sceneLastUpdate,
+                //                                 sceneDescription: scene.sceneDescription,
+                //                                 sceneKeynote: scene.sceneKeynote,
+                //                                 sceneAndroidOK: scene.sceneAndroidOK,
+                //                                 sceneIosOK: scene.sceneIosOK,
+                //                                 sceneWindowsOK: scene.sceneWindowsOK,
+                //                                 sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+                //                                 sceneOwner: scene.userName ? "" : scene.userName,
+                //                                 scenePostcardQuarter: urlQuarter,
+                //                                 scenePostcardHalf: urlHalf
+                //                             };
+                //                             availableScenesResponse.availableScenes.push(availableScene);
 
-                                            cb();
-                                        })();
-                                        }
-                                    });
-                                } else {
-                                    cb();
-                                }
-                            }, 
-                            function (err) {
-                                if (err) {
-                                    console.log('A file failed to process');
-                                    callback(null);
-                                    //else if no keys?
-                                } else {
+                //                             cb();
+                //                         })();
+                //                         }
+                //                     });
+                //                 } else {
+                //                     cb();
+                //                 }
+                //             }, 
+                //             function (err) {
+                //                 if (err) {
+                //                     console.log('A file failed to process');
+                //                     callback(null);
+                //                     //else if no keys?
+                //                 } else {
 
          
-                                    if (scenesKeyLocation && availableScenes != null && availableScenes != undefined && availableScenes.length > 0) {
-                                    availableScenesEntity = "<a-entity scale=\x22.75 .75 .75\x22 look-at=\x22#player\x22 position=\x22"+scenesKeyLocation+"\x22>"+ 
-                                    "<a-entity position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22availableScenesControl\x22 class=\x22envMap activeObjexRay\x22 toggle-available-scenes "+skyboxEnvMap+" gltf-model=\x22#key\x22></a-entity>"+
-                                    "<a-entity id=\x22availableScenesPanel\x22 visible='false' position=\x220 -1 0\x22>"+
-                                    "<a-entity id=\x22availableScenesHeaderText\x22 geometry=\x22primitive: plane; width: 3.25; height: 1\x22 position=\x220 1.75 0\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22" +
-                                    "text=\x22value:; wrap-count: 35;\x22></a-entity>" +
+                //                     if (scenesKeyLocation && availableScenes != null && availableScenes != undefined && availableScenes.length > 0) {
+                //                     availableScenesEntity = "<a-entity scale=\x22.75 .75 .75\x22 look-at=\x22#player\x22 position=\x22"+scenesKeyLocation+"\x22>"+ 
+                //                     "<a-entity position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22availableScenesControl\x22 class=\x22envMap activeObjexRay\x22 toggle-available-scenes "+skyboxEnvMap+" gltf-model=\x22#key\x22></a-entity>"+
+                //                     "<a-entity id=\x22availableScenesPanel\x22 visible='false' position=\x220 -1 0\x22>"+
+                //                     "<a-entity id=\x22availableScenesHeaderText\x22 geometry=\x22primitive: plane; width: 3.25; height: 1\x22 position=\x220 1.75 0\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22" +
+                //                     "text=\x22value:; wrap-count: 35;\x22></a-entity>" +
 
-                                    "<a-entity id=\x22availableScenePic\x22 class=\x22envMap activeObjexRay\x22 visible=\x22true\x22 position=\x220 3 -.1\x22 gltf-model=\x22#widelandscape_panel\x22 scale=\x22.5 .5 .5\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                                    "rotation='0 0 0'></a-entity>"+
-                                    "<a-entity gltf-model=\x22#square_panel\x22 scale=\x222.25 2.25 2.25\x22 position=\x220 2.1 -.25\x22></a-entity>" +
-                                    "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x221.5 -.75 0\x22></a-entity>" +
-                                    "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesPreviousButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-1.5 -.75 0\x22></a-entity>" +
-                                    "</a-entity></a-entity>";
-                                    console.log('processed attributions for ' + availableScenes.length);
+                //                     "<a-entity id=\x22availableScenePic\x22 class=\x22envMap activeObjexRay\x22 visible=\x22true\x22 position=\x220 3 -.1\x22 gltf-model=\x22#widelandscape_panel\x22 scale=\x22.5 .5 .5\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                //                     "rotation='0 0 0'></a-entity>"+
+                //                     "<a-entity gltf-model=\x22#square_panel\x22 scale=\x222.25 2.25 2.25\x22 position=\x220 2.1 -.25\x22></a-entity>" +
+                //                     "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x221.5 -.75 0\x22></a-entity>" +
+                //                     "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesPreviousButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-1.5 -.75 0\x22></a-entity>" +
+                //                     "</a-entity></a-entity>";
+                //                     console.log('processed attributions for ' + availableScenes.length);
 
-                                    modelAssets = modelAssets + "<a-asset-item id=\x22widelandscape_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5b.glb\x22></a-asset-item>\n";
+                //                     modelAssets = modelAssets + "<a-asset-item id=\x22widelandscape_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5b.glb\x22></a-asset-item>\n";
                                     
-                                    loadAvailableScenes = "ready(function(){\n" + //TODO base64 this stuff like the others...very
-                                    "let ascontrol = document.getElementById(\x22availableScenesControl\x22);\n"+
+                //                     loadAvailableScenes = "ready(function(){\n" + //TODO base64 this stuff like the others...very
+                //                     "let ascontrol = document.getElementById(\x22availableScenesControl\x22);\n"+
                                     
-                                    "ascontrol.setAttribute(\x22available-scenes-control\x22, \x22jsonData\x22, "+JSON.stringify(JSON.stringify(availableScenesResponse))+");\n"+ //double stringify! yes, it's needed
-                                    "});";
-                                    callback();
-                                    } else {
-                                        callback();
-                                    }
-                                }
-                            });
-                        }
-                    });
-                },
-                function (callback) { //update link pic URLs //TODO check for freshness, and rescrape if needed
-                    if (sceneResponse.sceneWebLinks != null && sceneResponse.sceneWebLinks.length > 0) {
-                        let index = 0;
+                //                     "ascontrol.setAttribute(\x22available-scenes-control\x22, \x22jsonData\x22, "+JSON.stringify(JSON.stringify(availableScenesResponse))+");\n"+ //double stringify! yes, it's needed
+                //                     "});";
+                //                     callback();
+                //                     } else {
+                //                         callback();
+                //                     }
+                //                 }
+                //             });
+                //         }
+                //     });
+                // },
+                // function (callback) { //update link pic URLs //TODO check for freshness, and rescrape if needed
+                //     if (sceneResponse.sceneWebLinks != null && sceneResponse.sceneWebLinks.length > 0) {
+                //         let index = 0;
                         
-                        for (var i = 0; i < sceneResponse.sceneWebLinks.length; i++) {
-                            if (ObjectID.isValid(sceneResponse.sceneWebLinks[i])) {
-                            db.weblinks.findOne({'_id': ObjectID(sceneResponse.sceneWebLinks[i])}, function (err, weblink){
-                                if (err || !weblink) {
-                                    console.log("can't find weblink");
-                                } else {
-                                    // index++
-                                    // let link = {};
-                                    let position = "-5 2 5";
-                                    let scale = "2 2 2";
-                                    if (sceneWeblinkLocations.length > index) {
-                                        // console.log(JSON.stringify(sceneWeblinkLocations[index]));
-                                        if (sceneWeblinkLocations[index].data != undefined) {
-                                            if (sceneWeblinkLocations[index].data.indexOf("_") != -1) {
-                                                //TODO don't add to scattered/layout versions
-                                            }
-                                        }
-                                        // position = sceneWeblinkLocations[index].x+" "+sceneWeblinkLocations[index].y+" "+sceneWeblinkLocations[index].z;
-                                        position = sceneWeblinkLocations[index].loc;
-                                        // console.log("setting weblink position: " + position);
-                                        if (sceneWeblinkLocations[index].markerObjScale != null && sceneWeblinkLocations[index].markerObjScale != undefined) {
-                                            scale = sceneWeblinkLocations[index].markerObjScale.toString() + " " + sceneWeblinkLocations[index].markerObjScale.toString() + " " + sceneWeblinkLocations[index].markerObjScale.toString();
-                                        }
-                                    } else {
-                                        let max = 20;
-                                        let min = -20;
-                                        let x = Math.random() * (max - min) + min;
-                                        // let y = Math.random() * (max.y - min.y) + min.y;
-                                        let z = Math.random() * (max - min) + min;
-                                        if (z >= -1 && z <= 1) {
-                                            z = -3;
-                                        }
-                                        if (x >= -1 && z <= 1) {
-                                            x = -3;
-                                        }
-                                        position = x + " " + 1.5 + " " + z;
-                                    }
+                //         for (var i = 0; i < sceneResponse.sceneWebLinks.length; i++) {
+                //             if (new ObjectId.isValid(sceneResponse.sceneWebLinks[i])) {
+                //             db.weblinks.findOne({'_id': new ObjectId(sceneResponse.sceneWebLinks[i])}, function (err, weblink){
+                //                 if (err || !weblink) {
+                //                     console.log("can't find weblink");
+                //                 } else {
+                //                     // index++
+                //                     // let link = {};
+                //                     let position = "-5 2 5";
+                //                     let scale = "2 2 2";
+                //                     if (sceneWeblinkLocations.length > index) {
+                //                         // console.log(JSON.stringify(sceneWeblinkLocations[index]));
+                //                         if (sceneWeblinkLocations[index].data != undefined) {
+                //                             if (sceneWeblinkLocations[index].data.indexOf("_") != -1) {
+                //                                 //TODO don't add to scattered/layout versions
+                //                             }
+                //                         }
+                //                         // position = sceneWeblinkLocations[index].x+" "+sceneWeblinkLocations[index].y+" "+sceneWeblinkLocations[index].z;
+                //                         position = sceneWeblinkLocations[index].loc;
+                //                         // console.log("setting weblink position: " + position);
+                //                         if (sceneWeblinkLocations[index].markerObjScale != null && sceneWeblinkLocations[index].markerObjScale != undefined) {
+                //                             scale = sceneWeblinkLocations[index].markerObjScale.toString() + " " + sceneWeblinkLocations[index].markerObjScale.toString() + " " + sceneWeblinkLocations[index].markerObjScale.toString();
+                //                         }
+                //                     } else {
+                //                         let max = 20;
+                //                         let min = -20;
+                //                         let x = Math.random() * (max - min) + min;
+                //                         // let y = Math.random() * (max.y - min.y) + min.y;
+                //                         let z = Math.random() * (max - min) + min;
+                //                         if (z >= -1 && z <= 1) {
+                //                             z = -3;
+                //                         }
+                //                         if (x >= -1 && z <= 1) {
+                //                             x = -3;
+                //                         }
+                //                         position = x + " " + 1.5 + " " + z;
+                //                     }
 
-                                    index++;
-                                    (async () => {
+                //                     index++;
+                //                     (async () => {
 
-                                        var urlStandard = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME, weblink._id +"/"+ weblink._id + ".standard.jpg", 6000);
+                //                         var urlStandard = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME, weblink._id +"/"+ weblink._id + ".standard.jpg", 6000);
 
-                                        weblinkAssets = weblinkAssets + "<img id=\x22wlimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + urlStandard + "'>";
-                                        let link = "basic-link=\x22href: "+weblink.link_url+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
-                                        let caption = "<a-troika-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 font=\x22../fonts/web/Acme.woff\x22 outlineWidth=\x222%\x22 outlineColor=\x22black\x22  fontSize=\x221\x22 anchor=\x22top\x22 maxWidth=\x2210\x22 position=\x220 1.1 .1\x22 wrapCount=\x2240\x22 value=\x22"+weblink.link_title+"\x22></a-troika-text>";
-                                        weblinkEntities = weblinkEntities + "<a-entity "+link+" position=\x22"+position+"\x22 weblink-materials=\x22index:"+index+"\x22 look-at=\x22#player\x22 gltf-model=\x22#flatsquare\x22 scale=\x22"+scale+"\x22 material=\x22shader: flat; src: #wlimage" + index + "; alphaTest: 0.5;\x22"+
-                                        " visible='true'>"+caption+"</a-entity>";   
-                                    })();
-                                    }
-                                });
-                            }
-                        }
-                    }
-                    callback(null);
-                },
+                //                         weblinkAssets = weblinkAssets + "<img id=\x22wlimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + urlStandard + "'>";
+                //                         let link = "basic-link=\x22href: "+weblink.link_url+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
+                //                         let caption = "<a-troika-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 font=\x22../fonts/web/Acme.woff\x22 outlineWidth=\x222%\x22 outlineColor=\x22black\x22  fontSize=\x221\x22 anchor=\x22top\x22 maxWidth=\x2210\x22 position=\x220 1.1 .1\x22 wrapCount=\x2240\x22 value=\x22"+weblink.link_title+"\x22></a-troika-text>";
+                //                         weblinkEntities = weblinkEntities + "<a-entity "+link+" position=\x22"+position+"\x22 weblink-materials=\x22index:"+index+"\x22 look-at=\x22#player\x22 gltf-model=\x22#flatsquare\x22 scale=\x22"+scale+"\x22 material=\x22shader: flat; src: #wlimage" + index + "; alphaTest: 0.5;\x22"+
+                //                         " visible='true'>"+caption+"</a-entity>";   
+                //                     })();
+                //                     }
+                //                 });
+                //             }
+                //         }
+                //     }
+                //     callback(null);
+                // },
                 // function (callback) {
                 //     let objex = [];
                 //     let actionModels = [];
                 //     console.log("tryna get all sceneObjects " + JSON.stringify(sceneResponse.sceneObjects));
                 //     // if (sceneObjectLocations.length > 0) {  // objex have more properties, but are parsed/assigned by components (mod_objex, mod_object) after page load
                 //         // console.log("sceneObjectLocations " + JSON.stringify(sceneObjectLocations));
-                //         let objectIDs = []; //to prevent dupes in objex response below
+                //         let new ObjectIds = []; //to prevent dupes in objex response below
                 //         async.each (sceneObjectLocations, function (locObj, callbackz) {
                             
-                //             if (locObj.objectID != undefined && locObj.objectID != "none" && sceneResponse.sceneObjects.indexOf(locObj.objectID) != -1 && objectIDs.indexOf(locObj.objectID) == -1) {
+                //             if (locObj.new ObjectId != undefined && locObj.new ObjectId != "none" && sceneResponse.sceneObjects.indexOf(locObj.new ObjectId) != -1 && new ObjectIds.indexOf(locObj.new ObjectId) == -1) {
                 //                 objectIDs.push(locObj.objectID);
                 //                 const o_id = ObjectID(locObj.objectID);
                 //                 db.obj_items.findOne({"_id": o_id}, function (err, objekt) { 
@@ -1685,669 +1560,669 @@ landing_router.get('/:_id', function (req, res) {
                     
                 //         });
                 // },
-                function (callback) {
-                    let objex = [];
-                    let actionModels = [];
-                    console.log("tryna get all sceneObjects " + JSON.stringify(sceneResponse.sceneObjects));
-                    // if (sceneObjectLocations.length > 0) {  // objex have more properties, but are parsed/assigned by components (mod_objex, mod_object) after page load
-                        // console.log("sceneObjectLocations " + JSON.stringify(sceneObjectLocations));
-                        let objectIDs = []; //to prevent dupes in objex response below
-                        // async.each (sceneObjectLocations, function (locObj, callbackz) { 
-                        async.each (sceneResponse.sceneObjects, function (objectID, callbackz) {  //just return them all now, even if not placed, so they're available for localmods
+                // function (callback) {
+                //     let objex = [];
+                //     let actionModels = [];
+                //     console.log("tryna get all sceneObjects " + JSON.stringify(sceneResponse.sceneObjects));
+                //     // if (sceneObjectLocations.length > 0) {  // objex have more properties, but are parsed/assigned by components (mod_objex, mod_object) after page load
+                //         // console.log("sceneObjectLocations " + JSON.stringify(sceneObjectLocations));
+                //         let objectIDs = []; //to prevent dupes in objex response below
+                //         // async.each (sceneObjectLocations, function (locObj, callbackz) { 
+                //         async.each (sceneResponse.sceneObjects, function (objectID, callbackz) {  //just return them all now, even if not placed, so they're available for localmods
                             
-                            if (objectID != undefined && objectID != "none" && sceneResponse.sceneObjects.indexOf(objectID) != -1 && objectIDs.indexOf(objectID) == -1) {
-                                objectIDs.push(objectID);
-                                const o_id = ObjectID(objectID);
-                                db.obj_items.findOne({"_id": o_id}, function (err, objekt) { 
-                                    if (err || !objekt) { 
-                                        callbackz(err);
-                                    } else {
+                //             if (objectID != undefined && objectID != "none" && sceneResponse.sceneObjects.indexOf(objectID) != -1 && objectIDs.indexOf(objectID) == -1) {
+                //                 objectIDs.push(objectID);
+                //                 const o_id = ObjectID(objectID);
+                //                 db.obj_items.findOne({"_id": o_id}, function (err, objekt) { 
+                //                     if (err || !objekt) { 
+                //                         callbackz(err);
+                //                     } else {
                                        
-                                    async.waterfall ([
-                                        function (cb) {
-                                            if (objekt.actionIDs != undefined && objekt.actionIDs.length > 0) {
-                                                console.log("tryna add obj actions " + objekt.actionIDs);
-                                                const aids = objekt.actionIDs.map(item => {
-                                                    return ObjectID(item);
-                                                });
-                                                db.actions.find({_id: {$in: aids }}, function (err, actions) {
-                                                    if (err || !actions) {
-                                                        // callback(err);
-                                                        cb(err);
-                                                    } else {
+                //                     async.waterfall ([
+                //                         function (cb) {
+                //                             if (objekt.actionIDs != undefined && objekt.actionIDs.length > 0) {
+                //                                 console.log("tryna add obj actions " + objekt.actionIDs);
+                //                                 const aids = objekt.actionIDs.map(item => {
+                //                                     return ObjectID(item);
+                //                                 });
+                //                                 db.actions.find({_id: {$in: aids }}, function (err, actions) {
+                //                                     if (err || !actions) {
+                //                                         // callback(err);
+                //                                         cb(err);
+                //                                     } else {
                                                         
-                                                        objekt.actions = actions;
-                                                        for (let a = 0; a < actions.length; a++) { //whew, now actions may have models, check for that and get urls below
-                                                            if (actions[a].modelID != undefined && actions[a].modelID != null && actions[a].modelID != "") {
-                                                                actionModels.push(actions[a]);
-                                                            }
-                                                            if (a === actions.length - 1) {
-                                                                cb(null);
-                                                            }
-                                                        }
+                //                                         objekt.actions = actions;
+                //                                         for (let a = 0; a < actions.length; a++) { //whew, now actions may have models, check for that and get urls below
+                //                                             if (actions[a].modelID != undefined && actions[a].modelID != null && actions[a].modelID != "") {
+                //                                                 actionModels.push(actions[a]);
+                //                                             }
+                //                                             if (a === actions.length - 1) {
+                //                                                 cb(null);
+                //                                             }
+                //                                         }
 
-                                                        // console.log("actions: " + JSON.stringify(objekt.actions));
+                //                                         // console.log("actions: " + JSON.stringify(objekt.actions));
                                                         
-                                                    }
-                                                });
-                                            } else {
-                                                cb(null);
-                                            }
-                                        },
-                                        function (cb) { //sprite sheets for object particle systems
-                                            if (objekt.particles != undefined && objekt.particles != null && objekt.particles != "None" ) {
-                                                if (objekt.particles.toString().includes("Fire")) {
-                                                    imageAssets = imageAssets + "<img id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>";
-                                                }
-                                                if (objekt.particles.toString().includes("Candle")) {
-                                                    imageAssets = imageAssets + "<img id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>";
-                                                }
-                                                if (objekt.particles.toString().includes("Smoke")) {
-                                                    imageAssets = imageAssets + "<img id=\x22smoke1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>";
-                                                }
-                                            }
-                                            cb(null);
-                                        },
-                                        function(cb) {
-                                         //get the model (needs array flexing!)
-                                        if (objekt.modelID != undefined && objekt.modelID != null) {
-                                            const m_id = ObjectID(objekt.modelID);
-                                            // 
-                                            db.models.findOne({"_id": m_id}, function (err, asset) { 
-                                            if (err || !asset) { 
-                                                cb(err);
-                                            } else {      
-                                                // console.log("founda matching model: " + JSON.stringify(asset));
-                                                if (asset.item_type == "glb") {
-                                                    const assetUserID = asset.userID;
-                                                    // var sourcePath =   "servicemedia/users/" + assetUserID + "/gltf/" + locMdl.gltf; //this should be "model" or "filename"
-                                                    (async () => {
-                                                        // let modelURL = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + assetUserID + "/gltf/" + asset.filename, Expires: 6000});
-                                                        let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + assetUserID + "/gltf/" + asset.filename, 6000);
-                                                        objekt.modelURL = modelURL;
-                                                        gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + objekt.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
-                                                        objex.push(objekt);     
-                                                        cb(null);
-                                                    })();
-                                                } else {
-                                                    objex.push(objekt);     
-                                                    cb(null);
-                                                }
-                                            }
-                                            });
-                                            } else {
-                                            cb(null);
-                                        }
-                                    }
+                //                                     }
+                //                                 });
+                //                             } else {
+                //                                 cb(null);
+                //                             }
+                //                         },
+                //                         function (cb) { //sprite sheets for object particle systems
+                //                             if (objekt.particles != undefined && objekt.particles != null && objekt.particles != "None" ) {
+                //                                 if (objekt.particles.toString().includes("Fire")) {
+                //                                     imageAssets = imageAssets + "<img id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>";
+                //                                 }
+                //                                 if (objekt.particles.toString().includes("Candle")) {
+                //                                     imageAssets = imageAssets + "<img id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>";
+                //                                 }
+                //                                 if (objekt.particles.toString().includes("Smoke")) {
+                //                                     imageAssets = imageAssets + "<img id=\x22smoke1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>";
+                //                                 }
+                //                             }
+                //                             cb(null);
+                //                         },
+                //                         function(cb) {
+                //                          //get the model (needs array flexing!)
+                //                         if (objekt.modelID != undefined && objekt.modelID != null) {
+                //                             const m_id = ObjectID(objekt.modelID);
+                //                             // 
+                //                             db.models.findOne({"_id": m_id}, function (err, asset) { 
+                //                             if (err || !asset) { 
+                //                                 cb(err);
+                //                             } else {      
+                //                                 // console.log("founda matching model: " + JSON.stringify(asset));
+                //                                 if (asset.item_type == "glb") {
+                //                                     const assetUserID = asset.userID;
+                //                                     // var sourcePath =   "servicemedia/users/" + assetUserID + "/gltf/" + locMdl.gltf; //this should be "model" or "filename"
+                //                                     (async () => {
+                //                                         // let modelURL = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + assetUserID + "/gltf/" + asset.filename, Expires: 6000});
+                //                                         let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + assetUserID + "/gltf/" + asset.filename, 6000);
+                //                                         objekt.modelURL = modelURL;
+                //                                         gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + objekt.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
+                //                                         objex.push(objekt);     
+                //                                         cb(null);
+                //                                     })();
+                //                                 } else {
+                //                                     objex.push(objekt);     
+                //                                     cb(null);
+                //                                 }
+                //                             }
+                //                             });
+                //                             } else {
+                //                             cb(null);
+                //                         }
+                //                     }
                                    
-                                    ], //waterfall end
+                //                     ], //waterfall end
 
-                                    function (err, result) { // #last function, close async
-                                       callbackz();
-                                    }
-                                    );
-                                    }
-                                    });
-                                } else {
-                                    callbackz();
-                                }
-                            }, function(err) {
+                //                     function (err, result) { // #last function, close async
+                //                        callbackz();
+                //                     }
+                //                     );
+                //                     }
+                //                     });
+                //                 } else {
+                //                     callbackz();
+                //                 }
+                //             }, function(err) {
                                 
-                            if (err) {
-                                console.log('A file failed to process ' + err);    
+                //             if (err) {
+                //                 console.log('A file failed to process ' + err);    
                             
-                                callback(null, actionModels);
-                            } else {
-                                // console.log("sceneObjex: " + JSON.stringify(objex));
-                                var buff = Buffer.from(JSON.stringify(objex)).toString("base64");
-                                var buff2 = Buffer.from(JSON.stringify(sceneObjectLocations)).toString("base64");
-                                objectData = "<a-entity mod_objex id=\x22sceneObjects\x22 data-objex-locations='"+buff2+"' data-objex='"+buff+"'></a-entity>";
-                                callback(null, actionModels);
-                            }
+                //                 callback(null, actionModels);
+                //             } else {
+                //                 // console.log("sceneObjex: " + JSON.stringify(objex));
+                //                 var buff = Buffer.from(JSON.stringify(objex)).toString("base64");
+                //                 var buff2 = Buffer.from(JSON.stringify(sceneObjectLocations)).toString("base64");
+                //                 objectData = "<a-entity mod_objex id=\x22sceneObjects\x22 data-objex-locations='"+buff2+"' data-objex='"+buff+"'></a-entity>";
+                //                 callback(null, actionModels);
+                //             }
                     
-                        });
-                    // } else {
-                    //     callback(null, actionModels);
-                    // }
-                },
-                function (actionModels, callback) { //fetch the extra models embedded in actions, if any
-                    // for (let i = 0; i < actionModels.length; i++) {
+                //         });
+                //     // } else {
+                //     //     callback(null, actionModels);
+                //     // }
+                // },
+                // function (actionModels, callback) { //fetch the extra models embedded in actions, if any
+                //     // for (let i = 0; i < actionModels.length; i++) {
 
-                    // }
-                    if (actionModels.length > 0) {
-                        async.each (actionModels, function (actionModel, callbackz) { //loop tru w/ async
-                            const m_id = ObjectID(actionModel.modelID);
-                                            // 
-                            db.models.findOne({"_id": m_id}, function (err, asset) { 
-                            if (err || !asset) { 
-                                callbackz(err);
-                            } else {      
-                                // console.log("founda matching model: " + JSON.stringify(asset));
-                                if (asset.item_type == "glb") {
-                                    let assetUserID = asset.userID;
-                                    // var sourcePath =   "servicemedia/users/" + assetUserID + "/gltf/" + locMdl.gltf; //this should be "model" or "filename"
-                                    (async () => {
-                                        // let modelURL = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + asset.userID + "/gltf/" + asset.filename, Expires: 6000});
-                                        let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + assetUserID + "/gltf/" + asset.filename, 6000);
-                                        gltfsAssets = gltfsAssets + "<a-asset-item class=\x22gltfAssets\x22 crossorigin=\x22anonymous\x22 response-type=\x22arraybuffer\x22 id=\x22" + actionModel.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
-                                        // objex.push(objekt);     
-                                        console.log("adding actionModel :" + actionModel.modelName);
-                                        callbackz(null);
-                                    })();
-                                } else {
-                                    // objex.push(objekt);     
-                                    callbackz(null);
-                                }
-                            }
-                            });
+                //     // }
+                //     if (actionModels.length > 0) {
+                //         async.each (actionModels, function (actionModel, callbackz) { //loop tru w/ async
+                //             const m_id = ObjectID(actionModel.modelID);
+                //                             // 
+                //             db.models.findOne({"_id": m_id}, function (err, asset) { 
+                //             if (err || !asset) { 
+                //                 callbackz(err);
+                //             } else {      
+                //                 // console.log("founda matching model: " + JSON.stringify(asset));
+                //                 if (asset.item_type == "glb") {
+                //                     let assetUserID = asset.userID;
+                //                     // var sourcePath =   "servicemedia/users/" + assetUserID + "/gltf/" + locMdl.gltf; //this should be "model" or "filename"
+                //                     (async () => {
+                //                         // let modelURL = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + asset.userID + "/gltf/" + asset.filename, Expires: 6000});
+                //                         let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + assetUserID + "/gltf/" + asset.filename, 6000);
+                //                         gltfsAssets = gltfsAssets + "<a-asset-item class=\x22gltfAssets\x22 crossorigin=\x22anonymous\x22 response-type=\x22arraybuffer\x22 id=\x22" + actionModel.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
+                //                         // objex.push(objekt);     
+                //                         console.log("adding actionModel :" + actionModel.modelName);
+                //                         callbackz(null);
+                //                     })();
+                //                 } else {
+                //                     // objex.push(objekt);     
+                //                     callbackz(null);
+                //                 }
+                //             }
+                //             });
                             
-                        }, function(err) {
+                //         }, function(err) {
                         
-                            if (err) {
-                                console.log('An actionModel failed to process');
-                                callback(err);
-                            } else {
-                                console.log('All actionModels have been processed successfully');
+                //             if (err) {
+                //                 console.log('An actionModel failed to process');
+                //                 callback(err);
+                //             } else {
+                //                 console.log('All actionModels have been processed successfully');
           
-                                callback(null);
-                            }
-                        });
-                    } else {
-                        callback(null);
-                    }
-                },   
-                function (callback) { //models are simpler, fewer properties`
-                    if (sceneModelLocations.length > 0) {
+                //                 callback(null);
+                //             }
+                //         });
+                //     } else {
+                //         callback(null);
+                //     }
+                // },   
+                // function (callback) { //models are simpler, fewer properties`
+                //     if (sceneModelLocations.length > 0) {
                        
-                        async.each (sceneModelLocations, function (locMdl, callbackz) { //loop tru w/ async
-                            var scale = 1;
-                            var offsetPos = "";
-                            var rotAnim = "";
-                            var posAnim = "";
-                            var ambientChild = "";
-                            // var ambientOffset = "";
-                            // let objAnim = "animation-mixer"; //to blend the canned ones, and/or obj anims set below
-                            let objAnim = ""; //no, must do this from component
-                            let cannedAnim = "";
-                            var rightRot = true;
-                            var rotVal = 360;
-                            let max = .6;
-                            let min = 1.2;
-                            let speed = Math.random() * (max - min) + min;
-                            let maxR = 0;
-                            let minR = 360;
-                            let randomR = Math.random() * (maxR - minR) + minR;
-                            let assetUserID = "";
-                            let entityType = ""; //used to set entity id
-                            let followCurve = "";
+                //         async.each (sceneModelLocations, function (locMdl, callbackz) { //loop tru w/ async
+                //             var scale = 1;
+                //             var offsetPos = "";
+                //             var rotAnim = "";
+                //             var posAnim = "";
+                //             var ambientChild = "";
+                //             // var ambientOffset = "";
+                //             // let objAnim = "animation-mixer"; //to blend the canned ones, and/or obj anims set below
+                //             let objAnim = ""; //no, must do this from component
+                //             let cannedAnim = "";
+                //             var rightRot = true;
+                //             var rotVal = 360;
+                //             let max = .6;
+                //             let min = 1.2;
+                //             let speed = Math.random() * (max - min) + min;
+                //             let maxR = 0;
+                //             let minR = 360;
+                //             let randomR = Math.random() * (maxR - minR) + minR;
+                //             let assetUserID = "";
+                //             let entityType = ""; //used to set entity id
+                //             let followCurve = "";
 
-                            let usdzFiles = '';
-                            let modelParent = "";
-                            let locationTags = locMdl.locationTags;
-                            if (sceneResponse.sceneUseDynCubeMap) {
-                                skyboxEnvMap = "skybox-env-map shadow=\x22cast:true; receive:true\x22";   
-                            }
-                            // if ((locMdl.eventData != null && locMdl.eventData != undefined && locMdl.eventData.length > 1) && (!locMdl.eventData.includes("noweb"))) {
+                //             let usdzFiles = '';
+                //             let modelParent = "";
+                //             let locationTags = locMdl.locationTags;
+                //             if (sceneResponse.sceneUseDynCubeMap) {
+                //                 skyboxEnvMap = "skybox-env-map shadow=\x22cast:true; receive:true\x22";   
+                //             }
+                //             // if ((locMdl.eventData != null && locMdl.eventData != undefined && locMdl.eventData.length > 1) && (!locMdl.eventData.includes("noweb"))) {
 
-                            //filter out cloudmarker types
-                            // console.log(sceneResponse.sceneModels.indexOf(locMdl.modelID) + " index locMdl deets " + JSON.stringify(locMdl));
-                            if (locMdl.modelID != undefined && locMdl.modelID != "none" && locMdl.markerType != "placeholder"
-                                && locMdl.markerType != "poi"                                
-                                && locMdl.markerType != "trigger"
-                                && locMdl.markerType != "spawntrigger"
-                                && locMdl.markerType != "gate"
-                                && locMdl.markerType != "mailbox"
-                                && locMdl.markerType != "portal" 
-                                && sceneResponse.sceneModels.indexOf(locMdl.modelID) != -1) {
+                //             //filter out cloudmarker types
+                //             // console.log(sceneResponse.sceneModels.indexOf(locMdl.modelID) + " index locMdl deets " + JSON.stringify(locMdl));
+                //             if (locMdl.modelID != undefined && locMdl.modelID != "none" && locMdl.markerType != "placeholder"
+                //                 && locMdl.markerType != "poi"                                
+                //                 && locMdl.markerType != "trigger"
+                //                 && locMdl.markerType != "spawntrigger"
+                //                 && locMdl.markerType != "gate"
+                //                 && locMdl.markerType != "mailbox"
+                //                 && locMdl.markerType != "portal" 
+                //                 && sceneResponse.sceneModels.indexOf(locMdl.modelID) != -1) {
 
-                                // console.log("tryna set model id:  " + JSON.stringify(locMdl));
-                                console.log("gots a mod_model : " + locMdl.name);
-                                const m_id = ObjectID(locMdl.modelID);
-                                // 
-                                db.models.findOne({"_id": m_id}, function (err, asset) { 
-                                if (err || !asset) { 
-                                    callbackz(err);
-                                } else {
+                //                 // console.log("tryna set model id:  " + JSON.stringify(locMdl));
+                //                 console.log("gots a mod_model : " + locMdl.name);
+                //                 const m_id = ObjectID(locMdl.modelID);
+                //                 // 
+                //                 db.models.findOne({"_id": m_id}, function (err, asset) { 
+                //                 if (err || !asset) { 
+                //                     callbackz(err);
+                //                 } else {
 
-                                (async () => {
-                                if (asset.item_type == "glb") {
+                //                 (async () => {
+                //                 if (asset.item_type == "glb") {
 
-                                    assetUserID = asset.userID;
-                                    let modelURL = "";
-                                    // var sourcePath =   "servicemedia/users/" + assetUserID + "/gltf/" + locMdl.gltf; //this should be "model" or "filename"
-                                    // (async () => {
-                                    // modelURL = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + assetUserID + "/gltf/" + asset.filename, Expires: 6000});
-                                        modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + assetUserID + "/gltf/" + asset.filename, 6000);
-                                    // console.log("modelURL " + modelURL + " modelType " + asset.item_type);
+                //                     assetUserID = asset.userID;
+                //                     let modelURL = "";
+                //                     // var sourcePath =   "servicemedia/users/" + assetUserID + "/gltf/" + locMdl.gltf; //this should be "model" or "filename"
+                //                     // (async () => {
+                //                     // modelURL = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + assetUserID + "/gltf/" + asset.filename, Expires: 6000});
+                //                         modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + assetUserID + "/gltf/" + asset.filename, 6000);
+                //                     // console.log("modelURL " + modelURL + " modelType " + asset.item_type);
 
-                                    assetNumber++;
-                                    let newAttribution = {};
+                //                     assetNumber++;
+                //                     let newAttribution = {};
                                     
-                                        newAttribution.name = asset.name;
-                                        newAttribution._id = asset._id;
-                                        newAttribution.contentType = asset.item_type;
-                                        newAttribution.sourceTitle = asset.sourceTitle;
-                                        newAttribution.sourceLink = asset.sourceLink;
-                                        newAttribution.authorName = asset.authorName;
-                                        newAttribution.authorLink = asset.authorLink;
-                                        newAttribution.license = asset.license;
-                                        newAttribution.sourceText = asset.sourceText;
-                                        newAttribution.modifications = asset.modifications;
-                                        attributions.push(newAttribution);
-                                    // }
-                                    // console.log("attributions " + JSON.stringify(attributions));
-                                    var navmesh = "";
-                                    var m_assetID = "gltfasset" + assetNumber;
-                                    let rx = locMdl.eulerx != null ? locMdl.eulerx : 0; 
-                                    let ry = locMdl.eulery != null ? locMdl.eulery : 0; 
-                                    // ry = parseFloat(ry) + 180; //fundge to match unity //NOPE - navmesh donut like it
-                                    let rz = locMdl.eulerz != null ? locMdl.eulerz : 0; 
-                                    let rotation = rx + " " + ry + " " + rz;
-                                    if (ry == 99) {
-                                        ry = randomR;
-                                        rotation = rx + " " + ry + " " + rz;
-                                        // console.log("tryna set random rotation for gltf to " + rotation);
-                                    }
+                //                         newAttribution.name = asset.name;
+                //                         newAttribution._id = asset._id;
+                //                         newAttribution.contentType = asset.item_type;
+                //                         newAttribution.sourceTitle = asset.sourceTitle;
+                //                         newAttribution.sourceLink = asset.sourceLink;
+                //                         newAttribution.authorName = asset.authorName;
+                //                         newAttribution.authorLink = asset.authorLink;
+                //                         newAttribution.license = asset.license;
+                //                         newAttribution.sourceText = asset.sourceText;
+                //                         newAttribution.modifications = asset.modifications;
+                //                         attributions.push(newAttribution);
+                //                     // }
+                //                     // console.log("attributions " + JSON.stringify(attributions));
+                //                     var navmesh = "";
+                //                     var m_assetID = "gltfasset" + assetNumber;
+                //                     let rx = locMdl.eulerx != null ? locMdl.eulerx : 0; 
+                //                     let ry = locMdl.eulery != null ? locMdl.eulery : 0; 
+                //                     // ry = parseFloat(ry) + 180; //fundge to match unity //NOPE - navmesh donut like it
+                //                     let rz = locMdl.eulerz != null ? locMdl.eulerz : 0; 
+                //                     let rotation = rx + " " + ry + " " + rz;
+                //                     if (ry == 99) {
+                //                         ry = randomR;
+                //                         rotation = rx + " " + ry + " " + rz;
+                //                         // console.log("tryna set random rotation for gltf to " + rotation);
+                //                     }
                                     
-                                    // objAnim = "animation-mixer=\x22timeScale:"+speed+"\x22";
-                                    if (locMdl.markerObjScale != null) {
-                                        scale = locMdl.markerObjScale;
-                                    }
-                                    if (locMdl.markerType == "follow ambient")  {
-                                        ambientChild = "ambientChild"; //follow ambient obj
-                                        // ambientOffset
-                                    }
-                                    if (locMdl.markerType == "follow curve" || (locMdl.eventData != null && locMdl.eventData != undefined && locMdl.eventData.length > 1 && locMdl.eventData.toLowerCase().includes("follow curve")))  {
-                                        // followCurve = "follow-path=\x22incrementBy:0.001; throttleTo:1\x22";
-                                        followCurve = "mod_curve=\x22init: true\x22";  //hrm, add a bunch of params here...
-                                        if (locMdl.markerType == "picture group") {
+                //                     // objAnim = "animation-mixer=\x22timeScale:"+speed+"\x22";
+                //                     if (locMdl.markerObjScale != null) {
+                //                         scale = locMdl.markerObjScale;
+                //                     }
+                //                     if (locMdl.markerType == "follow ambient")  {
+                //                         ambientChild = "ambientChild"; //follow ambient obj
+                //                         // ambientOffset
+                //                     }
+                //                     if (locMdl.markerType == "follow curve" || (locMdl.eventData != null && locMdl.eventData != undefined && locMdl.eventData.length > 1 && locMdl.eventData.toLowerCase().includes("follow curve")))  {
+                //                         // followCurve = "follow-path=\x22incrementBy:0.001; throttleTo:1\x22";
+                //                         followCurve = "mod_curve=\x22init: true\x22";  //hrm, add a bunch of params here...
+                //                         if (locMdl.markerType == "picture group") {
 
-                                        }
-                                        //TODO use scene image with proper type/tag 
-                                        imageAssets = imageAssets + "<img id=\x22explosion1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/explosion1.png\x22 crossorigin=\x22anonymous\x22>";
-                                    }
-                                    if (locMdl.markerType == "follow random path") {
-                                        // followCurve = "follow-path=\x22incrementBy:0.001; throttleTo:1\x22";
-                                        followCurve = "mod_random_path=\x22init: true\x22"  //hrm, add a bunch of params here...
-                                    }
-                                    if (locMdl.markerType == "follow parametric curve") {
-                                        let reverse = false;
-                                        if (locMdl.eventData.toLowerCase().includes("reverse")) {
-                                            reverse = true;
-                                        }
-                                        followCurve = "curve-follow=\x22curveData: #p_path; type: parametric_curve; reverse: "+reverse+"; duration: 64; loop: true;\x22";
-                                    }
-                                    if (locMdl.eventData != null && locMdl.eventData != undefined && locMdl.eventData.length > 1) { //eventData has info
-                                        // console.log("!!!tryna setup animation " + r.eventData);
-                                        if (locMdl.eventData.toLowerCase().includes("marker")) {
-                                            modelParent = "parent-to=\x22tracking: marker\x22";
-                                        }
-                                        if (locMdl.eventData.toLowerCase().includes("spawn")) {
-                                            arMode = "spawn";
+                //                         }
+                //                         //TODO use scene image with proper type/tag 
+                //                         imageAssets = imageAssets + "<img id=\x22explosion1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/explosion1.png\x22 crossorigin=\x22anonymous\x22>";
+                //                     }
+                //                     if (locMdl.markerType == "follow random path") {
+                //                         // followCurve = "follow-path=\x22incrementBy:0.001; throttleTo:1\x22";
+                //                         followCurve = "mod_random_path=\x22init: true\x22"  //hrm, add a bunch of params here...
+                //                     }
+                //                     if (locMdl.markerType == "follow parametric curve") {
+                //                         let reverse = false;
+                //                         if (locMdl.eventData.toLowerCase().includes("reverse")) {
+                //                             reverse = true;
+                //                         }
+                //                         followCurve = "curve-follow=\x22curveData: #p_path; type: parametric_curve; reverse: "+reverse+"; duration: 64; loop: true;\x22";
+                //                     }
+                //                     if (locMdl.eventData != null && locMdl.eventData != undefined && locMdl.eventData.length > 1) { //eventData has info
+                //                         // console.log("!!!tryna setup animation " + r.eventData);
+                //                         if (locMdl.eventData.toLowerCase().includes("marker")) {
+                //                             modelParent = "parent-to=\x22tracking: marker\x22";
+                //                         }
+                //                         if (locMdl.eventData.toLowerCase().includes("spawn")) {
+                //                             arMode = "spawn";
                                            
-                                        }
+                //                         }
                                 
-                                        rightRot = !rightRot;
-                                        if (rightRot == true) {
-                                            rotVal = -360;
-                                        }
-                                        var eSplit = locMdl.eventData.split("~");
-                                        if (eSplit[0] == "orbit") { 
-                                            offsetPos =  "<a-entity position=\x22"+ eSplit[1] + " 0 0\x22></a-entity>";
-                                            cannedAnim = "animation=\x22property: rotation; to: 0 " + (ry - 360) + " 0; loop: true; dur: 10000\x22";
+                //                         rightRot = !rightRot;
+                //                         if (rightRot == true) {
+                //                             rotVal = -360;
+                //                         }
+                //                         var eSplit = locMdl.eventData.split("~");
+                //                         if (eSplit[0] == "orbit") { 
+                //                             offsetPos =  "<a-entity position=\x22"+ eSplit[1] + " 0 0\x22></a-entity>";
+                //                             cannedAnim = "animation=\x22property: rotation; to: 0 " + (ry - 360) + " 0; loop: true; dur: 10000\x22";
 
-                                            // cannedAnim = "";
-                                        } else if (locMdl.eventData.includes("rotate")) {
-                                            let duration = 50000;
-                                            if (locMdl.eventData.includes("slow"))
-                                            duration = 100000;
-                                            if (locMdl.eventData.includes("fast"))
-                                            duration = 10000;
-                                            cannedAnim = "animation=\x22property: rotation; to: 0 360 0; loop: true; dur: "+duration+"\x22";
-                                            if (locMdl.eventData.includes("-rotate"))
-                                            cannedAnim = "animation=\x22property: rotation; to: 0 -360 0; loop: true; dur: "+duration+"\x22";
-                                        } else {
-                                            // objAnim = "animation-mixer=\x22clip: "+eSplit[0]+"\x22 animation__yoyo=\x22property: position; dir: alternate; dur: 10000; easing: easeInSine; loop: true;\x22>";
-                                            // objAnim = "animation-mixer=\x22clip: "+eSplit[0]+"; timeScale:"+speed+";\x22";
-                                            objAnim = "";
-                                        }
-                                        if (locMdl.eventData.includes("ground")) {
-                                            locMdl.y = 0;
-                                        }
-                                        if (eSplit[0] == "yoyo" || eSplit[1] == "yoyo") {
-                                            cannedAnim = "animation__yoyo=\x22property: position; dir: alternate; dur: 10000; easing: easeInSine; loop: true; to: "+locMdl.x+" "+(parseFloat(locMdl.y) + 2)+" "+locMdl.z+"\x22";
-                                        }
-                                        posAnim = "animation__pos=\x22property: position; to: random-position; dur: 15000; loop: true;";
-                                        if (locMdl.eventData.toLowerCase().includes("ambientchild"))  {
-                                            ambientChild = "ambientChild"; //follow ambient obj
-                                        }
-                                        // if (locMdl.eventData.toLowerCase().includes("beat"))  {
-                                        //     ambientChild = ambientChild + " beatscale "; //follow ambient obj
-                                        // }
-                                        if (locMdl.eventData.toLowerCase().includes("scatter"))  {
-                                            // ambientChild = "ambientChild"; //follow ambient obj
-                                        }
+                //                             // cannedAnim = "";
+                //                         } else if (locMdl.eventData.includes("rotate")) {
+                //                             let duration = 50000;
+                //                             if (locMdl.eventData.includes("slow"))
+                //                             duration = 100000;
+                //                             if (locMdl.eventData.includes("fast"))
+                //                             duration = 10000;
+                //                             cannedAnim = "animation=\x22property: rotation; to: 0 360 0; loop: true; dur: "+duration+"\x22";
+                //                             if (locMdl.eventData.includes("-rotate"))
+                //                             cannedAnim = "animation=\x22property: rotation; to: 0 -360 0; loop: true; dur: "+duration+"\x22";
+                //                         } else {
+                //                             // objAnim = "animation-mixer=\x22clip: "+eSplit[0]+"\x22 animation__yoyo=\x22property: position; dir: alternate; dur: 10000; easing: easeInSine; loop: true;\x22>";
+                //                             // objAnim = "animation-mixer=\x22clip: "+eSplit[0]+"; timeScale:"+speed+";\x22";
+                //                             objAnim = "";
+                //                         }
+                //                         if (locMdl.eventData.includes("ground")) {
+                //                             locMdl.y = 0;
+                //                         }
+                //                         if (eSplit[0] == "yoyo" || eSplit[1] == "yoyo") {
+                //                             cannedAnim = "animation__yoyo=\x22property: position; dir: alternate; dur: 10000; easing: easeInSine; loop: true; to: "+locMdl.x+" "+(parseFloat(locMdl.y) + 2)+" "+locMdl.z+"\x22";
+                //                         }
+                //                         posAnim = "animation__pos=\x22property: position; to: random-position; dur: 15000; loop: true;";
+                //                         if (locMdl.eventData.toLowerCase().includes("ambientchild"))  {
+                //                             ambientChild = "ambientChild"; //follow ambient obj
+                //                         }
+                //                         // if (locMdl.eventData.toLowerCase().includes("beat"))  {
+                //                         //     ambientChild = ambientChild + " beatscale "; //follow ambient obj
+                //                         // }
+                //                         if (locMdl.eventData.toLowerCase().includes("scatter"))  {
+                //                             // ambientChild = "ambientChild"; //follow ambient obj
+                //                         }
                                    
-                                    } else {
-                                        locMdl.eventData = ""; //WTF?! uh, dunno
-                                    }
-                                    if (locMdl.markerType != null && locMdl.markerType != undefined && locMdl.markerType.length > 1) {  
-                                        entityType = locMdl.markerType; //e.g. "target"
-                                        if (entityType == "poi") { //bc location-fu looks for this class to get gpsElements, so this causes dupes
-                                            entityType = "model";
-                                        }
-                                        if (locMdl.eventData.toLowerCase().includes("surface")) {
-                                            entityType = "surface";
-                                        }
+                //                     } else {
+                //                         locMdl.eventData = ""; //WTF?! uh, dunno
+                //                     }
+                //                     if (locMdl.markerType != null && locMdl.markerType != undefined && locMdl.markerType.length > 1) {  
+                //                         entityType = locMdl.markerType; //e.g. "target"
+                //                         if (entityType == "poi") { //bc location-fu looks for this class to get gpsElements, so this causes dupes
+                //                             entityType = "model";
+                //                         }
+                //                         if (locMdl.eventData.toLowerCase().includes("surface")) {
+                //                             entityType = "surface";
+                //                         }
 
-                                    }
-                                    if (locMdl.type.toLowerCase() == "geographic" && locMdl.latitude != null && locMdl.longitude != null && locMdl.latitude != 0 && locMdl.longitude != 0) { 
-                                        console.log(" lat/lng model " + JSON.stringify(locMdl));
-                                        // gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
-                                        gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + locMdl.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
-                                        gltfsEntities = gltfsEntities + "<a-entity class=\x22geo\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 mod_model=\x22markerType: "+locMdl.markerType+"; tags: "+locationTags+"; eventData:"+locMdl.eventData+"\x22 class=\x22gltf "+entityType+" "+ambientChild+" activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+locMdl.latitude+
-                                        // "; latitude: "+locMdl.longitude+";\x22 "+skyboxEnvMap+"  class=\x22gltf\x22 gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+" scale=\x22"+scale+" "+scale+" "+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";
-                                        "; longitude: "+locMdl.longitude+";\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+" rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";
+                //                     }
+                //                     if (locMdl.type.toLowerCase() == "geographic" && locMdl.latitude != null && locMdl.longitude != null && locMdl.latitude != 0 && locMdl.longitude != 0) { 
+                //                         console.log(" lat/lng model " + JSON.stringify(locMdl));
+                //                         // gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
+                //                         gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + locMdl.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
+                //                         gltfsEntities = gltfsEntities + "<a-entity class=\x22geo\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 mod_model=\x22markerType: "+locMdl.markerType+"; tags: "+locationTags+"; eventData:"+locMdl.eventData+"\x22 class=\x22gltf "+entityType+" "+ambientChild+" activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+locMdl.latitude+
+                //                         // "; latitude: "+locMdl.longitude+";\x22 "+skyboxEnvMap+"  class=\x22gltf\x22 gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+" scale=\x22"+scale+" "+scale+" "+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";
+                //                         "; longitude: "+locMdl.longitude+";\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+" rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";
                                         
-                                        callbackz(); //this or one below exits loop
-                                    } else {
+                //                         callbackz(); //this or one below exits loop
+                //                     } else {
                                        
-                                        //// scene type filters...
-                                        if (sceneResponse.sceneWebType == "ThreeJS") { //three
-                                            if (sceneResponse.sceneFaceTracking ) {
-                                                console.log("face tracking asset at " + modelURL);
-                                                gltfsAssets = {};
-                                                gltfsAssets.modelURL = modelURL;
-                                                gltfsAssets.offsetX = locMdl.x;
-                                                gltfsAssets.offsetY = locMdl.y;
-                                                gltfsAssets.scale = scale;
-                                            } else {
-                                                gltfsAssets = gltfsAssets +
-                                                "loader.load(\n"+
-                                                "\x22"+modelURL+"\x22,\n"+
-                                                // called when the resource is loaded
-                                                "function ( gltf ) {\n"+
-                                                    "scene.add( gltf.scene );\n"+
+                //                         //// scene type filters...
+                //                         if (sceneResponse.sceneWebType == "ThreeJS") { //three
+                //                             if (sceneResponse.sceneFaceTracking ) {
+                //                                 console.log("face tracking asset at " + modelURL);
+                //                                 gltfsAssets = {};
+                //                                 gltfsAssets.modelURL = modelURL;
+                //                                 gltfsAssets.offsetX = locMdl.x;
+                //                                 gltfsAssets.offsetY = locMdl.y;
+                //                                 gltfsAssets.scale = scale;
+                //                             } else {
+                //                                 gltfsAssets = gltfsAssets +
+                //                                 "loader.load(\n"+
+                //                                 "\x22"+modelURL+"\x22,\n"+
+                //                                 // called when the resource is loaded
+                //                                 "function ( gltf ) {\n"+
+                //                                     "scene.add( gltf.scene );\n"+
                                                  
-                                                    "if (!gltf.scene) return;\n" +
-                                                    "gltf.scene.traverse(function (node) {\n" +
-                                                        "if (node.material && 'envMap' in node.material) {\n" +
-                                                        "node.material.envMap = envMap;\n" +
-                                                        "node.material.envMap.intensity = 1;\n" +
-                                                        "node.material.needsUpdate = true;\n" +
-                                                        "}\n" +
-                                                    "});\n" +
-                                                    "gltf.scene.position.set("+locMdl.x+", "+locMdl.y+", "+locMdl.z+");\n"+
-                                                    "gltf.scene.rotation.set("+rx+", "+ry+", "+rz+");\n"+
-                                                    "gltf.scene.scale.set("+scale+", "+scale+", "+scale+");\n"+
-                                                "},\n"+
-                                                // called while loading is progressing
-                                                "function ( xhr ) {\n"+
-                                                    "console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );\n"+
-                                                    "},\n"+
-                                                // called when loading has errors
-                                                "function ( error ) {\n"+
-                                                    "console.log( 'An error happened' );\n"+
-                                                    "}\n"+
-                                                ");\n";
-                                            }
-                                            console.log("face tracking asset at " + modelURL);
+                //                                     "if (!gltf.scene) return;\n" +
+                //                                     "gltf.scene.traverse(function (node) {\n" +
+                //                                         "if (node.material && 'envMap' in node.material) {\n" +
+                //                                         "node.material.envMap = envMap;\n" +
+                //                                         "node.material.envMap.intensity = 1;\n" +
+                //                                         "node.material.needsUpdate = true;\n" +
+                //                                         "}\n" +
+                //                                     "});\n" +
+                //                                     "gltf.scene.position.set("+locMdl.x+", "+locMdl.y+", "+locMdl.z+");\n"+
+                //                                     "gltf.scene.rotation.set("+rx+", "+ry+", "+rz+");\n"+
+                //                                     "gltf.scene.scale.set("+scale+", "+scale+", "+scale+");\n"+
+                //                                 "},\n"+
+                //                                 // called while loading is progressing
+                //                                 "function ( xhr ) {\n"+
+                //                                     "console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );\n"+
+                //                                     "},\n"+
+                //                                 // called when loading has errors
+                //                                 "function ( error ) {\n"+
+                //                                     "console.log( 'An error happened' );\n"+
+                //                                     "}\n"+
+                //                                 ");\n";
+                //                             }
+                //                             console.log("face tracking asset at " + modelURL);
                                            
-                                        } else if (sceneResponse.sceneWebType == "BabylonJS") { //babylon, not really...
-                                            // gltfsAssets = gltfsAssets + "var lookCtrl = null;\nBABYLON.SceneLoader.ImportMesh('', '', \x22"+modelURL+"\x22, scene, function (meshes, particleSystems, skeletons) {"+
-                                            // "meshes[0].scaling = new BABYLON.Vector3("+scale+", "+scale+", "+scale+");\n"+
-                                            // "meshes[0].position = new BABYLON.Vector3("+locMdl.x+", "+locMdl.y+", "+locMdl.z+");\n"+
-                                            // "meshes[0].rotation = new BABYLON.Vector3("+rx+", "+ry+", "+rz+");\n"+
+                //                         } else if (sceneResponse.sceneWebType == "BabylonJS") { //babylon, not really...
+                //                             // gltfsAssets = gltfsAssets + "var lookCtrl = null;\nBABYLON.SceneLoader.ImportMesh('', '', \x22"+modelURL+"\x22, scene, function (meshes, particleSystems, skeletons) {"+
+                //                             // "meshes[0].scaling = new BABYLON.Vector3("+scale+", "+scale+", "+scale+");\n"+
+                //                             // "meshes[0].position = new BABYLON.Vector3("+locMdl.x+", "+locMdl.y+", "+locMdl.z+");\n"+
+                //                             // "meshes[0].rotation = new BABYLON.Vector3("+rx+", "+ry+", "+rz+");\n"+
                                            
-                                            // "for (var m = 0; m < meshes.length; m++){\n"+ //find mesh named eye
-                                            //     "console.log(meshes[m].material);\n"+
-                                            //     // "meshes[m].material.environmentTexture = new BABYLON.CubeTexture('', scene, undefined, undefined, "+JSON.stringify( cubeMapAsset)+");" +
-                                            //     "if (meshes[m].name.includes(\x22eyeball\x22)) {"+
+                //                             // "for (var m = 0; m < meshes.length; m++){\n"+ //find mesh named eye
+                //                             //     "console.log(meshes[m].material);\n"+
+                //                             //     // "meshes[m].material.environmentTexture = new BABYLON.CubeTexture('', scene, undefined, undefined, "+JSON.stringify( cubeMapAsset)+");" +
+                //                             //     "if (meshes[m].name.includes(\x22eyeball\x22)) {"+
                                                    
-                                            //         "console.log(meshes[m].name);"+
-                                            //         "let characterMesh = meshes[m];"+
-                                            //         "for (var b = 0; b < skeletons[0].bones.length - 1; b++){\n"+ //then find bone named eye //NM, pointless - can't use bone with gltf :(
+                //                             //         "console.log(meshes[m].name);"+
+                //                             //         "let characterMesh = meshes[m];"+
+                //                             //         "for (var b = 0; b < skeletons[0].bones.length - 1; b++){\n"+ //then find bone named eye //NM, pointless - can't use bone with gltf :(
                                                        
-                                            //             "if (skeletons[0].bones[b].name == \x22Eye\x22) {\n"+
-                                            //                 // "skeletons[0].bones.lookAt(mainCam.position);"+
-                                            //                 "console.log(skeletons[0].bones[b].name);\n"+
-                                            //                 "scene.beginAnimation(skeletons[0], 0, 100, true, 1.0);\n"+
-                                            //                 // "let lookCtrl = new BABYLON.BoneLookController(meshes[0], skeletons[0].bones[b], mainCam.position, {adjustYaw:Math.PI*.5, adjustPitch:Math.PI*.5, adjustRoll:Math.PI});\n"+
-                                            //                 "var skeleton = skeletons[0];\n"+
-                                            //                 "var time = 0;\n"+
-                                            //                 "var state = 'Initial';\n"+
-                                            //                 "var lastAppliedQuat = new BABYLON.Quaternion();\n"+
-                                            //                 "var stateTime = 0;\n"+
-                                            //                 "var timingFunc = (x) => Math.cos(x * Math.PI) * -0.5 + 0.5;\n"+
-                                            //                 // var cubeTex = new BABYLON.CubeTexture("", scene, );
-                                            //                 "scene.registerBeforeRender(function(){\n" +
+                //                             //             "if (skeletons[0].bones[b].name == \x22Eye\x22) {\n"+
+                //                             //                 // "skeletons[0].bones.lookAt(mainCam.position);"+
+                //                             //                 "console.log(skeletons[0].bones[b].name);\n"+
+                //                             //                 "scene.beginAnimation(skeletons[0], 0, 100, true, 1.0);\n"+
+                //                             //                 // "let lookCtrl = new BABYLON.BoneLookController(meshes[0], skeletons[0].bones[b], mainCam.position, {adjustYaw:Math.PI*.5, adjustPitch:Math.PI*.5, adjustRoll:Math.PI});\n"+
+                //                             //                 "var skeleton = skeletons[0];\n"+
+                //                             //                 "var time = 0;\n"+
+                //                             //                 "var state = 'Initial';\n"+
+                //                             //                 "var lastAppliedQuat = new BABYLON.Quaternion();\n"+
+                //                             //                 "var stateTime = 0;\n"+
+                //                             //                 "var timingFunc = (x) => Math.cos(x * Math.PI) * -0.5 + 0.5;\n"+
+                //                             //                 // var cubeTex = new BABYLON.CubeTexture("", scene, );
+                //                             //                 "scene.registerBeforeRender(function(){\n" +
                                                             
-                                            //                "});\n"+
+                //                             //                "});\n"+
                                                             
-                                            //             "}\n"+
-                                            //         "}\n"+
-                                            //         //  "lookCtrl = new BABYLON.BoneLookController(characterMesh, skeletons[0].bones[m], mainCam.position, {adjustYaw:Math.PI*.5, adjustPitch:Math.PI*.5, adjustRoll:Math.PI});\n"+
-                                            //     "}\n"+
-                                            // "}\n"+
+                //                             //             "}\n"+
+                //                             //         "}\n"+
+                //                             //         //  "lookCtrl = new BABYLON.BoneLookController(characterMesh, skeletons[0].bones[m], mainCam.position, {adjustYaw:Math.PI*.5, adjustPitch:Math.PI*.5, adjustRoll:Math.PI});\n"+
+                //                             //     "}\n"+
+                //                             // "}\n"+
 
-                                            // "});\n";
-                                        } else { //aframe !!!
-                                            // let zFix = parseFloat(locMdl.z) * -1; //fix to match unity 
-                                            let zFix = parseFloat(locMdl.z); //nope
+                //                             // "});\n";
+                //                         } else { //aframe !!!
+                //                             // let zFix = parseFloat(locMdl.z) * -1; //fix to match unity 
+                //                             let zFix = parseFloat(locMdl.z); //nope
 
-                                            if (locMdl.eventData.toLowerCase().includes("navmesh")) { //regress for now, this is "real" vs simple navmesh...
+                //                             if (locMdl.eventData.toLowerCase().includes("navmesh")) { //regress for now, this is "real" vs simple navmesh...
                                                
-                                                if (locMdl.eventData.toLowerCase().includes("simple navmesh")) {
-                                                    useSimpleNavmesh = true;
-                                                }
-                                                console.log("GOTSA NAVMESH!! use simple " + useSimpleNavmesh);
-                                                // navmesh = "nav-mesh";
-                                                // gltfsEntities = gltfsEntities +"<a-entity nav-mesh normal-material visible=\x22false\x22 position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 rotation=\x22"+rotation+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 gltf-model=\x22#" + m_assetID + "\x22></a-entity>";
-                                                // gltfsEntities = gltfsEntities +"<a-entity visible=\x22false\x22 position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 rotation=\x22"+rotation+"\x22 gltf-model=\x22#" + m_assetID + "\x22 nav-mesh normal-material></a-entity>";
-                                                // gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
-                                                // gltfsEntities = gltfsEntities +"<a-entity visible=\x22false\x22 gltf-model=\x22#" + m_assetID + "\x22 nav-mesh></a-entity>";
+                //                                 if (locMdl.eventData.toLowerCase().includes("simple navmesh")) {
+                //                                     useSimpleNavmesh = true;
+                //                                 }
+                //                                 console.log("GOTSA NAVMESH!! use simple " + useSimpleNavmesh);
+                //                                 // navmesh = "nav-mesh";
+                //                                 // gltfsEntities = gltfsEntities +"<a-entity nav-mesh normal-material visible=\x22false\x22 position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 rotation=\x22"+rotation+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 gltf-model=\x22#" + m_assetID + "\x22></a-entity>";
+                //                                 // gltfsEntities = gltfsEntities +"<a-entity visible=\x22false\x22 position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 rotation=\x22"+rotation+"\x22 gltf-model=\x22#" + m_assetID + "\x22 nav-mesh normal-material></a-entity>";
+                //                                 // gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
+                //                                 // gltfsEntities = gltfsEntities +"<a-entity visible=\x22false\x22 gltf-model=\x22#" + m_assetID + "\x22 nav-mesh></a-entity>";
 
-                                            } else {
-                                                // console.log("LOCMDL eventDATA is : " + locMdl.eventData.toLowerCase());
+                //                             } else {
+                //                                 // console.log("LOCMDL eventDATA is : " + locMdl.eventData.toLowerCase());
 
-                                                gltfsAssets = gltfsAssets + "<a-asset-item class=\x22gltfAssets\x22 id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
+                //                                 gltfsAssets = gltfsAssets + "<a-asset-item class=\x22gltfAssets\x22 id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
                                                 
-                                                // let yRot 
-                                                let scatterSurface = "";
-                                                let brownian = "";
-                                                let id = "gltf_" + m_assetID;
-                                                if (locMdl.eventData.toLowerCase().includes("surface")) {
-                                                    scatterSurface = "scatter-surface";
-                                                    id = 'scatterSurface';
-                                                    entityType = "surface";
+                //                                 // let yRot 
+                //                                 let scatterSurface = "";
+                //                                 let brownian = "";
+                //                                 let id = "gltf_" + m_assetID;
+                //                                 if (locMdl.eventData.toLowerCase().includes("surface")) {
+                //                                     scatterSurface = "scatter-surface";
+                //                                     id = 'scatterSurface';
+                //                                     entityType = "surface";
 
-                                                }
-                                                let modModel = "mod_model=\x22markerType: "+locMdl.markerType+"; tags: "+locMdl.locationTags+"; description:"+locMdl.description+"; eventData:"+locMdl.eventData+";\x22";
-                                                // let modMaterial = "";
-                                                if (locMdl.eventData.toLowerCase().includes("gallery")) {
-                                                    // modModel = "mod_model_photo_gallery";  maybe later
-                                                }
-                                                if (!locMdl.eventData.toLowerCase().includes("scatter")) { //not scatterd, normal placement
-                                                    let physicsMod = "";
-                                                    let shape = 'hull';
-                                                    if (locMdl.eventData.toLowerCase().includes('physics')){ //ammo for now // no do it in mod_model (where model isloaded)
-                                                    // let isTrigger = false;
+                //                                 }
+                //                                 let modModel = "mod_model=\x22markerType: "+locMdl.markerType+"; tags: "+locMdl.locationTags+"; description:"+locMdl.description+"; eventData:"+locMdl.eventData+";\x22";
+                //                                 // let modMaterial = "";
+                //                                 if (locMdl.eventData.toLowerCase().includes("gallery")) {
+                //                                     // modModel = "mod_model_photo_gallery";  maybe later
+                //                                 }
+                //                                 if (!locMdl.eventData.toLowerCase().includes("scatter")) { //not scatterd, normal placement
+                //                                     let physicsMod = "";
+                //                                     let shape = 'hull';
+                //                                     if (locMdl.eventData.toLowerCase().includes('physics')){ //ammo for now // no do it in mod_model (where model isloaded)
+                //                                     // let isTrigger = false;
                                                     
-                                                        if (locMdl.eventData.toLowerCase().includes('static')){
-                                                            // physicsMod = "ammo-body=\x22type: static\x22 ammo-shape=\x22type: box\x22";
-                                                            // physicsMod = "ammo-body=\x22type: static\x22 ammo-shape=\x22type: box\x22";
-                                                            // physicsMod = "mod_physics=\x22body: static; shape: box; model: "+locMdl.name+"\x22"
-                                                        }
-                                                        if (locMdl.eventData.toLowerCase().includes('dynamic')){
-                                                            // physicsMod = "ammo-body=\x22type: static\x22 ammo-shape=\x22type: box\x22";
-                                                            // physicsMod = "ammo-body=\x22type: static\x22 ammo-shape=\x22type: box\x22";
-                                                            // physicsMod = "mod_physics=\x22body: dynamic; shape: box; model: "+locMdl.name+"\x22"
+                //                                         if (locMdl.eventData.toLowerCase().includes('static')){
+                //                                             // physicsMod = "ammo-body=\x22type: static\x22 ammo-shape=\x22type: box\x22";
+                //                                             // physicsMod = "ammo-body=\x22type: static\x22 ammo-shape=\x22type: box\x22";
+                //                                             // physicsMod = "mod_physics=\x22body: static; shape: box; model: "+locMdl.name+"\x22"
+                //                                         }
+                //                                         if (locMdl.eventData.toLowerCase().includes('dynamic')){
+                //                                             // physicsMod = "ammo-body=\x22type: static\x22 ammo-shape=\x22type: box\x22";
+                //                                             // physicsMod = "ammo-body=\x22type: static\x22 ammo-shape=\x22type: box\x22";
+                //                                             // physicsMod = "mod_physics=\x22body: dynamic; shape: box; model: "+locMdl.name+"\x22"
                                                             
-                                                        }
-                                                    }
-                                                    if (locMdl.eventData.toLowerCase().includes("shader")) {
-                                                        if (locMdl.eventData.toLowerCase().includes("noise")) {
-                                                            console.log("TRYNA PUT A SHADER@@");
-                                                            // modMaterial = "material=\x22shader: noise;\x22";
-                                                            modModel = "mod_model=\x22markerType: "+locMdl.markerType+"; tags: "+locMdl.locationTags+"; eventData:"+locMdl.eventData+"; shader: noise\x22";
-                                                            let vertexShader  = requireText('../main/src/shaders/noise1_vertex.glsl', require);
-                                                            let fragmentShader = requireText('../main/src/shaders/noise1_fragment.glsl', require);
-                                                            shaderScripts = "<script type=\x22x-shader/x-vertex\x22 id=\x22noise1_vertex\x22>"+vertexShader+"</script>"+
-                                                            "<script type=\x22x-shader/x-fragment\x22 id=\x22noise1_fragment\x22>"+fragmentShader+"</script>";
-                                                        }
-                                                    }
-                                                    if (locMdl.markerType == "brownian path" || locMdl.markerType == "brownian motion") {
-                                                        if (locMdl.markerType == "brownian path") {
+                //                                         }
+                //                                     }
+                //                                     if (locMdl.eventData.toLowerCase().includes("shader")) {
+                //                                         if (locMdl.eventData.toLowerCase().includes("noise")) {
+                //                                             console.log("TRYNA PUT A SHADER@@");
+                //                                             // modMaterial = "material=\x22shader: noise;\x22";
+                //                                             modModel = "mod_model=\x22markerType: "+locMdl.markerType+"; tags: "+locMdl.locationTags+"; eventData:"+locMdl.eventData+"; shader: noise\x22";
+                //                                             let vertexShader  = requireText('../main/src/shaders/noise1_vertex.glsl', require);
+                //                                             let fragmentShader = requireText('../main/src/shaders/noise1_fragment.glsl', require);
+                //                                             shaderScripts = "<script type=\x22x-shader/x-vertex\x22 id=\x22noise1_vertex\x22>"+vertexShader+"</script>"+
+                //                                             "<script type=\x22x-shader/x-fragment\x22 id=\x22noise1_fragment\x22>"+fragmentShader+"</script>";
+                //                                         }
+                //                                     }
+                //                                     if (locMdl.markerType == "brownian path" || locMdl.markerType == "brownian motion") {
+                //                                         if (locMdl.markerType == "brownian path") {
 
-                                                            brownian = "brownian_path=\x22lineEnd:100000;lineStep:100;count:100;object:#thing-to-clone;positionVariance:88 33 86;spaceVectorOffset:101.1,100,100.2,101.2,100,100.3;rotationFollowsAxis:x;speed:0.01;\x22";
-                                                            gltfsEntities = gltfsEntities + "<a-gltf-model shadow src=\x22#"+m_assetID+"\x22 id=\x22thing-to-clone\x22 visible=\x22true\x22></a-gltf-model>"+
-                                                            "<a-entity "+brownian+
-                                                            " shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+
-                                                            " "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";
-                                                        } else if (locMdl.markerType == "brownian motion") {
-                                                            brownian = "brownian-motion=\x22speed:0.1;rotationVariance:.2 .2 .2;positionVariance:2.5 5 2.5;spaceVector:10.1,20.1,30.1,10.1,20.1,30.1;\x22";
-                                                            gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+brownian+" "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
-                                                            " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
-                                                            // " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";  //rem rotation bc navmesh donutlike
-                                                            " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>"; 
-                                                            gltfModel = modelURL;
-                                                        }
+                //                                             brownian = "brownian_path=\x22lineEnd:100000;lineStep:100;count:100;object:#thing-to-clone;positionVariance:88 33 86;spaceVectorOffset:101.1,100,100.2,101.2,100,100.3;rotationFollowsAxis:x;speed:0.01;\x22";
+                //                                             gltfsEntities = gltfsEntities + "<a-gltf-model shadow src=\x22#"+m_assetID+"\x22 id=\x22thing-to-clone\x22 visible=\x22true\x22></a-gltf-model>"+
+                //                                             "<a-entity "+brownian+
+                //                                             " shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+
+                //                                             " "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";
+                //                                         } else if (locMdl.markerType == "brownian motion") {
+                //                                             brownian = "brownian-motion=\x22speed:0.1;rotationVariance:.2 .2 .2;positionVariance:2.5 5 2.5;spaceVector:10.1,20.1,30.1,10.1,20.1,30.1;\x22";
+                //                                             gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+brownian+" "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
+                //                                             " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
+                //                                             // " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";  //rem rotation bc navmesh donutlike
+                //                                             " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>"; 
+                //                                             gltfModel = modelURL;
+                //                                         }
                                                         
-                                                    } else { //don't use brownian
-                                                        gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
-                                                        " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
-                                                        // " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";  //rem rotation bc navmesh donutlike
-                                                        " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>"; 
-                                                        gltfModel = modelURL;
-                                                    }
+                //                                     } else { //don't use brownian
+                //                                         gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
+                //                                         " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
+                //                                         // " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";  //rem rotation bc navmesh donutlike
+                //                                         " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>"; 
+                //                                         gltfModel = modelURL;
+                //                                     }
 
-                                                    // gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+brownian+" "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
-                                                    // " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
-                                                    // // " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";  //rem rotation bc navmesh donutlike
-                                                    // " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>"; 
-                                                    // gltfModel = modelURL;
-                                                } else { //placement instancing + surface scattering
-                                                    console.log("tryna scatter so0methings!@ " + locMdl.eventData.toLowerCase());
-                                                    let instancing = "instanced_meshes_mod=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+";\x22";
-                                                    let interaction = "";
-                                                    if (locMdl.eventData.toLowerCase().includes("everywhere")) {
+                //                                     // gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+brownian+" "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
+                //                                     // " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
+                //                                     // // " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";  //rem rotation bc navmesh donutlike
+                //                                     // " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>"; 
+                //                                     // gltfModel = modelURL;
+                //                                 } else { //placement instancing + surface scattering
+                //                                     console.log("tryna scatter so0methings!@ " + locMdl.eventData.toLowerCase());
+                //                                     let instancing = "instanced_meshes_mod=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+";\x22";
+                //                                     let interaction = "";
+                //                                     if (locMdl.eventData.toLowerCase().includes("everywhere")) {
                                                         
-                                                        if (locMdl.eventData.toLowerCase().includes('growpop')) {
-                                                            interaction = " interaction: growpop; ";
-                                                        } else if (locMdl.eventData.toLowerCase().includes('shrinkpop')) {
-                                                            interaction = " interaction: shrinkpop; ";
-                                                        } else if (locMdl.eventData.toLowerCase().includes('wiggle')) {
-                                                            interaction = " interaction: wiggle; ";
-                                                        }
-                                                        // instancing = "instanced-mesh=\x22capacity:100; updateMode: auto;\x22 instanced_meshes_sphere_physics=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22"; //scatter random sphere, e.g. in the sky..
-                                                        // console.log("instancing is " + instancing);
-                                                        // instancingEntity = "<a-sphere id=\x22ball-mesh\x22 radius=\x221\x22 color=\x22yellow\x22 instanced-mesh=\x22capacity: 100; updateMode: auto\x22></a-sphere>" +
-                                                        // "<a-entity id=\x22ball-recycler\x22 ball-recycler=\x22physics: ammo; ballCount: 10; width: 30; depth: 15; yKill: -30\x22 position=\x220 20 -25\x22></a-entity>";
-                                                    }
+                //                                         if (locMdl.eventData.toLowerCase().includes('growpop')) {
+                //                                             interaction = " interaction: growpop; ";
+                //                                         } else if (locMdl.eventData.toLowerCase().includes('shrinkpop')) {
+                //                                             interaction = " interaction: shrinkpop; ";
+                //                                         } else if (locMdl.eventData.toLowerCase().includes('wiggle')) {
+                //                                             interaction = " interaction: wiggle; ";
+                //                                         }
+                //                                         // instancing = "instanced-mesh=\x22capacity:100; updateMode: auto;\x22 instanced_meshes_sphere_physics=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22"; //scatter random sphere, e.g. in the sky..
+                //                                         // console.log("instancing is " + instancing);
+                //                                         // instancingEntity = "<a-sphere id=\x22ball-mesh\x22 radius=\x221\x22 color=\x22yellow\x22 instanced-mesh=\x22capacity: 100; updateMode: auto\x22></a-sphere>" +
+                //                                         // "<a-entity id=\x22ball-recycler\x22 ball-recycler=\x22physics: ammo; ballCount: 10; width: 30; depth: 15; yKill: -30\x22 position=\x220 20 -25\x22></a-entity>";
+                //                                     }
                                                     
-                                                    // console.log("locMdl is " + JSON.stringify(locMdl));
-                                                    if (locMdl.eventData.toLowerCase().includes("grass")) {
-                                                        instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 3000; scaleFactor: 6\x22";
-                                                    } else if (locMdl.eventData.toLowerCase().includes("plants")) {
-                                                        instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 500; scaleFactor: 8\x22";
-                                                    } else if (locMdl.eventData.toLowerCase().includes("shrooms")) {
-                                                        instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 50; scaleFactor: 2\x22";
-                                                    } else if (locMdl.eventData.toLowerCase().includes("rocks")) {
-                                                        instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 200; scaleFactor: 32\x22";
-                                                    } else if (locMdl.eventData.toLowerCase().includes("~")) {
-                                                        let split = locMdl.eventData.split("~");
-                                                        if (split.length) {
-                                                            instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: "+split[1]+"; scaleFactor: "+scale+"; tags: "+locMdl.locationTags+"\x22";
-                                                            // console.log("!!!tryna spoolit scatter dasta..." + instancing);
-                                                            if (locMdl.eventData.toLowerCase().includes("everywhere")) {
-                                                                // instancing = "instanced-mesh=\x22capacity:100; updateMode: auto;\x22 instanced_meshes_sphere=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; tags: "+locMdl.locationTags+" count: "+split[1]+"; scaleFactor: "+scale+";"+interaction+"\x22"; //scatter everywhere, e.g. in the sky..
-                                                                // console.log("instancing is " + instancing);
-                                                                // instancing = " instanced-mesh=\x22capacity:100; updateMode: 'auto'; positioning: 'world'\x22 "; //scatter everywhere, e.g. in the sky..
-                                                                instancingEntity = instancingEntity + "<a-entity instanced_meshes_sphere=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
-                                                            }
-                                                            if (locMdl.eventData.toLowerCase().includes("physics")) {
-                                                                // instancing = "instanced-mesh=\x22capacity:100; updateMode: auto;\x22 instanced_meshes_sphere=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; tags: "+locMdl.locationTags+" count: "+split[1]+"; scaleFactor: "+scale+";"+interaction+"\x22"; //scatter everywhere, e.g. in the sky..
-                                                                // console.log("instancing is " + instancing);
-                                                                // instancing = " instanced-mesh=\x22capacity:100; updateMode: 'auto'; positioning: 'world'\x22 "; //scatter everywhere, e.g. in the sky..
-                                                                instancingEntity = instancingEntity + "<a-entity scatter_physics=\x22_id: "+locMdl.modelID+"; count: "+split[1]+"; scaleFactor: "+scale+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
-                                                            }
-                                                            if (locMdl.eventData.toLowerCase().includes("instances")) {
-                                                                //TODO use model primatives
-                                                                instancingEntity = instancingEntity + "<a-sphere id=\x22i-mesh-sphere\x22 "+skyboxEnvMap+" radius=\x221\x22 material=\x22roughness: .2; color: blue; opacity: .5; transparent: true;\x22 instanced-mesh=\x22capacity: "+split[1]+"; updateMode: auto\x22></a-sphere>" +
-                                                                "<a-entity instanced_meshes_sphere_physics=\x22_id: "+locMdl.modelID+"; count: "+split[1]+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
-                                                            }
-                                                            if (locMdl.eventData.toLowerCase().includes("atomic")) {
-                                                                //TODO use model primatives
-                                                                instancingEntity = instancingEntity + "<a-sphere id=\x22i-mesh-sphere\x22 "+skyboxEnvMap+" radius=\x221\x22 material=\x22roughness: .2; color: blue; opacity: .5; transparent: true;\x22 instanced-mesh=\x22capacity: "+split[1]+"; updateMode: auto\x22></a-sphere>" +
-                                                                "<a-entity instanced_meshes_sphere_physics=\x22_id: "+locMdl.modelID+"; count: "+split[1]+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
-                                                            }
-                                                        }
-                                                    }
-                                                    let modelString = "gltf-model=\x22#" + m_assetID + "\x22";
-                                                    //todo, check for scene image with spritesheet type / tag
-                                                    imageAssets = imageAssets + "<img id=\x22explosion1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/explosion1.png\x22 crossorigin=\x22anonymous\x22>"; //for particles
+                //                                     // console.log("locMdl is " + JSON.stringify(locMdl));
+                //                                     if (locMdl.eventData.toLowerCase().includes("grass")) {
+                //                                         instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 3000; scaleFactor: 6\x22";
+                //                                     } else if (locMdl.eventData.toLowerCase().includes("plants")) {
+                //                                         instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 500; scaleFactor: 8\x22";
+                //                                     } else if (locMdl.eventData.toLowerCase().includes("shrooms")) {
+                //                                         instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 50; scaleFactor: 2\x22";
+                //                                     } else if (locMdl.eventData.toLowerCase().includes("rocks")) {
+                //                                         instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 200; scaleFactor: 32\x22";
+                //                                     } else if (locMdl.eventData.toLowerCase().includes("~")) {
+                //                                         let split = locMdl.eventData.split("~");
+                //                                         if (split.length) {
+                //                                             instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: "+split[1]+"; scaleFactor: "+scale+"; tags: "+locMdl.locationTags+"\x22";
+                //                                             // console.log("!!!tryna spoolit scatter dasta..." + instancing);
+                //                                             if (locMdl.eventData.toLowerCase().includes("everywhere")) {
+                //                                                 // instancing = "instanced-mesh=\x22capacity:100; updateMode: auto;\x22 instanced_meshes_sphere=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; tags: "+locMdl.locationTags+" count: "+split[1]+"; scaleFactor: "+scale+";"+interaction+"\x22"; //scatter everywhere, e.g. in the sky..
+                //                                                 // console.log("instancing is " + instancing);
+                //                                                 // instancing = " instanced-mesh=\x22capacity:100; updateMode: 'auto'; positioning: 'world'\x22 "; //scatter everywhere, e.g. in the sky..
+                //                                                 instancingEntity = instancingEntity + "<a-entity instanced_meshes_sphere=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
+                //                                             }
+                //                                             if (locMdl.eventData.toLowerCase().includes("physics")) {
+                //                                                 // instancing = "instanced-mesh=\x22capacity:100; updateMode: auto;\x22 instanced_meshes_sphere=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; tags: "+locMdl.locationTags+" count: "+split[1]+"; scaleFactor: "+scale+";"+interaction+"\x22"; //scatter everywhere, e.g. in the sky..
+                //                                                 // console.log("instancing is " + instancing);
+                //                                                 // instancing = " instanced-mesh=\x22capacity:100; updateMode: 'auto'; positioning: 'world'\x22 "; //scatter everywhere, e.g. in the sky..
+                //                                                 instancingEntity = instancingEntity + "<a-entity scatter_physics=\x22_id: "+locMdl.modelID+"; count: "+split[1]+"; scaleFactor: "+scale+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
+                //                                             }
+                //                                             if (locMdl.eventData.toLowerCase().includes("instances")) {
+                //                                                 //TODO use model primatives
+                //                                                 instancingEntity = instancingEntity + "<a-sphere id=\x22i-mesh-sphere\x22 "+skyboxEnvMap+" radius=\x221\x22 material=\x22roughness: .2; color: blue; opacity: .5; transparent: true;\x22 instanced-mesh=\x22capacity: "+split[1]+"; updateMode: auto\x22></a-sphere>" +
+                //                                                 "<a-entity instanced_meshes_sphere_physics=\x22_id: "+locMdl.modelID+"; count: "+split[1]+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
+                //                                             }
+                //                                             if (locMdl.eventData.toLowerCase().includes("atomic")) {
+                //                                                 //TODO use model primatives
+                //                                                 instancingEntity = instancingEntity + "<a-sphere id=\x22i-mesh-sphere\x22 "+skyboxEnvMap+" radius=\x221\x22 material=\x22roughness: .2; color: blue; opacity: .5; transparent: true;\x22 instanced-mesh=\x22capacity: "+split[1]+"; updateMode: auto\x22></a-sphere>" +
+                //                                                 "<a-entity instanced_meshes_sphere_physics=\x22_id: "+locMdl.modelID+"; count: "+split[1]+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
+                //                                             }
+                //                                         }
+                //                                     }
+                //                                     let modelString = "gltf-model=\x22#" + m_assetID + "\x22";
+                //                                     //todo, check for scene image with spritesheet type / tag
+                //                                     imageAssets = imageAssets + "<img id=\x22explosion1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/explosion1.png\x22 crossorigin=\x22anonymous\x22>"; //for particles
                                                     
-                                                    gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+modelString+" "+instancing+" class=\x22"+entityType+
-                                                    " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+
-                                                    " position=\x220 -20 0\x22></a-entity>";//scatter model below //nm, just load it from here w/ modelString
-                                                        // " <a-entity id=\x22"+locMdl.modelID+"\x22 "+modelParent+" "+modModel+" class=\x22gltf "+entityType+ 
-                                                        // " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" "+modelString+" "+objAnim+" "+cannedAnim+
-                                                        // // " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
-                                                        // " position=\x220 -10 0\x22></a-entity>"; 
+                //                                     gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+modelString+" "+instancing+" class=\x22"+entityType+
+                //                                     " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+
+                //                                     " position=\x220 -20 0\x22></a-entity>";//scatter model below //nm, just load it from here w/ modelString
+                //                                         // " <a-entity id=\x22"+locMdl.modelID+"\x22 "+modelParent+" "+modModel+" class=\x22gltf "+entityType+ 
+                //                                         // " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" "+modelString+" "+objAnim+" "+cannedAnim+
+                //                                         // // " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
+                //                                         // " position=\x220 -10 0\x22></a-entity>"; 
 
-                                                    gltfModel = modelURL;
+                //                                     gltfModel = modelURL;
                                                    
-                                                }
-                                            }
-                                        }
-                                        callbackz();
-                                        }
-                                    } else { //if not item_type "glb", either usdz or reality //TODO select on location view?
+                //                                 }
+                //                             }
+                //                         }
+                //                         callbackz();
+                //                         }
+                //                     } else { //if not item_type "glb", either usdz or reality //TODO select on location view?
                                         
-                                        assetUserID = asset.userID;
-                                        // var sourcePath =   "servicemedia/users/" + assetUserID + "/usdz/" + locMdl.gltf;
-                                        // let assetType = "usdz";
-                                        // if (asset.type == "reality")
-                                        // let modelURL = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + assetUserID + "/" + asset.item_type + "/" + asset.filename, Expires: 6000});
-                                        let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + assetUserID + "/gltf/" + asset.filename, 6000);
-                                        console.log("non-gltf modelURL " + modelURL + " modelType " + asset.item_type);
-                                        usdzFiles = modelURL;
+                //                         assetUserID = asset.userID;
+                //                         // var sourcePath =   "servicemedia/users/" + assetUserID + "/usdz/" + locMdl.gltf;
+                //                         // let assetType = "usdz";
+                //                         // if (asset.type == "reality")
+                //                         // let modelURL = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + assetUserID + "/" + asset.item_type + "/" + asset.filename, Expires: 6000});
+                //                         let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + assetUserID + "/gltf/" + asset.filename, 6000);
+                //                         console.log("non-gltf modelURL " + modelURL + " modelType " + asset.item_type);
+                //                         usdzFiles = modelURL;
                                         
-                                        loadUSDZ = "ready(function(){\n" +
-                                        "let usdzDataEntity = document.getElementById(\x22usdzData\x22);\n"+
-                                        // "console.log('tryna set audioEventData: '" + JSON.stringify(sceneResponse.sceneLocations)+");\n"+
-                                        // "SetPrimaryAudioEventsData("+JSON.stringify(JSON.stringify(primaryAudioObject))+");\n"+
-                                        "usdzDataEntity.setAttribute(\x22usdz\x22, \x22usdzData\x22, \x22"+usdzFiles+"\x22);\n"+ 
-                                        "});";
+                //                         loadUSDZ = "ready(function(){\n" +
+                //                         "let usdzDataEntity = document.getElementById(\x22usdzData\x22);\n"+
+                //                         // "console.log('tryna set audioEventData: '" + JSON.stringify(sceneResponse.sceneLocations)+");\n"+
+                //                         // "SetPrimaryAudioEventsData("+JSON.stringify(JSON.stringify(primaryAudioObject))+");\n"+
+                //                         "usdzDataEntity.setAttribute(\x22usdz\x22, \x22usdzData\x22, \x22"+usdzFiles+"\x22);\n"+ 
+                //                         "});";
                                               
-                                        usdzModel = modelURL;
-                                        // console.log(loadUSDZ);
-                                        callbackz();
-                                    }
-                                })(); //end (async
-                                    } 
-                                });
-                                } else {
-                                    callbackz();
-                                }
-                            // } else {
-                            //     callbackz(); //if "noweb"
-                            // }
-                        }, function(err) {
+                //                         usdzModel = modelURL;
+                //                         // console.log(loadUSDZ);
+                //                         callbackz();
+                //                     }
+                //                 })(); //end (async
+                //                     } 
+                //                 });
+                //                 } else {
+                //                     callbackz();
+                //                 }
+                //             // } else {
+                //             //     callbackz(); //if "noweb"
+                //             // }
+                //         }, function(err) {
                         
-                            if (err) {
-                                console.log('A file failed to process');
-                                callbackz(err);
-                            } else {
-                                callback(null);
-                            }
-                        });
+                //             if (err) {
+                //                 console.log('A file failed to process');
+                //                 callbackz(err);
+                //             } else {
+                //                 callback(null);
+                //             }
+                //         });
 
 
-                    } else {
-                        callback(null);
-                    }
-                },
+                //     } else {
+                //         callback(null);
+                //     }
+                // },
                 function (callback) {
                     // console.log("attributions 2" + JSON.stringify(attributions));
                     if (attributions != null && attributions != undefined && attributions.length > 0) {
@@ -2454,7 +2329,7 @@ landing_router.get('/:_id', function (req, res) {
                             if (textID && textID.length > 5) { 
                                 if (sceneTextLocations[i].markerType == "svg canvas billboard") {
                                    
-                                    let oid = ObjectID(textID);
+                                    let oid = new ObjectId(textID);
                                     db.text_items.findOne({_id: oid}, function (err, text_item){
                                         if (err || !text_item) {
                                             console.log("error getting text_items: " + err);
@@ -2482,7 +2357,7 @@ landing_router.get('/:_id', function (req, res) {
                                 } else if (sceneTextLocations[i].markerType == "svg billboard") {
                                    console.log("tryna get svg billboard " + textID);
                                     if (validator.isMongoId(textID)) {
-                                    let oid = ObjectID(textID);
+                                    let oid = new ObjectId(textID);
                                     db.text_items.findOne({_id: oid}, function (err, text_item){
                                         if (err || !text_item) {
                                             console.log("error getting text_items: " + err);
@@ -2513,7 +2388,7 @@ landing_router.get('/:_id', function (req, res) {
                         } else { //if it's an html...
                             // if (sceneResponse.sceneTextItems != null && sceneResponse.sceneTextItems != undefined && sceneResponse.sceneTextItems.length > 0) {
                                 console.log("Tryna fetch scenetextitgme " + sceneResponse.sceneTextItems);
-                                let oid = ObjectID(sceneResponse.sceneTextItems.toString());
+                                let oid = new ObjectId(sceneResponse.sceneTextItems.toString());
                             db.text_items.findOne({_id: oid}, function (err, text_item){
                                 if (err || !text_item) {
                                     console.log("error getting text_items: " + err);
@@ -2534,15 +2409,27 @@ landing_router.get('/:_id', function (req, res) {
                 },
                 function (callback) { //fethc audio items
                     
-                    db.audio_items.find({_id: {$in: requestedAudioItems }}, function (err, audio_items) {
-                        if (err || !audio_items) {
-                            console.log("error getting audio items: " + err);
+                    (async () => {
+                        try {
+                            const query = {_id: {$in: requestedAudioItems }};
+                            const audio_items = await RunDataQuery("audio_items", "find", query);
+                            if (!audio_items) {
+                                audio_items = [];
+                            }
+                            callback(null, audio_items);
+                        } catch (e) {
                             callback(null);
-                        } else {
-                            callback(null, audio_items) //send them along
-
                         }
-                    });
+                    })();
+                    // db.audio_items.find({_id: {$in: requestedAudioItems }}, function (err, audio_items) {
+                    //     if (err || !audio_items) {
+                    //         console.log("error getting audio items: " + err);
+                    //         callback(null);
+                    //     } else {
+                    //         callback(null, audio_items) //send them along
+
+                    //     }
+                    // });
                 },
                 
                 function (audio_items, callback) { //add the signed URLs to the obj array 
@@ -2777,7 +2664,7 @@ landing_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneVideos != null && sceneResponse.sceneVideos.length > 0) {
                         sceneResponse.sceneVideos.forEach(function (vid) {
                             // console.log("looking for sceneVideo : " + JSON.stringify(vid));
-                            var p_id = ObjectID(vid); //convert to binary to search by _id beloiw
+                            var p_id = new ObjectId(vid); //convert to binary to search by _id beloiw
                             requestedVideoItems.push(p_id); //populate array
                         });
                         db.video_items.find({_id: {$in: requestedVideoItems}}, function (err, video_items) {
@@ -2879,7 +2766,7 @@ landing_router.get('/:_id', function (req, res) {
                     console.log("videoGroups: " + sceneResponse.sceneVideoGroups);
                     if (sceneResponse.sceneVideoGroups != null && sceneResponse.sceneVideoGroups.length > 0) {
                         const vgID = sceneResponse.sceneVideoGroups[0];
-                        let oo_id = ObjectID(vgID);
+                        let oo_id = new ObjectId(vgID);
 
                         db.groups.find({"_id": oo_id}, function (err, groups) {
                             if (err || !groups) {
@@ -3108,79 +2995,50 @@ landing_router.get('/:_id', function (req, res) {
                         // callback(null);
                         // async.each(sceneResponse.scenePostcards, function (postcardID, callbackz) { 
                         //     index++;
-                            var oo_id = ObjectID(postcard);
+                        (async () => {
+                            var oo_id = new ObjectId(postcard);
                             // console.log("index? " + index);
-
-                            db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-
-                                bucketFolder = sceneResponse.sceneDomain; //TODO use "public" bucket if set in process.ENV
-                                if (nonLocalDomains.includes(bucketFolder)) { //TODO this should be a param of domain object
-                                    bucketFolder = "realitymangler.com";  //THIS! 
-                                    console.log("NONLOCALDOMAIN WTF!");
-                                }
-                                // console.log("params " + JSON.stringify(params)); 
-                                if (err || !picture_item) {
-                                    console.log("error getting postcard " + postcard._id + err);
-                                    callback(err);
+                            try {
+                                const query = {"_id": oo_id};
+                                const picture_item = await RunDataQuery("image_items", "findOne", query);
+                                if (picture_item) {
+                                    const postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ picture_item._id + ".standard." + picture_item.filename)
+                                     
+                                    postcardImages.push(postcard1);
+                                    console.log("postcard is " + postcard1);
+                                    callback();
                                 } else {
+                                    callback();
+                                }   
+    
+                            } catch (e) {   
+                                console.log("error getting postcard " + e);
+                            }
+                        })();
+                            // db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 
-                                    // postcard1 = sceneResponse.sceneDomain +"/postcards/"+sceneResponse.short_id +"/"+ picture_item._id + ".standard." + picture_item.filename;
-                                    // callback();
-                                    (async () => {
-                                        postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ picture_item._id + ".standard." + picture_item.filename)
-                                        // postcardImages.push(ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ picture_item._id + ".standard." + picture_item.filename, 12000)); //just return a single 
-                                        // // console.log("postcard1 " + postcard1);
-                                        // callback(null);
-                                        postcardImages.push(postcard1);
-                                        console.log("postcard is " + postcard1);
-                                        callback();
+                            //     bucketFolder = sceneResponse.sceneDomain; //TODO use "public" bucket if set in process.ENV
+                            //     if (nonLocalDomains.includes(bucketFolder)) { //TODO this should be a param of domain object
+                            //         bucketFolder = "realitymangler.com";  //THIS! 
+                            //         console.log("NONLOCALDOMAIN WTF!");
+                            //     }
+                            //     // console.log("params " + JSON.stringify(params)); 
+                            //     if (err || !picture_item) {
+                            //         console.log("error getting postcard " + postcard._id + err);
+                            //         callback(err);
+                            //     } else {
+
+                            //         // postcard1 = sceneResponse.sceneDomain +"/postcards/"+sceneResponse.short_id +"/"+ picture_item._id + ".standard." + picture_item.filename;
+                            //         // callback();
+                                    
                                         
-                                    })();
+                                        
                                    
-                                    // var params = {
-                                    //     Bucket: bucketFolder,
-                                    //     Key: "postcards/" + sceneResponse.short_id + "/"+ postcard + ".standard." + picture_item.filename //put in postcards folder instead of root, duh
-                                    // }
-                                    // //todo - MINIO support
-                                    // s3.headObject(params, function(err, data) { //check that the postcard is pushed to static route
-                                    //     if (err) {
-                                    //         console.log("postcard missing from static route, tryna copy to " + sceneResponse.sceneDomain);
-                                    //         s3.copyObject({Bucket: bucketFolder, CopySource: 'servicemedia/users/' + picture_item.userID +"/pictures/"+ picture_item._id + ".standard." + picture_item.filename,
-                                    //             Key: "postcards/" + sceneResponse.short_id + "/"+ picture_item._id + ".standard." + picture_item.filename}, function (err, data) {
-                                    //             if (err) {
-                                    //                 console.log("ERROR copyObject" + err);
-                                    //                 callback();
-                                    //             } else {
-                                    //                 console.log('SUCCESS copyObject');
-                                                    
-                                                    
-                                    //                 postcard1 = sceneResponse.sceneDomain +"/postcards/"+sceneResponse.short_id +"/"+ picture_item._id + ".standard." + picture_item.filename;
-                                                   
-                                    //                 callback();
-                                    //             }
-                                    //         });
-                                    //     } else {
-                                    //         postcardImages.push()
-                                    //         postcard1 = "http://" + bucketFolder +"/postcards/"+sceneResponse.short_id +"/"+ picture_item._id + ".standard." + picture_item.filename;
-                                    //         console.log("gotsa postcard " + postcard1 );
-                                    //         callback();
-                                    //     }
-                                        
-                                    // });
-                                }
-                            });
-                        //             }
-                        //         });
-                        //     },
-                        //     function (err) {                       
-                        //         if (err) {
-                        //             console.log('A file failed to process');
-                        //             callback();
-                        //         } else {
-                                 
-                        //             callback();
-                        //         }
-                        //     });
+                                   
+
+                            //     }
+                            // });
+                      
                     } else {
                         console.log("no postcard!");
                         callback();
@@ -3303,7 +3161,7 @@ landing_router.get('/:_id', function (req, res) {
                         let picIndex = 0;
                         async.each(sceneResponse.scenePictures, function (picID, callbackz) { //nested async-ery!
                                 
-                                var oo_id = ObjectID(picID);
+                                var oo_id = new ObjectId(picID);
                                 db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                     if (err || !picture_item) {
                                         console.log("error getting scenePictures " + picID + err);
@@ -3453,13 +3311,13 @@ landing_router.get('/:_id', function (req, res) {
                     console.log("skybox ids beez " + JSON.stringify(skyboxIDs) + " vs single skyboxID " + skyboxID);
                     if (skyboxIDs.length > 0) {
                         // skyboxID = skyboxIDs[Math.floor(Math.random() * skyboxIDs.length)];
-                        // oo_id =  ObjectID(skyboxID);
+                        // oo_id =  new ObjectId(skyboxID);
                     } 
                     if (skyboxID != "") {
-                        oo_id = ObjectID(skyboxID); //set if there's an equirect pic, above
+                        oo_id = new ObjectId(skyboxID); //set if there's an equirect pic, above
                     } else {
                         if (sceneResponse.sceneSkybox != null && sceneResponse.sceneSkybox != "") //old way
-                        oo_id = ObjectID(sceneResponse.sceneSkybox);
+                        oo_id = new ObjectId(sceneResponse.sceneSkybox);
                         //console.log("skybox chunck " + oo_id);
                     }
                   
@@ -3877,8 +3735,8 @@ landing_router.get('/:_id', function (req, res) {
         
         } //intial sceneData request, condition on type
     }//end else if not redirected
-    });
-    } //if params undefined
+    // });
+    // } //if params undefined
 });
 ///// END PRIMARY SERVERSIDE /webxr/ ROUTE //////////////////////
 
