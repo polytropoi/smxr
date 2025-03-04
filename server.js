@@ -99,7 +99,7 @@ var store = new MongoDBStore({ //store session info in a separate db with differ
   });
 
   store.on('connected', function() {
-    store.db; // The underlying MongoClient object from the MongoDB driver
+    store.db_old; // The underlying MongoClient object from the MongoDB driver
   });
 
 
@@ -321,8 +321,8 @@ io.on('connection', function(socket) {
                        room = rm; //set global room value for this socket, since we can only be in one at a time
                        io.to(room).emit('user joined', socket.uname, room);
                     } else {    //maybe do lookup on join? 
-                        // var oo_id = ObjectID(payload.userId);
-                        var oo_id = new ObjectId(payload.userId);
+                        // var oo_id = ObjectId.createFromHexString(payload.userId);
+                        var oo_id = ObjectId.createFromHexString(payload.userId);
                         db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
                             if (err != null) {
                                 socket.on("disconnect", (reason) => {
@@ -440,7 +440,7 @@ io.on('connection', function(socket) {
            
 //             if (payload.userId != null){
 //                 console.log("gotsa payload.userId : " + payload.userId);
-//                 var oo_id = ObjectID(payload.userId);
+//                 var oo_id = ObjectId.createFromHexString(payload.userId);
 //                 db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
 //                     if (err != null) {
 //                         req.session.error = 'Access denied!';
@@ -503,7 +503,7 @@ io.on('connection', function(socket) {
 //                         // console.log("gotsa token payload: " + req.session.user._id + " vs " +  payload.userId);
 //                         if (payload.userId != null){
 //                             console.log("gotsa payload.userId : " + payload.userId);
-//                             var oo_id = ObjectID(payload.userId);
+//                             var oo_id = ObjectId.createFromHexString(payload.userId);
 //                             db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
 //                                 if (err != null) {
 //                                     req.session.error = 'Access denied!';
@@ -579,7 +579,7 @@ export function requiredAuthentication(req, res, next) { //primary auth method, 
                         // console.log("gotsa token payload: " + req.session.user._id + " vs " +  payload.userId);
                         if (payload.userId != null){
                             console.log("gotsa payload.userId : " + payload.userId);
-                            var oo_id = ObjectID(payload.userId);
+                            var oo_id = ObjectId.createFromHexString(payload.userId);
                             db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
                                 if (err != null) {
                                     req.session.error = 'Access denied!';
@@ -693,7 +693,7 @@ export function requiredAuthentication(req, res, next) { //primary auth method, 
 //     }
 
 
-function saveTraffic (req, domain, shortID) {
+export function saveTraffic (req, domain, shortID) {
     let timestamp = Date.now();
 
     timestamp = parseInt(timestamp);
@@ -750,7 +750,7 @@ function nameCleaner(name) {
 function checkAppID(req, res, next) {
     console.log("req.headers: " + JSON.stringify(req.headers));
     if (req.headers.appid) {
-        var a_id = ObjectID(req.headers.appid.toString().replace(":", ""));
+        var a_id = ObjectId.createFromHexString(req.headers.appid.toString().replace(":", ""));
         db_old.apps.findOne({_id: a_id }, function (err, app) {
             if (err || !app) {
                 console.log("no app id!");
@@ -843,7 +843,7 @@ function usercheck (req, res, next) { //gotsta beez the owner of requested resou
     }
 }
 function domainadmin (req, res, next) { //TODO also check acl
-    db_old.users.findOne({_id: ObjectID(req.session.user._id)}, function (err, user) {
+    db_old.users.findOne({_id: ObjectId.createFromHexString(req.session.user._id)}, function (err, user) {
         if (err || !user) {
             res.send("noauth");
         } else {
@@ -930,7 +930,7 @@ export function getExtension(filename) {
 
 export function convertStringToObjectID (stringID) {
     if (ObjectId.isValid(stringID)) {
-        return new ObjectId(stringID);
+        return ObjectId.createFromHexString(stringID);
     } else {
         return null;
     }
@@ -967,7 +967,7 @@ app.post('/create_apikey/', requiredAuthentication, function(req, res){
     var uid = req.body.userID; 
     console.log("tryna create API Key for " + JSON.stringify(req.body.userID));
     if (uid) {
-        var oo_id = ObjectID(uid);
+        var oo_id = ObjectId.createFromHexString(uid);
         db_old.users.findOne({_id: oo_id}, function (err, user) {  
             if (err || !user) {
             req.session.error = 'Create API Key Failed - user not found ' + uid;
@@ -1345,7 +1345,7 @@ app.get("/", function (req, res) {
 
 // app.get("/unity/:id", function (req, res){ //redirect to unity
 
-//     // let oid = ObjectID(req.params.id);
+//     // let oid = ObjectId.createFromHexString(req.params.id);
 //     db.scenes.findOne({"short_id" : req.params.id}, function (err, scene) {
 //         if (err || !scene) {
 //             res.send("Sorry, that scene was not found");
@@ -1486,7 +1486,7 @@ app.get("/ami-rite-token/:token", function (req, res) {
                             res.send('0');
                         } else {   
                             console.log("gotsa payload.userId : " + payload.userId);
-                            var oo_id = ObjectID(payload.userId);
+                            var oo_id = ObjectId.createFromHexString(payload.userId);
                             db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
                             if (err != null) {
                                 req.session.error = 'Access denied!';
@@ -2200,7 +2200,7 @@ app.get('/traffic/:domain', requiredAuthentication, admin, function (req, res) {
 
 app.get('/validate/:auth_id', function (req, res) {
     console.log("tryna validate...");
-    //var u_id = ObjectID(req.params.auth_id);
+    //var u_id = ObjectId.createFromHexString(req.params.auth_id);
     var timestamp = Math.round(Date.now() / 1000);
     db_old.users.findOne({ validationHash : req.params.auth_id}, function (err, user) {
         if (err || !user) {
@@ -2614,7 +2614,7 @@ app.post('/stripe_collect_data', function (req,res) {
 
 app.get('/makedomainadmin/:domain/:_id',  checkAppID, requiredAuthentication, admin, function (req, res) {
     console.log(" makedomainadmin req" + req)
-    var u_id = ObjectID(req.params._id);
+    var u_id = ObjectId.createFromHexString(req.params._id);
     db_old.users.update(
         { "_id": u_id },
         {$set: { "authLevel" : "domain_admin_" + req.params.domain }}, function (err, done) {
@@ -2643,7 +2643,7 @@ app.post('/updatedomain/', requiredAuthentication, admin, domainadmin, function 
     req.body.lastUpdateTimestamp = timestamp;
     req.body.lastUpdateUserID = req.session.user._id.toString();
     req.body.lastUpdateUserName = req.session.user.userName;
-    db_old.domains.update({"_id": ObjectID(req.body._id)},
+    db_old.domains.update({"_id": ObjectId.createFromHexString(req.body._id)},
     {$set: {domain: req.body.domain, domainStatus: req.body.domainStatus.toLowerCase()}}, function (err, domain) {
         console.log("tryna update domain " + req.body._id);
     // db.apps.update(req.body,  function (err, app) {
@@ -2744,7 +2744,7 @@ app.post('/createapp/', requiredAuthentication, admin, domainadmin, function (re
 
 app.post('/updateapp/:appid', requiredAuthentication, admin, function (req, res) {
         console.log("tryna update appid " + req.params.appid + " body: " + JSON.stringify(req.body));
-        db_old.apps.update({"_id": ObjectID(req.body._id)},
+        db_old.apps.update({"_id": ObjectId.createFromHexString(req.body._id)},
         {$set: {appname: req.body.appname, appStatus: req.body.appStatus, appdomain: req.body.appdomain, appunitydomain: req.body.appunitydomain}}, function (err, app) {
             console.log("tryna update app " + req.body._id);
         // db.apps.update(req.body,  function (err, app) {
@@ -2758,15 +2758,15 @@ app.post('/updateapp/:appid', requiredAuthentication, admin, function (req, res)
 });
 app.post('/domain/', requiredAuthentication, domainadmin, function (req, res) {
     // console.log("tryna get domain info for " + req.params.domain);
-    let oid = ObjectID(req.body._id);
+    let oid = ObjectId.createFromHexString(req.body._id);
     db_old.domains.findOne({_id: oid}, function (err, domain) {
         if (err | !domain) {
             res.send("no domain for you");
         } else {
             if (domain.domainPictureIDs != null && domain.domainPictureIDs != undefined && domain.domainPictureIDs.length > 0) {
-                // oids = domain.domainPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
+                // oids = domain.domainPictureIDs.map(ObjectId.createFromHexString()); //convert to mongo object ids for searching
                 const oids = domain.domainPictureIDs.map(item => {
-                    return ObjectID(item);
+                    return ObjectId.createFromHexString(item);
                 })
                 db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                     if (err || !pic_items) {
@@ -2825,7 +2825,7 @@ app.get('/domain/:domain', checkAppID, requiredAuthentication, domainadmin, func
 });
 app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
     console.log("tryna get app " + req.params.appID);
-    let oid = ObjectID(req.params.appID);
+    let oid = ObjectId.createFromHexString(req.params.appID);
     db_old.apps.findOne({_id: oid}, function (err, app) {
         if (err | !app) {
             res.send("no apps");
@@ -2844,7 +2844,7 @@ app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
                             // app_admins = adminIDs;
                             if (IDs.length > 0) {
                                 async.each (IDs, function (ID, acallbackz) {
-                                    db_old.users.findOne({_id: ObjectID(ID)}, function (err, user) {
+                                    db_old.users.findOne({_id: ObjectId.createFromHexString(ID)}, function (err, user) {
                                         if (err || !user) {
                                             //invalid uid?
                                             console.log("bad user ID for app admin!");
@@ -2880,7 +2880,7 @@ app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
 
 
                                 // for (let i = 0; i < IDs.length; i++) {
-                                //     db.users.findOne({_id: ObjectID(IDs[i])}, function (err, user) {
+                                //     db.users.findOne({_id: ObjectId.createFromHexString(IDs[i])}, function (err, user) {
                                 //         if (err || !user) {
                                 //             //invalid uid?
                                 //             console.log("bad user ID for app admin!");
@@ -2905,7 +2905,7 @@ app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
                     if (app.appPictureIDs != null && app.appPictureIDs != undefined && app.appPictureIDs.length > 0) {
 
                         const oids = app.appPictureIDs.map(item => {
-                            return ObjectID(item);
+                            return ObjectId.createFromHexString(item);
                         });
                         console.log("oids " + oids);
                         db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
@@ -2973,7 +2973,7 @@ app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
                 // if (app.appPictureIDs != null && app.appPictureIDs != undefined && app.appPictureIDs.length > 0) {
                 //     let appPictures = [];
                 //     const oids = app.appPictureIDs.map(item => {
-                //         return ObjectID(item);
+                //         return ObjectId.createFromHexString(item);
                 //     });
                 //     console.log("oids " + oids);
                 //     db.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
@@ -3030,7 +3030,7 @@ app.get('/user_details/:uid', requiredAuthentication, domainadmin, function (req
     console.log("tryna get user " + req.params.uid);
 
     if (req.session.user.authLevel.toLowerCase().includes("domain") && req.params.uid != null) {
-        let uID = ObjectID(req.params.uid);
+        let uID = ObjectId.createFromHexString(req.params.uid);
 
     db_old.users.findOne({_id: uID}, function (err, user) {
         if (err || !user) {
@@ -3074,7 +3074,7 @@ app.get('/alldomains/', requiredAuthentication, admin, function (req, res) {
 app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) { //rem'd checkAppID, bc profiles can cross app lines
 
     console.log("tryna profile...");
-    var u_id = new ObjectId(req.params._id);
+    var u_id = ObjectId.createFromHexString(req.params._id);
     let profileResponse = {};
     db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
@@ -3103,7 +3103,7 @@ app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) 
                                     callback();
                                 }
                             });
-    //                         let a_id = ObjectID(user.activitiesID); 
+    //                         let a_id = ObjectId.createFromHexString(user.activitiesID); 
     //                         db.activities.find({"_id": a_id}, function (err, activities) {
     //                             if (err || !activities) {
     //                                 console.log("no activities");
@@ -3119,7 +3119,7 @@ app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) 
                     },
             //                 function (callback) {
             //                     if (user.inventoryID != undefined && user.inventoryID != null) {
-            //                         let a_id = ObjectID(user.inventoryID); 
+            //                         let a_id = ObjectId.createFromHexString(user.inventoryID); 
             //                         db.inventories.find({"_id": a_id}, function (err, inventory) {
             //                             if (err || !inventory) {
             //                                 console.log("no inventories");
@@ -3222,7 +3222,7 @@ app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) 
 app.get('/inventory/:_id', requiredAuthentication, usercheck, function (req, res) { //rem'd checkAppID, bc profiles can cross app lines //NOPE
 
     console.log("tryna get inventory for ... " + req.params._id);
-    var u_id = ObjectID(req.params._id);
+    var u_id = ObjectId.createFromHexString(req.params._id);
     let profileResponse = null;
     db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
@@ -3236,7 +3236,7 @@ app.get('/inventory/:_id', requiredAuthentication, usercheck, function (req, res
                   
                 function (callback) {
                     if (user.inventoryID != undefined && user.inventoryID != null) {
-                        let a_id = ObjectID(user.inventoryID); 
+                        let a_id = ObjectId.createFromHexString(user.inventoryID); 
                         db_old.inventories.findOne({"_id": a_id}, function (err, inventory) {
                             if (err || !inventory) {
                                 console.log("no inventories");
@@ -3271,8 +3271,8 @@ app.get('/inventory/:_id', requiredAuthentication, usercheck, function (req, res
 });
 
 app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
-    if (req.params._id != undefined && req.params._id != null && ObjectID.isValid(req.params._id)) { 
-        var u_id = ObjectID(req.params._id);
+    if (req.params._id != undefined && req.params._id != null && ObjectId.isValid(req.params._id)) { 
+        var u_id = ObjectId.createFromHexString(req.params._id);
         db_old.inventory_items.find({"userID": u_id}, function (err, items){
             if (err || !items) {
                 res.send("nope");
@@ -3288,7 +3288,7 @@ app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
 });
 
 app.post('/update_profile/:_id', requiredAuthentication, function (req, res) { //for end users to change their personal data
-    var u_id = ObjectID(req.params.auth_id);
+    var u_id = ObjectId.createFromHexString(req.params.auth_id);
     db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
@@ -3308,7 +3308,7 @@ app.post('/update_profile/:_id', requiredAuthentication, function (req, res) { /
 
 app.post('/drop/', requiredAuthentication, function (req, res) { 
     let timestamp = Math.round(Date.now() / 1000);
-    let i_id = ObjectID(req.body.inventoryObj._id); //player inventory//nope, id of the inventory_item
+    let i_id = ObjectId.createFromHexString(req.body.inventoryObj._id); //player inventory//nope, id of the inventory_item
     // let sceneInventoryID = null; //scene inventory
     let sceneInventory = null;
     let maxperscene = 0;
@@ -3318,7 +3318,7 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
         // },
         function (callback) { //check object
             // let sceneInventoryID = scene.sceneInventoryID;
-            let o_id = ObjectID(req.body.inventoryObj.objectID);
+            let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
             db_old.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
                 if (err || !obj) {
                     console.log("no object found for drop");
@@ -3341,7 +3341,7 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
                     console.log("error finding scene to dropin! " + err);
                     callback(err);
                 } else {
-                    db_old.inventory_items.find({$and: [{"sceneID" : scene._id, "objectID": ObjectID(req.body.inventoryObj.objectID)}]}, function (err, items) { //query to get count below
+                    db_old.inventory_items.find({$and: [{"sceneID" : scene._id, "objectID": ObjectId.createFromHexString(req.body.inventoryObj.objectID)}]}, function (err, items) { //query to get count below
                         if (err || !items) {
                             console.log("no scene for drop!");
                             callback(err);
@@ -3352,7 +3352,7 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
                             } else {
                                 db_old.inventory_items.updateOne({"_id": i_id}, {
                                 $unset: {userID: ""}, 
-                                $set: {sceneID : ObjectID(scene._id), location : req.body.inventoryObj.location}
+                                $set: {sceneID : ObjectId.createFromHexString(scene._id), location : req.body.inventoryObj.location}
                             }, function (err, saved) { //unset userID and set the sceneID for ownership reference
                                     if (err || !saved) {
                                         callback("error switching ownerszsipzt! " + err);
@@ -3385,7 +3385,7 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
 
 app.post('/dropnope/', requiredAuthentication, function (req, res) { 
     let timestamp = Math.round(Date.now() / 1000);
-    let i_id = ObjectID(req.body.inventoryID); //player inventory
+    let i_id = ObjectId.createFromHexString(req.body.inventoryID); //player inventory
     let sceneInventoryID = null; //scene inventory
     let sceneInventory = null;
     async.waterfall([
@@ -3405,8 +3405,8 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
             
             if (scene.sceneInventoryID != undefined && scene.sceneInventoryID != null) { //maybe needs a toggle instead of more tagsoup? 
                 sceneInventoryID = scene.sceneInventoryID;
-                let s_id = ObjectID(scene.sceneInventoryID);
-                // let o_id = ObjectID(req.body.inventoryObj.objectID);
+                let s_id = ObjectId.createFromHexString(scene.sceneInventoryID);
+                // let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
                 db_old.inventories.findOne({"_id": s_id}, function (err, inventory) {//check for scene inventory record
                     if (err || !inventory) {
                         console.log("no scene inventory?2");
@@ -3423,7 +3423,7 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
         },        
         function (callback) { //check object
             // let sceneInventoryID = scene.sceneInventoryID;
-            let o_id = ObjectID(req.body.inventoryObj.objectID);
+            let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
             db_old.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
                 if (err || !obj) {
                     console.log("no object found for drop");
@@ -3483,7 +3483,7 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
             
             if (sceneInventoryID != null) {
             console.log("trynna lookup scene invnetory " + sceneInventoryID);
-            let s_id = ObjectID(sceneInventoryID);
+            let s_id = ObjectId.createFromHexString(sceneInventoryID);
             let i_obj = req.body.inventoryObj;
             db_old.inventories.findOne({'_id': s_id },function (err, inventory){  
                 if (err || !inventory) {
@@ -3544,7 +3544,7 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
         function (callback) {
             if (req.body.action != undefined) {
                 // console.log(JSON.stringify(req.body.action));
-                var u_id = ObjectID(req.session.user._id);
+                var u_id = ObjectId.createFromHexString(req.session.user._id);
                 if (req.session.user._id != req.body.userData.userID) {
                     db_old.users.findOne({"_id": u_id}, function (err, user) {  
                         if (err || !user) {
@@ -3553,7 +3553,7 @@ app.post('/dropnope/', requiredAuthentication, function (req, res) {
                             callback(err);
                         } else {
                             if (req.session.user.activitiesID != undefined) { //add drop action to user activity
-                                var a_id = ObjectID(req.session.user.activitiesID);
+                                var a_id = ObjectId.createFromHexString(req.session.user.activitiesID);
                                 console.log("gotsa activities id " + req.session.activitiesID);
                                 let actionItem = {};
                                 actionItem.userID = req.body.userData._id;
@@ -3615,11 +3615,11 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
         let actionItem = {};
         let sceneInventoryID = null;
         
-        var u_id = ObjectID(req.session.user._id);
+        var u_id = ObjectId.createFromHexString(req.session.user._id);
         // let user = null;
         async.waterfall([
             function (callback) {
-                // var u_id = ObjectID(req.session.user._id);
+                // var u_id = ObjectId.createFromHexString(req.session.user._id);
                 if (req.session.user._id != req.body.userData.userID) {
                     db_old.users.findOne({"_id": u_id}, function (err, user) {  
                         if (err || !user) {
@@ -3635,19 +3635,19 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                                 actionItem.actionName = req.body.object_item.objtype;
                                 actionItem.actionResult = "none";
                             } else {
-                                actionItem.actionID = ObjectID(req.body.action._id);
+                                actionItem.actionID = ObjectId.createFromHexString(req.body.action._id);
                                 actionItem.actionType = req.body.action.actionType;
                                 actionItem.actionResult = req.body.action.actionResult;
                                 actionItem.actionName = req.body.action.actionName;
                             }
-                            actionItem.userID = ObjectID(req.body.userData._id);
-                            actionItem.objectID = ObjectID(req.body.object_item._id); //platform objectID not the same thing as mongo objectID (urg)
+                            actionItem.userID = ObjectId.createFromHexString(req.body.userData._id);
+                            actionItem.objectID = ObjectId.createFromHexString(req.body.object_item._id); //platform objectID not the same thing as mongo objectID (urg)
                             actionItem.objectName = req.body.object_item.name;
                             actionItem.timestamp = timestamp * 1000;
                             actionItem.fromScene = req.body.fromScene;
                 
-                            inventoryItem.userID = ObjectID(req.body.userData._id); //change these to oids later...
-                            inventoryItem.objectID = ObjectID(req.body.object_item._id);
+                            inventoryItem.userID = ObjectId.createFromHexString(req.body.userData._id); //change these to oids later...
+                            inventoryItem.objectID = ObjectId.createFromHexString(req.body.object_item._id);
                             inventoryItem.objectName = req.body.object_item.name;
                             inventoryItem.objectType = req.body.object_item.objtype;
                             inventoryItem.objectCategory = req.body.object_item.objcat;
@@ -3673,8 +3673,8 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                 console.log("checking if from scene ivnetory " + req.body.fromSceneInventory); //wait, this shouldbe scene ID!
                 if (req.body.fromSceneInventory) { 
                     console.log("tryna lookup scene inventory " + req.body.fromSceneInventory + " sceneID " + req.body.sceneID + " obhjectID " + req.body.object_item._id); //this is sceneID now
-                    // let s_id = ObjectID(req.body.fromSceneInventory);
-                    db_old.inventory_items.findOne({$and: [{"sceneID" : ObjectID(req.body.sceneID), "objectID": ObjectID(req.body.object_item._id)}]}, function (err, item){ //pick one if > 1? by timestamp?
+                    // let s_id = ObjectId.createFromHexString(req.body.fromSceneInventory);
+                    db_old.inventory_items.findOne({$and: [{"sceneID" : ObjectId.createFromHexString(req.body.sceneID), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]}, function (err, item){ //pick one if > 1? by timestamp?
                         if (err || !item) {
                             console.log("error getting a sceneID! " + err);
                             callback(null);
@@ -3715,7 +3715,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
             function (callback) {
                 if (sceneInventoryID != null) { //if this isn't null the pickup object came from the scene inventory, so just need to reassign it to user
                     console.log("sceneInventoryID " + sceneInventoryID);
-                    db_old.inventory_items.updateOne({"_id": sceneInventoryID}, {$unset: {sceneID: ""}, $set: {"userID" : ObjectID(req.body.userData._id)}}, function (err, saved) {
+                    db_old.inventory_items.updateOne({"_id": sceneInventoryID}, {$unset: {sceneID: ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData._id)}}, function (err, saved) {
                         if (err || !saved) {
                             callback("error switching ownerszsipzt! " + err);
                         } else {
@@ -3729,7 +3729,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                     if (req.body.object_item.maxPerUser != undefined && req.body.object_item.maxPerUser != null && 
                         req.body.object_item.maxPerUser != 0 && req.body.object_item.maxPerUser != "0") {
                         
-                        db_old.inventory_items.find({$and: [{"userID" : ObjectID(req.body.userData._id), "objectID": ObjectID(req.body.object_item._id)}]}, function (err, items) {
+                        db_old.inventory_items.find({$and: [{"userID" : ObjectId.createFromHexString(req.body.userData._id), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]}, function (err, items) {
                             if (err) {
                                 console.log(err);
                                 callback(err);
@@ -3781,7 +3781,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                 
                 if (req.body.object_item.maxPerUser != undefined && req.body.object_item.maxPerUser != null && 
                     req.body.object_item.maxPerUser != 0 && req.body.object_item.maxPerUser != "0" && user.inventoryID != undefined && user.inventoryID != null) {
-                    var i_id = ObjectID(user.inventoryID);
+                    var i_id = ObjectId.createFromHexString(user.inventoryID);
                     console.log("userInvetorory " + user.inventoryID);
                     db.inventories.findOne({"_id": i_id}, function (err, inventory) {
                         if (err || !inventory) {
@@ -3813,7 +3813,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                         function (user, callback) { //check and remove if it came from the scene's inventory, instead of the scene itself
                 if (req.body.fromSceneInventory != undefined && req.body.fromSceneInventory != null) { 
                     console.log("tryna lookup scene inventory " + req.body.fromSceneInventory);
-                    let s_id = ObjectID(req.body.fromSceneInventory);
+                    let s_id = ObjectId.createFromHexString(req.body.fromSceneInventory);
                    
                     db.inventories.findOne({'_id': s_id },function (err, inventory){  
                         if (err || !inventory) {
@@ -3858,7 +3858,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
             function (user, callback) { //log activity 
                 if (user.activitiesID != undefined && user.activitiesID != null)  {
                     console.log("updati9ng acvitiiies record" + user.activitiesID);
-                    var a_id = ObjectID(user.activitiesID);
+                    var a_id = ObjectId.createFromHexString(user.activitiesID);
                     db.activities.findOne({"_id": a_id}, function (err, activities) {
                         if (err || !activities) {
                             console.log("error getting user: " + err);
@@ -3906,7 +3906,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                 if (req.body.action.actionResult.toLowerCase() == "inventory") {
                     if (user.inventoryID != undefined && user.inventoryID != null) {
                         console.log("updating inventory record " + user.inventoryID);
-                        var i_id = ObjectID(user.inventoryID);
+                        var i_id = ObjectId.createFromHexString(user.inventoryID);
                         db.inventories.findOne({"_id": i_id}, function (err, inventory) {
                             if (err || !inventory) {
                                 console.log("error getting user: " + err);
@@ -3977,8 +3977,8 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
 });
 
 app.post('/update_user/', requiredAuthentication, admin, function (req, res) { //for admins to set lower permissions
-    // var u_id = ObjectID(req.params.auth_id);
-    let o_id = ObjectID(req.body._id);
+    // var u_id = ObjectId.createFromHexString(req.params.auth_id);
+    let o_id = ObjectId.createFromHexString(req.body._id);
     if (o_id != null) {
         db_old.users.findOne({"_id": o_id}, function (err, user) {
             if (err || !user) {
@@ -4095,7 +4095,7 @@ app.get('/get_models/:_id', requiredAuthentication, function (req, res) {
     // }
 });
 app.get('/get_model/:_id', requiredAuthentication, function (req, res) {
-    var model_id = new ObjectId(req.params._id);
+    var model_id = ObjectId.createFromHexString(req.params._id);
     console.log("tryna get_model for " + req.params._id );
       
     (async () => {
@@ -4189,7 +4189,7 @@ app.get('/get_model/:_id', requiredAuthentication, function (req, res) {
 // });
 
 // app.get('/bundleassetputurl/:_id/:version_sig/:platform_sig', checkAppID, requiredAuthentication, usercheck, function (req, res) {
-//     var u_id = ObjectID(req.params._id);
+//     var u_id = ObjectId.createFromHexString(req.params._id);
 //     db.users.findOne({"_id": u_id}, function (err, user) {
 //         if (err || !user) {
 //             console.log("error getting user: " + err);
@@ -4210,7 +4210,7 @@ app.get('/get_model/:_id', requiredAuthentication, function (req, res) {
 //     // if (cType = "application/octet-stream") {
 //     //     cType = "binary/octet-stream";
 //     // }
-//     var u_id = ObjectID(req.params._id);
+//     var u_id = ObjectId.createFromHexString(req.params._id);
 //     db.users.findOne({"_id": u_id}, function (err, user) {
 //         if (err || !user) {
 //             console.log("error getting user: " + err);
@@ -5666,7 +5666,7 @@ app.post('/staging_delete_array', requiredAuthentication, function (req, res) {
 //     // if (cType = "application/octet-stream") {
 //     //     cType = "binary/octet-stream";
 //     // }
-//     var u_id = ObjectID(req.params._id);
+//     var u_id = ObjectId.createFromHexString(req.params._id);
 //     db.users.findOne({"_id": u_id}, function (err, user) {
 //         if (err || !user) {
 //             console.log("error getting user: " + err);
@@ -5734,13 +5734,13 @@ app.post('/staging_delete_array', requiredAuthentication, function (req, res) {
 
   
 
-//     var u_id = ObjectID(req.params._id);
+//     var u_id = ObjectId.createFromHexString(req.params._id);
 //     db.users.findOne({"_id": u_id}, function (err, user) {
 //         if (err || !user) {
 //             res.send("not a valid user!");
 //             console.log("error getting user: " + err);
 //         } else {
-//             db.image_items.findOne({_id: ObjectID(req.params.image_id)}, function (err, picture_item) {
+//             db.image_items.findOne({_id: ObjectId.createFromHexString(req.params.image_id)}, function (err, picture_item) {
 //                 if (err || !picture_item) {
 //                     res.send("not a valid pic!")
 //                     console.log("error getting picture items: " + err);
@@ -5820,13 +5820,13 @@ app.post('/imagetarget_puturl/:_id/:image_id', requiredAuthentication, function 
 
   
 
-    var u_id = ObjectID(req.params._id);
+    var u_id = ObjectId.createFromHexString(req.params._id);
     db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
             res.send("not a valid user!");
             console.log("error getting user: " + err);
         } else {
-            db_old.image_items.findOne({_id: ObjectID(req.params.image_id)}, function (err, picture_item) {
+            db_old.image_items.findOne({_id: ObjectId.createFromHexString(req.params.image_id)}, function (err, picture_item) {
                 if (err || !picture_item) {
                     res.send("not a valid pic!")
                     console.log("error getting picture items: " + err);
@@ -5924,7 +5924,7 @@ app.post('/stagingputurl/:_id', requiredAuthentication, function (req, res) {
     //     cType = "model/gltf-binary";
     // }
     console.log("tryna get a puturl for : " + req.body.uid + " contentTYpe : " + cType);
-    var u_id = ObjectID(req.params._id);
+    var u_id = ObjectId.createFromHexString(req.params._id);
     db_old.users.findOne({"_id": u_id}, function (err, user) {
         if (err || !user) {
             console.log("error getting user: " + err);
@@ -6375,7 +6375,7 @@ app.get('/staging/:_id', requiredAuthentication, function (req, res) {
 // //       if (amirite("admin", req.session.user._id.toString())) { //check the acl
 
 //     console.log("tryna get assets for user...");
-//     var u_id = ObjectID(req.params._id);
+//     var u_id = ObjectId.createFromHexString(req.params._id);
 //     db.users.findOne({"_id": u_id}, function (err, user) {
 //         if (err || !user) {
 //             console.log("error getting user: " + err);
@@ -6654,8 +6654,8 @@ app.get('/invitation_check/:hzch', function (req, res) { //called from /landing/
                     action.actionType = "Send Email"
                     action.actionResult = "Invitation Button Clicked";
                     action.timestamp = timestamp * 1000; //ms trimmed on client
-                    action.targetPersonID = ObjectID(invitation.targetPersonID);
-                    action.userID = ObjectID(invitation.sentByUserID)
+                    action.targetPersonID = ObjectId.createFromHexString(invitation.targetPersonID);
+                    action.userID = ObjectId.createFromHexString(invitation.sentByUserID)
                 
                     action.targetEmail = invitation.sentToEmail;
                     action.fromScene = invitation.invitedToSceneShortID;
@@ -6773,7 +6773,7 @@ app.post('/invitation_req/', function (req,res) {
                                         theScene = scene;
                                         let urlHalf = "";
                                         if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-                                            var oo_id = ObjectID(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
+                                            var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
                                             db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                                 if (err || !picture_item || picture_item.length == 0) {
                                                     console.log("error getting postcard for availablescenes: 2" + err);
@@ -6816,7 +6816,7 @@ app.post('/invitation_req/', function (req,res) {
                                         geoLinks += "<strong><a href='http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "'>Map to location: "+sceneData.sceneLocations[i].name+"</a></strong><br><br>"+
                                         "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" +
                                             "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + sceneData.sceneLocations[i].latitude +
-                                            "," + sceneData.sceneLocations[i].longitude + "&zoom=15&size=600x400&maptype=roadmap&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:blue%7Clabel:%7C" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" + 
+                                            "," + sceneData.sceneLocations[i].longitude + "&zoom=15&size=600x400&maptype=roadmap&key="+process.env.GOOGLEMAPS_KEY+"&markers=color:blue%7Clabel:%7C" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" + 
                                             "</a>";
                                         if (sceneData.sceneLocations[i].eventData != undefined && sceneData.sceneLocations[i].eventData.toLowerCase().includes('restrict')) {
                                             eventData.restrictToLocation = true;
@@ -7478,7 +7478,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
 
             var uid = ip;
             if (req.session.user != undefined) {
-                uid = ObjectID(req.session.user._id.toString());
+                uid = ObjectId.createFromHexString(req.session.user._id.toString());
             }
             console.log("tryna mail to " +uid);
             async.each (emailSplit, function (email, callbackz) {
@@ -7515,7 +7515,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                                 pursoner.personID = person_id;
                                 pursoner.email = email.toString().trim();
                                 emailsFinal.push(pursoner);
-                                db_old.users.updateOne( { "_id": ObjectID(uid) }, { $addToSet: {people : person._id}});
+                                db_old.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}});
                                 callbackz();
                                 }
                             });
@@ -7549,7 +7549,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             //     activities : person.activities
                             // }});
                             emailsNotSent.push(person.email);
-                            // db.users.updateOne( { "_id": ObjectID(uid) }, { $addToSet: {people : person._id}});
+                            // db.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}});
 
                             //TODO respond with message
                             callbackz();
@@ -7561,7 +7561,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             //     lastUpdate : ts,
                             //     activities : person.activities
                             // }});
-                            // db.users.updateOne( { "_id": ObjectID(uid) }, { $addToSet: {people : person._id}});
+                            // db.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}});
                             action.actionID = emailActionID;
                             action.actionName = "Not Sent - Not Verified"
                             action.actionType = "Send Email"
@@ -7588,7 +7588,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             //     lastUpdate : ts,
                             //     activities : person.activities
                             // }});
-                            // db.users.updateOne( { "_id": ObjectID(uid) }, { $addToSet: {people : person._id}});
+                            // db.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}});
                             action.actionID = emailActionID;
                             action.actionName = "Not Sent - Opt Out"
                             action.actionType = "Send Email"
@@ -7639,11 +7639,11 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                     }
                     //callback won't wait on this, but whatever...
                     if (req.session.user) {
-                        db_old.users.findOne({"_id": ObjectID(uid)}, function (err, user) {
+                        db_old.users.findOne({"_id": ObjectId.createFromHexString(uid)}, function (err, user) {
                             if (err ||!user) {
                                 console.log("HEYWTF! caint find user " +req.session.user._id + " ...call the police!");
                             } else {
-                                db_old.users.updateOne( { "_id": ObjectID(uid) }, { $addToSet: {people : person._id}}); //addToSet should add array if not present, but prevent dupes (!?)
+                                db_old.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}}); //addToSet should add array if not present, but prevent dupes (!?)
                                 
                                 console.log("tryna add a person " + person._id + " to user" + req.session.user._id); //TODO add sentMailTo activity to user action inventory
         
@@ -7691,7 +7691,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             action.actionResult = "Not Sent - Scene Disallowed";
                             action.timestamp = ts;
                             if (req.session.user) {
-                                action.userID = ObjectID(req.session.user._id);
+                                action.userID = ObjectId.createFromHexString(req.session.user._id);
                             }
                             action.targetPersonID = thePerson._id;
                             action.emailAddressTo = thePerson.email;
@@ -7712,7 +7712,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             callback(null, '', eData, scene);
                         } else {
                             if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-                                var oo_id = ObjectID(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
+                                var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
                                 db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                     if (err || !picture_item || picture_item.length == 0) {
                                         console.log("error getting postcard for availablescenes: 2" + err);
@@ -7771,7 +7771,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                     geoLinks += "<strong><a href='http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "'>Map to location: "+sceneData.sceneLocations[i].name+"</a></strong><br><br>"+
                     "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" +
                         "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + sceneData.sceneLocations[i].latitude +
-                        "," + sceneData.sceneLocations[i].longitude + "&zoom=15&size=600x400&maptype=roadmap&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:blue%7Clabel:%7C" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" + 
+                        "," + sceneData.sceneLocations[i].longitude + "&zoom=15&size=600x400&maptype=roadmap&key="+process.env.GOOGLEMAPS_KEY+"&markers=color:blue%7Clabel:%7C" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" + 
                         "</a>";
                     if (sceneData.sceneLocations[i].eventData != undefined && sceneData.sceneLocations[i].eventData.toLowerCase().includes('restrict')) {
                         eventData.restrictToLocation = true;
@@ -8040,7 +8040,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
 /*
  app.get('/salt/:auth_id', function (req, res) {
  console.log("tryna salt...")
- var u_id = ObjectID(req.params.auth_id);
+ var u_id = ObjectId.createFromHexString(req.params.auth_id);
  db.users.findOne({"_id": u_id}, function (err, user) {
  if (err || !user) {
  console.log("error getting user: " + err);
@@ -8062,7 +8062,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
 
  app.get('/hash/:pw', function (req, res) {
  console.log("tryna salt...")
- var u_id = ObjectID(req.params.auth_id);
+ var u_id = ObjectId.createFromHexString(req.params.auth_id);
  db.users.findOne({"_id": u_id}, function (err, user) {
  if (err || !user) {
  console.log("error getting user: " + err);
@@ -8689,7 +8689,7 @@ app.post('/return_audiogroups/', function(req, res) {
 
         function(callback){ 
             if (req.body.triggerGroups != null && req.body.triggerGroups.length > 0) {
-                const group_ids = req.body.triggerGroups.map(item => { return ObjectID(item); });
+                const group_ids = req.body.triggerGroups.map(item => { return ObjectId.createFromHexString(item); });
                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
                     if (err || !group_items) {
                         console.log("error getting audiogroup items: " + err);
@@ -8710,7 +8710,7 @@ app.post('/return_audiogroups/', function(req, res) {
         },
         function(callback){ 
             if (req.body.ambientGroups != null && req.body.ambientGroups.length > 0) {
-                const group_ids = req.body.ambientGroups.map(item => { return ObjectID(item); });
+                const group_ids = req.body.ambientGroups.map(item => { return ObjectId.createFromHexString(item); });
                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
                     if (err || !group_items) {
                         console.log("error getting audiogroup items: " + err);
@@ -8730,7 +8730,7 @@ app.post('/return_audiogroups/', function(req, res) {
         },
         function(callback){ 
             if (req.body.primaryGroups != null && req.body.primaryGroups.length > 0) {
-                const group_ids = req.body.primaryGroups.map(item => { return ObjectID(item); });
+                const group_ids = req.body.primaryGroups.map(item => { return ObjectId.createFromHexString(item); });
                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
                     if (err || !group_items) {
                         console.log("error getting audiogroup items: " + err);
@@ -8750,7 +8750,7 @@ app.post('/return_audiogroups/', function(req, res) {
         },
         function(callback){ 
             if (req.body.objectGroups != null && req.body.objectGroups.length > 0) {
-                const group_ids = req.body.objectGroups.map(item => { return ObjectID(item); });
+                const group_ids = req.body.objectGroups.map(item => { return ObjectId.createFromHexString(item); });
                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
                     if (err || !group_items) {
                         console.log("error getting audiogroup items: " + err);
@@ -8788,7 +8788,7 @@ app.post('/return_audiogroups/', function(req, res) {
         },
         function (callback) {
             // console.log("audio IDs: " + audio_IDs);
-            const audio_ids = audio_IDs.map(item => { return ObjectID(item); });
+            const audio_ids = audio_IDs.map(item => { return ObjectId.createFromHexString(item); });
             db_old.audio_items.find({'_id': { $in: audio_ids}}).toArray(function (err, audio_items) {
                 if (err || !audio_items) {
                     console.log("error getting audio items: " + err);
@@ -8970,7 +8970,7 @@ app.get('/usergroups/:u_id', requiredAuthentication, function(req, res) {
 });
 app.post('/add_group_item/', requiredAuthentication, function (req, res) { //dunno why I rem'd the groupdata update...?
     console.log(JSON.stringify(req.body));
-    var o_id = ObjectID(req.body.group_id);   
+    var o_id = ObjectId.createFromHexString(req.body.group_id);   
     // console.log('groupID requested : ' + req.body.sourceID);
     db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
         if (err || !group) {
@@ -9009,7 +9009,7 @@ app.post('/add_group_item/', requiredAuthentication, function (req, res) { //dun
 });
 app.post('/remove_group_item/', requiredAuthentication, function (req, res) {
     console.log(JSON.stringify(req.body));
-    var o_id = ObjectID(req.body.group_id);   
+    var o_id = ObjectId.createFromHexString(req.body.group_id);   
     // console.log('groupID requested : ' + req.body.sourceID);
     db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
         if (err || !group) {
@@ -9073,7 +9073,7 @@ app.post('/remove_group_item/', requiredAuthentication, function (req, res) {
 });
 app.post('/update_group/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log(req.params._id);
-    var o_id = ObjectID(req.params._id);   
+    var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('group requested : ' + req.body._id);
     db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
         if (err || !group) {
@@ -9094,7 +9094,7 @@ app.post('/update_group/:_id', checkAppID, requiredAuthentication, function (req
 });
 app.post('/updategroup/', requiredAuthentication, function (req, res) {
     // console.log(req.body._id);
-    var o_id = ObjectID(req.body._id);   
+    var o_id = ObjectId.createFromHexString(req.body._id);   
     console.log('group requested : ' + req.body._id);
     db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
         if (err || !group) {
@@ -9133,7 +9133,7 @@ app.post('/updategroup/', requiredAuthentication, function (req, res) {
 
 // app.get('/mod_group_pics/:group_id', requiredAuthentication, function(req, res) { //quick hack
     
-//     let groupID = ObjectID(req.params.group_id);
+//     let groupID = ObjectId.createFromHexString(req.params.group_id);
 //     // let orientation = req.body.orientation;
 
 //     db.groups.findOne({"_id": groupID}, function(err, group) {
@@ -9141,7 +9141,7 @@ app.post('/updategroup/', requiredAuthentication, function (req, res) {
 //             console.log("error getting group item: " + err);
 //         } else {
 //             const image_ids = group.items.map(item => {
-//                 return ObjectID(item);
+//                 return ObjectId.createFromHexString(item);
 //             });
 //             db.image_items.find({_id: {$in: image_ids }}, function (err, pic_items) {
 //                 if (err || !pic_items) {
@@ -9149,7 +9149,7 @@ app.post('/updategroup/', requiredAuthentication, function (req, res) {
 //                     res.send(err);
 //                 } else {
 //                     for (let i = 0; i < pic_items.length; i++) {
-//                         let pid = ObjectID(pic_items[i]._id);
+//                         let pid = ObjectId.createFromHexString(pic_items[i]._id);
 //                         db.image_items.update({_id: pid}, {$set: {orientation: "Equirectangular"}}, function (err, saved) {
 //                             if (err || !saved) {
 //                                 console.log(err + "error updating pic " + pic_items[i]._id);
@@ -9171,7 +9171,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
 
     console.log('tryna return user group : ' + req.params.p_id);
     var pID = req.params.p_id;
-    var o_id = ObjectID(pID);
+    var o_id = ObjectId.createFromHexString(pID);
 
     db_old.groups.findOne({"_id": o_id}, function(err, group) {
         if (err || !group) {
@@ -9179,7 +9179,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
         } else {
             if (group.items != null) {
                 group.items = group.items.map(function (id) {
-                    return ObjectID(id);
+                    return ObjectId.createFromHexString(id);
                 });
                 if (group.lastUpdate != null) {
                     group.lastUpdateTimestamp = group.lastUpdate;
@@ -9474,7 +9474,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                                 
                                 if (scene_item.scenePostcards != undefined) {
                                     let scenePostcard = scene_item.scenePostcards[0];
-                                    db_old.image_items.findOne({'_id': ObjectID(scenePostcard)}, function(err, pic) {
+                                    db_old.image_items.findOne({'_id': ObjectId.createFromHexString(scenePostcard)}, function(err, pic) {
                                         if (err || !pic) {
                                             console.log("no postcard found for that id?!");
                                             if (group.groupdata) {
@@ -9581,7 +9581,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
 
                             //     console.log("scenePostcarnd " + scenePostcard);
                             //     if (scenePostcard != null && scenePostcard != undefined ) {
-                            //         db.image_items.findOne({'_id': ObjectID(scenePostcard)}, function(err, pic) {
+                            //         db.image_items.findOne({'_id': ObjectId.createFromHexString(scenePostcard)}, function(err, pic) {
                             //             if (err || !pic) {
                             //                 console.log("no postcard found for that id?!");
                             //             } else {
@@ -9763,7 +9763,7 @@ app.get('/sceneobjs/:g_id', checkAppID, requiredAuthentication, function(req, re
 ////            res.json(obj_items);
 //            for (var i = 0; i < obj_items.length; i++) {
 //                console.log("returning obj_item :" + obj_items[i]._id);
-////                var o_id = ObjectID(obj_items[i]._id);
+////                var o_id = ObjectId.createFromHexString(obj_items[i]._id);
 //                db.obj_items.update( { "_id": obj_items[i]._id }, { $set: {
 //
 //                    snapToGround: "false",
@@ -9798,7 +9798,7 @@ app.post('/newperson', checkAppID, requiredAuthentication, function (req, res) {
 
 app.post('/delete_person/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log("tryna delete person: " + req.params._id);
-    var o_id = ObjectID(req.params._id);
+    var o_id = ObjectId.createFromHexString(req.params._id);
     db_old.people.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
@@ -9806,7 +9806,7 @@ app.post('/delete_person/:_id', checkAppID, requiredAuthentication, function (re
 app.post('/update_person', requiredAuthentication, function (req, res) {
 //        var textitem = req.body;
     console.log("tryna update_person " + JSON.stringify(req.body));
-    var o_id = ObjectID(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
 //        textitem.userID = req.session.user._id.toString();
     db_old.people.update( { "_id": o_id }, { $set: {
         accountStatus: req.body.accountStatus,
@@ -9821,7 +9821,7 @@ app.post('/update_person', requiredAuthentication, function (req, res) {
 });
 
 app.get('/person_details/:p_id', requiredAuthentication, function(req, res) {
-    var o_id = ObjectID(req.params.p_id);
+    var o_id = ObjectId.createFromHexString(req.params.p_id);
     console.log('tryna return people for: ' + req.params.p_id);
     db_old.people.findOne({_id: o_id}, function(err, person) {
         if (err || !person) {
@@ -9865,7 +9865,7 @@ app.get('/mypeople/:u_id', requiredAuthentication,  function(req, res) {
     console.log('tryna return people for: ' + req.params.u_id);
     if (req.session.user._id.toString() == req.params.u_id) {
     
-    let oid = ObjectID(req.params.u_id.toString());
+    let oid = ObjectId.createFromHexString(req.params.u_id.toString());
     // async.waterfall
     db_old.users.findOne({"_id" : oid}, function (err, user) {
         if (err || !user) {
@@ -9893,7 +9893,7 @@ app.get('/mypeople/:u_id', requiredAuthentication,  function(req, res) {
 
 app.get('/person/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return person for: ' + req.params.p_id);
-    var o_id = ObjectID(req.params.p_id);
+    var o_id = ObjectId.createFromHexString(req.params.p_id);
     db_old.people.findOne({_id: o_id}, function(err, person) {
         if (err || !person) {
             console.log("error getting text_items : " + err);
@@ -9952,7 +9952,7 @@ app.get('/actions/:u_id', requiredAuthentication, function(req, res) {
 
 app.get('/action/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return action_items for: ' + req.params.p_id);
-    var o_id = ObjectID(req.params.p_id);
+    var o_id = ObjectId.createFromHexString(req.params.p_id);
     db_old.actions.findOne({_id: o_id}, function(err, action_item) {
         if (err || !action_item) {
             console.log("error getting action_item : " + err);
@@ -9965,7 +9965,7 @@ app.get('/action/:p_id', requiredAuthentication, function(req, res) {
 app.post('/update_action/', requiredAuthentication, admin, function (req, res) {
     //        var textitem = req.body;
         // console.log("req.body update text:" + JSON.stringify(req.body));
-        var o_id = ObjectID(req.body._id);
+        var o_id = ObjectId.createFromHexString(req.body._id);
     //        textitem.userID = req.session.user._id.toString();
         var timestamp = Math.round(Date.now() / 1000);
         db_old.actions.update( { "_id": o_id }, { $set: {
@@ -10062,7 +10062,7 @@ app.post('/newtext', requiredAuthentication, function (req, res) {
 
 app.post('/delete_text/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log("tryna delete text itme: " + req.body._id);
-    var o_id = ObjectID(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
     db_old.text_items.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
@@ -10070,7 +10070,7 @@ app.post('/delete_text/:_id', checkAppID, requiredAuthentication, function (req,
 app.post('/updatetext/:_id', requiredAuthentication, function (req, res) {
 //        var textitem = req.body;
     console.log("req.body update text:" + JSON.stringify(req.body));
-    var o_id = ObjectID(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
 //        textitem.userID = req.session.user._id.toString();
     var timestamp = Math.round(Date.now() / 1000);
     db_old.text_items.update( { "_id": o_id }, { $set: {
@@ -10105,7 +10105,7 @@ app.post('/updatetext/:_id', requiredAuthentication, function (req, res) {
 
 app.get('/svg/:_id', function(req, res) { 
     console.log('tryna return svg for: ' + req.params._id);
-    var o_id = ObjectID(req.params._id);
+    var o_id = ObjectId.createFromHexString(req.params._id);
     db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
         if (err || !text_item) {
             console.log("error getting text_items : " + err);
@@ -10117,7 +10117,7 @@ app.get('/svg/:_id', function(req, res) {
 });
 app.get('/font/:_id', function(req, res) { 
     console.log('tryna return font for: ' + req.params._id);
-    var o_id = ObjectID(req.params._id);
+    var o_id = ObjectId.createFromHexString(req.params._id);
     db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
         if (err || !text_item || text_item.type != "Font") {
             console.log("error getting font text_item : " + err);
@@ -10154,7 +10154,7 @@ app.get('/usertexts/:u_id', requiredAuthentication, function(req, res) {
 
 app.get('/usertext/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return usertexts for: ' + req.params.p_id);
-    var o_id = ObjectID(req.params.p_id);
+    var o_id = ObjectId.createFromHexString(req.params.p_id);
     db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
         if (err || !text_item) {
             console.log("error getting text_items : " + err);
@@ -10199,7 +10199,7 @@ app.get('/userpic/:p_id', requiredAuthentication, function(req, res) {
 
     console.log('tryna return userpic : ' + req.params.p_id);
     var pID = req.params.p_id;
-    var o_id = new ObjectId(pID);
+    var o_id = ObjectId.createFromHexString(pID);
     db_old.image_items.findOne({"_id": o_id}, function(err, picture_item) {
         if (err || !picture_item) {
             console.log("error getting picture items: " + err);
@@ -10310,8 +10310,8 @@ app.get('/userpic/:p_id', requiredAuthentication, function(req, res) {
 app.get('/hls/:_id', function(req, res) {  //main playback route for hls vids //todo auth? send to tracker?
     var pID = req.params._id;
     console.log("hls pid " + req.params._id);
-    if (ObjectID.isValid(pID)) {
-        var o_id = new ObjectId(pID);
+    if (ObjectId.isValid(pID)) {
+        var o_id = ObjectId.createFromHexString(pID);
         db_old.video_items.findOne({"_id": o_id}, function(err, video_item) {
             if (err || !video_item) {
                 console.log("error getting hls video item: " + err);
@@ -10410,7 +10410,7 @@ app.get('/hls/:_id', function(req, res) {  //main playback route for hls vids //
 app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return uservid : ' + req.params.p_id);
     var pID = req.params.p_id;
-    var o_id = new ObjectId(pID);
+    var o_id = ObjectId.createFromHexString(pID);
     db_old.video_items.findOne({"_id": o_id}, function(err, video_item) {
         if (err || !video_item) {
             console.log("error getting video items: " + err);
@@ -10474,7 +10474,7 @@ app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
         
 //         async.each (req.body.oIDs, function (oID, callbackz) { 
 //             //fetch obj and jack in the model url'
-//             let objID = ObjectID(oID);
+//             let objID = ObjectId.createFromHexString(oID);
 //             db.obj_items.findOne({_id: objID}, function (err, obj_item) {
 //                 if (err || !obj_item) {
 //                     callbackz(err);
@@ -10483,7 +10483,7 @@ app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
 //                     let mid = obj_item.modelID;
 //                     if (mid != null) {
 //                         // console.log("tryna get inventory modelID2 " + oid);
-//                         let m_id = ObjectID(mid);
+//                         let m_id = ObjectId.createFromHexString(mid);
 //                         db.models.findOne({"_id": m_id}, function (err, model) {
 //                         if (err || !model) {
 //                             console.log("error getting model: " + err);
@@ -10521,7 +10521,7 @@ app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
 app.post('/scene_inventory_objex/', function(req, res) {
     console.log('tryna return userobj : ' + req.params.p_id);
     const iids = req.body.oIDs.map(item => {
-        return ObjectID(item);
+        return ObjectId.createFromHexString(item);
     });
     let response = {};
     let objex = [];
@@ -10537,7 +10537,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
                         if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) {
                         // oids = domain.domainPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
                             const oids = obj_item.objectPictureIDs.map(item => {
-                                return ObjectID(item);
+                                return ObjectId.createFromHexString(item);
                             });
                             db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                                 if (err || !pic_items) {
@@ -10578,41 +10578,72 @@ app.post('/scene_inventory_objex/', function(req, res) {
                         // console.log(JSON.stringify(obj_item));
                         if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
                             const aids = obj_item.actionIDs.map(item => {
-                                return ObjectID(item);
+                                return ObjectId.createFromHexString(item);
                             });
-                            db_old.actions.find({_id: {$in: aids }}, function (err, actions) {
-                                if (err || !actions) {
-                                    callback(err);
-                                } else {
-                                    obj_item.actions = actions;
-                                    // console.log(JSON.stringify(obj_item.actions));
-                                    callback(null);
-                                }
-                            });
+                            (async () => {
+                              try {
+                                const query = {"_id": {$in: aids}};
+                                const actions = await RunDataQuery("actions", "find", query, req.originalUrl);
+                                if (actions && actions.length) {
+                                  obj_item.actions = actions;
+                                } 
+                              } catch (e) {
+                                console.log("error getting actions for object: " +e);
+                              }
+                              callback(null);
+                                
+                            })();
+                            // db_old.actions.find({_id: {$in: aids }}, function (err, actions) {
+                            //     if (err || !actions) {
+                            //         callback(err);
+                            //     } else {
+                            //         obj_item.actions = actions;
+                            //         // console.log(JSON.stringify(obj_item.actions));
+                            //         callback(null);
+                            //     }
+                            // });
+
+
                         } else {
                             callback(null);
                         }
                     }, 
                     function (callback) {
                         console.log("tryna get modelID " + obj_item.modelID);
-                        let oid = obj_item.modelID;
-                        if (oid != null) {
-                            console.log("tryna get modelID2 " + oid);
-                            let oo_id = ObjectID(oid);
-                            db_old.models.findOne({"_id": oo_id}, function (err, model) {
-                            if (err || !model) {
-                                console.log("error getting model: " + err);
-                                callback(err);
-                                } else {
-                                    (async () => {
-                                        console.log("got obj_j model:" + JSON.stringify(model));
-                                        // let url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + model.userID + "/gltf/" + model.filename, Expires: 6000});
-                                        let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                                        obj_item.modelURL = url;
-                                        callback(null);
-                                    })();
-                                }
-                        });
+                        // let oid = obj_item.modelID;
+                        if (obj_item.modelID) {
+                            // console.log("tryna get modelID2 " + obj_item.modelID.);
+                           
+                            (async () => {
+                              try {
+                                const oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
+                                const query = {"_id": oo_id};
+                                const model = await RunDataQuery("models", "findOne", query, req.originalUrl);
+                                if (model) {
+                                  let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                                  obj_item.modelURL = url;
+                                } 
+                              } catch (e) {
+                                console.log("error getting model for object: " +e);
+                              }
+                              callback(null);
+                                
+                            })();
+
+                        //     db_old.models.findOne({"_id": oo_id}, function (err, model) {
+                        //     if (err || !model) {
+                        //         console.log("error getting model: " + err);
+                        //         callback(err);
+                        //         } else {
+                        //             (async () => {
+                        //                 console.log("got obj_j model:" + JSON.stringify(model));
+                        //                 // let url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + model.userID + "/gltf/" + model.filename, Expires: 6000});
+                        //                 let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                        //                 obj_item.modelURL = url;
+                        //                 callback(null);
+                        //             })();
+                        //         }
+                        // });
                         } else {
                             callback(null);
                         }                                                     
@@ -10640,7 +10671,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
 app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return userobj : ' + req.params.p_id);
     var pID = req.params.p_id;
-    var o_id = ObjectID(pID);
+    var o_id = ObjectId.createFromHexString(pID);
     var childObjects = {};
     db_old.obj_items.findOne({"_id": o_id}, function(err, obj_item) {
         if (err || !obj_item) {
@@ -10652,7 +10683,7 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
                     if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) {
                     // oids = domain.domainPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
                         const oids = obj_item.objectPictureIDs.map(item => {
-                            return ObjectID(item);
+                            return ObjectId.createFromHexString(item);
                         });
                         db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                             if (err || !pic_items) {
@@ -10694,7 +10725,7 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
                     // console.log(JSON.stringify(obj_item));
                     if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
                         const aids = obj_item.actionIDs.map(item => {
-                            return ObjectID(item);
+                            return ObjectId.createFromHexString(item);
                         });
                         db_old.actions.find({_id: {$in: aids }}, function (err, actions) {
                             if (err || !actions) {
@@ -10714,7 +10745,7 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
                     let oid = obj_item.modelID;
                     if (oid != null) {
                         console.log("tryna get modelID2 " + oid);
-                        let oo_id = ObjectID(oid);
+                        let oo_id = ObjectId.createFromHexString(oid);
                         db_old.models.findOne({"_id": oo_id}, function (err, model) {
                         if (err || !model) {
                             console.log("error getting model: " + err);
@@ -10809,7 +10840,7 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
 app.get('/audio/:id', requiredAuthentication, function (req, res){ //TODO Authenticate below if Public/Private bool for this media item
 
     var audioID = req.params.id;
-    var o_id = ObjectID(audioID);   
+    var o_id = ObjectId.createFromHexString(audioID);   
     console.log('audioID requested : ' + audioID);
     db_old.audio_items.findOne({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item) {
@@ -10819,7 +10850,7 @@ app.get('/audio/:id', requiredAuthentication, function (req, res){ //TODO Authen
             async.waterfall([
                 function(callback){  
                     if (audio_item.textitemID != "") {
-                        var t_id = ObjectID(audio_item.textitemID);
+                        var t_id = ObjectId.createFromHexString(audio_item.textitemID);
                         db_old.text_items.findOne({"_id" : t_id}, function (err, text_item) {
                             if (err || !text_item) {
                                 console.log("no text for audio item");
@@ -10898,7 +10929,7 @@ app.get('/audio/:id', requiredAuthentication, function (req, res){ //TODO Authen
 app.post('/gen_short_code', checkAppID, requiredAuthentication, function (req, res) {
     console.log(req.params);
     var audioID = req.params.id;
-    var o_id = ObjectID(audioID);   
+    var o_id = ObjectId.createFromHexString(audioID);   
     console.log('audioID requested : ' + audioID);
     db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item && audio_item.short_id == null) {
@@ -10913,7 +10944,7 @@ app.post('/gen_short_code', checkAppID, requiredAuthentication, function (req, r
 app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log(req.params._id);
 
-    var o_id = ObjectID(req.params._id);   
+    var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('audioID requested : ' + req.body._id);
     db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item) {
@@ -10934,7 +10965,7 @@ app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res)
 // app.get('/itemkeys/:_id', function (req, res) { //return keys for specific item id
 
 //     console.log(req.params._id);
-//     var o_id = ObjectID(req.params._id);
+//     var o_id = ObjectId.createFromHexString(req.params._id);
 //     db.audio_item_keys.find({ "keyAudioItemID" : req.params._id}, function(err, itemKeys) {
 //         if (err || !itemKeys) {
 //             console.log("cain't get no itemKeys... " + err);
@@ -10978,7 +11009,7 @@ app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res)
 //         //console.log(jObj[0]);
 //         var audioIDs = new Array();
 //         jObj.audioItemIDs.forEach(function(item, index) {
-//             var a_id = ObjectID(item); //convert to binary to search by _id beloiw
+//             var a_id = ObjectId.createFromHexString(item); //convert to binary to search by _id beloiw
 //             audioIDs.push(a_id); //populate array that can be fed to mongo find below
 //         });
 //         console.log("first audioID: " + audioIDs[0]);
@@ -11145,7 +11176,7 @@ app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res)
 
 // app.post('/delete_key', checkAppID, requiredAuthentication, function (req, res) {
 //     console.log("tryna delete key: " + req.body.keyID);
-//     var o_id = ObjectID(req.body.keyID);
+//     var o_id = ObjectId.createFromHexString(req.body.keyID);
 //     db.audio_item_keys.remove( { "_id" : o_id }, 1 );
 //     res.send("deleted");
 
@@ -11153,7 +11184,7 @@ app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res)
 
 // app.post('/update_key', checkAppID, requiredAuthentication, function (req, res) {
 //     console.log("tryna delete key: " + req.body.keyID);
-//     var o_id = ObjectID(req.body.keyID);
+//     var o_id = ObjectId.createFromHexString(req.body.keyID);
 //     //db.audio_item_keys.remove( { "_id" : o_id }, 1 );
 //     //                              res.send("deleted");
 
@@ -11175,7 +11206,7 @@ app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res)
 app.get('/pathinfo',  checkAppID, requiredAuthentication, function (req, res) { //get default path info
 
     console.log(req.params._id);
-    var o_id = ObjectID(req.params._id);
+    var o_id = ObjectId.createFromHexString(req.params._id);
     db_old.paths.find({}, function(err, paths) {
         if (err || !paths) {
             console.log("cain't get no paths... " + err);
@@ -11189,7 +11220,7 @@ app.get('/pathinfo',  checkAppID, requiredAuthentication, function (req, res) { 
 app.get('/upaths/:_id',  checkAppID, requiredAuthentication, function (req, res) { //get default path info
 
     console.log("tryna get userpaths: ",req.params._id);
-    var o_id = ObjectID(req.params._id);
+    var o_id = ObjectId.createFromHexString(req.params._id);
     db_old.paths.find({ "user_id" : req.params._id}, function(err, paths) {
         if (err || !paths) {
             console.log("cain't get no paths... " + err);
@@ -11203,7 +11234,7 @@ app.get('/upaths/:_id',  checkAppID, requiredAuthentication, function (req, res)
 app.get('/upath/:u_id/:p_id',  checkAppID, requiredAuthentication, function (req, res) { //get default path info
 
     console.log("tryna get path: ", req.params.p_id);
-    var _id = ObjectID(req.params.p_id);
+    var _id = ObjectId.createFromHexString(req.params.p_id);
     db_old.paths.find({ _id : _id}, function(err, paths) {
         if (err || !paths) {
             console.log("cain't get no paths... " + err);
@@ -11217,7 +11248,7 @@ app.get('/upath/:u_id/:p_id',  checkAppID, requiredAuthentication, function (req
 // !!!DANGER!!!
 // app.get('/scoresremove/:appid',  function (req, res) { //get default path info
 //    console.log("nuke all score data for this application!: ", req.params.appid);
-// //    var _id = ObjectID(req.params.p_id);
+// //    var _id = ObjectId.createFromHexString(req.params.p_id);
 //    db.scores.remove({appID : req.params.appid}, function (err, saved) {
 //        if (err || !saved) {
 //            console.log('nuke fail');
@@ -11447,7 +11478,7 @@ app.get('/totalscores/:appid', function (req, res) {
 app.get('/topscores/:appid', function (req, res) { //whynotmakeitpublic
 
     console.log("tryna get scores for: " + req.params.appid);
-    //var _id = ObjectID(req.params.u_id);
+    //var _id = ObjectId.createFromHexString(req.params.u_id);
     var appid = req.params.appid.toString().replace(":", "");
     // console.log("tryna get scores for: " + appid);
     // db.scores.find({appID : appid}, { userName: 1, scoreType: 1, aka: 1, scoreTimestamp: 1, scoreInt: 1, _id:0 }, function(err, scores) {
@@ -11470,7 +11501,7 @@ app.get('/topscores/:appid', function (req, res) { //whynotmakeitpublic
 app.get('/scores/:u_id',  checkAppID, requiredAuthentication, function (req, res) {
 
     console.log("tryna get scores for: ", req.params.u_id);
-    //var _id = ObjectID(req.params.u_id);
+    //var _id = ObjectId.createFromHexString(req.params.u_id);
     var appid = req.headers.appid.toString().replace(":", "");
     db_old.scores.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, scores) {
         if (err || !scores) {
@@ -11488,7 +11519,7 @@ app.get('/scores/:u_id',  checkAppID, requiredAuthentication, function (req, res
 app.get('/get_available_storeitems/:app_id', checkAppID, requiredAuthentication, admin, function (req, res) { //OPEN FOR TESTING, lock down for prod!
 
     console.log("tryna get storeitems for: ", req.params.app_id);
-    //var _id = ObjectID(req.params.u_id);
+    //var _id = ObjectId.createFromHexString(req.params.u_id);
     // var appid = req.headers.appid.toString().replace(":", "");
     db_old.storeitems.find({appID : req.params.app_id, itemStatus: "Available"}, function(err, storeitems) {
         if (err || !storeitems) {
@@ -11503,7 +11534,7 @@ app.get('/get_available_storeitems/:app_id', checkAppID, requiredAuthentication,
                 if (storeitem.storeItemPictureIDs != null && storeitem.storeItemPictureIDs != undefined && storeitem.storeItemPictureIDs.length > 0) {
                     // oids = storeitem.storeItemPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
                     const oids = storeitem.storeItemPictureIDs.map(item => {
-                        return ObjectID(item);
+                        return ObjectId.createFromHexString(item);
                     })
                     db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                         if (err || !pic_items) {
@@ -11566,7 +11597,7 @@ app.get('/get_available_storeitems/:app_id', checkAppID, requiredAuthentication,
 app.get('/get_storeitems_all/',  requiredAuthentication, admin, function (req, res) {
 
     console.log("tryna get all the storeitems");
-    var _id = ObjectID(req.params.app_id);
+    var _id = ObjectId.createFromHexString(req.params.app_id);
 
     // var appid = req.headers.appid.toString().replace(":", "");
     db_old.storeitems.find({}, function(err, storeitems) {
@@ -11587,7 +11618,7 @@ app.get('/get_storeitems_all/',  requiredAuthentication, admin, function (req, r
                 if (storeitem.storeItemPictureIDs != null && storeitem.storeItemPictureIDs != undefined && storeitem.storeItemPictureIDs.length > 0) {
                     // oids = storeitem.storeItemPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
                     const oids = storeitem.storeItemPictureIDs.map(item => {
-                        return ObjectID(item);
+                        return ObjectId.createFromHexString(item);
                     })
                     db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                         if (err || !pic_items) {
@@ -11649,7 +11680,7 @@ app.get('/get_storeitems_all/',  requiredAuthentication, admin, function (req, r
 app.get('/get_storeitems/:app_id', requiredAuthentication, admin, function (req, res) {
 
     console.log("tryna get storeitems for: ", req.params.app_id);
-    var _id = ObjectID(req.params.app_id);
+    var _id = ObjectId.createFromHexString(req.params.app_id);
 
     // var appid = req.headers.appid.toString().replace(":", "");
     db_old.storeitems.find({appID : _id}, function(err, storeitems) {
@@ -11670,7 +11701,7 @@ app.get('/get_storeitems/:app_id', requiredAuthentication, admin, function (req,
                 if (storeitem.storeItemPictureIDs != null && storeitem.storeItemPictureIDs != undefined && storeitem.storeItemPictureIDs.length > 0) {
                     // oids = storeitem.storeItemPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
                     const oids = storeitem.storeItemPictureIDs.map(item => {
-                        return ObjectID(item);
+                        return ObjectId.createFromHexString(item);
                     })
                     db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                         if (err || !pic_items) {
@@ -11730,7 +11761,7 @@ app.get('/get_storeitems/:app_id', requiredAuthentication, admin, function (req,
 
 app.get('/get_storeitem/:_id',  requiredAuthentication, admin, function (req, res) {
     console.log("tryna get storeitem: ", req.params._id);
-    var item_id = ObjectID(req.params._id);
+    var item_id = ObjectId.createFromHexString(req.params._id);
     // var appid = req.headers.appid.toString().replace(":", "");
     db_old.storeitems.findOne({_id : item_id}, function(err, storeitem) {
         if (err || !storeitem) {
@@ -11744,7 +11775,7 @@ app.get('/get_storeitem/:_id',  requiredAuthentication, admin, function (req, re
                 function (callback) { // check for groups to which this purchase provides access
                     if (storeitem.storeItemSceneGroupIDs != null && storeitem.storeItemSceneGroupIDs != undefined && storeitem.storeItemSceneGroupIDs.length > 0) {
                         const g_oids = storeitem.storeItemSceneGroupIDs.map(item => {
-                            return ObjectID(item);
+                            return ObjectId.createFromHexString(item);
                         });
                         db_old.groups.find({_id: {$in: g_oids }}, function (err, groups) {
                             if (err || !groups) {
@@ -11765,7 +11796,7 @@ app.get('/get_storeitem/:_id',  requiredAuthentication, admin, function (req, re
                     if (storeitem.storeItemPictureIDs != null && storeitem.storeItemPictureIDs != undefined && storeitem.storeItemPictureIDs.length > 0) {
                         // oids = storeitem.storeItemPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
                         const oids = storeitem.storeItemPictureIDs.map(item => {
-                            return ObjectID(item);
+                            return ObjectId.createFromHexString(item);
                         });
                         db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                             if (err || !pic_items) {
@@ -11901,7 +11932,7 @@ app.post('/set_storeitem', checkAppID, requiredAuthentication, admin, function (
 // });
 app.post('/update_storeitem/', checkAppID, requiredAuthentication, admin, function (req, res) {
     console.log("tryna save storeitem : " + JSON.stringify(req.body));
-    var o_id = ObjectID(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
     var timestamp = Math.round(Date.now() / 1000);
     db_old.storeitems.findOne({_id: o_id}, function (err, item) {
         if ( err || !item) {
@@ -11932,7 +11963,7 @@ app.post('/update_storeitem/', checkAppID, requiredAuthentication, admin, functi
 });
 app.post('/delete_storeitem/', requiredAuthentication, admin, function (req, res) {
     console.log("tryna delete key: " + req.body._id);
-    var o_id = ObjectID(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
     db_old.storeitems.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
@@ -11940,7 +11971,7 @@ app.post('/delete_storeitem/', requiredAuthentication, admin, function (req, res
 app.post('/purchase', checkAppID, requiredAuthentication, function (req, res) {
     console.log("tryna post purchase: " + JSON.stringify(req.body));
 
-    var _id = ObjectID(req.body.userID);
+    var _id = ObjectId.createFromHexString(req.body.userID);
     var obody = req.body;
     db_old.users.findOne({"_id" : _id}, function (err, user) {
         if (err || !user) {
@@ -11982,8 +12013,8 @@ app.post('/purchase', checkAppID, requiredAuthentication, function (req, res) {
 
 app.post('/testpurchase', checkAppID, requiredAuthentication, function (req, res) {
     console.log("tryna post test purchase: " + JSON.stringify(req.body));
-    let _id = ObjectID(req.body.userID);
-    let storeitemID = ObjectID(req.body.storeitemID);
+    let _id = ObjectId.createFromHexString(req.body.userID);
+    let storeitemID = ObjectId.createFromHexString(req.body.storeitemID);
     let obody = req.body;
     
     db_old.users.findOne({"_id" : _id}, function (err, user) {// check user
@@ -12099,7 +12130,7 @@ app.get('/purchases/', requiredAuthentication, admin, function (req, res) { //al
 app.get('/purchases/:app_id/:u_id',  requiredAuthentication, function (req, res) {
 
     console.log("tryna get purchases for: ", req.params.u_id + " " + req.params.app_id);
-    //var _id = ObjectID(req.params.u_id);
+    //var _id = ObjectId.createFromHexString(req.params.u_id);
     // var appid = req.headers.appid.toString().replace(":", "");
     db_old.purchases.find({$and : [{userID : req.params.u_id}, {appID : req.params.app_id}]}, function(err, purchases) {
         if (err || !purchases || purchases == null || purchases.length == 0) {
@@ -12117,7 +12148,7 @@ app.get('/purchases/:app_id/:u_id',  requiredAuthentication, function (req, res)
 app.get('/purchases/:app_id',  checkAppID, requiredAuthentication, function (req, res) {
 
     console.log("tryna get purchases for appid: " + req.params.app_id);
-    //var _id = ObjectID(req.params.u_id);
+    //var _id = ObjectId.createFromHexString(req.params.u_id);
     // var appid = req.headers.appid.toString().replace(":", "");
     db_old.purchases.find({appID : req.params.app_id}, function(err, purchases) {
         if (err || !purchases || purchases == null || purchases.length == 0) {
@@ -12147,7 +12178,7 @@ app.post('/activity', requiredAuthentication, function (req, res) {
 app.get('/activities/:u_id',  checkAppID, requiredAuthentication, function (req, res) {
 
     console.log("tryna get activities for: ", req.params.u_id);
-    //var _id = ObjectID(req.params.u_id);
+    //var _id = ObjectId.createFromHexString(req.params.u_id);
     var appid = req.headers.appid.toString().replace(":", "");
     db_old.activity.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, activities) {
         if (err || !activities) {
@@ -12255,7 +12286,7 @@ app.post('/newpath', checkAppID, requiredAuthentication, function (req, res) {
 app.post('/update_path/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log(req.params._id);
 
-    var o_id = ObjectID(req.body._id);   
+    var o_id = ObjectId.createFromHexString(req.body._id);   
     console.log('path requested : ' + req.body._id);
     db_old.paths.find({ "_id" : o_id}, function(err, path) {
         if (err || !path) {
@@ -12293,7 +12324,7 @@ app.post('/update_path/:_id', checkAppID, requiredAuthentication, function (req,
 app.get('/sceneinfo',  checkAppID, requiredAuthentication, function (req, res) { //get default scene info
 
     console.log(req.params._id);
-    var o_id = ObjectID(req.params._id);
+    var o_id = ObjectId.createFromHexString(req.params._id);
     db_old.scenes.find({}, function(err, scenes) {
         if (err || !scenes) {
             console.log("cain't get no paths... " + err);
@@ -12306,8 +12337,8 @@ app.get('/sceneinfo',  checkAppID, requiredAuthentication, function (req, res) {
 
 app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
 
-    let s_id = ObjectID(req.body.scene_id);   
-    let g_id = ObjectID(req.body.group_id);   
+    let s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    let g_id = ObjectId.createFromHexString(req.body.group_id);   
     // let audiotype
     // console.log('tryna add a scene pic : ' + req.body);
 
@@ -12413,8 +12444,8 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
 
 app.post('/update_scene_location/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.scene_id);   
-    // var p_id = ObjectID(req.body.location_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    // var p_id = ObjectId.createFromHexString(req.body.location_id);   
     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -12502,7 +12533,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                                 
                                                                 newfile._id = saved._id;
                                                                 newFiles.push(newfile);
-                                                                var s_id = ObjectID(scene._id);   
+                                                                var s_id = ObjectId.createFromHexString(scene._id);   
                                                                 var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
                                                                 // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
                                                                 sceneModels.push(saved._id);
@@ -12544,7 +12575,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                                 
                                             //                     newfile._id = saved._id;
                                             //                     newFiles.push(newfile);
-                                            //                     var s_id = ObjectID(scene._id);   
+                                            //                     var s_id = ObjectId.createFromHexString(scene._id);   
                                             //                     var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
                                             //                     // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
                                             //                     sceneModels.push(saved._id);
@@ -12611,7 +12642,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                                     axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+saved._id, options)
                                                                     .then((response) => {
                                                                         console.log("grabAndSqueezepic response: " + response.status);
-                                                                        var s_id = ObjectID(scene._id);   
+                                                                        var s_id = ObjectId.createFromHexString(scene._id);   
                                                                         var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
                                                                         // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
                                                                         scenePictures.push(saved._id);
@@ -12642,7 +12673,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                         //         axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+saved._id, options)
                                                         //         .then((response) => {
                                                         //             console.log("grabAndSqueeze response: " + response.status);
-                                                        //             var s_id = ObjectID(scene._id);   
+                                                        //             var s_id = ObjectId.createFromHexString(scene._id);   
                                                         //             var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
                                                         //             // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
                                                         //             scenePictures.push(saved._id);
@@ -12863,8 +12894,8 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
 
 app.post('/add_scene_location/', requiredAuthentication, function (req, res) { //pick from "saved" list of location
 
-    var s_id = ObjectID(req.body.scene_id);   
-    var p_id = ObjectID(req.body.location_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    var p_id = ObjectId.createFromHexString(req.body.location_id);   
     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -12905,8 +12936,8 @@ app.post('/add_scene_location/', requiredAuthentication, function (req, res) { /
 
 app.post('/add_scene_model/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.scene_id);   
-    var p_id = ObjectID(req.body.model_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    var p_id = ObjectId.createFromHexString(req.body.model_id);   
     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -12939,8 +12970,8 @@ app.post('/add_scene_model/', requiredAuthentication, function (req, res) {
 
 app.post('/add_scene_obj/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.scene_id);   
-    var p_id = ObjectID(req.body.obj_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    var p_id = ObjectId.createFromHexString(req.body.obj_id);   
     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -12975,8 +13006,8 @@ app.post('/add_scene_obj/', requiredAuthentication, function (req, res) {
 
 app.post('/add_scenelocation_obj/', checkAppID, requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.scene_id);   
-    var p_id = ObjectID(req.body.obj_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    var p_id = ObjectId.createFromHexString(req.body.obj_id);   
 
     console.log('tryna add a scene location obj : ' + JSON.stringify(req.body));
 
@@ -13017,8 +13048,8 @@ app.post('/add_scenelocation_obj/', checkAppID, requiredAuthentication, function
 
 app.post('/add_scene_vid/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.scene_id);   
-    var p_id = ObjectID(req.body.vid_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    var p_id = ObjectId.createFromHexString(req.body.vid_id);   
     console.log('tryna add a scene vid : ' + JSON.stringify(req.body));
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -13049,8 +13080,8 @@ app.post('/add_scene_vid/', requiredAuthentication, function (req, res) {
 
 app.post('/add_scene_text_item/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.scene_id);   
-    var p_id = ObjectID(req.body.text_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    var p_id = ObjectId.createFromHexString(req.body.text_id);   
     console.log('tryna add a scene pic : ' + req.body);
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -13086,7 +13117,7 @@ app.post('/add_scene_text_item/', requiredAuthentication, function (req, res) {
 app.post('/scene_text_items/', function (req, res) {
     console.log("textIDs " + JSON.stringify(req.body.textIDs) + " length " + req.body.textIDs.length );
 
-    // var s_id = ObjectID(req.body.ids);   
+    // var s_id = ObjectId.createFromHexString(req.body.ids);   
     if (req.body.textIDs != undefined && req.body.textIDs != null && req.body.textIDs.length > 0) {
         let tempArray = [];
         // for ()
@@ -13110,8 +13141,8 @@ app.post('/scene_text_items/', function (req, res) {
 
 app.post('/add_scene_pic/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.scene_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + req.body);
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -13138,8 +13169,8 @@ app.post('/add_scene_pic/', requiredAuthentication, function (req, res) {
     });
 });
 app.post('/rem_domain_pic/', requiredAuthentication, admin, function (req, res) {
-    var s_id = ObjectID(req.body.domain_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.domain_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
     db_old.apps.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
@@ -13167,8 +13198,8 @@ app.post('/rem_domain_pic/', requiredAuthentication, admin, function (req, res) 
     });
 });
 app.post('/add_object_model/', requiredAuthentication, function (req, res) {
-    var s_id = ObjectID(req.body.object_id);   
-    var p_id = ObjectID(req.body.model_id);   
+    var s_id = ObjectId.createFromHexString(req.body.object_id);   
+    var p_id = ObjectId.createFromHexString(req.body.model_id);   
     console.log('tryna add a object model : ' + JSON.stringify(req.body));
     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
         if (err || !item) {
@@ -13189,8 +13220,8 @@ app.post('/add_object_model/', requiredAuthentication, function (req, res) {
     });
 });
 // app.post('/add_obj_model/', requiredAuthentication, function (req, res) { //save to array instead
-//     var s_id = ObjectID(req.body.object_id);   
-//     var p_id = ObjectID(req.body.model_id);   
+//     var s_id = ObjectId.createFromHexString(req.body.object_id);   
+//     var p_id = ObjectId.createFromHexString(req.body.model_id);   
 //     console.log('tryna add a object model : ' + JSON.stringify(req.body));
 //     db.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
 //         if (err || !item) {
@@ -13212,8 +13243,8 @@ app.post('/add_object_model/', requiredAuthentication, function (req, res) {
 // });
 
 app.post('/add_action_model/', requiredAuthentication, function (req, res) { //save to array instead
-    var s_id = ObjectID(req.body.action_id);   
-    var p_id = ObjectID(req.body.model_id);   
+    var s_id = ObjectId.createFromHexString(req.body.action_id);   
+    var p_id = ObjectId.createFromHexString(req.body.model_id);   
     console.log('tryna add an action model : ' + JSON.stringify(req.body));
     db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
         if (err || !item) {
@@ -13235,8 +13266,8 @@ app.post('/add_action_model/', requiredAuthentication, function (req, res) { //s
 });
 
 app.post('/add_action_object/', requiredAuthentication, function (req, res) { //save to array instead
-    var s_id = ObjectID(req.body.action_id);   
-    var p_id = ObjectID(req.body.object_id);   
+    var s_id = ObjectId.createFromHexString(req.body.action_id);   
+    var p_id = ObjectId.createFromHexString(req.body.object_id);   
     console.log('tryna add an action model : ' + JSON.stringify(req.body));
     db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
         if (err || !item) {
@@ -13258,8 +13289,8 @@ app.post('/add_action_object/', requiredAuthentication, function (req, res) { //
 });
 
 app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //save to array instead
-    var s_id = ObjectID(req.body.object_id);   
-    var a_id = ObjectID(req.body.action_id);   
+    var s_id = ObjectId.createFromHexString(req.body.object_id);   
+    var a_id = ObjectId.createFromHexString(req.body.action_id);   
     console.log('tryna add a object action : ' + JSON.stringify(req.body));
     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
         if (err || !item) {
@@ -13293,8 +13324,8 @@ app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //sav
     });
 });
 // app.post('/add_object_action/', requiredAuthentication, function (req, res) { //deprecated
-//     var s_id = ObjectID(req.body.object_id);   
-//     var a_id = ObjectID(req.body.action_id);   
+//     var s_id = ObjectId.createFromHexString(req.body.object_id);   
+//     var a_id = ObjectId.createFromHexString(req.body.action_id);   
 //     console.log('tryna add a object action : ' + JSON.stringify(req.body));
 //     db.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
 //         if (err || !item) {
@@ -13315,8 +13346,8 @@ app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //sav
 //     });
 // });
 app.post('/add_object_pic/', requiredAuthentication, function (req, res) {
-    var s_id = ObjectID(req.body.object_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.object_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a object pic : ' + JSON.stringify(req.body));
     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
@@ -13344,8 +13375,8 @@ app.post('/add_object_pic/', requiredAuthentication, function (req, res) {
     });
 });
 app.post('/rem_object_action/', requiredAuthentication, admin, function (req, res) {
-    var s_id = ObjectID(req.body.object_id);   
-    var p_id = ObjectID(req.body.action_id);   
+    var s_id = ObjectId.createFromHexString(req.body.object_id);   
+    var p_id = ObjectId.createFromHexString(req.body.action_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
@@ -13377,8 +13408,8 @@ app.post('/rem_object_action/', requiredAuthentication, admin, function (req, re
     });
 });
 app.post('/rem_object_pic/', requiredAuthentication, admin, function (req, res) {
-    var s_id = ObjectID(req.body.domain_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.domain_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
@@ -13406,8 +13437,8 @@ app.post('/rem_object_pic/', requiredAuthentication, admin, function (req, res) 
     });
 });
 app.post('/add_domain_pic/', requiredAuthentication, admin, function (req, res) {
-    var s_id = ObjectID(req.body.domain_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.domain_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a domain pic : ' + JSON.stringify(req.body));
     db_old.domains.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
@@ -13435,8 +13466,8 @@ app.post('/add_domain_pic/', requiredAuthentication, admin, function (req, res) 
     });
 });
 app.post('/rem_app_pic/', requiredAuthentication, admin, function (req, res) {
-    var s_id = ObjectID(req.body.app_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.app_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
     db_old.apps.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
@@ -13464,8 +13495,8 @@ app.post('/rem_app_pic/', requiredAuthentication, admin, function (req, res) {
     });
 });
 app.post('/add_app_pic/', requiredAuthentication, admin, function (req, res) {
-    var s_id = ObjectID(req.body.app_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.app_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
     db_old.apps.findOne({ "_id": s_id}, function (err, item) {
         if (err || !item) {
@@ -13494,8 +13525,8 @@ app.post('/add_app_pic/', requiredAuthentication, admin, function (req, res) {
     });
 });
 app.post('/rem_storeitem_pic/', checkAppID, requiredAuthentication, function (req, res) {
-    var s_id = ObjectID(req.body.storeitem_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
         if (err || !storeitem) {
@@ -13523,8 +13554,8 @@ app.post('/rem_storeitem_pic/', checkAppID, requiredAuthentication, function (re
     });
 });
 app.post('/add_storeitem_pic/', checkAppID, requiredAuthentication, function (req, res) {
-    var s_id = ObjectID(req.body.storeitem_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
         if (err || !storeitem) {
@@ -13553,8 +13584,8 @@ app.post('/add_storeitem_pic/', checkAppID, requiredAuthentication, function (re
     });
 });
 app.post('/add_storeitem_obj/', requiredAuthentication, admin, function (req, res) {
-    var s_id = ObjectID(req.body.storeitem_id);   
-    var p_id = ObjectID(req.body.obj_id);   
+    var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
+    var p_id = ObjectId.createFromHexString(req.body.obj_id);   
     console.log('tryna add a storeitem obj : ' + JSON.stringify(req.body));
     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
         if (err || !storeitem) {
@@ -13575,8 +13606,8 @@ app.post('/add_storeitem_obj/', requiredAuthentication, admin, function (req, re
     });
 });
 app.post('/add_storeitem_scenegroup/', requiredAuthentication, function (req, res) {
-    var s_id = ObjectID(req.body.storeitem_id);   
-    var p_id = ObjectID(req.body.group_id);   
+    var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
+    var p_id = ObjectId.createFromHexString(req.body.group_id);   
     console.log('tryna add a storeitem scenegroup : ' + JSON.stringify(req.body));
     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
         if (err || !storeitem) {
@@ -13606,8 +13637,8 @@ app.post('/add_storeitem_scenegroup/', requiredAuthentication, function (req, re
 });
 app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.scene_id);   
-    var p_id = ObjectID(req.body.pic_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -13635,7 +13666,7 @@ app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
 
 app.post('/add_group_item/', checkAppID, requiredAuthentication, function (req, res) {
 
-    var g_id = ObjectID(req.body.group_id);   
+    var g_id = ObjectId.createFromHexString(req.body.group_id);   
     var timestamp = Math.round(Date.now() / 1000);
     console.log('tryna add a group item : ' + req.body);
     db_old.groups.update({ "_id": g_id }, { $push: {items: req.body.item_id} },{ $set: {lastUpdateTimestamp : timestamp} });
@@ -13646,8 +13677,8 @@ app.post('/add_group_item/', checkAppID, requiredAuthentication, function (req, 
 
 app.post('/add_scene_audio/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.scene_id);   
-    var a_id = ObjectID(req.body.audio_id);   
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    var a_id = ObjectId.createFromHexString(req.body.audio_id);   
     console.log('tryna import primary audio : ' + req.body);
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -13674,8 +13705,8 @@ app.post('/add_scene_audio/', requiredAuthentication, function (req, res) {
 
 app.post('/import_scene_audio_timed_events/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectID(req.body.sceneID);   
-    var a_id = ObjectID(req.body.audioID);   
+    var s_id = ObjectId.createFromHexString(req.body.sceneID);   
+    var a_id = ObjectId.createFromHexString(req.body.audioID);   
     console.log('tryna import scene audio timed e3vents : ' + req.body);
 
     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
@@ -13720,7 +13751,7 @@ app.post('/import_scene_audio_timed_events/', requiredAuthentication, function (
 
 app.get('/uscenes/:_id',  requiredAuthentication, usercheck, function (req, res) { //get scenes for this user
     console.log("tryna get user scenes: ",req.params._id);
-    var o_id = ObjectID(req.params._id);
+    var o_id = ObjectId.createFromHexString(req.params._id);
     var scenesResponse = {};
     let query = {"user_id" : req.params._id};
     if (req.session.user.authLevel.toLowerCase().includes("domain")) { //domain admins can see everything
@@ -13737,7 +13768,7 @@ app.get('/uscenes/:_id',  requiredAuthentication, usercheck, function (req, res)
 });
 app.get('/uscenes/:appid',  requiredAuthentication, usercheck, function (req, res) { //get scenes for this user
     console.log("tryna get user scenes: ",req.params._id);
-    var o_id = ObjectID(req.params.appid);
+    var o_id = ObjectId.createFromHexString(req.params.appid);
     var scenesResponse = {};
 
     db_old.scenes.find({ "user_id" : req.params._id}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1,  sceneShareWithPublic: 1 },  function(err, scenes) {
@@ -13751,7 +13782,7 @@ app.get('/uscenes/:appid',  requiredAuthentication, usercheck, function (req, re
 });
 app.post('/uscenes/',  requiredAuthentication, usercheck, function (req, res) { //get scenes for app
     console.log("tryna get user scenes: ",req.params._id);
-    var o_id = ObjectID(req.params._id);
+    var o_id = ObjectId.createFromHexString(req.params._id);
     var scenesResponse = {};
     db_old.scenes.find({ "sceneAppName" : req.body.appName}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 },  function(err, scenes) {
         if (err || !scenes) {
@@ -13765,7 +13796,7 @@ app.post('/uscenes/',  requiredAuthentication, usercheck, function (req, res) { 
 app.post('/appscenes/',  requiredAuthentication, function (req, res) { //get scenes for app
     console.log("tryna get user scenes fer: " + req.body.sceneDomain);
 
-    // var o_id = ObjectID(req.params.appid);
+    // var o_id = ObjectId.createFromHexString(req.params.appid);
     // var scenesResponse = {};
     db_old.scenes.find({ "sceneDomain" : req.body.sceneDomain}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1, sceneStickyness: 1 },  function(err, scenes) {
         if (err || !scenes) {
@@ -13799,9 +13830,9 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
     async.waterfall([
         function (callback) {
             console.log("uscene lookup for reqstring " + reqstring);
-            var o_id = new ObjectId(reqstring);
+            var o_id = ObjectId.createFromHexString(reqstring);
             // var o_id = new ObjectId.createFromHexString(reqstring);
-            // var o_id = ObjectID(req.params.scene_id);
+            // var o_id = ObjectId.createFromHexString(req.params.scene_id);
             db_old.scenes.find({$or: [{ sceneTitle: reqstring },
                     { short_id : reqstring },
                     { _id : o_id}]},
@@ -13814,20 +13845,20 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                         if (sceneData[0].scenePictures != undefined) { 
                                 if (sceneData[0].scenePictures.length > 0) {
 {                                   sceneData[0].scenePictures.forEach(function (picture) {
-                                    var p_id = new ObjectId(picture); //convert to binary to search by _id beloiw
+                                    var p_id = ObjectId.createFromHexString(picture); //convert to binary to search by _id beloiw
                                     requestedPictureItems.push(p_id); //populate array
                                 });
                             }
                         }
                     }
                         // sceneData[0].sceneLocationIDs.forEach(function (locationID){
-                        //     var p_id = ObjectID(locationID); //convert to binary to search by _id beloiw
+                        //     var p_id = ObjectId.createFromHexString(locationID); //convert to binary to search by _id beloiw
                         //     requestedLocationItems.push(p_id); //populate array
                         // });
-                        // requestedAudioItems = [ ObjectID(sceneData[0].sceneTriggerAudioID), ObjectID(sceneData[0].sceneAmbientAudioID), ObjectID(sceneData[0].scenePrimaryAudioID)];
-                        var triggerOID = ObjectId.isValid(sceneData[0].sceneTriggerAudioID) ? new ObjectId(sceneData[0].sceneTriggerAudioID) : "";
-                        var ambientOID = ObjectId.isValid(sceneData[0].sceneAmbientAudioID) ? new ObjectId(sceneData[0].sceneAmbientAudioID) : "";
-                        var primaryOID = ObjectId.isValid(sceneData[0].scenePrimaryAudioID) ? new ObjectId(sceneData[0].scenePrimaryAudioID) : "";
+                        // requestedAudioItems = [ ObjectId.createFromHexString(sceneData[0].sceneTriggerAudioID), ObjectId.createFromHexString(sceneData[0].sceneAmbientAudioID), ObjectId.createFromHexString(sceneData[0].scenePrimaryAudioID)];
+                        var triggerOID = ObjectId.isValid(sceneData[0].sceneTriggerAudioID) ? ObjectId.createFromHexString(sceneData[0].sceneTriggerAudioID) : "";
+                        var ambientOID = ObjectId.isValid(sceneData[0].sceneAmbientAudioID) ? ObjectId.createFromHexString(sceneData[0].sceneAmbientAudioID) : "";
+                        var primaryOID = ObjectId.isValid(sceneData[0].scenePrimaryAudioID) ? ObjectId.createFromHexString(sceneData[0].scenePrimaryAudioID) : "";
                         requestedAudioItems = [ triggerOID, ambientOID, primaryOID];
                         sceneResponse = sceneData[0];
                         // console.log("sceneScatterOffset is " + sceneResponse.sceneScatterOffset);
@@ -14104,7 +14135,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 var postcards = [];
                 if (sceneResponse.scenePostcards != null && sceneResponse.scenePostcards.length > 0) {
                     async.each (sceneResponse.scenePostcards, function (postcardID, callbackz) { //nested async-ery!
-                        var oo_id = new ObjectId(postcardID);
+                        var oo_id = ObjectId.createFromHexString(postcardID);
                         db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                             if (err || !picture_item) {
                                 console.log("error getting postcatd items: " + err);
@@ -14166,7 +14197,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 //                console.log("sceneObjects : " + JSON.stringify(sceneResponse.sceneObjects));
                 if (sceneResponse.sceneModels != null) {
                     async.each (sceneResponse.sceneModels, function (objID, callbackz) { 
-                        var oo_id = new ObjectId(objID);
+                        var oo_id = ObjectId.createFromHexString(objID);
                         // console.log("7798 tryna get sceneModels: " + objID);
                         db_old.models.findOne({"_id": oo_id}, function (err, model) {
                             if (err || !model) {
@@ -14210,7 +14241,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 // if (sceneResponse.sceneObjectGroups) {
                     if (sceneResponse.sceneObjectGroups != null) {
                         async.each (sceneResponse.sceneObjectGroups, function (objID, callbackz) { //nested async-ery!
-                            var oo_id = new ObjectId(objID);
+                            var oo_id = ObjectId.createFromHexString(objID);
                             console.log("tryna get GroupObject: " + objID);
                             db_old.groups.findOne({"_id": oo_id}, function (err, group) {
                                 if (err || !group) {
@@ -14248,7 +14279,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 //                console.log("sceneObjects : " + JSON.stringify(sceneResponse.sceneObjects));
                 if (sceneResponse.sceneObjects != null) {
                     async.each (sceneResponse.sceneObjects, function (objID, callbackz) { //nested async-ery!
-                        var oo_id = new ObjectId(objID);
+                        var oo_id = ObjectId.createFromHexString(objID);
                         // console.log("4573 tryna get sceneObject: " + objID);
                         db_old.obj_items.findOne({"_id": oo_id}, function (err, obj_item) {
                             if (err || !obj_item) {
@@ -14301,7 +14332,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 
                 if ((sceneResponse.userName == null || sceneResponse.userName.length < 1) && (sceneResponse.user_id != null)) {
 
-                    var oo_id = new ObjectId(sceneResponse.user_id);
+                    var oo_id = ObjectId.createFromHexString(sceneResponse.user_id);
                     db_old.users.findOne({_id: oo_id}, function (err, user) {
                         if (!err || user != null) {
                             console.log("tryna inject usrname: " + user.userName);
@@ -14330,7 +14361,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 //     console.log("tryna get scene " + req.params.scene_id);
 //     var sceneID = req.params.scene_id.toString().replace(":", "");
 //     // var o_id = new ObjectId.createFromHexString(sceneID);
-//     var o_id = ObjectID(sceneID);
+//     var o_id = ObjectId.createFromHexString(sceneID);
 //     console.log("tryna get scene: " + sceneID);
 //     db.scenes.findOne({ _id : o_id}, function(err, scene) {
 //         if (err || !scene) {
@@ -14357,7 +14388,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 //                 async.each (scene.scenePostcards, function (postcardID, callbackz) {
 // //                                console.log("scenepostcard id: " + sceneResponse.scenePostcards[i]);
 // //                    console.log("scenepostcard id: " + postcardID);
-//                     var oo_id = ObjectID(postcardID);
+//                     var oo_id = ObjectId.createFromHexString(postcardID);
 //                     db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 //                         if (err || !picture_item) {
 //                             console.log("error getting picture items 1: " + err);
@@ -14419,7 +14450,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 //             async.each(scenes,
 //                 function (scene, callback) {
 //                     if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-//                         var oo_id = ObjectID(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
+//                         var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
 //                         db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 //                             if (err || !picture_item || picture_item.length == 0) {
 //                                 console.log("error getting postcard for availablescenes: 2" + err);
@@ -14482,7 +14513,7 @@ app.get('/domain_scenes/:domain',  function (req, res) {
             async.each(scenes,
                 function (scene, callback) {
                     if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-                        var oo_id = ObjectID(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
+                        var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
                         db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                             if (err || !picture_item) {
                                 console.log("error getting postcard for availablescenes: 2" + err);
@@ -14514,7 +14545,7 @@ app.get('/domain_scenes/:domain',  function (req, res) {
                                     scenePostcardHalf: urlHalf
                                 };
 //                                if (scene.scenePrimaryAudioID != null) {
-//                                    var o_id = ObjectID(scene.scenePrimaryAudioID);
+//                                    var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID);
 //
 //                                    db.audio_items.findOne({_id: o_id}, function (err, audio_item) {
 //                                        if (err || !audio_item) {
@@ -14582,7 +14613,7 @@ app.get('/available_user_scenes/:user_id', requiredAuthentication, function(req,
                     async.waterfall([
                             function (callback) {
                                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
-                                    var oo_id = new ObjectId(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
+                                    var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
                                     db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                         if (err || !picture_item) {
                                             console.log("error getting postcard for availablescenes: 2" + err);
@@ -14632,7 +14663,7 @@ app.get('/available_user_scenes/:user_id', requiredAuthentication, function(req,
                             function (avScene, callback) {
                                 console.log ("tryna get audio " + scene.scenePrimaryAudioID + " for " + JSON.stringify(avScene) );
                                 if (scene.scenePrimaryAudioID != null) {
-                                    var o_id = new ObjectId(scene.scenePrimaryAudioID );
+                                    var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID );
 
                                     db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
                                         if (err || !audio_item) {
@@ -14712,7 +14743,7 @@ app.get('/available_domain_scenes/:domain',  function (req, res) { //public scen
                             function (callback) {
                                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
                                     var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
-                                    var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                                    var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
                                     db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                         if (err || !picture_item) {
                                             console.log("error getting postcard for availablescenes: 2" + err);
@@ -14823,7 +14854,7 @@ app.get('/available_domain_scenes/:domain',  function (req, res) { //public scen
                                     // avScene.scenePrimaryAudioStreamURL = scene.scenePrimaryAudioStreamURL; //these tend to fsu on safari
                                 }
                                 if (scene.scenePrimaryAudioID != null && scene.scenePrimaryAudioID != "" && scene.scenePrimaryAudioID.length > 8) {
-                                    var o_id = new ObjectId(scene.scenePrimaryAudioID );
+                                    var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID );
 
                                     db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
                                         if (err || !audio_item) {
@@ -14887,7 +14918,7 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
         function (callback) { //do the user lookup
             console.log("tryna lookup user id " + req.params.user_id);
             if (req.params.user_id != "nilch" && req.params.user_id != "guest" && req.params.user_id != "") {
-                var oo_id = new ObjectId(req.params.user_id);
+                var oo_id = ObjectId.createFromHexString(req.params.user_id);
                 db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
                     if (err != null) {
                         console.log("error finding user " + req.params.user_id);
@@ -14954,7 +14985,7 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
                                 function (callback) {
                                     if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
                                         var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
-                                        var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                                        var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
                                         db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
                                             if (err || !picture_item) {
                                                 console.log("error getting postcard for availablescenes: 2" + err);
@@ -15043,7 +15074,7 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
                             function (avScene, callback) {
                                 // console.log ("tryna get audio " + scene.scenePrimaryAudioID + " for " + JSON.stringify(avScene) );
                                 if (scene.scenePrimaryAudioID != null && ObjectId.isValid(scene.scenePrimaryAudioID)) {
-                                    var o_id = new ObjectId(scene.scenePrimaryAudioID);
+                                    var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID);
                                     db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
                                         if (err || !audio_item) {
                                             console.log("error getting audio items: " + err);
@@ -15128,7 +15159,7 @@ app.get('/publicscenes', async (req, res) => {
     for (const scene of scenes) { 
       if (scene.scenePostcards != null && scene.scenePostcards.length > 0 && scene.scenePostcards[0] != undefined) {
         let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
-        var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]); //? still confused w/ mongojs driver?
+        var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //? still confused w/ mongojs driver?
         const picture_item = await db.collection("image_items").findOne({"_id": oo_id});
         try {
           var item_string_filename = JSON.stringify(picture_item.filename);
@@ -15209,7 +15240,7 @@ app.get('/publicscenes_old', function (req, res) { //deprecated, see available s
                         // console.log("count is " + count);
                         // count++;
                         let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
-                        var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                        var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
                         db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 
                             if (err || !picture_item || picture_item.length == 0) {
@@ -15296,7 +15327,7 @@ app.get('/singlescenedata/:scenekey', function (req, res) { //returns a public s
                 postcardIndex = getRandomInt(0, scenes[0].scenePostcards.length - 1);
 //                        db.image_items.find({postcardForScene: scene.short_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function (err, picture_items) {
                 console.log("tryna find postcard: " + scenes[0].scenePostcards[postcardIndex]);
-                var oo_id = new ObjectId(scenes[0].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                var oo_id = ObjectId.createFromHexString(scenes[0].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
                 db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 
                     if (err || !picture_item || picture_item.length == 0) {
@@ -15349,7 +15380,7 @@ app.get('/publicsinglerandom', function (req, res) { //returns a public scene id
                 postcardIndex = getRandomInt(0, scenes[sceneIndex].scenePostcards.length - 1);
 //                        db.image_items.find({postcardForScene: scene.short_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function (err, picture_items) {
                 console.log("tryna find postcard: " + scenes[sceneIndex].scenePostcards[postcardIndex]);
-                var oo_id = new ObjectId(scenes[sceneIndex].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                var oo_id = ObjectId.createFromHexString(scenes[sceneIndex].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
                 db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 
                     if (err || !picture_item || picture_item.length == 0) {
@@ -15411,7 +15442,7 @@ app.get('/userlocations/:u_id', requiredAuthentication, function(req, res) {
 
 app.post('/delete_location/',  requiredAuthentication, function (req, res) { //weird, post + path
     console.log("tryna delete key: " + req.body._id);
-    var o_id = new ObjectId(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
     db_old.locations.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
@@ -15421,7 +15452,7 @@ app.get('/userlocation/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return location : ' + req.params.p_id);
     var pID = req.params.p_id;
     if (pID != undefined && pID.length > 10) {
-    var o_id = new ObjectId(pID);
+    var o_id = ObjectId.createFromHexString(pID);
     db_old.locations.findOne({"_id": o_id}, function(err, location) {
         if (err || !location) {
             console.log("error getting location item: " + err);
@@ -15438,7 +15469,7 @@ app.get('/userlocation/:p_id', requiredAuthentication, function(req, res) {
 app.post('/update_location/:_id', requiredAuthentication, function (req, res) {
     console.log(JSON.stringify(req.body));
 
-    var o_id = new ObjectId(req.body._id);   
+    var o_id = ObjectId.createFromHexString(req.body._id);   
     console.log('location requested : ' + req.body._id);
     db_old.locations.findOne({ "_id" : o_id}, function(err, location) {
         if (err || !location) {
@@ -15497,7 +15528,7 @@ app.post('/newscene', requiredAuthentication, admin, function (req, res) {
             tempID = item_id;
             // newShortID = shortId(tempID);
             newShortID = shortid.generate(); //TODO - externalize and check for collisions!
-            var o_id = new ObjectId(tempID);
+            var o_id = ObjectId.createFromHexString(tempID);
             console.log(tempID + " = " + newShortID);
             db_old.scenes.update( { _id: o_id }, { $set: { short_id: newShortID }});
 
@@ -15546,20 +15577,20 @@ app.post('/newgroup', requiredAuthentication, function (req, res) {
 });
 
 app.post('/delete_group/', requiredAuthentication, function (req, res) { 
-    var o_id = new ObjectId(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
     db_old.groups.remove( { "_id" : o_id }, 1 );
     res.send("delback");
 });
 
 app.post('/clone_group/', requiredAuthentication, function (req, res) { 
     console.log("tryna clone group : " + req.body._id);
-    var o_id = new ObjectId(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
     db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
     if (err || !group) {
         res.send("group not found!");
     } else {
         var clonedgroup = group;
-        clonedgroup._id = new new ObjectId(); //better way
+        clonedgroup._id = new ObjectId.createFromHexString(); //better way
         clonedgroup.userID = req.session.user._id.toString();
         clonedgroup.userName = req.session.user.username;
         clonedgroup.name = group.name + " clone";
@@ -15586,7 +15617,7 @@ app.post('/clone_group/', requiredAuthentication, function (req, res) {
 ///  maybe later, with cleanup options
 // app.post('/delete_scene/:_id', checkAppID, requiredAuthentication, function (req, res) { 
 //     console.log("tryna delete key: " + req.body._id);
-//     var o_id = ObjectID(req.body._id);
+//     var o_id = ObjectId.createFromHexString(req.body._id);
 //     db.scenes.remove( { "_id" : o_id }, 1 );
 //     res.send("deleted");
 // });
@@ -15609,7 +15640,7 @@ app.post('/update_weblink/', requiredAuthentication, function (req, res) { //ref
         res.send(error);
     })
     // var dateNow = Date.now();
-    // db.weblinks.update({"_id": ObjectID(req.body.sceneID)}, { $set: {"render_date": dateNow}});
+    // db.weblinks.update({"_id": ObjectId.createFromHexString(req.body.sceneID)}, { $set: {"render_date": dateNow}});
     
 });
 
@@ -15674,7 +15705,7 @@ app.post('/weblink/', requiredAuthentication, function (req, res) {
                             
                         });
                         db_old.scenes.update(
-                            {'_id': new ObjectId(req.body.sceneID)},
+                            {'_id': ObjectId.createFromHexString(req.body.sceneID)},
                             {$push: { 'sceneWebLinks': savedlink._id.toString() } }
                         );
                         var dateNow = Date.now();
@@ -15726,7 +15757,7 @@ app.post('/weblink/', requiredAuthentication, function (req, res) {
                 .then(function () {
                 });
                 db_old.scenes.update(
-                    {'_id': new ObjectId(req.body.sceneID)},
+                    {'_id': ObjectId.createFromHexString(req.body.sceneID)},
                     {$addToSet: { 'sceneWebLinks': link._id.toString() } }
                 );
                 var dateNow = Date.now();
@@ -15741,7 +15772,7 @@ app.post('/clone_scene', requiredAuthentication, function (req,res) {
 
     console.log("request to clone scene " + JSON.stringify(req.body));
     // res.send("clone, ok!");
-    var o_id = new ObjectId(req.body.sceneID);   
+    var o_id = ObjectId.createFromHexString(req.body.sceneID);   
     // console.log('path requested : ' + req.body._id);
     db_old.scenes.findOne({ "_id" : o_id}, function(err, scene) {
         if (err || !scene) {
@@ -15766,7 +15797,7 @@ app.post('/clone_scene', requiredAuthentication, function (req,res) {
                     // newShortID = shortId(tempID);
                     let title = scene.sceneTitle + " clone";
                     newShortID = shortid.generate(); //TODO - externalize and check for collisions!
-                    var o_id = new ObjectId(item_id);
+                    var o_id = ObjectId.createFromHexString(item_id);
                     // theScene = JSON.parse(JSON.stringify(scene));
                     db_old.scenes.update( { _id: o_id }, { $set: {
                     short_id : newShortID,
@@ -16018,7 +16049,7 @@ app.post('/update_scene_locations', checkAppID, requiredAuthentication, function
 //        console.log(JSON.stringify(locationsObj.locations[i]));
 //
 //    }
-    var o_id = new ObjectId(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
 
     db_old.scenes.update({ "_id" : o_id}, { $push: { sceneLocations: { $each: locationsObj.locations } } }, function(err, result) {
         if (err || !result) {
@@ -16038,7 +16069,7 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
     console.log("update_scene req.header: " + JSON.stringify(req.headers));
     console.log(req.params._id);
     var lastUpdateTimestamp = Date.now();
-    var o_id = new ObjectId(req.body._id);   
+    var o_id = ObjectId.createFromHexString(req.body._id);   
     console.log('path requested : ' + req.body._id);
     db_old.scenes.findOne({ "_id" : o_id}, function(err, scene) {
         if (err || !scene) {
@@ -16387,7 +16418,7 @@ app.post('/newobj', requiredAuthentication, function (req, res) {
 
 app.post('/delete_obj/', requiredAuthentication, function (req, res) { 
     console.log("tryna delete obj: " + req.body._id);
-    var o_id = new ObjectId(req.body._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);
     db_old.obj_items.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
 });
@@ -16396,7 +16427,7 @@ app.post('/delete_obj/', requiredAuthentication, function (req, res) {
 app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
 
-    var o_id = new ObjectId(req.params._id);   
+    var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('pic requested : ' + req.body._id);
     db_old.image_items.findOne({ "_id" : o_id}, function(err, pic_item) {
         if (err || !pic_item) {
@@ -16451,7 +16482,7 @@ app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
 app.post('/update_video/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);    
 
-    var o_id = new ObjectId(req.params._id);   
+    var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('video requested : ' + req.body._id);
     db_old.video_items.findOne({ "_id" : o_id}, function(err, video_item) {
         if (err || !video_item) {
@@ -16498,7 +16529,7 @@ app.post('/update_video/:_id', requiredAuthentication, function (req, res) {
 app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);    
 
-    var o_id = new ObjectId(req.params._id);   
+    var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('model requested : ' + req.body._id);
     db_old.models.findOne({ "_id" : o_id}, function(err, model) {
         if (err || !model) {
@@ -16542,7 +16573,7 @@ app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
 
 app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
-    var o_id = new ObjectId(req.params._id);   
+    var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('tryna update obj : ' + req.params._id);
     let timestamp = Math.round(Date.now() / 1000);
     db_old.obj_items.find({ "_id" : o_id}, function(err, obj_item) {
@@ -16676,7 +16707,7 @@ app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
 
 app.post('/update_audio/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
-    var o_id = new ObjectId(req.params._id);   
+    var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('audioID requested : ' + req.body);
     db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item) {
@@ -16772,7 +16803,7 @@ app.post('/delete_audio/', requiredAuthentication, function (req, res){
 
     console.log('tryna delete audioID : ' + req.body._id);
     var audio_id = req.body._id;
-    var o_id = new ObjectId(audio_id);   
+    var o_id = ObjectId.createFromHexString(audio_id);   
 
     db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
         if (err || !audio_item) {
@@ -16867,7 +16898,7 @@ app.post('/delete_model/', requiredAuthentication, function (req, res){
     (async () => {
       try {
         var pic_id = req.body._id;
-        var o_id = new ObjectId(pic_id);   
+        var o_id = ObjectId.createFromHexString(pic_id);   
 
         const query = { "_id" : o_id};
         const model = await RunDataQuery("models", "findOne", query);
@@ -16909,7 +16940,7 @@ app.post('/delete_video/', requiredAuthentication, function (req, res){
 
     console.log('tryna delete videoID : ' + req.body._id);
     var vid_id = req.body._id;
-    var o_id = new ObjectId(vid_id);   
+    var o_id = ObjectId.createFromHexString(vid_id);   
 
     (async () => {
       try {
@@ -17037,7 +17068,7 @@ app.post('/delete_picture/', requiredAuthentication, function (req, res) { //TOD
 
     console.log('tryna delete pictureID : ' + req.body._id);
     var pic_id = req.body._id;
-    var o_id = new ObjectId(pic_id);   
+    var o_id = ObjectId.createFromHexString(pic_id);   
 
     (async () => {
       try {
@@ -17127,7 +17158,7 @@ app.post('/delete_picture/', requiredAuthentication, function (req, res) { //TOD
 //         } else {
 //             if (scene.scenePostcards != null && scene.scenePostcards.length) {
 //                 let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
-//                 var oo_id = new ObjectId(scene.scenePostcards[postcardIndex]);
+//                 var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]);
 //                 db_old.images.findOne({_id: oo_id}, function (err, pic) {
 //                     if (err || !pic) {
 //                         res.send("no postcard found");

@@ -3,7 +3,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 require('dotenv').config();
 
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ServerApiVersion, ObjectId } from "mongodb";
 // import { db } from "../server.js";
 /////////// official mongo driver, going here...
 const uri = process.env.MONGO_URL || "";
@@ -14,10 +14,14 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
-const db = client.db(); 
+export let db = client.db(); 
 
-export async function RunDataQuery(coll,type,query) {
-    console.log("tryna RunDataQuery " + coll + " " + type  + " " + JSON.stringify(query));
+export async function RunDataQuery(coll,type,query,from) {
+    if (!db) {
+        console.log("wheres the db?");
+        db = client.db();
+    }
+    console.log("tryna RunDataQuery " + coll + " " + type  + " " + JSON.stringify(query) + " " + from);
     switch  (type) {
 
         case "find": //i.e. more than one

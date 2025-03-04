@@ -39,6 +39,8 @@
     var auth = "";
     let domains = "";
     var apps = {};
+    let googleMapsKey = "";
+    
     amirite();
     
     function amirite () {
@@ -2510,7 +2512,7 @@
                         console.log('More or less ' + crd.accuracy + ' meters.');
                         let mapLink = "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + crd.latitude + "," + crd.longitude + "\x22>" +
                         "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + crd.latitude +
-                        "," + crd.longitude + "&zoom=15&size=600x400&maptype=roadmap&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:blue%7Clabel:%7C" + crd.latitude + "," + crd.longitude + "\x22>" + 
+                        "," + crd.longitude + "&zoom=15&size=600x400&maptype=roadmap&key="+googleMapsKey+"&markers=color:blue%7Clabel:%7C" + crd.latitude + "," + crd.longitude + "\x22>" + 
                         "</a>";
                         $("#mapElement").html(mapLink);
                     };
@@ -2611,7 +2613,7 @@
             if (type == "geographic") {
                 mapLink = "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + response.data.latitude + "," + response.data.longitude + "\x22>" +
                 "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + response.data.latitude +
-                "," + response.data.longitude + "&zoom=15&size=600x400&maptype=roadmap&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:blue%7Clabel:%7C" + response.data.latitude + "," + response.data.longitude + "\x22>" + 
+                "," + response.data.longitude + "&zoom=15&size=600x400&maptype=roadmap&key="+googleMapsKey+"&markers=color:blue%7Clabel:%7C" + response.data.latitude + "," + response.data.longitude + "\x22>" + 
                 "</a>";
             }
             var card = "<div class=\x22col-lg-12\x22>" +
@@ -2857,7 +2859,7 @@
                     }
                     if (arr[i].type.toLowerCase() == "geographic") {
                         locationMap = "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + arr[i].latitude + "," + arr[i].longitude + "\x22>" +
-                        "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + arr[i].latitude + "," + arr[i].longitude + "&zoom=15&size=600x300&maptype=roadmap&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + location.latitude + "," + location.longitude + "\x22>" + 
+                        "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + arr[i].latitude + "," + arr[i].longitude + "&zoom=15&size=600x300&maptype=roadmap&key="+googleMapsKey+"&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + location.latitude + "," + location.longitude + "\x22>" + 
                         "</a>";
                         location = "lat: " + arr[i].latitude + "<br>lon: " + arr[i].longitude;
                     } else {
@@ -8500,10 +8502,10 @@ function showGroup() {
                     hasItem = true;
                     let mapSrc = "";
                     if (arr[i].type.toLowerCase() == "geographic") {
-                        mapSrc = "https://maps.googleapis.com/maps/api/staticmap?center=" + arr[i].latitude + "," + arr[i].longitude + "&zoom=15&size=600x300&maptype=roadmap&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + arr[i].latitude + "," + arr[i].longitude;
+                        mapSrc = "https://maps.googleapis.com/maps/api/staticmap?center=" + arr[i].latitude + "," + arr[i].longitude + "&zoom=15&size=600x300&maptype=roadmap&key="+googleMapsKey+"&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + arr[i].latitude + "," + arr[i].longitude;
                         detailsPicLink = "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + arr[i].latitude + "," + arr[i].longitude + "\x22>" +
                         "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + arr[i].latitude + "," + arr[i].longitude + 
-                        "&zoom=15&size=600x300&maptype=roadmap&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + arr[i].latitude + "," + arr[i].longitude + "\x22>" + 
+                        "&zoom=15&size=600x300&maptype=roadmap&key="+googleMapsKey+"&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + arr[i].latitude + "," + arr[i].longitude + "\x22>" + 
                         "</a>";
                         location = "latitude: " + arr[i].latitude + "<br>latitude: " + arr[i].longitude;
                     } else {
@@ -12825,7 +12827,7 @@ function getAllPeople() {
                     if (sceneLocations[i].type != undefined && sceneLocations[i].type.toLowerCase() == "geographic") {
                         locationMap = "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + sceneLocations[i].latitude + "," + sceneLocations[i].longitude + "\x22>" +
                         "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + sceneLocations[i].latitude + "," + sceneLocations[i].longitude + 
-                        "&zoom=15&size=600x300&maptype=roadmap&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + sceneLocations[i].latitude + "," + sceneLocations[i].longitude + "\x22>" + 
+                        "&zoom=15&size=600x300&maptype=roadmap&key="+googleMapsKey+"&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + sceneLocations[i].latitude + "," + sceneLocations[i].longitude + "\x22>" + 
                         "</a>"; 
                         // "<br><br><button type=\x22button\x22 class=\x22remSceneLocation btn btn-xs btn-danger float-left\x22 id=\x22" + i + "\x22>Remove</button>";
 

@@ -3054,11 +3054,11 @@ webxr_router.get('/:_id', function (req, res) {
                                                     scale = locMdl.yscale != null ? locMdl.yscale : 1;
                                                     if (locMdl.eventData.toLowerCase().includes("everywhere")) {
                                                         
-                                                        if (locMdl.tags.toLowerCase().includes('growpop')) { //tags not eventdata?
+                                                        if (locMdl.tags && locMdl.tags.includes('growpop')) { //tags not eventdata?
                                                             interaction = " interaction: growpop; ";
-                                                        } else if (locMdl.tags.toLowerCase().includes('shrinkpop')) {
+                                                        } else if (locMdl.tags && locMdl.tags.includes('shrinkpop')) {
                                                             interaction = " interaction: shrinkpop; ";
-                                                        } else if (locMdl.tags.toLowerCase().includes('wiggle')) {
+                                                        } else if (locMdl.tags && locMdl.tags.includes('wiggle')) {
                                                             interaction = " interaction: wiggle; ";
                                                         }
                                                     

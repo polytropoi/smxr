@@ -191,7 +191,7 @@ $(function() {
             if (picGroupMgr) {
                let theData = picGroupMgr.getAttribute('data-picture-groups');
                let theJSONData = JSON.parse(atob(theData)); //convert from base64
-               console.log(JSON.stringify(theJSONData[0].images));
+               console.log(JSON.stringify(theJSONData));
                let picResp = "";
                for (let i = 0; i < theJSONData[0].images.length; i++) { //todo ++ groups
                   picResp = picResp + "<a href=\x22"+theJSONData[0].images[i].url+"\x22 target=\x22_blank\x22><img src=\x22"+theJSONData[0].images[i].url+"\x22 class=\x22cropped1 image-fluid\x22 style=\x22object-fit: cover;\x22 width=\x22512\x22 height=\x22256\x22></a>";

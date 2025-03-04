@@ -14,6 +14,7 @@ let gpsElements = null;
 let data_location_
 let doBuildings = false;
 let doTerrain = false;
+let googleMapsKey = "";
 
 
 AFRAME.registerComponent('location_init_ar', { 
@@ -263,7 +264,7 @@ function geoip(json){
               gpsThing.longitude = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
               gpsThing.index = index;
               gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
-              "&zoom=17&size=2048x2048&maptype=hybrid&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
+              "&zoom=17&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
               // gps.data.push(gpsThing);
               let gpsPanel = document.createElement("a-entity");
               var sceneEl = document.querySelector('a-scene');
@@ -288,7 +289,7 @@ function geoip(json){
             let mapEl = document.getElementById('youAreHere');
             mapJSON = {};
             mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + location.coords.latitude + "," + location.coords.longitude + // shows everhthing, need to scale zoom by max distance
-            "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:green%7Clabel:0%7C" + location.coords.latitude + "," + location.coords.longitude + markers;
+            "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + location.coords.latitude + "," + location.coords.longitude + markers;
             mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
             // $(".map-overlay").css('visibility','visible');
             // $(".map-overlay").backstretch(mapURL);
@@ -360,7 +361,7 @@ function geoip(json){
                       gpsThing.longitude = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
                       gpsThing.index = index;
                       gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
-                      "&zoom=14&size=2048x2048&maptype=hybrid&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
+                      "&zoom=14&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
                       // gps.data.push(gpsThing);
                     if (mode != 'mapbox') {
                       let gpsPanel = document.createElement("a-entity");
@@ -381,7 +382,7 @@ function geoip(json){
                 let mapEl = document.getElementById('youAreHere');
                 mapJSON = {};
                 mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + ipLookupData.latitude + "," + ipLookupData.longitude + // shows everhthing, need to scale zoom by max distance
-                "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:green%7Clabel:0%7C" + ipLookupData.latitude + "," + ipLookupData.longitude + markers;
+                "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + ipLookupData.latitude + "," + ipLookupData.longitude + markers;
                 mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
               }
               break;
@@ -431,7 +432,7 @@ function geoip(json){
           gpsThing.longitude = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
           gpsThing.index = index;
           gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
-          "&zoom=15&size=2048x2048&maptype=hybrid&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
+          "&zoom=15&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
           // gps.data.push(gpsThing);
           if (mode != 'mapbox') {
             let gpsPanel = document.createElement("a-entity");
@@ -449,7 +450,7 @@ function geoip(json){
         let mapEl = document.getElementById('youAreHere');
         mapJSON = {};
         mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + location.coords.latitude + "," + location.coords.longitude + // shows everhthing, need to scale zoom by max distance
-        "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key=AIzaSyCBlNNHgDBmv-vusmuvG3ylf0XjGoMkkCo&markers=color:green%7Clabel:0%7C" + location.coords.latitude + "," + location.coords.longitude + markers;
+        "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + location.coords.latitude + "," + location.coords.longitude + markers;
         mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
         // $(".map-overlay").css('visibility','visible');
         // $(".map-overlay").backstretch(mapURL);
