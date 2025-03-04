@@ -843,7 +843,7 @@ function usercheck (req, res, next) { //gotsta beez the owner of requested resou
     }
 }
 function domainadmin (req, res, next) { //TODO also check acl
-    db_old.users.findOne({_id: ObjectId.createFromHexString(req.session.user._id)}, function (err, user) {
+    db_old.users.findOne({_id: ObjectId.createFromHexString(req.session.user._id.toString())}, function (err, user) {
         if (err || !user) {
             res.send("noauth");
         } else {
@@ -10673,107 +10673,143 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
     var pID = req.params.p_id;
     var o_id = ObjectId.createFromHexString(pID);
     var childObjects = {};
-    db_old.obj_items.findOne({"_id": o_id}, function(err, obj_item) {
-        if (err || !obj_item) {
-            console.log("error getting picture items: " + err);
-        } else {
-            async.waterfall([
-                function(callback) {
-                    console.log("starting..");
-                    if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) {
-                    // oids = domain.domainPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
-                        const oids = obj_item.objectPictureIDs.map(item => {
-                            return ObjectId.createFromHexString(item);
-                        });
-                        db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-                            if (err || !pic_items) {
-                                console.log("error getting picture items: " + err);
-                                // res.send("error: " + err);
-                                callback(err);
-                            } else {
-                                
-                                    objectPictures = [];
-                                    pic_items.forEach(function(picture_item) {
-                                        (async () => {                
-                                            var imageItem = {};
-                                            const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, 6000);
-                                            const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, 6000);
-                                            const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, 6000);
 
-                                            // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-                                            // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-                                            // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-                                            imageItem.urlThumb = urlThumb;
-                                            imageItem.urlHalf = urlHalf;
-                                            imageItem.urlStandard = urlStandard;
-                                            imageItem._id = picture_item._id;
-                                            imageItem.filename = picture_item.filename;
-                                            objectPictures.push(imageItem);
-                                            obj_item.objectPictures = objectPictures;
-                                        })();
-                                    });
-                                    callback(null);
-                            }
-                        });
-                    
-                    } else {
-                        console.log('no pics');
-                        callback(null);
-                    }
-                },
-                function(callback) {
-                    // console.log(JSON.stringify(obj_item));
-                    if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
-                        const aids = obj_item.actionIDs.map(item => {
-                            return ObjectId.createFromHexString(item);
-                        });
-                        db_old.actions.find({_id: {$in: aids }}, function (err, actions) {
-                            if (err || !actions) {
-                                callback(err);
-                            } else {
-                                obj_item.actions = actions;
-                                // console.log(JSON.stringify(obj_item.actions));
-                                callback(null);
-                            }
-                        });
-                    } else {
-                        callback(null);
-                    }
-                }, 
-                function (callback) {
-                    console.log("tryna get modelID " + obj_item.modelID);
-                    let oid = obj_item.modelID;
-                    if (oid != null) {
-                        console.log("tryna get modelID2 " + oid);
-                        let oo_id = ObjectId.createFromHexString(oid);
-                        db_old.models.findOne({"_id": oo_id}, function (err, model) {
-                        if (err || !model) {
-                            console.log("error getting model: " + err);
-                            callback(err);
-                            } else {
-                                (async () => {
-                                    console.log("got objj model:" + JSON.stringify(model));
-                                    // let url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + model.userID + "/gltf/" + model.filename, Expires: 6000});
+    (async () => {
+      try {
+        const query = {"_id": o_id};
+        const obj_item = await RunDataQuery("obj_items", "findOne", query, req.originalUrl);
+        if (obj_item) {
+          if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
+            const aids = obj_item.actionIDs.map(item => {
+                return ObjectId.createFromHexString(item);
+            });
+            const actionsquery = {"_id": {$in: aids}};
+            const actions = await RunDataQuery("actions", "find", actionsquery, req.originalUrl);
+            if (actions && actions.length) {
+              obj_item.actions = actions;
+            }
+          }
+          //no need for object pics, I guess...
+          if (obj_item.modelID) {
+            let oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
+            const modelquery = {"_id": oo_id};
+            const model = await RunDataQuery("models", "findOne", modelquery, req.originalUrl);
+            if (model) {
+              obj_item.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename,6000);
+            }
 
-                                    obj_item.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename,6000);
-                                    callback(null);
-                                })();
-                            }
-                    });
-                    } else {
-                        callback(null);
-                    }                                                     
-                }
-            ],
-
-            function(err, result) { // #last function, close async
-                    // console.log("waterfall done: " + JSON.stringify(obj_item));
-                    res.json(obj_item);
-                }
-            );
+          }
         }
-    });
-});
+        res.json(obj_item);
+      } catch (e) {
+        console.log("error getting object " + e);
+        res.send("error getting object " + e);
+      }
+
+    })();
+  });
+
+    // db_old.obj_items.findOne({"_id": o_id}, function(err, obj_item) {
+    //     if (err || !obj_item) {
+    //         console.log("error getting picture items: " + err);
+    //     } else {
+    //         async.waterfall([
+    //             function(callback) {
+    //                 console.log("starting..");
+    //                 if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) {
+    //                 // oids = domain.domainPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
+    //                     const oids = obj_item.objectPictureIDs.map(item => {
+    //                         return ObjectId.createFromHexString(item);
+    //                     });
+    //                     db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+    //                         if (err || !pic_items) {
+    //                             console.log("error getting picture items: " + err);
+    //                             // res.send("error: " + err);
+    //                             callback(err);
+    //                         } else {
+                                
+    //                                 objectPictures = [];
+    //                                 pic_items.forEach(function(picture_item) {
+    //                                     (async () => {                
+    //                                         var imageItem = {};
+    //                                         const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, 6000);
+    //                                         const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, 6000);
+    //                                         const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, 6000);
+
+    //                                         // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
+    //                                         // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
+    //                                         // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
+    //                                         imageItem.urlThumb = urlThumb;
+    //                                         imageItem.urlHalf = urlHalf;
+    //                                         imageItem.urlStandard = urlStandard;
+    //                                         imageItem._id = picture_item._id;
+    //                                         imageItem.filename = picture_item.filename;
+    //                                         objectPictures.push(imageItem);
+    //                                         obj_item.objectPictures = objectPictures;
+    //                                     })();
+    //                                 });
+    //                                 callback(null);
+    //                         }
+    //                     });
+                    
+    //                 } else {
+    //                     console.log('no pics');
+    //                     callback(null);
+    //                 }
+    //             },
+    //             function(callback) {
+    //                 // console.log(JSON.stringify(obj_item));
+    //                 if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
+    //                     const aids = obj_item.actionIDs.map(item => {
+    //                         return ObjectId.createFromHexString(item);
+    //                     });
+    //                     db_old.actions.find({_id: {$in: aids }}, function (err, actions) {
+    //                         if (err || !actions) {
+    //                             callback(err);
+    //                         } else {
+    //                             obj_item.actions = actions;
+    //                             // console.log(JSON.stringify(obj_item.actions));
+    //                             callback(null);
+    //                         }
+    //                     });
+    //                 } else {
+    //                     callback(null);
+    //                 }
+    //             }, 
+    //             function (callback) {
+    //                 console.log("tryna get modelID " + obj_item.modelID);
+    //                 let oid = obj_item.modelID;
+    //                 if (oid != null) {
+    //                     console.log("tryna get modelID2 " + oid);
+    //                     let oo_id = ObjectId.createFromHexString(oid.toString());
+    //                     db_old.models.findOne({"_id": oo_id}, function (err, model) {
+    //                     if (err || !model) {
+    //                         console.log("error getting model: " + err);
+    //                         callback(err);
+    //                         } else {
+    //                             (async () => {
+    //                                 console.log("got objj model:" + JSON.stringify(model));
+    //                                 // let url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + model.userID + "/gltf/" + model.filename, Expires: 6000});
+
+    //                                 obj_item.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename,6000);
+    //                                 callback(null);
+    //                             })();
+    //                         }
+    //                 });
+    //                 } else {
+    //                     callback(null);
+    //                 }                                                     
+    //             }
+    //         ],
+
+    //         function(err, result) { // #last function, close async
+    //                 // console.log("waterfall done: " + JSON.stringify(obj_item));
+    //                 res.json(obj_item);
+    //             }
+    //         );
+    //     }
+    // });
+// });
 
 
 
