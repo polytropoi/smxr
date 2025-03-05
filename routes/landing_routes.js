@@ -217,7 +217,7 @@ landing_router.get('/:_id', async (req, res) => {
     let postcardImages = []; 
 
     const query = {"short_id": reqstring};
-    const sceneData = await RunDataQuery("scenes","findOne",query,req.originalUrl);
+    const sceneData = await RunDataQuery("scenes","findOne",query);
 
     // db.scenes.findOne({"short_id": reqstring}, function (err, sceneData) { 
             if (!sceneData) {
@@ -394,25 +394,45 @@ landing_router.get('/:_id', async (req, res) => {
                     let name2 = "";
                     let name3 = "";
                     const min = 0;
-                    db.lexicons.findOne({name: "nameArrays"}, function (err, items) {
-                    if (err || !items) {
-                        console.log("error getting scene 5: " + err);
-                        callback (err);
-                    } else {
-                        array1 = items.adjectives;
-                        array2 = items.colors;
-                        array3 = items.animals;
-                        // console.log("array 1" + array1);
-                        index1 = Math.floor(Math.random() * array1.length);
-                        name1 = UppercaseFirst(array1[index1]);
-                        index2 = Math.floor(Math.random() * array2.length);
-                        name2 = UppercaseFirst(array2[index2]);
-                        index3 = Math.floor(Math.random() * array3.length);
-                        name3 = UppercaseFirst(array3[index3]);
-                        avatarName = name1 + "_" + name2 + "_" + name3;
-                        callback();
+                    (async () => {
+
+                        const query = {"name": "nameArrays"};
+                        const item = await RunDataQuery("lexicons", "findOne", query);
+                        if (item) {
+                            array1 = item.adjectives;
+                            array2 = item.colors;
+                            array3 = item.animals;
+                            // console.log("array 1" + array1);
+                            index1 = Math.floor(Math.random() * array1.length);
+                            name1 = UppercaseFirst(array1[index1]);
+                            index2 = Math.floor(Math.random() * array2.length);
+                            name2 = UppercaseFirst(array2[index2]);
+                            index3 = Math.floor(Math.random() * array3.length);
+                            name3 = UppercaseFirst(array3[index3]);
+                            avatarName = name1 + "_" + name2 + "_" + name3;
                         }
-                    });
+                        callback(); 
+
+                    })();
+                    // db.lexicons.findOne({name: "nameArrays"}, function (err, items) {
+                    // if (err || !items) {
+                    //     console.log("error getting scene 5: " + err);
+                    //     callback (err);
+                    // } else {
+                    //     array1 = items.adjectives;
+                    //     array2 = items.colors;
+                    //     array3 = items.animals;
+                    //     // console.log("array 1" + array1);
+                    //     index1 = Math.floor(Math.random() * array1.length);
+                    //     name1 = UppercaseFirst(array1[index1]);
+                    //     index2 = Math.floor(Math.random() * array2.length);
+                    //     name2 = UppercaseFirst(array2[index2]);
+                    //     index3 = Math.floor(Math.random() * array3.length);
+                    //     name3 = UppercaseFirst(array3[index3]);
+                    //     avatarName = name1 + "_" + name2 + "_" + name3;
+                    //     callback();
+                    //     }
+                    // });
                 } else {
                     callback();
                 }
@@ -1016,7 +1036,7 @@ landing_router.get('/:_id', async (req, res) => {
                     (async () => {
                         try {
                             const query = {_id: {$in: requestedAudioItems }};
-                            const audio_items = await RunDataQuery("audio_items", "find", query, req.originalUrl);
+                            const audio_items = await RunDataQuery("audio_items", "find", query);
                             if (!audio_items) {
                                 audio_items = [];
                             }
@@ -1375,7 +1395,7 @@ landing_router.get('/:_id', async (req, res) => {
                                 const vgID = sceneResponse.sceneVideoGroups[0]; //just get the first one
                                 const oo_id = ObjectId.createFromHexString(vgID);
                                 const query = {"_id": oo_id};
-                                const group = await RunDataQuery("groups", "findOne", query, req.originalUrl);
+                                const group = await RunDataQuery("groups", "findOne", query);
                                 if (group) {
                                     requestedVideoGroups.push(group);
                                     const buff = Buffer.from(JSON.stringify(requestedVideoGroups)).toString("base64");
@@ -1625,7 +1645,7 @@ landing_router.get('/:_id', async (req, res) => {
                             try {
                                 var oo_id = ObjectId.createFromHexString(postcard);
                                 const query = {"_id": oo_id};
-                                const picture_item = await RunDataQuery("image_items", "findOne", query, req.originalUrl);
+                                const picture_item = await RunDataQuery("image_items", "findOne", query);
                                 if (picture_item) {
                                     const postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ picture_item._id + ".standard." + picture_item.filename)                                     
                                     postcardImages.push(postcard1);
@@ -1655,7 +1675,7 @@ landing_router.get('/:_id', async (req, res) => {
                             try {
                                 const objectIDs = sceneResponse.scenePictureGroups.map(convertStringToObjectID);
                                 const query = {"_id": {$in : objectIDs}};
-                                const groups = await RunDataQuery("groups","find",query,req.originalUrl);
+                                const groups = await RunDataQuery("groups","find",query);
                                 if (groups && groups.length) {
                                     for (var group of groups) {
                                         let picGroup = {};
@@ -1712,7 +1732,7 @@ landing_router.get('/:_id', async (req, res) => {
                                 try {                                       
                                     var oo_id = ObjectId.createFromHexString(picID);
                                     const query = {"_id": oo_id};
-                                    const picture_item = await RunDataQuery("image_items", "findOne", query, req.originalUrl);
+                                    const picture_item = await RunDataQuery("image_items", "findOne", query);
                                     if (picture_item) {
                                         var version = ".standard.";
                                         if (picture_item.orientation != undefined) {

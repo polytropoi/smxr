@@ -16,12 +16,12 @@ const client = new MongoClient(uri, {
 });
 export let db = client.db(); 
 
-export async function RunDataQuery(coll,type,query,from) {
+export async function RunDataQuery(coll,type,query,update) {
     if (!db) {
         console.log("wheres the db?");
         db = client.db();
     }
-    console.log("tryna RunDataQuery " + coll + " " + type  + " " + JSON.stringify(query) + " " + from);
+    console.log("tryna RunDataQuery " + coll + " " + type  + " " + JSON.stringify(query) + " " + JSON.stringify(update));
     switch  (type) {
 
         case "find": //i.e. more than one
@@ -85,6 +85,14 @@ export async function RunDataQuery(coll,type,query,from) {
             return await db.collection(coll).deleteMany(query);
         } catch (e) {
             console.log("db deleteMany error " + e);
+            return (null); 
+        }
+        case "updateOne": 
+        try {
+            const options = { upsert: true };
+            return await db.collection(coll).updateOne(query, update, options);
+        } catch (e) {
+            console.log("db updateOne error " + e);
             return (null); 
         }
     }

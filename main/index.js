@@ -40,7 +40,7 @@
     let domains = "";
     var apps = {};
     let googleMapsKey = "";
-    
+
     amirite();
     
     function amirite () {
@@ -12060,7 +12060,7 @@ function getAllPeople() {
                             axios.post('/update_obj/' + response.data._id,  data)
                                 .then(function (response) {
                                     console.log(response);
-                                    if (response.data.includes("updated")) {
+                                    if (response.data.includes("update")) {
                                         $("#topSuccess").html("Object Updated!");
                                         $("#topSuccess").show();
                                     } else if (response.data.includes("created")) {

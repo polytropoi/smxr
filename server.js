@@ -6,7 +6,7 @@ const require = createRequire(import.meta.url);
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import express from "express";
+import express, { query } from "express";
 import http from "http";
 import jwt from "jsonwebtoken";
 import axios from "axios";
@@ -16,6 +16,7 @@ import cookieParser from "cookie-parser";
 import mongojs from "mongojs";
 import methodOverride from "method-override";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 // import entities from "entities";
 import validator from "validator"; 
 // import minio from "minio";
@@ -34,7 +35,7 @@ const entities = require("entities");
 
 const minio = require('minio');
 
-const MongoDBStore = require('connect-mongodb-session')(session); //theShit
+// const MongoDBStore = require('connect-mongodb-session')(session); //the oldshit
 
 const requireText = require('require-text');
 
@@ -91,17 +92,19 @@ var databaseUrl = process.env.MONGO_URL; //main db connstring
 var collections = ["acl", "auth_req", "domains", "apps", "assets", "assetsbundles", "models", "users", "inventories", "inventory_items", "audio_items", "text_items", "audio_item_keys", "image_items", "video_items",
     "obj_items", "paths", "keys", "traffic", "scores", "attributes", "achievements", "activity", "actions", "purchases", "storeitems", "scenes", "groups", "weblinks", "locations", "iap"];
 
-export let db_old = mongojs(databaseUrl, collections);
+export let db_old = mongojs(databaseUrl, collections); //soon you will die!
 
-var store = new MongoDBStore({ //store session info in a separate db with different user, so nice
-    uri: process.env.MONGO_SESSIONS_URL,
-    collection: 'sessions'
-  });
+// var store = new MongoDBStore({ //store session info in a separate db with different user, so nice
+//     uri: process.env.MONGO_SESSIONS_URL,
+//     collection: 'sessions'
+//   });
 
-  store.on('connected', function() {
-    store.db_old; // The underlying MongoClient object from the MongoDB driver
-  });
-
+  // store.on('connected', function() {
+  //   store.db_old; // The underlying MongoClient object from the MongoDB driver
+  // });
+  // store.on('error', function(error) {
+  //   console.log(error);
+  // });
 
     app.use(express.static(path.join(__dirname, './'), { maxAge: oneDay }));
 
@@ -120,14 +123,15 @@ var store = new MongoDBStore({ //store session info in a separate db with differ
     });
 
     app.use(methodOverride());  //for header rewriting
-//    var sessionStore = new session.MemoryStore(); //nope
+
     var expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 2 hour
     app.use(session({
         resave: true,
         saveUninitialized: true,
-        store: store,
+        store: MongoStore.create({ mongoUrl: process.env.MONGO_SESSIONS_URL }),
         rolling: true,
         secret: process.env.JWT_SECRET }));
+
 
     app.use(cookieParser()); //unused?
     app.use(bodyParser.json({ "limit": "150mb", extended: true })); //set this to route specific somehow, for add_scene_mods?
@@ -193,7 +197,7 @@ var store = new MongoDBStore({ //store session info in a separate db with differ
         console.log("Express server listening on port 3000");
     });
     app.set('db', db_old);
-    app.set('store', store);
+    // app.set('store', store);
     app.set('s3', s3);
 
     db_old.scenes.createIndex( { short_id: -1 } );
@@ -578,26 +582,50 @@ export function requiredAuthentication(req, res, next) { //primary auth method, 
                         // )
                         // console.log("gotsa token payload: " + req.session.user._id + " vs " +  payload.userId);
                         if (payload.userId != null){
-                            console.log("gotsa payload.userId : " + payload.userId);
-                            var oo_id = ObjectId.createFromHexString(payload.userId);
-                            db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-                                if (err != null) {
-                                    req.session.error = 'Access denied!';
-                                    console.log("token authentication failed! User ID not found");
-                                    res.send('noauth');
-                                } else {
-                                    console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-                                    if (user.status == "validated") {
-                                    // userStatus = "subscriber";
-                                    console.log("gotsa subscriber!");
-                                    next();
+                            (async () => {
+                              console.log("gotsa payload.userId : " + payload.userId);
+                              try {
+                                var oo_id = ObjectId.createFromHexString(payload.userId);
+                                const query = {"_id": oo_id};
+                                const user = await RunDataQuery("users", "findOne", query);
+                                if (user) {
+                                  if (user.status == "validated") {
+                                      // userStatus = "subscriber";
+                                      console.log("user is good");
+                                      next();
                                     } else {
-                                        req.session.error = 'Access denied!';
-                                        console.log("token authentication failed! not a subscriber");
-                                        res.send('noauth');    
+                                      req.session.error = 'Access denied!';
+                                      console.log("token authentication failed! not a subscriber");
+                                      res.send('noauth');    
                                     }
+                                } else {
+                                  req.session.error = "access denied!";
+                                  req.send("noauth");
                                 }
-                            });
+                              } catch (e) {
+                                req.session.error = "auth error! " + e;
+                                console.log("auth error! " + e);
+                              }
+                            
+                            // db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
+                            //     if (err != null) {
+                            //         req.session.error = 'Access denied!';
+                            //         console.log("token authentication failed! User ID not found");
+                            //         res.send('noauth');
+                            //     } else {
+                            //         console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
+                            //         if (user.status == "validated") {
+                            //         // userStatus = "subscriber";
+                            //         console.log("gotsa subscriber!");
+                            //         next();
+                            //         } else {
+                            //             req.session.error = 'Access denied!';
+                            //             console.log("token authentication failed! not a subscriber");
+                            //             res.send('noauth');    
+                            //         }
+                            //     }
+                            // });
+                          })();
                             // next();
                         } else {
                             req.session.error = 'Access denied!';
@@ -1471,7 +1499,9 @@ function ReturnID(item) {
     //  console.log("id " + id + " frim rule item " + JSON.stringify(item));
      return id;
 }
-app.get("/ami-rite-token/:token", function (req, res) {
+
+////////////////////////////////////// MAIN CLIENT AUTH ROUTE - no cookies, just tokens now...
+app.get("/ami-rite-token/:token", function (req, res) { 
     jwt.verify(req.params.token, process.env.JWT_SECRET, function (err, payload) {
         console.log("token auth payload: " + JSON.stringify(payload));
             if (payload) {
@@ -1480,21 +1510,21 @@ app.get("/ami-rite-token/:token", function (req, res) {
                     res.send("3");   
                 } else {
                     console.log("time remaining on token: " + ((payload.exp * 1000) - Date.now()));
-                    if (payload.userId != null){
+                  if (payload.userId != null){
                         if (payload.userId == "0000000000000") {
                             console.log("payload is guest token"); 
                             res.send('0');
-                        } else {   
+                        } else {
+
                             console.log("gotsa payload.userId : " + payload.userId);
-                            var oo_id = ObjectId.createFromHexString(payload.userId);
-                            db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-                            if (err != null) {
-                                req.session.error = 'Access denied!';
-                                console.log("token authentication failed! User ID not found");
-                                res.send('noauth');
-                            } else {
-                                console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-                                if (user.status == "validated") {
+
+                            (async () => {
+                              try {
+                                var oo_id = ObjectId.createFromHexString(payload.userId);
+                                const query = {"_id": oo_id};
+                                const user = await RunDataQuery("users", "findOne", query);
+                                if (user) {
+                                  if (user.status == "validated") {
                                     // userStatus = "subscriber";
                                     console.log("gotsa subscriber!");
                                     let userData = {};
@@ -1502,30 +1532,90 @@ app.get("/ami-rite-token/:token", function (req, res) {
                                     userData.userName = user.userName;
                                     userData.sceneShortID = payload.shortID;
                                     userData.authLevel = user.authLevel;
-                                    db_old.scenes.findOne({'short_id': userData.sceneShortID}, function (err, scene) {
-                                        if (err || !scene) {
-                                            userData.sceneShortID = "not found";
-                                            
-                                            res.send(userData);
-                                        } else {
-                                            // console.log("scene " + )
-                                            if (scene.user_id == userData._id) { //TO DO check the acl for write_scene etc..
-                                                userData.sceneOwner = "indaehoose";
-                                                userData.sceneID = scene._id;
-                                                res.send(userData);
-                                            } else {
-                                                res.send(userData);
-                                            }
-                                        }
-                                    });
                                     
-                                } else {
-                                    req.session.error = 'Access denied!';
-                                    console.log("token authentication failed! not a subscriber");
-                                    res.send("2");    
+                                    const scenequery = {"short_id": userData.sceneShortID};
+                                    const scene = await RunDataQuery("scenes", "findOne", query); //check that user is authed for this scene
+                                    if (scene) {
+                                      if (scene.user_id == userData._id) { //TO DO check the acl for write_scene etc..
+                                          userData.sceneOwner = "indaehoose";
+                                          userData.sceneID = scene._id;
+                                          res.send(userData);
+                                        } else {
+                                          res.send(userData);
+                                        }
+                                    } else {
+                                      res.send(userData);
+                                    }
+                                    // db_old.scenes.findOne({'short_id': userData.sceneShortID}, function (err, scene) {
+                                    //     if (err || !scene) {
+                                    //         userData.sceneShortID = "not found";
+                                            
+                                    //         res.send(userData);
+                                    //     } else {
+                                    //         // console.log("scene " + )
+                                    //         if (scene.user_id == userData._id) { //TO DO check the acl for write_scene etc..
+                                    //             userData.sceneOwner = "indaehoose";
+                                    //             userData.sceneID = scene._id;
+                                    //             res.send(userData);
+                                    //         } else {
+                                    //             res.send(userData);
+                                    //         }
+                                    //     }
+                                    // });
+                                    
+                                    } else {
+                                      req.session.error = 'Access denied!';
+                                      console.log("token authentication failed! not a subscriber");
+                                      res.send("2");    
                                     }
                                 }
-                            });
+                                
+                              } catch (e) {
+                                res.send("auth error " + e);
+                              }
+                              
+                            })();
+                            
+                            
+                            // db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
+                            // if (err != null) {
+                            //     req.session.error = 'Access denied!';
+                            //     console.log("token authentication failed! User ID not found");
+                            //     res.send('noauth');
+                            // } else {
+                            //     console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
+                            //     if (user.status == "validated") {
+                            //         // userStatus = "subscriber";
+                            //         console.log("gotsa subscriber!");
+                            //         let userData = {};
+                            //         userData._id = user._id;
+                            //         userData.userName = user.userName;
+                            //         userData.sceneShortID = payload.shortID;
+                            //         userData.authLevel = user.authLevel;
+                            //         db_old.scenes.findOne({'short_id': userData.sceneShortID}, function (err, scene) {
+                            //             if (err || !scene) {
+                            //                 userData.sceneShortID = "not found";
+                                            
+                            //                 res.send(userData);
+                            //             } else {
+                            //                 // console.log("scene " + )
+                            //                 if (scene.user_id == userData._id) { //TO DO check the acl for write_scene etc..
+                            //                     userData.sceneOwner = "indaehoose";
+                            //                     userData.sceneID = scene._id;
+                            //                     res.send(userData);
+                            //                 } else {
+                            //                     res.send(userData);
+                            //                 }
+                            //             }
+                            //         });
+                                    
+                            //     } else {
+                            //         req.session.error = 'Access denied!';
+                            //         console.log("token authentication failed! not a subscriber");
+                            //         res.send("2");    
+                            //         }
+                            //     }
+                            // });
                         }
                         // next();
                     } else {
@@ -10519,9 +10609,9 @@ app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
 // });
 
 app.post('/scene_inventory_objex/', function(req, res) {
-    console.log('tryna return userobj : ' + req.params.p_id);
+    console.log('tryna return scene_inventory_objex : ' + req.params.p_id);
     const iids = req.body.oIDs.map(item => {
-        return ObjectId.createFromHexString(item);
+        return ObjectId.createFromHexString(item.toString());
     });
     let response = {};
     let objex = [];
@@ -10537,7 +10627,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
                         if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) {
                         // oids = domain.domainPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
                             const oids = obj_item.objectPictureIDs.map(item => {
-                                return ObjectId.createFromHexString(item);
+                                return ObjectId.createFromHexString(item.toString());
                             });
                             db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
                                 if (err || !pic_items) {
@@ -10583,7 +10673,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
                             (async () => {
                               try {
                                 const query = {"_id": {$in: aids}};
-                                const actions = await RunDataQuery("actions", "find", query, req.originalUrl);
+                                const actions = await RunDataQuery("actions", "find", query);
                                 if (actions && actions.length) {
                                   obj_item.actions = actions;
                                 } 
@@ -10618,7 +10708,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
                               try {
                                 const oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
                                 const query = {"_id": oo_id};
-                                const model = await RunDataQuery("models", "findOne", query, req.originalUrl);
+                                const model = await RunDataQuery("models", "findOne", query);
                                 if (model) {
                                   let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
                                   obj_item.modelURL = url;
@@ -10670,21 +10760,21 @@ app.post('/scene_inventory_objex/', function(req, res) {
 
 app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return userobj : ' + req.params.p_id);
-    var pID = req.params.p_id;
+    var pID = req.params.p_id.toString();
     var o_id = ObjectId.createFromHexString(pID);
     var childObjects = {};
 
     (async () => {
       try {
         const query = {"_id": o_id};
-        const obj_item = await RunDataQuery("obj_items", "findOne", query, req.originalUrl);
+        const obj_item = await RunDataQuery("obj_items", "findOne", query);
         if (obj_item) {
           if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
             const aids = obj_item.actionIDs.map(item => {
-                return ObjectId.createFromHexString(item);
+                return ObjectId.createFromHexString(item.toString());
             });
             const actionsquery = {"_id": {$in: aids}};
-            const actions = await RunDataQuery("actions", "find", actionsquery, req.originalUrl);
+            const actions = await RunDataQuery("actions", "find", actionsquery);
             if (actions && actions.length) {
               obj_item.actions = actions;
             }
@@ -10693,7 +10783,7 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
           if (obj_item.modelID) {
             let oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
             const modelquery = {"_id": oo_id};
-            const model = await RunDataQuery("models", "findOne", modelquery, req.originalUrl);
+            const model = await RunDataQuery("models", "findOne", modelquery);
             if (model) {
               obj_item.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename,6000);
             }
@@ -13675,29 +13765,57 @@ app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
-    console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
+    console.log('tryna add a scene postcard : ' + JSON.stringify(req.body));
 
-    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-        if (err || !scene) {
-            console.log("error getting sceneert 4: " + err);
+    (async () => {
+      try {
+        const scenequery = { "_id": s_id};
+        const scene = await RunDataQuery("scenes", "findOne", scenequery);
+        if (scene) {
+          const picquery = { "_id": p_id};
+          const pic = await RunDataQuery("image_items", "findOne", picquery);
+          if (pic) {
+            let scenePostcards = new Array();
+            if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
+                scenePostcards = scene.scenePostcards;
+            }
+            console.log("XXX scenePostcards: " + scenePostcards);
+            scenePostcards.push(req.body.pic_id);
+            const upquery = { "_id": s_id };
+            const updateDoc = {$set: {scenePostcards: scenePostcards}};
+            const status = await RunDataQuery("scenes", "updateOne", upquery, updateDoc);
+            res.send("updated: " + status);
+          } else {
+            res.send("postcard not found");
+          }
         } else {
-            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-                if (err || !pic) {
-                    console.log("error getting image items 4: " + err);
-                } else {
-                    var scenePostcards = new Array();
-                    if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-                        scenePostcards = scene.scenePostcards;
-                    }
-                    console.log("XXX scenePostcards: " + scenePostcards);
-                    scenePostcards.push(req.body.pic_id);
-                    db_old.scenes.update({ "_id": s_id }, { $set: {scenePostcards: scenePostcards}
-
-                    });
-                }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
-            });
+          res.send("scene not found!");
         }
-    });
+      } catch (e) {
+        res.send("error updating scene with postcard " + e);
+      }
+    })();
+    // db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    //     if (err || !scene) {
+    //         console.log("error getting sceneert 4: " + err);
+    //     } else {
+    //         db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
+    //             if (err || !pic) {
+    //                 console.log("error getting image items 4: " + err);
+    //             } else {
+    //                 var scenePostcards = new Array();
+    //                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
+    //                     scenePostcards = scene.scenePostcards;
+    //                 }
+    //                 console.log("XXX scenePostcards: " + scenePostcards);
+    //                 scenePostcards.push(req.body.pic_id);
+    //                 db_old.scenes.update({ "_id": s_id }, { $set: {scenePostcards: scenePostcards}
+
+    //                 });
+    //             }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
+    //         });
+    //     }
+    // });
 });
 
 app.post('/add_group_item/', checkAppID, requiredAuthentication, function (req, res) {
@@ -13908,28 +14026,30 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                     for (var i = 0; i < sceneResponse.sceneWebLinks.length; i++) {
                         console.log("weblink: " + JSON.stringify(sceneResponse.sceneWebLinks[i]));
                         if (ObjectId.isValid(sceneResponse.sceneWebLinks[i])) {
-                            db_old.weblinks.findOne({'_id': ObjectId(sceneResponse.sceneWebLinks[i])}, function (err, weblink) {
-                                if (err || !weblink) {
-                                    console.log("can't find weblink");
-                                } else {
+                            // db_old.weblinks.findOne({'_id': ObjectId.createFromHexString(sceneResponse.sceneWebLinks[i].toString())}, function (err, weblink) {
+                            //     if (err || !weblink) {
+                            //         console.log("can't find weblink");
+                            //     } else {
                                     (async () => { 
+                                        const query = {"_id": ObjectId.createFromHexString(sceneResponse.sceneWebLinks[i])};
+                                        const weblink = await RunDataQuery("weblinks", "findOne", query);
+                                        if (weblink) {
                                         console.log(JSON.stringify(weblink));
                                         let link = {};
-                                        // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia.web', Key: weblink._id + "/" + weblink._id + ".thumb.jpg", Expires: 6000});
-                                        // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia.web', Key:  weblink._id + "/" + weblink._id + ".half.jpg", Expires: 6000});
-                                        // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia.web', Key:  weblink._id + "/" + weblink._id + ".standard.jpg", Expires: 6000});
-                                        const urlHalf = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME,weblink._id + "/" + weblink._id + ".half.jpg",6000);
-                                        const urlStandard = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME,weblink._id + "/" + weblink._id + ".standard.jpg",6000);
-                                        link.urlThumb = "";
-                                        link.urlHalf = urlHalf;
-                                        link.urlStandard = urlStandard;
-                                        link.link_url = weblink.link_url;
-                                        link.link_title = weblink.link_title;
-                                        link._id = weblink._id;
-                                        weblinx.push(link);
+                                        
+                                          const urlHalf = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME,weblink._id + "/" + weblink._id + ".half.jpg",6000);
+                                          const urlStandard = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME,weblink._id + "/" + weblink._id + ".standard.jpg",6000);
+                                          link.urlThumb = "";
+                                          link.urlHalf = urlHalf;
+                                          link.urlStandard = urlStandard;
+                                          link.link_url = weblink.link_url;
+                                          link.link_title = weblink.link_title;
+                                          link._id = weblink._id;
+                                          weblinx.push(link);
+                                        }
                                     })();
-                                }
-                            });
+                            //     }
+                            // });
                         }
                     }
                     sceneResponse.weblinx = weblinx;
@@ -14047,8 +14167,10 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 });
             },
             function(audio_items, callback) { //add the signed URLs to the obj array
+              console.log("audio_items: ", JSON.stringify(audio_items));
+              (async () => {
                 for (var i = 0; i < audio_items.length; i++) {
-                    //    console.log("audio_item: ", audio_items[i]);
+                       
                     var item_string_filename = JSON.stringify(audio_items[i].filename);
                     item_string_filename = item_string_filename.replace(/\"/g, "");
                     var item_string_filename_ext = getExtension(item_string_filename);
@@ -14059,56 +14181,55 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                     var mp3Name = baseName + '.mp3';
                     var oggName = baseName + '.ogg';
                     var pngName = baseName + '.png';
+                    try {
+                        if (audio_items[i]) {
+                            console.log("audioitem " + audio_items[i].userID);
+                            const urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, 6000);
+                            const urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, 6000);
+                            const urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, 6000);
 
-                    (async () => {
-                        try {
-                            if (audio_items[i]) {
-                                const urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, 6000);
-                                const urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, 6000);
-                                const urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, 6000);
-
-            //                            audio_items.URLmp3 = urlMp3; //jack in teh signed urls into the object array
-                                audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-                                audio_items[i].URLogg = urlOgg;
-                                audio_items[i].URLpng = urlPng;
-                                if (audio_items[i].tags != null) {
-                                    if (audio_items[i].tags.length < 1) {
-                                        audio_items[i].tags = [""];
-                                    } else {
-                                        audio_items[i].tags = [""];
-                                    }
+        //                            audio_items.URLmp3 = urlMp3; //jack in teh signed urls into the object array
+                            audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
+                            audio_items[i].URLogg = urlOgg;
+                            audio_items[i].URLpng = urlPng;
+                            if (audio_items[i].tags != null) {
+                                if (audio_items[i].tags.length < 1) {
+                                    audio_items[i].tags = [""];
+                                } else {
+                                    audio_items[i].tags = [""];
                                 }
                             }
-  
-                            // callback(null);
-                        } catch (e) {
-                           
-                            // callback(null);
-                            console.log("error in audioResponse " + e + audio_items[i]);
-                            
                         }
-                    })();
-
+                    } catch (e) {
+                        console.log("error in audioResponse " + e + audio_items[i]);
+                    }
                 }
-                //   console.log('tryna send ' + audio_items);
+              })();
                 audioResponse = audio_items;
                 sceneResponse.audio = audioResponse;
-//                        console.log("audio", audioResponse);
-                callback(null, audio_items);
+                callback(null);
             },
 
-            function(audioStuff, callback) { //return the pic items
-                //   console.log("audioStuff ", audioStuff);
+            function(callback) { //return the pic items
                 // console.log("requestedPictureItems:  ", requestedPictureItems);
-                db_old.image_items.find({_id: {$in: requestedPictureItems }}, function (err, pic_items)
-                {
-                    if (err || !pic_items) {
-                        console.log("error getting picture items: " + err);
-                        callback(null);
-                    } else {
-                        callback(null, pic_items)
-                    }
-                });
+                (async () => {
+                  try {
+                    const query = {"_id": { $in: requestedPictureItems }};
+                    const pic_items = await RunDataQuery("image_items", "find", query);
+                    callback(null, pic_items);
+                  } catch (e) {
+                    callback(e);
+                  }
+                })();
+                // db_old.image_items.find({_id: {$in: requestedPictureItems }}, function (err, pic_items)
+                // {
+                //     if (err || !pic_items) {
+                //         console.log("error getting picture items: " + err);
+                //         callback(null);
+                //     } else {
+                //         callback(null, pic_items)
+                //     }
+                // });
             },
 
             function (picture_items, callback) {
@@ -14128,14 +14249,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                         var standardName = 'standard.' + baseName + item_string_filename_ext;
                         var originalName = 'original.' + baseName + item_string_filename_ext;
 
-                        // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + thumbName, Expires: 6000}); //just send back thumbnail urls for list
-                        // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + quarterName, Expires: 6000});
-                        // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + halfName, Expires: 6000});
-                        // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + standardName, Expires: 6000});
-                        
-                        // if (picture_items[i].useTarget) {
-                        //     urlTarget = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_items[i].userID + "/pictures/targets/" + picture_items[i]._id + ".mind", Expires: 6000});
-                        // }
+
                         let urlTarget = "";
                         const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + thumbName,6000);
                         const urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + quarterName,6000);
@@ -14145,7 +14259,8 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                             urlTarget = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_items[i].userID + "/pictures/targets/" + picture_items[i]._id + ".mind",6000);
                         }
 
-                        //var urlPng = knoxClient.signedUrl(audio_item[0]._id + "." + pngName, expiration);
+                        //var urlPng = knoxClient.signedUrl(audio_item[0]._id + "." + pngName, expiration); //whoa, ancient...
+
                         picture_items[i].urlThumb = urlThumb; //jack in teh signed urls into the object array
                         picture_items[i].urlQuarter = urlQuarter; //jack in teh signed urls into the object array
                         picture_items[i].urlHalf = urlHalf; //jack in teh signed urls into the object array
@@ -14159,7 +14274,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                         }
                         if (picture_items[i].hasAlphaChannel == null) {picture_items[i].hasAlphaChannel = false}
                         //pathResponse.path.pictures.push(urlThumb, urlQuarter, urlHalf, urlStandard);
-                        if (picture_items[i].tags != null && picture_items[i].tags.length < 1) {picture_items.tags = [""]}
+                        if (picture_items[i].tags != null && picture_items[i].tags.length < 1) {picture_items.tags = [];}
 
                     }
                     pictureResponse = picture_items ;
@@ -14170,50 +14285,79 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             function (callback) {
                 var postcards = [];
                 if (sceneResponse.scenePostcards != null && sceneResponse.scenePostcards.length > 0) {
-                    async.each (sceneResponse.scenePostcards, function (postcardID, callbackz) { //nested async-ery!
-                        var oo_id = ObjectId.createFromHexString(postcardID);
-                        db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-                            if (err || !picture_item) {
-                                console.log("error getting postcatd items: " + err);
-//                                        callback(err);
-//                                        callback(null);
-                                callbackz();
-                            } else {
-                                (async () => {
-                                    // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-                                    // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-                                    // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
 
-                                    const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename,6000);
-                                    const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename,6000);
-                                    const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename,6000);
-                                    var postcard = {};
-                                    postcard.userID = picture_item.userID;
-                                    postcard._id = picture_item._id;
-                                    postcard.sceneID = picture_item.postcardForScene;
-                                    postcard.urlThumb = urlThumb;
-                                    postcard.urlHalf = urlHalf;
-                                    postcard.urlStandard = urlStandard;
-                                    if (postcards.length < 9)
-                                        postcards.push(postcard);
-    //                                        console.log("pushing postcard: " + JSON.stringify(postcard));
-                                    callbackz();
-                                })();
-                            }
-                        });
+                  const oids = sceneResponse.scenePostcards.map(convertStringToObjectID);
+                  (async () => {
+                    try {
+                      const query = {"_id": { $in: oids }};
+                      const postcard_items = await RunDataQuery("image_items", "find", query);
+                      if (postcard_items && postcard_items.length) {
+                        for (let i = 0; i < postcard_items.length; i++) {
+                          const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + postcard_items[i].userID + "/pictures/" + postcard_items[i]._id + ".thumb." + postcard_items[i].filename,6000);
+                          const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + postcard_items[i].userID + "/pictures/" + postcard_items[i]._id + ".half." + postcard_items[i].filename,6000);
+                          const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + postcard_items[i].userID + "/pictures/" + postcard_items[i]._id + ".standard." + postcard_items[i].filename,6000);
+                          var postcard = {};
+                          postcard.userID = postcard_items[i].userID;
+                          postcard._id = postcard_items[i]._id;
+                          postcard.sceneID = postcard_items[i].postcardForScene;
+                          postcard.urlThumb = urlThumb;
+                          postcard.urlHalf = urlHalf;
+                          postcard.urlStandard = urlStandard;
+                          if (postcards.length < 9) {
+                            postcards.push(postcard);
+                          }
+                        } 
+                        callback(null, postcards);
+                      }
+                    } catch (e) {
+                      callback(e);
+                    }
+                  })();
+                  
+//                     async.each (sceneResponse.scenePostcards, function (postcardID, callbackz) { 
+//                         var oo_id = ObjectId.createFromHexString(postcardID);
+//                         db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+//                             if (err || !picture_item) {
+//                                 console.log("error getting postcatd items: " + err);
+// //                                        callback(err);
+// //                                        callback(null);
+//                                 callbackz();
+//                             } else {
+//                                 (async () => {
+//                                     // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
+//                                     // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
+//                                     // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
 
-                }, function(err) {
+//                                     const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename,6000);
+//                                     const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename,6000);
+//                                     const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename,6000);
+//                                     var postcard = {};
+//                                     postcard.userID = picture_item.userID;
+//                                     postcard._id = picture_item._id;
+//                                     postcard.sceneID = picture_item.postcardForScene;
+//                                     postcard.urlThumb = urlThumb;
+//                                     postcard.urlHalf = urlHalf;
+//                                     postcard.urlStandard = urlStandard;
+//                                     if (postcards.length < 9)
+//                                         postcards.push(postcard);
+//     //                                        console.log("pushing postcard: " + JSON.stringify(postcard));
+//                                     callbackz();
+//                                 })();
+//                             }
+//                         });
+
+//                 }, function(err) {
                        
-                        if (err) {
+//                         if (err) {
                             
-                            console.log('A file failed to process');
-                            callback(null, postcards);
-                        } else {
-                            console.log('All files have been processed successfully');
-                            callback(null, postcards);
-//                                        };
-                        }
-                });
+//                             console.log('A file failed to process');
+//                             callback(null, postcards);
+//                         } else {
+//                             console.log('All files have been processed successfully');
+//                             callback(null, postcards);
+// //                                        };
+//                         }
+//                 });
                 } else {
 //                      callback(null);
                     callback(null, postcards);
@@ -15194,10 +15338,13 @@ app.get('/publicscenes', async (req, res) => {
     console.log("gots public scenes" + scenes.length );
     for (const scene of scenes) { 
       if (scene.scenePostcards != null && scene.scenePostcards.length > 0 && scene.scenePostcards[0] != undefined) {
-        let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
-        var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //? still confused w/ mongojs driver?
-        const picture_item = await db.collection("image_items").findOne({"_id": oo_id});
+        
         try {
+          let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
+          var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //? still confused w/ mongojs driver?
+          const query = {"_id": oo_id};
+          const picture_item = await RunDataQuery("image_items", "findOne" , query);
+
           var item_string_filename = JSON.stringify(picture_item.filename);
           item_string_filename = item_string_filename.replace(/\"/g, "");
           var item_string_filename_ext = getExtension(item_string_filename);
@@ -16608,138 +16755,259 @@ app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
 });
 
 app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
-    console.log(req.params._id);
-    var o_id = ObjectId.createFromHexString(req.params._id);   
-    console.log('tryna update obj : ' + req.params._id);
-    let timestamp = Math.round(Date.now() / 1000);
-    db_old.obj_items.find({ "_id" : o_id}, function(err, obj_item) {
-        if (err || !obj_item) {
-            console.log("error getting obj items: " + err);
-            res.send(err);
-        } else {
-            if (obj_item.userID != req.session.user._id.toString() && !req.session.user.authLevel.toLowerCase().includes("admin")) {
-                res.send("user does not match " + req.session.user.authLevel);
-            } else {
-                db_old.obj_items.update( { _id: o_id }, { $set: { 
-                    // item_status: req.body.item_status,
-                    actionIDs: (req.body.actionIDs != "" && req.body.actionIDs != undefined && req.body.actionIDs != null) ? req.body.actionIDs : [],
-                    name: req.body.name,
-                    description: req.body.description,
-                    objtype: req.body.objtype,
-                    objcat: req.body.objcat,
-                    objsubcat: req.body.objsubcat,
-                    objclass: req.body.objclass,
-                    level: req.body.level,
-                    xpoints: req.body.xpoints,
-                    mana: req.body.mana,
-                    hitpoints: req.body.hitpoints,
-                    armorclass: req.body.armorclass,
-                    age: req.body.age,
-                    species: req.body.species,
-                    alignment: req.body.alignment,
-                    personality: req.body.personality,
-                    strength: req.body.strength,
-                    dexterity: req.body.dexterity,
-                    constitution: req.body.constitution,
-                    intelligence: req.body.intelligence,
-                    wisdom: req.body.wisdom,
-                    charisma: req.body.charisma,
-                    integrity: req.body.integrity,
-                    quality: req.body.quality,
-                    rarity: req.body.rarity,
-                    distribution: req.body.distribution,
-                    purity: req.body.purity,
-                    scale: req.body.scale,
-                    weight: req.body.weight,
-                    property: req.body.property,
-                    attribute: req.body.attribute,
-                    operator: req.body.operator,
-                    affect: req.body.affect,
-                    effectiveness: req.body.effectiveness,
-                    physics: req.body.physics,
-                    interaction: req.body.interaction,
-                    eventtype: req.body.eventtype,
-                    eventdata: req.body.eventdata,
-                    collidertype: req.body.collidertype,
-                    highlight: req.body.highlight,
-                    labeltext: req.body.labeltext,
-                    callouttext: req.body.callouttext,
-                    prompttext: req.body.prompttext,
-                    tags: req.body.tags,
-                    title: req.body.title,
 
-                    // price: req.body.price != null ? req.body.price : 0,
-                    intval: req.body.intval != null ? req.body.intval : 0,
-                    floatval: req.body.floatval != null ? req.body.floatval : 0,
-                    stringval: req.body.stringval != null ? req.body.stringval : "",
-                    assetname: req.body.assetname,
-                    assettype: req.body.assettype,
-                    audioEmit: req.body.audioEmit != null ? req.body.audioEmit : false,
-                    audioScale: req.body.audioScale != null ? req.body.audioScale : false,
-                    randomColor: req.body.randomColor != null ? req.body.randomColor : false,
-                    namedColor: req.body.namedColor,
-                    highlightColor: req.body.highlightColor,
-                    color1: req.body.color1,
-                    color2: req.body.color2,
-                    snapToGround: req.body.snapToGround  != null ? req.body.snapToGround : false,
-                    randomRotation: req.body.randomRotation != null ? req.body.randomRotation : false,
-    //                objectScale: req.body.objectScale ? req.body.objectScale : 0,
-                    xoffset: req.body.xoffset != null ? req.body.xoffset : "0",
-                    yoffset: req.body.yoffset != null ? req.body.yoffset : "0",
-                    zoffset: req.body.zoffset != null ? req.body.zoffset : "0",
-                    rotationAxis: req.body.rotationAxis != null ? req.body.rotationAxis : 0,
-                    rotationSpeed: req.body.rotationSpeed != null ? req.body.rotationSpeed : 0,
-                    objScale: req.body.objScale != null ? req.body.objScale : 1,
-                    maxPerScene: req.body.maxPerScene != null ? req.body.maxPerScene : 10,
-                    maxPerUser: req.body.maxPerUser != null ? req.body.maxPerUser : 1,
-                    maxTotal: req.body.maxTotal != null ? req.body.maxTotal : 1,
-                    speedFactor: req.body.speedFactor != null ? req.body.speedFactor : 3,
-                    colliderScale: req.body.colliderScale != null ? req.body.colliderScale : 1,
-                    triggerScale: req.body.triggerScale != null ? req.body.triggerScale : 1,
-                    yPosFudge: req.body.yPosFudge != null ? req.body.yPosFudge : 0,
-                    yRotFudge: req.body.yRotFudge != null ? req.body.yRotFudge : 0,
-                    eulerx: req.body.eulerx != null ? req.body.eulerx : 0,
-                    eulery: req.body.eulery != null ? req.body.eulery : 0,
-                    eulerz: req.body.eulerz != null ? req.body.eulerz : 0,
+    const id = req.params._id.toString();
+    console.log('tryna update obj : ' + id);
+
+    // var o_id = ;   
+    
+    const timestamp = Math.round(Date.now() / 1000);
+    (async () => {
+      try {
+        // const query = { "_id" : o_id};
+        // const obj_item = await RunDataQuery("obj_items", "findOne", query, req.originalUrl);
+        // if (obj_item) {
+        
+          const actionIDs = req.body.actionIDs.map(convertStringToObjectID);
+          const query = {"_id": ObjectId.createFromHexString(id)};
+          const updateDoc = { $set: {
+            actionIDs: actionIDs != null ? actionIDs : [],
+            name: req.body.name,
+            description: req.body.description,
+            objtype: req.body.objtype,
+            objcat: req.body.objcat,
+            objsubcat: req.body.objsubcat,
+            objclass: req.body.objclass,
+            level: req.body.level,
+            xpoints: req.body.xpoints,
+            mana: req.body.mana,
+            hitpoints: req.body.hitpoints,
+            armorclass: req.body.armorclass,
+            age: req.body.age,
+            species: req.body.species,
+            alignment: req.body.alignment,
+            personality: req.body.personality,
+            strength: req.body.strength,
+            dexterity: req.body.dexterity,
+            constitution: req.body.constitution,
+            intelligence: req.body.intelligence,
+            wisdom: req.body.wisdom,
+            charisma: req.body.charisma,
+            integrity: req.body.integrity,
+            quality: req.body.quality,
+            rarity: req.body.rarity,
+            distribution: req.body.distribution,
+            purity: req.body.purity,
+            scale: req.body.scale,
+            weight: req.body.weight,
+            property: req.body.property,
+            attribute: req.body.attribute,
+            operator: req.body.operator,
+            affect: req.body.affect,
+            effectiveness: req.body.effectiveness,
+            physics: req.body.physics,
+            interaction: req.body.interaction,
+            eventtype: req.body.eventtype,
+            eventdata: req.body.eventdata,
+            collidertype: req.body.collidertype,
+            highlight: req.body.highlight,
+            labeltext: req.body.labeltext,
+            callouttext: req.body.callouttext,
+            prompttext: req.body.prompttext,
+            tags: req.body.tags,
+            title: req.body.title,
+
+            // price: req.body.price != null ? req.body.price : 0,
+            intval: req.body.intval != null ? req.body.intval : 0,
+            floatval: req.body.floatval != null ? req.body.floatval : 0,
+            stringval: req.body.stringval != null ? req.body.stringval : "",
+            assetname: req.body.assetname,
+            assettype: req.body.assettype,
+            audioEmit: req.body.audioEmit != null ? req.body.audioEmit : false,
+            audioScale: req.body.audioScale != null ? req.body.audioScale : false,
+            randomColor: req.body.randomColor != null ? req.body.randomColor : false,
+            namedColor: req.body.namedColor,
+            highlightColor: req.body.highlightColor,
+            color1: req.body.color1,
+            color2: req.body.color2,
+            snapToGround: req.body.snapToGround  != null ? req.body.snapToGround : false,
+            randomRotation: req.body.randomRotation != null ? req.body.randomRotation : false,
+//                objectScale: req.body.objectScale ? req.body.objectScale : 0,
+            xoffset: req.body.xoffset != null ? req.body.xoffset : "0",
+            yoffset: req.body.yoffset != null ? req.body.yoffset : "0",
+            zoffset: req.body.zoffset != null ? req.body.zoffset : "0",
+            rotationAxis: req.body.rotationAxis != null ? req.body.rotationAxis : 0,
+            rotationSpeed: req.body.rotationSpeed != null ? req.body.rotationSpeed : 0,
+            objScale: req.body.objScale != null ? req.body.objScale : 1,
+            maxPerScene: req.body.maxPerScene != null ? req.body.maxPerScene : 10,
+            maxPerUser: req.body.maxPerUser != null ? req.body.maxPerUser : 1,
+            maxTotal: req.body.maxTotal != null ? req.body.maxTotal : 1,
+            speedFactor: req.body.speedFactor != null ? req.body.speedFactor : 3,
+            colliderScale: req.body.colliderScale != null ? req.body.colliderScale : 1,
+            triggerScale: req.body.triggerScale != null ? req.body.triggerScale : 1,
+            yPosFudge: req.body.yPosFudge != null ? req.body.yPosFudge : 0,
+            yRotFudge: req.body.yRotFudge != null ? req.body.yRotFudge : 0,
+            eulerx: req.body.eulerx != null ? req.body.eulerx : 0,
+            eulery: req.body.eulery != null ? req.body.eulery : 0,
+            eulerz: req.body.eulerz != null ? req.body.eulerz : 0,
+            
+            scatter: req.body.scatter != null ? req.body.scatter : false,
+            showcallout: req.body.showcallout != null ? req.body.showcallout : false,
+            // buyable: req.body.buyable != null ? req.body.buyable : false,
+            userspawnable: req.body.userspawnable != null ? req.body.userspawnable : false,
+            textitemID: req.body.textitemID != null ? req.body.textitemID : "",
+            pictureitemID: req.body.pictureitemID  != null ? req.body.pictureitemID : "",
+            audioitemID: req.body.audioitemID != null ? req.body.audioitemID : "",
+            textgroupID: req.body.textgroupID != null ? req.body.textgroupID : "",
+            picturegroupID: req.body.picturegroupID != null ? req.body.picturegroupID : "",
+            audiogroupID: req.body.audiogroupID != null ? req.body.audiogroupID : "",
+            synthPatch1: req.body.synthPatch1 != null ? req.body.synthPatch1 : "",
+            tonejsPatch1: req.body.tonejsPatch1 != null ? req.body.tonejsPatch1 : "",
+            synthNotes: req.body.synthNotes != null ? req.body.synthNotes : "",
+            synthDuration: req.body.synthDuration != null ? req.body.synthDuration : "",
+            particles: req.body.particles != null ? req.body.particles : "",
+            light: req.body.light != null ? req.body.light : "",
+            lastUpdateTimestamp: timestamp,
+            lastUpdateUserID: req.session.user._id,
+            lastUpdateUserName: req.session.user.name
+            // childObjectIDs: req.body.childObjectIDs
+            }};
+            const status = await RunDataQuery("obj_items", "updateOne", query, updateDoc);
+            res.send("update status " + status);
+      } catch (e) {
+        res.send("update obj error " + e);
+      }
+    })();
+  });
+
+    // db_old.obj_items.find({ "_id" : o_id}, function(err, obj_item) {
+    //     if (err || !obj_item) {
+    //         console.log("error getting obj items: " + err);
+    //         res.send(err);
+    //     } else {
+    //         if (obj_item.userID != req.session.user._id.toString() && !req.session.user.authLevel.toLowerCase().includes("admin")) {
+    //             res.send("user does not match " + req.session.user.authLevel);
+    //         } else {
+    //             db_old.obj_items.update( { _id: o_id }, { $set: { 
+    //                 // item_status: req.body.item_status,
+    //                 actionIDs: (req.body.actionIDs != "" && req.body.actionIDs != undefined && req.body.actionIDs != null) ? req.body.actionIDs : [],
+    //                 name: req.body.name,
+    //                 description: req.body.description,
+    //                 objtype: req.body.objtype,
+    //                 objcat: req.body.objcat,
+    //                 objsubcat: req.body.objsubcat,
+    //                 objclass: req.body.objclass,
+    //                 level: req.body.level,
+    //                 xpoints: req.body.xpoints,
+    //                 mana: req.body.mana,
+    //                 hitpoints: req.body.hitpoints,
+    //                 armorclass: req.body.armorclass,
+    //                 age: req.body.age,
+    //                 species: req.body.species,
+    //                 alignment: req.body.alignment,
+    //                 personality: req.body.personality,
+    //                 strength: req.body.strength,
+    //                 dexterity: req.body.dexterity,
+    //                 constitution: req.body.constitution,
+    //                 intelligence: req.body.intelligence,
+    //                 wisdom: req.body.wisdom,
+    //                 charisma: req.body.charisma,
+    //                 integrity: req.body.integrity,
+    //                 quality: req.body.quality,
+    //                 rarity: req.body.rarity,
+    //                 distribution: req.body.distribution,
+    //                 purity: req.body.purity,
+    //                 scale: req.body.scale,
+    //                 weight: req.body.weight,
+    //                 property: req.body.property,
+    //                 attribute: req.body.attribute,
+    //                 operator: req.body.operator,
+    //                 affect: req.body.affect,
+    //                 effectiveness: req.body.effectiveness,
+    //                 physics: req.body.physics,
+    //                 interaction: req.body.interaction,
+    //                 eventtype: req.body.eventtype,
+    //                 eventdata: req.body.eventdata,
+    //                 collidertype: req.body.collidertype,
+    //                 highlight: req.body.highlight,
+    //                 labeltext: req.body.labeltext,
+    //                 callouttext: req.body.callouttext,
+    //                 prompttext: req.body.prompttext,
+    //                 tags: req.body.tags,
+    //                 title: req.body.title,
+
+    //                 // price: req.body.price != null ? req.body.price : 0,
+    //                 intval: req.body.intval != null ? req.body.intval : 0,
+    //                 floatval: req.body.floatval != null ? req.body.floatval : 0,
+    //                 stringval: req.body.stringval != null ? req.body.stringval : "",
+    //                 assetname: req.body.assetname,
+    //                 assettype: req.body.assettype,
+    //                 audioEmit: req.body.audioEmit != null ? req.body.audioEmit : false,
+    //                 audioScale: req.body.audioScale != null ? req.body.audioScale : false,
+    //                 randomColor: req.body.randomColor != null ? req.body.randomColor : false,
+    //                 namedColor: req.body.namedColor,
+    //                 highlightColor: req.body.highlightColor,
+    //                 color1: req.body.color1,
+    //                 color2: req.body.color2,
+    //                 snapToGround: req.body.snapToGround  != null ? req.body.snapToGround : false,
+    //                 randomRotation: req.body.randomRotation != null ? req.body.randomRotation : false,
+    // //                objectScale: req.body.objectScale ? req.body.objectScale : 0,
+    //                 xoffset: req.body.xoffset != null ? req.body.xoffset : "0",
+    //                 yoffset: req.body.yoffset != null ? req.body.yoffset : "0",
+    //                 zoffset: req.body.zoffset != null ? req.body.zoffset : "0",
+    //                 rotationAxis: req.body.rotationAxis != null ? req.body.rotationAxis : 0,
+    //                 rotationSpeed: req.body.rotationSpeed != null ? req.body.rotationSpeed : 0,
+    //                 objScale: req.body.objScale != null ? req.body.objScale : 1,
+    //                 maxPerScene: req.body.maxPerScene != null ? req.body.maxPerScene : 10,
+    //                 maxPerUser: req.body.maxPerUser != null ? req.body.maxPerUser : 1,
+    //                 maxTotal: req.body.maxTotal != null ? req.body.maxTotal : 1,
+    //                 speedFactor: req.body.speedFactor != null ? req.body.speedFactor : 3,
+    //                 colliderScale: req.body.colliderScale != null ? req.body.colliderScale : 1,
+    //                 triggerScale: req.body.triggerScale != null ? req.body.triggerScale : 1,
+    //                 yPosFudge: req.body.yPosFudge != null ? req.body.yPosFudge : 0,
+    //                 yRotFudge: req.body.yRotFudge != null ? req.body.yRotFudge : 0,
+    //                 eulerx: req.body.eulerx != null ? req.body.eulerx : 0,
+    //                 eulery: req.body.eulery != null ? req.body.eulery : 0,
+    //                 eulerz: req.body.eulerz != null ? req.body.eulerz : 0,
                     
-                    scatter: req.body.scatter != null ? req.body.scatter : false,
-                    showcallout: req.body.showcallout != null ? req.body.showcallout : false,
-                    // buyable: req.body.buyable != null ? req.body.buyable : false,
-                    userspawnable: req.body.userspawnable != null ? req.body.userspawnable : false,
-                    textitemID: req.body.textitemID != null ? req.body.textitemID : "",
-                    pictureitemID: req.body.pictureitemID  != null ? req.body.pictureitemID : "",
-                    audioitemID: req.body.audioitemID != null ? req.body.audioitemID : "",
-                    textgroupID: req.body.textgroupID != null ? req.body.textgroupID : "",
-                    picturegroupID: req.body.picturegroupID != null ? req.body.picturegroupID : "",
-                    audiogroupID: req.body.audiogroupID != null ? req.body.audiogroupID : "",
-                    synthPatch1: req.body.synthPatch1 != null ? req.body.synthPatch1 : "",
-                    tonejsPatch1: req.body.tonejsPatch1 != null ? req.body.tonejsPatch1 : "",
-                    synthNotes: req.body.synthNotes != null ? req.body.synthNotes : "",
-                    synthDuration: req.body.synthDuration != null ? req.body.synthDuration : "",
-                    particles: req.body.particles != null ? req.body.particles : "",
-                    light: req.body.light != null ? req.body.light : "",
-                    lastUpdateTimestamp: timestamp,
-                    lastUpdateUserID: req.session.user._id,
-                    lastUpdateUserName: req.session.user.name
-                    // childObjectIDs: req.body.childObjectIDs
-                    }});
-                    res.send("updated " + new Date());
-                }
-                // } if (err) {
-                //     res.send(err);
-                // } else {
-                //     res.send("updated " + new Date());
-                // }
-            }
-        // }
-        // } if (err) {
-        //     res.send(err);
-        // } else {
-        //     res.send("updated " + new Date());
-        // }
-    });
+    //                 scatter: req.body.scatter != null ? req.body.scatter : false,
+    //                 showcallout: req.body.showcallout != null ? req.body.showcallout : false,
+    //                 // buyable: req.body.buyable != null ? req.body.buyable : false,
+    //                 userspawnable: req.body.userspawnable != null ? req.body.userspawnable : false,
+    //                 textitemID: req.body.textitemID != null ? req.body.textitemID : "",
+    //                 pictureitemID: req.body.pictureitemID  != null ? req.body.pictureitemID : "",
+    //                 audioitemID: req.body.audioitemID != null ? req.body.audioitemID : "",
+    //                 textgroupID: req.body.textgroupID != null ? req.body.textgroupID : "",
+    //                 picturegroupID: req.body.picturegroupID != null ? req.body.picturegroupID : "",
+    //                 audiogroupID: req.body.audiogroupID != null ? req.body.audiogroupID : "",
+    //                 synthPatch1: req.body.synthPatch1 != null ? req.body.synthPatch1 : "",
+    //                 tonejsPatch1: req.body.tonejsPatch1 != null ? req.body.tonejsPatch1 : "",
+    //                 synthNotes: req.body.synthNotes != null ? req.body.synthNotes : "",
+    //                 synthDuration: req.body.synthDuration != null ? req.body.synthDuration : "",
+    //                 particles: req.body.particles != null ? req.body.particles : "",
+    //                 light: req.body.light != null ? req.body.light : "",
+    //                 lastUpdateTimestamp: timestamp,
+    //                 lastUpdateUserID: req.session.user._id,
+    //                 lastUpdateUserName: req.session.user.name
+    //                 // childObjectIDs: req.body.childObjectIDs
+    //                 }});
+    //                 res.send("updated " + new Date());
+    //             }
+    //             // } if (err) {
+    //             //     res.send(err);
+    //             // } else {
+    //             //     res.send("updated " + new Date());
+    //             // }
+    //         }
+    //     // }
+    //     // } if (err) {
+    //     //     res.send(err);
+    //     // } else {
+    //     //     res.send("updated " + new Date());
+    //     // }
+    // });
 
-});
+// });
 
 app.post('/update_audio/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
