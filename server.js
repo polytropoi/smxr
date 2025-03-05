@@ -14167,7 +14167,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 });
             },
             function(audio_items, callback) { //add the signed URLs to the obj array
-              console.log("audio_items: ", JSON.stringify(audio_items));
+              // console.log("audio_items: ", JSON.stringify(audio_items));
               (async () => {
                 for (var i = 0; i < audio_items.length; i++) {
                        
@@ -14314,50 +14314,6 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                     }
                   })();
                   
-//                     async.each (sceneResponse.scenePostcards, function (postcardID, callbackz) { 
-//                         var oo_id = ObjectId.createFromHexString(postcardID);
-//                         db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-//                             if (err || !picture_item) {
-//                                 console.log("error getting postcatd items: " + err);
-// //                                        callback(err);
-// //                                        callback(null);
-//                                 callbackz();
-//                             } else {
-//                                 (async () => {
-//                                     // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-//                                     // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-//                                     // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-
-//                                     const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename,6000);
-//                                     const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename,6000);
-//                                     const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename,6000);
-//                                     var postcard = {};
-//                                     postcard.userID = picture_item.userID;
-//                                     postcard._id = picture_item._id;
-//                                     postcard.sceneID = picture_item.postcardForScene;
-//                                     postcard.urlThumb = urlThumb;
-//                                     postcard.urlHalf = urlHalf;
-//                                     postcard.urlStandard = urlStandard;
-//                                     if (postcards.length < 9)
-//                                         postcards.push(postcard);
-//     //                                        console.log("pushing postcard: " + JSON.stringify(postcard));
-//                                     callbackz();
-//                                 })();
-//                             }
-//                         });
-
-//                 }, function(err) {
-                       
-//                         if (err) {
-                            
-//                             console.log('A file failed to process');
-//                             callback(null, postcards);
-//                         } else {
-//                             console.log('All files have been processed successfully');
-//                             callback(null, postcards);
-// //                                        };
-//                         }
-//                 });
                 } else {
 //                      callback(null);
                     callback(null, postcards);
@@ -14376,42 +14332,27 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 var modelz = [];
 //                console.log("sceneObjects : " + JSON.stringify(sceneResponse.sceneObjects));
                 if (sceneResponse.sceneModels != null) {
-                    async.each (sceneResponse.sceneModels, function (objID, callbackz) { 
-                        var oo_id = ObjectId.createFromHexString(objID);
-                        // console.log("7798 tryna get sceneModels: " + objID);
-                        db_old.models.findOne({"_id": oo_id}, function (err, model) {
-                            if (err || !model) {
-                                console.log("error getting model: " + err);
-                                let model = {};
-                                model.url = "missing"; //so it's deletable from scene view
-                                model._id = objID; 
-                                modelz.push(model);
-                                callbackz();
-                            } else {
-                                (async () => {
-                                    // console.log("got user models:" + JSON.stringify(models));
-                                    // let url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + model.userID + "/gltf/" + model.filename, Expires: 6000});\
 
-                                    model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename );
-                                    // console.log("scene update route pushing to sceneModelz " + model._id);
-                                    modelz.push(model);
-                                    callbackz();
-                                })();
-                            }
-                        });
-                    }, function(err) {
-                       
-                        if (err) {
-                            
-                            console.log('A file failed to process');
-                            callback(null);
-                        } else {
-                            console.log('modelz have been added to scene.modelz');
-                            objectResponse = modelz;
-                            sceneResponse.sceneModelz = objectResponse;
-                            callback(null);
-                        }
-                    });
+                  (async () => {
+                    try {
+                      const oids = sceneResponse.sceneModels.map(convertStringToObjectID);
+                      const query = {"_id": { $in: oids }};
+                      const models = await RunDataQuery("models", "find", query); //how to show missing?  
+                      // if (models && models.length) {
+                      //   for (let i = 0; i < models.length; i++) {
+                      //     // models[i].url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename );// is this needed here?
+                      //     modelz.push(model);
+
+                      //   }
+                        sceneResponse.sceneModelz = models;
+                        callback(null);
+                      // }
+                      
+                    } catch (e) {
+                      callback(e);
+                    }
+                  })();
+
                 } else {
                     callback(null);
                 }
@@ -14420,33 +14361,46 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 var objexgroups = [];
                 // if (sceneResponse.sceneObjectGroups) {
                     if (sceneResponse.sceneObjectGroups != null) {
-                        async.each (sceneResponse.sceneObjectGroups, function (objID, callbackz) { //nested async-ery!
-                            var oo_id = ObjectId.createFromHexString(objID);
-                            console.log("tryna get GroupObject: " + objID);
-                            db_old.groups.findOne({"_id": oo_id}, function (err, group) {
-                                if (err || !group) {
-                                    console.log("error getting obj items: " + err);
-                                    callbackz();
-                                } else {
-                                    console.log("gotsome groupObjects to add to sceneObjects : "+ JSON.stringify(group));
-                                    // sceneResponse.sceneObjects = sceneResponse.sceneObjects.concat(group.items);
-                                    objexgroups.push(group);
-                                    callbackz();
-                                }
-                            });
-                        }, function(err) {
+                      (async () => {
+                        try {
+                          const oids = sceneResponse.sceneObjectGroups.map(convertStringToObjectID);
+                          const query = {"_id": { $in: oids }};
+                          const ogroups = await RunDataQuery("groups", "find", query);
+                          if (ogroups && ogroups.length) {
+                            sceneResponse.sceneObjexGroups = ogroups; //hrm
+                          }
+                          callback(null);
+                        } catch (e) {
+                          callback(e);
+                        }
+                    })();
+                        // async.each (sceneResponse.sceneObjectGroups, function (objID, callbackz) { //nested async-ery!
+                        //     var oo_id = ObjectId.createFromHexString(objID);
+                        //     console.log("tryna get GroupObject: " + objID);
+                        //     db_old.groups.findOne({"_id": oo_id}, function (err, group) {
+                        //         if (err || !group) {
+                        //             console.log("error getting obj items: " + err);
+                        //             callbackz();
+                        //         } else {
+                        //             console.log("gotsome groupObjects to add to sceneObjects : "+ JSON.stringify(group));
+                        //             // sceneResponse.sceneObjects = sceneResponse.sceneObjects.concat(group.items);
+                        //             objexgroups.push(group);
+                        //             callbackz();
+                        //         }
+                        //     });
+                        // }, function(err) {
                            
-                            if (err) {
+                        //     if (err) {
                                 
                                 
-                                console.log('A file failed to process');
-                                callback(err);
-                            } else {
-                                console.log('groupObjects have been added to sceneObjects');
-                                sceneResponse.sceneObjexGroups = objexgroups;
-                                callback(null);
-                            }
-                        });
+                        //         console.log('A file failed to process');
+                        //         callback(err);
+                        //     } else {
+                        //         console.log('groupObjects have been added to sceneObjects');
+                        //         sceneResponse.sceneObjexGroups = objexgroups;
+                        //         callback(null);
+                        //     }
+                        // });
                     } else {
                         callback(null);
                     }
@@ -14457,80 +14411,94 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 var objex = [];
                 console.log("tryna fetch all the sceneObjects: " + JSON.stringify(sceneResponse.sceneObjects));
 //                console.log("sceneObjects : " + JSON.stringify(sceneResponse.sceneObjects));
-                if (sceneResponse.sceneObjects != null) {
-                    async.each (sceneResponse.sceneObjects, function (objID, callbackz) { //nested async-ery!
-                        var oo_id = ObjectId.createFromHexString(objID);
-                        // console.log("4573 tryna get sceneObject: " + objID);
-                        db_old.obj_items.findOne({"_id": oo_id}, function (err, obj_item) {
-                            if (err || !obj_item) {
-                                console.log("error getting obj items: " + err);
-                                callbackz();
-                            } else {
+                if (sceneResponse.sceneObjects && sceneResponse.sceneObjects.length) {
 
-                                //console.log("4580 tryna find childObjectIDs: " + JSON.stringify(obj_item.childObjectIDs));
-                                obj_item.objectGroup = "none";
-                                if (obj_item.childObjectIDs != null && obj_item.childObjectIDs.length > 0) {
-                                    var childIDs = obj_item.childObjectIDs.map(convertStringToObjectID); //convert child IDs array to objIDs
-                                    db_old.obj_items.find({_id : {$in : childIDs}}, function(err, obj_items) {
-                                        if (err || !obj_items) {
-                                            console.log("error getting childObject items: " + err);
-                                            //res.send("error getting child objects");
-                                            objex.push(obj_item);
-                                            callbackz();
-                                        } else {
-                                            childObjects = obj_items;
-                                            console.log("childObjects: " + JSON.stringify(childObjects));
-                                            obj_item.childObjects = childObjects;
-                                            objex.push(obj_item);
-                                            callbackz();
-                                        }
-                                    });
-                                } else {
-                                    objex.push(obj_item);
-                                    callbackz();
-                                }
-                            }
-                        });
-                    }, function(err) {
+                  (async () => {
+                    try {
+                      const oids = sceneResponse.sceneObjects.map(convertStringToObjectID);
+                      const query = {"_id": { $in: oids }};
+                      const objeks = await RunDataQuery("obj_items", "find", query);
+                      // console.log("objeks:" + JSON.stringify(objeks));
+                      sceneResponse.sceneObjex = objeks;
+                      // objectResponse = objeks;
+                      callback(null);
+                    } catch (e) {
+                      callback(e);
+                    }
+                })();
+                    // async.each (sceneResponse.sceneObjects, function (objID, callbackz) { 
+                    //     var oo_id = ObjectId.createFromHexString(objID);
+                    //     // console.log("4573 tryna get sceneObject: " + objID);
+                    //     db_old.obj_items.findOne({"_id": oo_id}, function (err, obj_item) {
+                    //         if (err || !obj_item) {
+                    //             console.log("error getting obj items: " + err);
+                    //             callbackz();
+                    //         } else {
+
+                    //             //console.log("4580 tryna find childObjectIDs: " + JSON.stringify(obj_item.childObjectIDs));
+                    //             obj_item.objectGroup = "none";
+                    //             if (obj_item.childObjectIDs != null && obj_item.childObjectIDs.length > 0) {
+                    //                 var childIDs = obj_item.childObjectIDs.map(convertStringToObjectID); //convert child IDs array to objIDs
+                    //                 db_old.obj_items.find({_id : {$in : childIDs}}, function(err, obj_items) {
+                    //                     if (err || !obj_items) {
+                    //                         console.log("error getting childObject items: " + err);
+                    //                         //res.send("error getting child objects");
+                    //                         objex.push(obj_item);
+                    //                         callbackz();
+                    //                     } else {
+                    //                         childObjects = obj_items;
+                    //                         console.log("childObjects: " + JSON.stringify(childObjects));
+                    //                         obj_item.childObjects = childObjects;
+                    //                         objex.push(obj_item);
+                    //                         callbackz();
+                    //                     }
+                    //                 });
+                    //             } else {
+                    //                 objex.push(obj_item);
+                    //                 callbackz();
+                    //             }
+                    //         }
+                    //     });
+                    // }, function(err) {
                        
-                        if (err) {
+                    //     if (err) {
                             
-                            console.log('A file failed to process');
-                            callback(null, objex);
-                        } else {
-                            console.log('objects have been added to scene.objex');
-                            objectResponse = objex;
-                            sceneResponse.sceneObjex = objectResponse;
-                            callback(null, objex);
-                        }
-                    });
+                    //         console.log('A file failed to process');
+                    //         callback(null, objex);
+                    //     } else {
+                    //         console.log('objects have been added to scene.objex');
+                    //         objectResponse = objex;
+                    //         sceneResponse.sceneObjex = objectResponse;
+                    //         callback(null, objex);
+                    //     }
+                    // });
                 } else {
-                    callback(null, objex);
-                }
-            },
-            function (objex, callback) { //inject username, last step (since only id is in scene doc)
-
-                if ((sceneResponse.userName == null || sceneResponse.userName.length < 1) && (sceneResponse.user_id != null)) {
-
-                    var oo_id = ObjectId.createFromHexString(sceneResponse.user_id);
-                    db_old.users.findOne({_id: oo_id}, function (err, user) {
-                        if (!err || user != null) {
-                            console.log("tryna inject usrname: " + user.userName);
-                            sceneResponse.userName = user.userName;
-                            callback(null);
-                        }
-                    });
-
-                } else  {
                     callback(null);
                 }
             }
+            // function (objex, callback) { //inject username, last step (since only id is in scene doc)
+
+            //     if ((sceneResponse.userName == null || sceneResponse.userName.length < 1) && (sceneResponse.user_id != null)) {
+
+            //         var oo_id = ObjectId.createFromHexString(sceneResponse.user_id);
+            //         db_old.users.findOne({_id: oo_id}, function (err, user) {
+            //             if (!err || user != null) {
+            //                 console.log("tryna inject usrname: " + user.userName);
+            //                 sceneResponse.userName = user.userName;
+            //                 callback(null);
+            //             }
+            //         });
+
+            //     } else  {
+            //         callback(null);
+            //     }
+            // }
         ], //waterfall end
 
         function (err, result) { // #last function, close async
             // console.log("weblinx " + JSON.stringify(sceneResponse.weblinx));
             res.json(sceneResponse);
-            console.log("waterfall done for scene response");
+            console.log("scene response complete!");
         }
     );
 });
@@ -15384,7 +15352,7 @@ app.get('/publicscenes', async (req, res) => {
 
 
 
-app.get('/publicscenes_old', function (req, res) { //deprecated, see available scenes above...
+app.get('/publicscenes_old', function (req, res) { //deprecated, see publicscenes above...
     console.log("host is " + req.get('host'));
     // if (req.get('host') == "servicemedia.net") {
      
