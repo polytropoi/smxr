@@ -1,3 +1,5 @@
+//route for intermediate landing pages
+
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 

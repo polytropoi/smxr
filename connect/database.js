@@ -1,4 +1,4 @@
-//hoisted database functions
+//hoisted mongo io
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 require('dotenv').config();
@@ -14,13 +14,13 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
-export let db = client.db(); 
+const db = client.db(); 
 
-export async function RunDataQuery(coll,type,query,update) {
-    if (!db) {
-        console.log("wheres the db?");
-        db = client.db();
-    }
+export async function RunDataQuery(coll,type,query,update) {  //TODO Sqlite!
+    // if (!db) {
+    //     console.log("wheres the db?");
+    //     db = client.db();
+    // }
     console.log("tryna RunDataQuery " + coll + " " + type  + " " + JSON.stringify(query) + " " + JSON.stringify(update));
     switch  (type) {
 

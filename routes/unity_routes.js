@@ -1,3 +1,5 @@
+//route to support unity client from back when, mostly just a tweaked json w/ urls
+
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 

@@ -1,3 +1,5 @@
+//TODO all these routes are still in server.js
+
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 

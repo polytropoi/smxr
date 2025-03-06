@@ -436,7 +436,7 @@ function getExtension(filename) {
    return (i < 0) ? '' : filename.substr(i);
 }
 
-function GetMatrixData() {
+function GetMatrixData() { //use matrix.org for... something
    if (!matrixClient) {
       matrixClient = matrixcs.createClient("https://matrix.org");
    }

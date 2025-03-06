@@ -14141,30 +14141,39 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                     allgroups.push(...sceneResponse.sceneLocationGroups);
                 };
                 if (allgroups.length > 0) {
-                    const moids = allgroups.map(convertStringToObjectID);
-                    db_old.groups.find({_id: {$in: moids }}, function (err, items){
-                        if (err || !items) {
-                            console.log("error getting groupz items: " + err);
-                            callback(null);
-                        } else {
-                            sceneResponse.sceneGroups = items;
-                            callback(null)
+
+                    (async () => {
+                      try {
+                        const moids = allgroups.map(convertStringToObjectID);
+                        const query = {"_id": {$in: moids }};
+                        const items = await RunDataQuery("groups", "find", query);
+                        if (items) {
+                          sceneResponse.sceneGroups = items;
                         }
-                    });
+                        callback(null);
+                      } catch (e) {
+                        callback(e);
+                      }
+                    })();
+                    
+                 
                 } else {
                     callback(null);
                 }
             },
             function (callback) { //fethc audio items
-                db_old.audio_items.find({_id: {$in: requestedAudioItems }}, function (err, audio_items){
-                    if (err || !audio_items) {
-                        console.log("error getting audio items: " + err);
-                        callback(null);
-                    } else {
-
-                        callback(null, audio_items) //send them along
-                    }
-                });
+              console.log("tryna fetch requestedAudioItems " + requestedAudioItems); //already oid?
+              (async () => {
+                try {
+                  // const aoids = requestedAudioItems.map(convertStringToObjectID);
+                  const query = {"_id": {$in: requestedAudioItems }};
+                  const audio_items = await RunDataQuery("audio_items", "find", query);
+                  callback(null, audio_items);
+                } catch (e) {
+                  callback(e);
+                }
+              })();
+               
             },
             function(audio_items, callback) { //add the signed URLs to the obj array
               // console.log("audio_items: ", JSON.stringify(audio_items));
