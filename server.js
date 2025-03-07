@@ -10029,104 +10029,140 @@ app.get('/actions/:u_id', requiredAuthentication, function(req, res) {
     //         }
     //     });
     // } else {
-        db_old.actions.find({}).sort({otimestamp: -1}).toArray( function(err, action_items) {
-            if (err || !action_items) {
-                console.log("error getting action_items : " + err);
-            } else {
-                res.json(action_items);
-                console.log("returning action_items for " + req.params.u_id);
-            }
-        });
+        // db_old.actions.find({}).sort({otimestamp: -1}).toArray( function(err, action_items) {
+        //     if (err || !action_items) {
+        //         console.log("error getting action_items : " + err);
+        //     } else {
+        //         res.json(action_items);
+        //         console.log("returning action_items for " + req.params.u_id);
+        //     }
+        // });
+
+        (async () => {
+          try {
+            const query = {};
+            const action_item = await RunDataQuery("actions", "find", query);//hrm returning all for now.. 
+            res.json(action_item);
+          } catch (e) {
+            res.send(e);
+          }
+        })();
     // }
 });
 
 app.get('/action/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return action_items for: ' + req.params.p_id);
-    var o_id = ObjectId.createFromHexString(req.params.p_id);
-    db_old.actions.findOne({_id: o_id}, function(err, action_item) {
-        if (err || !action_item) {
-            console.log("error getting action_item : " + err);
-        } else {
-            res.json(action_item);
-            // console.log("returning text items for " + req.params.p_id);
-        }
-    });
+    (async () => {
+      try {
+        const o_id = ObjectId.createFromHexString(req.params.p_id);
+        const query = {"_id": o_id};
+        const action_item = await RunDataQuery("actions", "findOne", query);
+        res.json(action_item);
+      } catch (e) {
+        res.send(e);
+      }
+    })();
+    // var o_id = ObjectId.createFromHexString(req.params.p_id);
+    // db_old.actions.findOne({_id: o_id}, function(err, action_item) {
+    //     if (err || !action_item) {
+    //         console.log("error getting action_item : " + err);
+    //     } else {
+    //         res.json(action_item);
+    //         // console.log("returning text items for " + req.params.p_id);
+    //     }
+    // });
 });
 app.post('/update_action/', requiredAuthentication, admin, function (req, res) {
-    //        var textitem = req.body;
-        // console.log("req.body update text:" + JSON.stringify(req.body));
-        var o_id = ObjectId.createFromHexString(req.body._id);
-    //        textitem.userID = req.session.user._id.toString();
-        var timestamp = Math.round(Date.now() / 1000);
-        db_old.actions.update( { "_id": o_id }, { $set: {
-            
-            tags: req.body.tags,
-            actionName: req.body.actionName,
-            actionType: req.body.actionType,
-            actionResult: req.body.actionResult,
-            resultTarget: req.body.resultTarget,
-            sourceObjectMod: req.body.sourceObjectMod,
-            actionDesc: req.body.actionDesc,
-            property: req.body.property,
-            attribute: req.body.attribute,
-            operator: req.body.operator,
-            affect: req.body.affect,
-            // effectiveness: effectiveness,
-            xpoints: req.body.xpoints,
-            karma: req.body.karma,
-            hitpoints: req.body.hitpoints,
-            mana: req.body.mana,
-            difficulty: req.body.difficulty,
-            orderChaos: req.body.orderChaos,
-            alignment: req.body.alignment,
-            effectiveness: req.body.effectiveness,
-            e_i: req.body.e_i,
-            j_p: req.body.j_p,
-            s_n: req.body.s_n,
-            t_f: req.body.t_f,
-            integrity: req.body.integrity,
-            protectiveness: req.body.protectiveness,
-            generosity: req.body.generosity,
-            agreeableness: req.body.agreeableness,
-            discipline: req.body.discipline,
-            openness: req.body.openness,
-            confidence: req.body.confidence,
-            lastUpdateTimestamp: timestamp,
-            lastUpdateUserID: req.session.user._id,
-            lastUpdateUserName: req.session.user.userName
-        }}, function (err, saved) {
-        if (err || !saved) {
-            console.log(err + "error updating action");
-            res.send("error updating action " + err);
-        } else {
-            console.log("updated action");
-            res.send("updated " + new Date());
-        }
-     });
-        // if (err) {res.send(error)} else {res.send("updated " + new Date())}
-        // res.send("updated " + new Date());
+      console.log("update action " + JSON.stringify(req.body));
+        (async () => {
+          try {
+            const timestamp = Math.round(Date.now() / 1000);
+            const o_id = ObjectId.createFromHexString(req.body._id);
+            const query = {"_id": o_id};
+            const updoc = { $set: {
+              tags: req.body.tags,
+              actionName: req.body.actionName,
+              actionType: req.body.actionType,
+              actionResult: req.body.actionResult,
+              resultTarget: req.body.resultTarget,
+              sourceObjectMod: req.body.sourceObjectMod,
+              actionDesc: req.body.actionDesc,
+              property: req.body.property,
+              attribute: req.body.attribute,
+              operator: req.body.operator,
+              affect: req.body.affect,
+              // effectiveness: effectiveness,
+              xpoints: req.body.xpoints,
+              karma: req.body.karma,
+              hitpoints: req.body.hitpoints,
+              mana: req.body.mana,
+              difficulty: req.body.difficulty,
+              orderChaos: req.body.orderChaos,
+              alignment: req.body.alignment,
+              effectiveness: req.body.effectiveness,
+              e_i: req.body.e_i,
+              j_p: req.body.j_p,
+              s_n: req.body.s_n,
+              t_f: req.body.t_f,
+              integrity: req.body.integrity,
+              protectiveness: req.body.protectiveness,
+              generosity: req.body.generosity,
+              agreeableness: req.body.agreeableness,
+              discipline: req.body.discipline,
+              openness: req.body.openness,
+              confidence: req.body.confidence,
+              lastUpdateTimestamp: timestamp,
+              lastUpdateUserID: req.session.user._id,
+              lastUpdateUserName: req.session.user.userName
+            }};
+            const saved = await RunDataQuery("actions", "updateOne", query, updoc);
+            console.log("updated action " + JSON.stringify(saved));
+            res.send("updated");
+          } catch (e) {
+            console.log("update action error " + e);
+            res.send(e);
+          }
+        })();
+
     });
     
 
 app.post('/newaction', requiredAuthentication, function (req, res) {
 
-    var actionitem = req.body;
-    actionitem.userID = req.session.user._id.toString();
-    var timestamp = Math.round(Date.now() / 1000);
-    actionitem.otimestamp = timestamp;
-    actionitem.createdByUserID = req.session.user._id;
-    actionitem.createdByUserName =  req.session.user.userName;
+  (async () => {
+    try {
+      var actionitem = req.body;
+      actionitem.userID = req.session.user._id.toString();
+      var timestamp = Math.round(Date.now() / 1000);
+      actionitem.otimestamp = timestamp;
+      actionitem.createdByUserID = req.session.user._id;
+      actionitem.createdByUserName =  req.session.user.userName;
+      // res.json(action_item);
+      const saved = await RunDataQuery("actions", "insertOne", actionitem);
+      res.send("created new action " + saved._id);
+    } catch (e) {
+      console.log("error creating new action" + e);
+      res.send(e);
+    }
+  })();
+
+    // var actionitem = req.body;
+    // actionitem.userID = req.session.user._id.toString();
+    // var timestamp = Math.round(Date.now() / 1000);
+    // actionitem.otimestamp = timestamp;
+    // actionitem.createdByUserID = req.session.user._id;
+    // actionitem.createdByUserName =  req.session.user.userName;
     
-    db_old.actions.save(actionitem, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('action not saved..');
-            res.send("action not saved " + err);
-        } else {
-            var item_id = saved._id.toString();
-            console.log('new group created, id: ' + item_id);
-            res.send("created: " + item_id);
-        }
-    });
+    // db_old.actions.save(actionitem, function (err, saved) {
+    //     if ( err || !saved ) {
+    //         console.log('action not saved..');
+    //         res.send("action not saved " + err);
+    //     } else {
+    //         var item_id = saved._id.toString();
+    //         console.log('new group created, id: ' + item_id);
+    //         res.send("created: " + item_id);
+    //     }
+    // });
 });
 
 app.post('/newtext', requiredAuthentication, function (req, res) {
@@ -10138,23 +10174,42 @@ app.post('/newtext', requiredAuthentication, function (req, res) {
     textitem.createdByUserID = req.session.user._id;
     textitem.createdByUserName =  req.session.user.userName;
     
-    db_old.text_items.save(textitem, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('text not saved..');
-            res.send("text not saved " + err);
-        } else {
-            var item_id = saved._id.toString();
-            console.log('new group created, id: ' + item_id);
-            res.send("created: " + item_id);
-        }
-    });
+    (async () => {
+      try {
+        const saved = await RunDataQuery("text_items","insertOne",textitem);
+        res.send("created " + saved._id);
+      } catch (e) {
+        console.log("error creating text doc " + e);
+        res.send("errror crating text " + e);
+      }
+    })();
+
+    // db_old.text_items.save(textitem, function (err, saved) {
+    //     if ( err || !saved ) {
+    //         console.log('text not saved..');
+    //         res.send("text not saved " + err);
+    //     } else {
+    //         var item_id = saved._id.toString();
+    //         console.log('new group created, id: ' + item_id);
+    //         res.send("created: " + item_id);
+    //     }
+    // });
 });
 
-app.post('/delete_text/:_id', checkAppID, requiredAuthentication, function (req, res) {
+app.post('/delete_text/:_id', checkAppID, requiredAuthentication, function (req, res) { //unused!?!?
     console.log("tryna delete text itme: " + req.body._id);
-    var o_id = ObjectId.createFromHexString(req.body._id);
-    db_old.text_items.remove( { "_id" : o_id }, 1 );
-    res.send("deleted");
+    const o_id = ObjectId.createFromHexString(req.body._id);
+    const query = { "_id" : o_id };
+    (async () => {
+      try {
+        const removed = await RunDataQuery("text_items","removeOne",query);
+        res.send("deleted " + removed);
+      } catch (e) {
+        console.log("error dleting text doc " + e);
+        res.send("errror deleting text " + e);
+      }
+    })();
+
 });
 
 app.post('/updatetext/:_id', requiredAuthentication, function (req, res) {
@@ -10287,53 +10342,56 @@ app.get('/usertext/:p_id', requiredAuthentication, function(req, res) {
 // app.get('/userpic/:p_id', checkAppID, requiredAuthentication, function(req, res) {
 app.get('/userpic/:p_id', requiredAuthentication, function(req, res) {
 
-    console.log('tryna return userpic : ' + req.params.p_id);
-    var pID = req.params.p_id;
-    var o_id = ObjectId.createFromHexString(pID);
-    db_old.image_items.findOne({"_id": o_id}, function(err, picture_item) {
-        if (err || !picture_item) {
-            console.log("error getting picture items: " + err);
-        } else {
-            var item_string_filename = JSON.stringify(picture_item.filename);
-            item_string_filename = item_string_filename.replace(/\"/g, "");
-            var item_string_filename_ext = getExtension(item_string_filename);
-            var expiration = new Date();
-            expiration.setMinutes(expiration.getMinutes() + 30);
-            var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-            console.log("user pic basename: " + baseName);
-            var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-            var halfName = 'half.' + baseName + item_string_filename_ext;
-            var standardName = 'standard.' + baseName + item_string_filename_ext;
-            var originalName = 'original.' + baseName + item_string_filename_ext;
-            // console.log("original name : " + originalName);
-            // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + thumbName, Expires: 6000}); 
-            // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); 
-            // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + standardName, Expires: 6000});
-            // var urlTarget = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind", Expires: 6000});
-            // var urlOriginal = "";
-            //var urlPng = knoxClient.signedUrl(audio_item[0]._id + "." + pngName, expiration);
-            // console.log("urlTarget " + urlTarget);
+  console.log('tryna return userpic : ' + req.params.p_id);
+    // db_old.image_items.findOne({"_id": o_id}, function(err, picture_item) {
+    //     if (err || !picture_item) {
+    //         console.log("error getting picture items: " + err);
+    //     } else {
+      (async () => { 
+        
+        try {
+        const o_id = ObjectId.createFromHexString(req.params.p_id.toString());
 
-            (async () => { 
+        const query = {"_id": o_id};
+        let picture_item = await RunDataQuery("image_items", "findOne", query);
+        let item_string_filename = JSON.stringify(picture_item.filename);
+        item_string_filename = item_string_filename.replace(/\"/g, "");
+        const item_string_filename_ext = getExtension(item_string_filename);
+        let expiration = new Date();
+        expiration.setMinutes(expiration.getMinutes() + 30);
+        let baseName = path.basename(item_string_filename, (item_string_filename_ext));
+        console.log("user pic basename: " + baseName);
+        const thumbName = 'thumb.' + baseName + item_string_filename_ext;
+        const halfName = 'half.' + baseName + item_string_filename_ext;
+        const standardName = 'standard.' + baseName + item_string_filename_ext;
+        const originalName = 'original.' + baseName + item_string_filename_ext;
+        // console.log("original name : " + originalName);
+        // const urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + thumbName, Expires: 6000}); 
+        // const urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); 
+        // const urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + standardName, Expires: 6000});
+        // const urlTarget = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind", Expires: 6000});
+        // const urlOriginal = "";
+        //const urlPng = knoxClient.signedUrl(audio_item[0]._id + "." + pngName, expiration);
+        // console.log("urlTarget " + urlTarget);
 
-                var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + thumbName, 6000); 
-                var urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + standardName, 6000); 
-                var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); 
-                var urlTarget = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind", 6000); 
-                var urlOriginal = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/originals/" + picture_item._id + "." + originalName, 6000); 
+            const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + thumbName, 6000); 
+            const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + standardName, 6000); 
+            const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); 
+            const urlTarget = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind", 6000); 
+            const urlOriginal = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/originals/" + picture_item._id + "." + originalName, 6000); 
                 // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); 
                 // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + standardName, Expires: 6000});
                 // var urlTarget = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind", Expires: 6000});
-                if (minioClient) {
-                    picture_item.URLthumb = urlThumb; //jack in teh signed urls into the object array
-                    picture_item.URLhalf = urlHalf;
-                    picture_item.URLstandard = urlStandard;
-                    picture_item.URLoriginal = urlOriginal;
-                    picture_item.URLtarget = urlTarget;
-                    // res.json(picture)
-                    res.json(picture_item);
-                    console.log("returning picture_item for " + req.params.u_id);    
-                } else {
+                // if (minioClient) {
+                //     picture_item.URLthumb = urlThumb; //jack in teh signed urls into the object array
+                //     picture_item.URLhalf = urlHalf;
+                //     picture_item.URLstandard = urlStandard;
+                //     picture_item.URLoriginal = urlOriginal;
+                //     picture_item.URLtarget = urlTarget;
+                //     // res.json(picture)
+                //     res.json(picture_item);
+                //     console.log("returning picture_item for " + req.params.u_id);    
+                // } else {
                 // var params = {Bucket: process.env.ROOT_BUCKET_NAME, Key: "users/" + picture_item.userID + "/pictures/originals/" + picture_item._id + "." + originalName};
                 // s3.headObject(params, function(err, data) { //some old pix aren't saved with .original. in filename, check for that
                 //     if (err) {
@@ -10351,7 +10409,6 @@ app.get('/userpic/:p_id', requiredAuthentication, function(req, res) {
                 //     } else {
                 //         console.log("found that orig pic");
                         
-                
                         picture_item.URLthumb = urlThumb; //jack in teh signed urls into the object array
                         picture_item.URLhalf = urlHalf;
                         picture_item.URLstandard = urlStandard;
@@ -10389,12 +10446,15 @@ app.get('/userpic/:p_id', requiredAuthentication, function(req, res) {
                         
                     // }
                     // });
-                }
+                // }
+              } catch (e) {
+                console.log("picture get errora " + e);
+              }
                 // res.json(picture_items);
                 // console.log("returning picture_items for " + req.params.u_id);    
             })();
-        }
-    });
+    //     }
+    // });
 });
 
 app.get('/hls/:_id', function(req, res) {  //main playback route for hls vids //todo auth? send to tracker?
@@ -16589,54 +16649,58 @@ app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
 
     var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('pic requested : ' + req.body._id);
-    db_old.image_items.findOne({ "_id" : o_id}, function(err, pic_item) {
-        if (err || !pic_item) {
-            console.log("error getting pic items: " + err);
-        } else {
-            if (req.session.user._id != pic_item.userID && !req.session.user.authLevel.toLowerCase().includes("admin")) {
-                console.log("must be owner to update!");
-                res.send ("You don't have permission to update this");
-            } else {
-                console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
-                let timestamp = Math.round(Date.now() / 1000);
-                let isPublic = false;
-                if (req.body.isPublic != null) {
-                    isPublic = req.body.isPublic;
-                }
-                db_old.image_items.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
-                    tags: req.body.tags,
-                    title: req.body.title,
-                    isPublic : isPublic,
-                    useTarget : req.body.useTarget,
-                    orientation: req.body.orientation,
-                    hasAlphaChannel: req.body.hasAlphaChannel,
-                    imageData: req.body.imageData,
-                    captionUpper: req.body.captionUpper,
-                    captionLower: req.body.captionLower,
-                    mods: req.body.mods,
-                    license: req.body.license,
-                    description: req.body.description,
-                    linkType: req.body.linkType,
-                    linkURL: req.body.linkURL,
-                    sourceText: req.body.sourceText,
-                    sourceTitle: req.body.sourceTitle,
-                    sourceLink: req.body.sourceLink,
-                    authorName: req.body.authorName,
-                    authorLink: req.body.authorLink,
-                    nft: req.body.nft,
-                    lastUpdateTimestamp: timestamp,
-                    lastUpdateUserID: req.session.user._id,
-                    lastUpdateUserName: req.session.user.userName,
+ 
+      (async () => {
+        try {
+          const query = { "_id": o_id };
+          const pic_item = await RunDataQuery("image_items", "findOne", query);
+          if (req.session.user._id != pic_item.userID && !req.session.user.authLevel.toLowerCase().includes("admin")) {
+              console.log("must be owner to update!");
+              res.send ("You don't have permission to update this");
+          } else {
+              console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
+              let timestamp = Math.round(Date.now() / 1000);
+              let isPublic = false;
+              if (req.body.isPublic != null) {
+                  isPublic = req.body.isPublic;
+              }
 
-                }});
-                if (err) {
-                    res.send(error);
-                } else {
-                    res.send("updated " + new Date());
-                }
+              const query = { "_id": o_id };
+              const updoc = { $set: { item_status: req.body.item_status,
+                tags: req.body.tags,
+                title: req.body.title,
+                isPublic : isPublic,
+                useTarget : req.body.useTarget,
+                orientation: req.body.orientation,
+                hasAlphaChannel: req.body.hasAlphaChannel,
+                imageData: req.body.imageData,
+                captionUpper: req.body.captionUpper,
+                captionLower: req.body.captionLower,
+                mods: req.body.mods,
+                license: req.body.license,
+                description: req.body.description,
+                linkType: req.body.linkType,
+                linkURL: req.body.linkURL,
+                sourceText: req.body.sourceText,
+                sourceTitle: req.body.sourceTitle,
+                sourceLink: req.body.sourceLink,
+                authorName: req.body.authorName,
+                authorLink: req.body.authorLink,
+                nft: req.body.nft,
+                lastUpdateTimestamp: timestamp,
+                lastUpdateUserID: req.session.user._id,
+                lastUpdateUserName: req.session.user.userName
+              }};
+              const saved = await RunDataQuery("image_items","updateOne",query,updoc);
+              res.send("updated " + saved);
             }
+        } catch (e) {
+          console.log("error updating pic " + e);
+          res.send(e);
         }
-    });
+        
+      })();
+
 });
 
 app.post('/update_video/:_id', requiredAuthentication, function (req, res) {

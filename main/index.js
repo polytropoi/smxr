@@ -25,6 +25,7 @@
     window.getStoreItem = getStoreItem;
     window.previewGLTF = previewGLTF;
     window.logout = logout;
+    window.newText = newText;
 
     var cookie = Cookies.get();
     var type = getParameterByName("type", window.location.href); //these params used for routing in bigSwitch
@@ -1327,6 +1328,13 @@
             let url = "";
             let redir = "";
             switch (type) {
+            case "model":
+                url = '/delete_text';
+                data = { 
+                    _id : itemid
+                };
+                redir = "texts";
+            break;
             case "model":
                 url = '/delete_model';
                 data = { 
@@ -3980,6 +3988,7 @@
         let tags = [];
         axios.get('/action/' + item_id, config)
         .then(function (response) {
+            console.log("action " + JSON.stringify(response.data));
         let user = response.data.userID;
         let date = response.data.otimestamp;
         let actionMdl = "";
@@ -4259,8 +4268,8 @@
         $(function() { 
             axios.get('/main/ref/types.json') //init the dropdowns
             .then(function (typesResponse) {
-                types = typesResponse.data.types;
-                typesData = typesResponse.data; 
+                const types = typesResponse.data.types;
+                const typesData = typesResponse.data; 
                 for (let i = 0; i < typesData.actiontype.length; i++) {//populate dropdown options
                     var x = document.getElementById("actionTypeSelect");
                     var option = document.createElement("option");
@@ -4493,11 +4502,12 @@
                     actionDesc: actionDesc,
 
                 }
+                console.log("tryna post action updarte " + JSON.stringify(data));
                 axios.post('/update_action/', data)
                     .then(function (response) {
                         console.log(response);
-                        if (response.data.includes("updated")) {
-                            $("#topSuccess").html(response.data);
+                        if (response.status == 200) {
+                            $("#topSuccess").html(response);
                             $("#topSuccess").show();
                             
                         } else {
@@ -5717,7 +5727,7 @@
                 e.preventDefault();  
                 let newTag = document.getElementById("addTagInput").value;
                 console.log("tryna add tag " + newTag);
-                if (newTag.length > 2) {
+                if (newTag.length > 1) {
                 let html = "";
                 tags.push(newTag);
                 for (let i = 0; i < tags.length; i++) {
@@ -5758,6 +5768,7 @@
                 // let hasAlpha = document.getElementById("hasAlpha").value;
                 let hasAlpha = $("#hasAlpha").prop("checked");
                 let useTarget = $("#useTarget").prop("checked");
+                let tags = document.getElementById("tags").value;
                 let imageData = document.getElementById("imageData").value;
                 let captionUpper = document.getElementById("captionUpper").value;
                 let captionLower = document.getElementById("captionLower").value;

@@ -327,9 +327,7 @@ landing_router.get('/:_id', async (req, res) => {
                 function (callback) {
                 if (sceneData.sceneTags != null) {        
                     for (let i = 0; i < sceneData.sceneTags.length; i++) { //not ideal, but it's temporary... //no it isn't
-                        if (sceneData.sceneTags[i].toLowerCase().includes("debug")) {
-                            debugMode = true;
-                        }
+
                         if (sceneData.sceneTags[i].toLowerCase().includes("timer")) { //uses css font @import... //no! 
                              proceduralEntities = proceduralEntities + "<a-plane live_canvas=\x22src:#flying_canvas\x22 id=\x22flying_info_canvas\x22 material=\x22shader: flat; transparent: true;\x22look-at=\x22#player\x22 width=\x221\x22 height=\x221\x22 position=\x220 1.5 -1\x22></a-plane>";
 
@@ -342,11 +340,7 @@ landing_router.get('/:_id', async (req, res) => {
                         }
                         
 
-                       
-                        if (sceneData.sceneTags[i] == "instancing demo") {
-                            
-                            // instancingEntity = "<a-entity instanced_meshes_sphere_physics></a-entity>";
-                        }
+
                         if (sceneData.sceneTags[i] == "show transport") {
                             // console.log("GOTS SCENE TAG: " + sceneData.sceneTags[i]);
                             showTransport = true;
@@ -359,29 +353,19 @@ landing_router.get('/:_id', async (req, res) => {
                             // console.log("GOTS SCENE TAG: " + sceneData.sceneTags[i]);
                             showSceneManglerButtons = true;
                         }
-                        if (sceneData.sceneTags[i] == "use navmesh") {
-                            console.log("GOTS USENAVMESH TAG: " + sceneData.sceneTags[i]);
-                            useNavmesh = true;
-                        }
 
                         if (sceneData.sceneTags[i] == "show ethereum") {
                             ethereumButton = "<div class=\x22ethereum_button\x22 id=\x22ethereumButton\x22 style=\x22margin: 10px 10px;\x22><i class=\x22fab fa-ethereum fa-2x\x22></i></div>";
                         }
-                        // if (sceneData.sceneTags[i].includes("synth")) {
-                        //     synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script src=\x22../main/js/synth.js\x22></script>";
-                        // }
 
                     }
                 }
-                //TODO use sceneNetworkSettings or whatever
-                // socketScripts = "<script src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
-                // "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                // socketScripts = "<script src=\x22https://strr.us/socket.io/socket.io.js\x22></script>";
+               
                 if (socketHost != null && socketHost != "NONE") {
                     socketScripts = "<script src=\x22/socket.io/socket.io.js\x22></script>"; //
                 }
                 
-                // "<script src=\x22/main/vendor/jscookie/js.cookie.min.js\x22></script>" +
+          
                     
                 // TODO - backstretch include var!
                 // "<script src=\x22/main/js/jquery.backstretch.min.js\x22></script>"; 
@@ -416,25 +400,7 @@ landing_router.get('/:_id', async (req, res) => {
                         callback(); 
 
                     })();
-                    // db.lexicons.findOne({name: "nameArrays"}, function (err, items) {
-                    // if (err || !items) {
-                    //     console.log("error getting scene 5: " + err);
-                    //     callback (err);
-                    // } else {
-                    //     array1 = items.adjectives;
-                    //     array2 = items.colors;
-                    //     array3 = items.animals;
-                    //     // console.log("array 1" + array1);
-                    //     index1 = Math.floor(Math.random() * array1.length);
-                    //     name1 = UppercaseFirst(array1[index1]);
-                    //     index2 = Math.floor(Math.random() * array2.length);
-                    //     name2 = UppercaseFirst(array2[index2]);
-                    //     index3 = Math.floor(Math.random() * array3.length);
-                    //     name3 = UppercaseFirst(array3[index3]);
-                    //     avatarName = name1 + "_" + name2 + "_" + name3;
-                    //     callback();
-                    //     }
-                    // });
+                   
                 } else {
                     callback();
                 }
@@ -455,14 +421,12 @@ landing_router.get('/:_id', async (req, res) => {
                         if (sceneResponse.scenePictures != null && sceneResponse.scenePictures.length > 0) {
                             sceneResponse.scenePictures.forEach(function (picture) {
                                 // console.log("scenePIcture " + picture);
-                                var p_id = ObjectId.createFromHexString(picture); //convert to binary to search by _id beloiw
+                                var p_id = ObjectId.createFromHexString(picture.toString()); //convert to binary to search by _id beloiw
                                 requestedPictureItems.push(p_id); //populate array
                             });
                         }
                         
-                        if (sceneResponse.sceneDebugMode != null && sceneResponse.sceneDebugMode != undefined && sceneResponse.sceneDebugMode != "") {
-                            debugMode = true;
-                        }
+
                         if (sceneResponse.sceneYouTubeIDs != null && sceneResponse.sceneYouTubeIDs.length > 0) {
                             youtubes = sceneResponse.sceneYouTubeIDs;
                         }
@@ -1648,27 +1612,28 @@ landing_router.get('/:_id', async (req, res) => {
                                 var oo_id = ObjectId.createFromHexString(postcard);
                                 const query = {"_id": oo_id};
                                 const picture_item = await RunDataQuery("image_items", "findOne", query);
-                                if (picture_item) {
-                                    const postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ picture_item._id + ".standard." + picture_item.filename)                                     
-                                    postcardImages.push(postcard1);
+                                // if (picture_item) {
+                                const postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ picture_item._id + ".standard." + picture_item.filename)                                     
+                                postcardImages.push(postcard1);
 
-                                }
-                                callback();
+                                // }
+                                callback(null);
                                 
     
                             } catch (e) {   
                                 console.log("error getting postcard " + e);
+                                callback(e);
                             }
                         })();
                       
                     } else {
                         console.log("no postcard!");
-                        callback();
+                        callback(null);
                     }
                 },
                 
                 function (callback) {
-                    console.log("pictureGroups: " + sceneResponse.scenePictureGroups);
+                    console.log("pictureGroups: " + JSON.stringify(sceneResponse.scenePictureGroups));
                     if (sceneResponse.scenePictureGroups != null && sceneResponse.scenePictureGroups.length > 0) {
                         // pgID = sceneResponse.scenePictureGroups[0];
                         
@@ -1732,7 +1697,7 @@ landing_router.get('/:_id', async (req, res) => {
                         async.each(sceneResponse.scenePictures, function (picID, callbackz) { //nested async-ery!
                             (async () => {
                                 try {                                       
-                                    var oo_id = ObjectId.createFromHexString(picID);
+                                    var oo_id = ObjectId.createFromHexString(picID.toString());
                                     const query = {"_id": oo_id};
                                     const picture_item = await RunDataQuery("image_items", "findOne", query);
                                     if (picture_item) {
@@ -1971,14 +1936,6 @@ landing_router.get('/:_id', async (req, res) => {
                         // let hasTile = false;
                         // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
 
-                        if (sceneResponse.sceneTags.includes("landing pics")) {
-                            // if (requestedPictureGroups) {
-                                
-                                // picGroups = JSON.stringify(requestedPictureGroups);
-                                // pictureGroupsData = "<div id=\x22pictureGroupsData\x22 data-picture-groups='"+buff+"'></div>"; 
-                                // console.log(pictureGroupsData);
-                            // }
-                        }
                         let availableScenesHTML = ""; 
                         let bgstyle = "style=\x22height:100%; width:100%; overflow:auto;\x22";
                         let sceneAccess = "Access Open to Public"
@@ -2202,7 +2159,7 @@ landing_router.get('/:_id', async (req, res) => {
     }//end else if not redirected
     
 });
-///// END PRIMARY SERVERSIDE /webxr/ ROUTE //////////////////////
+///// END landing ROUTE //////////////////////
 
 
 export default landing_router;
