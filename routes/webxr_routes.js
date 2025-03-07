@@ -15,7 +15,7 @@ const minio = require('minio');
 
 import { db_old as db } from "../server.js";
 // import { s3 } from "../server.js";
-import { ReturnPresignedUrl} from "../server.js";
+import { ReturnPresignedUrl, saveTraffic} from "../server.js";
 
 
 var minioClient = null;
@@ -76,176 +76,7 @@ function HexToRgbValues (c) {
     return aRgb;
 }
 
-// function ReturnPresignedUrlSync (bucket, key, time) {
-//     if (minioClient) {
-//         minioClient.presignedGetObject(bucket, key, time, function(err, presignedUrl) { //use callback version here, can't await?
-//             if (err) {
-//                 console.log(err);
-//                 return "err";
-//             } else {
-//                 console.log("minio sync url " + presignedUrl)
-//                return presignedUrl;
-                
-//             }
-//         });
-//     } else {
-//         let url = s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time});
-//         console.log("s3 sync url" + url);
-//         return url;
-//     }
-// }
-// async function ReturnPresignedUrl(bucket, key, time) {
-    
-//     if (minioClient) {
-//         try {
-//             return minioClient.presignedGetObject(bucket, key, time);
-//         } catch (error) {
-//             return error
-//         }
-//     } else {
-//         try {
-//             return s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time}); //returns a promise if called in async function?
-//         } catch (error) {
-//             return error;
-//         } 
-//     }
-// }
-
-function saveDomainTraffic (domain) { //hrm... 
-    let timestamp = Date.now();
-
-    timestamp = parseInt(timestamp);
-    // console.log("tryna save req" + );
-    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
-    // let request = {};
-
-    var userdata = {
-        username: req.session.user ? req.session.user.userName : "",
-        _id: req.session.user ? req.session.user._id : "",
-        email: req.session.user ? req.session.user.email : "",
-        status: req.session.user ? req.session.user.status : "",
-        authlevel: req.session.user ? req.session.user.authLevel : ""
-    };
-    // console.log("traffic userdata " + JSON.stringify(userdata));
-    let data = {
-            timestamp: timestamp,
-            baseUrl: req.baseUrl,
-            headers: JSON.stringify(req.headers),
-            cookie: JSON.stringify(req.session.cookie),
-            userdata: userdata,
-            fresh: req.fresh,
-            hostname: req.hostname,
-            ip: req.ip,
-            referring_ip: ip,
-            method: req.method,
-            originalUrl: req.originalUrl,
-            params: JSON.stringify(req.params),
-           
-        }
-        db.traffic.save(data, function (err, saved) {
-            if ( err || !saved ) {
-                console.log('traffic not saved!' + err);
-                next();
-                
-            } else {
-                next();
-                // var item_id = saved._id.toString();
-                // console.log('new traffic id: ' + item_id);
-            }
-        });
-}
  
-
-// function saveTrafficOld (req, res, next) {
-//     let timestamp = Date.now();
-
-//     timestamp = parseInt(timestamp);
-//     // console.log("tryna save req" + );
-//     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
-//     // let request = {};
-
-//     var userdata = {
-//         username: req.session.user ? req.session.user.userName : "",
-//         _id: req.session.user ? req.session.user._id : "",
-//         email: req.session.user ? req.session.user.email : "",
-//         status: req.session.user ? req.session.user.status : "",
-//         authlevel: req.session.user ? req.session.user.authLevel : ""
-//     };
-//     // console.log("traffic userdata " + JSON.stringify(userdata));
-//     let data = {
-//             timestamp: timestamp,
-//             baseUrl: req.baseUrl,
-//             headers: JSON.stringify(req.headers),
-//             cookie: JSON.stringify(req.session.cookie),
-//             userdata: userdata,
-//             fresh: req.fresh,
-//             hostname: req.hostname,
-//             ip: req.ip,
-//             referring_ip: ip,
-//             method: req.method,
-//             originalUrl: req.originalUrl,
-//             params: JSON.stringify(req.params),
-           
-//         }
-//         db.traffic.save(data, function (err, saved) {
-//             if ( err || !saved ) {
-//                 console.log('traffic not saved!' + err);
-//                 next();
-                
-//             } else {
-//                 next();
-//                 // var item_id = saved._id.toString();
-//                 // console.log('new traffic id: ' + item_id);
-//             }
-//         });
-//     }
-
-    function saveTraffic (req, domain, shortID) {
-        let timestamp = Date.now();
-    
-        timestamp = parseInt(timestamp);
-        // console.log("tryna save req" + );
-        var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
-        // let request = {};
-    
-        var userdata = {
-            username: req.session.user ? req.session.user.userName : "",
-            _id: req.session.user ? req.session.user._id : "",
-            email: req.session.user ? req.session.user.email : "",
-            status: req.session.user ? req.session.user.status : "",
-            authlevel: req.session.user ? req.session.user.authLevel : ""
-        };
-        // console.log("traffic userdata " + JSON.stringify(userdata));
-        let data = {
-                short_id: shortID,
-                appdomain: domain,
-                timestamp: timestamp,
-                baseUrl: req.baseUrl,
-                headers: JSON.stringify(req.headers),
-                cookie: JSON.stringify(req.session.cookie),
-                userdata: userdata,
-                fresh: req.fresh,
-                hostname: req.hostname,
-                ip: req.ip,
-                referring_ip: ip,
-                method: req.method,
-                originalUrl: req.originalUrl,
-                params: JSON.stringify(req.params),
-               
-            }
-            db.traffic.save(data, function (err, saved) {
-                if ( err || !saved ) {
-                    console.log('traffic not saved!' + err);
-                    // next();
-                    
-                } else {
-                    // next();
-                    // var item_id = saved._id.toString();
-                    // console.log('new traffic id: ' + item_id);
-                }
-            });
-        }    
-
 ////////// test / example of aframe response
 webxr_router.get('/simple_aframe', function (req, res) { 
 
@@ -268,7 +99,7 @@ webxr_router.get('/simple_aframe', function (req, res) {
         res.send(response);
     }
 );
-////////////////////PRIMARY SERVERSIDE /WEBXR ROUTE///////////////////
+////////////////////PRIMARY /WEBXR ROUTE  e.g. /webxr/short_id ///////////////////
 webxr_router.get('/:_id', function (req, res) { 
    
     var reqstring = entities.decodeHTML(req.params._id);
@@ -1250,7 +1081,7 @@ webxr_router.get('/:_id', function (req, res) {
                                     pictureLocation.data = sceneResponse.sceneLocations[i].eventData; //should be the pic _id
                                     pictureLocation.scale = sceneResponse.sceneLocations[i].scale;
                                     pictureLocation.tags = sceneResponse.sceneLocations[i].tags;
-                                    console.log("pictureLocation: " + JSON.stringify(pictureLocation));
+                                    console.log("pictureLocation is: " + JSON.stringify(pictureLocation));
                                     locationPictures.push(pictureLocation);
                                 }
                                 if (sceneResponse.sceneLocations[i].markerType == "curve point") {
@@ -3740,7 +3571,7 @@ webxr_router.get('/:_id', function (req, res) {
                             } else {
                             // console.log("gotsa group: "+ JSON.stringify(groups));
                             async.each(groups, function (group, callbackz) { 
-                                console.log(JSON.stringify(group));
+                                console.log("video group " + JSON.stringify(group));
                                 let vidGroup = {};
                                 // vidGroup._id = groups[0]._id;
                                 // vidGroup.name = groups[0].name;

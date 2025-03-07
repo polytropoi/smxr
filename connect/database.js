@@ -21,7 +21,15 @@ export async function RunDataQuery(coll,type,query,update) {  //TODO Sqlite!
     //     console.log("wheres the db?");
     //     db = client.db();
     // }
-    console.log("tryna RunDataQuery " + coll + " " + type  + " " + JSON.stringify(query) + " " + JSON.stringify(update));
+    let q = JSON.stringify(query);
+    let u = "...";
+    if (coll == "traffic") {
+        q = query.timestamp;
+    }
+    if (update != undefined) {
+        u = "updoc"; //hrm
+    }
+    console.log("tryna RunDataQuery " + coll + " " + type  + " " + q + " " + u);
     switch  (type) {
 
         case "find": //i.e. more than one
@@ -56,7 +64,7 @@ export async function RunDataQuery(coll,type,query,update) {  //TODO Sqlite!
                 return (null); 
             }
         ////////////////////////////////
-        case "insertOne": //return only one
+        case "insertOne": //create a single new record
             try {
                 return await db.collection(coll).insertOne(query);
             } catch (e) {

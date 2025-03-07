@@ -628,8 +628,6 @@ export function saveTraffic (req, domain, shortID) {
     timestamp = parseInt(timestamp);
     // console.log("tryna save req" + );
     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
-    // let request = {};
-
     var userdata = {
         username: req.session.user ? req.session.user.userName : "",
         _id: req.session.user ? req.session.user._id : "",
@@ -637,7 +635,6 @@ export function saveTraffic (req, domain, shortID) {
         status: req.session.user ? req.session.user.status : "",
         authlevel: req.session.user ? req.session.user.authLevel : ""
     };
-    // console.log("traffic userdata " + JSON.stringify(userdata));
     let data = {
             short_id: shortID,
             appdomain: domain,
@@ -652,23 +649,19 @@ export function saveTraffic (req, domain, shortID) {
             referring_ip: ip,
             method: req.method,
             originalUrl: req.originalUrl,
-            params: JSON.stringify(req.params),
+            params: JSON.stringify(req.params)
            
-        }
-        db_old.traffic.save(data, function (err, saved) {
-            if ( err || !saved ) {
-                console.log('traffic not saved!' + err);
-                // next();
-                
-            } else {
-                // next();
-                // var item_id = saved._id.toString();
-                // console.log('new traffic id: ' + item_id);
-            }
-        });
+        }; //don't forget the semicolon => "intermediate type" error
+        // console.log("traffic " + JSON.stringify(data));
+        (async () => {
+          try {
+            const saved = await RunDataQuery("traffic", "insertOne", data);
+            // console.log("new traffic : "+ saved);
+          } catch (e) {
+            console.log("error logging traffic " + e);
+          }
+        })();
     }    
-
-
 
 function nameCleaner(name) {
 
@@ -680,17 +673,30 @@ function checkAppID(req, res, next) {
     console.log("req.headers: " + JSON.stringify(req.headers));
     if (req.headers.appid) {
         var a_id = ObjectId.createFromHexString(req.headers.appid.toString().replace(":", ""));
-        db_old.apps.findOne({_id: a_id }, function (err, app) {
-            if (err || !app) {
-                console.log("no app id!");
+
+        (async () => {
+          try {
+            const query = {"_id": a_id };
+            const app = await RunDataQuery("apps", "findOne", query);
+
+            next();
+          } catch (e) { 
+                console.log("no app id! " + e);
                 req.session.error = 'Access denied!';
-                res.send("noappauth");
-//                next();
-            } else {
-                console.log("hey, gotsa appID!");
-                next();
-            }
-        });
+                res.send("noappauth " + e);
+          }
+        })();
+//         db_old.apps.findOne({_id: a_id }, function (err, app) {
+//             if (err || !app) {
+//                 console.log("no app id!");
+//                 req.session.error = 'Access denied!';
+//                 res.send("noappauth");
+// //                next();
+//             } else {
+//                 console.log("hey, gotsa appID!");
+//                 next();
+//             }
+//         });
     } else {
         console.log("no app id!");
         req.session.error = 'Access denied!';
@@ -3308,7 +3314,7 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
 
         // },
         function (callback) { //check object
-            // let sceneInventoryID = scene.sceneInventoryID;
+
             let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
             db_old.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
                 if (err || !obj) {
@@ -3374,225 +3380,226 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
     });
 });
 
-app.post('/dropnope/', requiredAuthentication, function (req, res) { 
-    let timestamp = Math.round(Date.now() / 1000);
-    let i_id = ObjectId.createFromHexString(req.body.inventoryID); //player inventory
-    let sceneInventoryID = null; //scene inventory
-    let sceneInventory = null;
-    async.waterfall([
+// app.post('/dropnope/', requiredAuthentication, function (req, res) { 
+//     let timestamp = Math.round(Date.now() / 1000);
+//     let i_id = ObjectId.createFromHexString(req.body.inventoryID); //player inventory
+//     let sceneInventoryID = null; //scene inventory
+//     let sceneInventory = null;
+//     async.waterfall([
                   
-        function (callback) { //check scene
-            db_old.scenes.findOne({"short_id": req.body.inScene}, function (err, scene) {
-                if (err || !scene) {
-                    console.log("no scene for drop!");
-                    callback(err);
-                } else {
-                    console.log("gotsa scene for drop");
-                    callback(null, scene);
-                }
-            });
-        },        
-        function (scene, callback) { //scene inventory 
+//         function (callback) { //check scene
+//             db_old.scenes.findOne({"short_id": req.body.inScene}, function (err, scene) {
+//                 if (err || !scene) {
+//                     console.log("no scene for drop!");
+//                     callback(err);
+//                 } else {
+//                     console.log("gotsa scene for drop");
+//                     callback(null, scene);
+//                 }
+//             });
+//         },        
+//         function (scene, callback) { //scene inventory 
             
-            if (scene.sceneInventoryID != undefined && scene.sceneInventoryID != null) { //maybe needs a toggle instead of more tagsoup? 
-                sceneInventoryID = scene.sceneInventoryID;
-                let s_id = ObjectId.createFromHexString(scene.sceneInventoryID);
-                // let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
-                db_old.inventories.findOne({"_id": s_id}, function (err, inventory) {//check for scene inventory record
-                    if (err || !inventory) {
-                        console.log("no scene inventory?2");
-                        callback(err);
-                    } else {
-                        console.log('gotsa inventory' + inventory._id );
-                        sceneInventory = inventory;
-                        callback(null);
-                    }
-                });
-            } else {
-                callback("no scene inventory");
-            }
-        },        
-        function (callback) { //check object
-            // let sceneInventoryID = scene.sceneInventoryID;
-            let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
-            db_old.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
-                if (err || !obj) {
-                    console.log("no object found for drop");
-                    callback(err);
-                    // res.send("no object found");
-                } else {
-                    console.log("checking maxperscene " + obj.maxPerScene + " in " + sceneInventory.inventoryItems.length);
-                    // console.log("checking maxperscene " + obj.maxPerScene);
-                    // let iCount = 0;
-                    callback(null, obj);
-                }
-            });
-        },        
-        function (obj, callback) { //count similar objects in scene inventory
-            let iCount = 0;
-            if ( sceneInventory.inventoryItems != undefined && sceneInventory.inventoryItems.length > 0) { 
-                console.log("scene inventory items " + sceneInventory.inventoryItems.length);
-                async.each (sceneInventory.inventoryItems, function (i_item, callbackz) {
-                    if (i_item.objectID == obj._id) {
-                        iCount++;
-                        console.log("gotsa invnetory match with the obj " + iCount);
+//             if (scene.sceneInventoryID != undefined && scene.sceneInventoryID != null) { //maybe needs a toggle instead of more tagsoup? 
+//                 sceneInventoryID = scene.sceneInventoryID;
+//                 let s_id = ObjectId.createFromHexString(scene.sceneInventoryID);
+//                 // let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
+//                 db_old.inventories.findOne({"_id": s_id}, function (err, inventory) {//check for scene inventory record
+//                     if (err || !inventory) {
+//                         console.log("no scene inventory?2");
+//                         callback(err);
+//                     } else {
+//                         console.log('gotsa inventory' + inventory._id );
+//                         sceneInventory = inventory;
+//                         callback(null);
+//                     }
+//                 });
+//             } else {
+//                 callback("no scene inventory");
+//             }
+//         },        
+//         function (callback) { //check object
+//             // let sceneInventoryID = scene.sceneInventoryID;
+//             let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
+//             db_old.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
+//                 if (err || !obj) {
+//                     console.log("no object found for drop");
+//                     callback(err);
+//                     // res.send("no object found");
+//                 } else {
+//                     console.log("checking maxperscene " + obj.maxPerScene + " in " + sceneInventory.inventoryItems.length);
+//                     // console.log("checking maxperscene " + obj.maxPerScene);
+//                     // let iCount = 0;
+//                     callback(null, obj);
+//                 }
+//             });
+//         },        
+//         function (obj, callback) { //count similar objects in scene inventory
+//             let iCount = 0;
+//             if ( sceneInventory.inventoryItems != undefined && sceneInventory.inventoryItems.length > 0) { 
+//                 console.log("scene inventory items " + sceneInventory.inventoryItems.length);
+//                 async.each (sceneInventory.inventoryItems, function (i_item, callbackz) {
+//                     if (i_item.objectID == obj._id) {
+//                         iCount++;
+//                         console.log("gotsa invnetory match with the obj " + iCount);
                         
-                            if (iCount >= obj.maxPerScene) {
-                                // console.log("max per scene reached!");
-                                callbackz('maxxed');
+//                             if (iCount >= obj.maxPerScene) {
+//                                 // console.log("max per scene reached!");
+//                                 callbackz('maxxed');
                                 
-                            } else {
-                                // callback(null);
-                                callbackz();
-                            }
-                        // }
-                    } else {
-                        callbackz();
-                    }
+//                             } else {
+//                                 // callback(null);
+//                                 callbackz();
+//                             }
+//                         // }
+//                     } else {
+//                         callbackz();
+//                     }
                     
-                }, function(err) {
-                    if (err) {
-                        console.log('A scene inventory item failed to process : ' + err);
-                        //res.send("error: " + err);
-                        callback(err);
-                    } else {
-                        console.log('OK to add to scene inventory');
-                        // pcallbackz();
+//                 }, function(err) {
+//                     if (err) {
+//                         console.log('A scene inventory item failed to process : ' + err);
+//                         //res.send("error: " + err);
+//                         callback(err);
+//                     } else {
+//                         console.log('OK to add to scene inventory');
+//                         // pcallbackz();
 
-                        // console.log("app response " + JSON.stringify(app));
-                        // res.json(app);
-                        callback(null);
-                    }
-                });
+//                         // console.log("app response " + JSON.stringify(app));
+//                         // res.json(app);
+//                         callback(null);
+//                     }
+//                 });
 
                
-            } else {
-                callback(null);
-            }
-        },        
-        function (callback) {
+//             } else {
+//                 callback(null);
+//             }
+//         },        
+//         function (callback) {
             
-            if (sceneInventoryID != null) {
-            console.log("trynna lookup scene invnetory " + sceneInventoryID);
-            let s_id = ObjectId.createFromHexString(sceneInventoryID);
-            let i_obj = req.body.inventoryObj;
-            db_old.inventories.findOne({'_id': s_id },function (err, inventory){  
-                if (err || !inventory) {
-                     callback("no drop");
+//             if (sceneInventoryID != null) {
+//             console.log("trynna lookup scene invnetory " + sceneInventoryID);
+//             let s_id = ObjectId.createFromHexString(sceneInventoryID);
+//             let i_obj = req.body.inventoryObj;
+//             db_old.inventories.findOne({'_id': s_id },function (err, inventory){  
+//                 if (err || !inventory) {
+//                      callback("no drop");
                     
-                } else {
-                    // console.log("inventory: " + JSON.stringify(inventory));
-                    db_old.inventories.update({'_id': s_id }, { $push: { inventoryItems: i_obj }}, {upsert: false}, function (err, saved) { //add to scene inventory
-                        if (err || !saved) {
-                            console.log("problemo with inventory rm " + err);
-                            // res.send("inventory update error " + err);
-                            // res.send("error saving to scene inventory");
-                            callback(err);
-                        } else {
-                            console.log("added to scene inventory..." + JSON.stringify(i_obj) + " " +  JSON.stringify(saved));
-                            callback(null);
-                        }
-                    });
-                }
+//                 } else {
+//                     // console.log("inventory: " + JSON.stringify(inventory));
+//                     db_old.inventories.update({'_id': s_id }, { $push: { inventoryItems: i_obj }}, {upsert: false}, function (err, saved) { //add to scene inventory
+//                         if (err || !saved) {
+//                             console.log("problemo with inventory rm " + err);
+//                             // res.send("inventory update error " + err);
+//                             // res.send("error saving to scene inventory");
+//                             callback(err);
+//                         } else {
+//                             console.log("added to scene inventory..." + JSON.stringify(i_obj) + " " +  JSON.stringify(saved));
+//                             callback(null);
+//                         }
+//                     });
+//                 }
 
-                });
-            } else {
-                callback("no drop");
-            }
-            // db.inventories.update({_id: s_id }, { $push: { inventoryItems: i_obj }}, {upsert: false}, function (err, saved) { //add to scene inventory
-            //     if (err || !saved) {
-            //         console.log("problemo with inventory rm " + err);
-            //         // res.send("inventory update error " + err);
-            //         // res.send("error saving to scene inventory");
-            //         callback(err);
-            //     } else {
-            //         console.log("added to scene inventory..." + JSON.stringify(i_obj) + " " +  JSON.stringify(saved));
-            //         callback(null);
-            //     }
-            // });
-        },        
-        function (callback) {
-            db_old.inventories.findOne({_id: i_id}, function (err, inventory) { //check for player inventory record
-                if (err || !inventory) {
-                    console.log("error getting user inventory: " + err);
-                    callback(err);
-                    // res.send("user inventory not found!");
-                } else {
-                    console.log("ploayer inventory found with count " + inventory.inventoryItems.length);
-                    db_old.inventories.update({ "_id": i_id }, { $pull: { inventoryItems: {objectID: req.body.inventoryObj.objectID, timestamp: req.body.inventoryObj.timestamp} }}, function (err, saved) { //remove from player inventory
-                        if (err || !saved) {
-                            console.log("problemo with inventory rm " + err);
-                            // res.send("inventory update error " + err);
-                            callback(err);
-                        } else {
-                            console.log("ok rem'd obj from player inventorie " + JSON.stringify(saved));
-                            callback(null);
-                        }
-                    });
-                }
-            });
-        },        
-        function (callback) {
-            if (req.body.action != undefined) {
-                // console.log(JSON.stringify(req.body.action));
-                var u_id = ObjectId.createFromHexString(req.session.user._id);
-                if (req.session.user._id != req.body.userData.userID) {
-                    db_old.users.findOne({"_id": u_id}, function (err, user) {  
-                        if (err || !user) {
-                            console.log("error getting user: " + err);
-                            // res.send("bad user4");
-                            callback(err);
-                        } else {
-                            if (req.session.user.activitiesID != undefined) { //add drop action to user activity
-                                var a_id = ObjectId.createFromHexString(req.session.user.activitiesID);
-                                console.log("gotsa activities id " + req.session.activitiesID);
-                                let actionItem = {};
-                                actionItem.userID = req.body.userData._id;
-                                actionItem.actionID = req.body.action._id;
-                                actionItem.actionType = req.body.action.actionType;
-                                actionItem.actionResult = req.body.action.actionResult;
-                                actionItem.inScene = req.body.action.inScene;
+//                 });
+//             } else {
+//                 callback("no drop");
+//             }
+//             // db.inventories.update({_id: s_id }, { $push: { inventoryItems: i_obj }}, {upsert: false}, function (err, saved) { //add to scene inventory
+//             //     if (err || !saved) {
+//             //         console.log("problemo with inventory rm " + err);
+//             //         // res.send("inventory update error " + err);
+//             //         // res.send("error saving to scene inventory");
+//             //         callback(err);
+//             //     } else {
+//             //         console.log("added to scene inventory..." + JSON.stringify(i_obj) + " " +  JSON.stringify(saved));
+//             //         callback(null);
+//             //     }
+//             // });
+//         },        
+//         function (callback) {
+//             db_old.inventories.findOne({_id: i_id}, function (err, inventory) { //check for player inventory record
+//                 if (err || !inventory) {
+//                     console.log("error getting user inventory: " + err);
+//                     callback(err);
+//                     // res.send("user inventory not found!");
+//                 } else {
+//                     console.log("ploayer inventory found with count " + inventory.inventoryItems.length);
+//                     db_old.inventories.update({ "_id": i_id }, { $pull: { inventoryItems: {objectID: req.body.inventoryObj.objectID, timestamp: req.body.inventoryObj.timestamp} }}, function (err, saved) { //remove from player inventory
+//                         if (err || !saved) {
+//                             console.log("problemo with inventory rm " + err);
+//                             // res.send("inventory update error " + err);
+//                             callback(err);
+//                         } else {
+//                             console.log("ok rem'd obj from player inventorie " + JSON.stringify(saved));
+//                             callback(null);
+//                         }
+//                     });
+//                 }
+//             });
+//         },        
+//         function (callback) {
+//             if (req.body.action != undefined) {
+//                 // console.log(JSON.stringify(req.body.action));
+//                 var u_id = ObjectId.createFromHexString(req.session.user._id);
+//                 if (req.session.user._id != req.body.userData.userID) {
+//                     db_old.users.findOne({"_id": u_id}, function (err, user) {  
+//                         if (err || !user) {
+//                             console.log("error getting user: " + err);
+//                             // res.send("bad user4");
+//                             callback(err);
+//                         } else {
+//                             if (req.session.user.activitiesID != undefined) { //add drop action to user activity
+//                                 var a_id = ObjectId.createFromHexString(req.session.user.activitiesID);
+//                                 console.log("gotsa activities id " + req.session.activitiesID);
+//                                 let actionItem = {};
+//                                 actionItem.userID = req.body.userData._id;
+//                                 actionItem.actionID = req.body.action._id;
+//                                 actionItem.actionType = req.body.action.actionType;
+//                                 actionItem.actionResult = req.body.action.actionResult;
+//                                 actionItem.inScene = req.body.action.inScene;
                                 
-                                actionItem.actionName = req.body.action.actionName;
-                                // actionItem.objectID = req.body.object_item._id;
-                                // actionItem.objectName = req.body.object_item.name;
-                                actionItem.timestamp = timestamp;
-                                actionItem.fromScene = req.body.fromScene;
-                                db_old.activities.insertOne(actionItem);
-                                // db.activities.update({ _id: a_id }, { $push: { actionItems: actionItem }}, {upsert: false}, function (err, saved) {
-                                //     if (err || !saved) {
-                                //         // res.send('profcblemo ' + err);
-                                //         callback(err);
-                                //     } else {
-                                //         console.log("ok saved to acttivieeisD");
-                                //         callback(null);
-                                //         // res.send('updated' + JSON.stringify(saved));
-                                //     }
-                                // });
-                            } 
-                        }
-                    });
-                } else {
-                    // res.send("bad user");
-                    callback("bad user");
-                }
-            } else {
-                // res.send("no action");
-                callback("no action");
-            }
-        }
-    ],
-    function (err, result) { // #last function, close async
-        if (err) {
-            res.send(err);
-        } else {
-            res.send('updated');
-            // console.log("returning inventory " + profileResponse);
-        }
+//                                 actionItem.actionName = req.body.action.actionName;
+//                                 // actionItem.objectID = req.body.object_item._id;
+//                                 // actionItem.objectName = req.body.object_item.name;
+//                                 actionItem.timestamp = timestamp;
+//                                 actionItem.fromScene = req.body.fromScene;
+//                                 db_old.activities.insertOne(actionItem);
+//                                 // db.activities.update({ _id: a_id }, { $push: { actionItems: actionItem }}, {upsert: false}, function (err, saved) {
+//                                 //     if (err || !saved) {
+//                                 //         // res.send('profcblemo ' + err);
+//                                 //         callback(err);
+//                                 //     } else {
+//                                 //         console.log("ok saved to acttivieeisD");
+//                                 //         callback(null);
+//                                 //         // res.send('updated' + JSON.stringify(saved));
+//                                 //     }
+//                                 // });
+//                             } 
+//                         }
+//                     });
+//                 } else {
+//                     // res.send("bad user");
+//                     callback("bad user");
+//                 }
+//             } else {
+//                 // res.send("no action");
+//                 callback("no action");
+//             }
+//         }
+//     ],
+//     function (err, result) { // #last function, close async
+//         if (err) {
+//             res.send(err);
+//         } else {
+//             res.send('updated');
+//             // console.log("returning inventory " + profileResponse);
+//         }
       
-    }
-);
-});
+//     }
+// );
+// });
+
 //new pickup method
 // 1. find user, create action, create inventory
 // 2. lookup user inventory items
@@ -8963,104 +8970,177 @@ app.post('/add_group_item/', requiredAuthentication, function (req, res) { //dun
     console.log(JSON.stringify(req.body));
     var o_id = ObjectId.createFromHexString(req.body.group_id);   
     // console.log('groupID requested : ' + req.body.sourceID);
-    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
-        if (err || !group) {
-            console.log("error getting group: " + err);
-        } else {  //TODO check for proper type?
-            if (group.groupdata == undefined || group.groupdata == null) {
-                group.groupdata = [];
-            }
-            if (group.items == undefined || group.items == null) {
-                group.items = [];
-            }
-            newGroupData = group.groupdata;
-            newItems = group.items;
-            newItems.push(req.body.item_id);
-            var timestamp = Math.round(Date.now() / 1000);
-            newGroupItem = {}; //why was this rem'd?
-            newGroupItem.itemID = req.body.item_id; // ""?s
-            newGroupItem.itemIndex = newGroupData.length; // ""?
-            newGroupData.push(newGroupItem); // ""?
-            db_old.groups.update( { "_id": o_id }, { $set: {
-                        groupdata : newGroupData, // ""?
-                        lastUpdateTimestamp: timestamp,
-                        items: newItems
-                    }
-                }, function (err, rezponse) {
-                    if (err || !rezponse) {
-                        console.log("error updateing group: " + err);
-                        res.send(err);
-                    } else {
-                    console.log("group updated: " + req.body.group_id);
-                    res.send("group updated");
-                }
-            });
+    (async () => {
+      try {
+        let newGroupData = [];
+        let newItems = [];
+        const query = { "_id" : o_id};
+        const group = await RunDataQuery("groups", "findOne", query);
+        console.log("group to add itme " + JSON.stringify(group) );
+        if (group.groupdata == undefined || group.groupdata == null) {
+            group.groupdata = [];
         }
-    });
+        if (group.items == undefined || group.items == null) {
+            group.items = [];
+        }
+        newGroupData = group.groupdata;
+        newItems = group.items;
+        newItems.push(req.body.item_id);
+        const timestamp = Math.round(Date.now() / 1000);
+        let newGroupItem = {}; 
+        newGroupItem.itemID = req.body.item_id; // ""?s
+        newGroupItem.itemIndex = newGroupData.length; // ""?
+        newGroupData.push(newGroupItem); // ""?
+        const updoc ={ $set: {
+            groupdata : newGroupData, // ""?
+            lastUpdateTimestamp: timestamp,
+            items: newItems
+        }};
+        const updated = await RunDataQuery("groups", "updateOne", query, updoc);
+        res.send("updated " + updated);
+      } catch (e) {
+        console.log("group update failed " + e);
+        res.send(e);
+      }
+    })();
+
+
+    // db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
+    //     if (err || !group) {
+    //         console.log("error getting group: " + err);
+    //     } else {  //TODO check for proper type?
+    //         if (group.groupdata == undefined || group.groupdata == null) {
+    //             group.groupdata = [];
+    //         }
+    //         if (group.items == undefined || group.items == null) {
+    //             group.items = [];
+    //         }
+    //         newGroupData = group.groupdata;
+    //         newItems = group.items;
+    //         newItems.push(req.body.item_id);
+    //         var timestamp = Math.round(Date.now() / 1000);
+    //         newGroupItem = {}; //why was this rem'd?
+    //         newGroupItem.itemID = req.body.item_id; // ""?s
+    //         newGroupItem.itemIndex = newGroupData.length; // ""?
+    //         newGroupData.push(newGroupItem); // ""?
+    //         db_old.groups.update( { "_id": o_id }, { $set: {
+    //                     groupdata : newGroupData, // ""?
+    //                     lastUpdateTimestamp: timestamp,
+    //                     items: newItems
+    //                 }
+    //             }, function (err, rezponse) {
+    //                 if (err || !rezponse) {
+    //                     console.log("error updateing group: " + err);
+    //                     res.send(err);
+    //                 } else {
+    //                 console.log("group updated: " + req.body.group_id);
+    //                 res.send("group updated");
+    //             }
+    //         });
+    //     }
+    // });
 });
 app.post('/remove_group_item/', requiredAuthentication, function (req, res) {
-    console.log(JSON.stringify(req.body));
+    console.log("tryna remove group itme : "+ JSON.stringify(req.body));
     var o_id = ObjectId.createFromHexString(req.body.group_id);   
     // console.log('groupID requested : ' + req.body.sourceID);
-    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
-        if (err || !group) {
-            console.log("error getting group: " + err);
-        } else {
-            var timestamp = Math.round(Date.now() / 1000);
-            newGroupData = [];
-            newItems = [];
-            console.log("tryna update group" + JSON.stringify(group));
-            async.waterfall([
-                function(callback){ 
-                    if (group.groupdata) {
-                        let index = 0;
-                        group.groupdata.forEach(function(content) {
-                        console.log("groupdata " + content);
-                        if (content.itemID == req.body.item_id) {
-                            console.log("excluding on " + req.body.item_id);
-                        } else {
-                            index++;
-                            content.itemIndex = index;
-                            newGroupData.push(content);
-                        }
-                    });
-                    callback(null);
-                    } else {
-                        callback(null);
-                    }
-                },
-                function(callback){ 
-                        group.items.forEach(function(content) {
-                        console.log("item " + content);
-                        if (content == req.body.item_id) {
-                            console.log("matched onn " + req.body.item_id);
-                        } else {
-                            newItems.push(content);
-                        }
-                    });
-                    callback(null);
-                }
-            ],
-            function(err, result) { // #last function, close async
-                console.log(JSON.stringify("group:" + newGroupData + " itme: " + newItems));
-                db_old.groups.update( { "_id": o_id }, { $set: {
-                    lastUpdateTimestamp: timestamp,
-                    groupdata : newGroupData,
-                    items: newItems
-                    }
-                }, function (err, rezponse){
-                    if (err || !rezponse) {
-                        console.log("error updateing group: " + err);
-                        res.send(err);
-                    } else {
-                        console.log("group updated: " + req.body.group_id);
-                        res.send("group updated");
-                        }
-                    });
-                }
-            );
-        }
-    });
+
+    (async () => {
+      try {
+        var timestamp = Math.round(Date.now() / 1000);
+        let newGroupData = [];
+        let newItems = [];
+        const query = { "_id" : o_id};
+        const group = await RunDataQuery("groups", "findOne", query);
+        console.log("group to rm itme " + JSON.stringify(group) );
+        // if (group && group.groupData) {
+          let index = 0;
+          for (let i = 0;  i < group.items.length; i++) {          
+            if (group.items[i] == req.body.item_id) {
+              console.log("remming groupdata for item " + req.body.item_id);
+            } else {
+              index++;
+              let gData = {};
+              gData.itemID = group.items[i];
+              gData.itemIndex = index;
+              newGroupData.push(gData);
+              newItems.push(group.items[i]);
+            }
+            if (i == group.items.length - 1) {
+              const updoc = { $set: {
+                lastUpdateTimestamp: timestamp,
+                groupdata : newGroupData,
+                items: newItems
+                }};
+              const updated = await RunDataQuery("groups", "updateOne", query, updoc);
+              res.send("grup updated " + updated); 
+            }
+          }
+      } catch (e) {
+        console.log("group update failed " + e);
+        res.send(e);
+      }
+    })();
+
+    // db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
+    //     if (err || !group) {
+    //         console.log("error getting group: " + err);
+    //     } else {
+    //         var timestamp = Math.round(Date.now() / 1000);
+    //         let newGroupData = [];
+    //         let newItems = [];
+    //         console.log("tryna update group" + JSON.stringify(group));
+    //         async.waterfall([
+    //             function(callback){ 
+    //                 if (group.groupdata) {
+    //                     let index = 0;
+    //                     group.groupdata.forEach(function(content) {
+    //                     console.log("groupdata " + content);
+    //                     if (content.itemID == req.body.item_id) {
+    //                         console.log("excluding on " + req.body.item_id);
+    //                     } else {
+    //                         index++;
+    //                         content.itemIndex = index;
+    //                         newGroupData.push(content);
+    //                     }
+    //                 });
+    //                 callback(null);
+    //                 } else {
+    //                     callback(null);
+    //                 }
+    //             },
+    //             function(callback){ 
+    //                     group.items.forEach(function(content) {
+    //                     console.log("item " + content);
+    //                     if (content == req.body.item_id) {
+    //                         console.log("matched onn " + req.body.item_id);
+    //                     } else {
+    //                         newItems.push(content);
+    //                     }
+    //                 });
+    //                 callback(null);
+    //             }
+    //         ],
+    //         function(err, result) { // #last function, close async
+    //             console.log(JSON.stringify("group:" + newGroupData + " itme: " + newItems));
+    //             db_old.groups.update( { "_id": o_id }, { $set: {
+    //                 lastUpdateTimestamp: timestamp,
+    //                 groupdata : newGroupData,
+    //                 items: newItems
+    //                 }
+    //             }, function (err, rezponse){
+    //                 if (err || !rezponse) {
+    //                     console.log("error updateing group: " + err);
+    //                     res.send(err);
+    //                 } else {
+    //                     console.log("group updated: " + req.body.group_id);
+    //                     res.send("group updated");
+    //                     }
+    //                 });
+    //             }
+    //         );
+    //     }
+    // });
 });
 app.post('/update_group/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log(req.params._id);
@@ -13779,15 +13859,15 @@ app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
     // });
 });
 
-app.post('/add_group_item/', checkAppID, requiredAuthentication, function (req, res) {
+// app.post('/add_group_item/', checkAppID, requiredAuthentication, function (req, res) {
 
-    var g_id = ObjectId.createFromHexString(req.body.group_id);   
-    var timestamp = Math.round(Date.now() / 1000);
-    console.log('tryna add a group item : ' + req.body);
-    db_old.groups.update({ "_id": g_id }, { $push: {items: req.body.item_id} },{ $set: {lastUpdateTimestamp : timestamp} });
-    res.send("ok");
+//     var g_id = ObjectId.createFromHexString(req.body.group_id);   
+//     var timestamp = Math.round(Date.now() / 1000);
+//     console.log('tryna add a group item : ' + req.body);
+//     db_old.groups.update({ "_id": g_id }, { $push: {items: req.body.item_id} },{ $set: {lastUpdateTimestamp : timestamp} });
+//     res.send("ok");
 
-});
+// });
 
 
 app.post('/add_scene_audio/', requiredAuthentication, function (req, res) {
@@ -16192,298 +16272,546 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
     var lastUpdateTimestamp = Date.now();
     var o_id = ObjectId.createFromHexString(req.body._id);   
     console.log('path requested : ' + req.body._id);
-    db_old.scenes.findOne({ "_id" : o_id}, function(err, scene) {
-        if (err || !scene) {
-            console.log("error getting scene: " + err);
-        } else {
+    
+    (async () => {
+      try {
+        const query = { "_id" : o_id};
+        const updoc = { $set: {
+          sceneDomain : req.body.sceneDomain,
+          sceneAppName : req.body.sceneAppName,
+          sceneSource : req.body.sceneSource,
+          sceneAltURL : req.body.sceneAltURL != null ? req.body.sceneAltURL : "",
+          sceneStickyness : parseInt(req.body.sceneStickyness) != null ? parseInt(req.body.sceneStickyness) : 5,
+          sceneNumber : req.body.sceneNumber,
+          sceneTitle : req.body.sceneTitle,
+          sceneTags : req.body.sceneTags,
+          sceneYouTubeIDs : (req.body.sceneYouTubeIDs != null && req.body.sceneYouTubeIDs != undefined) ? req.body.sceneYouTubeIDs : [],
+          sceneVideoStreamUrls : (req.body.sceneVideoStreamUrls != null && req.body.sceneVideoStreamUrls != undefined) ? req.body.sceneVideoStreamUrls : [],
+          sceneLinks : req.body.sceneLinks,
+          scenePeopleGroupID : req.body.scenePeopleGroupID,
+          sceneLocationGroups : req.body.sceneLocationGroups,
+          sceneAudioGroups : req.body.sceneAudioGroups,
+          scenePictureGroups : req.body.scenePictureGroups,
+          sceneTextGroups : req.body.sceneTextGroups,
+          sceneVideoGroups : req.body.sceneVideoGroups,
+          sceneVideos : req.body.sceneVideos,
+          scenePlayer : req.body.scenePlayer  != null ? req.body.scenePlayer : "",
+          sceneCategory : req.body.sceneCategory != null ? req.body.sceneCategory : "None",
+          sceneType : (req.body.sceneType != null && req.body.sceneType.length > 2) ? req.body.sceneType : "Default",
+          sceneWebType : (req.body.sceneWebType != null && req.body.sceneWebType.length > 2) ? req.body.sceneWebType : "Default",
+          sceneCameraMode : req.body.sceneCameraMode != null ? req.body.sceneCameraMode : "First Person",
+          sceneDebugMode : req.body.sceneDebugMode != null ? req.body.sceneDebugMode : "",
+          sceneUseThreeDeeText : req.body.sceneUseThreeDeeText != null ? req.body.sceneUseThreeDeeText : false,
+          sceneAndroidOK : req.body.sceneAndroidOK != null ? req.body.sceneAndroidOK : false,
+          sceneIosOK : req.body.sceneIosOK != null ? req.body.sceneIosOK : false,
+          sceneWindowsOK : req.body.sceneWindowsOK != null ? req.body.sceneWindowsOK : false,
+          sceneWebGLOK : req.body.sceneWebGLOK != null ? req.body.sceneWebGLOK : false,
+          sceneLocationTracking : req.body.sceneLocationTracking != null ? req.body.sceneLocationTracking : false,
+          sceneShowAds : req.body.sceneShowAds != null ? req.body.sceneShowAds : false,
+          sceneShareWithPublic : req.body.sceneShareWithPublic != null ? req.body.sceneShareWithPublic : false,
+          sceneShareWithSubscribers : req.body.sceneShareWithSubscribers != null ? req.body.sceneShareWithSubscribers : false,
+          sceneShareWithGroups : req.body.sceneShareWithGroups != null ? req.body.sceneShareWithGroups : "",
+          sceneShareWithPeople : req.body.sceneShareWithPeople != null ? req.body.sceneShareWithPeople : "",
+          sceneShareWithGroups : req.body.sceneShareWithGroups != null ? req.body.sceneShareWithGroups : "",
+          sceneEventStart : req.body.sceneEventStart != null ? req.body.sceneEventStart : "",
+          sceneEventEnd : req.body.sceneEventEnd != null ? req.body.sceneEventEnd : "",
+          sceneAccessLinkExpire : req.body.sceneAccessLinkExpire != null ? req.body.sceneAccessLinkExpire : "",
+          sceneShareWithMessage : req.body.sceneShareWithMessage != null ? req.body.sceneShareWithMessage : "",
+          sceneEnvironment : req.body.sceneEnvironment != null ? req.body.sceneEnvironment : {},
+          sceneUseStaticObj : req.body.sceneUseStaticObj != null ? req.body.sceneUseStaticObj : false,
+          sceneStaticObjUrl : req.body.sceneStaticObjUrl != null ? req.body.sceneStaticObjUrl : "",
+          sceneStaticObjTextureUrl : req.body.sceneStaticObjTextureUrl != null ? req.body.sceneStaticObjTextureUrl : "",
+          sceneRandomizeColors : req.body.sceneRandomizeColors != null ? req.body.sceneRandomizeColors : false,
+          sceneTweakColors : req.body.sceneTweakColors != null ? req.body.sceneTweakColors : false,
+          sceneColorizeSky : req.body.sceneColorizeSky != null ? req.body.sceneColorizeSky : false,
+          sceneScatterMeshes : req.body.sceneScatterMeshes != null ? req.body.sceneScatterMeshes : false,
+          sceneScatterMeshLayers : req.body.sceneScatterMeshLayers != null ? req.body.sceneScatterMeshLayers : {},
+          sceneScatterObjectLayers : req.body.sceneScatterObjectLayers != null ? req.body.sceneScatterObjectLayers : {},
+          sceneScatterObjects : req.body.sceneScatterObjects != null ? req.body.sceneScatterObjects : false,
+          sceneScatterOffset : req.body.sceneScatterOffset != null ? req.body.sceneScatterOffset : "",
+          sceneShowViewportMeshes : req.body.sceneShowViewportMeshes != null ? req.body.sceneShowViewportMeshes : false,
+          sceneShowViewportObjects : req.body.sceneShowViewportObjects != null ? req.body.sceneShowViewportObjects : false,
+          sceneViewportMeshLayers : req.body.sceneViewportMeshLayers != null ? req.body.sceneViewportMeshLayers : {},
+          sceneViewportObjectLayers : req.body.sceneViewportObjectLayers != null ? req.body.sceneViewportObjectLayers : {},
+          sceneTargetColliderType : req.body.sceneTargetColliderType != null ? req.body.sceneTargetColliderType : "none",
+          sceneUseTargetObject : req.body.sceneUseTargetObject != null ? req.body.sceneUseTargetObject : false,
+          sceneTargetRotateToPlayer : req.body.sceneTargetRotateToPlayer != null ? req.body.sceneTargetRotateToPlayer : false,
+          // sceneTargetRotateToPlayer : req.body.sceneTargetRotateToPlayer != null ? req.body.sceneTargetRotateToPlayer : false,
+          sceneDetectHorizontalPlanes : req.body.sceneDetectHorizontalPlanes != null ? req.body.sceneDetectHorizontalPlanes : false,
+          sceneDetectVerticalPlanes : req.body.sceneDetectVerticalPlanes != null ? req.body.sceneDetectVerticalPlanes : false,
+          sceneCameraDepthOfField : req.body.sceneCameraDepthOfField != null ? req.body.sceneCameraDepthOfField : false,
+          sceneFlyable : req.body.sceneFlyable != null ? req.body.sceneFlyable : false,
+          sceneFaceTracking : req.body.sceneFaceTracking != null ? req.body.sceneFaceTracking : false,
+          sceneTargetObjectHeading : req.body.sceneTargetObjectHeading != null ? req.body.sceneTargetObjectHeading : 0,
+          sceneTargetObject : req.body.sceneTargetObject,
+          sceneTargetEvent : req.body.sceneTargetEvent,
+          sceneTargetText : req.body.sceneTargetText  != null ? req.body.sceneTargetText : "",
+          sceneNextScene : req.body.sceneNextScene != null ? req.body.sceneNextScene : "",
+          scenePreviousScene : req.body.scenePreviousScene,
+          sceneUseDynamicSky : req.body.sceneUseDynamicSky != null ? req.body.sceneUseDynamicSky : false,
+          sceneUseDynCubeMap : req.body.sceneUseDynCubeMap != null ? req.body.sceneUseDynCubeMap : false,
+          sceneUseSkyParticles : req.body.sceneUseSkyParticles != null ? req.body.sceneUseSkyParticles : false,
+          sceneSkyParticles : req.body.sceneSkyParticles != null ? req.body.sceneSkyParticles : "",
+          sceneUseDynamicShadows : req.body.sceneUseDynamicShadows != null ? req.body.sceneUseDynamicShadows : false,
+          sceneSkyRotationOffset : req.body.sceneSkyRotationOffset != null ? req.body.sceneSkyRotationOffset : 0,
+          sceneUseCameraBackground : req.body.sceneUseCameraBackground != null ? req.body.sceneUseCameraBackground : false,
+          sceneCameraOrientToPath : req.body.sceneCameraOrientToPath  != null ? req.body.sceneCameraOrientToPath : false,
+          sceneCameraPath : req.body.sceneCameraPath != null ? req.body.sceneCameraPath : "Random",
+          sceneUseSkybox : req.body.sceneUseSkybox != null ? req.body.sceneUseSkybox : false,
+          sceneSkybox : req.body.sceneSkybox,
+          sceneUseDynCubeMap : req.body.sceneUseDynCubeMap != null ? req.body.sceneUseDynCubeMap : false,
+          sceneUseSceneFog : req.body.sceneUseSceneFog != null ? req.body.sceneUseSceneFog : false,
+          sceneUseGlobalFog : req.body.sceneUseGlobalFog != null ? req.body.sceneUseGlobalFog : false,
+          sceneUseVolumetricFog : req.body.sceneUseVolumetricFog != null ? req.body.sceneUseVolumetricFog : false,
+          sceneGlobalFogDensity : req.body.sceneGlobalFogDensity != null ? req.body.sceneGlobalFogDensity : .001,
+          sceneUseSunShafts : req.body.sceneUseSunShafts != null ? req.body.sceneUseSunShafts : false,
+          // sceneRenderFloorPlane : req.body.sceneRenderFloorPlane != null ? req.body.sceneRenderFloorPlane : false,
+          sceneUseFloorPlane : req.body.sceneUseFloorPlane != null ? req.body.sceneUseFloorPlane : false,
+          sceneFloorplaneTexture : req.body.sceneFloorplaneTexture != null ? req.body.sceneFloorplaneTexture : "",
+          sceneUseEnvironment : req.body.sceneUseEnvironment != null ? req.body.sceneUseEnvironment : false,
+          sceneUseTerrain : req.body.sceneUseTerrain != null ? req.body.sceneUseTerrain : false,
+          sceneUseHeightmap : req.body.sceneUseHeightmap != null ? req.body.sceneUseHeightmap : false,
+          sceneHeightmap : req.body.sceneHeightmap,
+          sceneEnvironmentPreset : req.body.sceneEnvironmentPreset != null ? req.body.sceneEnvironmentPreset : "",
+          sceneTime: req.body.sceneTime,
+          sceneTimeSpeed: req.body.sceneTimeSpeed,
+          sceneWeather: req.body.sceneWeather,
+          sceneClouds: req.body.sceneClouds,
+          sceneWater: req.body.sceneWater,
+          sceneGroundLevel: req.body.sceneGroundLevel,
+          sceneWindFactor : req.body.sceneWindFactor != null ?  req.body.sceneWindFactor : 0,
+          sceneSkyRadius  : req.body.sceneSkyRadius != null ?  req.body.sceneSkyRadius : 202,
+          sceneLightningFactor : req.body.sceneLightningFactor != null ? req.body.sceneLightningFactor : 0,
+          sceneCharacters: req.body.sceneCharacters,
+          sceneEquipment: req.body.sceneEquipment,
+          sceneFlyingObjex: req.body.sceneFlyingObjex,
+          sceneSeason: req.body.sceneSeason,
+          scenePictures : req.body.scenePictures, //array of IDs only
+          scenePostcards : req.body.scenePostcards, //array of IDs only
+          sceneWebLinks : req.body.sceneWebLinks != null ? req.body.sceneWebLinks : [], //custom object //no, make it an array of IDs
+          sceneColor4 : req.body.sceneColor4,
+          sceneColor1 : req.body.sceneColor1,
+          sceneColor2 : req.body.sceneColor2,
+          sceneColor3 : req.body.sceneColor3,
+          sceneStyleTheme: req.body.sceneStyleTheme != null ? req.body.sceneStyleTheme : "",
+          sceneColor4Alt : req.body.sceneColor4Alt,
+          sceneColor1Alt : req.body.sceneColor1Alt,
+          sceneColor2Alt : req.body.sceneColor2Alt,
+          sceneColor3Alt : req.body.sceneColor3Alt,
+          sceneLocationRange : req.body.sceneLocationRange != null ? req.body.sceneLocationRange : .1,
+          sceneUseMap : req.body.sceneUseMap != null ? req.body.sceneUseMap : false,
+          sceneMapType : req.body.sceneMapType != null ? req.body.sceneMapType : "none",
+          sceneMapZoom : req.body.sceneMapZoom != null ? req.body.sceneMapZoom : 17,
+          sceneLatitude : req.body.sceneLatitude != null ? req.body.sceneLatitude : "",
+          sceneLongitude : req.body.sceneLongitude != null ? req.body.sceneLongitude : "",
+          sceneUseStreetMap : req.body.sceneUseStreetMap  != null ? req.body.sceneUseStreetMap : false,
+          sceneUseSatelliteMap : req.body.sceneUseSatelliteMap  != null ? req.body.sceneUseSatelliteMap : false,
+          sceneUseHybridMap : req.body.sceneUseHybridMap  != null ? req.body.sceneUseHybridMap : false,
+          sceneEmulateGPS : req.body.sceneEmulateGPS  != null ? req.body.sceneEmulateGPS : false,
+          sceneLocations : req.body.sceneLocations,
+          sceneTriggerAudioID : req.body.sceneTriggerAudioID,
+          scenePrimaryAudioTitle : req.body.scenePrimaryAudioTitle,
+          sceneAmbientAudioID : req.body.sceneAmbientAudioID,
+          scenePrimaryAudioID : req.body.scenePrimaryAudioID,
+          scenePrimaryAudioStreamURL : req.body.scenePrimaryAudioStreamURL,
+          sceneAmbientAudioStreamURL : req.body.sceneAmbientAudioStreamURL,
+          sceneTriggerAudioStreamURL : req.body.sceneTriggerAudioStreamURL,
+          scenePrimaryAudioGroups : req.body.scenePrimaryAudioGroups,
+          sceneAmbientAudioGroups : req.body.sceneAmbientAudioGroups,
+          sceneTriggerAudioGroups : req.body.sceneTriggerAudioGroups,
+          sceneBPM : req.body.sceneBPM != null ? req.body.sceneBPM : "100",
+          scenePrimaryPatch1 : req.body.scenePrimaryPatch1,
+          scenePrimaryPatch2 : req.body.scenePrimaryPatch2,
+          scenePrimaryMidiSequence1 : req.body.scenePrimaryMidiSequence1,
+          scenePrimarySequence2Transpose : req.body.scenePrimarySequence2Transpose != null ? req.body.scenePrimarySequence2Transpose : "0",
+          scenePrimarySequence1Transpose : req.body.scenePrimarySequence1Transpose != null ? req.body.scenePrimarySequence1Transpose : "0",
+          scenePrimaryMidiSequence2 : req.body.scenePrimaryMidiSequence2,
+          sceneAmbientVolume : req.body.sceneAmbientVolume,
+          scenePrimaryVolume : req.body.scenePrimaryVolume,
+          sceneTriggerVolume : req.body.sceneTriggerVolume,
+          sceneWeatherAudioVolume : req.body.sceneWeatherAudioVolume,
+          sceneMediaAudioVolume : req.body.sceneMediaAudioVolume,
+          sceneAmbientSynth1Volume : req.body.sceneAmbientSynth1Volume,
+          sceneAmbientSynth2Volume : req.body.sceneAmbientSynth2Volume,
+          sceneTriggerSynth1Volume : req.body.sceneTriggerSynth1Volume,
+          sceneAmbientPatch1 : req.body.sceneAmbientPatch1,
+          sceneAmbientPatch2 : req.body.sceneAmbientPatch2,
+          sceneAmbientSynth1ModulateByDistance : req.body.sceneAmbientSynth1ModulateByDistance != null ? req.body.sceneAmbientSynth1ModulateByDistance : false,
+          sceneAmbientSynth2ModulateByDistance : req.body.sceneAmbientSynth2ModulateByDistance != null ? req.body.sceneAmbientSynth2ModulateByDistance : false,
+          sceneAmbientSynth1ModulateByDistanceTarget : req.body.sceneAmbientSynth1ModulateByDistanceTarget != null ? req.body.sceneAmbientSynth1ModulateByDistanceTarget: false,
+          sceneAmbientSynth2ModulateByDistanceTarget : req.body.sceneAmbientSynth2ModulateByDistanceTarget != null ? req.body.sceneAmbientSynth2ModulateByDistanceTarget : false,
+          sceneAmbientMidiSequence1 : req.body.sceneAmbientMidiSequence1,
+          sceneAmbientMidiSequence2 : req.body.sceneAmbientMidiSequence2,
+          sceneAmbientSequence1Transpose : req.body.sceneAmbientSequence1Transpose != null ? req.body.sceneAmbientSequence1Transpose : "0",
+          sceneAmbientSequence2Transpose : req.body.sceneAmbientSequence2Transpose != null ? req.body.sceneAmbientSequence2Transpose : "0",
+          sceneTriggerPatch1 : req.body.sceneTriggerPatch1,
+          sceneTriggerPatch2 : req.body.sceneTriggerPatch2,
+          sceneTriggerPatch3 : req.body.sceneTriggerPatch3,
+          sceneGeneratePrimarySequences : req.body.sceneGeneratePrimarySequences != null ? req.body.sceneGeneratePrimarySequences : false,
+          sceneGenerateAmbientSequences : req.body.sceneGenerateAmbientSequences != null ? req.body.sceneGenerateAmbientSequences : false,
+          sceneGenerateTriggerSequences : req.body.sceneGenerateTriggerSequences != null ? req.body.sceneGenerateTriggerSequences : false,
+          sceneLoopPrimaryAudio : req.body.sceneLoopPrimaryAudio != null ? req.body.sceneLoopPrimaryAudio : false,
+          scenePrimaryAudioLoopCount : req.body.scenePrimaryAudioLoopCount != null ? req.body.scenePrimaryAudioLoopCount : 0,
+          sceneAutoplayPrimaryAudio : req.body.sceneAutoplayPrimaryAudio != null ? req.body.sceneAutoplayPrimaryAudio : false,
+          scenePrimaryAudioVisualizer : req.body.scenePrimaryAudioVisualizer != null ? req.body.scenePrimaryAudioVisualizer : false,
+          scenePrimaryAudioTriggerEvents : req.body.scenePrimaryAudioTriggerEvents != null ? req.body.scenePrimaryAudioTriggerEvents : false,
+          sceneAttachPrimaryAudioToTarget : req.body.sceneAttachPrimaryAudioToTarget != null ? req.body.sceneAttachPrimaryAudioToTarget : false,
+          sceneAutoplayAudioGroup : req.body.sceneAutoplayAudioGroup != null ? req.body.sceneAutoplayAudioGroup : false,
+          sceneLoopAllAudioGroup : req.body.sceneLoopAllAudioGroup != null ? req.body.sceneLoopAllAudioGroup : false,
+          sceneAnchorPositionAudioGroup : req.body.sceneAnchorPositionAudioGroup != null ? req.body.sceneAnchorPositionAudioGroup : false,
+          sceneAnchorCanvasAudioGroup : req.body.sceneAnchorCanvasAudioGroup != null ? req.body.sceneAnchorCanvasAudioGroup : false,
+          sceneCreateAudioSpline : req.body.sceneCreateAudioSpline != null ? req.body.sceneCreateAudioSpline : false,
+          sceneAttachAudioGroupToTarget : req.body.sceneAttachAudioGroupToTarget != null ? req.body.sceneAttachAudioGroupToTarget : false,
+          sceneUseMicrophoneInput : req.body.sceneUseMicrophoneInput != null ? req.body.sceneUseMicrophoneInput : false,
+          sceneKeynote : req.body.sceneKeynote,
+          sceneDescription : req.body.sceneDescription,
+          sceneGreeting : req.body.sceneGreeting,
+          sceneQuest : req.body.sceneQuest,
+          sceneFont : req.body.sceneFont,
+          sceneFontWeb1  : req.body.sceneFontWeb1,
+          sceneFontWeb2  : req.body.sceneFontWeb2,
+          sceneFontFillColor : req.body.sceneFontFillColor,
+          sceneFontOutlineColor : req.body.sceneFontOutlineColor,
+          sceneFontGlowColor : req.body.sceneFontGlowColor,
+          sceneTextBackground : req.body.sceneTextBackground,
+          sceneTextBackgroundColor : req.body.sceneTextBackgroundColor,
+          sceneTextItems : req.body.sceneTextItems, //ids of text items
+          sceneText : req.body.sceneText, //this is "primary" tex
+          sceneTextLoop : req.body.sceneTextLoop != null ? req.body.sceneTextLoop : false, //also for "primary" text below
+          scenePrimaryTextFontSize : req.body.scenePrimaryTextFontSize != null ? req.body.scenePrimaryTextFontSize : "12",
+          scenePrimaryTextMode : req.body.scenePrimaryTextMode != null ? req.body.scenePrimaryTextMode : "Normal",
+          scenePrimaryTextAlign : req.body.scenePrimaryTextAlign != null ? req.body.scenePrimaryTextAlign : "Left",
+          sceneNetworking : req.body.sceneNetworking != null ? req.body.sceneNetworking : "None",
+          scenePrimaryTextRotate : req.body.scenePrimaryTextRotate != null ? req.body.scenePrimaryTextRotate : false,
+          scenePrimaryTextScaleByDistance : req.body.scenePrimaryTextScaleByDistance != null ? req.body.scenePrimaryTextScaleByDistance : false,
+          sceneTextAudioSync : req.body.sceneTextAudioSync != null ? req.body.sceneTextAudioSync : false,
+          sceneTextUseModals : req.body.sceneTextUseModals != null ? req.body.sceneTextUseModals : true,
+          sceneObjects: req.body.sceneObjects,
+          sceneModels: req.body.sceneModels,
+          sceneObjectGroups: req.body.sceneObjectGroups,
+          sceneTimedEvents: req.body.sceneTimedEvents,
+          sceneLastUpdate : lastUpdateTimestamp
+        }};
+        const updated = await RunDataQuery("scenes", "updateOne", query, updoc);
+        res.send("updated " + updated);
+        //TODO update inventories?
+        // let inventoryID = scene.sceneInventoryID; //easier to jack in here, than ? make a temp batch route? 
+        // if (inventoryID == null) {
+        //     let inventories = {};
+        //     let inventoryItems = [];
+        //     inventories.inventoryItems = inventoryItems; 
+        //     db_old.inventories.save(inventories, function (err, saved) {
+        //     if (err || !saved) {
+        //         console.log("problemo2 with inventory add " + err); 
+        //         } else {
+        //             inventoryID = saved._id;
+        //             db_old.scenes.update( { "_id": o_id }, { $set: { sceneInventoryID : inventoryID }});
+        //         }
+        //     });
+        // }
 
-            let inventoryID = scene.sceneInventoryID; //easier to jack in here, than ? make a temp batch route? 
-            if (inventoryID == null) {
-                let inventories = {};
-                let inventoryItems = [];
-                inventories.inventoryItems = inventoryItems; 
-                db_old.inventories.save(inventories, function (err, saved) {
-                if (err || !saved) {
-                    console.log("problemo2 with inventory add " + err); 
-                    } else {
-                        inventoryID = saved._id;
-                        db_old.scenes.update( { "_id": o_id }, { $set: { sceneInventoryID : inventoryID }});
-                    }
-                });
-            }
-            console.log("tryna update scene " + req.body._id + " with cameraMode " + JSON.stringify(req.body.sceneCameraMode));
-            db_old.scenes.update( { "_id": o_id }, { $set: {
-                sceneDomain : req.body.sceneDomain,
-                sceneAppName : req.body.sceneAppName,
-                sceneSource : req.body.sceneSource,
-                sceneAltURL : req.body.sceneAltURL != null ? req.body.sceneAltURL : "",
-                sceneStickyness : parseInt(req.body.sceneStickyness) != null ? parseInt(req.body.sceneStickyness) : 5,
-//                    sceneUserName : scene.sceneUserName != null ? scene.sceneUserName : "",
-                sceneNumber : req.body.sceneNumber,
-                sceneTitle : req.body.sceneTitle,
-                sceneTags : req.body.sceneTags,
-                sceneYouTubeIDs : (req.body.sceneYouTubeIDs != null && req.body.sceneYouTubeIDs != undefined) ? req.body.sceneYouTubeIDs : [],
-                sceneVideoStreamUrls : (req.body.sceneVideoStreamUrls != null && req.body.sceneVideoStreamUrls != undefined) ? req.body.sceneVideoStreamUrls : [],
-                sceneLinks : req.body.sceneLinks,
-                scenePeopleGroupID : req.body.scenePeopleGroupID,
-                sceneLocationGroups : req.body.sceneLocationGroups,
-                sceneAudioGroups : req.body.sceneAudioGroups,
-                scenePictureGroups : req.body.scenePictureGroups,
-                sceneTextGroups : req.body.sceneTextGroups,
-                sceneVideoGroups : req.body.sceneVideoGroups,
-                sceneVideos : req.body.sceneVideos,
-                scenePlayer : req.body.scenePlayer  != null ? req.body.scenePlayer : "",
-                sceneCategory : req.body.sceneCategory != null ? req.body.sceneCategory : "None",
-                sceneType : (req.body.sceneType != null && req.body.sceneType.length > 2) ? req.body.sceneType : "Default",
-                sceneWebType : (req.body.sceneWebType != null && req.body.sceneWebType.length > 2) ? req.body.sceneWebType : "Default",
-                sceneCameraMode : req.body.sceneCameraMode != null ? req.body.sceneCameraMode : "First Person",
-                sceneDebugMode : req.body.sceneDebugMode != null ? req.body.sceneDebugMode : "",
-                sceneUseThreeDeeText : req.body.sceneUseThreeDeeText != null ? req.body.sceneUseThreeDeeText : false,
-                sceneAndroidOK : req.body.sceneAndroidOK != null ? req.body.sceneAndroidOK : false,
-                sceneIosOK : req.body.sceneIosOK != null ? req.body.sceneIosOK : false,
-                sceneWindowsOK : req.body.sceneWindowsOK != null ? req.body.sceneWindowsOK : false,
-                sceneWebGLOK : req.body.sceneWebGLOK != null ? req.body.sceneWebGLOK : false,
-                sceneLocationTracking : req.body.sceneLocationTracking != null ? req.body.sceneLocationTracking : false,
-                sceneShowAds : req.body.sceneShowAds != null ? req.body.sceneShowAds : false,
-                sceneShareWithPublic : req.body.sceneShareWithPublic != null ? req.body.sceneShareWithPublic : false,
-                sceneShareWithSubscribers : req.body.sceneShareWithSubscribers != null ? req.body.sceneShareWithSubscribers : false,
-                sceneShareWithGroups : req.body.sceneShareWithGroups != null ? req.body.sceneShareWithGroups : "",
-                sceneShareWithPeople : req.body.sceneShareWithPeople != null ? req.body.sceneShareWithPeople : "",
-                sceneShareWithGroups : req.body.sceneShareWithGroups != null ? req.body.sceneShareWithGroups : "",
-                sceneEventStart : req.body.sceneEventStart != null ? req.body.sceneEventStart : "",
-                sceneEventEnd : req.body.sceneEventEnd != null ? req.body.sceneEventEnd : "",
-                sceneAccessLinkExpire : req.body.sceneAccessLinkExpire != null ? req.body.sceneAccessLinkExpire : "",
-                sceneShareWithMessage : req.body.sceneShareWithMessage != null ? req.body.sceneShareWithMessage : "",
-                sceneEnvironment : req.body.sceneEnvironment != null ? req.body.sceneEnvironment : {},
-                sceneUseStaticObj : req.body.sceneUseStaticObj != null ? req.body.sceneUseStaticObj : false,
-                sceneStaticObjUrl : req.body.sceneStaticObjUrl != null ? req.body.sceneStaticObjUrl : "",
-                sceneStaticObjTextureUrl : req.body.sceneStaticObjTextureUrl != null ? req.body.sceneStaticObjTextureUrl : "",
-                sceneRandomizeColors : req.body.sceneRandomizeColors != null ? req.body.sceneRandomizeColors : false,
-                sceneTweakColors : req.body.sceneTweakColors != null ? req.body.sceneTweakColors : false,
-                sceneColorizeSky : req.body.sceneColorizeSky != null ? req.body.sceneColorizeSky : false,
-                sceneScatterMeshes : req.body.sceneScatterMeshes != null ? req.body.sceneScatterMeshes : false,
-                sceneScatterMeshLayers : req.body.sceneScatterMeshLayers != null ? req.body.sceneScatterMeshLayers : {},
-                sceneScatterObjectLayers : req.body.sceneScatterObjectLayers != null ? req.body.sceneScatterObjectLayers : {},
-                sceneScatterObjects : req.body.sceneScatterObjects != null ? req.body.sceneScatterObjects : false,
-                sceneScatterOffset : req.body.sceneScatterOffset != null ? req.body.sceneScatterOffset : "",
-                sceneShowViewportMeshes : req.body.sceneShowViewportMeshes != null ? req.body.sceneShowViewportMeshes : false,
-                sceneShowViewportObjects : req.body.sceneShowViewportObjects != null ? req.body.sceneShowViewportObjects : false,
-                sceneViewportMeshLayers : req.body.sceneViewportMeshLayers != null ? req.body.sceneViewportMeshLayers : {},
-                sceneViewportObjectLayers : req.body.sceneViewportObjectLayers != null ? req.body.sceneViewportObjectLayers : {},
-                sceneTargetColliderType : req.body.sceneTargetColliderType != null ? req.body.sceneTargetColliderType : "none",
-                sceneUseTargetObject : req.body.sceneUseTargetObject != null ? req.body.sceneUseTargetObject : false,
-                sceneTargetRotateToPlayer : req.body.sceneTargetRotateToPlayer != null ? req.body.sceneTargetRotateToPlayer : false,
-                // sceneTargetRotateToPlayer : req.body.sceneTargetRotateToPlayer != null ? req.body.sceneTargetRotateToPlayer : false,
-                sceneDetectHorizontalPlanes : req.body.sceneDetectHorizontalPlanes != null ? req.body.sceneDetectHorizontalPlanes : false,
-                sceneDetectVerticalPlanes : req.body.sceneDetectVerticalPlanes != null ? req.body.sceneDetectVerticalPlanes : false,
-                sceneCameraDepthOfField : req.body.sceneCameraDepthOfField != null ? req.body.sceneCameraDepthOfField : false,
-                sceneFlyable : req.body.sceneFlyable != null ? req.body.sceneFlyable : false,
-                sceneFaceTracking : req.body.sceneFaceTracking != null ? req.body.sceneFaceTracking : false,
-                sceneTargetObjectHeading : req.body.sceneTargetObjectHeading != null ? req.body.sceneTargetObjectHeading : 0,
-                sceneTargetObject : req.body.sceneTargetObject,
-                sceneTargetEvent : req.body.sceneTargetEvent,
-                sceneTargetText : req.body.sceneTargetText  != null ? req.body.sceneTargetText : "",
-                sceneNextScene : req.body.sceneNextScene != null ? req.body.sceneNextScene : "",
-                scenePreviousScene : req.body.scenePreviousScene,
-                sceneUseDynamicSky : req.body.sceneUseDynamicSky != null ? req.body.sceneUseDynamicSky : false,
-                sceneUseDynCubeMap : req.body.sceneUseDynCubeMap != null ? req.body.sceneUseDynCubeMap : false,
-                sceneUseSkyParticles : req.body.sceneUseSkyParticles != null ? req.body.sceneUseSkyParticles : false,
-                sceneSkyParticles : req.body.sceneSkyParticles != null ? req.body.sceneSkyParticles : "",
-                sceneUseDynamicShadows : req.body.sceneUseDynamicShadows != null ? req.body.sceneUseDynamicShadows : false,
-                sceneSkyRotationOffset : req.body.sceneSkyRotationOffset != null ? req.body.sceneSkyRotationOffset : 0,
-                sceneUseCameraBackground : req.body.sceneUseCameraBackground != null ? req.body.sceneUseCameraBackground : false,
-                sceneCameraOrientToPath : req.body.sceneCameraOrientToPath  != null ? req.body.sceneCameraOrientToPath : false,
-                sceneCameraPath : req.body.sceneCameraPath != null ? req.body.sceneCameraPath : "Random",
-                sceneUseSkybox : req.body.sceneUseSkybox != null ? req.body.sceneUseSkybox : false,
-                sceneSkybox : req.body.sceneSkybox,
-                sceneUseDynCubeMap : req.body.sceneUseDynCubeMap != null ? req.body.sceneUseDynCubeMap : false,
-                sceneUseSceneFog : req.body.sceneUseSceneFog != null ? req.body.sceneUseSceneFog : false,
-                sceneUseGlobalFog : req.body.sceneUseGlobalFog != null ? req.body.sceneUseGlobalFog : false,
-                sceneUseVolumetricFog : req.body.sceneUseVolumetricFog != null ? req.body.sceneUseVolumetricFog : false,
-                sceneGlobalFogDensity : req.body.sceneGlobalFogDensity != null ? req.body.sceneGlobalFogDensity : .001,
-                sceneUseSunShafts : req.body.sceneUseSunShafts != null ? req.body.sceneUseSunShafts : false,
-                // sceneRenderFloorPlane : req.body.sceneRenderFloorPlane != null ? req.body.sceneRenderFloorPlane : false,
-                sceneUseFloorPlane : req.body.sceneUseFloorPlane != null ? req.body.sceneUseFloorPlane : false,
-                sceneFloorplaneTexture : req.body.sceneFloorplaneTexture != null ? req.body.sceneFloorplaneTexture : "",
-                sceneUseEnvironment : req.body.sceneUseEnvironment != null ? req.body.sceneUseEnvironment : false,
-                sceneUseTerrain : req.body.sceneUseTerrain != null ? req.body.sceneUseTerrain : false,
-                sceneUseHeightmap : req.body.sceneUseHeightmap != null ? req.body.sceneUseHeightmap : false,
-                sceneHeightmap : req.body.sceneHeightmap,
-                sceneEnvironmentPreset : req.body.sceneEnvironmentPreset != null ? req.body.sceneEnvironmentPreset : "",
-                // sceneUseSimpleWater : req.body.sceneUseSimpleWater != null ? req.body.sceneUseSimpleWater : false,
-                // sceneUseOcean : req.body.sceneUseOcean != null ? req.body.sceneUseOcean : false,
-                // sceneUseFancyWater : req.body.sceneUseFancyWater != null ? req.body.sceneUseFancyWater : false,
-                sceneTime: req.body.sceneTime,
-                sceneTimeSpeed: req.body.sceneTimeSpeed,
-                sceneWeather: req.body.sceneWeather,
-                sceneClouds: req.body.sceneClouds,
-                sceneWater: req.body.sceneWater,
-                sceneGroundLevel: req.body.sceneGroundLevel,
-                sceneWindFactor : req.body.sceneWindFactor != null ?  req.body.sceneWindFactor : 0,
-                sceneSkyRadius  : req.body.sceneSkyRadius != null ?  req.body.sceneSkyRadius : 202,
-                sceneLightningFactor : req.body.sceneLightningFactor != null ? req.body.sceneLightningFactor : 0,
-                sceneCharacters: req.body.sceneCharacters,
-                sceneEquipment: req.body.sceneEquipment,
-                sceneFlyingObjex: req.body.sceneFlyingObjex,
-                sceneSeason: req.body.sceneSeason,
-                scenePictures : req.body.scenePictures, //array of IDs only
-                scenePostcards : req.body.scenePostcards, //array of IDs only
-                sceneWebLinks : req.body.sceneWebLinks != null ? req.body.sceneWebLinks : [], //custom object //no, make it an array of IDs
-                sceneColor4 : req.body.sceneColor4,
-                sceneColor1 : req.body.sceneColor1,
-                sceneColor2 : req.body.sceneColor2,
-                sceneColor3 : req.body.sceneColor3,
-                sceneStyleTheme: req.body.sceneStyleTheme != null ? req.body.sceneStyleTheme : "",
-                sceneColor4Alt : req.body.sceneColor4Alt,
-                sceneColor1Alt : req.body.sceneColor1Alt,
-                sceneColor2Alt : req.body.sceneColor2Alt,
-                sceneColor3Alt : req.body.sceneColor3Alt,
-                sceneLocationRange : req.body.sceneLocationRange != null ? req.body.sceneLocationRange : .1,
-                sceneUseMap : req.body.sceneUseMap != null ? req.body.sceneUseMap : false,
-                sceneMapType : req.body.sceneMapType != null ? req.body.sceneMapType : "none",
-                sceneMapZoom : req.body.sceneMapZoom != null ? req.body.sceneMapZoom : 17,
-                sceneLatitude : req.body.sceneLatitude != null ? req.body.sceneLatitude : "",
-                sceneLongitude : req.body.sceneLongitude != null ? req.body.sceneLongitude : "",
-                sceneUseStreetMap : req.body.sceneUseStreetMap  != null ? req.body.sceneUseStreetMap : false,
-                sceneUseSatelliteMap : req.body.sceneUseSatelliteMap  != null ? req.body.sceneUseSatelliteMap : false,
-                sceneUseHybridMap : req.body.sceneUseHybridMap  != null ? req.body.sceneUseHybridMap : false,
-                sceneEmulateGPS : req.body.sceneEmulateGPS  != null ? req.body.sceneEmulateGPS : false,
-                sceneLocations : req.body.sceneLocations,
-                sceneTriggerAudioID : req.body.sceneTriggerAudioID,
-                scenePrimaryAudioTitle : req.body.scenePrimaryAudioTitle,
-                sceneAmbientAudioID : req.body.sceneAmbientAudioID,
-                scenePrimaryAudioID : req.body.scenePrimaryAudioID,
-                scenePrimaryAudioStreamURL : req.body.scenePrimaryAudioStreamURL,
-                sceneAmbientAudioStreamURL : req.body.sceneAmbientAudioStreamURL,
-                sceneTriggerAudioStreamURL : req.body.sceneTriggerAudioStreamURL,
-                scenePrimaryAudioGroups : req.body.scenePrimaryAudioGroups,
-                sceneAmbientAudioGroups : req.body.sceneAmbientAudioGroups,
-                sceneTriggerAudioGroups : req.body.sceneTriggerAudioGroups,
-                sceneBPM : req.body.sceneBPM != null ? req.body.sceneBPM : "100",
-                scenePrimaryPatch1 : req.body.scenePrimaryPatch1,
-                scenePrimaryPatch2 : req.body.scenePrimaryPatch2,
-                scenePrimaryMidiSequence1 : req.body.scenePrimaryMidiSequence1,
-                scenePrimarySequence2Transpose : req.body.scenePrimarySequence2Transpose != null ? req.body.scenePrimarySequence2Transpose : "0",
-                scenePrimarySequence1Transpose : req.body.scenePrimarySequence1Transpose != null ? req.body.scenePrimarySequence1Transpose : "0",
-                scenePrimaryMidiSequence2 : req.body.scenePrimaryMidiSequence2,
-                sceneAmbientVolume : req.body.sceneAmbientVolume,
-                scenePrimaryVolume : req.body.scenePrimaryVolume,
-                sceneTriggerVolume : req.body.sceneTriggerVolume,
-                sceneWeatherAudioVolume : req.body.sceneWeatherAudioVolume,
-                sceneMediaAudioVolume : req.body.sceneMediaAudioVolume,
-                sceneAmbientSynth1Volume : req.body.sceneAmbientSynth1Volume,
-                sceneAmbientSynth2Volume : req.body.sceneAmbientSynth2Volume,
-                sceneTriggerSynth1Volume : req.body.sceneTriggerSynth1Volume,
-                sceneAmbientPatch1 : req.body.sceneAmbientPatch1,
-                sceneAmbientPatch2 : req.body.sceneAmbientPatch2,
-                sceneAmbientSynth1ModulateByDistance : req.body.sceneAmbientSynth1ModulateByDistance != null ? req.body.sceneAmbientSynth1ModulateByDistance : false,
-                sceneAmbientSynth2ModulateByDistance : req.body.sceneAmbientSynth2ModulateByDistance != null ? req.body.sceneAmbientSynth2ModulateByDistance : false,
-                sceneAmbientSynth1ModulateByDistanceTarget : req.body.sceneAmbientSynth1ModulateByDistanceTarget != null ? req.body.sceneAmbientSynth1ModulateByDistanceTarget: false,
-                sceneAmbientSynth2ModulateByDistanceTarget : req.body.sceneAmbientSynth2ModulateByDistanceTarget != null ? req.body.sceneAmbientSynth2ModulateByDistanceTarget : false,
-                sceneAmbientMidiSequence1 : req.body.sceneAmbientMidiSequence1,
-                sceneAmbientMidiSequence2 : req.body.sceneAmbientMidiSequence2,
-                sceneAmbientSequence1Transpose : req.body.sceneAmbientSequence1Transpose != null ? req.body.sceneAmbientSequence1Transpose : "0",
-                sceneAmbientSequence2Transpose : req.body.sceneAmbientSequence2Transpose != null ? req.body.sceneAmbientSequence2Transpose : "0",
-                sceneTriggerPatch1 : req.body.sceneTriggerPatch1,
-                sceneTriggerPatch2 : req.body.sceneTriggerPatch2,
-                sceneTriggerPatch3 : req.body.sceneTriggerPatch3,
-                sceneGeneratePrimarySequences : req.body.sceneGeneratePrimarySequences != null ? req.body.sceneGeneratePrimarySequences : false,
-                sceneGenerateAmbientSequences : req.body.sceneGenerateAmbientSequences != null ? req.body.sceneGenerateAmbientSequences : false,
-                sceneGenerateTriggerSequences : req.body.sceneGenerateTriggerSequences != null ? req.body.sceneGenerateTriggerSequences : false,
-                sceneLoopPrimaryAudio : req.body.sceneLoopPrimaryAudio != null ? req.body.sceneLoopPrimaryAudio : false,
-                scenePrimaryAudioLoopCount : req.body.scenePrimaryAudioLoopCount != null ? req.body.scenePrimaryAudioLoopCount : 0,
-                sceneAutoplayPrimaryAudio : req.body.sceneAutoplayPrimaryAudio != null ? req.body.sceneAutoplayPrimaryAudio : false,
-                scenePrimaryAudioVisualizer : req.body.scenePrimaryAudioVisualizer != null ? req.body.scenePrimaryAudioVisualizer : false,
-                scenePrimaryAudioTriggerEvents : req.body.scenePrimaryAudioTriggerEvents != null ? req.body.scenePrimaryAudioTriggerEvents : false,
-                sceneAttachPrimaryAudioToTarget : req.body.sceneAttachPrimaryAudioToTarget != null ? req.body.sceneAttachPrimaryAudioToTarget : false,
-                sceneAutoplayAudioGroup : req.body.sceneAutoplayAudioGroup != null ? req.body.sceneAutoplayAudioGroup : false,
-                sceneLoopAllAudioGroup : req.body.sceneLoopAllAudioGroup != null ? req.body.sceneLoopAllAudioGroup : false,
-                sceneAnchorPositionAudioGroup : req.body.sceneAnchorPositionAudioGroup != null ? req.body.sceneAnchorPositionAudioGroup : false,
-                sceneAnchorCanvasAudioGroup : req.body.sceneAnchorCanvasAudioGroup != null ? req.body.sceneAnchorCanvasAudioGroup : false,
-                sceneCreateAudioSpline : req.body.sceneCreateAudioSpline != null ? req.body.sceneCreateAudioSpline : false,
-                sceneAttachAudioGroupToTarget : req.body.sceneAttachAudioGroupToTarget != null ? req.body.sceneAttachAudioGroupToTarget : false,
-                sceneUseMicrophoneInput : req.body.sceneUseMicrophoneInput != null ? req.body.sceneUseMicrophoneInput : false,
-//                    sceneAmbientAudio2ID : req.body.sceneAmbientAudio2ID,
-                sceneKeynote : req.body.sceneKeynote,
-                sceneDescription : req.body.sceneDescription,
-                sceneGreeting : req.body.sceneGreeting,
-                sceneQuest : req.body.sceneQuest,
-                sceneFont : req.body.sceneFont,
-                sceneFontWeb1  : req.body.sceneFontWeb1,
-                sceneFontWeb2  : req.body.sceneFontWeb2,
-                sceneFontFillColor : req.body.sceneFontFillColor,
-                sceneFontOutlineColor : req.body.sceneFontOutlineColor,
-                sceneFontGlowColor : req.body.sceneFontGlowColor,
-                sceneTextBackground : req.body.sceneTextBackground,
-                sceneTextBackgroundColor : req.body.sceneTextBackgroundColor,
-                sceneTextItems : req.body.sceneTextItems, //ids of text items
-                sceneText : req.body.sceneText, //this is "primary" tex
-                sceneTextLoop : req.body.sceneTextLoop != null ? req.body.sceneTextLoop : false, //also for "primary" text below
-                scenePrimaryTextFontSize : req.body.scenePrimaryTextFontSize != null ? req.body.scenePrimaryTextFontSize : "12",
-                scenePrimaryTextMode : req.body.scenePrimaryTextMode != null ? req.body.scenePrimaryTextMode : "Normal",
-                scenePrimaryTextAlign : req.body.scenePrimaryTextAlign != null ? req.body.scenePrimaryTextAlign : "Left",
-                sceneNetworking : req.body.sceneNetworking != null ? req.body.sceneNetworking : "None",
-                scenePrimaryTextRotate : req.body.scenePrimaryTextRotate != null ? req.body.scenePrimaryTextRotate : false,
-                scenePrimaryTextScaleByDistance : req.body.scenePrimaryTextScaleByDistance != null ? req.body.scenePrimaryTextScaleByDistance : false,
-                sceneTextAudioSync : req.body.sceneTextAudioSync != null ? req.body.sceneTextAudioSync : false,
-                sceneTextUseModals : req.body.sceneTextUseModals != null ? req.body.sceneTextUseModals : true,
-                sceneObjects: req.body.sceneObjects,
-                sceneModels: req.body.sceneModels,
-                sceneObjectGroups: req.body.sceneObjectGroups,
-                sceneTimedEvents: req.body.sceneTimedEvents,
-                sceneLastUpdate : lastUpdateTimestamp
+      } catch (e) {
+        console.log("update scene error! " + e);
+        res.send("update scene error! " + e);
+      }
+      
+
+    })();
+
+//     db_old.scenes.findOne({ "_id" : o_id}, function(err, scene) {
+//         if (err || !scene) {
+//             console.log("error getting scene: " + err);
+//         } else {
+
+//             let inventoryID = scene.sceneInventoryID; //easier to jack in here, than ? make a temp batch route? 
+//             if (inventoryID == null) {
+//                 let inventories = {};
+//                 let inventoryItems = [];
+//                 inventories.inventoryItems = inventoryItems; 
+//                 db_old.inventories.save(inventories, function (err, saved) {
+//                 if (err || !saved) {
+//                     console.log("problemo2 with inventory add " + err); 
+//                     } else {
+//                         inventoryID = saved._id;
+//                         db_old.scenes.update( { "_id": o_id }, { $set: { sceneInventoryID : inventoryID }});
+//                     }
+//                 });
+//             }
+//             console.log("tryna update scene " + req.body._id + " with cameraMode " + JSON.stringify(req.body.sceneCameraMode));
+//             db_old.scenes.update( { "_id": o_id }, { $set: {
+//                 sceneDomain : req.body.sceneDomain,
+//                 sceneAppName : req.body.sceneAppName,
+//                 sceneSource : req.body.sceneSource,
+//                 sceneAltURL : req.body.sceneAltURL != null ? req.body.sceneAltURL : "",
+//                 sceneStickyness : parseInt(req.body.sceneStickyness) != null ? parseInt(req.body.sceneStickyness) : 5,
+// //                    sceneUserName : scene.sceneUserName != null ? scene.sceneUserName : "",
+//                 sceneNumber : req.body.sceneNumber,
+//                 sceneTitle : req.body.sceneTitle,
+//                 sceneTags : req.body.sceneTags,
+//                 sceneYouTubeIDs : (req.body.sceneYouTubeIDs != null && req.body.sceneYouTubeIDs != undefined) ? req.body.sceneYouTubeIDs : [],
+//                 sceneVideoStreamUrls : (req.body.sceneVideoStreamUrls != null && req.body.sceneVideoStreamUrls != undefined) ? req.body.sceneVideoStreamUrls : [],
+//                 sceneLinks : req.body.sceneLinks,
+//                 scenePeopleGroupID : req.body.scenePeopleGroupID,
+//                 sceneLocationGroups : req.body.sceneLocationGroups,
+//                 sceneAudioGroups : req.body.sceneAudioGroups,
+//                 scenePictureGroups : req.body.scenePictureGroups,
+//                 sceneTextGroups : req.body.sceneTextGroups,
+//                 sceneVideoGroups : req.body.sceneVideoGroups,
+//                 sceneVideos : req.body.sceneVideos,
+//                 scenePlayer : req.body.scenePlayer  != null ? req.body.scenePlayer : "",
+//                 sceneCategory : req.body.sceneCategory != null ? req.body.sceneCategory : "None",
+//                 sceneType : (req.body.sceneType != null && req.body.sceneType.length > 2) ? req.body.sceneType : "Default",
+//                 sceneWebType : (req.body.sceneWebType != null && req.body.sceneWebType.length > 2) ? req.body.sceneWebType : "Default",
+//                 sceneCameraMode : req.body.sceneCameraMode != null ? req.body.sceneCameraMode : "First Person",
+//                 sceneDebugMode : req.body.sceneDebugMode != null ? req.body.sceneDebugMode : "",
+//                 sceneUseThreeDeeText : req.body.sceneUseThreeDeeText != null ? req.body.sceneUseThreeDeeText : false,
+//                 sceneAndroidOK : req.body.sceneAndroidOK != null ? req.body.sceneAndroidOK : false,
+//                 sceneIosOK : req.body.sceneIosOK != null ? req.body.sceneIosOK : false,
+//                 sceneWindowsOK : req.body.sceneWindowsOK != null ? req.body.sceneWindowsOK : false,
+//                 sceneWebGLOK : req.body.sceneWebGLOK != null ? req.body.sceneWebGLOK : false,
+//                 sceneLocationTracking : req.body.sceneLocationTracking != null ? req.body.sceneLocationTracking : false,
+//                 sceneShowAds : req.body.sceneShowAds != null ? req.body.sceneShowAds : false,
+//                 sceneShareWithPublic : req.body.sceneShareWithPublic != null ? req.body.sceneShareWithPublic : false,
+//                 sceneShareWithSubscribers : req.body.sceneShareWithSubscribers != null ? req.body.sceneShareWithSubscribers : false,
+//                 sceneShareWithGroups : req.body.sceneShareWithGroups != null ? req.body.sceneShareWithGroups : "",
+//                 sceneShareWithPeople : req.body.sceneShareWithPeople != null ? req.body.sceneShareWithPeople : "",
+//                 sceneShareWithGroups : req.body.sceneShareWithGroups != null ? req.body.sceneShareWithGroups : "",
+//                 sceneEventStart : req.body.sceneEventStart != null ? req.body.sceneEventStart : "",
+//                 sceneEventEnd : req.body.sceneEventEnd != null ? req.body.sceneEventEnd : "",
+//                 sceneAccessLinkExpire : req.body.sceneAccessLinkExpire != null ? req.body.sceneAccessLinkExpire : "",
+//                 sceneShareWithMessage : req.body.sceneShareWithMessage != null ? req.body.sceneShareWithMessage : "",
+//                 sceneEnvironment : req.body.sceneEnvironment != null ? req.body.sceneEnvironment : {},
+//                 sceneUseStaticObj : req.body.sceneUseStaticObj != null ? req.body.sceneUseStaticObj : false,
+//                 sceneStaticObjUrl : req.body.sceneStaticObjUrl != null ? req.body.sceneStaticObjUrl : "",
+//                 sceneStaticObjTextureUrl : req.body.sceneStaticObjTextureUrl != null ? req.body.sceneStaticObjTextureUrl : "",
+//                 sceneRandomizeColors : req.body.sceneRandomizeColors != null ? req.body.sceneRandomizeColors : false,
+//                 sceneTweakColors : req.body.sceneTweakColors != null ? req.body.sceneTweakColors : false,
+//                 sceneColorizeSky : req.body.sceneColorizeSky != null ? req.body.sceneColorizeSky : false,
+//                 sceneScatterMeshes : req.body.sceneScatterMeshes != null ? req.body.sceneScatterMeshes : false,
+//                 sceneScatterMeshLayers : req.body.sceneScatterMeshLayers != null ? req.body.sceneScatterMeshLayers : {},
+//                 sceneScatterObjectLayers : req.body.sceneScatterObjectLayers != null ? req.body.sceneScatterObjectLayers : {},
+//                 sceneScatterObjects : req.body.sceneScatterObjects != null ? req.body.sceneScatterObjects : false,
+//                 sceneScatterOffset : req.body.sceneScatterOffset != null ? req.body.sceneScatterOffset : "",
+//                 sceneShowViewportMeshes : req.body.sceneShowViewportMeshes != null ? req.body.sceneShowViewportMeshes : false,
+//                 sceneShowViewportObjects : req.body.sceneShowViewportObjects != null ? req.body.sceneShowViewportObjects : false,
+//                 sceneViewportMeshLayers : req.body.sceneViewportMeshLayers != null ? req.body.sceneViewportMeshLayers : {},
+//                 sceneViewportObjectLayers : req.body.sceneViewportObjectLayers != null ? req.body.sceneViewportObjectLayers : {},
+//                 sceneTargetColliderType : req.body.sceneTargetColliderType != null ? req.body.sceneTargetColliderType : "none",
+//                 sceneUseTargetObject : req.body.sceneUseTargetObject != null ? req.body.sceneUseTargetObject : false,
+//                 sceneTargetRotateToPlayer : req.body.sceneTargetRotateToPlayer != null ? req.body.sceneTargetRotateToPlayer : false,
+//                 // sceneTargetRotateToPlayer : req.body.sceneTargetRotateToPlayer != null ? req.body.sceneTargetRotateToPlayer : false,
+//                 sceneDetectHorizontalPlanes : req.body.sceneDetectHorizontalPlanes != null ? req.body.sceneDetectHorizontalPlanes : false,
+//                 sceneDetectVerticalPlanes : req.body.sceneDetectVerticalPlanes != null ? req.body.sceneDetectVerticalPlanes : false,
+//                 sceneCameraDepthOfField : req.body.sceneCameraDepthOfField != null ? req.body.sceneCameraDepthOfField : false,
+//                 sceneFlyable : req.body.sceneFlyable != null ? req.body.sceneFlyable : false,
+//                 sceneFaceTracking : req.body.sceneFaceTracking != null ? req.body.sceneFaceTracking : false,
+//                 sceneTargetObjectHeading : req.body.sceneTargetObjectHeading != null ? req.body.sceneTargetObjectHeading : 0,
+//                 sceneTargetObject : req.body.sceneTargetObject,
+//                 sceneTargetEvent : req.body.sceneTargetEvent,
+//                 sceneTargetText : req.body.sceneTargetText  != null ? req.body.sceneTargetText : "",
+//                 sceneNextScene : req.body.sceneNextScene != null ? req.body.sceneNextScene : "",
+//                 scenePreviousScene : req.body.scenePreviousScene,
+//                 sceneUseDynamicSky : req.body.sceneUseDynamicSky != null ? req.body.sceneUseDynamicSky : false,
+//                 sceneUseDynCubeMap : req.body.sceneUseDynCubeMap != null ? req.body.sceneUseDynCubeMap : false,
+//                 sceneUseSkyParticles : req.body.sceneUseSkyParticles != null ? req.body.sceneUseSkyParticles : false,
+//                 sceneSkyParticles : req.body.sceneSkyParticles != null ? req.body.sceneSkyParticles : "",
+//                 sceneUseDynamicShadows : req.body.sceneUseDynamicShadows != null ? req.body.sceneUseDynamicShadows : false,
+//                 sceneSkyRotationOffset : req.body.sceneSkyRotationOffset != null ? req.body.sceneSkyRotationOffset : 0,
+//                 sceneUseCameraBackground : req.body.sceneUseCameraBackground != null ? req.body.sceneUseCameraBackground : false,
+//                 sceneCameraOrientToPath : req.body.sceneCameraOrientToPath  != null ? req.body.sceneCameraOrientToPath : false,
+//                 sceneCameraPath : req.body.sceneCameraPath != null ? req.body.sceneCameraPath : "Random",
+//                 sceneUseSkybox : req.body.sceneUseSkybox != null ? req.body.sceneUseSkybox : false,
+//                 sceneSkybox : req.body.sceneSkybox,
+//                 sceneUseDynCubeMap : req.body.sceneUseDynCubeMap != null ? req.body.sceneUseDynCubeMap : false,
+//                 sceneUseSceneFog : req.body.sceneUseSceneFog != null ? req.body.sceneUseSceneFog : false,
+//                 sceneUseGlobalFog : req.body.sceneUseGlobalFog != null ? req.body.sceneUseGlobalFog : false,
+//                 sceneUseVolumetricFog : req.body.sceneUseVolumetricFog != null ? req.body.sceneUseVolumetricFog : false,
+//                 sceneGlobalFogDensity : req.body.sceneGlobalFogDensity != null ? req.body.sceneGlobalFogDensity : .001,
+//                 sceneUseSunShafts : req.body.sceneUseSunShafts != null ? req.body.sceneUseSunShafts : false,
+//                 // sceneRenderFloorPlane : req.body.sceneRenderFloorPlane != null ? req.body.sceneRenderFloorPlane : false,
+//                 sceneUseFloorPlane : req.body.sceneUseFloorPlane != null ? req.body.sceneUseFloorPlane : false,
+//                 sceneFloorplaneTexture : req.body.sceneFloorplaneTexture != null ? req.body.sceneFloorplaneTexture : "",
+//                 sceneUseEnvironment : req.body.sceneUseEnvironment != null ? req.body.sceneUseEnvironment : false,
+//                 sceneUseTerrain : req.body.sceneUseTerrain != null ? req.body.sceneUseTerrain : false,
+//                 sceneUseHeightmap : req.body.sceneUseHeightmap != null ? req.body.sceneUseHeightmap : false,
+//                 sceneHeightmap : req.body.sceneHeightmap,
+//                 sceneEnvironmentPreset : req.body.sceneEnvironmentPreset != null ? req.body.sceneEnvironmentPreset : "",
+//                 // sceneUseSimpleWater : req.body.sceneUseSimpleWater != null ? req.body.sceneUseSimpleWater : false,
+//                 // sceneUseOcean : req.body.sceneUseOcean != null ? req.body.sceneUseOcean : false,
+//                 // sceneUseFancyWater : req.body.sceneUseFancyWater != null ? req.body.sceneUseFancyWater : false,
+//                 sceneTime: req.body.sceneTime,
+//                 sceneTimeSpeed: req.body.sceneTimeSpeed,
+//                 sceneWeather: req.body.sceneWeather,
+//                 sceneClouds: req.body.sceneClouds,
+//                 sceneWater: req.body.sceneWater,
+//                 sceneGroundLevel: req.body.sceneGroundLevel,
+//                 sceneWindFactor : req.body.sceneWindFactor != null ?  req.body.sceneWindFactor : 0,
+//                 sceneSkyRadius  : req.body.sceneSkyRadius != null ?  req.body.sceneSkyRadius : 202,
+//                 sceneLightningFactor : req.body.sceneLightningFactor != null ? req.body.sceneLightningFactor : 0,
+//                 sceneCharacters: req.body.sceneCharacters,
+//                 sceneEquipment: req.body.sceneEquipment,
+//                 sceneFlyingObjex: req.body.sceneFlyingObjex,
+//                 sceneSeason: req.body.sceneSeason,
+//                 scenePictures : req.body.scenePictures, //array of IDs only
+//                 scenePostcards : req.body.scenePostcards, //array of IDs only
+//                 sceneWebLinks : req.body.sceneWebLinks != null ? req.body.sceneWebLinks : [], //custom object //no, make it an array of IDs
+//                 sceneColor4 : req.body.sceneColor4,
+//                 sceneColor1 : req.body.sceneColor1,
+//                 sceneColor2 : req.body.sceneColor2,
+//                 sceneColor3 : req.body.sceneColor3,
+//                 sceneStyleTheme: req.body.sceneStyleTheme != null ? req.body.sceneStyleTheme : "",
+//                 sceneColor4Alt : req.body.sceneColor4Alt,
+//                 sceneColor1Alt : req.body.sceneColor1Alt,
+//                 sceneColor2Alt : req.body.sceneColor2Alt,
+//                 sceneColor3Alt : req.body.sceneColor3Alt,
+//                 sceneLocationRange : req.body.sceneLocationRange != null ? req.body.sceneLocationRange : .1,
+//                 sceneUseMap : req.body.sceneUseMap != null ? req.body.sceneUseMap : false,
+//                 sceneMapType : req.body.sceneMapType != null ? req.body.sceneMapType : "none",
+//                 sceneMapZoom : req.body.sceneMapZoom != null ? req.body.sceneMapZoom : 17,
+//                 sceneLatitude : req.body.sceneLatitude != null ? req.body.sceneLatitude : "",
+//                 sceneLongitude : req.body.sceneLongitude != null ? req.body.sceneLongitude : "",
+//                 sceneUseStreetMap : req.body.sceneUseStreetMap  != null ? req.body.sceneUseStreetMap : false,
+//                 sceneUseSatelliteMap : req.body.sceneUseSatelliteMap  != null ? req.body.sceneUseSatelliteMap : false,
+//                 sceneUseHybridMap : req.body.sceneUseHybridMap  != null ? req.body.sceneUseHybridMap : false,
+//                 sceneEmulateGPS : req.body.sceneEmulateGPS  != null ? req.body.sceneEmulateGPS : false,
+//                 sceneLocations : req.body.sceneLocations,
+//                 sceneTriggerAudioID : req.body.sceneTriggerAudioID,
+//                 scenePrimaryAudioTitle : req.body.scenePrimaryAudioTitle,
+//                 sceneAmbientAudioID : req.body.sceneAmbientAudioID,
+//                 scenePrimaryAudioID : req.body.scenePrimaryAudioID,
+//                 scenePrimaryAudioStreamURL : req.body.scenePrimaryAudioStreamURL,
+//                 sceneAmbientAudioStreamURL : req.body.sceneAmbientAudioStreamURL,
+//                 sceneTriggerAudioStreamURL : req.body.sceneTriggerAudioStreamURL,
+//                 scenePrimaryAudioGroups : req.body.scenePrimaryAudioGroups,
+//                 sceneAmbientAudioGroups : req.body.sceneAmbientAudioGroups,
+//                 sceneTriggerAudioGroups : req.body.sceneTriggerAudioGroups,
+//                 sceneBPM : req.body.sceneBPM != null ? req.body.sceneBPM : "100",
+//                 scenePrimaryPatch1 : req.body.scenePrimaryPatch1,
+//                 scenePrimaryPatch2 : req.body.scenePrimaryPatch2,
+//                 scenePrimaryMidiSequence1 : req.body.scenePrimaryMidiSequence1,
+//                 scenePrimarySequence2Transpose : req.body.scenePrimarySequence2Transpose != null ? req.body.scenePrimarySequence2Transpose : "0",
+//                 scenePrimarySequence1Transpose : req.body.scenePrimarySequence1Transpose != null ? req.body.scenePrimarySequence1Transpose : "0",
+//                 scenePrimaryMidiSequence2 : req.body.scenePrimaryMidiSequence2,
+//                 sceneAmbientVolume : req.body.sceneAmbientVolume,
+//                 scenePrimaryVolume : req.body.scenePrimaryVolume,
+//                 sceneTriggerVolume : req.body.sceneTriggerVolume,
+//                 sceneWeatherAudioVolume : req.body.sceneWeatherAudioVolume,
+//                 sceneMediaAudioVolume : req.body.sceneMediaAudioVolume,
+//                 sceneAmbientSynth1Volume : req.body.sceneAmbientSynth1Volume,
+//                 sceneAmbientSynth2Volume : req.body.sceneAmbientSynth2Volume,
+//                 sceneTriggerSynth1Volume : req.body.sceneTriggerSynth1Volume,
+//                 sceneAmbientPatch1 : req.body.sceneAmbientPatch1,
+//                 sceneAmbientPatch2 : req.body.sceneAmbientPatch2,
+//                 sceneAmbientSynth1ModulateByDistance : req.body.sceneAmbientSynth1ModulateByDistance != null ? req.body.sceneAmbientSynth1ModulateByDistance : false,
+//                 sceneAmbientSynth2ModulateByDistance : req.body.sceneAmbientSynth2ModulateByDistance != null ? req.body.sceneAmbientSynth2ModulateByDistance : false,
+//                 sceneAmbientSynth1ModulateByDistanceTarget : req.body.sceneAmbientSynth1ModulateByDistanceTarget != null ? req.body.sceneAmbientSynth1ModulateByDistanceTarget: false,
+//                 sceneAmbientSynth2ModulateByDistanceTarget : req.body.sceneAmbientSynth2ModulateByDistanceTarget != null ? req.body.sceneAmbientSynth2ModulateByDistanceTarget : false,
+//                 sceneAmbientMidiSequence1 : req.body.sceneAmbientMidiSequence1,
+//                 sceneAmbientMidiSequence2 : req.body.sceneAmbientMidiSequence2,
+//                 sceneAmbientSequence1Transpose : req.body.sceneAmbientSequence1Transpose != null ? req.body.sceneAmbientSequence1Transpose : "0",
+//                 sceneAmbientSequence2Transpose : req.body.sceneAmbientSequence2Transpose != null ? req.body.sceneAmbientSequence2Transpose : "0",
+//                 sceneTriggerPatch1 : req.body.sceneTriggerPatch1,
+//                 sceneTriggerPatch2 : req.body.sceneTriggerPatch2,
+//                 sceneTriggerPatch3 : req.body.sceneTriggerPatch3,
+//                 sceneGeneratePrimarySequences : req.body.sceneGeneratePrimarySequences != null ? req.body.sceneGeneratePrimarySequences : false,
+//                 sceneGenerateAmbientSequences : req.body.sceneGenerateAmbientSequences != null ? req.body.sceneGenerateAmbientSequences : false,
+//                 sceneGenerateTriggerSequences : req.body.sceneGenerateTriggerSequences != null ? req.body.sceneGenerateTriggerSequences : false,
+//                 sceneLoopPrimaryAudio : req.body.sceneLoopPrimaryAudio != null ? req.body.sceneLoopPrimaryAudio : false,
+//                 scenePrimaryAudioLoopCount : req.body.scenePrimaryAudioLoopCount != null ? req.body.scenePrimaryAudioLoopCount : 0,
+//                 sceneAutoplayPrimaryAudio : req.body.sceneAutoplayPrimaryAudio != null ? req.body.sceneAutoplayPrimaryAudio : false,
+//                 scenePrimaryAudioVisualizer : req.body.scenePrimaryAudioVisualizer != null ? req.body.scenePrimaryAudioVisualizer : false,
+//                 scenePrimaryAudioTriggerEvents : req.body.scenePrimaryAudioTriggerEvents != null ? req.body.scenePrimaryAudioTriggerEvents : false,
+//                 sceneAttachPrimaryAudioToTarget : req.body.sceneAttachPrimaryAudioToTarget != null ? req.body.sceneAttachPrimaryAudioToTarget : false,
+//                 sceneAutoplayAudioGroup : req.body.sceneAutoplayAudioGroup != null ? req.body.sceneAutoplayAudioGroup : false,
+//                 sceneLoopAllAudioGroup : req.body.sceneLoopAllAudioGroup != null ? req.body.sceneLoopAllAudioGroup : false,
+//                 sceneAnchorPositionAudioGroup : req.body.sceneAnchorPositionAudioGroup != null ? req.body.sceneAnchorPositionAudioGroup : false,
+//                 sceneAnchorCanvasAudioGroup : req.body.sceneAnchorCanvasAudioGroup != null ? req.body.sceneAnchorCanvasAudioGroup : false,
+//                 sceneCreateAudioSpline : req.body.sceneCreateAudioSpline != null ? req.body.sceneCreateAudioSpline : false,
+//                 sceneAttachAudioGroupToTarget : req.body.sceneAttachAudioGroupToTarget != null ? req.body.sceneAttachAudioGroupToTarget : false,
+//                 sceneUseMicrophoneInput : req.body.sceneUseMicrophoneInput != null ? req.body.sceneUseMicrophoneInput : false,
+// //                    sceneAmbientAudio2ID : req.body.sceneAmbientAudio2ID,
+//                 sceneKeynote : req.body.sceneKeynote,
+//                 sceneDescription : req.body.sceneDescription,
+//                 sceneGreeting : req.body.sceneGreeting,
+//                 sceneQuest : req.body.sceneQuest,
+//                 sceneFont : req.body.sceneFont,
+//                 sceneFontWeb1  : req.body.sceneFontWeb1,
+//                 sceneFontWeb2  : req.body.sceneFontWeb2,
+//                 sceneFontFillColor : req.body.sceneFontFillColor,
+//                 sceneFontOutlineColor : req.body.sceneFontOutlineColor,
+//                 sceneFontGlowColor : req.body.sceneFontGlowColor,
+//                 sceneTextBackground : req.body.sceneTextBackground,
+//                 sceneTextBackgroundColor : req.body.sceneTextBackgroundColor,
+//                 sceneTextItems : req.body.sceneTextItems, //ids of text items
+//                 sceneText : req.body.sceneText, //this is "primary" tex
+//                 sceneTextLoop : req.body.sceneTextLoop != null ? req.body.sceneTextLoop : false, //also for "primary" text below
+//                 scenePrimaryTextFontSize : req.body.scenePrimaryTextFontSize != null ? req.body.scenePrimaryTextFontSize : "12",
+//                 scenePrimaryTextMode : req.body.scenePrimaryTextMode != null ? req.body.scenePrimaryTextMode : "Normal",
+//                 scenePrimaryTextAlign : req.body.scenePrimaryTextAlign != null ? req.body.scenePrimaryTextAlign : "Left",
+//                 sceneNetworking : req.body.sceneNetworking != null ? req.body.sceneNetworking : "None",
+//                 scenePrimaryTextRotate : req.body.scenePrimaryTextRotate != null ? req.body.scenePrimaryTextRotate : false,
+//                 scenePrimaryTextScaleByDistance : req.body.scenePrimaryTextScaleByDistance != null ? req.body.scenePrimaryTextScaleByDistance : false,
+//                 sceneTextAudioSync : req.body.sceneTextAudioSync != null ? req.body.sceneTextAudioSync : false,
+//                 sceneTextUseModals : req.body.sceneTextUseModals != null ? req.body.sceneTextUseModals : true,
+//                 sceneObjects: req.body.sceneObjects,
+//                 sceneModels: req.body.sceneModels,
+//                 sceneObjectGroups: req.body.sceneObjectGroups,
+//                 sceneTimedEvents: req.body.sceneTimedEvents,
+//                 sceneLastUpdate : lastUpdateTimestamp
                 
-                }
-            });
-        } if (err) {res.send(err)} else {res.send("updated " + new Date())}
-    });
+//                 }
+
+
+//             });
+//         } if (err) {res.send(err)} else {res.send("updated " + new Date())}
+//     });
 });
 
-app.get('/sceneloc/:key', function (req, res){
+// app.get('/sceneloc/:key', function (req, res){
 
-    resObj = {};
+//     resObj = {};
 
-    db_old.scenes.find({ "short_id" : req.params.key}, function(err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err);
-        } else {
-            resObj.sceneLatitude = scenes[0].sceneLatitude;
-            resObj.sceneLongitude = scenes[0].sceneLongitude;
-            resObj.sceneLocationRange = scenes[0].sceneLocationRange;
-//                console.log(JSON.stringify(scenes));
-            res.json(resObj);
-        }
-    });
-});
+//     db_old.scenes.find({ "short_id" : req.params.key}, function(err, scenes) {
+//         if (err || !scenes) {
+//             console.log("cain't get no scenes... " + err);
+//         } else {
+//             resObj.sceneLatitude = scenes[0].sceneLatitude;
+//             resObj.sceneLongitude = scenes[0].sceneLongitude;
+//             resObj.sceneLocationRange = scenes[0].sceneLocationRange;
+// //                console.log(JSON.stringify(scenes));
+//             res.json(resObj);
+//         }
+//     });
+// });
 
-app.get('/seq/:_seqID', function (req, res) {
-    console.log("tryna get sequence");
-    var pathNumbers = [];
-    var pathSequence = [];
-    db_old.paths.find({}, function (err, paths) {
-        if (err || !paths) {
-            console.log("no paths found ", err);
-        } else {
-            paths.forEach(function (path) {
+// app.get('/seq/:_seqID', function (req, res) {
+//     console.log("tryna get sequence");
+//     var pathNumbers = [];
+//     var pathSequence = [];
+//     db_old.paths.find({}, function (err, paths) {
+//         if (err || !paths) {
+//             console.log("no paths found ", err);
+//         } else {
+//             paths.forEach(function (path) {
 
-                pathNumbers.push(parseInt(path.pathNumber));
-                pathNumbers.sort(function(a, b){return a-b});
-            });
-            paths.forEach(function (path) {
-                for (var i = 0; i < pathNumbers.length; i++) {
-                    if (pathNumbers[i] = path.pathNumber) {
-                        pathSequence.push(path._id);
-                        break;
-                    }
-                }
-            });
-        }
+//                 pathNumbers.push(parseInt(path.pathNumber));
+//                 pathNumbers.sort(function(a, b){return a-b});
+//             });
+//             paths.forEach(function (path) {
+//                 for (var i = 0; i < pathNumbers.length; i++) {
+//                     if (pathNumbers[i] = path.pathNumber) {
+//                         pathSequence.push(path._id);
+//                         break;
+//                     }
+//                 }
+//             });
+//         }
 
-        //   pathSequence.sort(function(a, b){return a-b});
-        console.log("pathSequence", pathSequence);
-        res.json(pathSequence);
-    });
-});
+//         //   pathSequence.sort(function(a, b){return a-b});
+//         console.log("pathSequence", pathSequence);
+//         res.json(pathSequence);
+//     });
+// });
 
 
 
@@ -16492,17 +16820,17 @@ app.get('/seq/:_seqID', function (req, res) {
 //     return Math.floor(Math.random() * Math.floor(max));
 //   }
   
-app.post('/netradiodetails', function (req, res) {
-    let streamurl = req.body.url;
+// app.post('/netradiodetails', function (req, res) {
+//     let streamurl = req.body.url;
     
-    // deprecated for now, lib has a bad vuln
-    // internetradio.getStationInfo(streamurl, function(error, station) {
-    //     console.log(station);
-    //     res.send(station);
-    //   }, internetradio.StreamSource.SHOUTCAST_V2);
+//     // deprecated for now, lib has a bad vuln
+//     // internetradio.getStationInfo(streamurl, function(error, station) {
+//     //     console.log(station);
+//     //     res.send(station);
+//     //   }, internetradio.StreamSource.SHOUTCAST_V2);
 
 
-});
+// });
 
 // app.post('/netradioheaders', function (req, res) { //no workie
 //     let streamurl = req.body.url;

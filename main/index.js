@@ -26,6 +26,7 @@
     window.previewGLTF = previewGLTF;
     window.logout = logout;
     window.newText = newText;
+    window.removeItem = removeItem;
 
     var cookie = Cookies.get();
     var type = getParameterByName("type", window.location.href); //these params used for routing in bigSwitch
@@ -8413,7 +8414,7 @@ function showGroup() {
         let addButton = '';
         let arr = [];
         let groupArr = [];
-        console.log("groupData: " + JSON.stringify(response.data));
+        console.log("groupData: " + JSON.stringify(response.data.items.length));
         if (response.data.type.toLowerCase().includes("picture")) {
             grouptype = pictype;
             let responseArr = response.data.image_items;
