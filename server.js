@@ -327,23 +327,40 @@ io.on('connection', function(socket) {
                     } else {    //maybe do lookup on join? 
                         // var oo_id = ObjectId.createFromHexString(payload.userId);
                         var oo_id = ObjectId.createFromHexString(payload.userId);
-                        db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-                            if (err != null) {
-                                socket.on("disconnect", (reason) => {
-                                    console.log("closing connection because userlookup failed");
-                                });
-                            } else {
-                                console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-                                console.log(socket.id + " named " + socket.uname + " tryna join " + rm );
-                                socket.join(rm);
-                                socket.room = room;
-                                room = rm; //set global room value for this socket, since we can only be in one at a time
-                                socket.userID = payload.userId;
-                                io.to(room).emit('user joined', socket.uname, room);
-                            }
-                        });
+                        (async () => {
+                          try {
+                            const query = {"_id": oo_id};
+                            const user = await RunDataQuery("users", "findOne", query);
+                            console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
+                            console.log(socket.id + " named " + socket.uname + " tryna join " + rm );
+                            socket.join(rm);
+                            socket.room = room;
+                            room = rm; //set global room value for this socket, since we can only be in one at a time
+                            socket.userID = payload.userId;
+                            io.to(room).emit('user joined', socket.uname, room);
+                          } catch (e) {
+                            console.log("user not found error! " + e);
+                            socket.on("disconnect", (reason) => {
+                              console.log("closing connection because userlookup failed");
+                            });
+                          }
+                        })();
+                        // db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
+                        //     if (err != null) {
+                        //         socket.on("disconnect", (reason) => {
+                        //             console.log("closing connection because userlookup failed");
+                        //         });
+                        //     } else {
+                        //         console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
+                        //         console.log(socket.id + " named " + socket.uname + " tryna join " + rm );
+                        //         socket.join(rm);
+                        //         socket.room = room;
+                        //         room = rm; //set global room value for this socket, since we can only be in one at a time
+                        //         socket.userID = payload.userId;
+                        //         io.to(room).emit('user joined', socket.uname, room);
+                        //     }
+                        // });
                     }
-                    // next();
                 } else {
                     socket.on("disconnect", (reason) => {
                         console.log("closing connection because no userID in payload " + reason);
@@ -435,122 +452,6 @@ io.on('connection', function(socket) {
     });
 
 });
-//*/
-
-// function tokenAuthentication(token) { //use for route security?
-//     jwt.verify(token, process.env.JWT_SECRET, function (err, payload) {
-//         console.log(JSON.stringify(payload));
-//         if (payload) {
-           
-//             if (payload.userId != null){
-//                 console.log("gotsa payload.userId : " + payload.userId);
-//                 var oo_id = ObjectId.createFromHexString(payload.userId);
-//                 db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-//                     if (err != null) {
-//                         req.session.error = 'Access denied!';
-//                         console.log("token authentication failed! User ID not found");
-//                         // res.send('noauth');
-//                         return ("no");
-//                     } else {
-//                         console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-//                         if (user.status == "validated") {
-//                         // userStatus = "subscriber";
-//                         console.log("gotsa subscriber!");
-//                         return ("yes");
-//                         } else {
-//                             req.session.error = 'Access denied!';
-//                             console.log("token authentication failed! not a subscriber");
-//                             return ("maybe");   
-//                         }
-//                     }
-//                 });
-//                 // next();
-//             } else {
-//                 return ("nope");
-//             }
-//         } else {
-//             return ("nooo");
-//         }
-//     });
-// }
-
-// function checkAuthentication(req) { //maybe needed later?  can just get session info in route
-
-//     if (req.session.user && req.session.user.status == "validated") { //check using session cookie
-//         if (requirePayment) { 
-//             if (req.session.user.paymentStatus == "ok") {
-//                 // next();
-//                 return "payment auth OK " + JSON.stringify(req.session.user);
-//             } else {
-//                 req.session.error = 'Access denied! - payment status not ok';
-//                 res.send('payment status not OK');
-//                 return "payment status not OK";       
-//             }
-//         } else {
-//             console.log("authenticated!");
-//             // next();
-//             return "auth OK";
-//         }
-//     } else {
-//         if (req.headers['x-access-token'] != null) {  //check using json web token
-//             var token = req.headers['x-access-token'];
-//             console.log("req.headers.token: " + token);
-//             jwt.verify(token, process.env.JWT_SECRET, function (err, payload) {
-//                     console.log(JSON.stringify(payload));
-//                     if (payload) {
-//                         // user.findById(payload.userId).then(
-//                         //     (doc)=>{
-//                         //         req.user=doc;
-//                         //         next();
-//                         //     }
-//                         // )
-//                         // console.log("gotsa token payload: " + req.session.user._id + " vs " +  payload.userId);
-//                         if (payload.userId != null){
-//                             console.log("gotsa payload.userId : " + payload.userId);
-//                             var oo_id = ObjectId.createFromHexString(payload.userId);
-//                             db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-//                                 if (err != null) {
-//                                     req.session.error = 'Access denied!';
-//                                     console.log("token authentication failed! User ID not found");
-//                                     // res.send('noauth');
-//                                     return "token auth failed, userID not found";
-//                                 } else {
-//                                     console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-//                                     if (user.status == "validated") {
-//                                     // userStatus = "subscriber";
-//                                     console.log("gotsa subscriber!");
-//                                     // next();
-//                                     return "token auth OK";
-//                                     } else {
-//                                         req.session.error = 'Access denied!';
-//                                         console.log("token authentication failed! not a subscriber");
-//                                         // res.send('noauth');
-//                                         return "token auth failed";    
-//                                     }
-//                                 }
-//                             });
-//                             // next();
-//                         } else {
-//                             req.session.error = 'Access denied!';
-//                             console.log("token authentication failed! headers: " + JSON.stringify(req.headers));
-//                             // res.send('noauth');
-//                             return "token auth failed";
-//                         }
-//                     } else {
-//                         req.session.error = 'Access denied!';
-//                         console.log("token authentication failed! headers: " + JSON.stringify(req.headers));
-//                         // res.send('noauth');
-//                         return "token auth failed";
-//                     }
-//             });
-//         } else {
-//             req.session.error = 'Access denied!';
-//             console.log("authentication failed! No cookie or token found");
-//             // res.send('noauth');
-//             return "token auth failed";
-//         }
-//     }
-// }
 
 
 export function requiredAuthentication(req, res, next) { //primary auth method, used as argument in the routes below
