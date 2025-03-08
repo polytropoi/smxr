@@ -1,10 +1,11 @@
-//hoisted mongo io
+//db connection and i/o 
+
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 require('dotenv').config();
 
 import { MongoClient, ServerApiVersion, ObjectId } from "mongodb";
-// import { db } from "../server.js";
+
 /////////// official mongo driver, going here...
 const uri = process.env.MONGO_URL || "";
 const client = new MongoClient(uri, {
@@ -16,11 +17,8 @@ const client = new MongoClient(uri, {
 });
 const db = client.db(); 
 
-export async function RunDataQuery(coll,type,query,update) {  //TODO Sqlite!
-    // if (!db) {
-    //     console.log("wheres the db?");
-    //     db = client.db();
-    // }
+export async function RunDataQuery(coll,type,query,update) {  //TODO pass in sort/limit... and add Sqlite!
+
     let q = JSON.stringify(query);
     let u = "...";
     if (coll == "traffic") {

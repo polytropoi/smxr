@@ -9241,491 +9241,735 @@ app.post('/updategroup/', requiredAuthentication, function (req, res) {
 app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
 
     console.log('tryna return user group : ' + req.params.p_id);
-    var pID = req.params.p_id;
-    var o_id = ObjectId.createFromHexString(pID);
+    // var pID = req.params.p_id;
+    const o_id = ObjectId.createFromHexString(req.params.p_id.toString());
 
-    db_old.groups.findOne({"_id": o_id}, function(err, group) {
-        if (err || !group) {
-            console.log("error getting group item: " + err);
-        } else {
-            if (group.items != null) {
-                group.items = group.items.map(function (id) {
-                    return ObjectId.createFromHexString(id);
-                });
-                if (group.lastUpdate != null) {
-                    group.lastUpdateTimestamp = group.lastUpdate;
+    (async () => {
+      try {
+        const query = {"_id": o_id};
+
+        const group = await RunDataQuery("groups", "findOne", query);
+        if (group && group.items) {
+          group.items = group.items.map(convertStringToObjectID);
+          if (group.lastUpdate != null) { //?
+            group.lastUpdateTimestamp = group.lastUpdate;
+          }
+          console.log("tryna fetch group " + JSON.stringify(group));
+          ///////////////////////////// audio group
+          const gquery = {"_id": { $in: group.items}};
+          if (group.type.toLowerCase() == "audio") {
+            
+            const audio_items = await RunDataQuery("audio_items", "find", gquery);
+            for (var i = 0; i < audio_items.length; i++) {
+              if (group.groupdata) {
+                var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+                        return obj.itemID === audio_items[i]._id.toString();
+                    })[0];
+                    if (obj != undefined && obj.itemIndex) {
+                        audio_items[i].itemIndex = obj.itemIndex;
+                    } else {
+                        audio_items[i].itemIndex = i;
+                    }
+              }
+              if (audio_items[i].clipDuration = {}) {
+                  audio_items[i].clipDuration = "";
+              }
+              var item_string_filename = JSON.stringify(audio_items[i].filename);
+              item_string_filename = item_string_filename.replace(/\"/g, "");
+              var item_string_filename_ext = getExtension(item_string_filename);
+              var expiration = new Date();
+              expiration.setMinutes(expiration.getMinutes() + 30);
+              var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+              // console.log("tryna jack in audio " + baseName + " to a group of " + group.type);
+              var mp3Name = baseName + '.mp3';
+              var oggName = baseName + '.ogg';
+              var pngName = baseName + '.png';
+              
+              const urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name,6000);
+              const urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName,6000);
+              const urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName,6000);
+              audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
+              audio_items[i].URLogg = urlOgg;
+              audio_items[i].URLpng = urlPng;
+              // currentIndex++;
+            }
+            audio_items.sort(function(a, b) {
+                return a.itemIndex - b.itemIndex;
+            });
+            group.audio_items = audio_items;
+            res.json(group);
+          ///////////////////////////// video group
+          } else if (group.type.toLowerCase() == "video") {
+            const video_items = await RunDataQuery("audio_items", "find", gquery);
+            for (var i = 0; i < video_items.length; i++) {
+              if (group.groupdata) {
+                  var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+                      return obj.itemID === video_items[i]._id.toString();
+                  })[0];
+                  if (obj != undefined && obj.itemIndex) {
+                      video_items[i].itemIndex = obj.itemIndex;
+                      console.log(video_items[i].itemIndex + "index for " + video_items[i]._id.toString() );
+                  } else {
+                      video_items[i].itemIndex = i;
+                      console.log(video_items[i].itemIndex + "natchrul index for " + video_items[i]._id.toString() );
+                  }
+              }
+              var item_string_filename = JSON.stringify(video_items[i].filename);
+              item_string_filename = item_string_filename.replace(/\"/g, "");
+              var item_string_filename_ext = getExtension(item_string_filename);
+              var expiration = new Date();
+              expiration.setMinutes(expiration.getMinutes() + 30);
+              var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+              console.log("tryna jack in video " + baseName + " to a group of " + group.type.toLowerCase());
+              var vidName = baseName + '.mp3';
+
+              video_items[i].vUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, 6000);
+            
+            }
+            video_items.sort(function(a, b) {
+                return a.itemIndex - b.itemIndex;
+            });
+            group.video_items = video_items;
+            group.video_items.sort(function(a, b) {
+                return a.itemIndex - b.itemIndex;
+            });
+            res.json(group);
+          ///////////////////////////// pic group  
+          } else if (group.type.toLowerCase() == "pictures") {
+            const image_items = await RunDataQuery("image_items", "find", gquery);
+            for (var i = 0; i < image_items.length; i++) {
+              if (group.groupdata) {
+                  var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+                      return obj.itemID === image_items[i]._id.toString();
+                  })[0];
+                  if (obj != undefined && obj.itemIndex) {
+                      image_items[i].itemIndex = obj.itemIndex;
+                      console.log(image_items[i].itemIndex + "index for " + image_items[i]._id.toString() );
+                  } else {
+                      image_items[i].itemIndex = i;
+                      console.log(image_items[i].itemIndex + "natchrul index for " + image_items[i]._id.toString() );
+                  }
+              }
+              var item_string_filename = JSON.stringify(image_items[i].filename);
+              item_string_filename = item_string_filename.replace(/\"/g, "");
+              var item_string_filename_ext = getExtension(item_string_filename);
+            
+              var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+              console.log(baseName);
+              var thumbName = 'thumb.' + baseName + item_string_filename_ext;
+              var halfName = 'half.' + baseName + item_string_filename_ext;
+              
+              image_items[i].urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName,6000);
+              image_items[i].urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName,6000);
+              }
+              image_items.sort(function(a, b) {
+                  return a.itemIndex - b.itemIndex;
+              });
+      
+              group.image_items = image_items;
+              group.image_items.sort(function(a, b) {
+                  return a.itemIndex - b.itemIndex;
+              });
+              res.json(group);
+            ///////////////////////////// location group    
+            } else if (group.type.toLowerCase() == "location") {
+              const location_items = await RunDataQuery("locations", "find", gquery);
+              for (var i = 0; i < location_items.length; i++) {
+                if (group.groupdata) {
+                    var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+                        return obj.itemID === location_items[i]._id.toString();
+                    })[0];
+                    if (obj != undefined && obj.itemIndex) {
+                        location_items[i].itemIndex = obj.itemIndex;
+                        console.log(location_items[i].itemIndex + "index for " + location_items[i]._id.toString());
+                    } else {
+                        location_items[i].itemIndex = i;
+                        console.log(location_items[i].itemIndex + "natchrul index for " + location_items[i]._id.toString());
+                    }
+                    }
                 }
-                if (group.type.toLowerCase() == "audio") {
-                    console.log("tryna get some audiogroup items: " + JSON.stringify(group.items));
-                    db_old.audio_items.find({'_id': { $in: group.items}}).toArray(function (err, audio_items) {
-                        if (err || !audio_items) {
-                            console.log("error getting audio items: " + err);
-                        } else {
-                            var currentIndex = 0;
-                            (async () => {
-                                for (var i = 0; i < audio_items.length; i++) {
-                                    if (group.groupdata) {
-                                        var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                            return obj.itemID === audio_items[i]._id.toString();
-                                        })[0];
-                                        if (obj != undefined && obj.itemIndex) {
-                                            audio_items[i].itemIndex = obj.itemIndex;
-                                        } else {
-                                            audio_items[i].itemIndex = i;
-                                        }
-                                    }
-                                    if (audio_items[i].clipDuration = {}) {
-                                        audio_items[i].clipDuration = "";
-                                    }
-                                    var item_string_filename = JSON.stringify(audio_items[i].filename);
-                                    item_string_filename = item_string_filename.replace(/\"/g, "");
-                                    var item_string_filename_ext = getExtension(item_string_filename);
-                                    var expiration = new Date();
-                                    expiration.setMinutes(expiration.getMinutes() + 30);
-                                    var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                    // console.log("tryna jack in audio " + baseName + " to a group of " + group.type);
-                                    var mp3Name = baseName + '.mp3';
-                                    var oggName = baseName + '.ogg';
-                                    var pngName = baseName + '.png';
+                location_items.sort(function (a, b) {
+                  return a.itemIndex - b.itemIndex;
+                });
+              
+                group.locations = location_items;
+                group.locations.sort(function (a, b) {
+                    return a.itemIndex - b.itemIndex;
+                });
+              res.json(group);
+            
+            } else if (group.type.toLowerCase() == "text") {
+              const text_items = await RunDataQuery("text_items", "find", gquery);
+              // for (var i = 0; i < text_items.length; i++) {
+              //   if (group.groupdata) {
+              //       var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+              //           return obj.itemID === text_items[i]._id.toString();
+              //       })[0];
+              //       if (obj != undefined && obj.itemIndex) {
+              //           text_items[i].itemIndex = obj.itemIndex;
+              //           console.log(text_items[i].itemIndex + "index for " + text_items[i]._id.toString());
+              //       } else {
+              //           text_items[i].itemIndex = i;
+              //           console.log(text_items[i].itemIndex + "natchrul index for " + text_items[i]._id.toString());
+              //             }
+              //         }
+              //     }
+              //   text_items.sort(function (a, b) {
+              //       return a.itemIndex - b.itemIndex;
+              //   });
+            
+                group.text_items = text_items;
+                group.text_items.sort(function (a, b) {
+                return a.itemIndex - b.itemIndex;
+                });
+                res.json(group);
+                
+            } else if (group.type.toLowerCase() == "people") {
+              const people = await RunDataQuery("people", "find", gquery);
+              // for (var i = 0; i < people.length; i++) {
+              //   if (group.groupdata) {
+              //       var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+              //           return obj.itemID === people[i]._id.toString();
+              //       })[0];
+              //       if (obj != undefined && obj.itemIndex) {
+              //           people[i].itemIndex = obj.itemIndex;
+              //           console.log(people[i].itemIndex + "index for " + people[i]._id.toString());
+              //       } else {
+              //           people[i].itemIndex = i;
+              //           console.log(people[i].itemIndex + "natchrul index for " + people[i]._id.toString());
+              //       }
+              //   }
+              // }
+              // people.sort(function (a, b) {
+              //   return a.itemIndex - b.itemIndex;
+              //     });
+              
+              group.people = people;
+              group.people.sort(function (a, b) {
+                  return a.itemIndex - b.itemIndex;
+              });
+              res.json(group);
+            } else if (group.type.toLowerCase() == "scenes") {
+              const scenes = await RunDataQuery("scenes", "find", gquery);
+
+            } else if (group.type.toLowerCase() == "objects") {
+              const obj_items = await RunDataQuery("scenes", "find", gquery);
+              // for (var i = 0; i < obj_items.length; i++) {
+              //   if (group.groupdata) {
+              //       var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+              //           return obj.itemID === obj_items[i]._id.toString();
+              //       })[0];
+              //       if (obj != undefined && obj.itemIndex) {
+              //           obj_items[i].itemIndex = obj.itemIndex;
+              //           console.log(obj_items[i].itemIndex + "index for " + obj_items[i]._id.toString());
+              //       } else {
+              //           obj_items[i].itemIndex = i;
+              //           console.log(obj_items[i].itemIndex + "natchrul index for " + obj_items[i]._id.toString());
+              //       }
+              //     }
+              // }
+              // obj_items.sort(function (a, b) {
+              //     return a.itemIndex - b.itemIndex;
+              // });
+              group.obj_items = obj_items;
+              group.obj_items.sort(function (a, b) {
+                  return a.itemIndex - b.itemIndex;
+              });
+              res.json(group);
+
+            }
+        }
+      } catch (e) {
+        console.log("error geting group data " + e);
+        res.send("errror geting group data " + e);
+      }
+    })();
+
+    //////////old way below!
+//     db_old.groups.findOne({"_id": o_id}, function(err, group) {
+//         if (err || !group) {
+//             console.log("error getting group item: " + err);
+//         } else {
+//             if (group.items != null) {
+//                 group.items = group.items.map(function (id) {
+//                     return ObjectId.createFromHexString(id);
+//                 });
+//                 if (group.lastUpdate != null) {
+//                     group.lastUpdateTimestamp = group.lastUpdate;
+//                 }
+//                 if (group.type.toLowerCase() == "audio") {
+//                     console.log("tryna get some audiogroup items: " + JSON.stringify(group.items));
+//                     db_old.audio_items.find({'_id': { $in: group.items}}).toArray(function (err, audio_items) {
+//                         if (err || !audio_items) {
+//                             console.log("error getting audio items: " + err);
+//                         } else {
+//                             var currentIndex = 0;
+//                             (async () => {
+
+
+//                                 for (var i = 0; i < audio_items.length; i++) {
+//                                     if (group.groupdata) {
+//                                         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                             return obj.itemID === audio_items[i]._id.toString();
+//                                         })[0];
+//                                         if (obj != undefined && obj.itemIndex) {
+//                                             audio_items[i].itemIndex = obj.itemIndex;
+//                                         } else {
+//                                             audio_items[i].itemIndex = i;
+//                                         }
+//                                     }
+//                                     if (audio_items[i].clipDuration = {}) {
+//                                         audio_items[i].clipDuration = "";
+//                                     }
+//                                     var item_string_filename = JSON.stringify(audio_items[i].filename);
+//                                     item_string_filename = item_string_filename.replace(/\"/g, "");
+//                                     var item_string_filename_ext = getExtension(item_string_filename);
+//                                     var expiration = new Date();
+//                                     expiration.setMinutes(expiration.getMinutes() + 30);
+//                                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                                     // console.log("tryna jack in audio " + baseName + " to a group of " + group.type);
+//                                     var mp3Name = baseName + '.mp3';
+//                                     var oggName = baseName + '.ogg';
+//                                     var pngName = baseName + '.png';
                                     
 
-                                    const urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name,6000);
-                                    const urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName,6000);
-                                    const urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName,6000);
-                                    audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-                                    audio_items[i].URLogg = urlOgg;
-                                    audio_items[i].URLpng = urlPng;
+//                                     const urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name,6000);
+//                                     const urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName,6000);
+//                                     const urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName,6000);
+//                                     audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
+//                                     audio_items[i].URLogg = urlOgg;
+//                                     audio_items[i].URLpng = urlPng;
                                    
-                                    // var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, Expires: 60000});
-                                    // var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, Expires: 60000});
-                                    // var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, Expires: 60000});
+//                                     // var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, Expires: 60000});
+//                                     // var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, Expires: 60000});
+//                                     // var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, Expires: 60000});
 
        
-                                    currentIndex++;
-                                }
+//                                     currentIndex++;
+//                                 }
                            
-                                audio_items.sort(function(a, b) {
+//                                 audio_items.sort(function(a, b) {
                                     
-                                    return a.itemIndex - b.itemIndex;
-                                });
+//                                     return a.itemIndex - b.itemIndex;
+//                                 });
 
-                                group.audio_items = audio_items;
-                                res.json(group);
-                                // console.log("returning group_item : " + JSON.stringify(group));
-                            })();
+//                                 group.audio_items = audio_items;
+//                                 res.json(group);
+//                                 // console.log("returning group_item : " + JSON.stringify(group));
+//                             })();
                             
-                        }
-//                            audio_items.sort(function(a, b) {
-//                                return a.itemIndex - b.itemIndex;
-//                            });
+//                         }
+// //                            audio_items.sort(function(a, b) {
+// //                                return a.itemIndex - b.itemIndex;
+// //                            });
                        
-                    });
-                } else if (group.type.toLowerCase() == "video") {
-                    db_old.video_items.find({'_id': { $in: group.items}}).toArray(function (err, video_items) {
-                        if (err || !video_items) {
-                            console.log("error getting video items: " + err);
-                        } else {
-                            (async () => { 
-                                for (var i = 0; i < video_items.length; i++) {
-                                    if (group.groupdata) {
-                                        var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                            return obj.itemID === video_items[i]._id.toString();
-                                        })[0];
-                                        if (obj != undefined && obj.itemIndex) {
-                                            video_items[i].itemIndex = obj.itemIndex;
-                                            console.log(video_items[i].itemIndex + "index for " + video_items[i]._id.toString() );
-                                        } else {
-                                            video_items[i].itemIndex = i;
-                                            console.log(video_items[i].itemIndex + "natchrul index for " + video_items[i]._id.toString() );
-                                        }
-                                    }
-                                    var item_string_filename = JSON.stringify(video_items[i].filename);
-                                    item_string_filename = item_string_filename.replace(/\"/g, "");
-                                    var item_string_filename_ext = getExtension(item_string_filename);
-                                    var expiration = new Date();
-                                    expiration.setMinutes(expiration.getMinutes() + 30);
-                                    var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                    console.log("tryna jack in video " + baseName + " to a group of " + group.type.toLowerCase());
-                                    var vidName = baseName + '.mp3';
+//                     });
+//                 } else if (group.type.toLowerCase() == "video") {
+//                     db_old.video_items.find({'_id': { $in: group.items}}).toArray(function (err, video_items) {
+//                         if (err || !video_items) {
+//                             console.log("error getting video items: " + err);
+//                         } else {
+//                             (async () => { 
+//                                 for (var i = 0; i < video_items.length; i++) {
+//                                     if (group.groupdata) {
+//                                         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                             return obj.itemID === video_items[i]._id.toString();
+//                                         })[0];
+//                                         if (obj != undefined && obj.itemIndex) {
+//                                             video_items[i].itemIndex = obj.itemIndex;
+//                                             console.log(video_items[i].itemIndex + "index for " + video_items[i]._id.toString() );
+//                                         } else {
+//                                             video_items[i].itemIndex = i;
+//                                             console.log(video_items[i].itemIndex + "natchrul index for " + video_items[i]._id.toString() );
+//                                         }
+//                                     }
+//                                     var item_string_filename = JSON.stringify(video_items[i].filename);
+//                                     item_string_filename = item_string_filename.replace(/\"/g, "");
+//                                     var item_string_filename_ext = getExtension(item_string_filename);
+//                                     var expiration = new Date();
+//                                     expiration.setMinutes(expiration.getMinutes() + 30);
+//                                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                                     console.log("tryna jack in video " + baseName + " to a group of " + group.type.toLowerCase());
+//                                     var vidName = baseName + '.mp3';
 
-                                    video_items[i].vUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, 6000);
-                                    // var urlVid = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, Expires: 60000});
-                                    // video_items[i].vUrl = urlVid; //jack in teh signed urls into the object array
+//                                     video_items[i].vUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, 6000);
+//                                     // var urlVid = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, Expires: 60000});
+//                                     // video_items[i].vUrl = urlVid; //jack in teh signed urls into the object array
 
-                                }
-                                video_items.sort(function(a, b) {
-                                    return a.itemIndex - b.itemIndex;
-                                });
+//                                 }
+//                                 video_items.sort(function(a, b) {
+//                                     return a.itemIndex - b.itemIndex;
+//                                 });
 
-                                group.video_items = video_items;
-                                group.video_items.sort(function(a, b) {
-                                    return a.itemIndex - b.itemIndex;
-                                });
-                                res.json(group);
-                                // console.log("returning group_item : " + group);
-                            })();
-                        }
-//                            video_items.sort(function(a, b) {
-//                                return a.itemIndex - b.itemIndex;
-//                            });
+//                                 group.video_items = video_items;
+//                                 group.video_items.sort(function(a, b) {
+//                                     return a.itemIndex - b.itemIndex;
+//                                 });
+//                                 res.json(group);
+//                                 // console.log("returning group_item : " + group);
+//                             })();
+//                         }
+// //                            video_items.sort(function(a, b) {
+// //                                return a.itemIndex - b.itemIndex;
+// //                            });
                       
-                    });
-                } else if (group.type.toLowerCase().includes("picture")) {
-                    db_old.image_items.find({'_id': { $in: group.items}}).toArray(function (err, image_items) {
-                        if (err || !image_items) {
-                            console.log("error getting image items: " + err);
-                        } else {
-                            (async () => {
-                                for (var i = 0; i < image_items.length; i++) {
-                                    if (group.groupdata) {
-                                        var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                            return obj.itemID === image_items[i]._id.toString();
-                                        })[0];
-                                        if (obj != undefined && obj.itemIndex) {
-                                            image_items[i].itemIndex = obj.itemIndex;
-                                            console.log(image_items[i].itemIndex + "index for " + image_items[i]._id.toString() );
-                                        } else {
-                                            image_items[i].itemIndex = i;
-                                            console.log(image_items[i].itemIndex + "natchrul index for " + image_items[i]._id.toString() );
-                                        }
-                                    }
-                                    var item_string_filename = JSON.stringify(image_items[i].filename);
-                                    item_string_filename = item_string_filename.replace(/\"/g, "");
-                                    var item_string_filename_ext = getExtension(item_string_filename);
-                                    //var expiration = new Date();
-                                    //expiration.setMinutes(expiration.getMinutes() + 30);
-                                    var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                    console.log(baseName);
-                                    var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-                                    var halfName = 'half.' + baseName + item_string_filename_ext;
+//                     });
+//                 } else if (group.type.toLowerCase().includes("picture")) {
+//                     db_old.image_items.find({'_id': { $in: group.items}}).toArray(function (err, image_items) {
+//                         if (err || !image_items) {
+//                             console.log("error getting image items: " + err);
+//                         } else {
+//                             (async () => {
+//                                 for (var i = 0; i < image_items.length; i++) {
+//                                     if (group.groupdata) {
+//                                         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                             return obj.itemID === image_items[i]._id.toString();
+//                                         })[0];
+//                                         if (obj != undefined && obj.itemIndex) {
+//                                             image_items[i].itemIndex = obj.itemIndex;
+//                                             console.log(image_items[i].itemIndex + "index for " + image_items[i]._id.toString() );
+//                                         } else {
+//                                             image_items[i].itemIndex = i;
+//                                             console.log(image_items[i].itemIndex + "natchrul index for " + image_items[i]._id.toString() );
+//                                         }
+//                                     }
+//                                     var item_string_filename = JSON.stringify(image_items[i].filename);
+//                                     item_string_filename = item_string_filename.replace(/\"/g, "");
+//                                     var item_string_filename_ext = getExtension(item_string_filename);
+//                                     //var expiration = new Date();
+//                                     //expiration.setMinutes(expiration.getMinutes() + 30);
+//                                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                                     console.log(baseName);
+//                                     var thumbName = 'thumb.' + baseName + item_string_filename_ext;
+//                                     var halfName = 'half.' + baseName + item_string_filename_ext;
 
 
-                                    // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName, Expires: 6000});
-                                    // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName, Expires: 6000});
-                                    image_items[i].urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName,6000);
-                                    image_items[i].urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName,6000);
-                                }
-                                image_items.sort(function(a, b) {
-                                    return a.itemIndex - b.itemIndex;
-                                });
+//                                     // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName, Expires: 6000});
+//                                     // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName, Expires: 6000});
+//                                     image_items[i].urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName,6000);
+//                                     image_items[i].urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName,6000);
+//                                 }
+//                                 image_items.sort(function(a, b) {
+//                                     return a.itemIndex - b.itemIndex;
+//                                 });
                         
-                                group.image_items = image_items;
-                                group.image_items.sort(function(a, b) {
-                                    return a.itemIndex - b.itemIndex;
-                                });
-                                res.json(group);
-                                // console.log("returning group_item : " + group);
+//                                 group.image_items = image_items;
+//                                 group.image_items.sort(function(a, b) {
+//                                     return a.itemIndex - b.itemIndex;
+//                                 });
+//                                 res.json(group);
+//                                 // console.log("returning group_item : " + group);
                             
-                            })();
-                        }
-                    });
+//                             })();
+//                         }
+//                     });
 
-            } else if (group.type.toLowerCase() == "location") {
-                    console.log("tryna get locations");
-                    db_old.locations.find({'_id': {$in: group.items}}).toArray(function (err, location_items) {
-                        if (err || !location_items) {
-                            console.log("error getting image items: " + err);
-                        } else {
-                            console.log("found locations : " + location_items.length);
-                            for (var i = 0; i < location_items.length; i++) {
-                                if (group.groupdata) {
-                                    var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                        return obj.itemID === location_items[i]._id.toString();
-                                    })[0];
-                                    if (obj != undefined && obj.itemIndex) {
-                                        location_items[i].itemIndex = obj.itemIndex;
-                                        console.log(location_items[i].itemIndex + "index for " + location_items[i]._id.toString());
-                                    } else {
-                                        location_items[i].itemIndex = i;
-                                        console.log(location_items[i].itemIndex + "natchrul index for " + location_items[i]._id.toString());
-                                    }
-                                }
-                            }
-                            location_items.sort(function (a, b) {
-                                return a.itemIndex - b.itemIndex;
-                            });
-                        }
-//                            video_items.sort(function(a, b) {
-//                                return a.itemIndex - b.itemIndex;
-//                            });
-                        group.locations = location_items;
-                        group.locations.sort(function (a, b) {
-                            return a.itemIndex - b.itemIndex;
-                        });
-                        res.json(group);
-                        console.log("returning group_item : " + group);
-                    });
-                } else if (group.type.toLowerCase() == "people") {
-                    console.log("tryna get people");
-                    db_old.people.find({'_id': {$in: group.items}}).toArray(function (err, people) {
-                        if (err || !people) {
-                            console.log("error getting text items: " + err);
-                            res.send("error getting text items: " + err);
-                        } else {
-                            console.log("found locations : " + people.length);
-                            for (var i = 0; i < people.length; i++) {
-                                if (group.groupdata) {
-                                    var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                        return obj.itemID === text_items[i]._id.toString();
-                                    })[0];
-                                    if (obj != undefined && obj.itemIndex) {
-                                        people[i].itemIndex = obj.itemIndex;
-                                        console.log(people[i].itemIndex + "index for " + text_items[i]._id.toString());
-                                    } else {
-                                        people[i].itemIndex = i;
-                                        console.log(people[i].itemIndex + "natchrul index for " + people[i]._id.toString());
-                                    }
-                                }
-                            }
-                            people.sort(function (a, b) {
-                                return a.itemIndex - b.itemIndex;
-                            });
-                        }
-//                            video_items.sort(function(a, b) {
-//                                return a.itemIndex - b.itemIndex;
-//                            });
-                        group.people = people;
-                        group.people.sort(function (a, b) {
-                            return a.itemIndex - b.itemIndex;
-                        });
-                        res.json(group);
-                        console.log("returning group_item : " + group);
-                    });
-                } else if (group.type.toLowerCase() == "text") {
-                    console.log("tryna get texts");
-                    db_old.text_items.find({'_id': {$in: group.items}}).toArray(function (err, text_items) {
-                        if (err || !text_items) {
-                            console.log("error getting text items: " + err);
-                            res.send("error getting text items: " + err);
-                        } else {
-                            console.log("found locations : " + text_items.length);
-                            for (var i = 0; i < text_items.length; i++) {
-                                if (group.groupdata) {
-                                    var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                        return obj.itemID === text_items[i]._id.toString();
-                                    })[0];
-                                    if (obj != undefined && obj.itemIndex) {
-                                        text_items[i].itemIndex = obj.itemIndex;
-                                        console.log(text_items[i].itemIndex + "index for " + text_items[i]._id.toString());
-                                    } else {
-                                        text_items[i].itemIndex = i;
-                                        console.log(text_items[i].itemIndex + "natchrul index for " + text_items[i]._id.toString());
-                                    }
-                                }
-                            }
-                            text_items.sort(function (a, b) {
-                                return a.itemIndex - b.itemIndex;
-                            });
-                        }
-//                            video_items.sort(function(a, b) {
-//                                return a.itemIndex - b.itemIndex;
-//                            });
-                        group.text_items = text_items;
-                        group.text_items.sort(function (a, b) {
-                            return a.itemIndex - b.itemIndex;
-                        });
-                        res.json(group);
-                        console.log("returning group_item : " + group);
-                    });
-                } else if (group.type.toLowerCase() == "scenes") {
-                    // console.log("tryna get scenes");
-                    let scenes = [];
-                    db_old.scenes.find({'_id': {$in: group.items}}).toArray(function (err, scene_items) {
-                        if (err || !scene_items) {
-                            console.log("error getting scenes items: " + err);
-                            res.send("error getting scenes items: " + err);
-                        } else {
-                            // console.log("found scenes : " + JSON.stringify(scene_item));
-                            let index = 0;
-                            async.each (scene_items, function (scene_item, callbackz) {
-                                let scene = {};
-                                scene._id = scene_item._id;
-                                scene.sceneTitle = scene_item.sceneTitle;
-                                scene.short_id = scene_item.short_id;
+//             } else if (group.type.toLowerCase() == "location") {
+//                     console.log("tryna get locations");
+//                     db_old.locations.find({'_id': {$in: group.items}}).toArray(function (err, location_items) {
+//                         if (err || !location_items) {
+//                             console.log("error getting image items: " + err);
+//                         } else {
+//                             console.log("found locations : " + location_items.length);
+//                             for (var i = 0; i < location_items.length; i++) {
+//                                 if (group.groupdata) {
+//                                     var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                         return obj.itemID === location_items[i]._id.toString();
+//                                     })[0];
+//                                     if (obj != undefined && obj.itemIndex) {
+//                                         location_items[i].itemIndex = obj.itemIndex;
+//                                         console.log(location_items[i].itemIndex + "index for " + location_items[i]._id.toString());
+//                                     } else {
+//                                         location_items[i].itemIndex = i;
+//                                         console.log(location_items[i].itemIndex + "natchrul index for " + location_items[i]._id.toString());
+//                                     }
+//                                 }
+//                             }
+//                             location_items.sort(function (a, b) {
+//                                 return a.itemIndex - b.itemIndex;
+//                             });
+//                         }
+// //                            video_items.sort(function(a, b) {
+// //                                return a.itemIndex - b.itemIndex;
+// //                            });
+//                         group.locations = location_items;
+//                         group.locations.sort(function (a, b) {
+//                             return a.itemIndex - b.itemIndex;
+//                         });
+//                         res.json(group);
+//                         console.log("returning group_item : " + group);
+//                     });
+//                 } else if (group.type.toLowerCase() == "people") {
+//                     console.log("tryna get people");
+//                     db_old.people.find({'_id': {$in: group.items}}).toArray(function (err, people) {
+//                         if (err || !people) {
+//                             console.log("error getting text items: " + err);
+//                             res.send("error getting text items: " + err);
+//                         } else {
+//                             console.log("found locations : " + people.length);
+//                             for (var i = 0; i < people.length; i++) {
+//                                 if (group.groupdata) {
+//                                     var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                         return obj.itemID === text_items[i]._id.toString();
+//                                     })[0];
+//                                     if (obj != undefined && obj.itemIndex) {
+//                                         people[i].itemIndex = obj.itemIndex;
+//                                         console.log(people[i].itemIndex + "index for " + text_items[i]._id.toString());
+//                                     } else {
+//                                         people[i].itemIndex = i;
+//                                         console.log(people[i].itemIndex + "natchrul index for " + people[i]._id.toString());
+//                                     }
+//                                 }
+//                             }
+//                             people.sort(function (a, b) {
+//                                 return a.itemIndex - b.itemIndex;
+//                             });
+//                         }
+// //                            video_items.sort(function(a, b) {
+// //                                return a.itemIndex - b.itemIndex;
+// //                            });
+//                         group.people = people;
+//                         group.people.sort(function (a, b) {
+//                             return a.itemIndex - b.itemIndex;
+//                         });
+//                         res.json(group);
+//                         console.log("returning group_item : " + group);
+//                     });
+//                 } else if (group.type.toLowerCase() == "text") {
+//                     console.log("tryna get texts");
+//                     db_old.text_items.find({'_id': {$in: group.items}}).toArray(function (err, text_items) {
+//                         if (err || !text_items) {
+//                             console.log("error getting text items: " + err);
+//                             res.send("error getting text items: " + err);
+//                         } else {
+//                             console.log("found locations : " + text_items.length);
+//                             for (var i = 0; i < text_items.length; i++) {
+//                                 if (group.groupdata) {
+//                                     var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                         return obj.itemID === text_items[i]._id.toString();
+//                                     })[0];
+//                                     if (obj != undefined && obj.itemIndex) {
+//                                         text_items[i].itemIndex = obj.itemIndex;
+//                                         console.log(text_items[i].itemIndex + "index for " + text_items[i]._id.toString());
+//                                     } else {
+//                                         text_items[i].itemIndex = i;
+//                                         console.log(text_items[i].itemIndex + "natchrul index for " + text_items[i]._id.toString());
+//                                     }
+//                                 }
+//                             }
+//                             text_items.sort(function (a, b) {
+//                                 return a.itemIndex - b.itemIndex;
+//                             });
+//                         }
+// //                            video_items.sort(function(a, b) {
+// //                                return a.itemIndex - b.itemIndex;
+// //                            });
+//                         group.text_items = text_items;
+//                         group.text_items.sort(function (a, b) {
+//                             return a.itemIndex - b.itemIndex;
+//                         });
+//                         res.json(group);
+//                         console.log("returning group_item : " + group);
+//                     });
+//                 } else if (group.type.toLowerCase() == "scenes") {
+//                     // console.log("tryna get scenes");
+//                     let scenes = [];
+//                     db_old.scenes.find({'_id': {$in: group.items}}).toArray(function (err, scene_items) {
+//                         if (err || !scene_items) {
+//                             console.log("error getting scenes items: " + err);
+//                             res.send("error getting scenes items: " + err);
+//                         } else {
+//                             // console.log("found scenes : " + JSON.stringify(scene_item));
+//                             let index = 0;
+//                             async.each (scene_items, function (scene_item, callbackz) {
+//                                 let scene = {};
+//                                 scene._id = scene_item._id;
+//                                 scene.sceneTitle = scene_item.sceneTitle;
+//                                 scene.short_id = scene_item.short_id;
                                 
-                                if (scene_item.scenePostcards != undefined) {
-                                    let scenePostcard = scene_item.scenePostcards[0];
-                                    db_old.image_items.findOne({'_id': ObjectId.createFromHexString(scenePostcard)}, function(err, pic) {
-                                        if (err || !pic) {
-                                            console.log("no postcard found for that id?!");
-                                            if (group.groupdata) {
-                                                var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                                    return obj.itemID === scene_item._id.toString();
-                                                })[0];
-                                                if (obj != undefined && obj.itemIndex) {
-                                                    scene.itemIndex = obj.itemIndex;
-                                                    console.log(scene_item.itemIndex + "index for " + scene._id.toString());
-                                                } else {
-                                                    scene.itemIndex = index;
-                                                    console.log(scene.itemIndex + "natchrul index for " + scene._id.toString());
-                                                }
-                                            }
-                                            index++;
-                                            scenes.push(scene);
-                                            callbackz();
-                                        } else {
-                                            var item_string_filename = pic.filename.replace(/\"/g, "");
-                                            var item_string_filename_ext = getExtension(item_string_filename);
-                                            //var expiration = new Date();
-                                            //expiration.setMinutes(expiration.getMinutes() + 30);
-                                            var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                            var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-                                            // var url1 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + pic.userID + "/pictures/" + pic._id + "." + thumbName, Expires: 6000});\
-                                            var url1 = "";
-                                            // console.log("postcard url : " + url1);
-                                            var halfName = 'thumb.' + baseName + item_string_filename_ext;
-                                            // var url2 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + pic.userID + "/pictures/" + pic._id + "." + halfName, Expires: 6000});
-                                            var url2 = "";
-                                            // if (scene_items[i])
-                                            scene.urlThumb = url1;
-                                            scene.urlHalf = url2;
-                                            if (group.groupdata) {
-                                                var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                                    return obj.itemID === scene_item._id.toString();
-                                                })[0];
-                                                if (obj != undefined && obj.itemIndex) {
-                                                    scene.itemIndex = obj.itemIndex;
-                                                    console.log(scene.itemIndex + "index for " + scene._id.toString());
-                                                } else {
-                                                    scene.itemIndex = index;
-                                                    console.log(scene.itemIndex + "natchrul index for " + scene._id.toString());
-                                                }
-                                            }
-                                            index++;
-                                            scenes.push(scene);
-                                            callbackz();
-                                            // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName, Expires: 6000});
-                                        }
-                                    });
-                                } else {
-                                    if (group.groupdata) {
-                                        var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                            return obj.itemID === scene_item._id.toString();
-                                        })[0];
-                                        if (obj != undefined && obj.itemIndex) {
-                                            scene.itemIndex = obj.itemIndex;
-                                            console.log(scene_item.itemIndex + "index for " + scene._id.toString());
-                                        } else {
-                                            scene.itemIndex = index;
-                                            console.log(scene.itemIndex + "natchrul index for " + scene._id.toString());
-                                        }
-                                    }
-                                    index++;
-                                    scenes.push(scene);
-                                    callbackz();
-                                }
+//                                 if (scene_item.scenePostcards != undefined) {
+//                                     let scenePostcard = scene_item.scenePostcards[0];
+//                                     db_old.image_items.findOne({'_id': ObjectId.createFromHexString(scenePostcard)}, function(err, pic) {
+//                                         if (err || !pic) {
+//                                             console.log("no postcard found for that id?!");
+//                                             if (group.groupdata) {
+//                                                 var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                                     return obj.itemID === scene_item._id.toString();
+//                                                 })[0];
+//                                                 if (obj != undefined && obj.itemIndex) {
+//                                                     scene.itemIndex = obj.itemIndex;
+//                                                     console.log(scene_item.itemIndex + "index for " + scene._id.toString());
+//                                                 } else {
+//                                                     scene.itemIndex = index;
+//                                                     console.log(scene.itemIndex + "natchrul index for " + scene._id.toString());
+//                                                 }
+//                                             }
+//                                             index++;
+//                                             scenes.push(scene);
+//                                             callbackz();
+//                                         } else {
+//                                             var item_string_filename = pic.filename.replace(/\"/g, "");
+//                                             var item_string_filename_ext = getExtension(item_string_filename);
+//                                             //var expiration = new Date();
+//                                             //expiration.setMinutes(expiration.getMinutes() + 30);
+//                                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                                             var thumbName = 'thumb.' + baseName + item_string_filename_ext;
+//                                             // var url1 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + pic.userID + "/pictures/" + pic._id + "." + thumbName, Expires: 6000});\
+//                                             var url1 = "";
+//                                             // console.log("postcard url : " + url1);
+//                                             var halfName = 'thumb.' + baseName + item_string_filename_ext;
+//                                             // var url2 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + pic.userID + "/pictures/" + pic._id + "." + halfName, Expires: 6000});
+//                                             var url2 = "";
+//                                             // if (scene_items[i])
+//                                             scene.urlThumb = url1;
+//                                             scene.urlHalf = url2;
+//                                             if (group.groupdata) {
+//                                                 var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                                     return obj.itemID === scene_item._id.toString();
+//                                                 })[0];
+//                                                 if (obj != undefined && obj.itemIndex) {
+//                                                     scene.itemIndex = obj.itemIndex;
+//                                                     console.log(scene.itemIndex + "index for " + scene._id.toString());
+//                                                 } else {
+//                                                     scene.itemIndex = index;
+//                                                     console.log(scene.itemIndex + "natchrul index for " + scene._id.toString());
+//                                                 }
+//                                             }
+//                                             index++;
+//                                             scenes.push(scene);
+//                                             callbackz();
+//                                             // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName, Expires: 6000});
+//                                         }
+//                                     });
+//                                 } else {
+//                                     if (group.groupdata) {
+//                                         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                             return obj.itemID === scene_item._id.toString();
+//                                         })[0];
+//                                         if (obj != undefined && obj.itemIndex) {
+//                                             scene.itemIndex = obj.itemIndex;
+//                                             console.log(scene_item.itemIndex + "index for " + scene._id.toString());
+//                                         } else {
+//                                             scene.itemIndex = index;
+//                                             console.log(scene.itemIndex + "natchrul index for " + scene._id.toString());
+//                                         }
+//                                     }
+//                                     index++;
+//                                     scenes.push(scene);
+//                                     callbackz();
+//                                 }
 
                                 
   
-                            }, function(err) {
-                                if (err) {
-                                    console.log('A file failed to process');
-                                    // callbackz(err);
-                                } else {
-                                    // console.log('scenexs ' + JSON.stringify(scenes));
-                                    scenes.sort(function (a, b) {
-                                        return a.itemIndex - b.itemIndex;
-                                    });
-                                    group.scene_items = scenes;
-                                    group.scene_items.sort(function (a, b) {
-                                        return a.itemIndex - b.itemIndex;
-                                    });
-                                    res.json(group);
-                                    // callback(null, scene_items);
-                                }
-                            });
+//                             }, function(err) {
+//                                 if (err) {
+//                                     console.log('A file failed to process');
+//                                     // callbackz(err);
+//                                 } else {
+//                                     // console.log('scenexs ' + JSON.stringify(scenes));
+//                                     scenes.sort(function (a, b) {
+//                                         return a.itemIndex - b.itemIndex;
+//                                     });
+//                                     group.scene_items = scenes;
+//                                     group.scene_items.sort(function (a, b) {
+//                                         return a.itemIndex - b.itemIndex;
+//                                     });
+//                                     res.json(group);
+//                                     // callback(null, scene_items);
+//                                 }
+//                             });
 
-                            // for (var i = 0; i < scene_items.length; i++) {
-                            //     if (group.groupdata) {
-                            //         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                            //             return obj.itemID === scene_items[i]._id.toString();
-                            //         })[0];
-                            //         if (obj != undefined && obj.itemIndex) {
-                            //             scene_items[i].itemIndex = obj.itemIndex;
-                            //             console.log(scene_items[i].itemIndex + "index for " + scene_items[i]._id.toString());
-                            //         } else {
-                            //             scene_items[i].itemIndex = i;
-                            //             console.log(scene_items[i].itemIndex + "natchrul index for " + scene_items[i]._id.toString());
-                            //         }
-                            //     }
-                            //     let scenePostcard = scene_items[i].scenePostcards[0];
+//                             // for (var i = 0; i < scene_items.length; i++) {
+//                             //     if (group.groupdata) {
+//                             //         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                             //             return obj.itemID === scene_items[i]._id.toString();
+//                             //         })[0];
+//                             //         if (obj != undefined && obj.itemIndex) {
+//                             //             scene_items[i].itemIndex = obj.itemIndex;
+//                             //             console.log(scene_items[i].itemIndex + "index for " + scene_items[i]._id.toString());
+//                             //         } else {
+//                             //             scene_items[i].itemIndex = i;
+//                             //             console.log(scene_items[i].itemIndex + "natchrul index for " + scene_items[i]._id.toString());
+//                             //         }
+//                             //     }
+//                             //     let scenePostcard = scene_items[i].scenePostcards[0];
 
-                            //     console.log("scenePostcarnd " + scenePostcard);
-                            //     if (scenePostcard != null && scenePostcard != undefined ) {
-                            //         db.image_items.findOne({'_id': ObjectId.createFromHexString(scenePostcard)}, function(err, pic) {
-                            //             if (err || !pic) {
-                            //                 console.log("no postcard found for that id?!");
-                            //             } else {
-                            //                 var item_string_filename = pic.filename.replace(/\"/g, "");
-                            //                 var item_string_filename_ext = getExtension(item_string_filename);
-                            //                 //var expiration = new Date();
-                            //                 //expiration.setMinutes(expiration.getMinutes() + 30);
-                            //                 var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                            //                 var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-                            //                 var url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + pic.userID + "/pictures/" + pic._id + "." + thumbName, Expires: 6000});
-                            //                 console.log("postcard url : " + url);
-                            //                 if (scene_items[i])
-                            //                 scene_items[i].urlThumb = url;
-                            //                 // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName, Expires: 6000});
-                            //             }
-                            //         });
-                            //     }
-                            //     // scene_items.urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName, Expires: 6000});
-                            // }
+//                             //     console.log("scenePostcarnd " + scenePostcard);
+//                             //     if (scenePostcard != null && scenePostcard != undefined ) {
+//                             //         db.image_items.findOne({'_id': ObjectId.createFromHexString(scenePostcard)}, function(err, pic) {
+//                             //             if (err || !pic) {
+//                             //                 console.log("no postcard found for that id?!");
+//                             //             } else {
+//                             //                 var item_string_filename = pic.filename.replace(/\"/g, "");
+//                             //                 var item_string_filename_ext = getExtension(item_string_filename);
+//                             //                 //var expiration = new Date();
+//                             //                 //expiration.setMinutes(expiration.getMinutes() + 30);
+//                             //                 var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                             //                 var thumbName = 'thumb.' + baseName + item_string_filename_ext;
+//                             //                 var url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + pic.userID + "/pictures/" + pic._id + "." + thumbName, Expires: 6000});
+//                             //                 console.log("postcard url : " + url);
+//                             //                 if (scene_items[i])
+//                             //                 scene_items[i].urlThumb = url;
+//                             //                 // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName, Expires: 6000});
+//                             //             }
+//                             //         });
+//                             //     }
+//                             //     // scene_items.urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName, Expires: 6000});
+//                             // }
 
-                        }
-//                            video_items.sort(function(a, b) {
-//                                return a.itemIndex - b.itemIndex;
-//                            });
-            // group.scene_items = scenes;
-            // group.scene_items.sort(function (a, b) {
-            //     return a.itemIndex - b.itemIndex;
-            // });
-            // res.json(group);
-                        // console.log("returning group_item : " + JSON.stringify(group));
-                    });    
-                } else if (group.type.toLowerCase() == "object" || group.type.toLowerCase() == "objects") {
-                    console.log("tryna get objex");
-                    db_old.obj_items.find({'_id': {$in: group.items}}).toArray(function (err, obj_items) {
-                        if (err || !obj_items) {
-                            console.log("error getting text items: " + err);
-                            res.send("error getting text items: " + err);
-                        } else {
-                            console.log("found locations : " + obj_items.length);
-                            for (var i = 0; i < obj_items.length; i++) {
-                                if (group.groupdata) {
-                                    var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-                                        return obj.itemID === obj_items[i]._id.toString();
-                                    })[0];
-                                    if (obj != undefined && obj.itemIndex) {
-                                        obj_items[i].itemIndex = obj.itemIndex;
-                                        console.log(obj_items[i].itemIndex + "index for " + obj_items[i]._id.toString());
-                                    } else {
-                                        obj_items[i].itemIndex = i;
-                                        console.log(obj_items[i].itemIndex + "natchrul index for " + obj_items[i]._id.toString());
-                                    }
-                                }
-                            }
-                            obj_items.sort(function (a, b) {
-                                return a.itemIndex - b.itemIndex;
-                            });
-                        }
-//                            video_items.sort(function(a, b) {
-//                                return a.itemIndex - b.itemIndex;
-//                            });
-                        group.obj_items = obj_items;
-                        group.obj_items.sort(function (a, b) {
-                            return a.itemIndex - b.itemIndex;
-                        });
-                        res.json(group);
-                        console.log("returning group_item : " + group);
-                    });
-                }
-        } else {
-                res.json(group);
-            }
-        }
-    });
+//                         }
+// //                            video_items.sort(function(a, b) {
+// //                                return a.itemIndex - b.itemIndex;
+// //                            });
+//             // group.scene_items = scenes;
+//             // group.scene_items.sort(function (a, b) {
+//             //     return a.itemIndex - b.itemIndex;
+//             // });
+//             // res.json(group);
+//                         // console.log("returning group_item : " + JSON.stringify(group));
+//                     });    
+//                 } else if (group.type.toLowerCase() == "object" || group.type.toLowerCase() == "objects") {
+//                     console.log("tryna get objex");
+//                     db_old.obj_items.find({'_id': {$in: group.items}}).toArray(function (err, obj_items) {
+//                         if (err || !obj_items) {
+//                             console.log("error getting text items: " + err);
+//                             res.send("error getting text items: " + err);
+//                         } else {
+//                             console.log("found locations : " + obj_items.length);
+//                             for (var i = 0; i < obj_items.length; i++) {
+//                                 if (group.groupdata) {
+//                                     var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
+//                                         return obj.itemID === obj_items[i]._id.toString();
+//                                     })[0];
+//                                     if (obj != undefined && obj.itemIndex) {
+//                                         obj_items[i].itemIndex = obj.itemIndex;
+//                                         console.log(obj_items[i].itemIndex + "index for " + obj_items[i]._id.toString());
+//                                     } else {
+//                                         obj_items[i].itemIndex = i;
+//                                         console.log(obj_items[i].itemIndex + "natchrul index for " + obj_items[i]._id.toString());
+//                                     }
+//                                 }
+//                             }
+//                             obj_items.sort(function (a, b) {
+//                                 return a.itemIndex - b.itemIndex;
+//                             });
+//                         }
+// //                            video_items.sort(function(a, b) {
+// //                                return a.itemIndex - b.itemIndex;
+// //                            });
+//                         group.obj_items = obj_items;
+//                         group.obj_items.sort(function (a, b) {
+//                             return a.itemIndex - b.itemIndex;
+//                         });
+//                         res.json(group);
+//                         console.log("returning group_item : " + group);
+//                     });
+//                 }
+//         } else {
+//                 res.json(group);
+//             }
+//         }
+//     });
 });
 
 app.get('/useraudio/:u_id', requiredAuthentication, function(req, res) {

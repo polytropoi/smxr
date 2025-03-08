@@ -8414,8 +8414,8 @@ function showGroup() {
         let addButton = '';
         let arr = [];
         let groupArr = [];
-        console.log("groupData: " + JSON.stringify(response.data.items.length));
-        if (response.data.type.toLowerCase().includes("picture")) {
+        console.log("groupData: " + JSON.stringify(response.data));
+        if (response.data.type.toLowerCase() == "pictures") {
             grouptype = pictype;
             let responseArr = response.data.image_items;
             let refArr = [];
@@ -8515,7 +8515,7 @@ function showGroup() {
                     let mapSrc = "";
                     if (arr[i].type.toLowerCase() == "geographic") {
                         mapSrc = "https://maps.googleapis.com/maps/api/staticmap?center=" + arr[i].latitude + "," + arr[i].longitude + "&zoom=15&size=600x300&maptype=roadmap&key="+googleMapsKey+"&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + arr[i].latitude + "," + arr[i].longitude;
-                        detailsPicLink = "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + arr[i].latitude + "," + arr[i].longitude + "\x22>" +
+                        let detailsPicLink = "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + arr[i].latitude + "," + arr[i].longitude + "\x22>" +
                         "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + arr[i].latitude + "," + arr[i].longitude + 
                         "&zoom=15&size=600x300&maptype=roadmap&key="+googleMapsKey+"&markers=color:blue%7Clabel:" + (i + 1) + "%7C" + arr[i].latitude + "," + arr[i].longitude + "\x22>" + 
                         "</a>";
@@ -8644,11 +8644,11 @@ function showGroup() {
                 });
             }
             for (let h = 0; h < idArr.length; h++) {
-                // console.log(idArr[h]);
+                console.log(idArr[h]);
                 let hasItem = false;
                 for (let i = 0; i < arr.length; i++) {
                     if (idArr[h] == arr[i]._id) {
-                    // console.log(idArr[h] + " " + arr[i]._id);    
+                    console.log(idArr[h] + " " + arr[i]._id);    
                     hasItem = true;
                     html = html + 
                         "<div class=\x22card ml-1 mr-1 mt-1 mb-1\x22 style=\x22width:320px;\x22>" +
