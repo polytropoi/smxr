@@ -1,15 +1,9 @@
-// from https://github.com/polytropoi
 
     // this single js file does the whole web admin interface:
     // 1. amirite checks authentication and pops some UI
     // 2. bigSwitch does "routing" and calls "controller" functions
     // 3. controller functions fetch json and generate html
     // 4. dom elements are selected and updated with new stuff as needed
-    // import Uppy from '../main/vendor/uppy/core';
-    // import Dashboard from '../main/vendor/uppy/dashboard';
-    
-    // import '../main/vendor/uppy/core/dist/style.min.css';
-    // import '../main/vendor/uppy/dashboard/dist/style.min.css';
     
 
     import {
@@ -17,9 +11,12 @@
         Dashboard,
         Webcam,
         AwsS3
-      } from 'https://releases.transloadit.com/uppy/v4.13.2/uppy.min.mjs'
+      } from 'https://releases.transloadit.com/uppy/v4.13.2/uppy.min.mjs'  //mmm. copy locally
     // new Uppy().use(Dashboard, { inline: true, target: '#drag-drop-area' });
 
+    // import {googleMapsKey} from "../server.js";
+
+    //these are onclick methods that don't work in module mode, quick fix is to globalize, TODO Fix for real...
     window.selectItem = selectItem;
     window.deleteItem = deleteItem;
     window.getStoreItem = getStoreItem;
@@ -61,6 +58,8 @@
             apps = data.apps;
             domains = data.domains;
             userNameLabel.innerText = username;
+            googleMapsKey = data.mapkey;
+
             let html = "";  
             // if (data.authLevel.includes("domain")) {
             //     $("#adminPanel").show();
@@ -8396,7 +8395,7 @@ function showGroup() {
     console.log("groupID is " + groupID);
     axios.get('/usergroup/' + groupID)
     .then(function (response) {
-        // console.log(JSON.stringify(response.data));
+        console.log(JSON.stringify(response.data));
         $("#pageTitle").html(response.data.type + " Group " +response.data.name +" by " + username);
         // var arr = response.data;
         // var html = "<div class=\x22row\x22>";
@@ -8415,7 +8414,7 @@ function showGroup() {
         let arr = [];
         let groupArr = [];
         console.log("groupData: " + JSON.stringify(response.data));
-        if (response.data.type.toLowerCase() == "pictures") {
+        if (response.data.type.toLowerCase() == "pictures" || response.data.type.toLowerCase() == "picture") {
             grouptype = pictype;
             let responseArr = response.data.image_items;
             let refArr = [];
@@ -8616,6 +8615,69 @@ function showGroup() {
         }
         if (response.data.type.toLowerCase() == "text") {
             grouptype = texttype;
+            console.log(response.data.text_items);
+            let responseArr = response.data.text_items;
+            let refArr = [];
+            let arr = [];
+            let idArr = response.data.items;
+            let groupArr = response.data.groupdata;
+            if (groupArr != null) { //if there's a groupdata array
+                console.log("gotsa text group data array");
+                groupArr = groupArr.sort(function(a, b){ //sort groupdata by index #
+                    return a.itemIndex > b.itemIndex;
+                });
+                for (let n = 0; n < groupArr.length; n++) { //copy out a reference array with proper order
+                    refArr.push(groupArr[n]._id);
+                }
+                idArr.sort(function(a, b){ //match order
+                    return refArr.indexOf(a) - refArr.indexOf(b);
+                });
+                arr = responseArr;
+            } else { //otherwise sort by index #'s added to request by server in the item Array
+                console.log("tryna sort by item indexes");
+                for (let n = 0; n < responseArr.length; n++) { //copy out a reference array with proper order, using server assigned indexes
+                    refArr.push(responseArr[n]._id);
+                }
+                arr = responseArr;
+                idArr.sort(function(a, b){ //match order
+                    return refArr.indexOf(a) - refArr.indexOf(b);
+                });
+            }
+            for (let h = 0; h < idArr.length; h++) {
+                console.log(idArr[h]);
+                let hasItem = false;
+                for (let i = 0; i < arr.length; i++) {
+                    console.log(JSON.stringify(arr[i]));
+                    if (idArr[h] == arr[i]._id) {
+                    console.log(idArr[h] + " " + arr[i]._id);    
+                    hasItem = true;
+                    html = html + 
+                        "<div class=\x22card ml-1 mr-1 mt-1 mb-1\x22 style=\x22width:256px;\x22>" +
+                            // "<img class=\x22card-img-top\x22 src=\x22" + arr[i].urlHalf + "\x22 alt=\x22Card image cap\x22>" +
+                            "<div class=\x22card-body\x22>" +
+                                "<div class=\x22 float-left\x22>" + arr[i].title + " <br> " + arr[i].desc + " </div><br><br>" +
+                                    "<label for=\x22itemIndex\x22>Index</label>" + //sceneTitle
+                                    "<input type=\x22text\x22 size=\x224\x22  class=\x22float-right\x22 id=\x22itemIndex\x22 value=\x22" + arr[i].itemIndex + "\x22>" +
+                                    "<br><a href=\x22#\x22 class=\x22btn btn-xs btn-danger\x22 onclick=\x22removeItem('group','item','" + response.data._id + "','" + arr[i]._id + "')\x22>Remove</a>" +
+                                    "<a href=\x22index.html?type=text&iid="+ arr[i]._id +"\x22 class=\x22float-right btn btn-xs btn-info\x22>Edit</a>" +
+                            "</div>" +
+                        "</div>";
+                    break;
+                    }
+                }
+                if (!hasItem) {  //show orphaned elements so they can be removed //TODO clean up references when parents are deleted
+                html = html + 
+                    "<div class=\x22card ml-1 mr-1 mt-1 mb-1\x22 style=\x22width:256px;\x22>" +
+                        "<div class=\x22card-body\x22>" +
+                            "<div class=\x22 float-left\x22>not found</div>" +
+                                "<label for=\x22itemIndex\x22>Item Index</label>" + //sceneTitle
+                                "<input type=\x22text\x22 size=\x224\x22  class=\x22float-right\x22 id=\x22itemIndex\x22 value=\x22not found\x22>" +
+                                "<br><a href=\x22#\x22 class=\x22btn btn-xs btn-danger\x22 onclick=\x22removeItem('group','item','" + response.data._id + "','" + idArr[h] + "')\x22>Remove</a>" +
+                        "</div>" +
+                    "</div>";        
+                }
+            }
+            addButton = "<a class=\x22btn btn-sm btn-primary float-right\x22 href=\x22index.html?type=pictures&mode=select&parent=group&iid=" + response.data._id + "\x22\x22>Add Item</a>";
         }
         if (response.data.type.toLowerCase() == "video") {
             grouptype = vidtype;
@@ -8644,7 +8706,7 @@ function showGroup() {
                 });
             }
             for (let h = 0; h < idArr.length; h++) {
-                console.log(idArr[h]);
+                console.log(idArr[h] + " vs arr " + arr );
                 let hasItem = false;
                 for (let i = 0; i < arr.length; i++) {
                     if (idArr[h] == arr[i]._id) {
@@ -8949,7 +9011,7 @@ function showGroup() {
         axios.get('/usergroups/' + userid)
         .then(function (response) {
             var arr = response.data;
-            console.log(JSON.stringify(arr));
+            // console.log(JSON.stringify(arr));
             let select = false;
             let select_grouptype = "";
             if (mode == "picgroup") {

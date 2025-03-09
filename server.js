@@ -22,7 +22,7 @@ import validator from "validator";
 // import minio from "minio";
 import helmet from "helmet";
 // import ObjectID from "bson-objectid";
-// import { MongoDBStore } from "connect-mongodb-session";
+
 import async from "async";
 import bcrypt from "bcrypt-nodejs";
 import shortid from "shortid";
@@ -35,8 +35,6 @@ const entities = require("entities");
 
 const minio = require('minio');
 
-// const MongoDBStore = require('connect-mongodb-session')(session); //the oldshit
-
 const requireText = require('require-text');
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -44,6 +42,8 @@ const __dirname = path.dirname(__filename); // get the name of the directory
     
 export let app = express();
 require('dotenv').config();
+
+export let googleMapsKey = process.env.GOOGLEMAPS_KEY;
 
 // app.use(helmet.contentSecurityPolicy());
 app.use(helmet.dnsPrefetchControl());
@@ -125,6 +125,7 @@ export let db_old = mongojs(databaseUrl, collections); //soon you will die!
     app.use(methodOverride());  //for header rewriting
 
     var expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 2 hour
+
     app.use(session({
         resave: true,
         saveUninitialized: true,
@@ -132,6 +133,12 @@ export let db_old = mongojs(databaseUrl, collections); //soon you will die!
         rolling: true,
         secret: process.env.JWT_SECRET }));
 
+    // app.use(session({
+    //   store: MongoStore.create({
+    //     mongoUrl: process.env.MONGO_SESSIONS_URL,
+    //     ttl: 14 * 24 * 60 * 60 // = 14 days. Default
+    //   })
+    // }));
 
     app.use(cookieParser()); //unused?
     app.use(bodyParser.json({ "limit": "150mb", extended: true })); //set this to route specific somehow, for add_scene_mods?
@@ -1546,6 +1553,8 @@ app.get("/ami-rite/:_id", function (req, res) {
            response.auth = req.session.user.authLevel;
            response.userName = req.session.user.userName;
             response.userID = req.params._id;
+            response.mapkey = process.env.GOOGLEMAPS_KEY;
+
             console.log("req.session.user.authLevel :" + req.session.user.authLevel);
             if (req.session.user.userName != "guest" && req.session.user.userName != "subscriber" && req.session.user.authLevel != undefined && req.session.user.authLevel != "noauth") {
                 if (response.auth.includes("admin")) {
@@ -7816,73 +7825,6 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                     var isNotPublicMessage = "";
                     var app_link = "servicemedia://scene?" + req.body.short_id;
                  
-                    // if (req.body.isPublic) {
-                    //     message = "An invitation to this private Immersive Scene was requested for you!";
-                    // } else {
-                    //     if (req.body.sceneShareWithMessage === "" || req.body.sceneShareWithMessage == null) {
-                    //         message = " has shared an Immersive Scene with you!";
-                    //     } else {
-                    //         message = " has shared an Immersive Scene with this message: " +
-                    //             "<hr><br><strong> " + req.body.sceneShareWithMessage +  "</strong><br>";
-                    //     }
-                    // }
-                    // message += restrictToEventMessage + restrictToLocationMessage;
-                    // if (req.body.sceneEventStart != undefined && req.body.sceneEventStart != null && req.body.sceneEventStart != "" ) {
-                    //     let datetimeString = new Date(req.body.sceneEventStart);
-                    //     message += "<br><strong>Event start: " + datetimeString.toLocaleString([], { hour12: true}) + "</strong><br>";
-                    //     // message += "<br><strong>Event start: " + datetimeString.toString() + "</strong><br>";
-                    //     console.log(message);
-                    // }
-                    // if (req.body.sceneEventEnd != undefined && req.body.sceneEventEnd != null && req.body.sceneEventEnd != "") {
-                    //     let datetimeString = new Date(req.body.sceneEventEnd);
-                    //     message += "<strong>Event end: " + datetimeString.toLocaleString([], { hour12: true})  + "</strong><br>";
-                    // }
-                    // message += geoLinks;
-                                // if (theScene.sceneShareWithPublic) {
-
-                                //     var htmlbody = req.session.user.userName + message + "</h3><hr>" +
-                                    
-                                //         "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>"+
-                                //         "<a href='"+ requestProtocol + "://" + req.headers.host + "/webxr/" + req.body.short_id+"'?pn=" + thePerson._id + " target='_blank'>" +
-                                //         "Click here to access this scene!</a></button><br>" +
-                                //         "<br> <a href='"+ requestProtocol + "://" + req.headers.host + "/webxr/" + req.body.short_id+"'?pn=" + thePerson._id + "target='_blank'><img src=" + urlHalf + "></a> " +
-                                //         "<br> Scene Title: " + req.body.sceneTitle +
-                                //         "<br> Scene Short ID: " + req.body.short_id +
-                                //         "<br> Scene Keynote: " + theScene.sceneKeynote +
-                                //         "<br> Scene Description: " + theScene.sceneDescription +
-                                //         "<br> Owner: " + theScene.userName +
-                                //         "<br><br><strong><a href='"+ requestProtocol + "://" + req.headers.host + "/qrcode/" + req.body.short_id + "'>Click here to scan QR Code for this scene</a></strong>" +
-                                //         "<br> For more scenes like this, or to get the latest app, visit <a href='https://servicemedia.net'>ServiceMedia.net!</a> ";
-                                //     ses.sendEmail( {
-                                //             Source: from,
-                                //             Destination: { ToAddresses: to, BccAddresses: bcc},
-                                //             Message: {
-                                //                 Subject: {
-                                //                     Data: subject
-                                //                 },
-                                //                 Body: {
-                                //                     Html: {
-                                //                         Data: htmlbody
-                                //                     }
-                                //                 }
-                                //             }
-                                //         }
-                                //         , function(err, data) {
-                                //             if(err) throw err
-                                //             console.log('Email sent:');
-                                //             console.log(data);
-                                //         });
-                                //     callbackzz();
-                                // } else {
-                        //TODO check user's auth?
-                        // if (timestamp < user.resetTimestamp + 3600) { //expires in 1 hour!
-                        // let sentByUserID = 
-                        // if (req.session.user) {
-
-                        // } else {
-                        //     sentByUserID: req.session.user._id.toString(),
-                        //     sentByUserEmail: adminEmail,
-                        // }
                         bcrypt.genSalt(3, function(err, salt) { //level3 easy, not a password itself
                             bcrypt.hash(timestamp.toString(), salt, null, function(err, hash) {
                                 // reset = hash;
@@ -7988,26 +7930,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                                     const status = await SendEmail(params.Destination.ToAddresses, params.Source, htmlbody, subject);
 
                                     })();
-                                // ses.sendEmail( {
-                                //         Source: from,
-                                //         Destination: { ToAddresses: to, BccAddresses: bcc},
-                                //         Message: {
-                                //             Subject: {
-                                //                 Data: subject
-                                //             },
-                                //             Body: {
-                                //                 Html: {
-                                //                     Data: htmlbody
-                                //                 }
-                                //             }
-                                //         }
-                                //     }
-                                //     , function(err, data) {
-                                //         if(err) throw err
-                                //         console.log('Email sent:');
-                                //         console.log(data);
-                                        
-                                //     });
+                                
                             });
                         });
                         callbackzz();
@@ -8035,51 +7958,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
         }
     );
 });
-/*
- app.get('/salt/:auth_id', function (req, res) {
- console.log("tryna salt...")
- var u_id = ObjectId.createFromHexString(req.params.auth_id);
- db.users.findOne({"_id": u_id}, function (err, user) {
- if (err || !user) {
- console.log("error getting user: " + err);
- } else {
- bcrypt.genSalt(10, function(err, salt) {
- bcrypt.hash("buster", salt, function(err, hash) {
- console.log("passhash " + hash);
- db.users.update({"_id": u_id}, { $set: {password: hash }});
- // Store hash in your password DB.
- });
- });
 
- //bcrypt.compare
- //  console.log("user profile for " + req.params.auth_id);
- //  res.json(user);
- }
- });
- });
-
- app.get('/hash/:pw', function (req, res) {
- console.log("tryna salt...")
- var u_id = ObjectId.createFromHexString(req.params.auth_id);
- db.users.findOne({"_id": u_id}, function (err, user) {
- if (err || !user) {
- console.log("error getting user: " + err);
- } else {
- bcrypt.genSalt(10, function(err, salt) {
- bcrypt.hash(user.password, salt, function(err, hash) {
- console.log("passhash " + hash);
- //db.users.update({"_id": u_id}, { $set: {password: hash }});
- // Store hash in your password DB.
- });
- });
-
- //  console.log("user profile for " + req.params.auth_id);
- //  res.json(user);
- }
- });
- });
- */
-// app.post('/newuser', checkAppID, function (req, res) {
 app.post('/newuser', requiredAuthentication, admin, function (req, res) {    
 //        $scope.user.domain = "servicmedia";
 //        $scope.user.appid = "55b2ecf840edea7583000001";
@@ -8148,26 +8027,7 @@ app.post('/newuser', requiredAuthentication, admin, function (req, res) {
                                                 const status2 = await SendEmail(process.env.ADMIN_EMAIL,process.env,ADMIN_EMAIL,htmlbody,topName + ' New User EVENT');
                                                 console.log("new user email statuses " + status1 + " " + status2);
                                             })();
-                                            // ses.sendEmail({
-                                            //         Source: from,
-                                            //         Destination: { ToAddresses: [req.body.userEmail, adminEmail] },
-                                            //         Message: {
-                                            //             Subject: {
-                                            //                 Data: topName + ' New User' //TODO Get app name somehow
-                                            //             },
-                                            //             Body: {
-                                            //                 Html: {
-                                            //                     Data: htmlbody
-                                            //                 }
-                                            //             }
-                                            //         }
-                                            //     }
-                                            // , function(err, data) {
-                                            //     if(err) throw err
-                                            //     console.log('Email sent:');
-                                            //     console.log(data);
-                                            //     //res.redirect("http://elnoise.com/#/login");
-                                            // });
+                                           
                                         }
                                     });
                             });
@@ -8186,408 +8046,8 @@ app.post('/newuser', requiredAuthentication, admin, function (req, res) {
 });
 
 
-app.get('/webplayer', function(req,res) {
-    res.sendfile(__dirname + '/servicmedia.net/webplayer.html');
-    console.log(req.session.auth);
-});
-/*
- app.get('/addtypecodesall', function(req, req) {
 
- db.audio_items.find({}, function (err, audio_items) {
 
- if (err || !audio_items) {
- console.log("error getting audio items: " + err);
- } else {
-
- async.waterfall([
- function(callback){ //randomize the returned array, takes a shake so async it...
- console.log("get all mongoIDs...");
- for (var i = 0; i < audio_items.length; i++) {
- tempID = "";
- tempID = audio_items[i]._id;
- console.log(tempID);
- db.audio_items.update( { _id: tempID }, { $set: { item_type: "audio" }});
- }
- callback(null);
- },
- function(callback){
- console.log("second step...");
- callback(null);
- }
- ],
-
- function(err, result) {
- console.log("done");
- }
-
- );
- }
- });
- });
-
- */
-/*
- app.get('/addstatuscodesall', function(req, req) {
-
- db.audio_items.find({}, function (err, audio_items) {
-
- if (err || !audio_items) {
- console.log("error getting audio items: " + err);
- } else {
-
- async.waterfall([
- function(callback){ //randomize the returned array, takes a shake so async it...
- console.log("get all mongoIDs...");
- for (var i = 0; i < audio_items.length; i++) {
- tempID = "";
- tempID = audio_items[i]._id;
- console.log(tempID);
- db.audio_items.update( { _id: tempID }, { $set: { userID: "5150540ab038969c24000008", username: "polytropoi" }});
- }
- callback(null);
- },
- function(callback){
- console.log("second step...");
- callback(null);
- }
- ],
-
- function(err, result) {
- console.log("done");
- }
-
- );
- }
- });
- });
- */
-/*
- DISABLED FOR SECURITY
- app.get('/addshortcodesall', function (req, res) {
-
- db.audio_items.find({}, function (err, audio_items) {
-
- if (err || !audio_items) {
- console.log("error getting audio items: " + err);
- } else {
-
- async.waterfall([
- function(callback){ //randomize the returned array, takes a shake so async it...
- console.log("get all mongoIDs...");
- for (var i = 0; i < audio_items.length; i++) {
- tempID = "";
- newShortID = "";
- tempID = audio_items[i]._id;
- newShortID = shortId(tempID);
- console.log(tempID + " = " + newShortID);
- db.audio_items.update( { _id: tempID }, { $set: { short_id: newShortID }});
- }
- callback(null);
- },
- function(callback){
- console.log("second step...");
- callback(null);
- }
- ],
-
- function(err, result) {
- console.log("done");
- }
-
- );
- }
- });
- });
-
-
- //});
-
-
- app.get('removeaudio', function (req, res) {
- db.audio_items.
- }
-
- app.get('/addtagarraysall', function (req, res) {
-
- db.audio_items.find({}, function (err, audio_items) {
-
- if (err || !audio_items) {
- console.log("error getting audio items: " + err);
- } else {
-
- async.waterfall([
- function(callback){ //randomize the returned array, takes a shake so async it...
- console.log("get all mongoIDs...");
- for (var i = 0; i < audio_items.length; i++) {
- var tempID = "";
-
- tempID = audio_items[i]._id;
- // newShortID = shortId(tempID);
- console.log("updating " + tempID);
- db.audio_items.update( { _id: tempID }, { $set: { tags: ['music', 'korkus'] }});
- }
- callback(null);
- },
- function(callback){
- console.log("second step...");
- callback(null);
- }
- ],
-
- function(err, result) {
- console.log("done");
- }
-
- );
- }
- });
- });
- */
-app.get('backupdata', function (req, res) {
-
-
-});
-
-
-//db.audio_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
-
-
-// app.get('/newaudiodata.json', checkAppID, requiredAuthentication,  function(req, res) {
-//     console.log('tryna return newaudiodata.json');
-//     db.audio_items.find({item_status: "public"}).sort({otimestamp: 1}).toArray( function(err,audio_items) {
-//         if (err || !audio_items) {
-//             console.log("error getting audio items: " + err);
-//         } else {
-
-//             async.waterfall([
-
-//                     function(callback){ //randomize the returned array, takes a shake so async it...
-
-//                         audio_items.splice(0,audio_items.length - maxItems); //truncate randomized array, take only last 20
-//                         audio_items.reverse();
-//                         callback(null);
-//                     },
-//                     function(callback) { //add the signed URLs to the obj array
-//                         for (var i = 0; i < audio_items.length; i++) {
-
-//                             var item_string_filename = JSON.stringify(audio_items[i].filename);
-//                             item_string_filename = item_string_filename.replace(/\"/g, "");
-//                             var item_string_filename_ext = getExtension(item_string_filename);
-//                             var expiration = new Date();
-//                             expiration.setMinutes(expiration.getMinutes() + 1000);
-//                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                             console.log(baseName);
-//                             var mp3Name = baseName + '.mp3';
-//                             var oggName = baseName + '.ogg';
-//                             var pngName = baseName + '.png';
-//                             // var urlMp3 = knoxClient.signedUrl(audio_items[i]._id + "." + mp3Name, expiration);
-//                             // var urlOgg = knoxClient.signedUrl(audio_items[i]._id + "." + oggName, expiration);
-//                             // var urlPng = knoxClient.signedUrl(audio_items[i]._id + "." + pngName, expiration);
-//                             var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/" + audio_items[i]._id + "." + mp3Name, Expires: 60000});
-//                             var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/" + audio_items[i]._id + "." + oggName, Expires: 60000});
-//                             var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/" + audio_items[i]._id + "." + pngName, Expires: 60000});
-//                             audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                             audio_items[i].URLogg = urlOgg;
-//                             audio_items[i].URLpng = urlPng;
-
-//                             //audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                             //audio_items[i].URLogg = urlOgg;
-//                             //audio_items[i].URLpng = urlPng;
-
-//                         }
-//                         console.log('tryna send ' + audio_items.length + 'audio_items ');
-//                         callback(null);
-//                     }],
-
-//                 function(err, result) { // #last function, close async
-//                     res.json(audio_items);
-//                     console.log("waterfall done: " + result);
-//                 }
-//             );
-//         }
-//     });
-
-// });
-
-// app.get('/randomaudiodata.json', checkAppID, requiredAuthentication, function(req, res) {
-//     console.log('tryna return randomaudiodata.json');
-//     db.audio_items.find({item_status: "public"}, function(err,audio_items) {
-//         if (err || !audio_items) {
-//             console.log("error getting audio items: " + err);
-//         } else {
-
-//             async.waterfall([
-
-//                     function(callback){ //randomize the returned array, takes a shake so async it...
-//                         audio_items = Shuffle(audio_items);
-//                         audio_items.splice(0,audio_items.length - maxItems); //truncate randomized array, take only last 20
-//                         callback(null);
-//                     },
-
-//                     function(callback) { //add the signed URLs to the obj array
-//                         for (var i = 0; i < audio_items.length; i++) {
-
-//                             var item_string_filename = JSON.stringify(audio_items[i].filename);
-//                             item_string_filename = item_string_filename.replace(/\"/g, "");
-//                             var item_string_filename_ext = getExtension(item_string_filename);
-//                             var expiration = new Date();
-//                             expiration.setMinutes(expiration.getMinutes() + 1000);
-//                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                             console.log(baseName);
-//                             var mp3Name = baseName + '.mp3';
-//                             var oggName = baseName + '.ogg';
-//                             var pngName = baseName + '.png';
-//                             //var urlMp3 = knoxClient.signedUrl(audio_items[i]._id + "." + mp3Name, expiration);
-//                             //var urlOgg = knoxClient.signedUrl(audio_items[i]._id + "." + oggName, expiration);
-//                             //var urlPng = knoxClient.signedUrl(audio_items[i]._id + "." + pngName, expiration);
-//                             var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/" + audio_items[i]._id + "." + mp3Name, Expires: 60000});
-//                             var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/" + audio_items[i]._id + "." + oggName, Expires: 60000});
-//                             var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/" + audio_items[i]._id + "." + pngName, Expires: 60000});
-//                             audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                             audio_items[i].URLogg = urlOgg;
-//                             audio_items[i].URLpng = urlPng;
-
-//                         }
-//                         console.log('tryna send ' + audio_items.length + 'audio_items ');
-//                         callback(null);
-//                     }],
-
-//                 function(err, result) { // #last function, close async
-//                     res.json(audio_items);
-//                     console.log("waterfall done: " + result);
-//                 }
-//             );
-//         }
-//     });
-
-// });
-
-// app.get('/playlist/:tag', function(req, res) {
-//     console.log('tryna return playlist: ' + req.params.tag);
-//     db.audio_items.find({tags: req.params.tag, item_status: "public"}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
-//         if (err || !audio_items) {
-//             console.log("error getting audio items: " + err);
-
-//         } else {
-
-//             async.waterfall([
-
-//                     function(callback){ //randomize the returned array, takes a shake so async it...
-//                         //audio_items = Shuffle(audio_items);
-//                         //audio_items.splice(0,audio_items.length - maxItems); //truncate randomized array, take only last 20
-//                         callback(null);
-//                     },
-
-//                     function(callback) { //add the signed URLs to the obj array
-//                         for (var i = 0; i < audio_items.length; i++) {
-
-//                             var item_string_filename = JSON.stringify(audio_items[i].filename);
-//                             item_string_filename = item_string_filename.replace(/\"/g, "");
-//                             var item_string_filename_ext = getExtension(item_string_filename);
-//                             var expiration = new Date();
-//                             expiration.setMinutes(expiration.getMinutes() + 1000);
-//                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                             console.log(baseName);
-//                             var mp3Name = baseName + '.mp3';
-//                             var oggName = baseName + '.ogg';
-//                             var pngName = baseName + '.png';
-//                             var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[0].userID + "/" + audio_items[0]._id + "." + mp3Name, Expires: 60000});
-//                             var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[0].userID + "/" + audio_items[0]._id + "." + oggName, Expires: 60000});
-//                             var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[0].userID + "/" + audio_items[0]._id + "." + pngName, Expires: 60000});
-//                             audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                             audio_items[i].URLogg = urlOgg;
-//                             audio_items[i].URLpng = urlPng;
-
-//                         }
-//                         console.log('tryna send ' + audio_items.length + 'audio_items ');
-//                         callback(null);
-//                     }],
-
-//                 function(err, result) { // #last function, close async
-//                     res.json(audio_items);
-//                     console.log("waterfall done: " + result);
-//                 }
-//             );
-//         }
-//     });
-
-// });
-
-// app.get('/audiofiles/:tag', function(req, res) {
-//     console.log('tryna return playlist: ' + req.params.tag);
-//     db.audio.find({tags: req.params.tag, item_status: "public"}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
-//         if (err || !audio_items) {
-//             console.log("error getting audio items: " + err);
-
-//         } else {
-
-//             async.waterfall([
-
-//                     function(callback){ //randomize the returned array, takes a shake so async it...
-//                         //audio_items = Shuffle(audio_items);
-//                         //audio_items.splice(0,audio_items.length - maxItems); //truncate randomized array, take only last 20
-//                         callback(null);
-//                     },
-
-//                     function(callback) { //add the signed URLs to the obj array
-//                         for (var i = 0; i < audio_items.length; i++) {
-
-//                             var item_string_filename = JSON.stringify(audio_items[i].filename);
-//                             item_string_filename = item_string_filename.replace(/\"/g, "");
-//                             var item_string_filename_ext = getExtension(item_string_filename);
-//                             var expiration = new Date();
-//                             expiration.setMinutes(expiration.getMinutes() + 1000);
-//                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                             console.log(baseName);
-//                             var mp3Name = baseName + '.mp3';
-//                             var oggName = baseName + '.ogg';
-//                             var pngName = baseName + '.png';
-//                             var urlMp3 = knoxClient.signedUrl(audio_items[i]._id + "." + mp3Name, expiration);
-//                             var urlOgg = knoxClient.signedUrl(audio_items[i]._id + "." + oggName, expiration);
-//                             var urlPng = knoxClient.signedUrl(audio_items[i]._id + "." + pngName, expiration);
-//                             audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                             audio_items[i].URLogg = urlOgg;
-//                             audio_items[i].URLpng = urlPng;
-
-//                         }
-//                         console.log('tryna send ' + audio_items.length + 'audio_items ');
-//                         callback(null);
-//                     }],
-
-//                 function(err, result) { // #last function, close async
-//                     res.json(audio_items);
-//                     console.log("waterfall done: " + result);
-//                 }
-//             );
-//         }
-//     });
-
-// });
-
-// app.get('/audiolist/:tag', function(req, res) {
-//     console.log('tryna return playlist: ' + req.params.tag);
-//     db.audio_items.find({tags: req.params.tag, item_status: "public"}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
-//         if (err || !audio_items) {
-//             console.log("error getting audio items: " + err);
-
-//         } else {
-
-//             res.json(audio_items);
-//             console.log("returning audio_items tagged " + req.params.tag);
-//         }
-//     });
-
-// });
-
-
-// app.post('/picarray/', checkAppID, requiredAuthentication, function(req,res) {
-
-//     console.log("picarray request: " + req.body);
-//     res.json(req.body);
-
-// });
-
-// app.get('/userpics/:u_id', checkAppID, requiredAuthentication, function(req, res) {
 app.get('/userpics/:u_id', requiredAuthentication, function (req, res) {
     console.log('tryna return userpics for: ' + req.params.u_id);
     let query = {userID: req.params.u_id};
@@ -9004,41 +8464,6 @@ app.post('/add_group_item/', requiredAuthentication, function (req, res) { //dun
       }
     })();
 
-
-    // db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
-    //     if (err || !group) {
-    //         console.log("error getting group: " + err);
-    //     } else {  //TODO check for proper type?
-    //         if (group.groupdata == undefined || group.groupdata == null) {
-    //             group.groupdata = [];
-    //         }
-    //         if (group.items == undefined || group.items == null) {
-    //             group.items = [];
-    //         }
-    //         newGroupData = group.groupdata;
-    //         newItems = group.items;
-    //         newItems.push(req.body.item_id);
-    //         var timestamp = Math.round(Date.now() / 1000);
-    //         newGroupItem = {}; //why was this rem'd?
-    //         newGroupItem.itemID = req.body.item_id; // ""?s
-    //         newGroupItem.itemIndex = newGroupData.length; // ""?
-    //         newGroupData.push(newGroupItem); // ""?
-    //         db_old.groups.update( { "_id": o_id }, { $set: {
-    //                     groupdata : newGroupData, // ""?
-    //                     lastUpdateTimestamp: timestamp,
-    //                     items: newItems
-    //                 }
-    //             }, function (err, rezponse) {
-    //                 if (err || !rezponse) {
-    //                     console.log("error updateing group: " + err);
-    //                     res.send(err);
-    //                 } else {
-    //                 console.log("group updated: " + req.body.group_id);
-    //                 res.send("group updated");
-    //             }
-    //         });
-    //     }
-    // });
 });
 app.post('/remove_group_item/', requiredAuthentication, function (req, res) {
     console.log("tryna remove group itme : "+ JSON.stringify(req.body));
@@ -9082,65 +8507,6 @@ app.post('/remove_group_item/', requiredAuthentication, function (req, res) {
       }
     })();
 
-    // db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
-    //     if (err || !group) {
-    //         console.log("error getting group: " + err);
-    //     } else {
-    //         var timestamp = Math.round(Date.now() / 1000);
-    //         let newGroupData = [];
-    //         let newItems = [];
-    //         console.log("tryna update group" + JSON.stringify(group));
-    //         async.waterfall([
-    //             function(callback){ 
-    //                 if (group.groupdata) {
-    //                     let index = 0;
-    //                     group.groupdata.forEach(function(content) {
-    //                     console.log("groupdata " + content);
-    //                     if (content.itemID == req.body.item_id) {
-    //                         console.log("excluding on " + req.body.item_id);
-    //                     } else {
-    //                         index++;
-    //                         content.itemIndex = index;
-    //                         newGroupData.push(content);
-    //                     }
-    //                 });
-    //                 callback(null);
-    //                 } else {
-    //                     callback(null);
-    //                 }
-    //             },
-    //             function(callback){ 
-    //                     group.items.forEach(function(content) {
-    //                     console.log("item " + content);
-    //                     if (content == req.body.item_id) {
-    //                         console.log("matched onn " + req.body.item_id);
-    //                     } else {
-    //                         newItems.push(content);
-    //                     }
-    //                 });
-    //                 callback(null);
-    //             }
-    //         ],
-    //         function(err, result) { // #last function, close async
-    //             console.log(JSON.stringify("group:" + newGroupData + " itme: " + newItems));
-    //             db_old.groups.update( { "_id": o_id }, { $set: {
-    //                 lastUpdateTimestamp: timestamp,
-    //                 groupdata : newGroupData,
-    //                 items: newItems
-    //                 }
-    //             }, function (err, rezponse){
-    //                 if (err || !rezponse) {
-    //                     console.log("error updateing group: " + err);
-    //                     res.send(err);
-    //                 } else {
-    //                     console.log("group updated: " + req.body.group_id);
-    //                     res.send("group updated");
-    //                     }
-    //                 });
-    //             }
-    //         );
-    //     }
-    // });
 });
 app.post('/update_group/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log(req.params._id);
@@ -9202,40 +8568,6 @@ app.post('/updategroup/', requiredAuthentication, function (req, res) {
     });
 });
 
-// app.get('/mod_group_pics/:group_id', requiredAuthentication, function(req, res) { //quick hack
-    
-//     let groupID = ObjectId.createFromHexString(req.params.group_id);
-//     // let orientation = req.body.orientation;
-
-//     db.groups.findOne({"_id": groupID}, function(err, group) {
-//         if (err || !group) {
-//             console.log("error getting group item: " + err);
-//         } else {
-//             const image_ids = group.items.map(item => {
-//                 return ObjectId.createFromHexString(item);
-//             });
-//             db.image_items.find({_id: {$in: image_ids }}, function (err, pic_items) {
-//                 if (err || !pic_items) {
-//                     console.log("didn't fine no pic_itemsz at all!");
-//                     res.send(err);
-//                 } else {
-//                     for (let i = 0; i < pic_items.length; i++) {
-//                         let pid = ObjectId.createFromHexString(pic_items[i]._id);
-//                         db.image_items.update({_id: pid}, {$set: {orientation: "Equirectangular"}}, function (err, saved) {
-//                             if (err || !saved) {
-//                                 console.log(err + "error updating pic " + pic_items[i]._id);
-//                             } else {
-//                                 console.log("updated pic " + pic_items[i]._id);
-//                             }
-//                         });
-                        
-//                     }
-//                 }
-//             });        
-
-//         }
-//     }); 
-// });
 
 
 app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
@@ -9249,7 +8581,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
         const query = {"_id": o_id};
 
         const group = await RunDataQuery("groups", "findOne", query);
-        if (group && group.items) {
+        // if (group && group.items) {
           group.items = group.items.map(convertStringToObjectID);
           if (group.lastUpdate != null) { //?
             group.lastUpdateTimestamp = group.lastUpdate;
@@ -9300,7 +8632,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
             res.json(group);
           ///////////////////////////// video group
           } else if (group.type.toLowerCase() == "video") {
-            const video_items = await RunDataQuery("audio_items", "find", gquery);
+            const video_items = await RunDataQuery("video_items", "find", gquery);
             for (var i = 0; i < video_items.length; i++) {
               if (group.groupdata) {
                   var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
@@ -9335,8 +8667,9 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
             });
             res.json(group);
           ///////////////////////////// pic group  
-          } else if (group.type.toLowerCase() == "pictures") {
+          } else if (group.type.toLowerCase() == "pictures" || group.type.toLowerCase() == "picture") {
             const image_items = await RunDataQuery("image_items", "find", gquery);
+            console.log("gots image_items " + image_items.length);
             for (var i = 0; i < image_items.length; i++) {
               if (group.groupdata) {
                   var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
@@ -9400,23 +8733,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
             
             } else if (group.type.toLowerCase() == "text") {
               const text_items = await RunDataQuery("text_items", "find", gquery);
-              // for (var i = 0; i < text_items.length; i++) {
-              //   if (group.groupdata) {
-              //       var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-              //           return obj.itemID === text_items[i]._id.toString();
-              //       })[0];
-              //       if (obj != undefined && obj.itemIndex) {
-              //           text_items[i].itemIndex = obj.itemIndex;
-              //           console.log(text_items[i].itemIndex + "index for " + text_items[i]._id.toString());
-              //       } else {
-              //           text_items[i].itemIndex = i;
-              //           console.log(text_items[i].itemIndex + "natchrul index for " + text_items[i]._id.toString());
-              //             }
-              //         }
-              //     }
-              //   text_items.sort(function (a, b) {
-              //       return a.itemIndex - b.itemIndex;
-              //   });
+              
             
                 group.text_items = text_items;
                 group.text_items.sort(function (a, b) {
@@ -9426,23 +8743,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                 
             } else if (group.type.toLowerCase() == "people") {
               const people = await RunDataQuery("people", "find", gquery);
-              // for (var i = 0; i < people.length; i++) {
-              //   if (group.groupdata) {
-              //       var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-              //           return obj.itemID === people[i]._id.toString();
-              //       })[0];
-              //       if (obj != undefined && obj.itemIndex) {
-              //           people[i].itemIndex = obj.itemIndex;
-              //           console.log(people[i].itemIndex + "index for " + people[i]._id.toString());
-              //       } else {
-              //           people[i].itemIndex = i;
-              //           console.log(people[i].itemIndex + "natchrul index for " + people[i]._id.toString());
-              //       }
-              //   }
-              // }
-              // people.sort(function (a, b) {
-              //   return a.itemIndex - b.itemIndex;
-              //     });
+             
               
               group.people = people;
               group.people.sort(function (a, b) {
@@ -9454,23 +8755,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
 
             } else if (group.type.toLowerCase() == "objects") {
               const obj_items = await RunDataQuery("scenes", "find", gquery);
-              // for (var i = 0; i < obj_items.length; i++) {
-              //   if (group.groupdata) {
-              //       var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-              //           return obj.itemID === obj_items[i]._id.toString();
-              //       })[0];
-              //       if (obj != undefined && obj.itemIndex) {
-              //           obj_items[i].itemIndex = obj.itemIndex;
-              //           console.log(obj_items[i].itemIndex + "index for " + obj_items[i]._id.toString());
-              //       } else {
-              //           obj_items[i].itemIndex = i;
-              //           console.log(obj_items[i].itemIndex + "natchrul index for " + obj_items[i]._id.toString());
-              //       }
-              //     }
-              // }
-              // obj_items.sort(function (a, b) {
-              //     return a.itemIndex - b.itemIndex;
-              // });
+            
               group.obj_items = obj_items;
               group.obj_items.sort(function (a, b) {
                   return a.itemIndex - b.itemIndex;
@@ -9478,498 +8763,13 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
               res.json(group);
 
             }
-        }
+        // }
       } catch (e) {
         console.log("error geting group data " + e);
         res.send("errror geting group data " + e);
       }
     })();
 
-    //////////old way below!
-//     db_old.groups.findOne({"_id": o_id}, function(err, group) {
-//         if (err || !group) {
-//             console.log("error getting group item: " + err);
-//         } else {
-//             if (group.items != null) {
-//                 group.items = group.items.map(function (id) {
-//                     return ObjectId.createFromHexString(id);
-//                 });
-//                 if (group.lastUpdate != null) {
-//                     group.lastUpdateTimestamp = group.lastUpdate;
-//                 }
-//                 if (group.type.toLowerCase() == "audio") {
-//                     console.log("tryna get some audiogroup items: " + JSON.stringify(group.items));
-//                     db_old.audio_items.find({'_id': { $in: group.items}}).toArray(function (err, audio_items) {
-//                         if (err || !audio_items) {
-//                             console.log("error getting audio items: " + err);
-//                         } else {
-//                             var currentIndex = 0;
-//                             (async () => {
-
-
-//                                 for (var i = 0; i < audio_items.length; i++) {
-//                                     if (group.groupdata) {
-//                                         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                             return obj.itemID === audio_items[i]._id.toString();
-//                                         })[0];
-//                                         if (obj != undefined && obj.itemIndex) {
-//                                             audio_items[i].itemIndex = obj.itemIndex;
-//                                         } else {
-//                                             audio_items[i].itemIndex = i;
-//                                         }
-//                                     }
-//                                     if (audio_items[i].clipDuration = {}) {
-//                                         audio_items[i].clipDuration = "";
-//                                     }
-//                                     var item_string_filename = JSON.stringify(audio_items[i].filename);
-//                                     item_string_filename = item_string_filename.replace(/\"/g, "");
-//                                     var item_string_filename_ext = getExtension(item_string_filename);
-//                                     var expiration = new Date();
-//                                     expiration.setMinutes(expiration.getMinutes() + 30);
-//                                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                     // console.log("tryna jack in audio " + baseName + " to a group of " + group.type);
-//                                     var mp3Name = baseName + '.mp3';
-//                                     var oggName = baseName + '.ogg';
-//                                     var pngName = baseName + '.png';
-                                    
-
-//                                     const urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name,6000);
-//                                     const urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName,6000);
-//                                     const urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName,6000);
-//                                     audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                                     audio_items[i].URLogg = urlOgg;
-//                                     audio_items[i].URLpng = urlPng;
-                                   
-//                                     // var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, Expires: 60000});
-//                                     // var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, Expires: 60000});
-//                                     // var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, Expires: 60000});
-
-       
-//                                     currentIndex++;
-//                                 }
-                           
-//                                 audio_items.sort(function(a, b) {
-                                    
-//                                     return a.itemIndex - b.itemIndex;
-//                                 });
-
-//                                 group.audio_items = audio_items;
-//                                 res.json(group);
-//                                 // console.log("returning group_item : " + JSON.stringify(group));
-//                             })();
-                            
-//                         }
-// //                            audio_items.sort(function(a, b) {
-// //                                return a.itemIndex - b.itemIndex;
-// //                            });
-                       
-//                     });
-//                 } else if (group.type.toLowerCase() == "video") {
-//                     db_old.video_items.find({'_id': { $in: group.items}}).toArray(function (err, video_items) {
-//                         if (err || !video_items) {
-//                             console.log("error getting video items: " + err);
-//                         } else {
-//                             (async () => { 
-//                                 for (var i = 0; i < video_items.length; i++) {
-//                                     if (group.groupdata) {
-//                                         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                             return obj.itemID === video_items[i]._id.toString();
-//                                         })[0];
-//                                         if (obj != undefined && obj.itemIndex) {
-//                                             video_items[i].itemIndex = obj.itemIndex;
-//                                             console.log(video_items[i].itemIndex + "index for " + video_items[i]._id.toString() );
-//                                         } else {
-//                                             video_items[i].itemIndex = i;
-//                                             console.log(video_items[i].itemIndex + "natchrul index for " + video_items[i]._id.toString() );
-//                                         }
-//                                     }
-//                                     var item_string_filename = JSON.stringify(video_items[i].filename);
-//                                     item_string_filename = item_string_filename.replace(/\"/g, "");
-//                                     var item_string_filename_ext = getExtension(item_string_filename);
-//                                     var expiration = new Date();
-//                                     expiration.setMinutes(expiration.getMinutes() + 30);
-//                                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                     console.log("tryna jack in video " + baseName + " to a group of " + group.type.toLowerCase());
-//                                     var vidName = baseName + '.mp3';
-
-//                                     video_items[i].vUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, 6000);
-//                                     // var urlVid = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, Expires: 60000});
-//                                     // video_items[i].vUrl = urlVid; //jack in teh signed urls into the object array
-
-//                                 }
-//                                 video_items.sort(function(a, b) {
-//                                     return a.itemIndex - b.itemIndex;
-//                                 });
-
-//                                 group.video_items = video_items;
-//                                 group.video_items.sort(function(a, b) {
-//                                     return a.itemIndex - b.itemIndex;
-//                                 });
-//                                 res.json(group);
-//                                 // console.log("returning group_item : " + group);
-//                             })();
-//                         }
-// //                            video_items.sort(function(a, b) {
-// //                                return a.itemIndex - b.itemIndex;
-// //                            });
-                      
-//                     });
-//                 } else if (group.type.toLowerCase().includes("picture")) {
-//                     db_old.image_items.find({'_id': { $in: group.items}}).toArray(function (err, image_items) {
-//                         if (err || !image_items) {
-//                             console.log("error getting image items: " + err);
-//                         } else {
-//                             (async () => {
-//                                 for (var i = 0; i < image_items.length; i++) {
-//                                     if (group.groupdata) {
-//                                         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                             return obj.itemID === image_items[i]._id.toString();
-//                                         })[0];
-//                                         if (obj != undefined && obj.itemIndex) {
-//                                             image_items[i].itemIndex = obj.itemIndex;
-//                                             console.log(image_items[i].itemIndex + "index for " + image_items[i]._id.toString() );
-//                                         } else {
-//                                             image_items[i].itemIndex = i;
-//                                             console.log(image_items[i].itemIndex + "natchrul index for " + image_items[i]._id.toString() );
-//                                         }
-//                                     }
-//                                     var item_string_filename = JSON.stringify(image_items[i].filename);
-//                                     item_string_filename = item_string_filename.replace(/\"/g, "");
-//                                     var item_string_filename_ext = getExtension(item_string_filename);
-//                                     //var expiration = new Date();
-//                                     //expiration.setMinutes(expiration.getMinutes() + 30);
-//                                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                     console.log(baseName);
-//                                     var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-//                                     var halfName = 'half.' + baseName + item_string_filename_ext;
-
-
-//                                     // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName, Expires: 6000});
-//                                     // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName, Expires: 6000});
-//                                     image_items[i].urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName,6000);
-//                                     image_items[i].urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName,6000);
-//                                 }
-//                                 image_items.sort(function(a, b) {
-//                                     return a.itemIndex - b.itemIndex;
-//                                 });
-                        
-//                                 group.image_items = image_items;
-//                                 group.image_items.sort(function(a, b) {
-//                                     return a.itemIndex - b.itemIndex;
-//                                 });
-//                                 res.json(group);
-//                                 // console.log("returning group_item : " + group);
-                            
-//                             })();
-//                         }
-//                     });
-
-//             } else if (group.type.toLowerCase() == "location") {
-//                     console.log("tryna get locations");
-//                     db_old.locations.find({'_id': {$in: group.items}}).toArray(function (err, location_items) {
-//                         if (err || !location_items) {
-//                             console.log("error getting image items: " + err);
-//                         } else {
-//                             console.log("found locations : " + location_items.length);
-//                             for (var i = 0; i < location_items.length; i++) {
-//                                 if (group.groupdata) {
-//                                     var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                         return obj.itemID === location_items[i]._id.toString();
-//                                     })[0];
-//                                     if (obj != undefined && obj.itemIndex) {
-//                                         location_items[i].itemIndex = obj.itemIndex;
-//                                         console.log(location_items[i].itemIndex + "index for " + location_items[i]._id.toString());
-//                                     } else {
-//                                         location_items[i].itemIndex = i;
-//                                         console.log(location_items[i].itemIndex + "natchrul index for " + location_items[i]._id.toString());
-//                                     }
-//                                 }
-//                             }
-//                             location_items.sort(function (a, b) {
-//                                 return a.itemIndex - b.itemIndex;
-//                             });
-//                         }
-// //                            video_items.sort(function(a, b) {
-// //                                return a.itemIndex - b.itemIndex;
-// //                            });
-//                         group.locations = location_items;
-//                         group.locations.sort(function (a, b) {
-//                             return a.itemIndex - b.itemIndex;
-//                         });
-//                         res.json(group);
-//                         console.log("returning group_item : " + group);
-//                     });
-//                 } else if (group.type.toLowerCase() == "people") {
-//                     console.log("tryna get people");
-//                     db_old.people.find({'_id': {$in: group.items}}).toArray(function (err, people) {
-//                         if (err || !people) {
-//                             console.log("error getting text items: " + err);
-//                             res.send("error getting text items: " + err);
-//                         } else {
-//                             console.log("found locations : " + people.length);
-//                             for (var i = 0; i < people.length; i++) {
-//                                 if (group.groupdata) {
-//                                     var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                         return obj.itemID === text_items[i]._id.toString();
-//                                     })[0];
-//                                     if (obj != undefined && obj.itemIndex) {
-//                                         people[i].itemIndex = obj.itemIndex;
-//                                         console.log(people[i].itemIndex + "index for " + text_items[i]._id.toString());
-//                                     } else {
-//                                         people[i].itemIndex = i;
-//                                         console.log(people[i].itemIndex + "natchrul index for " + people[i]._id.toString());
-//                                     }
-//                                 }
-//                             }
-//                             people.sort(function (a, b) {
-//                                 return a.itemIndex - b.itemIndex;
-//                             });
-//                         }
-// //                            video_items.sort(function(a, b) {
-// //                                return a.itemIndex - b.itemIndex;
-// //                            });
-//                         group.people = people;
-//                         group.people.sort(function (a, b) {
-//                             return a.itemIndex - b.itemIndex;
-//                         });
-//                         res.json(group);
-//                         console.log("returning group_item : " + group);
-//                     });
-//                 } else if (group.type.toLowerCase() == "text") {
-//                     console.log("tryna get texts");
-//                     db_old.text_items.find({'_id': {$in: group.items}}).toArray(function (err, text_items) {
-//                         if (err || !text_items) {
-//                             console.log("error getting text items: " + err);
-//                             res.send("error getting text items: " + err);
-//                         } else {
-//                             console.log("found locations : " + text_items.length);
-//                             for (var i = 0; i < text_items.length; i++) {
-//                                 if (group.groupdata) {
-//                                     var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                         return obj.itemID === text_items[i]._id.toString();
-//                                     })[0];
-//                                     if (obj != undefined && obj.itemIndex) {
-//                                         text_items[i].itemIndex = obj.itemIndex;
-//                                         console.log(text_items[i].itemIndex + "index for " + text_items[i]._id.toString());
-//                                     } else {
-//                                         text_items[i].itemIndex = i;
-//                                         console.log(text_items[i].itemIndex + "natchrul index for " + text_items[i]._id.toString());
-//                                     }
-//                                 }
-//                             }
-//                             text_items.sort(function (a, b) {
-//                                 return a.itemIndex - b.itemIndex;
-//                             });
-//                         }
-// //                            video_items.sort(function(a, b) {
-// //                                return a.itemIndex - b.itemIndex;
-// //                            });
-//                         group.text_items = text_items;
-//                         group.text_items.sort(function (a, b) {
-//                             return a.itemIndex - b.itemIndex;
-//                         });
-//                         res.json(group);
-//                         console.log("returning group_item : " + group);
-//                     });
-//                 } else if (group.type.toLowerCase() == "scenes") {
-//                     // console.log("tryna get scenes");
-//                     let scenes = [];
-//                     db_old.scenes.find({'_id': {$in: group.items}}).toArray(function (err, scene_items) {
-//                         if (err || !scene_items) {
-//                             console.log("error getting scenes items: " + err);
-//                             res.send("error getting scenes items: " + err);
-//                         } else {
-//                             // console.log("found scenes : " + JSON.stringify(scene_item));
-//                             let index = 0;
-//                             async.each (scene_items, function (scene_item, callbackz) {
-//                                 let scene = {};
-//                                 scene._id = scene_item._id;
-//                                 scene.sceneTitle = scene_item.sceneTitle;
-//                                 scene.short_id = scene_item.short_id;
-                                
-//                                 if (scene_item.scenePostcards != undefined) {
-//                                     let scenePostcard = scene_item.scenePostcards[0];
-//                                     db_old.image_items.findOne({'_id': ObjectId.createFromHexString(scenePostcard)}, function(err, pic) {
-//                                         if (err || !pic) {
-//                                             console.log("no postcard found for that id?!");
-//                                             if (group.groupdata) {
-//                                                 var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                                     return obj.itemID === scene_item._id.toString();
-//                                                 })[0];
-//                                                 if (obj != undefined && obj.itemIndex) {
-//                                                     scene.itemIndex = obj.itemIndex;
-//                                                     console.log(scene_item.itemIndex + "index for " + scene._id.toString());
-//                                                 } else {
-//                                                     scene.itemIndex = index;
-//                                                     console.log(scene.itemIndex + "natchrul index for " + scene._id.toString());
-//                                                 }
-//                                             }
-//                                             index++;
-//                                             scenes.push(scene);
-//                                             callbackz();
-//                                         } else {
-//                                             var item_string_filename = pic.filename.replace(/\"/g, "");
-//                                             var item_string_filename_ext = getExtension(item_string_filename);
-//                                             //var expiration = new Date();
-//                                             //expiration.setMinutes(expiration.getMinutes() + 30);
-//                                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                             var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-//                                             // var url1 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + pic.userID + "/pictures/" + pic._id + "." + thumbName, Expires: 6000});\
-//                                             var url1 = "";
-//                                             // console.log("postcard url : " + url1);
-//                                             var halfName = 'thumb.' + baseName + item_string_filename_ext;
-//                                             // var url2 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + pic.userID + "/pictures/" + pic._id + "." + halfName, Expires: 6000});
-//                                             var url2 = "";
-//                                             // if (scene_items[i])
-//                                             scene.urlThumb = url1;
-//                                             scene.urlHalf = url2;
-//                                             if (group.groupdata) {
-//                                                 var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                                     return obj.itemID === scene_item._id.toString();
-//                                                 })[0];
-//                                                 if (obj != undefined && obj.itemIndex) {
-//                                                     scene.itemIndex = obj.itemIndex;
-//                                                     console.log(scene.itemIndex + "index for " + scene._id.toString());
-//                                                 } else {
-//                                                     scene.itemIndex = index;
-//                                                     console.log(scene.itemIndex + "natchrul index for " + scene._id.toString());
-//                                                 }
-//                                             }
-//                                             index++;
-//                                             scenes.push(scene);
-//                                             callbackz();
-//                                             // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName, Expires: 6000});
-//                                         }
-//                                     });
-//                                 } else {
-//                                     if (group.groupdata) {
-//                                         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                             return obj.itemID === scene_item._id.toString();
-//                                         })[0];
-//                                         if (obj != undefined && obj.itemIndex) {
-//                                             scene.itemIndex = obj.itemIndex;
-//                                             console.log(scene_item.itemIndex + "index for " + scene._id.toString());
-//                                         } else {
-//                                             scene.itemIndex = index;
-//                                             console.log(scene.itemIndex + "natchrul index for " + scene._id.toString());
-//                                         }
-//                                     }
-//                                     index++;
-//                                     scenes.push(scene);
-//                                     callbackz();
-//                                 }
-
-                                
-  
-//                             }, function(err) {
-//                                 if (err) {
-//                                     console.log('A file failed to process');
-//                                     // callbackz(err);
-//                                 } else {
-//                                     // console.log('scenexs ' + JSON.stringify(scenes));
-//                                     scenes.sort(function (a, b) {
-//                                         return a.itemIndex - b.itemIndex;
-//                                     });
-//                                     group.scene_items = scenes;
-//                                     group.scene_items.sort(function (a, b) {
-//                                         return a.itemIndex - b.itemIndex;
-//                                     });
-//                                     res.json(group);
-//                                     // callback(null, scene_items);
-//                                 }
-//                             });
-
-//                             // for (var i = 0; i < scene_items.length; i++) {
-//                             //     if (group.groupdata) {
-//                             //         var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                             //             return obj.itemID === scene_items[i]._id.toString();
-//                             //         })[0];
-//                             //         if (obj != undefined && obj.itemIndex) {
-//                             //             scene_items[i].itemIndex = obj.itemIndex;
-//                             //             console.log(scene_items[i].itemIndex + "index for " + scene_items[i]._id.toString());
-//                             //         } else {
-//                             //             scene_items[i].itemIndex = i;
-//                             //             console.log(scene_items[i].itemIndex + "natchrul index for " + scene_items[i]._id.toString());
-//                             //         }
-//                             //     }
-//                             //     let scenePostcard = scene_items[i].scenePostcards[0];
-
-//                             //     console.log("scenePostcarnd " + scenePostcard);
-//                             //     if (scenePostcard != null && scenePostcard != undefined ) {
-//                             //         db.image_items.findOne({'_id': ObjectId.createFromHexString(scenePostcard)}, function(err, pic) {
-//                             //             if (err || !pic) {
-//                             //                 console.log("no postcard found for that id?!");
-//                             //             } else {
-//                             //                 var item_string_filename = pic.filename.replace(/\"/g, "");
-//                             //                 var item_string_filename_ext = getExtension(item_string_filename);
-//                             //                 //var expiration = new Date();
-//                             //                 //expiration.setMinutes(expiration.getMinutes() + 30);
-//                             //                 var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                             //                 var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-//                             //                 var url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + pic.userID + "/pictures/" + pic._id + "." + thumbName, Expires: 6000});
-//                             //                 console.log("postcard url : " + url);
-//                             //                 if (scene_items[i])
-//                             //                 scene_items[i].urlThumb = url;
-//                             //                 // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + thumbName, Expires: 6000});
-//                             //             }
-//                             //         });
-//                             //     }
-//                             //     // scene_items.urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + image_items[i].userID + "/pictures/" + image_items[i]._id + "." + halfName, Expires: 6000});
-//                             // }
-
-//                         }
-// //                            video_items.sort(function(a, b) {
-// //                                return a.itemIndex - b.itemIndex;
-// //                            });
-//             // group.scene_items = scenes;
-//             // group.scene_items.sort(function (a, b) {
-//             //     return a.itemIndex - b.itemIndex;
-//             // });
-//             // res.json(group);
-//                         // console.log("returning group_item : " + JSON.stringify(group));
-//                     });    
-//                 } else if (group.type.toLowerCase() == "object" || group.type.toLowerCase() == "objects") {
-//                     console.log("tryna get objex");
-//                     db_old.obj_items.find({'_id': {$in: group.items}}).toArray(function (err, obj_items) {
-//                         if (err || !obj_items) {
-//                             console.log("error getting text items: " + err);
-//                             res.send("error getting text items: " + err);
-//                         } else {
-//                             console.log("found locations : " + obj_items.length);
-//                             for (var i = 0; i < obj_items.length; i++) {
-//                                 if (group.groupdata) {
-//                                     var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
-//                                         return obj.itemID === obj_items[i]._id.toString();
-//                                     })[0];
-//                                     if (obj != undefined && obj.itemIndex) {
-//                                         obj_items[i].itemIndex = obj.itemIndex;
-//                                         console.log(obj_items[i].itemIndex + "index for " + obj_items[i]._id.toString());
-//                                     } else {
-//                                         obj_items[i].itemIndex = i;
-//                                         console.log(obj_items[i].itemIndex + "natchrul index for " + obj_items[i]._id.toString());
-//                                     }
-//                                 }
-//                             }
-//                             obj_items.sort(function (a, b) {
-//                                 return a.itemIndex - b.itemIndex;
-//                             });
-//                         }
-// //                            video_items.sort(function(a, b) {
-// //                                return a.itemIndex - b.itemIndex;
-// //                            });
-//                         group.obj_items = obj_items;
-//                         group.obj_items.sort(function (a, b) {
-//                             return a.itemIndex - b.itemIndex;
-//                         });
-//                         res.json(group);
-//                         console.log("returning group_item : " + group);
-//                     });
-//                 }
-//         } else {
-//                 res.json(group);
-//             }
-//         }
-//     });
 });
 
 app.get('/useraudio/:u_id', requiredAuthentication, function(req, res) {
@@ -9999,9 +8799,7 @@ app.get('/useraudio/:u_id', requiredAuthentication, function(req, res) {
                 var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, 6000); 
                 var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, 6000); 
 
-                // var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, Expires: 60000});
-                // var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, Expires: 60000});
-                // var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, Expires: 60000});
+           
                 audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
                 audio_items[i].URLogg = urlOgg;
                 audio_items[i].URLpng = urlPng;
@@ -14632,12 +13430,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                       const oids = sceneResponse.sceneModels.map(convertStringToObjectID);
                       const query = {"_id": { $in: oids }};
                       const models = await RunDataQuery("models", "find", query); //how to show missing?  
-                      // if (models && models.length) {
-                      //   for (let i = 0; i < models.length; i++) {
-                      //     // models[i].url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename );// is this needed here?
-                      //     modelz.push(model);
-
-                      //   }
+                     
                         sceneResponse.sceneModelz = models;
                         callback(null);
                       // }
@@ -14668,33 +13461,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                           callback(e);
                         }
                     })();
-                        // async.each (sceneResponse.sceneObjectGroups, function (objID, callbackz) { //nested async-ery!
-                        //     var oo_id = ObjectId.createFromHexString(objID);
-                        //     console.log("tryna get GroupObject: " + objID);
-                        //     db_old.groups.findOne({"_id": oo_id}, function (err, group) {
-                        //         if (err || !group) {
-                        //             console.log("error getting obj items: " + err);
-                        //             callbackz();
-                        //         } else {
-                        //             console.log("gotsome groupObjects to add to sceneObjects : "+ JSON.stringify(group));
-                        //             // sceneResponse.sceneObjects = sceneResponse.sceneObjects.concat(group.items);
-                        //             objexgroups.push(group);
-                        //             callbackz();
-                        //         }
-                        //     });
-                        // }, function(err) {
-                           
-                        //     if (err) {
-                                
-                                
-                        //         console.log('A file failed to process');
-                        //         callback(err);
-                        //     } else {
-                        //         console.log('groupObjects have been added to sceneObjects');
-                        //         sceneResponse.sceneObjexGroups = objexgroups;
-                        //         callback(null);
-                        //     }
-                        // });
+                      
                     } else {
                         callback(null);
                     }
@@ -14720,52 +13487,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                       callback(e);
                     }
                 })();
-                    // async.each (sceneResponse.sceneObjects, function (objID, callbackz) { 
-                    //     var oo_id = ObjectId.createFromHexString(objID);
-                    //     // console.log("4573 tryna get sceneObject: " + objID);
-                    //     db_old.obj_items.findOne({"_id": oo_id}, function (err, obj_item) {
-                    //         if (err || !obj_item) {
-                    //             console.log("error getting obj items: " + err);
-                    //             callbackz();
-                    //         } else {
-
-                    //             //console.log("4580 tryna find childObjectIDs: " + JSON.stringify(obj_item.childObjectIDs));
-                    //             obj_item.objectGroup = "none";
-                    //             if (obj_item.childObjectIDs != null && obj_item.childObjectIDs.length > 0) {
-                    //                 var childIDs = obj_item.childObjectIDs.map(convertStringToObjectID); //convert child IDs array to objIDs
-                    //                 db_old.obj_items.find({_id : {$in : childIDs}}, function(err, obj_items) {
-                    //                     if (err || !obj_items) {
-                    //                         console.log("error getting childObject items: " + err);
-                    //                         //res.send("error getting child objects");
-                    //                         objex.push(obj_item);
-                    //                         callbackz();
-                    //                     } else {
-                    //                         childObjects = obj_items;
-                    //                         console.log("childObjects: " + JSON.stringify(childObjects));
-                    //                         obj_item.childObjects = childObjects;
-                    //                         objex.push(obj_item);
-                    //                         callbackz();
-                    //                     }
-                    //                 });
-                    //             } else {
-                    //                 objex.push(obj_item);
-                    //                 callbackz();
-                    //             }
-                    //         }
-                    //     });
-                    // }, function(err) {
-                       
-                    //     if (err) {
-                            
-                    //         console.log('A file failed to process');
-                    //         callback(null, objex);
-                    //     } else {
-                    //         console.log('objects have been added to scene.objex');
-                    //         objectResponse = objex;
-                    //         sceneResponse.sceneObjex = objectResponse;
-                    //         callback(null, objex);
-                    //     }
-                    // });
+                    
                 } else {
                     callback(null);
                 }
@@ -14796,237 +13518,6 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
         }
     );
 });
-
-// //is this still used?
-// app.get('/uuscene/:user_id/:scene_id',  checkAppID, requiredAuthentication, uscene, function (req, res) { //view for updating scene for this user
-
-//     console.log("tryna get scene " + req.params.scene_id);
-//     var sceneID = req.params.scene_id.toString().replace(":", "");
-//     // var o_id = new ObjectId.createFromHexString(sceneID);
-//     var o_id = ObjectId.createFromHexString(sceneID);
-//     console.log("tryna get scene: " + sceneID);
-//     db.scenes.findOne({ _id : o_id}, function(err, scene) {
-//         if (err || !scene) {
-//             console.log("cain't get no scene... " + err);
-//         } else {
-// //            console.log(JSON.stringify(scenes));
-
-//             if (scene.sceneWebLinks != null && scene.sceneWebLinks.length > 0) {
-//                 for (var i = 0; i < scene.sceneWebLinks.length; i++) { //refresh themz
-//                     console.log("sceneWebLink id: " + scene.sceneWebLinks[i].link_id);
-//                     var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia.web', Key: scene.sceneWebLinks[i].link_id + ".thumb.jpg", Expires: 6000});
-//                     var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia.web', Key: scene.sceneWebLinks[i].link_id + ".half.jpg", Expires: 6000});
-//                     var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia.web', Key: scene.sceneWebLinks[i].link_id + ".standard.jpg", Expires: 6000});
-//                     scene.sceneWebLinks[i].urlThumb = urlThumb;
-//                     scene.sceneWebLinks[i].urlHalf = urlHalf;
-//                     scene.sceneWebLinks[i].urlStandard = urlStandard;
-
-//                 }
-//             }
-
-//             if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-//                 var postcards = [];
-// //              for (var i = 0; i < sceneResponse.scenePostcards.length; i++) { //refresh themz
-//                 async.each (scene.scenePostcards, function (postcardID, callbackz) {
-// //                                console.log("scenepostcard id: " + sceneResponse.scenePostcards[i]);
-// //                    console.log("scenepostcard id: " + postcardID);
-//                     var oo_id = ObjectId.createFromHexString(postcardID);
-//                     db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-//                         if (err || !picture_item) {
-//                             console.log("error getting picture items 1: " + err);
-// //                                        callback(err);
-// //                                        callback(null);
-//                             callbackz();
-//                         } else {
-//                             var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-//                             var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-
-//                             var postcard = {};
-//                             postcard.userID = picture_item.userID;
-//                             postcard._id = picture_item._id;
-//                             postcard.sceneID = scene._id;
-//                             postcard.sceneShortID = scene.short_id;
-//                             postcard.urlThumb = urlThumb;
-//                             postcard.urlHalf = urlHalf;
-//                             postcards.push(postcard);
-// //                            console.log("pushing postcard: " + JSON.stringify(postcard));
-//                             callbackz();
-//                         }
-
-//                     });
-
-//                 }, function(err) {
-                   
-//                     if (err) {
-                        
-                        
-//                         console.log('A file failed to process');
-// //                        callback(null, postcards);
-//                     } else {
-//                         console.log('All files have been processed successfully');
-// //                        callback(null, postcards);
-// //                                        };
-//                         scene.postcards = postcards;
-//                         res.send(scene);
-//                     }
-//                 });
-
-//             } else {
-//                 res.send(scene);
-//             }
-//         }
-//     });
-// });
-
-// app.get('/availablescenes/:_id',  requiredAuthentication, function (req, res) {
-
-//     var availableScenesResponse = {};
-//     var availableScenes = [];
-//     availableScenesResponse.availableScenes = availableScenes;
-
-//     //mongolian "OR" syntax...
-//     db.scenes.find( {$and: [{ "user_id": req.params._id}, { sceneShareWithPublic: true }]}, function (err, scenes) {
-//         if (err || !scenes) {
-//             console.log("cain't get no scenes... " + err)
-//         } else {
-//             async.each(scenes,
-//                 function (scene, callback) {
-//                     if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-//                         var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
-//                         db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-//                             if (err || !picture_item || picture_item.length == 0) {
-//                                 console.log("error getting postcard for availablescenes: 2" + err);
-//                             } else {
-//                                 var item_string_filename = JSON.stringify(picture_item.filename);
-//                                 item_string_filename = item_string_filename.replace(/\"/g, "");
-//                                 var item_string_filename_ext = getExtension(item_string_filename);
-//                                 var expiration = new Date();
-//                                 expiration.setMinutes(expiration.getMinutes() + 30);
-//                                 var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-// //                                    console.log(baseName);
-//                                 var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-//                                 var halfName = 'half.' + baseName + item_string_filename_ext;
-//                                 var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-//                                 var standardName = 'standard.' + baseName + item_string_filename_ext;
-//                                 var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
-//                                 var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
-//                                 var availableScene = {
-//                                     sceneDomain: scene.sceneDomain,
-//                                     sceneTitle: scene.sceneTitle,
-//                                     sceneKey: scene.short_id,
-//                                     sceneDescription: scene.sceneDescription,
-//                                     sceneKeynote: scene.sceneKeynote,
-//                                     sceneAndroidOK: scene.sceneAndroidOK,
-//                                     sceneIosOK: scene.sceneIosOK,
-//                                     sceneWindowsOK: scene.sceneWindowsOK,
-//                                     sceneWebGLOK: scene.sceneWebGLOK,
-//                                     sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-//                                     sceneOwner: scene.userName ? "" : scene.userName,
-//                                     scenePostcardQuarter: urlQuarter,
-//                                     scenePostcardHalf: urlHalf
-//                                 };
-//                                 availableScenesResponse.availableScenes.push(availableScene);
-//                             }
-//                             callback();
-//                         });
-//                     } else {
-//                         callback();
-//                     }
-//                 },
-//                 function (err) {
-//                     res.send(availableScenesResponse);
-//                 }
-//             );
-//         }
-//     });
-// });
-
-/* //superfluous
-app.get('/domain_scenes/:domain',  function (req, res) {
-    var availableScenesResponse = {};
-    var availableScenes = [];
-    availableScenesResponse.availableScenes = availableScenes;
-    console.log("tryna get domain " + req.params.domain);
-    //mongolian "OR" syntax...
-    db.scenes.find( {$and: [{ "sceneDomain": req.params.domain}, { sceneShareWithPublic: true }]}, function (err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err)
-        } else {
-            async.each(scenes,
-                function (scene, callback) {
-                    if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-                        var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
-                        db.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-                            if (err || !picture_item) {
-                                console.log("error getting postcard for availablescenes: 2" + err);
-
-                            } else {
-                                var item_string_filename = JSON.stringify(picture_item.filename);
-                                item_string_filename = item_string_filename.replace(/\"/g, "");
-                                var item_string_filename_ext = getExtension(item_string_filename);
-                                var expiration = new Date();
-                                expiration.setMinutes(expiration.getMinutes() + 30);
-                                var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                    console.log(baseName);
-                                var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-                                var halfName = 'half.' + baseName + item_string_filename_ext;
-                                var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-                                var standardName = 'standard.' + baseName + item_string_filename_ext;
-                                var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
-                                var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
-                                var primaryAudioUrl = "";
-                                var availableScene = {
-                                    sceneTitle: scene.sceneTitle,
-                                    sceneKey: scene.short_id,
-                                    sceneDescription: scene.sceneDescription,
-                                    sceneKeynote: scene.sceneKeynote,
-                                    sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-                                    sceneOwner: scene.userName ? "" : scene.userName,
-//                                    scenePrimaryAudioUrl: primaryAudioUrl,
-                                    scenePostcardQuarter: urlQuarter,
-                                    scenePostcardHalf: urlHalf
-                                };
-//                                if (scene.scenePrimaryAudioID != null) {
-//                                    var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID);
-//
-//                                    db.audio_items.findOne({_id: o_id}, function (err, audio_item) {
-//                                        if (err || !audio_item) {
-//                                            console.log("error getting audio items: " + err);
-//                                            callback();
-//                                        } else {
-//                                            var item_string_filename = JSON.stringify(audio_item.filename);
-//                                            console.log("audio filename: " + item_string_filename);
-//                                            item_string_filename = item_string_filename.replace(/\"/g, "");
-//                                            var item_string_filename_ext = getExtension(item_string_filename);
-//                                            var expiration = new Date();
-//                                            expiration.setMinutes(expiration.getMinutes() + 1000);
-//                                            var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                            //console.log(baseName);
-//                                            var mp3Name = baseName + '.mp3';
-//                                            var primaryAudioUrl = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID, Key: audio_item._id + "." + mp3Name, Expires: 60000});
-////                                            availableScene.primaryAudioUrl = primaryAudioUrl;
-//
-//                                        }
-//                                    });
-//                                }
-
-
-                                availableScenesResponse.availableScenes.push(availableScene);
-                            }
-                            callback();
-                        });
-                    } else {
-                        callback();
-                    }
-                },
-                function (err) {
-                    res.send(availableScenesResponse);
-                }
-            );
-        }
-    });
-});
-*/
 
 //unused....but maybe later
 app.get('/available_user_scenes/:user_id', requiredAuthentication, function(req,res){ //authenticated scenes, either owned by user or accessible via acl
@@ -16160,30 +14651,7 @@ app.post('/weblink/', requiredAuthentication, function (req, res) {
                 }
             });
         } else {
-        //     if (process.env.USE_TRANSLOADIT == true) { //nilch, over it
-        //     var weblinkParams = {
-        //         'steps': {
-        //             'extract': {
-        //                 'robot': '/html/convert',
-        //                 'url' : req.body.link_url
-        //             }
-        //         },
-        //         'template_id': process.env.TRANSLOADIT_WEBSCRAPE_TEMPLATE,
-        //         'fields' : { 'link_id' : link._id,
-        //             'user_id' : req.session.user._id
-        //         }
-        //     };
-
-        //     transloadClient.send(weblinkParams, function(ok) {
-        //         console.log('Success: ' + JSON.stringify(ok));
-        //         if (ok != null && ok != undefined) {
-        //             var dateNow = Date.now();
-        //             db.weblinks.update({"_id": link._id}, { $set: {"render_date": dateNow}});
-        //         }
-        //     }, function(err) {
-        //         console.log('Error: ' + JSON.stringify(err));
-        //     });
-        // } else {
+       
             console.log(" link item found for " + lurl);
             var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
             const options = {
@@ -16761,333 +15229,7 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
       
 
     })();
-
-//     db_old.scenes.findOne({ "_id" : o_id}, function(err, scene) {
-//         if (err || !scene) {
-//             console.log("error getting scene: " + err);
-//         } else {
-
-//             let inventoryID = scene.sceneInventoryID; //easier to jack in here, than ? make a temp batch route? 
-//             if (inventoryID == null) {
-//                 let inventories = {};
-//                 let inventoryItems = [];
-//                 inventories.inventoryItems = inventoryItems; 
-//                 db_old.inventories.save(inventories, function (err, saved) {
-//                 if (err || !saved) {
-//                     console.log("problemo2 with inventory add " + err); 
-//                     } else {
-//                         inventoryID = saved._id;
-//                         db_old.scenes.update( { "_id": o_id }, { $set: { sceneInventoryID : inventoryID }});
-//                     }
-//                 });
-//             }
-//             console.log("tryna update scene " + req.body._id + " with cameraMode " + JSON.stringify(req.body.sceneCameraMode));
-//             db_old.scenes.update( { "_id": o_id }, { $set: {
-//                 sceneDomain : req.body.sceneDomain,
-//                 sceneAppName : req.body.sceneAppName,
-//                 sceneSource : req.body.sceneSource,
-//                 sceneAltURL : req.body.sceneAltURL != null ? req.body.sceneAltURL : "",
-//                 sceneStickyness : parseInt(req.body.sceneStickyness) != null ? parseInt(req.body.sceneStickyness) : 5,
-// //                    sceneUserName : scene.sceneUserName != null ? scene.sceneUserName : "",
-//                 sceneNumber : req.body.sceneNumber,
-//                 sceneTitle : req.body.sceneTitle,
-//                 sceneTags : req.body.sceneTags,
-//                 sceneYouTubeIDs : (req.body.sceneYouTubeIDs != null && req.body.sceneYouTubeIDs != undefined) ? req.body.sceneYouTubeIDs : [],
-//                 sceneVideoStreamUrls : (req.body.sceneVideoStreamUrls != null && req.body.sceneVideoStreamUrls != undefined) ? req.body.sceneVideoStreamUrls : [],
-//                 sceneLinks : req.body.sceneLinks,
-//                 scenePeopleGroupID : req.body.scenePeopleGroupID,
-//                 sceneLocationGroups : req.body.sceneLocationGroups,
-//                 sceneAudioGroups : req.body.sceneAudioGroups,
-//                 scenePictureGroups : req.body.scenePictureGroups,
-//                 sceneTextGroups : req.body.sceneTextGroups,
-//                 sceneVideoGroups : req.body.sceneVideoGroups,
-//                 sceneVideos : req.body.sceneVideos,
-//                 scenePlayer : req.body.scenePlayer  != null ? req.body.scenePlayer : "",
-//                 sceneCategory : req.body.sceneCategory != null ? req.body.sceneCategory : "None",
-//                 sceneType : (req.body.sceneType != null && req.body.sceneType.length > 2) ? req.body.sceneType : "Default",
-//                 sceneWebType : (req.body.sceneWebType != null && req.body.sceneWebType.length > 2) ? req.body.sceneWebType : "Default",
-//                 sceneCameraMode : req.body.sceneCameraMode != null ? req.body.sceneCameraMode : "First Person",
-//                 sceneDebugMode : req.body.sceneDebugMode != null ? req.body.sceneDebugMode : "",
-//                 sceneUseThreeDeeText : req.body.sceneUseThreeDeeText != null ? req.body.sceneUseThreeDeeText : false,
-//                 sceneAndroidOK : req.body.sceneAndroidOK != null ? req.body.sceneAndroidOK : false,
-//                 sceneIosOK : req.body.sceneIosOK != null ? req.body.sceneIosOK : false,
-//                 sceneWindowsOK : req.body.sceneWindowsOK != null ? req.body.sceneWindowsOK : false,
-//                 sceneWebGLOK : req.body.sceneWebGLOK != null ? req.body.sceneWebGLOK : false,
-//                 sceneLocationTracking : req.body.sceneLocationTracking != null ? req.body.sceneLocationTracking : false,
-//                 sceneShowAds : req.body.sceneShowAds != null ? req.body.sceneShowAds : false,
-//                 sceneShareWithPublic : req.body.sceneShareWithPublic != null ? req.body.sceneShareWithPublic : false,
-//                 sceneShareWithSubscribers : req.body.sceneShareWithSubscribers != null ? req.body.sceneShareWithSubscribers : false,
-//                 sceneShareWithGroups : req.body.sceneShareWithGroups != null ? req.body.sceneShareWithGroups : "",
-//                 sceneShareWithPeople : req.body.sceneShareWithPeople != null ? req.body.sceneShareWithPeople : "",
-//                 sceneShareWithGroups : req.body.sceneShareWithGroups != null ? req.body.sceneShareWithGroups : "",
-//                 sceneEventStart : req.body.sceneEventStart != null ? req.body.sceneEventStart : "",
-//                 sceneEventEnd : req.body.sceneEventEnd != null ? req.body.sceneEventEnd : "",
-//                 sceneAccessLinkExpire : req.body.sceneAccessLinkExpire != null ? req.body.sceneAccessLinkExpire : "",
-//                 sceneShareWithMessage : req.body.sceneShareWithMessage != null ? req.body.sceneShareWithMessage : "",
-//                 sceneEnvironment : req.body.sceneEnvironment != null ? req.body.sceneEnvironment : {},
-//                 sceneUseStaticObj : req.body.sceneUseStaticObj != null ? req.body.sceneUseStaticObj : false,
-//                 sceneStaticObjUrl : req.body.sceneStaticObjUrl != null ? req.body.sceneStaticObjUrl : "",
-//                 sceneStaticObjTextureUrl : req.body.sceneStaticObjTextureUrl != null ? req.body.sceneStaticObjTextureUrl : "",
-//                 sceneRandomizeColors : req.body.sceneRandomizeColors != null ? req.body.sceneRandomizeColors : false,
-//                 sceneTweakColors : req.body.sceneTweakColors != null ? req.body.sceneTweakColors : false,
-//                 sceneColorizeSky : req.body.sceneColorizeSky != null ? req.body.sceneColorizeSky : false,
-//                 sceneScatterMeshes : req.body.sceneScatterMeshes != null ? req.body.sceneScatterMeshes : false,
-//                 sceneScatterMeshLayers : req.body.sceneScatterMeshLayers != null ? req.body.sceneScatterMeshLayers : {},
-//                 sceneScatterObjectLayers : req.body.sceneScatterObjectLayers != null ? req.body.sceneScatterObjectLayers : {},
-//                 sceneScatterObjects : req.body.sceneScatterObjects != null ? req.body.sceneScatterObjects : false,
-//                 sceneScatterOffset : req.body.sceneScatterOffset != null ? req.body.sceneScatterOffset : "",
-//                 sceneShowViewportMeshes : req.body.sceneShowViewportMeshes != null ? req.body.sceneShowViewportMeshes : false,
-//                 sceneShowViewportObjects : req.body.sceneShowViewportObjects != null ? req.body.sceneShowViewportObjects : false,
-//                 sceneViewportMeshLayers : req.body.sceneViewportMeshLayers != null ? req.body.sceneViewportMeshLayers : {},
-//                 sceneViewportObjectLayers : req.body.sceneViewportObjectLayers != null ? req.body.sceneViewportObjectLayers : {},
-//                 sceneTargetColliderType : req.body.sceneTargetColliderType != null ? req.body.sceneTargetColliderType : "none",
-//                 sceneUseTargetObject : req.body.sceneUseTargetObject != null ? req.body.sceneUseTargetObject : false,
-//                 sceneTargetRotateToPlayer : req.body.sceneTargetRotateToPlayer != null ? req.body.sceneTargetRotateToPlayer : false,
-//                 // sceneTargetRotateToPlayer : req.body.sceneTargetRotateToPlayer != null ? req.body.sceneTargetRotateToPlayer : false,
-//                 sceneDetectHorizontalPlanes : req.body.sceneDetectHorizontalPlanes != null ? req.body.sceneDetectHorizontalPlanes : false,
-//                 sceneDetectVerticalPlanes : req.body.sceneDetectVerticalPlanes != null ? req.body.sceneDetectVerticalPlanes : false,
-//                 sceneCameraDepthOfField : req.body.sceneCameraDepthOfField != null ? req.body.sceneCameraDepthOfField : false,
-//                 sceneFlyable : req.body.sceneFlyable != null ? req.body.sceneFlyable : false,
-//                 sceneFaceTracking : req.body.sceneFaceTracking != null ? req.body.sceneFaceTracking : false,
-//                 sceneTargetObjectHeading : req.body.sceneTargetObjectHeading != null ? req.body.sceneTargetObjectHeading : 0,
-//                 sceneTargetObject : req.body.sceneTargetObject,
-//                 sceneTargetEvent : req.body.sceneTargetEvent,
-//                 sceneTargetText : req.body.sceneTargetText  != null ? req.body.sceneTargetText : "",
-//                 sceneNextScene : req.body.sceneNextScene != null ? req.body.sceneNextScene : "",
-//                 scenePreviousScene : req.body.scenePreviousScene,
-//                 sceneUseDynamicSky : req.body.sceneUseDynamicSky != null ? req.body.sceneUseDynamicSky : false,
-//                 sceneUseDynCubeMap : req.body.sceneUseDynCubeMap != null ? req.body.sceneUseDynCubeMap : false,
-//                 sceneUseSkyParticles : req.body.sceneUseSkyParticles != null ? req.body.sceneUseSkyParticles : false,
-//                 sceneSkyParticles : req.body.sceneSkyParticles != null ? req.body.sceneSkyParticles : "",
-//                 sceneUseDynamicShadows : req.body.sceneUseDynamicShadows != null ? req.body.sceneUseDynamicShadows : false,
-//                 sceneSkyRotationOffset : req.body.sceneSkyRotationOffset != null ? req.body.sceneSkyRotationOffset : 0,
-//                 sceneUseCameraBackground : req.body.sceneUseCameraBackground != null ? req.body.sceneUseCameraBackground : false,
-//                 sceneCameraOrientToPath : req.body.sceneCameraOrientToPath  != null ? req.body.sceneCameraOrientToPath : false,
-//                 sceneCameraPath : req.body.sceneCameraPath != null ? req.body.sceneCameraPath : "Random",
-//                 sceneUseSkybox : req.body.sceneUseSkybox != null ? req.body.sceneUseSkybox : false,
-//                 sceneSkybox : req.body.sceneSkybox,
-//                 sceneUseDynCubeMap : req.body.sceneUseDynCubeMap != null ? req.body.sceneUseDynCubeMap : false,
-//                 sceneUseSceneFog : req.body.sceneUseSceneFog != null ? req.body.sceneUseSceneFog : false,
-//                 sceneUseGlobalFog : req.body.sceneUseGlobalFog != null ? req.body.sceneUseGlobalFog : false,
-//                 sceneUseVolumetricFog : req.body.sceneUseVolumetricFog != null ? req.body.sceneUseVolumetricFog : false,
-//                 sceneGlobalFogDensity : req.body.sceneGlobalFogDensity != null ? req.body.sceneGlobalFogDensity : .001,
-//                 sceneUseSunShafts : req.body.sceneUseSunShafts != null ? req.body.sceneUseSunShafts : false,
-//                 // sceneRenderFloorPlane : req.body.sceneRenderFloorPlane != null ? req.body.sceneRenderFloorPlane : false,
-//                 sceneUseFloorPlane : req.body.sceneUseFloorPlane != null ? req.body.sceneUseFloorPlane : false,
-//                 sceneFloorplaneTexture : req.body.sceneFloorplaneTexture != null ? req.body.sceneFloorplaneTexture : "",
-//                 sceneUseEnvironment : req.body.sceneUseEnvironment != null ? req.body.sceneUseEnvironment : false,
-//                 sceneUseTerrain : req.body.sceneUseTerrain != null ? req.body.sceneUseTerrain : false,
-//                 sceneUseHeightmap : req.body.sceneUseHeightmap != null ? req.body.sceneUseHeightmap : false,
-//                 sceneHeightmap : req.body.sceneHeightmap,
-//                 sceneEnvironmentPreset : req.body.sceneEnvironmentPreset != null ? req.body.sceneEnvironmentPreset : "",
-//                 // sceneUseSimpleWater : req.body.sceneUseSimpleWater != null ? req.body.sceneUseSimpleWater : false,
-//                 // sceneUseOcean : req.body.sceneUseOcean != null ? req.body.sceneUseOcean : false,
-//                 // sceneUseFancyWater : req.body.sceneUseFancyWater != null ? req.body.sceneUseFancyWater : false,
-//                 sceneTime: req.body.sceneTime,
-//                 sceneTimeSpeed: req.body.sceneTimeSpeed,
-//                 sceneWeather: req.body.sceneWeather,
-//                 sceneClouds: req.body.sceneClouds,
-//                 sceneWater: req.body.sceneWater,
-//                 sceneGroundLevel: req.body.sceneGroundLevel,
-//                 sceneWindFactor : req.body.sceneWindFactor != null ?  req.body.sceneWindFactor : 0,
-//                 sceneSkyRadius  : req.body.sceneSkyRadius != null ?  req.body.sceneSkyRadius : 202,
-//                 sceneLightningFactor : req.body.sceneLightningFactor != null ? req.body.sceneLightningFactor : 0,
-//                 sceneCharacters: req.body.sceneCharacters,
-//                 sceneEquipment: req.body.sceneEquipment,
-//                 sceneFlyingObjex: req.body.sceneFlyingObjex,
-//                 sceneSeason: req.body.sceneSeason,
-//                 scenePictures : req.body.scenePictures, //array of IDs only
-//                 scenePostcards : req.body.scenePostcards, //array of IDs only
-//                 sceneWebLinks : req.body.sceneWebLinks != null ? req.body.sceneWebLinks : [], //custom object //no, make it an array of IDs
-//                 sceneColor4 : req.body.sceneColor4,
-//                 sceneColor1 : req.body.sceneColor1,
-//                 sceneColor2 : req.body.sceneColor2,
-//                 sceneColor3 : req.body.sceneColor3,
-//                 sceneStyleTheme: req.body.sceneStyleTheme != null ? req.body.sceneStyleTheme : "",
-//                 sceneColor4Alt : req.body.sceneColor4Alt,
-//                 sceneColor1Alt : req.body.sceneColor1Alt,
-//                 sceneColor2Alt : req.body.sceneColor2Alt,
-//                 sceneColor3Alt : req.body.sceneColor3Alt,
-//                 sceneLocationRange : req.body.sceneLocationRange != null ? req.body.sceneLocationRange : .1,
-//                 sceneUseMap : req.body.sceneUseMap != null ? req.body.sceneUseMap : false,
-//                 sceneMapType : req.body.sceneMapType != null ? req.body.sceneMapType : "none",
-//                 sceneMapZoom : req.body.sceneMapZoom != null ? req.body.sceneMapZoom : 17,
-//                 sceneLatitude : req.body.sceneLatitude != null ? req.body.sceneLatitude : "",
-//                 sceneLongitude : req.body.sceneLongitude != null ? req.body.sceneLongitude : "",
-//                 sceneUseStreetMap : req.body.sceneUseStreetMap  != null ? req.body.sceneUseStreetMap : false,
-//                 sceneUseSatelliteMap : req.body.sceneUseSatelliteMap  != null ? req.body.sceneUseSatelliteMap : false,
-//                 sceneUseHybridMap : req.body.sceneUseHybridMap  != null ? req.body.sceneUseHybridMap : false,
-//                 sceneEmulateGPS : req.body.sceneEmulateGPS  != null ? req.body.sceneEmulateGPS : false,
-//                 sceneLocations : req.body.sceneLocations,
-//                 sceneTriggerAudioID : req.body.sceneTriggerAudioID,
-//                 scenePrimaryAudioTitle : req.body.scenePrimaryAudioTitle,
-//                 sceneAmbientAudioID : req.body.sceneAmbientAudioID,
-//                 scenePrimaryAudioID : req.body.scenePrimaryAudioID,
-//                 scenePrimaryAudioStreamURL : req.body.scenePrimaryAudioStreamURL,
-//                 sceneAmbientAudioStreamURL : req.body.sceneAmbientAudioStreamURL,
-//                 sceneTriggerAudioStreamURL : req.body.sceneTriggerAudioStreamURL,
-//                 scenePrimaryAudioGroups : req.body.scenePrimaryAudioGroups,
-//                 sceneAmbientAudioGroups : req.body.sceneAmbientAudioGroups,
-//                 sceneTriggerAudioGroups : req.body.sceneTriggerAudioGroups,
-//                 sceneBPM : req.body.sceneBPM != null ? req.body.sceneBPM : "100",
-//                 scenePrimaryPatch1 : req.body.scenePrimaryPatch1,
-//                 scenePrimaryPatch2 : req.body.scenePrimaryPatch2,
-//                 scenePrimaryMidiSequence1 : req.body.scenePrimaryMidiSequence1,
-//                 scenePrimarySequence2Transpose : req.body.scenePrimarySequence2Transpose != null ? req.body.scenePrimarySequence2Transpose : "0",
-//                 scenePrimarySequence1Transpose : req.body.scenePrimarySequence1Transpose != null ? req.body.scenePrimarySequence1Transpose : "0",
-//                 scenePrimaryMidiSequence2 : req.body.scenePrimaryMidiSequence2,
-//                 sceneAmbientVolume : req.body.sceneAmbientVolume,
-//                 scenePrimaryVolume : req.body.scenePrimaryVolume,
-//                 sceneTriggerVolume : req.body.sceneTriggerVolume,
-//                 sceneWeatherAudioVolume : req.body.sceneWeatherAudioVolume,
-//                 sceneMediaAudioVolume : req.body.sceneMediaAudioVolume,
-//                 sceneAmbientSynth1Volume : req.body.sceneAmbientSynth1Volume,
-//                 sceneAmbientSynth2Volume : req.body.sceneAmbientSynth2Volume,
-//                 sceneTriggerSynth1Volume : req.body.sceneTriggerSynth1Volume,
-//                 sceneAmbientPatch1 : req.body.sceneAmbientPatch1,
-//                 sceneAmbientPatch2 : req.body.sceneAmbientPatch2,
-//                 sceneAmbientSynth1ModulateByDistance : req.body.sceneAmbientSynth1ModulateByDistance != null ? req.body.sceneAmbientSynth1ModulateByDistance : false,
-//                 sceneAmbientSynth2ModulateByDistance : req.body.sceneAmbientSynth2ModulateByDistance != null ? req.body.sceneAmbientSynth2ModulateByDistance : false,
-//                 sceneAmbientSynth1ModulateByDistanceTarget : req.body.sceneAmbientSynth1ModulateByDistanceTarget != null ? req.body.sceneAmbientSynth1ModulateByDistanceTarget: false,
-//                 sceneAmbientSynth2ModulateByDistanceTarget : req.body.sceneAmbientSynth2ModulateByDistanceTarget != null ? req.body.sceneAmbientSynth2ModulateByDistanceTarget : false,
-//                 sceneAmbientMidiSequence1 : req.body.sceneAmbientMidiSequence1,
-//                 sceneAmbientMidiSequence2 : req.body.sceneAmbientMidiSequence2,
-//                 sceneAmbientSequence1Transpose : req.body.sceneAmbientSequence1Transpose != null ? req.body.sceneAmbientSequence1Transpose : "0",
-//                 sceneAmbientSequence2Transpose : req.body.sceneAmbientSequence2Transpose != null ? req.body.sceneAmbientSequence2Transpose : "0",
-//                 sceneTriggerPatch1 : req.body.sceneTriggerPatch1,
-//                 sceneTriggerPatch2 : req.body.sceneTriggerPatch2,
-//                 sceneTriggerPatch3 : req.body.sceneTriggerPatch3,
-//                 sceneGeneratePrimarySequences : req.body.sceneGeneratePrimarySequences != null ? req.body.sceneGeneratePrimarySequences : false,
-//                 sceneGenerateAmbientSequences : req.body.sceneGenerateAmbientSequences != null ? req.body.sceneGenerateAmbientSequences : false,
-//                 sceneGenerateTriggerSequences : req.body.sceneGenerateTriggerSequences != null ? req.body.sceneGenerateTriggerSequences : false,
-//                 sceneLoopPrimaryAudio : req.body.sceneLoopPrimaryAudio != null ? req.body.sceneLoopPrimaryAudio : false,
-//                 scenePrimaryAudioLoopCount : req.body.scenePrimaryAudioLoopCount != null ? req.body.scenePrimaryAudioLoopCount : 0,
-//                 sceneAutoplayPrimaryAudio : req.body.sceneAutoplayPrimaryAudio != null ? req.body.sceneAutoplayPrimaryAudio : false,
-//                 scenePrimaryAudioVisualizer : req.body.scenePrimaryAudioVisualizer != null ? req.body.scenePrimaryAudioVisualizer : false,
-//                 scenePrimaryAudioTriggerEvents : req.body.scenePrimaryAudioTriggerEvents != null ? req.body.scenePrimaryAudioTriggerEvents : false,
-//                 sceneAttachPrimaryAudioToTarget : req.body.sceneAttachPrimaryAudioToTarget != null ? req.body.sceneAttachPrimaryAudioToTarget : false,
-//                 sceneAutoplayAudioGroup : req.body.sceneAutoplayAudioGroup != null ? req.body.sceneAutoplayAudioGroup : false,
-//                 sceneLoopAllAudioGroup : req.body.sceneLoopAllAudioGroup != null ? req.body.sceneLoopAllAudioGroup : false,
-//                 sceneAnchorPositionAudioGroup : req.body.sceneAnchorPositionAudioGroup != null ? req.body.sceneAnchorPositionAudioGroup : false,
-//                 sceneAnchorCanvasAudioGroup : req.body.sceneAnchorCanvasAudioGroup != null ? req.body.sceneAnchorCanvasAudioGroup : false,
-//                 sceneCreateAudioSpline : req.body.sceneCreateAudioSpline != null ? req.body.sceneCreateAudioSpline : false,
-//                 sceneAttachAudioGroupToTarget : req.body.sceneAttachAudioGroupToTarget != null ? req.body.sceneAttachAudioGroupToTarget : false,
-//                 sceneUseMicrophoneInput : req.body.sceneUseMicrophoneInput != null ? req.body.sceneUseMicrophoneInput : false,
-// //                    sceneAmbientAudio2ID : req.body.sceneAmbientAudio2ID,
-//                 sceneKeynote : req.body.sceneKeynote,
-//                 sceneDescription : req.body.sceneDescription,
-//                 sceneGreeting : req.body.sceneGreeting,
-//                 sceneQuest : req.body.sceneQuest,
-//                 sceneFont : req.body.sceneFont,
-//                 sceneFontWeb1  : req.body.sceneFontWeb1,
-//                 sceneFontWeb2  : req.body.sceneFontWeb2,
-//                 sceneFontFillColor : req.body.sceneFontFillColor,
-//                 sceneFontOutlineColor : req.body.sceneFontOutlineColor,
-//                 sceneFontGlowColor : req.body.sceneFontGlowColor,
-//                 sceneTextBackground : req.body.sceneTextBackground,
-//                 sceneTextBackgroundColor : req.body.sceneTextBackgroundColor,
-//                 sceneTextItems : req.body.sceneTextItems, //ids of text items
-//                 sceneText : req.body.sceneText, //this is "primary" tex
-//                 sceneTextLoop : req.body.sceneTextLoop != null ? req.body.sceneTextLoop : false, //also for "primary" text below
-//                 scenePrimaryTextFontSize : req.body.scenePrimaryTextFontSize != null ? req.body.scenePrimaryTextFontSize : "12",
-//                 scenePrimaryTextMode : req.body.scenePrimaryTextMode != null ? req.body.scenePrimaryTextMode : "Normal",
-//                 scenePrimaryTextAlign : req.body.scenePrimaryTextAlign != null ? req.body.scenePrimaryTextAlign : "Left",
-//                 sceneNetworking : req.body.sceneNetworking != null ? req.body.sceneNetworking : "None",
-//                 scenePrimaryTextRotate : req.body.scenePrimaryTextRotate != null ? req.body.scenePrimaryTextRotate : false,
-//                 scenePrimaryTextScaleByDistance : req.body.scenePrimaryTextScaleByDistance != null ? req.body.scenePrimaryTextScaleByDistance : false,
-//                 sceneTextAudioSync : req.body.sceneTextAudioSync != null ? req.body.sceneTextAudioSync : false,
-//                 sceneTextUseModals : req.body.sceneTextUseModals != null ? req.body.sceneTextUseModals : true,
-//                 sceneObjects: req.body.sceneObjects,
-//                 sceneModels: req.body.sceneModels,
-//                 sceneObjectGroups: req.body.sceneObjectGroups,
-//                 sceneTimedEvents: req.body.sceneTimedEvents,
-//                 sceneLastUpdate : lastUpdateTimestamp
-                
-//                 }
-
-
-//             });
-//         } if (err) {res.send(err)} else {res.send("updated " + new Date())}
-//     });
 });
-
-// app.get('/sceneloc/:key', function (req, res){
-
-//     resObj = {};
-
-//     db_old.scenes.find({ "short_id" : req.params.key}, function(err, scenes) {
-//         if (err || !scenes) {
-//             console.log("cain't get no scenes... " + err);
-//         } else {
-//             resObj.sceneLatitude = scenes[0].sceneLatitude;
-//             resObj.sceneLongitude = scenes[0].sceneLongitude;
-//             resObj.sceneLocationRange = scenes[0].sceneLocationRange;
-// //                console.log(JSON.stringify(scenes));
-//             res.json(resObj);
-//         }
-//     });
-// });
-
-// app.get('/seq/:_seqID', function (req, res) {
-//     console.log("tryna get sequence");
-//     var pathNumbers = [];
-//     var pathSequence = [];
-//     db_old.paths.find({}, function (err, paths) {
-//         if (err || !paths) {
-//             console.log("no paths found ", err);
-//         } else {
-//             paths.forEach(function (path) {
-
-//                 pathNumbers.push(parseInt(path.pathNumber));
-//                 pathNumbers.sort(function(a, b){return a-b});
-//             });
-//             paths.forEach(function (path) {
-//                 for (var i = 0; i < pathNumbers.length; i++) {
-//                     if (pathNumbers[i] = path.pathNumber) {
-//                         pathSequence.push(path._id);
-//                         break;
-//                     }
-//                 }
-//             });
-//         }
-
-//         //   pathSequence.sort(function(a, b){return a-b});
-//         console.log("pathSequence", pathSequence);
-//         res.json(pathSequence);
-//     });
-// });
-
-
-
-
-// function getRandomInt(max) {
-//     return Math.floor(Math.random() * Math.floor(max));
-//   }
-  
-// app.post('/netradiodetails', function (req, res) {
-//     let streamurl = req.body.url;
-    
-//     // deprecated for now, lib has a bad vuln
-//     // internetradio.getStationInfo(streamurl, function(error, station) {
-//     //     console.log(station);
-//     //     res.send(station);
-//     //   }, internetradio.StreamSource.SHOUTCAST_V2);
-
-
-// });
-
-// app.post('/netradioheaders', function (req, res) { //no workie
-//     let streamurl = req.body.url;
-//     internetradio.getStationInfo(streamurl, function(error, station) {
-//         console.log(station);
-//         res.send(station);
-//     }, internetradio.StreamSource.STREAM);
-// });
-
-
-
-
-
 
 
 app.post('/newobj', requiredAuthentication, function (req, res) {
@@ -17394,134 +15536,6 @@ app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
     })();
   });
 
-    // db_old.obj_items.find({ "_id" : o_id}, function(err, obj_item) {
-    //     if (err || !obj_item) {
-    //         console.log("error getting obj items: " + err);
-    //         res.send(err);
-    //     } else {
-    //         if (obj_item.userID != req.session.user._id.toString() && !req.session.user.authLevel.toLowerCase().includes("admin")) {
-    //             res.send("user does not match " + req.session.user.authLevel);
-    //         } else {
-    //             db_old.obj_items.update( { _id: o_id }, { $set: { 
-    //                 // item_status: req.body.item_status,
-    //                 actionIDs: (req.body.actionIDs != "" && req.body.actionIDs != undefined && req.body.actionIDs != null) ? req.body.actionIDs : [],
-    //                 name: req.body.name,
-    //                 description: req.body.description,
-    //                 objtype: req.body.objtype,
-    //                 objcat: req.body.objcat,
-    //                 objsubcat: req.body.objsubcat,
-    //                 objclass: req.body.objclass,
-    //                 level: req.body.level,
-    //                 xpoints: req.body.xpoints,
-    //                 mana: req.body.mana,
-    //                 hitpoints: req.body.hitpoints,
-    //                 armorclass: req.body.armorclass,
-    //                 age: req.body.age,
-    //                 species: req.body.species,
-    //                 alignment: req.body.alignment,
-    //                 personality: req.body.personality,
-    //                 strength: req.body.strength,
-    //                 dexterity: req.body.dexterity,
-    //                 constitution: req.body.constitution,
-    //                 intelligence: req.body.intelligence,
-    //                 wisdom: req.body.wisdom,
-    //                 charisma: req.body.charisma,
-    //                 integrity: req.body.integrity,
-    //                 quality: req.body.quality,
-    //                 rarity: req.body.rarity,
-    //                 distribution: req.body.distribution,
-    //                 purity: req.body.purity,
-    //                 scale: req.body.scale,
-    //                 weight: req.body.weight,
-    //                 property: req.body.property,
-    //                 attribute: req.body.attribute,
-    //                 operator: req.body.operator,
-    //                 affect: req.body.affect,
-    //                 effectiveness: req.body.effectiveness,
-    //                 physics: req.body.physics,
-    //                 interaction: req.body.interaction,
-    //                 eventtype: req.body.eventtype,
-    //                 eventdata: req.body.eventdata,
-    //                 collidertype: req.body.collidertype,
-    //                 highlight: req.body.highlight,
-    //                 labeltext: req.body.labeltext,
-    //                 callouttext: req.body.callouttext,
-    //                 prompttext: req.body.prompttext,
-    //                 tags: req.body.tags,
-    //                 title: req.body.title,
-
-    //                 // price: req.body.price != null ? req.body.price : 0,
-    //                 intval: req.body.intval != null ? req.body.intval : 0,
-    //                 floatval: req.body.floatval != null ? req.body.floatval : 0,
-    //                 stringval: req.body.stringval != null ? req.body.stringval : "",
-    //                 assetname: req.body.assetname,
-    //                 assettype: req.body.assettype,
-    //                 audioEmit: req.body.audioEmit != null ? req.body.audioEmit : false,
-    //                 audioScale: req.body.audioScale != null ? req.body.audioScale : false,
-    //                 randomColor: req.body.randomColor != null ? req.body.randomColor : false,
-    //                 namedColor: req.body.namedColor,
-    //                 highlightColor: req.body.highlightColor,
-    //                 color1: req.body.color1,
-    //                 color2: req.body.color2,
-    //                 snapToGround: req.body.snapToGround  != null ? req.body.snapToGround : false,
-    //                 randomRotation: req.body.randomRotation != null ? req.body.randomRotation : false,
-    // //                objectScale: req.body.objectScale ? req.body.objectScale : 0,
-    //                 xoffset: req.body.xoffset != null ? req.body.xoffset : "0",
-    //                 yoffset: req.body.yoffset != null ? req.body.yoffset : "0",
-    //                 zoffset: req.body.zoffset != null ? req.body.zoffset : "0",
-    //                 rotationAxis: req.body.rotationAxis != null ? req.body.rotationAxis : 0,
-    //                 rotationSpeed: req.body.rotationSpeed != null ? req.body.rotationSpeed : 0,
-    //                 objScale: req.body.objScale != null ? req.body.objScale : 1,
-    //                 maxPerScene: req.body.maxPerScene != null ? req.body.maxPerScene : 10,
-    //                 maxPerUser: req.body.maxPerUser != null ? req.body.maxPerUser : 1,
-    //                 maxTotal: req.body.maxTotal != null ? req.body.maxTotal : 1,
-    //                 speedFactor: req.body.speedFactor != null ? req.body.speedFactor : 3,
-    //                 colliderScale: req.body.colliderScale != null ? req.body.colliderScale : 1,
-    //                 triggerScale: req.body.triggerScale != null ? req.body.triggerScale : 1,
-    //                 yPosFudge: req.body.yPosFudge != null ? req.body.yPosFudge : 0,
-    //                 yRotFudge: req.body.yRotFudge != null ? req.body.yRotFudge : 0,
-    //                 eulerx: req.body.eulerx != null ? req.body.eulerx : 0,
-    //                 eulery: req.body.eulery != null ? req.body.eulery : 0,
-    //                 eulerz: req.body.eulerz != null ? req.body.eulerz : 0,
-                    
-    //                 scatter: req.body.scatter != null ? req.body.scatter : false,
-    //                 showcallout: req.body.showcallout != null ? req.body.showcallout : false,
-    //                 // buyable: req.body.buyable != null ? req.body.buyable : false,
-    //                 userspawnable: req.body.userspawnable != null ? req.body.userspawnable : false,
-    //                 textitemID: req.body.textitemID != null ? req.body.textitemID : "",
-    //                 pictureitemID: req.body.pictureitemID  != null ? req.body.pictureitemID : "",
-    //                 audioitemID: req.body.audioitemID != null ? req.body.audioitemID : "",
-    //                 textgroupID: req.body.textgroupID != null ? req.body.textgroupID : "",
-    //                 picturegroupID: req.body.picturegroupID != null ? req.body.picturegroupID : "",
-    //                 audiogroupID: req.body.audiogroupID != null ? req.body.audiogroupID : "",
-    //                 synthPatch1: req.body.synthPatch1 != null ? req.body.synthPatch1 : "",
-    //                 tonejsPatch1: req.body.tonejsPatch1 != null ? req.body.tonejsPatch1 : "",
-    //                 synthNotes: req.body.synthNotes != null ? req.body.synthNotes : "",
-    //                 synthDuration: req.body.synthDuration != null ? req.body.synthDuration : "",
-    //                 particles: req.body.particles != null ? req.body.particles : "",
-    //                 light: req.body.light != null ? req.body.light : "",
-    //                 lastUpdateTimestamp: timestamp,
-    //                 lastUpdateUserID: req.session.user._id,
-    //                 lastUpdateUserName: req.session.user.name
-    //                 // childObjectIDs: req.body.childObjectIDs
-    //                 }});
-    //                 res.send("updated " + new Date());
-    //             }
-    //             // } if (err) {
-    //             //     res.send(err);
-    //             // } else {
-    //             //     res.send("updated " + new Date());
-    //             // }
-    //         }
-    //     // }
-    //     // } if (err) {
-    //     //     res.send(err);
-    //     // } else {
-    //     //     res.send("updated " + new Date());
-    //     // }
-    // });
-
-// });
 
 app.post('/update_audio/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
@@ -17824,63 +15838,7 @@ app.post('/delete_video/', requiredAuthentication, function (req, res){
         }
       })();
     });
-            // ListObjects
-           
-
-            // s3.listObjects(listparams, function(err, data) {
-            //     if (err) {
-            //         console.log(err);
-                    
-            //     }
-            //     if (data.Contents.length == 0) {
-            //         // console.log("no content found");
-            //         db.video_items.remove( { "_id" : o_id }, 1 );
-            //         console.log("no content found, video_item record deleted");
-            //         res.send("deleted");
-            //     } else {
-            //         response = data.Contents;
-            //         data.Contents.forEach(function(content) {
-            //             console.log("deleting vid thing " + content.Key);
-            //             delete_params.Delete.Objects.push({Key: content.Key}); //add the hls files
-                        
-            //         });
-            //         console.log(JSON.stringify(delete_params));
-
-            //         // DeleteObjects
-
-            //         s3.deleteObjects(delete_params, function(err, data) {
-            //             if (err) {
-            //                 console.log(err, err.stack);
-            //                 res.send(err);
-            //                 // an error occurred
-            //             }
-            //             else {
-            //                 db.video_items.remove( { "_id" : o_id }, 1 );
-            //                 console.log("some video things were deleted");
-            //                 res.send("deleted");
-            //             }
-            //         });
-                    
-            //     }
-            // });
-
-            // s3.deleteObjects(params, function(err, data) {
-            //     if (err) {
-            //         console.log(err, err.stack);
-            //         res.send(err);
-            //         // an error occurred
-            //     }
-            //     else {
-            //         db.video_items.remove( { "_id" : o_id }, 1 );
-            //         res.send("deleted");
-            //     }
-            // });
-            // s3.headObject({bucket: process.env.ROOT_BUCKET_NAME, key})
-
-//         }
-//     });
-// });
-
+        
 app.post('/delete_picture/', requiredAuthentication, function (req, res) { //TODO check user? or acl? another auth key?
     // console.log(req.body);
 
@@ -17968,199 +15926,11 @@ app.post('/delete_picture/', requiredAuthentication, function (req, res) { //TOD
   });
 
 
-// app.get('/scenepostcard/:short_id', function (req, res) {
-//     db_old.scenes.findOne({short_id: req.params.short_id}, function (err, scene) {
-//         if (err || !scene) {
-//             // console.log("error getting scene postcard: " + err);
-//             res.send("scene not found");
-//         } else {
-//             if (scene.scenePostcards != null && scene.scenePostcards.length) {
-//                 let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
-//                 var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]);
-//                 db_old.images.findOne({_id: oo_id}, function (err, pic) {
-//                     if (err || !pic) {
-//                         res.send("no postcard found");
-//                     } else {
-//                         //return postcard!
-//                         res.send(JSON.stringify(pic));
-//                     }
-//                 });
-//             }
-//         }
-//     });
-// }); 
-
-/*
-app.get('/braincheckbucket', function (req, res) {
-
-    var response = {};
-    var rezponze = {};
-    stagedItems = [];
-    async.waterfall([
-        function (callback) {
-            var params = {
-                Bucket: 'strr',
-                Prefix: 'braincheck/'
-            }
-            s3.listObjects(params, function(err, data) {
-                if (err) {
-                    console.log(err);
-                    return callback(err);
-                }
-                if (data.Contents.length == 0) {
-                    console.log("no content found");
-                    callback(null);
-                } else {
-                    response = data.Contents;
-                    callback();
-                }
-            });
-        },
-        function (callback) {
-
-            async.each (response, function (r, callbackz) { //loop tru w/ async
-                var name = r.Key;
-                var itme = {}
-                itme.name = name;
-                var assetURL = s3.getSignedUrl('getObject', {Bucket: 'strr', Key: r.Key, Expires: 6000});
-                itme.url = assetURL;
-
-                stagedItems.push(itme);
-                callbackz();
-            }, function(err) {
-               
-                if (err) {
-                    console.log('A file failed to process');
-                    callbackz(err);
-                } else {
-                    console.log('All files have been processed successfully');
-                    stagedItems.reverse();
-                    rezponze.bucketItems = stagedItems;
-                    callback(null);
-                }
-            });
-        }
-    ],
-    function (err, result) { // #last function, close async
-        res.json(rezponze);
-        console.log("waterfall done: " + result);
-    });
-
-
-});
-
-app.post('/uploadbraincheckvideo', upload.single('file'), function (req, res) {
-
-    console.log("uploadvideo headers: " + JSON.stringify(req.headers));
-    var returnString = "";
-    var expires = new Date();
-    expires.setMinutes(expires.getMinutes() + 30);
-    var ts = Math.round(Date.now() / 1000);
-
-    var fname = req.file.originalname.toLowerCase();
-    var fname_ext = getExtension(fname);
-    // fname = fname.substr(0, fname.lastIndexOf('.'));
-    // fname = nameCleaner(fname);
-    // fname = fname + fname_ext;
-    // var fsize = req.file.size;
-    console.log("filename: " + fname);
-    var fpath = req.file.path;
-    
-    async.waterfall([ //flow control for functions below, do one at a time, and pass vars to next as needed
-
-            function(callback) { //check for proper extensions
-                console.log("extension of " + fname + "is " + fname_ext);
-                if (fname_ext === ".mp4" || fname_ext === ".mov" || fname_ext === ".txt" || fname_ext === ".json") {
-                    callback(null);
-                } else {
-                    callback(error);
-                    res.end("no");
-                }
-            },
-            function(callback) { //check that we gotsa bucket for this user
-                var bucketFolder = 'strr/braincheck';
-                console.log(bucketFolder);
-                s3.headBucket({Bucket:bucketFolder},function(err,data){
-                    if(err){
-                        console.log("bucket creation");
-                        callback(null, bucketFolder);
-                    } else {
-                        console.log("Bucket exists and we have access");
-                        callback(null, bucketFolder);
-                    }
-                });
-            },
-            function(theBucketFolder, callback) { //upload orig file to s3 
-                var stream = fs.createReadStream(fpath);
-                var params = {Bucket: theBucketFolder, Key: fname, Body: stream};
-                console.log("orignal file to: " + JSON.stringify(params));
-                s3.upload(params, function(err, data) {
-                    if (err) {
-                        console.log("Error uploading data: ", err);
-                        stream.close();
-                        callback(err);
-                    } else {
-                        console.log("Successfully uploaded data to " + theBucketFolder);
-//              res.send('original file in s3');
-                        stream.close();
-                        callback(null, 'upload complete');
-                    }
-                });
-            }
-        ], //end async flow
-
-        function(err, result) { // #last function, close async
-            if (err != null) {
-                res.end(err)
-            } else {
-                console.log("waterfall done: " + result);
-                //  res.redirect('/upload.html');
-                res.end(result);
-            }
-        }
-    );
-});
- */
- 
 function Shuffle(o) {
     for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
 };
 
-// function GenerateName () {
-//     array1 = [];
-//     array2 = [];
-//     array3 = [];
-//     index1 = -1;
-//     index2 = -1;
-//     index3 = -1;
-//     name1 = "";
-//     name2 = "";
-//     name3 = "";
-//     min = 0;
-//     db_old.lexicons.findOne({name: "nameArrays"}, function (err, items) {
-//         if (err || !items) {
-//             console.log("error getting scene 5: " + err);
-//             return (err);
-//         } else {
-//             array1 = items.adjectives;
-//             array2 = items.colors;
-//             array3 = items.animals;
-//             // console.log("array 1" + array1);
-//             index1 = Math.floor(Math.random() * array1.length);
-//             name1 = UppercaseFirst(array1[index1]);
-//             index2 = Math.floor(Math.random() * array2.length);
-//             name2 = UppercaseFirst(array2[index2]);
-//             index3 = Math.floor(Math.random() * array3.length);
-//             name3 = UppercaseFirst(array3[index3]);
-//             const nameString = name1 + " " + name2 + " " + name3;
-//             console.log("fresh name : " +  name1 +" " + name2 +" " + name3);
-//             return nameString;
-//         }
-//     });
-
-   
-// };
 
 function UppercaseFirst(s) {
 // Check for empty string.
