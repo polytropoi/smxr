@@ -720,31 +720,31 @@ function checkSceneTitle(titleString) {
 
 }
 
-function amirite (acl_rule, u_id) { //check user id against acl
-    //        console.log("checking " + JSON.stringify(req.session));
-    //        if (JSON.stringify(req.session.user._id.toString()) == u_id) {
-    //            console.log("Logged in: " + req.session.user.userName);
-    // is there such a rule, and is this user id in it's userIDs array?
-    //            var u_id = session.user._id;
-    console.log("lookin for u_id :" + u_id + " in " + acl_rule);
-    db_old.acl.findOne({$and: [{acl_rule: acl_rule}, {userIDs: {$in: [u_id]}}]}, function (err, rule) {
-        if (err || !rule) {
-            //req.session.error = 'Access denied!';
-            //res.send('noauth');
-            console.log("sorry, that's not in the acl");
-            return false;
-        } else {
-            console.log("yep, that's in the acl");
-//                    next();
-            return true;
-        }
-    });
-//        }
-}
+// function amirite (acl_rule, u_id) { //check user id against acl
+//     //        console.log("checking " + JSON.stringify(req.session));
+//     //        if (JSON.stringify(req.session.user._id.toString()) == u_id) {
+//     //            console.log("Logged in: " + req.session.user.userName);
+//     // is there such a rule, and is this user id in it's userIDs array?
+//     //            var u_id = session.user._id;
+//     console.log("lookin for u_id :" + u_id + " in " + acl_rule);
+//     db_old.acl.findOne({$and: [{acl_rule: acl_rule}, {userIDs: {$in: [u_id]}}]}, function (err, rule) {
+//         if (err || !rule) {
+//             //req.session.error = 'Access denied!';
+//             //res.send('noauth');
+//             console.log("sorry, that's not in the acl");
+//             return false;
+//         } else {
+//             console.log("yep, that's in the acl");
+// //                    next();
+//             return true;
+//         }
+//     });
+// //        }
+// }
 
-function notify (req, res, next) {
+// function notify (req, res, next) {
 
-}
+// }
 
 function admin (req, res, next) { //check user id against acl
     var u_id = req.session.user._id.toString();
@@ -785,46 +785,60 @@ function usercheck (req, res, next) { //gotsta beez the owner of requested resou
     }
 }
 function domainadmin (req, res, next) { //TODO also check acl
-    db_old.users.findOne({_id: ObjectId.createFromHexString(req.session.user._id.toString())}, function (err, user) {
-        if (err || !user) {
-            res.send("noauth");
-        } else {
+    (async () => {
+        try {
+            const query = {"_id": ObjectId(createFromHexString(req.session.user._id.toString()))};
+            const user = await RunDataQuery("users", "findOne", query);
             if (user.authLevel.includes("domain_admin") || user.authLevel.includes("admin")) { //should be separate, but later..
                 next();
             } else {
                res.send("noauth");
             }
+        } catch (e) {
+            console.log("error checking domainadmin " + e);
+            res.send("noauth " + e);
         }
-    })
+    })();
+    // db_old.users.findOne({_id: ObjectId.createFromHexString(req.session.user._id.toString())}, function (err, user) {
+    //     if (err || !user) {
+    //         res.send("noauth");
+    //     } else {
+    //         if (user.authLevel.includes("domain_admin") || user.authLevel.includes("admin")) { //should be separate, but later..
+    //             next();
+    //         } else {
+    //            res.send("noauth");
+    //         }
+    //     }
+    // })
 }
 
-function domainadminn (req, res, next) {
-    var u_id = req.session.user._id.toString();
-//        var req_u_id = req.params.user_id;
-//        var domain = req.params.domain;
-//        console.log("checkin " + u_id + " vs " + req_u_id);
-//        if (u_id == req_u_id.toString().replace(":", "")) { //hrm.... dunno why the : needs trimming...
-    var rule = "domain_admin_" + req.params.domain.toString().replace(":", "");
-    console.log("acl rule check " + rule + " vs " + u_id);
-    //either admin or domain admin, admin can do everything
-    db_old.acl.findOne({$or :[{$and: [{acl_rule:rule }, {userIDs: {$in: [u_id]}}]}, {$and: [{acl_rule: "admin"}, {userIDs: {$in: [u_id]}}]}]}, function (err, rule) {
-        if (err || !rule) {
-            req.session.error = 'Access denied!';
-            res.send('noauth');
-            console.log("sorry, that's not in the domain_admin acl");
-            //                return false;
-        } else {
-            console.log("yep, that's in the domain_admin acl");
-            next();
-            //                return true;
-        }
-    });
-    //            next();
-//        } else {
-//            req.session.error = 'Access denied!';
-//            res.send('noauth');
-//        }
-}
+// function domainadminn (req, res, next) {
+//     var u_id = req.session.user._id.toString();
+// //        var req_u_id = req.params.user_id;
+// //        var domain = req.params.domain;
+// //        console.log("checkin " + u_id + " vs " + req_u_id);
+// //        if (u_id == req_u_id.toString().replace(":", "")) { //hrm.... dunno why the : needs trimming...
+//     var rule = "domain_admin_" + req.params.domain.toString().replace(":", "");
+//     console.log("acl rule check " + rule + " vs " + u_id);
+//     //either admin or domain admin, admin can do everything
+//     db_old.acl.findOne({$or :[{$and: [{acl_rule:rule }, {userIDs: {$in: [u_id]}}]}, {$and: [{acl_rule: "admin"}, {userIDs: {$in: [u_id]}}]}]}, function (err, rule) {
+//         if (err || !rule) {
+//             req.session.error = 'Access denied!';
+//             res.send('noauth');
+//             console.log("sorry, that's not in the domain_admin acl");
+//             //                return false;
+//         } else {
+//             console.log("yep, that's in the domain_admin acl");
+//             next();
+//             //                return true;
+//         }
+//     });
+//     //            next();
+// //        } else {
+// //            req.session.error = 'Access denied!';
+// //            res.send('noauth');
+// //        }
+// }
 
 function uscene (req, res, next) { //check user id against acl, for scene writing
     var u_id = req.session.user._id.toString();
@@ -835,19 +849,37 @@ function uscene (req, res, next) { //check user id against acl, for scene writin
         next();
     } else if (u_id == req_u_id.toString().replace(":", "")) { //hrm.... dunno why the : needs trimming...
 
-        db_old.acl.findOne({$and: [{"acl_rule": "write_scene_" + scene_id }, {"userIDs": {$in: [u_id]}}]}, function (err, rule) {
-            if (err || !rule) {
-                req.session.error = 'Access denied!';
-                res.send('noauth');
-                console.log("sorry, that's not in the acl");
-//                return false;
-            } else {
-                console.log("yep, that's in the acl");
-                next();
-//                return true;
+        (async () => {
+            try {
+                const query = {$and: [{"acl_rule": "write_scene_" + scene_id }, {"userIDs": {$in: [u_id]}}]};
+                const rule = await RunDataQuery("acl", "findOne", query);
+                if (rule) {
+                    next();
+                } else {
+                    req.session.error = 'Access denied!';
+                    res.send('noauth');
+                    console.log("sorry, that's not in the acl");
+                }
+
+            } catch (e) {
+                res.send("error " + e);
+                console.log("error in acl lookup " + e);
             }
-        });
-//            next();
+        })();
+
+//         db_old.acl.findOne({$and: [{"acl_rule": "write_scene_" + scene_id }, {"userIDs": {$in: [u_id]}}]}, function (err, rule) {
+//             if (err || !rule) {
+//                 req.session.error = 'Access denied!';
+//                 res.send('noauth');
+//                 console.log("sorry, that's not in the acl");
+// //                return false;
+//             } else {
+//                 console.log("yep, that's in the acl");
+//                 next();
+// //                return true;
+//             }
+//         });
+// //            next();
     } else {
         req.session.error = 'Access denied!';
         res.send('noauth');
@@ -890,51 +922,60 @@ export function removeDuplicates(arr){
 }
 
 export function saveActivity (data) {
-    db_old.activity.save(data, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('activity not saved..');
-            // res.send("nilch");
-        } else {
-            var item_id = saved._id.toString();
-            console.log('new activity id: ' + item_id);
-            // res.send(item_id);
+    (async () => {
+        try {
+            const saved = await RunDataQuery("activity", "insertOne", data);
+            console.log("inserted an activity " + saved);
+        } catch (e) {
+            console.log("error inserting activity " + e);
         }
-    });
+    })();
+   
+    // db_old.activity.save(data, function (err, saved) {
+    //     if ( err || !saved ) {
+    //         console.log('activity not saved..');
+    //         // res.send("nilch");
+    //     } else {
+    //         var item_id = saved._id.toString();
+    //         console.log('new activity id: ' + item_id);
+    //         // res.send(item_id);
+    //     }
+    // });
 }
-////////////////////////// create API KEYS
+////////////////////////// create API KEYS ... maybe later...
 
 
-app.post('/create_apikey/', requiredAuthentication, function(req, res){
+// app.post('/create_apikey/', requiredAuthentication, function(req, res){
     
-    var uid = req.body.userID; 
-    console.log("tryna create API Key for " + JSON.stringify(req.body.userID));
-    if (uid) {
-        var oo_id = ObjectId.createFromHexString(uid);
-        db_old.users.findOne({_id: oo_id}, function (err, user) {  
-            if (err || !user) {
-            req.session.error = 'Create API Key Failed - user not found ' + uid;
-            console.log('Create API Key Failed - user not found ' + uid);
-            res.send('noauth');
-        } else {
-            console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-            if (user.apikey && user.apikey.length > 4) { //hrm 
-                res.send("cain't have but one apikey, please contact system administrator");
-                // res.send(newkey);
-            } else {
-                let timestamp = Date.now();
-                timestamp = parseInt(timestamp);
-                let newkey = "smxr_apikey_" + uid + "_" + timestamp;
-                db_old.users.update( { _id: oo_id }, { $set: { 
-                    apikey: newkey
-                }});
-                res.send("apikey created!");
-                }
-            }
-        });
-    } else {
-        res.send("nope");
-    }
-});
+//     var uid = req.body.userID; 
+//     console.log("tryna create API Key for " + JSON.stringify(req.body.userID));
+//     if (uid) {
+//         var oo_id = ObjectId.createFromHexString(uid);
+//         db_old.users.findOne({_id: oo_id}, function (err, user) {  
+//             if (err || !user) {
+//             req.session.error = 'Create API Key Failed - user not found ' + uid;
+//             console.log('Create API Key Failed - user not found ' + uid);
+//             res.send('noauth');
+//         } else {
+//             console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
+//             if (user.apikey && user.apikey.length > 4) { //hrm 
+//                 res.send("cain't have but one apikey, please contact system administrator");
+//                 // res.send(newkey);
+//             } else {
+//                 let timestamp = Date.now();
+//                 timestamp = parseInt(timestamp);
+//                 let newkey = "smxr_apikey_" + uid + "_" + timestamp;
+//                 db_old.users.update( { _id: oo_id }, { $set: { 
+//                     apikey: newkey
+//                 }});
+//                 res.send("apikey created!");
+//                 }
+//             }
+//         });
+//     } else {
+//         res.send("nope");
+//     }
+// });
 
 
 ///////////////////////// OBJECT STORE (S3, Minio, etc) OPS BELOW - TODO - replace all s3 getSignedUrl calls with this, promised based version, to suport minio, etc... (!)
@@ -1555,46 +1596,104 @@ app.get("/ami-rite/:_id", function (req, res) {
             response.userID = req.params._id;
             response.mapkey = process.env.GOOGLEMAPS_KEY;
 
-            console.log("req.session.user.authLevel :" + req.session.user.authLevel);
+            console.log("ami-rite authLevel :" + req.session.user.authLevel);
             if (req.session.user.userName != "guest" && req.session.user.userName != "subscriber" && req.session.user.authLevel != undefined && req.session.user.authLevel != "noauth") {
                 if (response.auth.includes("admin")) {
-                    db_old.apps.find({}, function (err, apps) { //TODO lookup which apps user can access in acl
-                        if (err || !apps) {
-                            console.log("no apps anywhere!?!");
-                            res.send("no apps anywhere!?!");
-                        } else {
-                            
+
+                    (async () => {
+                        try {
+                            const query = {};
+                            const apps = await RunDataQuery("apps", "find", query);
                             if (response.auth.includes("domain_admin")) { 
                                 response.apps = apps;
                                 console.log("that there's a domain_admin!");
-                                db_old.domains.find({}, function (err, domains) { //domain admin sees all
-                                    if (err || !domains) {
-                                        res.json(response);
-                                    } else {
-                                        response.domains = domains;
-                                        res.json(response);
-                                    }
-                                });
+                                const domainsquery = {};
+                                const domains = await RunDataQuery("domains", "find", domainsquery);
+                                response.domains = domains;
+                                res.json(response);
+                                // db_old.domains.find({}, function (err, domains) { //domain admin sees all
+                                //     if (err || !domains) {
+                                //         res.json(response);
+                                //     } else {
+                                //         response.domains = domains;
+                                //         res.json(response);
+                                //     }
+                                // });
                             } else { //just an admin, check acl
-                                let aclQueryArray = apps.map(AppQuery); //flatten apps array for query
+                                const aclQueryArray = apps.map(AppQuery); //flatten apps array for query
+                                const aclquery = {"acl_rule" : { $in: aclQueryArray }, "userIDs": response.userID};
+                                const rules = await RunDataQuery("acl", "find", aclquery);
+                                if (rules && rules.length) {
+                                    let rulesAppIDs = rules.map(ReturnID).join(); // a string that's only the appIDs
+                                    // console.log(rulesAppIDs);
+                                    let appResponse = apps.filter(function (item) { //faster than nested for loops?
+                                        return rulesAppIDs.includes(item._id);  //filter out those that don't match the approved ones
+                                    });
+                                    // console.log("apps " + JSON.stringify(appResponse));
+                                    response.apps = appResponse;
+                                    res.json(response);
+                                } else {
+                                    console.log("caint find no rules!?!");
+                                    res.send("no rules!");
+                                }
                                 // console.log(aclQueryArray);
-                                db_old.acl.find({'acl_rule' : { $in: aclQueryArray }, 'userIDs': response.userID}, function (err, rules) {  //look for rules matching the live apps, and where the userID array has this user's ID
-                                    if (err || !rules) {
-                                        console.log("caint find no rules!?!");
-                                    } else {
-                                        let rulesAppIDs = rules.map(ReturnID).join(); // a string that's only the appIDs
-                                        // console.log(rulesAppIDs);
-                                        let appResponse = apps.filter(function (item) { //faster than nested for loops?
-                                            return rulesAppIDs.includes(item._id);  //filter out those that don't match the approved ones
-                                        });
-                                        // console.log("apps " + JSON.stringify(appResponse));
-                                        response.apps = appResponse;
-                                        res.json(response);
-                                    }
-                                });
+                                // db_old.acl.find({'acl_rule' : { $in: aclQueryArray }, 'userIDs': response.userID}, function (err, rules) {  //look for rules matching the live apps, and where the userID array has this user's ID
+                                //     if (err || !rules) {
+                                //         console.log("caint find no rules!?!");
+                                //     } else {
+                                //         let rulesAppIDs = rules.map(ReturnID).join(); // a string that's only the appIDs
+                                //         // console.log(rulesAppIDs);
+                                //         let appResponse = apps.filter(function (item) { //faster than nested for loops?
+                                //             return rulesAppIDs.includes(item._id);  //filter out those that don't match the approved ones
+                                //         });
+                                //         // console.log("apps " + JSON.stringify(appResponse));
+                                //         response.apps = appResponse;
+                                //         res.json(response);
+                                //     }
+                                // });
                             }
+                        } catch (e) {
+                            console.log("error checking admin fu " + e);
+                            res.send("error checking appdomain " + e);
                         }
-                    });
+                    })();
+                    // db_old.apps.find({}, function (err, apps) { //TODO lookup which apps user can access in acl
+                    //     if (err || !apps) {
+                    //         console.log("no apps anywhere!?!");
+                    //         res.send("no apps anywhere!?!");
+                    //     } else {
+                            
+                    //         if (response.auth.includes("domain_admin")) { 
+                    //             response.apps = apps;
+                    //             console.log("that there's a domain_admin!");
+                    //             db_old.domains.find({}, function (err, domains) { //domain admin sees all
+                    //                 if (err || !domains) {
+                    //                     res.json(response);
+                    //                 } else {
+                    //                     response.domains = domains;
+                    //                     res.json(response);
+                    //                 }
+                    //             });
+                    //         } else { //just an admin, check acl
+                    //             let aclQueryArray = apps.map(AppQuery); //flatten apps array for query
+                    //             // console.log(aclQueryArray);
+                    //             db_old.acl.find({'acl_rule' : { $in: aclQueryArray }, 'userIDs': response.userID}, function (err, rules) {  //look for rules matching the live apps, and where the userID array has this user's ID
+                    //                 if (err || !rules) {
+                    //                     console.log("caint find no rules!?!");
+                    //                 } else {
+                    //                     let rulesAppIDs = rules.map(ReturnID).join(); // a string that's only the appIDs
+                    //                     // console.log(rulesAppIDs);
+                    //                     let appResponse = apps.filter(function (item) { //faster than nested for loops?
+                    //                         return rulesAppIDs.includes(item._id);  //filter out those that don't match the approved ones
+                    //                     });
+                    //                     // console.log("apps " + JSON.stringify(appResponse));
+                    //                     response.apps = appResponse;
+                    //                     res.json(response);
+                    //                 }
+                    //             });
+                    //         }
+                    //     }
+                    // });
                 } else {
                     res.json(response);
                 }
@@ -1608,23 +1707,7 @@ app.get("/ami-rite/:_id", function (req, res) {
         res.send("0");
     }
 });
-app.get("/amiriite/:_id", function (req, res) {
-    // console.log("amirite: " + req.session);
-    if (req.session.user) {
-    // console.log(JSON.stringify(req.session.user._id.toString()) + " " + req.params._id);
-        if (req.session.user._id.toString() == req.params._id) {
-            var ubag = {};
-            ubag.name = req.session.user.userName;
-            ubag._id = req.session.user._id.toString();
-            ubag.type = req.session.user.type;
-            res.send(ubag);
-        } else {
-            res.send("0");
-        }
-    } else {
-        res.send("0");
-    }
-});
+
 
 app.get("/connectionCheck", function (req, res) {
     res.send("connected");
@@ -1726,108 +1809,108 @@ app.post("/logout", requiredAuthentication, function (req, res) {
     //res.redirect("/");
 });
 
-// app.post("/logout", checkAppID, requiredAuthentication, function (req, res) {
-app.post("/return_traffic_old", requiredAuthentication, function (req, res) {    
-    let trafficDataMod = [];
-    db_old.traffic.find({}, function (err, trafficdata) {
-        if (err || !trafficdata) {
-            res.send(err);
-        } else {
-            console.log("trafficdata length 1 " + trafficdata.length);
-            nodupes = [];
-            async.each (trafficdata, function (item, tcallback) { //pull out short_id from urls and flatten
-                var n = item.originalUrl.lastIndexOf('/');
-                var result = item.originalUrl.substring(n + 1);
-                if (nodupes.indexOf(result) == -1) {
-                    nodupes.push(result);
-                }
-                // console.log(result);
-                item.short_id = result; //for easier comparison below
-                trafficDataMod.push(item);
-                tcallback();
-            }, function(err) {
-                if (err) {
-                    console.log('traffic return loop brokend');
-                    res.send(err);
-                } else {
-                    dquery = { short_id : { $in : nodupes }};
-                    if (req.body.appdomain) {
-                        console.log("appdomain: "+ req.body.appdomain);
-                        dquery = { $and: [{short_id : { $in : nodupes }}, {sceneDomain: req.body.appdomain}]};
-                    }
-                    console.log("query: "+ JSON.stringify(dquery));
-                    // db.scenes.find({ short_id : { $in : nodupes }}, { short_id: 1, sceneTitle: 1, sceneDomain: 1, sceneAppName: 1, _id: 0 }, function (error, scenes) { //include domains and and app names
-                    db_old.scenes.find(dquery, { short_id: 1, sceneTitle: 1, sceneDomain: 1, sceneAppName: 1, _id: 0 }, function (error, scenes) { //include domains and and app names
-                        if (error || !scenes) {
-                            res.send(error);
-                        } else {
-                            // trafficdata.scenedata = scenes; //add for reference on client
-                            console.log("scenes legnth " + scenes.length);
-                            if (req.body.appdomain) {
-                                shortIDs = []; //make a simple array to use below
-                                for (let s = 0; s < scenes.length; s++) {
-                                    // console.log("pushing short_ids " + scenes[s].short_id );
-                                    shortIDs.push(scenes[s].short_id);
+// // app.post("/logout", checkAppID, requiredAuthentication, function (req, res) {
+// app.post("/return_traffic_old", requiredAuthentication, function (req, res) {    
+//     let trafficDataMod = [];
+//     db_old.traffic.find({}, function (err, trafficdata) {
+//         if (err || !trafficdata) {
+//             res.send(err);
+//         } else {
+//             console.log("trafficdata length 1 " + trafficdata.length);
+//             nodupes = [];
+//             async.each (trafficdata, function (item, tcallback) { //pull out short_id from urls and flatten
+//                 var n = item.originalUrl.lastIndexOf('/');
+//                 var result = item.originalUrl.substring(n + 1);
+//                 if (nodupes.indexOf(result) == -1) {
+//                     nodupes.push(result);
+//                 }
+//                 // console.log(result);
+//                 item.short_id = result; //for easier comparison below
+//                 trafficDataMod.push(item);
+//                 tcallback();
+//             }, function(err) {
+//                 if (err) {
+//                     console.log('traffic return loop brokend');
+//                     res.send(err);
+//                 } else {
+//                     dquery = { short_id : { $in : nodupes }};
+//                     if (req.body.appdomain) {
+//                         console.log("appdomain: "+ req.body.appdomain);
+//                         dquery = { $and: [{short_id : { $in : nodupes }}, {sceneDomain: req.body.appdomain}]};
+//                     }
+//                     console.log("query: "+ JSON.stringify(dquery));
+//                     // db.scenes.find({ short_id : { $in : nodupes }}, { short_id: 1, sceneTitle: 1, sceneDomain: 1, sceneAppName: 1, _id: 0 }, function (error, scenes) { //include domains and and app names
+//                     db_old.scenes.find(dquery, { short_id: 1, sceneTitle: 1, sceneDomain: 1, sceneAppName: 1, _id: 0 }, function (error, scenes) { //include domains and and app names
+//                         if (error || !scenes) {
+//                             res.send(error);
+//                         } else {
+//                             // trafficdata.scenedata = scenes; //add for reference on client
+//                             console.log("scenes legnth " + scenes.length);
+//                             if (req.body.appdomain) {
+//                                 shortIDs = []; //make a simple array to use below
+//                                 for (let s = 0; s < scenes.length; s++) {
+//                                     // console.log("pushing short_ids " + scenes[s].short_id );
+//                                     shortIDs.push(scenes[s].short_id);
 
-                                }
-                                // async.each (scenes, function (scene, callbk) {
+//                                 }
+//                                 // async.each (scenes, function (scene, callbk) {
 
 
-                                //     }, function (err) {
-                                //         if (err) {
+//                                 //     }, function (err) {
+//                                 //         if (err) {
 
-                                //         } else {
+//                                 //         } else {
 
-                                //     }
+//                                 //     }
                                     
-                                // });
-                                console.log(shortIDs);
-                                let i = 0; //iterator for below...
-                                async.each (trafficDataMod, function (trafficItem, callbackz) {   
+//                                 // });
+//                                 console.log(shortIDs);
+//                                 let i = 0; //iterator for below...
+//                                 async.each (trafficDataMod, function (trafficItem, callbackz) {   
 
-                                    if (trafficItem && trafficItem.hasOwnProperty('short_id')) {
-                                        // console.log(trafficItem);
-                                        // var n = trafficItem.originalUrl.lastIndexOf('/');
-                                        // var result = trafficItem.originalUrl.substring(n + 1);
-                                        if (shortIDs.indexOf(trafficItem.short_id) == -1) {
+//                                     if (trafficItem && trafficItem.hasOwnProperty('short_id')) {
+//                                         // console.log(trafficItem);
+//                                         // var n = trafficItem.originalUrl.lastIndexOf('/');
+//                                         // var result = trafficItem.originalUrl.substring(n + 1);
+//                                         if (shortIDs.indexOf(trafficItem.short_id) == -1) {
 
-                                            trafficDataMod.splice(i, 1); //remove element from traffic if not for this domain
-                                        } else {
-                                            console.log("shortid" + trafficItem.short_id + "setting appdomain " + req.body.appdomain);
-                                            trafficItem.appdomain = req.body.appdomain; //or add domain reference
-                                        }
-                                    }
-                                    i++;
-                                    callbackz();
-                                }, function(err) {
-                                    if (err) {
-                                        console.log('bad key');
-                                        res.send(err);
-                                    } else {
-                                        console.log("domain trafffic length: "+ trafficDataMod.length);
-                                        res.json(trafficDataMod);         
-                                    }
-                                });
-                                // for (let i = 0; i < trafficdata.length; i++) {
-                                //     if (shortIDs.indexOf(trafficdata[i].short_id) == -1) {
-                                //         trafficdata.splice(i, 1); //remove element from traffic if not for this domain
-                                //     } else {
-                                //         trafficdata[i].appdomain = req.body.appdomain; //or add domain reference
-                                //     }
-                                // }
+//                                             trafficDataMod.splice(i, 1); //remove element from traffic if not for this domain
+//                                         } else {
+//                                             console.log("shortid" + trafficItem.short_id + "setting appdomain " + req.body.appdomain);
+//                                             trafficItem.appdomain = req.body.appdomain; //or add domain reference
+//                                         }
+//                                     }
+//                                     i++;
+//                                     callbackz();
+//                                 }, function(err) {
+//                                     if (err) {
+//                                         console.log('bad key');
+//                                         res.send(err);
+//                                     } else {
+//                                         console.log("domain trafffic length: "+ trafficDataMod.length);
+//                                         res.json(trafficDataMod);         
+//                                     }
+//                                 });
+//                                 // for (let i = 0; i < trafficdata.length; i++) {
+//                                 //     if (shortIDs.indexOf(trafficdata[i].short_id) == -1) {
+//                                 //         trafficdata.splice(i, 1); //remove element from traffic if not for this domain
+//                                 //     } else {
+//                                 //         trafficdata[i].appdomain = req.body.appdomain; //or add domain reference
+//                                 //     }
+//                                 // }
                                                 
                                 
-                            } else {
-                                res.json(trafficdata);
-                            }
-                        }
-                    }); 
-                }
-            });
+//                             } else {
+//                                 res.json(trafficdata);
+//                             }
+//                         }
+//                     }); 
+//                 }
+//             });
            
-        }
-    })
-});
+//         }
+//     })
+// });
 
 // app.post("/return_traffic", requiredAuthentication, function (req, res) {    
 app.post("/return_traffic", function (req, res) {    //umm, need to limit scope below if no auth?
@@ -1847,136 +1930,146 @@ app.post("/return_traffic", function (req, res) {    //umm, need to limit scope 
             }
         }
     
+        (async () => {
+            try {
+                const trafficdata = await RunDataQuery("traffic", "find", query);
+                res.send(trafficdata);
+            } catch (e) {
+                console.log("error getting traffic data " +e);
+                res.send("error getting traffic data " +e);
+            }
+        })();
         // console.log("tryna quyery for " + JSON.stringify(query));
-        db_old.traffic.find(query, function (err, trafficdata) {
-            if (err || !trafficdata) {
-                res.send(err);
-            } else {
-                // console.log("all trafffic length: "+ trafficdata.length);
-                    res.json(trafficdata);
-                }
+        // db_old.traffic.find(query, function (err, trafficdata) {
+        //     if (err || !trafficdata) {
+        //         res.send(err);
+        //     } else {
+        //         // console.log("all trafffic length: "+ trafficdata.length);
+        //             res.json(trafficdata);
+        //         }
                 
-            });
+        //     });
     } else {
-        console.log("no start point!")
+        console.log("no start point!");
+        res.send("no startpoint defined!");
     }
     // })
 });
 
 
-app.post("/authreq_noasync", function (req, res) {
-    console.log('authRequest from: ' + req.body.uname + " " + req.body.umail);
-    var currentDate = Math.floor(new Date().getTime()/1000);
+// app.post("/authreq_noasync", function (req, res) {
+//     console.log('authRequest from: ' + req.body.uname + " " + req.body.umail);
+//     var currentDate = Math.floor(new Date().getTime()/1000);
 
 
-    var isSubscriber = false;
-    var username = req.body.uname;
-    var password = req.body.upass;
+//     var isSubscriber = false;
+//     var username = req.body.uname;
+//     var password = req.body.upass;
 
-// async.waterfall([
-//     function (callback) {
-    if (req.body.uname == "subscriber") {
-        db_old.iap.findOne ({receipt : req.body.upass}, function (err, iap) {
-            if (err || !iap) {
-                console.log("subscriber not found");
-                username = "guest";
-                password = "password";
-                res.send("subscriber not found");
-                // callback();
-            } else {
-                isSubscriber = true;
-                console.log("found subscriber " + iap._id);
-                db_old.users.findOne({userName : "subscriber"}, function (err, user) {
-                    if (err || !user) {
-                        res.end("cain't find nothing!");
-                    } else {
-                        req.session.user = user;
-                            res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
-                            var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
-                            // if (isSubscriber && username == "guest") {
-                            //     username = "subscriber"; //switch it back for return...
-                            // }
-                            var authResp = req.session.user._id.toString() + "~" + req.session.user.userName + "~" + authString;
-                            res.json(authResp);
-                            // req.session.auth = authUser[0]._id;
-                            appAuth = req.session.user._id.toString();
-                            console.log("auth = " + appAuth);
-                    }
-                });
-                // callback();
-            }
-        }); 
-    } else {
-    var un_query = {userName: username};
-    var em_query = {email: req.body.umail};
+// // async.waterfall([
+// //     function (callback) {
+//     if (req.body.uname == "subscriber") {
+//         db_old.iap.findOne ({receipt : req.body.upass}, function (err, iap) {
+//             if (err || !iap) {
+//                 console.log("subscriber not found");
+//                 username = "guest";
+//                 password = "password";
+//                 res.send("subscriber not found");
+//                 // callback();
+//             } else {
+//                 isSubscriber = true;
+//                 console.log("found subscriber " + iap._id);
+//                 db_old.users.findOne({userName : "subscriber"}, function (err, user) {
+//                     if (err || !user) {
+//                         res.end("cain't find nothing!");
+//                     } else {
+//                         req.session.user = user;
+//                             res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
+//                             var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
+//                             // if (isSubscriber && username == "guest") {
+//                             //     username = "subscriber"; //switch it back for return...
+//                             // }
+//                             var authResp = req.session.user._id.toString() + "~" + req.session.user.userName + "~" + authString;
+//                             res.json(authResp);
+//                             // req.session.auth = authUser[0]._id;
+//                             appAuth = req.session.user._id.toString();
+//                             console.log("auth = " + appAuth);
+//                     }
+//                 });
+//                 // callback();
+//             }
+//         }); 
+//     } else {
+//     var un_query = {userName: username};
+//     var em_query = {email: req.body.umail};
 
-    db_old.users.find(
-        { $or: [un_query, em_query] }, //mongo-lian "OR" syntax...
-        //password: req.body.upass},
-        //{password:0},
-        function(err, authUser) {
-            if( err || !authUser) {
-                console.log("user not found");
-                res.send("user not found");
-                req.session.auth = "noauth";
-                // callback();
-            } else {
-                console.log(username + " found " + authUser.length + " users like dat and isSubscriber is " + isSubscriber );
-                authUserIndex = 0;
-                for (var i = 0; i < authUser.length; i++) {
-                    if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name
-                        authUserIndex = i;
-                    }
-                }
-                if (authUser[authUserIndex] !== null && authUser[authUserIndex] !== undefined && authUser[authUserIndex].status == "validated") {
-                    if (requirePayment) {
-                        if (authUser[authUserIndex].paymentStatus != "ok") {
-                            console.log("payment status not OK");
-                            res.send("payment status not ok");
-                            req.session.auth = "noauth";
-                        }
-                    }
-                    var hash = authUser[authUserIndex].password;
-                    bcrypt.compare(password, hash, function (err, match) {  //check password vs hash
-                        if (match) {
-                            req.session.user = authUser[authUserIndex];
-                            res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
-                            var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
-                            if (isSubscriber && username == "guest") {
-                                username = "subscriber"; //switch it back for return...
-                            }
-                            var authResp = req.session.user._id.toString() + "~" + username + "~" + authString;
-                            res.json(authResp);
-                            // req.session.auth = authUser[0]._id;
-                            appAuth = authUser[authUserIndex]._id;
-                            console.log("auth = " + appAuth);
-                        } else if (password == "321FireMeBoy123") { // VERY STUMPID FOR ADIN OVERRIDE TODO: IMPERSONATE USER LOGIC?
-                            req.session.user = authUser[authUserIndex];
+//     db_old.users.find(
+//         { $or: [un_query, em_query] }, //mongo-lian "OR" syntax...
+//         //password: req.body.upass},
+//         //{password:0},
+//         function(err, authUser) {
+//             if( err || !authUser) {
+//                 console.log("user not found");
+//                 res.send("user not found");
+//                 req.session.auth = "noauth";
+//                 // callback();
+//             } else {
+//                 console.log(username + " found " + authUser.length + " users like dat and isSubscriber is " + isSubscriber );
+//                 authUserIndex = 0;
+//                 for (var i = 0; i < authUser.length; i++) {
+//                     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name
+//                         authUserIndex = i;
+//                     }
+//                 }
+//                 if (authUser[authUserIndex] !== null && authUser[authUserIndex] !== undefined && authUser[authUserIndex].status == "validated") {
+//                     if (requirePayment) {
+//                         if (authUser[authUserIndex].paymentStatus != "ok") {
+//                             console.log("payment status not OK");
+//                             res.send("payment status not ok");
+//                             req.session.auth = "noauth";
+//                         }
+//                     }
+//                     var hash = authUser[authUserIndex].password;
+//                     bcrypt.compare(password, hash, function (err, match) {  //check password vs hash
+//                         if (match) {
+//                             req.session.user = authUser[authUserIndex];
+//                             res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
+//                             var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
+//                             if (isSubscriber && username == "guest") {
+//                                 username = "subscriber"; //switch it back for return...
+//                             }
+//                             var authResp = req.session.user._id.toString() + "~" + username + "~" + authString;
+//                             res.json(authResp);
+//                             // req.session.auth = authUser[0]._id;
+//                             appAuth = authUser[authUserIndex]._id;
+//                             console.log("auth = " + appAuth);
+//                         } else if (password == "321FireMeBoy123") { // VERY STUMPID FOR ADIN OVERRIDE TODO: IMPERSONATE USER LOGIC?
+//                             req.session.user = authUser[authUserIndex];
 
-                            res.cookie('_id', req.session.user._id.toString(), { maxAge: 9000 } );
-                            var authResp = req.session.user._id.toString() + "~" + username ;
-                            res.json(authResp);
-                            // req.session.auth = authUser[0]._id;
-                            appAuth = authUser[authUserIndex]._id;
-                            console.log("admin auth noascyn = " + appAuth);
+//                             res.cookie('_id', req.session.user._id.toString(), { maxAge: 9000 } );
+//                             var authResp = req.session.user._id.toString() + "~" + username ;
+//                             res.json(authResp);
+//                             // req.session.auth = authUser[0]._id;
+//                             appAuth = authUser[authUserIndex]._id;
+//                             console.log("admin auth noascyn = " + appAuth);
 
-                        } else {
-                            console.log("auth fail");
-                            req.session.auth = "noauth";
-                            res.send("noauth");
-                        }
-                        // callback();
-                    });
-                } else {
-                    console.log("user account not validated 2");
-                    res.send("user account not validated");
-                    req.session.auth = "noauth";
-                    // callback();
-                }
-            }
-        });
-    };
-});
+//                         } else {
+//                             console.log("auth fail");
+//                             req.session.auth = "noauth";
+//                             res.send("noauth");
+//                         }
+//                         // callback();
+//                     });
+//                 } else {
+//                     console.log("user account not validated 2");
+//                     res.send("user account not validated");
+//                     req.session.auth = "noauth";
+//                     // callback();
+//                 }
+//             }
+//         });
+//     };
+// });
 
 app.post("/authreq", function (req, res) {
     console.log('authRequest from: ' + req.body.uname);
@@ -2022,7 +2115,7 @@ app.post("/authreq", function (req, res) {
                         req.session.auth = "noauth";
                         callback();
                     } else {
-                        console.log(username + " found " + authUser.length + " users like dat and isSubscriber is " + isSubscriber );
+                        console.log("found a user like dat " + username + " authlevel " + authUser[0].authLevel + " and isSubscriber " + isSubscriber );
                         let authUserIndex = 0;
                         // for (var i = 0; i < authUser.length; i++) {
                         //     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name
@@ -2082,7 +2175,7 @@ app.post("/authreq", function (req, res) {
                                             console.log("auth = " + appAuth);
 
                                         } else {
-                                            console.log("auth fail");
+                                            console.log("hash does not match!");
                                             req.session.auth = "noauth";
                                             res.send("authentication failed");
                                         }
@@ -7073,7 +7166,7 @@ app.get('/userpics/:u_id', requiredAuthentication, function (req, res) {
             var thumbName = 'thumb.' + baseName + item_string_filename_ext;
             var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + thumbName, 6000); 
             picture_items[i].URLthumb = urlThumb;
-            console.log(picture_items[i].URLthumb);
+            // console.log(picture_items[i].URLthumb);
         }
             res.json(picture_items);
        } catch (e) {
@@ -7522,7 +7615,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
           if (group.lastUpdate != null) { //?
             group.lastUpdateTimestamp = group.lastUpdate;
           }
-          console.log("tryna fetch group " + JSON.stringify(group));
+          console.log("tryna fetch group " + group._id);
           ///////////////////////////// audio group
           const gquery = {"_id": { $in: group.items}};
           if (group.type.toLowerCase() == "audio") {
@@ -11192,7 +11285,7 @@ app.post('/import_scene_audio_timed_events/', requiredAuthentication, function (
                         db_old.scenes.update({ "_id": s_id }, { $set: {sceneTimedEvents: sceneTimedEvents}});
                         
                         if (err) {
-                            res.send(error);w
+                            res.send(error);
                         } else {    
                             res.send("updated " + new Date());
                         }
@@ -11276,7 +11369,7 @@ app.post('/appscenes/',  requiredAuthentication, function (req, res) { //get sce
         }
     });
 });
-app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function (req, res) { //view for updating scene for this user
+app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function (req, res) { //scene view for editing/updating scene in admin mode for this user
 
     console.log("tryna get scene id: ", req.params.scene_id + " excaped " + entities.decodeHTML(req.params.scene_id));
     var reqstring = entities.decodeHTML(req.params.scene_id).toString().replace(":", "");

@@ -3,9 +3,8 @@
     // 1. amirite checks authentication and pops some UI
     // 2. bigSwitch does "routing" and calls "controller" functions
     // 3. controller functions fetch json and generate html
-    // 4. dom elements are selected and updated with new stuff as needed
+    // 4. normal dom elements selected and updated with new stuff as needed
     
-
     import {
         Uppy,
         Dashboard,
@@ -24,7 +23,8 @@
     window.logout = logout;
     window.newText = newText;
     window.removeItem = removeItem;
-
+    window.getApp = getApp;
+    
     var cookie = Cookies.get();
     var type = getParameterByName("type", window.location.href); //these params used for routing in bigSwitch
     var appid = getParameterByName("appid", window.location.href);
@@ -40,7 +40,7 @@
     var apps = {};
     let googleMapsKey = "";
 
-    amirite();
+    amirite(); //checks session cookie is valid and gets it going..
     
     function amirite () {
         if (cookie != null && cookie._id != null) {
@@ -18011,21 +18011,21 @@ function getAllPeople() {
         });
     }
 
-    function createAPIKey (uid) {
-        let data = {userID: uid};
-        // let config = { headers: { appid: appid,
-        //     }
-        // }
-        axios.post('/create_apikey/', data)
-        .then(function (response) {
-        // console.log(JSON.stringify(response));
-        // var jsonResponse = response.data;
-        //  var jsonResponse = response.data;
+    // function createAPIKey (uid) {
+    //     let data = {userID: uid};
+    //     // let config = { headers: { appid: appid,
+    //     //     }
+    //     // }
+    //     axios.post('/create_apikey/', data)
+    //     .then(function (response) {
+    //     // console.log(JSON.stringify(response));
+    //     // var jsonResponse = response.data;
+    //     //  var jsonResponse = response.data;
         
-        console.log(response.data);
+    //     console.log(response.data);
 
-        });
-    }
+    //     });
+    // }
 
     function showProfilePurchases(response) {
     var jsonResponse = response.data;
