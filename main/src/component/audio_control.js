@@ -2143,25 +2143,7 @@ AFRAME.registerComponent('audio_groups_control', { //element and component are a
 
     LoadAudioGroups: function (groupArray) {
 
-        // console.log("tryna fetch audioGroups: " +JSON.stringify(groupArray));
-        // var posting = $.ajax({
-        //     url: "/return_audiogroups",
-        //     type: 'POST',
-        //       contentType: "application/json; charset=utf-8",
-        //     dataType: "json",
-        //     data: JSON.stringify(groupArray),
-        //         success: function( data, textStatus, xhr ){
-        //             console.log("audiogroups data: " + JSON.stringify(data));
-        //             this.audioGroupsData = data;
-                    
-
-        //         },
-        //         error: function( xhr, textStatus, errorThrown ){
-        //             console.log("error! " + errorThrown);
-        //             // document.cookie = "expires=Thu, 01 Jan 1970 00:00:00"; //set to expired date to delete?
-        //             }
-        //         });
-        FetchAudioGroupsData(groupArray);
+        FetchAudioGroupsData(groupArray); //needs external...?
 
     },
 

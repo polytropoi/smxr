@@ -1327,8 +1327,9 @@
             let data = [];
             let url = "";
             let redir = "";
+            console.log("tryna delete " +type+ " " + itemid);
             switch (type) {
-            case "model":
+            case "text":
                 url = '/delete_text';
                 data = { 
                     _id : itemid

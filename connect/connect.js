@@ -62,6 +62,8 @@ let matrixRoomsData = null;
 // let vidz = null;
 // let videoEl = null;
 
+let timedEventsListenerMode = ""
+
 let mouseDownStarttime = 0;
 let mouseDowntime = 0;
 let isFiring = false;
@@ -184,7 +186,7 @@ $(function() {
       }
    } else {
       console.log("not aframe or default scenetype!");
-      GetTextItems(); //only for plain pages or text adventure, scene_text_control fetches for aframe
+      // GetTextItems(); //only for plain pages or text adventure, scene_text_control fetches for aframe
       if (settings.sceneType == "landing") {
          if (settings.sceneTags && settings.sceneTags.includes("landing pics")) {
             let picGroupMgr = document.getElementById("pictureGroupsData");
@@ -2962,11 +2964,13 @@ function SetVideoEventsData (type) {
      return a - b;
    });
    
-   if (type == null && timedEventsListenerMode == null) {
-   timedEventsListenerMode = "Primary Video";
-   }
+
    if (tkStarttimes.length > 0) {
-     console.log("tryna run video events listenr with timedEventsListenerMode : " + timedEventsListenerMode);
+      let teMode = "Primary Video";
+      if (!timedEventsListenerMode) {
+         teMode = timedEventsListenerMode;
+      }
+     console.log("tryna run video events listenr with timedEventsListenerMode : " + teMode);
      TimedEventListener();
    }
  }
