@@ -223,66 +223,6 @@ export let db_old = mongojs(databaseUrl, collections); //soon you will die!
     
     // import oculus_routes from './routes/oculus_routes.js';
 
-/////// this one is for aframe nat, no usrs  
-/*
-const rooms = {};
-
-io.on("connection", socket => {
-  console.log("user connected", socket.id);
-
-  let curRoom = null;
-//   socket.on('reconnect_attempt', () => {
-//     socket.io.opts.transports = ['polling', 'websocket'];
-//   });
-
-  socket.on("joinRoom", data => {
-    const { room } = data;
-
-    if (!rooms[room]) {
-      rooms[room] = {
-        name: room,
-        occupants: {},
-      };
-    }
-
-    const joinedTime = Date.now();
-    rooms[room].occupants[socket.id] = joinedTime;
-    curRoom = room;
-
-    console.log(`${socket.id} joined room ${room}`);
-    socket.join(room);
-
-    socket.emit("connectSuccess", { joinedTime });
-    const occupants = rooms[room].occupants;
-    io.in(curRoom).emit("occupantsChanged", { occupants });
-
-  });
-
-  socket.on("send", data => {
-    io.to(data.to).emit("send", data);
-  });
-
-  socket.on("broadcast", data => {
-    socket.to(curRoom).broadcast.emit("broadcast", data);
-  });
-
-  socket.on("disconnect", () => {
-    console.log('disconnected: ', socket.id, curRoom);
-    if (rooms[curRoom]) {
-      console.log("user disconnected", socket.id);
-
-      delete rooms[curRoom].occupants[socket.id];
-      const occupants = rooms[curRoom].occupants;
-      socket.to(curRoom).broadcast.emit("occupantsChanged", { occupants });
-
-      if (occupants == {}) {
-        console.log("everybody left room");
-        delete rooms[curRoom];
-      }
-    }
-  });
-});
-*/
 /////// SHOW/HIDE Below to run socket.io on same port
 
 ///this one gets users through handshake
@@ -354,21 +294,7 @@ io.on('connection', function(socket) {
                             });
                           }
                         })();
-                        // db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-                        //     if (err != null) {
-                        //         socket.on("disconnect", (reason) => {
-                        //             console.log("closing connection because userlookup failed");
-                        //         });
-                        //     } else {
-                        //         console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-                        //         console.log(socket.id + " named " + socket.uname + " tryna join " + rm );
-                        //         socket.join(rm);
-                        //         socket.room = room;
-                        //         room = rm; //set global room value for this socket, since we can only be in one at a time
-                        //         socket.userID = payload.userId;
-                        //         io.to(room).emit('user joined', socket.uname, room);
-                        //     }
-                        // });
+                       
                     }
                 } else {
                     socket.on("disconnect", (reason) => {
@@ -404,17 +330,10 @@ io.on('connection', function(socket) {
                 io.sockets.connected[key].emit('room users', JSON.stringify(returnObj));
             });
         }
-        
-        // io.emit('disconnected');
-        
     });
     socket.on('room users', function (room) {
         io.sockets.adapter.rooms.get(room);
-        // console.log("room users in " + room + " " + io.sockets.adapter.rooms.get(room)); //not an array, this is a Set now... what?
-       
-        // if (io.sockets.adapter.rooms[room] != undefined) {
-        //     var roomUsers = io.sockets.adapter.rooms[room].sockets;
-        //     console.log("roomUsers " + JSON.stringify(roomUsers));
+     
         if (io.sockets.adapter.rooms.get(room) != undefined) {
             var roomUsers = io.sockets.adapter.rooms.get(room);
             // console.log("roomUsers " + roomUsers);
@@ -425,15 +344,7 @@ io.on('connection', function(socket) {
                 const namePlusColor = io.sockets.sockets.get(user).uname + "~" + io.sockets.sockets.get(user).uname.color;
                 returnObj[user] = namePlusColor;
             }
-            // Object.keys(roomUsers).forEach(function(key) {
-            //     console.log("roomUsers key " + key + " uname " + io.sockets.connected[key].uname);
-            //     // returnObj[key] = io.sockets.connected[key].uname; //socketID : username
-            //     let namePlusColor = io.sockets.connected[key].uname + "~" + io.sockets.connected[key].color;
-            //     returnObj[key] = namePlusColor;
-            //     // returnObj[io.sockets.connected[key].uname] = key; //cook up a nice dict for client to use
-            // });
-            // console.log(roomUsersString);
-            // console.log("tryna get room users for " + room + " " + JSON.stringify(returnObj));
+           
             io.in(room).emit('room users', JSON.stringify(returnObj));
         }
     });
@@ -473,7 +384,7 @@ io.on('connection', function(socket) {
 });
 
 
-export function requiredAuthentication(req, res, next) { //primary auth method, used as argument in the routes below
+export function requiredAuthentication(req, res, next) { //primary auth method, used as "middlewre" in the routes below
 
     if (req.session.user && req.session.user.status == "validated") { //check using session cookie
         if (requirePayment) { 
@@ -527,24 +438,7 @@ export function requiredAuthentication(req, res, next) { //primary auth method, 
                                 console.log("auth error! " + e);
                               }
                             
-                            // db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-                            //     if (err != null) {
-                            //         req.session.error = 'Access denied!';
-                            //         console.log("token authentication failed! User ID not found");
-                            //         res.send('noauth');
-                            //     } else {
-                            //         console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-                            //         if (user.status == "validated") {
-                            //         // userStatus = "subscriber";
-                            //         console.log("gotsa subscriber!");
-                            //         next();
-                            //         } else {
-                            //             req.session.error = 'Access denied!';
-                            //             console.log("token authentication failed! not a subscriber");
-                            //             res.send('noauth');    
-                            //         }
-                            //     }
-                            // });
+                           
                           })();
                             // next();
                         } else {
@@ -565,80 +459,6 @@ export function requiredAuthentication(req, res, next) { //primary auth method, 
         }
     }
 }
-
-
-
-// function traffic (req, res, next) { //deprecated, used dynamodb
-//     let timestamp = Date.now();
-
-//     timestamp = parseInt(timestamp);
-//     console.log("tryna save req" + req.body);
-//     var ip = req.headers['x-forwarded-for'] ||
-//      req.socket.remoteAddress ||
-//      null;
-//     let params = {
-//         TableName: trafficTable, //dynamodb table name at aws
-//         Item: {
-//             timestamp: timestamp,
-//             baseUrl: req.baseUrl,
-//             body: JSON.stringify(req.body),
-//             fresh: req.fresh,
-//             hostname: req.hostname,
-//             ip: req.ip,
-//             referring_ip: ip,
-//             method: req.method,
-//             originalUrl: req.originalUrl,
-//             params: JSON.stringify(req.params),
-//             headers: JSON.stringify(req.headers)
-            
-//         }
-//     };
-// }
-
-
-// function saveTraffic (req, res, next) {
-//     let timestamp = Date.now();
-
-//     timestamp = parseInt(timestamp);
-//     // console.log("tryna save req" + );
-//     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
-//     // let request = {};
-
-//     var userdata = {
-//         username: req.session.user ? req.session.user.userName : "",
-//         _id: req.session.user ? req.session.user._id : "",
-//         email: req.session.user ? req.session.user.email : "",
-//         status: req.session.user ? req.session.user.status : "",
-//         authlevel: req.session.user ? req.session.user.authLevel : ""
-//     };
-//     // console.log("traffic userdata " + JSON.stringify(userdata));
-//     let data = {
-//             timestamp: timestamp,
-//             baseUrl: req.baseUrl,
-//             headers: JSON.stringify(req.headers),
-//             cookie: JSON.stringify(req.session.cookie),
-//             userdata: userdata,
-//             fresh: req.fresh,
-//             hostname: req.hostname,
-//             ip: req.ip,
-//             referring_ip: ip,
-//             method: req.method,
-//             originalUrl: req.originalUrl,
-//             params: JSON.stringify(req.params),
-           
-//         }
-//         db.traffic.save(data, function (err, saved) {
-//             if ( err || !saved ) {
-//                 console.log('traffic not saved!' + err);
-//                 next();
-                
-//             } else {
-//                 next();
-//                 // var item_id = saved._id.toString();
-//                 // console.log('new traffic id: ' + item_id);
-//             }
-//         });
-//     }
 
 
 export function saveTraffic (req, domain, shortID) {
@@ -705,17 +525,7 @@ function checkAppID(req, res, next) {
                 res.send("noappauth " + e);
           }
         })();
-//         db_old.apps.findOne({_id: a_id }, function (err, app) {
-//             if (err || !app) {
-//                 console.log("no app id!");
-//                 req.session.error = 'Access denied!';
-//                 res.send("noappauth");
-// //                next();
-//             } else {
-//                 console.log("hey, gotsa appID!");
-//                 next();
-//             }
-//         });
+
     } else {
         console.log("no app id!");
         req.session.error = 'Access denied!';
@@ -726,37 +536,6 @@ function checkAppID(req, res, next) {
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
-function checkSceneTitle(titleString) {
-
-
-}
-
-// function amirite (acl_rule, u_id) { //check user id against acl
-//     //        console.log("checking " + JSON.stringify(req.session));
-//     //        if (JSON.stringify(req.session.user._id.toString()) == u_id) {
-//     //            console.log("Logged in: " + req.session.user.userName);
-//     // is there such a rule, and is this user id in it's userIDs array?
-//     //            var u_id = session.user._id;
-//     console.log("lookin for u_id :" + u_id + " in " + acl_rule);
-//     db_old.acl.findOne({$and: [{acl_rule: acl_rule}, {userIDs: {$in: [u_id]}}]}, function (err, rule) {
-//         if (err || !rule) {
-//             //req.session.error = 'Access denied!';
-//             //res.send('noauth');
-//             console.log("sorry, that's not in the acl");
-//             return false;
-//         } else {
-//             console.log("yep, that's in the acl");
-// //                    next();
-//             return true;
-//         }
-//     });
-// //        }
-// }
-
-// function notify (req, res, next) {
-
-// }
 
 function admin (req, res, next) { //check user id against acl
     var u_id = req.session.user._id.toString();
@@ -770,18 +549,6 @@ function admin (req, res, next) { //check user id against acl
             }
         }
     }
-//     db.acl.findOne({$and: [{acl_rule: "admin"}, {userIDs: {$in: [u_id]}}]}, function (err, rule) {
-//         if (err || !rule) {
-//             req.session.error = 'Access denied!';
-//             res.send('noauth');
-//             console.log("sorry, that's not in the acl");
-// //                return false;
-//         } else {
-//             console.log("yep, that's in the acl");
-//             next();
-// //                return true;
-//         }
-//     });
 }
 
 function usercheck (req, res, next) { //gotsta beez the owner of requested resource
@@ -796,6 +563,7 @@ function usercheck (req, res, next) { //gotsta beez the owner of requested resou
         res.send('noauth');
     }
 }
+
 function domainadmin (req, res, next) { //TODO also check acl
     (async () => {
         try {
@@ -811,46 +579,8 @@ function domainadmin (req, res, next) { //TODO also check acl
             res.send("noauth " + e);
         }
     })();
-    // db_old.users.findOne({_id: ObjectId.createFromHexString(req.session.user._id.toString())}, function (err, user) {
-    //     if (err || !user) {
-    //         res.send("noauth");
-    //     } else {
-    //         if (user.authLevel.includes("domain_admin") || user.authLevel.includes("admin")) { //should be separate, but later..
-    //             next();
-    //         } else {
-    //            res.send("noauth");
-    //         }
-    //     }
-    // })
+   
 }
-
-// function domainadminn (req, res, next) {
-//     var u_id = req.session.user._id.toString();
-// //        var req_u_id = req.params.user_id;
-// //        var domain = req.params.domain;
-// //        console.log("checkin " + u_id + " vs " + req_u_id);
-// //        if (u_id == req_u_id.toString().replace(":", "")) { //hrm.... dunno why the : needs trimming...
-//     var rule = "domain_admin_" + req.params.domain.toString().replace(":", "");
-//     console.log("acl rule check " + rule + " vs " + u_id);
-//     //either admin or domain admin, admin can do everything
-//     db_old.acl.findOne({$or :[{$and: [{acl_rule:rule }, {userIDs: {$in: [u_id]}}]}, {$and: [{acl_rule: "admin"}, {userIDs: {$in: [u_id]}}]}]}, function (err, rule) {
-//         if (err || !rule) {
-//             req.session.error = 'Access denied!';
-//             res.send('noauth');
-//             console.log("sorry, that's not in the domain_admin acl");
-//             //                return false;
-//         } else {
-//             console.log("yep, that's in the domain_admin acl");
-//             next();
-//             //                return true;
-//         }
-//     });
-//     //            next();
-// //        } else {
-// //            req.session.error = 'Access denied!';
-// //            res.send('noauth');
-// //        }
-// }
 
 function uscene (req, res, next) { //check user id against acl, for scene writing
     var u_id = req.session.user._id.toString();
@@ -879,35 +609,12 @@ function uscene (req, res, next) { //check user id against acl, for scene writin
             }
         })();
 
-//         db_old.acl.findOne({$and: [{"acl_rule": "write_scene_" + scene_id }, {"userIDs": {$in: [u_id]}}]}, function (err, rule) {
-//             if (err || !rule) {
-//                 req.session.error = 'Access denied!';
-//                 res.send('noauth');
-//                 console.log("sorry, that's not in the acl");
-// //                return false;
-//             } else {
-//                 console.log("yep, that's in the acl");
-//                 next();
-// //                return true;
-//             }
-//         });
-// //            next();
     } else {
         req.session.error = 'Access denied!';
         res.send('noauth');
     }
 }
-function makeLowerCase(string) {
-    return string.toLowerCase();
-}
-function makeExtensionLowerCase (filename) {
-    var i = filename.lastIndexOf('.');
-    if (i < 0) {
-       return filename;
-    } else {
-        
-    }
-}
+
 export function getExtension(filename) {
     // console.log("tryna get extension of " + filename);
     var i = filename.lastIndexOf('.');
@@ -943,16 +650,7 @@ export function saveActivity (data) {
         }
     })();
    
-    // db_old.activity.save(data, function (err, saved) {
-    //     if ( err || !saved ) {
-    //         console.log('activity not saved..');
-    //         // res.send("nilch");
-    //     } else {
-    //         var item_id = saved._id.toString();
-    //         console.log('new activity id: ' + item_id);
-    //         // res.send(item_id);
-    //     }
-    // });
+   
 }
 ////////////////////////// create API KEYS ... maybe later...
 
@@ -1319,57 +1017,6 @@ app.get("/", function (req, res) {
     // res.end();
 });
 
-// app.get("/copyall", function (req, res) {
-
-//     db.audio_items.find({}, function(err,audio_items) {
-//         if (err || !audio_items) {
-//             console.log("error getting audio items: " + err);
-//         } else {
-
-//         }
-//     });
-// });
-
-// app.get("/s/:shortcode", function (req, res) {
-//     //send "Hello World" to the client as html
-//     // res.send("Hello World!");
-//     // console.log("tryna redirect to shortcode " + req.params.shortcode);
-//     res.redirect("https://strr.us/connect/?scene=" + req.params.shortcode);
-
-// });
-
-// app.get("/unity/:id", function (req, res){ //redirect to unity
-
-//     // let oid = ObjectId.createFromHexString(req.params.id);
-//     db.scenes.findOne({"short_id" : req.params.id}, function (err, scene) {
-//         if (err || !scene) {
-//             res.send("Sorry, that scene was not found");
-//         } else {
-//             saveTraffic(req, scene.sceneDomain, scene.short_id);
-//             if (scene.sceneWebGLOK) {
-//                 let sceneUnityWebDomain = "https://mvmv.us";
-//                 db.apps.findOne({"appdomain": scene.sceneDomain}, function(err,app) {
-//                     if (err || !app) {
-//                         console.log("no apps for you!");
-//                         res.send("Sorry, hostname for unity web player not found"); //nice landing, sniff useragent and show mobile deeplinks if present
-//                     } else {
-//                         // domain.apps = apps;
-//                         // res.json(domain);
-                        
-//                         if (app.appunitydomain) {
-//                             sceneUnityWebDomain = app.appunitydomain;
-
-//                         }
-//                         // console.log(sceneUnityWebDomain);
-//                         res.redirect(sceneUnityWebDomain + '/?scene=' + req.params.id);
-//                     }
-//                 });
-//             } else {
-//                 res.send("Sorry, that scene is not configured to support the Unity Web Player");
-//             }
-//         }
-//     });
-// });
 
 app.get("/privacy.html", function (req,res) {
     res.redirect("/main/privacy.html");
@@ -1409,50 +1056,6 @@ app.get("/amirite/:_id", function (req, res) {
     }
 });
 
-
-// app.post("/oculus/:app/:action", function (req, res) {
-    
-//     if (req.params.app.toString().toLowerCase() == "cowbots_rift") {
-//         console.log("oculus request for cowbots" + JSON.stringify(req.body));
-//         if (req.params.action.toString().toLowerCase() == "validate") {
-//             let data = {};
-//             data.access_token = process.env.COWBOTS_OCULUS_RIFT_TOKEN;
-//             data.nonce = req.body.nonce;
-//             data.user_id = req.body.oID;
-//             console.log(JSON.stringify(data));
-//             axios.post("https://graph.oculus.com/user_nonce_validate/", data) 
-//             .then((response) => {
-//             // console.log("oculus api validaaqtion response: " + JSON.stringify(response.data));
-//             res.send("nonce validation response: " + JSON.stringify(response.data));
-//             })
-//             .catch(function (error) {
-//                 res.send(error);
-//             })
-//         } else {
-//             res.send("dunno...no action");
-//         }
-//     } else if ((req.params.app.toString().toLowerCase() == "cowbots_quest")) {
-//         if (req.params.action.toString().toLowerCase() == "validate") {
-//             let data = {};
-//             data.access_token = process.env.COWBOTS_OCULUS_QUEST_TOKEN;
-//             data.nonce = req.body.nonce;
-//             data.user_id = req.body.oID;
-//             console.log(JSON.stringify(data));
-//             axios.post("https://graph.oculus.com/user_nonce_validate/", data)
-//             .then((response) => {
-//             // console.log("oculus api validaaqtion response: " + JSON.stringify(response.data));
-//             res.send("nonce validation response: " + JSON.stringify(response.data));
-//             })
-//             .catch(function (error) {
-//                 res.send(error);
-//             })
-//         } else {
-//             res.send("dunno...no action");
-//         }
-//     } else {
-//         res.send("for who/what?");
-//     }
-// });
 
 function AppQuery (app) {
     // console.log(JSON.stringify(app._id));
@@ -3431,6 +3034,7 @@ app.get('/get_userassets/:_id', requiredAuthentication, usercheck, function (req
 
 app.get('/get_models/:_id', requiredAuthentication, function (req, res) {
     console.log("tryna get_models for " + req.params._id );
+    
         db_old.models.find({"userID": req.params._id}, function (err, models) {
             if (err || !models) {
                 console.log("error getting user assets: " + err);
@@ -13377,18 +12981,7 @@ app.post('/delete_audio/', requiredAuthentication, function (req, res){
                            res.send(e);
                         }
                     })();
-                    // s3.deleteObjects(params, function(err, data) {
-                    //     if (err) {
-                    //         console.log(err, err.stack);
-                    //         res.send(err);
-                    //         // an error occurred
-                    //     }
-                    //     else {
-                    //         console.log(data);
-                            
-                    //         // successful response
-                    //     }
-                    // });
+                   
                 }
             })();
         
