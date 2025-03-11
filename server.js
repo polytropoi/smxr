@@ -318,7 +318,7 @@ io.on('connection', function(socket) {
         socket.room = room;
         room = rm; //set global room value for this socket, since we can only be in one at a time
         jwt.verify(socket.token, process.env.JWT_SECRET, function (err, payload) {
-            console.log(JSON.stringify(payload));
+            console.log("socket payload: " + JSON.stringify(payload));
             if (payload) {
                 if (payload.userId != null){
                     // console.log("gotsa payload.userId : " + payload.userId);
@@ -341,7 +341,9 @@ io.on('connection', function(socket) {
                             console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
                             console.log(socket.id + " named " + socket.uname + " tryna join " + rm );
                             socket.join(rm);
+                            console.log(socket.rooms); 
                             socket.room = room;
+                            console.log(socket.rooms); 
                             room = rm; //set global room value for this socket, since we can only be in one at a time
                             socket.userID = payload.userId;
                             io.to(room).emit('user joined', socket.uname, room);
@@ -407,19 +409,29 @@ io.on('connection', function(socket) {
         
     });
     socket.on('room users', function (room) {
-        if (io.sockets.adapter.rooms[room] != undefined) {
-        var roomUsers = io.sockets.adapter.rooms[room].sockets;
-        // console.log("roomUsers " + JSON.stringify(roomUsers));
-        var returnObj = {};
+        io.sockets.adapter.rooms.get(room);
+        console.log("room users room " + room + " " + io.sockets.adapter.rooms.get(room)); //not an array, this is a Set now... what?
        
-
-        Object.keys(roomUsers).forEach(function(key) {
-            // console.log("roomUsers key " + key + " uname " + io.sockets.connected[key].uname);
-            // returnObj[key] = io.sockets.connected[key].uname; //socketID : username
-            let namePlusColor = io.sockets.connected[key].uname + "~" + io.sockets.connected[key].color;
-            returnObj[key] = namePlusColor;
-            // returnObj[io.sockets.connected[key].uname] = key; //cook up a nice dict for client to use
-        });
+        // if (io.sockets.adapter.rooms[room] != undefined) {
+        //     var roomUsers = io.sockets.adapter.rooms[room].sockets;
+        //     console.log("roomUsers " + JSON.stringify(roomUsers));
+        if (io.sockets.adapter.rooms.get(room) != undefined) {
+        var roomUsers = io.sockets.adapter.rooms.get(room);
+        console.log("roomUsers " + roomUsers);
+        var returnObj = {};
+            
+        for (const user of roomUsers) {
+            console.log("room user : " +user + " name "+ io.sockets.sockets.get(user).uname);
+            let namePlusColor = io.sockets.sockets.get(user).uname + "~" + io.sockets.sockets.get(user).uname.color;
+            returnObj[user] = namePlusColor;
+        }
+        // Object.keys(roomUsers).forEach(function(key) {
+        //     console.log("roomUsers key " + key + " uname " + io.sockets.connected[key].uname);
+        //     // returnObj[key] = io.sockets.connected[key].uname; //socketID : username
+        //     let namePlusColor = io.sockets.connected[key].uname + "~" + io.sockets.connected[key].color;
+        //     returnObj[key] = namePlusColor;
+        //     // returnObj[io.sockets.connected[key].uname] = key; //cook up a nice dict for client to use
+        // });
         // console.log(roomUsersString);
         // console.log("tryna get room users for " + room + " " + JSON.stringify(returnObj));
         io.in(room).emit('room users', JSON.stringify(returnObj));
@@ -8235,38 +8247,68 @@ app.get('/font/:_id', function(req, res) {
 
 app.get('/usertexts/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return usertexts for: ' + req.params.u_id);
-    if (!req.session.user.authLevel.includes("domain")) {
-        db_old.text_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
-            if (err || !text_items) {
-                console.log("error getting text_items : " + err);
-            } else {
+    if (!req.session.user.authLevel.includes("domain")) { //if not domain admin
+        (async () => {
+            try {
+                const query = {userID: req.params.u_id};
+                const text_items = await RunDataQuery("text_items", "find", query);
                 res.json(text_items);
-                console.log("returning text items for " + req.params.u_id);
+            } catch (e) {
+                console.log("error getting usertexts " + e);
+                res.send("error getting usertexts " + e);
             }
-        });
+        })();
+        // db_old.text_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
+        //     if (err || !text_items) {
+        //         console.log("error getting text_items : " + err);
+        //     } else {
+        //         res.json(text_items);
+        //         console.log("returning text items for " + req.params.u_id);
+        //     }
+        // });
     } else {
-        db_old.text_items.find({}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
-            if (err || !text_items) {
-                console.log("error getting text_items : " + err);
-            } else {
+        (async () => {
+            try {
+                const query = {};
+                const text_items = await RunDataQuery("text_items", "find", query);
                 res.json(text_items);
-                console.log("returning text items for " + req.params.u_id);
+            } catch (e) {
+                console.log("error getting usertexts " + e);
+                res.send("error getting usertexts " + e);
             }
-        });
+        })();
+        // db_old.text_items.find({}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
+        //     if (err || !text_items) {
+        //         console.log("error getting text_items : " + err);
+        //     } else {
+        //         res.json(text_items);
+        //         console.log("returning text items for " + req.params.u_id);
+        //     }
+        // });
     }
 });
 
 app.get('/usertext/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return usertexts for: ' + req.params.p_id);
     var o_id = ObjectId.createFromHexString(req.params.p_id);
-    db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
-        if (err || !text_item) {
-            console.log("error getting text_items : " + err);
-        } else {
+    (async () => {
+        try {
+            const query = {"_id": o_id};
+            const text_item = await RunDataQuery("text_items", "findOne", query);
             res.json(text_item);
-            console.log("returning text items for " + req.params.u_id);
+        } catch (e) {
+            console.log("error getting usertexty " + e);
+            res.send("error getting usertexty " + e);
         }
-    });
+    })();
+    // db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
+    //     if (err || !text_item) {
+    //         console.log("error getting text_items : " + err);
+    //     } else {
+    //         res.json(text_item);
+    //         console.log("returning text item for " + req.params.p_id);
+    //     }
+    // });
 });
 
 app.get('/userpic/:p_id', requiredAuthentication, function(req, res) {
@@ -8283,6 +8325,7 @@ app.get('/userpic/:p_id', requiredAuthentication, function(req, res) {
 
         const query = {"_id": o_id};
         let picture_item = await RunDataQuery("image_items", "findOne", query);
+
         let item_string_filename = JSON.stringify(picture_item.filename);
         item_string_filename = item_string_filename.replace(/\"/g, "");
         const item_string_filename_ext = getExtension(item_string_filename);
@@ -8325,95 +8368,115 @@ app.get('/hls/:_id', function(req, res) {  //main playback route for hls vids //
     console.log("hls pid " + req.params._id);
     if (ObjectId.isValid(pID)) {
         var o_id = ObjectId.createFromHexString(pID);
-        db_old.video_items.findOne({"_id": o_id}, function(err, video_item) {
-            if (err || !video_item) {
-                console.log("error getting hls video item: " + err);
-                res.send("error getting hls video item: " + err);
-            } else {
-                if (minioClient) {
-                    (async () => {
-                        let buffer = [];
-                        
-                        await minioClient.getObject(process.env.ROOT_BUCKET_NAME, 'users/' + video_item.userID + '/video/' + video_item._id + '/hls/output.m3u8', function(err, dataStream) {
-                        if (err) {
-                            console.log(err);
-                        }
-                        dataStream.on('data', function(chunk) {
-                        //   size += chunk.length
-                            buffer.push(chunk);
-                            // chunk.pipe(fileStream);
-                        })
-                        dataStream.on('end', function() {
-                            let manifestString = buffer.toString();
-                            // console.log(manifestString);
-
-                            var data = [];
-                            var stream = minioClient.listObjects(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/', false);
-                            stream.on('data', function(obj) { 
-                                data.push(obj) 
-                            } )
-                            stream.on("end", function (obj) { 
-                                // console.log("minio bucket list: " + JSON.stringify(data)); 
-
-                                async.each (data, function (s3Object, callbackz) { //takes a shake so async, and respond when it's done
-                                    // console.log("minio data element: " + JSON.stringify(s3Object));
-                                    if (getExtension(s3Object.name) == ".ts") { //swap out .ts files (e.g 001.ts) for signed urls
-                                        // console.log("minio key " + path.basename(s3Object.name)); 
-                                        // let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, s3Object.name.toString(), 36000);
-                                        minioClient.presignedGetObject(process.env.ROOT_BUCKET_NAME, s3Object.name.toString(), 24*60*60, function(err, presignedUrl) { //use callback version here, can't await?
-                                            if (err) return console.log(err);
-                                            // console.log("url " + presignedUrl);
-                                            manifestString = manifestString.replace(path.basename(s3Object.name.toString()), presignedUrl); //rebuild the manifest with signed urls - brilliant!
-                                            callbackz();
-                                            });                                          
-                                    } else {
-                                        callbackz();
-                                    }
-                                        
-                                    }, function(err) {
-                                        if (err) {
-                                            // console.log('hls mangler failed to process');
-                                            res.send("error! " + err);
-                                        } else {
-                                            // console.log('All files have been processed successfully');
-                                            res.setHeader('content-type', 'application/x-mpegURL');
-                                            res.send(manifestString);
-                                        }
-                                });
-                            })
-                            stream.on('error', function(err) { 
-                                console.log(err)
-                            } );
-                        });
-                            dataStream.on('error', function(err) {
-                            console.log(err);
-                        
-                        });
-                        });
-                    })();
-                } else { //below updated w/ aws sdk v3 - getSignedUrl must be async now... but no need for async.each!
-                    (async () => {
-                        try {
-                            let manifest = await GetObject(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/output.m3u8');
-                            const files = await ListObjects(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/');
-                            // console.log("files: "+ files.Contents.length);
-                            for (const s3Object of files.Contents) {
-                                if (getExtension(s3Object.Key) == ".ts") { //swap out .ts files (e.g 001.ts) for signed urls
-                                    let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, s3Object.Key);
-                                    // console.log("url " + url);
-                                    manifest = manifest.replace(path.basename(s3Object.Key), url); //rebuild the manifest with signed urls - clever girl!
-                                }
-                            }
-                            res.setHeader('content-type', 'application/x-mpegURL');
-                            res.send(manifest);
-                        
-                        } catch (caught) {
-                            res.send(caught);
-                        }
-                    })();
+        (async () => {
+            try {
+                const query = {"_id": o_id};
+                const video_item = await RunDataQuery("video_items", "findOne", query);
+                let manifest = await GetObject(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/output.m3u8');
+                const files = await ListObjects(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/');
+                // console.log("files: "+ files.Contents.length);
+                for (const s3Object of files.Contents) {
+                    if (getExtension(s3Object.Key) == ".ts") { //swap out .ts files (e.g 001.ts) for signed urls
+                        let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, s3Object.Key);
+                        // console.log("url " + url);
+                        manifest = manifest.replace(path.basename(s3Object.Key), url); //rebuild the manifest with signed urls - ha!
+                    }
                 }
+                res.setHeader('content-type', 'application/x-mpegURL');
+                res.send(manifest);
+            } catch (e) {
+
             }
-        });
+        })();
+        // db_old.video_items.findOne({"_id": o_id}, function(err, video_item) {
+        //     if (err || !video_item) {
+        //         console.log("error getting hls video item: " + err);
+        //         res.send("error getting hls video item: " + err);
+        //     } else {
+        //         if (minioClient) {
+        //             (async () => {
+        //                 let buffer = [];
+                        
+        //                 await minioClient.getObject(process.env.ROOT_BUCKET_NAME, 'users/' + video_item.userID + '/video/' + video_item._id + '/hls/output.m3u8', function(err, dataStream) {
+        //                 if (err) {
+        //                     console.log(err);
+        //                 }
+        //                 dataStream.on('data', function(chunk) {
+        //                 //   size += chunk.length
+        //                     buffer.push(chunk);
+        //                     // chunk.pipe(fileStream);
+        //                 })
+        //                 dataStream.on('end', function() {
+        //                     let manifestString = buffer.toString();
+        //                     // console.log(manifestString);
+
+        //                     var data = [];
+        //                     var stream = minioClient.listObjects(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/', false);
+        //                     stream.on('data', function(obj) { 
+        //                         data.push(obj) 
+        //                     } )
+        //                     stream.on("end", function (obj) { 
+        //                         // console.log("minio bucket list: " + JSON.stringify(data)); 
+
+        //                         async.each (data, function (s3Object, callbackz) { //takes a shake so async, and respond when it's done
+        //                             // console.log("minio data element: " + JSON.stringify(s3Object));
+        //                             if (getExtension(s3Object.name) == ".ts") { //swap out .ts files (e.g 001.ts) for signed urls
+        //                                 // console.log("minio key " + path.basename(s3Object.name)); 
+        //                                 // let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, s3Object.name.toString(), 36000);
+        //                                 minioClient.presignedGetObject(process.env.ROOT_BUCKET_NAME, s3Object.name.toString(), 24*60*60, function(err, presignedUrl) { //use callback version here, can't await?
+        //                                     if (err) return console.log(err);
+        //                                     // console.log("url " + presignedUrl);
+        //                                     manifestString = manifestString.replace(path.basename(s3Object.name.toString()), presignedUrl); //rebuild the manifest with signed urls - brilliant!
+        //                                     callbackz();
+        //                                     });                                          
+        //                             } else {
+        //                                 callbackz();
+        //                             }
+                                        
+        //                             }, function(err) {
+        //                                 if (err) {
+        //                                     // console.log('hls mangler failed to process');
+        //                                     res.send("error! " + err);
+        //                                 } else {
+        //                                     // console.log('All files have been processed successfully');
+        //                                     res.setHeader('content-type', 'application/x-mpegURL');
+        //                                     res.send(manifestString);
+        //                                 }
+        //                         });
+        //                     })
+        //                     stream.on('error', function(err) { 
+        //                         console.log(err)
+        //                     } );
+        //                 });
+        //                     dataStream.on('error', function(err) {
+        //                     console.log(err);
+                        
+        //                 });
+        //                 });
+        //             })();
+        //         } else { //below updated w/ aws sdk v3 - getSignedUrl must be async now... but no need for async.each!
+        //             (async () => {
+        //                 try {
+        //                     let manifest = await GetObject(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/output.m3u8');
+        //                     const files = await ListObjects(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/');
+        //                     // console.log("files: "+ files.Contents.length);
+        //                     for (const s3Object of files.Contents) {
+        //                         if (getExtension(s3Object.Key) == ".ts") { //swap out .ts files (e.g 001.ts) for signed urls
+        //                             let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, s3Object.Key);
+        //                             // console.log("url " + url);
+        //                             manifest = manifest.replace(path.basename(s3Object.Key), url); //rebuild the manifest with signed urls - clever girl!
+        //                         }
+        //                     }
+        //                     res.setHeader('content-type', 'application/x-mpegURL');
+        //                     res.send(manifest);
+                        
+        //                 } catch (caught) {
+        //                     res.send(caught);
+        //                 }
+        //             })();
+        //         }
+        //     }
+        // });
     } else {
         console.log("error " + pID);
         res.send("error in id " + pID);
@@ -8626,94 +8689,132 @@ app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
 app.get('/audio/:id', requiredAuthentication, function (req, res){ //TODO Authenticate below if Public/Private bool for this media item
 
     var audioID = req.params.id;
-    var o_id = ObjectId.createFromHexString(audioID);   
+    var o_id = ObjectId.createFromHexString(audioID.toString());   
     console.log('audioID requested : ' + audioID);
-    db_old.audio_items.findOne({ "_id" : o_id}, function(err, audio_item) {
-        if (err || !audio_item) {
-            console.log("error getting audio items: " + err);
-        } else {
-            let orig = null;
-            async.waterfall([
-                function(callback){  
-                    if (audio_item.textitemID != "") {
-                        var t_id = ObjectId.createFromHexString(audio_item.textitemID);
-                        db_old.text_items.findOne({"_id" : t_id}, function (err, text_item) {
-                            if (err || !text_item) {
-                                console.log("no text for audio item");
-                                callback(null, "error");
-                            } else {
-                                console.log(text_item);
-                                if (text_item.textstring != "") {
 
-                                callback(null, text_item.textstring);
-
-                                console.log("text_item.textstring: " + text_item.textstring);
-                                } else {
-                                    callback(null, "");
-                                }
-                            }
-                        });
-
-                    } else {
-                        callback(null, "");
-                    }
-                },
-  
-                function(text_string, callback) { //add the signed URLs to the obj array
-
-                    (async () => {
-                        var item_string_filename = JSON.stringify(audio_item.filename);
-                        item_string_filename = item_string_filename.replace(/\"/g, "");
-                        var item_string_filename_ext = getExtension(item_string_filename);
-                        var expiration = new Date();
-                        expiration.setMinutes(expiration.getMinutes() + 3);
-                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                        console.log(baseName);
-                        var mp3Name = baseName + '.mp3';
-                        var oggName = baseName + '.ogg';
-                        var pngName = baseName + '.png';
-
-                        var urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name, 6000); 
-                        var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + oggName, 6000); 
-                        var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + pngName, 6000); 
-                        // var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name, Expires: 6000});
-                        // var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + oggName, Expires: 6000});
-                        // var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + pngName, Expires: 6000});
-                        audio_item.URLmp3 = urlMp3; //jack in teh signed urls into the object array
-                        audio_item.URLogg = urlOgg;
-                        audio_item.URLpng = urlPng;
-                        if (orig != null) {
-                            audio_item.URLorig = orig;
-                        }
-                        audio_item.textString = text_string;
-
-                        callback(null);
-                    })();
-                }],
-
-                function(err, result) { // #last function, close async
-                    res.json(audio_item);
-                    console.log("waterfall done: " + result);
+    (async () => {
+        try {
+            const query = { "_id" : o_id};
+            const audio_item = await RunDataQuery("audio_items", "findOne", query);
+            if (audio_item.textitemID && audio_item.textitemID != "") {
+                const t_id = ObjectId.createFromHexString(audio_item.textitemID.toString());
+                const textquery = {"_id" : t_id};
+                const text_item = await RunDataQuery("text_items", "findOne", textquery);
+                if (text_item) {
+                    audio_item.textString = text_item.textstring;
                 }
-            );
-        }
-    });
-});
+            }
+            let item_string_filename = JSON.stringify(audio_item.filename);
+            item_string_filename = item_string_filename.replace(/\"/g, "");
+            let item_string_filename_ext = getExtension(item_string_filename);
+            let expiration = new Date();
+            expiration.setMinutes(expiration.getMinutes() + 3);
+            var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+            // console.log(baseName);
+            const mp3Name = baseName + '.mp3';
+            const oggName = baseName + '.ogg';
+            const pngName = baseName + '.png';
 
-app.post('/gen_short_code', checkAppID, requiredAuthentication, function (req, res) {
-    console.log(req.params);
-    var audioID = req.params.id;
-    var o_id = ObjectId.createFromHexString(audioID);   
-    console.log('audioID requested : ' + audioID);
-    db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
-        if (err || !audio_item && audio_item.short_id == null) {
-            console.log("error getting audio items: " + err);
-        } else {
-            console.log("tryna update " + req.params.id + " to status " + req.params.item_status);
-            db_old.audio_items.update( { _id: o_id }, { $set: { item_status: req.params.item_status }});
+            var urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name, 6000); 
+            var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + oggName, 6000); 
+            var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + pngName, 6000); 
+            audio_item.URLmp3 = urlMp3; //jack in teh signed urls into the object array
+            audio_item.URLogg = urlOgg;
+            audio_item.URLpng = urlPng;
+            res.json(audio_item);
+        } catch (e) {
+            console.log("error getting audio " + e);
+            res.send("error getting audio  " + e);
         }
-    });
+    })();
 });
+    // db_old.audio_items.findOne({ "_id" : o_id}, function(err, audio_item) {
+    //     if (err || !audio_item) {
+    //         console.log("error getting audio items: " + err);
+    //     } else {
+    //         let orig = null;
+    //         async.waterfall([
+    //             function(callback){  
+                    
+    //                 if (audio_item.textitemID && audio_item.textitemID != "") {
+    //                     var t_id = ObjectId.createFromHexString(audio_item.textitemID.toString());
+    //                     db_old.text_items.findOne({"_id" : t_id}, function (err, text_item) {
+    //                         if (err || !text_item) {
+    //                             console.log("no text for audio item");
+    //                             callback(null, "error");
+    //                         } else {
+    //                             console.log(text_item);
+    //                             if (text_item.textstring != "") {
+
+    //                             callback(null, text_item.textstring);
+
+    //                             console.log("text_item.textstring: " + text_item.textstring);
+    //                             } else {
+    //                                 callback(null, "");
+    //                             }
+    //                         }
+    //                     });
+
+    //                 } else {
+    //                     callback(null, "");
+    //                 }
+    //             },
+  
+    //             function(text_string, callback) { //add the signed URLs to the obj array
+
+    //                 (async () => {
+    //                     var item_string_filename = JSON.stringify(audio_item.filename);
+    //                     item_string_filename = item_string_filename.replace(/\"/g, "");
+    //                     var item_string_filename_ext = getExtension(item_string_filename);
+    //                     var expiration = new Date();
+    //                     expiration.setMinutes(expiration.getMinutes() + 3);
+    //                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+    //                     console.log(baseName);
+    //                     var mp3Name = baseName + '.mp3';
+    //                     var oggName = baseName + '.ogg';
+    //                     var pngName = baseName + '.png';
+
+    //                     var urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name, 6000); 
+    //                     var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + oggName, 6000); 
+    //                     var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + pngName, 6000); 
+    //                     // var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name, Expires: 6000});
+    //                     // var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + oggName, Expires: 6000});
+    //                     // var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + pngName, Expires: 6000});
+    //                     audio_item.URLmp3 = urlMp3; //jack in teh signed urls into the object array
+    //                     audio_item.URLogg = urlOgg;
+    //                     audio_item.URLpng = urlPng;
+    //                     if (orig != null) {
+    //                         audio_item.URLorig = orig;
+    //                     }
+    //                     audio_item.textString = text_string;
+
+    //                     callback(null);
+    //                 })();
+    //             }],
+
+    //             function(err, result) { // #last function, close async
+    //                 res.json(audio_item);
+    //                 console.log("waterfall done: " + result);
+    //             }
+    //         );
+    //     }
+    // });
+// });
+
+// app.post('/gen_short_code', checkAppID, requiredAuthentication, function (req, res) {
+//     console.log(req.params);
+//     var audioID = req.params.id;
+//     var o_id = ObjectId.createFromHexString(audioID);   
+//     console.log('audioID requested : ' + audioID);
+//     db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
+//         if (err || !audio_item && audio_item.short_id == null) {
+//             console.log("error getting audio items: " + err);
+//         } else {
+//             console.log("tryna update " + req.params.id + " to status " + req.params.item_status);
+//             db_old.audio_items.update( { _id: o_id }, { $set: { item_status: req.params.item_status }});
+//         }
+//     });
+// });
 
 app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log(req.params._id);

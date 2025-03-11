@@ -2027,7 +2027,7 @@ if (settings && !socket) {
    });
 
    socket.on('user joined', function(data) {
-      console.log(data + 'joined room ' + room);
+      console.log("room user " + data + 'joined room ' + room);
       socket.emit('room users', room);
       UpdatePlayerAvatars(roomUsers);
       EmitSelfPosition();
@@ -2041,7 +2041,7 @@ if (settings && !socket) {
    });
 
    socket.on('room users', function (data) {
-   //  console.log("room users data : " + data);
+    console.log("room users data : " + data);
    $('#users').html("");
 
       roomUsers = JSON.parse(data);
@@ -2551,6 +2551,7 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
                if (createAvatarEl) {
                   let createAvatarComponent = createAvatarEl.components.create_avatars;
                   if (createAvatarComponent)
+                     console.log("gots createAvatarComponennt, tryna createAvatar..." + key);
                   createAvatarComponent.createAvatar(key); //YES, it's below, but...
                }
                // let avatar = document.createElement("a-entity"); //this make bad!
@@ -2575,7 +2576,7 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
       }
 
       let roomAvatars = sceneEl.querySelectorAll('.avatar');
-      console.log("roomAvatars " + roomAvatars);
+      console.log("roomAvatars " + roomAvatars.length);
       var dupeCheck = "";
       for (var a=0; a<roomAvatars.length; a++) { //clean up disconnected avatars
          let active = false;
