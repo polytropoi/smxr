@@ -410,31 +410,31 @@ io.on('connection', function(socket) {
     });
     socket.on('room users', function (room) {
         io.sockets.adapter.rooms.get(room);
-        console.log("room users room " + room + " " + io.sockets.adapter.rooms.get(room)); //not an array, this is a Set now... what?
+        // console.log("room users in " + room + " " + io.sockets.adapter.rooms.get(room)); //not an array, this is a Set now... what?
        
         // if (io.sockets.adapter.rooms[room] != undefined) {
         //     var roomUsers = io.sockets.adapter.rooms[room].sockets;
         //     console.log("roomUsers " + JSON.stringify(roomUsers));
         if (io.sockets.adapter.rooms.get(room) != undefined) {
-        var roomUsers = io.sockets.adapter.rooms.get(room);
-        console.log("roomUsers " + roomUsers);
-        var returnObj = {};
-            
-        for (const user of roomUsers) {
-            console.log("room user : " +user + " name "+ io.sockets.sockets.get(user).uname);
-            let namePlusColor = io.sockets.sockets.get(user).uname + "~" + io.sockets.sockets.get(user).uname.color;
-            returnObj[user] = namePlusColor;
-        }
-        // Object.keys(roomUsers).forEach(function(key) {
-        //     console.log("roomUsers key " + key + " uname " + io.sockets.connected[key].uname);
-        //     // returnObj[key] = io.sockets.connected[key].uname; //socketID : username
-        //     let namePlusColor = io.sockets.connected[key].uname + "~" + io.sockets.connected[key].color;
-        //     returnObj[key] = namePlusColor;
-        //     // returnObj[io.sockets.connected[key].uname] = key; //cook up a nice dict for client to use
-        // });
-        // console.log(roomUsersString);
-        // console.log("tryna get room users for " + room + " " + JSON.stringify(returnObj));
-        io.in(room).emit('room users', JSON.stringify(returnObj));
+            var roomUsers = io.sockets.adapter.rooms.get(room);
+            // console.log("roomUsers " + roomUsers);
+            var returnObj = {};
+                
+            for (const user of roomUsers) {
+                console.log("room user : " +user + " name "+ io.sockets.sockets.get(user).uname); //the new way get the user's socket
+                const namePlusColor = io.sockets.sockets.get(user).uname + "~" + io.sockets.sockets.get(user).uname.color;
+                returnObj[user] = namePlusColor;
+            }
+            // Object.keys(roomUsers).forEach(function(key) {
+            //     console.log("roomUsers key " + key + " uname " + io.sockets.connected[key].uname);
+            //     // returnObj[key] = io.sockets.connected[key].uname; //socketID : username
+            //     let namePlusColor = io.sockets.connected[key].uname + "~" + io.sockets.connected[key].color;
+            //     returnObj[key] = namePlusColor;
+            //     // returnObj[io.sockets.connected[key].uname] = key; //cook up a nice dict for client to use
+            // });
+            // console.log(roomUsersString);
+            // console.log("tryna get room users for " + room + " " + JSON.stringify(returnObj));
+            io.in(room).emit('room users', JSON.stringify(returnObj));
         }
     });
     socket.on('pic frame', function(data, sid) { //sid = sender's socket.id
@@ -1467,8 +1467,8 @@ function ReturnID(item) {
      return id;
 }
 
-////////////////////////////////////// MAIN CLIENT AUTH ROUTE - no cookies, just tokens now...
-app.get("/ami-rite-token/:token", function (req, res) { 
+////////////////////////////////////// CLIENT AUTH ROUTE - no cookies, just tokens now...
+app.get("/ami-rite-token/:token", function (req, res) { //
     jwt.verify(req.params.token, process.env.JWT_SECRET, function (err, payload) {
         console.log("token auth payload: " + JSON.stringify(payload));
             if (payload) {
@@ -1513,22 +1513,7 @@ app.get("/ami-rite-token/:token", function (req, res) {
                                     } else {
                                       res.send(userData);
                                     }
-                                    // db_old.scenes.findOne({'short_id': userData.sceneShortID}, function (err, scene) {
-                                    //     if (err || !scene) {
-                                    //         userData.sceneShortID = "not found";
-                                            
-                                    //         res.send(userData);
-                                    //     } else {
-                                    //         // console.log("scene " + )
-                                    //         if (scene.user_id == userData._id) { //TO DO check the acl for write_scene etc..
-                                    //             userData.sceneOwner = "indaehoose";
-                                    //             userData.sceneID = scene._id;
-                                    //             res.send(userData);
-                                    //         } else {
-                                    //             res.send(userData);
-                                    //         }
-                                    //     }
-                                    // });
+                                   
                                     
                                     } else {
                                       req.session.error = 'Access denied!';
@@ -1543,48 +1528,8 @@ app.get("/ami-rite-token/:token", function (req, res) {
                               
                             })();
                             
-                            
-                            // db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-                            // if (err != null) {
-                            //     req.session.error = 'Access denied!';
-                            //     console.log("token authentication failed! User ID not found");
-                            //     res.send('noauth');
-                            // } else {
-                            //     console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-                            //     if (user.status == "validated") {
-                            //         // userStatus = "subscriber";
-                            //         console.log("gotsa subscriber!");
-                            //         let userData = {};
-                            //         userData._id = user._id;
-                            //         userData.userName = user.userName;
-                            //         userData.sceneShortID = payload.shortID;
-                            //         userData.authLevel = user.authLevel;
-                            //         db_old.scenes.findOne({'short_id': userData.sceneShortID}, function (err, scene) {
-                            //             if (err || !scene) {
-                            //                 userData.sceneShortID = "not found";
-                                            
-                            //                 res.send(userData);
-                            //             } else {
-                            //                 // console.log("scene " + )
-                            //                 if (scene.user_id == userData._id) { //TO DO check the acl for write_scene etc..
-                            //                     userData.sceneOwner = "indaehoose";
-                            //                     userData.sceneID = scene._id;
-                            //                     res.send(userData);
-                            //                 } else {
-                            //                     res.send(userData);
-                            //                 }
-                            //             }
-                            //         });
-                                    
-                            //     } else {
-                            //         req.session.error = 'Access denied!';
-                            //         console.log("token authentication failed! not a subscriber");
-                            //         res.send("2");    
-                            //         }
-                            //     }
-                            // });
                         }
-                        // next();
+                      
                     } else {
                         req.session.error = 'Access denied!';
                         console.log("token authentication failed! headers: " + JSON.stringify(req.headers));
@@ -1599,12 +1544,13 @@ app.get("/ami-rite-token/:token", function (req, res) {
     });
 });
 
-app.get("/ami-rite/:_id", function (req, res) {
+///////// ADMIN SESSION CHECK
+app.get("/ami-rite/:_id", function (req, res) { 
     if (req.session.user) {
         if (req.session.user._id.toString() == req.params._id) {
-           var response = {};
-           response.auth = req.session.user.authLevel;
-           response.userName = req.session.user.userName;
+            var response = {};
+            response.auth = req.session.user.authLevel;
+            response.userName = req.session.user.userName;
             response.userID = req.params._id;
             response.mapkey = process.env.GOOGLEMAPS_KEY;
 
@@ -1623,14 +1569,7 @@ app.get("/ami-rite/:_id", function (req, res) {
                                 const domains = await RunDataQuery("domains", "find", domainsquery);
                                 response.domains = domains;
                                 res.json(response);
-                                // db_old.domains.find({}, function (err, domains) { //domain admin sees all
-                                //     if (err || !domains) {
-                                //         res.json(response);
-                                //     } else {
-                                //         response.domains = domains;
-                                //         res.json(response);
-                                //     }
-                                // });
+                              
                             } else { //just an admin, check acl
                                 const aclQueryArray = apps.map(AppQuery); //flatten apps array for query
                                 const aclquery = {"acl_rule" : { $in: aclQueryArray }, "userIDs": response.userID};
@@ -1648,64 +1587,14 @@ app.get("/ami-rite/:_id", function (req, res) {
                                     console.log("caint find no rules!?!");
                                     res.send("no rules!");
                                 }
-                                // console.log(aclQueryArray);
-                                // db_old.acl.find({'acl_rule' : { $in: aclQueryArray }, 'userIDs': response.userID}, function (err, rules) {  //look for rules matching the live apps, and where the userID array has this user's ID
-                                //     if (err || !rules) {
-                                //         console.log("caint find no rules!?!");
-                                //     } else {
-                                //         let rulesAppIDs = rules.map(ReturnID).join(); // a string that's only the appIDs
-                                //         // console.log(rulesAppIDs);
-                                //         let appResponse = apps.filter(function (item) { //faster than nested for loops?
-                                //             return rulesAppIDs.includes(item._id);  //filter out those that don't match the approved ones
-                                //         });
-                                //         // console.log("apps " + JSON.stringify(appResponse));
-                                //         response.apps = appResponse;
-                                //         res.json(response);
-                                //     }
-                                // });
+
                             }
                         } catch (e) {
                             console.log("error checking admin fu " + e);
                             res.send("error checking appdomain " + e);
                         }
                     })();
-                    // db_old.apps.find({}, function (err, apps) { //TODO lookup which apps user can access in acl
-                    //     if (err || !apps) {
-                    //         console.log("no apps anywhere!?!");
-                    //         res.send("no apps anywhere!?!");
-                    //     } else {
-                            
-                    //         if (response.auth.includes("domain_admin")) { 
-                    //             response.apps = apps;
-                    //             console.log("that there's a domain_admin!");
-                    //             db_old.domains.find({}, function (err, domains) { //domain admin sees all
-                    //                 if (err || !domains) {
-                    //                     res.json(response);
-                    //                 } else {
-                    //                     response.domains = domains;
-                    //                     res.json(response);
-                    //                 }
-                    //             });
-                    //         } else { //just an admin, check acl
-                    //             let aclQueryArray = apps.map(AppQuery); //flatten apps array for query
-                    //             // console.log(aclQueryArray);
-                    //             db_old.acl.find({'acl_rule' : { $in: aclQueryArray }, 'userIDs': response.userID}, function (err, rules) {  //look for rules matching the live apps, and where the userID array has this user's ID
-                    //                 if (err || !rules) {
-                    //                     console.log("caint find no rules!?!");
-                    //                 } else {
-                    //                     let rulesAppIDs = rules.map(ReturnID).join(); // a string that's only the appIDs
-                    //                     // console.log(rulesAppIDs);
-                    //                     let appResponse = apps.filter(function (item) { //faster than nested for loops?
-                    //                         return rulesAppIDs.includes(item._id);  //filter out those that don't match the approved ones
-                    //                     });
-                    //                     // console.log("apps " + JSON.stringify(appResponse));
-                    //                     response.apps = appResponse;
-                    //                     res.json(response);
-                    //                 }
-                    //             });
-                    //         }
-                    //     }
-                    // });
+                  
                 } else {
                     res.json(response);
                 }
@@ -1814,117 +1703,12 @@ app.get("/qcode/:domain/:code", function (req, res) {
 });
 
 
-// app.post("/logout", checkAppID, requiredAuthentication, function (req, res) {
 app.post("/logout", requiredAuthentication, function (req, res) {    
     req.session.destroy();
     res.send("logged out");
     //res.redirect("/");
 });
-
-// // app.post("/logout", checkAppID, requiredAuthentication, function (req, res) {
-// app.post("/return_traffic_old", requiredAuthentication, function (req, res) {    
-//     let trafficDataMod = [];
-//     db_old.traffic.find({}, function (err, trafficdata) {
-//         if (err || !trafficdata) {
-//             res.send(err);
-//         } else {
-//             console.log("trafficdata length 1 " + trafficdata.length);
-//             nodupes = [];
-//             async.each (trafficdata, function (item, tcallback) { //pull out short_id from urls and flatten
-//                 var n = item.originalUrl.lastIndexOf('/');
-//                 var result = item.originalUrl.substring(n + 1);
-//                 if (nodupes.indexOf(result) == -1) {
-//                     nodupes.push(result);
-//                 }
-//                 // console.log(result);
-//                 item.short_id = result; //for easier comparison below
-//                 trafficDataMod.push(item);
-//                 tcallback();
-//             }, function(err) {
-//                 if (err) {
-//                     console.log('traffic return loop brokend');
-//                     res.send(err);
-//                 } else {
-//                     dquery = { short_id : { $in : nodupes }};
-//                     if (req.body.appdomain) {
-//                         console.log("appdomain: "+ req.body.appdomain);
-//                         dquery = { $and: [{short_id : { $in : nodupes }}, {sceneDomain: req.body.appdomain}]};
-//                     }
-//                     console.log("query: "+ JSON.stringify(dquery));
-//                     // db.scenes.find({ short_id : { $in : nodupes }}, { short_id: 1, sceneTitle: 1, sceneDomain: 1, sceneAppName: 1, _id: 0 }, function (error, scenes) { //include domains and and app names
-//                     db_old.scenes.find(dquery, { short_id: 1, sceneTitle: 1, sceneDomain: 1, sceneAppName: 1, _id: 0 }, function (error, scenes) { //include domains and and app names
-//                         if (error || !scenes) {
-//                             res.send(error);
-//                         } else {
-//                             // trafficdata.scenedata = scenes; //add for reference on client
-//                             console.log("scenes legnth " + scenes.length);
-//                             if (req.body.appdomain) {
-//                                 shortIDs = []; //make a simple array to use below
-//                                 for (let s = 0; s < scenes.length; s++) {
-//                                     // console.log("pushing short_ids " + scenes[s].short_id );
-//                                     shortIDs.push(scenes[s].short_id);
-
-//                                 }
-//                                 // async.each (scenes, function (scene, callbk) {
-
-
-//                                 //     }, function (err) {
-//                                 //         if (err) {
-
-//                                 //         } else {
-
-//                                 //     }
-                                    
-//                                 // });
-//                                 console.log(shortIDs);
-//                                 let i = 0; //iterator for below...
-//                                 async.each (trafficDataMod, function (trafficItem, callbackz) {   
-
-//                                     if (trafficItem && trafficItem.hasOwnProperty('short_id')) {
-//                                         // console.log(trafficItem);
-//                                         // var n = trafficItem.originalUrl.lastIndexOf('/');
-//                                         // var result = trafficItem.originalUrl.substring(n + 1);
-//                                         if (shortIDs.indexOf(trafficItem.short_id) == -1) {
-
-//                                             trafficDataMod.splice(i, 1); //remove element from traffic if not for this domain
-//                                         } else {
-//                                             console.log("shortid" + trafficItem.short_id + "setting appdomain " + req.body.appdomain);
-//                                             trafficItem.appdomain = req.body.appdomain; //or add domain reference
-//                                         }
-//                                     }
-//                                     i++;
-//                                     callbackz();
-//                                 }, function(err) {
-//                                     if (err) {
-//                                         console.log('bad key');
-//                                         res.send(err);
-//                                     } else {
-//                                         console.log("domain trafffic length: "+ trafficDataMod.length);
-//                                         res.json(trafficDataMod);         
-//                                     }
-//                                 });
-//                                 // for (let i = 0; i < trafficdata.length; i++) {
-//                                 //     if (shortIDs.indexOf(trafficdata[i].short_id) == -1) {
-//                                 //         trafficdata.splice(i, 1); //remove element from traffic if not for this domain
-//                                 //     } else {
-//                                 //         trafficdata[i].appdomain = req.body.appdomain; //or add domain reference
-//                                 //     }
-//                                 // }
-                                                
-                                
-//                             } else {
-//                                 res.json(trafficdata);
-//                             }
-//                         }
-//                     }); 
-//                 }
-//             });
-           
-//         }
-//     })
-// });
-
-// app.post("/return_traffic", requiredAuthentication, function (req, res) {    
+ 
 app.post("/return_traffic", function (req, res) {    //umm, need to limit scope below if no auth?
     // let trafficDataMod = [];
     // console.log("return traffic data " + JSON.stringify(req.body));
@@ -1951,16 +1735,7 @@ app.post("/return_traffic", function (req, res) {    //umm, need to limit scope 
                 res.send("error getting traffic data " +e);
             }
         })();
-        // console.log("tryna quyery for " + JSON.stringify(query));
-        // db_old.traffic.find(query, function (err, trafficdata) {
-        //     if (err || !trafficdata) {
-        //         res.send(err);
-        //     } else {
-        //         // console.log("all trafffic length: "+ trafficdata.length);
-        //             res.json(trafficdata);
-        //         }
-                
-        //     });
+
     } else {
         console.log("no start point!");
         res.send("no startpoint defined!");
@@ -1969,249 +1744,111 @@ app.post("/return_traffic", function (req, res) {    //umm, need to limit scope 
 });
 
 
-// app.post("/authreq_noasync", function (req, res) {
-//     console.log('authRequest from: ' + req.body.uname + " " + req.body.umail);
-//     var currentDate = Math.floor(new Date().getTime()/1000);
-
-
-//     var isSubscriber = false;
-//     var username = req.body.uname;
-//     var password = req.body.upass;
-
-// // async.waterfall([
-// //     function (callback) {
-//     if (req.body.uname == "subscriber") {
-//         db_old.iap.findOne ({receipt : req.body.upass}, function (err, iap) {
-//             if (err || !iap) {
-//                 console.log("subscriber not found");
-//                 username = "guest";
-//                 password = "password";
-//                 res.send("subscriber not found");
-//                 // callback();
-//             } else {
-//                 isSubscriber = true;
-//                 console.log("found subscriber " + iap._id);
-//                 db_old.users.findOne({userName : "subscriber"}, function (err, user) {
-//                     if (err || !user) {
-//                         res.end("cain't find nothing!");
-//                     } else {
-//                         req.session.user = user;
-//                             res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
-//                             var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
-//                             // if (isSubscriber && username == "guest") {
-//                             //     username = "subscriber"; //switch it back for return...
-//                             // }
-//                             var authResp = req.session.user._id.toString() + "~" + req.session.user.userName + "~" + authString;
-//                             res.json(authResp);
-//                             // req.session.auth = authUser[0]._id;
-//                             appAuth = req.session.user._id.toString();
-//                             console.log("auth = " + appAuth);
-//                     }
-//                 });
-//                 // callback();
-//             }
-//         }); 
-//     } else {
-//     var un_query = {userName: username};
-//     var em_query = {email: req.body.umail};
-
-//     db_old.users.find(
-//         { $or: [un_query, em_query] }, //mongo-lian "OR" syntax...
-//         //password: req.body.upass},
-//         //{password:0},
-//         function(err, authUser) {
-//             if( err || !authUser) {
-//                 console.log("user not found");
-//                 res.send("user not found");
-//                 req.session.auth = "noauth";
-//                 // callback();
-//             } else {
-//                 console.log(username + " found " + authUser.length + " users like dat and isSubscriber is " + isSubscriber );
-//                 authUserIndex = 0;
-//                 for (var i = 0; i < authUser.length; i++) {
-//                     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name
-//                         authUserIndex = i;
-//                     }
-//                 }
-//                 if (authUser[authUserIndex] !== null && authUser[authUserIndex] !== undefined && authUser[authUserIndex].status == "validated") {
-//                     if (requirePayment) {
-//                         if (authUser[authUserIndex].paymentStatus != "ok") {
-//                             console.log("payment status not OK");
-//                             res.send("payment status not ok");
-//                             req.session.auth = "noauth";
-//                         }
-//                     }
-//                     var hash = authUser[authUserIndex].password;
-//                     bcrypt.compare(password, hash, function (err, match) {  //check password vs hash
-//                         if (match) {
-//                             req.session.user = authUser[authUserIndex];
-//                             res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
-//                             var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
-//                             if (isSubscriber && username == "guest") {
-//                                 username = "subscriber"; //switch it back for return...
-//                             }
-//                             var authResp = req.session.user._id.toString() + "~" + username + "~" + authString;
-//                             res.json(authResp);
-//                             // req.session.auth = authUser[0]._id;
-//                             appAuth = authUser[authUserIndex]._id;
-//                             console.log("auth = " + appAuth);
-//                         } else if (password == "321FireMeBoy123") { // VERY STUMPID FOR ADIN OVERRIDE TODO: IMPERSONATE USER LOGIC?
-//                             req.session.user = authUser[authUserIndex];
-
-//                             res.cookie('_id', req.session.user._id.toString(), { maxAge: 9000 } );
-//                             var authResp = req.session.user._id.toString() + "~" + username ;
-//                             res.json(authResp);
-//                             // req.session.auth = authUser[0]._id;
-//                             appAuth = authUser[authUserIndex]._id;
-//                             console.log("admin auth noascyn = " + appAuth);
-
-//                         } else {
-//                             console.log("auth fail");
-//                             req.session.auth = "noauth";
-//                             res.send("noauth");
-//                         }
-//                         // callback();
-//                     });
-//                 } else {
-//                     console.log("user account not validated 2");
-//                     res.send("user account not validated");
-//                     req.session.auth = "noauth";
-//                     // callback();
-//                 }
-//             }
-//         });
-//     };
-// });
-
+//////////////////////////////////// AUTHREQ LOGIN ROUTE
 app.post("/authreq", function (req, res) {
-    console.log('authRequest from: ' + req.body.uname);
-    var currentDate = Math.floor(new Date().getTime()/1000);
+    console.log('authRequest for: ' + req.body.uname);
+    // var currentDate = Math.floor(new Date().getTime()/1000);
 
+    let isSubscriber = false;
+    const username = req.body.uname;
+    const password = req.body.upass;
 
-    var isSubscriber = false;
-    var username = req.body.uname;
-    var password = req.body.upass;
-    // var iap_id
-    async.waterfall([
-        function (callback) {
-            if (req.body.uname == "subscriber") {
-                db_old.iap.findOne ({receipt : req.body.upass}, function (err, iap) {
-                    if (err || !iap) {
-                        console.log("subscriber not found");
-                        // username = "guest";
-                        // password = "password";
-                        callback();
-                    } else {
-                        isSubscriber = true;
-                        console.log("found subscriber " + iap._id);
-                        callback();
-                    }
-                }); 
-            } else {
-                callback();
-            }
-        },
-        function (callback) {
-            if (username == "subscriber" && !isSubscriber) { 
-                username = "guest";
-                password = "password";
-            }
+    (async () => {
+        try {
+            // if (username == "subscriber") { //wtf
+            //     const query = {receipt : password};
+            //     const iap = await RunDataQuery("iap", "findOne", query);
+            //     if (iap) {
+            //         isSubscriber = true;
+            //     }
+            //     if (username == "subscriber" && !isSubscriber) { //mmkay
+            //         username = "guest";
+            //         password = "password";
+            //     }
+            // }
+
             var un_query = {userName: username};
             var em_query = {email: username};
-            console.log("tryna find " + username);
-            db_old.users.find( {$or: [un_query, em_query] }, function(err, authUser) {
+            console.log("authreq tryna find " + username);
+            const query = {$or: [un_query, em_query]}; //use either un or email
+            const authUser = await RunDataQuery("users", "find", query);
+            console.log(authUser.length + " users like dat " + username + " authlevel " + authUser[0].authLevel + " and isSubscriber " + isSubscriber );
+            const authUserIndex = 0; //
+            // for (var i = 0; i < authUser.length; i++) {
+            //     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name// seems a bad !!!
+            //         authUserIndex = i;
+            //     }
+            // }
+            if (authUser[authUserIndex] != null && authUser[authUserIndex] != undefined && authUser[authUserIndex].status == "validated" ) {
 
-                    if( err || !authUser) {
-                        console.log("user not found");
-                        res.send("user not found");
-                        req.session.auth = "noauth";
-                        callback();
-                    } else {
-                        console.log("found a user like dat " + username + " authlevel " + authUser[0].authLevel + " and isSubscriber " + isSubscriber );
-                        let authUserIndex = 0;
-                        // for (var i = 0; i < authUser.length; i++) {
-                        //     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name
-                        //         authUserIndex = i;
-                        //     }
+                if (username == "subscriber" && isSubscriber) { //if it's a validated subscriber let 'em through without password hashtest like below//BUT WHY?
+                    req.session.user = authUser[authUserIndex];
+                        res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
+                        var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
+                        // if (isSubscriber && username == "guest") {
+                        //     username = "subscriber"; //switch it back for return...
                         // }
+                        var authResp = req.session.user._id.toString() + "~" + username + "~" + authString;
+                        res.json(authResp);
+                        // req.session.auth = authUser[0]._id;
+                        appAuth = authUser[authUserIndex]._id;
+                        console.log("auth = " + appAuth);
                         
-                        if (authUser[authUserIndex] != null && authUser[authUserIndex] != undefined && authUser[authUserIndex].status == "validated" ) {
-
-                            if (username == "subscriber" && isSubscriber) { //if it's a validated subscriber let 'em through without password hashtest like below
-                                req.session.user = authUser[authUserIndex];
-                                    res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
-                                    var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
-                                    // if (isSubscriber && username == "guest") {
-                                    //     username = "subscriber"; //switch it back for return...
-                                    // }
-                                    var authResp = req.session.user._id.toString() + "~" + username + "~" + authString;
-                                    res.json(authResp);
-                                    // req.session.auth = authUser[0]._id;
-                                    appAuth = authUser[authUserIndex]._id;
-                                    console.log("auth = " + appAuth);
-                                    callback();
+                } else {
+                    var hash = authUser[authUserIndex].password;
+                    bcrypt.compare(password, hash, function (err, match) {  //check password vs hash
+                        if (match) {
+                            if (requirePayment && authUser[authUserIndex].paymentStatus != "ok") {
+                                console.log("payment status not OK");
+                                req.session.auth = "noauth";
+                                res.send("payment status not ok");
+                                // callback();
                             } else {
-                                 
-                                    var hash = authUser[authUserIndex].password;
-                                    bcrypt.compare(password, hash, function (err, match) {  //check password vs hash
-                                        if (match) {
-                                            if (requirePayment && authUser[authUserIndex].paymentStatus != "ok") {
-                                                console.log("payment status not OK");
-                                                req.session.auth = "noauth";
-                                                res.send("payment status not ok");
-                                                // callback();
-                                            } else {
-                                                req.session.user = authUser[authUserIndex];
-                                                var token=jwt.sign({userId:authUser[authUserIndex]._id},process.env.JWT_SECRET, { expiresIn: '1h' });
-                                                res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
-                                                var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
-                                                var authResp = req.session.user._id.toString() + "~" + username + "~" + authString + "~" + token;
-                                                res.json(authResp);
-                                                // req.session.auth = authUser[0]._id;
-                                                appAuth = authUser[authUserIndex]._id;
-                                                console.log("auth = " + appAuth);
-                                            }
-
-                                        } else if (password == process.env.TESTPASS) { //TODO: IMPERSONATE USER LOGIC?
-                                            console.log("admin override..?!");
-                                            // req.session.auth = "noauth";
-                                            // res.send("noauth");
-                                            req.session.user = authUser[authUserIndex];
-                                            var token=jwt.sign({userId:authUser[authUserIndex]._id},process.env.JWT_SECRET, { expiresIn: '1h' });
-                                            res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
-                                            var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
-                                            var authResp = req.session.user._id.toString() + "~" + username + "~" + authString + "~" + token;
-                                            res.json(authResp);
-                                            // req.session.auth = authUser[0]._id;
-                                            appAuth = authUser[authUserIndex]._id;
-                                            console.log("auth = " + appAuth);
-
-                                        } else {
-                                            console.log("hash does not match!");
-                                            req.session.auth = "noauth";
-                                            res.send("authentication failed");
-                                        }
-                                        callback();
-                                    });
-                                
+                                req.session.user = authUser[authUserIndex];
+                                var token=jwt.sign({userId:authUser[authUserIndex]._id},process.env.JWT_SECRET, { expiresIn: '1h' });
+                                res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
+                                var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
+                                var authResp = req.session.user._id.toString() + "~" + username + "~" + authString + "~" + token;
+                                res.json(authResp);
+                                // req.session.auth = authUser[0]._id;
+                                appAuth = authUser[authUserIndex]._id;
+                                console.log("auth = " + appAuth);
                             }
-                        } else {
-                            console.log("user account not validated 1");
-                            res.send("user account not validated");
-                            req.session.auth = "noauth";
-                            callback();
-                        }
-                    }
-                // }
-            });
-        }
-    ],
-    function (err, result) { // #last function, close async
-        // res.json(profileResponse);
-        console.log("waterfall done: " + result);
-    }
-);
 
+                        } else if (password == process.env.TESTPASS) { //WHAT? TODO: IMPERSONATE USER LOGIC? 
+                            console.log("admin override..?!");
+                            // req.session.auth = "noauth";
+                            // res.send("noauth");
+                            req.session.user = authUser[authUserIndex];
+                            var token=jwt.sign({userId:authUser[authUserIndex]._id},process.env.JWT_SECRET, { expiresIn: '1h' });
+                            res.cookie('_id', req.session.user._id.toString(), { maxAge: 36000 });
+                            var authString = req.session.user.authLevel != null ? req.session.user.authLevel : "noauth";
+                            var authResp = req.session.user._id.toString() + "~" + username + "~" + authString + "~" + token;
+                            res.json(authResp);
+                            // req.session.auth = authUser[0]._id;
+                            appAuth = authUser[authUserIndex]._id;
+                            console.log("auth = " + appAuth);
+
+                        } else {
+                            console.log("hash does not match!");
+                            req.session.auth = "noauth";
+                            res.send("authentication failed");
+                        }
+                    });
+                }
+            } else {
+                console.log("user account not validated 1");
+                res.send("user account not validated");
+                req.session.auth = "noauth";
+            }
+
+        } catch (e) {
+            console.log("authreq error " + e);
+            res.send("authreq error " + e);
+        }
+    })();
+});
+   
 app.get('/traffic/:domain', requiredAuthentication, admin, function (req, res) {
     console.log("tryna get traffic info for " + req.params.domain);
     db_old.domains.findOne({"domain": req.params.domain}, function (err, domain) {
@@ -2230,8 +1867,6 @@ app.get('/traffic/:domain', requiredAuthentication, admin, function (req, res) {
         }
     });
 });
-
-
 
 
     // } else { //login with facebook //UNUSED
@@ -2267,7 +1902,7 @@ app.get('/traffic/:domain', requiredAuthentication, admin, function (req, res) {
 
     // }
 
-});
+// });
 
 // app.post('/ios_inapp_purchase/', function(req, res){
 //     console.log("tryna save ios inapp purchase type " + JSON.stringify(req.body.productID));
@@ -2325,22 +1960,7 @@ app.get('/validate/:auth_id', function (req, res) {
     });
 });
 
-// app.get('/profile/makehimlikeuntoagod/:userid',  function (req, res) {
-//        console.log("req" + req.params.userid);
-//        db.acl.save(
-//         { 'acl_rule': "admin" }, function (err, acl) {
-//             if (err || !acl) {
-//             } else {
-//                 // db.acl.update({ 'acl_rule': "write_scene_" + saved._id },{ $push: { 'userIDs': req.session.user._id.toString() } });
-//                console.log("ok saved acl");
-//             }
-//         });
-//        db.acl.update(
-//            { acl_rule: "admin" },
-//            { $push: { userIDs: req.params.userid } }
-//        );
-//        res.send('done');
-// });
+
 
 app.post('/stripe_charge', requiredAuthentication, function (req,res) {
 
@@ -2542,9 +2162,6 @@ app.post('/stripe_collect_data', function (req,res) {
         // res.send(JSON.stringify(charge));
     });
 
-
-
-
 //    var charge = stripe.charges.create({
 //        amount: 1000,
 //        currency: "usd",
@@ -2558,170 +2175,6 @@ app.post('/stripe_collect_data', function (req,res) {
 //
 //    });
 });
-
-// app.post('/check_sub_email/', requiredAuthentication, function(req, res){ //convert IAP subscriber to actual user //ugh, no
-//     console.log(req.body);
-//     // res.send("you sent " + req.body);
-//     db.users.find( {email: req.body.email}, function (err, users) {
-//         if (err || !users || users.length < 1) { //if no users already exist for this email
-//             db.iap.findOne({receipt: req.body.receipt}, function (err, recpt) { //is receipt "valid" i.e. stored in iap table?
-//                 if (err || !recpt) {
-//                     res.send("invalid receipt");
-//                 } else { 
-//                     db.users.find({receipt : req.body.receipt}, function (err, receepts) { //has receipt already been used for an existing user?
-//                         if (err || receepts.length > 0) {
-//                             var htmlbody = req.body.email + " tryna reuse same receipt : " + JSON.stringify(req.body.receipt);
-//                             // ses.sendEmail( {
-//                             //     Source: "admin@servicemedia.net",
-//                             //     Destination: { ToAddresses: [adminEmail]},
-//                             //     Message: {
-//                             //         Subject: {
-//                             //             Data: "receipt reuse from " + req.body.email
-//                             //         },
-//                             //         Body: {
-//                             //             Html: {
-//                             //                 Data: htmlbody
-//                             //             }
-//                             //         }
-//                             //     }
-//                             // }
-//                             // , function(err, data) {
-//                             //     if(err) throw err
-//                             //     console.log('Email sent:');
-//                             //     console.log(data);
-                               
-//                             // });
-
-//                             (async () => {
-
-//                                 try {
-//                                     // const status1 = await SendEmail(to, from, htmlbody, subject);
-//                                     const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, "receipt reuse from " + req.body.email);
-//                                     console.log("sub ckeck fail " + status2);
-//                                     // res.redirect("/#/");
-//                                     // callback(null);
-//                                 } catch (e) {
-//                                     console.log("sub chck mailfail " + e);
-//                                     // callback(e);
-//                                     // res.send(e);
-//                                 }
-                               
-//                             })();
-//                             res.send("Error: this subscription has already been used by another user.  Please contact admin@servicemedia.net");
-
-//                         } else {
-//                             console.log('fixing to make a new user from iap subscriber!'); //do it!
-//                             var from = "admin@servicemedia.net";
-//                             var timestamp = Math.round(Date.now() / 1000);
-//                             var ip = req.headers['x-forwarded-for'] ||
-//                                 req.connection.remoteAddress ||
-//                                 req.socket.remoteAddress ||
-//                                 req.connection.socket.remoteAddress;
-//                             var userPass = shortid.generate();
-//                             bcrypt.genSalt(10, function(err, salt) {
-//                                 bcrypt.hash(userPass, salt, null, function(err, hash) {
-//                                     var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-//                                     db.users.save({
-//                                         type : 'iap_subscriber',
-//                                         status : 'unvalidated',
-//                                         userName : req.body.email,
-//                                         email : req.body.email,
-//                                         createDate : timestamp,
-//                                         validationHash : cleanhash,
-//                                         createIP : ip,
-//                                         paymentStatus: "ok",
-//                                         receipt: req.body.receipt,
-//                                         iapID: recpt._id,
-//                                         // odomain : req.body.domain, //original domain
-//                                         // oappid : req.headers.appid.toString().replace(":", ""), //original app id
-//                                         password : hash
-//                                     },
-//                                     function (err, newUser){
-//                                         if ( err || !newUser ){
-//                                             console.log("db error, new user not saved", err);
-//                                             res.send("error creating user : " + err);
-//                                         } else {
-//                                             console.log("new user saved to db");
-//                                             var user_id = newUser._id.toString();
-//                                             console.log("userID: " + user_id);
-
-//                                             htmlbody = "Welcome to " + topName + ", " + req.body.email + "!  <a href=\""+ rootHost + "/validate/" + cleanhash + "\">To get started, click this link to validate account</a> <br><br>"+
-//                                             "You may then log into the app, using your email as username, and with the password <strong>" + userPass + "</strong> which you may change at any time.<br>" +
-//                                             "You may also change your username, but your account will remain tied to this email address.<br><br>" +
-//                                             "in-app-purchase ID: " + recpt._id;  
-//                                             // ses.sendEmail({
-//                                             //         Source: from,
-//                                             //         Destination: { ToAddresses: [req.body.email], CcAddresses: [], BccAddresses: [adminEmail] },
-//                                             //         Message: {
-//                                             //             Subject: {
-//                                             //                 Data: 'New ' + topName + ' Subscription!'
-//                                             //             },
-//                                             //             Body: {
-//                                             //                 Html: {
-//                                             //                     Data: htmlbody
-//                                             //                 }
-//                                             //             }
-//                                             //         }
-//                                             //     }
-//                                             //     , function(err, data) {
-//                                             //         if(err) throw err
-//                                             //         console.log('Email sent:');
-//                                             //         console.log(data);
-//                                             //         //res.redirect("http://elnoise.com/#/login");
-//                                             //     });
-//                                             (async () => {
-
-//                                                 try {
-//                                                     // const status1 = await SendEmail(to, from, htmlbody, subject);
-//                                                     const status2 = await SendEmail(req.body.email, process.env.ADMIN_EMAIL, htmlbody, "receipt reuse from " + 'New ' + topName + ' Subscription!');
-//                                                     console.log("new sub mail " + status2);
-//                                                     // res.redirect("/#/");
-//                                                     // callback(null);
-//                                                 } catch (e) {
-//                                                     console.log("new sub req mailfail " + e);
-//                                                     // callback(e);
-//                                                     // res.send(e);
-//                                                 }
-                                               
-//                                             })();
-//                                             res.send("Thanks! A validation email has been sent to the address you provided; you must click on the validation link to activate your account.");
-//                                             // res.redirect("/#/newthanks");
-//                                             var htmlbody = req.body.email + " iap subscriber converting to user with receipt : " + JSON.stringify(req.body.receipt);
-                                            
-//                                             ses.sendEmail( {
-//                                                 Source: "admin@servicemedia.net",
-//                                                 Destination: { ToAddresses: [adminEmail]},
-//                                                 Message: {
-//                                                     Subject: {
-//                                                         Data: "new iap user " + req.body.email
-//                                                     },
-//                                                     Body: {
-//                                                         Html: {
-//                                                             Data: htmlbody
-//                                                         }
-//                                                     }
-//                                                 }
-//                                             }
-//                                             , function(err, data) {
-//                                                 if(err) throw err
-//                                                 console.log('Email sent:');
-//                                                 console.log(data);
-                                            
-//                                             });
-//                                         }
-//                                     });
-//                                 });
-//                             });
-//                         }
-//                     });
-//                 }
-//             });
-//         } else {
-
-//             res.send("Sorry, that email is already in use.\n\nTo recover a lost password, use the Reset button on the previous page");
-//         }
-//     });
-// });
 
 app.get('/makedomainadmin/:domain/:_id',  checkAppID, requiredAuthentication, admin, function (req, res) {
     console.log(" makedomainadmin req" + req)
@@ -2748,6 +2201,7 @@ app.get('/makedomainadmin/:domain/:_id',  checkAppID, requiredAuthentication, ad
         }
     );
 });
+
 app.post('/updatedomain/', requiredAuthentication, admin, domainadmin, function (req, res) { //um, no// um, fuckit
     console.log("tryna uddate domain! for " + JSON.stringify(req.body));
     var timestamp = Math.round(Date.now() / 1000);
@@ -3494,225 +2948,6 @@ app.post('/drop/', requiredAuthentication, function (req, res) {
     });
 });
 
-// app.post('/dropnope/', requiredAuthentication, function (req, res) { 
-//     let timestamp = Math.round(Date.now() / 1000);
-//     let i_id = ObjectId.createFromHexString(req.body.inventoryID); //player inventory
-//     let sceneInventoryID = null; //scene inventory
-//     let sceneInventory = null;
-//     async.waterfall([
-                  
-//         function (callback) { //check scene
-//             db_old.scenes.findOne({"short_id": req.body.inScene}, function (err, scene) {
-//                 if (err || !scene) {
-//                     console.log("no scene for drop!");
-//                     callback(err);
-//                 } else {
-//                     console.log("gotsa scene for drop");
-//                     callback(null, scene);
-//                 }
-//             });
-//         },        
-//         function (scene, callback) { //scene inventory 
-            
-//             if (scene.sceneInventoryID != undefined && scene.sceneInventoryID != null) { //maybe needs a toggle instead of more tagsoup? 
-//                 sceneInventoryID = scene.sceneInventoryID;
-//                 let s_id = ObjectId.createFromHexString(scene.sceneInventoryID);
-//                 // let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
-//                 db_old.inventories.findOne({"_id": s_id}, function (err, inventory) {//check for scene inventory record
-//                     if (err || !inventory) {
-//                         console.log("no scene inventory?2");
-//                         callback(err);
-//                     } else {
-//                         console.log('gotsa inventory' + inventory._id );
-//                         sceneInventory = inventory;
-//                         callback(null);
-//                     }
-//                 });
-//             } else {
-//                 callback("no scene inventory");
-//             }
-//         },        
-//         function (callback) { //check object
-//             // let sceneInventoryID = scene.sceneInventoryID;
-//             let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
-//             db_old.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
-//                 if (err || !obj) {
-//                     console.log("no object found for drop");
-//                     callback(err);
-//                     // res.send("no object found");
-//                 } else {
-//                     console.log("checking maxperscene " + obj.maxPerScene + " in " + sceneInventory.inventoryItems.length);
-//                     // console.log("checking maxperscene " + obj.maxPerScene);
-//                     // let iCount = 0;
-//                     callback(null, obj);
-//                 }
-//             });
-//         },        
-//         function (obj, callback) { //count similar objects in scene inventory
-//             let iCount = 0;
-//             if ( sceneInventory.inventoryItems != undefined && sceneInventory.inventoryItems.length > 0) { 
-//                 console.log("scene inventory items " + sceneInventory.inventoryItems.length);
-//                 async.each (sceneInventory.inventoryItems, function (i_item, callbackz) {
-//                     if (i_item.objectID == obj._id) {
-//                         iCount++;
-//                         console.log("gotsa invnetory match with the obj " + iCount);
-                        
-//                             if (iCount >= obj.maxPerScene) {
-//                                 // console.log("max per scene reached!");
-//                                 callbackz('maxxed');
-                                
-//                             } else {
-//                                 // callback(null);
-//                                 callbackz();
-//                             }
-//                         // }
-//                     } else {
-//                         callbackz();
-//                     }
-                    
-//                 }, function(err) {
-//                     if (err) {
-//                         console.log('A scene inventory item failed to process : ' + err);
-//                         //res.send("error: " + err);
-//                         callback(err);
-//                     } else {
-//                         console.log('OK to add to scene inventory');
-//                         // pcallbackz();
-
-//                         // console.log("app response " + JSON.stringify(app));
-//                         // res.json(app);
-//                         callback(null);
-//                     }
-//                 });
-
-               
-//             } else {
-//                 callback(null);
-//             }
-//         },        
-//         function (callback) {
-            
-//             if (sceneInventoryID != null) {
-//             console.log("trynna lookup scene invnetory " + sceneInventoryID);
-//             let s_id = ObjectId.createFromHexString(sceneInventoryID);
-//             let i_obj = req.body.inventoryObj;
-//             db_old.inventories.findOne({'_id': s_id },function (err, inventory){  
-//                 if (err || !inventory) {
-//                      callback("no drop");
-                    
-//                 } else {
-//                     // console.log("inventory: " + JSON.stringify(inventory));
-//                     db_old.inventories.update({'_id': s_id }, { $push: { inventoryItems: i_obj }}, {upsert: false}, function (err, saved) { //add to scene inventory
-//                         if (err || !saved) {
-//                             console.log("problemo with inventory rm " + err);
-//                             // res.send("inventory update error " + err);
-//                             // res.send("error saving to scene inventory");
-//                             callback(err);
-//                         } else {
-//                             console.log("added to scene inventory..." + JSON.stringify(i_obj) + " " +  JSON.stringify(saved));
-//                             callback(null);
-//                         }
-//                     });
-//                 }
-
-//                 });
-//             } else {
-//                 callback("no drop");
-//             }
-//             // db.inventories.update({_id: s_id }, { $push: { inventoryItems: i_obj }}, {upsert: false}, function (err, saved) { //add to scene inventory
-//             //     if (err || !saved) {
-//             //         console.log("problemo with inventory rm " + err);
-//             //         // res.send("inventory update error " + err);
-//             //         // res.send("error saving to scene inventory");
-//             //         callback(err);
-//             //     } else {
-//             //         console.log("added to scene inventory..." + JSON.stringify(i_obj) + " " +  JSON.stringify(saved));
-//             //         callback(null);
-//             //     }
-//             // });
-//         },        
-//         function (callback) {
-//             db_old.inventories.findOne({_id: i_id}, function (err, inventory) { //check for player inventory record
-//                 if (err || !inventory) {
-//                     console.log("error getting user inventory: " + err);
-//                     callback(err);
-//                     // res.send("user inventory not found!");
-//                 } else {
-//                     console.log("ploayer inventory found with count " + inventory.inventoryItems.length);
-//                     db_old.inventories.update({ "_id": i_id }, { $pull: { inventoryItems: {objectID: req.body.inventoryObj.objectID, timestamp: req.body.inventoryObj.timestamp} }}, function (err, saved) { //remove from player inventory
-//                         if (err || !saved) {
-//                             console.log("problemo with inventory rm " + err);
-//                             // res.send("inventory update error " + err);
-//                             callback(err);
-//                         } else {
-//                             console.log("ok rem'd obj from player inventorie " + JSON.stringify(saved));
-//                             callback(null);
-//                         }
-//                     });
-//                 }
-//             });
-//         },        
-//         function (callback) {
-//             if (req.body.action != undefined) {
-//                 // console.log(JSON.stringify(req.body.action));
-//                 var u_id = ObjectId.createFromHexString(req.session.user._id);
-//                 if (req.session.user._id != req.body.userData.userID) {
-//                     db_old.users.findOne({"_id": u_id}, function (err, user) {  
-//                         if (err || !user) {
-//                             console.log("error getting user: " + err);
-//                             // res.send("bad user4");
-//                             callback(err);
-//                         } else {
-//                             if (req.session.user.activitiesID != undefined) { //add drop action to user activity
-//                                 var a_id = ObjectId.createFromHexString(req.session.user.activitiesID);
-//                                 console.log("gotsa activities id " + req.session.activitiesID);
-//                                 let actionItem = {};
-//                                 actionItem.userID = req.body.userData._id;
-//                                 actionItem.actionID = req.body.action._id;
-//                                 actionItem.actionType = req.body.action.actionType;
-//                                 actionItem.actionResult = req.body.action.actionResult;
-//                                 actionItem.inScene = req.body.action.inScene;
-                                
-//                                 actionItem.actionName = req.body.action.actionName;
-//                                 // actionItem.objectID = req.body.object_item._id;
-//                                 // actionItem.objectName = req.body.object_item.name;
-//                                 actionItem.timestamp = timestamp;
-//                                 actionItem.fromScene = req.body.fromScene;
-//                                 db_old.activities.insertOne(actionItem);
-//                                 // db.activities.update({ _id: a_id }, { $push: { actionItems: actionItem }}, {upsert: false}, function (err, saved) {
-//                                 //     if (err || !saved) {
-//                                 //         // res.send('profcblemo ' + err);
-//                                 //         callback(err);
-//                                 //     } else {
-//                                 //         console.log("ok saved to acttivieeisD");
-//                                 //         callback(null);
-//                                 //         // res.send('updated' + JSON.stringify(saved));
-//                                 //     }
-//                                 // });
-//                             } 
-//                         }
-//                     });
-//                 } else {
-//                     // res.send("bad user");
-//                     callback("bad user");
-//                 }
-//             } else {
-//                 // res.send("no action");
-//                 callback("no action");
-//             }
-//         }
-//     ],
-//     function (err, result) { // #last function, close async
-//         if (err) {
-//             res.send(err);
-//         } else {
-//             res.send('updated');
-//             // console.log("returning inventory " + profileResponse);
-//         }
-      
-//     }
-// );
-// });
 
 //new pickup method
 // 1. find user, create action, create inventory
@@ -7815,13 +7050,22 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
 
 app.get('/useraudio/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return useraudio for: ' + req.params.u_id);
+
+    // (async () => {
+    //     try {
+
+    //     } catch (e) {
+
+    //     }
+    // })();
+
     db_old.audio_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
 
         if (err || !audio_items) {
             console.log("error getting picture items: " + err);
 
         } else {
-            console.log("# " + audio_items.length);
+            console.log("# useraudios " + audio_items.length);
 
             (async () => {
             for (var i = 0; i < audio_items.length; i++) {
