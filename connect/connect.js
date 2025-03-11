@@ -87,7 +87,7 @@ let allowCameraLock = true;
 const camLockButton = document.getElementById("camLockToggleButton");
 let intersections = [];
 
-
+window.timedEventsListenerMode = timedEventsListenerMode;
 /////////////////// main onload function below, populate settings, etc.
 $(function() { 
    // InitIDB();
@@ -106,6 +106,7 @@ $(function() {
    if (timedEventsEl) {
       let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
       timeKeysData =  JSON.parse(atob(theTimedEventsData));
+      timedEventsListenerMode = timeKeysData.listenTo;
       console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
    }
    lastCloudUpdate = settings.sceneLastUpdate;

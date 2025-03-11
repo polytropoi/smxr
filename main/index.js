@@ -24,7 +24,8 @@
     window.newText = newText;
     window.removeItem = removeItem;
     window.getApp = getApp;
-    
+    window.getDomain = getDomain;
+
     var cookie = Cookies.get();
     var type = getParameterByName("type", window.location.href); //these params used for routing in bigSwitch
     var appid = getParameterByName("appid", window.location.href);

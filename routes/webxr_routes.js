@@ -11,7 +11,7 @@ const validator = require('validator');
 const jwt = require("jsonwebtoken");
 const requireText = require('require-text');
 const { Console } = require("console");
-const minio = require('minio');
+
 
 import { db_old as db } from "../server.js";
 // import { s3 } from "../server.js";
@@ -20,6 +20,7 @@ import { ReturnPresignedUrl, saveTraffic} from "../server.js";
 
 var minioClient = null;
 if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
+        const minio = require('minio');
         minioClient = new minio.Client({
         endPoint: process.env.MINIOENDPOINT,
         port: 9000,

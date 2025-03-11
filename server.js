@@ -10,7 +10,7 @@ import express, { query } from "express";
 import http from "http";
 import jwt from "jsonwebtoken";
 import axios from "axios";
-import fs from "fs";
+// import fs from "fs";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import mongojs from "mongojs";
@@ -30,12 +30,12 @@ import QRCode from "qrcode";
 import { ObjectId } from "mongodb";
 import { RunDataQuery } from "./connect/database.js"; //connection happens here
 
-
 const entities = require("entities");
 
-const minio = require('minio');
 
-const requireText = require('require-text');
+
+
+// const requireText = require('require-text');
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
@@ -83,10 +83,6 @@ var corsOptions = function (origin) {
 
 var oneDay = 86400000;
 
-
-
-
-
 var databaseUrl = process.env.MONGO_URL; //main db connstring
 // console.log(databaseUrl);
 var collections = ["acl", "auth_req", "domains", "apps", "assets", "assetsbundles", "models", "users", "inventories", "inventory_items", "audio_items", "text_items", "audio_item_keys", "image_items", "video_items",
@@ -94,33 +90,22 @@ var collections = ["acl", "auth_req", "domains", "apps", "assets", "assetsbundle
 
 export let db_old = mongojs(databaseUrl, collections); //soon you will die!
 
-// var store = new MongoDBStore({ //store session info in a separate db with different user, so nice
-//     uri: process.env.MONGO_SESSIONS_URL,
-//     collection: 'sessions'
-//   });
 
-  // store.on('connected', function() {
-  //   store.db_old; // The underlying MongoClient object from the MongoDB driver
-  // });
-  // store.on('error', function(error) {
-  //   console.log(error);
-  // });
+app.use(express.static(path.join(__dirname, './'), { maxAge: oneDay }));
 
-    app.use(express.static(path.join(__dirname, './'), { maxAge: oneDay }));
+app.use(function(req, res, next) {
 
-    app.use(function(req, res, next) {
-
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'GET,POST');
-        res.header('Access-Control-Max-Age', '300');
-        res.header('Access-Control-Allow-Headers', 'Origin, Access-Control-Allow-Origin, x-unity-version, X-Unity-Version, token, cookie, appid, Cookie, X-Access-Token, x-access-token, X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
-        res.header('Access-Control-Expose-Headers', 'set-cookie, Set-Cookie', 'token');
-        if ('OPTIONS' == req.method) {
-            res.send(200);
-        } else {
-            next();
-        }
-    });
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,POST');
+    res.header('Access-Control-Max-Age', '300');
+    res.header('Access-Control-Allow-Headers', 'Origin, Access-Control-Allow-Origin, x-unity-version, X-Unity-Version, token, cookie, appid, Cookie, X-Access-Token, x-access-token, X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+    res.header('Access-Control-Expose-Headers', 'set-cookie, Set-Cookie', 'token');
+    if ('OPTIONS' == req.method) {
+        res.send(200);
+    } else {
+        next();
+    }
+});
 
     app.use(methodOverride());  //for header rewriting
 
@@ -180,6 +165,7 @@ export let db_old = mongojs(databaseUrl, collections); //soon you will die!
     ///////// minio init ///////////////////////////////
     var minioClient = null;
     if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
+        const minio = require('minio');
             minioClient = new minio.Client({
             endPoint: process.env.MINIOENDPOINT,
             port: 9000,
@@ -567,7 +553,8 @@ function usercheck (req, res, next) { //gotsta beez the owner of requested resou
 function domainadmin (req, res, next) { //TODO also check acl
     (async () => {
         try {
-            const query = {"_id": ObjectId(createFromHexString(req.session.user._id.toString()))};
+            const oid = ObjectId.createFromHexString(req.session.user._id.toString());
+            const query = {"_id": oid};
             const user = await RunDataQuery("users", "findOne", query);
             if (user.authLevel.includes("domain_admin") || user.authLevel.includes("admin")) { //should be separate, but later..
                 next();
@@ -578,8 +565,7 @@ function domainadmin (req, res, next) { //TODO also check acl
             console.log("error checking domainadmin " + e);
             res.send("noauth " + e);
         }
-    })();
-   
+    })();  
 }
 
 function uscene (req, res, next) { //check user id against acl, for scene writing
@@ -1378,7 +1364,7 @@ app.post("/authreq", function (req, res) {
             console.log(authUser.length + " users like dat " + username + " authlevel " + authUser[0].authLevel + " and isSubscriber " + isSubscriber );
             const authUserIndex = 0; //
             // for (var i = 0; i < authUser.length; i++) {
-            //     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name// seems a bad !!!
+            //     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name// seems a bad thing because why
             //         authUserIndex = i;
             //     }
             // }

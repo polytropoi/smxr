@@ -19,6 +19,8 @@ let colorInput_2 = null;
 let colorInput_3 = null;
 let colorInput_4 = null;
 
+window.PlayPauseMedia = PlayPauseMedia;
+
 
 window.addEventListener( 'keydown',  ( event ) => {
   // console.log("keydown code " + event.keyCode);

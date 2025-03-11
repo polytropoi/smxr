@@ -853,7 +853,7 @@ AFRAME.registerComponent('mod_object', {
           this.tags = [...this.tags, ...this.data.objectData.tags]; //spread operator!
         }
         // if (this.data.locationData && this.data.locationData.markerType) {
-          console.log(this.data.objectData.name + " gots tags: " + this.tags + " markerType : "+ this.data.locationData.markerType);
+          console.log("NEW OBJECT: " +this.data.objectData.name + " gots tags: " + this.tags + " markerType : "+ this.data.locationData.markerType);
 
           // for (let i = 0; i < this.tags.length; i++) {  //nm, bad idea?
           //   console.log("adding class with tag " + this.tags[i]);
@@ -1344,41 +1344,35 @@ AFRAME.registerComponent('mod_object', {
               // this.recursivelySetChildrenShader(obj);
   
             }
-
+            console.log("MOD_OBJECT event.data " + this.data.eventData);
   
-            if (this.data.eventData.toLowerCase().includes("target") || (this.data.tags && this.data.tags.includes("target"))) {
+            if (this.data.eventData && this.data.eventData.length && this.data.eventData.toLowerCase().includes("target") || (this.data.tags && this.data.tags.includes("target"))) {
               // this.el.id = "target_object";
               this.el.classList.add("target");
             
             }
 
-            if (this.data.eventData.toLowerCase().includes("transparent")) {
+            if (this.data.eventData && this.data.eventData.length && this.data.eventData.toLowerCase().includes("transparent")) {
               console.log("tryna set transparent");
               obj.visible = false;
             }
-            if (this.data.eventData.toLowerCase().includes("particle")) {
+            if (this.data.eventData && this.data.eventData.length && this.data.eventData.toLowerCase().includes("particle")) {
               console.log("tryna spawn a particle!");
   
               this.el.setAttribute('mod_particles', {type: 'fireball'});
            
             }
-            if (this.data.eventData.toLowerCase().includes("fireworks")) {
+            if (this.data.eventData && this.data.eventData.length && this.data.eventData.toLowerCase().includes("fireworks")) {
               console.log("tryna spawn fireworks!");
   
               this.el.setAttribute('fireworks_spawner', {type: 'fireball'});
            
             }
-            if (this.data.eventData.toLowerCase().includes("audiotrigger")) {
-              // console.log("gotsa audiotrigg3re!");
-  
-              // this.el.setAttribute('fireworks_spawner', {type: 'fireball'});
-              this.hasAudioTrigger = true;
-            }
-            if (this.data.eventData.toLowerCase().includes("glow")) {
+            if (this.data.eventData && this.data.eventData.length && this.data.eventData.toLowerCase().includes("glow")) {
 
               this.el.setAttribute("glow");
             }
-            if (this.data.markerType.toLowerCase().includes("character") || this.data.eventData.toLowerCase().includes("agent") || 
+            if (this.data.markerType.toLowerCase().includes("character") || (this.data.eventData && this.data.eventData.length && this.data.eventData.toLowerCase().includes("agent")) || 
               (this.data.objectData.physics && this.data.objectData.physics.includes("Navmesh Agent"))) { 
               if (settings.useNavmesh || settings.useSimpleNavmesh) {
                 // this.el.setAttribute("nav-agent", "");
@@ -1446,12 +1440,12 @@ AFRAME.registerComponent('mod_object', {
                 if (i == clips.length - 1) {
                     if (hasAnims) {
                       console.log("model has anims " + this.data.eventData + " idelIndex " + idleIndex);
-                    if (this.data.eventData.includes("loop_all_anims")) {
+                    if (this.data.eventData && this.data.eventData.length && this.data.eventData.includes("loop_all_anims")) {
                       theEl.setAttribute('animation-mixer', {
                         "clip": clips[0].name,
                         "loop": "repeat",
                       });
-                    } else if (this.data.eventData.includes("loop_dance_anims")) {
+                    } else if (this.data.eventData && this.data.eventData.length && this.data.eventData.includes("loop_dance_anims")) {
                       theEl.setAttribute('animation-mixer', {
                         "loop": "repeat",
                       });
@@ -1472,7 +1466,7 @@ AFRAME.registerComponent('mod_object', {
               this.nodeName = node.name;
               node.frustumCulled = false; //just turn off for everything, objects are special...
               // console.log("object node: " + this.nodeName)
-              if (this.data.eventData.includes("eyelook") && this.nodeName.toLowerCase().includes("eye")) { //must be set in eventData and as mesh name
+              if (this.data.eventData && this.data.eventData.length && this.data.eventData.includes("eyelook") && this.nodeName.toLowerCase().includes("eye")) { //must be set in eventData and as mesh name
                 if (node instanceof THREE.Mesh) {
                 this.meshChildren.push(node);
                 console.log("gotsa eye!");
@@ -1487,31 +1481,31 @@ AFRAME.registerComponent('mod_object', {
             
             for (i = 0; i < this.meshChildren.length; i++) { //apply mods to the special things
               console.log("gotsa special !! meshChild " + this.meshChildren[i].name);
-              if (this.meshChildren[i].name.includes("trigger")) { 
-                //ugh, nm
-                  let child = this.el.object3D.getObjectByName(this.meshChildren[i].name, true);
-                  child.visible = false;
+              // if (this.meshChildren[i].name.includes("trigger")) { 
+              //   //ugh, nm
+              //     let child = this.el.object3D.getObjectByName(this.meshChildren[i].name, true);
+              //     child.visible = false;
   
-                  // let triggerEl = document.createElement('a-entity'); //later
-                  // var targetPos = new THREE.Vector3();
-                  // child.getWorldPosition(targetPos);
-                  // this.child = child.clone();
-                  // triggerEl.setObject3D("mesh", this.child);
-                  // // let child = this.child.clone();
-                  // // this.child.position(targetPos);
-                  // // triggerEl.setObject3D("mesh", child.clone());
-                  // // triggerEl.setObject3D("mesh", child);
-                  // child.remove();
-                  // // triggerEl.setAttribute('geometry', {primitive: 'box', width: 1});
-                  // triggerEl.setAttribute('position', targetPos);
-                  // console.log("gotsa special teryna set a trigger mesh..");
-                  // triggerEl.setAttribute('mod_physics', {eventData: this.data.eventData, tags: this.data.tags, isTrigger: true});
-                  // // triggerEl.classList.add('activeObjexRay');
-                  // triggerEl.id = "TRIGGGER";
-                  // this.sceneEl.appendChild(triggerEl);
+              //     // let triggerEl = document.createElement('a-entity'); //later
+              //     // var targetPos = new THREE.Vector3();
+              //     // child.getWorldPosition(targetPos);
+              //     // this.child = child.clone();
+              //     // triggerEl.setObject3D("mesh", this.child);
+              //     // // let child = this.child.clone();
+              //     // // this.child.position(targetPos);
+              //     // // triggerEl.setObject3D("mesh", child.clone());
+              //     // // triggerEl.setObject3D("mesh", child);
+              //     // child.remove();
+              //     // // triggerEl.setAttribute('geometry', {primitive: 'box', width: 1});
+              //     // triggerEl.setAttribute('position', targetPos);
+              //     // console.log("gotsa special teryna set a trigger mesh..");
+              //     // triggerEl.setAttribute('mod_physics', {eventData: this.data.eventData, tags: this.data.tags, isTrigger: true});
+              //     // // triggerEl.classList.add('activeObjexRay');
+              //     // triggerEl.id = "TRIGGGER";
+              //     // this.sceneEl.appendChild(triggerEl);
                   
-                  // triggerEl.classList.add('trigger');
-              }
+              //     // triggerEl.classList.add('trigger');
+              // }
                 if (this.meshChildren[i].name.includes("eye")) { //mod_object eye
                 console.log("gotsa eye too!");
                 let child = this.el.object3D.getObjectByName(this.meshChildren[i].name, true);
@@ -1576,14 +1570,14 @@ AFRAME.registerComponent('mod_object', {
               this.hasCallout = true;
             }
             
-            if (this.data.eventData.toLowerCase().includes("main") && this.data.eventData.toLowerCase().includes("text")) {
+            if (this.data.eventData && this.data.eventData.length && this.data.eventData.toLowerCase().includes("main") && this.data.eventData.toLowerCase().includes("text")) {
               document.getElementById("mainTextToggle").setAttribute("visible", false);
               this.data.eventData = document.getElementById("mainText").getAttribute("main-text-control", "mainTextString"); 
               console.log("target eventData : "+ JSON.stringify(this.data.eventData));
               this.textData = this.data.eventData.mainTextString.split("~");
             } else {
               // this.textData = 
-              if (this.data.eventData.toLowerCase().includes("callout") ) {
+              if (this.data.eventData && this.data.eventData.length && this.data.eventData.toLowerCase().includes("callout") ) {
                 hasCallout = true;
                 this.textData = this.data.locationData.description;
               }
