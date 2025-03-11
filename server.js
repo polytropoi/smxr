@@ -2951,22 +2951,23 @@ app.post('/update_user/', requiredAuthentication, admin, function (req, res) { /
     }
 });
 
-app.post('/update_userassets/', requiredAuthentication, function (req, res) {
-    var u_id = req.body.user_id;
-    console.log("tryna update userassets for " + u_id);
-    var resp = db_old.assets.update( { "user_id": u_id }, { $set : req.body}, {upsert: true});
+// app.post('/update_userassets/', requiredAuthentication, function (req, res) {
+//     var u_id = req.body.user_id;
+//     console.log("tryna update userassets for " + u_id);
+//     var resp = db_old.assets.update( { "user_id": u_id }, { $set : req.body}, {upsert: true});
 
-//    db.people.findAndModify({
-//        query: { name: "Pascal", state: "active", rating: 25 },
-//        sort: { rating: 1 },
-//        update: { $inc: { score: 1 } },
-//        upsert: true,
-//        new: true
-//    })
+// //    db.people.findAndModify({
+// //        query: { name: "Pascal", state: "active", rating: 25 },
+// //        sort: { rating: 1 },
+// //        update: { $inc: { score: 1 } },
+// //        upsert: true,
+// //        new: true
+// //    })
 
-    res.send(resp);
-});
+//     res.send(resp);
+// });
 
+// old unity fu...
 // app.post('/update_userassetpic/', requiredAuthentication, upload.single('file'), function (req, res) {
 // //    var platform = req.body.pform;
 // //    var fname = req.body.fname;
@@ -3009,41 +3010,43 @@ app.post('/update_userassets/', requiredAuthentication, function (req, res) {
 //             );
 //     });
 
-app.get('/get_userassets/:_id', requiredAuthentication, usercheck, function (req, res) {
-    console.log("tryna get_userassets for " + req.params._id );
-    // if (req.session.user.authLevel.toLowerCase().includes("admin")) {
-    //     db.assets.find({}, function (err, assets) {
-    //         if (err || !assets) {
-    //             console.log("error getting user assets: " + err);
-    //         } else {
-    //             console.log("got all the assets!");
-    //             res.send (assets);
-    //         }
-    //     });
-    // } else {
-        db_old.assets.find({"user_id": req.params._id}, function (err, assets) {
-            if (err || !assets) {
-                console.log("error getting user assets: " + err);
-            } else {
-                console.log("got user assets!");
-                res.send (assets);
-            }
-        });
-    // }
-});
+// app.get('/get_userassets/:_id', requiredAuthentication, usercheck, function (req, res) {
+//     console.log("tryna get_userassets for " + req.params._id );
+//     // if (req.session.user.authLevel.toLowerCase().includes("admin")) {
+//     //     db.assets.find({}, function (err, assets) {
+//     //         if (err || !assets) {
+//     //             console.log("error getting user assets: " + err);
+//     //         } else {
+//     //             console.log("got all the assets!");
+//     //             res.send (assets);
+//     //         }
+//     //     });
+//     // } else {
+//         db_old.assets.find({"user_id": req.params._id}, function (err, assets) {
+//             if (err || !assets) {
+//                 console.log("error getting user assets: " + err);
+//             } else {
+//                 console.log("got user assets!");
+//                 res.send (assets);
+//             }
+//         });
+//     // }
+// });
 
 app.get('/get_models/:_id', requiredAuthentication, function (req, res) {
     console.log("tryna get_models for " + req.params._id );
-    
-        db_old.models.find({"userID": req.params._id}, function (err, models) {
-            if (err || !models) {
-                console.log("error getting user assets: " + err);
-            } else {
-                // console.log("got user models:" + JSON.stringify(models));
-                res.send (models);
-            }
-        });
-    // }
+
+    (async () => {
+      try {
+        const query = {"userID": req.params._id};
+        const models = await RunDataQuery("models", "find", query);
+        res.send(models);
+      } catch (e) {
+        console.log("error getting modelz " + e);
+        res.send("error getting modelz " + e);
+      }
+    })();
+
 });
 app.get('/get_model/:_id', requiredAuthentication, function (req, res) {
     var model_id = ObjectId.createFromHexString(req.params._id);
@@ -3068,286 +3071,11 @@ app.get('/get_model/:_id', requiredAuthentication, function (req, res) {
       }
 
     })();
-        // db_old.models.findOne(, function (err, model) {
-        //     if (err || !model) {
-        //         console.log("error getting model: " + err);
-        //         res.send(err);
-        //     } else {
-        //         (async () => {
-        //             try {
-                        
-        //                 model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-        //                 res.send (model);
-                    
-        //             } catch (e) {
-        //                 res.send(e);
-        //             }
-        //         })();
-                // console.log("got user models:" + JSON.stringify(models));
-                // let url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + model.userID + "/gltf/" + model.filename, Expires: 6000});
-                // model.url = url;
-                
-        //     }
-        // });
+
 });
 
-// app.get('/asset_conv/:_id', requiredAuthentication, usercheck, function (req, res) {
-//     // console.log("tryna get_userassets for " + req.params._id );
-//     db.assets.findOne({"user_id": req.params._id}, function (err, assets) {
-//         if (err || !assets) {
-//             console.log("error getting user assets: " + err);
-//         } else {
-//             console.log("got user assets!");
-//             let response = {};
-//             for (asset in assets) {
-                
-//             }
-//             res.send (response);
-//         }
-//     });
-// });
 
-// app.get('/sceneassetputurl/:u_id', requiredAuthentication, usercheck, function (req, res) {
 
-//     db.users.findOne({"_id": u_id}, function (err, user) {
-//         if (err || !user) {
-//             console.log("error getting user: " + err);
-//         } else {
-//             const fileName = req.query['file-name'];
-//             const fileType = req.query['file-type'];
-//             const s3Params = {
-//                 Bucket: S3_BUCKET,
-//                 Key: fileName,
-//                 Expires: 60,
-//                 ContentType: fileType,
-//                 ACL: 'public-read'
-//             };
-
-//             s3.getSignedUrl('putObject', s3Params, (err, data) => {
-//                 if(err){
-//                 console.log(err);
-//                 return res.end();
-//                 }
-//                 const returnData = {
-//                 signedRequest: data,
-//                 url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
-//                 };
-//                 res.write(JSON.stringify(returnData));
-//                 res.end();
-//             });
-//         }
-//     });
-// });
-
-// app.get('/bundleassetputurl/:_id/:version_sig/:platform_sig', checkAppID, requiredAuthentication, usercheck, function (req, res) {
-//     var u_id = ObjectId.createFromHexString(req.params._id);
-//     db.users.findOne({"_id": u_id}, function (err, user) {
-//         if (err || !user) {
-//             console.log("error getting user: " + err);
-//         } else {
-//             var url = s3.getSignedUrl('putObject', {Bucket: 'servicemedia', Key: "users/" + u_id + "/assets/" + req.params.version_sig + "/bundles_" + req.params.platform_sig, Expires: 600});
-// //            s3.getSignedUrl('putObject', params, (err, url) => {
-// //                if (err) return console.log(err);
-
-//             res.json({ url: url });
-// //        });
-//         }
-//     });
-// });
-
-// app.post('/objputurl/:_id', requiredAuthentication, function (req, res) {
-//     console.log("tryna get a puturl for : " + req.body.uid + " contentTYpe : " + req.body.contentType);
-//     var cType = req.body.contentType;
-//     // if (cType = "application/octet-stream") {
-//     //     cType = "binary/octet-stream";
-//     // }
-//     var u_id = ObjectId.createFromHexString(req.params._id);
-//     db.users.findOne({"_id": u_id}, function (err, user) {
-//         if (err || !user) {
-//             console.log("error getting user: " + err);
-//         } else {
-//             //TODO is user in good standing? 
-//             // var params =
-//             var timestamp = Math.round(Date.now());
-//             const params = {
-//                 Bucket: 'archive1',
-//                 //meatadata aqui
-//                 // ACL: 'bucket-owner-full-control',
-//                 // ContentType: 'text/csv',
-//                 Body: '',
-//                 ContentType: cType,
-//                 Key: 'obj_staging/' + u_id + '/' + timestamp + '_' + req.body.filename,
-//                 // Key: req.body.filename,
-//                 Expires: 100
-//               };
-//             // var url = s3.getSignedUrl('putObject', {Bucket: 'servicemedia', Key: "users/" + u_id + "/staging" + req.params.platform_sig, Expires: 600});
-//             s3.getSignedUrl('putObject', params, function(err, signedUrl) {
-//                 let response;
-//                 if (err) {
-//                   response = {
-//                     statusCode: 500,
-//                     headers: {
-//                       'Access-Control-Allow-Origin': '*',
-//                     },
-//                     body: JSON.stringify({
-//                       error: 'Did not receive signed url'
-//                     }),
-//                   };
-//                   console.log("putObject url error : " + err );
-//                   res.json(err);
-//                 } else {
-//                   response = {
-//                     statusCode: 200,
-//                     headers: {
-//                       'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-//                     },
-//                     body: "",
-//                     // body: JSON.stringify({
-//                     //   message: `Url successfully created`,
-//                     //   signedUrl,
-//                     // }),
-//                     method: "put",
-//                     url: signedUrl,
-//                     fields: []
-//                     };
-//                     console.log("putObject url : " + signedUrl );
-//                     res.json(response);
-//                 }
-//             });
-//         }
-//     });
-// });
-
-// app.post('/process_object_files', requiredAuthentication, function (req, res) { //from staging folder
-//     var itemsArray = req.body.processMe.items;
-//     // var createGroup = false;
-//     // var groupType = "";
-//     // var groupID;
-//     var uid;
-//     var isObj
-//     var objName;
-//     console.log("process_object_files : " + JSON.stringify(req.body));
-//     var itemsExtensions = itemsArray.map(item => {
-//         return getExtension(item.key);
-//     });
-
-//     var meateada = {};
-//     var groupitems = [];
-//     var params = {
-//         Bucket: 'archive1',
-//     };
-//     var nameSplitter = function(name) {
-//         // index = name.indexOf("_");
-//         var splitName = name.split("_");
-//         console.log(name + " splitName " + splitName[3]);
-//         // return name.substring(index + 2);   
-//         return splitName[3]; 
-//     }
-//     // var originalName = function (name) {
-//     //     var index = name.indexOf("_");
-//     //     return name.substring(index + 1); //strip off prepended timestamp and _ for title and stuff
-//     // }
-//     // console.log("all items must be the same media type " + itemsExtensions.length); //TODO handle if they're different
-
-//         var isObj = false; //if it's an obj (for now), upload with sibling files, to a named bucket...
-//         var objName = "";
-          
-//             async.waterfall([
-//             // function (callback) {
-//             //     // console.log("Bucket exists and we have access");
-//             //     var params = {Bucket: 'archive1', Delimiter: item.uid, Key: "obj_staging/" + item.uid + "/" + item.key}    
-//             //     s3.headObject(params, function (err, data) {
-//             //         if (err && err.code === 'NotFound') {
-//             //             // Handle no object on cloud here
-//             //             console.log(err);
-//             //             callback(err);
-//             //             res.send("staged file not found");
-//             //         } else {
-//             //             // meateada = metadata;
-//             //             console.log("staged file meateada " + data);
-//             //             callback(null);
-//             //         }
-//             //     });
-//             // },    
-//             function(callback) {
-//                 async.each(itemsArray, function (item, cb) { 
-                    
-//                     console.log("item  :" + item.key);
-//                     var iext = getExtension(item.key);
-//                     if (iext == ".obj") {
-//                         isObj = true;
-//                         objName = nameSplitter(item.key);
-//                         callback();
-//                     } else {
-//                         // console.log("cain't find no object file");
-//                         cb(null);
-//                     }
-//                 });
-//             },
-//             // function (callback) {
-//             //     for (var i = 0; i < itemsArray.length; i++) {
-//             //         console.log("item  :" + itemsArray[i].key);
-//             //         var iext = getExtension(itemsArray[i].key);
-//             //         if (iext == ".obj") {
-//             //             isObj = true;
-//             //             objName = originalName(itemsArray[i].key);
-//             //         }
-//             //     }
-//             //     callback(null);
-            
-//             // },
-//             function (callback) {
-//                 if (isObj) {
-//                     console.log("object name is " + objName);
-//                     async.each(itemsArray, function (item, cb) { 
-                    
-//                     var targetBucket = "servicemedia";
-//                     var copySource = "archive1/obj_staging/" + item.uid + "/" + item.key;
-//                     var ck = "users/" + item.uid + "/objs/" + objName + "/" + nameSplitter(item.key);
-//                     s3.copyObject({Bucket: targetBucket, CopySource: copySource, Key: ck}, function (err,data){
-//                         if (err) {
-//                             console.log("ERROR copyObject" + err);
-//                             cb(err);
-//                         }
-//                         else {
-//                             console.log("SUCCESS copyObject key " + ck + " response: " + data );
-//                             cb(null);
-//                         }
-//                     });
-//                     },
-//                     function (err) {
-//                        
-//                         if (err) {
-//                             console.log('A file failed to process');
-//                             callback(null);
-//                         } else {
-//                             console.log('All files have been processed successfully');
-//                             callback(null);
-//                         }
-//                     });
-//                 } else {
-//                     console.log("cain't find no objs, ending...");
-//                     callback(err);
-//                     }
-//                 }
-//         ],
-//         function(err, result) { // #last function, close async
-//             if (err != null) {
-//                 res.send(err);
-//             } else {
-//                 console.log("waterfall done: " + result);
-//                 //  res.redirect('/upload.html');
-//                 res.send("upload completee!");
-//             }
-//         });
-//     // }
-// }); //end app.post /process_object
-
-function sizeOf(key, bucket) {
-    return s3.headObject({ Key: key, Bucket: bucket })
-        .promise()
-        .then(res => res.ContentLength);
-}
 app.post('/process_video_hls', requiredAuthentication, function (req, res) {
     console.log("userid = " + req.session.user._id);
     var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
@@ -3360,10 +3088,7 @@ app.post('/process_video_hls', requiredAuthentication, function (req, res) {
     //   console.log(response.data);
       console.log("grabAndSqueeze response: " + response.status);
       res.send("processing video");
-    //   console.log(response.statusText);
-    //   console.log(response.headers);
-    //   console.log(response.config);
-        // callback(null);
+
     })
     .catch(function (error) {
         // handle error
@@ -3371,9 +3096,7 @@ app.post('/process_video_hls', requiredAuthentication, function (req, res) {
         res.send("error: " + error);
         // callback(error);
     })
-    // .then(function () {
-    //     // console.log('nerp');
-    // });
+
 });
 
 app.get('/process_video_hls_local', requiredAuthentication, function (req, res) {
@@ -3388,10 +3111,7 @@ app.get('/process_video_hls_local', requiredAuthentication, function (req, res) 
     //   console.log(response.data);
       console.log("grabAndSqueeze response: " + response.status);
       res.send("processing video");
-    //   console.log(response.statusText);
-    //   console.log(response.headers);
-    //   console.log(response.config);
-        // callback(null);
+
     })
     .catch(function (error) {
         // handle error
@@ -3399,9 +3119,7 @@ app.get('/process_video_hls_local', requiredAuthentication, function (req, res) 
         res.send("error: " + error);
         // callback(error);
     })
-    // .then(function () {
-    //     // console.log('nerp');
-    // });
+
 });
 
 
