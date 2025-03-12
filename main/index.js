@@ -5446,7 +5446,7 @@
                     "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22captionLower\x22 placeholder=\x22Enter Lower Caption\x22 value=\x22" + captionLower + "\x22 >" +
                     "</div>" +
                     "<div class=\x22col form-group col-md-4\x22>" +
-                        "<label for=\x22sceneTags\x22>Tags</label><br>" + //Tags
+                        "<label for=\x22tags\x22>Tags</label><br>" + //Tags
                         "<div class=\x22input-group\x22>" +
                         "<div class=\x22input-group-prepend\x22>" +
                         "<button class=\x22btn input-group-text\x22 id=\x22addTagButton\x22>+</button>" +
@@ -5770,7 +5770,7 @@
                 // let hasAlpha = document.getElementById("hasAlpha").value;
                 let hasAlpha = $("#hasAlpha").prop("checked");
                 let useTarget = $("#useTarget").prop("checked");
-                let tags = document.getElementById("tags").value;
+                // let tags = document.getElementById("tags").value;
                 let imageData = document.getElementById("imageData").value;
                 let captionUpper = document.getElementById("captionUpper").value;
                 let captionLower = document.getElementById("captionLower").value;

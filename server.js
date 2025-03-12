@@ -6656,38 +6656,48 @@ app.post('/delete_text/:_id', checkAppID, requiredAuthentication, function (req,
 
 app.post('/updatetext/:_id', requiredAuthentication, function (req, res) {
 //        var textitem = req.body;
-    console.log("req.body update text:" + JSON.stringify(req.body));
+    // console.log("req.body update text:" + JSON.stringify(req.body));
     var o_id = ObjectId.createFromHexString(req.body._id);
 //        textitem.userID = req.session.user._id.toString();
     var timestamp = Math.round(Date.now() / 1000);
-    db_old.text_items.update( { "_id": o_id }, { $set: {
+    (async () => {
+        try {
+            const query = { "_id": o_id };
+            const updoc = { $set: {
         
-        tags: req.body.tags,
-        title: req.body.title,
-        type: req.body.type,
-        desc: req.body.desc,  //  ? req.body.desc : req.body.textstring.substr(0,20) + "...",
-        mode: req.body.mode,
-        font: req.body.font,
-        author: req.body.author,
-        source: req.body.source,
-        sourceURL: req.body.sourceURL,
-        year: req.body.year,
-        fontSize: req.body.fontSize,
-        alignment: req.body.alignment != null ? req.body.alignment : "left" ,
-        textBackground: req.body.textBackground,
-        textBackgroundColor: req.body.textBackgroundColor,
-        fillColor: req.body.fillColor,
-        outlineColor: req.body.outlineColor,
-        glowColor: req.body.glowColor,
-        textstring: req.body.textstring,
-        rotateToPlayer : req.body.rotateToPlayer != null ? req.body.rotateToPlayer : false,
-        scaleByDistance : req.body.scaleByDistance != null ? req.body.scaleByDistance : false,
-        useThreeDeeText : req.body.useThreeDeeText != null ? req.body.useThreeDeeText : false,
-        lastUpdateTimestamp: timestamp,
-        lastUpdateUserID: req.session.user._id,
-        lastUpdateUserName: req.session.user.userName
-    }});
-    res.send("updated " + new Date());
+                tags: req.body.tags,
+                title: req.body.title,
+                type: req.body.type,
+                desc: req.body.desc,  //  ? req.body.desc : req.body.textstring.substr(0,20) + "...",
+                mode: req.body.mode,
+                font: req.body.font,
+                author: req.body.author,
+                source: req.body.source,
+                sourceURL: req.body.sourceURL,
+                year: req.body.year,
+                fontSize: req.body.fontSize,
+                alignment: req.body.alignment != null ? req.body.alignment : "left" ,
+                textBackground: req.body.textBackground,
+                textBackgroundColor: req.body.textBackgroundColor,
+                fillColor: req.body.fillColor,
+                outlineColor: req.body.outlineColor,
+                glowColor: req.body.glowColor,
+                textstring: req.body.textstring,
+                rotateToPlayer : req.body.rotateToPlayer != null ? req.body.rotateToPlayer : false,
+                scaleByDistance : req.body.scaleByDistance != null ? req.body.scaleByDistance : false,
+                useThreeDeeText : req.body.useThreeDeeText != null ? req.body.useThreeDeeText : false,
+                lastUpdateTimestamp: timestamp,
+                lastUpdateUserID: req.session.user._id,
+                lastUpdateUserName: req.session.user.userName
+            }};
+            const updated = await RunDataQuery("text_items", "updateOne", query, updoc);
+            res.send("text updated " + updated);
+        } catch (e) {
+            console.log("error updating textitem " + e);
+            res.send("error updating textitem " + e);
+        } 
+    })();
+
 });
 
 app.get('/svg/:_id', function(req, res) { 
@@ -6729,14 +6739,7 @@ app.get('/usertexts/:u_id', requiredAuthentication, function(req, res) {
                 res.send("error getting usertexts " + e);
             }
         })();
-        // db_old.text_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
-        //     if (err || !text_items) {
-        //         console.log("error getting text_items : " + err);
-        //     } else {
-        //         res.json(text_items);
-        //         console.log("returning text items for " + req.params.u_id);
-        //     }
-        // });
+      
     } else {
         (async () => {
             try {
@@ -6748,14 +6751,7 @@ app.get('/usertexts/:u_id', requiredAuthentication, function(req, res) {
                 res.send("error getting usertexts " + e);
             }
         })();
-        // db_old.text_items.find({}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, text_items) {
-        //     if (err || !text_items) {
-        //         console.log("error getting text_items : " + err);
-        //     } else {
-        //         res.json(text_items);
-        //         console.log("returning text items for " + req.params.u_id);
-        //     }
-        // });
+        
     }
 });
 
@@ -6772,60 +6768,51 @@ app.get('/usertext/:p_id', requiredAuthentication, function(req, res) {
             res.send("error getting usertexty " + e);
         }
     })();
-    // db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
-    //     if (err || !text_item) {
-    //         console.log("error getting text_items : " + err);
-    //     } else {
-    //         res.json(text_item);
-    //         console.log("returning text item for " + req.params.p_id);
-    //     }
-    // });
+    
 });
 
 app.get('/userpic/:p_id', requiredAuthentication, function(req, res) {
 
   console.log('tryna return userpic : ' + req.params.p_id);
-    // db_old.image_items.findOne({"_id": o_id}, function(err, picture_item) {
-    //     if (err || !picture_item) {
-    //         console.log("error getting picture items: " + err);
-    //     } else {
+    
       (async () => { 
         
         try {
-        const o_id = ObjectId.createFromHexString(req.params.p_id.toString());
+            const o_id = ObjectId.createFromHexString(req.params.p_id.toString());
 
-        const query = {"_id": o_id};
-        let picture_item = await RunDataQuery("image_items", "findOne", query);
+            const query = {"_id": o_id};
+            let picture_item = await RunDataQuery("image_items", "findOne", query);
 
-        let item_string_filename = JSON.stringify(picture_item.filename);
-        item_string_filename = item_string_filename.replace(/\"/g, "");
-        const item_string_filename_ext = getExtension(item_string_filename);
-        let expiration = new Date();
-        expiration.setMinutes(expiration.getMinutes() + 30);
-        let baseName = path.basename(item_string_filename, (item_string_filename_ext));
-        console.log("user pic basename: " + baseName);
-        const thumbName = 'thumb.' + baseName + item_string_filename_ext;
-        const halfName = 'half.' + baseName + item_string_filename_ext;
-        const standardName = 'standard.' + baseName + item_string_filename_ext;
-        const originalName = 'original.' + baseName + item_string_filename_ext;
-      
+            let item_string_filename = JSON.stringify(picture_item.filename);
+            item_string_filename = item_string_filename.replace(/\"/g, "");
+            const item_string_filename_ext = getExtension(item_string_filename);
+            let expiration = new Date();
+            expiration.setMinutes(expiration.getMinutes() + 30);
+            let baseName = path.basename(item_string_filename, (item_string_filename_ext));
+            console.log("user pic basename: " + baseName);
+            const thumbName = 'thumb.' + baseName + item_string_filename_ext;
+            const halfName = 'half.' + baseName + item_string_filename_ext;
+            const standardName = 'standard.' + baseName + item_string_filename_ext;
+            const originalName = 'original.' + baseName + item_string_filename_ext;
 
             const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + thumbName, 6000); 
             const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + standardName, 6000); 
             const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); 
             const urlTarget = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind", 6000); 
             const urlOriginal = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/originals/" + picture_item._id + "." + originalName, 6000); 
-        
-                
-                picture_item.URLthumb = urlThumb; //jack in teh signed urls into the object array
-                picture_item.URLhalf = urlHalf;
-                picture_item.URLstandard = urlStandard;
-                picture_item.URLoriginal = urlOriginal;
-                picture_item.URLtarget = urlTarget;
-                // console.log("urlTarget " + urlTarget);
-
-                res.json(picture_item);
-                
+            
+                    
+            picture_item.URLthumb = urlThumb; //jack in teh signed urls into the object array
+            picture_item.URLhalf = urlHalf;
+            picture_item.URLstandard = urlStandard;
+            picture_item.URLoriginal = urlOriginal;
+            picture_item.URLtarget = urlTarget;
+            // console.log("urlTarget " + urlTarget);
+            if (!picture_item.tags) {
+                picture_item.tags = [];
+            }
+            res.json(picture_item);
+                    
         } catch (e) {
         console.log("picture get errora " + e);
         }
@@ -6845,8 +6832,8 @@ app.get('/hls/:_id', function(req, res) {  //main playback route for hls vids //
                 const video_item = await RunDataQuery("video_items", "findOne", query);
                 let manifest = await GetObject(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/output.m3u8');
                 const files = await ListObjects(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/');
-                // console.log("files: "+ files.Contents.length);
-                for (const s3Object of files.Contents) {
+                console.log("hls files # "+ files.Contents.length);
+                for (const s3Object of files.Contents) { //hrm, maybe not for minio...
                     if (getExtension(s3Object.Key) == ".ts") { //swap out .ts files (e.g 001.ts) for signed urls
                         let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, s3Object.Key);
                         // console.log("url " + url);
@@ -6859,95 +6846,7 @@ app.get('/hls/:_id', function(req, res) {  //main playback route for hls vids //
 
             }
         })();
-        // db_old.video_items.findOne({"_id": o_id}, function(err, video_item) {
-        //     if (err || !video_item) {
-        //         console.log("error getting hls video item: " + err);
-        //         res.send("error getting hls video item: " + err);
-        //     } else {
-        //         if (minioClient) {
-        //             (async () => {
-        //                 let buffer = [];
-                        
-        //                 await minioClient.getObject(process.env.ROOT_BUCKET_NAME, 'users/' + video_item.userID + '/video/' + video_item._id + '/hls/output.m3u8', function(err, dataStream) {
-        //                 if (err) {
-        //                     console.log(err);
-        //                 }
-        //                 dataStream.on('data', function(chunk) {
-        //                 //   size += chunk.length
-        //                     buffer.push(chunk);
-        //                     // chunk.pipe(fileStream);
-        //                 })
-        //                 dataStream.on('end', function() {
-        //                     let manifestString = buffer.toString();
-        //                     // console.log(manifestString);
-
-        //                     var data = [];
-        //                     var stream = minioClient.listObjects(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/', false);
-        //                     stream.on('data', function(obj) { 
-        //                         data.push(obj) 
-        //                     } )
-        //                     stream.on("end", function (obj) { 
-        //                         // console.log("minio bucket list: " + JSON.stringify(data)); 
-
-        //                         async.each (data, function (s3Object, callbackz) { //takes a shake so async, and respond when it's done
-        //                             // console.log("minio data element: " + JSON.stringify(s3Object));
-        //                             if (getExtension(s3Object.name) == ".ts") { //swap out .ts files (e.g 001.ts) for signed urls
-        //                                 // console.log("minio key " + path.basename(s3Object.name)); 
-        //                                 // let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, s3Object.name.toString(), 36000);
-        //                                 minioClient.presignedGetObject(process.env.ROOT_BUCKET_NAME, s3Object.name.toString(), 24*60*60, function(err, presignedUrl) { //use callback version here, can't await?
-        //                                     if (err) return console.log(err);
-        //                                     // console.log("url " + presignedUrl);
-        //                                     manifestString = manifestString.replace(path.basename(s3Object.name.toString()), presignedUrl); //rebuild the manifest with signed urls - brilliant!
-        //                                     callbackz();
-        //                                     });                                          
-        //                             } else {
-        //                                 callbackz();
-        //                             }
-                                        
-        //                             }, function(err) {
-        //                                 if (err) {
-        //                                     // console.log('hls mangler failed to process');
-        //                                     res.send("error! " + err);
-        //                                 } else {
-        //                                     // console.log('All files have been processed successfully');
-        //                                     res.setHeader('content-type', 'application/x-mpegURL');
-        //                                     res.send(manifestString);
-        //                                 }
-        //                         });
-        //                     })
-        //                     stream.on('error', function(err) { 
-        //                         console.log(err)
-        //                     } );
-        //                 });
-        //                     dataStream.on('error', function(err) {
-        //                     console.log(err);
-                        
-        //                 });
-        //                 });
-        //             })();
-        //         } else { //below updated w/ aws sdk v3 - getSignedUrl must be async now... but no need for async.each!
-        //             (async () => {
-        //                 try {
-        //                     let manifest = await GetObject(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/output.m3u8');
-        //                     const files = await ListObjects(process.env.ROOT_BUCKET_NAME,'users/' + video_item.userID + '/video/' + video_item._id + '/hls/');
-        //                     // console.log("files: "+ files.Contents.length);
-        //                     for (const s3Object of files.Contents) {
-        //                         if (getExtension(s3Object.Key) == ".ts") { //swap out .ts files (e.g 001.ts) for signed urls
-        //                             let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, s3Object.Key);
-        //                             // console.log("url " + url);
-        //                             manifest = manifest.replace(path.basename(s3Object.Key), url); //rebuild the manifest with signed urls - clever girl!
-        //                         }
-        //                     }
-        //                     res.setHeader('content-type', 'application/x-mpegURL');
-        //                     res.send(manifest);
-                        
-        //                 } catch (caught) {
-        //                     res.send(caught);
-        //                 }
-        //             })();
-        //         }
-        //     }
-        // });
+        
     } else {
         console.log("error " + pID);
         res.send("error in id " + pID);
@@ -6958,26 +6857,23 @@ app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return uservid : ' + req.params.p_id);
     var pID = req.params.p_id;
     var o_id = ObjectId.createFromHexString(pID);
-    db_old.video_items.findOne({"_id": o_id}, function(err, video_item) {
-        if (err || !video_item) {
-            console.log("error getting video items: " + err);
-        } else {
-            var item_string_filename = JSON.stringify(video_item.filename);
+    (async () => {
+        try {
+            const query = {"_id": o_id};
+            const video_item = await RunDataQuery("video_items", "findOne", query);
+            let item_string_filename = JSON.stringify(video_item.filename);
             item_string_filename = item_string_filename.replace(/\"/g, "");
-            var item_string_filename_ext = getExtension(item_string_filename);
-            var expiration = new Date();
-            expiration.setMinutes(expiration.getMinutes() + 30);
-
-            (async () => {
-            // var vidUrl = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + video_item.userID + "/video/" + video_item._id + "/" + video_item._id + "." + video_item.filename, Expires: 6000}); //just send back thumbnail urls for list
             var vidUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + video_item.userID + "/video/" + video_item._id + "/" + video_item._id + "." + video_item.filename, 6000);
-            //var urlPng = knoxClient.signedUrl(audio_item[0]._id + "." + pngName, expiration);
+
             video_item.URLvid = vidUrl; //jack in teh signed urls into the object array
-                        console.log("returning video_item : " + video_item.URLvid);
+                        // console.log("returning video_item : " + video_item.URLvid);
             res.json(video_item);
-            })();
+        } catch (e) {
+            console.log("error getting uservide " + e);
+            res.send("error getting uservid " + e);
         }
-    });
+    })();
+
 });
 
 app.post('/scene_inventory_objex/', function(req, res) {
@@ -7054,17 +6950,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
                               callback(null);
                                 
                             })();
-                            // db_old.actions.find({_id: {$in: aids }}, function (err, actions) {
-                            //     if (err || !actions) {
-                            //         callback(err);
-                            //     } else {
-                            //         obj_item.actions = actions;
-                            //         // console.log(JSON.stringify(obj_item.actions));
-                            //         callback(null);
-                            //     }
-                            // });
-
-
+                         
                         } else {
                             callback(null);
                         }
@@ -7199,93 +7085,7 @@ app.get('/audio/:id', requiredAuthentication, function (req, res){ //TODO Authen
         }
     })();
 });
-    // db_old.audio_items.findOne({ "_id" : o_id}, function(err, audio_item) {
-    //     if (err || !audio_item) {
-    //         console.log("error getting audio items: " + err);
-    //     } else {
-    //         let orig = null;
-    //         async.waterfall([
-    //             function(callback){  
-                    
-    //                 if (audio_item.textitemID && audio_item.textitemID != "") {
-    //                     var t_id = ObjectId.createFromHexString(audio_item.textitemID.toString());
-    //                     db_old.text_items.findOne({"_id" : t_id}, function (err, text_item) {
-    //                         if (err || !text_item) {
-    //                             console.log("no text for audio item");
-    //                             callback(null, "error");
-    //                         } else {
-    //                             console.log(text_item);
-    //                             if (text_item.textstring != "") {
-
-    //                             callback(null, text_item.textstring);
-
-    //                             console.log("text_item.textstring: " + text_item.textstring);
-    //                             } else {
-    //                                 callback(null, "");
-    //                             }
-    //                         }
-    //                     });
-
-    //                 } else {
-    //                     callback(null, "");
-    //                 }
-    //             },
   
-    //             function(text_string, callback) { //add the signed URLs to the obj array
-
-    //                 (async () => {
-    //                     var item_string_filename = JSON.stringify(audio_item.filename);
-    //                     item_string_filename = item_string_filename.replace(/\"/g, "");
-    //                     var item_string_filename_ext = getExtension(item_string_filename);
-    //                     var expiration = new Date();
-    //                     expiration.setMinutes(expiration.getMinutes() + 3);
-    //                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-    //                     console.log(baseName);
-    //                     var mp3Name = baseName + '.mp3';
-    //                     var oggName = baseName + '.ogg';
-    //                     var pngName = baseName + '.png';
-
-    //                     var urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name, 6000); 
-    //                     var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + oggName, 6000); 
-    //                     var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + pngName, 6000); 
-    //                     // var urlMp3 = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name, Expires: 6000});
-    //                     // var urlOgg = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + oggName, Expires: 6000});
-    //                     // var urlPng = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + pngName, Expires: 6000});
-    //                     audio_item.URLmp3 = urlMp3; //jack in teh signed urls into the object array
-    //                     audio_item.URLogg = urlOgg;
-    //                     audio_item.URLpng = urlPng;
-    //                     if (orig != null) {
-    //                         audio_item.URLorig = orig;
-    //                     }
-    //                     audio_item.textString = text_string;
-
-    //                     callback(null);
-    //                 })();
-    //             }],
-
-    //             function(err, result) { // #last function, close async
-    //                 res.json(audio_item);
-    //                 console.log("waterfall done: " + result);
-    //             }
-    //         );
-    //     }
-    // });
-// });
-
-// app.post('/gen_short_code', checkAppID, requiredAuthentication, function (req, res) {
-//     console.log(req.params);
-//     var audioID = req.params.id;
-//     var o_id = ObjectId.createFromHexString(audioID);   
-//     console.log('audioID requested : ' + audioID);
-//     db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
-//         if (err || !audio_item && audio_item.short_id == null) {
-//             console.log("error getting audio items: " + err);
-//         } else {
-//             console.log("tryna update " + req.params.id + " to status " + req.params.item_status);
-//             db_old.audio_items.update( { _id: o_id }, { $set: { item_status: req.params.item_status }});
-//         }
-//     });
-// });
 
 app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log(req.params._id);
@@ -11848,31 +11648,31 @@ app.post('/clone_scene', requiredAuthentication, function (req,res) {
     });
 });
 
-app.post('/update_scene_locations', checkAppID, requiredAuthentication, function (req, res){ //unused.  I think.
+// app.post('/update_scene_locations', checkAppID, requiredAuthentication, function (req, res){ //unused.  I think.
 
-    console.log("tryna update scene locations: " + req.body.locations);
-    var sceneID = req.body.sceneID;
+//     console.log("tryna update scene locations: " + req.body.locations);
+//     var sceneID = req.body.sceneID;
 
-    var locationsObj = JSON.parse(req.body.locations);
-//    console.log("number of locations: " + locationsObj.locations.Length);
-//    for (var i = 0; i < locationsObj.locations.Length; i++) {
-//        console.log(JSON.stringify(locationsObj.locations[i]));
-//
-//    }
-    var o_id = ObjectId.createFromHexString(req.body._id);
+//     var locationsObj = JSON.parse(req.body.locations);
+// //    console.log("number of locations: " + locationsObj.locations.Length);
+// //    for (var i = 0; i < locationsObj.locations.Length; i++) {
+// //        console.log(JSON.stringify(locationsObj.locations[i]));
+// //
+// //    }
+//     var o_id = ObjectId.createFromHexString(req.body._id);
 
-    db_old.scenes.update({ "_id" : o_id}, { $push: { sceneLocations: { $each: locationsObj.locations } } }, function(err, result) {
-        if (err || !result) {
-            console.log("error updating scene locations: " + err);
-        } else {
-            res.send(result);
-        }
-    });
-//    locationsObj.locations.filter(function (item){
-//       console.log(JSON.stringify(item));
-//    });
+//     db_old.scenes.update({ "_id" : o_id}, { $push: { sceneLocations: { $each: locationsObj.locations } } }, function(err, result) {
+//         if (err || !result) {
+//             console.log("error updating scene locations: " + err);
+//         } else {
+//             res.send(result);
+//         }
+//     });
+// //    locationsObj.locations.filter(function (item){
+// //       console.log(JSON.stringify(item));
+// //    });
 
-});
+// });
 
 app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
 
@@ -12128,7 +11928,6 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
     })();
 });
 
-
 app.post('/newobj', requiredAuthentication, function (req, res) {
 
     var newobj = req.body;
@@ -12136,23 +11935,45 @@ app.post('/newobj', requiredAuthentication, function (req, res) {
     newobj.userName = req.session.user.userName;
     let timestamp = Math.round(Date.now() / 1000);
     newobj.createdTimestamp = timestamp;
-    db_old.obj_items.save(newobj, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('object not saved..');
-            res.send("nilch");
-        } else {
+    (async () => {
+        try {
+            const saved = await RunDataQuery("obj_items", "insertOne", newobj);
             var item_id = saved._id.toString();
             console.log('new object created, id: ' + item_id);
             res.send("created: " + item_id);
+        } catch (e) {
+            console.log("error creating new obj!" + e)
+            res.send("error creating new obj " + e);
         }
-    });
+    })();
+
+    // db_old.obj_items.save(newobj, function (err, saved) {
+    //     if ( err || !saved ) {
+    //         console.log('object not saved..');
+    //         res.send("nilch");
+    //     } else {
+    //         var item_id = saved._id.toString();
+    //         console.log('new object created, id: ' + item_id);
+    //         res.send("created: " + item_id);
+    //     }
+    // });
 });
 
 app.post('/delete_obj/', requiredAuthentication, function (req, res) { 
     console.log("tryna delete obj: " + req.body._id);
     var o_id = ObjectId.createFromHexString(req.body._id);
-    db_old.obj_items.remove( { "_id" : o_id }, 1 );
-    res.send("deleted");
+    (async () => {
+        try {
+            const query = { "_id" : o_id };
+            const removed = await RunDataQuery("obj_items", "deleteOne", query);
+            res.send("deleted");
+        } catch (e) {
+            console.log("error deleting audio!" + e)
+            res.send("error dleting audio " + e);
+        }
+    })();
+    // db_old.obj_items.remove( { "_id" : o_id }, 1 );
+    // res.send("deleted");
 });
 
 
@@ -12220,25 +12041,21 @@ app.post('/update_video/:_id', requiredAuthentication, function (req, res) {
 
     var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('video requested : ' + req.body._id);
-    db_old.video_items.findOne({ "_id" : o_id}, function(err, video_item) {
-        if (err || !video_item) {
-            console.log("error getting pic items: " + err);
-        } else {
-            console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
+
+    (async () => {
+        try {
+            const query = { "_id" : o_id};
             let timestamp = Math.round(Date.now() / 1000);
             let isPublic = false;
             if (req.body.isPublic != null) {
                 isPublic = req.body.isPublic;
             }
-            db_old.video_items.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
+            const updoc = { $set: { item_status: req.body.item_status,
                 tags: req.body.tags,
                 timekeys: req.body.timekeys,
                 title: req.body.title,
                 isPublic : isPublic,
                 orientation: req.body.orientation,
-                // hasAlphaChannel: req.body.hasAlphaChannel,
-                // captionUpper: req.body.captionUpper,
-                // captionLower: req.body.captionLower,
                 hasAlphaChannel: req.body.hasAlphaChannel,
                 captionUpper: req.body.captionUpper,
                 captionLower: req.body.captionLower,
@@ -12256,10 +12073,53 @@ app.post('/update_video/:_id', requiredAuthentication, function (req, res) {
                 lastUpdateTimestamp: timestamp,
                 lastUpdateUserID: req.session.user._id,
                 lastUpdateUserName: req.session.user.name,
+            }};
+            const updated = await RunDataQuery("video_items", "updateOne", query, updoc);
+            res.send("updated video " + updated);
+        } catch (e) {
+            console.log("error updating video " + e);
+        }
+    })();
+    // db_old.video_items.findOne({ "_id" : o_id}, function(err, video_item) {
+    //     if (err || !video_item) {
+    //         console.log("error getting pic items: " + err);
+    //     } else {
+    //         console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
+    //         let timestamp = Math.round(Date.now() / 1000);
+    //         let isPublic = false;
+    //         if (req.body.isPublic != null) {
+    //             isPublic = req.body.isPublic;
+    //         }
+    //         db_old.video_items.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
+    //             tags: req.body.tags,
+    //             timekeys: req.body.timekeys,
+    //             title: req.body.title,
+    //             isPublic : isPublic,
+    //             orientation: req.body.orientation,
+    //             // hasAlphaChannel: req.body.hasAlphaChannel,
+    //             // captionUpper: req.body.captionUpper,
+    //             // captionLower: req.body.captionLower,
+    //             hasAlphaChannel: req.body.hasAlphaChannel,
+    //             captionUpper: req.body.captionUpper,
+    //             captionLower: req.body.captionLower,
+    //             mods: req.body.mods,
+    //             license: req.body.license,
+    //             description: req.body.description,
+    //             linkType: req.body.linkType,
+    //             linkURL: req.body.linkURL,
+    //             sourceText: req.body.sourceText,
+    //             sourceTitle: req.body.sourceTitle,
+    //             sourceLink: req.body.sourceLink,
+    //             authorName: req.body.authorName,
+    //             authorLink: req.body.authorLink,
+    //             nft: req.body.nft,
+    //             lastUpdateTimestamp: timestamp,
+    //             lastUpdateUserID: req.session.user._id,
+    //             lastUpdateUserName: req.session.user.name,
 
-            }});
-        } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    });
+    //         }});
+    //     } if (err) {res.send(error)} else {res.send("updated " + new Date())}
+    // });
 });
 
 app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
@@ -12438,20 +12298,18 @@ app.post('/update_audio/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
     var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('audioID requested : ' + req.body);
-    db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
-        if (err || !audio_item) {
-            console.log("error getting audio items: " + err);
-        } else {
-            //console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
-            let timestamp = Math.round(Date.now() / 1000);
+
+    (async () => {
+        try {
+            const query = { "_id" : o_id};
+            const timestamp = Math.round(Date.now() / 1000);
             let isPublic = false;
             if (req.body.isPublic != null) {
                 isPublic = req.body.isPublic;
             }
             if (req.body.clipDuration != null && req.body.clipDuration != undefined)
             req.body.clipDuration = req.body.clipDuration.toString();
-            db_old.audio_items.update( { _id: o_id }, { $set: { 
-                // item_status : req.body.item_status != null ? req.body.item_status : "",
+            const updoc = { $set: {
                 tags: req.body.tags,
                 timekeys : req.body.timekeys,
                 samplekeys : req.body.samplekeys,
@@ -12471,61 +12329,105 @@ app.post('/update_audio/:_id', requiredAuthentication, function (req, res) {
                 lastUpdateTimestamp: timestamp,
                 lastUpdateUserID: req.session.user._id,
                 lastUpdateUserName: req.session.user.userName
-            }});
-        } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    });
-});
-
-app.get('/audioitems/:tag', checkAppID, requiredAuthentication, function(req, res) {
-    console.log('tryna return playlist: ' + req.params.tag);
-    db_old.audio.find({tags: req.params.tag, item_status: "public"}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
-        if (err || !audio_items) {
-            console.log("error getting audio items: " + err);
-
-        } else {
-
-            async.waterfall([
-
-                    function(callback){ //randomize the returned array, takes a shake so async it...
-                        //audio_items = Shuffle(audio_items);
-                        //audio_items.splice(0,audio_items.length - maxItems); //truncate randomized array, take only last 20
-                        callback(null);
-                    },
-
-                    function(callback) { //add the signed URLs to the obj array
-                        for (var i = 0; i < audio_items.length; i++) {
-
-                            var item_string_filename = JSON.stringify(audio_items[i].filename);
-                            item_string_filename = item_string_filename.replace(/\"/g, "");
-                            var item_string_filename_ext = getExtension(item_string_filename);
-                            var expiration = new Date();
-                            expiration.setMinutes(expiration.getMinutes() + 1000);
-                            var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                            console.log(baseName);
-                            var mp3Name = baseName + '.mp3';
-                            var oggName = baseName + '.ogg';
-                            var pngName = baseName + '.png';
-                            var urlMp3 = knoxClient.signedUrl(audio_items[i]._id + "." + mp3Name, expiration);
-                            var urlOgg = knoxClient.signedUrl(audio_items[i]._id + "." + oggName, expiration);
-                            var urlPng = knoxClient.signedUrl(audio_items[i]._id + "." + pngName, expiration);
-                            audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-                            audio_items[i].URLogg = urlOgg;
-                            audio_items[i].URLpng = urlPng;
-
-                        }
-                        console.log('tryna send ' + audio_items.length + 'audio_items ');
-                        callback(null);
-                    }],
-
-                function(err, result) { // #last function, close async
-                    res.json(audio_items);
-                    console.log("waterfall done: " + result);
-                }
-            );
+            }};
+            const updated = await RunDataQuery ("audio_items", "updateOne", query, updoc);
+            res.send("updated audio item " + updated);
+        } catch (e) {
+            console.log("error updating audio item " + e);
+            res.send("error updating audio item " + e);
         }
-    });
-
+    })();
 });
+
+    // db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
+    //     if (err || !audio_item) {
+    //         console.log("error getting audio items: " + err);
+    //     } else {
+
+    //         //console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
+    //         let timestamp = Math.round(Date.now() / 1000);
+    //         let isPublic = false;
+    //         if (req.body.isPublic != null) {
+    //             isPublic = req.body.isPublic;
+    //         }
+    //         if (req.body.clipDuration != null && req.body.clipDuration != undefined)
+    //         req.body.clipDuration = req.body.clipDuration.toString();
+    //         db_old.audio_items.update( { _id: o_id }, { $set: { 
+    //             // item_status : req.body.item_status != null ? req.body.item_status : "",
+    //             tags: req.body.tags,
+    //             timekeys : req.body.timekeys,
+    //             samplekeys : req.body.samplekeys,
+    //             user_groups: req.body.user_groups,
+    //             title: req.body.title,
+    //             isPublic : isPublic,
+    //             alt_title: req.body.alt_title,
+    //             alt_artist: req.body.alt_artist,
+    //             alt_source: req.body.alt_album,
+    //             modVol: req.body.modVol,
+    //             sourceText: req.body.sourceText != undefined ? req.body.sourceText : "",
+    //             clipDuration : req.body.clipDuration != null ? req.body.clipDuration : "",
+    //             textitemID : req.body.textitemID != null ? req.body.textitemID : "",
+    //             textgroupID : req.body.textgroupitemID != null ? req.body.textgroupitemID : "",
+    //             pictureitemID : req.body.pictureitemID != null ? req.body.pictureitemID : "",
+    //             picturegroupID : req.body.picturegroupID != null ? req.body.picturegroupID : "",
+    //             lastUpdateTimestamp: timestamp,
+    //             lastUpdateUserID: req.session.user._id,
+    //             lastUpdateUserName: req.session.user.userName
+    //         }});
+    //     } if (err) {res.send(error)} else {res.send("updated " + new Date())}
+    // });
+// });
+
+// app.get('/audioitems/:tag', checkAppID, requiredAuthentication, function(req, res) {
+//     console.log('tryna return playlist: ' + req.params.tag);
+//     db_old.audio.find({tags: req.params.tag, item_status: "public"}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
+//         if (err || !audio_items) {
+//             console.log("error getting audio items: " + err);
+
+//         } else {
+
+//             async.waterfall([
+
+//                     function(callback){ //randomize the returned array, takes a shake so async it...
+//                         //audio_items = Shuffle(audio_items);
+//                         //audio_items.splice(0,audio_items.length - maxItems); //truncate randomized array, take only last 20
+//                         callback(null);
+//                     },
+
+//                     function(callback) { //add the signed URLs to the obj array
+//                         for (var i = 0; i < audio_items.length; i++) {
+
+//                             var item_string_filename = JSON.stringify(audio_items[i].filename);
+//                             item_string_filename = item_string_filename.replace(/\"/g, "");
+//                             var item_string_filename_ext = getExtension(item_string_filename);
+//                             var expiration = new Date();
+//                             expiration.setMinutes(expiration.getMinutes() + 1000);
+//                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                             console.log(baseName);
+//                             var mp3Name = baseName + '.mp3';
+//                             var oggName = baseName + '.ogg';
+//                             var pngName = baseName + '.png';
+//                             var urlMp3 = knoxClient.signedUrl(audio_items[i]._id + "." + mp3Name, expiration);
+//                             var urlOgg = knoxClient.signedUrl(audio_items[i]._id + "." + oggName, expiration);
+//                             var urlPng = knoxClient.signedUrl(audio_items[i]._id + "." + pngName, expiration);
+//                             audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
+//                             audio_items[i].URLogg = urlOgg;
+//                             audio_items[i].URLpng = urlPng;
+
+//                         }
+//                         console.log('tryna send ' + audio_items.length + 'audio_items ');
+//                         callback(null);
+//                     }],
+
+//                 function(err, result) { // #last function, close async
+//                     res.json(audio_items);
+//                     console.log("waterfall done: " + result);
+//                 }
+//             );
+//         }
+//     });
+
+// });
 
 
 app.post('/delete_audio/', requiredAuthentication, function (req, res){
