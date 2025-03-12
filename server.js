@@ -32,9 +32,6 @@ import { RunDataQuery } from "./connect/database.js"; //connection happens here
 
 const entities = require("entities");
 
-
-
-
 // const requireText = require('require-text');
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -59,7 +56,7 @@ app.use(helmet.xssFilter());
 
 
 
-var stripe = require("stripe")(process.env.STRIPE_KEY);
+
 
 var rootHost = process.env.ROOT_HOST
 var topName = process.env.ROOT_NAME;
@@ -202,8 +199,10 @@ app.use(function(req, res, next) {
     app.use('/webxr', webxr_routes); 
     import landing_routes from './routes/landing_routes.js';
     app.use('/landing', landing_routes);  
-    // import unity_routes from './routes/unity_routes.js';
-    // app.use('/unity', unity_routes);  
+    import unity_routes from './routes/unity_routes.js';
+    app.use('/unity', unity_routes);  
+    import stripe_routes from './routes/stripe_routes.js';
+    app.use('/stripe', stripe_routes);
     // import gs_routes from './routes/gs_routes.js';
     // app.use('/gs', gs_routes);  
     
@@ -369,8 +368,9 @@ io.on('connection', function(socket) {
 
 });
 
+//////////////////// middleware functions inserted into routes
 
-export function requiredAuthentication(req, res, next) { //primary auth method, used as "middlewre" in the routes below
+export function requiredAuthentication(req, res, next) { //primary auth method, used in the routes below
 
     if (req.session.user && req.session.user.status == "validated") { //check using session cookie
         if (requirePayment) { 
@@ -1364,7 +1364,7 @@ app.post("/authreq", function (req, res) {
             console.log(authUser.length + " users like dat " + username + " authlevel " + authUser[0].authLevel + " and isSubscriber " + isSubscriber );
             const authUserIndex = 0; //
             // for (var i = 0; i < authUser.length; i++) {
-            //     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name// seems a bad thing because why
+            //     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name// seems like a bad thing...
             //         authUserIndex = i;
             //     }
             // }
@@ -1440,21 +1440,22 @@ app.post("/authreq", function (req, res) {
    
 app.get('/traffic/:domain', requiredAuthentication, admin, function (req, res) {
     console.log("tryna get traffic info for " + req.params.domain);
-    db_old.domains.findOne({"domain": req.params.domain}, function (err, domain) {
-        if (err | !domain) {
-            res.send("that ain't no domain");
-        } else {
-            
-            db_old.scenes.find( { "sceneDomain": sceneResponse.sceneDomain}, function (err, scenes) {
-                if (err || !scenes) {
-                    console.log("cain't get no domain scenes for " + req.params.domain +  " " + err);
-                    res.send("cain't get no domain scenes for " + req.params.domain +  " " + err);
-                } else {
-
-                }
-            });
+    (async () => {
+        try {
+            const query = {"domain": req.params.domain};
+            const domain = await RunDataQuery("domain","findOne", query);
+            if (domain) {
+                const scenequery = {"sceneDomain": sceneResponse.sceneDomain};
+                const scenes = await RunDataQuery("scenes", "find", scenequery);
+                res.send(scenes);
+            } else {
+                res.send(req.params.domain + " domain not found!");
+            }
+           
+        } catch (e) {
+            res.send("error getting domain traffic " +e);
         }
-    });
+    })();
 });
 
 
@@ -1537,233 +1538,151 @@ app.get('/validate/:auth_id', function (req, res) {
     console.log("tryna validate...");
     //var u_id = ObjectId.createFromHexString(req.params.auth_id);
     var timestamp = Math.round(Date.now() / 1000);
-    db_old.users.findOne({ validationHash : req.params.auth_id}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting user: " + err);
-        } else {
-            db_old.users.update( { _id: user._id }, { $set: { status: 'validated' }});
-            console.log("validated user " + req.params.auth_id);
-            // res.send("<h4>Thanks " + user.userName + ", your address has been validated! <a href=\"https://servicemedia.net/#/login\">Click here to login.</a> </h4>");
-            res.send("<h4>Thanks " + user.userName + ", your address has been validated! You may now login using the credentials you supplied.  <br><br>To change your password, <a href=\"" + rootHost + "/resetpw.html\">Click here</a> </h4>");
-        }
-    });
-});
-
-
-
-app.post('/stripe_charge', requiredAuthentication, function (req,res) {
-
-    // (LATER): When it's time to charge the customer again, retrieve the customer ID.
-
-    db_old.users.findOne({userName: req.body.uname}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting user: " + err);
-        } else {
-            if (user.stripeCustomerID != null) {
-                stripe.charges.create({
-                    amount: 1500, // $15.00 this time
-                    currency: "usd",
-                    customer: user.stripeCustomerID,
-                }).then(function(charge){
-                    console.log(JSON.stringify(change));
-                });
+    (async () => {
+        try {
+            const query = {"validationHash" : req.params.auth_id};
+            const user = await RunDataQuery("users","findOne", query);
+            if (user) {
+                const uquery = { _id: user._id };
+                const updoc =  { $set: { status: 'validated' }};
+                const upuser = await RunDataQuery("users"," updateOne", query, updoc);
+                res.send("<h4>Thanks " + user.userName + 
+                ", your address has been validated! You may now login using the credentials you supplied.  <br><br>To change your password, <a href=\"" + rootHost + 
+                "/resetpw.html\">Click here</a> </h4>");
             } else {
-                    console.log("no customer id!");
+                res.send("validation string not found!");
             }
+            res.send();
+           
+           
+        } catch (e) {
+            console.log("error validating user " +e);
+            res.send("error validating user " +e);
         }
-    });
+    })();
 });
 
-app.post('/stripe_collect_data', function (req,res) {
 
-    var token = req.body.stripeToken;
-    var purchaseTimestamp = Date.now();
-    var customerID = "";
-    stripe.customers.create({
-        email: req.body.stripeEmail,
-        source: token
-    }).then(function(customer) {
-        // YOUR CODE: Save the customer ID and other info in a database for later.
-        customerID = customer.id;
-        return stripe.charges.create({
-            amount: req.body.amountInCents,
-            currency: "usd",
-            receipt_email: req.body.stripeEmail,
-            customer: customer.id
-        });
-    }).then(function(charge) {
-        // Use and save the charge info.
-        // console.log("charged! " + token +  " body:  " + JSON.stringify(req.body) + " charge " + JSON.stringify(charge));
-        req.body.purchaseTimestamp = purchaseTimestamp;
-        req.body.chargeDetails = charge;
 
-        db_old.users.findOne({email: req.body.stripeEmail }, function (err, user) {
-            if (err || ! user) { //if it's a new user
-                console.log('dinna find that email - new user!');
-                db_old.purchases.save(req.body, function (err, saved) { //save purchase first
-                    if ( err || !saved ) {
-                        console.log('purchase not saved..');
-        //                res.send("nilch");
-                    } else {
-                        var item_id = saved._id.toString(); //purchase ID
-                        console.log('new purchase id: ' + item_id);
-                        var from = "admin@servicemedia.net";
-                        var timestamp = Math.round(Date.now() / 1000);
-                        var ip = req.headers['x-forwarded-for'] ||
-                            req.connection.remoteAddress ||
-                            req.socket.remoteAddress ||
-                            req.connection.socket.remoteAddress;
-                        var userPass = shortid.generate();
-                        bcrypt.genSalt(10, function(err, salt) {
-                        bcrypt.hash(userPass, salt, null, function(err, hash) {
-                        var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-                        db_old.users.save({
-                                type : 'webuser',
-                                status : 'unvalidated',
-                                userName : req.body.stripeEmail,
-                                email : req.body.stripeEmail,
-                                createDate : timestamp,
-                                validationHash : cleanhash,
-                                createIP : ip,
-                                paymentStatus: "ok",
-                                lastPurchaseID: item_id,
-                                // odomain : req.body.domain, //original domain
-                                // oappid : req.headers.appid.toString().replace(":", ""), //original app id
-                                password : hash
-                            },
-                            function (err, newUser){
-                                if ( err || !newUser ){
-                                    console.log("db error, new user not saved", err);
-                                    res.send("error");
-                                } else  {
-                                    console.log("new user saved to db");
-                                    var user_id = newUser._id.toString();
-                                    console.log("userID: " + user_id);
+// app.post('/stripe_charge', requiredAuthentication, function (req,res) {
 
-                                    htmlbody = "Welcome to " + topName + ", " + req.body.stripeEmail + "! <br><a href=\"" + rootHost + "/validate/" + cleanhash + "\">To get started, click here to validate account</a> <br><br>"+
-                                    "You may then log into the app, using your email as username, and with the password <strong>" + userPass + "</strong> which you may change at any time." +
-                                    " You may also change your username, but your account will remain tied to this email address.<br><br>" +
-                                    "Payment ID: " + item_id;
+//     // (LATER): When it's time to charge the customer again, retrieve the customer ID.
 
-                                    (async () => {
-
-                                        try {
-                                            // const status1 = await SendEmail(to, from, htmlbody, subject);
-                                            const status2 = await SendEmail(req.body.stripeEmail, process.env.ADMIN_EMAIL, htmlbody, 'New ' + topName + ' Subscription!');
-                                            console.log("new sub mail " + status2);
-                                            // res.redirect("/#/");
-                                            // callback(null);
-                                        } catch (e) {
-                                            console.log("payment update mailfail " + e);
-                                            // callback(e);
-                                            // res.send(e);
-                                        }
-                                    
-                                    })();
-                                    // ses.sendEmail({
-                                    //     Source: from,
-                                    //     Destination: { ToAddresses: [req.body.stripeEmail], CcAddresses: [], BccAddresses: [adminEmail] },
-                                    //     Message: {
-                                    //         Subject: {
-                                    //             Data: 'New ' + topName + ' Subscription!'
-                                    //         },
-                                    //         Body: {
-                                    //             Html: {
-                                    //                 Data: htmlbody
-                                    //             }
-                                    //         }
-                                    //     }
-                                    // }
-                                    // , function(err, data) {
-                                    //     if(err) throw err
-                                    //     console.log('Email sent:');
-                                    //     console.log(data);
-                                    //     //res.redirect("http://elnoise.com/#/login");
-                                    // });
-                                }
-                                    res.redirect("/#/newthanks");
-                                });
-
-                            });
-                        });
-                    }
-                });
-
-            } else {
-                console.log("tryna update payment for existing user " + req.body.stripeEmail);
-                db_old.purchases.save(req.body, function (err, saved) {
-                if ( err || !saved ) {
-                    console.log('purchase not saved..');
-                    res.send("nilch");
-                } else {
-                    var item_id = saved._id.toString();
-                    console.log('new purchase id: ' + item_id);
-                    if (item_id != null) {
+//     (async () => {
+//         try {
+//             const query = {"userName": req.body.uname};
+//             const user = await RunDataQuery("users", "findOne",query);
+//             if (user) {
+//                 if (user.stripeCustomerID != null) {
+//                     stripe.charges.create({
+//                         amount: 1500, // $15.00 this time
+//                         currency: "usd",
+//                         customer: user.stripeCustomerID,
+//                     }).then(function(charge){
+//                         console.log("stripeCharge : " + req.body.uname);
+//                         res.send(JSON.stringify(charge));
                         
-                        db_old.users.update( { email: req.body.stripeEmail }, { $set: { stripeCustomerID: customerID, paymentStatus: "ok", lastPurchaseID : item_id }});
-                    
-                        htmlbody = "Thanks for your support, your payment was received! You should be able login as usual.<br>"+
-                        "If you need to reset your password, go to " + rootHost + "/#/reset/<br>" + 
-                        "If you have any questions or problems, you may reply to this email, or contact polytropoi@gmail.com. <br>Best regards,<br>Jim Cherry<br><br>" +
-                        "Payment ID: " + item_id;
+//                     });
+//                 } else {
+//                         console.log("no stripe customer id!");
+//                         res.send("no stripe customer ID!");
+//                 }
+//             }
+//         } catch (e) {
+//             res.send("error doing stripe charge " +e);
+//         }
+//     })();
 
-                        (async () => {
+// });
 
-                            try {
-                                // const status1 = await SendEmail(to, from, htmlbody, subject);
-                                const status2 = await SendEmail(req.body.stripeEmail, process.env.ADMIN_EMAIL, htmlbody, topName + ' Payment Received - Thanks!');
-                                console.log("new sub mail " + status2);
-                                // res.redirect("/#/");
-                                // callback(null);
-                            } catch (e) {
-                                console.log("payment update mailfail " + e);
-                                // callback(e);
-                                // res.send(e);
-                            }
-                           
-                        })();
-                        // ses.sendEmail({
-                        //     Source: "admin@servicemedia.net",
-                        //     Destination: { ToAddresses: [req.body.stripeEmail], CcAddresses: [], BccAddresses: [adminEmail] },
-                        //     Message: {
-                        //         Subject: {
-                        //             Data: topName + ' Payment Received - Thanks!'
-                        //         },
-                        //         Body: {
-                        //             Html: {
-                        //                 Data: htmlbody
-                        //             }
-                        //         }
-                        //     }
-                        // }
-                        // , function(err, data) {
-                        //     if(err) throw err
-                        //     console.log('Email sent:');
-                        //     console.log(data);
-                        //     //res.redirect("http://elnoise.com/#/login");
-                        // });
-                    }
-                }
-                });
-                res.redirect("/#/thanks");
-            }
-        });
-        // res.send(JSON.stringify(charge));
-    });
+// app.post('/stripe_collect_data', function (req,res) { // hrm...
 
-//    var charge = stripe.charges.create({
-//        amount: 1000,
-//        currency: "usd",
-//        description: "Example charge",
-//        source: token,
-//    }, function(err, charge) {
-//        // asynchronously called
-//        console.log("charged! " + token +  " body:  " + JSON.stringify(req.body) + " charge " + JSON.stringify(charge));
-//
-//        res.send("token : " + token +  " for " + JSON.stringify(req.body));
-//
-//    });
-});
+//     var token = req.body.stripeToken;
+//     var purchaseTimestamp = Date.now();
+//     var customerID = "";
+//     stripe.customers.create({
+//         email: req.body.stripeEmail,
+//         source: token
+//     }).then(function(customer) {
+//         //Save the customer ID and other info in a database for later.
+//         customerID = customer.id;
+//         return stripe.charges.create({
+//             amount: req.body.amountInCents,
+//             currency: "usd",
+//             receipt_email: req.body.stripeEmail,
+//             customer: customer.id
+//         });
+//     }).then(function(charge) {
+//         // Use and save the charge info.
+//         // console.log("charged! " + token +  " body:  " + JSON.stringify(req.body) + " charge " + JSON.stringify(charge));
+//         req.body.purchaseTimestamp = purchaseTimestamp;
+//         req.body.chargeDetails = charge;
+
+//         (async () => {
+//             try {
+//                 const query = {"email": req.body.stripeEmail };
+//                 const user = await RunDataQuery("users", "findOne",query);
+//                 if (!user) { //no user found w/ email, so new user
+//                     var item_id = saved._id.toString(); //purchase ID
+//                     console.log('new purchase id: ' + item_id);
+//                     var from = "admin@servicemedia.net";
+//                     var timestamp = Math.round(Date.now() / 1000);
+//                     var ip = req.headers['x-forwarded-for'] ||
+//                         req.connection.remoteAddress ||
+//                         req.socket.remoteAddress ||
+//                         req.connection.socket.remoteAddress;
+//                     var userPass = shortid.generate();
+//                     const cleanhash = bcrypt.genSalt(10, function(err, salt) {
+//                         bcrypt.hash(userPass, salt, null, function(err, hash) {
+//                         return validator.blacklist(hash, ['/','.','$']);                       
+//                         });
+//                     });
+//                     const newUser = await RunDataQuery("users", "insertOne", updoc);
+//                     const updoc = {
+//                         type : 'webuser',
+//                         status : 'unvalidated',
+//                         userName : req.body.stripeEmail,
+//                         email : req.body.stripeEmail,
+//                         createDate : timestamp,
+//                         validationHash : cleanhash,
+//                         createIP : ip,
+//                         paymentStatus: "ok",
+//                         lastPurchaseID: item_id,
+//                         password : hash
+//                     };
+//                     var user_id = newUser._id.toString();
+//                     console.log("userID: " + user_id);
+
+//                     htmlbody = "Welcome to " + topName + ", " + req.body.stripeEmail + "! <br><a href=\"" + rootHost + "/validate/" + cleanhash + "\">To get started, click here to validate account</a> <br><br>"+
+//                     "You may then log into the app, using your email as username, and with the password <strong>" + userPass + "</strong> which you may change at any time." +
+//                     " You may also change your username, but your account will remain tied to this email address.<br><br>" +
+//                     "Payment ID: " + item_id;
+
+//                     const mailStatus = await SendEmail(req.body.stripeEmail, process.env.ADMIN_EMAIL, htmlbody, 'New ' + topName + ' Subscription!');
+//                     console.log("new sub mail " + mailStatus);
+
+//                 } else {
+//                     //existing user
+//                     console.log("tryna update payment for existing user " + req.body.stripeEmail);
+//                     const saved = await RunDataQuery("payments", "insertOne", req.body);
+//                     const item_id = saved._id.toString();
+//                     const userquery =  { "email": req.body.stripeEmail };
+//                     const updoc = { $set: { stripeCustomerID: customerID, paymentStatus: "ok", lastPurchaseID : item_id }}; //what else?
+//                     const updated = await RunDataQuery("users", "updateOne", userquery, updoc);
+//                     htmlbody = "Thanks for your support, your payment was received! You should be able login as usual.<br>"+
+//                     "If you need to reset your password, go to " + rootHost + "/#/reset/<br>" + 
+//                     "If you have any questions or problems, you may reply to this email, or contact polytropoi@gmail.com. <br>Best regards,<br>Jim Cherry<br><br>" +
+//                     "Payment ID: " + item_id;
+//                     const mailStatus = await SendEmail(req.body.stripeEmail, process.env.ADMIN_EMAIL, htmlbody, topName + ' Payment Received - Thanks!');
+//                     console.log("new sub mail " + mailStatus);
+//                 }
+//                 res.redirect("/#/newthanks");
+//             } catch (e) {
+//                 res.send("error processing stripe charge " +e);
+//             }
+//         })();
+//     });
+// });
 
 app.get('/makedomainadmin/:domain/:_id',  checkAppID, requiredAuthentication, admin, function (req, res) {
     console.log(" makedomainadmin req" + req)

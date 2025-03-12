@@ -11,8 +11,7 @@ const ObjectID = require("bson-objectid");
 const path = require("path");
 
 
-import { db } from "../server.js";
-// import { s3 } from "../server.js";
+import { db_old as db } from "../server.js";
 import { ReturnPresignedUrl, getExtension, removeDuplicates } from "../server.js";
 
 unity_router.get("/test", function (req, res) {
@@ -731,7 +730,7 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { //need 
                 if ((sceneResponse.userName == null || sceneResponse.userName.length < 1) && (sceneResponse.user_id != null)) {
 
                     var oo_id = ObjectID(sceneResponse.user_id);
-                    db.users.findOne({_id: oo_id}, function (err, user) {
+                    db_old.users.findOne({_id: oo_id}, function (err, user) {
                         if (!err || user != null) {
                             console.log("tryna inject usrname: " + user.userName);
                             sceneResponse.userName = user.userName;
