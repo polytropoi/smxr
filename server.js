@@ -2380,456 +2380,200 @@ app.post('/update_profile/:_id', requiredAuthentication, function (req, res) { /
 
 
 app.post('/drop/', requiredAuthentication, function (req, res) { 
-    let timestamp = Math.round(Date.now() / 1000);
-    let i_id = ObjectId.createFromHexString(req.body.inventoryObj._id); //player inventory//nope, id of the inventory_item
+    // let timestamp = Math.round(Date.now() / 1000);
+    let i_id = ObjectId.createFromHexString(req.body.inventoryObj._id); //id of the inventory_item
     // let sceneInventoryID = null; //scene inventory
-    let sceneInventory = null;
+    // let sceneInventory = null;
     let maxperscene = 0;
-    async.waterfall([
-        // function (callback) {
 
-        // },
-        function (callback) { //check object
-
+    (async () => {
+        try {
             let o_id = ObjectId.createFromHexString(req.body.inventoryObj.objectID);
-            db_old.obj_items.findOne({"_id": o_id}, function (err, obj) { //get obj to check maxperscene
-                if (err || !obj) {
-                    console.log("no object found for drop");
-                    callback(err);
-                    // res.send("no object found");
-                } else {
-   
-                    console.log("checking maxperscene " + obj.maxPerScene);
-                    // let iCount = 0;
-                    if (obj.maxPerScene != undefined && obj.maxPerScene != null) {
-                        maxperscene = obj.maxPerScene;
-                    }
-                    callback(null);
-                }
-            });
-        },  
-        function (callback) { //check scene
-            db_old.scenes.findOne({"short_id": req.body.inScene}, function (err, scene){
-                if (err || !scene) {
-                    console.log("error finding scene to dropin! " + err);
-                    callback(err);
-                } else {
-                    db_old.inventory_items.find({$and: [{"sceneID" : scene._id, "objectID": ObjectId.createFromHexString(req.body.inventoryObj.objectID)}]}, function (err, items) { //query to get count below
-                        if (err || !items) {
-                            console.log("no scene for drop!");
-                            callback(err);
-                        } else {
-                            console.log("gotsa scene for drop items " + items);
-                            if (items.length > maxperscene) {
-                                callback("maxed per scene!");
-                            } else {
-                                db_old.inventory_items.updateOne({"_id": i_id}, {
-                                $unset: {userID: ""}, 
-                                $set: {sceneID : ObjectId.createFromHexString(scene._id), location : req.body.inventoryObj.location}
-                            }, function (err, saved) { //unset userID and set the sceneID for ownership reference
-                                    if (err || !saved) {
-                                        callback("error switching ownerszsipzt! " + err);
-                                    } else {
-                                        callback(null);
-                                    }
-                                });
-                                // callback(null);
-
-                            }
-                            // callback(null);
-                        }
-                    });
-                }
-            })
-            
+            const objquery = {"_id": o_id};
+            const obj = await RunDataQuery("obj_items", "findOne", objquery);
+            if (obj.maxPerScene != undefined && obj.maxPerScene != null) {
+                maxperscene = obj.maxPerScene;
+            }
+            const scenequery = {"short_id": req.body.inScene}; //should save real sceneID, to skip this one
+            const scene = await RunDataQuery("scenes", "findOne", scenequery);
+            const invquery = {$and: [{"sceneID" : scene._id, "objectID": ObjectId.createFromHexString(req.body.inventoryObj.objectID)}]};
+            const inv_items = await RunDataQuery("inventory_items", "find", invquery);
+            if (inv_items.length > maxperscene) {
+                res.send("maxed per scene!");
+            } else {
+                const upinvquery = {"_id": i_id};
+                const updoc = {$unset: {userID: ""}, $set: {"sceneID" : scene._id, "location": req.body.inventoryObj.location}};
+                const updated = await RunDataQuery("inventory_items", "updateOne", upinvquery, updoc);
+                console.log("drop has dropped");
+                res.send("updated " + updated);
+                
+            }
+        } catch (e) {
+            console.log("error dropping an inventory item! " + e);
+            res.send("error dropping " + e);
         }
-    ],        
-    
-    function (err, result) { // #last function, close async
-        if (err) {
-            res.send(err);
-        } else {
-            res.send('updated');
-            // console.log("returning inventory " + profileResponse);
-        }
-      
-    });
+    })();
 });
-
-
-//new pickup method
-// 1. find user, create action, create inventory
-// 2. lookup user inventory items
-// 3. count objectIDs
-// 4. 
 
 app.post('/pickup/', requiredAuthentication, function (req, res) { 
     let timestamp = Math.round(Date.now() / 1000);
-    // console.log("pickup userid " + req.session.user._id + " data: " + JSON.stringify(req.body));
-        let inventoryItem = {};
-        let actionItem = {};
-        let sceneInventoryID = null;
-        
-        var u_id = ObjectId.createFromHexString(req.session.user._id);
-        // let user = null;
-        async.waterfall([
-            function (callback) {
-                // var u_id = ObjectId.createFromHexString(req.session.user._id);
-                if (req.session.user._id != req.body.userData.userID) {
-                    db_old.users.findOne({"_id": u_id}, function (err, user) {  
-                        if (err || !user) {
-                            console.log("error getting user: " + err);
-                            callback("baduserdatazz~!");
-                        } else {
-                            // user = user;
-                            
-
-                            if (req.body.action == undefined) { //for "Drop" and "Pickup" object types, action is assumed
-                                actionItem.actionID = null;
-                                actionItem.actionType = req.body.object_item.objtype;
-                                actionItem.actionName = req.body.object_item.objtype;
-                                actionItem.actionResult = "none";
-                            } else {
-                                actionItem.actionID = ObjectId.createFromHexString(req.body.action._id);
-                                actionItem.actionType = req.body.action.actionType;
-                                actionItem.actionResult = req.body.action.actionResult;
-                                actionItem.actionName = req.body.action.actionName;
-                            }
-                            actionItem.userID = ObjectId.createFromHexString(req.body.userData._id);
-                            actionItem.objectID = ObjectId.createFromHexString(req.body.object_item._id); //platform objectID not the same thing as mongo objectID (urg)
-                            actionItem.objectName = req.body.object_item.name;
-                            actionItem.timestamp = timestamp * 1000;
-                            actionItem.fromScene = req.body.fromScene;
-                
-                            inventoryItem.userID = ObjectId.createFromHexString(req.body.userData._id); //change these to oids later...
-                            inventoryItem.objectID = ObjectId.createFromHexString(req.body.object_item._id);
-                            inventoryItem.objectName = req.body.object_item.name;
-                            inventoryItem.objectType = req.body.object_item.objtype;
-                            inventoryItem.objectCategory = req.body.object_item.objcat;
-                            inventoryItem.obectSubCategory = req.body.object_item.objsubcat;
-                            inventoryItem.obectClass = req.body.object_item.objclass;
-                            inventoryItem.timestamp = timestamp;
-                            inventoryItem.fromScene = req.body.fromScene;
-                            
-                            // if (req.body.object_item.actionID != undefined && req.body.object_item.actionID != null) { //if not default action
-                            //     actionItem.actionID = req.body.object_item.actionID;
-                            //     actionItem.actionName = req.body.object_item.actionName;
-                            //     // actionItem.actionType = req.body.object_item.actionType;
-                            // }
-                            console.log("gotsa userr match for pickup action with inventory item " + JSON.stringify(inventoryItem) );
-                            callback(null);
-                        }
-                    });
-                } else {
-                    callback("baduserdatazx~!");
-                }
-            },
-            function (callback) { //check if it came from the scene's inventory, instead of the scene itself, and unset below
-                console.log("checking if from scene ivnetory " + req.body.fromSceneInventory); //wait, this shouldbe scene ID!
-                if (req.body.fromSceneInventory) { 
-                    console.log("tryna lookup scene inventory " + req.body.fromSceneInventory + " sceneID " + req.body.sceneID + " obhjectID " + req.body.object_item._id); //this is sceneID now
-                    // let s_id = ObjectId.createFromHexString(req.body.fromSceneInventory);
-                    db_old.inventory_items.findOne({$and: [{"sceneID" : ObjectId.createFromHexString(req.body.sceneID), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]}, function (err, item){ //pick one if > 1? by timestamp?
-                        if (err || !item) {
-                            console.log("error getting a sceneID! " + err);
-                            callback(null);
-                        
-                        } else {
-                            sceneInventoryID = item._id;
-                            console.log("gotsa sceneInventoryID "+ sceneInventoryID);
-                            callback(null); //
-                        }
-                    });
-
-                            // db.inventories.findOne({'_id': s_id },function (err, inventory){  
-                            //     if (err || !inventory) {
-                            //         callback("no scene inventory");
-                                    
-                            //     } else {
-                            //         // console.log("scene inventory: " + JSON.stringify(inventory));
-                                    
-                            //         db.inventories.update({'_id': s_id }, { $pull: { inventoryItems: {objectID: req.body.object_item._id, timestamp: req.body.timestamp} }}, function (err, saved) { //remove from scene inventory
-                            //             if (err || !saved) {
-                            //                 console.log("problemo with inventory rm " + err);
-                            //                 // res.send("inventory update error " + err);
-                            //                 // res.send("error saving to scene inventory");
-                            //                 callback(err);
-                            //             } else {
-                            //                 console.log("removed fromk scene inventory..." + req.body.object_item._id);
-                            //                 callback(null, user);
-                            //             }
-                            //         });
-                            //     }
-                
-                            //     });
-                    // callback(null, user);
-                } else {
-                    callback(null);
-                }
-            },
-            function (callback) {
-                if (sceneInventoryID != null) { //if this isn't null the pickup object came from the scene inventory, so just need to reassign it to user
-                    console.log("sceneInventoryID " + sceneInventoryID);
-                    db_old.inventory_items.updateOne({"_id": sceneInventoryID}, {$unset: {sceneID: ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData._id)}}, function (err, saved) {
-                        if (err || !saved) {
-                            callback("error switching ownerszsipzt! " + err);
-                        } else {
-                            console.log("uipdateed invenotyr_ item " + JSON.stringify(saved));
-                            callback(null);
-                        }
-                    });
-                // } else {
-                } else {   //if it didn't come from scene inventory, it's part of scene 'original' data
-                    console.log("checcking max per user " + req.body.object_item.maxPerUser + " userID: " + req.body.userData._id + " objectID " + req.body.object_item._id);
-                    if (req.body.object_item.maxPerUser != undefined && req.body.object_item.maxPerUser != null && 
-                        req.body.object_item.maxPerUser != 0 && req.body.object_item.maxPerUser != "0") {
-                        
-                        db_old.inventory_items.find({$and: [{"userID" : ObjectId.createFromHexString(req.body.userData._id), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]}, function (err, items) {
-                            if (err) {
-                                console.log(err);
-                                callback(err);
-                            } else {
-                                console.log("user inventory items : " + items.length);
-                                if (items != null && items.length > 0) {
-                                   
-                                    if (items.length >= req.body.object_item.maxPerUser) {
-                                        console.log("userCurrentCount: " + items.length + " maxPerUser: " + req.body.object_item.maxPerUser);
-                                        callback("maxed!");
-                                    } else {
-                                        db_old.inventory_items.insertOne(inventoryItem, function (err, saved){
-                                            if (err || !saved) {
-                                                callback(err);
-                                            } else {
-                                                callback(null);
-                                                console.log("add pickup object to user inventory " + saved._id);
-                                            }
-                                        });
-                                    }
-                                
-                                } else {
-                                    console.log("tryna add inventory item......");
-                                    db_old.inventory_items.insertOne(inventoryItem, function (err, saved) {
-                                        if (err || !saved) {
-                                            callback(err);
-                                        } else {
-                                            console.log("add pickup object to user inventory " + saved._id);
-                                            callback(null);
-                                        }
-                                    });
-                                }
-                            }
-                        }); 
-                    } else {
-                        db_old.inventory_items.insertOne(inventoryItem, function (err, saved){
-                            if (err || !saved) {
-                                callback(err);
-                            } else {
-                                console.log("saved inventoryItem: " + JSON.stringify(saved));
-                                callback(null);
-                            }
-                        });
-                    }
-                }
-            },
-            /*
-            function (user, callback) { //check inventory limits
-                
-                if (req.body.object_item.maxPerUser != undefined && req.body.object_item.maxPerUser != null && 
-                    req.body.object_item.maxPerUser != 0 && req.body.object_item.maxPerUser != "0" && user.inventoryID != undefined && user.inventoryID != null) {
-                    var i_id = ObjectId.createFromHexString(user.inventoryID);
-                    console.log("userInvetorory " + user.inventoryID);
-                    db.inventories.findOne({"_id": i_id}, function (err, inventory) {
-                        if (err || !inventory) {
-                            console.log("error getting user: " + err);
-                            callback(err);
-                        } else {
-                            let objCount = 0;
-                            for (let i = 0; i < inventory.inventoryItems.length; i++) {
-                                if (inventory.inventoryItems[i].objectID == req.body.object_item._id) {
-                                    objCount++;
-                                }
-                            }
-                            console.log("user has " + objCount + " of these items, of max " + req.body.object_item.maxPerUser);
-                            if (objCount < req.body.object_item.maxPerUser) {
-                                callback(null, user);
-                            } else {
-                                callback("maxed");
-                            }
-                        }
-                    });
-                } else {
-                    if (user.inventoryID != undefined && user.inventoryID != null) {
-                        callback("no limits have been set for this item, contact Admin to fix");
-                    } else {
-                        callback(null, user); //get at least one and init the records if needed below
-                    }
-                }
-            },
-                        function (user, callback) { //check and remove if it came from the scene's inventory, instead of the scene itself
-                if (req.body.fromSceneInventory != undefined && req.body.fromSceneInventory != null) { 
-                    console.log("tryna lookup scene inventory " + req.body.fromSceneInventory);
-                    let s_id = ObjectId.createFromHexString(req.body.fromSceneInventory);
-                   
-                    db.inventories.findOne({'_id': s_id },function (err, inventory){  
-                        if (err || !inventory) {
-                             callback("no scene inventory");
-                            
-                        } else {
-                            // console.log("scene inventory: " + JSON.stringify(inventory));
-                            
-                            db.inventories.update({'_id': s_id }, { $pull: { inventoryItems: {objectID: req.body.object_item._id, timestamp: req.body.timestamp} }}, function (err, saved) { //remove from scene inventory
-                                if (err || !saved) {
-                                    console.log("problemo with inventory rm " + err);
-                                    // res.send("inventory update error " + err);
-                                    // res.send("error saving to scene inventory");
-                                    callback(err);
-                                } else {
-                                    console.log("removed fromk scene inventory..." + req.body.object_item._id);
-                                    callback(null, user);
-                                }
-                            });
-                        }
-        
-                        });
-                    // callback(null, user);
-                } else {
-                    callback(null, user);
-                }
-            },
-                    */
-
-    
-            function (callback) {
-                db_old.activities.insertOne(actionItem, function(err, saved){
-                    if (err || !saved) {
-                        callback(err);
-                    } else {
-                        console.log("saved actionItem " + JSON.stringify(saved));
-                        callback(null);
-                    }
-                });
-            },
-           /* //nope, activities saved as individual records now, not as array elements in a single record (like inventory)
-            function (user, callback) { //log activity 
-                if (user.activitiesID != undefined && user.activitiesID != null)  {
-                    console.log("updati9ng acvitiiies record" + user.activitiesID);
-                    var a_id = ObjectId.createFromHexString(user.activitiesID);
-                    db.activities.findOne({"_id": a_id}, function (err, activities) {
-                        if (err || !activities) {
-                            console.log("error getting user: " + err);
-                            callback(err);
-                        } else {
-                            console.log("activities list found with count " + activities.actionItems.length);
-                            db.activities.update({ "_id": a_id }, { $push: { actionItems: actionItem }}, {upsert: false}, function (err, saved) {
-                                if (err || !saved) {
-                                    console.log("problemo with actitiers add " + err);
-                                    // res.send('profcblemo ' + err);
-                                    callback(err);
-                                } else {
-                                    console.log("ok saved to acttivieis");
-                                    callback(null, user);
-                                    // res.send('updated' + JSON.stringify(saved));
-                                }
-                            });
-                        }
-                    });
-                } else { //new activitiesID if needed
-                    let activities = {};
-                    let actionItems = [];
-                    actionItems.push(actionItem);
-                    activities.actionItems = actionItems; //so can push new entries into a single array in this record
-                    db.activities.save(activities, function (err, saved) {
-                    if (err || !saved) {
-                        console.log("problemo2 with activities add " + err);
-                        callback(err);
-                    } else {
-                        console.log("new activities record " + saved._id);
-                        db.users.update({"_id": u_id}, {$set: {activitiesID: saved._id}}, function (err, updated) {
-                            if (err || !updated) {
-                                console.log("problemo2 with activity7 add " + err);
-                                callback(err);
-                            } else {
-                                callback(null, user);
-                            }
-                            });
-                        }
-                    });   
-                }
-            },
-           
-            function (user, callback) { //add to player inventory
-                if (req.body.action.actionResult.toLowerCase() == "inventory") {
-                    if (user.inventoryID != undefined && user.inventoryID != null) {
-                        console.log("updating inventory record " + user.inventoryID);
-                        var i_id = ObjectId.createFromHexString(user.inventoryID);
-                        db.inventories.findOne({"_id": i_id}, function (err, inventory) {
-                            if (err || !inventory) {
-                                console.log("error getting user: " + err);
-                                callback(err);
-                            } else {
-                                console.log("inventory found with count " + inventory.inventoryItems.length);
-                                db.inventories.update({"_id": i_id }, { $push: { inventoryItems: inventoryItem }}, {upsert: false}, function (err, saved) {
-                                    if (err || !saved) {
-                                        console.log("problemo with inventory add " + err);
-                                        callback(err);
-                                    } else {
-                                        console.log("ok saved to inventories");
-                                        callback(null);
-                                    }
-                                });
-                            }
-                        });
-                    } else { //new inventory if needed 
-                        let inventories = {};
-                        let inventoryItems = [];
-                        inventoryItems.push(inventoryItem);
-                        inventories.inventoryItems = inventoryItems; 
-                        db.inventories.save(inventories, function (err, saved) {
-                        if (err || !saved) {
-                            console.log("problemo2 with inventory add " + err);
-                            callback(err);
-                        } else {
-                            console.log("making new inventories record " + saved._id);
-                            db.users.update({"_id": u_id}, {$set: {inventoryID: saved._id}}, function (err, updated) {
-                                if (err || !updated) {
-                                    console.log("problemo2 with inventory add " + err);
-                                    callback(err);
-                                } else {
-                                    console.log("added new inventory for y ou!");
-                                    callback(null);
-                                }
-                            });
-                            // res.send("invotrye savve" + JSON.stringify(saved));
-                            }
-                        });                       
-                    }
-                } else {
-                    callback(null);
-                }
-            }
-             */
-        ],
-        function (err, result) { // #last function, close async
-            if (err != null) {
-                res.send(err);
+    console.log("pickup called userid " + req.session.user._id + " from scene inventory " + req.body.fromSceneInventory);
+    let inventoryItem = {};
+    let actionItem = {};
+    // let sceneInventoryID = null;        
+    // var u_id = ObjectId.createFromHexString(req.session.user._id);
+    (async () => {
+        try {
+            // const query = {"_id": u_id};
+            // const user = await RunDataQuery("users", "findOne", query);
+            if (req.body.action == undefined) { //for "Drop" and "Pickup" object types, action is assumed
+                actionItem.actionID = null;
+                actionItem.actionType = req.body.object_item.objtype;
+                actionItem.actionName = req.body.object_item.objtype;
+                actionItem.actionResult = "none";
             } else {
-                if (actionItem.actionResult.toLowerCase() == "inventory") {
-                    console.log("pickup saved");
-                    res.send("saved");
-                } else if (actionItem.actionResult.toLowerCase() == "consume") {
-                    console.log("pickup consumed");
-                    res.send("consume");
-                } 
-                // else if (actionItem.actionResult.toLowerCase() == "equip") {
-                //     console.log("pickup equipped");
-                //     res.send("equip");
-                // }
-                
-                
+                actionItem.actionID = ObjectId.createFromHexString(req.body.action._id);
+                actionItem.actionType = req.body.action.actionType;
+                actionItem.actionResult = req.body.action.actionResult;
+                actionItem.actionName = req.body.action.actionName;
             }
+            actionItem.userID = ObjectId.createFromHexString(req.body.userData._id);
+            actionItem.objectID = ObjectId.createFromHexString(req.body.object_item._id); //platform objectID not the same thing as mongo objectID (urg)
+            actionItem.objectName = req.body.object_item.name;
+            actionItem.timestamp = timestamp * 1000;
+            actionItem.fromScene = req.body.fromScene;
+
+            inventoryItem.userID = ObjectId.createFromHexString(req.body.userData._id); //change these to oids later...
+            inventoryItem.objectID = ObjectId.createFromHexString(req.body.object_item._id);
+            inventoryItem.objectName = req.body.object_item.name;
+            inventoryItem.objectType = req.body.object_item.objtype;
+            inventoryItem.objectCategory = req.body.object_item.objcat;
+            inventoryItem.obectSubCategory = req.body.object_item.objsubcat;
+            inventoryItem.obectClass = req.body.object_item.objclass;
+            inventoryItem.timestamp = timestamp;
+            inventoryItem.fromScene = req.body.fromScene;
+
+            if (req.body.fromSceneInventory) { //if it came from the scene's inventory (e.g. was dropped by another user), 
+                                                // rather than as an element of the scene's config, unset from scene and reassign to user instead of creating a new inventory item as below...
+                if (req.body.object_item.maxPerUser != undefined && req.body.object_item.maxPerUser != null &&   
+                    req.body.object_item.maxPerUser != 0 && req.body.object_item.maxPerUser != "0") { 
+                    const query = {$and: [{"userID" : ObjectId.createFromHexString(req.body.userData._id), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]};
+                    const inventory_items = await RunDataQuery("inventory_items", "find", query); //need to count first
+                    console.log(req.body.object_item.maxPerUser + " max per userr and they gots " +inventory_items.length);
+                    if (inventory_items && inventory_items.length) {
+                        if (inventory_items.length >= req.body.object_item.maxPerUser) {
+                            console.log("MAXED - userCurrentCount: " + inventory_items.length + " maxPerUser: " + req.body.object_item.maxPerUser);
+                            res.send("user is maxed on this item!");
+                        } else {
+                            console.log("tryna lookup scene inventory " + req.body.fromSceneInventory + " sceneID " + req.body.sceneID + " obhjectID " + req.body.object_item._id); //this is sceneID now
+                            const iquery = {$and: [{"sceneID" : ObjectId.createFromHexString(req.body.sceneID), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]};
+                            // const inventory = await RunDataQuery("inventory_items", "findOne", iquery);
+                            // sceneInventoryID = inventory._id;
+                            const updoc = {$unset: {sceneID: ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData._id)}};
+                            const updated = await RunDataQuery("inventory_items", "updateOne", iquery, updoc);
+                            console.log("updated an inv item ! " + JSON.stringify(updated));
+                            const asaved = await RunDataQuery("activities", "insertOne", actionItem);
+                            if (actionItem.actionResult.toLowerCase() == "inventory") {
+                                console.log("pickup saved");
+                                res.send("saved");
+                            } else if (actionItem.actionResult.toLowerCase() == "consume") {
+                                console.log("pickup consumed");
+                                res.send("consume");
+                            } 
+                        }
+                    } else { //they got zero of these, so give it up
+                        console.log("tryna lookup scene inventory " + req.body.fromSceneInventory + " sceneID " + req.body.sceneID + " obhjectID " + req.body.object_item._id); //this is sceneID now
+                        const iquery = {$and: [{"sceneID" : ObjectId.createFromHexString(req.body.sceneID), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]};
+                        // const inventory = await RunDataQuery("inventory_items", "findOne", iquery);
+                        // sceneInventoryID = inventory._id;
+                        const updoc = {$unset: {sceneID: ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData._id)}};
+                        const updated = await RunDataQuery("inventory_items", "updateOne", iquery, updoc);
+                        console.log("updated an inv item ! " + JSON.stringify(updated));
+                        const asaved = await RunDataQuery("activities", "insertOne", actionItem);
+                        if (actionItem.actionResult.toLowerCase() == "inventory") {
+                            console.log("pickup saved");
+                            res.send("saved");
+                        } else if (actionItem.actionResult.toLowerCase() == "consume") {
+                            console.log("pickup consumed");
+                            res.send("consume");
+                        } 
+                    }
+                } else { //no max per user, go for it...
+                    console.log("tryna lookup scene inventory " + req.body.fromSceneInventory + " sceneID " + req.body.sceneID + " obhjectID " + req.body.object_item._id); //this is sceneID now
+                    const iquery = {$and: [{"sceneID" : ObjectId.createFromHexString(req.body.sceneID), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]};
+                    // const inventory = await RunDataQuery("inventory_items", "findOne", iquery);
+                    // sceneInventoryID = inventory._id;
+                    const updoc = {$unset: {sceneID: ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData._id)}};
+                    const updated = await RunDataQuery("inventory_items", "updateOne", iquery, updoc);
+                    console.log("updated an inv item ! " + JSON.stringify(updated));
+                    const asaved = await RunDataQuery("activities", "insertOne", actionItem);
+                    if (actionItem.actionResult.toLowerCase() == "inventory") {
+                        console.log("pickup saved");
+                        res.send("saved");
+                    } else if (actionItem.actionResult.toLowerCase() == "consume") {
+                        console.log("pickup consumed");
+                        res.send("consume");
+                    } 
+                }
+                // res.send("updated inventory " + updated)
+            } else { // TODO flex for other sources (user, etc) without just moar bools
+                if (req.body.object_item.maxPerUser != undefined && req.body.object_item.maxPerUser != null &&   
+                req.body.object_item.maxPerUser != 0 && req.body.object_item.maxPerUser != "0") { //enforce maxperuser param, 0 = no limit
+                    
+                const query = {$and: [{"userID" : ObjectId.createFromHexString(req.body.userData._id), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]};
+                const inventory_items = await RunDataQuery("inventory_items", "find", query); //need to count first
+                if (inventory_items && inventory_items.length) {
+                    if (inventory_items.length >= req.body.object_item.maxPerUser) {
+                        console.log("MAXED - userCurrentCount: " + inventory_items.length + " maxPerUser: " + req.body.object_item.maxPerUser);
+                        res.send("user is maxed on this item!");
+                        
+                        } else {
+                            const saved = await RunDataQuery("inventory_items", "insertOne", inventoryItem );
+                            console.log("saved an inv item ! " + saved);
+                            const asaved = await RunDataQuery("activities", "insertOne", actionItem);
+                            if (actionItem.actionResult.toLowerCase() == "inventory") {
+                                console.log("pickup saved");
+                                res.send("saved");
+                            } else if (actionItem.actionResult.toLowerCase() == "consume") {
+                                console.log("pickup consumed");
+                                res.send("consume");
+                            } 
+                        }
+                    } else {
+                        const saved = await RunDataQuery("inventory_items", "insertOne", inventoryItem );
+                        console.log("saved an inv item ! " + saved);
+                        const asaved = await RunDataQuery("activities", "insertOne", actionItem);
+                        if (actionItem.actionResult.toLowerCase() == "inventory") {
+                            console.log("pickup saved");
+                            res.send("saved");
+                        } else if (actionItem.actionResult.toLowerCase() == "consume") {
+                            console.log("pickup consumed");
+                            res.send("consume");
+                        } 
+                    }
+                
+                } else {
+                    const saved = await RunDataQuery("inventory_items", "insertOne", inventoryItem );
+                    console.log("saved an inv item ! " + saved);
+                    const asaved = await RunDataQuery("activities", "insertOne", actionItem);
+                    if (actionItem.actionResult.toLowerCase() == "inventory") {
+                        console.log("pickup saved");
+                        res.send("saved");
+                    } else if (actionItem.actionResult.toLowerCase() == "consume") {
+                        console.log("pickup consumed");
+                        res.send("consume");
+                    } 
+                }
+            
+            }
+            
+        } catch (e) {
+            console.log("error updating inventory " + e);
+            res.send("error with inventory stuff " + e);
         }
-    );
+    })();
 });
+
 
 app.post('/update_user/', requiredAuthentication, admin, function (req, res) { //for admins to set lower permissions
     // var u_id = ObjectId.createFromHexString(req.params.auth_id);
@@ -6935,7 +6679,7 @@ app.post('/scene_inventory_objex/', function(req, res) {
                         // console.log(JSON.stringify(obj_item));
                         if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
                             const aids = obj_item.actionIDs.map(item => {
-                                return ObjectId.createFromHexString(item);
+                                return ObjectId.createFromHexString(item.toString());
                             });
                             (async () => {
                               try {
