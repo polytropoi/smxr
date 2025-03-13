@@ -10894,295 +10894,234 @@ app.post('/clone_scene', requiredAuthentication, function (req,res) {
     // res.send("clone, ok!");
     var o_id = ObjectId.createFromHexString(req.body.sceneID);   
     // console.log('path requested : ' + req.body._id);
-    db_old.scenes.findOne({ "_id" : o_id}, function(err, scene) {
-        if (err || !scene) {
-            res.send("cain't fine no scene with that");
-        } else {
-            let newScene = {};
-            // let theScene = {};
-            // newScene.sceneTitle = scene.sceneTitle + " clone";
-            // newScene.user_id = req.session.user._id.toString();
-            // newScene.userName = req.session.user.userName;
-            // newScene.otimestamp = Math.round(Date.now() / 1000);
-            db_old.scenes.save(newScene, function (err, saved) {
-                if ( err || !saved ) {
-                    console.log('scene not saved..');
-                    res.send("nilch");
-                } else {
-                    var item_id = saved._id.toString();
-                    console.log('created new scene id: ' + item_id);
-                    tempID = "";
-                    newShortID = "";
-                    tempID = item_id;
-                    // newShortID = shortId(tempID);
-                    let title = scene.sceneTitle + " clone";
-                    newShortID = shortid.generate(); //TODO - externalize and check for collisions!
-                    var o_id = ObjectId.createFromHexString(item_id);
-                    // theScene = JSON.parse(JSON.stringify(scene));
-                    db_old.scenes.update( { _id: o_id }, { $set: {
-                    short_id : newShortID,
-                    sceneTitle : title,
+    (async () => {
+        try {
+            const query = { "_id" : o_id};
+            const scene = await RunDataQuery("scenes", "findOne", query);
+            let title = scene.sceneTitle + " clone";
+            const newShortID = shortid.generate(); //TODO - externalize and check for collisions!
+            const updoc = {
+                short_id : newShortID,
+                sceneTitle : title,
+                user_id : req.session.user._id.toString(),
+                userName : req.session.user.userName,
+                otimestamp : Math.round(Date.now() / 1000),
+                clonedFromID : scene.short_id,
+                sceneDomain : scene.sceneDomain,
+                sceneAppName : scene.sceneAppName,
+                sceneSource : scene.sceneSource,
+                sceneAltURL : scene.sceneAltURL != null ? scene.sceneAltURL : "",
+                sceneStickyness : parseInt(scene.sceneStickyness) != null ? parseInt(scene.sceneStickyness) : 5,
+                sceneNumber : scene.sceneNumber,
+                sceneTags : scene.sceneTags,
+                sceneYouTubeIDs : (scene.sceneYouTubeIDs != null && scene.sceneYouTubeIDs != undefined) ? scene.sceneYouTubeIDs : [],
+                sceneVideoStreamUrls : (scene.sceneVideoStreamUrls != null && scene.sceneVideoStreamUrls != undefined) ? scene.sceneVideoStreamUrls : [],
+                sceneLinks : scene.sceneLinks,
+                scenePeopleGroupID : scene.scenePeopleGroupID,
+                sceneLocationGroups : scene.sceneLocationGroups,
+                sceneAudioGroups : scene.sceneAudioGroups,
+                scenePictureGroups : scene.scenePictureGroups,
+                sceneTextGroups : scene.sceneTextGroups,
+                sceneVideoGroups : scene.sceneVideoGroups,
+                sceneVideos : scene.sceneVideos,
+                scenePlayer : scene.scenePlayer  != null ? scene.scenePlayer : "",
+                sceneCategory : scene.sceneCategory != null ? scene.sceneCategory : "None",
+                sceneType : (scene.sceneType != null && scene.sceneType.length > 2) ? scene.sceneType : "Default",
+                sceneWebType : (scene.sceneWebType != null && scene.sceneWebType.length > 2) ? scene.sceneWebType : "Default",
+                sceneCameraMode : scene.sceneCameraMode != null ? scene.sceneCameraMode : "First Person",
+                sceneDebugMode : scene.sceneDebugMode != null ? scene.sceneDebugMode : "",
+                sceneUseThreeDeeText : scene.sceneUseThreeDeeText != null ? scene.sceneUseThreeDeeText : false,
+                sceneAndroidOK : scene.sceneAndroidOK != null ? scene.sceneAndroidOK : false,
+                sceneIosOK : scene.sceneIosOK != null ? scene.sceneIosOK : false,
+                sceneWindowsOK : scene.sceneWindowsOK != null ? scene.sceneWindowsOK : false,
+                sceneLocationTracking : scene.sceneLocationTracking != null ? scene.sceneLocationTracking : false,
+                sceneShowAds : scene.sceneShowAds != null ? scene.sceneShowAds : false,
+                sceneShareWithPublic : false,
+                sceneShareWithSubscribers : scene.sceneShareWithSubscribers != null ? scene.sceneShareWithSubscribers : false,
+                sceneShareWithGroups : scene.sceneShareWithGroups != null ? scene.sceneShareWithGroups : "",
+                sceneShareWithPeople : scene.sceneShareWithPeople != null ? scene.sceneShareWithPeople : "",
+                sceneEventStart : scene.sceneEventStart != null ? scene.sceneEventStart : "",
+                sceneEventEnd : scene.sceneEventEnd != null ? scene.sceneEventEnd : "",
+                sceneEnvironment : scene.sceneEnvironment != null ? scene.sceneEnvironment : {},
+                sceneUseStaticObj : scene.sceneUseStaticObj != null ? scene.sceneUseStaticObj : false,
+                sceneStaticObjUrl : scene.sceneStaticObjUrl != null ? scene.sceneStaticObjUrl : "",
+                sceneStaticObjTextureUrl : scene.sceneStaticObjTextureUrl != null ? scene.sceneStaticObjTextureUrl : "",
+                sceneRandomizeColors : scene.sceneRandomizeColors != null ? scene.sceneRandomizeColors : false,
+                sceneTweakColors : scene.sceneTweakColors != null ? scene.sceneTweakColors : false,
+                sceneColorizeSky : scene.sceneColorizeSky != null ? scene.sceneColorizeSky : false,
+                sceneScatterMeshes : scene.sceneScatterMeshes != null ? scene.sceneScatterMeshes : false,
+                sceneScatterMeshLayers : scene.sceneScatterMeshLayers != null ? scene.sceneScatterMeshLayers : {},
+                sceneScatterObjectLayers : scene.sceneScatterObjectLayers != null ? scene.sceneScatterObjectLayers : {},
+                sceneScatterObjects : scene.sceneScatterObjects != null ? scene.sceneScatterObjects : false,
+                sceneScatterOffset : scene.sceneScatterOffset != null ? scene.sceneScatterOffset : "",
+                sceneShowViewportMeshes : scene.sceneShowViewportMeshes != null ? scene.sceneShowViewportMeshes : false,
+                sceneShowViewportObjects : scene.sceneShowViewportObjects != null ? scene.sceneShowViewportObjects : false,
+                sceneViewportMeshLayers : scene.sceneViewportMeshLayers != null ? scene.sceneViewportMeshLayers : {},
+                sceneViewportObjectLayers : scene.sceneViewportObjectLayers != null ? scene.sceneViewportObjectLayers : {},
+                sceneTargetColliderType : scene.sceneTargetColliderType != null ? scene.sceneTargetColliderType : "none",
+                sceneUseTargetObject : scene.sceneUseTargetObject != null ? scene.sceneUseTargetObject : false,
+                sceneTargetRotateToPlayer : scene.sceneTargetRotateToPlayer != null ? scene.sceneTargetRotateToPlayer : false,
+                sceneDetectHorizontalPlanes : scene.sceneDetectHorizontalPlanes != null ? scene.sceneDetectHorizontalPlanes : false,
+                sceneDetectVerticalPlanes : scene.sceneDetectVerticalPlanes != null ? scene.sceneDetectVerticalPlanes : false,
+                sceneCameraDepthOfField : scene.sceneCameraDepthOfField != null ? scene.sceneCameraDepthOfField : false,
+                sceneFlyable : scene.sceneFlyable != null ? scene.sceneFlyable : false,
+                sceneFaceTracking : scene.sceneFaceTracking != null ? scene.sceneFaceTracking : false,
+                sceneTargetObjectHeading : scene.sceneTargetObjectHeading != null ? scene.sceneTargetObjectHeading : 0,
+                sceneTargetObject : scene.sceneTargetObject,
+                sceneTargetEvent : scene.sceneTargetEvent,
+                sceneTargetText : scene.sceneTargetText  != null ? scene.sceneTargetText : "",
+                sceneNextScene : scene.sceneNextScene != null ? scene.sceneNextScene : "",
+                scenePreviousScene : scene.scenePreviousScene,
+                sceneUseDynamicSky : scene.sceneUseDynamicSky != null ? scene.sceneUseDynamicSky : false,
+                sceneUseDynCubeMap : scene.sceneUseDynCubeMap != null ? scene.sceneUseDynCubeMap : false,
+                sceneUseSkyParticles : scene.sceneUseSkyParticles != null ? scene.sceneUseSkyParticles : false,
+                sceneSkyParticles : scene.sceneSkyParticles != null ? scene.sceneSkyParticles : "",
+                sceneUseDynamicShadows : scene.sceneUseDynamicShadows != null ? scene.sceneUseDynamicShadows : false,
+                sceneSkyRotationOffset : scene.sceneSkyRotationOffset != null ? scene.sceneSkyRotationOffset : 0,
+                sceneUseCameraBackground : scene.sceneUseCameraBackground != null ? scene.sceneUseCameraBackground : false,
+                sceneCameraOrientToPath : scene.sceneCameraOrientToPath  != null ? scene.sceneCameraOrientToPath : false,
+                sceneCameraPath : scene.sceneCameraPath != null ? scene.sceneCameraPath : "Random",
+                sceneUseSkybox : scene.sceneUseSkybox != null ? scene.sceneUseSkybox : false,
+                sceneSkybox : scene.sceneSkybox,
+                sceneUseDynCubeMap : scene.sceneUseDynCubeMap != null ? scene.sceneUseDynCubeMap : false,
+                sceneUseSceneFog : scene.sceneUseSceneFog != null ? scene.sceneUseSceneFog : false,
+                sceneUseGlobalFog : scene.sceneUseGlobalFog != null ? scene.sceneUseGlobalFog : false,
+                sceneUseVolumetricFog : scene.sceneUseVolumetricFog != null ? scene.sceneUseVolumetricFog : false,
+                sceneGlobalFogDensity : scene.sceneGlobalFogDensity != null ? scene.sceneGlobalFogDensity : .001,
+                sceneUseSunShafts : scene.sceneUseSunShafts != null ? scene.sceneUseSunShafts : false,
+                sceneUseFloorPlane : scene.sceneUseFloorPlane != null ? scene.sceneUseFloorPlane : false,
+                sceneFloorplaneTexture : scene.sceneFloorplaneTexture != null ? scene.sceneFloorplaneTexture : "",
+                sceneUseEnvironment : scene.sceneUseEnvironment != null ? scene.sceneUseEnvironment : false,
+                sceneUseTerrain : scene.sceneUseTerrain != null ? scene.sceneUseTerrain : false,
+                sceneUseHeightmap : scene.sceneUseHeightmap != null ? scene.sceneUseHeightmap : false,
+                sceneHeightmap : scene.sceneHeightmap,
+                sceneEnvironmentPreset : scene.sceneEnvironmentPreset != null ? scene.sceneEnvironmentPreset : "",
+                sceneTime : scene.sceneTime,
+                sceneTimeSpeed : scene.sceneTimeSpeed,
+                sceneWeather : scene.sceneWeather,
+                sceneClouds : scene.sceneClouds,
+                sceneWater : scene.sceneWater,
+                sceneGroundLevel : scene.sceneGroundLevel,
+                sceneWindFactor  : scene.sceneWindFactor != null ?  scene.sceneWindFactor : 0,
+                sceneSkyRadius  : scene.sceneSkyRadius != null ?  scene.sceneSkyRadius : 202,
+                sceneLightningFactor  : scene.sceneLightningFactor != null ? scene.sceneLightningFactor : 0,
+                sceneCharacters : scene.sceneCharacters,
+                sceneEquipment : scene.sceneEquipment,
+                sceneFlyingObjex : scene.sceneFlyingObjex,
+                sceneSeason : scene.sceneSeason,
+                scenePictures  : scene.scenePictures, //array of IDs only
+                scenePostcards  : scene.scenePostcards, //array of IDs only
+                sceneWebLinks  : scene.sceneWebLinks != null ? scene.sceneWebLinks : [], //custom object //no, make it an array of IDs
+                sceneColor4  : scene.sceneColor4,
+                sceneColor1  : scene.sceneColor1,
+                sceneColor2  : scene.sceneColor2,
+                sceneColor3  : scene.sceneColor3,
+                sceneLocationRange  : scene.sceneLocationRange != null ? scene.sceneLocationRange : .1,
+                sceneUseMap  : scene.sceneUseMap != null ? scene.sceneUseMap : false,
+                sceneMapType  : scene.sceneMapType != null ? scene.sceneMapType : "none",
+                sceneMapZoom  : scene.sceneMapZoom != null ? scene.sceneMapZoom : 16,
+                sceneLatitude  : scene.sceneLatitude != null ? scene.sceneLatitude : "",
+                sceneLongitude  : scene.sceneLongitude != null ? scene.sceneLongitude : "",
+                 sceneUseStreetMap  : scene.sceneUseStreetMap  != null ? scene.sceneUseStreetMap : false,
+                sceneUseSatelliteMap  : scene.sceneUseSatelliteMap  != null ? scene.sceneUseSatelliteMap : false,
+                sceneUseHybridMap  : scene.sceneUseHybridMap  != null ? scene.sceneUseHybridMap : false,
+                sceneEmulateGPS  : scene.sceneEmulateGPS  != null ? scene.sceneEmulateGPS : false,
+                sceneLocations  : scene.sceneLocations,
+                sceneTriggerAudioID  : scene.sceneTriggerAudioID,
+                scenePrimaryAudioTitle  : scene.scenePrimaryAudioTitle,
+                sceneAmbientAudioID  : scene.sceneAmbientAudioID,
+                scenePrimaryAudioID  : scene.scenePrimaryAudioID,
+                scenePrimaryAudioStreamURL  : scene.scenePrimaryAudioStreamURL,
+                sceneAmbientAudioStreamURL  : scene.sceneAmbientAudioStreamURL,
+                sceneTriggerAudioStreamURL  : scene.sceneTriggerAudioStreamURL,
+                scenePrimaryAudioGroups  : scene.scenePrimaryAudioGroups,
+                sceneAmbientAudioGroups  : scene.sceneAmbientAudioGroups,
+                sceneTriggerAudioGroups  : scene.sceneTriggerAudioGroups,
+                sceneBPM  : scene.sceneBPM != null ? scene.sceneBPM : "100",
+                scenePrimaryPatch1  : scene.scenePrimaryPatch1,
+                scenePrimaryPatch2  : scene.scenePrimaryPatch2,
+                scenePrimaryMidiSequence1  : scene.scenePrimaryMidiSequence1,
+                scenePrimarySequence2Transpose  : scene.scenePrimarySequence2Transpose != null ? scene.scenePrimarySequence2Transpose : "0",
+                scenePrimarySequence1Transpose  : scene.scenePrimarySequence1Transpose != null ? scene.scenePrimarySequence1Transpose : "0",
+                scenePrimaryMidiSequence2  : scene.scenePrimaryMidiSequence2,
+                sceneAmbientVolume  : scene.sceneAmbientVolume,
+                scenePrimaryVolume  : scene.scenePrimaryVolume,
+                sceneTriggerVolume  : scene.sceneTriggerVolume,
+                sceneWeatherAudioVolume  : scene.sceneWeatherAudioVolume,
+                sceneMediaAudioVolume  : scene.sceneMediaAudioVolume,
+                sceneAmbientSynth1Volume  : scene.sceneAmbientSynth1Volume,
+                sceneAmbientSynth2Volume  : scene.sceneAmbientSynth2Volume,
+                sceneTriggerSynth1Volume  : scene.sceneTriggerSynth1Volume,
+                sceneAmbientPatch1  : scene.sceneAmbientPatch1,
+                sceneAmbientPatch2  : scene.sceneAmbientPatch2,
+                sceneAmbientSynth1ModulateByDistance  : scene.sceneAmbientSynth1ModulateByDistance != null ? scene.sceneAmbientSynth1ModulateByDistance : false,
+                sceneAmbientSynth2ModulateByDistance  : scene.sceneAmbientSynth2ModulateByDistance != null ? scene.sceneAmbientSynth2ModulateByDistance : false,
+                sceneAmbientSynth1ModulateByDistanceTarget  : scene.sceneAmbientSynth1ModulateByDistanceTarget != null ? scene.sceneAmbientSynth1ModulateByDistanceTarget: false,
+                sceneAmbientSynth2ModulateByDistanceTarget  : scene.sceneAmbientSynth2ModulateByDistanceTarget != null ? scene.sceneAmbientSynth2ModulateByDistanceTarget : false,
+                sceneAmbientMidiSequence1  : scene.sceneAmbientMidiSequence1,
+                sceneAmbientMidiSequence2  : scene.sceneAmbientMidiSequence2,
+                sceneAmbientSequence1Transpose  : scene.sceneAmbientSequence1Transpose != null ? scene.sceneAmbientSequence1Transpose : "0",
+                sceneAmbientSequence2Transpose  : scene.sceneAmbientSequence2Transpose != null ? scene.sceneAmbientSequence2Transpose : "0",
+                sceneTriggerPatch1  : scene.sceneTriggerPatch1,
+                sceneTriggerPatch2  : scene.sceneTriggerPatch2,
+                sceneTriggerPatch3  : scene.sceneTriggerPatch3,
+                sceneGeneratePrimarySequences  : scene.sceneGeneratePrimarySequences != null ? scene.sceneGeneratePrimarySequences : false,
+                sceneGenerateAmbientSequences  : scene.sceneGenerateAmbientSequences != null ? scene.sceneGenerateAmbientSequences : false,
+                sceneGenerateTriggerSequences  : scene.sceneGenerateTriggerSequences != null ? scene.sceneGenerateTriggerSequences : false,
+                sceneLoopPrimaryAudio  : scene.sceneLoopPrimaryAudio != null ? scene.sceneLoopPrimaryAudio : false,
+                scenePrimaryAudioLoopCount  : scene.scenePrimaryAudioLoopCount != null ? scene.scenePrimaryAudioLoopCount : 0,
+                sceneAutoplayPrimaryAudio  : scene.sceneAutoplayPrimaryAudio != null ? scene.sceneAutoplayPrimaryAudio : false,
+                scenePrimaryAudioVisualizer  : scene.scenePrimaryAudioVisualizer != null ? scene.scenePrimaryAudioVisualizer : false,
+                scenePrimaryAudioTriggerEvents  : scene.scenePrimaryAudioTriggerEvents != null ? scene.scenePrimaryAudioTriggerEvents : false,
+                sceneAttachPrimaryAudioToTarget  : scene.sceneAttachPrimaryAudioToTarget != null ? scene.sceneAttachPrimaryAudioToTarget : false,
+                sceneAutoplayAudioGroup  : scene.sceneAutoplayAudioGroup != null ? scene.sceneAutoplayAudioGroup : false,
+                sceneLoopAllAudioGroup  : scene.sceneLoopAllAudioGroup != null ? scene.sceneLoopAllAudioGroup : false,
+                sceneAnchorPositionAudioGroup  : scene.sceneAnchorPositionAudioGroup != null ? scene.sceneAnchorPositionAudioGroup : false,
+                sceneAnchorCanvasAudioGroup  : scene.sceneAnchorCanvasAudioGroup != null ? scene.sceneAnchorCanvasAudioGroup : false,
+                sceneCreateAudioSpline  : scene.sceneCreateAudioSpline != null ? scene.sceneCreateAudioSpline : false,
+                sceneAttachAudioGroupToTarget  : scene.sceneAttachAudioGroupToTarget != null ? scene.sceneAttachAudioGroupToTarget : false,
+                sceneUseMicrophoneInput  : scene.sceneUseMicrophoneInput != null ? scene.sceneUseMicrophoneInput : false,
+                sceneKeynote  : scene.sceneKeynote,
+                sceneDescription  : scene.sceneDescription,
+                sceneStyleTheme: scene.sceneStyleTheme != null ? scene.sceneStyleTheme : "",
+                sceneFontWeb1  : scene.sceneFontWeb1,
+                sceneFontWeb2  : scene.sceneFontWeb2,
+                sceneFont  : scene.sceneFont,
+                sceneFontFillColor  : scene.sceneFontFillColor,
+                sceneFontOutlineColor  : scene.sceneFontOutlineColor,
+                sceneFontGlowColor  : scene.sceneFontGlowColor,
+                sceneTextBackground  : scene.sceneTextBackground,
+                sceneTextBackgroundColor  : scene.sceneTextBackgroundColor,
+                sceneTextItems  : scene.sceneTextItems, //ids of text items
+                sceneText  : scene.sceneText, //this is "primary" tex
+                sceneTextLoop  : scene.sceneTextLoop != null ? scene.sceneTextLoop : false, //also for "primary" text below
+                scenePrimaryTextFontSize  : scene.scenePrimaryTextFontSize != null ? scene.scenePrimaryTextFontSize : "12",
+                scenePrimaryTextMode  : scene.scenePrimaryTextMode != null ? scene.scenePrimaryTextMode : "Normal",
+                scenePrimaryTextAlign  : scene.scenePrimaryTextAlign != null ? scene.scenePrimaryTextAlign : "Left",
+                sceneNetworking  : scene.sceneNetworking != null ? scene.sceneNetworking : "None",
+                scenePrimaryTextRotate  : scene.scenePrimaryTextRotate != null ? scene.scenePrimaryTextRotate : false,
+                scenePrimaryTextScaleByDistance  : scene.scenePrimaryTextScaleByDistance != null ? scene.scenePrimaryTextScaleByDistance : false,
+                sceneTextAudioSync  : scene.sceneTextAudioSync != null ? scene.sceneTextAudioSync : false,
+                sceneTextUseModals  : scene.sceneTextUseModals != null ? scene.sceneTextUseModals : true,
+                sceneObjects : scene.sceneObjects,
+                sceneModels : scene.sceneModels,
+                sceneObjectGroups : scene.sceneObjectGroups,
+                sceneLastUpdate : new Date()
+                };
+                const inserted = await RunDataQuery("scenes", "insertOne", updoc);
+                console.log("cloned scene! " + JSON.stringify(inserted));
+                let resp = {};
+                // resp.item_id = item_id;
+                resp.title = title;
+                res.send(resp);
 
-                    user_id : req.session.user._id.toString(),
-                    userName : req.session.user.userName,
-                    otimestamp : Math.round(Date.now() / 1000),
-                    clonedFromID : scene.short_id,
-                    sceneDomain : scene.sceneDomain,
-                    sceneAppName : scene.sceneAppName,
-                    sceneSource : scene.sceneSource,
-                    sceneAltURL : scene.sceneAltURL != null ? scene.sceneAltURL : "",
-                    sceneStickyness : parseInt(scene.sceneStickyness) != null ? parseInt(scene.sceneStickyness) : 5,
-                    sceneNumber : scene.sceneNumber,
-                    sceneTags : scene.sceneTags,
-                    sceneYouTubeIDs : (scene.sceneYouTubeIDs != null && scene.sceneYouTubeIDs != undefined) ? scene.sceneYouTubeIDs : [],
-                    sceneVideoStreamUrls : (scene.sceneVideoStreamUrls != null && scene.sceneVideoStreamUrls != undefined) ? scene.sceneVideoStreamUrls : [],
-                    sceneLinks : scene.sceneLinks,
-                    scenePeopleGroupID : scene.scenePeopleGroupID,
-                    sceneLocationGroups : scene.sceneLocationGroups,
-                    sceneAudioGroups : scene.sceneAudioGroups,
-                    scenePictureGroups : scene.scenePictureGroups,
-                    sceneTextGroups : scene.sceneTextGroups,
-                    sceneVideoGroups : scene.sceneVideoGroups,
-                    sceneVideos : scene.sceneVideos,
-                    scenePlayer : scene.scenePlayer  != null ? scene.scenePlayer : "",
-                    sceneCategory : scene.sceneCategory != null ? scene.sceneCategory : "None",
-                    sceneType : (scene.sceneType != null && scene.sceneType.length > 2) ? scene.sceneType : "Default",
-                    sceneWebType : (scene.sceneWebType != null && scene.sceneWebType.length > 2) ? scene.sceneWebType : "Default",
-                    sceneCameraMode : scene.sceneCameraMode != null ? scene.sceneCameraMode : "First Person",
-                    sceneDebugMode : scene.sceneDebugMode != null ? scene.sceneDebugMode : "",
-                    sceneUseThreeDeeText : scene.sceneUseThreeDeeText != null ? scene.sceneUseThreeDeeText : false,
-                    sceneAndroidOK : scene.sceneAndroidOK != null ? scene.sceneAndroidOK : false,
-                    sceneIosOK : scene.sceneIosOK != null ? scene.sceneIosOK : false,
-                    sceneWindowsOK : scene.sceneWindowsOK != null ? scene.sceneWindowsOK : false,
-                    sceneLocationTracking : scene.sceneLocationTracking != null ? scene.sceneLocationTracking : false,
-                    sceneShowAds : scene.sceneShowAds != null ? scene.sceneShowAds : false,
-                    sceneShareWithPublic : false,
-                    sceneShareWithSubscribers : scene.sceneShareWithSubscribers != null ? scene.sceneShareWithSubscribers : false,
-                    sceneShareWithGroups : scene.sceneShareWithGroups != null ? scene.sceneShareWithGroups : "",
-                    sceneShareWithPeople : scene.sceneShareWithPeople != null ? scene.sceneShareWithPeople : "",
-                    sceneEventStart : scene.sceneEventStart != null ? scene.sceneEventStart : "",
-                    sceneEventEnd : scene.sceneEventEnd != null ? scene.sceneEventEnd : "",
-                    sceneEnvironment : scene.sceneEnvironment != null ? scene.sceneEnvironment : {},
-                    sceneUseStaticObj : scene.sceneUseStaticObj != null ? scene.sceneUseStaticObj : false,
-                    sceneStaticObjUrl : scene.sceneStaticObjUrl != null ? scene.sceneStaticObjUrl : "",
-                    sceneStaticObjTextureUrl : scene.sceneStaticObjTextureUrl != null ? scene.sceneStaticObjTextureUrl : "",
-                    sceneRandomizeColors : scene.sceneRandomizeColors != null ? scene.sceneRandomizeColors : false,
-                    sceneTweakColors : scene.sceneTweakColors != null ? scene.sceneTweakColors : false,
-                    sceneColorizeSky : scene.sceneColorizeSky != null ? scene.sceneColorizeSky : false,
-                    sceneScatterMeshes : scene.sceneScatterMeshes != null ? scene.sceneScatterMeshes : false,
-                    sceneScatterMeshLayers : scene.sceneScatterMeshLayers != null ? scene.sceneScatterMeshLayers : {},
-                    sceneScatterObjectLayers : scene.sceneScatterObjectLayers != null ? scene.sceneScatterObjectLayers : {},
-                    sceneScatterObjects : scene.sceneScatterObjects != null ? scene.sceneScatterObjects : false,
-                    sceneScatterOffset : scene.sceneScatterOffset != null ? scene.sceneScatterOffset : "",
-                    sceneShowViewportMeshes : scene.sceneShowViewportMeshes != null ? scene.sceneShowViewportMeshes : false,
-                    sceneShowViewportObjects : scene.sceneShowViewportObjects != null ? scene.sceneShowViewportObjects : false,
-                    sceneViewportMeshLayers : scene.sceneViewportMeshLayers != null ? scene.sceneViewportMeshLayers : {},
-                    sceneViewportObjectLayers : scene.sceneViewportObjectLayers != null ? scene.sceneViewportObjectLayers : {},
-                    sceneTargetColliderType : scene.sceneTargetColliderType != null ? scene.sceneTargetColliderType : "none",
-                    sceneUseTargetObject : scene.sceneUseTargetObject != null ? scene.sceneUseTargetObject : false,
-                    sceneTargetRotateToPlayer : scene.sceneTargetRotateToPlayer != null ? scene.sceneTargetRotateToPlayer : false,
-                    sceneDetectHorizontalPlanes : scene.sceneDetectHorizontalPlanes != null ? scene.sceneDetectHorizontalPlanes : false,
-                    sceneDetectVerticalPlanes : scene.sceneDetectVerticalPlanes != null ? scene.sceneDetectVerticalPlanes : false,
-                    sceneCameraDepthOfField : scene.sceneCameraDepthOfField != null ? scene.sceneCameraDepthOfField : false,
-                    sceneFlyable : scene.sceneFlyable != null ? scene.sceneFlyable : false,
-                    sceneFaceTracking : scene.sceneFaceTracking != null ? scene.sceneFaceTracking : false,
-                    sceneTargetObjectHeading : scene.sceneTargetObjectHeading != null ? scene.sceneTargetObjectHeading : 0,
-                    sceneTargetObject : scene.sceneTargetObject,
-                    sceneTargetEvent : scene.sceneTargetEvent,
-                    sceneTargetText : scene.sceneTargetText  != null ? scene.sceneTargetText : "",
-                    sceneNextScene : scene.sceneNextScene != null ? scene.sceneNextScene : "",
-                    scenePreviousScene : scene.scenePreviousScene,
-                    sceneUseDynamicSky : scene.sceneUseDynamicSky != null ? scene.sceneUseDynamicSky : false,
-                    sceneUseDynCubeMap : scene.sceneUseDynCubeMap != null ? scene.sceneUseDynCubeMap : false,
-                    sceneUseSkyParticles : scene.sceneUseSkyParticles != null ? scene.sceneUseSkyParticles : false,
-                    sceneSkyParticles : scene.sceneSkyParticles != null ? scene.sceneSkyParticles : "",
-                    sceneUseDynamicShadows : scene.sceneUseDynamicShadows != null ? scene.sceneUseDynamicShadows : false,
-                    sceneSkyRotationOffset : scene.sceneSkyRotationOffset != null ? scene.sceneSkyRotationOffset : 0,
-                    sceneUseCameraBackground : scene.sceneUseCameraBackground != null ? scene.sceneUseCameraBackground : false,
-                    sceneCameraOrientToPath : scene.sceneCameraOrientToPath  != null ? scene.sceneCameraOrientToPath : false,
-                    sceneCameraPath : scene.sceneCameraPath != null ? scene.sceneCameraPath : "Random",
-                    sceneUseSkybox : scene.sceneUseSkybox != null ? scene.sceneUseSkybox : false,
-                    sceneSkybox : scene.sceneSkybox,
-                    sceneUseDynCubeMap : scene.sceneUseDynCubeMap != null ? scene.sceneUseDynCubeMap : false,
-                    sceneUseSceneFog : scene.sceneUseSceneFog != null ? scene.sceneUseSceneFog : false,
-                    sceneUseGlobalFog : scene.sceneUseGlobalFog != null ? scene.sceneUseGlobalFog : false,
-                    sceneUseVolumetricFog : scene.sceneUseVolumetricFog != null ? scene.sceneUseVolumetricFog : false,
-                    sceneGlobalFogDensity : scene.sceneGlobalFogDensity != null ? scene.sceneGlobalFogDensity : .001,
-                    sceneUseSunShafts : scene.sceneUseSunShafts != null ? scene.sceneUseSunShafts : false,
-                    sceneUseFloorPlane : scene.sceneUseFloorPlane != null ? scene.sceneUseFloorPlane : false,
-                    sceneFloorplaneTexture : scene.sceneFloorplaneTexture != null ? scene.sceneFloorplaneTexture : "",
-                    sceneUseEnvironment : scene.sceneUseEnvironment != null ? scene.sceneUseEnvironment : false,
-                    sceneUseTerrain : scene.sceneUseTerrain != null ? scene.sceneUseTerrain : false,
-                    sceneUseHeightmap : scene.sceneUseHeightmap != null ? scene.sceneUseHeightmap : false,
-                    sceneHeightmap : scene.sceneHeightmap,
-                    sceneEnvironmentPreset : scene.sceneEnvironmentPreset != null ? scene.sceneEnvironmentPreset : "",
-                    sceneTime : scene.sceneTime,
-                    sceneTimeSpeed : scene.sceneTimeSpeed,
-                    sceneWeather : scene.sceneWeather,
-                    sceneClouds : scene.sceneClouds,
-                    sceneWater : scene.sceneWater,
-                    sceneGroundLevel : scene.sceneGroundLevel,
-                    sceneWindFactor  : scene.sceneWindFactor != null ?  scene.sceneWindFactor : 0,
-                    sceneSkyRadius  : scene.sceneSkyRadius != null ?  scene.sceneSkyRadius : 202,
-                    sceneLightningFactor  : scene.sceneLightningFactor != null ? scene.sceneLightningFactor : 0,
-                    sceneCharacters : scene.sceneCharacters,
-                    sceneEquipment : scene.sceneEquipment,
-                    sceneFlyingObjex : scene.sceneFlyingObjex,
-                    sceneSeason : scene.sceneSeason,
-                    scenePictures  : scene.scenePictures, //array of IDs only
-                    scenePostcards  : scene.scenePostcards, //array of IDs only
-                    sceneWebLinks  : scene.sceneWebLinks != null ? scene.sceneWebLinks : [], //custom object //no, make it an array of IDs
-                    sceneColor4  : scene.sceneColor4,
-                    sceneColor1  : scene.sceneColor1,
-                    sceneColor2  : scene.sceneColor2,
-                    sceneColor3  : scene.sceneColor3,
-                    sceneLocationRange  : scene.sceneLocationRange != null ? scene.sceneLocationRange : .1,
-                    sceneUseMap  : scene.sceneUseMap != null ? scene.sceneUseMap : false,
-                    sceneMapType  : scene.sceneMapType != null ? scene.sceneMapType : "none",
-                    sceneMapZoom  : scene.sceneMapZoom != null ? scene.sceneMapZoom : 16,
-                    sceneLatitude  : scene.sceneLatitude != null ? scene.sceneLatitude : "",
-                    sceneLongitude  : scene.sceneLongitude != null ? scene.sceneLongitude : "",
-                     sceneUseStreetMap  : scene.sceneUseStreetMap  != null ? scene.sceneUseStreetMap : false,
-                    sceneUseSatelliteMap  : scene.sceneUseSatelliteMap  != null ? scene.sceneUseSatelliteMap : false,
-                    sceneUseHybridMap  : scene.sceneUseHybridMap  != null ? scene.sceneUseHybridMap : false,
-                    sceneEmulateGPS  : scene.sceneEmulateGPS  != null ? scene.sceneEmulateGPS : false,
-                    sceneLocations  : scene.sceneLocations,
-                    sceneTriggerAudioID  : scene.sceneTriggerAudioID,
-                    scenePrimaryAudioTitle  : scene.scenePrimaryAudioTitle,
-                    sceneAmbientAudioID  : scene.sceneAmbientAudioID,
-                    scenePrimaryAudioID  : scene.scenePrimaryAudioID,
-                    scenePrimaryAudioStreamURL  : scene.scenePrimaryAudioStreamURL,
-                    sceneAmbientAudioStreamURL  : scene.sceneAmbientAudioStreamURL,
-                    sceneTriggerAudioStreamURL  : scene.sceneTriggerAudioStreamURL,
-                    scenePrimaryAudioGroups  : scene.scenePrimaryAudioGroups,
-                    sceneAmbientAudioGroups  : scene.sceneAmbientAudioGroups,
-                    sceneTriggerAudioGroups  : scene.sceneTriggerAudioGroups,
-                    sceneBPM  : scene.sceneBPM != null ? scene.sceneBPM : "100",
-                    scenePrimaryPatch1  : scene.scenePrimaryPatch1,
-                    scenePrimaryPatch2  : scene.scenePrimaryPatch2,
-                    scenePrimaryMidiSequence1  : scene.scenePrimaryMidiSequence1,
-                    scenePrimarySequence2Transpose  : scene.scenePrimarySequence2Transpose != null ? scene.scenePrimarySequence2Transpose : "0",
-                    scenePrimarySequence1Transpose  : scene.scenePrimarySequence1Transpose != null ? scene.scenePrimarySequence1Transpose : "0",
-                    scenePrimaryMidiSequence2  : scene.scenePrimaryMidiSequence2,
-                    sceneAmbientVolume  : scene.sceneAmbientVolume,
-                    scenePrimaryVolume  : scene.scenePrimaryVolume,
-                    sceneTriggerVolume  : scene.sceneTriggerVolume,
-                    sceneWeatherAudioVolume  : scene.sceneWeatherAudioVolume,
-                    sceneMediaAudioVolume  : scene.sceneMediaAudioVolume,
-                    sceneAmbientSynth1Volume  : scene.sceneAmbientSynth1Volume,
-                    sceneAmbientSynth2Volume  : scene.sceneAmbientSynth2Volume,
-                    sceneTriggerSynth1Volume  : scene.sceneTriggerSynth1Volume,
-                    sceneAmbientPatch1  : scene.sceneAmbientPatch1,
-                    sceneAmbientPatch2  : scene.sceneAmbientPatch2,
-                    sceneAmbientSynth1ModulateByDistance  : scene.sceneAmbientSynth1ModulateByDistance != null ? scene.sceneAmbientSynth1ModulateByDistance : false,
-                    sceneAmbientSynth2ModulateByDistance  : scene.sceneAmbientSynth2ModulateByDistance != null ? scene.sceneAmbientSynth2ModulateByDistance : false,
-                    sceneAmbientSynth1ModulateByDistanceTarget  : scene.sceneAmbientSynth1ModulateByDistanceTarget != null ? scene.sceneAmbientSynth1ModulateByDistanceTarget: false,
-                    sceneAmbientSynth2ModulateByDistanceTarget  : scene.sceneAmbientSynth2ModulateByDistanceTarget != null ? scene.sceneAmbientSynth2ModulateByDistanceTarget : false,
-                    sceneAmbientMidiSequence1  : scene.sceneAmbientMidiSequence1,
-                    sceneAmbientMidiSequence2  : scene.sceneAmbientMidiSequence2,
-                    sceneAmbientSequence1Transpose  : scene.sceneAmbientSequence1Transpose != null ? scene.sceneAmbientSequence1Transpose : "0",
-                    sceneAmbientSequence2Transpose  : scene.sceneAmbientSequence2Transpose != null ? scene.sceneAmbientSequence2Transpose : "0",
-                    sceneTriggerPatch1  : scene.sceneTriggerPatch1,
-                    sceneTriggerPatch2  : scene.sceneTriggerPatch2,
-                    sceneTriggerPatch3  : scene.sceneTriggerPatch3,
-                    sceneGeneratePrimarySequences  : scene.sceneGeneratePrimarySequences != null ? scene.sceneGeneratePrimarySequences : false,
-                    sceneGenerateAmbientSequences  : scene.sceneGenerateAmbientSequences != null ? scene.sceneGenerateAmbientSequences : false,
-                    sceneGenerateTriggerSequences  : scene.sceneGenerateTriggerSequences != null ? scene.sceneGenerateTriggerSequences : false,
-                    sceneLoopPrimaryAudio  : scene.sceneLoopPrimaryAudio != null ? scene.sceneLoopPrimaryAudio : false,
-                    scenePrimaryAudioLoopCount  : scene.scenePrimaryAudioLoopCount != null ? scene.scenePrimaryAudioLoopCount : 0,
-                    sceneAutoplayPrimaryAudio  : scene.sceneAutoplayPrimaryAudio != null ? scene.sceneAutoplayPrimaryAudio : false,
-                    scenePrimaryAudioVisualizer  : scene.scenePrimaryAudioVisualizer != null ? scene.scenePrimaryAudioVisualizer : false,
-                    scenePrimaryAudioTriggerEvents  : scene.scenePrimaryAudioTriggerEvents != null ? scene.scenePrimaryAudioTriggerEvents : false,
-                    sceneAttachPrimaryAudioToTarget  : scene.sceneAttachPrimaryAudioToTarget != null ? scene.sceneAttachPrimaryAudioToTarget : false,
-                    sceneAutoplayAudioGroup  : scene.sceneAutoplayAudioGroup != null ? scene.sceneAutoplayAudioGroup : false,
-                    sceneLoopAllAudioGroup  : scene.sceneLoopAllAudioGroup != null ? scene.sceneLoopAllAudioGroup : false,
-                    sceneAnchorPositionAudioGroup  : scene.sceneAnchorPositionAudioGroup != null ? scene.sceneAnchorPositionAudioGroup : false,
-                    sceneAnchorCanvasAudioGroup  : scene.sceneAnchorCanvasAudioGroup != null ? scene.sceneAnchorCanvasAudioGroup : false,
-                    sceneCreateAudioSpline  : scene.sceneCreateAudioSpline != null ? scene.sceneCreateAudioSpline : false,
-                    sceneAttachAudioGroupToTarget  : scene.sceneAttachAudioGroupToTarget != null ? scene.sceneAttachAudioGroupToTarget : false,
-                    sceneUseMicrophoneInput  : scene.sceneUseMicrophoneInput != null ? scene.sceneUseMicrophoneInput : false,
-                    sceneKeynote  : scene.sceneKeynote,
-                    sceneDescription  : scene.sceneDescription,
-                    sceneStyleTheme: scene.sceneStyleTheme != null ? scene.sceneStyleTheme : "",
-                    sceneFontWeb1  : scene.sceneFontWeb1,
-                    sceneFontWeb2  : scene.sceneFontWeb2,
-                    sceneFont  : scene.sceneFont,
-                    sceneFontFillColor  : scene.sceneFontFillColor,
-                    sceneFontOutlineColor  : scene.sceneFontOutlineColor,
-                    sceneFontGlowColor  : scene.sceneFontGlowColor,
-                    sceneTextBackground  : scene.sceneTextBackground,
-                    sceneTextBackgroundColor  : scene.sceneTextBackgroundColor,
-                    sceneTextItems  : scene.sceneTextItems, //ids of text items
-                    sceneText  : scene.sceneText, //this is "primary" tex
-                    sceneTextLoop  : scene.sceneTextLoop != null ? scene.sceneTextLoop : false, //also for "primary" text below
-                    scenePrimaryTextFontSize  : scene.scenePrimaryTextFontSize != null ? scene.scenePrimaryTextFontSize : "12",
-                    scenePrimaryTextMode  : scene.scenePrimaryTextMode != null ? scene.scenePrimaryTextMode : "Normal",
-                    scenePrimaryTextAlign  : scene.scenePrimaryTextAlign != null ? scene.scenePrimaryTextAlign : "Left",
-                    sceneNetworking  : scene.sceneNetworking != null ? scene.sceneNetworking : "None",
-                    scenePrimaryTextRotate  : scene.scenePrimaryTextRotate != null ? scene.scenePrimaryTextRotate : false,
-                    scenePrimaryTextScaleByDistance  : scene.scenePrimaryTextScaleByDistance != null ? scene.scenePrimaryTextScaleByDistance : false,
-                    sceneTextAudioSync  : scene.sceneTextAudioSync != null ? scene.sceneTextAudioSync : false,
-                    sceneTextUseModals  : scene.sceneTextUseModals != null ? scene.sceneTextUseModals : true,
-                    sceneObjects : scene.sceneObjects,
-                    sceneModels : scene.sceneModels,
-                    sceneObjectGroups : scene.sceneObjectGroups,
-                    sceneLastUpdate : new Date()
-                        }
-                    });
-                    // console.log("tryna update new scene " + JSON.stringify(theScene));
-                    // db.scenes.update( { _id: o_id }, { $set: {theScene}}); 
-                    // db.acl.save(
-                    //     { acl_rule: "read_scene_" + saved._id },  function (err, acl) {
-                    //         if (err || !acl) {
-                    //         } else {
-                    //             db.acl.update({ 'acl_rule': "read_scene_" + saved._id},{ $push: { 'userIDs': req.session.user._id.toString() } });
-                    //             console.log("ok saved acl");
-                    //         }
-                    //     });
-                    // db.acl.save(
-                    //     { 'acl_rule': "write_scene_" + saved._id }, function (err, acl) {
-                    //         if (err || !acl) {
-                    //         } else {
-                    //             db.acl.update({ 'acl_rule': "write_scene_" + saved._id },{ $push: { 'userIDs': req.session.user._id.toString() } });
-                    //             console.log("ok saved acl");
-                    //         }
-                    //     });
-                    let resp = {};
-                    resp.item_id = item_id;
-                    res.send(resp);
-                }
-            });
-            // res.send(scene);
+        } catch (e) {
+            console.log("eerror cloning scene " + e);
+            res.send("eerror cloning scene " + e);
         }
-    
-    });
+    })();
 });
 
-// app.post('/update_scene_locations', checkAppID, requiredAuthentication, function (req, res){ //unused.  I think.
-
-//     console.log("tryna update scene locations: " + req.body.locations);
-//     var sceneID = req.body.sceneID;
-
-//     var locationsObj = JSON.parse(req.body.locations);
-// //    console.log("number of locations: " + locationsObj.locations.Length);
-// //    for (var i = 0; i < locationsObj.locations.Length; i++) {
-// //        console.log(JSON.stringify(locationsObj.locations[i]));
-// //
-// //    }
-//     var o_id = ObjectId.createFromHexString(req.body._id);
-
-//     db_old.scenes.update({ "_id" : o_id}, { $push: { sceneLocations: { $each: locationsObj.locations } } }, function(err, result) {
-//         if (err || !result) {
-//             console.log("error updating scene locations: " + err);
-//         } else {
-//             res.send(result);
-//         }
-//     });
-// //    locationsObj.locations.filter(function (item){
-// //       console.log(JSON.stringify(item));
-// //    });
-
-// });
 
 app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
 

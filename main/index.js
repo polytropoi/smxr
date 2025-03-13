@@ -25,6 +25,7 @@
     window.removeItem = removeItem;
     window.getApp = getApp;
     window.getDomain = getDomain;
+    window.CloneScene = CloneScene;
 
     var cookie = Cookies.get();
     var type = getParameterByName("type", window.location.href); //these params used for routing in bigSwitch
@@ -17584,8 +17585,7 @@ function getAllPeople() {
     }
     function CloneScene(sceneID, shortID) {
         console.log("sceneID is" + sceneID);
-        // alert(this.id);
-        var nameKey = this.id; //id css selector has the filename
+        
         $.confirm({
             title: 'Confirm!',
             content: 'Are you sure you want to clone scene ' + shortID + '?',
@@ -17602,9 +17602,9 @@ function getAllPeople() {
                         }),
                         success: function( data, textStatus, xhr ){
                             console.log(data);
-                            window.location.reload();
-                            // $("#topSuccess").html("Scene Cloned!");
-                            // $("#topSuccess").show();
+                            // window.location.reload();
+                            $("#topSuccess").html("Scene Cloned!");
+                            $("#topSuccess").show();
 
                         },
                         error: function( xhr, textStatus, errorThrown ){
