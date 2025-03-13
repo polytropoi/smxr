@@ -2516,7 +2516,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                     } 
                 }
                 // res.send("updated inventory " + updated)
-            } else { // TODO flex for other sources (user, etc) without just moar bools
+            } else { //did not come from sceneInventory, but was part of scene config... but NOT REMOVED!?! hrm..
                 if (req.body.object_item.maxPerUser != undefined && req.body.object_item.maxPerUser != null &&   
                 req.body.object_item.maxPerUser != 0 && req.body.object_item.maxPerUser != "0") { //enforce maxperuser param, 0 = no limit
                     
@@ -2884,68 +2884,14 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                             callback(er);
                                         }
                                     })();
-                                    // s3.headObject(params, function (err, data) {
-                                    //     if (err && err.code === 'NotFound') {
-                                    //         // Handle no object on cloud here
-                                    //         console.log(err);
-                                    //         callback(err);
-                                    //         // res.send("staged file not found");
-                                    //     } else {
-                                    //         // meateada = metadata;
-                                    //         console.log("head staged file meateada " + data);
-                                    //         callback(null);
-                                    //     }
-                                    // });
+                                 
                                 }
                             
-                            // var params = {Bucket: 'archive1', Delimiter: item.uid, Key: "staging/" + item.uid + "/" + itemKey}    
-                            // s3.headObject(params, function (err, data) {
-                            //     if (err && err.code === 'NotFound') {
-                            //         // Handle no object on cloud here
-                            //         console.log(err);
-                            //         callback(err);
-                            //         res.send("staged file not found");
-                            //     } else {
-                            //         // meateada = metadata;
-                            //         console.log("staged file meateada " + data);
-                            //         callback(null);
-                            //     }
-                            // });
-                            // if (ReturnObjectMetadata(stagingBucket, "staging/" + item.uid + "/" + itemKey)) {
-
-                            // } else {
-
-                            // }
+                        
                         },
-                        //TODO do this later, and copy the whole user folder
-                        // function(callback) { //copy file to the archive folder (current staging one will be deleted) 
-                        //     var targetBucket = "archive1";
-                        //     var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
-                        //     var ck = "archived/" + item.uid + "/" + itemKey;
-                        //     s3.copyObject({Bucket: targetBucket, CopySource: copySource, Key: ck}, function (err,data){
-                        //         if (err) {
-                        //             console.log("ERROR copyObject" + err);
-                        //             callback(err);
-                        //         } else {
-                        //             console.log("SUCCESS copyObject key " + ck + " data: " + data);
-                        //             callback(null);
-                        //         }
-                        //     });
-                        // },
+                       
                         function (callback) { // get the size for the source file
-                            // console.log("item uid : " + item.uid);
-                            // var params = {Bucket: 'archive1', Key: "staging/" + item.uid + "/" + itemKey};
-                            // s3.headObject(params, function(err, data) {
-                            //     if (err) {
-                            //         console.log(err, err.stack);  // an error occurred
-                            //         callback(err);
-                            //     } else {
-                            //         console.log(data);           // successful response
-                            //         size = data.ContentLength;
-                            //         console.log("sizeOf = " + size);
-                            //         callback(null);
-                            //     }    
-                            // });
+                          
  
                                 if (minioClient) {
                                     (async () => {  //flex with minio, etc..
@@ -2983,37 +2929,14 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                             callback(er);
                                         }
                                     })();
-                                    // var params = {Bucket: stagingBucket, Key: "staging/" + item.uid + "/" + itemKey}    
-                                    // s3.headObject(params, function (err, data) {
-                                    //     if (err && err.code === 'NotFound') {
-                                    //         // Handle no object on cloud here
-                                    //         console.log(err);
-                                    //         callback(err);
-                                    //         res.send("staged file not found");
-                                    //     } else {
-                                    //         console.log(data);  
-                                    //         size = data.ContentLength;
-                                    //         console.log("sizeOf = " + size);
-                                    //         callback(null);
-                                    //     }
-                                    // });
+                                   
                                 }
                             // })();
                             
                         },
                         function (callback) { // Get a url for the source file
                             console.log("stagign item uid : " + item.uid);
-                            // var params = {Bucket: 'archive1', Key: "staging/" + item.uid + "/" + itemKey};
-
-                            // s3.getSignedUrl('getObject', params, function (err, url) {
-                            //     if (err) {
-                            //         console.log(err);
-                            //         cb(); //?
-                            //     } else {
-                            //         console.log("The URL is", url);
-                            //         callback(null, url);
-                            //     }
-                            // });
+                            
                             (async () => {  
                                 try {
                                     const url = await ReturnPresignedUrl(stagingBucket, "staging/" + item.uid + "/" + itemKey, 6000);
@@ -3079,21 +3002,8 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                                                 callback(e);
                                                             }
                                                         })();
-                                                        // s3.copyObject({Bucket: targetBucket, CopySource: targetBucket, Key: ck}, function (err,data){
-                                                        //     if (err) {
-                                                        //         console.log("ERROR copyObject" + err);
-                                                        //         callback(err);
-                                                        //     } else {
-                                                        //         console.log("SUCCESS copyObject key " + ck );
-                                                        //         // callback(null);
-                                                        //         callback(null, item_id, tUrl);
-                                                        //     }
-                                                        // });
+                                                       
                                                     }
-                                                    // let copyResponse = await CopyObject(targetBucket, copySource, ck).promise(); //later
-                                                    // console.log("copy response: "+ copyResponse);
-                                                    // callback(null, item_id, tUrl);
-                                               
                                             
                                         }
                                     }
@@ -3118,11 +3028,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                             console.log('audio item not saved..');
                                             callback (err);
                                         } else {
-                                            // var item_id = saved._id.toString();
-                                            // groupitems.push(item_id);
-                                            // console.log('new item id: ' + item_id);
-                                            // callback(null, item_id, tUrl);
-
+                                           
                                             var item_id = saved._id.toString();
                                             groupitems.push(item_id);
                                             console.log('new picture item id: ' + item_id);
@@ -3162,29 +3068,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                                             }
                                                         })();
                                                         
-                                                        // s3.copyObject({Bucket: targetBucket, CopySource: copySource, Key: ck}, function (err,data){
-                                                        //     if (err) {
-                                                        //         console.log("ERROR copyObject" + err);
-                                                        //         callback(err);
-                                                        //     } else {
-                                                        //         console.log("SUCCESS copyObject key " + ck );
-                                                        //         // callback(null);
-                                                        //         callback(null, item_id, tUrl);
-                                                        //     }
-                                                        // });
                                                     }
-
-                                            
-                                            // s3.copyObject({Bucket: targetBucket, CopySource: copySource, Key: ck}, function (err,data){
-                                            //     if (err) {
-                                            //         console.log("ERROR audio copyObject" + err);
-                                            //         callback(err);
-                                            //     } else {
-                                            //         console.log("SUCCESS copyObject audio key " + ck );
-                                            //         // callback(null);
-                                            //         callback(null, item_id, tUrl);
-                                            //     }
-                                            // });
                                         }
                                     }
                                 );
@@ -3290,42 +3174,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                         },
                         function(iID, tUrl, callback) { //send to transloadit and/or copy to production folder.. //no, now do resizing on media server!
                             if (groupType == ".jpg"  || groupType == ".jpeg" || groupType == ".JPG" || groupType == ".png" || groupType == ".PNG") {
-                                // console.log("transcodePictureURL request: " + tUrl);
-                                // var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
-                                // var ck = "users/" + item.uid + "/" + iID + ".original." + itemKey;
-                                // console.log("tryna copy origiinal to " + ck);
-                                // var targetBucket = "servicemedia";
-                                // s3.copyObject({Bucket: targetBucket, CopySource: copySource, Key: ck}, function (err,data){
-                                //     if (err) {
-                                //         console.log("ERROR copyObject" + err);
-                                //         callback(err);
-                                //     } else {
-                                //         console.log("SUCCESS copyObject key " + ck );
-                                //         callback(null);
-                                //     }
-                                // });
-                                // console.log("tryna USE_TRANSLOADIT ?" + process.env.USE_TRANSLOADIT); //OLD WAY used transloadit
-                                // if (process.env.USE_TRANSLOADIT == true) {
-                                //     var encodePictureUrlParams = {
-                                //         steps: {
-                                //             ':orig': {
-                                //                 robot: '/http/import',
-                                //                 url : tUrl
-                                //             }
-                                //         },
-                                //         'template_id': 'f9e7db371a1a4fd29022cc959305a671',
-                                //         'fields' : { image_item_id : iID,
-                                //             user_id : item.uid
-                                //         }
-                                //     };
-                                //     transloadClient.send(encodePictureUrlParams, function(ok) {
-                                //     console.log('transloadit Success: ' + encodePictureUrlParams); //if it makes it to transloadit, copy original too
-                                //     }, function(err) {
-                                //         console.log('transloadit Error: ' + JSON.stringify(err));
-                                //         callback(err);
-                                //     });
-                                
-                            // } else { //NEW WAY uses GrabAndSqueeze
+                               
                                 console.log("tryna push pic to GS " + groupType);
                                 var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
                                 const options = {
@@ -3354,29 +3203,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                    
                             } else if (groupType == ".mp3" || groupType == ".wav" || groupType == ".aif" || groupType == ".aiff" || groupType == ".ogg" || 
                                 groupType == ".MP3" || groupType == ".WAV" || groupType == ".AIFF" || groupType == ".AIFF" || groupType == ".OGG"  ) { 
-                                // console.log("tryna USE_TRANSLOADIT for audio?" + process.env.USE_TRANSLOADIT);
-                                // if (process.env.USE_TRANSLOADIT == true) { //nilch need to rem
-                                //     console.log("transcodeAudioURL request: " + tUrl);
-                                //     var encodeAudioUrlParams = {
-                                //         steps: {
-                                //             ':orig': {
-                                //                 robot: '/http/import',
-                                //                 url : tUrl
-                                //             }
-                                //         },
-                                //         'template_id': '84da9df057e311e4bdecf5e543756029',
-                                //         'fields' : { audio_item_id : iID,
-                                //             user_id : req.session.user._id.toString()
-                                //         }
-                                //     };
-                                //     transloadClient.send(encodeAudioUrlParams, function(ok) {
-                                //         console.log('Success: ' + JSON.stringify(ok));
-                                //         callback(null);
-                                //     }, function(err) {
-                                //         console.log('Error: ' + JSON.stringify(err));
-                                //         callback(err);
-                                //     });
-                                // } else {
+                                
                                     console.log("tryna process audio userid = " + req.session.user._id);
                                     var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
                                     const options = {
@@ -3408,18 +3235,6 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                 var ck = "users/" + item.uid + "/video/" + iID + "/" + iID + "." + itemKey;
                                 console.log("tryna process a video file " + copySource + " to " + targetBucket + ck);
 
-
-                                // s3.copyObject({Bucket: targetBucket, CopySource: copySource, Key: ck}, function (err, data){
-                                //     if (err) {
-                                //         console.log("ERROR copyObject" + err);
-                                //         callback(err);
-                                //     }
-                                //     else {
-                                //         console.log("SUCCESS copyObject key " + ck );
-                                //         callback(null);
-                                //     }
-                                // });
-
                                         if (minioClient) {
                                             (async () => {  
                                                 try {
@@ -3448,19 +3263,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                                 }
                                             })();
 
-                                            // s3.copyObject({Bucket: targetBucket, CopySource: copySource, Key: ck}, function (err,data){
-                                            //     if (err) {
-                                            //         console.log("ERROR copyObject" + err);
-                                            //         callback(err);
-                                            //     } else {
-                                            //         console.log("SUCCESS copyObject key " + ck );
-                                            //         // callback(null);
-                                            //         callback(null);
-                                            //     }
-                                            // });
-                                        }
-
-                                
+                                        }                                
                             } else if (groupType == ".glb") {
                                 var targetBucket = process.env.ROOT_BUCKET_NAME;
                                 var copySource = process.env.STAGING_BUCKET_NAME + "staging/" + item.uid + "/" + itemKey;
@@ -3498,27 +3301,9 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                                                     callback(e);
                                                 }
                                             })();
-                                            // s3.copyObject({Bucket: targetBucket, CopySource: copySource, Key: ck, ContentType: 'model/gltf-binary', Metadata: metadata}, function (err,data){ //no workiie?
-                                            //     if (err) {
-                                            //         console.log("ERROR copyObject" + err);
-                                            //         callback(err);
-                                            //     } else {
-                                            //         console.log("SUCCESS copyObject key " + ck );
-                                            //         // callback(null);
-                                            //         callback(null);
-                                            //     }
-                                            // });
+                                           
                                         }
-                                    
-                                // s3.copyObject({Bucket: targetBucket, CopySource: copySource, Key: ck}, function (err,data){
-                                //     if (err) {
-                                //         console.log("ERROR copyObject" + err);
-                                //         callback(err);
-                                //     } else {
-                                //         console.log("SUCCESS copyObject key " + ck );
-                                //         callback(null);
-                                //     }
-                                // });
+
                             } else if (groupType == ".usdz") {
                                 var targetBucket = "servicemedia";
                                 var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
@@ -3561,10 +3346,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                         function (callback) {
                            
                             params.Delete.Objects.push({Key: 'staging/' + item.uid + '/' + item.key}); //clean up
-                            // console.log("delete params: " + JSON.stringify(params));
 
-                            // (async () => {  
-                                
                                     if (minioClient) { // --really only one here...
                                         (async () => {
                                             try {
@@ -3620,9 +3402,8 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             console.log("processing files complete");
 
                             callbk();
-                    // console.log("available domain scene waterfall done with count: " + availableScenesResponse.availableScenes.length    
-                        uid = itemsArray[0].uid;
-                        // ();
+                    
+                            uid = itemsArray[0].uid;
                         
                         }
                     })
@@ -3762,11 +3543,6 @@ app.post('/staging_delete_array', requiredAuthentication, function (req, res) {
 app.post('/imagetarget_puturl/:_id/:image_id', requiredAuthentication, function (req, res) {
     console.log("tryna get a puturl for : " + req.body.uid + " contentTYpe : " + req.body.contentType);
     var cType = req.body.contentType;
-    // if (cType = "application/octet-stream") {
-    //     cType = "binary/octet-stream";
-    // }
-
-  
 
     var u_id = ObjectId.createFromHexString(req.params._id);
     db_old.users.findOne({"_id": u_id}, function (err, user) {
@@ -3790,9 +3566,7 @@ app.post('/imagetarget_puturl/:_id/:image_id', requiredAuthentication, function 
                 // Key: 'staging/' + u_id + '/' + timestamp + '_' + req.body.filename,
                 Key: "users/" + picture_item.userID + "/pictures/targets/" + req.params.image_id + ".mind",
                 Expires: 100
-                };
-            // var url = s3.getSignedUrl('putObject', {Bucket: 'servicemedia', Key: "users/" + u_id + "/staging" + req.params.platform_sig, Expires: 600});
-                
+                };               
                     (async () => {
                         try {
                         const data = await ReturnPresignedUrlPut(params.Body, params.Key, 6000); 
@@ -3831,13 +3605,7 @@ app.post('/imagetarget_puturl/:_id/:image_id', requiredAuthentication, function 
 app.post('/stagingputurl/:_id', requiredAuthentication, function (req, res) {
     
     var cType = req.body.contentType;
-    // if (cType = "application/octet-stream") {
-    //     cType = "binary/octet-stream";
-    // }
-    // if (cType.includes("gltf")) {
-    //     console.log("tryna mod content type!");
-    //     cType = "model/gltf-binary";
-    // }
+   
     console.log("tryna get a puturl for : " + req.body.uid + " contentTYpe : " + cType);
     var u_id = ObjectId.createFromHexString(req.params._id);
     db_old.users.findOne({"_id": u_id}, function (err, user) {
@@ -3859,57 +3627,25 @@ app.post('/stagingputurl/:_id', requiredAuthentication, function (req, res) {
                 Key: req.body.filename,
                 Expires: 100
               };
-            // var url = s3.getSignedUrl('putObject', {Bucket: 'servicemedia', Key: "users/" + u_id + "/staging" + req.params.platform_sig, Expires: 600});
-
-                try {
-                    if (minioClient) {
-                        (async () => {    
-                        minioClient.presignedPutObject(process.env.STAGING_BUCKET_NAME, req.body.filename, 1000, function(err, presignedUrl) {
-                            if (err) {
-                                response = {
-                                statusCode: 500,
-                                headers: {
-                                    'Access-Control-Allow-Origin': '*',
-                                },
-                                body: JSON.stringify({
-                                    error: 'Did not receive signed url'
-                                }),
-                                };
-                                console.log("putObject url error : " + err );
-                                res.json(err);
-                                
-                            } else {
-                                response = {
-                                statusCode: 200,
-                                headers: {
-                                    'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-                                },
-                                // metadata: {
-                                //     'Content-Type': cType
-                                // },
-                                body: "",
-                                // body: JSON.stringify({
-                                //   message: `Url successfully created`,
-                                //   signedUrl,
-                                // }),
-                                method: "put",
-                                url: presignedUrl,
-                                fields: []
-                                };
-                                console.log("putObject url : " + presignedUrl );
-                                res.json(response);
-                            }
+            try {
+                if (minioClient) {
+                    (async () => {    
+                    minioClient.presignedPutObject(process.env.STAGING_BUCKET_NAME, req.body.filename, 1000, function(err, presignedUrl) {
+                        if (err) {
+                            response = {
+                            statusCode: 500,
+                            headers: {
+                                'Access-Control-Allow-Origin': '*',
+                            },
+                            body: JSON.stringify({
+                                error: 'Did not receive signed url'
+                            }),
+                            };
+                            console.log("putObject url error : " + err );
+                            res.json(err);
                             
-                          });
-                        })();
-                    } else {
-                        (async () => {    
-                        try {
-                       
-                        const signedUrl = await ReturnPresignedUrlPut(process.env.STAGING_BUCKET_NAME, req.body.filename, 6000);
-                        
-                        // console.log("puturl: " + signedUrl );
-                        const response = {
+                        } else {
+                            response = {
                             statusCode: 200,
                             headers: {
                                 'Access-Control-Allow-Origin': '*', // Required for CORS support to work
@@ -3923,36 +3659,66 @@ app.post('/stagingputurl/:_id', requiredAuthentication, function (req, res) {
                             //   signedUrl,
                             // }),
                             method: "put",
-                            url: signedUrl,
+                            url: presignedUrl,
                             fields: []
                             };
-                            
-                            console.log("putObject url : " + signedUrl );
-
+                            console.log("putObject url : " + presignedUrl );
                             res.json(response);
-                        
-                        } catch (e) {
-                            
-                            response = {
-                            statusCode: 500,
-                            headers: {
-                                'Access-Control-Allow-Origin': '*',
-                            },
-                            body: JSON.stringify({
-                                error: 'Did not receive signed url'
-                            }),
-                            };
-                            console.log("putObject url error : " + e );
-                            res.json(e);
-                           
                         }
+                        
+                        });
                     })();
+                } else {
+                    (async () => {    
+                    try {
+                    
+                    const signedUrl = await ReturnPresignedUrlPut(process.env.STAGING_BUCKET_NAME, req.body.filename, 6000);
+                    
+                    // console.log("puturl: " + signedUrl );
+                    const response = {
+                        statusCode: 200,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+                        },
+                        // metadata: {
+                        //     'Content-Type': cType
+                        // },
+                        body: "",
+                        // body: JSON.stringify({
+                        //   message: `Url successfully created`,
+                        //   signedUrl,
+                        // }),
+                        method: "put",
+                        url: signedUrl,
+                        fields: []
+                        };
+                        
+                        console.log("putObject url : " + signedUrl );
 
-                       
+                        res.json(response);
+                    
+                    } catch (e) {
+                        
+                        response = {
+                        statusCode: 500,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                        },
+                        body: JSON.stringify({
+                            error: 'Did not receive signed url'
+                        }),
+                        };
+                        console.log("putObject url error : " + e );
+                        res.json(e);
+                        
                     }
-                } catch (e) {
-                    res.json(e);
+                })();
+
+                    
                 }
+            } catch (e) {
+                res.json(e);
+            }
   
         }
     });
@@ -11691,16 +11457,7 @@ app.post('/newobj', requiredAuthentication, function (req, res) {
         }
     })();
 
-    // db_old.obj_items.save(newobj, function (err, saved) {
-    //     if ( err || !saved ) {
-    //         console.log('object not saved..');
-    //         res.send("nilch");
-    //     } else {
-    //         var item_id = saved._id.toString();
-    //         console.log('new object created, id: ' + item_id);
-    //         res.send("created: " + item_id);
-    //     }
-    // });
+   
 });
 
 app.post('/delete_obj/', requiredAuthentication, function (req, res) { 
@@ -11824,46 +11581,7 @@ app.post('/update_video/:_id', requiredAuthentication, function (req, res) {
             console.log("error updating video " + e);
         }
     })();
-    // db_old.video_items.findOne({ "_id" : o_id}, function(err, video_item) {
-    //     if (err || !video_item) {
-    //         console.log("error getting pic items: " + err);
-    //     } else {
-    //         console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
-    //         let timestamp = Math.round(Date.now() / 1000);
-    //         let isPublic = false;
-    //         if (req.body.isPublic != null) {
-    //             isPublic = req.body.isPublic;
-    //         }
-    //         db_old.video_items.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
-    //             tags: req.body.tags,
-    //             timekeys: req.body.timekeys,
-    //             title: req.body.title,
-    //             isPublic : isPublic,
-    //             orientation: req.body.orientation,
-    //             // hasAlphaChannel: req.body.hasAlphaChannel,
-    //             // captionUpper: req.body.captionUpper,
-    //             // captionLower: req.body.captionLower,
-    //             hasAlphaChannel: req.body.hasAlphaChannel,
-    //             captionUpper: req.body.captionUpper,
-    //             captionLower: req.body.captionLower,
-    //             mods: req.body.mods,
-    //             license: req.body.license,
-    //             description: req.body.description,
-    //             linkType: req.body.linkType,
-    //             linkURL: req.body.linkURL,
-    //             sourceText: req.body.sourceText,
-    //             sourceTitle: req.body.sourceTitle,
-    //             sourceLink: req.body.sourceLink,
-    //             authorName: req.body.authorName,
-    //             authorLink: req.body.authorLink,
-    //             nft: req.body.nft,
-    //             lastUpdateTimestamp: timestamp,
-    //             lastUpdateUserID: req.session.user._id,
-    //             lastUpdateUserName: req.session.user.name,
 
-    //         }});
-    //     } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    // });
 });
 
 app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
@@ -12083,108 +11801,19 @@ app.post('/update_audio/:_id', requiredAuthentication, function (req, res) {
     })();
 });
 
-    // db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
-    //     if (err || !audio_item) {
-    //         console.log("error getting audio items: " + err);
-    //     } else {
-
-    //         //console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
-    //         let timestamp = Math.round(Date.now() / 1000);
-    //         let isPublic = false;
-    //         if (req.body.isPublic != null) {
-    //             isPublic = req.body.isPublic;
-    //         }
-    //         if (req.body.clipDuration != null && req.body.clipDuration != undefined)
-    //         req.body.clipDuration = req.body.clipDuration.toString();
-    //         db_old.audio_items.update( { _id: o_id }, { $set: { 
-    //             // item_status : req.body.item_status != null ? req.body.item_status : "",
-    //             tags: req.body.tags,
-    //             timekeys : req.body.timekeys,
-    //             samplekeys : req.body.samplekeys,
-    //             user_groups: req.body.user_groups,
-    //             title: req.body.title,
-    //             isPublic : isPublic,
-    //             alt_title: req.body.alt_title,
-    //             alt_artist: req.body.alt_artist,
-    //             alt_source: req.body.alt_album,
-    //             modVol: req.body.modVol,
-    //             sourceText: req.body.sourceText != undefined ? req.body.sourceText : "",
-    //             clipDuration : req.body.clipDuration != null ? req.body.clipDuration : "",
-    //             textitemID : req.body.textitemID != null ? req.body.textitemID : "",
-    //             textgroupID : req.body.textgroupitemID != null ? req.body.textgroupitemID : "",
-    //             pictureitemID : req.body.pictureitemID != null ? req.body.pictureitemID : "",
-    //             picturegroupID : req.body.picturegroupID != null ? req.body.picturegroupID : "",
-    //             lastUpdateTimestamp: timestamp,
-    //             lastUpdateUserID: req.session.user._id,
-    //             lastUpdateUserName: req.session.user.userName
-    //         }});
-    //     } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    // });
-// });
-
-// app.get('/audioitems/:tag', checkAppID, requiredAuthentication, function(req, res) {
-//     console.log('tryna return playlist: ' + req.params.tag);
-//     db_old.audio.find({tags: req.params.tag, item_status: "public"}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
-//         if (err || !audio_items) {
-//             console.log("error getting audio items: " + err);
-
-//         } else {
-
-//             async.waterfall([
-
-//                     function(callback){ //randomize the returned array, takes a shake so async it...
-//                         //audio_items = Shuffle(audio_items);
-//                         //audio_items.splice(0,audio_items.length - maxItems); //truncate randomized array, take only last 20
-//                         callback(null);
-//                     },
-
-//                     function(callback) { //add the signed URLs to the obj array
-//                         for (var i = 0; i < audio_items.length; i++) {
-
-//                             var item_string_filename = JSON.stringify(audio_items[i].filename);
-//                             item_string_filename = item_string_filename.replace(/\"/g, "");
-//                             var item_string_filename_ext = getExtension(item_string_filename);
-//                             var expiration = new Date();
-//                             expiration.setMinutes(expiration.getMinutes() + 1000);
-//                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                             console.log(baseName);
-//                             var mp3Name = baseName + '.mp3';
-//                             var oggName = baseName + '.ogg';
-//                             var pngName = baseName + '.png';
-//                             var urlMp3 = knoxClient.signedUrl(audio_items[i]._id + "." + mp3Name, expiration);
-//                             var urlOgg = knoxClient.signedUrl(audio_items[i]._id + "." + oggName, expiration);
-//                             var urlPng = knoxClient.signedUrl(audio_items[i]._id + "." + pngName, expiration);
-//                             audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                             audio_items[i].URLogg = urlOgg;
-//                             audio_items[i].URLpng = urlPng;
-
-//                         }
-//                         console.log('tryna send ' + audio_items.length + 'audio_items ');
-//                         callback(null);
-//                     }],
-
-//                 function(err, result) { // #last function, close async
-//                     res.json(audio_items);
-//                     console.log("waterfall done: " + result);
-//                 }
-//             );
-//         }
-//     });
-
-// });
 
 
 app.post('/delete_audio/', requiredAuthentication, function (req, res){
 
     console.log('tryna delete audioID : ' + req.body._id);
-    var audio_id = req.body._id;
-    var o_id = ObjectId.createFromHexString(audio_id);   
+    const audio_id = req.body._id;
+    const o_id = ObjectId.createFromHexString(audio_id);   
 
-    db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
-        if (err || !audio_item) {
-            console.log("error getting picture item: " + err);
-        } else {
-            var item_string_filename = audio_item[0].filename;
+    (async () => {
+        try {
+            const query = { "_id" : o_id};
+            const audio_item = await RunDataQuery("audio_items", "findOne", query);
+            let item_string_filename = audio_item.filename;
             item_string_filename = item_string_filename.replace(/\"/g, "");
             var item_string_filename_ext = getExtension(item_string_filename);
             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
@@ -12192,71 +11821,37 @@ app.post('/delete_audio/', requiredAuthentication, function (req, res){
             var pngName = baseName + ".png";
             var mp3Name = baseName + ".mp3";
             var oggName = baseName + ".ogg";
-
-            (async () => {
-
-                if (minioClient) {
-                    var keys = []
-                    keys.push(
-                        "users/" + req.session.user._id.toString() + "/" + item_string_filename,
-                        "users/" + req.session.user._id.toString() + "/" + audio_item[0]._id + "." + pngName,
-                        "users/" + req.session.user._id.toString() + "/" + audio_item[0]._id + "." + mp3Name,
-                        "users/" + req.session.user._id.toString() + "/" + audio_item[0]._id + "." + oggName,
-
-                        );
-                    minioClient.removeObjects(process.env.ROOT_BUCKET_NAME, keys, function(e) {
-                        if (e) {
-                            console.log('Unable to remove Objects ',e);
-                            res.send('Unable to remove Objects ',e);
-                        } else {
-                            console.log('Removed the objects successfully');
-                            db_old.audio_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
-                            res.send("deleted");
+            var params = {
+                Bucket: process.env.ROOT_BUCKET_NAME, // required
+                Delete: { // required
+                    Objects: [ // required
+                        {
+                            Key: "users/" + req.session.user._id.toString() + "/" + item_string_filename // required
+                        },
+                        {
+                            Key: "users/" + req.session.user._id.toString() + "/" + audio_item._id + "." + pngName // required
+                        },
+                        {
+                            Key: "users/" + req.session.user._id.toString() + "/" + audio_item._id + "." + mp3Name // required
+                        },
+                        {
+                            Key: "users/" + req.session.user._id.toString() + "/" + audio_item._id + "." + oggName // required
                         }
-    
-                    });
-                } else {
-                    var params = {
-                        Bucket: process.env.ROOT_BUCKET_NAME, // required
-                        Delete: { // required
-                            Objects: [ // required
-                                {
-                                    Key: "users/" + req.session.user._id.toString() + "/" + item_string_filename // required
-                                },
-                                {
-                                    Key: "users/" + req.session.user._id.toString() + "/" + audio_item[0]._id + "." + pngName // required
-                                },
-                                {
-                                    Key: "users/" + req.session.user._id.toString() + "/" + audio_item[0]._id + "." + mp3Name // required
-                                },
-                                {
-                                    Key: "users/" + req.session.user._id.toString() + "/" + audio_item[0]._id + "." + oggName // required
-                                }
-                                // ... more items ...
-                            ],
-                            Quiet: true || false
-                        }
-                        //MFA: 'STRING_VALUE',
-                    };
-
-                    (async () => {
-                        try {
-                           const status = await DeleteObjects(params.Bucket, params.Delete);
-                           db_old.audio_items.remove( { "_id" : o_id }, 1 );
-
-                           res.send("files deleted ~" + status);
-                            // db.image_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
-                        } catch (e) {
-                           res.send(e);
-                        }
-                    })();
-                   
+                    ],
+                    Quiet: true || false
                 }
-            })();
-        
+            };
+            const status = await DeleteObjects(params.Bucket, params.Delete);
+            const deleted = await RunDataQuery("audio_items", "deleteOne", query);
+            res.send(status + " files deleted ~" + deleted);
+        } catch (e) {
+            console.log("error deleting audio " +e);
+            res.send("error deleting audio " +e);
         }
-    });
+
+    })();
 });
+  
 app.post('/delete_model/', requiredAuthentication, function (req, res){
     console.log("tryna delete model: " + req.body);
     (async () => {
