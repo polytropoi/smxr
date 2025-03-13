@@ -11588,23 +11588,17 @@ app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);    
 
     var o_id = ObjectId.createFromHexString(req.params._id);   
-    console.log('model requested : ' + req.body._id);
-    db_old.models.findOne({ "_id" : o_id}, function(err, model) {
-        if (err || !model) {
-            console.log("error getting pic items: " + err);
-        } else {
-            console.log(req.session.user._id + "vs" + model.userID);
+    console.log('update model requested : ' + req.body._id);
 
-            if (req.session.user._id != model.userID) {
-                console.log("must be owner to update!");
-                res.send ("You don't have permission to update this");
-            } else {
-                let timestamp = Math.round(Date.now() / 1000);
-                let isPublic = false;
-                if (req.body.isPublic != null) {
-                    isPublic = req.body.isPublic;
-                }
-                db_old.models.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
+    (async () => {
+        try {
+            let timestamp = Math.round(Date.now() / 1000);
+            let isPublic = false;
+            if (req.body.isPublic != null) {
+                isPublic = req.body.isPublic;
+            }
+            const query = { "_id" : o_id};
+            const updoc = { $set: { item_status: req.body.item_status,
                 tags: req.body.tags,
                 name: req.body.name,
                 isPublic : isPublic,
@@ -11618,16 +11612,54 @@ app.post('/update_model/:_id', requiredAuthentication, function (req, res) {
                 lastUpdateTimestamp: timestamp,
                 lastUpdateUserID: req.session.user._id,
                 lastUpdateUserName: req.session.user.userName,
-                }});
-                if (err) {
-                    res.send(error);
-                } else {
-                    res.send("updated " + new Date());
-                }
-            } 
+                }};
+                const updated = await RunDataQuery("models", "updateOne", query, updoc);
+                res.send("updated model " + updated);
+        } catch (e) {
+            console.log("error updatign model " + e);
+            res.send("error updatign model " + e);
         }
-    });
+    })();
 });
+//     db_old.models.findOne({ "_id" : o_id}, function(err, model) {
+//         if (err || !model) {
+//             console.log("error getting pic items: " + err);
+//         } else {
+//             console.log(req.session.user._id + "vs" + model.userID);
+
+//             if (req.session.user._id != model.userID) {
+//                 console.log("must be owner to update!");
+//                 res.send ("You don't have permission to update this");
+//             } else {
+//                 let timestamp = Math.round(Date.now() / 1000);
+//                 let isPublic = false;
+//                 if (req.body.isPublic != null) {
+//                     isPublic = req.body.isPublic;
+//                 }
+//                 db_old.models.update( { _id: o_id }, { $set: { item_status: req.body.item_status,
+//                 tags: req.body.tags,
+//                 name: req.body.name,
+//                 isPublic : isPublic,
+//                 sourceTitle: req.body.sourceTitle,
+//                 sourceLink: req.body.sourceLink,
+//                 sourceText: req.body.sourceText.replace(/"/g, "'"),
+//                 authorName: req.body.authorName,
+//                 authorLink: req.body.authorLink,
+//                 license: req.body.license,
+//                 modifications: req.body.modifications,
+//                 lastUpdateTimestamp: timestamp,
+//                 lastUpdateUserID: req.session.user._id,
+//                 lastUpdateUserName: req.session.user.userName,
+//                 }});
+//                 if (err) {
+//                     res.send(error);
+//                 } else {
+//                     res.send("updated " + new Date());
+//                 }
+//             } 
+//         }
+//     });
+// });
 
 app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
 
