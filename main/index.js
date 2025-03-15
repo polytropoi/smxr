@@ -9792,8 +9792,8 @@ function showGroup() {
         appid: appid,
         }
         }
-        tagsHtml = "";
-        tags = [];
+        let tagsHtml = "";
+        let tags = [];
         axios.get('/user_details/' + itemid, config)
         .then(function (response) {
         // let ouser = response.data.userID;

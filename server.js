@@ -2267,13 +2267,25 @@ app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
 //     }
 // });
 app.get('/domain/:appID', checkAppID, requiredAuthentication, domainadmin, function (req, res) { //redundant? 
-    db_old.apps.find({"app": req.params.appID}, function (err, app) {
-        if (err | !users) {
-            res.send("no apps");
-        } else {
+    
+    (async () => {
+        try {
+            const query = {"app": req.params.appID};
+            const app = await RunDataQuery("apps", "findOne", query);
             res.json(app);
+        } catch (e) {
+            console.log("error getting app data " + e);
+            res.send("error getting app data " + e);
         }
-    });
+    })();
+    
+    // db_old.apps.find({"app": req.params.appID}, function (err, app) {
+    //     if (err | !users) {
+    //         res.send("no apps");
+    //     } else {
+    //         res.json(app);
+    //     }
+    // });
 });
 
 app.get('/user_details/:uid', requiredAuthentication, domainadmin, function (req, res) { //todo
@@ -2281,14 +2293,23 @@ app.get('/user_details/:uid', requiredAuthentication, domainadmin, function (req
 
     if (req.session.user.authLevel.toLowerCase().includes("domain") && req.params.uid != null) {
         let uID = ObjectId.createFromHexString(req.params.uid);
-
-    db_old.users.findOne({_id: uID}, function (err, user) {
-        if (err || !user) {
-            res.send("that user was not found");
-        } else {
-            res.json(user);
-        }
-    });
+        (async () => {
+            try {
+                const query = {"_id" : uID};
+                const user = await RunDataQuery("users", "findOne", query);
+                res.json(user);
+            } catch (e) {
+                console.log("error getting user data " + e);
+                res.send("error getting user data " + e);
+            }
+        })();
+    // db_old.users.findOne({_id: uID}, function (err, user) {
+    //     if (err || !user) {
+    //         res.send("that user was not found");
+    //     } else {
+    //         res.json(user);
+    //     }
+    // });
     } else {
         res.send('nope');
     }
@@ -2297,14 +2318,26 @@ app.get('/user_details/:uid', requiredAuthentication, domainadmin, function (req
 // app.get('/allusers/', checkAppID, requiredAuthentication, admin, function (req, res) { //todo
 app.get('/allusers/', requiredAuthentication, admin, function (req, res) { //todo
     console.log("tryna get users");
+    
     if (req.session.user.authLevel.toLowerCase().includes("domain")) {
-    db_old.users.find({}, function (err, users) {
-        if (err | !users) {
-            res.send("wtf! no users!?!?!");
-        } else {
-            res.json(users);
-        }
-    });
+        (async () => {
+            try {
+                const query = {};
+                const users = await RunDataQuery("users", "find", query);
+                res.json(users);
+            } catch (e) {
+                console.log("error getting users " + e);
+                res.send("error getting users " + e);
+            }
+        })();
+
+    // db_old.users.find({}, function (err, users) {
+    //     if (err | !users) {
+    //         res.send("wtf! no users!?!?!");
+    //     } else {
+    //         res.json(users);
+    //     }
+    // });
 } else {
     res.send('');
 }
@@ -2312,13 +2345,24 @@ app.get('/allusers/', requiredAuthentication, admin, function (req, res) { //tod
 
 app.get('/alldomains/', requiredAuthentication, admin, function (req, res) {
     console.log("tryna get domains");
-    db_old.domains.find({}, function (err, users) {
-        if (err | !users) {
-            res.send("wtf! no domains!?!?!");
-        } else {
-            res.json(users);
+    (async () => {
+        try {
+            const query = {};
+            const domains = await RunDataQuery("domains", "find", query);
+            res.json(domains);
+        } catch (e) {
+            console.log("error getting domains " + e);
+            res.send("error getting domains " + e);
         }
-    });
+    })();
+    
+    // db_old.domains.find({}, function (err, users) {
+    //     if (err | !users) {
+    //         res.send("wtf! no domains!?!?!");
+    //     } else {
+    //         res.json(users);
+    //     }
+    // });
 });
 
 app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) { //rem'd checkAppID, bc profiles can cross app lines
@@ -2326,234 +2370,275 @@ app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) 
     console.log("tryna profile...");
     var u_id = ObjectId.createFromHexString(req.params._id);
     let profileResponse = {};
-    db_old.users.findOne({"_id": u_id}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting user: " + err);
-        } else {
+    (async () => {
+        try {
+            const query = {"_id": u_id};
+            const user = await RunDataQuery("users", "findOne", query);
             profileResponse = user;
             profileResponse.activity = {};
             profileResponse.scores = {};
             profileResponse.purchases = {};
             profileResponse.assets = {};
             profileResponse.inventory = {};
-            console.log("user profile for " + req.params._id);
+            const uquery = {"userID": u_id}; //toString?
+            const upquery = {"userID": req.params._id};
+            const activities = await RunDataQuery("activities", "find", uquery);
+            const inventory_items = await RunDataQuery("inventory_items", "find", uquery);
+            const scores = await RunDataQuery("scores", "find", upquery);
+            const purchases = await RunDataQuery("purchases", "find", upquery);
+            profileResponse.activities = activities;
+            profileResponse.scores = scores;
+            profileResponse.inventory = inventory_items;
+            profileResponse.purchases = purchases;
 
-            async.waterfall([
+            res.json(profileResponse);
+        } catch (e) {
+            console.log("error getting profile " + e);
+            res.send("error getting profile " + e);
+        }
+    })();
+});
+//     db_old.users.findOne({"_id": u_id}, function (err, user) {
+//         if (err || !user) {
+//             console.log("error getting user: " + err);
+//         } else {
+//             profileResponse = user;
+//             profileResponse.activity = {};
+//             profileResponse.scores = {};
+//             profileResponse.purchases = {};
+//             profileResponse.assets = {};
+//             profileResponse.inventory = {};
+//             console.log("user profile for " + req.params._id);
 
-                    function (callback) {
-                        // if (user.activitiesID != undefined && user.activitiesID != null) {
-                            db_old.activities.find({userID: u_id}, function(err, activities){
-                                if (err || !activities) {
-                                    console.log("no activities");
-                                    // res.json(profileResponse);
-                                    callback();
-                                } else {
-                                    // console.log("activieis: " + JSON.stringify(activities)); 
-                                    profileResponse.activities = activities;
-                                    callback();
-                                }
-                            });
-    //                         let a_id = ObjectId.createFromHexString(user.activitiesID); 
-    //                         db.activities.find({"_id": a_id}, function (err, activities) {
-    //                             if (err || !activities) {
-    //                                 console.log("no activities");
-    // //                                      res.json(profileResponse);
-    //                                 callback();
-    //                             } else {
-    //                                 // console.log("user activitiesw: " + JSON.stringify(activities));
-    //                                 profileResponse.activity = activities;
-    //                                 callback();
-    //                             }
-    //                         });
-                        // }
-                    },
-            //                 function (callback) {
-            //                     if (user.inventoryID != undefined && user.inventoryID != null) {
-            //                         let a_id = ObjectId.createFromHexString(user.inventoryID); 
-            //                         db.inventories.find({"_id": a_id}, function (err, inventory) {
-            //                             if (err || !inventory) {
-            //                                 console.log("no inventories");
-            // //                                      res.json(profileResponse);
-            //                                 callback();
-            //                             } else {
-            //                                 // console.log("user activitiesw: " + JSON.stringify(activities));
-            //                                 profileResponse.inventory = inventory;
-            //                                 callback();
-            //                             }
-            //                         });
-            //                     }
-            //                 },
+//             async.waterfall([
+
 //                     function (callback) {
-//                         db.activity.find({"userID": req.params._id}, function (err, activities) {
-//                             if (err || !activities) {
-//                                 console.log("no activities");
+//                         // if (user.activitiesID != undefined && user.activitiesID != null) {
+//                             db_old.activities.find({userID: u_id}, function(err, activities){
+//                                 if (err || !activities) {
+//                                     console.log("no activities");
+//                                     // res.json(profileResponse);
+//                                     callback();
+//                                 } else {
+//                                     // console.log("activieis: " + JSON.stringify(activities)); 
+//                                     profileResponse.activities = activities;
+//                                     callback();
+//                                 }
+//                             });
+//     //                         let a_id = ObjectId.createFromHexString(user.activitiesID); 
+//     //                         db.activities.find({"_id": a_id}, function (err, activities) {
+//     //                             if (err || !activities) {
+//     //                                 console.log("no activities");
+//     // //                                      res.json(profileResponse);
+//     //                                 callback();
+//     //                             } else {
+//     //                                 // console.log("user activitiesw: " + JSON.stringify(activities));
+//     //                                 profileResponse.activity = activities;
+//     //                                 callback();
+//     //                             }
+//     //                         });
+//                         // }
+//                     },
+//             //                 function (callback) {
+//             //                     if (user.inventoryID != undefined && user.inventoryID != null) {
+//             //                         let a_id = ObjectId.createFromHexString(user.inventoryID); 
+//             //                         db.inventories.find({"_id": a_id}, function (err, inventory) {
+//             //                             if (err || !inventory) {
+//             //                                 console.log("no inventories");
+//             // //                                      res.json(profileResponse);
+//             //                                 callback();
+//             //                             } else {
+//             //                                 // console.log("user activitiesw: " + JSON.stringify(activities));
+//             //                                 profileResponse.inventory = inventory;
+//             //                                 callback();
+//             //                             }
+//             //                         });
+//             //                     }
+//             //                 },
+// //                     function (callback) {
+// //                         db.activity.find({"userID": req.params._id}, function (err, activities) {
+// //                             if (err || !activities) {
+// //                                 console.log("no activities");
+// // //                                      res.json(profileResponse);
+// //                                 callback();
+// //                             } else {
+// //                                 // console.log("user activitiesw: " + JSON.stringify(activities));
+// //                                 profileResponse.activity = activities;
+// //                                 callback();
+// //                             }
+// //                         });
+// //                     },
+//                     function (callback) {
+//                         db_old.inventory_items.find({"userID": u_id}, function(err, items){
+//                             if (err || !items) {
+//                                 console.log("no inventory items for user " + req.params._id);
+//                                 callback(null);
+//                             } else {
+//                                 profileResponse.inventory = items;
+//                                 callback(null);
+//                             }
+//                         })
+//                     },
+//                     function (callback) {
+//                         db_old.scores.find({"userID": req.params._id}, function (err, scores) {
+//                             if (err || !scores) {
+//                                 console.log("no scores");
 // //                                      res.json(profileResponse);
 //                                 callback();
 //                             } else {
-//                                 // console.log("user activitiesw: " + JSON.stringify(activities));
-//                                 profileResponse.activity = activities;
+//                                 // console.log("user scores: " + JSON.stringify(scores));
+//                                 profileResponse.scores = scores;
 //                                 callback();
 //                             }
 //                         });
+
 //                     },
-                    function (callback) {
-                        db_old.inventory_items.find({"userID": u_id}, function(err, items){
-                            if (err || !items) {
-                                console.log("no inventory items for user " + req.params._id);
-                                callback(null);
-                            } else {
-                                profileResponse.inventory = items;
-                                callback(null);
-                            }
-                        })
-                    },
-                    function (callback) {
-                        db_old.scores.find({"userID": req.params._id}, function (err, scores) {
-                            if (err || !scores) {
-                                console.log("no scores");
-//                                      res.json(profileResponse);
-                                callback();
-                            } else {
-                                // console.log("user scores: " + JSON.stringify(scores));
-                                profileResponse.scores = scores;
-                                callback();
-                            }
-                        });
-
-                    },
-                    function (callback) {
-                        db_old.purchases.find({"userID": req.params._id}, function (err, purchases) {
-                            if (err || !purchases) {
-                                console.log("no purchases");
-//                                      res.json(profileResponse);
-                                callback();
-                            } else {
-                                // console.log("user purchases: " + JSON.stringify(purchases));
-                                profileResponse.purchases = purchases;
-                                callback();
-                            }
-                        });
-
-                    }],
 //                     function (callback) {
-//                         var params = {
-//                             Bucket: 'mvmv.us',
-// //                            Delimiter: '/',
-//                             Prefix: 'assets_2018_1/bundles_ios/'
-//                         }
-
-//                         s3.listObjects(params, function(err, data) {
-//                             if (err) {
-//                                 console.log(err);
-//                                 return callback(err);
-//                             }
-//                             if (data.Contents.length == 0) {
-//                                 console.log("no content found");
-//                                 callback(null);
+//                         db_old.purchases.find({"userID": req.params._id}, function (err, purchases) {
+//                             if (err || !purchases) {
+//                                 console.log("no purchases");
+// //                                      res.json(profileResponse);
+//                                 callback();
 //                             } else {
-
-
-//                                 profileResponse.assets = data.Contents;
-//                                 // console.log("assets available: " + JSON.stringify( profileResponse.assets));
+//                                 // console.log("user purchases: " + JSON.stringify(purchases));
+//                                 profileResponse.purchases = purchases;
 //                                 callback();
 //                             }
 //                         });
 
 //                     }],
-                function (err, result) { // #last function, close async
-                    res.json(profileResponse);
-                    console.log("waterfall done: " + result);
-                }
-            );
-        }
-    });
-});
+// //                     function (callback) {
+// //                         var params = {
+// //                             Bucket: 'mvmv.us',
+// // //                            Delimiter: '/',
+// //                             Prefix: 'assets_2018_1/bundles_ios/'
+// //                         }
 
-app.get('/inventory/:_id', requiredAuthentication, usercheck, function (req, res) { //rem'd checkAppID, bc profiles can cross app lines //NOPE
+// //                         s3.listObjects(params, function(err, data) {
+// //                             if (err) {
+// //                                 console.log(err);
+// //                                 return callback(err);
+// //                             }
+// //                             if (data.Contents.length == 0) {
+// //                                 console.log("no content found");
+// //                                 callback(null);
+// //                             } else {
 
-    console.log("tryna get inventory for ... " + req.params._id);
-    var u_id = ObjectId.createFromHexString(req.params._id);
-    let profileResponse = null;
-    db_old.users.findOne({"_id": u_id}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting user: " + err);
-        } else {
-            // profileResponse.inventory = {};
-            // profileResponse.scores = {};
-            console.log("user profile for " + req.params._id);
 
-            async.waterfall([
+// //                                 profileResponse.assets = data.Contents;
+// //                                 // console.log("assets available: " + JSON.stringify( profileResponse.assets));
+// //                                 callback();
+// //                             }
+// //                         });
+
+// //                     }],
+//                 function (err, result) { // #last function, close async
+//                     res.json(profileResponse);
+//                     console.log("waterfall done: " + result);
+//                 }
+//             );
+//         }
+//     });
+// });
+
+// app.get('/inventory/:_id', requiredAuthentication, usercheck, function (req, res) { //rem'd checkAppID, bc profiles can cross app lines //NOPE
+
+//     console.log("tryna get inventory for ... " + req.params._id);
+//     var u_id = ObjectId.createFromHexString(req.params._id);
+//     let profileResponse = null;
+//     db_old.users.findOne({"_id": u_id}, function (err, user) {
+//         if (err || !user) {
+//             console.log("error getting user: " + err);
+//         } else {
+//             // profileResponse.inventory = {};
+//             // profileResponse.scores = {};
+//             console.log("user profile for " + req.params._id);
+
+//             async.waterfall([
                   
-                function (callback) {
-                    if (user.inventoryID != undefined && user.inventoryID != null) {
-                        let a_id = ObjectId.createFromHexString(user.inventoryID); 
-                        db_old.inventories.findOne({"_id": a_id}, function (err, inventory) {
-                            if (err || !inventory) {
-                                console.log("no inventories");
-    //                          res.json(profileResponse);
-                                profileResponse = null;
-                                callback(null);
-                            } else {
-                                // console.log("user activitiesw: " + JSON.stringify(activities));
-                                profileResponse = inventory;
-                                callback(null);
-                            }
-                        });
-                    } else {
-                        callback("no inventory found");
-                    }
-                }
+//                 function (callback) {
+//                     if (user.inventoryID != undefined && user.inventoryID != null) {
+//                         let a_id = ObjectId.createFromHexString(user.inventoryID); 
+//                         db_old.inventories.findOne({"_id": a_id}, function (err, inventory) {
+//                             if (err || !inventory) {
+//                                 console.log("no inventories");
+//     //                          res.json(profileResponse);
+//                                 profileResponse = null;
+//                                 callback(null);
+//                             } else {
+//                                 // console.log("user activitiesw: " + JSON.stringify(activities));
+//                                 profileResponse = inventory;
+//                                 callback(null);
+//                             }
+//                         });
+//                     } else {
+//                         callback("no inventory found");
+//                     }
+//                 }
 
 
-                ],
-                function (err, result) { // #last function, close async
-                    if (err) {
-                        res.send(err);
-                    } else {
-                        res.send(profileResponse);
-                        // console.log("returning inventory " + profileResponse);
-                    }
+//                 ],
+//                 function (err, result) { // #last function, close async
+//                     if (err) {
+//                         res.send(err);
+//                     } else {
+//                         res.send(profileResponse);
+//                         // console.log("returning inventory " + profileResponse);
+//                     }
                   
-                }
-            );
-        }
-    });
-});
+//                 }
+//             );
+//         }
+//     });
+// });
 
 app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
     if (req.params._id != undefined && req.params._id != null && ObjectId.isValid(req.params._id)) { 
         var u_id = ObjectId.createFromHexString(req.params._id);
-        db_old.inventory_items.find({"userID": u_id}, function (err, items){
-            if (err || !items) {
-                res.send("nope");
-            } else {
+
+        (async () => {
+            try {
+                const query = {"userID": u_id};
+                const inventory_items = await RunDataQuery("inventory_items", "find", query);
                 let profileResponse = {};
-                profileResponse.inventoryItems = items;
-                res.send(profileResponse);
+                profileResponse.inventoryItems = inventory_items;
+                res.json(profileResponse);;
+            } catch (e) {
+                console.log("error getting user inventory " + e);
+                res.send("error getting user inventory " + e);
             }
-        });
+        })();
+        // db_old.inventory_items.find({"userID": u_id}, function (err, items){
+        //     if (err || !items) {
+        //         res.send("nope");
+        //     } else {
+        //         let profileResponse = {};
+        //         profileResponse.inventoryItems = items;
+        //         res.send(profileResponse);
+        //     }
+        // });
     } else {
         res.send('no inventory userid!');
     }
 });
 
-app.post('/update_profile/:_id', requiredAuthentication, function (req, res) { //for end users to change their personal data
-    var u_id = ObjectId.createFromHexString(req.params.auth_id);
-    db_old.users.findOne({"_id": u_id}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting user: " + err);
+// app.post('/update_profile/:_id', requiredAuthentication, function (req, res) { //for end users to change their personal data //unused
+//     var u_id = ObjectId.createFromHexString(req.params.auth_id);
+//     db_old.users.findOne({"_id": u_id}, function (err, user) {
+//         if (err || !user) {
+//             console.log("error getting user: " + err);
 
-        } else {
-            console.log("users authlevel : " + user.authLevel);
+//         } else {
+//             console.log("users authlevel : " + user.authLevel);
 
-            db_old.users.update({ _id: o_id }, { $set: {
-                // authLevel : req.body.authLevel
-//                    profilePic : profilePic
-            }});
-        }
-        //}
-    });
-});
+//             db_old.users.update({ _id: o_id }, { $set: {
+//                 // authLevel : req.body.authLevel
+// //                    profilePic : profilePic
+//             }});
+//         }
+//         //}
+//     });
+// });
 
 
 app.post('/drop/', requiredAuthentication, function (req, res) { 
@@ -2754,28 +2839,47 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
 
 app.post('/update_user/', requiredAuthentication, admin, function (req, res) { //for admins to set lower permissions
     // var u_id = ObjectId.createFromHexString(req.params.auth_id);
-    let o_id = ObjectId.createFromHexString(req.body._id);
-    if (o_id != null) {
-        db_old.users.findOne({"_id": o_id}, function (err, user) {
-            if (err || !user) {
-                console.log("error getting user: " + err);
-                res.send("error: " + err);
-            } else {
-            
-                db_old.users.update({ _id: o_id }, { $set: {
-                    authLevel : req.body.authLevel,
-                    paymentStatus: req.body.paymentStatus,
-                    status: req.body.status,
-                    type: req.body.type
-    //                    profilePic : profilePic
-                }});
-                console.log("tryna update4 users : " + JSON.stringify(req.body));
-                res.send("updated");
-            }
-            //}
-        });
-    }
+    (async () => {
+        try {    
+            const o_id = ObjectId.createFromHexString(req.body._id);
+            const query = {"_id": o_id};
+            const updoc = { $set: {
+                authLevel : req.body.authLevel,
+                paymentStatus: req.body.paymentStatus,
+                status: req.body.status,
+                type: req.body.type
+//              profilePic : profilePic
+            }};
+            const updated = await RunDataQuery("users", "updateOne", query, updoc);
+        } catch (e) {
+            console.log("error updating user " + e);
+            res.send("error updating user " + e);
+        }
+    })();
 });
+    // let o_id = ObjectId.createFromHexString(req.body._id);
+
+    // if (o_id != null) {
+    //     db_old.users.findOne({"_id": o_id}, function (err, user) {
+    //         if (err || !user) {
+    //             console.log("error getting user: " + err);
+    //             res.send("error: " + err);
+    //         } else {
+            
+    //             db_old.users.update({ _id: o_id }, { $set: {
+    //                 authLevel : req.body.authLevel,
+    //                 paymentStatus: req.body.paymentStatus,
+    //                 status: req.body.status,
+    //                 type: req.body.type
+    // //                    profilePic : profilePic
+    //             }});
+    //             console.log("tryna update4 users : " + JSON.stringify(req.body));
+    //             res.send("updated");
+    //         }
+    //         //}
+    //     });
+    // }
+// });
 
 // app.post('/update_userassets/', requiredAuthentication, function (req, res) {
 //     var u_id = req.body.user_id;
@@ -2978,6 +3082,691 @@ app.post('/ipfs_up', requiredAuthentication, function (req, res) {
     // });
 });
 
+app.post('/process_staging_files_2', requiredAuthentication, function (req, res) { //from staging folder
+    var itemsArray = req.body.processMe.items;
+    var createGroup = false;
+    var groupType = "";
+    var groupID;
+    var uid;
+    // var isObj
+    // var objName;
+    console.log("process_staging_files : " + JSON.stringify(req.body));
+    var itemsExtensions = itemsArray.map(item => {
+        return getExtension(item.key).toLowerCase();
+    });
+    var stagingBucket = process.env.STAGING_BUCKET_NAME;
+    // var meateada = {};
+    var groupitems = [];
+    var params = {
+        Bucket: process.env.STAGING_BUCKET_NAME,
+    };
+    params.Delete = {Objects:[]};
+    var originalName = function (name) {
+        var index = name.indexOf("_");
+        return name.substring(index + 1); //strip off prepended timestamp and _ for title and stuff
+    }
+
+    const allEqual = itemsExtensions => itemsExtensions.every( v => v === itemsExtensions[0] ); //if all extensions the same, then make a group (which is the point)
+    console.log("same extensions: "+ itemsExtensions[0]);
+
+    if (allEqual(itemsExtensions) && (itemsExtensions[0].toLowerCase() == ".usdz" || itemsExtensions[0].toLowerCase() == ".reality" || itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
+     itemsExtensions[0].toLowerCase() == ".aif" || itemsExtensions[0].toLowerCase() == ".aiff" || itemsExtensions[0].toLowerCase() == ".ogg" || itemsExtensions[0].toLowerCase() == ".wav" || itemsExtensions[0].toLowerCase() == ".mp3" || 
+     itemsExtensions[0].toLowerCase() == ".mp4" || itemsExtensions[0].toLowerCase() == ".webm" || itemsExtensions[0].toLowerCase() == ".mov" || itemsExtensions[0].toLowerCase() == ".mkv")) { //need to think how to flex, and use contenttype
+        
+        var ts = Math.round(Date.now() / 1000);
+        createGroup = true;
+        groupType = itemsExtensions[0];
+        if (itemsArray[0].uid != req.session.user._id) {
+            res.send("ids do not match! no upload for you");
+        } else {
+
+            (async () => { 
+                try {
+                    for (let i = 0; i < itemsArray.length; i++) {
+                        let itemKey = itemsArray[i].key.toLowerCase();
+                        itemKey = itemKey.replace(/[/\\?%*:|"<>]\s/g, '-');
+                        let size = 0;
+                        const data = await ReturnObjectMetadata(stagingBucket,"staging/" + itemsArray[i].uid + "/" + itemKey); 
+                        size = data.ContentLength;
+                        console.log("gotsa object " + itemKey + "sizeOf = " + size);
+                    } 
+                    
+                } catch (er) {
+                    console.log()
+                }
+            })();
+         
+        async.waterfall([ //TODO just do this with await..
+              
+            function(callbk) {     //callbk
+                async.each(itemsArray, function (item, cb) {  //1. make sure the file is where it's supposed to be...
+                    let itemKey = item.key.toLowerCase();
+                    itemKey = itemKey.replace(/[/\\?%*:|"<>]\s/g, '-');
+                    let size = 0;
+                    async.waterfall([
+                        function (callback) {
+                            console.log("groupTYpe : " + groupType);
+                            // console.log("Bucket exists and we have access");
+                             // to flex with minio, etc..
+                                if (minioClient) {
+                                    (async () => { 
+                                        try {
+                                            minioClient.statObject(stagingBucket, "staging/" + item.uid + "/" + itemKey, function(err, stat) { //statObject = headObject at s3
+                                                if (err) {
+                                                    console.log(err);
+                                                    callback(err);
+                                                } else {
+                                                    console.log("minio statObject " + stat);
+                                                    callback(null);
+                                                }
+
+                                            });
+                                        // callback(null);
+                                        } catch (e) {
+                                            callback(e);
+                                        }
+                                    })();
+                                } else {
+                                    // var params = {Bucket: stagingBucket, Delimiter: item.uid, Key: "staging/" + item.uid + "/" + itemKey}    
+                                    (async () => { 
+                                        try {
+                                        let objectExists = await ReturnObjectExists(stagingBucket,"staging/" + item.uid + "/" + itemKey);
+                                            if (objectExists) {
+                                                console.log("gotsa object " + itemKey);
+                                                callback();
+                                            } else {
+                                                callback("no object found");
+                                            }
+                                        } catch (er) {
+                                            callback(er);
+                                        }
+                                    })();
+                                 
+                                }
+                            
+                        
+                        },
+                       
+                        function (callback) { // get the size for the source file
+                          
+ 
+                                if (minioClient) {
+                                    (async () => {  //flex with minio, etc..
+                                        try {
+                                            minioClient.statObject(stagingBucket, "staging/" + item.uid + "/" + itemKey, function(err, stat) {
+                                                if (err) {
+                                                    console.log(err)
+                                                    callback(err);
+                                                } else {
+                                                    console.log("minio statObject " + stat);
+                                                    callback(null);
+                                                }
+                                            
+                                            });
+                                            
+                                        } catch (e) {
+                                            callback(e);
+                                        }
+                                    })();
+                                } else {
+                                    (async () => { 
+                                        try {
+                                        let data = await ReturnObjectMetadata(stagingBucket,"staging/" + item.uid + "/" + itemKey);
+                                            if (data) {
+                                                console.log("gotsa object " + itemKey);
+                                                // callback();
+                                                console.log(data);  
+                                                size = data.ContentLength;
+                                                console.log("sizeOf = " + size);
+                                                callback(null);
+                                            } else {
+                                                callback("no object found");
+                                            }
+                                        } catch (er) {
+                                            callback(er);
+                                        }
+                                    })();
+                                   
+                                }
+                            // })();
+                            
+                        },
+                        function (callback) { // Get a url for the source file
+                            console.log("stagign item uid : " + item.uid);
+                            
+                            (async () => {  
+                                try {
+                                    const url = await ReturnPresignedUrl(stagingBucket, "staging/" + item.uid + "/" + itemKey, 6000);
+                                    
+                                    callback(null, url);
+                                } catch (e) {
+                                    callback(e);
+                                }
+                            })();
+                        },
+                        function (tUrl, callback) { //make an appropriate (by file extension) record in the db and get an _id
+                            if (groupType == ".jpg" || groupType == ".jpeg" || groupType == ".JPG" || groupType == ".png" || groupType == ".PNG") {
+                                console.log("tryna save a jpg at " + tUrl);
+                                
+                                db_old.image_items.save({   
+                                    type : "fromStaging",
+                                    userID : item.uid,
+                                    userName : req.session.user.userName,
+                                    title : originalName(itemKey),
+                                    filename : itemKey,
+                                    item_type : 'picture',
+                                    tags: [],
+                                    item_status: "private",
+                                    otimestamp : ts,
+                                    ofilesize : size },
+                                    function (err, saved) {
+                                    if ( err || !saved ) {
+                                        console.log('picture not saved..');
+                                        callback (err);
+                                        } else {
+                                            var item_id = saved._id.toString();
+                                            groupitems.push(item_id);
+                                            console.log('new picture item id: ' + item_id);
+                                            // console.log("transcodePictureURL request: " + tUrl);
+                                            var copySource = "archive1/staging/" + saved.userID + "/" + saved.filename;
+                                            var ck = "users/" + saved.userID + "/pictures/originals/" + item_id + ".original." + saved.filename; //path change!
+                                            console.log("tryna copy origiinal to " + ck);
+                                            var targetBucket = process.env.ROOT_BUCKET_NAME;
+                                            
+                                                    if (minioClient) {
+                                                        (async () => {  
+                                                            try {
+                                                        minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
+                                                            if (e) {
+                                                                callback(e);
+                                                            } else {
+                                                                console.log("Successfully copied the object:");
+                                                                console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
+                                                                callback(null, item_id, tUrl);
+                                                            }
+                                                        
+                                                          });
+                                                        } catch (e) {
+                                                            callback(e);
+                                                        }
+                                                        })();
+                                                    } else {
+                                                        (async () => {  
+                                                            try {
+                                                                const data = await CopyObject(targetBucket, copySource, ck);
+                                                                callback(null, item_id, tUrl);
+                                                            } catch (e) {
+                                                                callback(e);
+                                                            }
+                                                        })();
+                                                       
+                                                    }
+                                            
+                                        }
+                                    }
+                                );
+                            } else if (groupType == ".mp3" || groupType == ".MP3" || groupType == ".wav" || groupType == ".ogg" || groupType == ".OGG" || groupType == ".aif" ||  groupType == ".AIFF" || groupType == ".WAV"  )  {
+                                console.log("tryna save an audio " + tUrl);
+                                db_old.audio_items.save(
+                                    {type : "stagedUserAudio",
+                                        userID : req.session.user._id.toString(),
+                                        username : req.session.user.userName,
+                                        title : originalName(itemKey),
+                                        artist : "",
+                                        album :  "",
+                                        filename : itemKey,
+                                        item_type : "audio",
+                                        tags: [],
+                                        item_status: "private",
+                                        otimestamp : ts,
+                                        ofilesize : size},
+                                    function (err, saved) {
+                                        if ( err || !saved ) {
+                                            console.log('audio item not saved..');
+                                            callback (err);
+                                        } else {
+                                           
+                                            var item_id = saved._id.toString();
+                                            groupitems.push(item_id);
+                                            console.log('new picture item id: ' + item_id);
+                                            // console.log("transcodePictureURL request: " + tUrl);
+                                            var copySource = "archive1/staging/" + saved.userID + "/" + saved.filename;
+                                            var ck = "users/" + saved.userID + "/audio/originals/" + item_id + ".original." + saved.filename; //path change!
+                                            console.log("tryna copy origiinal to " + ck);
+                                            var targetBucket = process.env.ROOT_BUCKET_NAME;
+
+                                             
+                                                
+                                                    if (minioClient) {
+                                                        (async () => { 
+                                                        try {
+                                                        minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
+                                                            if (e) {
+                                                                callback(e);
+                                                            } else {
+                                                                console.log("Successfully copied the object:");
+                                                                console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
+                                                                callback(null, item_id, tUrl);
+                                                            }
+                                                            
+                                                          });
+                                                        } catch (e) {
+                                                            callback(e);
+                                                        }
+                                                    })();
+                                                    } else {
+                                                        (async () => { 
+                                                            try {
+                                                                const status = await CopyObject(targetBucket, copySource, ck);
+                                                                console.log("copied somethings " + status);
+                                                                callback(null, item_id, tUrl);
+                                                            } catch (e) {
+                                                                callback(e);
+                                                            }
+                                                        })();
+                                                        
+                                                    }
+                                        }
+                                    }
+                                );
+                            } else if (groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".mov" || groupType.toLowerCase() == ".webm")  {
+                                console.log("tryna save a video " + tUrl);
+                                db_old.video_items.save(
+                                    {
+                                        userID : req.session.user._id.toString(),
+                                        username : req.session.user.userName,
+                                        title : originalName(item.key),
+                                        filename : itemKey,
+                                        item_type : 'video',
+                                        tags: [],
+                                        item_status: "private",
+                                        otimestamp : ts,
+                                        ofilesize : size},
+                                    function (err, saved) {
+                                        if ( err || !saved ) {
+                                            console.log('video not saved..');
+                                            callback (err);
+                                        } else {
+                                            var item_id = saved._id.toString();
+                                            groupitems.push(item_id);
+                                            console.log('new item id: ' + item_id);
+                                            callback(null, item_id, tUrl);
+                                        }
+                                    }
+                                );
+                            } else if (groupType == ".glb") {
+                                console.log("tryna save a glb " + tUrl);
+                                db_old.models.save({
+                                    userID : req.session.user._id.toString(),
+                                    username : req.session.user.userName,
+                                    name : ts + "_" + originalName(item.key),
+                                    filename : itemKey,
+                                    item_type : 'glb',
+                                    tags: [],
+                                    item_status: "private",
+                                    otimestamp : ts,
+                                    ofilesize : size },
+                                function (err, saved) {
+                                    if ( err || !saved ) {
+                                        console.log('glb not saved..');
+                                        callback (err);
+                                    } else {
+                                        var item_id = saved._id.toString();
+                                        groupitems.push(item_id);
+                                        console.log('new item id: ' + item_id);
+                                        callback(null, item_id, tUrl);
+                                    }
+                                });
+                                // callback(null, null, tUrl); //don't save in db for now
+                            // }
+                            } else if (groupType == ".usdz") {
+                                console.log("tryna save a usdz " + tUrl);
+                                db_old.models.save({
+                                    userID : req.session.user._id.toString(),
+                                    username : req.session.user.userName,
+                                    name : ts + "_" + originalName(item.key),
+                                    filename : itemKey,
+                                    item_type : 'usdz',
+                                    tags: [],
+                                    item_status: "private",
+                                    otimestamp : ts,
+                                    ofilesize : size },
+                                function (err, saved) {
+                                    if ( err || !saved ) {
+                                        console.log('usdz not saved..');
+                                        callback (err);
+                                    } else {
+                                        var item_id = saved._id.toString();
+                                        groupitems.push(item_id);
+                                        console.log('new item id: ' + item_id);
+                                        callback(null, item_id, tUrl);
+                                    }
+                                });
+                                // callback(null, null, tUrl); //don't save in db for now
+                            } else if (groupType == ".reality") {
+                                console.log("tryna save a .reality file " + tUrl);
+                                db_old.models.save({
+                                    userID : req.session.user._id.toString(),
+                                    username : req.session.user.userName,
+                                    name : ts + "_" + originalName(item.key),
+                                    filename : itemKey,
+                                    item_type : 'reality',
+                                    tags: [],
+                                    item_status: "private",
+                                    otimestamp : ts,
+                                    ofilesize : size },
+                                function (err, saved) {
+                                    if ( err || !saved ) {
+                                        console.log('reality file not saved..');
+                                        callback (err);
+                                    } else {
+                                        var item_id = saved._id.toString();
+                                        groupitems.push(item_id);
+                                        console.log('new item id: ' + item_id);
+                                        callback(null, item_id, tUrl);
+                                    }
+                                });
+                                // callback(null, null, tUrl); //don't save in db for now
+                            }
+                        },
+                        function(iID, tUrl, callback) { //send to transloadit and/or copy to production folder.. //no, now do resizing on media server!
+                            if (groupType == ".jpg"  || groupType == ".jpeg" || groupType == ".JPG" || groupType == ".png" || groupType == ".PNG") {
+                               
+                                console.log("tryna push pic to GS " + groupType);
+                                var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+                                const options = {
+                                    headers: {'X-Access-Token': token}
+                                    };
+                                axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+iID, options)
+                                .then((response) => {
+                                //   console.log(response.data);
+                                    console.log("grabAndSqueeze response: " + response.status);
+                                //   console.log(response.statusText);
+                                //   console.log(response.headers);
+                                //   console.log(response.config);
+                                    callback(null);
+                                })
+                                
+                                // .then(function () {
+                                //     // console.log('nerp');
+                                //     callback(null);
+                                // })
+                                .catch(function (error) {
+                                    // handle error
+                                    // console.log(error);
+                                    callback(error);
+                                });
+
+                                   
+                            } else if (groupType == ".mp3" || groupType == ".wav" || groupType == ".aif" || groupType == ".aiff" || groupType == ".ogg" || 
+                                groupType == ".MP3" || groupType == ".WAV" || groupType == ".AIFF" || groupType == ".AIFF" || groupType == ".OGG"  ) { 
+                                
+                                    console.log("tryna process audio userid = " + req.session.user._id);
+                                    var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+                                    const options = {
+                                        headers: {'X-Access-Token': token}
+                                        };
+                                    axios.get(process.env.GS_HOST + "/process_audio_download/"+iID, options)
+                                    // .then((response) => {
+                                    // //   console.log(response.data);
+                                    //     console.log("grabAndSqueeze process_audio response: " + response.data);
+                                    // //   console.log(response.statusText);
+                                    // //   console.log(response.headers);
+                                    // //   console.log(response.config);
+                                    //     // callback(null);
+                                    // })
+                                    .then(function () {
+                                        // console.log("grabAndSqueeze process_audio response: " + response.data);
+                                        callback(null);
+                                    })
+                                    .catch(function (error) {
+                                        // handle error
+                                        // console.log(error);
+                                        callback(error);
+                                    });
+                                // }
+                            } else if (groupType.toLowerCase() == ".mpg" || groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".webm" || groupType.toLowerCase() == ".mov") {
+                                var targetBucket = "servicemedia";
+                                var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
+                                
+                                var ck = "users/" + item.uid + "/video/" + iID + "/" + iID + "." + itemKey;
+                                console.log("tryna process a video file " + copySource + " to " + targetBucket + ck);
+
+                                        if (minioClient) {
+                                            (async () => {  
+                                                try {
+                                                    minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
+                                                    if (e) {
+                                                        callback(e);
+                                                    } else {
+                                                        console.log("Successfully copied audio object:");
+                                                        console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
+                                                        callback(null);
+                                                    }
+                                                    
+                                                });
+                                                } catch (e) {
+                                                    callback(e);
+                                                }
+                                            })();
+                                        } else {
+                                            (async () => { 
+                                                try {
+                                                    const status = await CopyObject(targetBucket, copySource, ck);
+                                                    console.log("copied somethings " + status);
+                                                    callback(null);
+                                                } catch (e) {
+                                                    callback(e);
+                                                }
+                                            })();
+
+                                        }                                
+                            } else if (groupType == ".glb") {
+                                var targetBucket = process.env.ROOT_BUCKET_NAME;
+                                var copySource = process.env.STAGING_BUCKET_NAME + "staging/" + item.uid + "/" + itemKey;
+                                var ck = "users/" + item.uid + "/gltf/" + itemKey;
+                                console.log("tryna copy glb to " + ck);
+
+                                        let metadata = {"Content-Type":"model/gltf-binary"};
+                                        // metadata.Content-Type = 'model/gltf-binary';
+                                        if (minioClient) {
+                                            (async () => {  
+                                                try {
+                                            // minioClient.copyObject(targetBucket, ck, copySource, metadata, function(e, data) { //hrm dunno, needs testing
+                                                minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
+                                                    if (e) {
+                                                        callback(e);
+                                                    } else {
+                                                        console.log("Successfully copied glb object:");
+                                                        console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
+                                                        callback(null);
+                                                    }
+                                                    
+                                                });
+                                                } catch (e) {
+                                                    callback(e);
+                                                }
+                                            })();
+                                        } else {
+                                            console.log("tryna copy with metadata" + JSON.stringify(metadata));
+
+                                            (async () => {
+                                                try {
+                                                    const status = await CopyObject(targetBucket, copySource, ck);
+                                                    callback(null);
+                                                } catch (e) {
+                                                    callback(e);
+                                                }
+                                            })();
+                                           
+                                        }
+
+                            } else if (groupType == ".usdz") {
+                                var targetBucket = "servicemedia";
+                                var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
+                                var ck = "users/" + item.uid + "/usdz/" + itemKey;
+                                console.log("tryna copy usdz to " + ck);
+
+                                        if (minioClient) {
+                                            (async () => {  
+                                                try {
+                                                minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
+                                                    if (e) {
+                                                        callback(e);
+                                                    } else {
+                                                        console.log("Successfully copied usdz object:");
+                                                        console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
+                                                        callback(null);
+                                                    }
+                                                    
+                                                });
+                                                } catch (e){
+                                                    callback(e);   
+                                                }
+                                            })();
+                                        } else {
+                                            (async () => {
+                                                try {
+                                                    const status = await CopyObject(targetBucket, copySource, ck);
+                                                    callback(null);
+                                                } catch (e) {
+                                                    callback(e);
+                                                }
+                                            })();
+                                            
+                                        }
+                                 
+                            } 
+                           
+
+                        },
+                        function (callback) {
+                           
+                            params.Delete.Objects.push({Key: 'staging/' + item.uid + '/' + item.key}); //clean up
+
+                                    if (minioClient) { // --really only one here...
+                                        (async () => {
+                                            try {
+                                            minioClient.removeObject(process.env.STAGING_BUCKET_NAME, 'staging/' + item.uid + '/' + item.key, function(err) {
+                                                if (err) {
+                                                console.log('Unable to remove object', err);
+                                                callback(err);
+                                                }
+                                                console.log('Removed the object');
+                                                callback(null);
+                                            })
+                                            } catch (e) {
+                                                callback(e);
+                                            }
+                                        })();
+                                    } else {
+                                        (async () => {
+                                            try {
+                                               await DeleteObjects(process.env.STAGING_BUCKET_NAME, params.Delete);
+
+                                                callback(null);
+                                                // db.image_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
+                                            } catch (e) {
+                                               callback(e);
+                                            }
+                                        })();
+                                       
+                                    }
+        
+                        
+                        },
+                        ], //inner waterfall async end                        
+                        function(err, result) { // #last function, close async
+                            if (err != null) {
+                                console.log("callback callback err");
+                                // callback(err);
+                                cb(err);
+                            } else {
+                                console.log("callbacks done!~");
+                            //    callback(null);
+                                cb();
+                            uid = itemsArray[0].uid;    
+                            }
+                        
+                        });
+                    // cb();
+                    }, 
+                    function (err, result) { // #last function, close async
+                        if (err != null) {
+                            console.log("error processing files! " + err);
+                            callbk(err);
+                        } else {
+                            console.log("processing files complete");
+
+                            callbk();
+                    
+                            uid = itemsArray[0].uid;
+                        
+                        }
+                    })
+                },
+                function (callbk) {
+                  
+                    var group = {};                
+                    group.userID = uid;
+                    group.items = groupitems;
+                    if (group.items.length > 1) {
+                        console.log("tryna make group for " + uid + " length " + group.items.length);
+                        if (groupType == ".jpg" || groupType == ".jpeg") {
+                            group.type = "picture";
+                            group.name = "pictures " + ts;
+                        } else if (groupType == ".png") {
+                            group.type = "picture";
+                            group.name = "pictures " + ts;
+                        } else if (groupType == ".glb") {
+                            group.type = "models";
+                            group.name = "models " + ts;
+                        } else if (groupType == ".mp3") {
+                            group.type = "audio";
+                            group.name = "audio " + ts;
+                        } else if (groupType == ".mp4" || groupType == ".webm" || groupType == ".mov" || groupType == ".mpg" || groupType == ".MTS") {
+                            group.type = "video";
+                            group.name = "video " + ts;
+                        } 
+                        // else {
+                            // callbk(null); caught in db save below?  
+                        if (group.type != undefined && group.type != null) {
+                            db_old.groups.save(group, function (err, saved) {
+                                if ( err || !saved ) {
+                                    console.log('group not saved..');
+                                    callbk(err);
+                                    // res.send("nilch");
+                                } else {
+                                    groupID = saved._id.toString();
+                                    console.log('new group created, id: ' + groupID);
+                                    callbk(null);
+                                    //res.send("group created : " + item_id);
+                                }
+                            });
+                            } else {
+                                callbk(null);
+                            }
+                        // }
+                    } else { //no group if only one
+                        callbk(null);
+                    }
+                }
+             
+            ],
+            function(err, result) { // #last function, close async
+                if (err != null) {
+                    res.send(err);
+                } else {
+                    console.log("waterfall done: " + result);
+                    //  res.redirect('/upload.html');
+                    res.send("group created with groupID " + groupID);
+                }
+            });
+        }
+    } else { //if not all the same, check if it's an object file, and upload with siblings (*.mtl and pic file(s))
+        console.log("all items must be the same media type " + itemsExtensions.length); //TODO handle if they're different
+    }
+}); //end app.post /process_staging
 
 app.post('/process_staging_files', requiredAuthentication, function (req, res) { //from staging folder
     var itemsArray = req.body.processMe.items;
@@ -3016,8 +3805,8 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
         if (itemsArray[0].uid != req.session.user._id) {
             res.send("ids do not match! no upload for you");
         } else {
-        async.waterfall([
-           
+        async.waterfall([ //TODO just do this with await..
+              
             function(callbk) {     //callbk
                 async.each(itemsArray, function (item, cb) {  //1. make sure the file is where it's supposed to be...
                     let itemKey = item.key.toLowerCase();
@@ -10973,7 +11762,7 @@ app.post('/scrape_weblink/', requiredAuthentication, function (req, res) {
         try {
             const query = {"link_url" : lurl};
             const link = await RunDataQuery("weblinks", "findOne", query);
-            if (link) {
+            if (link) {  //update existing link if it already exists in db
                 console.log(" link item found for " + lurl);
                 var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
                 const options = {
@@ -10998,8 +11787,36 @@ app.post('/scrape_weblink/', requiredAuthentication, function (req, res) {
                 const updoc = { $set: {"render_date": dateNow, "link_title": req.body.link_title}};
                 const updatedweblink = await RunDataQuery("weblinks", "updateOne", upquery, updoc);
                 res.send("ok");
+            } else {
+                const savedLink = await RunDataQuery("weblinks", "insertOne", req.body); //insert record if it doesn't exist yet
+                console.log(" link item found for " + lurl);
+                var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+                const options = {
+                    headers: {'X-Access-Token': token}
+                };
+                const data = {
+                    "_id" : savedLink._id
+                };
+                axios.post(process.env.GS_HOST + "/scrapeweb/", data, options)
+                .then((response) => {
+                  console.log(response.data);
+                  
+                })
+                .catch(function (error) {
+                    res.end(error);
+                });
+                const scenequery = {'_id': ObjectId.createFromHexString(req.body.sceneID)};
+                const sceneupdoc = {$addToSet: { 'sceneWebLinks': link._id.toString()}};
+                const sceneupdate = await RunDataQuery("scenes", "updateOne", scenequery, sceneupdoc);
+                const dateNow = Date.now();
+                const upquery = {"_id": savedLink._id};
+                const updoc = { $set: {"render_date": Date.now()}};
+                const updatedweblink = await RunDataQuery("weblinks", "updateOne", upquery, updoc);
+                res.send("ok");
             }
         } catch (e) {
+            console.log('error scraping weblink ' +e);
+            res.send('error scraping weblink ' +e);
 
         }
     })();
