@@ -1687,27 +1687,41 @@ app.get('/validate/:auth_id', function (req, res) {
 app.get('/makedomainadmin/:domain/:_id',  checkAppID, requiredAuthentication, admin, function (req, res) {
     console.log(" makedomainadmin req" + req)
     var u_id = ObjectId.createFromHexString(req.params._id);
-    db_old.users.update(
-        { "_id": u_id },
-        {$set: { "authLevel" : "domain_admin_" + req.params.domain }}, function (err, done) {
-            if (err | !done) {
-                console.log("proobalert");
-                res.send("proobalert");
-            } else {
-                db_old.acl.update({ acl_rule: "domain_admin_" + req.params.domain }, { $push: { 'userIDs': req.params._id }}, {upsert : true},  function (err, saved) {
-                    if (err || !saved) {
-                        console.log("prooblemo");
-                        res.send('prooblemo');
-                    } else {
-//                                db.acl.update({ 'acl_rule': "domain_admin_" + req.params.domain},{ $push: { 'userIDs': req.params._id } });
-                        console.log("ok saved acl");
-                    }
-                    console.log("gold");
-                    res.send('gold');
-                });
-            }
+    (async () => {
+        try {
+            const query = { "_id": u_id };
+            const updoc = {$set: { "authLevel" : "domain_admin_" + req.params.domain }};
+            const uupdated = await RunDataQuery("users", "updateOne", query, updoc);
+            const aclquery =  { acl_rule: "domain_admin_" + req.params.domain };
+            const aclupdoc = { $push: { 'userIDs': req.params._id }};
+            const aclupdated = await RunDataQuery("acl", "updateOne", aclquery, aclupdoc);
+            res.send("updated " + uupdated + aclupdated);
+        } catch (e) {
+            console.log("error making domain admin! " + e);
+            res.send("error making domain admin! " + e);
         }
-    );
+    })();
+//     db_old.users.update(
+//         { "_id": u_id },
+//         {$set: { "authLevel" : "domain_admin_" + req.params.domain }}, function (err, done) {
+//             if (err | !done) {
+//                 console.log("proobalert");
+//                 res.send("proobalert");
+//             } else {
+//                 db_old.acl.update({ acl_rule: "domain_admin_" + req.params.domain }, { $push: { 'userIDs': req.params._id }}, {upsert : true},  function (err, saved) {
+//                     if (err || !saved) {
+//                         console.log("prooblemo");
+//                         res.send('prooblemo');
+//                     } else {
+// //                                db.acl.update({ 'acl_rule': "domain_admin_" + req.params.domain},{ $push: { 'userIDs': req.params._id } });
+//                         console.log("ok saved acl");
+//                     }
+//                     console.log("gold");
+//                     res.send('gold');
+//                 });
+//             }
+//         }
+//     );
 });
 
 app.post('/updatedomain/', requiredAuthentication, admin, domainadmin, function (req, res) { //um, no// um, fuckit
@@ -1716,19 +1730,32 @@ app.post('/updatedomain/', requiredAuthentication, admin, domainadmin, function 
     req.body.lastUpdateTimestamp = timestamp;
     req.body.lastUpdateUserID = req.session.user._id.toString();
     req.body.lastUpdateUserName = req.session.user.userName;
-    db_old.domains.update({"_id": ObjectId.createFromHexString(req.body._id)},
-    {$set: {domain: req.body.domain, domainStatus: req.body.domainStatus.toLowerCase()}}, function (err, domain) {
-        console.log("tryna update domain " + req.body._id);
-    // db.apps.update(req.body,  function (err, app) {
-        if (err || !domain) {
-            res.send("no domain update for you");
-        } else {
-            // console.log("updated app id " + )
-            res.send("updated");
+    (async () => {
+        try {
+            const query = {"_id": ObjectId.createFromHexString(req.body._id)};
+            const updoc = {$set: {domain: req.body.domain, domainStatus: req.body.domainStatus.toLowerCase()}};
+            const updated = await RunDataQuery("domains", "updateOne", query, updoc);
+           
+            res.send("updated " + updated);
+        } catch (e) {
+            console.log("error updating domain " + e);
+            res.send("error updating domain " + e);
         }
-    });
+    })();
+
+    // db_old.domains.update({"_id": ObjectId.createFromHexString(req.body._id)},
+    // {$set: {domain: req.body.domain, domainStatus: req.body.domainStatus.toLowerCase()}}, function (err, domain) {
+    //     console.log("tryna update domain " + req.body._id);
+    // // db.apps.update(req.body,  function (err, app) {
+    //     if (err || !domain) {
+    //         res.send("no domain update for you");
+    //     } else {
+    //         // console.log("updated app id " + )
+    //         res.send("updated");
+    //     }
+    // });
 });
-app.post('/createdomain/', requiredAuthentication, admin, domainadmin, function (req, res) { //um, no// um, fuckit
+app.post('/createdomain/', requiredAuthentication, admin, domainadmin, function (req, res) { 
 
     var timestamp = Math.round(Date.now() / 1000);
     req.body.dateCreated = timestamp;
@@ -1736,13 +1763,22 @@ app.post('/createdomain/', requiredAuthentication, admin, domainadmin, function 
     // req.body.appStatus = "active";
     req.body.createdByUserID = req.session.user._id.toString();
     req.body.createdByUserName = req.session.user.userName;
-    db_old.domains.save(req.body, function (err, domain) {
-        if (err | !domain) {
-            res.send("no domain for you");
-        } else {
-            res.json("created " + domain);
+    (async () => {
+        try {
+            const saved = await RunDataQuery("domains", "insertOne", req.body);
+            res.send("created " + saved);
+        } catch (e) {
+            console.log("error creatging domain " + e);
+            res.send("error creating domain " + e);
         }
-    });
+    })();
+    // db_old.domains.save(req.body, function (err, domain) {
+    //     if (err | !domain) {
+    //         res.send("no domain for you");
+    //     } else {
+    //         res.json("created " + domain);
+    //     }
+    // });
 });
 
 // app.get('/create_app/:domain/:appname', checkAppID, requiredAuthentication, domainadmin, function (req, res) {
@@ -1756,290 +1792,431 @@ app.post('/createdomain/', requiredAuthentication, admin, domainadmin, function 
 //     });
 // });
 app.post('/allapps/', requiredAuthentication, admin, function (req, res) {
-
-    db_old.apps.find({}, function (err, apps) { //TODO fetch users for each?  or resources used?
-        if (err | !apps) {
-            console.log("no apps for admin!?!");
-            res.send("no apps for admin - that ain't right!~");
-        } else {
+    (async () => {
+        try {
+            const query = {}; //find all!
+            const apps = await RunDataQuery("apps", "find", query);
+            let response = {};
             response.apps = apps;
-            res.json(response);
+            res.send(response);
+        } catch (e) {
+            console.log("error getting apps " + e);
+            res.send("error getting apps " + e);
         }
-    });
+    })();
+    // db_old.apps.find({}, function (err, apps) { //TODO fetch users for each?  or resources used?
+    //     if (err | !apps) {
+    //         console.log("no apps for admin!?!");
+    //         res.send("no apps for admin - that ain't right!~");
+    //     } else {
+    //         response.apps = apps;
+    //         res.json(response);
+    //     }
+    // });
 });
 
 app.post('/remove_app_admin/', requiredAuthentication, domainadmin, function (req, res){
     console.log("tryna remove app admin " + JSON.stringify(req.body));
-    db_old.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $pull: { 'userIDs': req.body.user_id }}, function (err, saved) {
-        if (err || !saved) {
-            console.log("prooblemo " + err);
-            res.send('prooblemo ' + err);
-        } else {
-            console.log("ok saved acl");
+    (async () => {
+        try {
+            const query = {"acl_rule": "app_admin_" + req.body.app_id};
+            const updoc = { $pull: { 'userIDs': req.body.user_id }};
+            const updated = await RunDataQuery("acl", "updateOne", query, updoc);
+           
+            res.send("updated " + updated);
+        } catch (e) {
+            console.log("error updating domain " + e);
+            res.send("error updating domain " + e);
         }
-        console.log("updated acl");
-        res.send('updated acl');
-    });
+    })();
+
+    // db_old.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $pull: { 'userIDs': req.body.user_id }}, function (err, saved) {
+    //     if (err || !saved) {
+    //         console.log("prooblemo " + err);
+    //         res.send('prooblemo ' + err);
+    //     } else {
+    //         console.log("ok saved acl");
+    //     }
+    //     console.log("updated acl");
+    //     res.send('updated acl');
+    // });
 }); 
 
 app.post('/add_app_admin/', requiredAuthentication, domainadmin, function (req, res){
     console.log("tryna add app admin " + JSON.stringify(req.body));
-    db_old.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $push: { 'userIDs': req.body.user_id }}, {upsert : true},  function (err, saved) {
-        if (err || !saved) {
-            console.log("prooblemo " + err);
-            res.send('prooblemo ' + err);
-        } else {
-            console.log("ok saved acl");
+    (async () => {
+        try {
+            const query = {"acl_rule": "app_admin_" + req.body.app_id};
+            const updoc = { $push: { "userIDs": req.body.user_id }};
+            const updated = await RunDataQuery("acl", "updateOne", query, updoc);
+           
+            res.send("updated " + updated);
+        } catch (e) {
+            console.log("error updating domain " + e);
+            res.send("error updating domain " + e);
         }
-        console.log("updated acl");
-        res.send('updated acl');
-    });
+    })();
+
+    // db_old.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $push: { 'userIDs': req.body.user_id }}, {upsert : true},  function (err, saved) {
+    //     if (err || !saved) {
+    //         console.log("prooblemo " + err);
+    //         res.send('prooblemo ' + err);
+    //     } else {
+    //         console.log("ok saved acl");
+    //     }
+    //     console.log("updated acl");
+    //     res.send('updated acl');
+    // });
 }); 
 
 app.post('/createapp/', requiredAuthentication, admin, domainadmin, function (req, res) {
-    db_old.apps.find({$and: [{"appdomain": req.body.appdomain}, {"appname": req.body.appname}]}, function (err, apps) {
-        if (!err && (apps == null || apps.length == 0)) {
-            req.body.dateCreated = new Date();
-            req.body.createdByUserID = req.session.user._id.toString();
-            req.body.createdByUserName = req.session.user.userName;
-            db_old.apps.save(req.body, function (err, app) {
-                if (err || !app) {
-                    res.send("no app for you" + err);
-                } else {
-                    res.json("created" + app);
-                }
-            });
-        } else {
-            res.send("sorry, that app name already exists");
+
+
+    (async () => {
+        try {
+            const query = {$and: [{"appdomain": req.body.appdomain}, {"appname": req.body.appname}]};
+            const app = await RunDataQuery("apps", "findOne", query);
+            if (app == null) {
+                req.body.dateCreated = new Date();
+                req.body.createdByUserID = req.session.user._id.toString();
+                req.body.createdByUserName = req.session.user.userName;
+                const saved = await RunDataQuery("apps", "insertOne", req.body);
+                res.send("app created " + saved);
+            } else {
+                res.send("sorry that app name already exists!");
+            }
+            res.send("updated " + updated);
+        } catch (e) {
+            console.log("error creating app " + e);
+            res.send("error creating app " + e);
         }
-    });
+    })();
+
+    // const query = {$and: [{"appdomain": req.body.appdomain}, {"appname": req.body.appname}]};
+    // const app = await RunDataQuery("apps", "findOne", query);
+    // if (app == null) {
+    //     req.body.dateCreated = new Date();
+    //         req.body.createdByUserID = req.session.user._id.toString();
+    //         req.body.createdByUserName = req.session.user.userName;
+    // }
+
+
+    // db_old.apps.find({$and: [{"appdomain": req.body.appdomain}, {"appname": req.body.appname}]}, function (err, apps) {
+    //     if (!err && (apps == null || apps.length == 0)) {
+    //         req.body.dateCreated = new Date();
+    //         req.body.createdByUserID = req.session.user._id.toString();
+    //         req.body.createdByUserName = req.session.user.userName;
+    //         db_old.apps.save(req.body, function (err, app) {
+    //             if (err || !app) {
+    //                 res.send("no app for you" + err);
+    //             } else {
+    //                 res.json("created" + app);
+    //             }
+    //         });
+    //     } else {
+    //         res.send("sorry, that app name already exists");
+    //     }
+    // });
 });
 
 app.post('/updateapp/:appid', requiredAuthentication, admin, function (req, res) {
         console.log("tryna update appid " + req.params.appid + " body: " + JSON.stringify(req.body));
-        db_old.apps.update({"_id": ObjectId.createFromHexString(req.body._id)},
-        {$set: {appname: req.body.appname, appStatus: req.body.appStatus, appdomain: req.body.appdomain, appunitydomain: req.body.appunitydomain}}, function (err, app) {
-            console.log("tryna update app " + req.body._id);
-        // db.apps.update(req.body,  function (err, app) {
-            if (err || !app) {
-                res.send("no app for you");
-            } else {
-                // console.log("updated app id " + )
-                res.send("updated");
+
+        (async () => {
+            try {
+                const query = {"_id": ObjectId.createFromHexString(req.body._id)};
+                const updoc = {$set: {appname: req.body.appname, appStatus: req.body.appStatus, appdomain: req.body.appdomain, appunitydomain: req.body.appunitydomain}};
+                const updated = await RunDataQuery("apps", "updateOne", query, updoc);
+               
+                res.send("updated " + updated);
+            } catch (e) {
+                console.log("error updating domain " + e);
+                res.send("error updating domain " + e);
             }
-        });
+        })();
+
+        // db_old.apps.update({"_id": ObjectId.createFromHexString(req.body._id)},
+        // {$set: {appname: req.body.appname, appStatus: req.body.appStatus, appdomain: req.body.appdomain, appunitydomain: req.body.appunitydomain}}, function (err, app) {
+        //     console.log("tryna update app " + req.body._id);
+        // // db.apps.update(req.body,  function (err, app) {
+        //     if (err || !app) {
+        //         res.send("no app for you");
+        //     } else {
+        //         // console.log("updated app id " + )
+        //         res.send("updated");
+        //     }
+        // });
 });
 app.post('/domain/', requiredAuthentication, domainadmin, function (req, res) {
-    // console.log("tryna get domain info for " + req.params.domain);
-    let oid = ObjectId.createFromHexString(req.body._id);
-    db_old.domains.findOne({_id: oid}, function (err, domain) {
-        if (err | !domain) {
-            res.send("no domain for you");
-        } else {
-            if (domain.domainPictureIDs != null && domain.domainPictureIDs != undefined && domain.domainPictureIDs.length > 0) {
-                // oids = domain.domainPictureIDs.map(ObjectId.createFromHexString()); //convert to mongo object ids for searching
-                const oids = domain.domainPictureIDs.map(item => {
-                    return ObjectId.createFromHexString(item);
-                })
-                db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-                    if (err || !pic_items) {
-                        console.log("error getting picture items: " + err);
-                        res.send("error: " + err);
-                    } else {
-                        // (async () => {
-                            try {
-                            domainPictures = [];
-                            pic_items.forEach(function(picture_item){   
-                                (async () => {             
-                                var imageItem = {};
-                                // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-                                // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-                                // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-                                const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, 6000);
-                                // imageItem.urlThumb = urlThumb;
-                                imageItem.urlHalf = urlHalf;
-                                // imageItem.urlStandard = urlStandard;
-                                imageItem._id = picture_item._id;
-                                imageItem.filename = picture_item.filename;
-                                domainPictures.push(imageItem);
-                                domain.domainPictures = domainPictures;
-                                })();
-                            });
-                        res.json(domain);
-                        } catch (e) {
+    console.log("tryna get domain info for " + req.body._id);
+    
+    (async () => {
+        try {
+            let oid = ObjectId.createFromHexString(req.body._id);
+            const query = {"_id": oid}; 
+            const domain = await RunDataQuery("domains", "findOne", query);
 
-                        }
-                    // })();
-                    }
-                });
-            } else {
-                 res.json(domain);
-            }
+            res.send(domain);  //nevermind the pics...
+        } catch (e) {
+            console.log("error getting domain " + e);
+            res.send("error getting domain " + e);
         }
-    }); 
+    })();
 });
+
+//     db_old.domains.findOne({_id: oid}, function (err, domain) {
+//         if (err | !domain) {
+//             res.send("no domain for you");
+//         } else {
+//             if (domain.domainPictureIDs != null && domain.domainPictureIDs != undefined && domain.domainPictureIDs.length > 0) {
+//                 // oids = domain.domainPictureIDs.map(ObjectId.createFromHexString()); //convert to mongo object ids for searching
+//                 const oids = domain.domainPictureIDs.map(item => {
+//                     return ObjectId.createFromHexString(item);
+//                 })
+//                 db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+//                     if (err || !pic_items) {
+//                         console.log("error getting picture items: " + err);
+//                         res.send("error: " + err);
+//                     } else {
+//                         // (async () => {
+//                             try {
+//                             domainPictures = [];
+//                             pic_items.forEach(function(picture_item){   
+//                                 (async () => {             
+//                                 var imageItem = {};
+//                                 // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
+//                                 // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
+//                                 // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
+//                                 const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, 6000);
+//                                 // imageItem.urlThumb = urlThumb;
+//                                 imageItem.urlHalf = urlHalf;
+//                                 // imageItem.urlStandard = urlStandard;
+//                                 imageItem._id = picture_item._id;
+//                                 imageItem.filename = picture_item.filename;
+//                                 domainPictures.push(imageItem);
+//                                 domain.domainPictures = domainPictures;
+//                                 })();
+//                             });
+//                         res.json(domain);
+//                         } catch (e) {
+
+//                         }
+//                     // })();
+//                     }
+//                 });
+//             } else {
+//                  res.json(domain);
+//             }
+//         }
+//     }); 
+// });
+
+
 app.get('/domain/:domain', checkAppID, requiredAuthentication, domainadmin, function (req, res) {
     console.log("tryna get domain info for " + req.params.domain);
-    db_old.domains.findOne({"domain": req.params.domain}, function (err, domain) {
-        if (err | !domain) {
-            res.send("no domain for you");
-        } else {
-            db_old.apps.find({"appdomain": req.params.domain}, function(err,apps) {
-                if (err || !apps) {
-                    console.log("no apps for you!");
-                    res.json(domain);
-                } else {
-                    domain.apps = apps;
-                    res.json(domain);
-                }
-            })
+
+    (async () => {
+        try {
+            const query = {"domain": req.params.domain}; 
+            const domain = await RunDataQuery("domains", "findOne", query);
+            res.json(domain); //nevermind the pics...
+        } catch (e) {
+            console.log("error getting domain " + e);
+            res.send("error getting domain " + e);
         }
-    });
+    })();
+
+    // db_old.domains.findOne({"domain": req.params.domain}, function (err, domain) {
+    //     if (err | !domain) {
+    //         res.send("no domain for you");
+    //     } else {
+    //         db_old.apps.find({"appdomain": req.params.domain}, function(err,apps) {
+    //             if (err || !apps) {
+    //                 console.log("no apps for you!");
+    //                 res.json(domain);
+    //             } else {
+    //                 domain.apps = apps;
+    //                 res.json(domain);
+    //             }
+    //         })
+    //     }
+    // });
 });
+
 app.get('/app/:appID', requiredAuthentication, admin, function (req, res) {
     console.log("tryna get app " + req.params.appID);
     let oid = ObjectId.createFromHexString(req.params.appID);
-    db_old.apps.findOne({_id: oid}, function (err, app) {
-        if (err | !app) {
-            res.send("no apps");
-        } else {
+    
+    (async () => {
+        try {
+            const query = {"_id": oid}; 
+            let app = await RunDataQuery("apps", "findOne", query);
             let app_admins = [];
-            let appPictures = [];
-            async.waterfall([
-                function (callback) {
-                    db_old.acl.findOne({acl_rule: "app_admin_" + req.params.appID}, function (err, acl_rule) {
-                        if (err || !acl_rule) {
-                            callback();
-                            //no admins
-                        } else {
-                            let IDs = acl_rule.userIDs;
-                            console.log("app Admins: " + IDs);
-                            // app_admins = adminIDs;
-                            if (IDs.length > 0) {
-                                async.each (IDs, function (ID, acallbackz) {
-                                    db_old.users.findOne({_id: ObjectId.createFromHexString(ID)}, function (err, user) {
-                                        if (err || !user) {
-                                            //invalid uid?
-                                            console.log("bad user ID for app admin!");
-                                            acallbackz();
-                                            // callback();
-                                        } else { //jack in admin username and ID for response 
-                                            let admin = {};
-                                            admin.userID = user._id;
-                                            admin.userName = user.userName;
-                                            app_admins.push(admin);     
-                                           
-                                            console.log("admin " + JSON.stringify(admin));
-                                            acallbackz();
-                                           
-                                        }
-                                    });
-                                    
-                                    
-                                }, function(err) {
-                                    if (err) {
-                                        console.log('An admin failed to process');
-                                        //res.send("error: " + err);
-                                        callback(err);
-                                    } else {
-                                        console.log('Added admins to app successfully');
-                                        // pcallbackz();
-
-                                        // console.log("app response " + JSON.stringify(app));
-                                        // res.json(app);
-                                        callback();
-                                    }
-                                });
-
-
-                                // for (let i = 0; i < IDs.length; i++) {
-                                //     db.users.findOne({_id: ObjectId.createFromHexString(IDs[i])}, function (err, user) {
-                                //         if (err || !user) {
-                                //             //invalid uid?
-                                //             console.log("bad user ID for app admin!");
-                                //             // callback();
-                                //         } else { //jack in admin username and ID for response 
-                                //             let admin = {};
-                                //             admin.userID = user._id;
-                                //             admin.userName = user.userName;
-                                //             app_admins.push(admin);     
-                                           
-                                //             console.log("admin " + JSON.stringify(admin));
-                                           
-                                //         }
-                                //     });
-                                // }
-                                // callback();
-                            }
-                        }
-                    });
-                },
-                function (callback) {
-                    if (app.appPictureIDs != null && app.appPictureIDs != undefined && app.appPictureIDs.length > 0) {
-
-                        const oids = app.appPictureIDs.map(item => {
-                            return ObjectId.createFromHexString(item);
-                        });
-                        console.log("oids " + oids);
-                        db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-                            if (err || !pic_items) {
-                                callback();
-                                console.log("error getting picture items: " + err);
-                            } else {
-                                console.log("picItems found for app : " + JSON.stringify(pic_items));
-                                async.each (pic_items, function (picture_item, pcallbackz) {
-                                    var imageItem = {};
-                                    (async () => {
-                                    try {
-                                        // const urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-                                        const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename,6000);
-                                        imageItem.urlHalf = urlHalf;
-                                        imageItem._id = picture_item._id;
-                                        imageItem.filename = picture_item.filename;
-                                        appPictures.push(imageItem);
-                                        pcallbackz();
-                                    } catch (e) {
-
-                                    }
-                                   
-                                    })();
-                                }, function(err) {
-                                    if (err) {
-                                        console.log('An app pic image failed to process');
-                                        //res.send("error: " + err);
-                                        callback(err);
-                                    } else {
-                                        console.log('Added images to app successfully');
-                                        // pcallbackz();
-
-                                        console.log("app response " + JSON.stringify(app));
-                                        // res.json(app);
-                                        callback();
-                                    }
-                                });
-                                // callback();
-                            }
-                        });
-                    } else {
-                        callback();
-                    }
-
-                }],
-            function (err, result) { // #last function, close async
-                if (err) {
-                    res.send(err);
-                    console.log("app response err: "+err);
-                } else {
-                    app.appPictures = appPictures;
-                    app.appAdmins = app_admins;
-                    res.json(app);
-                    console.log("app waterfall done: " + JSON.stringify(app));
-                }
+            const aclquery = {acl_rule: "app_admin_" + req.params.appID};
+            const acl_rule = await RunDataQuery("acl", "findOne", aclquery);
+            const IDs = acl_rule.userIDs;
+            for (let i = 0; i < IDs.length; i++) {
+                const uid = ObjectId.createFromHexString(IDs[i]);
+                const userquery = {"_id": uid};
+                const user = await RunDataQuery("users", "findOne", userquery);
+                let admin = {};
+                admin.userID = user._id;
+                admin.userName = user.userName;
+                app_admins.push(admin);     
+                
+                console.log("pushing admin " + JSON.stringify(admin));
             }
-            );
+            app.appPictures = []; //nm
+            app.appAdmins = app_admins;
+            res.json(app);
+        } catch (e) {
+            console.log("error getting domain " + e);
+            res.send("error getting domain " + e);
         }
-        });    
-    });
+    })();
+});
+
+    // db_old.apps.findOne({_id: oid}, function (err, app) {
+    //     if (err | !app) {
+    //         res.send("no apps");
+    //     } else {
+    //         let app_admins = [];
+    //         let appPictures = [];
+    //         async.waterfall([
+    //             function (callback) {
+    //                 db_old.acl.findOne({acl_rule: "app_admin_" + req.params.appID}, function (err, acl_rule) {
+    //                     if (err || !acl_rule) {
+    //                         callback();
+    //                         //no admins
+    //                     } else {
+    //                         let IDs = acl_rule.userIDs;
+    //                         console.log("app Admins: " + IDs);
+    //                         // app_admins = adminIDs;
+    //                         if (IDs.length > 0) {
+    //                             async.each (IDs, function (ID, acallbackz) {
+    //                                 db_old.users.findOne({_id: ObjectId.createFromHexString(ID)}, function (err, user) {
+    //                                     if (err || !user) {
+    //                                         //invalid uid?
+    //                                         console.log("bad user ID for app admin!");
+    //                                         acallbackz();
+    //                                         // callback();
+    //                                     } else { //jack in admin username and ID for response 
+    //                                         let admin = {};
+    //                                         admin.userID = user._id;
+    //                                         admin.userName = user.userName;
+    //                                         app_admins.push(admin);     
+                                           
+    //                                         console.log("admin " + JSON.stringify(admin));
+    //                                         acallbackz();
+                                           
+    //                                     }
+    //                                 });
+                                    
+                                    
+    //                             }, function(err) {
+    //                                 if (err) {
+    //                                     console.log('An admin failed to process');
+    //                                     //res.send("error: " + err);
+    //                                     callback(err);
+    //                                 } else {
+    //                                     console.log('Added admins to app successfully');
+    //                                     // pcallbackz();
+
+    //                                     // console.log("app response " + JSON.stringify(app));
+    //                                     // res.json(app);
+    //                                     callback();
+    //                                 }
+    //                             });
+
+
+    //                             // for (let i = 0; i < IDs.length; i++) {
+    //                             //     db.users.findOne({_id: ObjectId.createFromHexString(IDs[i])}, function (err, user) {
+    //                             //         if (err || !user) {
+    //                             //             //invalid uid?
+    //                             //             console.log("bad user ID for app admin!");
+    //                             //             // callback();
+    //                             //         } else { //jack in admin username and ID for response 
+    //                             //             let admin = {};
+    //                             //             admin.userID = user._id;
+    //                             //             admin.userName = user.userName;
+    //                             //             app_admins.push(admin);     
+                                           
+    //                             //             console.log("admin " + JSON.stringify(admin));
+                                           
+    //                             //         }
+    //                             //     });
+    //                             // }
+    //                             // callback();
+    //                         }
+    //                     }
+    //                 });
+    //             },
+    //             function (callback) {
+    //                 if (app.appPictureIDs != null && app.appPictureIDs != undefined && app.appPictureIDs.length > 0) {
+
+    //                     const oids = app.appPictureIDs.map(item => {
+    //                         return ObjectId.createFromHexString(item);
+    //                     });
+    //                     console.log("oids " + oids);
+    //                     db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+    //                         if (err || !pic_items) {
+    //                             callback();
+    //                             console.log("error getting picture items: " + err);
+    //                         } else {
+    //                             console.log("picItems found for app : " + JSON.stringify(pic_items));
+    //                             async.each (pic_items, function (picture_item, pcallbackz) {
+    //                                 var imageItem = {};
+    //                                 (async () => {
+    //                                 try {
+    //                                     // const urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
+    //                                     const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename,6000);
+    //                                     imageItem.urlHalf = urlHalf;
+    //                                     imageItem._id = picture_item._id;
+    //                                     imageItem.filename = picture_item.filename;
+    //                                     appPictures.push(imageItem);
+    //                                     pcallbackz();
+    //                                 } catch (e) {
+
+    //                                 }
+                                   
+    //                                 })();
+    //                             }, function(err) {
+    //                                 if (err) {
+    //                                     console.log('An app pic image failed to process');
+    //                                     //res.send("error: " + err);
+    //                                     callback(err);
+    //                                 } else {
+    //                                     console.log('Added images to app successfully');
+    //                                     // pcallbackz();
+
+    //                                     console.log("app response " + JSON.stringify(app));
+    //                                     // res.json(app);
+    //                                     callback();
+    //                                 }
+    //                             });
+    //                             // callback();
+    //                         }
+    //                     });
+    //                 } else {
+    //                     callback();
+    //                 }
+
+    //             }],
+    //         function (err, result) { // #last function, close async
+    //             if (err) {
+    //                 res.send(err);
+    //                 console.log("app response err: "+err);
+    //             } else {
+    //                 app.appPictures = appPictures;
+    //                 app.appAdmins = app_admins;
+    //                 res.json(app);
+    //                 console.log("app waterfall done: " + JSON.stringify(app));
+    //             }
+    //         }
+    //         );
+    //     }
+    //     });    
+    // });
 
 
             // console.log(JSON.stringify(app.appPictureIDs));
@@ -10787,107 +10964,141 @@ app.post('/update_weblink/', requiredAuthentication, function (req, res) { //ref
     
 });
 
-app.post('/weblink/', requiredAuthentication, function (req, res) {
+app.post('/scrape_weblink/', requiredAuthentication, function (req, res) {
     console.log("req.header: " + req.headers);
     console.log("checkin weblink: " + req.body.link_url + " for scene " + req.body.sceneID);
     var lurl = "";
     lurl = req.body.link_url;
-    
-    db_old.weblinks.findOne({ link_url : lurl}, function(err, link) {
-        if (err) {
-            console.log("error getting link items: " + err);
-        } else if (!link) {  //hasn't been scraped before
-            console.log("no link item found for " + lurl);
-            db_old.weblinks.save(req.body, function (err, savedlink) {
-                if (err || !savedlink) {
-                    console.log('link not saved..');
-                    res.send("nilch");
-                } else {
-                    if (process.env.USE_TRANSLOADIT  == true) {
-                        var weblinkParams = {
-                            'steps': {
-                                'extract': {
-                                    'robot': '/html/convert',
-                                    'url' : req.body.link_url
-                                }
-                            },
-                            'template_id': process.env.TRANSLOADIT_WEBSCRAPE_TEMPLATE,
-                            'fields' : { 'link_id' : savedlink._id,
-                                'user_id' : req.session.user._id.toString()
-                            }
-                        };
-
-                        transloadClient.send(weblinkParams, function(ok) {
-                            console.log('Success: ' + JSON.stringify(ok));
-                            if (ok != null && ok != undefined) {
-                                var dateNow = Date.now();
-                                db_old.weblinks.update({"_id": savedlink._id}, { $set: {"render_date": dateNow}});
-                            }
-                        }, function(err) {
-                            console.log('Error: ' + JSON.stringify(err));
-    //                                res.send(err);
-                        });
-                    } else {
-                        // console.log("userid = " + req.session.user._id);
-                        var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-                        const options = {
-                            headers: {'X-Access-Token': token}
-                          };
-                        const data = {
-                            "_id" : savedlink._id
-                        };
-                        axios.post(process.env.GS_HOST + "/scrapeweb/", data, options)
-                        .then((response) => {
-                            console.log(response.data);
-                        })
-                        .catch(function (error) {
-                            res.end(error);
-                        })
-                        .then(function () {
-                            // console.log('nerp');
-                            
-                        });
-                        db_old.scenes.update(
-                            {'_id': ObjectId.createFromHexString(req.body.sceneID)},
-                            {$push: { 'sceneWebLinks': savedlink._id.toString() } }
-                        );
-                        var dateNow = Date.now();
-                        db_old.weblinks.update({"_id": savedlink._id}, { $set: {"render_date": dateNow}});
-                        res.send("ok");
-                    }
-                }
-            });
-        } else {
-       
-            console.log(" link item found for " + lurl);
-            var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-            const options = {
-                headers: {'X-Access-Token': token}
-              };
-            const data = {
-                "_id" : link._id
-            };
-            axios.post(process.env.GS_HOST + "/scrapeweb/", data, options)
+    (async () => {
+        try {
+            const query = {"link_url" : lurl};
+            const link = await RunDataQuery("weblinks", "findOne", query);
+            if (link) {
+                console.log(" link item found for " + lurl);
+                var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+                const options = {
+                    headers: {'X-Access-Token': token}
+                };
+                const data = {
+                    "_id" : link._id
+                };
+                axios.post(process.env.GS_HOST + "/scrapeweb/", data, options)
                 .then((response) => {
                   console.log(response.data);
+                  
                 })
                 .catch(function (error) {
                     res.end(error);
-                })
-                .then(function () {
                 });
-                db_old.scenes.update(
-                    {'_id': ObjectId.createFromHexString(req.body.sceneID)},
-                    {$addToSet: { 'sceneWebLinks': link._id.toString() } }
-                );
-                var dateNow = Date.now();
-                db_old.weblinks.update({"_id": link._id}, { $set: {"render_date": dateNow, "link_title": req.body.link_title}});
+                const scenequery = {'_id': ObjectId.createFromHexString(req.body.sceneID)};
+                const sceneupdoc = {$addToSet: { 'sceneWebLinks': link._id.toString()}};
+                const sceneupdate = await RunDataQuery("scenes", "updateOne", scenequery, sceneupdoc);
+                const dateNow = Date.now();
+                const upquery = {"_id": link._id};
+                const updoc = { $set: {"render_date": dateNow, "link_title": req.body.link_title}};
+                const updatedweblink = await RunDataQuery("weblinks", "updateOne", upquery, updoc);
                 res.send("ok");
-            
-            // }
+            }
+        } catch (e) {
+
         }
-    });
+    })();
 });
+//     db_old.weblinks.findOne({ link_url : lurl}, function(err, link) {
+//         if (err) {
+//             console.log("error getting link items: " + err);
+//         } else if (!link) {  //hasn't been scraped before
+//             console.log("no link item found for " + lurl);
+//             db_old.weblinks.save(req.body, function (err, savedlink) {
+//                 if (err || !savedlink) {
+//                     console.log('link not saved..');
+//                     res.send("nilch");
+//                 } else {
+//                     if (process.env.USE_TRANSLOADIT  == true) {
+//                         var weblinkParams = {
+//                             'steps': {
+//                                 'extract': {
+//                                     'robot': '/html/convert',
+//                                     'url' : req.body.link_url
+//                                 }
+//                             },
+//                             'template_id': process.env.TRANSLOADIT_WEBSCRAPE_TEMPLATE,
+//                             'fields' : { 'link_id' : savedlink._id,
+//                                 'user_id' : req.session.user._id.toString()
+//                             }
+//                         };
+
+//                         transloadClient.send(weblinkParams, function(ok) {
+//                             console.log('Success: ' + JSON.stringify(ok));
+//                             if (ok != null && ok != undefined) {
+//                                 var dateNow = Date.now();
+//                                 db_old.weblinks.update({"_id": savedlink._id}, { $set: {"render_date": dateNow}});
+//                             }
+//                         }, function(err) {
+//                             console.log('Error: ' + JSON.stringify(err));
+//     //                                res.send(err);
+//                         });
+//                     } else {
+//                         // console.log("userid = " + req.session.user._id);
+//                         var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+//                         const options = {
+//                             headers: {'X-Access-Token': token}
+//                           };
+//                         const data = {
+//                             "_id" : savedlink._id
+//                         };
+//                         axios.post(process.env.GS_HOST + "/scrapeweb/", data, options)
+//                         .then((response) => {
+//                             console.log(response.data);
+//                         })
+//                         .catch(function (error) {
+//                             res.end(error);
+//                         })
+//                         .then(function () {
+//                             // console.log('nerp');
+                            
+//                         });
+//                         db_old.scenes.update(
+//                             {'_id': ObjectId.createFromHexString(req.body.sceneID)},
+//                             {$push: { 'sceneWebLinks': savedlink._id.toString() } }
+//                         );
+//                         var dateNow = Date.now();
+//                         db_old.weblinks.update({"_id": savedlink._id}, { $set: {"render_date": dateNow}});
+//                         res.send("ok");
+//                     }
+//                 }
+//             });
+//         } else {
+       
+//             console.log(" link item found for " + lurl);
+//             var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+//             const options = {
+//                 headers: {'X-Access-Token': token}
+//               };
+//             const data = {
+//                 "_id" : link._id
+//             };
+//             axios.post(process.env.GS_HOST + "/scrapeweb/", data, options)
+//                 .then((response) => {
+//                   console.log(response.data);
+//                 })
+//                 .catch(function (error) {
+//                     res.end(error);
+//                 })
+//                 .then(function () {
+//                 });
+//                 db_old.scenes.update(
+//                     {'_id': ObjectId.createFromHexString(req.body.sceneID)},
+//                     {$addToSet: { 'sceneWebLinks': link._id.toString() } }
+//                 );
+//                 var dateNow = Date.now();
+//                 db_old.weblinks.update({"_id": link._id}, { $set: {"render_date": dateNow, "link_title": req.body.link_title}});
+//                 res.send("ok");
+            
+//             // }
+//         }
+//     });
+// });
 app.post('/clone_scene', requiredAuthentication, function (req,res) {
 
     console.log("request to clone scene " + JSON.stringify(req.body));

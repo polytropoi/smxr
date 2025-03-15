@@ -15872,7 +15872,7 @@ function getAllPeople() {
                         stump.link_url = link;
                         stump.sceneID = response.data._id;
                         console.log("tryna add scene weblink" + stump.sceneID);
-                        axios.post('/weblink/', stump)
+                        axios.post('/scrape_weblink/', stump)
                             .then(function (response) {
                                 console.log(response);
                                 if (response.data != "ok") {
