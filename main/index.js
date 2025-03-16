@@ -26,6 +26,7 @@
     window.getApp = getApp;
     window.getDomain = getDomain;
     window.CloneScene = CloneScene;
+    window.newGroup = newGroup;
 
     var cookie = Cookies.get();
     var type = getParameterByName("type", window.location.href); //these params used for routing in bigSwitch
@@ -1371,7 +1372,7 @@
                 data = { 
                     _id : itemid
                 };
-                redir = "audios";
+                redir = "audio";
             break;
             case "storeitem":
                 url = '/delete_storeitem';

@@ -3066,26 +3066,17 @@ app.post('/ipfs_up', requiredAuthentication, function (req, res) {
       console.log("grabAndSqueeze ipfs add response: " + JSON.stringify(response.data));
       
       res.send(JSON.stringify(response.data));
-    //   console.log(response.statusText);
-    //   console.log(response.headers);
-    //   console.log(response.config);
-        // callback(null);
+    
     })
     .catch(function (error) {
         // handle error
         console.log(error);
         res.send("error: " + error);
         // callback(error);
-    })
-    // .then(function () {
-    //     // console.log('nerp');
-    // });
+    });
 });
 
-// function ReturnContentType (ext) {
-//     if 
-// }
-app.post('/process_staging_files_2', requiredAuthentication, function (req, res) { //from staging folder
+app.post('/process_staging_files', requiredAuthentication, function (req, res) { //uploaded files go into staging folder, this processes them into database, makes groups, sends to file conversion, etc.
     var itemsArray = req.body.processMe.items;
     var createGroup = false;
     var groupType = "";
@@ -3097,7 +3088,8 @@ app.post('/process_staging_files_2', requiredAuthentication, function (req, res)
     var itemsExtensions = itemsArray.map(item => {
         return getExtension(item.key).toLowerCase();
     });
-    var stagingBucket = process.env.STAGING_BUCKET_NAME;
+    const stagingBucket = process.env.STAGING_BUCKET_NAME;
+    const targetBucket = process.env.ROOT_BUCKET_NAME;
     // var meateada = {};
     var groupitems = [];
     var params = {
@@ -3108,7 +3100,7 @@ app.post('/process_staging_files_2', requiredAuthentication, function (req, res)
         var index = name.indexOf("_");
         return name.substring(index + 1); //strip off prepended timestamp and _ for title and stuff
     }
-
+    
     const allEqual = itemsExtensions => itemsExtensions.every( v => v === itemsExtensions[0] ); //if all extensions the same, then make a group (which is the point)
     console.log("same extensions: "+ itemsExtensions[0]);
 
@@ -3120,16 +3112,19 @@ app.post('/process_staging_files_2', requiredAuthentication, function (req, res)
         createGroup = true;
         groupType = itemsExtensions[0];
         let contentType = "";
-        if (groupType == ".jpg" || groupType == ".jpeg" || groupType == ".JPG" || groupType == ".png" || groupType == ".PNG") {
-            contentType = "image";
-        } else if (groupType == ".mp3" || groupType == ".MP3" || groupType == ".wav" || groupType == ".ogg" || groupType == ".OGG" || groupType == ".aif" ||  groupType == ".AIFF" || groupType == ".WAV"  )  {
+        if (groupType.toLowerCase()  == ".jpg" || groupType.toLowerCase()  == ".jpeg" || groupType.toLowerCase()  == ".png") {
+            contentType = "picture";
+        } else if (groupType.toLowerCase()  == ".mp3" || groupTyp.toLowerCase()  == ".wav" || groupType.toLowerCase()  == ".ogg" || groupType.toLowerCase()  == ".aif"  )  {
             contentType = "audio"
         } else if (groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".mov" || groupType.toLowerCase() == ".webm")  {
             contentType = "video";
-        } else if (groupType == ".glb" || groupType == ".usdz") {
+        } else if (groupType.toLowerCase()  == ".glb" || groupType.toLowerCase()  == ".usdz") {
             contentType == "model";
+        } else {
+            console.log("invalid contentType!");
+            // res.end("invalid content type!");
         }
-        if (itemsArray[0].uid != req.session.user._id) {
+        if (itemsArray[0].uid != req.session.user._id) { //hrm check em all
             res.send("ids do not match! no upload for you");
         } else {
 
@@ -3140,1366 +3135,166 @@ app.post('/process_staging_files_2', requiredAuthentication, function (req, res)
                         let itemKey = itemsArray[i].key.toLowerCase();
                         itemKey = itemKey.replace(/[/\\?%*:|"<>]\s/g, '-');
                         const itemUID = itemsArray[i].uid;
+                        let item_id = "";//set below with db object id after db entry is created
                         // let size = 0;
                         const data = await ReturnObjectMetadata(stagingBucket,"staging/" + itemUID + "/" + itemKey); 
                         const size = data.ContentLength;
-                        console.log("gotsa object " + itemKey + "sizeOf = " + size);
+                        console.log("processing staging file type " + groupType + " id " + itemKey + "sizeOf = " + size);
                         const url = await ReturnPresignedUrl(stagingBucket, "staging/" + itemUID + "/" + itemKey, 6000);
-                        if (contentType == "image") {
+                        if (contentType == "picture") {
                             const updoc = {   
                                 "type" : "fromStaging",
-                                "userID" : item.uid,
-                                userName : req.session.user.userName,
-                                title : originalName(itemKey),
-                                filename : itemKey,
-                                item_type : 'picture',
-                                tags: [],
-                                item_status: "private",
-                                otimestamp : ts,
-                                ofilesize : size };
-                            const image = await RunDataQuery("image_items", "insertOne", updoc);   
-                            var item_id = image._id.toString();
+                                "userID" : itemUID,
+                                "userName" : req.session.user.userName,
+                                "title" : originalName(itemKey),
+                                "filename" : itemKey,
+                                "item_type" : 'picture',
+                                "tags": [],
+                                "item_status": "private",
+                                "otimestamp" : ts,
+                                "ofilesize" : size };
+                            const saved = await RunDataQuery("image_items", "insertOne", updoc);   
+                            console.log(JSON.stringify(saved));
+                            item_id = saved.insertedId.toString(); //objectID of new item
                             groupitems.push(item_id);
                             console.log('new picture item id: ' + item_id);
                             // console.log("transcodePictureURL request: " + tUrl);
-                            var copySource = "archive1/staging/" + saved.userID + "/" + saved.filename;
-                            var ck = "users/" + saved.userID + "/pictures/originals/" + item_id + ".original." + saved.filename; //path change!
+                            var copySource = "archive1/staging/" + updoc.userID + "/" + updoc.filename;
+                            var ck = "users/" + itemUID + "/pictures/originals/" + item_id + ".original." + updoc.filename; //path change!
                             console.log("tryna copy origiinal to " + ck);
-                            var targetBucket = process.env.ROOT_BUCKET_NAME;            
+        
                             const status = await CopyObject(targetBucket, copySource, ck);
-                            console.log("copied somethings " + status);
+                            console.log("copied somethings " + JSON.stringify(status) + " to " + ck + " from " + copySource );
+                            var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+                            const options = {
+                                headers: {'X-Access-Token': token}
+                                };
+                            axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+item_id, options)//pictures automatically Grabbed and Squeezed...
+                            .then((response) => {
+                                console.log("resize_uploaded_picture gs response: " + response.status);
+                            })
+                            .catch(function (error) {
+                                console.log("gs pic error " + error);
+                            });
                         } else if (contentType == "audio") {
-                            const updoc = {type : "stagedUserAudio",
-                                userID : req.session.user._id.toString(),
-                                username : req.session.user.userName,
-                                title : originalName(itemKey),
-                                artist : "",
-                                album :  "",
-                                filename : itemKey,
-                                item_type : "audio",
-                                tags: [],
-                                item_status: "private",
-                                otimestamp : ts,
-                                ofilesize : size};
+                            const updoc = {
+                                "type" : "stagedUserAudio",
+                                "userID" : req.session.user._id.toString(),
+                                "username" : req.session.user.userName,
+                                "title" : originalName(itemKey),
+                                "artist" : "",
+                                "album" :  "",
+                                "filename" : itemKey,
+                                "item_type" : "audio",
+                                "tags": [],
+                                "item_status": "private",
+                                "otimestamp" : ts,
+                                "ofilesize" : size};
                             const saved = await RunDataQuery("audio_items", "insertOne", updoc); 
-                            var item_id = saved._id.toString();
+                            item_id = saved.insertedId.toString(); //id (and acknowledgement) is the only thing the insert returns now, so use the updoc values
                             groupitems.push(item_id);
                             console.log('new picture item id: ' + item_id);
-                            var copySource = "archive1/staging/" + saved.userID + "/" + saved.filename;
-                            var ck = "users/" + saved.userID + "/audio/originals/" + item_id + ".original." + saved.filename; //path change!
+                            var copySource = "archive1/staging/" + updoc.userID + "/" + updoc.filename;
+                            var ck = "users/" + updoc.userID + "/audio/originals/" + item_id + ".original." + updoc.filename; //path change!
                             console.log("tryna copy origiinal to " + ck);
-                            var targetBucket = process.env.ROOT_BUCKET_NAME;                             
+                         
                             const status = await CopyObject(targetBucket, copySource, ck);
                             console.log("copied somethings " + status);
-                                         
-                            } else if (contentType == "video") {
-                                
-                            } else if (contentType == "model") {
-                            
-                            }  
-                    }   
+                            console.log("copied somethings " + status);
+                            var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET); 
+                            const options = {
+                                headers: {'X-Access-Token': token}
+                                };
+                            axios.get(process.env.GS_HOST + "/process_audio_download/"+item_id, options)// audio automatically Grabbed and Squeezed...
+                            .then((response) => {
+                                console.log("process audio gs response: " + response.status);
+                            })
+                            .catch(function (error) {
+                                console.log("gs audio error " + error);
+                            });      
+                        } else if (contentType == "video") {
+                            const updoc = {
+                                "userID" : req.session.user._id.toString(),
+                                "username" : req.session.user.userName,
+                                "title" : originalName(item.key),
+                                "filename" : itemKey,
+                                "item_type" : 'video',
+                                "tags": [],
+                                "item_status": "private",
+                                "otimestamp" : ts,
+                                "ofilesize" : size };
+                            const saved = await RunDataQuery("video_items", "insertOne", updoc);
+                            item_id = saved.insertedId.toString();
+                            groupitems.push(item_id);
+                            console.log('new item id: ' + item_id);
+
+                            var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
+                            var ck = "users/" + updoc.userID + "/video/" + item_id + "/" + item_id + "." + itemKey; //video folder w/ id bc encoded HLS files go in there, later..
+                            const status = await CopyObject(targetBucket, copySource, ck);
+                            console.log(status + " copied a video file " + copySource + " to " + targetBucket + ck);
+                        } else if (contentType == "model") {
+                            let model_type = "glb"; //support usdz models too
+                            if (groupType == ".usdz") {
+                                model_type == "usdz";
+                            }
+                            const updoc = {
+                                "userID" : req.session.user._id.toString(),
+                                "username" : req.session.user.userName,
+                                "name" : ts + "_" + originalName(item.key),
+                                "filename" : itemKey,
+                                "item_type" : model_type,
+                                "tags": [],
+                                "item_status": "private",
+                                "otimestamp" : ts,
+                                "ofilesize" : size };
+                            const saved = await RunDataQuery("models", "insertOne", updoc);
+                            item_id = saved.insertedId.toString();
+                            groupitems.push(item_id);
+
+                            const copySource = process.env.STAGING_BUCKET_NAME + "staging/" + item.uid + "/" + itemKey;
+                            let ck = "users/" + item.uid + "/gltf/" + itemKey;
+                            if (model_type == "usdz") {
+                                ck = "users/" + item.uid + "/usdz/" + itemKey;
+                            }
+                            const status = await CopyObject(targetBucket, copySource, ck);
+                            console.log(status + " copied a model file " + copySource + " to " + targetBucket + ck);                          
+                        }
+                        params.Delete.Objects.push({Key: 'staging/' + item.uid + '/' + item.key}); //clean up
+                    } //end loop
+                    var group = {};   //create new group w/ upped items             
+                    group.userID = req.session.user._id.toString();
+                    group.items = groupitems;
+                    if (group.items.length > 1) {
+                        console.log("tryna make group for " + req.session.user._id.toString() + " length " + group.items.length);
+                        if (contentType == "picture") {
+                            group.type = "picture";
+                            group.name = "pictures " + ts;
+                        } else if (contentType == "model") {
+                            group.type = "models";
+                            group.name = "models " + ts;
+                        } else if (contentType == "audio") {
+                            group.type = "audio";
+                            group.name = "audio " + ts;
+                        } else if (contentType == "video") {
+                            group.type = "video";
+                            group.name = "video " + ts;
+                        } 
+                        const saved = await RunDataQuery("groups", "insertOne", group);
+                        console.log("saved group " + saved.insertedId);
+                        res.send("group created " + saved.insertedId);
+                    } else {
+                        res.send("file processing complete, no group");
+                    }
+
+                   const deleted = await DeleteObjects(process.env.STAGING_BUCKET_NAME, params.Delete); //cleanup staging
+                   console.log("deleted staginjg files " + JSON.stringify(deleted));
                 } catch (e) {
                     console.log("error processing staging files.." +e);
                 }
             })();
         }
-        // async.waterfall([ //TODO just do this with await..
-              
-        //     function(callbk) {     //callbk
-        //         async.each(itemsArray, function (item, cb) {  //1. make sure the file is where it's supposed to be...
-        //             let itemKey = item.key.toLowerCase();
-        //             itemKey = itemKey.replace(/[/\\?%*:|"<>]\s/g, '-');
-        //             let size = 0;
-        //             async.waterfall([
-        //                 function (callback) {
-        //                     console.log("groupTYpe : " + groupType);
-        //                     // console.log("Bucket exists and we have access");
-        //                      // to flex with minio, etc..
-        //                         if (minioClient) {
-        //                             (async () => { 
-        //                                 try {
-        //                                     minioClient.statObject(stagingBucket, "staging/" + item.uid + "/" + itemKey, function(err, stat) { //statObject = headObject at s3
-        //                                         if (err) {
-        //                                             console.log(err);
-        //                                             callback(err);
-        //                                         } else {
-        //                                             console.log("minio statObject " + stat);
-        //                                             callback(null);
-        //                                         }
-
-        //                                     });
-        //                                 // callback(null);
-        //                                 } catch (e) {
-        //                                     callback(e);
-        //                                 }
-        //                             })();
-        //                         } else {
-        //                             // var params = {Bucket: stagingBucket, Delimiter: item.uid, Key: "staging/" + item.uid + "/" + itemKey}    
-        //                             (async () => { 
-        //                                 try {
-        //                                 let objectExists = await ReturnObjectExists(stagingBucket,"staging/" + item.uid + "/" + itemKey);
-        //                                     if (objectExists) {
-        //                                         console.log("gotsa object " + itemKey);
-        //                                         callback();
-        //                                     } else {
-        //                                         callback("no object found");
-        //                                     }
-        //                                 } catch (er) {
-        //                                     callback(er);
-        //                                 }
-        //                             })();
-                                 
-        //                         }
-                            
-                        
-        //                 },
-                       
-        //                 function (callback) { // get the size for the source file
-                          
- 
-        //                         if (minioClient) {
-        //                             (async () => {  //flex with minio, etc..
-        //                                 try {
-        //                                     minioClient.statObject(stagingBucket, "staging/" + item.uid + "/" + itemKey, function(err, stat) {
-        //                                         if (err) {
-        //                                             console.log(err)
-        //                                             callback(err);
-        //                                         } else {
-        //                                             console.log("minio statObject " + stat);
-        //                                             callback(null);
-        //                                         }
-                                            
-        //                                     });
-                                            
-        //                                 } catch (e) {
-        //                                     callback(e);
-        //                                 }
-        //                             })();
-        //                         } else {
-        //                             (async () => { 
-        //                                 try {
-        //                                 let data = await ReturnObjectMetadata(stagingBucket,"staging/" + item.uid + "/" + itemKey);
-        //                                     if (data) {
-        //                                         console.log("gotsa object " + itemKey);
-        //                                         // callback();
-        //                                         console.log(data);  
-        //                                         size = data.ContentLength;
-        //                                         console.log("sizeOf = " + size);
-        //                                         callback(null);
-        //                                     } else {
-        //                                         callback("no object found");
-        //                                     }
-        //                                 } catch (er) {
-        //                                     callback(er);
-        //                                 }
-        //                             })();
-                                   
-        //                         }
-        //                     // })();
-                            
-        //                 },
-        //                 function (callback) { // Get a url for the source file
-        //                     console.log("stagign item uid : " + item.uid);
-                            
-        //                     (async () => {  
-        //                         try {
-        //                             const url = await ReturnPresignedUrl(stagingBucket, "staging/" + item.uid + "/" + itemKey, 6000);
-                                    
-        //                             callback(null, url);
-        //                         } catch (e) {
-        //                             callback(e);
-        //                         }
-        //                     })();
-        //                 },
-        //                 function (tUrl, callback) { //make an appropriate (by file extension) record in the db and get an _id
-        //                     if (groupType == ".jpg" || groupType == ".jpeg" || groupType == ".JPG" || groupType == ".png" || groupType == ".PNG") {
-        //                         console.log("tryna save a jpg at " + tUrl);
-                                
-        //                         db_old.image_items.save({   
-        //                             type : "fromStaging",
-        //                             userID : item.uid,
-        //                             userName : req.session.user.userName,
-        //                             title : originalName(itemKey),
-        //                             filename : itemKey,
-        //                             item_type : 'picture',
-        //                             tags: [],
-        //                             item_status: "private",
-        //                             otimestamp : ts,
-        //                             ofilesize : size },
-        //                             function (err, saved) {
-        //                             if ( err || !saved ) {
-        //                                 console.log('picture not saved..');
-        //                                 callback (err);
-        //                                 } else {
-        //                                     var item_id = saved._id.toString();
-        //                                     groupitems.push(item_id);
-        //                                     console.log('new picture item id: ' + item_id);
-        //                                     // console.log("transcodePictureURL request: " + tUrl);
-        //                                     var copySource = "archive1/staging/" + saved.userID + "/" + saved.filename;
-        //                                     var ck = "users/" + saved.userID + "/pictures/originals/" + item_id + ".original." + saved.filename; //path change!
-        //                                     console.log("tryna copy origiinal to " + ck);
-        //                                     var targetBucket = process.env.ROOT_BUCKET_NAME;
-                                            
-        //                                             if (minioClient) {
-        //                                                 (async () => {  
-        //                                                     try {
-        //                                                 minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-        //                                                     if (e) {
-        //                                                         callback(e);
-        //                                                     } else {
-        //                                                         console.log("Successfully copied the object:");
-        //                                                         console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-        //                                                         callback(null, item_id, tUrl);
-        //                                                     }
-                                                        
-        //                                                   });
-        //                                                 } catch (e) {
-        //                                                     callback(e);
-        //                                                 }
-        //                                                 })();
-        //                                             } else {
-        //                                                 (async () => {  
-        //                                                     try {
-        //                                                         const data = await CopyObject(targetBucket, copySource, ck);
-        //                                                         callback(null, item_id, tUrl);
-        //                                                     } catch (e) {
-        //                                                         callback(e);
-        //                                                     }
-        //                                                 })();
-                                                       
-        //                                             }
-                                            
-        //                                 }
-        //                             }
-        //                         );
-        //                     } else if (groupType == ".mp3" || groupType == ".MP3" || groupType == ".wav" || groupType == ".ogg" || groupType == ".OGG" || groupType == ".aif" ||  groupType == ".AIFF" || groupType == ".WAV"  )  {
-        //                         console.log("tryna save an audio " + tUrl);
-        //                         db_old.audio_items.save(
-        //                             {type : "stagedUserAudio",
-        //                                 userID : req.session.user._id.toString(),
-        //                                 username : req.session.user.userName,
-        //                                 title : originalName(itemKey),
-        //                                 artist : "",
-        //                                 album :  "",
-        //                                 filename : itemKey,
-        //                                 item_type : "audio",
-        //                                 tags: [],
-        //                                 item_status: "private",
-        //                                 otimestamp : ts,
-        //                                 ofilesize : size},
-        //                             function (err, saved) {
-        //                                 if ( err || !saved ) {
-        //                                     console.log('audio item not saved..');
-        //                                     callback (err);
-        //                                 } else {
-                                           
-        //                                     var item_id = saved._id.toString();
-        //                                     groupitems.push(item_id);
-        //                                     console.log('new picture item id: ' + item_id);
-        //                                     // console.log("transcodePictureURL request: " + tUrl);
-        //                                     var copySource = "archive1/staging/" + saved.userID + "/" + saved.filename;
-        //                                     var ck = "users/" + saved.userID + "/audio/originals/" + item_id + ".original." + saved.filename; //path change!
-        //                                     console.log("tryna copy origiinal to " + ck);
-        //                                     var targetBucket = process.env.ROOT_BUCKET_NAME;
-
-                                             
-                                                
-        //                                             if (minioClient) {
-        //                                                 (async () => { 
-        //                                                 try {
-        //                                                 minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-        //                                                     if (e) {
-        //                                                         callback(e);
-        //                                                     } else {
-        //                                                         console.log("Successfully copied the object:");
-        //                                                         console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-        //                                                         callback(null, item_id, tUrl);
-        //                                                     }
-                                                            
-        //                                                   });
-        //                                                 } catch (e) {
-        //                                                     callback(e);
-        //                                                 }
-        //                                             })();
-        //                                             } else {
-        //                                                 (async () => { 
-        //                                                     try {
-        //                                                         const status = await CopyObject(targetBucket, copySource, ck);
-        //                                                         console.log("copied somethings " + status);
-        //                                                         callback(null, item_id, tUrl);
-        //                                                     } catch (e) {
-        //                                                         callback(e);
-        //                                                     }
-        //                                                 })();
-                                                        
-        //                                             }
-        //                                 }
-        //                             }
-        //                         );
-        //                     } else if (groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".mov" || groupType.toLowerCase() == ".webm")  {
-        //                         console.log("tryna save a video " + tUrl);
-        //                         db_old.video_items.save(
-        //                             {
-        //                                 userID : req.session.user._id.toString(),
-        //                                 username : req.session.user.userName,
-        //                                 title : originalName(item.key),
-        //                                 filename : itemKey,
-        //                                 item_type : 'video',
-        //                                 tags: [],
-        //                                 item_status: "private",
-        //                                 otimestamp : ts,
-        //                                 ofilesize : size},
-        //                             function (err, saved) {
-        //                                 if ( err || !saved ) {
-        //                                     console.log('video not saved..');
-        //                                     callback (err);
-        //                                 } else {
-        //                                     var item_id = saved._id.toString();
-        //                                     groupitems.push(item_id);
-        //                                     console.log('new item id: ' + item_id);
-        //                                     callback(null, item_id, tUrl);
-        //                                 }
-        //                             }
-        //                         );
-        //                     } else if (groupType == ".glb") {
-        //                         console.log("tryna save a glb " + tUrl);
-        //                         db_old.models.save({
-        //                             userID : req.session.user._id.toString(),
-        //                             username : req.session.user.userName,
-        //                             name : ts + "_" + originalName(item.key),
-        //                             filename : itemKey,
-        //                             item_type : 'glb',
-        //                             tags: [],
-        //                             item_status: "private",
-        //                             otimestamp : ts,
-        //                             ofilesize : size },
-        //                         function (err, saved) {
-        //                             if ( err || !saved ) {
-        //                                 console.log('glb not saved..');
-        //                                 callback (err);
-        //                             } else {
-        //                                 var item_id = saved._id.toString();
-        //                                 groupitems.push(item_id);
-        //                                 console.log('new item id: ' + item_id);
-        //                                 callback(null, item_id, tUrl);
-        //                             }
-        //                         });
-        //                         // callback(null, null, tUrl); //don't save in db for now
-        //                     // }
-        //                     } else if (groupType == ".usdz") {
-        //                         console.log("tryna save a usdz " + tUrl);
-        //                         db_old.models.save({
-        //                             userID : req.session.user._id.toString(),
-        //                             username : req.session.user.userName,
-        //                             name : ts + "_" + originalName(item.key),
-        //                             filename : itemKey,
-        //                             item_type : 'usdz',
-        //                             tags: [],
-        //                             item_status: "private",
-        //                             otimestamp : ts,
-        //                             ofilesize : size },
-        //                         function (err, saved) {
-        //                             if ( err || !saved ) {
-        //                                 console.log('usdz not saved..');
-        //                                 callback (err);
-        //                             } else {
-        //                                 var item_id = saved._id.toString();
-        //                                 groupitems.push(item_id);
-        //                                 console.log('new item id: ' + item_id);
-        //                                 callback(null, item_id, tUrl);
-        //                             }
-        //                         });
-        //                         // callback(null, null, tUrl); //don't save in db for now
-        //                     } else if (groupType == ".reality") {
-        //                         console.log("tryna save a .reality file " + tUrl);
-        //                         db_old.models.save({
-        //                             userID : req.session.user._id.toString(),
-        //                             username : req.session.user.userName,
-        //                             name : ts + "_" + originalName(item.key),
-        //                             filename : itemKey,
-        //                             item_type : 'reality',
-        //                             tags: [],
-        //                             item_status: "private",
-        //                             otimestamp : ts,
-        //                             ofilesize : size },
-        //                         function (err, saved) {
-        //                             if ( err || !saved ) {
-        //                                 console.log('reality file not saved..');
-        //                                 callback (err);
-        //                             } else {
-        //                                 var item_id = saved._id.toString();
-        //                                 groupitems.push(item_id);
-        //                                 console.log('new item id: ' + item_id);
-        //                                 callback(null, item_id, tUrl);
-        //                             }
-        //                         });
-        //                         // callback(null, null, tUrl); //don't save in db for now
-        //                     }
-        //                 },
-        //                 function(iID, tUrl, callback) { //send to transloadit and/or copy to production folder.. //no, now do resizing on media server!
-        //                     if (groupType == ".jpg"  || groupType == ".jpeg" || groupType == ".JPG" || groupType == ".png" || groupType == ".PNG") {
-                               
-        //                         console.log("tryna push pic to GS " + groupType);
-        //                         var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-        //                         const options = {
-        //                             headers: {'X-Access-Token': token}
-        //                             };
-        //                         axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+iID, options)
-        //                         .then((response) => {
-        //                         //   console.log(response.data);
-        //                             console.log("grabAndSqueeze response: " + response.status);
-        //                         //   console.log(response.statusText);
-        //                         //   console.log(response.headers);
-        //                         //   console.log(response.config);
-        //                             callback(null);
-        //                         })
-                                
-        //                         // .then(function () {
-        //                         //     // console.log('nerp');
-        //                         //     callback(null);
-        //                         // })
-        //                         .catch(function (error) {
-        //                             // handle error
-        //                             // console.log(error);
-        //                             callback(error);
-        //                         });
-
-                                   
-        //                     } else if (groupType == ".mp3" || groupType == ".wav" || groupType == ".aif" || groupType == ".aiff" || groupType == ".ogg" || 
-        //                         groupType == ".MP3" || groupType == ".WAV" || groupType == ".AIFF" || groupType == ".AIFF" || groupType == ".OGG"  ) { 
-                                
-        //                             console.log("tryna process audio userid = " + req.session.user._id);
-        //                             var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-        //                             const options = {
-        //                                 headers: {'X-Access-Token': token}
-        //                                 };
-        //                             axios.get(process.env.GS_HOST + "/process_audio_download/"+iID, options)
-        //                             // .then((response) => {
-        //                             // //   console.log(response.data);
-        //                             //     console.log("grabAndSqueeze process_audio response: " + response.data);
-        //                             // //   console.log(response.statusText);
-        //                             // //   console.log(response.headers);
-        //                             // //   console.log(response.config);
-        //                             //     // callback(null);
-        //                             // })
-        //                             .then(function () {
-        //                                 // console.log("grabAndSqueeze process_audio response: " + response.data);
-        //                                 callback(null);
-        //                             })
-        //                             .catch(function (error) {
-        //                                 // handle error
-        //                                 // console.log(error);
-        //                                 callback(error);
-        //                             });
-        //                         // }
-        //                     } else if (groupType.toLowerCase() == ".mpg" || groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".webm" || groupType.toLowerCase() == ".mov") {
-        //                         var targetBucket = "servicemedia";
-        //                         var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
-                                
-        //                         var ck = "users/" + item.uid + "/video/" + iID + "/" + iID + "." + itemKey;
-        //                         console.log("tryna process a video file " + copySource + " to " + targetBucket + ck);
-
-        //                                 if (minioClient) {
-        //                                     (async () => {  
-        //                                         try {
-        //                                             minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-        //                                             if (e) {
-        //                                                 callback(e);
-        //                                             } else {
-        //                                                 console.log("Successfully copied audio object:");
-        //                                                 console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-        //                                                 callback(null);
-        //                                             }
-                                                    
-        //                                         });
-        //                                         } catch (e) {
-        //                                             callback(e);
-        //                                         }
-        //                                     })();
-        //                                 } else {
-        //                                     (async () => { 
-        //                                         try {
-        //                                             const status = await CopyObject(targetBucket, copySource, ck);
-        //                                             console.log("copied somethings " + status);
-        //                                             callback(null);
-        //                                         } catch (e) {
-        //                                             callback(e);
-        //                                         }
-        //                                     })();
-
-        //                                 }                                
-        //                     } else if (groupType == ".glb") {
-        //                         var targetBucket = process.env.ROOT_BUCKET_NAME;
-        //                         var copySource = process.env.STAGING_BUCKET_NAME + "staging/" + item.uid + "/" + itemKey;
-        //                         var ck = "users/" + item.uid + "/gltf/" + itemKey;
-        //                         console.log("tryna copy glb to " + ck);
-
-        //                                 let metadata = {"Content-Type":"model/gltf-binary"};
-        //                                 // metadata.Content-Type = 'model/gltf-binary';
-        //                                 if (minioClient) {
-        //                                     (async () => {  
-        //                                         try {
-        //                                     // minioClient.copyObject(targetBucket, ck, copySource, metadata, function(e, data) { //hrm dunno, needs testing
-        //                                         minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-        //                                             if (e) {
-        //                                                 callback(e);
-        //                                             } else {
-        //                                                 console.log("Successfully copied glb object:");
-        //                                                 console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-        //                                                 callback(null);
-        //                                             }
-                                                    
-        //                                         });
-        //                                         } catch (e) {
-        //                                             callback(e);
-        //                                         }
-        //                                     })();
-        //                                 } else {
-        //                                     console.log("tryna copy with metadata" + JSON.stringify(metadata));
-
-        //                                     (async () => {
-        //                                         try {
-        //                                             const status = await CopyObject(targetBucket, copySource, ck);
-        //                                             callback(null);
-        //                                         } catch (e) {
-        //                                             callback(e);
-        //                                         }
-        //                                     })();
-                                           
-        //                                 }
-
-        //                     } else if (groupType == ".usdz") {
-        //                         var targetBucket = "servicemedia";
-        //                         var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
-        //                         var ck = "users/" + item.uid + "/usdz/" + itemKey;
-        //                         console.log("tryna copy usdz to " + ck);
-
-        //                                 if (minioClient) {
-        //                                     (async () => {  
-        //                                         try {
-        //                                         minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-        //                                             if (e) {
-        //                                                 callback(e);
-        //                                             } else {
-        //                                                 console.log("Successfully copied usdz object:");
-        //                                                 console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-        //                                                 callback(null);
-        //                                             }
-                                                    
-        //                                         });
-        //                                         } catch (e){
-        //                                             callback(e);   
-        //                                         }
-        //                                     })();
-        //                                 } else {
-        //                                     (async () => {
-        //                                         try {
-        //                                             const status = await CopyObject(targetBucket, copySource, ck);
-        //                                             callback(null);
-        //                                         } catch (e) {
-        //                                             callback(e);
-        //                                         }
-        //                                     })();
-                                            
-        //                                 }
-                                 
-        //                     } 
-                           
-
-        //                 },
-        //                 function (callback) {
-                           
-        //                     params.Delete.Objects.push({Key: 'staging/' + item.uid + '/' + item.key}); //clean up
-
-        //                             if (minioClient) { // --really only one here...
-        //                                 (async () => {
-        //                                     try {
-        //                                     minioClient.removeObject(process.env.STAGING_BUCKET_NAME, 'staging/' + item.uid + '/' + item.key, function(err) {
-        //                                         if (err) {
-        //                                         console.log('Unable to remove object', err);
-        //                                         callback(err);
-        //                                         }
-        //                                         console.log('Removed the object');
-        //                                         callback(null);
-        //                                     })
-        //                                     } catch (e) {
-        //                                         callback(e);
-        //                                     }
-        //                                 })();
-        //                             } else {
-        //                                 (async () => {
-        //                                     try {
-        //                                        await DeleteObjects(process.env.STAGING_BUCKET_NAME, params.Delete);
-
-        //                                         callback(null);
-        //                                         // db.image_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
-        //                                     } catch (e) {
-        //                                        callback(e);
-        //                                     }
-        //                                 })();
-                                       
-        //                             }
-        
-                        
-        //                 },
-        //                 ], //inner waterfall async end                        
-        //                 function(err, result) { // #last function, close async
-        //                     if (err != null) {
-        //                         console.log("callback callback err");
-        //                         // callback(err);
-        //                         cb(err);
-        //                     } else {
-        //                         console.log("callbacks done!~");
-        //                     //    callback(null);
-        //                         cb();
-        //                     uid = itemsArray[0].uid;    
-        //                     }
-                        
-        //                 });
-        //             // cb();
-        //             }, 
-        //             function (err, result) { // #last function, close async
-        //                 if (err != null) {
-        //                     console.log("error processing files! " + err);
-        //                     callbk(err);
-        //                 } else {
-        //                     console.log("processing files complete");
-
-        //                     callbk();
-                    
-        //                     uid = itemsArray[0].uid;
-                        
-        //                 }
-        //             })
-        //         },
-        //         function (callbk) {
-                  
-        //             var group = {};                
-        //             group.userID = uid;
-        //             group.items = groupitems;
-        //             if (group.items.length > 1) {
-        //                 console.log("tryna make group for " + uid + " length " + group.items.length);
-        //                 if (groupType == ".jpg" || groupType == ".jpeg") {
-        //                     group.type = "picture";
-        //                     group.name = "pictures " + ts;
-        //                 } else if (groupType == ".png") {
-        //                     group.type = "picture";
-        //                     group.name = "pictures " + ts;
-        //                 } else if (groupType == ".glb") {
-        //                     group.type = "models";
-        //                     group.name = "models " + ts;
-        //                 } else if (groupType == ".mp3") {
-        //                     group.type = "audio";
-        //                     group.name = "audio " + ts;
-        //                 } else if (groupType == ".mp4" || groupType == ".webm" || groupType == ".mov" || groupType == ".mpg" || groupType == ".MTS") {
-        //                     group.type = "video";
-        //                     group.name = "video " + ts;
-        //                 } 
-        //                 // else {
-        //                     // callbk(null); caught in db save below?  
-        //                 if (group.type != undefined && group.type != null) {
-        //                     db_old.groups.save(group, function (err, saved) {
-        //                         if ( err || !saved ) {
-        //                             console.log('group not saved..');
-        //                             callbk(err);
-        //                             // res.send("nilch");
-        //                         } else {
-        //                             groupID = saved._id.toString();
-        //                             console.log('new group created, id: ' + groupID);
-        //                             callbk(null);
-        //                             //res.send("group created : " + item_id);
-        //                         }
-        //                     });
-        //                     } else {
-        //                         callbk(null);
-        //                     }
-        //                 // }
-        //             } else { //no group if only one
-        //                 callbk(null);
-        //             }
-        //         }
-             
-        //     ],
-        //     function(err, result) { // #last function, close async
-        //         if (err != null) {
-        //             res.send(err);
-        //         } else {
-        //             console.log("waterfall done: " + result);
-        //             //  res.redirect('/upload.html');
-        //             res.send("group created with groupID " + groupID);
-        //         }
-        //     });
-        // }
-    } else { //if not all the same, check if it's an object file, and upload with siblings (*.mtl and pic file(s))
-        console.log("all items must be the same media type " + itemsExtensions.length); //TODO handle if they're different
-    }
-}); //end app.post /process_staging
-
-app.post('/process_staging_files', requiredAuthentication, function (req, res) { //from staging folder
-    var itemsArray = req.body.processMe.items;
-    var createGroup = false;
-    var groupType = "";
-    var groupID;
-    var uid;
-    var isObj
-    var objName;
-    console.log("process_staging_files : " + JSON.stringify(req.body));
-    var itemsExtensions = itemsArray.map(item => {
-        return getExtension(item.key).toLowerCase();
-    });
-    var stagingBucket = process.env.STAGING_BUCKET_NAME;
-    var meateada = {};
-    var groupitems = [];
-    var params = {
-        Bucket: process.env.STAGING_BUCKET_NAME,
-    };
-    params.Delete = {Objects:[]};
-    var originalName = function (name) {
-        var index = name.indexOf("_");
-        return name.substring(index + 1); //strip off prepended timestamp and _ for title and stuff
-    }
-
-    const allEqual = itemsExtensions => itemsExtensions.every( v => v === itemsExtensions[0] ); //if all extensions the same, then make a group (which is the point)
-    console.log("same extensions: "+ itemsExtensions[0]);
-
-    if (allEqual(itemsExtensions) && (itemsExtensions[0].toLowerCase() == ".usdz" || itemsExtensions[0].toLowerCase() == ".reality" || itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
-     itemsExtensions[0].toLowerCase() == ".aif" || itemsExtensions[0].toLowerCase() == ".aiff" || itemsExtensions[0].toLowerCase() == ".ogg" || itemsExtensions[0].toLowerCase() == ".wav" || itemsExtensions[0].toLowerCase() == ".mp3" || 
-     itemsExtensions[0].toLowerCase() == ".mp4" || itemsExtensions[0].toLowerCase() == ".webm" || itemsExtensions[0].toLowerCase() == ".mov" || itemsExtensions[0].toLowerCase() == ".mkv")) { //need to think how to flex, and use contenttype
-        
-        var ts = Math.round(Date.now() / 1000);
-        createGroup = true;
-        groupType = itemsExtensions[0];
-        if (itemsArray[0].uid != req.session.user._id) {
-            res.send("ids do not match! no upload for you");
-        } else {
-        async.waterfall([ //TODO just do this with await..
-              
-            function(callbk) {     //callbk
-                async.each(itemsArray, function (item, cb) {  //1. make sure the file is where it's supposed to be...
-                    let itemKey = item.key.toLowerCase();
-                    itemKey = itemKey.replace(/[/\\?%*:|"<>]\s/g, '-');
-                    let size = 0;
-                    async.waterfall([
-                        function (callback) {
-                            console.log("groupTYpe : " + groupType);
-                            // console.log("Bucket exists and we have access");
-                             // to flex with minio, etc..
-                                if (minioClient) {
-                                    (async () => { 
-                                        try {
-                                            minioClient.statObject(stagingBucket, "staging/" + item.uid + "/" + itemKey, function(err, stat) { //statObject = headObject at s3
-                                                if (err) {
-                                                    console.log(err);
-                                                    callback(err);
-                                                } else {
-                                                    console.log("minio statObject " + stat);
-                                                    callback(null);
-                                                }
-
-                                            });
-                                        // callback(null);
-                                        } catch (e) {
-                                            callback(e);
-                                        }
-                                    })();
-                                } else {
-                                    // var params = {Bucket: stagingBucket, Delimiter: item.uid, Key: "staging/" + item.uid + "/" + itemKey}    
-                                    (async () => { 
-                                        try {
-                                        let objectExists = await ReturnObjectExists(stagingBucket,"staging/" + item.uid + "/" + itemKey);
-                                            if (objectExists) {
-                                                console.log("gotsa object " + itemKey);
-                                                callback();
-                                            } else {
-                                                callback("no object found");
-                                            }
-                                        } catch (er) {
-                                            callback(er);
-                                        }
-                                    })();
-                                 
-                                }
-                            
-                        
-                        },
-                       
-                        function (callback) { // get the size for the source file
-                          
- 
-                                if (minioClient) {
-                                    (async () => {  //flex with minio, etc..
-                                        try {
-                                            minioClient.statObject(stagingBucket, "staging/" + item.uid + "/" + itemKey, function(err, stat) {
-                                                if (err) {
-                                                    console.log(err)
-                                                    callback(err);
-                                                } else {
-                                                    console.log("minio statObject " + stat);
-                                                    callback(null);
-                                                }
-                                            
-                                            });
-                                            
-                                        } catch (e) {
-                                            callback(e);
-                                        }
-                                    })();
-                                } else {
-                                    (async () => { 
-                                        try {
-                                        let data = await ReturnObjectMetadata(stagingBucket,"staging/" + item.uid + "/" + itemKey);
-                                            if (data) {
-                                                console.log("gotsa object " + itemKey);
-                                                // callback();
-                                                console.log(data);  
-                                                size = data.ContentLength;
-                                                console.log("sizeOf = " + size);
-                                                callback(null);
-                                            } else {
-                                                callback("no object found");
-                                            }
-                                        } catch (er) {
-                                            callback(er);
-                                        }
-                                    })();
-                                   
-                                }
-                            // })();
-                            
-                        },
-                        function (callback) { // Get a url for the source file
-                            console.log("stagign item uid : " + item.uid);
-                            
-                            (async () => {  
-                                try {
-                                    const url = await ReturnPresignedUrl(stagingBucket, "staging/" + item.uid + "/" + itemKey, 6000);
-                                    
-                                    callback(null, url);
-                                } catch (e) {
-                                    callback(e);
-                                }
-                            })();
-                        },
-                        function (tUrl, callback) { //make an appropriate (by file extension) record in the db and get an _id
-                            if (groupType == ".jpg" || groupType == ".jpeg" || groupType == ".JPG" || groupType == ".png" || groupType == ".PNG") {
-                                console.log("tryna save a jpg at " + tUrl);
-                                
-                                db_old.image_items.save({   
-                                    type : "fromStaging",
-                                    userID : item.uid,
-                                    userName : req.session.user.userName,
-                                    title : originalName(itemKey),
-                                    filename : itemKey,
-                                    item_type : 'picture',
-                                    tags: [],
-                                    item_status: "private",
-                                    otimestamp : ts,
-                                    ofilesize : size },
-                                    function (err, saved) {
-                                    if ( err || !saved ) {
-                                        console.log('picture not saved..');
-                                        callback (err);
-                                        } else {
-                                            var item_id = saved._id.toString();
-                                            groupitems.push(item_id);
-                                            console.log('new picture item id: ' + item_id);
-                                            // console.log("transcodePictureURL request: " + tUrl);
-                                            var copySource = "archive1/staging/" + saved.userID + "/" + saved.filename;
-                                            var ck = "users/" + saved.userID + "/pictures/originals/" + item_id + ".original." + saved.filename; //path change!
-                                            console.log("tryna copy origiinal to " + ck);
-                                            var targetBucket = process.env.ROOT_BUCKET_NAME;
-                                            
-                                                    if (minioClient) {
-                                                        (async () => {  
-                                                            try {
-                                                        minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-                                                            if (e) {
-                                                                callback(e);
-                                                            } else {
-                                                                console.log("Successfully copied the object:");
-                                                                console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-                                                                callback(null, item_id, tUrl);
-                                                            }
-                                                        
-                                                          });
-                                                        } catch (e) {
-                                                            callback(e);
-                                                        }
-                                                        })();
-                                                    } else {
-                                                        (async () => {  
-                                                            try {
-                                                                const data = await CopyObject(targetBucket, copySource, ck);
-                                                                callback(null, item_id, tUrl);
-                                                            } catch (e) {
-                                                                callback(e);
-                                                            }
-                                                        })();
-                                                       
-                                                    }
-                                            
-                                        }
-                                    }
-                                );
-                            } else if (groupType == ".mp3" || groupType == ".MP3" || groupType == ".wav" || groupType == ".ogg" || groupType == ".OGG" || groupType == ".aif" ||  groupType == ".AIFF" || groupType == ".WAV"  )  {
-                                console.log("tryna save an audio " + tUrl);
-                                db_old.audio_items.save(
-                                    {type : "stagedUserAudio",
-                                        userID : req.session.user._id.toString(),
-                                        username : req.session.user.userName,
-                                        title : originalName(itemKey),
-                                        artist : "",
-                                        album :  "",
-                                        filename : itemKey,
-                                        item_type : "audio",
-                                        tags: [],
-                                        item_status: "private",
-                                        otimestamp : ts,
-                                        ofilesize : size},
-                                    function (err, saved) {
-                                        if ( err || !saved ) {
-                                            console.log('audio item not saved..');
-                                            callback (err);
-                                        } else {
-                                           
-                                            var item_id = saved._id.toString();
-                                            groupitems.push(item_id);
-                                            console.log('new picture item id: ' + item_id);
-                                            // console.log("transcodePictureURL request: " + tUrl);
-                                            var copySource = "archive1/staging/" + saved.userID + "/" + saved.filename;
-                                            var ck = "users/" + saved.userID + "/audio/originals/" + item_id + ".original." + saved.filename; //path change!
-                                            console.log("tryna copy origiinal to " + ck);
-                                            var targetBucket = process.env.ROOT_BUCKET_NAME;
-
-                                             
-                                                
-                                                    if (minioClient) {
-                                                        (async () => { 
-                                                        try {
-                                                        minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-                                                            if (e) {
-                                                                callback(e);
-                                                            } else {
-                                                                console.log("Successfully copied the object:");
-                                                                console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-                                                                callback(null, item_id, tUrl);
-                                                            }
-                                                            
-                                                          });
-                                                        } catch (e) {
-                                                            callback(e);
-                                                        }
-                                                    })();
-                                                    } else {
-                                                        (async () => { 
-                                                            try {
-                                                                const status = await CopyObject(targetBucket, copySource, ck);
-                                                                console.log("copied somethings " + status);
-                                                                callback(null, item_id, tUrl);
-                                                            } catch (e) {
-                                                                callback(e);
-                                                            }
-                                                        })();
-                                                        
-                                                    }
-                                        }
-                                    }
-                                );
-                            } else if (groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".mov" || groupType.toLowerCase() == ".webm")  {
-                                console.log("tryna save a video " + tUrl);
-                                db_old.video_items.save(
-                                    {
-                                        userID : req.session.user._id.toString(),
-                                        username : req.session.user.userName,
-                                        title : originalName(item.key),
-                                        filename : itemKey,
-                                        item_type : 'video',
-                                        tags: [],
-                                        item_status: "private",
-                                        otimestamp : ts,
-                                        ofilesize : size},
-                                    function (err, saved) {
-                                        if ( err || !saved ) {
-                                            console.log('video not saved..');
-                                            callback (err);
-                                        } else {
-                                            var item_id = saved._id.toString();
-                                            groupitems.push(item_id);
-                                            console.log('new item id: ' + item_id);
-                                            callback(null, item_id, tUrl);
-                                        }
-                                    }
-                                );
-                            } else if (groupType == ".glb") {
-                                console.log("tryna save a glb " + tUrl);
-                                db_old.models.save({
-                                    userID : req.session.user._id.toString(),
-                                    username : req.session.user.userName,
-                                    name : ts + "_" + originalName(item.key),
-                                    filename : itemKey,
-                                    item_type : 'glb',
-                                    tags: [],
-                                    item_status: "private",
-                                    otimestamp : ts,
-                                    ofilesize : size },
-                                function (err, saved) {
-                                    if ( err || !saved ) {
-                                        console.log('glb not saved..');
-                                        callback (err);
-                                    } else {
-                                        var item_id = saved._id.toString();
-                                        groupitems.push(item_id);
-                                        console.log('new item id: ' + item_id);
-                                        callback(null, item_id, tUrl);
-                                    }
-                                });
-                                // callback(null, null, tUrl); //don't save in db for now
-                            // }
-                            } else if (groupType == ".usdz") {
-                                console.log("tryna save a usdz " + tUrl);
-                                db_old.models.save({
-                                    userID : req.session.user._id.toString(),
-                                    username : req.session.user.userName,
-                                    name : ts + "_" + originalName(item.key),
-                                    filename : itemKey,
-                                    item_type : 'usdz',
-                                    tags: [],
-                                    item_status: "private",
-                                    otimestamp : ts,
-                                    ofilesize : size },
-                                function (err, saved) {
-                                    if ( err || !saved ) {
-                                        console.log('usdz not saved..');
-                                        callback (err);
-                                    } else {
-                                        var item_id = saved._id.toString();
-                                        groupitems.push(item_id);
-                                        console.log('new item id: ' + item_id);
-                                        callback(null, item_id, tUrl);
-                                    }
-                                });
-                                // callback(null, null, tUrl); //don't save in db for now
-                            } else if (groupType == ".reality") {
-                                console.log("tryna save a .reality file " + tUrl);
-                                db_old.models.save({
-                                    userID : req.session.user._id.toString(),
-                                    username : req.session.user.userName,
-                                    name : ts + "_" + originalName(item.key),
-                                    filename : itemKey,
-                                    item_type : 'reality',
-                                    tags: [],
-                                    item_status: "private",
-                                    otimestamp : ts,
-                                    ofilesize : size },
-                                function (err, saved) {
-                                    if ( err || !saved ) {
-                                        console.log('reality file not saved..');
-                                        callback (err);
-                                    } else {
-                                        var item_id = saved._id.toString();
-                                        groupitems.push(item_id);
-                                        console.log('new item id: ' + item_id);
-                                        callback(null, item_id, tUrl);
-                                    }
-                                });
-                                // callback(null, null, tUrl); //don't save in db for now
-                            }
-                        },
-                        function(iID, tUrl, callback) { //send to transloadit and/or copy to production folder.. //no, now do resizing on media server!
-                            if (groupType == ".jpg"  || groupType == ".jpeg" || groupType == ".JPG" || groupType == ".png" || groupType == ".PNG") {
-                               
-                                console.log("tryna push pic to GS " + groupType);
-                                var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-                                const options = {
-                                    headers: {'X-Access-Token': token}
-                                    };
-                                axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+iID, options)
-                                .then((response) => {
-                                //   console.log(response.data);
-                                    console.log("grabAndSqueeze response: " + response.status);
-                                //   console.log(response.statusText);
-                                //   console.log(response.headers);
-                                //   console.log(response.config);
-                                    callback(null);
-                                })
-                                
-                                // .then(function () {
-                                //     // console.log('nerp');
-                                //     callback(null);
-                                // })
-                                .catch(function (error) {
-                                    // handle error
-                                    // console.log(error);
-                                    callback(error);
-                                });
-
-                                   
-                            } else if (groupType == ".mp3" || groupType == ".wav" || groupType == ".aif" || groupType == ".aiff" || groupType == ".ogg" || 
-                                groupType == ".MP3" || groupType == ".WAV" || groupType == ".AIFF" || groupType == ".AIFF" || groupType == ".OGG"  ) { 
-                                
-                                    console.log("tryna process audio userid = " + req.session.user._id);
-                                    var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-                                    const options = {
-                                        headers: {'X-Access-Token': token}
-                                        };
-                                    axios.get(process.env.GS_HOST + "/process_audio_download/"+iID, options)
-                                    // .then((response) => {
-                                    // //   console.log(response.data);
-                                    //     console.log("grabAndSqueeze process_audio response: " + response.data);
-                                    // //   console.log(response.statusText);
-                                    // //   console.log(response.headers);
-                                    // //   console.log(response.config);
-                                    //     // callback(null);
-                                    // })
-                                    .then(function () {
-                                        // console.log("grabAndSqueeze process_audio response: " + response.data);
-                                        callback(null);
-                                    })
-                                    .catch(function (error) {
-                                        // handle error
-                                        // console.log(error);
-                                        callback(error);
-                                    });
-                                // }
-                            } else if (groupType.toLowerCase() == ".mpg" || groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".webm" || groupType.toLowerCase() == ".mov") {
-                                var targetBucket = "servicemedia";
-                                var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
-                                
-                                var ck = "users/" + item.uid + "/video/" + iID + "/" + iID + "." + itemKey;
-                                console.log("tryna process a video file " + copySource + " to " + targetBucket + ck);
-
-                                        if (minioClient) {
-                                            (async () => {  
-                                                try {
-                                                    minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-                                                    if (e) {
-                                                        callback(e);
-                                                    } else {
-                                                        console.log("Successfully copied audio object:");
-                                                        console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-                                                        callback(null);
-                                                    }
-                                                    
-                                                });
-                                                } catch (e) {
-                                                    callback(e);
-                                                }
-                                            })();
-                                        } else {
-                                            (async () => { 
-                                                try {
-                                                    const status = await CopyObject(targetBucket, copySource, ck);
-                                                    console.log("copied somethings " + status);
-                                                    callback(null);
-                                                } catch (e) {
-                                                    callback(e);
-                                                }
-                                            })();
-
-                                        }                                
-                            } else if (groupType == ".glb") {
-                                var targetBucket = process.env.ROOT_BUCKET_NAME;
-                                var copySource = process.env.STAGING_BUCKET_NAME + "staging/" + item.uid + "/" + itemKey;
-                                var ck = "users/" + item.uid + "/gltf/" + itemKey;
-                                console.log("tryna copy glb to " + ck);
-
-                                        let metadata = {"Content-Type":"model/gltf-binary"};
-                                        // metadata.Content-Type = 'model/gltf-binary';
-                                        if (minioClient) {
-                                            (async () => {  
-                                                try {
-                                            // minioClient.copyObject(targetBucket, ck, copySource, metadata, function(e, data) { //hrm dunno, needs testing
-                                                minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-                                                    if (e) {
-                                                        callback(e);
-                                                    } else {
-                                                        console.log("Successfully copied glb object:");
-                                                        console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-                                                        callback(null);
-                                                    }
-                                                    
-                                                });
-                                                } catch (e) {
-                                                    callback(e);
-                                                }
-                                            })();
-                                        } else {
-                                            console.log("tryna copy with metadata" + JSON.stringify(metadata));
-
-                                            (async () => {
-                                                try {
-                                                    const status = await CopyObject(targetBucket, copySource, ck);
-                                                    callback(null);
-                                                } catch (e) {
-                                                    callback(e);
-                                                }
-                                            })();
-                                           
-                                        }
-
-                            } else if (groupType == ".usdz") {
-                                var targetBucket = "servicemedia";
-                                var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
-                                var ck = "users/" + item.uid + "/usdz/" + itemKey;
-                                console.log("tryna copy usdz to " + ck);
-
-                                        if (minioClient) {
-                                            (async () => {  
-                                                try {
-                                                minioClient.copyObject(targetBucket, ck, copySource, function(e, data) {
-                                                    if (e) {
-                                                        callback(e);
-                                                    } else {
-                                                        console.log("Successfully copied usdz object:");
-                                                        console.log("etag = " + data.etag + ", lastModified = " + data.lastModified);
-                                                        callback(null);
-                                                    }
-                                                    
-                                                });
-                                                } catch (e){
-                                                    callback(e);   
-                                                }
-                                            })();
-                                        } else {
-                                            (async () => {
-                                                try {
-                                                    const status = await CopyObject(targetBucket, copySource, ck);
-                                                    callback(null);
-                                                } catch (e) {
-                                                    callback(e);
-                                                }
-                                            })();
-                                            
-                                        }
-                                 
-                            } 
-                           
-
-                        },
-                        function (callback) {
-                           
-                            params.Delete.Objects.push({Key: 'staging/' + item.uid + '/' + item.key}); //clean up
-
-                                    if (minioClient) { // --really only one here...
-                                        (async () => {
-                                            try {
-                                            minioClient.removeObject(process.env.STAGING_BUCKET_NAME, 'staging/' + item.uid + '/' + item.key, function(err) {
-                                                if (err) {
-                                                console.log('Unable to remove object', err);
-                                                callback(err);
-                                                }
-                                                console.log('Removed the object');
-                                                callback(null);
-                                            })
-                                            } catch (e) {
-                                                callback(e);
-                                            }
-                                        })();
-                                    } else {
-                                        (async () => {
-                                            try {
-                                               await DeleteObjects(process.env.STAGING_BUCKET_NAME, params.Delete);
-
-                                                callback(null);
-                                                // db.image_items.remove( { "_id" : o_id }, 1 );  // TODO what if files are gone but db reference remains? 
-                                            } catch (e) {
-                                               callback(e);
-                                            }
-                                        })();
-                                       
-                                    }
-        
-                        
-                        },
-                        ], //inner waterfall async end                        
-                        function(err, result) { // #last function, close async
-                            if (err != null) {
-                                console.log("callback callback err");
-                                // callback(err);
-                                cb(err);
-                            } else {
-                                console.log("callbacks done!~");
-                            //    callback(null);
-                                cb();
-                            uid = itemsArray[0].uid;    
-                            }
-                        
-                        });
-                    // cb();
-                    }, 
-                    function (err, result) { // #last function, close async
-                        if (err != null) {
-                            console.log("error processing files! " + err);
-                            callbk(err);
-                        } else {
-                            console.log("processing files complete");
-
-                            callbk();
-                    
-                            uid = itemsArray[0].uid;
-                        
-                        }
-                    })
-                },
-                function (callbk) {
-                  
-                    var group = {};                
-                    group.userID = uid;
-                    group.items = groupitems;
-                    if (group.items.length > 1) {
-                        console.log("tryna make group for " + uid + " length " + group.items.length);
-                        if (groupType == ".jpg" || groupType == ".jpeg") {
-                            group.type = "picture";
-                            group.name = "pictures " + ts;
-                        } else if (groupType == ".png") {
-                            group.type = "picture";
-                            group.name = "pictures " + ts;
-                        } else if (groupType == ".glb") {
-                            group.type = "models";
-                            group.name = "models " + ts;
-                        } else if (groupType == ".mp3") {
-                            group.type = "audio";
-                            group.name = "audio " + ts;
-                        } else if (groupType == ".mp4" || groupType == ".webm" || groupType == ".mov" || groupType == ".mpg" || groupType == ".MTS") {
-                            group.type = "video";
-                            group.name = "video " + ts;
-                        } 
-                        // else {
-                            // callbk(null); caught in db save below?  
-                        if (group.type != undefined && group.type != null) {
-                            db_old.groups.save(group, function (err, saved) {
-                                if ( err || !saved ) {
-                                    console.log('group not saved..');
-                                    callbk(err);
-                                    // res.send("nilch");
-                                } else {
-                                    groupID = saved._id.toString();
-                                    console.log('new group created, id: ' + groupID);
-                                    callbk(null);
-                                    //res.send("group created : " + item_id);
-                                }
-                            });
-                            } else {
-                                callbk(null);
-                            }
-                        // }
-                    } else { //no group if only one
-                        callbk(null);
-                    }
-                }
-             
-            ],
-            function(err, result) { // #last function, close async
-                if (err != null) {
-                    res.send(err);
-                } else {
-                    console.log("waterfall done: " + result);
-                    //  res.redirect('/upload.html');
-                    res.send("group created with groupID " + groupID);
-                }
-            });
-        }
-    } else { //if not all the same, check if it's an object file, and upload with siblings (*.mtl and pic file(s))
+       
+    } else { //if not all the same, check if it's an object file, and upload with siblings (*.mtl and pic file(s)) //haha no
         console.log("all items must be the same media type " + itemsExtensions.length); //TODO handle if they're different
     }
 }); //end app.post /process_staging
@@ -11754,8 +10549,18 @@ app.post('/newgroup', requiredAuthentication, function (req, res) {
 
 app.post('/delete_group/', requiredAuthentication, function (req, res) { 
     var o_id = ObjectId.createFromHexString(req.body._id);
-    db_old.groups.remove( { "_id" : o_id }, 1 );
-    res.send("delback");
+    (async () => {
+        try {
+            const query = {"_id": o_id};
+            const deleted = await RunDataQuery("groups", "deleteOne", query);
+            res.send("deleted group " + JSON.stringify(deleted));
+        } catch (e) {
+            console.log("error deleteing group " + e);
+            res.send("error deleting group "+ e);
+        }
+    })();
+    // db_old.groups.remove( { "_id" : o_id }, 1 );
+    // res.send("delback");
 });
 
 app.post('/clone_group/', requiredAuthentication, function (req, res) { 
