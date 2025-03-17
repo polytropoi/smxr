@@ -17,14 +17,16 @@ import mongojs from "mongojs";
 import methodOverride from "method-override";
 import session from "express-session";
 import MongoStore from "connect-mongo";
-// import entities from "entities";
 import validator from "validator"; 
 // import minio from "minio";
 import helmet from "helmet";
-// import ObjectID from "bson-objectid";
+
+// import ObjectID from "bson-objectid"; //nope
+// import bcrypt from "bcrypt-nodejs"; //deprecated!
 
 import async from "async";
-import bcrypt from "bcrypt-nodejs";
+
+import bcrypt from "bcryptjs"; //just drop in replacement ?!? ok then
 import shortid from "shortid";
 import QRCode from "qrcode";
 import { ObjectId } from "mongodb";
@@ -2851,6 +2853,7 @@ app.post('/update_user/', requiredAuthentication, admin, function (req, res) { /
 //              profilePic : profilePic
             }};
             const updated = await RunDataQuery("users", "updateOne", query, updoc);
+            res.send("updated " + JSON.stringify(updated));
         } catch (e) {
             console.log("error updating user " + e);
             res.send("error updating user " + e);
@@ -4867,7 +4870,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
     );
 });
 
-app.post('/newuser', requiredAuthentication, admin, function (req, res) {    
+app.post('/newuser', requiredAuthentication, admin, function (req, res) { //only admins make new users now..!   
 //        $scope.user.domain = "servicmedia";
 //        $scope.user.appid = "55b2ecf840edea7583000001";
 
@@ -4875,7 +4878,7 @@ app.post('/newuser', requiredAuthentication, admin, function (req, res) {
     var domain = req.body.domain;
     console.log('newUser request from: ' + JSON.stringify(req.body));
     // ws.send("authorized");
-    if (req.body.userPass.length < 7) {  //weak
+    if (req.body.userPass.length < 7) {  //weak..
         console.log("bad password");
         res.send("badpassword");
 
@@ -4886,23 +4889,23 @@ app.post('/newuser', requiredAuthentication, admin, function (req, res) {
 
     } else {
 
-        db_old.users.findOne({userName: req.body.userName}, function(err, existingUserName) { //check if the username already exists
-            if (err || !existingUserName) {  //should combine these queries into an "$or" //but then couldn't respond separately
-                db_old.users.findOne({email: req.body.userEmail}, function(err, existingUserEmail) { //check if the email already exists
-                    if (err || !existingUserEmail || req.body.userEmail == domainAdminEmail) {
-                        console.log('dinna find tha name');
-                        var from = adminEmail; //TODO CHANGe!!!!
-                        var timestamp = Math.round(Date.now() / 1000);
-                        var ip = req.headers['x-forwarded-for'] ||
-                            req.connection.remoteAddress ||
-                            req.socket.remoteAddress ||
-                            req.connection.socket.remoteAddress;
-                        bcrypt.genSalt(10, function(err, salt) {
-                            bcrypt.hash(req.body.userPass, salt, null, function(err, hash) {
-                                var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-                                db_old.users.save(
-                                    {type : 'baseuser',
-                                        status : 'unvalidated',
+        (async () => {
+            try {
+                const unquery = {"userName": req.body.userName};
+                const emquery = {"email": req.body.userName};
+                const username = await RunDataQuery("users", "findOne", unquery);
+                const email = await RunDataQuery("users", "findOne", emquery);
+                if ((!username && !email) || req.body.userEmail == domainAdminEmail) {//?
+                    var timestamp = Math.round(Date.now() / 1000);
+                    var ip = req.headers['x-forwarded-for'] ||
+                        req.connection.remoteAddress ||
+                        req.socket.remoteAddress ||
+                        req.connection.socket.remoteAddress;
+                        const salt = await bcrypt.genSalt(10);
+                        const hash = await bcrypt.hash(req.body.userPass, salt);
+                        const cleanhash = validator.blacklist(hash, ['/','.','$']); 
+                        const updoc =  {type : 'baseuser',
+                                        status : 'unvalidated', //hrm
                                         authLevel : 'base',
                                         userName : req.body.userName,
                                         email : req.body.userEmail,
@@ -4913,45 +4916,124 @@ app.post('/newuser', requiredAuthentication, admin, function (req, res) {
                                         // odomain : req.body.domain, //original domain
                                         // oappid : req.headers.appid.toString().replace(":", ""), //original app id
                                         password : hash
-                                    },
-                                    function (err, newUser){
-                                        if ( err || !newUser ){
-                                            console.log("db error, new user not saved", err);
-                                            res.send("error");
-                                        } else {
-                                            console.log("new user saved to db");
-                                            var user_id = newUser._id.toString();
-                                            console.log("userID: " + user_id);
-                                            req.session.auth = user_id;
-                                            req.session.user = newUser;
-                                            res.cookie('_id', user_id, { maxAge: 900000, httpOnly: false});
-                                            res.send("validation email sent");
-                                            //send validation email
+                                    };
+                        const newUser = await RunDataQuery("users", "insertOne", updoc);
+                        const user_id = newUser.insertedId.toString(); //objectID of new record
+                        console.log("new user saved to db userID: " + user_id);
+                        // req.session.auth = user_id;
+                        // req.session.user = newUser;
+                        // res.cookie('_id', user_id, { maxAge: 90000, httpOnly: false}); //wait till validated!
+                       
+                        //send validation email
+                        let htmlbody = "Welcome, " + req.body.userName + "! <a href=\"" + rootHost + "/validate/" + cleanhash + "\"> Click here to validate your new account</a>"
+                        const status1 = await SendEmail(req.body.userEmail, process.env.ADMIN_EMAIL, htmlbody, req.body.userName + ' New User');
+                        const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, req.body.userName + ' New User EVENT');
+                        console.log("new user email statuses " + status1 + " " + status2);
+                        res.send("validation email sent! check your email");
+                        // bcrypt.genSalt(10, function(err, salt) {
+                        //     bcrypt.hash(req.body.userPass, salt, null, function(err, hash) {
+                        //         var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
+                        //         const updoc =  {type : 'baseuser',
+                        //             status : 'unvalidated',
+                        //             authLevel : 'base',
+                        //             userName : req.body.userName,
+                        //             email : req.body.userEmail,
+                        //             createDate : timestamp,
+                        //             validationHash : cleanhash,
+                        //             createIP : ip,
+                        //             paymentStatus: "ok", //hrm...
+                        //             // odomain : req.body.domain, //original domain
+                        //             // oappid : req.headers.appid.toString().replace(":", ""), //original app id
+                        //             password : hash
+                        //         };
+                        //         // const newuser = await RunDataQuery("users", "insertOne", updoc);
 
-                                            htmlbody = "Welcome, " + req.body.userName + "! <a href=\"" + rootHost + "/validate/" + cleanhash + "\"> Click here to validate your new account</a>"
-
-                                            (async () => {
-                                                const status1 = await SendEmail(req.body.userEmail,process.env,ADMIN_EMAIL,htmlbody,topName + ' New User');
-                                                const status2 = await SendEmail(process.env.ADMIN_EMAIL,process.env,ADMIN_EMAIL,htmlbody,topName + ' New User EVENT');
-                                                console.log("new user email statuses " + status1 + " " + status2);
-                                            })();
-                                           
-                                        }
-                                    });
-                            });
-                        });
-                    } else {
-                        console.log("that email already exists or something went wrong");
-                        res.send("emailtaken");
+                        //     });
+                        // });
+                } else {
+                    if (username) {
+                        console.log("username is taken!");
                     }
-                });
-            } else {
-                console.log("that name is already taken or something went wrong");
-                res.send("nametaken");
+                    if (email) {
+                        console.log("email is taken!");
+                    }
+                    res.send ("username and/or email was taken!");
+                }
+
+            } catch (e) {
+                console.log("error creating new user ! " + e);
+                res.send("error creating new user ! " + e);
+
             }
-        });
+        })();
     }
 });
+//         db_old.users.findOne({userName: req.body.userName}, function(err, existingUserName) { //check if the username already exists
+//             if (err || !existingUserName) {  //should combine these queries into an "$or" //but then couldn't respond separately
+//                 db_old.users.findOne({email: req.body.userEmail}, function(err, existingUserEmail) { //check if the email already exists
+//                     if (err || !existingUserEmail || req.body.userEmail == domainAdminEmail) {
+//                         console.log('dinna find tha name');
+//                         var from = adminEmail; //TODO CHANGe!!!!
+//                         var timestamp = Math.round(Date.now() / 1000);
+//                         var ip = req.headers['x-forwarded-for'] ||
+//                             req.connection.remoteAddress ||
+//                             req.socket.remoteAddress ||
+//                             req.connection.socket.remoteAddress;
+//                         bcrypt.genSalt(10, function(err, salt) {
+//                             bcrypt.hash(req.body.userPass, salt, null, function(err, hash) {
+//                                 var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
+//                                 db_old.users.save(
+//                                     {type : 'baseuser',
+//                                         status : 'unvalidated',
+//                                         authLevel : 'base',
+//                                         userName : req.body.userName,
+//                                         email : req.body.userEmail,
+//                                         createDate : timestamp,
+//                                         validationHash : cleanhash,
+//                                         createIP : ip,
+//                                         paymentStatus: "ok", //hrm...
+//                                         // odomain : req.body.domain, //original domain
+//                                         // oappid : req.headers.appid.toString().replace(":", ""), //original app id
+//                                         password : hash
+//                                     },
+//                                     function (err, newUser){
+//                                         if ( err || !newUser ){
+//                                             console.log("db error, new user not saved", err);
+//                                             res.send("error");
+//                                         } else {
+//                                             console.log("new user saved to db");
+//                                             var user_id = newUser._id.toString();
+//                                             console.log("userID: " + user_id);
+//                                             req.session.auth = user_id;
+//                                             req.session.user = newUser;
+//                                             res.cookie('_id', user_id, { maxAge: 900000, httpOnly: false});
+//                                             res.send("validation email sent");
+//                                             //send validation email
+
+//                                             htmlbody = "Welcome, " + req.body.userName + "! <a href=\"" + rootHost + "/validate/" + cleanhash + "\"> Click here to validate your new account</a>"
+
+//                                             (async () => {
+//                                                 const status1 = await SendEmail(req.body.userEmail,process.env,ADMIN_EMAIL,htmlbody,topName + ' New User');
+//                                                 const status2 = await SendEmail(process.env.ADMIN_EMAIL,process.env,ADMIN_EMAIL,htmlbody,topName + ' New User EVENT');
+//                                                 console.log("new user email statuses " + status1 + " " + status2);
+//                                             })();
+                                           
+//                                         }
+//                                     });
+//                             });
+//                         });
+//                     } else {
+//                         console.log("that email already exists or something went wrong");
+//                         res.send("emailtaken");
+//                     }
+//                 });
+//             } else {
+//                 console.log("that name is already taken or something went wrong");
+//                 res.send("nametaken");
+//             }
+//         });
+//     }
+// });
 
 
 

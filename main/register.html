@@ -36,16 +36,21 @@
               </div>
               <form id="theForm" class="user"></form>
                 <div class="form-group row">
-                  <div class="col-sm-6 mb-3 mb-sm-0">
+                  <!-- <div class="col-sm-6 mb-3 mb-sm-0">
                     <input type="text" class="form-control form-control-user" id="userName" placeholder="User Name">
-                  </div>
+                  </div> -->
                   <!-- <div class="col-sm-6">
                     <input type="text" class="form-control form-control-user" id="exampleLastName" placeholder="Last Name">
                   </div> -->
-                </div>
-                <div class="form-group">
+                  <!-- <div class="form-group"> -->
+                    <input type="email" class="form-control form-control-user" id="userName" placeholder="User Name">
+                  <!-- </div>   -->
+                </div>  
+                <div class="form-group row">
+                <!-- <div class="form-group"> -->
                   <input type="email" class="form-control form-control-user" id="userEmail" placeholder="Email Address">
-                </div>
+                <!-- </div> -->
+              </div>
                 <div class="form-group row">
                   <div class="col-sm-6 mb-3 mb-sm-0">
                     <input type="password" class="form-control form-control-user" id="inputPassword" placeholder="Password">
@@ -54,7 +59,7 @@
                     <input type="password" class="form-control form-control-user" id="repeatPassword" placeholder="Repeat Password">
                   </div>
                 </div>
-                <a href="#" onclick="newuserreq();" class="btn btn-primary btn-user btn-block">
+                <a id="submitbutton" href="#" onclick="newuserreq();" class="btn btn-primary btn-user btn-block">
                   Register New Account
                 </a>
                 <hr>
@@ -67,10 +72,10 @@
               </form>
               <hr>
               <div class="text-center">
-                <a class="small" href="forgot-password.html">Forgot Password?</a>
+                <a class="small" href="resetpw.html">Forgot Password?</a>
               </div>
               <div class="text-center">
-                <a class="small" href="login.html">Already have an account? Login!</a>
+                <a class="small" href="sign_in.html">Already have an account? Login!</a>
               </div>
             </div>
           </div>
@@ -92,10 +97,15 @@
   <script>
 
     function newuserreq() {
-      var hostname = "";
-      var userName = $( "#userName" ).val();
-      var userEmail = $( "#userEmail" ).val();
-      var userPass = $( "#repeatPassword" ).val();
+
+      let hostname = "";
+      const userName = $( "#userName" ).val();
+      const userEmail = $( "#userEmail" ).val();
+      const userPass = $( "#repeatPassword" ).val();
+      const userpassInput = $( "#inputPassword" ).val();
+      if (userPass != userpassInput) {
+        $('#theForm').html("Password fields must match!");
+      }
       console.log("tryna submit for uName " + userName);
       var posting = $.ajax({
       url: hostname + "/newuser",
@@ -110,6 +120,9 @@
           }),
         success: function( data, textStatus, xhr ){
             console.log(data);
+            $('#theForm').html("Thanks! A validation email has been sent to the address you provided.");
+            document.getElementById("submitbutton").style.display = 'none';
+            
             // var r = data.replace(/["']/g, ""); //cleanup
             // var resp = r.split('~'); //response is tilde delimited
             // Cookies.set('_id', resp[0], { expires: 7 });
@@ -121,6 +134,7 @@
         error: function( xhr, textStatus, errorThrown ){
             console.log( xhr.responseText );
             $('#theForm').html( xhr.responseText);
+            document.getElementById("submitbutton").style.display = 'none';
             // Cookies.remove('_id');
           }
         });
