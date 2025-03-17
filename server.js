@@ -3373,187 +3373,241 @@ app.post('/staging_delete_array', requiredAuthentication, function (req, res) {
 
 app.post('/imagetarget_puturl/:_id/:image_id', requiredAuthentication, function (req, res) {
     console.log("tryna get a puturl for : " + req.body.uid + " contentTYpe : " + req.body.contentType);
-    var cType = req.body.contentType;
-
-    var u_id = ObjectId.createFromHexString(req.params._id);
-    db_old.users.findOne({"_id": u_id}, function (err, user) {
-        if (err || !user) {
-            res.send("not a valid user!");
-            console.log("error getting user: " + err);
-        } else {
-            db_old.image_items.findOne({_id: ObjectId.createFromHexString(req.params.image_id)}, function (err, picture_item) {
-                if (err || !picture_item) {
-                    res.send("not a valid pic!")
-                    console.log("error getting picture items: " + err);
-                } else {
-
-                const params = {
+    // var cType = req.body.contentType;\
+    // var u_id = ObjectId.createFromHexString(req.params._id);
+    (async () => {
+        try {
+            const query = {"_id": ObjectId.createFromHexString(req.params.image_id)};
+            const picture_item = await RunDataQuery("image_items", "findOne", query);
+            const params = {
                 Bucket: process.env.ROOT_BUCKET_NAME,
-                //meatadata aqui
-                // ACL: 'bucket-owner-full-control',
-                // ContentType: 'text/csv',
                 Body: '',
                 ContentType: 'application/octet-stream',
-                // Key: 'staging/' + u_id + '/' + timestamp + '_' + req.body.filename,
                 Key: "users/" + picture_item.userID + "/pictures/targets/" + req.params.image_id + ".mind",
                 Expires: 100
-                };               
-                    (async () => {
-                        try {
-                        const data = await ReturnPresignedUrlPut(params.Body, params.Key, 6000); 
-                        response = {
-                                statusCode: 200,
-                                headers: {
-                                    'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-                                    'Content-Type': 'application/octet-stream'
-                                },
-                                body: "",
-                                // body: JSON.stringify({
-                                //   message: `Url successfully created`,
-                                //   signedUrl,
-                                // }),
-                                method: "put",
-                                url: signedUrl,
-                                fields: []
-                                };
-                            
-                            console.log("putObject url : " + signedUrl );
-                                
-                            res.json(response);
-                        } catch (e) {
-                            res.send(e);
-                        }
-                    })();
-                  
-                }
-            });
+                }; 
+            const signedUrl = await ReturnPresignedUrlPut(params.Body, params.Key, 6000); 
+            response = {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+                    'Content-Type': 'application/octet-stream'
+                },
+                body: "",
+                method: "put",
+                url: signedUrl,
+                fields: []
+                };
+            
+            console.log("putObject url : " + signedUrl );
+            res.json(response);
+        } catch (e) {
+            console.log("errpr getting puturl for imagetarget " +e)
+            res.send("errpr getting puturl for imagetarget " +e);
         }
-    });
+    })();
 });
+//     db_old.users.findOne({"_id": u_id}, function (err, user) {
+//         if (err || !user) {
+//             res.send("not a valid user!");
+//             console.log("error getting user: " + err);
+//         } else {
+//             db_old.image_items.findOne({_id: ObjectId.createFromHexString(req.params.image_id)}, function (err, picture_item) {
+//                 if (err || !picture_item) {
+//                     res.send("not a valid pic!")
+//                     console.log("error getting picture items: " + err);
+//                 } else {
+
+//                 const params = {
+//                 Bucket: process.env.ROOT_BUCKET_NAME,
+//                 //meatadata aqui
+//                 // ACL: 'bucket-owner-full-control',
+//                 // ContentType: 'text/csv',
+//                 Body: '',
+//                 ContentType: 'application/octet-stream',
+//                 // Key: 'staging/' + u_id + '/' + timestamp + '_' + req.body.filename,
+//                 Key: "users/" + picture_item.userID + "/pictures/targets/" + req.params.image_id + ".mind",
+//                 Expires: 100
+//                 };               
+//                     (async () => {
+//                         try {
+//                         const signedUrl = await ReturnPresignedUrlPut(params.Body, params.Key, 6000); 
+//                         response = {
+//                                 statusCode: 200,
+//                                 headers: {
+//                                     'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+//                                     'Content-Type': 'application/octet-stream'
+//                                 },
+//                                 body: "",
+//                                 // body: JSON.stringify({
+//                                 //   message: `Url successfully created`,
+//                                 //   signedUrl,
+//                                 // }),
+//                                 method: "put",
+//                                 url: signedUrl,
+//                                 fields: []
+//                                 };
+                            
+//                             console.log("putObject url : " + signedUrl );
+                                
+//                             res.json(response);
+//                         } catch (e) {
+//                             res.send(e);
+//                         }
+//                     })();
+                  
+//                 }
+//             });
+//         }
+//     });
+// });
 
 
 
 app.post('/stagingputurl/:_id', requiredAuthentication, function (req, res) {
     
     var cType = req.body.contentType;
-   
+    
     console.log("tryna get a puturl for : " + req.body.uid + " contentTYpe : " + cType);
     var u_id = ObjectId.createFromHexString(req.params._id);
-    db_old.users.findOne({"_id": u_id}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting user: " + err);
-        } else {
-            //TODO is user in good standing? 
-            // var params =
-            var timestamp = Math.round(Date.now());
-            const params = {
-                Bucket: process.env.STAGING_BUCKET_NAME,
-                //meatadata aqui
-                // ACL: 'bucket-owner-full-control',
-                // ContentType: 'text/csv',
-                Body: '',
-                ContentType: cType,
-            
-                // Key: 'staging/' + u_id + '/' + timestamp + '_' + req.body.filename,
-                Key: req.body.filename,
-                Expires: 100
-              };
-            try {
-                if (minioClient) {
-                    (async () => {    
-                    minioClient.presignedPutObject(process.env.STAGING_BUCKET_NAME, req.body.filename, 1000, function(err, presignedUrl) {
-                        if (err) {
-                            response = {
-                            statusCode: 500,
-                            headers: {
-                                'Access-Control-Allow-Origin': '*',
-                            },
-                            body: JSON.stringify({
-                                error: 'Did not receive signed url'
-                            }),
-                            };
-                            console.log("putObject url error : " + err );
-                            res.json(err);
-                            
-                        } else {
-                            response = {
-                            statusCode: 200,
-                            headers: {
-                                'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-                            },
-                            // metadata: {
-                            //     'Content-Type': cType
-                            // },
-                            body: "",
-                            // body: JSON.stringify({
-                            //   message: `Url successfully created`,
-                            //   signedUrl,
-                            // }),
-                            method: "put",
-                            url: presignedUrl,
-                            fields: []
-                            };
-                            console.log("putObject url : " + presignedUrl );
-                            res.json(response);
-                        }
-                        
-                        });
-                    })();
-                } else {
-                    (async () => {    
-                    try {
-                    
-                    const signedUrl = await ReturnPresignedUrlPut(process.env.STAGING_BUCKET_NAME, req.body.filename, 6000);
-                    
-                    // console.log("puturl: " + signedUrl );
-                    const response = {
-                        statusCode: 200,
-                        headers: {
-                            'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-                        },
-                        // metadata: {
-                        //     'Content-Type': cType
-                        // },
-                        body: "",
-                        // body: JSON.stringify({
-                        //   message: `Url successfully created`,
-                        //   signedUrl,
-                        // }),
-                        method: "put",
-                        url: signedUrl,
-                        fields: []
-                        };
-                        
-                        console.log("putObject url : " + signedUrl );
 
-                        res.json(response);
-                    
-                    } catch (e) {
-                        
-                        response = {
-                        statusCode: 500,
-                        headers: {
-                            'Access-Control-Allow-Origin': '*',
-                        },
-                        body: JSON.stringify({
-                            error: 'Did not receive signed url'
-                        }),
-                        };
-                        console.log("putObject url error : " + e );
-                        res.json(e);
-                        
-                    }
-                })();
-
-                    
-                }
-            } catch (e) {
-                res.json(e);
-            }
-  
+    (async () => {
+        try {
+            //no need to check user(?), authed in middleware...
+            const signedUrl = await ReturnPresignedUrlPut(process.env.STAGING_BUCKET_NAME, req.body.filename, 6000);
+            const response = {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+                },
+                body: "",
+                method: "put",
+                url: signedUrl,
+                fields: []
+                };
+                console.log("putObject url : " + signedUrl );
+            res.json(response);
+        } catch (e) {
+            console.log("error getting staging put url " + e);
+            res.send("error getting staging put url " + e);
         }
-    });
+    })();
 });
+//     db_old.users.findOne({"_id": u_id}, function (err, user) {
+//         if (err || !user) {
+//             console.log("error getting user: " + err);
+//         } else {
+//             //TODO is user in good standing? 
+//             // var params =
+//             var timestamp = Math.round(Date.now());
+//             const params = {
+//                 Bucket: process.env.STAGING_BUCKET_NAME,
+//                 //meatadata aqui
+//                 // ACL: 'bucket-owner-full-control',
+//                 // ContentType: 'text/csv',
+//                 Body: '',
+//                 ContentType: cType,
+            
+//                 // Key: 'staging/' + u_id + '/' + timestamp + '_' + req.body.filename,
+//                 Key: req.body.filename,
+//                 Expires: 100
+//               };
+//             try {
+//                 if (minioClient) {
+//                     (async () => {    
+//                     minioClient.presignedPutObject(process.env.STAGING_BUCKET_NAME, req.body.filename, 1000, function(err, presignedUrl) {
+//                         if (err) {
+//                             response = {
+//                             statusCode: 500,
+//                             headers: {
+//                                 'Access-Control-Allow-Origin': '*',
+//                             },
+//                             body: JSON.stringify({
+//                                 error: 'Did not receive signed url'
+//                             }),
+//                             };
+//                             console.log("putObject url error : " + err );
+//                             res.json(err);
+                            
+//                         } else {
+//                             response = {
+//                             statusCode: 200,
+//                             headers: {
+//                                 'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+//                             },
+//                             // metadata: {
+//                             //     'Content-Type': cType
+//                             // },
+//                             body: "",
+//                             // body: JSON.stringify({
+//                             //   message: `Url successfully created`,
+//                             //   signedUrl,
+//                             // }),
+//                             method: "put",
+//                             url: presignedUrl,
+//                             fields: []
+//                             };
+//                             console.log("putObject url : " + presignedUrl );
+//                             res.json(response);
+//                         }
+                        
+//                         });
+//                     })();
+//                 } else {
+//                     (async () => {    
+//                     try {
+                    
+//                     const signedUrl = await ReturnPresignedUrlPut(process.env.STAGING_BUCKET_NAME, req.body.filename, 6000);
+                    
+//                     // console.log("puturl: " + signedUrl );
+//                     const response = {
+//                         statusCode: 200,
+//                         headers: {
+//                             'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+//                         },
+//                         // metadata: {
+//                         //     'Content-Type': cType
+//                         // },
+//                         body: "",
+//                         // body: JSON.stringify({
+//                         //   message: `Url successfully created`,
+//                         //   signedUrl,
+//                         // }),
+//                         method: "put",
+//                         url: signedUrl,
+//                         fields: []
+//                         };
+                        
+//                         console.log("putObject url : " + signedUrl );
+
+//                         res.json(response);
+                    
+//                     } catch (e) {
+                        
+//                         response = {
+//                         statusCode: 500,
+//                         headers: {
+//                             'Access-Control-Allow-Origin': '*',
+//                         },
+//                         body: JSON.stringify({
+//                             error: 'Did not receive signed url'
+//                         }),
+//                         };
+//                         console.log("putObject url error : " + e );
+//                         res.json(e);
+                        
+//                     }
+//                 })();
+
+                    
+//                 }
+//             } catch (e) {
+//                 res.json(e);
+//             }
+  
+//         }
+//     });
+// });
 
 
 app.get('/staging/:_id', requiredAuthentication, function (req, res) {
@@ -3562,92 +3616,130 @@ app.get('/staging/:_id', requiredAuthentication, function (req, res) {
     let response = {};
     let rezponze = {};
     let stagedItems = [];
-    async.waterfall([
-        function (callback) {
-           
-            // (async () => {  
-                var params = {
-                    Bucket: process.env.STAGING_BUCKET_NAME,
-                    Prefix: 'staging/' + u_id + '/'
+
+    (async () => {
+        try {
+            const params = {
+                Bucket: process.env.STAGING_BUCKET_NAME,
+                Prefix: 'staging/' + u_id + '/'
+            };
+            const items = await ListObjects(process.env.STAGING_BUCKET_NAME,'staging/' + u_id + '/');
+            response = items.Contents;
+            for (let i = 0; i < response.length; i++) {
+                let name = ""
+                if (minioClient) {
+                    name = response[i].name; 
+                } else {
+                    name = response[i].Key; //close but not identical!
                 }
-                // try {
-                    if (minioClient) {
-                        var data = [];
-                        var stream = minioClient.listObjects(process.env.STAGING_BUCKET_NAME,'staging/' + u_id + '/', false);
-                        stream.on('data', function(obj) { data.push(obj); } );
-                        stream.on("end", function (obj) { 
-                            // if (data.Contents.length == 0) {
-                            //     console.log("no content found");
-                            //     callback(null);
-                            // } else {
-                                // console.log("data: " + JSON.stringify(data));
-                                response = data;
-                                callback();
-                            // }
-                           
-                        });
-                        stream.on('error', function(err) { 
-                            console.log(err);
-                            callback(err);
-                        } );
+                let url = await ReturnPresignedUrl(process.env.STAGING_BUCKET_NAME, name, 6000);
+                name = name.replace('staging/' + u_id + '/', "");
+                var itme = {}
+                itme.name = name;
+            
+                itme.url = url;
 
-
-                    } else {
-                        (async () => {                      
-                            try {
-                                
-                                const items = await ListObjects(process.env.STAGING_BUCKET_NAME,'staging/' + u_id + '/');
-                                // console.log("files: "+ items.Contents);
-                            
-                                response = items.Contents;
-                                callback();
-                            
-                            } catch (caught) {
-                                res.send(caught);
-                                callback(caught);
-                            }
-                        })();
-                        
-                    }
-           
-        },
-        function (callback) {
-
-                (async () => {  
-                    // try {
-                        // console.log("tryna ghet name "+ name);
-                    for (let i = 0; i < response.length; i++) {
-                        var name = ""
-                        if (minioClient) {
-                            name = response[i].name; 
-                        } else {
-                            name = response[i].Key; //close but not identical!
-                        }
-
-                        let url = await ReturnPresignedUrl(process.env.STAGING_BUCKET_NAME, name, 6000);
-                        name = name.replace('staging/' + u_id + '/', "");
-                        var itme = {}
-                        itme.name = name;
-                     
-                        itme.url = url;
-        
-                        stagedItems.push(itme);
-                        // callbackz();
-                    }
-                    console.log(stagedItems.length + ' staging files have been fetched');
-                    stagedItems.reverse();
-                    rezponze.stagedItems = stagedItems;
-                    callback(null);
-
-                })();
-
+                stagedItems.push(itme);
+                // callbackz();
+            }
+            console.log(stagedItems.length + ' staging files have been fetched');
+            stagedItems.reverse();
+            rezponze.stagedItems = stagedItems;
+            // console.log("files: "+ items.Contents);
+            res.send(rezponze);
+        } catch (e) {
+            console.log("error getting stainging " + e);
+            res.send("error getting stainging " + e);
         }
-    ],
-    function (err, result) { // #last function, close async
-        res.json(rezponze);
-        // console.log("staging files fetchd! : " + result);
-    });
+
+    })();
 });
+//     async.waterfall([
+//         function (callback) {
+           
+//             // (async () => {  
+//                 var params = {
+//                     Bucket: process.env.STAGING_BUCKET_NAME,
+//                     Prefix: 'staging/' + u_id + '/'
+//                 }
+//                 // try {
+//                     if (minioClient) {
+//                         var data = [];
+//                         var stream = minioClient.listObjects(process.env.STAGING_BUCKET_NAME,'staging/' + u_id + '/', false);
+//                         stream.on('data', function(obj) { data.push(obj); } );
+//                         stream.on("end", function (obj) { 
+//                             // if (data.Contents.length == 0) {
+//                             //     console.log("no content found");
+//                             //     callback(null);
+//                             // } else {
+//                                 // console.log("data: " + JSON.stringify(data));
+//                                 response = data;
+//                                 callback();
+//                             // }
+                           
+//                         });
+//                         stream.on('error', function(err) { 
+//                             console.log(err);
+//                             callback(err);
+//                         } );
+
+
+//                     } else {
+//                         (async () => {                      
+//                             try {
+                                
+//                                 const items = await ListObjects(process.env.STAGING_BUCKET_NAME,'staging/' + u_id + '/');
+//                                 // console.log("files: "+ items.Contents);
+                            
+//                                 response = items.Contents;
+//                                 callback();
+                            
+//                             } catch (caught) {
+//                                 res.send(caught);
+//                                 callback(caught);
+//                             }
+//                         })();
+                        
+//                     }
+           
+//         },
+//         function (callback) {
+
+//                 (async () => {  
+//                     // try {
+//                         // console.log("tryna ghet name "+ name);
+//                     for (let i = 0; i < response.length; i++) {
+//                         var name = ""
+//                         if (minioClient) {
+//                             name = response[i].name; 
+//                         } else {
+//                             name = response[i].Key; //close but not identical!
+//                         }
+
+//                         let url = await ReturnPresignedUrl(process.env.STAGING_BUCKET_NAME, name, 6000);
+//                         name = name.replace('staging/' + u_id + '/', "");
+//                         var itme = {}
+//                         itme.name = name;
+                     
+//                         itme.url = url;
+        
+//                         stagedItems.push(itme);
+//                         // callbackz();
+//                     }
+//                     console.log(stagedItems.length + ' staging files have been fetched');
+//                     stagedItems.reverse();
+//                     rezponze.stagedItems = stagedItems;
+//                     callback(null);
+
+//                 })();
+
+//         }
+//     ],
+//     function (err, result) { // #last function, close async
+//         res.json(rezponze);
+//         // console.log("staging files fetchd! : " + result);
+//     });
+// });
 
 
 app.get('/sharedasset/:assetstring', checkAppID, requiredAuthentication, function (req, res) {
@@ -4930,26 +5022,7 @@ app.post('/newuser', requiredAuthentication, admin, function (req, res) { //only
                         const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, req.body.userName + ' New User EVENT');
                         console.log("new user email statuses " + status1 + " " + status2);
                         res.send("validation email sent! check your email");
-                        // bcrypt.genSalt(10, function(err, salt) {
-                        //     bcrypt.hash(req.body.userPass, salt, null, function(err, hash) {
-                        //         var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-                        //         const updoc =  {type : 'baseuser',
-                        //             status : 'unvalidated',
-                        //             authLevel : 'base',
-                        //             userName : req.body.userName,
-                        //             email : req.body.userEmail,
-                        //             createDate : timestamp,
-                        //             validationHash : cleanhash,
-                        //             createIP : ip,
-                        //             paymentStatus: "ok", //hrm...
-                        //             // odomain : req.body.domain, //original domain
-                        //             // oappid : req.headers.appid.toString().replace(":", ""), //original app id
-                        //             password : hash
-                        //         };
-                        //         // const newuser = await RunDataQuery("users", "insertOne", updoc);
 
-                        //     });
-                        // });
                 } else {
                     if (username) {
                         console.log("username is taken!");
@@ -4968,72 +5041,6 @@ app.post('/newuser', requiredAuthentication, admin, function (req, res) { //only
         })();
     }
 });
-//         db_old.users.findOne({userName: req.body.userName}, function(err, existingUserName) { //check if the username already exists
-//             if (err || !existingUserName) {  //should combine these queries into an "$or" //but then couldn't respond separately
-//                 db_old.users.findOne({email: req.body.userEmail}, function(err, existingUserEmail) { //check if the email already exists
-//                     if (err || !existingUserEmail || req.body.userEmail == domainAdminEmail) {
-//                         console.log('dinna find tha name');
-//                         var from = adminEmail; //TODO CHANGe!!!!
-//                         var timestamp = Math.round(Date.now() / 1000);
-//                         var ip = req.headers['x-forwarded-for'] ||
-//                             req.connection.remoteAddress ||
-//                             req.socket.remoteAddress ||
-//                             req.connection.socket.remoteAddress;
-//                         bcrypt.genSalt(10, function(err, salt) {
-//                             bcrypt.hash(req.body.userPass, salt, null, function(err, hash) {
-//                                 var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-//                                 db_old.users.save(
-//                                     {type : 'baseuser',
-//                                         status : 'unvalidated',
-//                                         authLevel : 'base',
-//                                         userName : req.body.userName,
-//                                         email : req.body.userEmail,
-//                                         createDate : timestamp,
-//                                         validationHash : cleanhash,
-//                                         createIP : ip,
-//                                         paymentStatus: "ok", //hrm...
-//                                         // odomain : req.body.domain, //original domain
-//                                         // oappid : req.headers.appid.toString().replace(":", ""), //original app id
-//                                         password : hash
-//                                     },
-//                                     function (err, newUser){
-//                                         if ( err || !newUser ){
-//                                             console.log("db error, new user not saved", err);
-//                                             res.send("error");
-//                                         } else {
-//                                             console.log("new user saved to db");
-//                                             var user_id = newUser._id.toString();
-//                                             console.log("userID: " + user_id);
-//                                             req.session.auth = user_id;
-//                                             req.session.user = newUser;
-//                                             res.cookie('_id', user_id, { maxAge: 900000, httpOnly: false});
-//                                             res.send("validation email sent");
-//                                             //send validation email
-
-//                                             htmlbody = "Welcome, " + req.body.userName + "! <a href=\"" + rootHost + "/validate/" + cleanhash + "\"> Click here to validate your new account</a>"
-
-//                                             (async () => {
-//                                                 const status1 = await SendEmail(req.body.userEmail,process.env,ADMIN_EMAIL,htmlbody,topName + ' New User');
-//                                                 const status2 = await SendEmail(process.env.ADMIN_EMAIL,process.env,ADMIN_EMAIL,htmlbody,topName + ' New User EVENT');
-//                                                 console.log("new user email statuses " + status1 + " " + status2);
-//                                             })();
-                                           
-//                                         }
-//                                     });
-//                             });
-//                         });
-//                     } else {
-//                         console.log("that email already exists or something went wrong");
-//                         res.send("emailtaken");
-//                     }
-//                 });
-//             } else {
-//                 console.log("that name is already taken or something went wrong");
-//                 res.send("nametaken");
-//             }
-//         });
-//     }
-// });
 
 
 
@@ -5067,31 +5074,7 @@ app.get('/userpics/:u_id', requiredAuthentication, function (req, res) {
         res.send("error getting userpics "+ e);
        } 
     })();
-    // // db.image_items.find(query).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, picture_items) {
-    // db_old.image_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function(err, picture_items) {
-
-    //     if (err || !picture_items) {
-    //         console.log("error getting picture items: " + err);
-    //     } else {
-    //         console.log("userpics for " + req.params.u_id);
-    //         (async () => { 
-    //         for (var i = 0; i < picture_items.length; i++) {
-    //             // console.log("pic userID: "+ picture_items[i].userID);
-    //             var item_string_filename = JSON.stringify(picture_items[i].filename);
-    //             item_string_filename = item_string_filename.replace(/\"/g, "");
-    //             var item_string_filename_ext = getExtension(item_string_filename);
-    //             var expiration = new Date();
-    //             expiration.setMinutes(expiration.getMinutes() + 30);
-    //             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-    //             var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-    //             var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + thumbName, 6000); 
-    //             picture_items[i].URLthumb = urlThumb;
-    //             }
-    //             res.json(picture_items);
-    //             console.log("returning picture_items for " + req.params.u_id);
-    //         })();
-    //     }
-    // });
+   
 });
 
 app.get('/uservids/:u_id', requiredAuthentication, function(req, res) {
@@ -5193,176 +5176,6 @@ app.post('/return_audiogroups/', function(req, res) {
     })();
 });
 
-//     async.waterfall([
-
-//         function(callback){ 
-//             if (req.body.triggerGroups != null && req.body.triggerGroups.length > 0) {
-//                 const group_ids = req.body.triggerGroups.map(item => { return ObjectId.createFromHexString(item); });
-//                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
-//                     if (err || !group_items) {
-//                         console.log("error getting audiogroup items: " + err);
-//                         callback(err);
-//                     } else {
-//                         // res.json(group_items);
-//                         // console.log("returning audiogroup " + JSON.stringify(group_items.groupdata));
-//                         let groupdata = group_items[0].groupdata;
-//                         groupItems.push.apply(groupItems, groupdata); //concat arrays
-//                         response.triggerGroupItems = group_items;
-                        
-//                         callback(null);
-//                     }
-//                 });
-//             } else {
-//                 callback(null);
-//             }
-//         },
-//         function(callback){ 
-//             if (req.body.ambientGroups != null && req.body.ambientGroups.length > 0) {
-//                 const group_ids = req.body.ambientGroups.map(item => { return ObjectId.createFromHexString(item); });
-//                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
-//                     if (err || !group_items) {
-//                         console.log("error getting audiogroup items: " + err);
-//                         callback(err);
-//                     } else {
-//                         // res.json(group_items);
-//                         // console.log("returning audiogroup " + JSON.stringify(group_items.groupdata));
-//                         response.ambientGroupItems = group_items;
-//                         let groupdata = group_items[0].groupdata;
-//                         groupItems.push.apply(groupItems, groupdata); //concat arrays
-//                         callback(null);
-//                     }
-//                 });
-//             } else {
-//                 callback(null);
-//             }
-//         },
-//         function(callback){ 
-//             if (req.body.primaryGroups != null && req.body.primaryGroups.length > 0) {
-//                 const group_ids = req.body.primaryGroups.map(item => { return ObjectId.createFromHexString(item); });
-//                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
-//                     if (err || !group_items) {
-//                         console.log("error getting audiogroup items: " + err);
-//                         callback(err);
-//                     } else {
-//                         // res.json(group_items);
-//                         // console.log("returning audiogroup " + JSON.stringify(group_items));
-//                         response.primaryGroupItems = group_items;
-//                         let groupdata = group_items[0].groupdata;
-//                         groupItems.push.apply(groupItems, groupdata); //concat arrays
-//                         callback(null);
-//                     }
-//                 });
-//             } else {
-//                 callback(null);
-//             }
-//         },
-//         function(callback){ 
-//             if (req.body.objectGroups != null && req.body.objectGroups.length > 0) {
-//                 const group_ids = req.body.objectGroups.map(item => { return ObjectId.createFromHexString(item); });
-//                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
-//                     if (err || !group_items) {
-//                         console.log("error getting audiogroup items: " + err);
-//                         callback(err);
-//                     } else {
-//                         // res.json(group_items);
-//                         // console.log("returning audiogroup " + JSON.stringify(group_items));
-//                         response.objectGroupItems = group_items;
-//                         let groupdata = group_items[0].groupdata;
-//                         groupItems.push.apply(groupItems, groupdata); //concat arrays
-//                         callback(null);
-//                     }
-//                 });
-//             } else {
-//                 callback(null);
-//             }
-//         },
-//         function (callback) {
-//             // console.log("auido groupitems: " +JSON.stringify(groupItems));
-//             if (groupItems.length > 0) {
-//                 async.each (groupItems, function (item, callbackz) { //takes a shake so async, and respond when it's done
-//                     audio_IDs.push(item.itemID);
-//                     // console.log("item: " + JSON.stringify(item));
-//                     callbackz();
-//                 }, function(err) {
-//                     if (err) {
-//                         res.send("error! " + err);
-//                     } else {
-//                         callback(null);
-//                     }
-//                 });
-//             } else {
-//                 callback("no group items");
-//             }
-//         },
-//         function (callback) {
-//             // console.log("audio IDs: " + audio_IDs);
-//             const audio_ids = audio_IDs.map(item => { return ObjectId.createFromHexString(item); });
-//             db_old.audio_items.find({'_id': { $in: audio_ids}}).toArray(function (err, audio_items) {
-//                 if (err || !audio_items) {
-//                     console.log("error getting audio items: " + err);
-//                     callback(err);
-//                 } else {
-                    
-//                     callback(null, audio_items);
-//                 }
-//             });
-//         },
-//         function (audio_items, callback) {
-//             // console.log("audio_group_itemss: "+ JSON.stringify(audio_items));
-//             // callback(null);
-//             if (audio_items.length > 0) {
-//                 let audioItems = [];
-//                 async.each (audio_items, function (item, callbackz) { //takes a shake so async, and respond when it's done
-                   
-
-//                     (async () => {
-//                         var item_string_filename = JSON.stringify(item.filename);
-//                         item_string_filename = item_string_filename.replace(/\"/g, "");
-//                         var item_string_filename_ext = getExtension(item_string_filename);
-//                         var expiration = new Date();
-//                         expiration.setMinutes(expiration.getMinutes() + 30);
-//                         var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                         // console.log("tryna jack in " + baseName + " to a group of " + group.type);
-//                         var mp3Name = baseName + '.mp3';
-//                         var oggName = baseName + '.ogg';
-//                         var pngName = baseName + '.png';
-
-//                         var urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + mp3Name, 10000);
-//                         var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + oggName, 10000);
-//                         var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + pngName, 10000);
-
-//                         item.URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                         item.URLogg = urlOgg;
-//                         item.URLpng = urlPng;
-//                         audioItems.push(item);
-//                         callbackz();
-//                     })();
-
-
-//                 }, function(err) {
-//                     if (err) {
-//                         res.send("error! " + err);
-//                     } else {
-//                         // console.log("audio items: " + JSON.stringify(audioItems));
-//                         response.audioItems = audioItems;
-//                         callback(null);
-//                     }
-//                 });
-//             } else {
-//                 callback("no audio items");
-                
-//             }
-//         }
-       
-//     ],
-
-//     function(err, result) { // #last function, close async
-//         res.json(response);
-//         console.log("audio_groups waterfall done: " + result);
-//     }
-// );
-
-// });
 
 app.get('/usergroups/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return usergroups for: ' + req.params.u_id);
