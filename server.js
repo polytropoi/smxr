@@ -3758,39 +3758,69 @@ app.get('/sharedasset/:assetstring', checkAppID, requiredAuthentication, functio
 
 app.post('/resetcheck', function (req, res) {
     console.log("reset check:" + req.body.hzch);
-    db_old.users.findOne({"resetHash": req.body.hzch}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting user: " + err);
-            res.send("invalidlink");
-        } else {
-            var timestamp = Math.round(Date.now() / 1000);
-            if (timestamp < user.resetTimestamp + 3600) { //expires in 1 hour!
-                console.log(user.resetTimestamp);
-                res.send("validlink");
-            } else {
-                console.log("expired link");
-                res.send("invalidlink");
-            }
-        }
-    });
+    (async () => {
+        try {
+           const query = {"resetHash": req.body.hzch};
+           const user = await RunDataQuery("users", "findOne", query);
+           var timestamp = Math.round(Date.now() / 1000);
+           if (timestamp < user.resetTimestamp + 3600) { //expires in 1 hour!
+               console.log("current timestamp is less than userreset " + user.resetTimestamp);
+               res.send("validlink");
+           } else {
+               console.log("expired link");
+               res.send("invalidlink");
+           }
+        } catch (e) {
+            console.log("error checking pwreset " + e);
+            res.send("error checking pwreset " + e);
+        } 
+    })();
+
+    // db_old.users.findOne({"resetHash": req.body.hzch}, function (err, user) {
+    //     if (err || !user) {
+    //         console.log("error getting user: " + err);
+    //         res.send("invalidlink");
+    //     } else {
+    //         var timestamp = Math.round(Date.now() / 1000);
+    //         if (timestamp < user.resetTimestamp + 3600) { //expires in 1 hour!
+    //             console.log(user.resetTimestamp);
+    //             res.send("validlink");
+    //         } else {
+    //             console.log("expired link");
+    //             res.send("invalidlink");
+    //         }
+    //     }
+    // });
 });
 
 app.post('/optout/', function (req, res) {
     console.log("tryna optout " + JSON.stringify(req.body));
     var timestamp = Math.round(Date.now() / 1000);
-    db_old.people.findOne({email: req.body.sentToEmail}, function  (err, person) {
-        if (err || !person) {
-            res.send(err);
-        } else {
-            db_old.people.updateOne( { "email": req.body.sentToEmail }, {$set: {accountStatus : "Email Verified", contactStatus: "Opt Out Global", lastUpdate: timestamp}}, function (err, saved) {
-                if (err || !saved) {
-                    res.send(err);
-                } else {
-                    res.send(saved);
-                }
-            });
+
+    (async () => {
+        try {
+            const query = {"email": req.body.sentToEmail};
+            const updoc = {$set: {accountStatus : "Email Verified", contactStatus: "Opt Out Global", lastUpdate: timestamp}};
+            const person = await RunDataQuery("people", "updateOne", query, updoc);
+            res.send("updated " + person);
+        } catch (e) {
+            console.log("error opting out " + e);
+            res.send("error opting out " + e);
         }
-    });
+    })();
+    // db_old.people.findOne({email: req.body.sentToEmail}, function  (err, person) {
+    //     if (err || !person) {
+    //         res.send(err);
+    //     } else {
+    //         db_old.people.updateOne( { "email": req.body.sentToEmail }, {$set: {accountStatus : "Email Verified", contactStatus: "Opt Out Global", lastUpdate: timestamp}}, function (err, saved) {
+    //             if (err || !saved) {
+    //                 res.send(err);
+    //             } else {
+    //                 res.send(saved);
+    //             }
+    //         });
+    //     }
+    // });
 });
 
 app.get('/optout_check/:hzch', function (req, res) { //called from /landing/invite.html
@@ -3800,88 +3830,129 @@ app.get('/optout_check/:hzch', function (req, res) { //called from /landing/invi
         requestProtocol = 'http';
     }
 
-    db_old.invitations.findOne({"invitationHash": hash}, function (err, invitation) {
-        var timestamp = Math.round(Date.now() / 1000);
-        if (err || !invitation) {
-            console.log("did not find invitation: " + err);
-            res.send("not found");
-        } else {
-            // console.log("invitation check:" + JSON.stringify(invitation));
-           
-                var response = {};
-                response.short_id = invitation.invitedToSceneShortID;
-                response.sentByUserName = invitation.sentByUserName;
-                response.sentByUserID = invitation.sentByUserID;
-                response.sentToEmail = invitation.sentToEmail;
-                res.send(response);
-                // response.url = requestProtocol + "://" + req.headers.host + "/webxr/" + invitation.invitedToSceneShortID + "?p=" + pin;
-
+    (async () => {
+        try {
+            const query = {"invitationHash": hash};
+            const invitaiton = await RunDataQuery("invitations", "findOne", query);
+            var response = {};
+            response.short_id = invitation.invitedToSceneShortID;
+            response.sentByUserName = invitation.sentByUserName;
+            response.sentByUserID = invitation.sentByUserID;
+            response.sentToEmail = invitation.sentToEmail;
+            res.send(response);
+        } catch (e) {
+            console.log("error in optout_check " + e);
+            res.send("error in optout_check " + e);
         }
-    }); 
+    })();
 });
+    // db_old.invitations.findOne({"invitationHash": hash}, function (err, invitation) {
+    //     var timestamp = Math.round(Date.now() / 1000);
+    //     if (err || !invitation) {
+    //         console.log("did not find invitation: " + err);
+    //         res.send("not found");
+    //     } else {
+    //         // console.log("invitation check:" + JSON.stringify(invitation));
+           
+    //             var response = {};
+    //             response.short_id = invitation.invitedToSceneShortID;
+    //             response.sentByUserName = invitation.sentByUserName;
+    //             response.sentByUserID = invitation.sentByUserID;
+    //             response.sentToEmail = invitation.sentToEmail;
+    //             res.send(response);
+    //             // response.url = requestProtocol + "://" + req.headers.host + "/webxr/" + invitation.invitedToSceneShortID + "?p=" + pin;
+
+    //     }
+    // }); 
+// });
 app.get('/invitation_check/:hzch', function (req, res) { //called from /landing/invite.html
     let hash = req.params.hzch;
     let requestProtocol = 'https';
     if (req.headers.host.includes("localhost")) {
         requestProtocol = 'http';
     }
-
-    db_old.invitations.findOne({"invitationHash": hash}, function (err, invitation) {
-        var timestamp = Math.round(Date.now() / 1000);
-        if (err || !invitation) {
-            console.log("did not find invitation: " + err);
-            res.send("not found");
-        } else {
-            // console.log("invitation check:" + JSON.stringify(invitation));
-           
-            var pin = Math.random().toString().substr(2,6); //hrm...
-            if (timestamp < invitation.invitationTimestamp + 36000) { //expires in 10 hour! //TODO access window start and end timestamps
-                console.log("timestamp checks out!" + JSON.stringify(invitation));
-
-                db_old.invitations.update ( { "invitationHash": hash }, { $set: { validated: true, pin : pin, pinTimeout: timestamp + 6400} }); 
-                var response = {};
-                response.short_id = invitation.invitedToSceneShortID;
-                response.ok = "yep";
-                response.pin = pin;
-                response.to = invitation.sentToEmail;
-                response.timestampStart = invitation.sceneEventStart;
-                response.timestampEnd = invitation.sceneEventEnd;
-                response.url = requestProtocol + "://" + req.headers.host + "/webxr/" + invitation.invitedToSceneShortID + "?p=" + pin;
-               
-                QRCode.toDataURL(response.url, function (err, url) {
- 
-                response.qrcode = url;
-                res.send(response);
-                });
-               
-            } else {
-                console.log("expired link");
-                res.send("expired_"+invitation.invitedToSceneShortID); //send back sceneID, to allow invite request
-            }
-
-            db_old.actions.findOne({"actionType": "Send Email"}, function (err, emailAction) {
-                if (err || !emailAction) {
-                    callback("error getting email action!" + err);
-                } else {
-                    action.actionID = emailAction._id;
-                    action.actionName = "Invitation Click"
-                    action.actionType = "Send Email"
-                    action.actionResult = "Invitation Button Clicked";
-                    action.timestamp = timestamp * 1000; //ms trimmed on client
-                    action.targetPersonID = ObjectId.createFromHexString(invitation.targetPersonID);
-                    action.userID = ObjectId.createFromHexString(invitation.sentByUserID)
-                
-                    action.targetEmail = invitation.sentToEmail;
-                    action.fromScene = invitation.invitedToSceneShortID;
-                    // action.data = req.body.sceneShareWithMessage;
-                    db_old.activities.insertOne(action);
-                } 
+    (async () => {
+        const query = {"invitationHash": hash};
+        const invitation = await RunDataQuery("invitations", "findOne", query);
+        const timestamp = Math.round(Date.now() / 1000);
+        if (timestamp < invitation.invitationTimestamp + 36000) { //expires in 10 hours! //TODO access window start and end timestamps
+            console.log("timestamp checks out!" + JSON.stringify(invitation));
+            const updoc = { $set: { validated: true, pin : pin, pinTimeout: timestamp + 6400} };
+            const upstatus = await RunDataQuery("invitations", "updateOne", query, updoc);
+            var response = {};
+            response.short_id = invitation.invitedToSceneShortID;
+            response.ok = "yep";
+            response.pin = pin;
+            response.to = invitation.sentToEmail;
+            response.timestampStart = invitation.sceneEventStart;
+            response.timestampEnd = invitation.sceneEventEnd;
+            response.url = requestProtocol + "://" + req.headers.host + "/webxr/" + invitation.invitedToSceneShortID + "?p=" + pin;
+            QRCode.toDataURL(response.url, function (err, url) {
+            response.qrcode = url;
+            res.send(response);
             });
-            let action = {};
-            db_old.people.updateOne( { "email": invitation.sentToEmail }, {$set: {accountStatus : "Email Verified", lastUpdate: timestamp}});
+        } else {
+            console.log("expired link");
+            res.send("expired_"+invitation.invitedToSceneShortID); //send back sceneID, to allow invite request
         }
-    }); 
+    })();
 });
+//     db_old.invitations.findOne({"invitationHash": hash}, function (err, invitation) {
+//         var timestamp = Math.round(Date.now() / 1000);
+//         if (err || !invitation) {
+//             console.log("did not find invitation: " + err);
+//             res.send("not found");
+//         } else {
+//             // console.log("invitation check:" + JSON.stringify(invitation));
+           
+//             var pin = Math.random().toString().substr(2,6); //hrm...
+//             if (timestamp < invitation.invitationTimestamp + 36000) { //expires in 10 hour! //TODO access window start and end timestamps
+//                 console.log("timestamp checks out!" + JSON.stringify(invitation));
+
+//                 db_old.invitations.update ( { "invitationHash": hash }, { $set: { validated: true, pin : pin, pinTimeout: timestamp + 6400} }); 
+//                 var response = {};
+//                 response.short_id = invitation.invitedToSceneShortID;
+//                 response.ok = "yep";
+//                 response.pin = pin;
+//                 response.to = invitation.sentToEmail;
+//                 response.timestampStart = invitation.sceneEventStart;
+//                 response.timestampEnd = invitation.sceneEventEnd;
+//                 response.url = requestProtocol + "://" + req.headers.host + "/webxr/" + invitation.invitedToSceneShortID + "?p=" + pin;
+               
+//                 QRCode.toDataURL(response.url, function (err, url) {
+ 
+//                 response.qrcode = url;
+//                 res.send(response);
+//                 });
+               
+//             } else {
+//                 console.log("expired link");
+//                 res.send("expired_"+invitation.invitedToSceneShortID); //send back sceneID, to allow invite request
+//             }
+
+//             db_old.actions.findOne({"actionType": "Send Email"}, function (err, emailAction) {
+//                 if (err || !emailAction) {
+//                     callback("error getting email action!" + err);
+//                 } else {
+//                     action.actionID = emailAction._id;
+//                     action.actionName = "Invitation Click"
+//                     action.actionType = "Send Email"
+//                     action.actionResult = "Invitation Button Clicked";
+//                     action.timestamp = timestamp * 1000; //ms trimmed on client
+//                     action.targetPersonID = ObjectId.createFromHexString(invitation.targetPersonID);
+//                     action.userID = ObjectId.createFromHexString(invitation.sentByUserID)
+                
+//                     action.targetEmail = invitation.sentToEmail;
+//                     action.fromScene = invitation.invitedToSceneShortID;
+//                     // action.data = req.body.sceneShareWithMessage;
+//                     db_old.activities.insertOne(action);
+//                 } 
+//             });
+//             let action = {};
+//             db_old.people.updateOne( { "email": invitation.sentToEmail }, {$set: {accountStatus : "Email Verified", lastUpdate: timestamp}});
+//         }
+//     }); 
+// });
 app.post('/invitation_req/', function (req,res) {
     console.log("invite req " + JSON.stringify(req.body));
     let thePerson = null;
