@@ -5034,227 +5034,253 @@ app.get('/uservids/:u_id', requiredAuthentication, function(req, res) {
          res.send("error getting uservids "+ e);
         } 
      })();
-
-//     db_old.video_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, video_items) {
-
-//         if (err || !video_items) {
-//             console.log("error getting video items: " + err);
-
-//         } else {
-//             console.log("# " + video_items.length);
-//             (async () => {
-//             for (var i = 0; i < video_items.length; i++) {
-
-//                 var item_string_filename = JSON.stringify(video_items[i].filename);
-//                 item_string_filename = item_string_filename.replace(/\"/g, "");
-//                 var item_string_filename_ext = getExtension(item_string_filename);
-//                 var expiration = new Date();
-//                 expiration.setMinutes(expiration.getMinutes() + 30);
-//                 var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                 //                        console.log(baseName + "xxxxxxx");
-// //                    var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-//                 var halfName = 'half.' + baseName + item_string_filename_ext;
-//                 var standardName = 'standard.' + baseName + item_string_filename_ext;
-
-//                 //var pngName = baseName + '.png';
-
-//                     try {
-//                         video_items[i].URLvid = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, 6000); //just send back thumbnail urls for list
-//                         // video_items[i].URLvid = vidUrl;
-//                     } catch (e) {
-//                         console.log(e);
-//                     }
-                   
-               
-//                 // var vidUrl = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, Expires: 6000}); //just send back thumbnail urls for list
-//                 //var urlPng = knoxClient.signedUrl(audio_item[0]._id + "." + pngName, expiration);
-//                  //jack in teh signed urls into the object array
-//                 //console.log("picture item: " + urlThumb, picture_items[0]);
-
-//                 }
-//             })();
-
-//             res.json(video_items);
-//             console.log("returning video_items for " + req.params.u_id);
-
-//         }
-//     });
 });
-app.post('/return_audiogroups/', function(req, res) {
-    // console.log('tryna return audiogroups: ' + JSON.stringify(req.body));
-    let response = req.body;
-    let groupItems = [];
-    let audio_IDs = [];
-    async.waterfall([
 
-        function(callback){ 
+app.post('/return_audiogroups/', function(req, res) {
+    console.log('tryna return audiogroups: ' + JSON.stringify(req.body));
+    let response = req.body;
+    (async () => {
+        try {
+            let groupItems = [];
+            let audio_IDs = [];
+            let audioItems = [];
             if (req.body.triggerGroups != null && req.body.triggerGroups.length > 0) {
                 const group_ids = req.body.triggerGroups.map(item => { return ObjectId.createFromHexString(item); });
-                db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
-                    if (err || !group_items) {
-                        console.log("error getting audiogroup items: " + err);
-                        callback(err);
-                    } else {
-                        // res.json(group_items);
-                        // console.log("returning audiogroup " + JSON.stringify(group_items.groupdata));
-                        let groupdata = group_items[0].groupdata;
-                        groupItems.push.apply(groupItems, groupdata); //concat arrays
-                        response.triggerGroupItems = group_items;
-                        
-                        callback(null);
-                    }
-                });
-            } else {
-                callback(null);
+                const query = {"_id": {$in: group_ids}};
+                const group_items = await RunDataQuery("groups", "find", query);
+                let groupdata = group_items[0].groupdata;
+                groupItems.push.apply(groupItems, groupdata); //concat arrays
+                response.triggerGroupItems = group_items;
             }
-        },
-        function(callback){ 
             if (req.body.ambientGroups != null && req.body.ambientGroups.length > 0) {
                 const group_ids = req.body.ambientGroups.map(item => { return ObjectId.createFromHexString(item); });
-                db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
-                    if (err || !group_items) {
-                        console.log("error getting audiogroup items: " + err);
-                        callback(err);
-                    } else {
-                        // res.json(group_items);
-                        // console.log("returning audiogroup " + JSON.stringify(group_items.groupdata));
-                        response.ambientGroupItems = group_items;
-                        let groupdata = group_items[0].groupdata;
-                        groupItems.push.apply(groupItems, groupdata); //concat arrays
-                        callback(null);
-                    }
-                });
-            } else {
-                callback(null);
+                const query = {"_id": {$in: group_ids}};
+                const group_items = await RunDataQuery("groups", "find", query);
+                let groupdata = group_items[0].groupdata;
+                groupItems.push.apply(groupItems, groupdata); //concat arrays
+                response.ambientGroupItems = group_items;
             }
-        },
-        function(callback){ 
             if (req.body.primaryGroups != null && req.body.primaryGroups.length > 0) {
                 const group_ids = req.body.primaryGroups.map(item => { return ObjectId.createFromHexString(item); });
-                db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
-                    if (err || !group_items) {
-                        console.log("error getting audiogroup items: " + err);
-                        callback(err);
-                    } else {
-                        // res.json(group_items);
-                        // console.log("returning audiogroup " + JSON.stringify(group_items));
-                        response.primaryGroupItems = group_items;
-                        let groupdata = group_items[0].groupdata;
-                        groupItems.push.apply(groupItems, groupdata); //concat arrays
-                        callback(null);
-                    }
-                });
-            } else {
-                callback(null);
+                const query = {"_id": {$in: group_ids}};
+                const group_items = await RunDataQuery("groups", "find", query);
+                let groupdata = group_items[0].groupdata;
+                groupItems.push.apply(groupItems, groupdata); //concat arrays
+                response.primaryGroupItems = group_items;
             }
-        },
-        function(callback){ 
-            if (req.body.objectGroups != null && req.body.objectGroups.length > 0) {
+            if (req.body.objectGroups != null && req.body.objectGroups.length > 0) { //while we're here, get the object groups too (?)
                 const group_ids = req.body.objectGroups.map(item => { return ObjectId.createFromHexString(item); });
-                db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
-                    if (err || !group_items) {
-                        console.log("error getting audiogroup items: " + err);
-                        callback(err);
-                    } else {
-                        // res.json(group_items);
-                        // console.log("returning audiogroup " + JSON.stringify(group_items));
-                        response.objectGroupItems = group_items;
-                        let groupdata = group_items[0].groupdata;
-                        groupItems.push.apply(groupItems, groupdata); //concat arrays
-                        callback(null);
-                    }
-                });
-            } else {
-                callback(null);
+                const query = {"_id": {$in: group_ids}};
+                const group_items = await RunDataQuery("groups", "find", query);
+                let groupdata = group_items[0].groupdata;
+                groupItems.push.apply(groupItems, groupdata); //concat arrays
+                response.objectGroupItems = group_items;
             }
-        },
-        function (callback) {
-            // console.log("auido groupitems: " +JSON.stringify(groupItems));
-            if (groupItems.length > 0) {
-                async.each (groupItems, function (item, callbackz) { //takes a shake so async, and respond when it's done
-                    audio_IDs.push(item.itemID);
-                    // console.log("item: " + JSON.stringify(item));
-                    callbackz();
-                }, function(err) {
-                    if (err) {
-                        res.send("error! " + err);
-                    } else {
-                        callback(null);
-                    }
-                });
-            } else {
-                callback("no group items");
+            for (let i = 0; i < groupItems.length; i++) {
+                audio_IDs.push(groupItems[i].itemID);
             }
-        },
-        function (callback) {
-            // console.log("audio IDs: " + audio_IDs);
-            const audio_ids = audio_IDs.map(item => { return ObjectId.createFromHexString(item); });
-            db_old.audio_items.find({'_id': { $in: audio_ids}}).toArray(function (err, audio_items) {
-                if (err || !audio_items) {
-                    console.log("error getting audio items: " + err);
-                    callback(err);
-                } else {
+            audio_IDs = audio_IDs.map(item => { return ObjectId.createFromHexString(item); });
+            const audioquery = {"_id": { $in: audio_IDs}};
+            const audio_items = await RunDataQuery("audio_items", "find", audioquery);
+            console.log("gots a bunch of audio_items " + audio_items.length);
+            for (var item of audio_items) { //ahh, async iterable!
+                let item_string_filename = JSON.stringify(item.filename);
+                item_string_filename = item_string_filename.replace(/\"/g, "");
+                let item_string_filename_ext = getExtension(item_string_filename);
+                let expiration = new Date();
+                expiration.setMinutes(expiration.getMinutes() + 30);
+                let baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                // console.log("tryna jack in " + baseName + " to a group of " + group.type);
+                const mp3Name = baseName + '.mp3';
+                const oggName = baseName + '.ogg';
+                const pngName = baseName + '.png';
+                const urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + mp3Name, 10000);
+                const urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + oggName, 10000);
+                const urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + pngName, 10000);
+                item.URLmp3 = urlMp3; //jack in teh signed urls into the object array
+                item.URLogg = urlOgg;
+                item.URLpng = urlPng;
+                audioItems.push(item);
+            }
+            response.audioItems = audioItems;
+            res.send(response);
+        } catch (e) {
+            console.log("error getting audio groups " + e);
+            res.send("error getting audio groups " + e);
+        }
+    })();
+});
+
+//     async.waterfall([
+
+//         function(callback){ 
+//             if (req.body.triggerGroups != null && req.body.triggerGroups.length > 0) {
+//                 const group_ids = req.body.triggerGroups.map(item => { return ObjectId.createFromHexString(item); });
+//                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
+//                     if (err || !group_items) {
+//                         console.log("error getting audiogroup items: " + err);
+//                         callback(err);
+//                     } else {
+//                         // res.json(group_items);
+//                         // console.log("returning audiogroup " + JSON.stringify(group_items.groupdata));
+//                         let groupdata = group_items[0].groupdata;
+//                         groupItems.push.apply(groupItems, groupdata); //concat arrays
+//                         response.triggerGroupItems = group_items;
+                        
+//                         callback(null);
+//                     }
+//                 });
+//             } else {
+//                 callback(null);
+//             }
+//         },
+//         function(callback){ 
+//             if (req.body.ambientGroups != null && req.body.ambientGroups.length > 0) {
+//                 const group_ids = req.body.ambientGroups.map(item => { return ObjectId.createFromHexString(item); });
+//                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
+//                     if (err || !group_items) {
+//                         console.log("error getting audiogroup items: " + err);
+//                         callback(err);
+//                     } else {
+//                         // res.json(group_items);
+//                         // console.log("returning audiogroup " + JSON.stringify(group_items.groupdata));
+//                         response.ambientGroupItems = group_items;
+//                         let groupdata = group_items[0].groupdata;
+//                         groupItems.push.apply(groupItems, groupdata); //concat arrays
+//                         callback(null);
+//                     }
+//                 });
+//             } else {
+//                 callback(null);
+//             }
+//         },
+//         function(callback){ 
+//             if (req.body.primaryGroups != null && req.body.primaryGroups.length > 0) {
+//                 const group_ids = req.body.primaryGroups.map(item => { return ObjectId.createFromHexString(item); });
+//                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
+//                     if (err || !group_items) {
+//                         console.log("error getting audiogroup items: " + err);
+//                         callback(err);
+//                     } else {
+//                         // res.json(group_items);
+//                         // console.log("returning audiogroup " + JSON.stringify(group_items));
+//                         response.primaryGroupItems = group_items;
+//                         let groupdata = group_items[0].groupdata;
+//                         groupItems.push.apply(groupItems, groupdata); //concat arrays
+//                         callback(null);
+//                     }
+//                 });
+//             } else {
+//                 callback(null);
+//             }
+//         },
+//         function(callback){ 
+//             if (req.body.objectGroups != null && req.body.objectGroups.length > 0) {
+//                 const group_ids = req.body.objectGroups.map(item => { return ObjectId.createFromHexString(item); });
+//                 db_old.groups.find({_id: {$in: group_ids}}, function(err, group_items) {
+//                     if (err || !group_items) {
+//                         console.log("error getting audiogroup items: " + err);
+//                         callback(err);
+//                     } else {
+//                         // res.json(group_items);
+//                         // console.log("returning audiogroup " + JSON.stringify(group_items));
+//                         response.objectGroupItems = group_items;
+//                         let groupdata = group_items[0].groupdata;
+//                         groupItems.push.apply(groupItems, groupdata); //concat arrays
+//                         callback(null);
+//                     }
+//                 });
+//             } else {
+//                 callback(null);
+//             }
+//         },
+//         function (callback) {
+//             // console.log("auido groupitems: " +JSON.stringify(groupItems));
+//             if (groupItems.length > 0) {
+//                 async.each (groupItems, function (item, callbackz) { //takes a shake so async, and respond when it's done
+//                     audio_IDs.push(item.itemID);
+//                     // console.log("item: " + JSON.stringify(item));
+//                     callbackz();
+//                 }, function(err) {
+//                     if (err) {
+//                         res.send("error! " + err);
+//                     } else {
+//                         callback(null);
+//                     }
+//                 });
+//             } else {
+//                 callback("no group items");
+//             }
+//         },
+//         function (callback) {
+//             // console.log("audio IDs: " + audio_IDs);
+//             const audio_ids = audio_IDs.map(item => { return ObjectId.createFromHexString(item); });
+//             db_old.audio_items.find({'_id': { $in: audio_ids}}).toArray(function (err, audio_items) {
+//                 if (err || !audio_items) {
+//                     console.log("error getting audio items: " + err);
+//                     callback(err);
+//                 } else {
                     
-                    callback(null, audio_items);
-                }
-            });
-        },
-        function (audio_items, callback) {
-            // console.log("audio_group_itemss: "+ JSON.stringify(audio_items));
-            // callback(null);
-            if (audio_items.length > 0) {
-                let audioItems = [];
-                async.each (audio_items, function (item, callbackz) { //takes a shake so async, and respond when it's done
+//                     callback(null, audio_items);
+//                 }
+//             });
+//         },
+//         function (audio_items, callback) {
+//             // console.log("audio_group_itemss: "+ JSON.stringify(audio_items));
+//             // callback(null);
+//             if (audio_items.length > 0) {
+//                 let audioItems = [];
+//                 async.each (audio_items, function (item, callbackz) { //takes a shake so async, and respond when it's done
                    
 
-                    (async () => {
-                        var item_string_filename = JSON.stringify(item.filename);
-                        item_string_filename = item_string_filename.replace(/\"/g, "");
-                        var item_string_filename_ext = getExtension(item_string_filename);
-                        var expiration = new Date();
-                        expiration.setMinutes(expiration.getMinutes() + 30);
-                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                        // console.log("tryna jack in " + baseName + " to a group of " + group.type);
-                        var mp3Name = baseName + '.mp3';
-                        var oggName = baseName + '.ogg';
-                        var pngName = baseName + '.png';
+//                     (async () => {
+//                         var item_string_filename = JSON.stringify(item.filename);
+//                         item_string_filename = item_string_filename.replace(/\"/g, "");
+//                         var item_string_filename_ext = getExtension(item_string_filename);
+//                         var expiration = new Date();
+//                         expiration.setMinutes(expiration.getMinutes() + 30);
+//                         var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                         // console.log("tryna jack in " + baseName + " to a group of " + group.type);
+//                         var mp3Name = baseName + '.mp3';
+//                         var oggName = baseName + '.ogg';
+//                         var pngName = baseName + '.png';
 
-                        var urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + mp3Name, 10000);
-                        var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + oggName, 10000);
-                        var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + pngName, 10000);
+//                         var urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + mp3Name, 10000);
+//                         var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + oggName, 10000);
+//                         var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + item.userID + "/audio/" + item._id + "." + pngName, 10000);
 
-                        item.URLmp3 = urlMp3; //jack in teh signed urls into the object array
-                        item.URLogg = urlOgg;
-                        item.URLpng = urlPng;
-                        audioItems.push(item);
-                        callbackz();
-                    })();
+//                         item.URLmp3 = urlMp3; //jack in teh signed urls into the object array
+//                         item.URLogg = urlOgg;
+//                         item.URLpng = urlPng;
+//                         audioItems.push(item);
+//                         callbackz();
+//                     })();
 
 
-                }, function(err) {
-                    if (err) {
-                        res.send("error! " + err);
-                    } else {
-                        // console.log("audio items: " + JSON.stringify(audioItems));
-                        response.audioItems = audioItems;
-                        callback(null);
-                    }
-                });
-            } else {
-                callback("no audio items");
+//                 }, function(err) {
+//                     if (err) {
+//                         res.send("error! " + err);
+//                     } else {
+//                         // console.log("audio items: " + JSON.stringify(audioItems));
+//                         response.audioItems = audioItems;
+//                         callback(null);
+//                     }
+//                 });
+//             } else {
+//                 callback("no audio items");
                 
-            }
-        }
+//             }
+//         }
        
-    ],
+//     ],
 
-    function(err, result) { // #last function, close async
-        res.json(response);
-        console.log("audio_groups waterfall done: " + result);
-    }
-);
+//     function(err, result) { // #last function, close async
+//         res.json(response);
+//         console.log("audio_groups waterfall done: " + result);
+//     }
+// );
 
-});
+// });
 
 app.get('/usergroups/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return usergroups for: ' + req.params.u_id);
