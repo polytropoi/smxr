@@ -1460,82 +1460,6 @@ app.get('/traffic/:domain', requiredAuthentication, admin, function (req, res) {
     })();
 });
 
-
-    // } else { //login with facebook //UNUSED
-    //     console.log("tryna login with facebook ID: " + req.body.fbID); 
-    //     db.users.find(
-    //         {facebookID: req.body.fbID},{deviceID:0, email:0, password:0}, function(err, authUser) {
-
-    //             if (err || ! authUser) {
-    //                 console.log("facebook user not found");
-    //                 res.json("error: " + err);
-    //                 db.users.save(
-    //                     {type : "facebookUser",
-    //                         userName : req.body.uName,
-    //                         facebookID : req.body.fbID}, function (err, saved){
-    //                         if ( err || !saved ){
-    //                             console.log("db error, message not saved");
-    //                         } else  {
-    //                             console.log("message saved to db");
-    //                             var fbUser_id = saved._id.toString();
-    //                             console.log("facebook userID: " + fbUser_id);
-    //                             req.session.auth = fbUser_id;
-    //                             res.json(fbUser_id);
-    //                         }
-    //                     });
-    //             } else {
-    //                 console.log("facebook authenticated: " + authUser[0].userName);
-    //                 res.json(authUser[0]._id);
-    //                 req.session.auth = authUser[0]._id;
-    //                 appAuth = authUser[0]._id;
-    //                 console.log("auth = " + req.session.auth);
-    //             }
-    //         });
-
-    // }
-
-// });
-
-// app.post('/ios_inapp_purchase/', function(req, res){
-//     console.log("tryna save ios inapp purchase type " + JSON.stringify(req.body.productID));
-//     var item = req.body;
-//     item.datePosted = Date.now();
-//     item.isValidated = "no";
-//     item.sourcePlatform = "iOS";
-//     // item.userID = "";
-//     var htmlbody = "incoming IAP: " + JSON.stringify(item);
-//         ses.sendEmail( {
-//             Source: "admin@servicemedia.net",
-//             Destination: { ToAddresses: [adminEmail]},
-//             Message: {
-//                 Subject: {
-//                     Data: "Incoming IAP"
-//                 },
-//                 Body: {
-//                     Html: {
-//                         Data: htmlbody
-//                     }
-//                 }
-//             }
-//         }
-//         , function(err, data) {
-//             if(err) throw err
-//             console.log('Email sent:');
-//             console.log(data);
-           
-//         });
-//     db.iap.save(item, function (err, saved) {
-//         if ( err || !saved ) {
-//             console.log('iap not saved..');
-//             res.send("error " + err);
-//         } else {
-//             var item_id = saved._id.toString();
-//             console.log('new iap, id: ' + item_id);
-//             res.send(item_id);
-//         }
-//     });
-// });
-
 app.get('/validate/:auth_id', function (req, res) {
     console.log("tryna validate...");
     //var u_id = ObjectId.createFromHexString(req.params.auth_id);
@@ -1565,126 +1489,6 @@ app.get('/validate/:auth_id', function (req, res) {
 });
 
 
-
-// app.post('/stripe_charge', requiredAuthentication, function (req,res) {
-
-//     // (LATER): When it's time to charge the customer again, retrieve the customer ID.
-
-//     (async () => {
-//         try {
-//             const query = {"userName": req.body.uname};
-//             const user = await RunDataQuery("users", "findOne",query);
-//             if (user) {
-//                 if (user.stripeCustomerID != null) {
-//                     stripe.charges.create({
-//                         amount: 1500, // $15.00 this time
-//                         currency: "usd",
-//                         customer: user.stripeCustomerID,
-//                     }).then(function(charge){
-//                         console.log("stripeCharge : " + req.body.uname);
-//                         res.send(JSON.stringify(charge));
-                        
-//                     });
-//                 } else {
-//                         console.log("no stripe customer id!");
-//                         res.send("no stripe customer ID!");
-//                 }
-//             }
-//         } catch (e) {
-//             res.send("error doing stripe charge " +e);
-//         }
-//     })();
-
-// });
-
-// app.post('/stripe_collect_data', function (req,res) { // hrm...
-
-//     var token = req.body.stripeToken;
-//     var purchaseTimestamp = Date.now();
-//     var customerID = "";
-//     stripe.customers.create({
-//         email: req.body.stripeEmail,
-//         source: token
-//     }).then(function(customer) {
-//         //Save the customer ID and other info in a database for later.
-//         customerID = customer.id;
-//         return stripe.charges.create({
-//             amount: req.body.amountInCents,
-//             currency: "usd",
-//             receipt_email: req.body.stripeEmail,
-//             customer: customer.id
-//         });
-//     }).then(function(charge) {
-//         // Use and save the charge info.
-//         // console.log("charged! " + token +  " body:  " + JSON.stringify(req.body) + " charge " + JSON.stringify(charge));
-//         req.body.purchaseTimestamp = purchaseTimestamp;
-//         req.body.chargeDetails = charge;
-
-//         (async () => {
-//             try {
-//                 const query = {"email": req.body.stripeEmail };
-//                 const user = await RunDataQuery("users", "findOne",query);
-//                 if (!user) { //no user found w/ email, so new user
-//                     var item_id = saved._id.toString(); //purchase ID
-//                     console.log('new purchase id: ' + item_id);
-//                     var from = "admin@servicemedia.net";
-//                     var timestamp = Math.round(Date.now() / 1000);
-//                     var ip = req.headers['x-forwarded-for'] ||
-//                         req.connection.remoteAddress ||
-//                         req.socket.remoteAddress ||
-//                         req.connection.socket.remoteAddress;
-//                     var userPass = shortid.generate();
-//                     const cleanhash = bcrypt.genSalt(10, function(err, salt) {
-//                         bcrypt.hash(userPass, salt, null, function(err, hash) {
-//                         return validator.blacklist(hash, ['/','.','$']);                       
-//                         });
-//                     });
-//                     const newUser = await RunDataQuery("users", "insertOne", updoc);
-//                     const updoc = {
-//                         type : 'webuser',
-//                         status : 'unvalidated',
-//                         userName : req.body.stripeEmail,
-//                         email : req.body.stripeEmail,
-//                         createDate : timestamp,
-//                         validationHash : cleanhash,
-//                         createIP : ip,
-//                         paymentStatus: "ok",
-//                         lastPurchaseID: item_id,
-//                         password : hash
-//                     };
-//                     var user_id = newUser._id.toString();
-//                     console.log("userID: " + user_id);
-
-//                     htmlbody = "Welcome to " + topName + ", " + req.body.stripeEmail + "! <br><a href=\"" + rootHost + "/validate/" + cleanhash + "\">To get started, click here to validate account</a> <br><br>"+
-//                     "You may then log into the app, using your email as username, and with the password <strong>" + userPass + "</strong> which you may change at any time." +
-//                     " You may also change your username, but your account will remain tied to this email address.<br><br>" +
-//                     "Payment ID: " + item_id;
-
-//                     const mailStatus = await SendEmail(req.body.stripeEmail, process.env.ADMIN_EMAIL, htmlbody, 'New ' + topName + ' Subscription!');
-//                     console.log("new sub mail " + mailStatus);
-
-//                 } else {
-//                     //existing user
-//                     console.log("tryna update payment for existing user " + req.body.stripeEmail);
-//                     const saved = await RunDataQuery("payments", "insertOne", req.body);
-//                     const item_id = saved._id.toString();
-//                     const userquery =  { "email": req.body.stripeEmail };
-//                     const updoc = { $set: { stripeCustomerID: customerID, paymentStatus: "ok", lastPurchaseID : item_id }}; //what else?
-//                     const updated = await RunDataQuery("users", "updateOne", userquery, updoc);
-//                     htmlbody = "Thanks for your support, your payment was received! You should be able login as usual.<br>"+
-//                     "If you need to reset your password, go to " + rootHost + "/#/reset/<br>" + 
-//                     "If you have any questions or problems, you may reply to this email, or contact polytropoi@gmail.com. <br>Best regards,<br>Jim Cherry<br><br>" +
-//                     "Payment ID: " + item_id;
-//                     const mailStatus = await SendEmail(req.body.stripeEmail, process.env.ADMIN_EMAIL, htmlbody, topName + ' Payment Received - Thanks!');
-//                     console.log("new sub mail " + mailStatus);
-//                 }
-//                 res.redirect("/#/newthanks");
-//             } catch (e) {
-//                 res.send("error processing stripe charge " +e);
-//             }
-//         })();
-//     });
-// });
 
 app.get('/makedomainadmin/:domain/:_id',  checkAppID, requiredAuthentication, admin, function (req, res) {
     console.log(" makedomainadmin req" + req)
@@ -1966,52 +1770,6 @@ app.post('/domain/', requiredAuthentication, domainadmin, function (req, res) {
     })();
 });
 
-//     db_old.domains.findOne({_id: oid}, function (err, domain) {
-//         if (err | !domain) {
-//             res.send("no domain for you");
-//         } else {
-//             if (domain.domainPictureIDs != null && domain.domainPictureIDs != undefined && domain.domainPictureIDs.length > 0) {
-//                 // oids = domain.domainPictureIDs.map(ObjectId.createFromHexString()); //convert to mongo object ids for searching
-//                 const oids = domain.domainPictureIDs.map(item => {
-//                     return ObjectId.createFromHexString(item);
-//                 })
-//                 db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-//                     if (err || !pic_items) {
-//                         console.log("error getting picture items: " + err);
-//                         res.send("error: " + err);
-//                     } else {
-//                         // (async () => {
-//                             try {
-//                             domainPictures = [];
-//                             pic_items.forEach(function(picture_item){   
-//                                 (async () => {             
-//                                 var imageItem = {};
-//                                 // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-//                                 // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-//                                 // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-//                                 const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, 6000);
-//                                 // imageItem.urlThumb = urlThumb;
-//                                 imageItem.urlHalf = urlHalf;
-//                                 // imageItem.urlStandard = urlStandard;
-//                                 imageItem._id = picture_item._id;
-//                                 imageItem.filename = picture_item.filename;
-//                                 domainPictures.push(imageItem);
-//                                 domain.domainPictures = domainPictures;
-//                                 })();
-//                             });
-//                         res.json(domain);
-//                         } catch (e) {
-
-//                         }
-//                     // })();
-//                     }
-//                 });
-//             } else {
-//                  res.json(domain);
-//             }
-//         }
-//     }); 
-// });
 
 
 app.get('/domain/:domain', checkAppID, requiredAuthentication, domainadmin, function (req, res) {
@@ -3117,7 +2875,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
         let contentType = "";
         if (groupType.toLowerCase()  == ".jpg" || groupType.toLowerCase()  == ".jpeg" || groupType.toLowerCase()  == ".png") {
             contentType = "picture";
-        } else if (groupType.toLowerCase()  == ".mp3" || groupTyp.toLowerCase()  == ".wav" || groupType.toLowerCase()  == ".ogg" || groupType.toLowerCase()  == ".aif"  )  {
+        } else if (groupType.toLowerCase()  == ".mp3" || groupType.toLowerCase()  == ".wav" || groupType.toLowerCase()  == ".ogg" || groupType.toLowerCase()  == ".aif"  )  {
             contentType = "audio"
         } else if (groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".mov" || groupType.toLowerCase() == ".webm")  {
             contentType = "video";
@@ -4346,130 +4104,168 @@ app.post('/invitation_req/', function (req,res) {
     }
 });
 
-app.post ('/get_invitations', checkAppID, requiredAuthentication, function (req,res) {// sigh, need to encrypt this...
-    var timestamp = Math.round(Date.now() / 1000);
+app.post ('/get_invitations', checkAppID, requiredAuthentication, function (req,res) {// sigh, need to encrypt this...//called from nowhere?
+    const timestamp = Math.round(Date.now() / 1000);
     console.log("tryna get_invitations: " + JSON.stringify(req.body) + " at timestamp " + timestamp);
     // var emailString = req.body.email;
-    if (req.body.email != null)
-    var query = {$and: [{sentToEmail : req.body.email}, {validated : true}, {accessTimeWindow: {$gt : timestamp}}]};
-    if (req.body.pin != null)
-    var query = {$and: [{pin : req.body.pin}, {validated : true}, {accessTimeWindow: {$gt : timestamp}}]};
+    let query = null;
+    if (req.body.email != null) {
+        query = {$and: [{sentToEmail : req.body.email}, {validated : true}, {accessTimeWindow: {$gt : timestamp}}]};
+    }
+    if (req.body.pin != null) {
+        query = {$and: [{pin : req.body.pin}, {validated : true}, {accessTimeWindow: {$gt : timestamp}}]};
+    }
+
     console.log("tryna get_invitations: " + JSON.stringify(req.body) + " at timestamp " + timestamp + " with query " + query);
+
     if (query != null) {
-        db_old.invitations.find (query, function (err, invitations) {
-            // db.invitations.find ({$and: [{sentToEmail : req.body.email}, {validated : true} ]}, function (err, invitations) {
-            if (err || !invitations) {
-                console.log("error getting invitations: " + err);
-            } else {
-                //TODO - Pass along a postcard for each invitation..., needs an async
-                var invitationsData = {};
+        (async () => {
+            try {
+                const invitations = await RunDataQuery("invitations", "find", query);
+                let invitationsData = {};
                 invitationsData.invitations = invitations;
                 res.json(invitationsData);
+            } catch (e) {
+                console.log("errror getting invitations " + e);
+                res.send("errror getting invitations " + e);
             }
-        });
+            
+        })();
+        // db_old.invitations.find (query, function (err, invitations) {
+        //     // db.invitations.find ({$and: [{sentToEmail : req.body.email}, {validated : true} ]}, function (err, invitations) {
+        //     if (err || !invitations) {
+        //         console.log("error getting invitations: " + err);
+        //     } else {
+        //         //TODO - Pass along a postcard for each invitation..., needs an async
+        //         var invitationsData = {};
+        //         invitationsData.invitations = invitations;
+        //         res.json(invitationsData);
+        //     }
+        // });
     } else {
         res.end("null query");
     }
 });
 
-app.post('/savepw', function (req, res){
+app.post('/savepw', function (req, res){ //saved changed password after reset link clicked
 
-    db_old.users.findOne({"resetHash": req.body.hzch}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting user: " + err);
-        } else {
-            var timestamp = Math.round(Date.now() / 1000);
-            if (timestamp < user.resetTimestamp + 3600) { //expires in 1 hour!
-                // console.log(req.body.password);
-                bcrypt.genSalt(10, function(err, salt) {
-                    bcrypt.hash(req.body.password, salt, null, function(err, hash) {
-                        db_old.users.update( { _id: user._id }, { $set: { resetHash: "", resetTimestamp: timestamp, password: hash}});
-                        res.send("pwsaved");
-                    });
-                });
-            } else {
-                console.log("expired link");
-                res.send("expiredlink");
+    var timestamp = Math.round(Date.now() / 1000);
+    if (timestamp < user.resetTimestamp + 3600) { //expires in 1 hour!
+        // console.log(req.body.password);
+        (async () => {
+            try {
+                const query = {"resetHash": req.body.hzch}; //could do it with just one...
+                const user = await RunDataQuery("users", "findOne", query); 
+                const salt = await bcrypt.genSalt(10);
+                const hash = await bcrypt.hash(req.body.password, salt);
+                const uquery = { "_id": user._id }; //already an objectID!
+                const updoc = { $set: { resetHash: "", resetTimestamp: timestamp, password: hash}}
+                const updated = await RunDataQuery("users", "updateOne", uquery, updoc);
+                res.send("updated password " + updated);
+            } catch (e) {
+                console.log("error saving password!@ " + e);
+                res.send("error saving password!@ " + e);
             }
-
-        }
-    });
+        })();
+    } else {
+        console.log("expired link");
+        res.send("expiredlink");
+    }
 });
 
-app.post('/resetpw', function (req, res) {
+app.post('/resetpw', function (req, res) { //send an email with reset link
 
     console.log('reset request from: ' + req.body.email);
-    // ws.send("authorized");
     var subject = topName + " Password Reset";
-    var from = "admin@servicemedia.net";
-    var to = [req.body.email];
-    // var to = [adminEmail];
-    var bcc = [domainAdminEmail];
-    //var reset = "";
+   
     var timestamp = Math.round(Date.now() / 1000);
 
     if (validator.isEmail(req.body.email) == true) {
 
-        db_old.users.findOne({"email": req.body.email}, function (err, user) {
-            if (err || !user) {
-                console.log("error getting user: " + err);
-                res.send("email address not found");
-            } else {
+        (async () => {
+            try {
+                const query = {"email": req.body.email}; //could do it with just one...
+                const user = await RunDataQuery("users", "findOne", query); 
+                const salt = await bcrypt.genSalt(10);
+                const hash = await bcrypt.hash(timestamp.toString(), salt);
+                var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
+                const uquery = { "_id": user._id }; //already an objectID!
+                const updoc = { $set: {"resetHash": cleanhash, "resetTimestamp": timestamp}};
+                const updated = await RunDataQuery("users", "updateOne", uquery, updoc);
+                const htmlbody = "<h3>" + topName + " Password Reset</h3><hr><br>" +
+                "Click here to reset your password (link expires in 1 hour): </br>" +
+                rootHost + "/main/resetter.html?hzch=" + cleanhash;
+                const status1 = await SendEmail(req.body.email, process.env.ADMIN_EMAIL, htmlbody, subject);
+                const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, subject);
+                console.log(updated + "resetpw mails " + status1 + " " + status2);
+                res.redirect("/#/");
+               
+            } catch (e) {
+                console.log("error resetting password!@ " + e);
+                res.send("error resetting password!@ " + e);
+            }
+        })();
 
-                bcrypt.genSalt(3, function(err, salt) { //level3 easy, not a password itself
-                    bcrypt.hash(timestamp.toString(), salt, null, function(err, hash) {
-                        // reset = hash;
-                        var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-                        db_old.users.update( { _id: user._id }, { $set: { resetHash: cleanhash, resetTimestamp: timestamp}});
-                        var htmlbody = "<h3>" + topName + " Password Reset</h3><hr><br>" +
-                            "Click here to reset your password (link expires in 1 hour): </br>" +
-                            rootHost + "/main/resetter.html?hzch=" + cleanhash;
-                        // console.log(domainAdminEmail + " tryna send html body" + htmlbody);
+        // db_old.users.findOne({"email": req.body.email}, function (err, user) {
+        //     if (err || !user) {
+        //         console.log("error getting user: " + err);
+        //         res.send("email address not found");
+        //     } else {
 
-                        (async () => {
+        //         bcrypt.genSalt(3, function(err, salt) { //level3 easy, not a password itself
+        //             bcrypt.hash(timestamp.toString(), salt, null, function(err, hash) {
+        //                 // reset = hash;
+        //                 var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
+        //                 db_old.users.update( { _id: user._id }, { $set: { resetHash: cleanhash, resetTimestamp: timestamp}});
+        //                 var htmlbody = "<h3>" + topName + " Password Reset</h3><hr><br>" +
+        //                     "Click here to reset your password (link expires in 1 hour): </br>" +
+        //                     rootHost + "/main/resetter.html?hzch=" + cleanhash;
+        //                 // console.log(domainAdminEmail + " tryna send html body" + htmlbody);
 
-                            try {
-                                const status1 = await SendEmail(req.body.email, process.env.ADMIN_EMAIL, htmlbody, subject);
-                                const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, subject);
-                                console.log("resetpw mails " + status1 + " " + status2);
-                                res.redirect("/#/");
-                            } catch (e) {
-                                console.log("pw reset mail errlr " + e);
+        //                 (async () => {
+
+        //                     try {
+        //                         const status1 = await SendEmail(req.body.email, process.env.ADMIN_EMAIL, htmlbody, subject);
+        //                         const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, subject);
+        //                         console.log("resetpw mails " + status1 + " " + status2);
+        //                         res.redirect("/#/");
+        //                     } catch (e) {
+        //                         console.log("pw reset mail errlr " + e);
                                 
-                                res.send(e);
-                            }
+        //                         res.send(e);
+        //                     }
                            
-                        })();
+        //                 })();
                     
                             
-                    });
-                });
-            }
-        });
+        //             });
+        //         });
+        //     }
+        // });
     } else {
         res.send("invalid email address");
     }
 });
 
 
-app.post('/ext_auth_req/:domain', function (req, res) {
-    console.log("tryna get ext_auth_req!" + req.body.email);
-    const data = {};
-    data.email = req.body.email.toString().trim();
-    var token=jwt.sign({app:req.params.domain},process.env.JWT_SECRET);
-    const options = {
-        headers: {'X-Access-Token': token}
-        };
-    axios.post("https://rrxr.net/ext_auth_response/", data, options) //todo FLEXIT via app record
-    .then((response) => {
-    // .then(function () {
-        console.log("ext_auth emails: " + JSON.stringify(response.data));
-        res.send(response.data)
-    })
-    .catch(function (error) {
-        res.send("er3oror! " + error);
-    });
-});
+// app.post('/ext_auth_req/:domain', function (req, res) { //um..no
+//     console.log("tryna get ext_auth_req!" + req.body.email);
+//     const data = {};
+//     data.email = req.body.email.toString().trim();
+//     var token=jwt.sign({app:req.params.domain},process.env.JWT_SECRET);
+//     const options = {
+//         headers: {'X-Access-Token': token}
+//         };
+//     axios.post("https://rrxr.net/ext_auth_response/", data, options) //todo FLEXIT via app record
+//     .then((response) => {
+//     // .then(function () {
+//         console.log("ext_auth emails: " + JSON.stringify(response.data));
+//         res.send(response.data)
+//     })
+//     .catch(function (error) {
+//         res.send("er3oror! " + error);
+//     });
+// });
 
 app.post('/share_scene/', function (req, res) { //yep! //make it public?
 
@@ -4491,6 +4287,10 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
     req.socket.remoteAddress ||
     req.connection.socket.remoteAddress;
 
+    // (async () => {
+
+
+    // })();
     async.waterfall([
 
         function(callback) {
@@ -10470,51 +10270,63 @@ app.post('/update_location/:_id', requiredAuthentication, function (req, res) {
 
 app.post('/newscene', requiredAuthentication, admin, function (req, res) {
     console.log(req.body);
-    var newScene = {};    
-//        newScene.title = newScene.title
-//        newScene.sceneOwner_id = req.session.user._id.toString();
-//        newScene.sceneOwnerName = req.session.user.username;
-    newScene.sceneTitle = req.body.title;
-    newScene.user_id = req.session.user._id.toString();
-    newScene.userName = req.session.user.userName;
-    newScene.otimestamp = Math.round(Date.now() / 1000);
-    newScene.sceneLocations = [];
-    db_old.scenes.save(newScene, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('scene not saved..');
-            res.send("nilch");
-        } else {
-            var item_id = saved._id.toString();
-            console.log('created new scene id: ' + item_id);
-            tempID = "";
-            newShortID = "";
-            tempID = item_id;
-            // newShortID = shortId(tempID);
-            newShortID = shortid.generate(); //TODO - externalize and check for collisions!
-            var o_id = ObjectId.createFromHexString(tempID);
-            console.log(tempID + " = " + newShortID);
-            db_old.scenes.update( { _id: o_id }, { $set: { short_id: newShortID }});
 
-            // db.acl.save(
-            //     { acl_rule: "read_scene_" + saved._id },  function (err, acl) {
-            //         if (err || !acl) {
-            //         } else {
-            //             db.acl.update({ 'acl_rule': "read_scene_" + saved._id},{ $push: { 'userIDs': req.session.user._id.toString() } });
-            //             console.log("ok saved acl");
-            //         }
-            //     });
-            // db.acl.save(
-            //     { 'acl_rule': "write_scene_" + saved._id }, function (err, acl) {
-            //         if (err || !acl) {
-            //         } else {
-            //             db.acl.update({ 'acl_rule': "write_scene_" + saved._id },{ $push: { 'userIDs': req.session.user._id.toString() } });
-            //             console.log("ok saved acl");
-            //         }
-            //     });
-            res.send("created new scene " + item_id);
+    (async () => {
+        try {
+        const newShortID = shortid.generate(); //um, collisions?
+        const updoc = {    
+            "sceneTitle": req.body.title,
+            "user_id": req.session.user._id.toString(),
+            "userName": req.session.user.userName,
+            "otimestamp": Math.round(Date.now() / 1000),
+            "sceneLocations": [],
+            "short_id": newShortID
+        };
+        const newscene =  await RunDataQuery("scenes", "insertOne", updoc);
+        res.send("new scene created! " + JSON.stringify(newscene));
+        } catch (e) {
+            console.log('error creating new scene ' + e);
+            res.send('error creating new scene ' + e);
         }
-    });
+    })();
 });
+
+    // db_old.scenes.save(newScene, function (err, saved) {
+    //     if ( err || !saved ) {
+    //         console.log('scene not saved..');
+    //         res.send("nilch");
+    //     } else {
+    //         var item_id = saved._id.toString();
+    //         console.log('created new scene id: ' + item_id);
+    //         tempID = "";
+    //         newShortID = "";
+    //         tempID = item_id;
+    //         // newShortID = shortId(tempID);
+    //         newShortID = shortid.generate(); //TODO - externalize and check for collisions!
+    //         var o_id = ObjectId.createFromHexString(tempID);
+    //         console.log(tempID + " = " + newShortID);
+    //         db_old.scenes.update( { _id: o_id }, { $set: { short_id: newShortID }});
+
+    //         // db.acl.save(
+    //         //     { acl_rule: "read_scene_" + saved._id },  function (err, acl) {
+    //         //         if (err || !acl) {
+    //         //         } else {
+    //         //             db.acl.update({ 'acl_rule': "read_scene_" + saved._id},{ $push: { 'userIDs': req.session.user._id.toString() } });
+    //         //             console.log("ok saved acl");
+    //         //         }
+    //         //     });
+    //         // db.acl.save(
+    //         //     { 'acl_rule': "write_scene_" + saved._id }, function (err, acl) {
+    //         //         if (err || !acl) {
+    //         //         } else {
+    //         //             db.acl.update({ 'acl_rule': "write_scene_" + saved._id },{ $push: { 'userIDs': req.session.user._id.toString() } });
+    //         //             console.log("ok saved acl");
+    //         //         }
+    //         //     });
+    //         res.send("created new scene " + item_id);
+    //     }
+    // });
+// });
 
 
 app.post('/newgroup', requiredAuthentication, function (req, res) {
