@@ -3591,7 +3591,7 @@ app.get('/optout_check/:hzch', function (req, res) { //called from /landing/invi
     (async () => {
         try {
             const query = {"invitationHash": hash};
-            const invitaiton = await RunDataQuery("invitations", "findOne", query);
+            const invitation = await RunDataQuery("invitations", "findOne", query);
             var response = {};
             response.short_id = invitation.invitedToSceneShortID;
             response.sentByUserName = invitation.sentByUserName;
@@ -4331,9 +4331,9 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
             // if (req.session.user != undefined) {
             const uid = ObjectId.createFromHexString(req.session.user._id.toString());
             // }
-            console.log("tryna mail to " +uid);
-            for (const email in emailSplit2) {
-               const personquery = {email: email.toString().trim()};
+            console.log("tryna send invitations for " +uid + " to emails " + emailSplit2);
+            for (const email of emailSplit2) {
+               const personquery = {"email": email.toString().trim()};
                const person = await RunDataQuery("people", "findOne", personquery);
                 if (!person) {
                     let newperson = {};
@@ -4361,10 +4361,11 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                     console.log("new person created for " + email + " " + updated);
                     // db_old.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person_id}});
                 } else {
+                    console.log("gotsa person : "+ JSON.stringify(person));
                     if (person.activities == undefined) {
                         person.activities = [];
                     }
-                    let action = {};
+                    let action = {}; //check out the person and save the action, email or no
                     if (person.accountStatus != undefined && (person.accountStatus.toString().toLowerCase().includes("blacklist") || 
                         person.accountStatus.toString().toLowerCase().includes ("banned"))) {
                         console.log("opt out global for " + email);
@@ -4444,7 +4445,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                         var pursoner = {};
                         console.log('found person id: ' + person._id);
                         pursoner.personID = person._id;
-                        pursoner.email = email.toString().trim();
+                        pursoner.email = person.email.toString().trim();
                         emailsFinal.push(pursoner);
                         if (req.session.user) {
                             const uquery = { "_id": uid };
@@ -4458,6 +4459,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                 } //checked and validated all the emails
             }             
             if (emailsFinal.length) {
+                console.log("emailsFinal " + JSON.stringify(emailsFinal));
                 const scenequery = {short_id: req.body.short_id};
                 const scene = await RunDataQuery("scenes", "findOne", scenequery);
                 sceneData = scene;
@@ -4536,9 +4538,9 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                 }
                 ///OK gots emails, scenedata, auth - ready to send!
                 // async.each (eData, function (data, callbackzz) {
-                    console.log("email data is " + data);
-                for (const data in emailsFinal) {
-            
+                    console.log("email data is " + JSON.stringify(emailsFinal));
+                for (const data of emailsFinal) {
+                    console.log ("data is "+ JSON.stringify(data));
                     var subject = "Invitation : " + sceneData.sceneTitle;
                     var from = adminEmail;
                 
@@ -4636,6 +4638,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                                 }
                             }
                         };          
+                        console.log("email params "+ JSON.stringify(params));
                     const status = await SendEmail(params.Destination.ToAddresses, params.Source, htmlbody, subject);
                 }
                 console.log("scene sharing complete!");
