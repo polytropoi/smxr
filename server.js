@@ -3711,441 +3711,443 @@ app.get('/invitation_check/:hzch', function (req, res) { //called from /landing/
 //         }
 //     }); 
 // });
-app.post('/invitation_req/', function (req,res) {
-    console.log("invite req " + JSON.stringify(req.body));
-    let thePerson = null;
-    let referrer = req.headers['x-forwarded-for'] ||
-    req.connection.remoteAddress ||
-    req.socket.remoteAddress ||
-    req.connection.socket.remoteAddress;
-    if (req.body.shortID != undefined && req.body.shortID.length > 4) {
-        db_old.scenes.findOne({"short_id": req.body.shortID}, function (err, scene) {
-            if (err ||!scene) {
-                res.send("nope");
-            } else {
-                if (scene.sceneShareWithGroups != undefined && scene.sceneShareWithGroups != null) {
-                    if (scene.sceneShareWithGroups.toString().toLowerCase().includes("disallow all")) {
-                        res.send("nope - invitations disallowed");
-                    } else {
-                        async.waterfall([
 
-                            function(callback) { //is this account in the scene's allowed groups? 
-                                callback(null); //...
-                            },
-                            function(callback) { //is accountStatus OK?
+
+// app.post('/invitation_req/', function (req,res) { //unused..?
+//     console.log("invite req " + JSON.stringify(req.body));
+//     let thePerson = null;
+//     let referrer = req.headers['x-forwarded-for'] ||
+//     req.connection.remoteAddress ||
+//     req.socket.remoteAddress ||
+//     req.connection.socket.remoteAddress;
+//     if (req.body.shortID != undefined && req.body.shortID.length > 4) {
+//         db_old.scenes.findOne({"short_id": req.body.shortID}, function (err, scene) {
+//             if (err ||!scene) {
+//                 res.send("nope");
+//             } else {
+//                 if (scene.sceneShareWithGroups != undefined && scene.sceneShareWithGroups != null) {
+//                     if (scene.sceneShareWithGroups.toString().toLowerCase().includes("disallow all")) {
+//                         res.send("nope - invitations disallowed");
+//                     } else {
+//                         async.waterfall([
+
+//                             function(callback) { //is this account in the scene's allowed groups? 
+//                                 callback(null); //...
+//                             },
+//                             function(callback) { //is accountStatus OK?
                                 
-                                db_old.people.findOne({"email": req.body.email.trim()}, function (err, person) {
-                                    let action = {};
-                                    let ts = Date.now();
-                                    if (err) {
-                                        console.log("error lookinup person didn't find that person's email for invite req");
-                                        callback("error on personlookup!");
-                                    } else {
-                                        if  (!person) {
-                                            console.log("tryna creqate new persosa");
-                                            let activities = [];
-                                            let action1 = {};
-                                            let action2 = {};
-                                            action1.createNewPerson = ts;
-                                            action2.requestedInvitation = ts + "_" + req.body.shortID + "_" + referrer;
-                                            activities.push(action1);
-                                            activities.push(action2); //bc they need to be separate array elements
+//                                 db_old.people.findOne({"email": req.body.email.trim()}, function (err, person) {
+//                                     let action = {};
+//                                     let ts = Date.now();
+//                                     if (err) {
+//                                         console.log("error lookinup person didn't find that person's email for invite req");
+//                                         callback("error on personlookup!");
+//                                     } else {
+//                                         if  (!person) {
+//                                             console.log("tryna creqate new persosa");
+//                                             let activities = [];
+//                                             let action1 = {};
+//                                             let action2 = {};
+//                                             action1.createNewPerson = ts;
+//                                             action2.requestedInvitation = ts + "_" + req.body.shortID + "_" + referrer;
+//                                             activities.push(action1);
+//                                             activities.push(action2); //bc they need to be separate array elements
                 
-                                            db_old.people.save( { "email": req.body.email.trim()}, { $set: {
-                                                lastUpdate : ts,
-                                                activities : activities,
-                                                accountStatus: 'Not Verified',
-                                                contactStatus: 'Not Indicated'
-                                            }}, 
-                                            function (err, saved) {
-                                                if ( err || !saved ) {
-                                                    console.log('person not saved..');
-                                                    callback (err);
-                                                } else {
-                                                    callback(null);
-                                                    thePerson = saved;
-                                                }
-                                            });
-                                        } else {
-                                            if (person.activities == undefined) {
-                                                person.activities = [];
-                                            }
-                                            action.requestedInvitation = ts + "_" + req.body.shortID + "_" + referrer;
-                                            person.activities.push(action);
-                                            if (person.accountStatus == undefined) {
-                                                person.accountStatus = "Not Verified";
-                                            }
-                                            if (person.contactStatus == undefined) {
-                                                person.contactStatus = "Not Indicated";
-                                            }
-                                            db_old.people.update( { "_id": person._id }, { $set: {
-                                                lastUpdate : ts,
-                                                activities : person.activities,
-                                                accountStatus: person.accountStatus,
-                                                contactStatus: person.contactStatus
-                                            }});
-                                            thePerson = person;
-                                            console.log("gotsa person" + person.activities.length + " "+ person.accountStatus);
-                                            if (person.accountStatus != undefined && (person.accountStatus.toString().toLowerCase().includes("blacklist") || person.accountStatus.toString().toLowerCase().includes ("banned"))) {
-                                                callback("nope  - that account is blocked");
-                                            } else if (person.accountStatus != undefined && (person.activities != undefined && person.activities.length > 3) && person.accountStatus.toString().toLowerCase().includes("not verified")) {
-                                                callback("nope  - that account is not verified");
-                                            } else if (person.contactStatus != undefined && (person.contactStatus.toString().toLowerCase().includes("global opt out"))) {
-                                                callback("nope  - user has opted out"); //pass along and bail later?
-                                            } else {
-                                                callback(null);
-                                            }
-                                        }
-                                    }
-                                });
-                            },
+//                                             db_old.people.save( { "email": req.body.email.trim()}, { $set: {
+//                                                 lastUpdate : ts,
+//                                                 activities : activities,
+//                                                 accountStatus: 'Not Verified',
+//                                                 contactStatus: 'Not Indicated'
+//                                             }}, 
+//                                             function (err, saved) {
+//                                                 if ( err || !saved ) {
+//                                                     console.log('person not saved..');
+//                                                     callback (err);
+//                                                 } else {
+//                                                     callback(null);
+//                                                     thePerson = saved;
+//                                                 }
+//                                             });
+//                                         } else {
+//                                             if (person.activities == undefined) {
+//                                                 person.activities = [];
+//                                             }
+//                                             action.requestedInvitation = ts + "_" + req.body.shortID + "_" + referrer;
+//                                             person.activities.push(action);
+//                                             if (person.accountStatus == undefined) {
+//                                                 person.accountStatus = "Not Verified";
+//                                             }
+//                                             if (person.contactStatus == undefined) {
+//                                                 person.contactStatus = "Not Indicated";
+//                                             }
+//                                             db_old.people.update( { "_id": person._id }, { $set: {
+//                                                 lastUpdate : ts,
+//                                                 activities : person.activities,
+//                                                 accountStatus: person.accountStatus,
+//                                                 contactStatus: person.contactStatus
+//                                             }});
+//                                             thePerson = person;
+//                                             console.log("gotsa person" + person.activities.length + " "+ person.accountStatus);
+//                                             if (person.accountStatus != undefined && (person.accountStatus.toString().toLowerCase().includes("blacklist") || person.accountStatus.toString().toLowerCase().includes ("banned"))) {
+//                                                 callback("nope  - that account is blocked");
+//                                             } else if (person.accountStatus != undefined && (person.activities != undefined && person.activities.length > 3) && person.accountStatus.toString().toLowerCase().includes("not verified")) {
+//                                                 callback("nope  - that account is not verified");
+//                                             } else if (person.contactStatus != undefined && (person.contactStatus.toString().toLowerCase().includes("global opt out"))) {
+//                                                 callback("nope  - user has opted out"); //pass along and bail later?
+//                                             } else {
+//                                                 callback(null);
+//                                             }
+//                                         }
+//                                     }
+//                                 });
+//                             },
                            
-                            // function(person, callback) { //send mail
-                            //     console.log("gotsa person " + JSON.stringify(person) );
-                            //     callback(null, person);
+//                             // function(person, callback) { //send mail
+//                             //     console.log("gotsa person " + JSON.stringify(person) );
+//                             //     callback(null, person);
                                 
-                            // },
-                            function (callback) {
-                                // if (person.length > 0) {
-                                // let emailArray = eData;
-                                db_old.scenes.findOne({short_id: req.body.shortID}, function (err, scene) {
-                                    if (err || !scene) {
-                                        console.log("error getting scene for sharing: " + err);
-                                        callback(err);
-                                    } else {
-                                        theScene = scene;
-                                        let urlHalf = "";
-                                        if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-                                            var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
-                                            db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-                                                if (err || !picture_item || picture_item.length == 0) {
-                                                    console.log("error getting postcard for availablescenes: 2" + err);
-                                                    callback(null, '', eData)
-                                                } else {
-                                                    var item_string_filename = JSON.stringify(picture_item.filename);
-                                                    item_string_filename = item_string_filename.replace(/\"/g, "");
-                                                    var item_string_filename_ext = getExtension(item_string_filename);
-                                                    var expiration = new Date();
-                                                    expiration.setMinutes(expiration.getMinutes() + 30);
-                                                    var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                                    var halfName = 'half.' + baseName + item_string_filename_ext;
-                                                    // var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-                                                    // var standardName = 'standard.' + baseName + item_string_filename_ext;
-                                                    (async () => {
-                                                        try {
-                                                            // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
-                                                            // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
-                                                            urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
-                                                            callback(null, urlHalf, scene);
-                                                        } catch (e) {
-                                                            callback(e);
-                                                        }
-                                                    })();
+//                             // },
+//                             function (callback) {
+//                                 // if (person.length > 0) {
+//                                 // let emailArray = eData;
+//                                 db_old.scenes.findOne({short_id: req.body.shortID}, function (err, scene) {
+//                                     if (err || !scene) {
+//                                         console.log("error getting scene for sharing: " + err);
+//                                         callback(err);
+//                                     } else {
+//                                         theScene = scene;
+//                                         let urlHalf = "";
+//                                         if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
+//                                             var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
+//                                             db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+//                                                 if (err || !picture_item || picture_item.length == 0) {
+//                                                     console.log("error getting postcard for availablescenes: 2" + err);
+//                                                     callback(null, '', eData)
+//                                                 } else {
+//                                                     var item_string_filename = JSON.stringify(picture_item.filename);
+//                                                     item_string_filename = item_string_filename.replace(/\"/g, "");
+//                                                     var item_string_filename_ext = getExtension(item_string_filename);
+//                                                     var expiration = new Date();
+//                                                     expiration.setMinutes(expiration.getMinutes() + 30);
+//                                                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                                                     var halfName = 'half.' + baseName + item_string_filename_ext;
+//                                                     // var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+//                                                     // var standardName = 'standard.' + baseName + item_string_filename_ext;
+//                                                     (async () => {
+//                                                         try {
+//                                                             // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
+//                                                             // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
+//                                                             urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+//                                                             callback(null, urlHalf, scene);
+//                                                         } catch (e) {
+//                                                             callback(e);
+//                                                         }
+//                                                     })();
 
-                                                }
-                                            });
-                                        } else {
-                                            callback(null, '', scene);
-                                        }
-                                    }
-                                });
-                            },
-                            function(urlHalf, sceneData, callback) {
-                                console.log("scene locations " +JSON.stringify(sceneData.sceneLocations));
-                                let geoLinks = "";
-                                let eventData = {};
-                                for (let i = 0; i < sceneData.sceneLocations.length; i++) {
-                                    if (sceneData.sceneLocations[i].type.toLowerCase() == "geographic") { //TODO what if multiple?  this will get last one in array, maybe?
-                                        geoLinks += "<strong><a href='http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "'>Map to location: "+sceneData.sceneLocations[i].name+"</a></strong><br><br>"+
-                                        "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" +
-                                            "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + sceneData.sceneLocations[i].latitude +
-                                            "," + sceneData.sceneLocations[i].longitude + "&zoom=15&size=600x400&maptype=roadmap&key="+process.env.GOOGLEMAPS_KEY+"&markers=color:blue%7Clabel:%7C" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" + 
-                                            "</a>";
-                                        if (sceneData.sceneLocations[i].eventData != undefined && sceneData.sceneLocations[i].eventData.toLowerCase().includes('restrict')) {
-                                            eventData.restrictToLocation = true;
-                                        }
-                                    }
-                                }
-                                callback(null, urlHalf, sceneData, geoLinks, eventData);
-                            },
+//                                                 }
+//                                             });
+//                                         } else {
+//                                             callback(null, '', scene);
+//                                         }
+//                                     }
+//                                 });
+//                             },
+//                             function(urlHalf, sceneData, callback) {
+//                                 console.log("scene locations " +JSON.stringify(sceneData.sceneLocations));
+//                                 let geoLinks = "";
+//                                 let eventData = {};
+//                                 for (let i = 0; i < sceneData.sceneLocations.length; i++) {
+//                                     if (sceneData.sceneLocations[i].type.toLowerCase() == "geographic") { //TODO what if multiple?  this will get last one in array, maybe?
+//                                         geoLinks += "<strong><a href='http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "'>Map to location: "+sceneData.sceneLocations[i].name+"</a></strong><br><br>"+
+//                                         "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" +
+//                                             "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + sceneData.sceneLocations[i].latitude +
+//                                             "," + sceneData.sceneLocations[i].longitude + "&zoom=15&size=600x400&maptype=roadmap&key="+process.env.GOOGLEMAPS_KEY+"&markers=color:blue%7Clabel:%7C" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" + 
+//                                             "</a>";
+//                                         if (sceneData.sceneLocations[i].eventData != undefined && sceneData.sceneLocations[i].eventData.toLowerCase().includes('restrict')) {
+//                                             eventData.restrictToLocation = true;
+//                                         }
+//                                     }
+//                                 }
+//                                 callback(null, urlHalf, sceneData, geoLinks, eventData);
+//                             },
                     
-                            function(urlHalf, sceneData, geoLinks, eventData, callback) { //pull out  event data
-                                console.log("scene locations " +JSON.stringify(sceneData.sceneTags));
+//                             function(urlHalf, sceneData, geoLinks, eventData, callback) { //pull out  event data
+//                                 console.log("scene locations " +JSON.stringify(sceneData.sceneTags));
                     
-                                if ((sceneData.sceneEventStart != undefined && sceneData.sceneEventStart != null) || (sceneData.sceneEventEnd != undefined && sceneEventEnd != null)) {
-                                        eventData.eventStart = sceneData.sceneEventStart;
-                                        eventData.eventEnd = sceneData.sceneEventEnd;
+//                                 if ((sceneData.sceneEventStart != undefined && sceneData.sceneEventStart != null) || (sceneData.sceneEventEnd != undefined && sceneEventEnd != null)) {
+//                                         eventData.eventStart = sceneData.sceneEventStart;
+//                                         eventData.eventEnd = sceneData.sceneEventEnd;
                                 
-                                        if (sceneData.sceneTags != undefined && sceneData.sceneTags != null && sceneData.sceneTags.length > 0 && sceneData.sceneTags.toString().toLowerCase().includes("restrict to event")) {
-                                            eventData.restrictToEvent = true;
-                                        } else {
-                                            eventData.restrictToEvent = false;
-                                        }
-                                    }
-                                callback(null, urlHalf, geoLinks, eventData);
-                            },
+//                                         if (sceneData.sceneTags != undefined && sceneData.sceneTags != null && sceneData.sceneTags.length > 0 && sceneData.sceneTags.toString().toLowerCase().includes("restrict to event")) {
+//                                             eventData.restrictToEvent = true;
+//                                         } else {
+//                                             eventData.restrictToEvent = false;
+//                                         }
+//                                     }
+//                                 callback(null, urlHalf, geoLinks, eventData);
+//                             },
                     
-                            function(urlHalf, geoLinks, eventData, callback) { //spin through validated data, send appropriate mail
-                                // console.log("eDatahs : " +JSON.stringify(eData));
-                                // let trimmedMails = [" a ", "b", " c", "d "].map(function(e){return e.trim();}); erp
-                                // async.each (eData, function (data, callbackzz) {
-                                    // console.log("email data is " + data);
-                                    let requestProtocol = 'https';
-                                    if (req.headers.host.includes("localhost")) {
-                                        requestProtocol = 'http';
-                                    }
-                                    var subject = "Invitation : " + theScene.sceneTitle;
-                                    var from = adminEmail;
+//                             function(urlHalf, geoLinks, eventData, callback) { //spin through validated data, send appropriate mail
+//                                 // console.log("eDatahs : " +JSON.stringify(eData));
+//                                 // let trimmedMails = [" a ", "b", " c", "d "].map(function(e){return e.trim();}); erp
+//                                 // async.each (eData, function (data, callbackzz) {
+//                                     // console.log("email data is " + data);
+//                                     let requestProtocol = 'https';
+//                                     if (req.headers.host.includes("localhost")) {
+//                                         requestProtocol = 'http';
+//                                     }
+//                                     var subject = "Invitation : " + theScene.sceneTitle;
+//                                     var from = adminEmail;
                                    
-                                    var to = [thePerson.email];
+//                                     var to = [thePerson.email];
                                    
-                                    var bcc = [];
+//                                     var bcc = [];
                                     
-                                    var timestamp = Math.round(Date.now() / 1000);
-                                    var message = "";
-                                    var restrictToEventMessage = eventData.restrictToEvent ? "<br>Access is restricted to the event time" : "";
-                                    var restrictToLocationMessage = eventData.restrictToLocation ? "<br>Access is restricted to the event location<br>" : "";
+//                                     var timestamp = Math.round(Date.now() / 1000);
+//                                     var message = "";
+//                                     var restrictToEventMessage = eventData.restrictToEvent ? "<br>Access is restricted to the event time" : "";
+//                                     var restrictToLocationMessage = eventData.restrictToLocation ? "<br>Access is restricted to the event location<br>" : "";
                                    
-                                    var app_link = "servicemedia://scene?" + req.body.short_id;
+//                                     var app_link = "servicemedia://scene?" + req.body.short_id;
                                    
-                                    if (req.body.sceneShareWithMessage === "" || req.body.sceneShareWithMessage == null) {
-                                        message = "Here's your immersive scene invitation - follow the link below to gain access!";
-                                    } 
-                                    // else {
-                                    //     message = " has shared an Immersive Scene with this message: " +
-                                    //         "<hr><br><strong> " + req.body.sceneShareWithMessage +  "</strong><br>";
-                                    // }
-                                    message += restrictToEventMessage + restrictToLocationMessage;
-                                    if (req.body.sceneEventStart != undefined && req.body.sceneEventStart != null && req.body.sceneEventStart != "" ) {
-                                        let datetimeString = new Date(req.body.sceneEventStart);
-                                        message += "<br><strong>Event start: " + datetimeString.toLocaleString([], { hour12: true}) + "</strong><br>";
-                                        // message += "<br><strong>Event start: " + datetimeString.toString() + "</strong><br>";
-                                        console.log(message);
-                                    }
-                                    if (req.body.sceneEventEnd != undefined && req.body.sceneEventEnd != null && req.body.sceneEventEnd != "") {
-                                        let datetimeString = new Date(req.body.sceneEventEnd);
-                                        message += "<strong>Event end: " + datetimeString.toLocaleString([], { hour12: true})  + "</strong><br>";
-                                    }
-                                    message += geoLinks;
-                                    if (theScene.sceneShareWithPublic) {
-                                        var htmlbody = message + "</h3><hr>" +
-                                            "<a href='"+ requestProtocol + "://" + req.headers.host + "/webxr/" + req.body.short_id+"' target='_blank'>" +
-                                            "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>"+
-                                            "Click here to access this scene!</a></button><br>" +
-                                            "<br> <a href='"+ requestProtocol + "://" + req.headers.host + "/webxr/" + req.body.short_id+"' target='_blank'><img src=" + urlHalf + "></a> " +
-                                            "<br> Scene Title: " + theScene.sceneTitle +
-                                            "<br> Scene Short ID: " + theScene.short_id +
-                                            "<br> Scene Keynote: " + theScene.sceneKeynote +
-                                            "<br> Scene Description: " + theScene.sceneDescription +
-                                            "<br> Owner: " + theScene.userName +
-                                            "<br><br><strong><a href='"+ requestProtocol + "://" + req.headers.host + "/qrcode/" + req.body.short_id + "'>Click here to scan QR Code for this scene</a></strong>" +
-                                            "<br> For more scenes like this, or to get the latest app, visit <a href='https://servicemedia.net'>ServiceMedia.net!</a> ";
-                                            (async () => {
+//                                     if (req.body.sceneShareWithMessage === "" || req.body.sceneShareWithMessage == null) {
+//                                         message = "Here's your immersive scene invitation - follow the link below to gain access!";
+//                                     } 
+//                                     // else {
+//                                     //     message = " has shared an Immersive Scene with this message: " +
+//                                     //         "<hr><br><strong> " + req.body.sceneShareWithMessage +  "</strong><br>";
+//                                     // }
+//                                     message += restrictToEventMessage + restrictToLocationMessage;
+//                                     if (req.body.sceneEventStart != undefined && req.body.sceneEventStart != null && req.body.sceneEventStart != "" ) {
+//                                         let datetimeString = new Date(req.body.sceneEventStart);
+//                                         message += "<br><strong>Event start: " + datetimeString.toLocaleString([], { hour12: true}) + "</strong><br>";
+//                                         // message += "<br><strong>Event start: " + datetimeString.toString() + "</strong><br>";
+//                                         console.log(message);
+//                                     }
+//                                     if (req.body.sceneEventEnd != undefined && req.body.sceneEventEnd != null && req.body.sceneEventEnd != "") {
+//                                         let datetimeString = new Date(req.body.sceneEventEnd);
+//                                         message += "<strong>Event end: " + datetimeString.toLocaleString([], { hour12: true})  + "</strong><br>";
+//                                     }
+//                                     message += geoLinks;
+//                                     if (theScene.sceneShareWithPublic) {
+//                                         var htmlbody = message + "</h3><hr>" +
+//                                             "<a href='"+ requestProtocol + "://" + req.headers.host + "/webxr/" + req.body.short_id+"' target='_blank'>" +
+//                                             "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>"+
+//                                             "Click here to access this scene!</a></button><br>" +
+//                                             "<br> <a href='"+ requestProtocol + "://" + req.headers.host + "/webxr/" + req.body.short_id+"' target='_blank'><img src=" + urlHalf + "></a> " +
+//                                             "<br> Scene Title: " + theScene.sceneTitle +
+//                                             "<br> Scene Short ID: " + theScene.short_id +
+//                                             "<br> Scene Keynote: " + theScene.sceneKeynote +
+//                                             "<br> Scene Description: " + theScene.sceneDescription +
+//                                             "<br> Owner: " + theScene.userName +
+//                                             "<br><br><strong><a href='"+ requestProtocol + "://" + req.headers.host + "/qrcode/" + req.body.short_id + "'>Click here to scan QR Code for this scene</a></strong>" +
+//                                             "<br> For more scenes like this, or to get the latest app, visit <a href='https://servicemedia.net'>ServiceMedia.net!</a> ";
+//                                             (async () => {
 
-                                                try {
-                                                    const status1 = await SendEmail(to, from, htmlbody, subject);
-                                                    const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, subject);
-                                                    console.log("invite_req mails " + status1 + " " + status2);
-                                                    // res.redirect("/#/");
-                                                    callback(null);
-                                                } catch (e) {
-                                                    console.log("invite_req mail errlr " + e);
-                                                    callback(e);
-                                                    // res.send(e);
-                                                }
+//                                                 try {
+//                                                     const status1 = await SendEmail(to, from, htmlbody, subject);
+//                                                     const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, subject);
+//                                                     console.log("invite_req mails " + status1 + " " + status2);
+//                                                     // res.redirect("/#/");
+//                                                     callback(null);
+//                                                 } catch (e) {
+//                                                     console.log("invite_req mail errlr " + e);
+//                                                     callback(e);
+//                                                     // res.send(e);
+//                                                 }
                                                
-                                            })();
-                                        // ses.sendEmail( {
-                                        //         Source: from,
-                                        //         Destination: { ToAddresses: to, BccAddresses: bcc},
-                                        //         Message: {
-                                        //             Subject: {
-                                        //                 Data: subject
-                                        //             },
-                                        //             Body: {
-                                        //                 Html: {
-                                        //                     Data: htmlbody
-                                        //                 }
-                                        //             }
-                                        //         }
-                                        //     }
-                                        //     , function(err, data) {
-                                        //         if(err)  callback(err);
-                                        //         console.log('Email sent:');
-                                        //         console.log(data);
-                                        //     });
-                                        // // callbackzz();
-                                        // callback(null);
-                                    } else {
-                                        //TODO check user's auth?
-                                        // if (timestamp < user.resetTimestamp + 3600) { //expires in 1 hour!
-                                        bcrypt.genSalt(3, function(err, salt) { //level3 easy, not a password itself
-                                            bcrypt.hash(timestamp.toString(), salt, null, function(err, hash) {
-                                                // reset = hash;
-                                                var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-                                                var invitation = {
-                                                    validated: false,
-                                                    // invitedToSceneShareWithPublic:
-                                                    invitedToSceneTitle: theScene.sceneTitle,
-                                                    invitedToSceneID: theScene._id,
-                                                    invitedToSceneShortID: theScene.short_id,
-                                                    accessTimeWindow: timestamp + 86400, //one day //will deprecate...
-                                                    sceneEventStart : req.body.sceneEventStart,
-                                                    sceneEventEnd: req.body.sceneEventEnd,
-                                                    sceneAccessLinkExpire: req.body.sceneAccessLinkExpire,
-                                                    sceneRestrictToEvent: eventData.restrictToEvent,
-                                                    sceneRestrictToLocation: eventData.restrictToLocation,
-                                                    sentByUserName: thePerson.email,
-                                                    sentByUserID: "00000000000000000",
-                                                    sentToEmail: to,
-                                                    sentToPersonID: thePerson._id,
-                                                    invitationHash: cleanhash,
-                                                    invitationTimestamp: timestamp,
-                                                }
-                                                db_old.invitations.save(invitation, function (err, saved) {
-                                                    if ( err || !saved ) {
-                                                        console.log('problem saving invitaiton');
-                                                    } else {
-                                                        // var item_id = saved._id.toString();
-                                                        console.log('new invitiation id: ' + saved._id.toString());
-                                                    }
-                                                });
-                                                if (req.body.sceneShareWithMessage === "" || req.body.sceneShareWithMessage == null) {
-                                                    message = "Here's your immersive scene invitation - follow the link below to gain access!";
-                                                    // "<h3>Scene Invitation from " + from + "</h3><hr><br>"
-                                                }
-                                                //  else {
-                                                //     message = req.session.user.userName + " has shared an Immersive Scene with this message: "+
-                                                //         "<hr><strong>" + req.body.sceneShareWithMessage +  "</strong><br><hr>";
-                                                // }
-                                                message += restrictToEventMessage + restrictToLocationMessage;
-                                                if (req.body.sceneEventStart != undefined && req.body.sceneEventStart != null && req.body.sceneEventStart != "") {
-                                                    let datetimeString = new Date(req.body.sceneEventStart);
-                                                    message += "<br><strong>Event start: " + datetimeString.toLocaleString([], { hour12: true}) + "</strong><br>";
-                                                    // message += "<br><strong>Event start: " + datetimeString.toString() + "</strong><br>";
-                                                    console.log(message);
-                                                }
-                                                if (req.body.sceneEventEnd != undefined && req.body.sceneEventEnd != null && req.body.sceneEventEnd != "") {
-                                                    let datetimeString = new Date(req.body.sceneEventEnd);
-                                                    message += "<strong>Event end: " + datetimeString.toLocaleString([], { hour12: true})  + "</strong><br>";
-                                                }
-                                                message += geoLinks;
-                                                var htmlbody = message +
-                                                    "<br> Scene Title: " + theScene.sceneTitle +
-                                                    "<br> Short ID: " + theScene.short_id +
-                                                    "<br> Keynote: " + theScene.sceneKeynote +
-                                                    "<br> Description: " + theScene.sceneDescription +
-                                                    "<br> Owner: " + theScene.userName +
-                                                    "<br><strong>This is a private scene, intended only for subscribers or invited guests.</strong><br>" +
-                                                    "<a href='"+ requestProtocol + "://" + req.headers.host + "/landing/invite.html?iv=" + cleanhash + "' target='_blank'>" +
-                                                    "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
-                                                    "Click here to authenticate your access!</a></button><br>" +
-                                                    "<br> <img src=" + urlHalf + "> " +
-                                                    "<br> For more info, or to become a subscriber, visit <a href='https://servicemedia.net'>ServiceMedia.net!</a> ";
+//                                             })();
+//                                         // ses.sendEmail( {
+//                                         //         Source: from,
+//                                         //         Destination: { ToAddresses: to, BccAddresses: bcc},
+//                                         //         Message: {
+//                                         //             Subject: {
+//                                         //                 Data: subject
+//                                         //             },
+//                                         //             Body: {
+//                                         //                 Html: {
+//                                         //                     Data: htmlbody
+//                                         //                 }
+//                                         //             }
+//                                         //         }
+//                                         //     }
+//                                         //     , function(err, data) {
+//                                         //         if(err)  callback(err);
+//                                         //         console.log('Email sent:');
+//                                         //         console.log(data);
+//                                         //     });
+//                                         // // callbackzz();
+//                                         // callback(null);
+//                                     } else {
+//                                         //TODO check user's auth?
+//                                         // if (timestamp < user.resetTimestamp + 3600) { //expires in 1 hour!
+//                                         bcrypt.genSalt(3, function(err, salt) { //level3 easy, not a password itself
+//                                             bcrypt.hash(timestamp.toString(), salt, null, function(err, hash) {
+//                                                 // reset = hash;
+//                                                 var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
+//                                                 var invitation = {
+//                                                     validated: false,
+//                                                     // invitedToSceneShareWithPublic:
+//                                                     invitedToSceneTitle: theScene.sceneTitle,
+//                                                     invitedToSceneID: theScene._id,
+//                                                     invitedToSceneShortID: theScene.short_id,
+//                                                     accessTimeWindow: timestamp + 86400, //one day //will deprecate...
+//                                                     sceneEventStart : req.body.sceneEventStart,
+//                                                     sceneEventEnd: req.body.sceneEventEnd,
+//                                                     sceneAccessLinkExpire: req.body.sceneAccessLinkExpire,
+//                                                     sceneRestrictToEvent: eventData.restrictToEvent,
+//                                                     sceneRestrictToLocation: eventData.restrictToLocation,
+//                                                     sentByUserName: thePerson.email,
+//                                                     sentByUserID: "00000000000000000",
+//                                                     sentToEmail: to,
+//                                                     sentToPersonID: thePerson._id,
+//                                                     invitationHash: cleanhash,
+//                                                     invitationTimestamp: timestamp,
+//                                                 }
+//                                                 db_old.invitations.save(invitation, function (err, saved) {
+//                                                     if ( err || !saved ) {
+//                                                         console.log('problem saving invitaiton');
+//                                                     } else {
+//                                                         // var item_id = saved._id.toString();
+//                                                         console.log('new invitiation id: ' + saved._id.toString());
+//                                                     }
+//                                                 });
+//                                                 if (req.body.sceneShareWithMessage === "" || req.body.sceneShareWithMessage == null) {
+//                                                     message = "Here's your immersive scene invitation - follow the link below to gain access!";
+//                                                     // "<h3>Scene Invitation from " + from + "</h3><hr><br>"
+//                                                 }
+//                                                 //  else {
+//                                                 //     message = req.session.user.userName + " has shared an Immersive Scene with this message: "+
+//                                                 //         "<hr><strong>" + req.body.sceneShareWithMessage +  "</strong><br><hr>";
+//                                                 // }
+//                                                 message += restrictToEventMessage + restrictToLocationMessage;
+//                                                 if (req.body.sceneEventStart != undefined && req.body.sceneEventStart != null && req.body.sceneEventStart != "") {
+//                                                     let datetimeString = new Date(req.body.sceneEventStart);
+//                                                     message += "<br><strong>Event start: " + datetimeString.toLocaleString([], { hour12: true}) + "</strong><br>";
+//                                                     // message += "<br><strong>Event start: " + datetimeString.toString() + "</strong><br>";
+//                                                     console.log(message);
+//                                                 }
+//                                                 if (req.body.sceneEventEnd != undefined && req.body.sceneEventEnd != null && req.body.sceneEventEnd != "") {
+//                                                     let datetimeString = new Date(req.body.sceneEventEnd);
+//                                                     message += "<strong>Event end: " + datetimeString.toLocaleString([], { hour12: true})  + "</strong><br>";
+//                                                 }
+//                                                 message += geoLinks;
+//                                                 var htmlbody = message +
+//                                                     "<br> Scene Title: " + theScene.sceneTitle +
+//                                                     "<br> Short ID: " + theScene.short_id +
+//                                                     "<br> Keynote: " + theScene.sceneKeynote +
+//                                                     "<br> Description: " + theScene.sceneDescription +
+//                                                     "<br> Owner: " + theScene.userName +
+//                                                     "<br><strong>This is a private scene, intended only for subscribers or invited guests.</strong><br>" +
+//                                                     "<a href='"+ requestProtocol + "://" + req.headers.host + "/landing/invite.html?iv=" + cleanhash + "' target='_blank'>" +
+//                                                     "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
+//                                                     "Click here to authenticate your access!</a></button><br>" +
+//                                                     "<br> <img src=" + urlHalf + "> " +
+//                                                     "<br> For more info, or to become a subscriber, visit <a href='https://servicemedia.net'>ServiceMedia.net!</a> ";
 
-                                                    (async () => {
+//                                                     (async () => {
 
-                                                        try {
-                                                            const status1 = await SendEmail(to, from, htmlbody, subject);
-                                                            const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, subject);
-                                                            console.log("invite_req mails " + status1 + " " + status2);
-                                                            // res.redirect("/#/");
-                                                            callback(null);
-                                                        } catch (e) {
-                                                            console.log("infivite req mail errlr " + e);
-                                                            callback(e);
-                                                            // res.send(e);
-                                                        }
+//                                                         try {
+//                                                             const status1 = await SendEmail(to, from, htmlbody, subject);
+//                                                             const status2 = await SendEmail(process.env.ADMIN_EMAIL, process.env.ADMIN_EMAIL, htmlbody, subject);
+//                                                             console.log("invite_req mails " + status1 + " " + status2);
+//                                                             // res.redirect("/#/");
+//                                                             callback(null);
+//                                                         } catch (e) {
+//                                                             console.log("infivite req mail errlr " + e);
+//                                                             callback(e);
+//                                                             // res.send(e);
+//                                                         }
                                                        
-                                                    })();
+//                                                     })();
 
-                                            //     ses.sendEmail( {
-                                            //         Source: from,
-                                            //         Destination: { ToAddresses: to, BccAddresses: bcc },
-                                            //         Message: {
-                                            //             Subject: {
-                                            //                 Data: subject
-                                            //             },
-                                            //             Body: {
-                                            //                 Html: {
-                                            //                     Data: htmlbody
-                                            //                 }
-                                            //             }
-                                            //         }
-                                            //     }
-                                            //     , function(err, data) {
-                                            //         if(err) callback(err);
-                                            //         console.log('Email sent:');
-                                            //         console.log(data);
+//                                             //     ses.sendEmail( {
+//                                             //         Source: from,
+//                                             //         Destination: { ToAddresses: to, BccAddresses: bcc },
+//                                             //         Message: {
+//                                             //             Subject: {
+//                                             //                 Data: subject
+//                                             //             },
+//                                             //             Body: {
+//                                             //                 Html: {
+//                                             //                     Data: htmlbody
+//                                             //                 }
+//                                             //             }
+//                                             //         }
+//                                             //     }
+//                                             //     , function(err, data) {
+//                                             //         if(err) callback(err);
+//                                             //         console.log('Email sent:');
+//                                             //         console.log(data);
                                                     
-                                            //     });
-                                            });
-                                        });
-                                    }                                
-                                }
-                        ],
-                        function (err, result) { // #last function, close async
-                            if (err) {
-                                console.log("error with invitereq " + err);
-                                res.send(err);
-                            } else {
-                                console.log("invitation_req done: " + JSON.stringify(result));
-                                res.send("invitation sent");
-                            }
-                            }
-                        );
+//                                             //     });
+//                                             });
+//                                         });
+//                                     }                                
+//                                 }
+//                         ],
+//                         function (err, result) { // #last function, close async
+//                             if (err) {
+//                                 console.log("error with invitereq " + err);
+//                                 res.send(err);
+//                             } else {
+//                                 console.log("invitation_req done: " + JSON.stringify(result));
+//                                 res.send("invitation sent");
+//                             }
+//                             }
+//                         );
                         
-                    }
-                }
-            }
-        })
-    } else {
-        res.send("nope");
-    }
-});
+//                     }
+//                 }
+//             }
+//         })
+//     } else {
+//         res.send("nope");
+//     }
+// });
 
-app.post ('/get_invitations', checkAppID, requiredAuthentication, function (req,res) {// sigh, need to encrypt this...//called from nowhere?
-    const timestamp = Math.round(Date.now() / 1000);
-    console.log("tryna get_invitations: " + JSON.stringify(req.body) + " at timestamp " + timestamp);
-    // var emailString = req.body.email;
-    let query = null;
-    if (req.body.email != null) {
-        query = {$and: [{sentToEmail : req.body.email}, {validated : true}, {accessTimeWindow: {$gt : timestamp}}]};
-    }
-    if (req.body.pin != null) {
-        query = {$and: [{pin : req.body.pin}, {validated : true}, {accessTimeWindow: {$gt : timestamp}}]};
-    }
+// app.post ('/get_invitations', checkAppID, requiredAuthentication, function (req,res) {// sigh, need to encrypt this...//called from nowhere?
+//     const timestamp = Math.round(Date.now() / 1000);
+//     console.log("tryna get_invitations: " + JSON.stringify(req.body) + " at timestamp " + timestamp);
+//     // var emailString = req.body.email;
+//     let query = null;
+//     if (req.body.email != null) {
+//         query = {$and: [{sentToEmail : req.body.email}, {validated : true}, {accessTimeWindow: {$gt : timestamp}}]};
+//     }
+//     if (req.body.pin != null) {
+//         query = {$and: [{pin : req.body.pin}, {validated : true}, {accessTimeWindow: {$gt : timestamp}}]};
+//     }
 
-    console.log("tryna get_invitations: " + JSON.stringify(req.body) + " at timestamp " + timestamp + " with query " + query);
+//     console.log("tryna get_invitations: " + JSON.stringify(req.body) + " at timestamp " + timestamp + " with query " + query);
 
-    if (query != null) {
-        (async () => {
-            try {
-                const invitations = await RunDataQuery("invitations", "find", query);
-                let invitationsData = {};
-                invitationsData.invitations = invitations;
-                res.json(invitationsData);
-            } catch (e) {
-                console.log("errror getting invitations " + e);
-                res.send("errror getting invitations " + e);
-            }
+//     if (query != null) {
+//         (async () => {
+//             try {
+//                 const invitations = await RunDataQuery("invitations", "find", query);
+//                 let invitationsData = {};
+//                 invitationsData.invitations = invitations;
+//                 res.json(invitationsData);
+//             } catch (e) {
+//                 console.log("errror getting invitations " + e);
+//                 res.send("errror getting invitations " + e);
+//             }
             
-        })();
-        // db_old.invitations.find (query, function (err, invitations) {
-        //     // db.invitations.find ({$and: [{sentToEmail : req.body.email}, {validated : true} ]}, function (err, invitations) {
-        //     if (err || !invitations) {
-        //         console.log("error getting invitations: " + err);
-        //     } else {
-        //         //TODO - Pass along a postcard for each invitation..., needs an async
-        //         var invitationsData = {};
-        //         invitationsData.invitations = invitations;
-        //         res.json(invitationsData);
-        //     }
-        // });
-    } else {
-        res.end("null query");
-    }
-});
+//         })();
+//         // db_old.invitations.find (query, function (err, invitations) {
+//         //     // db.invitations.find ({$and: [{sentToEmail : req.body.email}, {validated : true} ]}, function (err, invitations) {
+//         //     if (err || !invitations) {
+//         //         console.log("error getting invitations: " + err);
+//         //     } else {
+//         //         //TODO - Pass along a postcard for each invitation..., needs an async
+//         //         var invitationsData = {};
+//         //         invitationsData.invitations = invitations;
+//         //         res.json(invitationsData);
+//         //     }
+//         // });
+//     } else {
+//         res.end("null query");
+//     }
+// });
 
 app.post('/savepw', function (req, res){ //saved changed password after reset link clicked
 
@@ -4267,7 +4269,394 @@ app.post('/resetpw', function (req, res) { //send an email with reset link
 //     });
 // });
 
+
 app.post('/share_scene/', function (req, res) { //yep! //make it public?
+
+    //temp container for objex with peopleID + email
+    console.log("tryna share scnee with prootocl " + req.protocol);
+    let requestProtocol = 'https';
+    if (req.headers.host.includes("localhost")) {
+        requestProtocol = 'http';
+    }
+    let sceneData = {};
+    let ts = Date.now();
+    var emailsFinal = [];
+    var emailSplit = [];
+    var emailsNotSent = [];
+    let thePerson = {};
+    let emailActionID = "";
+    var ip = req.headers['x-forwarded-for'] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    req.connection.socket.remoteAddress;
+
+    (async () => {
+        try {
+            const mailactionquery = {"actionType": "Send Email"};
+            const emailAction = await RunDataQuery("actions", "findOne", mailactionquery);
+            let emailActionID = emailAction._id;
+            if (!emailActionID) { //create the email action if it doesn't exist.. hrm
+                const newactionupdoc = {"actionType": "Send Email", "actionName": "Send Email"};
+                const newaction = await RunDataQuery("actions", "insertOne", newactionupdoc);
+                emailActionID = newaction.insertedId;
+            }
+            var emails = req.body.sceneShareWithPeople != undefined ? req.body.sceneShareWithPeople : req.body.email; //the latter if it's from the public invitation form
+            console.log("sharing emails : " + emails);
+            if (emails.includes(",")) {
+                emailSplit = emails.split(",");
+            } else {
+                emailSplit.push(emails); //if there's only one
+            }
+            for (var m = 0; m < emailSplit.length; m++) {
+                let mMail = emailSplit[m].toString();
+                console.log("maybeMail: " + mMail);
+                mMail = mMail.trim();
+                if (validator.isEmail(mMail) == false){
+                    console.log(mMail + " is a bad email!");
+                    
+                    // res.end("an email address was invalid!");
+                    // break;
+                    // callback(true); //err = true means bail if any bad emails!
+                    // return;
+                } else {
+                    console.log(mMail + " is a good email!");
+                }
+            }
+            var emailSplit2 = emailSplit.filter(val => {
+                return validator.isEmail;
+            });
+            console.log("emailSplit is " + JSON.stringify(emailSplit2));
+
+            // var uid = ip;
+            // if (req.session.user != undefined) {
+            const uid = ObjectId.createFromHexString(req.session.user._id.toString());
+            // }
+            console.log("tryna mail to " +uid);
+            for (const email in emailSplit2) {
+               const personquery = {email: email.toString().trim()};
+               const person = await RunDataQuery("people", "findOne", personquery);
+                if (!person) {
+                    let newperson = {};
+                    if (req.session.user) {
+                        newperson.userID = req.session.user._id.toString();
+                    }
+                    newperson.dateCreated = ts;
+                    newperson.email = email.toString().trim();
+                    let action = {};
+                    action.wasSentEmail = ts + "_" + uid + "_" + req.body.short_id;
+                    
+                    newperson.accountStatus = 'Not Verified';
+                    newperson.contactStatus = 'Not Indicated';
+                    console.log("fixing to save new person " + JSON.stringify(newperson));   
+                    const savedPerson = await RunDataQuery("people", "insertOne", newperson);
+                    var person_id = savedPerson.insertedId.toString();
+                    var pursoner = {};
+                    console.log('new person created, id: ' + person_id);
+                    pursoner.personID = person_id;
+                    pursoner.email = email.toString().trim();
+                    emailsFinal.push(pursoner);
+                    const uquery = { "_id": uid };
+                    const updoc = { $addToSet: {"people" : person_id}};
+                    const updated = await RunDataQuery("users", "updateOne", uquery, updoc);
+                    console.log("new person created for " + email + " " + updated);
+                    // db_old.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person_id}});
+                } else {
+                    if (person.activities == undefined) {
+                        person.activities = [];
+                    }
+                    let action = {};
+                    if (person.accountStatus != undefined && (person.accountStatus.toString().toLowerCase().includes("blacklist") || 
+                        person.accountStatus.toString().toLowerCase().includes ("banned"))) {
+                        console.log("opt out global for " + email);
+                        action.actionID = emailActionID;
+                        action.actionName = "Not Sent - Blacklist"
+                        action.actionType = "Send Email"
+                        action.actionResult = "Not Sent - Blacklist";
+                        action.timestamp = ts;
+                        action.userID = uid
+                    
+                        action.targetPersonID = person._id;
+                        action.emailAddressTo = person.email;
+                        action.fromScene = req.body.short_id;
+                        action.data = req.body.sceneShareWithMessage;
+                        
+                        db_old.activities.insertOne(action);
+                        const activity = await RunDataQuery("activities", "insertOne", action);
+                        console.log("person on blacklist! " + JSON.stringify(activity));
+                        emailsNotSent.push(person.email);
+                        
+                    } else if (person.accountStatus != undefined && (person.activities != undefined && person.activities.length > 3) && 
+                                person.accountStatus.toString().toLowerCase().includes("not verified")) {
+                       
+                        action.actionID = emailActionID;
+                        action.actionName = "Not Sent - Not Verified"
+                        action.actionType = "Send Email"
+                        action.actionResult = "Not Sent - Not Verified";
+                        action.timestamp = ts;
+                        action.userID = uid
+                    
+                        action.targetID = person._id;
+                        action.emailAddressTo = person.email;
+                        action.fromScene = req.body.short_id;
+                        action.data = req.body.sceneShareWithMessage;
+                        
+                        const activity = await RunDataQuery("activities", "insertOne", action);
+                        console.log("person on not valiodated! " + JSON.stringify(activity));
+                        emailsNotSent.push(person.email);
+                        
+                    } else if (person.contactStatus != undefined && 
+                                person.contactStatus.toString().toLowerCase().includes("opt out global")) {
+                        console.log("opt out global for " + email);
+                      
+                        action.actionID = emailActionID;
+                        action.actionName = "Not Sent - Opt Out"
+                        action.actionType = "Send Email"
+                        action.actionResult = "Not Sent - Global Opt Out";
+                        action.timestamp = ts;
+                        action.userID = uid
+                    
+                        action.targetID = person._id;
+                        action.emailAddressTo = person.email;
+                        action.fromScene = req.body.short_id;
+                        action.data = req.body.sceneShareWithMessage;
+                        
+                        const activity = await RunDataQuery("activities", "insertOne", action);
+                        console.log("person has opted out! " + JSON.stringify(activity));
+                        emailsNotSent.push(person.email);
+                        // callbackz(); //do not add to emailsFinal!
+                    } else {    
+                       
+                        action.actionID = emailActionID;
+                        action.actionName = "Sent Email"
+                        action.actionType = "Send Email"
+                        action.actionResult = "Sent Email";
+                        action.timestamp = ts;
+                        action.userID = uid
+                    
+                        action.targetID = person._id;
+                        action.emailAddressTo = person.email;
+                        action.fromScene = req.body.short_id;
+                        action.data = req.body.sceneShareWithMessage;
+                        
+                        const activity = await RunDataQuery("activities", "insertOne", action);
+                        console.log("person on blacklist! " + JSON.stringify(activity));
+
+                        var pursoner = {};
+                        console.log('found person id: ' + person._id);
+                        pursoner.personID = person._id;
+                        pursoner.email = email.toString().trim();
+                        emailsFinal.push(pursoner);
+                        if (req.session.user) {
+                            const uquery = { "_id": uid };
+                            const updoc = { $addToSet: {"people" : person._id}};
+                            const updated = await RunDataQuery("users", "updateOne", uquery, updoc);
+                            console.log('added person to users people ' + uid);
+                            // db_old.users.updateOne( { "_id": uid }, { $addToSet: {people : person._id}});
+                        }
+                        
+                    }
+                } //checked and validated all the emails
+            }             
+            if (emailsFinal.length) {
+                const scenequery = {short_id: req.body.short_id};
+                const scene = await RunDataQuery("scenes", "findOne", scenequery);
+                sceneData = scene;
+
+                let geoLinks = "";
+                let eventData = {};
+                let urlHalf = "";
+                if (scene.sceneShareWithGroups != undefined && scene.sceneShareWithGroups != null) {
+                    if (scene.sceneShareWithGroups.toString().toLowerCase().includes("disallow all")) {
+                      
+                        let action = {};
+                        console.log("invitations not allowed for this scene " + req.body.short_id);
+                        action.actionID = emailActionID;
+                        action.actionName = "Not Sent - Scene Disallowed";
+                        action.actionType = "Send Email";
+                        action.actionResult = "Not Sent - Scene Disallowed";
+                        action.timestamp = ts;
+                        if (req.session.user) {
+                            action.userID = ObjectId.createFromHexString(req.session.user._id);
+                        }
+                        action.targetPersonID = thePerson._id;
+                        action.emailAddressTo = thePerson.email;
+                        action.fromScene = req.body.short_id;
+                        const activity = await RunDataQuery("activities", "insertOne", action);
+                        console.log("person on not valiodated! " + JSON.stringify(activity));
+
+                    } else if (scene.sceneShareWithGroups.toString().toLowerCase().includes("scene people only")) {
+                        console.log(JSON.stringify(emailsFinal) + " vs " + JSON.stringify(scene.sceneShareWithPeople));
+                        for (let i = 0 ; i < emailsFinal.length; i++) { //should be async, but this is only gonna catch one...
+                            if (scene.sceneShareWithPeople.indexOf(emailsFinal[i].email) == -1) {
+                                console.log("removing " + emailsFinal[i].email + " not on the list..");
+                                emailsFinal.splice(i);
+
+                            }
+                        }
+                    } 
+                    
+                } 
+                if (sceneData.scenePostcards != null && sceneData.scenePostcards.length > 0) {
+                    var oo_id = ObjectId.createFromHexString(sceneData.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
+                    const picquery = {"_id": oo_id};
+                    const picture_item = await RunDataQuery("image_items", "findOne", picquery);
+                    var item_string_filename = JSON.stringify(picture_item.filename);
+                    item_string_filename = item_string_filename.replace(/\"/g, "");
+                    var item_string_filename_ext = getExtension(item_string_filename);
+                    var expiration = new Date();
+                    expiration.setMinutes(expiration.getMinutes() + 30);
+                    var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                    var halfName = 'half.' + baseName + item_string_filename_ext;
+                           
+                    urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+                } else {
+                    console.log("scene has no postcard! that's a bad...but whatever...");
+                }
+                for (let i = 0; i < sceneData.sceneLocations.length; i++) {
+                    if (sceneData.sceneLocations[i].type.toLowerCase() == "geographic") { //TODO what if multiple?  this will get last one in array, maybe?
+                        geoLinks += "<strong><a href='http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "'>Map to location: "+sceneData.sceneLocations[i].name+"</a></strong><br><br>"+
+                        "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" +
+                            "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + sceneData.sceneLocations[i].latitude +
+                            "," + sceneData.sceneLocations[i].longitude + "&zoom=15&size=600x400&maptype=roadmap&key="+process.env.GOOGLEMAPS_KEY+"&markers=color:blue%7Clabel:%7C" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" + 
+                            "</a>";
+                        if (sceneData.sceneLocations[i].eventData != undefined && sceneData.sceneLocations[i].eventData.toLowerCase().includes('restrict')) {
+                            eventData.restrictToLocation = true;
+                        }
+                    }
+                }
+                if ((sceneData.sceneEventStart != undefined && sceneData.sceneEventStart != null) || (sceneData.sceneEventEnd != undefined && sceneEventEnd != null)) {
+                    eventData.eventStart = sceneData.sceneEventStart;
+                    eventData.eventEnd = sceneData.sceneEventEnd;
+            
+                    if (sceneData.sceneTags != undefined && sceneData.sceneTags != null && sceneData.sceneTags.length > 0 && sceneData.sceneTags.toString().toLowerCase().includes("restrict to event")) {
+                        eventData.restrictToEvent = true;
+                    } else {
+                        eventData.restrictToEvent = false;
+                    }
+                }
+                ///OK gots emails, scenedata, auth - ready to send!
+                // async.each (eData, function (data, callbackzz) {
+                    console.log("email data is " + data);
+                for (const data in emailsFinal) {
+            
+                    var subject = "Invitation : " + sceneData.sceneTitle;
+                    var from = adminEmail;
+                
+                    var to = [data.email];
+                
+                    var bcc = [];
+                    
+                    var timestamp = Math.round(Date.now() / 1000);
+                    var message = "";
+                    var restrictToEventMessage = eventData.restrictToEvent ? "<br>Access is restricted to the event time" : "";
+                    var restrictToLocationMessage = eventData.restrictToLocation ? "<br>Access is restricted to the event location<br>" : "";
+                    var isNotPublicMessage = "";
+                    var app_link = "servicemedia://scene?" + req.body.short_id;
+                 
+                    const salt = await bcrypt.genSalt(10);
+                    const hash = await bcrypt.hash(timestamp.toString(), salt);
+                    const cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
+                    const invitation = {
+                            validated: false,
+                            // invitedToSceneShareWithPublic:
+                            invitedToSceneTitle: sceneData.sceneTitle,
+                            invitedToSceneID: sceneData._id,
+                            invitedToSceneShortID: sceneData.short_id,
+                            accessTimeWindow: timestamp + 86400, //one day //will deprecate...
+                            sceneEventStart : sceneData.sceneEventStart,
+                            sceneEventEnd: sceneData.sceneEventEnd,
+                            sceneAccessLinkExpire: sceneData.sceneAccessLinkExpire,
+                            sceneRestrictToEvent: eventData.restrictToEvent,
+                            sceneRestrictToLocation: eventData.restrictToLocation,
+                            sentByUserName: req.session.user ? req.session.user.userName.toString() : ip,
+                            sentByUserID: req.session.user ? req.session.user._id.toString() : "",
+                            sentByUserEmail: req.session.user ? req.session.user.email.toString() : adminEmail,
+                            sentToEmail: to,
+                            targetPersonID: data.personID,
+                            invitationHash: cleanhash,
+                            invitationTimestamp: timestamp,
+                        };
+                    const invsaved = await RunDataQuery("invitations", "insertOne", invitation);       
+                    console.log("saved invitation " + invsaved.insertedId);                         
+                    let landingButtons = "<br><a href='"+ requestProtocol + "://" + req.headers.host + "/landing/invite.html?iv=" + cleanhash + "' target='_blank'>" +
+                    "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
+                    "Click here to access this scene!</a></button><br>";
+
+                    if (req.body.publicRequest) {
+                            message = "An invitation to this private Immersive Scene was requested for you!";
+
+                    } else {
+                            if (sceneData.sceneShareWithMessage === "" || sceneData.sceneShareWithMessage == null || sceneData.sceneShareWithMessage.length < 2) {
+                                message = req.session.user.userName + " has shared an Immersive Scene!";
+                                // "<h3>Scene Invitation from " + from + "</h3><hr><br>"
+                            } else {
+                                message = req.session.user.userName + " has shared an Immersive Scene with this message: "+
+                                    "<hr><strong>" + req.body.sceneShareWithMessage +  "</strong><br><hr>";
+                            }
+                            landingButtons = "<br><a href='"+ requestProtocol + "://" + req.headers.host + "/landing/"+sceneData.short_id+"?iv=" + cleanhash + "' target='_blank'>" +
+                            "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
+                            "Scene Landing Page</a></button><br>";
+                    }
+                    message += restrictToEventMessage + restrictToLocationMessage;
+                    if (sceneData.sceneEventStart != undefined && sceneData.sceneEventStart != null && sceneData.sceneEventStart != "") {
+                        let datetimeString = new Date(sceneData.sceneEventStart);
+                        message += "<br><strong>Event start: " + datetimeString.toLocaleString([], { hour12: true}) + "</strong><br>";
+                        // message += "<br><strong>Event start: " + datetimeString.toString() + "</strong><br>";
+                        console.log(message);
+                    }
+                    if (sceneData.sceneEventEnd != undefined && sceneData.sceneEventEnd != null && sceneData.sceneEventEnd != "") {
+                        let datetimeString = new Date(sceneData.sceneEventEnd);
+                        message += "<strong>Event end: " + datetimeString.toLocaleString([], { hour12: true})  + "</strong><br>";
+                    }
+                    if (!sceneData.sceneShareWithPublic) { 
+                        isNotPublicMessage = "<br><strong>This is a private scene, intended only for subscribers or invited guests.</strong><br>";
+                    }
+                    message += geoLinks;
+                    var htmlbody = message +
+                        isNotPublicMessage +
+                        landingButtons +
+                        "<br> <img src=" + urlHalf + "> " +
+                        "<br> Scene Title: " + sceneData.sceneTitle +
+                        "<br> Short ID: " + sceneData.short_id +
+                        "<br> Keynote: " + sceneData.sceneKeynote +
+                        "<br> Description: " + sceneData.sceneDescription +
+                        "<br> Owner: " + sceneData.userName +
+                        "<br> For more info, or to become a subscriber, visit <a href='https://servicemedia.net'>ServiceMedia.net!</a><br><br> "+
+                        "<br> To stop messages like this, <a href='"+ requestProtocol + "://" + req.headers.host + "/landing/opt_out.html?iv=" + cleanhash + "' target='_blank'>click here</a><br><br> ";
+                        const params = { Source: process.env.ADMIN_EMAIL,
+                            Destination: { ToAddresses: to, BccAddresses: bcc},
+                            Message: {
+                                Subject: {
+                                    Data: subject
+                                },
+                                Body: {
+                                    Html: {
+                                        Data: htmlbody
+                                    }
+                                }
+                            }
+                        };          
+                    const status = await SendEmail(params.Destination.ToAddresses, params.Source, htmlbody, subject);
+                }
+                console.log("scene sharing complete!");
+                res.send("scene sharing complete!");
+            } else {
+                console.log("no valid emails!");
+                res.send("no valid emails, no sharing for you");
+            }
+
+        } catch (e) {
+            console.log("error sharing scene " + e);
+            res.send('error sharing scene ' + e);
+        }
+
+    })();
+   
+});
+
+
+
+app.post('/share_scene_2/', function (req, res) { //yep! //make it public?
 
     //temp container for objex with peopleID + email
     console.log("tryna share scnee with prootocl " + req.protocol);
@@ -4396,7 +4785,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                                 pursoner.personID = person_id;
                                 pursoner.email = email.toString().trim();
                                 emailsFinal.push(pursoner);
-                                db_old.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}});
+                                db_old.users.updateOne( { "_id": uid }, { $addToSet: {people : person._id}});
                                 callbackz();
                                 }
                             });
@@ -4608,11 +4997,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
 
                                         // var thumbName = 'thumb.' + baseName + item_string_filename_ext;
                                         var halfName = 'half.' + baseName + item_string_filename_ext;
-                                        // var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-                                        // var standardName = 'standard.' + baseName + item_string_filename_ext;
-                                        // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 60000}); //just send back thumbnail urls for list
-                                        // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
-                                       
+                                                                              
                                         (async () => {
                                             try {
                                                 // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
@@ -4832,6 +5217,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
         }
     );
 });
+
 
 app.post('/newuser', requiredAuthentication, admin, function (req, res) { //only admins make new users now..!   
 //        $scope.user.domain = "servicmedia";
