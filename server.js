@@ -10288,37 +10288,75 @@ app.post('/newlocation', requiredAuthentication, function (req, res) {
     location.userID = req.session.user._id.toString();
     var timestamp = Math.round(Date.now() / 1000);
     location.lastUpdate = timestamp;
-    db_old.locations.save(location, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('location not saved..');
-            res.send("nilch");
-        } else {
-            var item_id = saved._id.toString();
-            console.log('new location created, id: ' + item_id);
-            res.send("created" + item_id);
+
+    (async () => {
+        try {
+            const saved = await RunDataQuery("locations", "insertOne", location); 
+            console.log("new location " + saved.insertedId);
+            res.send("new location " + saved.insertedId);
+        } catch (e) {
+            console.log("error creating new location " + e);
+            res.send("error creaating new location " + e);
         }
-    });
+    })();
 });
+
+//     db_old.locations.save(location, function (err, saved) {
+//         if ( err || !saved ) {
+//             console.log('location not saved..');
+//             res.send("nilch");
+//         } else {
+//             var item_id = saved._id.toString();
+//             console.log('new location created, id: ' + item_id);
+//             res.send("created" + item_id);
+//         }
+//     });
+// });
+
 app.get('/userlocations/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return userlocations for: ' + req.params.u_id);
-    db_old.locations.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, location_items) {
 
-        if (err || !location_items) {
-            console.log("error getting userlocation items: " + err);
-
-        } else {
-
-            res.json(location_items);
-            // console.log("returning userlocations for " + req.params.u_id + " " + JSON.stringify(location_items));
+    (async () => {
+        try {
+            const query = {"userID": req.params.u_id};
+            const locations = await RunDataQuery("locations", "find", query);
+            res.send(locations);
+        } catch (e) {
+            console.log('error getting userlocations ' + e);
+            res.send('error getting userlocations ' + e);
         }
-    });
+    })();
 });
+    // db_old.locations.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, location_items) {
+
+    //     if (err || !location_items) {
+    //         console.log("error getting userlocation items: " + err);
+
+    //     } else {
+
+    //         res.json(location_items);
+    //         // console.log("returning userlocations for " + req.params.u_id + " " + JSON.stringify(location_items));
+    //     }
+    // });
+// });
 
 app.post('/delete_location/',  requiredAuthentication, function (req, res) { //weird, post + path
     console.log("tryna delete key: " + req.body._id);
     var o_id = ObjectId.createFromHexString(req.body._id);
+    (async () => {
+        try {
+            const query = {"_id":  o_id};
+            const deleted = await RunDataQuery("locations", "deleteOne", query);
+            console.log("deleted location " + JSON.stringify(deleted));
+            res.send("deleted location " + JSON.stringify(deleted));
+        } catch (e) {
+            console.log('error deleted location ' + e);
+            res.send('error deleted location' + e);
+        }
+    })();
     db_old.locations.remove( { "_id" : o_id }, 1 );
     res.send("deleted");
+
 });
 
 app.get('/userlocation/:p_id', requiredAuthentication, function(req, res) {
