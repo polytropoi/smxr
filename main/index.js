@@ -15997,7 +15997,7 @@ function getAllPeople() {
                                 axios.post('/share_scene/', data)
                                     .then(function (response) {
                                         console.log(response);
-                                       if (response.data.includes("Invitations sent: ")) {
+                                       if (response.data.includes("invited")) {
                                             // window.location.reload();
                                             $("#topSuccess").html(response.data);
                                             $("#topSuccess").show();

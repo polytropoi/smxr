@@ -5310,93 +5310,125 @@ app.get('/useraudio/:u_id', requiredAuthentication, function(req, res) {
     //     }
     // })();
 
-    db_old.audio_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
+    // db_old.audio_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, audio_items) {
 
-        if (err || !audio_items) {
-            console.log("error getting picture items: " + err);
+    //     if (err || !audio_items) {
+    //         console.log("error getting picture items: " + err);
 
-        } else {
-            console.log("# useraudios " + audio_items.length);
+    //     } else {
+    //         console.log("# useraudios " + audio_items.length);
 
-            (async () => {
-            for (var i = 0; i < audio_items.length; i++) {
-                var item_string_filename = JSON.stringify(audio_items[i].filename);
-                item_string_filename = item_string_filename.replace(/\"/g, "");
-                var item_string_filename_ext = getExtension(item_string_filename);
-                var expiration = new Date();
-                expiration.setMinutes(expiration.getMinutes() + 30);
-                var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                //console.log(baseName);
-                var mp3Name = baseName + '.mp3';
-                var oggName = baseName + '.ogg';
-                var pngName = baseName + '.png';
+        (async () => {
+            try {
+                const query = {"userID": req.params.u_id};
+                let audio_items = await RunDataQuery("audio_items", "find", query);
+                for (var i = 0; i < audio_items.length; i++) {
+                    var item_string_filename = JSON.stringify(audio_items[i].filename);
+                    item_string_filename = item_string_filename.replace(/\"/g, "");
+                    var item_string_filename_ext = getExtension(item_string_filename);
+                    var expiration = new Date();
+                    expiration.setMinutes(expiration.getMinutes() + 30);
+                    var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                    //console.log(baseName);
+                    var mp3Name = baseName + '.mp3';
+                    var oggName = baseName + '.ogg';
+                    var pngName = baseName + '.png';
 
-                var urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, 6000); 
-                var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, 6000); 
-                var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, 6000); 
+                    var urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, 6000); 
+                    var urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, 6000); 
+                    var urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, 6000); 
 
-           
-                audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-                audio_items[i].URLogg = urlOgg;
-                audio_items[i].URLpng = urlPng;
+            
+                    audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
+                    audio_items[i].URLogg = urlOgg;
+                    audio_items[i].URLpng = urlPng;
                 }
                 res.json(audio_items);
-            })();
-//                console.log("returning audio_items for " + req.params.u_id);
-        }
+            } catch (e) {
+                console.log("error getting user audio_items " + e);
+                res.send("error getting user audio_items " + e);
+            }
+        })();
     });
-});
+//                console.log("returning audio_items for " + req.params.u_id);
+    //     }
+    // });
+// });
 
 app.get('/userobjs/:u_id', checkAppID, requiredAuthentication, function(req, res) {
     console.log('tryna return userobjs for: ' + req.params.u_id);
-    db_old.obj_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, obj_items) {
-
-        if (err || !obj_items) {
-            console.log("error getting obj items: " + err);
-
-        } else {
-            console.log("# of userobjs " + obj_items.length);
-
-            res.json(obj_items);
-            console.log("returning obj_items for " + req.params.u_id);
+    (async () => {
+        try {
+            const query = {"userID": req.params.u_id};
+            const obj_items = await RunDataQuery("obj_items", "find", query);
+        } catch (e) {
+            console.log("error getting obj_items " + e);
+            res.send("error getting obj_items " + e);
         }
-    });
-});
 
-app.get('/allobjs/:u_id', requiredAuthentication, domainadmin, function(req, res) { //TODO make one route,check auth status
-    console.log('tryna return userobjs for: ' + req.params.u_id);
+    })();
+});
+//     db_old.obj_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, obj_items) {
+
+//         if (err || !obj_items) {
+//             console.log("error getting obj items: " + err);
+
+//         } else {
+//             console.log("# of userobjs " + obj_items.length);
+
+//             res.json(obj_items);
+//             console.log("returning obj_items for " + req.params.u_id);
+//         }
+//     });
+// });
+
+app.get('/allobjs/:u_id', requiredAuthentication, domainadmin, function(req, res) { //all userobj reqs come here too - everything for everybody?!?...TODO check public status, use userobj route
+    console.log('allobjs/ tryna return ALL userobjs');
     // if (domainadmin()) {
-    db_old.obj_items.find({}, function(err, obj_items) {
-
-        if (err || !obj_items) {
-            console.log("error getting obj items: " + err);
-
-        } else {
-            console.log("returning userobjs " + obj_items.length);
-
+    (async () => {
+        try {
+            const query = {};
+            const obj_items = await RunDataQuery("obj_items", "find", query);
+            console.log("gots obj_items " + obj_items.length);
             res.json(obj_items);
-            // console.log("returning obj_items for " + req.params.u_id);
+        } catch (e) {
+            console.log("error getting obj items: " + e);
+            res.send("error getting obj items: " + e);
         }
-    });
-
+    })();
 });
 
+    //     db_old.obj_items.find({}, function(err, obj_items) {
 
-app.get('/sceneobjs/:g_id', checkAppID, requiredAuthentication, function(req, res) {
-    console.log('tryna return userobjs for: ' + req.params.u_id);
-    db_old.obj_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, obj_items) {
+//         if (err || !obj_items) {
+//             console.log("error getting obj items: " + err);
 
-        if (err || !obj_items) {
-            console.log("error getting obj items: " + err);
+//         } else {
+//             console.log("returning userobjs " + obj_items.length);
 
-        } else {
-            console.log("# of userobjs " + obj_items.length);
+//             res.json(obj_items);
+//             // console.log("returning obj_items for " + req.params.u_id);
+//         }
+//     });
 
-            res.json(obj_items);
-            console.log("returning obj_items for " + req.params.u_id);
-        }
-    });
-});
+// });
+
+
+// app.get('/sceneobjs/:g_id', checkAppID, requiredAuthentication, function(req, res) {
+//     console.log('tryna return userobjs for: ' + req.params.u_id);
+//     db_old.obj_items.find({userID: req.params.u_id}).sort({otimestamp: -1}).limit(maxItems).toArray( function(err, obj_items) {
+
+//         if (err || !obj_items) {
+//             console.log("error getting obj items: " + err);
+
+//         } else {
+//             console.log("# of userobjs " + obj_items.length);
+
+//             res.json(obj_items);
+//             console.log("returning obj_items for " + req.params.u_id);
+//         }
+//     });
+// });
 
 
 app.post('/newperson', checkAppID, requiredAuthentication, function (req, res) {
