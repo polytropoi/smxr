@@ -4361,7 +4361,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                     console.log("new person created for " + email + " " + updated);
                     // db_old.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person_id}});
                 } else {
-                    console.log("gotsa person : "+ JSON.stringify(person));
+                    console.log("found a person : "+ person.email);
                     if (person.activities == undefined) {
                         person.activities = [];
                     }
@@ -4381,7 +4381,6 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                         action.fromScene = req.body.short_id;
                         action.data = req.body.sceneShareWithMessage;
                         
-                        db_old.activities.insertOne(action);
                         const activity = await RunDataQuery("activities", "insertOne", action);
                         console.log("person on blacklist! " + JSON.stringify(activity));
                         emailsNotSent.push(person.email);
@@ -4440,10 +4439,10 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                         action.data = req.body.sceneShareWithMessage;
                         
                         const activity = await RunDataQuery("activities", "insertOne", action);
-                        console.log("person on blacklist! " + JSON.stringify(activity));
+                        console.log("ok to send email to " + person.email);
 
                         var pursoner = {};
-                        console.log('found person id: ' + person._id);
+                        // console.log('found person id: ' + person._id);
                         pursoner.personID = person._id;
                         pursoner.email = person.email.toString().trim();
                         emailsFinal.push(pursoner);
@@ -4454,7 +4453,6 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                             console.log('added person to users people ' + uid);
                             // db_old.users.updateOne( { "_id": uid }, { $addToSet: {people : person._id}});
                         }
-                        
                     }
                 } //checked and validated all the emails
             }             
@@ -4539,8 +4537,10 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                 ///OK gots emails, scenedata, auth - ready to send!
                 // async.each (eData, function (data, callbackzz) {
                     console.log("email data is " + JSON.stringify(emailsFinal));
+                    let lastMails = [];
                 for (const data of emailsFinal) {
                     console.log ("data is "+ JSON.stringify(data));
+                    lastMails.push(data.email);
                     var subject = "Invitation : " + sceneData.sceneTitle;
                     var from = adminEmail;
                 
@@ -4581,7 +4581,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                     const invsaved = await RunDataQuery("invitations", "insertOne", invitation);       
                     console.log("saved invitation " + invsaved.insertedId);                         
                     let landingButtons = "<br><a href='"+ requestProtocol + "://" + req.headers.host + "/landing/invite.html?iv=" + cleanhash + "' target='_blank'>" +
-                    "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
+                    "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 12px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
                     "Click here to access this scene!</a></button><br>";
 
                     if (req.body.publicRequest) {
@@ -4589,15 +4589,22 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
 
                     } else {
                             if (sceneData.sceneShareWithMessage === "" || sceneData.sceneShareWithMessage == null || sceneData.sceneShareWithMessage.length < 2) {
-                                message = req.session.user.userName + " has shared an Immersive Scene!";
+                                message = req.session.user.userName + " has shared an Immersive Scene with you!";
                                 // "<h3>Scene Invitation from " + from + "</h3><hr><br>"
                             } else {
-                                message = req.session.user.userName + " has shared an Immersive Scene with this message: "+
+                                message = req.session.user.userName + " has shared an Immersive Scene with you, and says "+
                                     "<hr><strong>" + req.body.sceneShareWithMessage +  "</strong><br><hr>";
                             }
                             landingButtons = "<br><a href='"+ requestProtocol + "://" + req.headers.host + "/landing/"+sceneData.short_id+"?iv=" + cleanhash + "' target='_blank'>" +
-                            "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
-                            "Scene Landing Page</a></button><br>";
+                            "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 12px; background-color: #1f4566; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
+                            "Landing Page</button></a>"+
+    
+                            "<a a href='"+ requestProtocol + "://" + req.headers.host + "/webxr/"+sceneData.short_id+"?iv=" + cleanhash + "' target='_blank'>"+
+                            "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 12px; background-color: #1f4566; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
+                            "WebXR</button></a>"+
+                            "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/" +  sceneData.short_id + "\x22 target=\x22_blank\x22>"+
+                            "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 12px; background-color: #1f4566; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
+                            "Send to Quest</button></a>";
                     }
                     message += restrictToEventMessage + restrictToLocationMessage;
                     if (sceneData.sceneEventStart != undefined && sceneData.sceneEventStart != null && sceneData.sceneEventStart != "") {
@@ -4617,12 +4624,16 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                     var htmlbody = message +
                         isNotPublicMessage +
                         landingButtons +
-                        "<br> <img src=" + urlHalf + "> " +
+
                         "<br> Scene Title: " + sceneData.sceneTitle +
                         "<br> Short ID: " + sceneData.short_id +
                         "<br> Keynote: " + sceneData.sceneKeynote +
                         "<br> Description: " + sceneData.sceneDescription +
                         "<br> Owner: " + sceneData.userName +
+
+                        "<br><a href='"+ requestProtocol + "://" + req.headers.host + "/webxr/"+sceneData.short_id+"?iv=" + cleanhash + "' target='_blank'>"+ 
+                        "<img style='width: 512; height: 225; object-fit: cover' src=" + urlHalf + "></a> " +
+
                         "<br> For more info, or to become a subscriber, visit <a href='https://servicemedia.net'>ServiceMedia.net!</a><br><br> "+
                         "<br> To stop messages like this, <a href='"+ requestProtocol + "://" + req.headers.host + "/landing/opt_out.html?iv=" + cleanhash + "' target='_blank'>click here</a><br><br> ";
                         const params = { Source: process.env.ADMIN_EMAIL,
@@ -4638,11 +4649,12 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                                 }
                             }
                         };          
-                        console.log("email params "+ JSON.stringify(params));
+                        
                     const status = await SendEmail(params.Destination.ToAddresses, params.Source, htmlbody, subject);
+                    console.log("email status "+ JSON.stringify(status));
                 }
                 console.log("scene sharing complete!");
-                res.send("scene sharing complete!");
+                res.send("You invited " + lastMails + " to the scene!");
             } else {
                 console.log("no valid emails!");
                 res.send("no valid emails, no sharing for you");
@@ -4655,574 +4667,10 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
 
     })();
    
-});
+}); //end share_scene
 
 
-
-app.post('/share_scene_2/', function (req, res) { //yep! //make it public?
-
-    //temp container for objex with peopleID + email
-    console.log("tryna share scnee with prootocl " + req.protocol);
-    let requestProtocol = 'https';
-    if (req.headers.host.includes("localhost")) {
-        requestProtocol = 'http';
-    }
-    let theScene = {};
-    let ts = Date.now();
-    var emailsFinal = [];
-    var emailSplit = [];
-    var emailsNotSent = [];
-    let thePerson = {};
-    let emailActionID = "";
-    var ip = req.headers['x-forwarded-for'] ||
-    req.connection.remoteAddress ||
-    req.socket.remoteAddress ||
-    req.connection.socket.remoteAddress;
-
-    // (async () => {
-
-
-    // })();
-    async.waterfall([
-
-        function(callback) {
-            db_old.actions.findOne({"actionType": "Send Email"}, function (err, emailAction) {
-                if (err) {
-                    callback("error getting email action!" + err);
-                } else if (!emailAction) {
-                    db_old.actions.insertOne({"actionType": "Send Email", "actionName": "Send Email"}, function(err, saved) {
-                        if (err || !saved) {
-                            callback("saving email action error");
-                        } else {
-                            emailActionID = saved._id;
-                            callback(null);
-                        }
-                        
-
-                    });
-                } else {
-                    emailActionID = emailAction._id; //for better search, make sure to save with mongoID
-                    callback(null);
-                }
-            });
-
-        },
-        function(callback) {
-        console.log("share node: " + req.body._id + " mail: " + req.body.sceneShareWithPeople);
-
-            var emails = req.body.sceneShareWithPeople != undefined ? req.body.sceneShareWithPeople : req.body.email; //the latter if it's from the public invitation form
-            if (emails.includes(",")) {
-                emailSplit = emails.split(",");
-            } else {
-                emailSplit.push(emails); //if there's only one
-            }
-            // emailSplit.forEach(element => {
-            //     if (!validator.isEmail) {
-            //         res.end("bad bmail!");
-            //         callback(err);
-            //     }
-            // });
-            // emailSplit = emailSplit.filter(val => {
-            //     return validator.isEmail;
-            // });
-
-            for (var m = 0; m < emailSplit.length; m++) {
-                let mMail = emailSplit[m].toString();
-                console.log("maybeMail: " + mMail);
-                mMail = mMail.trim();
-                if (validator.isEmail(mMail) == false){
-                    console.log(mMail + " is a bad email!");
-                    res.end("an email address was invalid!");
-                    //
-                    callback(true); //err = true means bail if any bad emails!
-                    return;
-                } else {
-                    console.log(mMail + " is a good email!");
-                }
-            }
-            var emailSplit2 = emailSplit.filter(val => {
-                return validator.isEmail;
-            });
-            console.log("emailSplit is " + JSON.stringify(emailSplit2));
-            callback(null, emailSplit2);
-        },
-
-        function(emailSplit, callback){ //build temp array of objex with email + peopleID
-
-            var uid = ip;
-            if (req.session.user != undefined) {
-                uid = ObjectId.createFromHexString(req.session.user._id.toString());
-            }
-            console.log("tryna mail to " +uid);
-            async.each (emailSplit, function (email, callbackz) {
-
-                // db.people.findOne({ $and: [ {userID: uid}, {email: email.trim()} ]}, function(err, person) {
-                db_old.people.findOne({email: email.toString().trim()}, function(err, person) {
-                    if (err || !person) {
-                        
-                        console.log("did not find that person : " + err);
-                        var person = {};
-                        if (req.session.user) {
-                            person.userID = req.session.user._id.toString();
-                        }
-                        person.dateCreated = ts;
-                        person.email = email.toString().trim();
-                        // person.activities = [];
-                        let action = {};
-                        action.wasSentEmail = ts + "_" + uid + "_" + req.body.short_id;
-                        // person.activities = [];
-                        // person.activities.push(action);
-                        person.accountStatus = 'Not Verified';
-                        person.contactStatus = 'Not Indicated';
-                        console.log("fixing to save new person " + JSON.stringify(person));
-                        db_old.people.save(person, function (err, saved) {
-                        if ( err || !saved ) {
-                            console.log('person not saved..');
-                            res.end();
-                            callbackz();
-                            } else {
-                                thePerson = saved;
-                                var person_id = saved._id.toString();
-                                var pursoner = {};
-                                console.log('new person created, id: ' + person_id);
-                                pursoner.personID = person_id;
-                                pursoner.email = email.toString().trim();
-                                emailsFinal.push(pursoner);
-                                db_old.users.updateOne( { "_id": uid }, { $addToSet: {people : person._id}});
-                                callbackz();
-                                }
-                            });
-                    } else {
-                        //TODO update emailCount field? or 'touches'?
-                        if (person.activities == undefined) {
-                            person.activities = [];
-                        }
-                        thePerson = person;
-                        let action = {};
-                        if (person.accountStatus != undefined && (person.accountStatus.toString().toLowerCase().includes("blacklist") || person.accountStatus.toString().toLowerCase().includes ("banned"))) {
-                            console.log("opt out global for " + email);
-                            action.actionID = emailActionID;
-                            action.actionName = "Not Sent - Blacklist"
-                            action.actionType = "Send Email"
-                            action.actionResult = "Not Sent - Blacklist";
-                            action.timestamp = ts;
-                            action.userID = uid
-                        
-                            action.targetPersonID = person._id;
-                            action.emailAddressTo = person.email;
-                            action.fromScene = req.body.short_id;
-                            action.data = req.body.sceneShareWithMessage;
-                            
-                            db_old.activities.insertOne(action);
-                            // action.sendEmailBlockedBlacklist = ts + "_" + uid+ "_" + req.body.short_id;
-                            // person.activities.push(action);
-
-                            // db.people.update( { "_id": person._id }, { $set: {
-                            //     lastUpdate : ts,
-                            //     activities : person.activities
-                            // }});
-                            emailsNotSent.push(person.email);
-                            // db.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}});
-
-                            //TODO respond with message
-                            callbackz();
-                        } else if (person.accountStatus != undefined && (person.activities != undefined && person.activities.length > 3) && person.accountStatus.toString().toLowerCase().includes("not verified")) {
-                            // action.sendEmailUnverified = ts + "_" + uid + "_" + req.body.short_id;
-                            // person.activities.push(action);
-
-                            // db.people.update( { "_id": person._id }, { $set: {
-                            //     lastUpdate : ts,
-                            //     activities : person.activities
-                            // }});
-                            // db.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}});
-                            action.actionID = emailActionID;
-                            action.actionName = "Not Sent - Not Verified"
-                            action.actionType = "Send Email"
-                            action.actionResult = "Not Sent - Not Verified";
-                            action.timestamp = ts;
-                            action.userID = uid
-                        
-                            action.targetID = person._id;
-                            action.emailAddressTo = person.email;
-                            action.fromScene = req.body.short_id;
-                            action.data = req.body.sceneShareWithMessage;
-                            
-                            db_old.activities.insertOne(action);
-                            emailsNotSent.push(person.email);
-                            callbackz();
-
-
-                        } else if (person.contactStatus != undefined && person.contactStatus.toString().toLowerCase().includes("opt out global")) {
-                            console.log("opt out global for " + email);
-                            // action.sendEmailBlockedOptOutGlobal = ts + "_" + uid+ "_" + req.body.short_id;
-                            // person.activities.push(action);
-
-                            // db.people.update( { "_id": person._id }, { $set: {
-                            //     lastUpdate : ts,
-                            //     activities : person.activities
-                            // }});
-                            // db.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}});
-                            action.actionID = emailActionID;
-                            action.actionName = "Not Sent - Opt Out"
-                            action.actionType = "Send Email"
-                            action.actionResult = "Not Sent - Global Opt Out";
-                            action.timestamp = ts;
-                            action.userID = uid
-                        
-                            action.targetID = person._id;
-                            action.emailAddressTo = person.email;
-                            action.fromScene = req.body.short_id;
-                            action.data = req.body.sceneShareWithMessage;
-                            
-                            db_old.activities.insertOne(action);
-                            emailsNotSent.push(person.email);
-                            callbackz(); //do not add to emailsFinal!
-                        } else {    
-                            // action.wasSentEmail = ts + "_" + uid+ "_" + req.body.short_id;
-                            // person.activities.push(action);
-
-                            // db.people.update( { "_id": person._id }, { $set: {
-                            //     lastUpdate : ts,
-                            //     activities : person.activities
-                            // }});
-                            action.actionID = emailActionID;
-                            action.actionName = "Sent Email"
-                            action.actionType = "Send Email"
-                            action.actionResult = "Sent Email";
-                            action.timestamp = ts;
-                            action.userID = uid
-                        
-                            action.targetID = person._id;
-                            action.emailAddressTo = person.email;
-                            action.fromScene = req.body.short_id;
-                            action.data = req.body.sceneShareWithMessage;
-                            
-                            db_old.activities.insertOne(action);
-                            var pursoner = {};
-                            console.log('found person id: ' + person._id);
-                            pursoner.personID = person._id;
-                            pursoner.email = email.toString().trim();
-                            emailsFinal.push(pursoner);
-                            if (req.session.user) {
-                                db_old.users.updateOne( { "_id": uid }, { $addToSet: {people : person._id}});
-                            }
-                            callbackz();
-                        }
-                        
-                    }
-                    //callback won't wait on this, but whatever...
-                    if (req.session.user) {
-                        db_old.users.findOne({"_id": ObjectId.createFromHexString(uid)}, function (err, user) {
-                            if (err ||!user) {
-                                console.log("HEYWTF! caint find user " +req.session.user._id + " ...call the police!");
-                            } else {
-                                db_old.users.updateOne( { "_id": ObjectId.createFromHexString(uid) }, { $addToSet: {people : person._id}}); //addToSet should add array if not present, but prevent dupes (!?)
-                                
-                                console.log("tryna add a person " + person._id + " to user" + req.session.user._id); //TODO add sentMailTo activity to user action inventory
-        
-                            }
-                        });
-                    }
-                    });
-                
-
-            }, function(err) {
-               
-                if (err) {
-                    console.log('A file failed to process');
-                    callback(null, emailsFinal);
-
-                } else {
-                    // console.log('All files have been processed successfully');
-                    console.log("emailsFinal is " + JSON.stringify(emailsFinal));
-                    callback(null, emailsFinal);
-                }
-            });
-
-        },
-        // function (eData, callback) {
-        //     callback(null, eData);
-        // },
-        function (eData, callback) {
-            if (eData.length > 0) {
-            // let emailArray = eData;
-            db_old.scenes.findOne({short_id: req.body.short_id}, function (err, scene) {
-                if (err || !scene) {
-                    console.log("error getting scene for sharing: " + err);
-                    callback(err);
-                } else {
-                    theScene = scene;
-                    let urlHalf = "";
-                    if (scene.sceneShareWithGroups != undefined && scene.sceneShareWithGroups != null) {
-                        if (scene.sceneShareWithGroups.toString().toLowerCase().includes("disallow all")) {
-                            callback("nope - invitations disallowed");
-                            let action = {};
-                            console.log("invitations not allowed for this scene " + req.body.short_id);
-                            action.actionID = emailActionID;
-                            action.actionName = "Not Sent - Scene Disallowed";
-                            action.actionType = "Send Email";
-                            action.actionResult = "Not Sent - Scene Disallowed";
-                            action.timestamp = ts;
-                            if (req.session.user) {
-                                action.userID = ObjectId.createFromHexString(req.session.user._id);
-                            }
-                            action.targetPersonID = thePerson._id;
-                            action.emailAddressTo = thePerson.email;
-                            action.fromScene = req.body.short_id;
-                            // action.data = req.body.sceneShareWithMessage;
-                            
-                            db_old.activities.insertOne(action);
-                            res.send("invitations disallowed for this scene");s
-                        } else if (scene.sceneShareWithGroups.toString().toLowerCase().includes("scene people only")) {
-                            console.log(JSON.stringify(eData) + " vs " + JSON.stringify(scene.sceneShareWithPeople));
-                            for (let i = 0 ; i < eData.length; i++) { //should be async, but this is only gonna catch one...
-                                if (scene.sceneShareWithPeople.indexOf(eData[i].email) == -1) {
-                                    console.log("removing " + eData[i].email + " not on the list..");
-                                    eData.splice(i);
-
-                                }
-                            }
-                            callback(null, '', eData, scene);
-                        } else {
-                            if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
-                                var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
-                                db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-                                    if (err || !picture_item || picture_item.length == 0) {
-                                        console.log("error getting postcard for availablescenes: 2" + err);
-                                        callback(null, '', eData)
-                                    } else {
-                                        var item_string_filename = JSON.stringify(picture_item.filename);
-                                        item_string_filename = item_string_filename.replace(/\"/g, "");
-                                        var item_string_filename_ext = getExtension(item_string_filename);
-                                        var expiration = new Date();
-                                        expiration.setMinutes(expiration.getMinutes() + 30);
-                                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-
-                                        // var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-                                        var halfName = 'half.' + baseName + item_string_filename_ext;
-                                                                              
-                                        (async () => {
-                                            try {
-                                                // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
-                                                // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
-                                                urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
-                                               
-                                                callback(null, urlHalf, eData, scene);
-
-                                            } catch (e) {
-                                                // callback(e);
-                                                throw(e);
-                                            }
-                                        })();
-                                    }
-                                });
-                            } else {
-                                callback(null, '', eData, scene);
-                            }
-                        }
-                    } if (scene.sceneShareWithPeople != undefined && scene.sceneShareWithPeople != null) { 
-                        //compare emails to share with explicit list in the scene 
-                        //no, only do this above if sceneShareWithGroups == "Scene People Only"
-                    }
-                }
-            });
-        } else {
-            callback("no valid email!");
-            res.send("did not send to invalid address(es): " + emailsNotSent.toString() );
-        }
-        },
-        function(urlHalf, eData, sceneData, callback) {
-            // console.log("scene locations " +JSON.stringify(sceneData.sceneLocations));
-            let geoLinks = "";
-            let eventData = {};
-            for (let i = 0; i < sceneData.sceneLocations.length; i++) {
-                if (sceneData.sceneLocations[i].type.toLowerCase() == "geographic") { //TODO what if multiple?  this will get last one in array, maybe?
-                    geoLinks += "<strong><a href='http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "'>Map to location: "+sceneData.sceneLocations[i].name+"</a></strong><br><br>"+
-                    "<a target=\x22_blank\x22 href=\x22http://maps.google.com?q=" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" +
-                        "<img class=\x22img-thumbnail\x22 style=\x22width: 300px;\x22 src=\x22https://maps.googleapis.com/maps/api/staticmap?center=" + sceneData.sceneLocations[i].latitude +
-                        "," + sceneData.sceneLocations[i].longitude + "&zoom=15&size=600x400&maptype=roadmap&key="+process.env.GOOGLEMAPS_KEY+"&markers=color:blue%7Clabel:%7C" + sceneData.sceneLocations[i].latitude + "," + sceneData.sceneLocations[i].longitude + "\x22>" + 
-                        "</a>";
-                    if (sceneData.sceneLocations[i].eventData != undefined && sceneData.sceneLocations[i].eventData.toLowerCase().includes('restrict')) {
-                        eventData.restrictToLocation = true;
-                    }
-                }
-            }
-            callback(null, urlHalf, eData, sceneData, geoLinks, eventData);
-        },
-
-        function(urlHalf, eData, sceneData, geoLinks, eventData, callback) { //pull out  event data
-            console.log("scene locations " +JSON.stringify(sceneData.sceneTags));
-
-            if ((sceneData.sceneEventStart != undefined && sceneData.sceneEventStart != null) || (sceneData.sceneEventEnd != undefined && sceneEventEnd != null)) {
-                    eventData.eventStart = sceneData.sceneEventStart;
-                    eventData.eventEnd = sceneData.sceneEventEnd;
-            
-                    if (sceneData.sceneTags != undefined && sceneData.sceneTags != null && sceneData.sceneTags.length > 0 && sceneData.sceneTags.toString().toLowerCase().includes("restrict to event")) {
-                        eventData.restrictToEvent = true;
-                    } else {
-                        eventData.restrictToEvent = false;
-                    }
-                }
-            callback(null, urlHalf, eData, geoLinks, eventData);
-        },
-
-        function(urlHalf, eData, geoLinks, eventData, callback) { //spin through validated data, send appropriate mail
-            console.log("eDatahs : " +JSON.stringify(eData));
-            // let trimmedMails = [" a ", "b", " c", "d "].map(function(e){return e.trim();}); erp
-            if (eData.length) {
-                async.each (eData, function (data, callbackzz) {
-                    // console.log("email data is " + data);
-            
-                    var subject = "Invitation : " + theScene.sceneTitle;
-                    var from = adminEmail;
-                
-                    var to = [data.email];
-                
-                    var bcc = [];
-                    
-                    var timestamp = Math.round(Date.now() / 1000);
-                    var message = "";
-                    var restrictToEventMessage = eventData.restrictToEvent ? "<br>Access is restricted to the event time" : "";
-                    var restrictToLocationMessage = eventData.restrictToLocation ? "<br>Access is restricted to the event location<br>" : "";
-                    var isNotPublicMessage = "";
-                    var app_link = "servicemedia://scene?" + req.body.short_id;
-                 
-                        bcrypt.genSalt(3, function(err, salt) { //level3 easy, not a password itself
-                            bcrypt.hash(timestamp.toString(), salt, null, function(err, hash) {
-                                // reset = hash;
-                                var cleanhash = validator.blacklist(hash, ['/','.','$']); //make it URL safe
-                                var invitation = {
-                                    validated: false,
-                                    // invitedToSceneShareWithPublic:
-                                    invitedToSceneTitle: theScene.sceneTitle,
-                                    invitedToSceneID: theScene._id,
-                                    invitedToSceneShortID: theScene.short_id,
-                                    accessTimeWindow: timestamp + 86400, //one day //will deprecate...
-                                    sceneEventStart : theScene.sceneEventStart,
-                                    sceneEventEnd: theScene.sceneEventEnd,
-                                    sceneAccessLinkExpire: theScene.sceneAccessLinkExpire,
-                                    sceneRestrictToEvent: eventData.restrictToEvent,
-                                    sceneRestrictToLocation: eventData.restrictToLocation,
-                                    sentByUserName: req.session.user ? req.session.user.userName.toString() : ip,
-                                    sentByUserID: req.session.user ? req.session.user._id.toString() : "",
-                                    sentByUserEmail: req.session.user ? req.session.user.email.toString() : adminEmail,
-                                    sentToEmail: to,
-                                    targetPersonID: data.personID,
-                                    invitationHash: cleanhash,
-                                    invitationTimestamp: timestamp,
-                                }
-
-                                db_old.invitations.save(invitation, function (err, saved) {
-                                    if ( err || !saved ) {
-                                        console.log('problem saving invitaiton');
-                                    } else {
-                                        // var item_id = saved._id.toString();
-                                        console.log('new invitiation id: ' + saved._id.toString());
-                                    }
-                                });
-                                
-                                let landingButtons = "<br><a href='"+ requestProtocol + "://" + req.headers.host + "/landing/invite.html?iv=" + cleanhash + "' target='_blank'>" +
-                                "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
-                                "Click here to access this scene!</a></button><br>";
-
-                                if (req.body.publicRequest) {
-                                        message = "An invitation to this private Immersive Scene was requested for you!";
-
-                                } else {
-                                        if (theScene.sceneShareWithMessage === "" || theScene.sceneShareWithMessage == null || theScene.sceneShareWithMessage.length < 2) {
-                                            message = req.session.user.userName + " has shared an Immersive Scene!";
-                                            // "<h3>Scene Invitation from " + from + "</h3><hr><br>"
-                                        } else {
-                                            message = req.session.user.userName + " has shared an Immersive Scene with this message: "+
-                                                "<hr><strong>" + req.body.sceneShareWithMessage +  "</strong><br><hr>";
-                                        }
-                                        landingButtons = "<br><a href='"+ requestProtocol + "://" + req.headers.host + "/landing/"+theScene.short_id+"?iv=" + cleanhash + "' target='_blank'>" +
-                                        "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
-                                        "Scene Landing Page</a></button><br>";
-                                }
-                                message += restrictToEventMessage + restrictToLocationMessage;
-                                if (theScene.sceneEventStart != undefined && theScene.sceneEventStart != null && theScene.sceneEventStart != "") {
-                                    let datetimeString = new Date(theScene.sceneEventStart);
-                                    message += "<br><strong>Event start: " + datetimeString.toLocaleString([], { hour12: true}) + "</strong><br>";
-                                    // message += "<br><strong>Event start: " + datetimeString.toString() + "</strong><br>";
-                                    console.log(message);
-                                }
-                                if (theScene.sceneEventEnd != undefined && theScene.sceneEventEnd != null && theScene.sceneEventEnd != "") {
-                                    let datetimeString = new Date(theScene.sceneEventEnd);
-                                    message += "<strong>Event end: " + datetimeString.toLocaleString([], { hour12: true})  + "</strong><br>";
-                                }
-                                if (!theScene.sceneShareWithPublic) { 
-                                    isNotPublicMessage = "<br><strong>This is a private scene, intended only for subscribers or invited guests.</strong><br>";
-                                }
-                                message += geoLinks;
-                                var htmlbody = message +
-
-                                    isNotPublicMessage +
-
-                                    // "<br><a href='"+ requestProtocol + "://" + req.headers.host + "/landing/invite.html?iv=" + cleanhash + "' target='_blank'>" +
-                                    // "<button style='font-family: Arial, Helvetica, sans-serif;  font-size: 18px; background-color: blue; color: white; border-radius: 8px; margin: 10px; padding: 10px;'>" +
-                                    // "Click here to access this scene!</a></button><br>" +
-                                    landingButtons +
-
-                                    "<br> <img src=" + urlHalf + "> " +
-                                    "<br> Scene Title: " + theScene.sceneTitle +
-                                    "<br> Short ID: " + theScene.short_id +
-                                    "<br> Keynote: " + theScene.sceneKeynote +
-                                    "<br> Description: " + theScene.sceneDescription +
-                                    "<br> Owner: " + theScene.userName +
-                                    "<br> For more info, or to become a subscriber, visit <a href='https://servicemedia.net'>ServiceMedia.net!</a><br><br> "+
-                                    "<br> To stop messages like this, <a href='"+ requestProtocol + "://" + req.headers.host + "/landing/opt_out.html?iv=" + cleanhash + "' target='_blank'>click here</a><br><br> ";
-
-
-                                    const params = { Source: process.env.ADMIN_EMAIL,
-                                        Destination: { ToAddresses: to, BccAddresses: bcc},
-                                        Message: {
-                                            Subject: {
-                                                Data: subject
-                                            },
-                                            Body: {
-                                                Html: {
-                                                    Data: htmlbody
-                                                }
-                                            }
-                                        }
-                                    };
-
-                                    (async () => {
-                                    const status = await SendEmail(params.Destination.ToAddresses, params.Source, htmlbody, subject);
-
-                                    })();
-                                
-                            });
-                        });
-                        callbackzz();
-                    // }
-
-                }, function(err) {
-                
-                    if (err) {
-                        console.log('A file failed to process');
-                        res.send(err);
-                    } else {
-                        console.log('All files have been processed successfully');
-                        res.send("Invitations sent: " + JSON.stringify(emailsFinal));
-                    }
-                });
-                callback(null);
-            } else {
-                callback(null);
-                res.send("no valid address");
-            }
-        }],
-
-    function(err, result) { // #last function, close async
-            console.log("waterfall done: " + result);
-        }
-    );
-});
-
-
-app.post('/newuser', requiredAuthentication, admin, function (req, res) { //only admins make new users now..!   
+app.post('/newuser', requiredAuthentication, admin, function (req, res) { //only admins can make new users..for now..!   
 //        $scope.user.domain = "servicmedia";
 //        $scope.user.appid = "55b2ecf840edea7583000001";
 
@@ -5439,15 +4887,27 @@ app.post('/return_audiogroups/', function(req, res) {
 
 app.get('/usergroups/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return usergroups for: ' + req.params.u_id);
-    db_old.groups.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, group_items) {
-        if (err || !group_items) {
-            console.log("error getting usergroups items: " + err);
-        } else {
-            res.json(group_items);
-            console.log("returning usergroups for " + req.params.u_id);
+    (async () => {
+        try {
+            const query = {"userID": req.params.u_id};
+            const groups = await RunDataQuery("groups", "find", query);
+            res.send(groups);
+        } catch (e) {
+            console.log('error getting usergroups ' + e);
+            res.send('error getting usergroups ' + e);
+
         }
-    });
+    })();
 });
+    // db_old.groups.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, group_items) {
+    //     if (err || !group_items) {
+    //         console.log("error getting usergroups items: " + err);
+    //     } else {
+    //         res.json(group_items);
+    //         console.log("returning usergroups for " + req.params.u_id);
+    //     }
+    // });
+// });
 app.post('/add_group_item/', requiredAuthentication, function (req, res) { //dunno why I rem'd the groupdata update...?
     console.log(JSON.stringify(req.body));
     var o_id = ObjectId.createFromHexString(req.body.group_id);   
@@ -5530,45 +4990,47 @@ app.post('/remove_group_item/', requiredAuthentication, function (req, res) {
     })();
 
 });
-app.post('/update_group/:_id', checkAppID, requiredAuthentication, function (req, res) {
-    console.log(req.params._id);
-    var o_id = ObjectId.createFromHexString(req.params._id);   
+app.post('/update_group/', requiredAuthentication, function (req, res) {
+    // console.log(req.params._id);
+    var o_id = ObjectId.createFromHexString(req.body._id);   
     console.log('group requested : ' + req.body._id);
-    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
-        if (err || !group) {
-            console.log("error getting group: " + err);
-        } else {
-            console.log("tryna update group" + req.body._id);
-            var timestamp = Math.round(Date.now() / 1000);
-            db_old.groups.update( { "_id": o_id }, { $set: {
+    (async () => {
+        try {
+            const query = { "_id" : o_id};
+            const updoc =  { $set: {
                 lastUpdateTimestamp: timestamp,
                 groupdata : req.body.groupdata,
                 items: req.body.items,
                 tags: req.body.tags,
                 title: req.body.title,
                 name: req.body.name
-            }});
-        } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    });
+            }};
+            const updated = await RunDataQuery("groups", "updateOne", query, updoc);
+            res.send("updated group " + updated);
+        } catch (e) {
+            console.log('error updating usergroup ' + e);
+            res.send('error updating usergroup ' + e);
+
+        }
+    })();
 });
+
 app.post('/updategroup/', requiredAuthentication, function (req, res) {
     // console.log(req.body._id);
     var o_id = ObjectId.createFromHexString(req.body._id);   
     console.log('group requested : ' + req.body._id);
-    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
-        if (err || !group) {
-            console.log("error getting group: " + err);
-
-        } else {
+    (async () => {
+        try {
+            const query = { "_id" : o_id};
+            const group = await RunDataQuery("groups", "findOne", query);
             console.log("tryna update grup " + req.body._id);
             let grupdata = group.groupdata;
             var timestamp = Math.round(Date.now() / 1000);
-            if (req.body.groupdata != null) {
+            if (req.body.groupdata != null && req.body.groupdata != undefined) {
                 grupdata = req.body.groupdata;
             }
             if (grupdata == null) {
                 grupdata = [];
-                
                 for (let i = 0; i < group.items.length; i++) {
                     let gditem = {};
                     gditem.itemID = group.items[i];
@@ -5576,19 +5038,58 @@ app.post('/updategroup/', requiredAuthentication, function (req, res) {
                     console.log("tryna fix index " + JSON.stringify(gditem));
                     grupdata.push(gditem);
                 }
-                // group.groupdata = gd;
-                console.log("tryna update with no group data and fix " + JSON.stringify(grupdata));
+                console.log("tryna fix group with no group data " + JSON.stringify(grupdata));
             }
-
-            db_old.groups.update( { "_id": o_id }, { $set: {
+            // const query = { "_id" : o_id};
+            const updoc =  { $set: { //items are added / removed via separate methods, eg add_group_item
                 lastUpdateTimestamp: timestamp,
                 tags: req.body.tags,
                 name: req.body.name,
                 groupdata: grupdata
-            }});
-        } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    });
+            }};
+            const updated = await RunDataQuery("groups", "updateOne", query, updoc);
+            res.send("updated group " + updated);
+        } catch (e) {
+            console.log('error updating usergroup ' + e);
+            res.send('error updating usergroup ' + e);
+
+        }
+    })();
 });
+//     db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
+//         if (err || !group) {
+//             console.log("error getting group: " + err);
+
+//         } else {
+//             console.log("tryna update grup " + req.body._id);
+//             let grupdata = group.groupdata;  
+//             var timestamp = Math.round(Date.now() / 1000);
+//             if (req.body.groupdata != null) {
+//                 grupdata = req.body.groupdata;
+//             }
+//             if (grupdata == null) {
+//                 grupdata = [];
+                
+//                 for (let i = 0; i < group.items.length; i++) {
+//                     let gditem = {};
+//                     gditem.itemID = group.items[i];
+//                     gditem.itemIndex = i.toString();
+//                     console.log("tryna fix index " + JSON.stringify(gditem));
+//                     grupdata.push(gditem);
+//                 }
+//                 // group.groupdata = gd;
+//                 console.log("tryna update with no group data and fix " + JSON.stringify(grupdata));
+//             }
+
+//             db_old.groups.update( { "_id": o_id }, { $set: {
+//                 lastUpdateTimestamp: timestamp,
+//                 tags: req.body.tags,
+//                 name: req.body.name,
+//                 groupdata: grupdata
+//             }});
+//         } if (err) {res.send(error)} else {res.send("updated " + new Date())}
+//     });
+// });
 
 
 
@@ -5603,7 +5104,11 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
         const query = {"_id": o_id};
 
         const group = await RunDataQuery("groups", "findOne", query);
+        console.log("group " + JSON.stringify(group));
         // if (group && group.items) {
+        if (!group.items) {
+            group.items = [];
+        }
           group.items = group.items.map(convertStringToObjectID);
           if (group.lastUpdate != null) { //?
             group.lastUpdateTimestamp = group.lastUpdate;
