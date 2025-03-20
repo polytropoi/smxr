@@ -5442,23 +5442,47 @@ app.post('/newperson', checkAppID, requiredAuthentication, function (req, res) {
     //     textitem.desc = textitem.textstring.substr(0,20) + "...";
     // }
     console.log("fixing to save new person " + JSON.stringify(person));
-    db_old.people.save(person, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('person not saved..');
-            res.send("nilch");
-        } else {
-            var item_id = saved._id.toString();
-            console.log('new person created, id: ' + item_id);
-            res.send(item_id);
+    (async () => {
+
+        try {
+            const newperson = await RunDataQuery("people", "insertOne", person);
+            res.send("new person with id " + newperson.insertedId);
+        } catch (e) {
+            console.log("error creating new peerson " + e);
+            res.send("error creating new peerson " + e);
         }
-    });
+
+    })();
+
+    // db_old.people.save(person, function (err, saved) {
+    //     if ( err || !saved ) {
+    //         console.log('person not saved..');
+    //         res.send("nilch");
+    //     } else {
+    //         var item_id = saved._id.toString();
+    //         console.log('new person created, id: ' + item_id);
+    //         res.send(item_id);
+    //     }
+    // });
 });
 
 app.post('/delete_person/:_id', checkAppID, requiredAuthentication, function (req, res) {
     console.log("tryna delete person: " + req.params._id);
     var o_id = ObjectId.createFromHexString(req.params._id);
-    db_old.people.remove( { "_id" : o_id }, 1 );
-    res.send("deleted");
+    (async () => {
+
+        try {
+            const query = { "_id" : o_id };
+            const deleted = await RunDataQuery("people", "deleteOne", query);
+            res.send("deleted person! " + deleted);
+        } catch (e) {
+            console.log("error deleteing peerson " + e);
+            res.send("error deleting new peerson " + e);
+        }
+
+    })();
+    // db_old.people.remove( { "_id" : o_id }, 1 );
+    // res.send("deleted");
 });
 
 app.post('/update_person', requiredAuthentication, function (req, res) {
@@ -5466,107 +5490,169 @@ app.post('/update_person', requiredAuthentication, function (req, res) {
     console.log("tryna update_person " + JSON.stringify(req.body));
     var o_id = ObjectId.createFromHexString(req.body._id);
 //        textitem.userID = req.session.user._id.toString();
-    db_old.people.update( { "_id": o_id }, { $set: {
-        accountStatus: req.body.accountStatus,
-        contactStatus: req.body.contactStatus,
-        // tags: req.body.tags,
-        // fullname: req.body.fullname,
-        // nickname: req.body.nickname,
-        // email: req.body.email,
-        lastUpdate : Date.now()
-    }});
-    res.send("updated " + Date.now());
+    (async () => {
+
+        try {
+            const query = { "_id" : o_id };
+            const updoc = { $set: {
+                accountStatus: req.body.accountStatus,
+                contactStatus: req.body.contactStatus,
+                lastUpdate : Date.now()
+            }}
+            const updated = await RunDataQuery("people", "updateOne", query, updoc);
+            res.send("updated person! " + JSON.stringify(updated));
+        } catch (e) {
+            console.log("error deleteing peerson " + e);
+            res.send("error deleting new peerson " + e);
+        }
+    })();
+
+    // db_old.people.update( { "_id": o_id }, { $set: {
+    //     accountStatus: req.body.accountStatus,
+    //     contactStatus: req.body.contactStatus,
+    //     // tags: req.body.tags,
+    //     // fullname: req.body.fullname,
+    //     // nickname: req.body.nickname,
+    //     // email: req.body.email,
+    //     lastUpdate : Date.now()
+    // }});
+    // res.send("updated " + Date.now());
 });
 
 app.get('/person_details/:p_id', requiredAuthentication, function(req, res) {
     var o_id = ObjectId.createFromHexString(req.params.p_id);
-    console.log('tryna return people for: ' + req.params.p_id);
-    db_old.people.findOne({_id: o_id}, function(err, person) {
-        if (err || !person) {
-            console.log("error getting person : " + err);
-        } else {
-            res.json(person);
-            console.log("returning people for " + req.params.p_id);
+    console.log('tryna a person with id ' + req.params.p_id);
+    (async () => {
+        try {
+            const query = { "_id" : o_id };
+            const person = await RunDataQuery("people", "findOne", query);
+            res.send(person);
+        } catch (e) {
+            console.log("error getting person_details " + e);
+            res.send("error getting person_details " + e);
         }
-    });
+    })();
+
+    // db_old.people.findOne({_id: o_id}, function(err, person) {
+    //     if (err || !person) {
+    //         console.log("error getting person : " + err);
+    //     } else {
+    //         res.json(person);
+    //         console.log("returning people for " + req.params.p_id);
+    //     }
+    // });
 });
 
 app.get('/people/:u_id', requiredAuthentication, function(req, res) { //this is people "created by" user
     console.log('tryna return people for: ' + req.params.u_id);
-    db_old.people.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, people) {
-        if (err || !people) {
-            console.log("error getting people : " + err);
-        } else {
-            res.json(people);
-            console.log("returning people for " + req.params.u_id);
+    (async () => {
+        try {
+            const query = {"userID": req.params.u_id};
+            
+            const people = await RunDataQuery("people", "find", query);
+            res.send(people);
+        } catch (e) {
+            console.log("error getting userpeople " + e);
+            res.send("error getting userpeople " + e);
         }
-    });
+    })();
+    // db_old.people.find({userID: req.params.u_id}).sort({otimestamp: -1}).toArray( function(err, people) {
+    //     if (err || !people) {
+    //         console.log("error getting people : " + err);
+    //     } else {
+    //         res.json(people);
+    //         console.log("returning people for " + req.params.u_id);
+    //     }
+    // });
 });
 
 app.get('/allpeople/', requiredAuthentication, admin, function(req, res) {
-    console.log('tryna return people for: ' + req.params.u_id);
-    if (req.session.user.authLevel.toLowerCase().includes("domain")) {
-    db_old.people.find({}).sort({otimestamp: -1}).toArray( function(err, people) {
-        if (err || !people) {
-            console.log("error getting people : " + err);
-        } else {
-            res.json(people);
-            console.log("returning people for " + req.params.u_id);
-        }
-    });
-    } else {
-        res.send("no");
-    }
-});
-
-app.get('/mypeople/:u_id', requiredAuthentication,  function(req, res) {
-    console.log('tryna return people for: ' + req.params.u_id);
-    if (req.session.user._id.toString() == req.params.u_id) {
-    
-    let oid = ObjectId.createFromHexString(req.params.u_id.toString());
-    // async.waterfall
-    db_old.users.findOne({"_id" : oid}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting people : " + err);
-            res.send("err findin user for people " + err);
-        } else {
-            if (user.people != undefined && user.people != null) {
-                db_old.people.find({"_id": {$in: user.people }}).sort({otimestamp: -1}).toArray( function(errr, people) {
-                    if (err || !people) {
-                        console.log("error getting people : " + errr);
-                        res.send("my erroneous people " + errr);
-                    } else {
-                        res.json(people);
-                        console.log("returning people for " + req.params.u_id);
-                    }
-                });
+    // console.log('tryna return people for: ' + req.params.u_id);
+    (async () => {
+        try {
+            if (req.session.user.authLevel.toLowerCase().includes("domain")) {
+                const peoplequery = {};
+                const people = await RunDataQuery("people", "find", peoplequery);
+                res.send(people);
+            } else {
+                const uidstring = req.session.user._id.toString();
+                const oid = ObjectId.createFromHexString(uidstring);
+                const userquery = {"_id": oid};
+                const user = await RunDataQuery("users", "findOne", userquery);
+                // const query = {"id": req.params.u_id};
+                console.log("user " + JSON.stringify(user));
+                const peoplequery = {"_id": {$in: user.people }};
+                const people = await RunDataQuery("people", "find", peoplequery);
+                res.send(people);
             }
+        } catch (e) {
+            console.log("error getting userpeople " + e);
+            res.send("error getting userpeople " + e);
         }
-    });
-    } else {
-        console.log("somebody tryna get people without no surfticket!");
-    }
-
+    })();
+    // if (req.session.user.authLevel.toLowerCase().includes("domain")) {
+    // db_old.people.find({}).sort({otimestamp: -1}).toArray( function(err, people) {
+    //     if (err || !people) {
+    //         console.log("error getting people : " + err);
+    //     } else {
+    //         res.json(people);
+    //         console.log("returning people for " + req.params.u_id);
+    //     }
+    // });
+    // } else {
+    //     res.send("no");
+    // }
 });
 
-app.get('/person/:p_id', requiredAuthentication, function(req, res) {
-    console.log('tryna return person for: ' + req.params.p_id);
-    var o_id = ObjectId.createFromHexString(req.params.p_id);
-    db_old.people.findOne({_id: o_id}, function(err, person) {
-        if (err || !person) {
-            console.log("error getting text_items : " + err);
-        } else {
-            db_old.invitations.find({sentToPersonID: person._id.toString()}, function (err, invitations) {
-                if (err || !invitations) {
-                    res.json(person);
-                } else {
-                    person.invitations = invitations;
-                    res.json(person);
-                }
-            });
-        }
-    });
-});
+// app.get('/mypeople/:u_id', requiredAuthentication,  function(req, res) {
+//     console.log('tryna return people for: ' + req.params.u_id);
+//     if (req.session.user._id.toString() == req.params.u_id) {
+        
+//         let oid = ObjectId.createFromHexString(req.params.u_id.toString());
+//         // // async.waterfall
+//         // db_old.users.findOne({"_id" : oid}, function (err, user) {
+//         //     if (err || !user) {
+//         //         console.log("error getting people : " + err);
+//         //         res.send("err findin user for people " + err);
+//         //     } else {
+//         //         if (user.people != undefined && user.people != null) {
+//         //             db_old.people.find({"_id": {$in: user.people }}).sort({otimestamp: -1}).toArray( function(errr, people) {
+//         //                 if (err || !people) {
+//         //                     console.log("error getting people : " + errr);
+//         //                     res.send("my erroneous people " + errr);
+//         //                 } else {
+//         //                     res.json(people);
+//         //                     console.log("returning people for " + req.params.u_id);
+//         //                 }
+//         //             });
+//         //         }
+//         //     }
+//         // });
+//     } else {
+//         console.log("somebody tryna get people without no surfticket!");
+//     }
+
+// });
+
+// app.get('/person/:p_id', requiredAuthentication, function(req, res) {
+//     console.log('tryna return person for: ' + req.params.p_id);
+//     var o_id = ObjectId.createFromHexString(req.params.p_id);
+
+//     db_old.people.findOne({_id: o_id}, function(err, person) {
+//         if (err || !person) {
+//             console.log("error getting text_items : " + err);
+//         } else {
+//             db_old.invitations.find({sentToPersonID: person._id.toString()}, function (err, invitations) {
+//                 if (err || !invitations) {
+//                     res.json(person);
+//                 } else {
+//                     person.invitations = invitations;
+//                     res.json(person);
+//                 }
+//             });
+//         }
+//     });
+// });
 
 app.get('/actions/:u_id', requiredAuthentication, function(req, res) {
     console.log('tryna return action_items for: ' + req.params.u_id);
@@ -5759,27 +5845,49 @@ app.post('/updatetext/:_id', requiredAuthentication, function (req, res) {
 app.get('/svg/:_id', function(req, res) { 
     console.log('tryna return svg for: ' + req.params._id);
     var o_id = ObjectId.createFromHexString(req.params._id);
-    db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
-        if (err || !text_item) {
-            console.log("error getting text_items : " + err);
-        } else {
-            res.send(text_item.textstring); //text file saved as svg format
-            console.log("returning svg item " + req.params._id);
+
+    (async () => {
+        try {
+            const query = {"_id": o_id};
+            const text_item = await RunDataQuery("text_items", "findOne", query);
+            res.send(text_item.text_string);
+        } catch (e) {
+            console.log('error getting svg ' + e);
+            res.send('error getting svg ' + e);
         }
-    });
+    })();
+    // db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
+    //     if (err || !text_item) {
+    //         console.log("error getting text_items : " + err);
+    //     } else {
+    //         res.send(text_item.textstring); //text file saved as svg format
+    //         console.log("returning svg item " + req.params._id);
+    //     }
+    // });
 });
-app.get('/font/:_id', function(req, res) { 
+app.get('/font/:_id', function(req, res) {  //hrm, this one and svg above are the same, getting a text_item...
     console.log('tryna return font for: ' + req.params._id);
     var o_id = ObjectId.createFromHexString(req.params._id);
-    db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
-        if (err || !text_item || text_item.type != "Font") {
-            console.log("error getting font text_item : " + err);
-            res.send(err);
-        } else {
-            res.send(text_item.textstring); //text file saved as svg format
-            console.log("returning font item " + req.params._id);
+    (async () => {
+        try {
+            const query = {"_id": o_id};
+            const text_item = await RunDataQuery("text_items", "findOne", query);
+            res.send(text_item.text_string);
+        } catch (e) {
+            console.log('error getting font ' + e);
+            res.send('error getting font ' + e);
         }
-    });
+    })();
+
+    // db_old.text_items.findOne({_id: o_id}, function(err, text_item) {
+    //     if (err || !text_item || text_item.type != "Font") {
+    //         console.log("error getting font text_item : " + err);
+    //         res.send(err);
+    //     } else {
+    //         res.send(text_item.textstring); //text file saved as svg format
+    //         console.log("returning font item " + req.params._id);
+    //     }
+    // });
 });
 
 app.get('/usertexts/:u_id', requiredAuthentication, function(req, res) {
@@ -9272,326 +9380,403 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
     );
 });
 
-//unused....but maybe later
-app.get('/available_user_scenes/:user_id', requiredAuthentication, function(req,res){ //authenticated scenes, either owned by user or accessible via acl
-    var availableScenesResponse = {};
-    var availableScenes = [];
-    var availableScene = {};
-    availableScenesResponse.availableScenes = availableScenes;
-    console.log("tryna get domain " + req.params.domain);
-    //mongolian "OR" syntax...
-    var query = {user_id: req.params.user_id};
-    // if (req.params.domain == "servicemedia.net") { //show all public scenes for servicemedia
-    //     query = {sceneShareWithPublic: true};
-    // } else {
-    //     query = {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]};
-    // }
-    // db.scenes.find( {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]}, function (err, scenes) {
-        db_old.scenes.find( query, function (err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err)
-        } else {
-            console.log("gots " + scenes.length + " scenes")
-            async.each(scenes,
-                function (scene, cb) {
-                    availableScene = {};
-                    console.log("scene name : " + scene.sceneTitle);
-                    async.waterfall([
-                            function (callback) {
-                                if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
-                                    var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
-                                    db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-                                        if (err || !picture_item) {
-                                            console.log("error getting postcard for availablescenes: 2" + err);
-                                            cb();
-                                        } else {
-                                            (async () => {
-                                            var item_string_filename = JSON.stringify(picture_item.filename);
-                                            item_string_filename = item_string_filename.replace(/\"/g, "");
-                                            var item_string_filename_ext = getExtension(item_string_filename);
-                                            var expiration = new Date();
-                                            expiration.setMinutes(expiration.getMinutes() + 30);
-                                            var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                            // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
-                                            // var standardName = 'standard.' + baseName + item_string_filename_ext;
-                                            var halfName = 'half.' + baseName + item_string_filename_ext;
-                                            var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+// //unused....but maybe later//too late!
+// app.get('/available_user_scenes/:user_id', requiredAuthentication, function(req,res){ //authenticated scenes, either owned by user or accessible via acl
+//     var availableScenesResponse = {};
+//     var availableScenes = [];
+//     var availableScene = {};
+//     availableScenesResponse.availableScenes = availableScenes;
+//     console.log("tryna get domain " + req.params.domain);
+//     //mongolian "OR" syntax...
+//     var query = {user_id: req.params.user_id};
+//     // if (req.params.domain == "servicemedia.net") { //show all public scenes for servicemedia
+//     //     query = {sceneShareWithPublic: true};
+//     // } else {
+//     //     query = {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]};
+//     // }
+//     // db.scenes.find( {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]}, function (err, scenes) {
+//         db_old.scenes.find( query, function (err, scenes) {
+//         if (err || !scenes) {
+//             console.log("cain't get no scenes... " + err)
+//         } else {
+//             console.log("gots " + scenes.length + " scenes")
+//             async.each(scenes,
+//                 function (scene, cb) {
+//                     availableScene = {};
+//                     console.log("scene name : " + scene.sceneTitle);
+//                     async.waterfall([
+//                             function (callback) {
+//                                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
+//                                     var oo_id = ObjectId.createFromHexString(scene.scenePostcards[0]); //TODO randomize? or ensure latest?  or use assigned default?
+//                                     db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+//                                         if (err || !picture_item) {
+//                                             console.log("error getting postcard for availablescenes: 2" + err);
+//                                             cb();
+//                                         } else {
+//                                             (async () => {
+//                                             var item_string_filename = JSON.stringify(picture_item.filename);
+//                                             item_string_filename = item_string_filename.replace(/\"/g, "");
+//                                             var item_string_filename_ext = getExtension(item_string_filename);
+//                                             var expiration = new Date();
+//                                             expiration.setMinutes(expiration.getMinutes() + 30);
+//                                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                                             // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
+//                                             // var standardName = 'standard.' + baseName + item_string_filename_ext;
+//                                             var halfName = 'half.' + baseName + item_string_filename_ext;
+//                                             var quarterName = 'quarter.' + baseName + item_string_filename_ext;
 
-                                            // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
-                                            // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
-                                            const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName,6000 );
-                                            const urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quar,6000 );
-                                            availableScene = {
-                                                sceneTitle: scene.sceneTitle,
-                                                sceneKey: scene.short_id,
-                                                sceneType: scene.sceneType,
-                                                sceneLastUpdate: scene.sceneLastUpdate,
-                                                sceneDescription: scene.sceneDescription,
-                                                sceneKeynote: scene.sceneKeynote,
-                                                sceneAndroidOK: scene.sceneAndroidOK,
-                                                sceneIosOK: scene.sceneIosOK,
-                                                sceneWindowsOK: scene.sceneWindowsOK,
-                                                sceneWebGLOK: scene.sceneWebGLOK,
-                                                sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-                                                sceneOwner: scene.userName ? "" : scene.userName,
-                                                scenePostcardQuarter: urlQuarter,
-                                                scenePostcardHalf: urlHalf
-                                            };
-                                            callback(null, availableScene);
-                                        })();
-                                        }
-                                    });
-                                } else {
-                                    cb(); //no postcards, next...
-                                }
-                            },
+//                                             // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
+//                                             // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
+//                                             const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName,6000 );
+//                                             const urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quar,6000 );
+//                                             availableScene = {
+//                                                 sceneTitle: scene.sceneTitle,
+//                                                 sceneKey: scene.short_id,
+//                                                 sceneType: scene.sceneType,
+//                                                 sceneLastUpdate: scene.sceneLastUpdate,
+//                                                 sceneDescription: scene.sceneDescription,
+//                                                 sceneKeynote: scene.sceneKeynote,
+//                                                 sceneAndroidOK: scene.sceneAndroidOK,
+//                                                 sceneIosOK: scene.sceneIosOK,
+//                                                 sceneWindowsOK: scene.sceneWindowsOK,
+//                                                 sceneWebGLOK: scene.sceneWebGLOK,
+//                                                 sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+//                                                 sceneOwner: scene.userName ? "" : scene.userName,
+//                                                 scenePostcardQuarter: urlQuarter,
+//                                                 scenePostcardHalf: urlHalf
+//                                             };
+//                                             callback(null, availableScene);
+//                                         })();
+//                                         }
+//                                     });
+//                                 } else {
+//                                     cb(); //no postcards, next...
+//                                 }
+//                             },
 
-                            function (avScene, callback) {
-                                console.log ("tryna get audio " + scene.scenePrimaryAudioID + " for " + JSON.stringify(avScene) );
-                                if (scene.scenePrimaryAudioID != null) {
-                                    var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID );
+//                             function (avScene, callback) {
+//                                 console.log ("tryna get audio " + scene.scenePrimaryAudioID + " for " + JSON.stringify(avScene) );
+//                                 if (scene.scenePrimaryAudioID != null) {
+//                                     var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID );
 
-                                    db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
-                                        if (err || !audio_item) {
-                                            console.log("error getting audio items: " + err);
-                                            callback(null,err);
-                                        } else {
-                                            var item_string_filename = JSON.stringify(audio_item.filename);
-                                            console.log("audio filename: " + item_string_filename);
-                                            item_string_filename = item_string_filename.replace(/\"/g, "");
-                                            var item_string_filename_ext = getExtension(item_string_filename);
-                                            var expiration = new Date();
-                                            expiration.setMinutes(expiration.getMinutes() + 1000);
-                                            var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                            //console.log(baseName);
-                                            var mp3Name = baseName + '.mp3';
-                                            var primaryAudioUrl = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/" + audio_item._id + "." + mp3Name, Expires: 60000});
-                                            avScene.primaryAudioUrl = primaryAudioUrl;
-                                            console.log("tryna push " + primaryAudioUrl + " to scene number " + availableScenesResponse.availableScenes.length);
-                                            availableScenesResponse.availableScenes.push(avScene);
-                                            callback(null, 'done');
-                                        }
-                                    });
-                                } else {
-                                    availableScenesResponse.availableScenes.push(avScene);
-                                    callback(null, 'done');
-                                }
-                            }
-                        ], //waterfall async end
-                        function (err, result) { // #last function, close async
-                            console.log("available domain scene waterfall done: " + result);
-                            cb();
-                        }
-                    );
-                }, // each scene async end
-                function (err) {
-//                    callbag();
-                    availableScenesResponse.availableScenes.sort(function(a, b) {
-                        return b.sceneLastUpdate - a.sceneLastUpdate;
-                    });
-                    JSON.stringify(availableScenesResponse);
-                    res.send(availableScenesResponse);
-                }
-            );
-        }
-    });
-});
+//                                     db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
+//                                         if (err || !audio_item) {
+//                                             console.log("error getting audio items: " + err);
+//                                             callback(null,err);
+//                                         } else {
+//                                             var item_string_filename = JSON.stringify(audio_item.filename);
+//                                             console.log("audio filename: " + item_string_filename);
+//                                             item_string_filename = item_string_filename.replace(/\"/g, "");
+//                                             var item_string_filename_ext = getExtension(item_string_filename);
+//                                             var expiration = new Date();
+//                                             expiration.setMinutes(expiration.getMinutes() + 1000);
+//                                             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                                             //console.log(baseName);
+//                                             var mp3Name = baseName + '.mp3';
+//                                             var primaryAudioUrl = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/" + audio_item._id + "." + mp3Name, Expires: 60000});
+//                                             avScene.primaryAudioUrl = primaryAudioUrl;
+//                                             console.log("tryna push " + primaryAudioUrl + " to scene number " + availableScenesResponse.availableScenes.length);
+//                                             availableScenesResponse.availableScenes.push(avScene);
+//                                             callback(null, 'done');
+//                                         }
+//                                     });
+//                                 } else {
+//                                     availableScenesResponse.availableScenes.push(avScene);
+//                                     callback(null, 'done');
+//                                 }
+//                             }
+//                         ], //waterfall async end
+//                         function (err, result) { // #last function, close async
+//                             console.log("available domain scene waterfall done: " + result);
+//                             cb();
+//                         }
+//                     );
+//                 }, // each scene async end
+//                 function (err) {
+// //                    callbag();
+//                     availableScenesResponse.availableScenes.sort(function(a, b) {
+//                         return b.sceneLastUpdate - a.sceneLastUpdate;
+//                     });
+//                     JSON.stringify(availableScenesResponse);
+//                     res.send(availableScenesResponse);
+//                 }
+//             );
+//         }
+//     });
+// });
 // app.get('/designated ')
+
 app.get('/available_domain_scenes/:domain',  function (req, res) { //public scenes for this app's domain name, used by public websites
-    var availableScenesResponse = {};
-    var availableScenes = [];
-    var availableScene = {};
+    let availableScenesResponse = {};
+    let availableScenes = [];
+   
     availableScenesResponse.availableScenes = availableScenes;
-    // console.log("tryna get domain " + req.params.domain + " adn id " + req.params.user_id);
-    //mongolian "OR" syntax...
-    var query = {};
+    let query = {};
     if (req.params.domain == "servicemedia.net") { //show all public scenes for servicemedia
         query = {sceneShareWithPublic: true};
-        // if (req.params.user_id != null && req.params.user_id.Length > 8)
-        // query = {$and: [{ "user_id": req.params.user_id}, {sceneShareWithPublic: true }]}; //also all scenes with this user_id
     } else {
         query = {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]};
-        // if (req.params.user_id != null && req.params.user_id.Length > 8)
-        // query = {$and: [{ "sceneDomain": req.params.domain}, { "user_id": req.params.user_id}, {sceneShareWithPublic: true }]}; //also all scenes with this user_id
     }
-    // db.scenes.find( {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]}, function (err, scenes) {
+   
         console.log("available scene query: "+ JSON.stringify(query));
-        db_old.scenes.find( query, function (err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err)
-        } else {
-            console.log("gots " + scenes.length + " scenes")
-            async.each(scenes,
-                function (scene, cb) {
-                    availableScene = {};
-                    // console.log("scene name : " + scene.sceneTitle);
-                    async.waterfall([
-                            function (callback) {
-                                if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
-                                    var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
-                                    var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-                                    db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-                                        if (err || !picture_item) {
-                                            console.log("error getting postcard for availablescenes: 2" + err);
-                                            if (req.params.user_id != null && req.params.user_id && req.params.user_id == scene.user_id) { //show incomplete scenes by this user
-                                                availableScene = {
-                                                    sceneTitle: scene.sceneTitle,
-                                                    sceneKey: scene.short_id,
-                                                    sceneType: scene.sceneType,
-                                                    sceneTags: scene.sceneTags,
-                                                    sceneAltURL: scene.sceneAltURL,
-                                                    sceneLastUpdate: scene.sceneLastUpdate,
-                                                    sceneDescription: scene.sceneDescription,
-                                                    sceneKeynote: scene.sceneKeynote,
-                                                    sceneCategory: scene.sceneCategory,
-                                                    sceneSource: scene.sceneSource,
-                                                    sceneAndroidOK: scene.sceneAndroidOK,
-                                                    sceneIosOK: scene.sceneIosOK,
-                                                    sceneWindowsOK: scene.sceneWindowsOK,
-                                                    sceneWebGLOK: scene.sceneWebGLOK,
-                                                    sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-                                                    sceneOwner: scene.userName ? "" : scene.userName,
-                                                    scenePostcardQuarter: "nilch",
-                                                    scenePostcardHalf: "nilch"
-                                                    // sceneAndroidOK: scene.sceneAndroidOK,
-                                                    // sceneIosOK: scene.sceneIosOK,
-                                                    // sceneWindowsOK: scene.sceneWindowsOK
-                                                };
-                                                callback(null, availableScene);
-                                            } else {
-                                                cb(); //no postcards, next...
-                                            }
-                                        } else {
-                                            (async () => {
-                                                var item_string_filename = JSON.stringify(picture_item.filename);
-                                                item_string_filename = item_string_filename.replace(/\"/g, "");
-                                                var item_string_filename_ext = getExtension(item_string_filename);
-                                                var expiration = new Date();
-                                                expiration.setMinutes(expiration.getMinutes() + 30);
-                                                var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                                // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
-                                                // var standardName = 'standard.' + baseName + item_string_filename_ext;
-                                                var halfName = 'half.' + baseName + item_string_filename_ext;
-                                                var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-                                                var originalName = 'original.' + baseName + item_string_filename_ext;
-                                                const urlOrig = "";
-                                                // if (req.params.domain == "xrswim.com") { //return orig ones for xrswim..
-                                                //     // urlOrig = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/originals/" + picture_item._id + "." + originalName, Expires: 6000});
-                                                //     url
-                                                //     // s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + origName, Expires: 6000}); //just send back thumbnail urls for list
-                                                // }
-                                                // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
-                                                // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
-                                                const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
-                                                const urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
-                                                availableScene = {
-                                                    sceneTitle: scene.sceneTitle,
-                                                    sceneKey: scene.short_id,
-                                                    sceneType: scene.sceneType,
-                                                    sceneWebType: scene.sceneWebType,
-                                                    sceneAltURL: scene.sceneAltURL,
-                                                    sceneLastUpdate: scene.sceneLastUpdate,
-                                                    sceneDescription: scene.sceneDescription,
-                                                    sceneKeynote: scene.sceneKeynote,
-                                                    sceneCategory: scene.sceneCategory,
-                                                    sceneSource: scene.sceneSource,
-                                                    sceneTags: scene.sceneTags,
-                                                    sceneWebGLOK: scene.sceneWebGLOK,
-                                                    sceneAndroidOK: scene.sceneAndroidOK,
-                                                    sceneIosOK: scene.sceneIosOK,
-                                                    sceneWindowsOK: scene.sceneWindowsOK,
-                                                    sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-                                                    sceneOwner: scene.userName,
-                                                    scenePostcardQuarter: urlQuarter,
-                                                    scenePostcardHalf: urlHalf,
-                                                    scenePostcardOriginal: urlOrig
-                                                };
-                                                callback(null, availableScene);
-                                            })();
-                                        }
-                                    });
-                                } else {
-                                    if (req.params.user_id != null && req.params.user_id && req.params.user_id == scene.user_id) { //show incomplete scenes by this user
-                                        availableScene = {
-                                            sceneTitle: scene.sceneTitle,
-                                            sceneKey: scene.short_id,
-                                            sceneType: scene.sceneType,
-                                            sceneLastUpdate: scene.sceneLastUpdate,
-                                            sceneDescription: scene.sceneDescription,
-                                            sceneKeynote: scene.sceneKeynote,
-                                            sceneWebGLOK: scene.sceneWebGLOK,
-                                            sceneAndroidOK: scene.sceneAndroidOK,
-                                            sceneIosOK: scene.sceneIosOK,
-                                            sceneWindowsOK: scene.sceneWindowsOK,
-                                            sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-                                            sceneOwner: scene.userName ? "" : scene.userName,
-                                            scenePostcardQuarter: "nilch",
-                                            scenePostcardHalf: "nilch"
-                                        };
-                                        callback(null, availableScene);
-                                    } else {
-                                        cb(); //no postcards, next...
-                                    }
-                                }
-                            },
-                            function (avScene, callback) {
-                                // console.log ("tryna get audio " + scene.scenePrimaryAudioID + " for " + JSON.stringify(avScene) );
-                                if (scene.scenePrimaryAudioStreamURL != null && scene.scenePrimaryAudioStreamURL != "" && scene.scenePrimaryAudioStreamURL.length > 6) { 
-                                    // avScene.scenePrimaryAudioStreamURL = scene.scenePrimaryAudioStreamURL; //these tend to fsu on safari
-                                }
-                                if (scene.scenePrimaryAudioID != null && scene.scenePrimaryAudioID != "" && scene.scenePrimaryAudioID.length > 8) {
-                                    var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID );
 
-                                    db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
-                                        if (err || !audio_item) {
-                                            console.log("error getting audio items: " + err);
-                                            callback(null,err);
-                                        } else {
-                                            (async () => {
-                                                var item_string_filename = JSON.stringify(audio_item.filename);
-                                                // console.log("audio filename: " + item_string_filename);
-                                                item_string_filename = item_string_filename.replace(/\"/g, "");
-                                                var item_string_filename_ext = getExtension(item_string_filename);
-                                                var expiration = new Date();
-                                                expiration.setMinutes(expiration.getMinutes() + 1000);
-                                                var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                                                //console.log(baseName);
-                                                var mp3Name = baseName + '.mp3';
-                                                // var primaryAudioUrl = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name, Expires: 60000});
-                                                const primaryAudioUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name,6000);
-                                                avScene.primaryAudioUrl = primaryAudioUrl;
-                                                // console.log("tryna push " + primaryAudioUrl + " to scene number " + availableScenesResponse.availableScenes.length);
-                                                availableScenesResponse.availableScenes.push(avScene);
-                                                callback(null, 'done');
-                                            })();
-                                        }
-                                    });
-                                } else {
-                                    availableScenesResponse.availableScenes.push(avScene);
-                                    callback(null, 'done');
-                                }
-                            }
-                        ], //waterfall async end
-                        function (err, result) { // #last function, close async
-                            // console.log("available domain scene waterfall done with count: " + availableScenesResponse.availableScenes.length);
-                            cb();
-                        }
-                    );
-                }, // each scene async end
-                function (err) {
-//                    callbag();
-                    availableScenesResponse.availableScenes.sort(function(a, b) {
-                        return b.sceneLastUpdate - a.sceneLastUpdate;
-                    });
-                    JSON.stringify(availableScenesResponse);
-                    res.send(availableScenesResponse);
+        (async () => {
+            try {
+                const scenes = await RunDataQuery("scenes", "find", query);
+                for (const scene of scenes) {
+                    let availableScene = {};
+                    // console.log("scene " + JSON.stringify(scene));
+                    if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { 
+                        // console.log("no postcard found for this scene : " + scene.short_id);
+                        const postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
+                        var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]);
+                        const postcardquery = {"_id": oo_id};
+                        const picture_item = await RunDataQuery("image_items", "findOne", postcardquery);
+                        var item_string_filename = JSON.stringify(picture_item.filename);
+                        item_string_filename = item_string_filename.replace(/\"/g, "");
+                        var item_string_filename_ext = getExtension(item_string_filename);
+                        var expiration = new Date();
+                        expiration.setMinutes(expiration.getMinutes() + 30);
+                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                        // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
+                        // var standardName = 'standard.' + baseName + item_string_filename_ext;
+                        var halfName = 'half.' + baseName + item_string_filename_ext;
+                        var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+                        var originalName = 'original.' + baseName + item_string_filename_ext;
+                        const urlOrig = "";
+                        const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+                        const urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+                        availableScene = {
+                            sceneTitle: scene.sceneTitle,
+                            sceneKey: scene.short_id,
+                            sceneType: scene.sceneType,
+                            sceneWebType: scene.sceneWebType,
+                            sceneAltURL: scene.sceneAltURL,
+                            sceneLastUpdate: scene.sceneLastUpdate,
+                            sceneDescription: scene.sceneDescription,
+                            sceneKeynote: scene.sceneKeynote,
+                            sceneCategory: scene.sceneCategory,
+                            sceneSource: scene.sceneSource,
+                            sceneTags: scene.sceneTags,
+                            sceneWebGLOK: scene.sceneWebGLOK,
+                            sceneAndroidOK: scene.sceneAndroidOK,
+                            sceneIosOK: scene.sceneIosOK,
+                            sceneWindowsOK: scene.sceneWindowsOK,
+                            sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+                            sceneOwner: scene.userName,
+                            scenePostcardQuarter: urlQuarter,
+                            scenePostcardHalf: urlHalf,
+                            scenePostcardOriginal: urlOrig
+                        };
+                        //nope, the domain pages don't use the audiolink...
+                        // if (scene.scenePrimaryAudioID != null && scene.scenePrimaryAudioID != "" && scene.scenePrimaryAudioID.length > 8) {
+                        //     var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID );
+                        //     const query = {"_id": o_id};
+                        //     const audio_item = await RunDataQuery("audio_items", "findOne", query);
+                        //     var item_string_filename = JSON.stringify(audio_item.filename);
+                            
+                        //     item_string_filename = item_string_filename.replace(/\"/g, "");
+                        //     var item_string_filename_ext = getExtension(item_string_filename);
+                        //     var expiration = new Date();
+                        //     expiration.setMinutes(expiration.getMinutes() + 1000);
+                        //     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                            
+                        //     var mp3Name = baseName + '.mp3';
+                            
+                        //     const primaryAudioUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name,6000);
+                        //     availableScene.primaryAudioUrl = primaryAudioUrl;
+                        // }
+                        availableScenesResponse.availableScenes.push(availableScene);
+                    } else {
+                        console.log("availahle scene needs a postcard ! " + scene.short_id);
+                    }
                 }
-            );
-        }
-    });
-});
+                availableScenesResponse.availableScenes.sort(function(a, b) {
+                    return b.sceneLastUpdate - a.sceneLastUpdate;
+                });
+                res.send(availableScenesResponse);
+            } catch (e) {
 
-app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthentication, function (req, res) { //public scenes for this app's domain name, w/ platform filter //TODO authenticate, check acl
+            }
+        })();
+    });
+
+//         db_old.scenes.find( query, function (err, scenes) {
+//         if (err || !scenes) {
+//             console.log("cain't get no scenes... " + err)
+//         } else {
+//             console.log("gots " + scenes.length + " scenes")
+//             async.each(scenes,
+//                 function (scene, cb) {
+//                     availableScene = {};
+//                     // console.log("scene name : " + scene.sceneTitle);
+//                     async.waterfall([
+//                             function (callback) {
+//                                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
+//                                     var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
+//                                     var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+//                                     db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+//                                         if (err || !picture_item) {
+//                                             console.log("error getting postcard for availablescenes: 2" + err);
+//                                             if (req.params.user_id != null && req.params.user_id && req.params.user_id == scene.user_id) { //show incomplete scenes by this user
+//                                                 availableScene = {
+//                                                     sceneTitle: scene.sceneTitle,
+//                                                     sceneKey: scene.short_id,
+//                                                     sceneType: scene.sceneType,
+//                                                     sceneTags: scene.sceneTags,
+//                                                     sceneAltURL: scene.sceneAltURL,
+//                                                     sceneLastUpdate: scene.sceneLastUpdate,
+//                                                     sceneDescription: scene.sceneDescription,
+//                                                     sceneKeynote: scene.sceneKeynote,
+//                                                     sceneCategory: scene.sceneCategory,
+//                                                     sceneSource: scene.sceneSource,
+//                                                     sceneAndroidOK: scene.sceneAndroidOK,
+//                                                     sceneIosOK: scene.sceneIosOK,
+//                                                     sceneWindowsOK: scene.sceneWindowsOK,
+//                                                     sceneWebGLOK: scene.sceneWebGLOK,
+//                                                     sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+//                                                     sceneOwner: scene.userName ? "" : scene.userName,
+//                                                     scenePostcardQuarter: "nilch",
+//                                                     scenePostcardHalf: "nilch"
+//                                                     // sceneAndroidOK: scene.sceneAndroidOK,
+//                                                     // sceneIosOK: scene.sceneIosOK,
+//                                                     // sceneWindowsOK: scene.sceneWindowsOK
+//                                                 };
+//                                                 callback(null, availableScene);
+//                                             } else {
+//                                                 cb(); //no postcards, next...
+//                                             }
+//                                         } else {
+//                                             (async () => {
+//                                                 var item_string_filename = JSON.stringify(picture_item.filename);
+//                                                 item_string_filename = item_string_filename.replace(/\"/g, "");
+//                                                 var item_string_filename_ext = getExtension(item_string_filename);
+//                                                 var expiration = new Date();
+//                                                 expiration.setMinutes(expiration.getMinutes() + 30);
+//                                                 var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                                                 // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
+//                                                 // var standardName = 'standard.' + baseName + item_string_filename_ext;
+//                                                 var halfName = 'half.' + baseName + item_string_filename_ext;
+//                                                 var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+//                                                 var originalName = 'original.' + baseName + item_string_filename_ext;
+//                                                 const urlOrig = "";
+//                                                 // if (req.params.domain == "xrswim.com") { //return orig ones for xrswim..
+//                                                 //     // urlOrig = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/originals/" + picture_item._id + "." + originalName, Expires: 6000});
+//                                                 //     url
+//                                                 //     // s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + origName, Expires: 6000}); //just send back thumbnail urls for list
+//                                                 // }
+//                                                 // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
+//                                                 // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
+//                                                 const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+//                                                 const urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+//                                                 availableScene = {
+//                                                     sceneTitle: scene.sceneTitle,
+//                                                     sceneKey: scene.short_id,
+//                                                     sceneType: scene.sceneType,
+//                                                     sceneWebType: scene.sceneWebType,
+//                                                     sceneAltURL: scene.sceneAltURL,
+//                                                     sceneLastUpdate: scene.sceneLastUpdate,
+//                                                     sceneDescription: scene.sceneDescription,
+//                                                     sceneKeynote: scene.sceneKeynote,
+//                                                     sceneCategory: scene.sceneCategory,
+//                                                     sceneSource: scene.sceneSource,
+//                                                     sceneTags: scene.sceneTags,
+//                                                     sceneWebGLOK: scene.sceneWebGLOK,
+//                                                     sceneAndroidOK: scene.sceneAndroidOK,
+//                                                     sceneIosOK: scene.sceneIosOK,
+//                                                     sceneWindowsOK: scene.sceneWindowsOK,
+//                                                     sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+//                                                     sceneOwner: scene.userName,
+//                                                     scenePostcardQuarter: urlQuarter,
+//                                                     scenePostcardHalf: urlHalf,
+//                                                     scenePostcardOriginal: urlOrig
+//                                                 };
+//                                                 callback(null, availableScene);
+//                                             })();
+//                                         }
+//                                     });
+//                                 } else {
+//                                     if (req.params.user_id != null && req.params.user_id && req.params.user_id == scene.user_id) { //show incomplete scenes by this user
+//                                         availableScene = {
+//                                             sceneTitle: scene.sceneTitle,
+//                                             sceneKey: scene.short_id,
+//                                             sceneType: scene.sceneType,
+//                                             sceneLastUpdate: scene.sceneLastUpdate,
+//                                             sceneDescription: scene.sceneDescription,
+//                                             sceneKeynote: scene.sceneKeynote,
+//                                             sceneWebGLOK: scene.sceneWebGLOK,
+//                                             sceneAndroidOK: scene.sceneAndroidOK,
+//                                             sceneIosOK: scene.sceneIosOK,
+//                                             sceneWindowsOK: scene.sceneWindowsOK,
+//                                             sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+//                                             sceneOwner: scene.userName ? "" : scene.userName,
+//                                             scenePostcardQuarter: "nilch",
+//                                             scenePostcardHalf: "nilch"
+//                                         };
+//                                         callback(null, availableScene);
+//                                     } else {
+//                                         cb(); //no postcards, next...
+//                                     }
+//                                 }
+//                             },
+//                             function (avScene, callback) {
+//                                 // console.log ("tryna get audio " + scene.scenePrimaryAudioID + " for " + JSON.stringify(avScene) );
+//                                 if (scene.scenePrimaryAudioStreamURL != null && scene.scenePrimaryAudioStreamURL != "" && scene.scenePrimaryAudioStreamURL.length > 6) { 
+//                                     // avScene.scenePrimaryAudioStreamURL = scene.scenePrimaryAudioStreamURL; //these tend to fsu on safari
+//                                 }
+//                                 if (scene.scenePrimaryAudioID != null && scene.scenePrimaryAudioID != "" && scene.scenePrimaryAudioID.length > 8) {
+//                                     var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID );
+
+//                                     db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
+//                                         if (err || !audio_item) {
+//                                             console.log("error getting audio items: " + err);
+//                                             callback(null,err);
+//                                         } else {
+//                                             (async () => {
+//                                                 var item_string_filename = JSON.stringify(audio_item.filename);
+//                                                 // console.log("audio filename: " + item_string_filename);
+//                                                 item_string_filename = item_string_filename.replace(/\"/g, "");
+//                                                 var item_string_filename_ext = getExtension(item_string_filename);
+//                                                 var expiration = new Date();
+//                                                 expiration.setMinutes(expiration.getMinutes() + 1000);
+//                                                 var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+//                                                 //console.log(baseName);
+//                                                 var mp3Name = baseName + '.mp3';
+//                                                 // var primaryAudioUrl = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name, Expires: 60000});
+//                                                 const primaryAudioUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name,6000);
+//                                                 avScene.primaryAudioUrl = primaryAudioUrl;
+//                                                 // console.log("tryna push " + primaryAudioUrl + " to scene number " + availableScenesResponse.availableScenes.length);
+//                                                 availableScenesResponse.availableScenes.push(avScene);
+//                                                 callback(null, 'done');
+//                                             })();
+//                                         }
+//                                     });
+//                                 } else {
+//                                     availableScenesResponse.availableScenes.push(avScene);
+//                                     callback(null, 'done');
+//                                 }
+//                             }
+//                         ], //waterfall async end
+//                         function (err, result) { // #last function, close async
+//                             // console.log("available domain scene waterfall done with count: " + availableScenesResponse.availableScenes.length);
+//                             cb();
+//                         }
+//                     );
+//                 }, // each scene async end
+//                 function (err) {
+// //                    callbag();
+//                     availableScenesResponse.availableScenes.sort(function(a, b) {
+//                         return b.sceneLastUpdate - a.sceneLastUpdate;
+//                     });
+//                     JSON.stringify(availableScenesResponse);
+//                     res.send(availableScenesResponse);
+//                 }
+//             );
+//         }
+//     });
+// });
+
+app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthentication, function (req, res) { //called from Unity ? public scenes for this app's domain name, w/ platform filter //TODO authenticate, check acl
 
     var availableScenesResponse = {};
     var availableScenes = [];
@@ -10265,16 +10450,27 @@ app.post('/newgroup', requiredAuthentication, function (req, res) {
     group.lastUpdate = timestamp;
     let items = [];
     group.items = items;
-    db_old.groups.save(group, function (err, saved) {
-        if ( err || !saved ) {
-            // console.log('group not saved..');
-            res.send("error " + err );
-        } else {
-            var item_id = saved._id.toString();
-            console.log('new group created, id: ' + item_id);
-            res.send(item_id);
+    (async () => {
+        try {
+
+            const saved = await RunDataQuery("groups", "insertOne", group);
+            res.send(saved.insertedId);
+        } catch (e) {
+            console.log("error creating new group " + e);
+            res.send("error creating new group "+ e);
         }
-    });
+    })();
+    
+    // db_old.groups.save(group, function (err, saved) {
+    //     if ( err || !saved ) {
+    //         // console.log('group not saved..');
+    //         res.send("error " + err );
+    //     } else {
+    //         var item_id = saved._id.toString();
+    //         console.log('new group created, id: ' + item_id);
+    //         res.send(item_id);
+    //     }
+    // });
 });
 
 app.post('/delete_group/', requiredAuthentication, function (req, res) { 
@@ -10296,34 +10492,58 @@ app.post('/delete_group/', requiredAuthentication, function (req, res) {
 app.post('/clone_group/', requiredAuthentication, function (req, res) { 
     console.log("tryna clone group : " + req.body._id);
     var o_id = ObjectId.createFromHexString(req.body._id);
-    db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
-    if (err || !group) {
-        res.send("group not found!");
-    } else {
-        var clonedgroup = group;
-        clonedgroup._id = new ObjectId.createFromHexString(); //better way
-        clonedgroup.userID = req.session.user._id.toString();
-        clonedgroup.userName = req.session.user.username;
-        clonedgroup.name = group.name + " clone";
-        var timestamp = Math.round(Date.now() / 1000);
-        clonedgroup.lastUpdate = timestamp;
-        console.log("new group data " + JSON.stringify(clonedgroup));
-        db_old.groups.insert(clonedgroup, function (err, saved) {
-            if ( err || !saved ) {
-                // console.log('group not saved..');
-                res.send("error " + err );
-            } else {
-                var item_id = saved._id.toString();
-                console.log('new group created, id: ' + item_id);
-                res.send("cloned group : " + item_id);
-            }
-        });
-    }
-    
-    });
 
-
+    (async () => {
+        try {
+            const query = { "_id" : o_id};
+            const group = await RunDataQuery("groups", "findOne", query);
+            let clonedgroup = {};
+            // clonedgroup._id = new ObjectId.createFromHexString(); //better way
+            clonedgroup.type = group.type;
+            clonedgroup.userID = req.session.user._id.toString();
+            clonedgroup.userName = req.session.user.username;
+            clonedgroup.name = group.name + " clone";
+            var timestamp = Math.round(Date.now() / 1000);
+            clonedgroup.groupdata = group.groupdata;
+            clonedgroup.items = group.items;
+            clonedgroup.lastUpdate = timestamp;
+            console.log("new group data " + JSON.stringify(clonedgroup));
+            const newgroup = await RunDataQuery("groups", "insertOne", clonedgroup);
+            console.log("cloned group created " + newgroup.insertedId);
+            res.send("group cloned! " + newgroup.insertedId);
+        } catch (e) {
+            console.log("error cloning group " + e);
+            res.send("error cloning group " + e);
+            
+        }
+    })();
 });
+    // db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
+    // if (err || !group) {
+    //     res.send("group not found!");
+    // } else {
+    //     var clonedgroup = group;
+    //     clonedgroup._id = new ObjectId.createFromHexString(); //better way
+    //     clonedgroup.userID = req.session.user._id.toString();
+    //     clonedgroup.userName = req.session.user.username;
+    //     clonedgroup.name = group.name + " clone";
+    //     var timestamp = Math.round(Date.now() / 1000);
+    //     clonedgroup.lastUpdate = timestamp;
+    //     console.log("new group data " + JSON.stringify(clonedgroup));
+    //     db_old.groups.insert(clonedgroup, function (err, saved) {
+    //         if ( err || !saved ) {
+    //             // console.log('group not saved..');
+    //             res.send("error " + err );
+    //         } else {
+    //             var item_id = saved._id.toString();
+    //             console.log('new group created, id: ' + item_id);
+    //             res.send("cloned group : " + item_id);
+    //         }
+    //     });
+    // }
+    
+    // });
+// });
 
 ///  maybe later, with cleanup options
 // app.post('/delete_scene/:_id', checkAppID, requiredAuthentication, function (req, res) { 

@@ -28,6 +28,7 @@
     window.CloneScene = CloneScene;
     window.newGroup = newGroup;
     window.newScene = newScene;
+    window.cloneGroup = cloneGroup;
 
     var cookie = Cookies.get();
     var type = getParameterByName("type", window.location.href); //these params used for routing in bigSwitch
@@ -185,27 +186,28 @@
             $("#pageTitle").html("All Registered Users");
             getAllUsers();
         break;
-        case "person": //gets everything atm
+        case "person": //gets a person!
             $("#tables").show();
             $("#table1").show();
             $("#table1Title").html("Person");
             $("#pageTitle").html("Person");
             showPerson();
         break;
-        case "mypeople": //gets everything atm
+        case "mypeople": //now get user's people//no
             $("#tables").show();
             $("#table1").show();
             $("#table1Title").html("My People");
             $("#pageTitle").html("My People");
             getMyPeople();
         break;
-        case "people": //gets everything atm
+        case "people": //gets users people or all if domain admin
             $("#tables").show();
             $("#table1").show();
             $("#table1Title").html("People");
             $("#pageTitle").html("All People");
             getAllPeople();
         break;
+
         case "appusers": //gets everything atm
             $("#tables").show();
             $("#table1").show();
@@ -9602,19 +9604,11 @@ function showGroup() {
         appid: appid,
         }
         }
-        tagsHtml = "";
-        tags = [];
+
         axios.get('/person_details/' + itemid, config)
         .then(function (response) {
-        // let ouser = response.data.userID;
-        // let date = response.data.otimestamp;
-        // let user = null;
-        // if (response.data.lastUpdateUserName != null) {
-        //     user = response.data.lastUpdateUserName;
-        // }
-        // if (response.data.lastUpdateTimestamp != null) {
-        //     date = response.data.lastUpdateTimestamp;
-        // }
+            console.log("person " + JSON.stringify(response));
+        
         let mailCountLast24 = 0;
         let mailCountLastWeek = 0;
         let mailCountTotal = 0;
@@ -9640,11 +9634,6 @@ function showGroup() {
                         mailCountLast24++;
                     }
 
-                    // let mailDeets = {};
-                    // mailDeets.sentBy = reversedActivities[i][o].split("_")[0];
-                    // mailDeets.sentDate = reversedActivities[i][o].split("_")[1];
-                    // console.log("maildeet" + JSON.stringify(mailDeets));
-                    
                 }
                 //bracket notation on the array element convert
                 activities += o + " | " + reversedActivities[i][o].split("_")[1] + " | " + convertTimestamp(reversedActivities[i][o].split("_")[0]/1000) + " | " + reversedActivities[i][o].split("_")[2] + "<br>";
