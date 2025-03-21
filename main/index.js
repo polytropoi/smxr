@@ -29,6 +29,8 @@
     window.newGroup = newGroup;
     window.newScene = newScene;
     window.cloneGroup = cloneGroup;
+    window.newLocation = newLocation;
+    window.showLocation = showLocation;
 
     var cookie = Cookies.get();
     var type = getParameterByName("type", window.location.href); //these params used for routing in bigSwitch

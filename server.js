@@ -10293,7 +10293,7 @@ app.post('/newlocation', requiredAuthentication, function (req, res) {
         try {
             const saved = await RunDataQuery("locations", "insertOne", location); 
             console.log("new location " + saved.insertedId);
-            res.send("new location " + saved.insertedId);
+            res.send("created new location " + saved.insertedId);
         } catch (e) {
             console.log("error creating new location " + e);
             res.send("error creaating new location " + e);
@@ -10354,9 +10354,6 @@ app.post('/delete_location/',  requiredAuthentication, function (req, res) { //w
             res.send('error deleted location' + e);
         }
     })();
-    db_old.locations.remove( { "_id" : o_id }, 1 );
-    res.send("deleted");
-
 });
 
 app.get('/userlocation/:p_id', requiredAuthentication, function(req, res) {
@@ -10379,30 +10376,33 @@ app.get('/userlocation/:p_id', requiredAuthentication, function(req, res) {
 });
 
 app.post('/update_location/:_id', requiredAuthentication, function (req, res) {
-    console.log(JSON.stringify(req.body));
-
-    var o_id = ObjectId.createFromHexString(req.body._id);   
+    console.log("tryna update_location " + JSON.stringify(req.body));
+   
     console.log('location requested : ' + req.body._id);
-    db_old.locations.findOne({ "_id" : o_id}, function(err, location) {
-        if (err || !location) {
-            console.log("error getting audio items: " + err);
-        } else {
-            console.log("tryna update location" + req.body._id);
-            var timestamp = Math.round(Date.now() / 1000);
+    (async () => {
+        try {
+            const o_id = ObjectId.createFromHexString(req.body._id);   
+            const query = { "_id" : o_id};
+            let location = await RunDataQuery("locations", "findOne", query);
+            console.log("tryna update location " + req.body._id);
+            const timestamp = Math.round(Date.now() / 1000);
             location.lastUpdate = timestamp;
             if (location.type.toLowerCase() == "geographic") {
-                db_old.locations.update( { "_id": o_id }, { $set: {
+                const gupdoc = {$set: {
                     tags: req.body.tags,
                     name: req.body.name,
                     description: req.body.description,
                     latitude: req.body.latitude,
                     longitude: req.body.longitude,
                     lastUpdate: timestamp
-                }});
-                res.send("updated");
-            }
-            if (location.type.toLowerCase() == "worldspace") {
-                db_old.locations.update( { "_id": o_id }, { $set: {
+                }};
+                // console.log("gupdoc " + JSON.stringify(gupdoc));
+                // const o_id = ObjectId.createFromHexString(req.body._id); 
+                const lquery = {"_id" : o_id};
+                const updated = await RunDataQuery("locations", "updateOne", lquery, gupdoc);
+                res.send("updated " + JSON.stringify(updated));
+            } else if (location.type.toLowerCase() == "worldspace") {
+                const wupdoc = { $set: {
                     tags: req.body.tags,
                     name: req.body.name,
                     description: req.body.description,
@@ -10410,12 +10410,52 @@ app.post('/update_location/:_id', requiredAuthentication, function (req, res) {
                     y: req.body.y,
                     z: req.body.z,
                     lastUpdate: timestamp
-                }});
-                res.send("updated");
+                }};
+                // console.log("gupdoc " + JSON.stringify(wupdoc));
+                // const o_id = ObjectId.createFromHexString(req.body._id); 
+                const wquery = {"_id" : o_id};
+                const updated = await RunDataQuery("locations", "updateOne", wquery, wupdoc);
+                res.send("updated " + JSON.stringify(updated));
             } 
-        } if (err) {res.send(error)};
-    });
+        } catch (e) {
+            console.log("error updating location " + e);
+            res.send("error updating location " + e);
+        }
+    })();
 });
+//     db_old.locations.findOne({ "_id" : o_id}, function(err, location) {
+//         if (err || !location) {
+//             console.log("error getting audio items: " + err);
+//         } else {
+//             console.log("tryna update location" + req.body._id);
+//             var timestamp = Math.round(Date.now() / 1000);
+//             location.lastUpdate = timestamp;
+//             if (location.type.toLowerCase() == "geographic") {
+//                 db_old.locations.update( { "_id": o_id }, { $set: {
+//                     tags: req.body.tags,
+//                     name: req.body.name,
+//                     description: req.body.description,
+//                     latitude: req.body.latitude,
+//                     longitude: req.body.longitude,
+//                     lastUpdate: timestamp
+//                 }});
+//                 res.send("updated");
+//             }
+//             if (location.type.toLowerCase() == "worldspace") {
+//                 db_old.locations.update( { "_id": o_id }, { $set: {
+//                     tags: req.body.tags,
+//                     name: req.body.name,
+//                     description: req.body.description,
+//                     x: req.body.x,
+//                     y: req.body.y,
+//                     z: req.body.z,
+//                     lastUpdate: timestamp
+//                 }});
+//                 res.send("updated");
+//             } 
+//         } if (err) {res.send(error)};
+//     });
+// });
 
 app.post('/newscene', requiredAuthentication, admin, function (req, res) {
     console.log(req.body);
