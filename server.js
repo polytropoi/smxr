@@ -6103,247 +6103,6 @@ app.post('/scene_inventory_objex/', function(req, res) {
         }
     })();
 });
-//     db_old.obj_items.find({"_id": {$in: iids}}, function(err, obj_items) {
-//         if (err || !obj_items) {
-//             console.log("error getting picture items: " + err);
-//         } else {
-//             async.each (obj_items, function (obj_item, callbackz) {
-//                 async.waterfall([
-//                     function(callback) {
-//                         console.log("starting..");
-//                         if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) {
-//                         // oids = domain.domainPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
-//                             const oids = obj_item.objectPictureIDs.map(item => {
-//                                 return ObjectId.createFromHexString(item.toString());
-//                             });
-//                             db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-//                                 if (err || !pic_items) {
-//                                     console.log("error getting picture items: " + err);
-//                                     // res.send("error: " + err);
-//                                     callback(err);
-//                                 } else {
-//                                     (async () => {
-//                                         objectPictures = [];
-//                                         // pic_items.forEach(function(picture_item) {               
-//                                             for (let i = 0; i < pic_items.length; i++) { 
-//                                                 var imageItem = {};
-                                                
-//                                                 var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".thumb." + pic_items[i].filename, 6000);
-//                                                 var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".half." + pic_items[i].filename, 6000);
-//                                                 // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-//                                                 imageItem.urlThumb = urlThumb;
-//                                                 imageItem.urlHalf = urlHalf;
-//                                                 // imageItem.urlStandard = urlStandard;
-//                                                 imageItem._id = pic_items[i]._id;
-//                                                 imageItem.filename = pic_items[i].filename;
-//                                                 objectPictures.push(imageItem);
-//                                                 obj_item.objectPictures = objectPictures;
-//                                             }
-//                                         // });
-//                                         callback(null);
-//                                     })();
-//                                 }
-//                             });
-                        
-//                         } else {
-//                             console.log('no pics');
-//                             callback(null);
-//                         }
-//                     },
-//                     function(callback) {
-//                         // console.log(JSON.stringify(obj_item));
-//                         if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
-//                             const aids = obj_item.actionIDs.map(item => {
-//                                 return ObjectId.createFromHexString(item.toString());
-//                             });
-//                             (async () => {
-//                               try {
-//                                 const query = {"_id": {$in: aids}};
-//                                 const actions = await RunDataQuery("actions", "find", query);
-//                                 if (actions && actions.length) {
-//                                   obj_item.actions = actions;
-//                                 } 
-//                               } catch (e) {
-//                                 console.log("error getting actions for object: " +e);
-//                               }
-//                               callback(null);
-                                
-//                             })();
-                         
-//                         } else {
-//                             callback(null);
-//                         }
-//                     }, 
-//                     function (callback) {
-//                         console.log("tryna get modelID " + obj_item.modelID);
-//                         // let oid = obj_item.modelID;
-//                         if (obj_item.modelID) {
-//                             // console.log("tryna get modelID2 " + obj_item.modelID.);
-                           
-//                             (async () => {
-//                               try {
-//                                 const oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
-//                                 const query = {"_id": oo_id};
-//                                 const model = await RunDataQuery("models", "findOne", query);
-//                                 if (model) {
-//                                   let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-//                                   obj_item.modelURL = url;
-//                                 } 
-//                               } catch (e) {
-//                                 console.log("error getting model for object: " +e);
-//                               }
-//                               callback(null);
-                                
-//                             })();
-
-//                         } else {
-//                             callback(null);
-//                         }                                                     
-//                     }
-//                 ],
-
-//                 function(err, result) { // #last function, close async.waterfall
-//                         // console.log("waterfall done: " + JSON.stringify(obj_item));
-//                         // res.json(obj_item);
-//                         response.objex.push(obj_item);
-//                         callbackz(null); //callback for async.each
-//                     }
-//                 );
-//             }, function(err) { //async.each close
-//                 if (err) {
-//                     res.send("problem getting inventory " + err);
-//                 } else {
-//                     res.send(response);
-//                 }
-//             });
-//         }
-//     });
-// });
-
-app.post('/scene_inventory_objex_old/', function(req, res) {
-    console.log('tryna return scene_inventory_objex : ' + req.params.p_id);
-    const iids = req.body.oIDs.map(item => {
-        return ObjectId.createFromHexString(item.toString());
-    });
-    let response = {};
-    let objex = [];
-    response.objex = objex;
-    db_old.obj_items.find({"_id": {$in: iids}}, function(err, obj_items) {
-        if (err || !obj_items) {
-            console.log("error getting picture items: " + err);
-        } else {
-            async.each (obj_items, function (obj_item, callbackz) {
-                async.waterfall([
-                    function(callback) {
-                        console.log("starting..");
-                        if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) {
-                        // oids = domain.domainPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
-                            const oids = obj_item.objectPictureIDs.map(item => {
-                                return ObjectId.createFromHexString(item.toString());
-                            });
-                            db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-                                if (err || !pic_items) {
-                                    console.log("error getting picture items: " + err);
-                                    // res.send("error: " + err);
-                                    callback(err);
-                                } else {
-                                    (async () => {
-                                        objectPictures = [];
-                                        // pic_items.forEach(function(picture_item) {               
-                                            for (let i = 0; i < pic_items.length; i++) { 
-                                                var imageItem = {};
-                                                
-                                                var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".thumb." + pic_items[i].filename, 6000);
-                                                var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".half." + pic_items[i].filename, 6000);
-                                                // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-                                                imageItem.urlThumb = urlThumb;
-                                                imageItem.urlHalf = urlHalf;
-                                                // imageItem.urlStandard = urlStandard;
-                                                imageItem._id = pic_items[i]._id;
-                                                imageItem.filename = pic_items[i].filename;
-                                                objectPictures.push(imageItem);
-                                                obj_item.objectPictures = objectPictures;
-                                            }
-                                        // });
-                                        callback(null);
-                                    })();
-                                }
-                            });
-                        
-                        } else {
-                            console.log('no pics');
-                            callback(null);
-                        }
-                    },
-                    function(callback) {
-                        // console.log(JSON.stringify(obj_item));
-                        if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
-                            const aids = obj_item.actionIDs.map(item => {
-                                return ObjectId.createFromHexString(item.toString());
-                            });
-                            (async () => {
-                              try {
-                                const query = {"_id": {$in: aids}};
-                                const actions = await RunDataQuery("actions", "find", query);
-                                if (actions && actions.length) {
-                                  obj_item.actions = actions;
-                                } 
-                              } catch (e) {
-                                console.log("error getting actions for object: " +e);
-                              }
-                              callback(null);
-                                
-                            })();
-                         
-                        } else {
-                            callback(null);
-                        }
-                    }, 
-                    function (callback) {
-                        console.log("tryna get modelID " + obj_item.modelID);
-                        // let oid = obj_item.modelID;
-                        if (obj_item.modelID) {
-                            // console.log("tryna get modelID2 " + obj_item.modelID.);
-                           
-                            (async () => {
-                              try {
-                                const oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
-                                const query = {"_id": oo_id};
-                                const model = await RunDataQuery("models", "findOne", query);
-                                if (model) {
-                                  let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                                  obj_item.modelURL = url;
-                                } 
-                              } catch (e) {
-                                console.log("error getting model for object: " +e);
-                              }
-                              callback(null);
-                                
-                            })();
-
-                        } else {
-                            callback(null);
-                        }                                                     
-                    }
-                ],
-
-                function(err, result) { // #last function, close async.waterfall
-                        // console.log("waterfall done: " + JSON.stringify(obj_item));
-                        // res.json(obj_item);
-                        response.objex.push(obj_item);
-                        callbackz(null); //callback for async.each
-                    }
-                );
-            }, function(err) { //async.each close
-                if (err) {
-                    res.send("problem getting inventory " + err);
-                } else {
-                    res.send(response);
-                }
-            });
-        }
-    });
-});
 
 app.get('/userobj/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return userobj : ' + req.params.p_id);
@@ -6431,70 +6190,6 @@ app.get('/audio/:id', requiredAuthentication, function (req, res){ //TODO Authen
 });
   
 
-app.post('/update/:_id', checkAppID, requiredAuthentication, function (req, res) {
-    console.log(req.params._id);
-
-    var o_id = ObjectId.createFromHexString(req.params._id);   
-    console.log('audioID requested : ' + req.body._id);
-    db_old.audio_items.find({ "_id" : o_id}, function(err, audio_item) {
-        if (err || !audio_item) {
-            console.log("error getting audio items: " + err);
-        } else {
-            console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
-            db_old.audio_items.update( { _id: o_id }, { $set: {
-                item_status: req.body.item_status,
-                tags: req.body.tags,
-                alt_title: req.body.alt_title,
-                alt_artist: req.body.alt_artist,
-                alt_album: req.body.alt_album
-            }});
-        }
-    });
-});
-
-///////////////
-app.get('/pathinfo',  checkAppID, requiredAuthentication, function (req, res) { //get default path info
-
-    console.log(req.params._id);
-    var o_id = ObjectId.createFromHexString(req.params._id);
-    db_old.paths.find({}, function(err, paths) {
-        if (err || !paths) {
-            console.log("cain't get no paths... " + err);
-        } else {
-            console.log(JSON.stringify(paths));
-            res.json(paths);
-        }
-    });
-});
-
-app.get('/upaths/:_id',  checkAppID, requiredAuthentication, function (req, res) { //get default path info
-
-    console.log("tryna get userpaths: ",req.params._id);
-    var o_id = ObjectId.createFromHexString(req.params._id);
-    db_old.paths.find({ "user_id" : req.params._id}, function(err, paths) {
-        if (err || !paths) {
-            console.log("cain't get no paths... " + err);
-        } else {
-            console.log(JSON.stringify(paths));
-            res.json(paths);
-        }
-    });
-});
-
-app.get('/upath/:u_id/:p_id',  checkAppID, requiredAuthentication, function (req, res) { //get default path info
-
-    console.log("tryna get path: ", req.params.p_id);
-    var _id = ObjectId.createFromHexString(req.params.p_id);
-    db_old.paths.find({ _id : _id}, function(err, paths) {
-        if (err || !paths) {
-            console.log("cain't get no paths... " + err);
-        } else {
-            console.log(JSON.stringify(paths));
-            res.send(paths);
-        }
-    });
-});
-
 // !!!DANGER!!!
 // app.get('/scoresremove/:appid',  function (req, res) { //get default path info
 //    console.log("nuke all score data for this application!: ", req.params.appid);
@@ -6520,18 +6215,19 @@ app.post('/score', checkAppID, requiredAuthentication, function (req, res) {
     scorePost.remoteAddress = req.connection.remoteAddress;
     scorePost.scoreTimestamp = parseInt(req.body.scoreTimestamp);
     console.log("tryna post score: " + JSON.stringify(scorePost));
-    db_old.scores.save(scorePost, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('score not saved..');
-            res.send("nilch");
-        } else {
-            var item_id = saved._id.toString();
-            console.log('new score id: ' + item_id);
-            res.send(item_id);
+
+    (async () => {
+        try {
+            const saved = await RunDataQuery("scores", "insertOne", scorePost);
+            res.send("new score saved " + saved.insertedId);
+        } catch (e) {
+            console.log("error saving score " + e);
+            res.send("error saving score " + e);
         }
-    });
+    })();
 });
-app.get('/scores/:appid/:sceneID/:scoreMode', function (req, res) { //tight
+
+app.get('/scores/:appid/:sceneID/:scoreMode', function (req, res) { //top scores for Unity?
 
     let appid = req.params.appid.toString().replace(":", "");
     let sceneID = req.params.sceneID;
@@ -6540,10 +6236,10 @@ app.get('/scores/:appid/:sceneID/:scoreMode', function (req, res) { //tight
     let scores = {};
     let scoresResponse = {};
 
-    db_old.scores.find({ $or: [ { appID : appid, sceneID : sceneID, scoreMode: scoreMode }, { appID : appid, altSceneID : sceneID, scoreMode: scoreMode } ] }, function (err, scores) {
-        if (err || !scores) {
-            res.send("error or no scores found " + err );
-        } else {
+    (async () => {
+        try {
+            const query = { "appID" : appid, "sceneID" : sceneID, "scoreMode": scoreMode };
+            const scores = await RunDataQuery("scores", "find", query);
             let culledScores = [];
             scores.forEach(function(score){ //cull all but highest score for each user
                 if (culledScores.length > 0) {
@@ -6561,52 +6257,41 @@ app.get('/scores/:appid/:sceneID/:scoreMode', function (req, res) { //tight
             });
             scoresResponse.scores = culledScores;
             res.send(scoresResponse);
+
+        } catch (e) {
+            console.log("error getting top scores " + e);
+            res.send("error getting scores " + e);
         }
-    });
+    })();
 });
+
 
 app.get('/totalscores_aka/:appid', function (req, res) { //does not use userID, but the "aka" name from "guest" players
 
     var appid = req.params.appid.toString().replace(":", "");
 
-    // console.log("tryna get total user scores for app: " + appid);
+    console.log("tryna get total user scores for app: " + appid);
 
     var scoresResponse = {};
-    var appScores = {};
     if (appid != undefined && appid != "") {
-    async.waterfall([
 
-            function (callback) { //get all scores for this app
-                db_old.scores.find({appID : appid}, function(err, scores) {
-                    if (err || !scores) {
-                        console.log("cain't get no scores... " + err);
-                        callback(err);
-                    } else {
+        (async () => {
+            try {
+                const query = {"appID" : appid};
+                const scores = await RunDataQuery("scores", "find", query);
+                let appScores = scores;
+                let uids = [];
+                let lookup = {};
+                let totalscores = [];
 
-                        appScores = scores;
-                        // console.log("scores: " + JSON.stringify(appScores));
-                        callback(null, scores);
-                    }
-
-                });
-            }, //pull unique userIDs
-            function (userScores, callback) {
-                var items = userScores;
-                var uids = [];
-                var lookup = {};
-                for (var item, i = 0; item = items[i++];) {
+                for (var item, i = 0; item = appScores[i++];) {
                     var uid = item.aka; //use the "aka" username
                     if (!(uid in lookup)) {
                         lookup[uid] = 1;
                         uids.push(uid);
                     }
                 }
-                // console.log(JSON.stringify(uids));
-                callback(null, userScores, uids);
-            }, //loop through again to aggregate scores for each user
-            function (scores, uids, callback) { //aggregate
-                var totalscores = [];
-                async.each (uids, function (uid, callbackz) {
+                for (const uid in uids) {
                     var uscores = {};
                     var scoretemp = 0;
                     for (var entry in appScores) {
@@ -6617,39 +6302,24 @@ app.get('/totalscores_aka/:appid', function (req, res) { //does not use userID, 
                     uscores.scoreName = uid;
                     uscores.scoreTotal = scoretemp;
                     totalscores.push(uscores);
-
-                    callbackz();
-                }, function(err) {
-                   
-                    if (err) {
-                        console.log('A file failed to process');
-                        callbackz(err);
-                    } else {
-                        console.log('All files have been processed successfully');
-                        callback(null, totalscores);
-                    }
-                });
-            }, function (totalscores, callback) { //sort descending by scoreTotal
+                }
                 totalscores.sort((a, b) => (a.scoreTotal < b.scoreTotal) ? 1 : -1);
-                callback(null, totalscores);
-            }, function (totalscores, callback) { //inject rank
-                // console.log("tryna rank totalscores " + JSON.stringify(totalscores));
                 for (var i = 0; i < totalscores.length; i++) {
                     totalscores[i].rank = i + 1;
                 }
-                callback(null, totalscores);
+                scoresResponse.totalscores = totalscores;
+                res.json(scoresResponse);
+            } catch (e) {
+                console.log("error getting totalscores_aka " +e);
+                res.send("error getting totalscores_aka " +e);
             }
-        ], //end of async.waterfall
-        function (err, result) { // #last function, close async
-            scoresResponse.totalscores = result;
-            res.json(scoresResponse);
-            console.log("totalscore waterfall done");
-        })
+        })();
     } else {
-        console.log("appid undefined or empty");
-        res.send("no app id!");
-    } 
+        console.log("no app id for scores!");
+        res.send("no app id for scores!");
+    }
 });
+
 
 app.get('/totalscores/:appid', function (req, res) {
 
@@ -6657,74 +6327,49 @@ app.get('/totalscores/:appid', function (req, res) {
 
     console.log("tryna get total user scores for app: " + appid);
 
-    var scoresResponse = {};
-    var appScores = {};
+    let scoresResponse = {};
 
-    async.waterfall([
+    (async () => {
+        try {
+            const query = {"appID" : appid};
+            const scores = await RunDataQuery("scores", "find", query);
+            let appScores = scores;
+            let uids = [];
+            let lookup = {};
+            let totalscores = [];
 
-            function (callback) { //get all scores for this app
-                db_old.scores.find({appID : appid}, function(err, scores) {
-                    if (err || !scores) {
-                        console.log("cain't get no scores... " + err);
-                        callback(err);
-                    } else {
-
-                        appScores = scores;
-                        // console.log("scores: " + JSON.stringify(appScores));
-                        callback(null, scores);
-                    }
-
-                });
-            }, //pull unique userIDs
-            function (userScores, callback) {
-                var items = userScores;
-                var uids = [];
-                var lookup = {};
-                for (var item, i = 0; item = items[i++];) {
+            for (var item, i = 0; item = appScores[i++];) {
                     var uid = item.userID;
                     if (!(uid in lookup)) {
                         lookup[uid] = 1;
                         uids.push(uid);
                     }
                 }
-                console.log(JSON.stringify(uids));
-                callback(null, userScores, uids);
-            }, //loop through again to aggregate scores for each user
-            function (scores, uids, callback) {
-                var totalscores = [];
-                async.each (uids, function (uid, callbackz) {
-                    var uscores = {};
-                    var scoretemp = 0;
-                    for (var entry in appScores) {
-                        if (uid == appScores[entry].userID) {
-                            scoretemp = scoretemp + parseInt(appScores[entry].score);
-                        }
+            for (const uid in uids) {
+                var uscores = {};
+                var scoretemp = 0;
+                for (var entry in appScores) {
+                    if (uid == appScores[entry].userID) {
+                        scoretemp = scoretemp + parseInt(appScores[entry].score);
                     }
-                    uscores.user = uid;
-                    uscores.scoreTotal = scoretemp;
-                    totalscores.push(uscores);
-                    callbackz();
-                }, function(err) {
-                   
-                    if (err) {
-                        console.log('A file failed to process');
-                        callbackz(err);
-                    } else {
-                        console.log('All scores have been processed successfully');
-                        scoresResponse.topscores = topscores;
-                        callback(null);
-                    }
-                });
+                }
+                uscores.scoreName = uid;
+                uscores.scoreTotal = scoretemp;
+                totalscores.push(uscores);
             }
-
-        ], //end of async.waterfall
-        function (err, result) { // #last function, close async
+            totalscores.sort((a, b) => (a.scoreTotal < b.scoreTotal) ? 1 : -1);
+            for (var i = 0; i < totalscores.length; i++) {
+                totalscores[i].rank = i + 1;
+            }
+            scoresResponse.totalscores = totalscores;
             res.json(scoresResponse);
-            console.log("waterfall done: " + result);
-        })
+        } catch (e) {
+            console.log("error getting totalscores_aka " +e);
+            res.send("error getting totalscores_aka " +e);
+        }
+    })();
 });
-// app.get()
-
+    
 app.get('/topscores/:appid', function (req, res) { //whynotmakeitpublic
 
     console.log("tryna get scores for: " + req.params.appid);
@@ -6732,20 +6377,20 @@ app.get('/topscores/:appid', function (req, res) { //whynotmakeitpublic
     var appid = req.params.appid.toString().replace(":", "");
     // console.log("tryna get scores for: " + appid);
     // db.scores.find({appID : appid}, { userName: 1, scoreType: 1, aka: 1, scoreTimestamp: 1, scoreInt: 1, _id:0 }, function(err, scores) {
-        db_old.scores.find({appID : appid}, function(err, scores) {    
-        if (err || !scores) {
-            console.log("cain't get no scores... " + err);
-        } else {
-        //    console.log(JSON.stringify(scores));
-            var scoresResponse = {};
-            // scores.sort(function(a, b) {
-            //     return b.scoreInt - a.scoreInt;
-            // });
-            // console.log("scores : " + JSON.stringify(scores) );
+
+    (async () => {
+        try {
+            const query = {"appID" : appid};
+            const scores = await RunDataQuery("scores", "find", query);
+            let scoresResponse = {};
+        
             scoresResponse.scores = scores;
             res.json(scoresResponse);
+        } catch (e) {
+            console.log("error getting top scores " + e);
+            res.send("error getting top scores " + e);
         }
-    });
+    })();
 });
 
 app.get('/scores/:u_id',  checkAppID, requiredAuthentication, function (req, res) {
@@ -6753,178 +6398,66 @@ app.get('/scores/:u_id',  checkAppID, requiredAuthentication, function (req, res
     console.log("tryna get scores for: ", req.params.u_id);
     //var _id = ObjectId.createFromHexString(req.params.u_id);
     var appid = req.headers.appid.toString().replace(":", "");
-    db_old.scores.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, scores) {
-        if (err || !scores) {
-            console.log("cain't get no scores... " + err);
-        } else {
-//            console.log(JSON.stringify(scores));
-            var scoresResponse = {};
 
+    (async () => {
+        try {
+            const query = {$and : [{"userID" : req.params.u_id}, {"appID" : appid}]};
+            const scores = await RunDataQuery("scores", "find", query);
+            let scoresResponse = {};
             scoresResponse.scores = scores;
             res.json(scoresResponse);
+        } catch (e) {
+            console.log("error getting top scores " + e);
+            res.send("error getting top scores " + e);
         }
-    });
-});
-
-app.get('/get_available_storeitems/:app_id', checkAppID, requiredAuthentication, admin, function (req, res) { //OPEN FOR TESTING, lock down for prod!
-
-    console.log("tryna get storeitems for: ", req.params.app_id);
-    //var _id = ObjectId.createFromHexString(req.params.u_id);
-    // var appid = req.headers.appid.toString().replace(":", "");
-    db_old.storeitems.find({appID : req.params.app_id, itemStatus: "Available"}, function(err, storeitems) {
-        if (err || !storeitems) {
-            console.log("cain't get no storeitems... " + err);
-        } else {
-//            console.log(JSON.stringify(scores));
-            var storeitemsResponse = {};
-            
-            async.each (storeitems, function (storeitem, callbackz) {
-                var storeItemPictures = [];
-                // console.log("storeitem.storeItemPictureIDs " + JSON.stringify(storeitem.storeItemPictureIDs ));
-                if (storeitem.storeItemPictureIDs != null && storeitem.storeItemPictureIDs != undefined && storeitem.storeItemPictureIDs.length > 0) {
-                    // oids = storeitem.storeItemPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
-                    const oids = storeitem.storeItemPictureIDs.map(item => {
-                        return ObjectId.createFromHexString(item);
-                    })
-                    db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-                        if (err || !pic_items) {
-                            callbackz();
-                            console.log("error getting picture items: " + err);
-                        } else {
-                            async.each (pic_items, function (picture_item, pcallbackz) {
-                                // console.log("gotsa picture item for store item: " + JSON.stringify(picture_item));
-                                (async () => {
-                                    var imageItem = {};
-                                    // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-                                    
-                                    // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-                                    // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-                                    imageItem.urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename,6000);
-                                    // imageItem.urlHalf = urlHalf;
-                                    // imageItem.urlStandard = urlStandard;
-                                    imageItem._id = picture_item._id;
-                                    imageItem.filename = picture_item.filename;
-                                    storeItemPictures.push(imageItem);
-                                    pcallbackz();
-                                })();
-                            }, function(err) {
-                               
-                                if (err) {
-                                    console.log('A storeitem image failed to process');
-                                    callbackz(err);
-                                } else {
-                                    console.log('Added images to storeitem successfully');
-                                    // pcallbackz();
-                                    storeitem.storeItemPictures = storeItemPictures;
-                                    callbackz();
-                                }
-                            });
-                           
-                        }
-                    });
-                } else {
-                    callbackz();
-                } 
-            }, function(err) {
-               
-                if (err) {
-                    console.log('A file failed to process');
-                    // callbackz(err);
-                    res.send("error: " + err);
-                } else {
-                    console.log('All files have been processed successfully');
-                    // scoresResponse.topscores = topscores;
-                    // callback(null);
-                    storeitemsResponse.storeitems = storeitems;
-                    res.json(storeitemsResponse);  
-                }
-            });
-
-        }
-    });
+    })();
 });
 
 app.get('/get_storeitems_all/',  requiredAuthentication, admin, function (req, res) {
 
     console.log("tryna get all the storeitems");
-    var _id = ObjectId.createFromHexString(req.params.app_id);
 
-    // var appid = req.headers.appid.toString().replace(":", "");
-    db_old.storeitems.find({}, function(err, storeitems) {
-        if (err || !storeitems) {
-            console.log("cain't get no storeitems... " + err);
-        } else {
-//            console.log(JSON.stringify(scores));
-            var storeitemsResponse = {};
-            
-            async.each (storeitems, function (storeitem, callbackz) {
+    (async () => {
+        try {
+            const query = {};
+            const storeitems = await RunDataQuery("storeitems", "find", query);
+            let storeitemsResponse = {};
+            for (let storeitem in storeitems) {
                 var storeItemPictures = [];
                 if (storeitem.lastUpdateTimestamp === null || storeitem.lastUpdateTimestamp === undefined) {
                     if (storeitem.itemCreateDate != null && storeitem.itemCreateDate != undefined) {
                         storeitem.lastUpdateTimestamp = storeitem.itemCreateDate;
                     }
                 }
-                // console.log("storeitem.storeItemPictureIDs " + JSON.stringify(storeitem.storeItemPictureIDs ));
                 if (storeitem.storeItemPictureIDs != null && storeitem.storeItemPictureIDs != undefined && storeitem.storeItemPictureIDs.length > 0) {
                     // oids = storeitem.storeItemPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
                     const oids = storeitem.storeItemPictureIDs.map(item => {
                         return ObjectId.createFromHexString(item);
-                    })
-                    db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-                        if (err || !pic_items) {
-                            callbackz();
-                            console.log("error getting picture items: " + err);
-                        } else {
-                            async.each (pic_items, function (picture_item, pcallbackz) {
-                                (async () => {
-                                    // console.log("gotsa picture item for store item: " + JSON.stringify(picture_item));
-                                    var imageItem = {};
-                                    // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-                                    // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-                                    // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-                                    imageItem.urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename,6000);
-                                    // imageItem.urlHalf = urlHalf;
-                                    // imageItem.urlStandard = urlStandard;
-                                    imageItem._id = picture_item._id;
-                                    imageItem.filename = picture_item.filename;
-                                    storeItemPictures.push(imageItem);
-                                    pcallbackz();
-                                })();
-                            }, function(err) {
-                               
-                                if (err) {
-                                    console.log('A storeitem image failed to process');
-                                    callbackz(err);
-                                } else {
-                                    console.log('Added images to storeitem successfully');
-                                    // pcallbackz();
-                                    storeitem.storeItemPictures = storeItemPictures;
-                                    callbackz();
-                                }
-                            });
-                           
-                        }
                     });
-                } else {
-                    callbackz();
-                } 
-            }, function(err) {
-               
-                if (err) {
-                    console.log('A file failed to process');
-                    // callbackz(err);
-                    res.send("error: " + err);
-                } else {
-                    console.log('All files have been processed successfully');
-                    // scoresResponse.topscores = topscores;
-                    // callback(null);
-                    storeitemsResponse.storeitems = storeitems;
-                    res.json(storeitemsResponse);  
+                    const imagequery = {"_id": {$in: oids }};
+                    const image_items = await RunDataQuery("image_items","find",imagequery); 
+                    for (const item in image_items) {
+                        var imageItem = {};
+                        // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
+                        // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
+                        // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
+                        imageItem.urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename,6000);
+                        // imageItem.urlHalf = urlHalf;
+                        // imageItem.urlStandard = urlStandard;
+                        imageItem._id = picture_item._id;
+                        imageItem.filename = picture_item.filename;
+                        storeItemPictures.push(imageItem);
+                    }
+                    storeitem.storeItemPictures = storeItemPictures;
                 }
-            });
-
+            }
+            storeitemsResponse.storeitems = storeitems;
+            res.send(storeitemsResponse);            
+        } catch (e) {
+            console.log("error getting storeitems all " + e);
+            res.send("error getting stoeritems all " + e);
         }
-    });
+    })();
 });
 
 app.get('/get_storeitems/:app_id', requiredAuthentication, admin, function (req, res) {
@@ -6932,171 +6465,115 @@ app.get('/get_storeitems/:app_id', requiredAuthentication, admin, function (req,
     console.log("tryna get storeitems for: ", req.params.app_id);
     var _id = ObjectId.createFromHexString(req.params.app_id);
 
-    // var appid = req.headers.appid.toString().replace(":", "");
-    db_old.storeitems.find({appID : _id}, function(err, storeitems) {
-        if (err || !storeitems) {
-            console.log("cain't get no storeitems... " + err);
-        } else {
-//            console.log(JSON.stringify(scores));
-            var storeitemsResponse = {};
-            
-            async.each (storeitems, function (storeitem, callbackz) {
+    (async () => {
+        try {
+            const query = {"appID" : _id};
+            const storeitems = await RunDataQuery("storeitems", "find", query);
+            let storeitemsResponse = {};
+            for (let storeitem in storeitems) {
                 var storeItemPictures = [];
                 if (storeitem.lastUpdateTimestamp === null || storeitem.lastUpdateTimestamp === undefined) {
                     if (storeitem.itemCreateDate != null && storeitem.itemCreateDate != undefined) {
                         storeitem.lastUpdateTimestamp = storeitem.itemCreateDate;
                     }
                 }
-                // console.log("storeitem.storeItemPictureIDs " + JSON.stringify(storeitem.storeItemPictureIDs ));
                 if (storeitem.storeItemPictureIDs != null && storeitem.storeItemPictureIDs != undefined && storeitem.storeItemPictureIDs.length > 0) {
                     // oids = storeitem.storeItemPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
                     const oids = storeitem.storeItemPictureIDs.map(item => {
                         return ObjectId.createFromHexString(item);
-                    })
-                    db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-                        if (err || !pic_items) {
-                            callbackz();
-                            console.log("error getting picture items: " + err);
-                        } else {
-                            async.each (pic_items, function (picture_item, pcallbackz) {
-                                // console.log("gotsa picture item for store item: " + JSON.stringify(picture_item));
-                                (async () => {
-                                    var imageItem = {};
-                                    // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-                                    // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-                                    // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-                                    imageItem.urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename,6000);
-                                    // imageItem.urlHalf = urlHalf;
-                                    // imageItem.urlStandard = urlStandard;
-                                    imageItem._id = picture_item._id;
-                                    imageItem.filename = picture_item.filename;
-                                    storeItemPictures.push(imageItem);
-                                    pcallbackz();
-                                })();
-                            }, function(err) {
-                               
-                                if (err) {
-                                    console.log('A storeitem image failed to process');
-                                    callbackz(err);
-                                } else {
-                                    console.log('Added images to storeitem successfully');
-                                    // pcallbackz();
-                                    storeitem.storeItemPictures = storeItemPictures;
-                                    callbackz();
-                                }
-                            });
-                           
-                        }
                     });
-                } else {
-                    callbackz();
-                } 
-            }, function(err) {
-               
-                if (err) {
-                    console.log('A file failed to process');
-                    // callbackz(err);
-                    res.send("error: " + err);
-                } else {
-                    console.log('All files have been processed successfully');
-                    // scoresResponse.topscores = topscores;
-                    // callback(null);
-                    storeitemsResponse.storeitems = storeitems;
-                    res.json(storeitemsResponse);  
+                    const imagequery = {"_id": {$in: oids }};
+                    const image_items = await RunDataQuery("image_items","find",imagequery); 
+                    for (const item in image_items) {
+                        var imageItem = {};
+                        // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
+                        // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
+                        // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
+                        imageItem.urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename,6000);
+                        // imageItem.urlHalf = urlHalf;
+                        // imageItem.urlStandard = urlStandard;
+                        imageItem._id = picture_item._id;
+                        imageItem.filename = picture_item.filename;
+                        storeItemPictures.push(imageItem);
+                    }
+                    storeitem.storeItemPictures = storeItemPictures;
                 }
-            });
+            }
+            storeitemsResponse.storeitems = storeitems;
+            res.send(storeitemsResponse);            
+        } catch (e) {
+            console.log("error getting storeitems all " + e);
+            res.send("error getting stoeritems all " + e);
         }
-    });
+    })();
 });
+
 
 app.get('/get_storeitem/:_id',  requiredAuthentication, admin, function (req, res) {
     console.log("tryna get storeitem: ", req.params._id);
-    var item_id = ObjectId.createFromHexString(req.params._id);
+   
     // var appid = req.headers.appid.toString().replace(":", "");
-    db_old.storeitems.findOne({_id : item_id}, function(err, storeitem) {
-        if (err || !storeitem) {
-            console.log("cain't get no storeitem... " + err);
-        } else {
-            if (storeitem.totalSold == null || storeitem.totalSold == undefined) {
-                storeitem.totalSold = 0;
-            }
-            console.log(JSON.stringify(storeitem));
-            async.waterfall([
-                function (callback) { // check for groups to which this purchase provides access
-                    if (storeitem.storeItemSceneGroupIDs != null && storeitem.storeItemSceneGroupIDs != undefined && storeitem.storeItemSceneGroupIDs.length > 0) {
-                        const g_oids = storeitem.storeItemSceneGroupIDs.map(item => {
-                            return ObjectId.createFromHexString(item);
-                        });
-                        db_old.groups.find({_id: {$in: g_oids }}, function (err, groups) {
-                            if (err || !groups) {
-                                console.log("error getting grupe items: " + err);
-                                callback(err);
-                                // res.send("error: " + err);
-                            } else {
-                                storeitem.storeItemAccessGroups = groups;
-                                console.log("store item goups: " + JSON.stringify(groups));
-                                callback();
-                            }
-                        });
-                    } else {
-                        callback();
-                    }
-                }, 
-                function (callback) { //pics for this store item
-                    if (storeitem.storeItemPictureIDs != null && storeitem.storeItemPictureIDs != undefined && storeitem.storeItemPictureIDs.length > 0) {
-                        // oids = storeitem.storeItemPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
-                        const oids = storeitem.storeItemPictureIDs.map(item => {
-                            return ObjectId.createFromHexString(item);
-                        });
-                        db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
-                            if (err || !pic_items) {
-                                console.log("error getting picture items: " + err);
-                                // res.send("error: " + err);
-                                callback(err);
-                            } else {
-                                storeItemPictures = [];
-                               
-                                pic_items.forEach(function(picture_item){               
-                                    (async () => { 
-                                        var imageItem = {};
-                                        // var urlThumb = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, Expires: 6000});
-                                        // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, Expires: 6000});
-                                        // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-                                        
-                                        imageItem.urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, 6000);
-                                        imageItem.urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, 6000);
-                                        imageItem.urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, 6000);
-                                        imageItem._id = picture_item._id;
-                                        imageItem.filename = picture_item.filename;
-                                        storeItemPictures.push(imageItem);
-                                        storeitem.storeItemPictures = storeItemPictures;
-                                    })();
-                                });
-                                callback();
-                           
-                                // res.json(storeitem);
-                            }
-                        });
-                    } else {
-                        callback();
-                    }
+    (async () => {
+        try {
+            const item_id = ObjectId.createFromHexString(req.params._id);
+            
+            const query = {_id : item_id};
+            let storeitem = await RunDataQuery("storeitems", "findOne", query);
+            let storeitemResponse = {};
+            // for (let storeitem of storeitems) {
+                var storeItemPictures = [];
+                console.log("store item " + JSON.stringify(storeitem));
+                if (storeitem.totalSold == null || storeitem.totalSold == undefined) {
+                    storeitem.totalSold = 0;
                 }
-            ], //end of async.waterfall
-            function (err, result) { // #last function, close async
-                if (!err) {
-                    console.log("returning storeintem: " + storeitem);
-                    res.json(storeitem);
-                    // 
-                } else {
-                    console.log("err: " + err);
-                    res.send(err);
+                if (storeitem.lastUpdateTimestamp === null || storeitem.lastUpdateTimestamp === undefined) {
+                    if (storeitem.itemCreateDate != null && storeitem.itemCreateDate != undefined) {
+                        storeitem.lastUpdateTimestamp = storeitem.itemCreateDate;
+                    }
+                }           
+                //hrm, dunno...         
+                if (storeitem.storeItemSceneGroupIDs != null && storeitem.storeItemSceneGroupIDs != undefined && storeitem.storeItemSceneGroupIDs.length > 0) {
+                    const g_oids = storeitem.storeItemSceneGroupIDs.map(item => {
+                        return ObjectId.createFromHexString(item);
+                    });
+                    const query = {_id: {$in: g_oids }};
+                    const groups = await RunDataQuery("groups", "find", query);
+                    if (groups && groups.length) {
+                        storeitem.storeItemAccessGroups = groups;
+                    }
+
+                  
+                } 
+                if (storeitem.storeItemPictureIDs != null && storeitem.storeItemPictureIDs != undefined && storeitem.storeItemPictureIDs.length > 0) {
+                    // oids = storeitem.storeItemPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
+                    const oids = storeitem.storeItemPictureIDs.map(item => {
+                        return ObjectId.createFromHexString(item);
+                    });
+                    const imagequery = {"_id": {$in: oids }};
+                    const image_items = await RunDataQuery("image_items","find",imagequery); 
+                    for (const picture_item in image_items) {
+                        var imageItem = {};
+                        imageItem.urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".thumb." + picture_item.filename, 6000);
+                        imageItem.urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".half." + picture_item.filename, 6000);
+                        imageItem.urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, 6000);
+                        imageItem._id = picture_item._id;
+                        imageItem.filename = picture_item.filename;
+                        storeItemPictures.push(imageItem);
+                        storeitem.storeItemPictures = storeItemPictures;
+                    }
+                    storeitem.storeItemPictures = storeItemPictures;
                 }
-
-            });
-
+            // }
+            // storeitemResponse.storeitem = storeitem;
+            res.send(storeitem);            
+        } catch (e) {
+            console.log("error getting storeitem " + e);
+            res.send("error getting stoeritem " + e);
         }
-    });
+    })();
 });
+
+
 app.post('/set_storeitem', checkAppID, requiredAuthentication, admin, function (req, res) {
     console.log("tryna save storeitem : " + JSON.stringify(req.body));
     let storeitem = req.body;
@@ -7104,92 +6581,28 @@ app.post('/set_storeitem', checkAppID, requiredAuthentication, admin, function (
     storeitem.createdTimestamp = timestamp;
     storeitem.createdByUserID = req.session.user._id;
     storeitem.createdByUserName = req.session.userName;
-    db_old.storeitems.save(storeitem, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('purchaseable not saved..');
-            res.send("nilch");
-        } else {
-            var item_id = saved._id.toString();
-            // console.log('new purchaseable id: ' + item_id);
-            res.send("created");
+
+    (async () => {
+        try {
+            
+            const saved = await RunDataQuery("storeitems", "insertOne", storeitem);
+            res.send("created store item " + saved.insertedId );
+        } catch (e) {
+            console.log("error creagting new store item " + e);
+            res.send("error creating new store itme " + e);
         }
-    });
+    })();
 });
 
-// app.get('/delete_store_items_man/:appid', function (req, res) {
-//     if (req.params.appid.length > 10) {
-//         db.storeitems.remove({});
-//         res.send("all storeitems have been removed");
-//     }
-// });
-// app.post('/import_storeitems', requiredAuthentication, function (req, res) {
-//     console.log("tryna import storeitems for : " + req.body.appid);
-    
-//     let storeItemsData = req.body.storeitems;
-//     async.each (storeItemsData, function (storeItem, pcallbackz) {
-//         // console.log(JSON.stringify(storeItem));
-//         let storeItemMod = {
-//             appID: req.body.appid,
-//             itemType: "Wearable",
-//             itemSubType: storeItem.wearableType,
-//             itemStatus: "Testing",
-//             itemName: storeItem.name,
-//             itemDisplayName: storeItem.displayName,
-//             itemAltName: storeItem.archetype,
-//             itemCreateDate: Math.round(Date.now() / 1000),
-//             itemCreatedByUserName: req.session.user.userName,
-//             itemCreatedByUserID: req.session.user._id,
-//             maxPerUser: 1,
-//             maxTotal: 10,
-//             totalUsed: 0,
-//             itemTags: storeItem.tags
-            
-//         }
-
-//         delete storeItem['wearableType'];
-//         delete storeItem['name'];
-//         delete storeItem['archetype'];
-//         delete storeItem['displayName'];
-//         delete storeItem['tags'];
-//         storeItemMod.jsonAttributes = storeItem;
-       
-
-//         db.storeitems.save(storeItemMod, function (err, saved) {
-//             if ( err || !saved ) {
-//                 console.log('store item not saved..');
-//                 // res.send("nilch");
-//                 pcallbackz();
-//             } else {
-//                 // var item_id = saved._id.toString();
-//                 console.log('new storeitem id: ' + saved._id);
-//                 // console.log(JSON.stringify(storeItemMod));
-//                 pcallbackz();
-//                 // res.send("created");
-//             }
-//         });
-//     }, function(err) {
-//        
-//         if (err) {
-//             console.log('prollem importing store item');
-            
-//         } else {
-//             console.log('imported a bunch of storeitems successfully');
-//             // pcallbackz();
-//             // storeitem.storeItemPictures = storeItemPictures;
-            
-//         }
-//     });
-// });
 app.post('/update_storeitem/', checkAppID, requiredAuthentication, admin, function (req, res) {
     console.log("tryna save storeitem : " + JSON.stringify(req.body));
     var o_id = ObjectId.createFromHexString(req.body._id);
     var timestamp = Math.round(Date.now() / 1000);
-    db_old.storeitems.findOne({_id: o_id}, function (err, item) {
-        if ( err || !item) {
-            console.log('item not found..');
-            res.send("nilch");
-        } else {
-            db_old.storeitems.update( { _id: o_id }, { $set: {
+
+    (async () => {
+        try {
+            const query = {"_id": o_id};
+            const updoc = { $set: {
                 itemName: req.body.itemName,
                 itemDisplayName: req.body.itemDisplayName,
                 itemAltName: req.body.itemAltName,
@@ -7206,17 +6619,34 @@ app.post('/update_storeitem/', checkAppID, requiredAuthentication, admin, functi
                 displayAssetURL: req.body.displayAssetURL,
                 storeItemPictureIDs: req.body.storeItemPictureIDs,
                 lastUpdateTimestamp: timestamp
-            }});   
-            res.send("updated");
+            }};
+            const updated = await RunDataQuery("storeitems", "updateOne", query, updoc);
+            res.send("updated store item " + JSON.stringify(updated) );
+        } catch (e) {
+            console.log("error updating new store item " + e);
+            res.send("error updating new store item " + e);
         }
-    });
-});
+    })();
+}); 
+
 app.post('/delete_storeitem/', requiredAuthentication, admin, function (req, res) {
     console.log("tryna delete key: " + req.body._id);
     var o_id = ObjectId.createFromHexString(req.body._id);
-    db_old.storeitems.remove( { "_id" : o_id }, 1 );
-    res.send("deleted");
+    (async () => {
+        try {
+            const query = {"_id": o_id};
+           
+            const deleted = await RunDataQuery("storeitems", "deleteOne", query);
+            res.send("deleted store item " + JSON.stringify(deleted) );
+        } catch (e) {
+            console.log("error deleting store item " + e);
+            res.send("error deleting store item " + e);
+        }
+    })();
+    // db_old.storeitems.remove( { "_id" : o_id }, 1 );
+    // res.send("deleted");
 });
+
 
 app.post('/purchase', checkAppID, requiredAuthentication, function (req, res) {
     console.log("tryna post purchase: " + JSON.stringify(req.body));
@@ -7319,26 +6749,7 @@ app.post('/testpurchase', checkAppID, requiredAuthentication, function (req, res
                                                 }
 
                                             })(); 
-                                            // ses.sendEmail( {
-                                            //     Source: adminEmail,
-                                            //     Destination: { ToAddresses: [userEmail]},
-                                            //     Message: {
-                                            //         Subject: {
-                                            //             Data: "Your Purchase"
-                                            //         },
-                                            //         Body: {
-                                            //             Html: {
-                                            //                 Data: htmlbody
-                                            //             }
-                                            //         }
-                                            //     }
-                                            // }
-                                            // , function(err, data) {
-                                            //     if(err) throw err
-                                            //     console.log('Email sent:');
-                                            //     console.log(data);
-                                               
-                                            // });
+                                           
                                             res.send("purchase id: " + item_id + " charged " + saved.price);
                                         }
                                     });
