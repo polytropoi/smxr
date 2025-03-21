@@ -333,8 +333,6 @@ AFRAME.registerComponent('mod_objex', {
         return resp;
       },
       returnObjectData: function(objectID) {
-        // console.log('tryna return object data for ' +objectID);
-        // let hasObj = false;
         let objek = null;
         if (this.data.jsonObjectData.length > 0) {
           for (let i = 0; i < this.data.jsonObjectData.length; i++) {
@@ -346,16 +344,13 @@ AFRAME.registerComponent('mod_objex', {
             }
           }
         }
-        // if (objek == null) {
-        //   FetchSceneInventoryObject([objectID]);
-        // }
         return objek;
       },
       returnObjexData: function() { //everything
         return this.data.jsonObjectData;
       },
       addFetchedObject (obj) { //for scene inventory objects, not in player inventory, added after initial load
-        console.log("tryna add fetched obj " + obj._id)
+        console.log("tryna add fetched obj " + obj._id);
         this.data.jsonObjectData.push(obj); 
       },
       
