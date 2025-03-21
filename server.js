@@ -6041,6 +6041,186 @@ app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
 });
 
 app.post('/scene_inventory_objex/', function(req, res) {
+    console.log('tryna return scene_inventory_objex : ' + req.body.oIDs);
+    const iids = req.body.oIDs.map(item => {
+        return ObjectId.createFromHexString(item.toString());
+    });
+
+    (async () => {
+        try {
+            const query = {"_id": {$in: iids}};
+            const obj_items = await RunDataQuery("obj_items", "find", query);
+            let response = {};
+            let objex = [];
+            response.objex = objex;
+            console.log("gots scene inventory items length " + obj_items.length);
+            for (let obj_item of obj_items) {
+
+                if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) { //unused?
+                    const query = {_id: {$in: oids }};
+                    const pic_items = await RunDataQuery("image_items", "find", query);
+                    objectPictures = [];
+                // pic_items.forEach(function(picture_item) {               
+                    for (let i = 0; i < pic_items.length; i++) { 
+                        var imageItem = {};
+                        var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".thumb." + pic_items[i].filename, 6000);
+                        var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".half." + pic_items[i].filename, 6000);
+                        // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
+                        imageItem.urlThumb = urlThumb;
+                        imageItem.urlHalf = urlHalf;
+                        // imageItem.urlStandard = urlStandard;
+                        imageItem._id = pic_items[i]._id;
+                        imageItem.filename = pic_items[i].filename;
+                        objectPictures.push(imageItem);
+                        obj_item.objectPictures = objectPictures;
+                    }
+                }
+                if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) { //the good stuff!
+                    const aids = obj_item.actionIDs.map(item => {
+                        return ObjectId.createFromHexString(item.toString());
+                    });
+                    const query = {"_id": {$in: aids}};
+                    const actions = await RunDataQuery("actions", "find", query);
+                    if (actions && actions.length) {
+                        obj_item.actions = actions;
+                    } 
+                } 
+                if (obj_item.modelID) {
+                    const oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
+                    const query = {"_id": oo_id};
+                    const model = await RunDataQuery("models", "findOne", query);
+                    if (model) {
+                        let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                        obj_item.modelURL = url;
+                    } 
+                }
+                response.objex.push(obj_item);
+            }
+            res.send(response);
+        } catch (e) {
+            console.log("scene_objex_inventory error " +e);
+            res.send("scene_objex_inventory error " +e);
+        }
+    })();
+});
+//     db_old.obj_items.find({"_id": {$in: iids}}, function(err, obj_items) {
+//         if (err || !obj_items) {
+//             console.log("error getting picture items: " + err);
+//         } else {
+//             async.each (obj_items, function (obj_item, callbackz) {
+//                 async.waterfall([
+//                     function(callback) {
+//                         console.log("starting..");
+//                         if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) {
+//                         // oids = domain.domainPictureIDs.map(ObjectID()); //convert to mongo object ids for searching
+//                             const oids = obj_item.objectPictureIDs.map(item => {
+//                                 return ObjectId.createFromHexString(item.toString());
+//                             });
+//                             db_old.image_items.find({_id: {$in: oids }}, function (err, pic_items) {
+//                                 if (err || !pic_items) {
+//                                     console.log("error getting picture items: " + err);
+//                                     // res.send("error: " + err);
+//                                     callback(err);
+//                                 } else {
+//                                     (async () => {
+//                                         objectPictures = [];
+//                                         // pic_items.forEach(function(picture_item) {               
+//                                             for (let i = 0; i < pic_items.length; i++) { 
+//                                                 var imageItem = {};
+                                                
+//                                                 var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".thumb." + pic_items[i].filename, 6000);
+//                                                 var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".half." + pic_items[i].filename, 6000);
+//                                                 // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
+//                                                 imageItem.urlThumb = urlThumb;
+//                                                 imageItem.urlHalf = urlHalf;
+//                                                 // imageItem.urlStandard = urlStandard;
+//                                                 imageItem._id = pic_items[i]._id;
+//                                                 imageItem.filename = pic_items[i].filename;
+//                                                 objectPictures.push(imageItem);
+//                                                 obj_item.objectPictures = objectPictures;
+//                                             }
+//                                         // });
+//                                         callback(null);
+//                                     })();
+//                                 }
+//                             });
+                        
+//                         } else {
+//                             console.log('no pics');
+//                             callback(null);
+//                         }
+//                     },
+//                     function(callback) {
+//                         // console.log(JSON.stringify(obj_item));
+//                         if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) {
+//                             const aids = obj_item.actionIDs.map(item => {
+//                                 return ObjectId.createFromHexString(item.toString());
+//                             });
+//                             (async () => {
+//                               try {
+//                                 const query = {"_id": {$in: aids}};
+//                                 const actions = await RunDataQuery("actions", "find", query);
+//                                 if (actions && actions.length) {
+//                                   obj_item.actions = actions;
+//                                 } 
+//                               } catch (e) {
+//                                 console.log("error getting actions for object: " +e);
+//                               }
+//                               callback(null);
+                                
+//                             })();
+                         
+//                         } else {
+//                             callback(null);
+//                         }
+//                     }, 
+//                     function (callback) {
+//                         console.log("tryna get modelID " + obj_item.modelID);
+//                         // let oid = obj_item.modelID;
+//                         if (obj_item.modelID) {
+//                             // console.log("tryna get modelID2 " + obj_item.modelID.);
+                           
+//                             (async () => {
+//                               try {
+//                                 const oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
+//                                 const query = {"_id": oo_id};
+//                                 const model = await RunDataQuery("models", "findOne", query);
+//                                 if (model) {
+//                                   let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+//                                   obj_item.modelURL = url;
+//                                 } 
+//                               } catch (e) {
+//                                 console.log("error getting model for object: " +e);
+//                               }
+//                               callback(null);
+                                
+//                             })();
+
+//                         } else {
+//                             callback(null);
+//                         }                                                     
+//                     }
+//                 ],
+
+//                 function(err, result) { // #last function, close async.waterfall
+//                         // console.log("waterfall done: " + JSON.stringify(obj_item));
+//                         // res.json(obj_item);
+//                         response.objex.push(obj_item);
+//                         callbackz(null); //callback for async.each
+//                     }
+//                 );
+//             }, function(err) { //async.each close
+//                 if (err) {
+//                     res.send("problem getting inventory " + err);
+//                 } else {
+//                     res.send(response);
+//                 }
+//             });
+//         }
+//     });
+// });
+
+app.post('/scene_inventory_objex_old/', function(req, res) {
     console.log('tryna return scene_inventory_objex : ' + req.params.p_id);
     const iids = req.body.oIDs.map(item => {
         return ObjectId.createFromHexString(item.toString());
@@ -10232,55 +10412,55 @@ app.get('/singlescenedata/:scenekey', function (req, res) { //returns a public s
     });
 });
 
-app.get('/publicsinglerandom', function (req, res) { //returns a public scene id and standard url for postcard
-    var availableScenesResponse = {};
-    var availableScenes = [];
-    availableScenesResponse.availableScenes = availableScenes;
+// app.get('/publicsinglerandom', function (req, res) { //returns a public scene id and standard url for postcard
+//     var availableScenesResponse = {};
+//     var availableScenes = [];
+//     availableScenesResponse.availableScenes = availableScenes;
 
-    db_old.scenes.find({ sceneShareWithPublic: true }, function (err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err)
+//     db_old.scenes.find({ sceneShareWithPublic: true }, function (err, scenes) {
+//         if (err || !scenes) {
+//             console.log("cain't get no scenes... " + err)
 
-        } else {
+//         } else {
 
-            sceneIndex = getRandomInt(0, scenes.length - 1);
-//            async.each(scenes,
-            // 2nd param is the function that each item is passed to
+//             sceneIndex = getRandomInt(0, scenes.length - 1);
+// //            async.each(scenes,
+//             // 2nd param is the function that each item is passed to
 
-            // Call an asynchronous function, often a save() to DB
-            //            scene.someAsyncCall(function () {
-            // Async call is done, alert via callback
-            if (scenes[sceneIndex].scenePostcards != null && scenes[sceneIndex].scenePostcards.length > 0) {
-                postcardIndex = getRandomInt(0, scenes[sceneIndex].scenePostcards.length - 1);
-//                        db.image_items.find({postcardForScene: scene.short_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function (err, picture_items) {
-                console.log("tryna find postcard: " + scenes[sceneIndex].scenePostcards[postcardIndex]);
-                var oo_id = ObjectId.createFromHexString(scenes[sceneIndex].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-                db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+//             // Call an asynchronous function, often a save() to DB
+//             //            scene.someAsyncCall(function () {
+//             // Async call is done, alert via callback
+//             if (scenes[sceneIndex].scenePostcards != null && scenes[sceneIndex].scenePostcards.length > 0) {
+//                 postcardIndex = getRandomInt(0, scenes[sceneIndex].scenePostcards.length - 1);
+// //                        db.image_items.find({postcardForScene: scene.short_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function (err, picture_items) {
+//                 console.log("tryna find postcard: " + scenes[sceneIndex].scenePostcards[postcardIndex]);
+//                 var oo_id = ObjectId.createFromHexString(scenes[sceneIndex].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+//                 db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
 
-                    if (err || !picture_item || picture_item.length == 0) {
-                        console.log("error getting picture items for publicsimple" + JSON.stringify(scenes[sceneIndex].scenePostcards[postcardIndex]));
+//                     if (err || !picture_item || picture_item.length == 0) {
+//                         console.log("error getting picture items for publicsimple" + JSON.stringify(scenes[sceneIndex].scenePostcards[postcardIndex]));
 
-                    } else {
-//                                console.log("# " + picture_items.length);
-//                                    for (var i = 0; i < 1; i++) {
+//                     } else {
+// //                                console.log("# " + picture_items.length);
+// //                                    for (var i = 0; i < 1; i++) {
 
-                        var item_string_filename = JSON.stringify(picture_item.filename);
-                        item_string_filename = item_string_filename.replace(/\"/g, "");
-                        var item_string_filename_ext = getExtension(item_string_filename);
-                        var expiration = new Date();
-                        expiration.setMinutes(expiration.getMinutes() + 30);
-                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-                        var standardName = 'standard.' + baseName + item_string_filename_ext;
+//                         var item_string_filename = JSON.stringify(picture_item.filename);
+//                         item_string_filename = item_string_filename.replace(/\"/g, "");
+//                         var item_string_filename_ext = getExtension(item_string_filename);
+//                         var expiration = new Date();
+//                         expiration.setMinutes(expiration.getMinutes() + 30);
+//                         var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+// //                                var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+//                         var standardName = 'standard.' + baseName + item_string_filename_ext;
 
-                        var urlStandard = scenes[sceneIndex].short_id + "~" + s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + standardName, Expires: 6000}); //just send back thumbnail urls for list
-                        res.send(urlStandard);
-                    }
-                });
-            }
-        }
-    });
-});
+//                         var urlStandard = scenes[sceneIndex].short_id + "~" + s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + standardName, Expires: 6000}); //just send back thumbnail urls for list
+//                         res.send(urlStandard);
+//                     }
+//                 });
+//             }
+//         }
+//     });
+// });
 
 app.post('/newlocation', requiredAuthentication, function (req, res) {
 

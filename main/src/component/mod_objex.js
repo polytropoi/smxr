@@ -279,7 +279,7 @@ AFRAME.registerComponent('mod_objex', {
         }
       },
       loadSceneInventoryObjects: function () { //coming back from upstream call after updating jsonObjectData with missing sceneInventoryItems
-        console.log("tryna loadSceneInventoryObjects fromSceneInventory " + this.fromSceneInventory);
+        console.log("tryna loadSceneInventoryObjects fromSceneInventory " + this.fromSceneInventory + " " + this.sceneInventoryItems.length);
         if (this.sceneInventoryItems != null) {
           for (let i = 0; i < this.sceneInventoryItems.length; i++) { 
             for (let j = 0; j < this.data.jsonObjectData.length; j++) {

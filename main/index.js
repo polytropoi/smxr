@@ -17788,9 +17788,9 @@ function getAllPeople() {
         }, {})
       
     }
-    function linkBarClickEvent(event, array){
+    function linkBarClickEvent(event, array) { 
         if(array[0]){
-            e = array[0];
+            let e = array[0];
             var x_value = this.data.labels[e._index]; //url
             var y_value = this.data.datasets[0].data[e._index]; //count
             window.open(x_value, '_blank');
