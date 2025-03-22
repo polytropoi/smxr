@@ -785,5 +785,59 @@ unity_router.get("/unity/:id", function (req, res){ //redirect to unity
     });
 });
 
+//unity only...
+// app.get('/singlescenedata/:scenekey', function (req, res) { //returns a public scene id and standard url for postcard
+//     var availableScenesResponse = {};
+//     var availableScenes = [];
+//     var sckey = req.params.scenekey;
+//     availableScenesResponse.availableScenes = availableScenes;
+
+//     db_old.scenes.find({$or: [ { short_id: sckey }, { sceneTitle: sckey } ]}, function (err, scenes) {
+//         if (err || !scenes) {
+//             console.log("cain't get no scenes... " + err)
+//             res.send("scene not found");
+//         } else {
+//             console.log("got " + scenes.length + " scenes from req " + req.params.scenekey);
+//             // sceneIndex = getRandomInt(0, scenes.length - 1);
+// //            async.each(scenes,
+//             // 2nd param is the function that each item is passed to
+
+//             // Call an asynchronous function, often a save() to DB
+//             //            scene.someAsyncCall(function () {
+//             // Async call is done, alert via callback
+//             if (scenes[0].scenePostcards != null && scenes[0].scenePostcards.length > 0) {
+//                 postcardIndex = getRandomInt(0, scenes[0].scenePostcards.length - 1);
+// //                        db.image_items.find({postcardForScene: scene.short_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function (err, picture_items) {
+//                 console.log("tryna find postcard: " + scenes[0].scenePostcards[postcardIndex]);
+//                 var oo_id = ObjectId.createFromHexString(scenes[0].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+//                 db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
+
+//                     if (err || !picture_item || picture_item.length == 0) {
+//                         console.log("error getting picture items for publicsimple" + JSON.stringify(scenes[0].scenePostcards[postcardIndex]));
+
+//                     } else {
+// //                                console.log("# " + picture_items.length);
+// //                                    for (var i = 0; i < 1; i++) {
+
+//                         var item_string_filename = JSON.stringify(picture_item.filename);
+//                         item_string_filename = item_string_filename.replace(/\"/g, "");
+//                         var item_string_filename_ext = getExtension(item_string_filename);
+//                         var expiration = new Date();
+//                         expiration.setMinutes(expiration.getMinutes() + 30);
+//                         var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+// //                                var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+//                         var halfName = 'half.' + baseName + item_string_filename_ext;
+
+//                         var scenedata = scenes[0].short_id + "~" + scenes[0].sceneTitle + "~" + baseName + "~"  + s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back a string and munge it
+//                         res.send(scenedata);
+//                     }
+//                 });
+//             } else {
+//                 var scenedata = scenes[0].short_id + "~" + scenes[0].sceneTitle + "~"  + "na" + "~https://servicemedia.s3.amazonaws.com/assets/pics/postcardna.png"; //no postcard but valid scene
+//                 res.send(scenedata);
+//             }
+//         }
+//     });
+// });
 
 export default unity_router;

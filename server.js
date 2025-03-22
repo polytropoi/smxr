@@ -496,7 +496,7 @@ function nameCleaner(name) {
     return name.replace(/[^a-zA-Z0-9\-]/gi, ''); // Strip any special charactere
 }
 
-function checkAppID(req, res, next) {
+export function checkAppID(req, res, next) {
     console.log("req.headers: " + JSON.stringify(req.headers));
     if (req.headers.appid) {
         var a_id = ObjectId.createFromHexString(req.headers.appid.toString().replace(":", ""));
@@ -5073,488 +5073,588 @@ app.post('/delete_storeitem/', requiredAuthentication, admin, function (req, res
 });
 
 
-app.post('/purchase', checkAppID, requiredAuthentication, function (req, res) {
-    console.log("tryna post purchase: " + JSON.stringify(req.body));
+// app.post('/purchase', checkAppID, requiredAuthentication, function (req, res) {
+//     console.log("tryna post purchase: " + JSON.stringify(req.body));
 
-    var _id = ObjectId.createFromHexString(req.body.userID);
-    var obody = req.body;
-    db_old.users.findOne({"_id" : _id}, function (err, user) {
-        if (err || !user) {
-            console.log("error getting user: " + err);
-            res.send("error " + err);
-        } else {
-            var userEmail = user.email;
-            console.log("tryna charge " + userEmail);
-            obody.userEmail = userEmail;
-            if (user.stripeCustomerID != null) {
-                stripe.charges.create({
-                    amount: 1500, // $15.00 this time
-                    currency: "usd",
-                    customer: user.stripeCustomerID,
-                    receipt_email: userEmail,
-                    description: req.body.purchaseDescription,
+//     var _id = ObjectId.createFromHexString(req.body.userID);
+//     var obody = req.body;
+//     db_old.users.findOne({"_id" : _id}, function (err, user) {
+//         if (err || !user) {
+//             console.log("error getting user: " + err);
+//             res.send("error " + err);
+//         } else {
+//             var userEmail = user.email;
+//             console.log("tryna charge " + userEmail);
+//             obody.userEmail = userEmail;
+//             if (user.stripeCustomerID != null) {
+//                 stripe.charges.create({
+//                     amount: 1500, // $15.00 this time
+//                     currency: "usd",
+//                     customer: user.stripeCustomerID,
+//                     receipt_email: userEmail,
+//                     description: req.body.purchaseDescription,
 
-                }).then(function(charge){
-                    console.log(JSON.stringify(charge));
-                    obody.stripeToken = charge;
-                    db_old.purchases.save(obody, function (err, saved) {
-                        if ( err || !saved ) {
-                            console.log('purchase not saved..');
-                            res.send("nilch");
-                        } else {
-                            var item_id = saved._id.toString();
-                            console.log('new purchase id: ' + item_id);
-                            res.send("purchase id: " + item_id + " charged " + JSON.stringify(charge));
-                        }
-                    });
-                });
-            } else {
-                console.log("no customer id!");
-                res.send("no id");
-            }
-        }
-    });
-});
+//                 }).then(function(charge){
+//                     console.log(JSON.stringify(charge));
+//                     obody.stripeToken = charge;
+//                     db_old.purchases.save(obody, function (err, saved) {
+//                         if ( err || !saved ) {
+//                             console.log('purchase not saved..');
+//                             res.send("nilch");
+//                         } else {
+//                             var item_id = saved._id.toString();
+//                             console.log('new purchase id: ' + item_id);
+//                             res.send("purchase id: " + item_id + " charged " + JSON.stringify(charge));
+//                         }
+//                     });
+//                 });
+//             } else {
+//                 console.log("no customer id!");
+//                 res.send("no id");
+//             }
+//         }
+//     });
+// });
 
-app.post('/testpurchase', checkAppID, requiredAuthentication, function (req, res) {
-    console.log("tryna post test purchase: " + JSON.stringify(req.body));
-    let _id = ObjectId.createFromHexString(req.body.userID);
-    let storeitemID = ObjectId.createFromHexString(req.body.storeitemID);
-    let obody = req.body;
+// app.post('/stripe_testpurchase', checkAppID, requiredAuthentication, function (req, res) {
+//     console.log("tryna post test purchase: " + JSON.stringify(req.body));
+//     let _id = ObjectId.createFromHexString(req.body.userID);
+//     let storeitemID = ObjectId.createFromHexString(req.body.storeitemID);
+//     let obody = req.body;
     
-    db_old.users.findOne({"_id" : _id}, function (err, user) {// check user
-        if (err || !user) {
-            console.log("error getting user: " + err);
-            res.send("error " + err);
-        } else {
-            db_old.storeitems.findOne({"_id" : storeitemID}, function (err, storeitem){ //check store item
-                if (err || !storeitem) {
-                    console.log("no store item error " + err);
-                    res.send("error " + err);
-                } else {
-                    let usertotal = 0;
-                    db_old.purchases.find({userID: req.body.userID, storeitemID: req.body.storeitemID}, function (err, purchases) { //check user's previous purchases of this item doesn't exceed maxPerUser
-                        if (err) {
-                            console.log("error! " + err);
-                        } else {
+//     db_old.users.findOne({"_id" : _id}, function (err, user) {// check user
+//         if (err || !user) {
+//             console.log("error getting user: " + err);
+//             res.send("error " + err);
+//         } else {
+//             db_old.storeitems.findOne({"_id" : storeitemID}, function (err, storeitem){ //check store item
+//                 if (err || !storeitem) {
+//                     console.log("no store item error " + err);
+//                     res.send("error " + err);
+//                 } else {
+//                     let usertotal = 0;
+//                     db_old.purchases.find({userID: req.body.userID, storeitemID: req.body.storeitemID}, function (err, purchases) { //check user's previous purchases of this item doesn't exceed maxPerUser
+//                         if (err) {
+//                             console.log("error! " + err);
+//                         } else {
 
-                            for (let i = 0; i < purchases.length; i++) {
-                                let quantity = (purchases[i].quantity != null) ? purchases[i].quantity : 1;
-                                usertotal += quantity;
-                            }
-                            if (usertotal >= storeitem.maxPerUser) {
-                                console.log("maxPerUser exceeded!");
-                                res.send("this user can't buy more of these!");
-                            } else {
-                                console.log("checking inventory totalSold == " + total + " maxTotal ==  " + storeitem.maxTotal );
-                                if (storeitem.maxTotal == 0 || total < storeitem.maxTotal) { //check maxTotal
-                                    var userEmail = user.email;
-                                    console.log("tryna charge " + userEmail);
-                                    obody.userEmail = userEmail;
-                                    obody.purchaseStatus = "Test Purchase"
-                                    if (obody.quantity == null) {
-                                        obody.quantity = 1;
-                                    }
-                                    // if (obody.quantity < storeitem.maxPerUser) {
-                                    db_old.purchases.save(obody, function (err, saved) {
-                                        if ( err || !saved ) {
-                                            console.log('purchase not saved..');
-                                            res.send("purchase failed");
-                                        } else {
-                                            var item_id = saved._id.toString();
-                                            console.log('new purchase id: ' + item_id);
-                                            db_old.storeitems.update( { "_id": storeitemID },{ $inc: { totalSold: obody.quantity }});
-                                            var htmlbody = "Thanks for your Purchase: " + JSON.stringify(saved);
-                                            (async () => {
-                                                try {
-                                                    const status = await SendEmail(userEmail, adminEmail, htmlbody, "Your Purchase");
-                                                    const status2 = await SendEmail(userEmail, adminEmail, htmlbody, "Your Purchase ADMIN");
-                                                } catch (e) {
-                                                     console.log("error sending! " + e);
-                                                }
+//                             for (let i = 0; i < purchases.length; i++) {
+//                                 let quantity = (purchases[i].quantity != null) ? purchases[i].quantity : 1;
+//                                 usertotal += quantity;
+//                             }
+//                             if (usertotal >= storeitem.maxPerUser) {
+//                                 console.log("maxPerUser exceeded!");
+//                                 res.send("this user can't buy more of these!");
+//                             } else {
+//                                 console.log("checking inventory totalSold == " + total + " maxTotal ==  " + storeitem.maxTotal );
+//                                 if (storeitem.maxTotal == 0 || total < storeitem.maxTotal) { //check maxTotal
+//                                     var userEmail = user.email;
+//                                     console.log("tryna charge " + userEmail);
+//                                     obody.userEmail = userEmail;
+//                                     obody.purchaseStatus = "Test Purchase"
+//                                     if (obody.quantity == null) {
+//                                         obody.quantity = 1;
+//                                     }
+//                                     // if (obody.quantity < storeitem.maxPerUser) {
+//                                     db_old.purchases.save(obody, function (err, saved) {
+//                                         if ( err || !saved ) {
+//                                             console.log('purchase not saved..');
+//                                             res.send("purchase failed");
+//                                         } else {
+//                                             var item_id = saved._id.toString();
+//                                             console.log('new purchase id: ' + item_id);
+//                                             db_old.storeitems.update( { "_id": storeitemID },{ $inc: { totalSold: obody.quantity }});
+//                                             var htmlbody = "Thanks for your Purchase: " + JSON.stringify(saved);
+//                                             (async () => {
+//                                                 try {
+//                                                     const status = await SendEmail(userEmail, adminEmail, htmlbody, "Your Purchase");
+//                                                     const status2 = await SendEmail(userEmail, adminEmail, htmlbody, "Your Purchase ADMIN");
+//                                                 } catch (e) {
+//                                                      console.log("error sending! " + e);
+//                                                 }
 
-                                            })(); 
+//                                             })(); 
                                            
-                                            res.send("purchase id: " + item_id + " charged " + saved.price);
-                                        }
-                                    });
-                                } else {
-                                    console.log("Sold Out!")
-                                    res.send("that item is sold out");
-                                }
-                            }
-                        }
-                    }); //check user's purchases for this item
-                    let total = 0;
-                    if (storeitem.totalSold != null) {
-                        total = storeitem.totalSold;
-                    }
+//                                             res.send("purchase id: " + item_id + " charged " + saved.price);
+//                                         }
+//                                     });
+//                                 } else {
+//                                     console.log("Sold Out!")
+//                                     res.send("that item is sold out");
+//                                 }
+//                             }
+//                         }
+//                     }); //check user's purchases for this item
+//                     let total = 0;
+//                     if (storeitem.totalSold != null) {
+//                         total = storeitem.totalSold;
+//                     }
 
-                } 
-            }); 
+//                 } 
+//             }); 
 
-        }
-    });
-});
+//         }
+//     });
+// });
+
 app.get('/purchases/', requiredAuthentication, admin, function (req, res) { //all the things..
 
     console.log("tryna get all purchases! ");
 
-    db_old.purchases.find({}, function(err, purchases) {
-        if (err || !purchases || purchases == null || purchases.length == 0) {
-            console.log("cain't get no purchases... ");
-            res.send("no purchases");
-        } else {
-//            console.log(JSON.stringify(scores));
-            var purchasesResponse = {};
+    (async () => {
+        try {
+            const query = {};
+            const purchases = await RunDataQuery("purchases", "find", query);
+            let purchasesResponse = {};
             purchasesResponse.purchases = purchases;
             res.json(purchasesResponse);
+        } catch (e) {
+            console.log("error getting all purchases " + e);
+            res.send("error getting all purchases " + e);
         }
-    });
+    })();
 });
+//     db_old.purchases.find({}, function(err, purchases) {
+//         if (err || !purchases || purchases == null || purchases.length == 0) {
+//             console.log("cain't get no purchases... ");
+//             res.send("no purchases");
+//         } else {
+// //            console.log(JSON.stringify(scores));
+//             var purchasesResponse = {};
+//             purchasesResponse.purchases = purchases;
+//             res.json(purchasesResponse);
+//         }
+//     });
+// });
 
 app.get('/purchases/:app_id/:u_id',  requiredAuthentication, function (req, res) {
 
     console.log("tryna get purchases for: ", req.params.u_id + " " + req.params.app_id);
-    //var _id = ObjectId.createFromHexString(req.params.u_id);
-    // var appid = req.headers.appid.toString().replace(":", "");
-    db_old.purchases.find({$and : [{userID : req.params.u_id}, {appID : req.params.app_id}]}, function(err, purchases) {
-        if (err || !purchases || purchases == null || purchases.length == 0) {
-            console.log("cain't get no purchases... ");
-            res.send("no purchases");
-        } else {
-//            console.log(JSON.stringify(scores));
-            var purchasesResponse = {};
+    (async () => {
+        try {
+            const query = {$and : [{userID : req.params.u_id}, {appID : req.params.app_id}]};
+            const purchases = await RunDataQuery("purchases", "find", query);
+            let purchasesResponse = {};
             purchasesResponse.purchases = purchases;
             res.json(purchasesResponse);
+        } catch (e) {
+            console.log("error getting purchases " + e);
+            res.send("error getting purchases " + e);
         }
-    });
+    })();
 });
+//     db_old.purchases.find({$and : [{userID : req.params.u_id}, {appID : req.params.app_id}]}, function(err, purchases) {
+//         if (err || !purchases || purchases == null || purchases.length == 0) {
+//             console.log("cain't get no purchases... ");
+//             res.send("no purchases");
+//         } else {
+// //            console.log(JSON.stringify(scores));
+//             var purchasesResponse = {};
+//             purchasesResponse.purchases = purchases;
+//             res.json(purchasesResponse);
+//         }
+//     });
+// });
 
 app.get('/purchases/:app_id',  checkAppID, requiredAuthentication, function (req, res) {
 
     console.log("tryna get purchases for appid: " + req.params.app_id);
     //var _id = ObjectId.createFromHexString(req.params.u_id);
     // var appid = req.headers.appid.toString().replace(":", "");
-    db_old.purchases.find({appID : req.params.app_id}, function(err, purchases) {
-        if (err || !purchases || purchases == null || purchases.length == 0) {
-            console.log("cain't get no purchases... ");
-            res.send("no purchases");
-        } else {
-            var purchasesResponse = {};
+    (async () => {
+        try {
+            const query = {"appID" : req.params.app_id};
+            const purchases = await RunDataQuery("purchases", "find", query);
+            let purchasesResponse = {};
             purchasesResponse.purchases = purchases;
             res.json(purchasesResponse);
+        } catch (e) {
+            console.log("error getting purchases " + e);
+            res.send("error getting purchases " + e);
         }
-    });
+    })();
 });
-app.post('/activity', requiredAuthentication, function (req, res) {
+
+//     db_old.purchases.find({appID : req.params.app_id}, function(err, purchases) {
+//         if (err || !purchases || purchases == null || purchases.length == 0) {
+//             console.log("cain't get no purchases... ");
+//             res.send("no purchases");
+//         } else {
+//             var purchasesResponse = {};
+//             purchasesResponse.purchases = purchases;
+//             res.json(purchasesResponse);
+//         }
+//     });
+// });
+
+app.post('/activity', requiredAuthentication, function (req, res) { //unused?
     console.log("tryna post activity");
-    db_old.activity.save(req.body, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('activity not saved..');
-            res.send("nilch");
-        } else {
-            var item_id = saved._id.toString();
-            console.log('new score id: ' + item_id);
-            res.send(item_id);
+    (async () => {
+        try {
+            
+            const saved = await RunDataQuery("activity", "insertOne", req.body);
+            res.send("inserted activity " + JSON.stringify(saved) );
+        } catch (e) {
+            console.log("error inserting activity " + e);
+            res.send("error inserting activity " + e);
         }
-    });
+    })();
 });
+
+//     db_old.activity.save(req.body, function (err, saved) {
+//         if ( err || !saved ) {
+//             console.log('activity not saved..');
+//             res.send("nilch");
+//         } else {
+//             var item_id = saved._id.toString();
+//             console.log('new score id: ' + item_id);
+//             res.send(item_id);
+//         }
+//     });
+// });
 
 app.get('/activities/:u_id',  checkAppID, requiredAuthentication, function (req, res) {
 
     console.log("tryna get activities for: ", req.params.u_id);
     //var _id = ObjectId.createFromHexString(req.params.u_id);
     var appid = req.headers.appid.toString().replace(":", "");
-    db_old.activity.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, activities) {
-        if (err || !activities) {
-            console.log("cain't get no activities... " + err);
-            res.send(err);
-        } else {
-            console.log(JSON.stringify(activities));
-            var activitiesResponse = {};
+    (async () => {
+        try {
+            const query = {$and : [{userID : req.params.u_id}, {appID : appid}]};
+            const activities = await RunDataQuery("activity", "find", query);
+            let activitiesResponse = {};
             activitiesResponse.activities = activities;
             res.json(activitiesResponse);
+        } catch (e) {
+            console.log("error inserting activity " + e);
+            res.send("error inserting activity " + e);
         }
-    });
+    })();
 });
 
+//     db_old.activity.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, activities) {
+//         if (err || !activities) {
+//             console.log("cain't get no activities... " + err);
+//             res.send(err);
+//         } else {
+//             console.log(JSON.stringify(activities));
+//             var activitiesResponse = {};
+//             activitiesResponse.activities = activities;
+//             res.json(activitiesResponse);
+//         }
+//     });
+// });
 
-app.get('/activitytotals/:appid', function (req, res) {
 
-    var appid = req.params.appid.toString().replace(":", "");
+// app.get('/activitytotals/:appid', function (req, res) {
 
-    console.log("tryna get total user activities for app: " + appid);
+//     var appid = req.params.appid.toString().replace(":", "");
 
-    var scoresResponse = {};
-    var appScores = {};
+//     console.log("tryna get total user activities for app: " + appid);
 
-    async.waterfall([
+//     var scoresResponse = {};
+//     var appScores = {};
 
-            function (callback) { //get all scores for this app
-                db_old.scores.find({appID : appid}, function(err, activities) {
-                    if (err || !scores) {
-                        console.log("cain't get no scores... " + err);
-                        callback(err);
-                    } else {
+    
+//     async.waterfall([
 
-                        appScores = scores;
-                        console.log("scores: " + JSON.stringify(appScores));
-                        callback(null, scores);
-                    }
+//             function (callback) { //get all scores for this app
+//                 db_old.scores.find({appID : appid}, function(err, activities) {
+//                     if (err || !scores) {
+//                         console.log("cain't get no scores... " + err);
+//                         callback(err);
+//                     } else {
 
-                });
-            }, //pull unique userIDs
-            function (userScores, callback) {
-                var items = userScores;
-                var uids = [];
-                var lookup = {};
-                for (var item, i = 0; item = items[i++];) {
-                    var uid = item.userID;
-                    if (!(uid in lookup)) {
-                        lookup[uid] = 1;
-                        uids.push(uid);
-                    }
-                }
-                console.log(JSON.stringify(uids));
-                callback(null, userScores, uids);
-            }, //loop through again to aggregate scores for each user
-            function (scores, uids, callback) {
-                var totalscores = [];
-                async.each (uids, function (uid, callbackz) {
-                    var uscores = {};
-                    var scoretemp = 0;
-                    for (var entry in appScores) {
-                        if (uid == appScores[entry].userID) {
-                            scoretemp = scoretemp + parseInt(appScores[entry].score);
-                        }
-                    }
-                    uscores.user = uid;
-                    uscores.scoreTotal = scoretemp;
-                    totalscores.push(uscores);
-                    callbackz();
-                }, function(err) {
+//                         appScores = scores;
+//                         console.log("scores: " + JSON.stringify(appScores));
+//                         callback(null, scores);
+//                     }
+
+//                 });
+//             }, //pull unique userIDs
+//             function (userScores, callback) {
+//                 var items = userScores;
+//                 var uids = [];
+//                 var lookup = {};
+//                 for (var item, i = 0; item = items[i++];) {
+//                     var uid = item.userID;
+//                     if (!(uid in lookup)) {
+//                         lookup[uid] = 1;
+//                         uids.push(uid);
+//                     }
+//                 }
+//                 console.log(JSON.stringify(uids));
+//                 callback(null, userScores, uids);
+//             }, //loop through again to aggregate scores for each user
+//             function (scores, uids, callback) {
+//                 var totalscores = [];
+//                 async.each (uids, function (uid, callbackz) {
+//                     var uscores = {};
+//                     var scoretemp = 0;
+//                     for (var entry in appScores) {
+//                         if (uid == appScores[entry].userID) {
+//                             scoretemp = scoretemp + parseInt(appScores[entry].score);
+//                         }
+//                     }
+//                     uscores.user = uid;
+//                     uscores.scoreTotal = scoretemp;
+//                     totalscores.push(uscores);
+//                     callbackz();
+//                 }, function(err) {
                    
-                    if (err) {
-                        console.log('A file failed to process');
-                        callbackz(err);
-                    } else {
-                        console.log('All files have been processed successfully');
-                        scoresResponse.topscores = topscores;
-                        callback(null);
-                    }
-                });
-            }
+//                     if (err) {
+//                         console.log('A file failed to process');
+//                         callbackz(err);
+//                     } else {
+//                         console.log('All files have been processed successfully');
+//                         scoresResponse.topscores = topscores;
+//                         callback(null);
+//                     }
+//                 });
+//             }
 
-        ], //end of async.waterfall
-        function (err, result) { // #last function, close async
-            res.json(scoresResponse);
-            console.log("waterfall done: " + result);
-        })
-});
+//         ], //end of async.waterfall
+//         function (err, result) { // #last function, close async
+//             res.json(scoresResponse);
+//             console.log("waterfall done: " + result);
+//         })
+// });
 
-app.post('/newpath', checkAppID, requiredAuthentication, function (req, res) {
+// app.post('/newpath', checkAppID, requiredAuthentication, function (req, res) {
 
-    db_old.paths.save(req.body, function (err, saved) {
-        if ( err || !saved ) {
-            console.log('path not saved..');
-            res.send("nilch");
-        } else {
-            var item_id = saved._id.toString();
-            console.log('new path id: ' + item_id);
-            res.send(item_id);
+//     db_old.paths.save(req.body, function (err, saved) {
+//         if ( err || !saved ) {
+//             console.log('path not saved..');
+//             res.send("nilch");
+//         } else {
+//             var item_id = saved._id.toString();
+//             console.log('new path id: ' + item_id);
+//             res.send(item_id);
 
-        }
-    });
+//         }
+//     });
 
-});
+// });
 
-app.post('/update_path/:_id', checkAppID, requiredAuthentication, function (req, res) {
-    console.log(req.params._id);
+// app.post('/update_path/:_id', checkAppID, requiredAuthentication, function (req, res) {
+//     console.log(req.params._id);
 
-    var o_id = ObjectId.createFromHexString(req.body._id);   
-    console.log('path requested : ' + req.body._id);
-    db_old.paths.find({ "_id" : o_id}, function(err, path) {
-        if (err || !path) {
-            console.log("error getting path items: " + err);
-        } else {
-            console.log("tryna update path " + req.body._id);
-            db_old.paths.update( { "_id": o_id }, { $set: {
+//     var o_id = ObjectId.createFromHexString(req.body._id);   
+//     console.log('path requested : ' + req.body._id);
+//     db_old.paths.find({ "_id" : o_id}, function(err, path) {
+//         if (err || !path) {
+//             console.log("error getting path items: " + err);
+//         } else {
+//             console.log("tryna update path " + req.body._id);
+//             db_old.paths.update( { "_id": o_id }, { $set: {
 
-                pathUserID : req.body.user_id,
-                pathNumber : req.body.pathNumber,
-                pathTitle : req.body.pathTitle,
-                pathMeaning : req.body.pathMeaning,
-                pathAttribution : req.body.pathAttribution,
-                pathColor1 : req.body.pathColor1,
-                pathColor2 : req.body.pathColor2,
+//                 pathUserID : req.body.user_id,
+//                 pathNumber : req.body.pathNumber,
+//                 pathTitle : req.body.pathTitle,
+//                 pathMeaning : req.body.pathMeaning,
+//                 pathAttribution : req.body.pathAttribution,
+//                 pathColor1 : req.body.pathColor1,
+//                 pathColor2 : req.body.pathColor2,
 
-                pathMapPictureID : req.body.pathMapPictureID,
-                pathPictureID : req.body.pathPictureID,
-                pathArcanumNumber : req.body.pathArcanumNumber,
-                pathArcanumTitle : req.body.pathArcanumTitle,
-                pathArcanumPictureID : req.body.pathArcanumPictureID,
-                pathTriggerAudioID : req.body.pathTriggerAudioID,
-                pathSpokenAudioID : req.body.pathSpokenAudioID,
-                pathBackgroundAudioID : req.body.pathBackgroundAudioID,
-                pathEnvironmentAudioID : req.body.pathEnvironmentAudioID,
-                pathKeynote : req.body.pathKeynote,
-                pathDescription : req.body.pathDescription,
-                pathText : req.body.pathText}
-            });
-        } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    });
-});
+//                 pathMapPictureID : req.body.pathMapPictureID,
+//                 pathPictureID : req.body.pathPictureID,
+//                 pathArcanumNumber : req.body.pathArcanumNumber,
+//                 pathArcanumTitle : req.body.pathArcanumTitle,
+//                 pathArcanumPictureID : req.body.pathArcanumPictureID,
+//                 pathTriggerAudioID : req.body.pathTriggerAudioID,
+//                 pathSpokenAudioID : req.body.pathSpokenAudioID,
+//                 pathBackgroundAudioID : req.body.pathBackgroundAudioID,
+//                 pathEnvironmentAudioID : req.body.pathEnvironmentAudioID,
+//                 pathKeynote : req.body.pathKeynote,
+//                 pathDescription : req.body.pathDescription,
+//                 pathText : req.body.pathText}
+//             });
+//         } if (err) {res.send(error)} else {res.send("updated " + new Date())}
+//     });
+// });
 
 ///////////////
-app.get('/sceneinfo',  checkAppID, requiredAuthentication, function (req, res) { //get default scene info
+// app.get('/sceneinfo',  checkAppID, requiredAuthentication, function (req, res) { //get default scene info
 
-    console.log(req.params._id);
-    var o_id = ObjectId.createFromHexString(req.params._id);
-    db_old.scenes.find({}, function(err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no paths... " + err);
-        } else {
-            console.log(JSON.stringify(scenes));
-            res.json(scenes);
-        }
-    });
-});
+//     console.log(req.params._id);
+//     var o_id = ObjectId.createFromHexString(req.params._id);
+//     db_old.scenes.find({}, function(err, scenes) {
+//         if (err || !scenes) {
+//             console.log("cain't get no paths... " + err);
+//         } else {
+//             console.log(JSON.stringify(scenes));
+//             res.json(scenes);
+//         }
+//     });
+// });
 
 app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
 
     let s_id = ObjectId.createFromHexString(req.body.scene_id);   
     let g_id = ObjectId.createFromHexString(req.body.group_id);   
-    // let audiotype
-    // console.log('tryna add a scene pic : ' + req.body);
-
-    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-        if (err || !scene) {
-            console.log("error getting sceneert 4: " + err);
-        } else {
-            db_old.groups.findOne({ "_id": g_id}, function (err, group) {
-                if (err || !group) {
-                    console.log("error getting image items 4: " + err);
-                } else {
-                    if (req.body.grouptype.toLowerCase().includes('picture')) {
+   
+    (async () => {
+        try {
+            const scenequery = { "_id": s_id};
+            const groupquery = { "_id": g_id};
+            const scene = await RunDataQuery("scenes", "findOne", scenequery);
+            const group = await RunDataQuery("groups", "findOne", groupquery);
+            if (req.body.grouptype.toLowerCase().includes('picture')) {
                     var scenePictureGroups = scene.scenePictureGroups || new Array();
                     console.log("tryna add pic group to scene: " + s_id);
-                        if (scenePictureGroups.indexOf(req.body.group_id) > -1) {
-                            console.log("redundant group id");
-                        } else {
-                            scenePictureGroups.push(req.body.group_id);
-                            db_old.scenes.update({ "_id": s_id }, { $set: {scenePictureGroups: scenePictureGroups}});
-                        }
-
-                    } else  if (req.body.grouptype == 'audio') {
-                        var sceneAudioGroups = scene.sceneAudioGroups || new Array();
-                        console.log("tryna add audio group to scene: " + s_id);
-                        if (sceneAudioGroups.indexOf(req.body.group_id) > -1) {
-                            console.log("redundant group id");
-                        } else {
-                            sceneAudioGroups.push(req.body.group_id);
-                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneAudioGroups: sceneAudioGroups}});
-                            
-                        }
-                    } else  if (req.body.grouptype == 'paudio') {
-                            let scenePrimaryAudioGroups = scene.scenePrimaryAudioGroups || new Array();
-                            console.log("tryna add primary audio group to scene: " + s_id);
-                            if (scenePrimaryAudioGroups.indexOf(req.body.group_id) > -1) {
-                                console.log("redundant group id");
-                            } else {
-                                scenePrimaryAudioGroups.push(req.body.group_id);
-                                db_old.scenes.update({ "_id": s_id }, { $set: {scenePrimaryAudioGroups: scenePrimaryAudioGroups}});
-                            }
-                    } else  if (req.body.grouptype == 'aaudio') {
-                        let sceneAmbientAudioGroups = scene.sceneAmbientAudioGroups || new Array();
-                        console.log("tryna add ambient audio group to scene: " + s_id);
-                        if (sceneAmbientAudioGroups.indexOf(req.body.group_id) > -1) {
-                            console.log("redundant group id");
-                        } else {
-                            sceneAmbientAudioGroups.push(req.body.group_id);
-                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneAmbientAudioGroups: sceneAmbientAudioGroups}});
-                        }
-                    } else  if (req.body.grouptype == 'taudio') {
-                        let sceneTriggerAudioGroups = scene.sceneTriggerAudioGroups || new Array();
-                        console.log("tryna add trigger audio group to scene: " + s_id);
-                        if (sceneTriggerAudioGroups.indexOf(req.body.group_id) > -1) {
-                            console.log("redundant group id");
-                        } else {
-                            sceneTriggerAudioGroups.push(req.body.group_id);
-                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneTriggerAudioGroups: sceneTriggerAudioGroups}});
-                        }            
-                    } else if (req.body.grouptype == 'text') {
-                        var sceneTextGroups = scene.sceneTextGroups || new Array();
-                        console.log("tryna add video group to scene: " + s_id);
-                        if (sceneTextGroups.indexOf(req.body.group_id) > -1) {
-                            console.log("redundant group id");
-                        } else {
-                            sceneTextGroups.push(req.body.group_id);
-                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneTextGroups: sceneTextGroups}});
-                        }
-
-                    } else if (req.body.grouptype == 'object') {
-                        var sceneObjectGroups = scene.sceneObjectGroups || new Array();
-                        console.log("tryna add object group to scene: " + s_id);
-                        if (sceneObjectGroups.indexOf(req.body.group_id) > -1) {
-                            console.log("redundant group id");
-                        } else {
-                            sceneObjectGroups.push(req.body.group_id);
-                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneObjectGroups: sceneObjectGroups}});
-                        }
-
-                    } else if (req.body.grouptype == 'video') {
-                        var sceneVideoGroups = scene.sceneVideoGroups || new Array();
-                        console.log("tryna add location group to scene: " + s_id);
-                        if (sceneVideoGroups.indexOf(req.body.group_id) > -1) {
-                            console.log("redundant group id");
-                        } else {
-                            sceneVideoGroups.push(req.body.group_id);
-                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneVideoGroups: sceneVideoGroups}});
-                        }
-                    } else if (req.body.grouptype == 'location') {
-                        var sceneLocationGroups = scene.sceneLocationGroups || new Array();
-                        console.log("tryna add location group to scene: " + s_id);
-                        if (sceneLocationGroups.indexOf(req.body.group_id) > -1) {
-                            console.log("redundant group id");
-                        } else {
-                            sceneLocationGroups.push(req.body.group_id);
-                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocationGroups: sceneLocationGroups}});
-                        }
+                    if (scenePictureGroups.indexOf(req.body.group_id) > -1) {
+                        console.log("redundant group id");
+                    } else {
+                        scenePictureGroups.push(req.body.group_id);
+                        const updoc = { $set: {scenePictureGroups: scenePictureGroups}};
+                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                        console.log("updateed scene with picture group " + JSON.stringify(updated));
                     }
-                }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
-            });
+
+                } else  if (req.body.grouptype == 'audio') {
+                    var sceneAudioGroups = scene.sceneAudioGroups || new Array();
+                    console.log("tryna add audio group to scene: " + s_id);
+                    if (sceneAudioGroups.indexOf(req.body.group_id) > -1) {
+                        console.log("redundant group id");
+                    } else {
+                        sceneAudioGroups.push(req.body.group_id);
+                        const updoc = { $set: {sceneAudioGroups: sceneAudioGroups}};
+                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                        console.log("updateed scene with audio group " + JSON.stringify(updated));
+                       
+                    }
+                } else  if (req.body.grouptype == 'paudio') {
+                        let scenePrimaryAudioGroups = scene.scenePrimaryAudioGroups || new Array();
+                        console.log("tryna add primary audio group to scene: " + s_id);
+                        if (scenePrimaryAudioGroups.indexOf(req.body.group_id) > -1) {
+                            console.log("redundant group id");
+                        } else {
+                        scenePrimaryAudioGroups.push(req.body.group_id);
+                        const updoc = { $set: {scenePrimaryAudioGroups: scenePrimaryAudioGroups}};
+                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                        console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                        }
+                } else  if (req.body.grouptype == 'aaudio') {
+                    let sceneAmbientAudioGroups = scene.sceneAmbientAudioGroups || new Array();
+                    console.log("tryna add ambient audio group to scene: " + s_id);
+                    if (sceneAmbientAudioGroups.indexOf(req.body.group_id) > -1) {
+                        console.log("redundant group id");
+                    } else {
+                        sceneAmbientAudioGroups.push(req.body.group_id);
+                        const updoc = { $set: {sceneAmbientAudioGroups: sceneAmbientAudioGroups}};
+                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                        console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                    }
+                } else  if (req.body.grouptype == 'taudio') {
+                    let sceneTriggerAudioGroups = scene.sceneTriggerAudioGroups || new Array();
+                    console.log("tryna add trigger audio group to scene: " + s_id);
+                    if (sceneTriggerAudioGroups.indexOf(req.body.group_id) > -1) {
+                        console.log("redundant group id");
+                    } else {
+                        sceneTriggerAudioGroups.push(req.body.group_id);
+                        const updoc = { $set: {sceneTriggerAudioGroups: sceneTriggerAudioGroups}};
+                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                        console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                    }            
+                } else if (req.body.grouptype == 'text') {
+                    var sceneTextGroups = scene.sceneTextGroups || new Array();
+                    console.log("tryna add video group to scene: " + s_id);
+                    if (sceneTextGroups.indexOf(req.body.group_id) > -1) {
+                        console.log("redundant group id");
+                    } else {
+                        sceneTextGroups.push(req.body.group_id);
+                        const updoc = { $set: {sceneTextGroups: sceneTextGroups}};
+                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                        console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                    }
+
+                } else if (req.body.grouptype == 'object') {
+                    var sceneObjectGroups = scene.sceneObjectGroups || new Array();
+                    console.log("tryna add object group to scene: " + s_id);
+                    if (sceneObjectGroups.indexOf(req.body.group_id) > -1) {
+                        console.log("redundant group id");
+                    } else {
+                        sceneObjectGroups.push(req.body.group_id);
+                        const updoc = { $set: {sceneObjectGroups: sceneObjectGroups}};
+                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                        console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                    }
+
+                } else if (req.body.grouptype == 'video') {
+                    var sceneVideoGroups = scene.sceneVideoGroups || new Array();
+                    console.log("tryna add location group to scene: " + s_id);
+                    if (sceneVideoGroups.indexOf(req.body.group_id) > -1) {
+                        console.log("redundant group id");
+                    } else {
+                        sceneVideoGroups.push(req.body.group_id);
+                        const updoc = { $set: {sceneVideoGroups: sceneVideoGroups}};
+                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                        console.log("updateed scene with audio group " + JSON.stringify(updated));
+ 
+                    }
+                } else if (req.body.grouptype == 'location') {
+                    var sceneLocationGroups = scene.sceneLocationGroups || new Array();
+                    console.log("tryna add location group to scene: " + s_id);
+                    if (sceneLocationGroups.indexOf(req.body.group_id) > -1) {
+                        console.log("redundant group id");
+                    } else {
+                        sceneLocationGroups.push(req.body.group_id);
+                        const updoc = { $set: {sceneLocationGroups: sceneLocationGroups}};
+                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                        console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                    }
+                }
+                res.send("updated scene with group");
+        } catch {
+            console.log('error adding group to scene ' +e);
+            res.send('error adding group to scene ' +e);
         }
-    });
+    })();
 });
 
-app.post('/update_scene_location/', requiredAuthentication, function (req, res) {
+// app.post('/update_scene_location/', requiredAuthentication, function (req, res) {
 
-    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
-    // var p_id = ObjectId.createFromHexString(req.body.location_id);   
-    console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
+//     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+//     // var p_id = ObjectId.createFromHexString(req.body.location_id);   
+//     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
-    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-        if (err || !scene) {
-            console.log("error getting sceneert 4 obj: " + err);
-            res.send(err);
-        } else {
+//     (async () => {
+//         try {
+//             const saved = await RunDataQuery("activity", "insertOne", req.body);
+//             res.send("inserted activity " + JSON.stringify(saved) );
+//         } catch (e) {
+//             console.log("error inserting activity " + e);
+//             res.send("error inserting activity " + e);
+//         }
+//     })();
 
-            var sceneLocs = scene.sceneLocations;
-            if (sceneLocs == null || !Array.isArray(sceneLocs)) {
-                sceneLocs = [];
-            }
-                // sceneLocs
-                    // console.log("tryna add sceneLocations: " + sceneLocations);
-                    sceneLocs.push(req.body);
-                    res.send(JSON.stringify(sceneLocs));
-                    // db.scenes.update({ "_id": s_id }, { $set: {sceneLocations: sceneLocs}});
-            }
+//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {   
+//         if (err || !scene) {
+//             console.log("error getting sceneert 4 obj: " + err);
+//             res.send(err);
+//         } else {
+
+//             var sceneLocs = scene.sceneLocations;
+//             if (sceneLocs == null || !Array.isArray(sceneLocs)) {
+//                 sceneLocs = [];
+//             }
+//                 // sceneLocs
+//                     // console.log("tryna add sceneLocations: " + sceneLocations);
+//                     sceneLocs.push(req.body);
+//                     res.send(JSON.stringify(sceneLocs));
+//                     // db.scenes.update({ "_id": s_id }, { $set: {sceneLocations: sceneLocs}});
+//             }
               
-    });
-});
+//     });
+// });
 
-app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, res) {
+app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, res) { //update "mods" coming from webxr client, not admin pages
     if (req.params.s_id == req.body.shortID) {
         
         // console.log(JSON.stringify(req.session.user) + " vs " + JSON.stringify(req.body.userData)); 
@@ -5791,26 +5891,9 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                         
                                     });
                                 }
-                                // // }
-                                //     // callback(null);
-                                // } else {
-                                //     // callback("scene mods oops");
-                                //     callback(null);
-                                // }
-
+                              
                             }, 
-                            // function(err) {
-                                   
-                            //         if (err) {
-                            //             console.log('A file failed to process');
-                            //             callbackz(err);
-                            //         } else {
-                            //             console.log('All files have been processed successfully');
-                            //             scoresResponse.topscores = topscores;
-                            //             callback(null);
-                            //         }
-                            //     }
-                            // },  
+                          
                             function (callback) { 
                                 console.log("saving color mods " + JSON.stringify(req.body.colorMods));
                                 if (req.body.colorMods != null) {
@@ -7842,59 +7925,6 @@ app.get('/publicscenes_old', function (req, res) { //deprecated, see publicscene
     });
 });
 
-app.get('/singlescenedata/:scenekey', function (req, res) { //returns a public scene id and standard url for postcard
-    var availableScenesResponse = {};
-    var availableScenes = [];
-    var sckey = req.params.scenekey;
-    availableScenesResponse.availableScenes = availableScenes;
-
-    db_old.scenes.find({$or: [ { short_id: sckey }, { sceneTitle: sckey } ]}, function (err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err)
-            res.send("scene not found");
-        } else {
-            console.log("got " + scenes.length + " scenes from req " + req.params.scenekey);
-            // sceneIndex = getRandomInt(0, scenes.length - 1);
-//            async.each(scenes,
-            // 2nd param is the function that each item is passed to
-
-            // Call an asynchronous function, often a save() to DB
-            //            scene.someAsyncCall(function () {
-            // Async call is done, alert via callback
-            if (scenes[0].scenePostcards != null && scenes[0].scenePostcards.length > 0) {
-                postcardIndex = getRandomInt(0, scenes[0].scenePostcards.length - 1);
-//                        db.image_items.find({postcardForScene: scene.short_id}).sort({otimestamp: -1}).limit(maxItems).toArray(function (err, picture_items) {
-                console.log("tryna find postcard: " + scenes[0].scenePostcards[postcardIndex]);
-                var oo_id = ObjectId.createFromHexString(scenes[0].scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-                db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-
-                    if (err || !picture_item || picture_item.length == 0) {
-                        console.log("error getting picture items for publicsimple" + JSON.stringify(scenes[0].scenePostcards[postcardIndex]));
-
-                    } else {
-//                                console.log("# " + picture_items.length);
-//                                    for (var i = 0; i < 1; i++) {
-
-                        var item_string_filename = JSON.stringify(picture_item.filename);
-                        item_string_filename = item_string_filename.replace(/\"/g, "");
-                        var item_string_filename_ext = getExtension(item_string_filename);
-                        var expiration = new Date();
-                        expiration.setMinutes(expiration.getMinutes() + 30);
-                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-                        var halfName = 'half.' + baseName + item_string_filename_ext;
-
-                        var scenedata = scenes[0].short_id + "~" + scenes[0].sceneTitle + "~" + baseName + "~"  + s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back a string and munge it
-                        res.send(scenedata);
-                    }
-                });
-            } else {
-                var scenedata = scenes[0].short_id + "~" + scenes[0].sceneTitle + "~"  + "na" + "~https://servicemedia.s3.amazonaws.com/assets/pics/postcardna.png"; //no postcard but valid scene
-                res.send(scenedata);
-            }
-        }
-    });
-});
 
 app.post('/newlocation', requiredAuthentication, function (req, res) {
 
@@ -7952,15 +7982,19 @@ app.get('/userlocation/:p_id', requiredAuthentication, function(req, res) {
     console.log('tryna return location : ' + req.params.p_id);
     var pID = req.params.p_id;
     if (pID != undefined && pID.length > 10) {
-    var o_id = ObjectId.createFromHexString(pID);
-    db_old.locations.findOne({"_id": o_id}, function(err, location) {
-        if (err || !location) {
-            console.log("error getting location item: " + err);
-        } else {
-            res.json(location);
-            console.log("returning location item : " + location);
-        }
-    });
+        var o_id = ObjectId.createFromHexString(pID);
+        
+        (async () => {
+            try {
+                const query = {"_id":  o_id};
+                const location = await RunDataQuery("locations", "findOne", query);
+                res.json(location);
+            } catch (e) {
+                console.log('error gettiong  userlocation ' + e);
+                res.send('error getting userlocation' + e);
+            }
+        })();
+
     } else {
         res.send("not a valid location ID!");
     }
