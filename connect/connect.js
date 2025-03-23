@@ -615,7 +615,7 @@ function SaveModsToCloud() { //Save button on location modal, writes local mods 
       xhr.onload = function () {
          // do something to response
          console.log(this.responseText);
-         if (this.responseText == 'ok') {
+         if (this.responseText == 'updated') {
             // SaveLocalData();
             DeleteLocalSceneData();
             setTimeout(function () {

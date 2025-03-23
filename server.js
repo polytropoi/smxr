@@ -1092,7 +1092,7 @@ app.get("/ami-rite-token/:token", function (req, res) { //
                                     userData.authLevel = user.authLevel;
                                     
                                     const scenequery = {"short_id": userData.sceneShortID};
-                                    const scene = await RunDataQuery("scenes", "findOne", query); //check that user is authed for this scene
+                                    const scene = await RunDataQuery("scenes", "findOne", scenequery); //check that user is authed for this scene
                                     if (scene) {
                                       if (scene.user_id == userData._id) { //TO DO check the acl for write_scene etc..
                                           userData.sceneOwner = "indaehoose";
@@ -5656,339 +5656,191 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
 
 app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, res) { //update "mods" coming from webxr client, not admin pages
     if (req.params.s_id == req.body.shortID) {
-        
-        // console.log(JSON.stringify(req.session.user) + " vs " + JSON.stringify(req.body.userData)); 
+
         if (req.body.userData._id == req.session.user._id) {    
             
-            db_old.scenes.findOne({ "short_id": req.params.s_id}, function (err, scene) {
-                if (err || !scene) {
-                    console.log("error getting skeen: " + err);
-                    res.send(err);
-                } else {
-                    // console.log("mods for " +req.params.s_id + " " + JSON.stringify(req.body)); 
-                    console.log("sceneowner: " + scene.userID);
-                    let query = {};
-                    if (!scene.sceneTags.includes("no mods")) { //needs a param!
-                        if (scene.user_id == req.body.userData._id) { //just scene owner for now
-
-                        // console.log("user match for modz with colorMods " + JSON.stringify(req.body.colorMods) ); 
-                        let query = {};
+            (async () => {
+                try {
+                    console.log("scnee mods " + JSON.stringify(req.body));
+                    const query = {"short_id": req.params.s_id};
+                    const scene = await RunDataQuery("scenes", "findOne", query);
+                    if (!scene.sceneTags.includes("no mods")) { 
+                        let scenequery = {};
                         let newFiles = []; 
-
-                        async.waterfall([
-                            function (callback) { 
-                                if (req.body.localFiles != null) {
-                                // console.log("tryna save localfiles: " + JSON.stringify(req.body.localFiles));
-                                let newfile = {};
-
-                                async.each (req.body.localFiles, function (file, callbackz) {
-                                    let timestamp = Math.round(Date.now() / 1000);
-                                    console.log("gotsa uploaded localfile " + file.name);
-                                    // (async () => {
-                                    let buffer = Buffer.from(file.data, 'base64');
-                                    
-                                    if (getExtension(file.name) == ".glb") { //should sniff the thing instead, but...
-                                        // let buff = Buffer.from(file.data, 'base64');
-                                        let awskey = 'users/' + req.session.user._id.toString() + '/gltf/' + timestamp + '_' + file.name;
-                                        let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
-                                            Key: awskey, 
-                                            // ContentEncoding: 'base64',
-                                            ContentType: 'application/octet-stream',
-                                            Body: buffer};
-                                            console.log("tryna upload w/key " + awskey);
-                                            (async () => {
-                                                try {
-                                                    const status = await PutObject(params.Bucket, params.Key, params.Body);
-                                                    db_old.models.save({ //add to models collection
-                                                        userID : req.session.user._id.toString(),
-                                                        username : req.session.user.userName,
-                                                        name : timestamp + "_" + file.name,
-                                                        filename : timestamp + "_" + file.name,
-                                                        item_type : 'glb',
-                                                        tags: [],
-                                                        item_status: "private",
-                                                        otimestamp : timestamp,
-                                                        ofilesize : file.size },
-                                                        function (err, saved) {
-                                                            if ( err || !saved ) {
-                                                                console.log('glb not saved..');
-                                                                callbackz (err);
-                                                            } else {
-                                                                console.log("glb saved with id " + saved._id)
-                                                                newfile.name = file.name.replace("local_","");
-                                                                
-                                                                newfile._id = saved._id;
-                                                                newFiles.push(newfile);
-                                                                var s_id = ObjectId.createFromHexString(scene._id);   
-                                                                var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
-                                                                // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
-                                                                sceneModels.push(saved._id);
-                                                                db_old.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}}); //add model to scene
-                                                                callbackz();
-                                                            }
-                                                    });
-                                                } catch (e) {
-                                                    callbackz (err);
-                                                }
-                                                
-                                            
-                                            })();
-                                            // s3.upload(params, function(err, data) { //upload model
-                                            //     if (err) {
-
-                                            //         console.log("Error uploading data. ", err);
-                                            //         callbackz(err)
-                                            //     } else {
-                                            //         console.log("Success uploading data " + JSON.stringify(data));
-                                            //         console.log('uploaded ' + file.name);
-                                            //         db.models.save({ //add to models collection
-                                            //             userID : req.session.user._id.toString(),
-                                            //             username : req.session.user.userName,
-                                            //             name : timestamp + "_" + file.name,
-                                            //             filename : timestamp + "_" + file.name,
-                                            //             item_type : 'glb',
-                                            //             tags: [],
-                                            //             item_status: "private",
-                                            //             otimestamp : timestamp,
-                                            //             ofilesize : file.size },
-                                            //             function (err, saved) {
-                                            //                 if ( err || !saved ) {
-                                            //                     console.log('glb not saved..');
-                                            //                     callbackz (err);
-                                            //                 } else {
-                                            //                     console.log("glb saved with id " + saved._id)
-                                            //                     newfile.name = file.name.replace("local_","");
-                                                                
-                                            //                     newfile._id = saved._id;
-                                            //                     newFiles.push(newfile);
-                                            //                     var s_id = ObjectId.createFromHexString(scene._id);   
-                                            //                     var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
-                                            //                     // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
-                                            //                     sceneModels.push(saved._id);
-                                            //                     db.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}}); //add model to scene
-                                            //                     callbackz();
-                                            //                 }
-                                            //         });
-                                            //     }
-                                            // });
-                                            
-                                        } else if (getExtension(file.name) == ".jpg" || getExtension(file.name) == ".png") { 
-                                            let hasAlpha = false;
-                                            if (getExtension(file.name) == ".png") {
-                                                hasAlpha = true;
-                                            }
-
-                                            db_old.image_items.save({ //do the db first for this one, bc we needs the _id for naming pattern below(really?)
-                                                type : "fromLocalFile",
-                                                userID : req.session.user._id.toString(),
-                                                userName : req.session.user.userName,
-                                                title : file.name,
-                                                filename : file.name,
-                                                item_type : 'picture',
-                                                tags: [],
-                                                item_status: "private",
-                                                hasAlphaChannel: hasAlpha,
-                                                otimestamp : timestamp,
-                                                ofilesize : file.size },
-                                                // function (err, saved) {
-                                                function (err, saved) {
-                                                    if ( err || !saved ) {
-                                                        console.log('image Item not saved..');
-                                                        callbackz (err);
-                                                    } else {
-                                                        console.log("jpg saved with id " + saved._id);
-                                                        let newfile = {};
-                                                        newfile.name = file.name;
-                                                        newfile.name.replace("local_","");
-                                                        newfile._id = saved._id;
-                                                        newFiles.push(newfile);
-                                                       
-
-                                                        let awskey = 'users/' + req.session.user._id.toString() + '/pictures/originals/' + saved._id + '.original.' + file.name;
-
-                                                        let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
-                                                            Key: awskey, 
-                                                            // ContentEncoding: 'base64',
-                                                            ContentType: 'application/octet-stream',
-                                                            Body: buffer};
-
-                                                            (async () => {
-                                                                try {
-                                                                    const status = await PutObject(params.Bucket, params.Key, params.Body);
-
-                                                                    console.log("put a pic: " + JSON.stringify(status));
-                                                                    console.log('uploaded ' + file.name);
-                                                                // callbackz();
-                                                                // console.log("tryna push pic to GS " + groupType);
-
-                                                                    var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-                                                                    const options = {
-                                                                        headers: {'X-Access-Token': token}
-                                                                    };
-                                                                    axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+saved._id, options)
-                                                                    .then((response) => {
-                                                                        console.log("grabAndSqueezepic response: " + response.status);
-                                                                        var s_id = ObjectId.createFromHexString(scene._id);   
-                                                                        var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
-                                                                        // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
-                                                                        scenePictures.push(saved._id);
-                                                                        db_old.scenes.update({ "_id": s_id }, { $set: {scenePictures: scenePictures}}); //add pictureID to scene
-                                                                        callbackz();
-                                                                    })                                                     
-                                                                    .catch(function (error) {
-                                                                        callbackz(error);
-                                                                    });
-                                                                } catch (e) {
-                                                                    console.log("Error uploading file. ", err);
-                                                                    callbackz(err)
-                                                                }
-                                                            })();
-
-                                                        //     s3.upload(params, function(err, data) { //upload
-                                                        //     if (err) {
-                                                               
-                                                        //     } else {
-                                                        //         console.log("Success uploading data " + JSON.stringify(data));
-                                                        //         console.log('uploaded ' + file.name);
-                                                        //         // callbackz();
-                                                        //         // console.log("tryna push pic to GS " + groupType);
-                                                        //         var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-                                                        //         const options = {
-                                                        //             headers: {'X-Access-Token': token}
-                                                        //             };
-                                                        //         axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+saved._id, options)
-                                                        //         .then((response) => {
-                                                        //             console.log("grabAndSqueeze response: " + response.status);
-                                                        //             var s_id = ObjectId.createFromHexString(scene._id);   
-                                                        //             var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
-                                                        //             // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
-                                                        //             scenePictures.push(saved._id);
-                                                        //             db.scenes.update({ "_id": s_id }, { $set: {scenePictures: scenePictures}}); //add pictureID to scene
-                                                        //             callbackz();
-                                                        //         })                                                     
-                                                        //         .catch(function (error) {
-                                                        //             callbackz(error);
-                                                        //         });
-                                                        //     }
-
-                                                        // });
-                                                    }
-                                                });
-                                        } else {
-                                            console.log("caint do that kinda file right now...");
-                                            callbackz("bad file type");
-                                        }
-                                    
-                                    },  function(err) {
-                                        if (err) {
-                                            console.log('A file failed to process');
-                                            callback(err);
-                                        } else {
-                                            console.log('scene mod files have been processed successfully');
-                                            callback(null);
-                                        }
-                                    
-                                        
-                                    });
-                                }
-                              
-                            }, 
-                          
-                            function (callback) { 
-                                console.log("saving color mods " + JSON.stringify(req.body.colorMods));
-                                if (req.body.colorMods != null) {
-                                    let sceneColor1 = req.body.colorMods.sceneColor1 != null ? req.body.colorMods.sceneColor1 : "";
-                                    let sceneColor2 = req.body.colorMods.sceneColor2 != null ? req.body.colorMods.sceneColor2 : "";
-                                    let sceneColor3 = req.body.colorMods.sceneColor3 != null ? req.body.colorMods.sceneColor3 : "";
-                                    let sceneColor4 = req.body.colorMods.sceneColor4 != null ? req.body.colorMods.sceneColor4 : "";
-                                    if (sceneColor1 != "") {
-                                        query.sceneColor1 = sceneColor1;
-                                        console.log("query is " + query.sceneColor1);
-                                    }
-                                    if (sceneColor2 != "") {
-                                        query.sceneColor2 = sceneColor2;
-                                    }
-                                    if (sceneColor3 != "") {
-                                        query.sceneColor3 = sceneColor3;
-                                    }
-                                    if (sceneColor4 != "") {
-                                        query.sceneColor4 = sceneColor4;
-                                    }
-                                }
-                                if (req.body.volumeMods != null) {
-                                    query.scenePrimaryVolume = req.body.volumeMods.volumePrimary != null ? req.body.volumeMods.volumePrimary : 0;
-                                    query.sceneAmbientVolume = req.body.volumeMods.volumeAmbient != null ? req.body.volumeMods.volumeAmbient : 0;
-                                    query.sceneTriggerVolume = req.body.volumeMods.volumeTrigger != null ? req.body.volumeMods.volumeTrigger : 0;
-                                }
-                                if (req.body.sceneEnvironmentPreset != null) {
-                                    console.log("enviro preset " + req.body.sceneEnvironmentPreset);
-                                    query.sceneEnvironmentPreset = req.body.sceneEnvironmentPreset;
-                                }
+                        if (req.body.localFiles != null) {
+                           
+                            for (let file in req.body.localFiles) {
+                                let timestamp = Math.round(Date.now() / 1000);
+                                console.log("gotsa uploaded localfile " + file.name);
+                                let buffer = Buffer.from(file.data, 'base64');
+                                //models and images only atm...
+                                if (getExtension(file.name) == ".glb") { //should sniff the thing instead, but...
+                                    let awskey = 'users/' + req.session.user._id.toString() + '/gltf/' + timestamp + '_' + file.name;
+                                    let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
+                                        Key: awskey, 
+                                    // ContentEncoding: 'base64',
+                                        ContentType: 'application/octet-stream',
+                                        Body: buffer};
+                                    const status = await PutObject(params.Bucket, params.Key, params.Body);
+                                    console.log("uploaded file " + awskey + " " + JSON.stringify(status));
+                                    const newmodel = { //add to models collection
+                                        userID : req.session.user._id.toString(),
+                                        username : req.session.user.userName,
+                                        name : timestamp + "_" + file.name,
+                                        filename : timestamp + "_" + file.name,
+                                        item_type : 'glb',
+                                        tags: [],
+                                        item_status: "private",
+                                        otimestamp : timestamp,
+                                        ofilesize : file.size };
+                                    const saved = await RunDataQuery("models", "insertOne", newmodel);
+                                    console.log("glb saved with id " + saved.insertedId); //.insertedId == ObjectId of new record
+                                    newfile.name = file.name.replace("local_","");
+                                    newfile._id = saved.insertedId;
+                                    newFiles.push(newfile);
+                                    var s_id = ObjectId.createFromHexString(scene._id);   
+                                    var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
+                                    sceneModels.push(saved._id);
+                                    const query = { "_id": s_id };
+                                    const updoc = { $set: {"sceneModels": sceneModels}};
+                                    const updated = await RunDataQuery("scenes","findOne", query, updoc);
                                 
-                                callback(null);
-                            },
-                            function (callback) { 
-                                console.log("saving sceneTags mods " + JSON.stringify(req.body.sceneTags));
-                                if (req.body.sceneTags != null) {
-                                    query.sceneTags = req.body.sceneTags;
-                                    console.log("query is " + query.sceneColor1);
+                                } else if (getExtension(file.name) == ".jpg" || getExtension(file.name) == ".png") { 
+                                    let hasAlpha = false;
+                                    if (getExtension(file.name) == ".png") {
+                                        hasAlpha = true;
                                     }
-                                callback(null);
-                            },
-                            function (callback) {
-                                if (req.body.locationMods != null) {
+                                    const newimage = { 
+                                        type : "fromLocalFile",
+                                        userID : req.session.user._id.toString(),
+                                        userName : req.session.user.userName,
+                                        title : file.name,
+                                        filename : file.name,
+                                        item_type : 'picture',
+                                        tags: [],
+                                        item_status: "private",
+                                        hasAlphaChannel: hasAlpha,
+                                        otimestamp : timestamp,
+                                        ofilesize : file.size };
+                                    const saved = await RunDataQuery("image_items", "insertOne", newimage);
+                                    console.log("image saved with id " + saved.insertedId);
+                                    let newfile = {};
+                                    newfile.name = file.name;
+                                    newfile.name.replace("local_","");
+                                    newfile._id = saved.insertedId;
+                                    newFiles.push(newfile);
+                                    let awskey = 'users/' + req.session.user._id.toString() + '/pictures/originals/' + saved.insertedId + '.original.' + file.name;
+                                    let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
+                                        Key: awskey, 
+                                        // ContentEncoding: 'base64',
+                                        ContentType: 'application/octet-stream',
+                                        Body: buffer};
+                                    const status = await PutObject(params.Bucket, params.Key, params.Body);
+                                    console.log("put a pic: " + JSON.stringify(status));
+                                    console.log('uploaded ' + file.name);
+                                    var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+                                    const options = {
+                                        headers: {'X-Access-Token': token}
+                                    };
+                                    const response = await axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+saved.insertedId, options);
+                                    console.log("grabAndSqueezepic response: " + response.status);
+                                    var s_id = ObjectId.createFromHexString(scene.insertedId);   
+                                    var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
+                                    scenePictures.push(saved.insertedId);
+                                    const updoc = { $set: {"scenePictures": scenePictures}};
+                                    const query = { "_id": s_id };
+                                    const imageupdated = await RunDataQuery("scenes","findOne", query, updoc);
+                                    console.log("image mod updated.." + imageupdated);
+                                    // db_old.scenes.update({ "_id": s_id }, ); //add pictureID to scene
+                                }
+                            }
+
+                            if (req.body.colorMods != null) {
+                                let sceneColor1 = req.body.colorMods.sceneColor1 != null ? req.body.colorMods.sceneColor1 : "";
+                                let sceneColor2 = req.body.colorMods.sceneColor2 != null ? req.body.colorMods.sceneColor2 : "";
+                                let sceneColor3 = req.body.colorMods.sceneColor3 != null ? req.body.colorMods.sceneColor3 : "";
+                                let sceneColor4 = req.body.colorMods.sceneColor4 != null ? req.body.colorMods.sceneColor4 : "";
+                                if (sceneColor1 != "") {
+                                    scenequery.sceneColor1 = sceneColor1;
+                                    console.log("query is " + scenequery.sceneColor1);
+                                }
+                                if (sceneColor2 != "") {
+                                    scenequery.sceneColor2 = sceneColor2;
+                                }
+                                if (sceneColor3 != "") {
+                                    scenequery.sceneColor3 = sceneColor3;
+                                }
+                                if (sceneColor4 != "") {
+                                    scenequery.sceneColor4 = sceneColor4;
+                                }
+                            }
+                            if (req.body.volumeMods != null) {
+                                scenequery.scenePrimaryVolume = req.body.volumeMods.volumePrimary != null ? req.body.volumeMods.volumePrimary : 0;
+                                scenequery.sceneAmbientVolume = req.body.volumeMods.volumeAmbient != null ? req.body.volumeMods.volumeAmbient : 0;
+                                scenequery.sceneTriggerVolume = req.body.volumeMods.volumeTrigger != null ? req.body.volumeMods.volumeTrigger : 0;
+                            }
+                            if (req.body.sceneEnvironmentPreset != null) {
+                                console.log("enviro preset " + req.body.sceneEnvironmentPreset);
+                                scenequery.sceneEnvironmentPreset = req.body.sceneEnvironmentPreset;
+                            }
+                            if (req.body.sceneTags != null) {
+                                scenequery.sceneTags = req.body.sceneTags;
+                                console.log("query is " + scenequery.sceneTags);
+                            }
+                            if (req.body.locationMods != null) {
                                      
-                                    for (let l = 0; l < req.body.locationMods.length; l++) {
-                                        let isMatch = false;
-                                        // let name = req.body.locationMods[i].name;
-                                        delete req.body.locationMods[l].isNew; //going to the cloud don't need these
-                                        delete req.body.locationMods[l].isLocal;
-                                        if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
-                                            let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
-                                            req.body.locationMods[l].name = name;
-                                        }
-                                        console.log("has newfile? " + req.body.locationMods[l].modelID + " Vs " + JSON.stringify(newFiles));
-                                        if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length) {
-                                            for (let i = 0; i < newFiles.length; i++) {
-                                                if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length && (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_", ""))) { //reassign modelID w/ new DB _id
-                                                    console.log("gotsa new model file match! " + newFiles[i].name);
-                                                    req.body.locationMods[l].modelID = newFiles[i]._id;
-                                                    req.body.locationMods[l].model = newFiles[i].name;
+                                for (let l = 0; l < req.body.locationMods.length; l++) {
+                                    let isMatch = false;
+                                    // let name = req.body.locationMods[i].name;
+                                    delete req.body.locationMods[l].isNew; //going to the cloud don't need these
+                                    delete req.body.locationMods[l].isLocal;
+                                    if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
+                                        let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
+                                        req.body.locationMods[l].name = name;
+                                    }
+                                    console.log("has newfile? " + req.body.locationMods[l].modelID + " Vs " + JSON.stringify(newFiles));
+                                    if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length) {
+                                        for (let i = 0; i < newFiles.length; i++) {
+                                            if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length && (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_", ""))) { //reassign modelID w/ new DB _id
+                                                console.log("gotsa new model file match! " + newFiles[i].name);
+                                                req.body.locationMods[l].modelID = newFiles[i]._id;
+                                                req.body.locationMods[l].model = newFiles[i].name;
 
-                                                }
                                             }
                                         }
-                                        if (req.body.locationMods[l].mediaID && req.body.locationMods[l].mediaID.length) {
-                                            for (let i = 0; i < newFiles.length; i++) {
-                                                if (newFiles[i].name == req.body.locationMods[l].mediaID.replace("local_", "")) { //reassign modelID w/ new DB _id
-                                                    console.log("gotsa new media file match! " + newFiles[i].name);
-                                                    req.body.locationMods[l].mediaID = newFiles[i]._id;
-                                                    req.body.locationMods[l].mediaName = newFiles[i].name;
+                                    }
+                                    if (req.body.locationMods[l].mediaID && req.body.locationMods[l].mediaID.length) {
+                                        for (let i = 0; i < newFiles.length; i++) {
+                                            if (newFiles[i].name == req.body.locationMods[l].mediaID.replace("local_", "")) { //reassign modelID w/ new DB _id
+                                                console.log("gotsa new media file match! " + newFiles[i].name);
+                                                req.body.locationMods[l].mediaID = newFiles[i]._id;
+                                                req.body.locationMods[l].mediaName = newFiles[i].name;
 
-                                                }
                                             }
                                         }
-                                        for (let i = 0; i < scene.sceneLocations.length; i++) { //TODO check if it's actually been modded?
-                                            if (req.body.locationMods[l].timestamp == scene.sceneLocations[i].timestamp) {
-                                                isMatch = true;
-                                                // console.log("gotsa match with existing location! " + scene.sceneLocations[i].timestamp + " vs " + req.body.locationMods[l].timestamp);
-                                                let tsVar = null;
-                                                if (Number.isInteger(scene.sceneLocations[i].timestamp)) { // shit happens
-                                                    tsVar = parseInt(req.body.locationMods[l].timestamp);
-                                                } else {
-                                                    tsVar = req.body.locationMods[l].timestamp.toString();
-                                                }
-                                                if ((scene.sceneLocations[i].tags && scene.sceneLocations[i].tags.includes("no mods"))) {
-                                                    console.log("mods not allowed for " + scene.sceneLocations[i].timestamp)
-                                                } else {
-                                                    // console.log("tryna update location item " + JSON.stringify(req.body.locationMods[l]));
-                                                    db_old.scenes.update(
-                                                        { 'short_id': req.params.s_id, 'sceneLocations.timestamp': tsVar}, 
-                                                        { $set: { 'sceneLocations.$' : req.body.locationMods[l]}} //replaces whole object in array, uses positional $ operator https://docs.mongodb.com/manual/tutorial/update-documents/#Updating-The%24positionaloperator
-                                                    );
-                                                }
+                                    }
+                                    for (let i = 0; i < scene.sceneLocations.length; i++) { //TODO check if it's actually been modded?
+                                        let tsVar = null;
+                                        if (req.body.locationMods[l].timestamp == scene.sceneLocations[i].timestamp) {
+                                            isMatch = true;
+                                            // console.log("gotsa match with existing location! " + scene.sceneLocations[i].timestamp + " vs " + req.body.locationMods[l].timestamp);
+                                            
+                                            if (Number.isInteger(scene.sceneLocations[i].timestamp)) { // shit happens
+                                                tsVar = parseInt(req.body.locationMods[l].timestamp);
+                                            } else {
+                                                tsVar = req.body.locationMods[l].timestamp.toString();
+                                            }
+                                            if ((scene.sceneLocations[i].tags && scene.sceneLocations[i].tags.includes("no mods"))) {
+                                                console.log("mods not allowed for " + scene.sceneLocations[i].timestamp)
+                                            } else {
+                                                const squery = { 'short_id': req.params.s_id, 'sceneLocations.timestamp': tsVar};
+                                                const updoc = { $set: { 'sceneLocations.$' : req.body.locationMods[l]}};
+                                                const updated = await RunDataQuery("scenes", "updateOne", squery, updoc);
+                                                console.log("updated with local mods " + JSON.stringify(updated));
+                                                
                                             }
                                         }
+                                    
                                         if (!isMatch) {
                                             // let timestamp = Math.round(Date.now() / 1000);
                                             // console.log("no match with existing location, must be new " + req.body.locationMods[l].timestamp);
@@ -6008,58 +5860,373 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                     }
                                                 }
                                             }
-                                            db_old.scenes.update(
-                                                { 'short_id': req.params.s_id},
-                                                { $push: { 'sceneLocations' : req.body.locationMods[l]} } 
-                                            )
+                                           
+                                                const squery = { 'short_id': req.params.s_id};
+                                                const updoc = { $push: { 'sceneLocations' : req.body.locationMods[l]}};
+                                                const updated = await RunDataQuery("scenes", "updateOne", squery, updoc);
+                                                console.log("updated with local mods " + JSON.stringify(updated));
                                         }
+                                       
+                                        // console.log("updated with local mods " + updated);
                                     }
-                                } 
-                                callback(null);
-                            }
+                                }
+                            } 
+                            const finalquery = {'short_id': req.params.s_id};
+                            const updoc = { $set: scenequery };
+                            const finalupdated = await RunDataQuery("scenes", "updateOne", finalquery, updoc);
+                            console.log("updated with local mods " + JSON.stringify(finalupdated));
+                            res.send("updated");
+                        }
+                    }
+       
+                } catch (e) {
+                    console.log("error adding local mods " + e);
+                    res.send("error adding local mods " + e);
+                }
+            })(); //end async
+        } else {
+            console.log("tryna add_scene_mnods, but you aint the scene owner!");
+            res.send("must be scene owner!!");
+        }
+    } else {
+        console.log("scene mods are not allowed!");
+        res.send("mods not allowed for this");
+    }
+});
+//             db_old.scenes.findOne({ "short_id": req.params.s_id}, function (err, scene) {
+//                 if (err || !scene) {
+//                     console.log("error getting skeen: " + err);
+//                     res.send(err);
+//                 } else {
+//                     // console.log("mods for " +req.params.s_id + " " + JSON.stringify(req.body)); 
+//                     console.log("sceneowner: " + scene.userID);
+//                     let query = {};
+//                     if (!scene.sceneTags.includes("no mods")) { //needs a param!
+//                         if (scene.user_id == req.body.userData._id) { //just scene owner for now
+
+//                         // console.log("user match for modz with colorMods " + JSON.stringify(req.body.colorMods) ); 
+//                         let query = {};
+//                         let newFiles = []; 
+
+//                         async.waterfall([
+//                             function (callback) { 
+//                                 if (req.body.localFiles != null) {
+//                                 // console.log("tryna save localfiles: " + JSON.stringify(req.body.localFiles));
+//                                 let newfile = {};
+
+//                                 async.each (req.body.localFiles, function (file, callbackz) {
+//                                     let timestamp = Math.round(Date.now() / 1000);
+//                                     console.log("gotsa uploaded localfile " + file.name);
+//                                     // (async () => {
+//                                     let buffer = Buffer.from(file.data, 'base64');
+                                    
+//                                     if (getExtension(file.name) == ".glb") { //should sniff the thing instead, but...
+//                                         // let buff = Buffer.from(file.data, 'base64');
+//                                         let awskey = 'users/' + req.session.user._id.toString() + '/gltf/' + timestamp + '_' + file.name;
+//                                         let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
+//                                             Key: awskey, 
+//                                             // ContentEncoding: 'base64',
+//                                             ContentType: 'application/octet-stream',
+//                                             Body: buffer};
+//                                             console.log("tryna upload w/key " + awskey);
+//                                             (async () => {
+//                                                 try {
+//                                                     const status = await PutObject(params.Bucket, params.Key, params.Body);
+//                                                     db_old.models.save({ //add to models collection
+//                                                         userID : req.session.user._id.toString(),
+//                                                         username : req.session.user.userName,
+//                                                         name : timestamp + "_" + file.name,
+//                                                         filename : timestamp + "_" + file.name,
+//                                                         item_type : 'glb',
+//                                                         tags: [],
+//                                                         item_status: "private",
+//                                                         otimestamp : timestamp,
+//                                                         ofilesize : file.size },
+//                                                         function (err, saved) {
+//                                                             if ( err || !saved ) {
+//                                                                 console.log('glb not saved..');
+//                                                                 callbackz (err);
+//                                                             } else {
+//                                                                 console.log("glb saved with id " + saved._id)
+//                                                                 newfile.name = file.name.replace("local_","");
+                                                                
+//                                                                 newfile._id = saved._id;
+//                                                                 newFiles.push(newfile);
+//                                                                 var s_id = ObjectId.createFromHexString(scene._id);   
+//                                                                 var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
+//                                                                 // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
+//                                                                 sceneModels.push(saved._id);
+//                                                                 db_old.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}}); //add model to scene
+//                                                                 callbackz();
+//                                                             }
+//                                                     });
+//                                                 } catch (e) {
+//                                                     callbackz (err);
+//                                                 }
+                                                
+                                            
+//                                             })();
+                                         
+                                            
+//                                         } else if (getExtension(file.name) == ".jpg" || getExtension(file.name) == ".png") { 
+//                                             let hasAlpha = false;
+//                                             if (getExtension(file.name) == ".png") {
+//                                                 hasAlpha = true;
+//                                             }
+
+//                                             db_old.image_items.save({ //do the db first for this one, bc we needs the _id for naming pattern below(really?)
+//                                                 type : "fromLocalFile",
+//                                                 userID : req.session.user._id.toString(),
+//                                                 userName : req.session.user.userName,
+//                                                 title : file.name,
+//                                                 filename : file.name,
+//                                                 item_type : 'picture',
+//                                                 tags: [],
+//                                                 item_status: "private",
+//                                                 hasAlphaChannel: hasAlpha,
+//                                                 otimestamp : timestamp,
+//                                                 ofilesize : file.size },
+//                                                 // function (err, saved) {
+//                                                 function (err, saved) {
+//                                                     if ( err || !saved ) {
+//                                                         console.log('image Item not saved..');
+//                                                         callbackz (err);
+//                                                     } else {
+//                                                         console.log("jpg saved with id " + saved._id);
+//                                                         let newfile = {};
+//                                                         newfile.name = file.name;
+//                                                         newfile.name.replace("local_","");
+//                                                         newfile._id = saved._id;
+//                                                         newFiles.push(newfile);
+                                                       
+
+//                                                         let awskey = 'users/' + req.session.user._id.toString() + '/pictures/originals/' + saved._id + '.original.' + file.name;
+
+//                                                         let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
+//                                                             Key: awskey, 
+//                                                             // ContentEncoding: 'base64',
+//                                                             ContentType: 'application/octet-stream',
+//                                                             Body: buffer};
+
+//                                                             (async () => {
+//                                                                 try {
+//                                                                     const status = await PutObject(params.Bucket, params.Key, params.Body);
+
+//                                                                     console.log("put a pic: " + JSON.stringify(status));
+//                                                                     console.log('uploaded ' + file.name);
+//                                                                 // callbackz();
+//                                                                 // console.log("tryna push pic to GS " + groupType);
+
+//                                                                     var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+//                                                                     const options = {
+//                                                                         headers: {'X-Access-Token': token}
+//                                                                     };
+//                                                                     axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+saved._id, options)
+//                                                                     .then((response) => {
+//                                                                         console.log("grabAndSqueezepic response: " + response.status);
+//                                                                         var s_id = ObjectId.createFromHexString(scene._id);   
+//                                                                         var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
+//                                                                         // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
+//                                                                         scenePictures.push(saved._id);
+//                                                                         db_old.scenes.update({ "_id": s_id }, { $set: {scenePictures: scenePictures}}); //add pictureID to scene
+//                                                                         callbackz();
+//                                                                     })                                                     
+//                                                                     .catch(function (error) {
+//                                                                         callbackz(error);
+//                                                                     });
+//                                                                 } catch (e) {
+//                                                                     console.log("Error uploading file. ", err);
+//                                                                     callbackz(err)
+//                                                                 }
+//                                                             })();
+//                                                     }
+//                                                 });
+//                                         } else {
+//                                             console.log("caint do that kinda file right now...");
+//                                             callbackz("bad file type");
+//                                         }
+                                    
+//                                     },  function(err) {
+//                                         if (err) {
+//                                             console.log('A file failed to process');
+//                                             callback(err);
+//                                         } else {
+//                                             console.log('scene mod files have been processed successfully');
+//                                             callback(null);
+//                                         }
+                                    
+                                        
+//                                     });
+//                                 }
+                              
+//                             }, 
+                          
+//                             function (callback) { 
+//                                 console.log("saving color mods " + JSON.stringify(req.body.colorMods));
+//                                 if (req.body.colorMods != null) {
+//                                     let sceneColor1 = req.body.colorMods.sceneColor1 != null ? req.body.colorMods.sceneColor1 : "";
+//                                     let sceneColor2 = req.body.colorMods.sceneColor2 != null ? req.body.colorMods.sceneColor2 : "";
+//                                     let sceneColor3 = req.body.colorMods.sceneColor3 != null ? req.body.colorMods.sceneColor3 : "";
+//                                     let sceneColor4 = req.body.colorMods.sceneColor4 != null ? req.body.colorMods.sceneColor4 : "";
+//                                     if (sceneColor1 != "") {
+//                                         query.sceneColor1 = sceneColor1;
+//                                         console.log("query is " + query.sceneColor1);
+//                                     }
+//                                     if (sceneColor2 != "") {
+//                                         query.sceneColor2 = sceneColor2;
+//                                     }
+//                                     if (sceneColor3 != "") {
+//                                         query.sceneColor3 = sceneColor3;
+//                                     }
+//                                     if (sceneColor4 != "") {
+//                                         query.sceneColor4 = sceneColor4;
+//                                     }
+//                                 }
+//                                 if (req.body.volumeMods != null) {
+//                                     query.scenePrimaryVolume = req.body.volumeMods.volumePrimary != null ? req.body.volumeMods.volumePrimary : 0;
+//                                     query.sceneAmbientVolume = req.body.volumeMods.volumeAmbient != null ? req.body.volumeMods.volumeAmbient : 0;
+//                                     query.sceneTriggerVolume = req.body.volumeMods.volumeTrigger != null ? req.body.volumeMods.volumeTrigger : 0;
+//                                 }
+//                                 if (req.body.sceneEnvironmentPreset != null) {
+//                                     console.log("enviro preset " + req.body.sceneEnvironmentPreset);
+//                                     query.sceneEnvironmentPreset = req.body.sceneEnvironmentPreset;
+//                                 }
+                                
+//                                 callback(null);
+//                             },
+//                             function (callback) { 
+//                                 console.log("saving sceneTags mods " + JSON.stringify(req.body.sceneTags));
+//                                 if (req.body.sceneTags != null) {
+//                                     query.sceneTags = req.body.sceneTags;
+//                                     console.log("query is " + query.sceneColor1);
+//                                     }
+//                                 callback(null);
+//                             },
+//                             function (callback) {
+//                                 if (req.body.locationMods != null) {
+                                     
+//                                     for (let l = 0; l < req.body.locationMods.length; l++) {
+//                                         let isMatch = false;
+//                                         // let name = req.body.locationMods[i].name;
+//                                         delete req.body.locationMods[l].isNew; //going to the cloud don't need these
+//                                         delete req.body.locationMods[l].isLocal;
+//                                         if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
+//                                             let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
+//                                             req.body.locationMods[l].name = name;
+//                                         }
+//                                         console.log("has newfile? " + req.body.locationMods[l].modelID + " Vs " + JSON.stringify(newFiles));
+//                                         if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length) {
+//                                             for (let i = 0; i < newFiles.length; i++) {
+//                                                 if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length && (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_", ""))) { //reassign modelID w/ new DB _id
+//                                                     console.log("gotsa new model file match! " + newFiles[i].name);
+//                                                     req.body.locationMods[l].modelID = newFiles[i]._id;
+//                                                     req.body.locationMods[l].model = newFiles[i].name;
+
+//                                                 }
+//                                             }
+//                                         }
+//                                         if (req.body.locationMods[l].mediaID && req.body.locationMods[l].mediaID.length) {
+//                                             for (let i = 0; i < newFiles.length; i++) {
+//                                                 if (newFiles[i].name == req.body.locationMods[l].mediaID.replace("local_", "")) { //reassign modelID w/ new DB _id
+//                                                     console.log("gotsa new media file match! " + newFiles[i].name);
+//                                                     req.body.locationMods[l].mediaID = newFiles[i]._id;
+//                                                     req.body.locationMods[l].mediaName = newFiles[i].name;
+
+//                                                 }
+//                                             }
+//                                         }
+//                                         for (let i = 0; i < scene.sceneLocations.length; i++) { //TODO check if it's actually been modded?
+//                                             if (req.body.locationMods[l].timestamp == scene.sceneLocations[i].timestamp) {
+//                                                 isMatch = true;
+//                                                 // console.log("gotsa match with existing location! " + scene.sceneLocations[i].timestamp + " vs " + req.body.locationMods[l].timestamp);
+//                                                 let tsVar = null;
+//                                                 if (Number.isInteger(scene.sceneLocations[i].timestamp)) { // shit happens
+//                                                     tsVar = parseInt(req.body.locationMods[l].timestamp);
+//                                                 } else {
+//                                                     tsVar = req.body.locationMods[l].timestamp.toString();
+//                                                 }
+//                                                 if ((scene.sceneLocations[i].tags && scene.sceneLocations[i].tags.includes("no mods"))) {
+//                                                     console.log("mods not allowed for " + scene.sceneLocations[i].timestamp)
+//                                                 } else {
+//                                                     // console.log("tryna update location item " + JSON.stringify(req.body.locationMods[l]));
+//                                                     db_old.scenes.update(
+//                                                         { 'short_id': req.params.s_id, 'sceneLocations.timestamp': tsVar}, 
+//                                                         { $set: { 'sceneLocations.$' : req.body.locationMods[l]}} //replaces whole object in array, uses positional $ operator https://docs.mongodb.com/manual/tutorial/update-documents/#Updating-The%24positionaloperator
+//                                                     );
+//                                                 }
+//                                             }
+//                                         }
+//                                         if (!isMatch) {
+//                                             // let timestamp = Math.round(Date.now() / 1000);
+//                                             // console.log("no match with existing location, must be new " + req.body.locationMods[l].timestamp);
+//                                             delete req.body.locationMods[l].isNew; //going to the cloud don't need these
+//                                             delete req.body.locationMods[l].isLocal;
+//                                             // req.body.locationMods[l].timestamp = timestamp;
+//                                             if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
+//                                                 let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
+//                                                 req.body.locationMods[l].name = name;
+//                                             }
+//                                             console.log("new loc new files? " + req.body.locationMods[l].modelID + " V " + JSON.stringify(newFiles));
+//                                             if (newFiles.includes(req.body.locationMods[l].modelID)) {
+//                                                 for (let i = 0; i < newFiles.length; i++) {
+//                                                     if (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_","")) { //reassign modelID w/ new DB _id
+//                                                         console.log("gotsa match new loc new model!");
+//                                                         req.body.locationMods[l].modelID = newFiles[i]._id;
+//                                                     }
+//                                                 }
+//                                             }
+//                                             db_old.scenes.update(
+//                                                 { 'short_id': req.params.s_id},
+//                                                 { $push: { 'sceneLocations' : req.body.locationMods[l]} } 
+//                                             )
+//                                         }
+//                                     }
+//                                 } 
+//                                 callback(null);
+//                             }
     
-                            ], //end of async.waterfall
-                            function (err, result) { // #last function, close async
-                            if (!err) {
-                                 db_old.scenes.update(
-                                { 'short_id': req.params.s_id},
-                                    { $set: query } 
-                                )
-                                res.send("ok");
-                                // 
-                            } else {
-                                console.log("error saving scene mods : " + err );
-                                res.send(err);
-                            }
-                            });
-                            // if (req.body.timedEventMods != null) {
-                                // console.log("tryna save timed events : " + JSON.stringify(query));
-                            //     query.sceneTimedEvents = req.body.timedEventMods;
-                            // }
+//                             ], //end of async.waterfall
+//                             function (err, result) { // #last function, close async
+//                             if (!err) {
+//                                  db_old.scenes.update(
+//                                 { 'short_id': req.params.s_id},
+//                                     { $set: query } 
+//                                 )
+//                                 res.send("ok");
+//                                 // 
+//                             } else {
+//                                 console.log("error saving scene mods : " + err );
+//                                 res.send(err);
+//                             }
+//                             });
+//                             // if (req.body.timedEventMods != null) {
+//                                 // console.log("tryna save timed events : " + JSON.stringify(query));
+//                             //     query.sceneTimedEvents = req.body.timedEventMods;
+//                             // }
 
                            
 
-                            // res.send("ok");
+//                             // res.send("ok");
 
 
-                        } else {
-                            console.log("tryna add_scene_mnods, but you aint the scene owner!");
-                            res.send("must be scene owner!!");
-                        }
-                    } else {
-                        console.log("scene mods are not allowed!");
-                        res.send("mods not allowed for this");
-                    }
-                }
-            });
-        }
-    }
-    // let mods = JSON.parse(atob(thestring));
-    // let json = JSON.stringify(mods);
-    // console.log(json);
-    // res.send(json);
-    // console.log()
-});
+                    //     } else {
+                    //         console.log("tryna add_scene_mnods, but you aint the scene owner!");
+                    //         res.send("must be scene owner!!");
+                    //     }
+                    // } else {
+                    //     console.log("scene mods are not allowed!");
+                    //     res.send("mods not allowed for this");
+                    // }
+//                 }
+//             });
+//         }
+//     }
+//     // let mods = JSON.parse(atob(thestring));
+//     // let json = JSON.stringify(mods);
+//     // console.log(json);
+//     // res.send(json);
+//     // console.log()
+// });
 
 app.post('/add_scene_location/', requiredAuthentication, function (req, res) { //pick from "saved" list of location
 
