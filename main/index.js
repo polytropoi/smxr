@@ -12524,7 +12524,7 @@ function getAllPeople() {
             let sceneVideoStreamUrls = (response.data.sceneVideoStreamUrls != undefined && response.data.sceneVideoStreamUrls != null) ? response.data.sceneVideoStreamUrls : new Array();
             // let scenePictureGroups = ""; 
             let scenePictureGroups = (response.data.scenePictureGroups != undefined && response.data.scenePictureGroups != null) ? response.data.scenePictureGroups : ""; 
-            let scenePictures = (response.data.scenePictures != undefined && response.data.scenePictures != null) ? response.data.scenePictures : ""; //ids
+            let scenePictures = (response.data.scenePictures != undefined && response.data.scenePictures != null) ? response.data.scenePictures : ""; //ids //all the id containers should be arrays!
             let scenePostcards = (response.data.scenePostcards != undefined && response.data.scenePostcards != null) ? response.data.scenePostcards : ""; //ids
             let sceneVideos = (response.data.sceneVideos != undefined && response.data.sceneVideos != null) ? response.data.sceneVideos : ""; //ids
             let sceneTextItems = (response.data.sceneTextItems != undefined && response.data.sceneTextItems != null) ? response.data.sceneTextItems : ""; //ids

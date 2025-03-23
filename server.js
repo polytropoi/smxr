@@ -6232,77 +6232,121 @@ app.post('/add_scene_location/', requiredAuthentication, function (req, res) { /
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
     var p_id = ObjectId.createFromHexString(req.body.location_id);   
-    console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
+    console.log('tryna add a scene location : ' + JSON.stringify(req.body));
 
-    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-        if (err || !scene) {
-            console.log("error getting sceneert 4 obj: " + err);
-        } else {
-
-            // if (scene.sceneLocations != null && scene.sceneLocations.indexOf(req.body.location_id) > -1) {
-            //     //In the array!
-            //     res.send("duplicates not allowed!")
-            // } else {
-            
-            db_old.locations.findOne({ "_id": p_id}, function (err, obj) {
-                if (err || !obj) {
-                    console.log("error getting obj items 4: " + err);
-                } else {
-                    var timestamp = Math.round(Date.now() / 1000);
-                    obj.timestamp = timestamp;
-
-                    var sceneLocs = scene.sceneLocations;
-                    if (sceneLocs == null || !Array.isArray(sceneLocs)) {
-                        sceneLocs = [];
-                    }
-                    // console.log("tryna add sceneLocations: " + sceneLocations);
-                    sceneLocs.push(obj);
-                    db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocations: sceneLocs}});
-                }
-                if (err) {
-                    res.send(error);
-                } else {
-                    res.send("updated " + new Date());
-                }
-            });
-            // }
+    (async () => {
+        try {
+            const scenequery = { "_id": s_id};
+            const locquery= { "_id": p_id};
+            let location = await RunDataQuery("locations", "findOne", locquery);
+            const timestamp = Math.round(Date.now() / 1000);
+            location.timestamp = timestamp;
+            const updoc ={$addToSet: { "sceneLocations": location}};
+            const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
+            res.send("updated " + JSON.stringify(updated));
+        } catch {
+            console.log("error addding scene location " + e);
+            res.send("error addding scene location " + e);
         }
-    });
+    })();
 });
+
+//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
+//         if (err || !scene) {
+//             console.log("error getting sceneert 4 obj: " + err);
+//         } else {
+
+//             // if (scene.sceneLocations != null && scene.sceneLocations.indexOf(req.body.location_id) > -1) {
+//             //     //In the array!
+//             //     res.send("duplicates not allowed!")
+//             // } else {
+            
+//             db_old.locations.findOne({ "_id": p_id}, function (err, obj) {
+//                 if (err || !obj) {
+//                     console.log("error getting obj items 4: " + err);
+//                 } else {
+//                     var timestamp = Math.round(Date.now() / 1000);
+//                     obj.timestamp = timestamp;
+
+//                     var sceneLocs = scene.sceneLocations;
+//                     if (sceneLocs == null || !Array.isArray(sceneLocs)) {
+//                         sceneLocs = [];
+//                     }
+//                     // console.log("tryna add sceneLocations: " + sceneLocations);
+//                     sceneLocs.push(obj);
+//                     db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocations: sceneLocs}});
+//                 }
+//                 if (err) {
+//                     res.send(error);
+//                 } else {
+//                     res.send("updated " + new Date());
+//                 }
+//             });
+//             // }
+//         }
+//     });
+// });
 
 app.post('/add_scene_model/', requiredAuthentication, function (req, res) {
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
     var p_id = ObjectId.createFromHexString(req.body.model_id);   
-    console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
-
-    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-        if (err || !scene) {
-            console.log("error getting sceneert 4 obj: " + err);
-        } else {
-            if (scene.sceneModels != null && scene.sceneModels.indexOf(req.body.model_id) > -1) {
-                res.send("duplicate models not allowed!")
+    console.log('tryna add a scene model : ' + JSON.stringify(req.body));
+    
+    (async () => {
+        try {
+            const scenequery = { "_id": s_id};
+            const modelquery = { "_id": p_id};
+            const scene = await RunDataQuery("scenes", "findOne", scenequery);
+            
+            const hasModel = (scene.sceneModels.length && scene.sceneModels.indexOf(req.body.model_id) > -1) ? true : false;
+            console.log("sceneModels " + JSON.stringify(scene.sceneModels) +" vs "+req.body.model_id + " " + hasModel );
+            if (scene.sceneModels == "" || !hasModel) {
+                let model = await RunDataQuery("models", "findOne", modelquery); //just to check it's real...?
+                let sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
+                sceneModels.push(model._id.toString()); //the real one
+                const updoc ={$set: { "sceneModels": sceneModels}}; //addToSet should prevent dupes? //but all these are set as empty strings, not arrays, so addtoset doens't work :(
+                const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
+                console.log("updated " + JSON.stringify(updated));
+                res.send("updated " + JSON.stringify(updated));
             } else {
-                db_old.models.findOne({ "_id": p_id}, function (err, model) {
-                    if (err || !model) {
-                        console.log("error getting model 4: " + err);
-                    } else {
-                            var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
-                            // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
-                            sceneModels.push(req.body.model_id);
-                            db_old.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}
-                        });
-                    }
-                    if (err) {
-                        res.send(error);
-                    } else {
-                        res.send("updated " + new Date());
-                    }
-                });
+                console.log("duplicate model ids not allowed!");
+                res.send("no dupes - the scene already has that model reference!");
             }
+        } catch {
+            console.log("error addding scene model " + e);
+            res.send("error addding scene location " + e);
         }
-    });
+    })();
 });
+
+//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
+//         if (err || !scene) {
+//             console.log("error getting sceneert 4 obj: " + err);
+//         } else {
+//             if (scene.sceneModels != null && scene.sceneModels.indexOf(req.body.model_id) > -1) {
+//                 res.send("duplicate models not allowed!")
+//             } else {
+//                 db_old.models.findOne({ "_id": p_id}, function (err, model) {
+//                     if (err || !model) {
+//                         console.log("error getting model 4: " + err);
+//                     } else {
+//                             var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
+//                             // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
+//                             sceneModels.push(req.body.model_id);
+//                             db_old.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}
+//                         });
+//                     }
+//                     if (err) {
+//                         res.send(error);
+//                     } else {
+//                         res.send("updated " + new Date());
+//                     }
+//                 });
+//             }
+//         }
+//     });
+// });
 
 app.post('/add_scene_obj/', requiredAuthentication, function (req, res) {
 
@@ -6310,77 +6354,104 @@ app.post('/add_scene_obj/', requiredAuthentication, function (req, res) {
     var p_id = ObjectId.createFromHexString(req.body.obj_id);   
     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
 
-    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-        if (err || !scene) {
-            console.log("error getting sceneert 4 obj: " + err);
-        } else {
-
-            if (scene.sceneObjects != null && scene.sceneObjects.indexOf(req.body.obj_id) > -1) {
-                //In the array!
-                res.send("duplicates not allowed!")
+    (async () => {
+        try {
+            const scenequery = { "_id": s_id};
+            const objquery = { "_id": p_id};
+            const scene = await RunDataQuery("scenes", "findOne", scenequery);
+            
+            const hasModel = (scene.sceneObjects.length && scene.sceneObjects.indexOf(req.body.obj_id) > -1) ? true : false;
+            console.log("sceneObjects " + JSON.stringify(scene.sceneObjects) +" vs "+req.body.obj_id + " " + hasModel );
+            if (scene.sceneObjects == "" || !hasModel) {
+                let object = await RunDataQuery("obj_items", "findOne", objquery); //just to check it's real...?
+                let sceneObjects = (scene.sceneObjects != undefined && scene.sceneObjects != null && scene.sceneObjects.length > 0) ? scene.sceneObjects : new Array();
+                sceneObjects.push(object._id.toString()); //the real one
+                const updoc ={$set: { "sceneObjects": sceneObjects}}; //addToSet should prevent dupes? //but all these are set as empty strings, not arrays, so addtoset doens't work :(
+                const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
+                console.log("updated " + JSON.stringify(updated));
+                res.send("updated " + JSON.stringify(updated));
             } else {
-                db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) {
-                    if (err || !obj) {
-                        console.log("error getting obj items 4: " + err);
-                    } else {
-                        var sceneObjs = (scene.sceneObjects != undefined && scene.sceneObjects != null && scene.sceneObjects != "") ? scene.sceneObjects : new Array();
-                        console.log("XXX sceneObjs: " + sceneObjs);
-                        sceneObjs.push(req.body.obj_id);
-                        db_old.scenes.update({ "_id": s_id }, { $set: {sceneObjects: sceneObjs}
-                        });
-                    }
-                    if (err) {
-                        res.send(error)
-                    } else {
-                        res.send("updated " + new Date())
-                    }
-                });
+                console.log("duplicate obj ids not allowed!");
+                res.send("no dupes - the scene already has that object reference!");
             }
+        } catch {
+            console.log("error addding scene model " + e);
+            res.send("error addding scene location " + e);
         }
-    });
+    })();
 });
+//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
+//         if (err || !scene) {
+//             console.log("error getting sceneert 4 obj: " + err);
+//         } else {
 
-app.post('/add_scenelocation_obj/', checkAppID, requiredAuthentication, function (req, res) {
+//             if (scene.sceneObjects != null && scene.sceneObjects.indexOf(req.body.obj_id) > -1) {
+//                 //In the array!
+//                 res.send("duplicates not allowed!")
+//             } else {
+//                 db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) {
+//                     if (err || !obj) {
+//                         console.log("error getting obj items 4: " + err);
+//                     } else {
+//                         var sceneObjs = (scene.sceneObjects != undefined && scene.sceneObjects != null && scene.sceneObjects != "") ? scene.sceneObjects : new Array();
+//                         console.log("XXX sceneObjs: " + sceneObjs);
+//                         sceneObjs.push(req.body.obj_id);
+//                         db_old.scenes.update({ "_id": s_id }, { $set: {sceneObjects: sceneObjs}
+//                         });
+//                     }
+//                     if (err) {
+//                         res.send(error)
+//                     } else {
+//                         res.send("updated " + new Date())
+//                     }
+//                 });
+//             }
+//         }
+//     });
+// });
 
-    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
-    var p_id = ObjectId.createFromHexString(req.body.obj_id);   
+//unused?
+// app.post('/add_scenelocation_obj/', checkAppID, requiredAuthentication, function (req, res) {
 
-    console.log('tryna add a scene location obj : ' + JSON.stringify(req.body));
+//     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+//     var p_id = ObjectId.createFromHexString(req.body.obj_id);   
 
-    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-        if (err || !scene) {
-            console.log("error getting scene location obj: " + err);
-        } else {
+//     console.log('tryna add a scene location obj : ' + JSON.stringify(req.body));
 
-            if (scene.sceneLocations != null) {
-                for (var i = 0; i < scene.sceneLocations.length; i++) {
-                    console.log("tryna find location " + req.body.location_id + " vs " + scene.sceneLocations[i].timestamp);
-                    if  (scene.sceneLocations[i].timestamp == req.body.location_id) {
-                        console.log("gotsa matching sceneLocation!");
-                        db_old.obj_items.findOne({ "_id": p_id}, function (err, object) {
-                            if (err || !object) {
-                                console.log("error getting object : " + err);
-                                res.end();
-                            } else {
-                                scene.sceneLocations[i].location_object = object;
-                                var sceneObjs = scene.sceneObjects != undefined ? scene.sceneObjects : new Array();
-                                console.log("truyna push sceene location object id " + req.body.obj_id);
-                                sceneObjs.push(req.body.obj_id);
+//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
+//         if (err || !scene) {
+//             console.log("error getting scene location obj: " + err);
+//         } else {
 
-                                db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocations: scene.sceneLocations, sceneObjects: sceneObjs}});
-                                res.send("updated " + new Date());
-                            }
+//             if (scene.sceneLocations != null) {
+//                 for (var i = 0; i < scene.sceneLocations.length; i++) {
+//                     console.log("tryna find location " + req.body.location_id + " vs " + scene.sceneLocations[i].timestamp);
+//                     if  (scene.sceneLocations[i].timestamp == req.body.location_id) {
+//                         console.log("gotsa matching sceneLocation!");
+//                         db_old.obj_items.findOne({ "_id": p_id}, function (err, object) {
+//                             if (err || !object) {
+//                                 console.log("error getting object : " + err);
+//                                 res.end();
+//                             } else {
+//                                 scene.sceneLocations[i].location_object = object;
+//                                 var sceneObjs = scene.sceneObjects != undefined ? scene.sceneObjects : new Array();
+//                                 console.log("truyna push sceene location object id " + req.body.obj_id);
+//                                 sceneObjs.push(req.body.obj_id);
 
-                        });
-                        break;
-                    }
-                };
-            } else {
-                res.send("location not found in scene")
-            }
-        }
-    });
-});
+//                                 db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocations: scene.sceneLocations, sceneObjects: sceneObjs}});
+//                                 res.send("updated " + new Date());
+//                             }
+
+//                         });
+//                         break;
+//                     }
+//                 };
+//             } else {
+//                 res.send("location not found in scene")
+//             }
+//         }
+//     });
+// });
 
 app.post('/add_scene_vid/', requiredAuthentication, function (req, res) {
 
