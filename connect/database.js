@@ -17,22 +17,30 @@ const client = new MongoClient(uri, {
 });
 const db = client.db(); 
 
-export async function RunDataQuery(coll,type,query,update) {  //TODO pass in sort/limit... and add Sqlite!
+export async function RunDataQuery(coll,type,query,update,sort) {  //TODO pass in sort/limit... and add Sqlite!
 
     let q = JSON.stringify(query);
     let u = "...";
+    let s = "..."
     if (coll == "traffic") {
         q = query.timestamp;
     }
     if (update != undefined) {
         u = "updoc"; //hrm
     }
-    console.log("tryna RunDataQuery " + coll + " " + type  + " " + q + " " + u);
+    if (sort) {
+        s = "sorted";
+    }
+    console.log("tryna RunDataQuery " + coll + " " + type  + " " + q + " " + u + " " + s);
     switch  (type) {
 
         case "find": //i.e. more than one
             try {
-                return await db.collection(coll).find(query).toArray();
+                if (sort) {
+                    return await db.collection(coll).find(query).sort(sort).toArray();
+                } else {
+                    return await db.collection(coll).find(query).toArray();
+                }
             } catch (e) {
                 console.log("db find error " + e);
                 return ([]); //? or empty string or array? 

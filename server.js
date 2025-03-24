@@ -7488,27 +7488,53 @@ app.post('/add_scene_audio/', requiredAuthentication, function (req, res) {
     var a_id = ObjectId.createFromHexString(req.body.audio_id);   
     console.log('tryna import primary audio : ' + req.body);
 
-    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-        if (err || !scene) {
-            console.log("error getting sceneert 4: " + err);
-        } else {
-            db_old.audio_items.findOne({ "_id": a_id}, function (err, audio) {
-                if (err || !audio) {
-                    console.log("error getting audio items 4: " + err);
-                } else {
-                    if (req.body.audio_type === "trigger") {
-                        db_old.scenes.update({ "_id": s_id }, { $set: {sceneTriggerAudioID: req.body.audio_id}});
-                    } else if (req.body.audio_type === "ambient") {
-                        db_old.scenes.update({ "_id": s_id }, { $set: {sceneAmbientAudioID: req.body.audio_id}});
-                    } else if (req.body.audio_type === "primary") {
-                        db_old.scenes.update({ "_id": s_id }, { $set: {scenePrimaryAudioID: req.body.audio_id}});
-                    }
-
-                }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
-            });
+    (async () => {
+        try {
+            const scenequery = { "_id": s_id};
+            const audioquery = { "_id": a_id};
+            // const scene = await RunDataQuery("scenes", "findOne", scenequery);
+            const audio = await RunDataQuery("audio_items", "findOne", audioquery);
+            if (req.body.audio_type === "trigger") {
+                const updoc = { $set: {"sceneTriggerAudioID": audio._id.toString()}};
+                const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
+                console.log("updated scene trigger audio" + JSON.stringify(updated));
+            } else if (req.body.audio_type === "ambient") {
+                const updoc = { $set: {"sceneTriggerAudioID": audio._id.toString()}};
+                const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
+                console.log("updated scene ambient audio" + JSON.stringify(updated));
+            } else if (req.body.audio_type === "primary") {
+                const updoc = { $set: {"scenePrimaryAudioID": audio._id.toString()}};
+                const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
+                console.log("updated scene primary audio" + JSON.stringify(updated));
+            }
+            res.send("updated");
+        } catch (e) {
+            console.log("error updating scene audio " + e);
+          res.send("error updating scene audio " + e);
         }
-    });
+    })();
 });
+    // db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
+    //     if (err || !scene) {
+    //         console.log("error getting sceneert 4: " + err);
+    //     } else {
+    //         db_old.audio_items.findOne({ "_id": a_id}, function (err, audio) {
+    //             if (err || !audio) {
+    //                 console.log("error getting audio items 4: " + err);
+    //             } else {
+    //                 if (req.body.audio_type === "trigger") {
+    //                     db_old.scenes.update({ "_id": s_id }, { $set: {sceneTriggerAudioID: req.body.audio_id}});
+    //                 } else if (req.body.audio_type === "ambient") {
+    //                     db_old.scenes.update({ "_id": s_id }, { $set: {sceneAmbientAudioID: req.body.audio_id}});
+    //                 } else if (req.body.audio_type === "primary") {
+    //                     db_old.scenes.update({ "_id": s_id }, { $set: {scenePrimaryAudioID: req.body.audio_id}});
+    //                 }
+
+    //             }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
+    //         });
+    //     }
+    // });
+// });
 
 app.post('/import_scene_audio_timed_events/', requiredAuthentication, function (req, res) {
 
@@ -7516,33 +7542,53 @@ app.post('/import_scene_audio_timed_events/', requiredAuthentication, function (
     var a_id = ObjectId.createFromHexString(req.body.audioID);   
     console.log('tryna import scene audio timed e3vents : ' + req.body);
 
-    db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-        if (err || !scene) {
-            console.log("error getting scene for audio timekey import: " + err);
-        } else {
-            db_old.audio_items.findOne({ "_id": a_id}, function (err, audio) {
-                if (err || !audio) {
-                    console.log("error getting audio items 4: " + err);
-                } else {
-                    if (audio.timekeys != undefined && audio.timekeys != null && audio.timekeys.length) {
-                        let sceneTimedEvents = {};
-                        sceneTimedEvents.timekeys = audio.timekeys;
-                        db_old.scenes.update({ "_id": s_id }, { $set: {sceneTimedEvents: sceneTimedEvents}});
-                        
-                        if (err) {
-                            res.send(error);
-                        } else {    
-                            res.send("updated " + new Date());
-                        }
-                     } else {
-                        res.send("no timekeys found for that audio item.");
-                     } 
-                      
-                }
-            });
+    (async () => {
+        try {
+            const scenequery = { "_id": s_id};
+            const audioquery = { "_id": a_id};
+            // const scene = await RunDataQuery("scenes", "findOne", scenequery);
+            const audio = await RunDataQuery("audio_items", "findOne", audioquery);
+            if (audio.timekeys != undefined && audio.timekeys != null && audio.timekeys.length) {
+                let sceneTimedEvents = {};
+                sceneTimedEvents.timekeys = audio.timekeys;
+                const updoc = {$set: {"sceneTimedEvents": sceneTimedEvents}};
+                const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
+                res.send("updated " + JSON.stringify(updated));
+            } else {
+                res.send("no timekeys found for that audio item.");
+            }   
+        } catch (e) {
+            console.log("error importing audio timekeys " + e);
+          res.send("error importing audio timekeys " + e);
         }
-    });
+    })();
 });
+//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
+//         if (err || !scene) {
+//             console.log("error getting scene for audio timekey import: " + err);
+//         } else {
+//             db_old.audio_items.findOne({ "_id": a_id}, function (err, audio) {
+//                 if (err || !audio) {
+//                     console.log("error getting audio items 4: " + err);
+//                 } else {
+//                     if (audio.timekeys != undefined && audio.timekeys != null && audio.timekeys.length) {
+//                         let sceneTimedEvents = {};
+//                         sceneTimedEvents.timekeys = audio.timekeys;
+//                         db_old.scenes.update({ "_id": s_id }, { $set: {sceneTimedEvents: sceneTimedEvents}});
+                        
+//                         if (err) {
+//                             res.send(error);
+//                         } else {    
+//                             res.send("updated " + new Date());
+//                         }
+//                     } else {
+//                         res.send("no timekeys found for that audio item.");
+//                     }   
+//                 }
+//             });
+//         }
+//     });
+// });
 
 
 //
@@ -7564,55 +7610,82 @@ app.get('/uscenes/:_id',  requiredAuthentication, usercheck, function (req, res)
     if (req.session.user.authLevel.toLowerCase().includes("domain")) { //domain admins can see everything
         query = {};
     }
-    db_old.scenes.find(query, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 },  function(err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err);
-            res.send("noscenes");
-        } else { //should externalize
-            res.json(scenes);
+    (async () => {
+        try {
+            const sort = { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 };
+            const scenes = await RunDataQuery("scenes","find",query,null,sort);
+            res.send(scenes);
+        } catch (e) {
+            console.log("error getting user scenes " + e);
+            res.send("error getting user scenes " + e);
         }
-    });
+    })();
+    // db_old.scenes.find(query, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 },  function(err, scenes) {
+    //     if (err || !scenes) {
+    //         console.log("cain't get no scenes... " + err);
+    //         res.send("noscenes");
+    //     } else { //should externalize
+    //         res.json(scenes);
+    //     }
+    // });
 });
-app.get('/uscenes/:appid',  requiredAuthentication, usercheck, function (req, res) { //get scenes for this user
-    console.log("tryna get user scenes: ",req.params._id);
-    var o_id = ObjectId.createFromHexString(req.params.appid);
-    var scenesResponse = {};
 
-    db_old.scenes.find({ "user_id" : req.params._id}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1,  sceneShareWithPublic: 1 },  function(err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err);
-            res.send("noscenes");
-        } else { //should externalize
-            res.json(scenes);
-        }
-    });
-});
+// app.get('/uscenes/:appid',  requiredAuthentication, usercheck, function (req, res) { //get scenes for this user
+//     console.log("tryna get user scenes: ",req.params._id);
+//     var o_id = ObjectId.createFromHexString(req.params.appid);
+//     var scenesResponse = {};
+
+//     db_old.scenes.find({ "user_id" : req.params._id}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1,  sceneShareWithPublic: 1 },  function(err, scenes) {
+//         if (err || !scenes) {
+//             console.log("cain't get no scenes... " + err);
+//             res.send("noscenes");
+//         } else { //should externalize
+//             res.json(scenes);
+//         }
+//     });
+// });
+
 app.post('/uscenes/',  requiredAuthentication, usercheck, function (req, res) { //get scenes for app
-    console.log("tryna get user scenes: ",req.params._id);
-    var o_id = ObjectId.createFromHexString(req.params._id);
-    var scenesResponse = {};
-    db_old.scenes.find({ "sceneAppName" : req.body.appName}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 },  function(err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err);
-            res.send("noscenes");
-        } else { //should externalize
-            res.json(scenes);
+    console.log("tryna get app scenes: ",req.params._id);
+    (async () => {
+        try {
+            const query = { "sceneAppName" : req.body.appName};
+            const sort = { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 };
+            const scenes = await RunDataQuery("scenes","find",query,null,sort);
+            res.send(scenes);
+        } catch (e) {
+            console.log("error getting app scenes " + e);
+            res.send("error getting app scenes " + e);
         }
-    });
+    })();
 });
+
 app.post('/appscenes/',  requiredAuthentication, function (req, res) { //get scenes for app
     console.log("tryna get user scenes fer: " + req.body.sceneDomain);
 
     // var o_id = ObjectId.createFromHexString(req.params.appid);
     // var scenesResponse = {};
-    db_old.scenes.find({ "sceneDomain" : req.body.sceneDomain}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1, sceneStickyness: 1 },  function(err, scenes) {
-        if (err || !scenes) {
-            console.log("cain't get no scenes... " + err);
-            res.send("noscenes");
-        } else { //should externalize
-            res.json(scenes);
+
+    (async () => {
+        try {
+            const query = { "sceneDomain" : req.body.sceneDomain};
+            const sort = { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 };
+            const scenes = await RunDataQuery("scenes","find",query,null,sort);
+            res.send(scenes);
+        } catch (e) {
+            console.log("error getting app scenes " + e);
+            res.send("error getting app scenes " + e);
         }
-    });
+    })();
+
+    // db_old.scenes.find({ "sceneDomain" : req.body.sceneDomain}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1, sceneStickyness: 1 },  function(err, scenes) {
+    //     if (err || !scenes) {
+    //         console.log("cain't get no scenes... " + err);
+    //         res.send("noscenes");
+    //     } else { //should externalize
+    //         res.json(scenes);
+    //     }
+    // });
 });
 app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function (req, res) { //scene view for editing/updating scene in admin mode for this user
 
