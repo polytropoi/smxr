@@ -1475,6 +1475,7 @@
                 });
             }
         }
+        //this stuff is terrible, but it works... //TODO fixit!
         if (sourcetype == "scene") {
             if (itemtype == "model") {
                 let data = { 
@@ -1882,27 +1883,27 @@
                 });
             }
         }
-        if (sourcetype == "storeitem") {
-            if (itemtype == "scenegroup") {
-                let data = { 
-                    storeitem_id : sourceID,
-                    group_id: itemID
-                };
-                axios.post('/add_storeitem_scenegroup', data, headers)
-                .then(function (response) {
-                    console.log(response);
-                    if (response.data.includes("updated")) {
-                        window.history.back();
-                    } else {
-                        $("#topAlert").html(response.data);
-                        $("#topAlert").show();
-                    }
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
-            }
-        }
+        // if (sourcetype == "storeitem") {
+        //     if (itemtype == "scenegroup") {
+        //         let data = { 
+        //             storeitem_id : sourceID,
+        //             group_id: itemID
+        //         };
+        //         axios.post('/add_storeitem_scenegroup', data, headers)
+        //         .then(function (response) {
+        //             console.log(response);
+        //             if (response.data.includes("updated")) {
+        //                 window.history.back();
+        //             } else {
+        //                 $("#topAlert").html(response.data);
+        //                 $("#topAlert").show();
+        //             }
+        //         })
+        //         .catch(function (error) {
+        //             console.log(error);
+        //         });
+        //     }
+        // }
         if (sourcetype == "asset") {
             if (itemtype == "picture") {
                 let data = { 
@@ -1977,7 +1978,7 @@
                     action_id: itemID
                 };
 
-                axios.post('/add_obj_action', data, headers) //add_object_action deprecated, push to array now
+                axios.post('/add_obj_action', data, headers) //add_object_action deprecated, push to array now//what?
                 .then(function (response) {
                     console.log(response);
                     if (response.data.includes("updated")) {

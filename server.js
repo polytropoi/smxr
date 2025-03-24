@@ -6597,8 +6597,6 @@ app.post('/scene_text_items/', function (req, res) {
     }
 });
 
-
-
 app.post('/add_scene_pic/', requiredAuthentication, function (req, res) {
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
@@ -6766,85 +6764,141 @@ app.post('/add_action_model/', requiredAuthentication, function (req, res) { //s
     var p_id = ObjectId.createFromHexString(req.body.model_id);   
     console.log('tryna add an action model : ' + JSON.stringify(req.body));
 
-    
-
-    db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
-        if (err || !item) {
-            console.log("error getting object 4: " + err);
-            res.send("object not found!")
-        } else {
-            db_old.models.findOne({ "_id": p_id}, function (err, model) { //does model exist
-                if (err || !model) {
-                    console.log("error getting model for object: " + err);
-                    res.send("model for object not found");
-                } else {
-                    // console.log("tryna add model info " + JSON.stringify(model));
-                    db_old.actions.update({ "_id": s_id }, { $set: {modelID: model._id, modelName: model.name}}); //update object with model info
-                    res.send("updated");
-                }  
-            });
+    (async () => {
+        try {
+            const actionquery = { "_id": s_id};
+            const modelquery = { "_id": p_id}
+            // const object = await RunDataQuery("obj_items", "findOne", objquery);
+            const model = await RunDataQuery("models", "findOne", modelquery);
+            const updoc = { $set: {"modelID": model._id, "modelName": model.name}};
+            const updated = await RunDataQuery("actions", "updateOne", actionquery, updoc);
+            console.log('getting scene_text_items : ' + req.body.textIDs);
+            res.send("updated object " + updated );
+        } catch {
+            console.log("error updating object model " + e);
+            res.send("error updating object modek " + e);
         }
-    });
+    })();
+
 });
+
+    // db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
+    //     if (err || !item) {
+    //         console.log("error getting object 4: " + err);
+    //         res.send("object not found!")
+    //     } else {
+    //         db_old.models.findOne({ "_id": p_id}, function (err, model) { //does model exist
+    //             if (err || !model) {
+    //                 console.log("error getting model for object: " + err);
+    //                 res.send("model for object not found");
+    //             } else {
+    //                 // console.log("tryna add model info " + JSON.stringify(model));
+    //                 db_old.actions.update({ "_id": s_id }, { $set: {modelID: model._id, modelName: model.name}}); //update object with model info
+    //                 res.send("updated");
+    //             }  
+    //         });
+    //     }
+    // });
+// });
 
 app.post('/add_action_object/', requiredAuthentication, function (req, res) { //save to array instead
     var s_id = ObjectId.createFromHexString(req.body.action_id);   
     var p_id = ObjectId.createFromHexString(req.body.object_id);   
     console.log('tryna add an action model : ' + JSON.stringify(req.body));
-    db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
-        if (err || !item) {
-            console.log("error getting action 4: " + err);
-            res.send("action not found!")
-        } else {
-            db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) { //does model exist
-                if (err || !obj) {
-                    console.log("error getting model for object: " + err);
-                    res.send("model for object not found");
-                } else {
-                    // console.log("tryna add model info " + JSON.stringify(model));
-                    db_old.actions.update({ "_id": s_id }, { $set: {objectID: obj._id, objectName: obj.name}}); //update object with object info
-                    res.send("updated");
-                }  
-            });
+
+    (async () => {
+        try {
+            const actionquery = { "_id": s_id};
+            const objquery = { "_id": p_id}
+            // const object = await RunDataQuery("obj_items", "findOne", objquery);
+            const object = await RunDataQuery("obj_items", "findOne", objquery);
+            const updoc = { $set: {"objectID": object._id, "objectName": object.name}};
+            const updated = await RunDataQuery("actions", "updateOne", actionquery, updoc);
+            console.log('getting scene_text_items : ' + req.body.textIDs);
+            res.send("updated object " + updated );
+        } catch {
+            console.log("error updating object model " + e);
+            res.send("error updating object modek " + e);
         }
-    });
+    })();
 });
+    // db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
+    //     if (err || !item) {
+    //         console.log("error getting action 4: " + err);
+    //         res.send("action not found!")
+    //     } else {
+    //         db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) { //does model exist
+    //             if (err || !obj) {
+    //                 console.log("error getting model for object: " + err);
+    //                 res.send("model for object not found");
+    //             } else {
+    //                 // console.log("tryna add model info " + JSON.stringify(model));
+    //                 db_old.actions.update({ "_id": s_id }, { $set: {objectID: obj._id, objectName: obj.name}}); //update object with object info
+    //                 res.send("updated");
+    //             }  
+    //         });
+    //     }
+    // });
+// });
 
 app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //save to array instead
-    var s_id = ObjectId.createFromHexString(req.body.object_id);   
+    var o_id = ObjectId.createFromHexString(req.body.object_id);   
     var a_id = ObjectId.createFromHexString(req.body.action_id);   
     console.log('tryna add a object action : ' + JSON.stringify(req.body));
-    db_old.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
-        if (err || !item) {
-            console.log("error getting object 4 action: " + err);
-            res.send("object not found!")
-        } else {
-            db_old.actions.findOne({ "_id": a_id}, function (err, action) { //does action exist
-                if (err || !action) {
-                    console.log("error getting action for object: " + err);
-                    res.send("action for object not found");
-                } else {
-                    
-                    
-                    if (item.actionIDs == undefined || item.actionIDs.length > 0 || item.actionIDs.indexOf(action._id.toString()) == -1 ) {
-                        db_old.obj_items.update({ "_id": s_id }, { $push: {actionIDs: action._id.toString()}}, {upsert: false}, function (err, saved) {
-                            if (err || !saved) {
-                                res.send("error saving action " + err);
-                            } else {
-                                console.log("saved action to object: " +JSON.stringify(saved));
-                                res.send("updated");
-                            }
-                    });
-                } else {
-                    console.log("dupe action");
-                    res.send("no duplicate actions!");
-                }
+    
+    (async () => {
+        try {
+            const actionquery = { "_id": a_id};
+            const objquery = { "_id": o_id}
+            // const object = await RunDataQuery("obj_items", "findOne", objquery);
+            const object = await RunDataQuery("obj_items", "findOne", objquery);
+            const action = await RunDataQuery("actions", "findOne", actionquery);  
+
+            if (object.actionIDs && object.actionIDs.indexOf(action._id.toString()) == -1 ) {
+                let objectActions = (object.actionIDs != undefined && object.actionIDs != null && object.actionIDs.length > 0) ? object.actionIDs : new Array();
+                objectActions.push(action._id.toString()); 
+                const updoc = {$set: {"actionIDs": objectActions}};
+                const updated = await RunDataQuery("obj_items", "updateOne", objquery, updoc);
+                console.log('getting scene_text_items : ' + req.body.textIDs);
+                res.send("updated object " + updated );
+            } else {
+                res.send("object already has that action attached!");
             }
-                 
-            });
+        } catch {
+            console.log("error updating object model " + e);
+            res.send("error updating object modek " + e);
         }
-    });
+    })();
 });
+
+//     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
+//         if (err || !item) {
+//             console.log("error getting object 4 action: " + err);
+//             res.send("object not found!")
+//         } else {
+//             db_old.actions.findOne({ "_id": a_id}, function (err, action) { //does action exist
+//                 if (err || !action) {
+//                     console.log("error getting action for object: " + err);
+//                     res.send("action for object not found");
+//                 } else {
+//                     if (item.actionIDs == undefined || item.actionIDs.length > 0 || item.actionIDs.indexOf(action._id.toString()) == -1 ) {
+//                         db_old.obj_items.update({ "_id": s_id }, { $push: {actionIDs: action._id.toString()}}, {upsert: false}, function (err, saved) {
+//                             if (err || !saved) {
+//                                 res.send("error saving action " + err);
+//                             } else {
+//                                 console.log("saved action to object: " +JSON.stringify(saved));
+//                                 res.send("updated");
+//                             }
+//                     });
+//                 } else {
+//                     console.log("dupe action");
+//                     res.send("no duplicate actions!");
+//                 }
+//             }
+//             });
+//         }
+//     });
+// });
 // app.post('/add_object_action/', requiredAuthentication, function (req, res) { //deprecated
 //     var s_id = ObjectId.createFromHexString(req.body.object_id);   
 //     var a_id = ObjectId.createFromHexString(req.body.action_id);   
@@ -6868,295 +6922,527 @@ app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //sav
 //     });
 // });
 app.post('/add_object_pic/', requiredAuthentication, function (req, res) {
-    var s_id = ObjectId.createFromHexString(req.body.object_id);   
+    var o_id = ObjectId.createFromHexString(req.body.object_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a object pic : ' + JSON.stringify(req.body));
-    db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
-        if (err || !item) {
-            console.log("error getting object 4: " + err);
-            res.send("object not found!")
-        } else {
-            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-                if (err || !pic) {
-                    console.log("error getting image items for object: " + err);
-                } else {
-                    var objectPics = item.objectPictureIDs;
-                    if (objectPics == null) {
-                        objectPics = [];
-                    }
-                    if ( objectPics.indexOf(req.body.pic_id) == -1 ) {
-                        objectPics.push(req.body.pic_id);
-                        db_old.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
-                        if (err) {res.send(error)} else {res.send("updated " + new Date())}
-                    } else {
-                        res.send("that picture is already assigned to this object");
-                    }
-                }  
-            });
+
+    (async () => {
+        try {
+            const picquery = { "_id": p_id};
+            const objquery = { "_id": o_id};
+            // const object = await RunDataQuery("obj_items", "findOne", objquery);
+            const object = await RunDataQuery("obj_items", "findOne", objquery);
+            const picture = await RunDataQuery("image_items", "findOne", picquery);  
+
+            if (object.objectPictureIDs && object.objectPictureIDs.indexOf(picture._id.toString()) == -1 ) {
+                let objectPictures = (object.objectPictureIDs != undefined && object.objectPictureIDs != null && object.objectPictureIDs.length > 0) ? object.objectPictureIDs : new Array();
+                objectPictures.push(picture._id.toString()); 
+                const updoc = {$set: {"objectPictureIDs": objectPictures}};
+                const updated = await RunDataQuery("obj_items", "updateOne", objquery, updoc);
+                console.log('getting scene_text_items : ' + req.body.textIDs);
+                res.send("updated object " + updated );
+            } else {
+                res.send("object already has that picture attached!");
+            }
+        } catch {
+            console.log("error updating object picture " + e);
+            res.send("error updating object picture " + e);
         }
-    });
+    })();
 });
+    // db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
+    //     if (err || !item) {
+    //         console.log("error getting object 4: " + err);
+    //         res.send("object not found!")
+    //     } else {
+    //         db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
+    //             if (err || !pic) {
+    //                 console.log("error getting image items for object: " + err);
+    //             } else {
+    //                 var objectPics = item.objectPictureIDs;
+    //                 if (objectPics == null) {
+    //                     objectPics = [];
+    //                 }
+    //                 if ( objectPics.indexOf(req.body.pic_id) == -1 ) {
+    //                     objectPics.push(req.body.pic_id);
+    //                     db_old.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
+    //                     if (err) {res.send(error)} else {res.send("updated " + new Date())}
+    //                 } else {
+    //                     res.send("that picture is already assigned to this object");
+    //                 }
+    //             }  
+    //         });
+    //     }
+    // });
+// });
+
 app.post('/rem_object_action/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.object_id);   
-    var p_id = ObjectId.createFromHexString(req.body.action_id);   
+    // var p_id = ObjectId.createFromHexString(req.body.action_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
-        if (err || !item) {
-            console.log("error getting sceneert 4: " + err);
-            res.send("app not found!")
-        } else {
-            db_old.actions.findOne({ "_id": p_id}, function (err, action) {
-                if (err || !action) {
-                    console.log("error getting image items for domain: " + err);
+    (async () => {
+        try {
+            const objquery = {"_id": s_id};
+            const object = await RunDataQuery("obj_items", "findOne", objquery);
+            var actionIDs = object.actionIDs;
+            if (actionIDs != null) {
+                let index = actionIDs.indexOf(req.body.action_id);
+                if ( index != -1 ) {
+                    actionIDs.splice(index, 1);
+                    const updoc = { $set: {"actionIDs": actionIDs}};
+                    const updated = await RunDataQuery("obj_items", "updateOne", objquery, updoc);
+                    res.send("updated object" + JSON.stringify(updated));
                 } else {
-                    var actionIDs = item.actionIDs;
-                    if (actionIDs != null) {
-                    let index = actionIDs.indexOf(req.body.action_id);
-                    if ( index != -1 ) {
-                        actionIDs.splice(index, 1);
-                        db_old.obj_items.update({ "_id": s_id }, { $set: {actionIDs: actionIDs}});
-                        if (err) {
-                            res.send(err);
-                            } else {
-                                res.send("updated " + new Date())
-                            }
-                        } else {
-                            res.send("that action is not assigned to this object");
-                        }
-                    }
-                }  
-            });
+                    res.send("that action is not assigned to this object");
+                }
+            } else {
+                res.send("no actions on this obj!");
+            }
+        } catch (e) {
+            console.log("error removing action from object!" +e);
+            res.send("error removing action from object!" +e);
         }
-    });
+    })();
 });
+//     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
+//         if (err || !item) {
+//             console.log("error getting sceneert 4: " + err);
+//             res.send("app not found!")
+//         } else {
+//             db_old.actions.findOne({ "_id": p_id}, function (err, action) {
+//                 if (err || !action) {
+//                     console.log("error getting image items for domain: " + err);
+//                 } else {
+//                     var actionIDs = item.actionIDs;
+//                     if (actionIDs != null) {
+//                     let index = actionIDs.indexOf(req.body.action_id);
+//                     if ( index != -1 ) {
+//                         actionIDs.splice(index, 1);
+//                         db_old.obj_items.update({ "_id": s_id }, { $set: {actionIDs: actionIDs}});
+//                         if (err) {
+//                             res.send(err);
+//                             } else {
+//                                 res.send("updated " + new Date())
+//                             }
+//                         } else {
+//                             res.send("that action is not assigned to this object");
+//                         }
+//                     }
+//                 }  
+//             });
+//         }
+//     });
+// });
+
 app.post('/rem_object_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.domain_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
-        if (err || !item) {
-            console.log("error getting sceneert 4: " + err);
-            res.send("app not found!")
-        } else {
-            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-                if (err || !pic) {
-                    console.log("error getting image items for domain: " + err);
+
+    (async () => {
+        try {
+            const objquery = {"_id": s_id};
+            const object = await RunDataQuery("obj_items", "findOne", objquery);
+            var objectPics = object.objectPictureIDs;
+            if (objectPics != null) {
+                let index = objectPics.indexOf(req.body.pic_id);
+                if ( index != -1 ) {
+                    objectPics.splice(index, 1);
+                    const updoc = { $set: {"objectPictureIDs": objectPics}};
+                    const updated = await RunDataQuery("obj_items", "updateOne", objquery, updoc);
+                    res.send("updated object" + JSON.stringify(updated));
                 } else {
-                    var objectPics = item.objectPictureIDs;
-                    if (objectPics != null) {
-                    let index = objectPics.indexOf(req.body.pic_id);
-                    if ( index != -1 ) {
-                        objectPics.splice(index, 1);
-                        db_old.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
-                        if (err) {res.send(error)} else {res.send("updated " + new Date())}
-                    } else {
-                        res.send("that picture is not assigned to this app");
-                    }
-                    }
-                }  
-            });
+                    res.send("that picture is not assigned to this object");
+                }
+            } else {
+                res.send("no pic on this obj!");
+            }
+        } catch (e) {
+            console.log("error removing pic from object!" +e);
+            res.send("error removing pic from object!" +e);
         }
-    });
+    })();
 });
+//     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
+//         if (err || !item) {
+//             console.log("error getting sceneert 4: " + err);
+//             res.send("app not found!")
+//         } else {
+//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
+//                 if (err || !pic) {
+//                     console.log("error getting image items for domain: " + err);
+//                 } else {
+//                     var objectPics = item.objectPictureIDs;
+//                     if (objectPics != null) {
+//                     let index = objectPics.indexOf(req.body.pic_id);
+//                     if ( index != -1 ) {
+//                         objectPics.splice(index, 1);
+//                         db_old.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
+//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
+//                     } else {
+//                         res.send("that picture is not assigned to this app");
+//                     }
+//                     }
+//                 }  
+//             });
+//         }
+//     });
+// });
 app.post('/add_domain_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.domain_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a domain pic : ' + JSON.stringify(req.body));
-    db_old.domains.findOne({ "_id": s_id}, function (err, item) {
-        if (err || !item) {
-            console.log("error getting sceneert 4: " + err);
-            res.send("domain not found!")
-        } else {
-            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-                if (err || !pic) {
-                    console.log("error getting image items for storeitem: " + err);
+    (async () => {
+        try {
+            const domainquery = {"_id": s_id};
+            const picquery = {"_id": p_id};
+            const domain = await RunDataQuery("domains", "findOne", domainquery);
+            const picture = await RunDataQuery("image_items", "findOne", picquery);
+            var domainPics = domain.domainPictureIDs;
+                if (domainPics == null) {
+                    domainPics = [];
+                }
+                if ( domainPics.indexOf(picture._id.toString()) == -1 ) {
+                    domainPics.push(picture._id.toString());
+                    const updoc = { $set: {"domainPictureIDs": domainPics}};
+                    const updated = await RunDataQuery("domains", "updateOne", domainquery, updoc);
+                    res.send("updated " + JSON.stringify(updated));
                 } else {
-                    var domainPics = item.domainPictureIDs;
-                    if (domainPics == null) {
-                        domainPics = [];
-                    }
-                    if ( domainPics.indexOf(req.body.pic_id) == -1 ) {
-                        domainPics.push(req.body.pic_id);
-                        db_old.domains.update({ "_id": s_id }, { $set: {domainPictureIDs: domainPics}});
-                        if (err) {res.send(error)} else {res.send("updated " + new Date())}
-                    } else {
-                        res.send("that picture is already assigned to this domain");
-                    }
-                }  
-            });
+                    res.send("that picture is already assigned to this domain");
+                }
+        } catch (e) {
+            console.log("error removing pic from object!" +e);
+            res.send("error removing pic from object!" +e);
         }
-    });
+    })();
 });
+//     db_old.domains.findOne({ "_id": s_id}, function (err, item) {
+//         if (err || !item) {
+//             console.log("error getting sceneert 4: " + err);
+//             res.send("domain not found!")
+//         } else {
+//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
+//                 if (err || !pic) {
+//                     console.log("error getting image items for storeitem: " + err);
+//                 } else {
+//                     var domainPics = item.domainPictureIDs;
+//                     if (domainPics == null) {
+//                         domainPics = [];
+//                     }
+//                     if ( domainPics.indexOf(req.body.pic_id) == -1 ) {
+//                         domainPics.push(req.body.pic_id);
+//                         db_old.domains.update({ "_id": s_id }, { $set: {domainPictureIDs: domainPics}});
+//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
+//                     } else {
+//                         res.send("that picture is already assigned to this domain");
+//                     }
+//                 }  
+//             });
+//         }
+//     });
+// });
 app.post('/rem_app_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.app_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db_old.apps.findOne({ "_id": s_id}, function (err, item) {
-        if (err || !item) {
-            console.log("error getting sceneert 4: " + err);
-            res.send("app not found!")
-        } else {
-            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-                if (err || !pic) {
-                    console.log("error getting image items for storeitem: " + err);
+
+    (async () => {
+        try {
+            const appquery = {"_id": s_id};
+            const picquery = {"_id": p_id};
+            const app = await RunDataQuery("apps", "findOne", appquery);
+            const picture = await RunDataQuery("image_items", "findOne", picquery);
+            var appPics = app.appPictureIDs;
+
+            if (appPics != null) {
+                let index = appPics.indexOf(picture._id.toString());
+                if ( index != -1 ) {
+                    appPics.splice(index, 1);
+                    const updoc = { $set: {appPictureIDs: appPics}};
+                    const updated = await RunDataQuery("apps", "updateOne", appquery, updoc);
+                    res.send("updated " + JSON.stringify(updated));
                 } else {
-                    var appPics = item.appPictureIDs;
-                    if (appPics != null) {
-                    let index = appPics.indexOf(req.body.pic_id);
-                    if ( index != -1 ) {
-                        appPics.splice(index, 1);
-                        db_old.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
-                        if (err) {res.send(error)} else {res.send("updated " + new Date())}
-                    } else {
-                        res.send("that picture is not assigned to this app");
-                    }
-                    }
-                }  
-            });
+                    res.send("that picture is not assigned to this app");
+                }
+            }
+        } catch (e) {
+            console.log("error removing pic from app!" +e);
+            res.send("error removing pic from app!" +e);
         }
-    });
+    })();
 });
+//     db_old.apps.findOne({ "_id": s_id}, function (err, item) {
+//         if (err || !item) {
+//             console.log("error getting sceneert 4: " + err);
+//             res.send("app not found!")
+//         } else {
+//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
+//                 if (err || !pic) {
+//                     console.log("error getting image items for storeitem: " + err);
+//                 } else {
+//                     var appPics = item.appPictureIDs;
+//                     if (appPics != null) {
+//                     let index = appPics.indexOf(req.body.pic_id);
+//                     if ( index != -1 ) {
+//                         appPics.splice(index, 1);
+//                         db_old.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
+//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
+//                     } else {
+//                         res.send("that picture is not assigned to this app");
+//                     }
+//                     }
+//                 }  
+//             });
+//         }
+//     });
+// });
 app.post('/add_app_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.app_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db_old.apps.findOne({ "_id": s_id}, function (err, item) {
-        if (err || !item) {
-            console.log("error getting sceneert 4: " + err);
-            res.send("store item not found!")
-        } else {
-            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-                if (err || !pic) {
-                    console.log("error getting image items for storeitem: " + err);
-                } else {
-                    var appPics = item.appPictureIDs;
-                    if (appPics == null) {
-                        appPics = [];
-                    }
-                    // console.log("XXX scenePics: " + storeItemPics);
-                    if ( appPics.indexOf(req.body.pic_id) == -1 ) {
-                        appPics.push(req.body.pic_id);
-                        db_old.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
-                        if (err) {res.send(error)} else {res.send("updated " + new Date())}
-                    } else {
-                        res.send("that picture is already assigned to this storeitem");
-                    }
-                }  
-            });
+
+    (async () => {
+        try {
+            const appquery = {"_id": s_id};
+            const picquery = {"_id": p_id};
+            const app = await RunDataQuery("apps", "findOne", appquery);
+            const picture = await RunDataQuery("image_items", "findOne", picquery);
+            var appPics = app.appPictureIDs;
+            if (appPics == null) {
+                appPics = [];
+            }
+            // console.log("XXX scenePics: " + storeItemPics);
+            if ( appPics.indexOf(picture._id.toString()) == -1 ) {
+                appPics.push(picture._id.toString());
+                const updoc = { $set: {"appPictureIDs": appPics}};
+                const updated = await RunDataQuery("apps", "updateOne", appquery, updoc);
+                res.send("updated app" + updated);
+            } else {
+                res.send("that picture is already assigned to this app");
+            }
+            
+        } catch (e) {
+            console.log("error adding pic from app!" +e);
+            res.send("error adding pic from app!" +e);
         }
-    });
+    })();
 });
+
+//     db_old.apps.findOne({ "_id": s_id}, function (err, item) {
+//         if (err || !item) {
+//             console.log("error getting sceneert 4: " + err);
+//             res.send("store item not found!")
+//         } else {
+//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
+//                 if (err || !pic) {
+//                     console.log("error getting image items for storeitem: " + err);
+//                 } else {
+//                     var appPics = item.appPictureIDs;
+//                     if (appPics == null) {
+//                         appPics = [];
+//                     }
+//                     // console.log("XXX scenePics: " + storeItemPics);
+//                     if ( appPics.indexOf(req.body.pic_id) == -1 ) {
+//                         appPics.push(req.body.pic_id);
+//                         db_old.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
+//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
+//                     } else {
+//                         res.send("that picture is already assigned to this storeitem");
+//                     }
+//                 }  
+//             });
+//         }
+//     });
+// });
+
 app.post('/rem_storeitem_pic/', checkAppID, requiredAuthentication, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
-        if (err || !storeitem) {
-            console.log("error getting sceneert 4: " + err);
-            res.send("store item not found!")
-        } else {
-            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-                if (err || !pic) {
-                    console.log("error getting image items for storeitem: " + err);
-                } else {
-                    var storeItemPics = storeitem.storeItemPictureIDs;
-                    if (storeItemPics != null) {
-                    let index = storeItemPics.indexOf(req.body.pic_id);
-                    if ( index != -1 ) {
-                        storeItemPics.splice(index, 1);
-                        db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
-                        if (err) {res.send(error)} else {res.send("updated " + new Date())}
-                    } else {
-                        res.send("that picture is not assigned to this storeitem");
-                    }
-                    }
-                }  
-            });
+    (async () => {
+        try {
+            const siquery = {"_id": s_id};
+            const picquery = {"_id": p_id};
+            const storeitem = await RunDataQuery("storeitems", "findOne", siquery);
+            const picture = await RunDataQuery("image_items", "findOne", picquery);
+            var storeItemPics = storeitem.storeItemPictureIDs;
+            if (storeItemPics != null) {
+            let index = storeItemPics.indexOf(picture._id.toString());
+            if ( index != -1 ) {
+                storeItemPics.splice(index, 1);
+                const updoc = { $set: {storeItemPictureIDs: storeItemPics}};
+                const updated = await RunDataQuery("storeitems", "updateOne", siquery, updoc);
+                // db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
+               res.send("updated " + JSON.stringify(updated));
+            } else {
+                res.send("that picture is not assigned to this storeitem");
+            }
+            }
+            
+        } catch (e) {
+            console.log("error adding pic from app!" +e);
+            res.send("error adding pic from app!" +e);
         }
-    });
+    })();
 });
-app.post('/add_storeitem_pic/', checkAppID, requiredAuthentication, function (req, res) {
-    var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
-    var p_id = ObjectId.createFromHexString(req.body.pic_id);   
+//     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
+//         if (err || !storeitem) {
+//             console.log("error getting sceneert 4: " + err);
+//             res.send("store item not found!")
+//         } else {
+//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
+//                 if (err || !pic) {
+//                     console.log("error getting image items for storeitem: " + err);
+//                 } else {
+//                     var storeItemPics = storeitem.storeItemPictureIDs;
+//                     if (storeItemPics != null) {
+//                     let index = storeItemPics.indexOf(req.body.pic_id);
+//                     if ( index != -1 ) {
+//                         storeItemPics.splice(index, 1);
+//                         db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
+//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
+//                     } else {
+//                         res.send("that picture is not assigned to this storeitem");
+//                     }
+//                     }
+//                 }  
+//             });
+//         }
+//     });
+// });
+
+app.post('/add_storeitem_pic/', requiredAuthentication, function (req, res) {
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
-    db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
-        if (err || !storeitem) {
-            console.log("error getting sceneert 4: " + err);
-            res.send("store item not found!")
-        } else {
-            db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-                if (err || !pic) {
-                    console.log("error getting image items for storeitem: " + err);
-                } else {
-                    var storeItemPics = storeitem.storeItemPictureIDs;
-                    if (storeItemPics == null) {
-                        storeItemPics = [];
-                    }
-                    console.log("XXX scenePics: " + storeItemPics);
-                    if ( storeItemPics.indexOf(req.body.pic_id) == -1 ) {
-                        storeItemPics.push(req.body.pic_id);
-                        db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
-                        if (err) {res.send(error)} else {res.send("updated " + new Date())}
-                    } else {
-                        res.send("that picture is already assigned to this storeitem");
-                    }
-                }  
-            });
+    var s_id = ObjectId.createFromHexString(req.body.storeitem_id.toString());   
+    var p_id = ObjectId.createFromHexString(req.body.pic_id.toString());   
+
+    (async () => {
+        try {
+            const siquery = {"_id": s_id};
+            const picquery = {"_id": p_id};
+            const storeitem = await RunDataQuery("storeitems", "findOne", siquery);
+            const picture = await RunDataQuery("image_items", "findOne", picquery);
+            var storeItemPics = storeitem.storeItemPictureIDs;
+            if (storeItemPics == null) {
+                storeItemPics = [];
+            }
+            if ( storeItemPics.indexOf(picture._id.toString()) == -1 ) {
+                storeItemPics.push(picture._id.toString());
+                const updoc = { $set: {"storeItemPictureIDs": storeItemPics}};
+                const updated = await RunDataQuery("storeitems", "updateOne", siquery, updoc);
+                res.send("updated " + JSON.stringify(updated));
+                // db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
+                // if (err) {res.send(error)} else {res.send("updated " + new Date())}
+            } else {
+                res.send("that picture is already assigned to this storeitem");
+            }
+            
+        } catch (e) {
+            console.log("error adding pic from app!" +e);
+            res.send("error adding pic from app!" +e);
         }
-    });
+    })();
 });
+
+//     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
+//         if (err || !storeitem) {
+//             console.log("error getting sceneert 4: " + err);
+//             res.send("store item not found!")
+//         } else {
+//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
+//                 if (err || !pic) {
+//                     console.log("error getting image items for storeitem: " + err);
+//                 } else {
+//                     var storeItemPics = storeitem.storeItemPictureIDs;
+//                     if (storeItemPics == null) {
+//                         storeItemPics = [];
+//                     }
+//                     console.log("XXX scenePics: " + storeItemPics);
+//                     if ( storeItemPics.indexOf(req.body.pic_id) == -1 ) {
+//                         storeItemPics.push(req.body.pic_id);
+//                         db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
+//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
+//                     } else {
+//                         res.send("that picture is already assigned to this storeitem");
+//                     }
+//                 }  
+//             });
+//         }
+//     });
+// });
+
 app.post('/add_storeitem_obj/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
     var p_id = ObjectId.createFromHexString(req.body.obj_id);   
     console.log('tryna add a storeitem obj : ' + JSON.stringify(req.body));
-    db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
-        if (err || !storeitem) {
-            console.log("error getting sceneert 4: " + err);
-            res.send("store item not found!")
-        } else {
-            db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) {
-                if (err || !obj) {
-                    console.log("error getting image items for storeitem: " + err);
-                } else {
-        
-                db_old.storeitems.update({ "_id": s_id }, { $set: {objectID: obj._id, objectName: obj.name}});
-                if (err) {res.send(error)} else {res.send("updated " + new Date())}
 
-                }         
-            });
+    (async () => {
+        try {
+            const siquery = {"_id": s_id};
+            const objquery = {"_id": p_id};
+            // const storeitem = await RunDataQuery("storeitems", "findOne", siquery);
+            const object = await RunDataQuery("obj_items", "findOne", objquery);
+            const updoc = {$set: {"objectID": object._id, "objectName": object.name}};
+            const updated = await RunDataQuery("storeitems", "updateOne", siquery, updoc);
+            res.send("updated " + JSON.stringify(updated));
+            
+        } catch (e) {
+            console.log("error adding obj to store item" +e);
+            res.send("error adding obj to store item" +e);
         }
-    });
+    })();
 });
-app.post('/add_storeitem_scenegroup/', requiredAuthentication, function (req, res) {
-    var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
-    var p_id = ObjectId.createFromHexString(req.body.group_id);   
-    console.log('tryna add a storeitem scenegroup : ' + JSON.stringify(req.body));
-    db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
-        if (err || !storeitem) {
-            console.log("error getting sceneert 4: " + err);
-            res.send("store item not found!")
-        } else {
-            db_old.groups.findOne({ "_id": p_id}, function (err, group) {
-                if (err || !group) {
-                    console.log("error getting image items for storeitem: " + err);
-                } else {
-                    var storeItemSceneGroups = storeitem.storeItemSceneGroups;
-                    if (storeItemSceneGroups == null) {
-                        storeItemSceneGroups = [];
-                    }
-                    console.log("updating storeitem sceneGroups: " + storeItemSceneGroups);
-                    if ( storeItemSceneGroups.indexOf(req.body.group_id) == -1 ) {
-                        storeItemSceneGroups.push(req.body.group_id);
-                        db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemSceneGroupIDs: storeItemSceneGroups}});
-                        if (err) {res.send(error)} else {res.send("updated " + new Date())}
-                    } else {
-                        res.send("that group is already assigned to this storeitem");
-                    }
-                }  
-            });
-        }
-    });
-});
+
+// //    
+
+// app.post('/add_storeitem_scenegroup/', requiredAuthentication, function (req, res) { //gonna rem this...
+//     var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
+//     var p_id = ObjectId.createFromHexString(req.body.group_id);   
+//     console.log('tryna add a storeitem scenegroup : ' + JSON.stringify(req.body));
+
+//     (async () => {
+//         try {
+//             const siquery = {"_id": s_id};
+//             const objquery = {"_id": p_id};
+//             // const storeitem = await RunDataQuery("storeitems", "findOne", siquery);
+//             const object = await RunDataQuery("obj_items", "findOne", objquery);
+//             const updoc = {$set: {"objectID": object._id, "objectName": object.name}};
+//             const updated = await RunDataQuery("storeitems", "updateOne", siquery, updoc);
+//             res.send("updated " + JSON.stringify(updated));
+            
+//         } catch (e) {
+//             console.log("error adding obj to store item" +e);
+//             res.send("error adding obj to store item" +e);
+//         }
+//     })();
+
+//     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
+//         if (err || !storeitem) {
+//             console.log("error getting sceneert 4: " + err);
+//             res.send("store item not found!")
+//         } else {
+//             db_old.groups.findOne({ "_id": p_id}, function (err, group) {
+//                 if (err || !group) {
+//                     console.log("error getting image items for storeitem: " + err);
+//                 } else {
+//                     var storeItemSceneGroups = storeitem.storeItemSceneGroups;
+//                     if (storeItemSceneGroups == null) {
+//                         storeItemSceneGroups = [];
+//                     }
+//                     console.log("updating storeitem sceneGroups: " + storeItemSceneGroups);
+//                     if ( storeItemSceneGroups.indexOf(req.body.group_id) == -1 ) {
+//                         storeItemSceneGroups.push(req.body.group_id);
+//                         db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemSceneGroupIDs: storeItemSceneGroups}});
+//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
+//                     } else {
+//                         res.send("that group is already assigned to this storeitem");
+//                     }
+//                 }  
+//             });
+//         }
+//     });
+// });
+
 app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
