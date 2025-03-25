@@ -57,9 +57,6 @@ app.use(helmet.referrerPolicy());
 app.use(helmet.xssFilter());
 
 
-
-
-
 var rootHost = process.env.ROOT_HOST
 var topName = process.env.ROOT_NAME;
 var requirePayment = true; //if subscription is required to login, true for servicemedia
@@ -1058,7 +1055,7 @@ function ReturnID(item) {
      return id;
 }
 
-////////////////////////////////////// CLIENT AUTH ROUTE - no cookies, just tokens now...
+////////////////////////////////////// CLIENT (i.e. WebXR) AUTH ROUTE - no cookies, just tokens now...
 app.get("/ami-rite-token/:token", function (req, res) { //
     jwt.verify(req.params.token, process.env.JWT_SECRET, function (err, payload) {
         console.log("token auth payload: " + JSON.stringify(payload));
@@ -1208,9 +1205,7 @@ app.get("/connectionCheck", function (req, res) {
 app.get("/qrcode/:domain/:code", function (req, res) {
     var options = {scale: 10, width: 1024}
     var s = req.params.domain + "/" + req.params.code + "/webxr.html";
-    // s.replace("~", "/");
     QRCode.toDataURL(s, options, function (err, url) {
-        // console.log(url);
         var imgLink = "<h3><strong><a target=\x22_blank\x22 href=\x22https://jeromeetienne.github.io/AR.js/data/images/HIRO.jpg\x22>Click Here For AR Marker</a><strong></h3><br><div style=\x22width: 100%; top-margin: 10px; text-align: center;\x22><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
         res.send(imgLink);
     });
@@ -1219,9 +1214,7 @@ app.get("/qrcode/:domain/:code", function (req, res) {
 app.get("/qrcode/:code", function (req, res) {
     var options = {scale: 10, width: 1024}
     var s = rootHost + "/webxr/" + req.params.code;
-    // s.replace("~", "/");
     QRCode.toDataURL(s, options, function (err, url) {
-        // console.log(url);
         var imgLink = "<h3><strong><a target=\x22_blank\x22 href=\x22https://jeromeetienne.github.io/AR.js/data/images/HIRO.jpg\x22>Click Here For AR Marker</a><strong></h3><br><div style=\x22width: 100%; top-margin: 10px; text-align: center;\x22><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
         res.send(imgLink);
     });
@@ -1230,9 +1223,7 @@ app.get("/qrcode/:code", function (req, res) {
 app.get("/qrcode_url/:code", function (req, res) {
     var options = {scale: 10, width: 1024}
     var s = "http://" + encodeURI(req.params.code);
-    // s.replace("~", "/");
     QRCode.toDataURL(s, options, function (err, url) {
-        // console.log(url);
         var imgLink = "<h3><strong><a target=\x22_blank\x22 href=\x22https://jeromeetienne.github.io/AR.js/data/images/HIRO.jpg\x22>Click Here For AR Marker</a><strong></h3><br><div style=\x22width: 100%; top-margin: 10px; text-align: center;\x22><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
         res.send(imgLink);
     });
@@ -1241,9 +1232,7 @@ app.get("/qrcode_tls/:code", function (req, res) {
     var options = {scale: 10, width: 1024}
     var s = "https://" + encodeURI(req.params.code);
     console.log(s);
-    // s.replace("~", "/");
     QRCode.toDataURL(s, options, function (err, url) {
-        // console.log(url);
         var imgLink = "<div style=\x22width: 100%; top-margin: 10px; text-align: center;\x22><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
         res.send(imgLink);
     });
@@ -1251,9 +1240,7 @@ app.get("/qrcode_tls/:code", function (req, res) {
 app.get("/qrcode_tls_path/:domain/:code", function (req, res) {
     var options = {scale: 10, width: 1024}
     var s = "https://" +req.params.domain + "/" + req.params.code + "/index.html";
-    // s.replace("~", "/");
-    QRCode.toDataURL(s, options, function (err, url) {
-        // console.log(url);
+        QRCode.toDataURL(s, options, function (err, url) {
         var imgLink = "<div><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
         res.send(imgLink);
     });
@@ -1261,9 +1248,7 @@ app.get("/qrcode_tls_path/:domain/:code", function (req, res) {
 app.get("/qrcode_tls_path_folder/:domain/:code", function (req, res) {
     var options = {scale: 10, width: 1024}
     var s = "https://" +req.params.domain + "/" + req.params.code + "/";
-    // s.replace("~", "/");
     QRCode.toDataURL(s, options, function (err, url) {
-        // console.log(url);
         var imgLink = "<div><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
         res.send(imgLink);
     });
@@ -1272,11 +1257,9 @@ app.get("/qrcode_path/:fullpath", function (req, res) {
     console.log("tryna get qrcode for " + req.params.fullpath);
     var options = {scale: 10, width: 1024}
     var s = "https://" +req.params.fullpath;
-    // console.log("tryan qrcode for" + s);
     let string = s.replace(/~/g, "/");
     console.log("tryan qrcode for" + string);
     QRCode.toDataURL(string, options, function (err, url) {
-        // console.log(url);
         var imgLink = "<div><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
         res.send(imgLink);
     });
@@ -1285,9 +1268,7 @@ app.get("/qrcode_path/:fullpath", function (req, res) {
 app.get("/qcode/:domain/:code", function (req, res) {
     var options = {scale: 10, width: 1024}
     var s = req.params.domain + "/" + req.params.code + "/index.html";
-    // s.replace("~", "/");
     QRCode.toDataURL(s, options, function (err, url) {
-        // console.log(url);
         var imgLink = "<h3><strong><a target=\x22_blank\x22 href=\x22http://"+s+"\x22>Link : "+s+"</a><strong></h3><br><div style=\x22width: 100%; top-margin: 10px; text-align: center;\x22><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
         res.send(imgLink);
     });
@@ -1297,11 +1278,11 @@ app.get("/qcode/:domain/:code", function (req, res) {
 app.post("/logout", requiredAuthentication, function (req, res) {    
     req.session.destroy();
     res.send("logged out");
-    //res.redirect("/");
+    
 });
  
 app.post("/return_traffic", function (req, res) {    //umm, need to limit scope below if no auth?
-    // let trafficDataMod = [];
+   
     // console.log("return traffic data " + JSON.stringify(req.body));
     let query = {};
     let startpoint = req.body.startpoint;
@@ -1331,7 +1312,7 @@ app.post("/return_traffic", function (req, res) {    //umm, need to limit scope 
         console.log("no start point!");
         res.send("no startpoint defined!");
     }
-    // })
+
 });
 
 
@@ -1489,46 +1470,24 @@ app.get('/validate/:auth_id', function (req, res) {
 });
 
 
-
-app.get('/makedomainadmin/:domain/:_id',  checkAppID, requiredAuthentication, admin, function (req, res) {
-    console.log(" makedomainadmin req" + req)
-    var u_id = ObjectId.createFromHexString(req.params._id);
-    (async () => {
-        try {
-            const query = { "_id": u_id };
-            const updoc = {$set: { "authLevel" : "domain_admin_" + req.params.domain }};
-            const uupdated = await RunDataQuery("users", "updateOne", query, updoc);
-            const aclquery =  { acl_rule: "domain_admin_" + req.params.domain };
-            const aclupdoc = { $push: { 'userIDs': req.params._id }};
-            const aclupdated = await RunDataQuery("acl", "updateOne", aclquery, aclupdoc);
-            res.send("updated " + uupdated + aclupdated);
-        } catch (e) {
-            console.log("error making domain admin! " + e);
-            res.send("error making domain admin! " + e);
-        }
-    })();
-//     db_old.users.update(
-//         { "_id": u_id },
-//         {$set: { "authLevel" : "domain_admin_" + req.params.domain }}, function (err, done) {
-//             if (err | !done) {
-//                 console.log("proobalert");
-//                 res.send("proobalert");
-//             } else {
-//                 db_old.acl.update({ acl_rule: "domain_admin_" + req.params.domain }, { $push: { 'userIDs': req.params._id }}, {upsert : true},  function (err, saved) {
-//                     if (err || !saved) {
-//                         console.log("prooblemo");
-//                         res.send('prooblemo');
-//                     } else {
-// //                                db.acl.update({ 'acl_rule': "domain_admin_" + req.params.domain},{ $push: { 'userIDs': req.params._id } });
-//                         console.log("ok saved acl");
-//                     }
-//                     console.log("gold");
-//                     res.send('gold');
-//                 });
-//             }
+// app.get('/makedomainadmin/:domain/:_id',  checkAppID, requiredAuthentication, admin, function (req, res) { //hrm...
+//     console.log(" makedomainadmin req" + req)
+//     var u_id = ObjectId.createFromHexString(req.params._id);
+//     (async () => {
+//         try {
+//             const query = { "_id": u_id };
+//             const updoc = {$set: { "authLevel" : "domain_admin_" + req.params.domain }};
+//             const uupdated = await RunDataQuery("users", "updateOne", query, updoc);
+//             const aclquery =  { acl_rule: "domain_admin_" + req.params.domain };
+//             const aclupdoc = { $push: { 'userIDs': req.params._id }};
+//             const aclupdated = await RunDataQuery("acl", "updateOne", aclquery, aclupdoc);
+//             res.send("updated " + uupdated + aclupdated);
+//         } catch (e) {
+//             console.log("error making domain admin! " + e);
+//             res.send("error making domain admin! " + e);
 //         }
-//     );
-});
+//     })();
+// });
 
 app.post('/updatedomain/', requiredAuthentication, admin, domainadmin, function (req, res) { //um, no// um, fuckit
     console.log("tryna uddate domain! for " + JSON.stringify(req.body));
@@ -1549,17 +1508,6 @@ app.post('/updatedomain/', requiredAuthentication, admin, domainadmin, function 
         }
     })();
 
-    // db_old.domains.update({"_id": ObjectId.createFromHexString(req.body._id)},
-    // {$set: {domain: req.body.domain, domainStatus: req.body.domainStatus.toLowerCase()}}, function (err, domain) {
-    //     console.log("tryna update domain " + req.body._id);
-    // // db.apps.update(req.body,  function (err, app) {
-    //     if (err || !domain) {
-    //         res.send("no domain update for you");
-    //     } else {
-    //         // console.log("updated app id " + )
-    //         res.send("updated");
-    //     }
-    // });
 });
 app.post('/createdomain/', requiredAuthentication, admin, domainadmin, function (req, res) { 
 
@@ -1578,25 +1526,9 @@ app.post('/createdomain/', requiredAuthentication, admin, domainadmin, function 
             res.send("error creating domain " + e);
         }
     })();
-    // db_old.domains.save(req.body, function (err, domain) {
-    //     if (err | !domain) {
-    //         res.send("no domain for you");
-    //     } else {
-    //         res.json("created " + domain);
-    //     }
-    // });
+    
 });
 
-// app.get('/create_app/:domain/:appname', checkAppID, requiredAuthentication, domainadmin, function (req, res) {
-//     db.apps.save({"appname": req.params.appname, "appStatus": "active", "domain": req.params.domain, "dateCreated": new Date()}, function (err, app) {
-//         if (err | !app) {
-//             res.send("no app for you");
-//         } else {
-//             res.json(app);
-
-//         }
-//     });
-// });
 app.post('/allapps/', requiredAuthentication, admin, function (req, res) {
     (async () => {
         try {
@@ -1610,15 +1542,7 @@ app.post('/allapps/', requiredAuthentication, admin, function (req, res) {
             res.send("error getting apps " + e);
         }
     })();
-    // db_old.apps.find({}, function (err, apps) { //TODO fetch users for each?  or resources used?
-    //     if (err | !apps) {
-    //         console.log("no apps for admin!?!");
-    //         res.send("no apps for admin - that ain't right!~");
-    //     } else {
-    //         response.apps = apps;
-    //         res.json(response);
-    //     }
-    // });
+   
 });
 
 app.post('/remove_app_admin/', requiredAuthentication, domainadmin, function (req, res){
@@ -1636,16 +1560,7 @@ app.post('/remove_app_admin/', requiredAuthentication, domainadmin, function (re
         }
     })();
 
-    // db_old.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $pull: { 'userIDs': req.body.user_id }}, function (err, saved) {
-    //     if (err || !saved) {
-    //         console.log("prooblemo " + err);
-    //         res.send('prooblemo ' + err);
-    //     } else {
-    //         console.log("ok saved acl");
-    //     }
-    //     console.log("updated acl");
-    //     res.send('updated acl');
-    // });
+
 }); 
 
 app.post('/add_app_admin/', requiredAuthentication, domainadmin, function (req, res){
@@ -1663,16 +1578,6 @@ app.post('/add_app_admin/', requiredAuthentication, domainadmin, function (req, 
         }
     })();
 
-    // db_old.acl.update({ acl_rule: "app_admin_" + req.body.app_id}, { $push: { 'userIDs': req.body.user_id }}, {upsert : true},  function (err, saved) {
-    //     if (err || !saved) {
-    //         console.log("prooblemo " + err);
-    //         res.send('prooblemo ' + err);
-    //     } else {
-    //         console.log("ok saved acl");
-    //     }
-    //     console.log("updated acl");
-    //     res.send('updated acl');
-    // });
 }); 
 
 app.post('/createapp/', requiredAuthentication, admin, domainadmin, function (req, res) {
@@ -1698,31 +1603,6 @@ app.post('/createapp/', requiredAuthentication, admin, domainadmin, function (re
         }
     })();
 
-    // const query = {$and: [{"appdomain": req.body.appdomain}, {"appname": req.body.appname}]};
-    // const app = await RunDataQuery("apps", "findOne", query);
-    // if (app == null) {
-    //     req.body.dateCreated = new Date();
-    //         req.body.createdByUserID = req.session.user._id.toString();
-    //         req.body.createdByUserName = req.session.user.userName;
-    // }
-
-
-    // db_old.apps.find({$and: [{"appdomain": req.body.appdomain}, {"appname": req.body.appname}]}, function (err, apps) {
-    //     if (!err && (apps == null || apps.length == 0)) {
-    //         req.body.dateCreated = new Date();
-    //         req.body.createdByUserID = req.session.user._id.toString();
-    //         req.body.createdByUserName = req.session.user.userName;
-    //         db_old.apps.save(req.body, function (err, app) {
-    //             if (err || !app) {
-    //                 res.send("no app for you" + err);
-    //             } else {
-    //                 res.json("created" + app);
-    //             }
-    //         });
-    //     } else {
-    //         res.send("sorry, that app name already exists");
-    //     }
-    // });
 });
 
 app.post('/updateapp/:appid', requiredAuthentication, admin, function (req, res) {
@@ -1741,17 +1621,6 @@ app.post('/updateapp/:appid', requiredAuthentication, admin, function (req, res)
             }
         })();
 
-        // db_old.apps.update({"_id": ObjectId.createFromHexString(req.body._id)},
-        // {$set: {appname: req.body.appname, appStatus: req.body.appStatus, appdomain: req.body.appdomain, appunitydomain: req.body.appunitydomain}}, function (err, app) {
-        //     console.log("tryna update app " + req.body._id);
-        // // db.apps.update(req.body,  function (err, app) {
-        //     if (err || !app) {
-        //         res.send("no app for you");
-        //     } else {
-        //         // console.log("updated app id " + )
-        //         res.send("updated");
-        //     }
-        // });
 });
 app.post('/domain/', requiredAuthentication, domainadmin, function (req, res) {
     console.log("tryna get domain info for " + req.body._id);
@@ -3649,41 +3518,6 @@ app.post('/updategroup/', requiredAuthentication, function (req, res) {
         }
     })();
 });
-//     db_old.groups.findOne({ "_id" : o_id}, function(err, group) {
-//         if (err || !group) {
-//             console.log("error getting group: " + err);
-
-//         } else {
-//             console.log("tryna update grup " + req.body._id);
-//             let grupdata = group.groupdata;  
-//             var timestamp = Math.round(Date.now() / 1000);
-//             if (req.body.groupdata != null) {
-//                 grupdata = req.body.groupdata;
-//             }
-//             if (grupdata == null) {
-//                 grupdata = [];
-                
-//                 for (let i = 0; i < group.items.length; i++) {
-//                     let gditem = {};
-//                     gditem.itemID = group.items[i];
-//                     gditem.itemIndex = i.toString();
-//                     console.log("tryna fix index " + JSON.stringify(gditem));
-//                     grupdata.push(gditem);
-//                 }
-//                 // group.groupdata = gd;
-//                 console.log("tryna update with no group data and fix " + JSON.stringify(grupdata));
-//             }
-
-//             db_old.groups.update( { "_id": o_id }, { $set: {
-//                 lastUpdateTimestamp: timestamp,
-//                 tags: req.body.tags,
-//                 name: req.body.name,
-//                 groupdata: grupdata
-//             }});
-//         } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//     });
-// });
-
 
 
 app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
@@ -3994,12 +3828,9 @@ app.post('/delete_person/:_id', checkAppID, requiredAuthentication, function (re
             res.send("deleted person! " + deleted);
         } catch (e) {
             console.log("error deleteing peerson " + e);
-            res.send("error deleting new peerson " + e);
+            res.send("error deleting peerson " + e);
         }
-
-    })();
-    // db_old.people.remove( { "_id" : o_id }, 1 );
-    // res.send("deleted");
+    })();   
 });
 
 app.post('/update_person', requiredAuthentication, function (req, res) {
@@ -4023,17 +3854,6 @@ app.post('/update_person', requiredAuthentication, function (req, res) {
             res.send("error deleting new peerson " + e);
         }
     })();
-
-    // db_old.people.update( { "_id": o_id }, { $set: {
-    //     accountStatus: req.body.accountStatus,
-    //     contactStatus: req.body.contactStatus,
-    //     // tags: req.body.tags,
-    //     // fullname: req.body.fullname,
-    //     // nickname: req.body.nickname,
-    //     // email: req.body.email,
-    //     lastUpdate : Date.now()
-    // }});
-    // res.send("updated " + Date.now());
 });
 
 app.get('/person_details/:p_id', requiredAuthentication, function(req, res) {
@@ -5072,7 +4892,7 @@ app.post('/delete_storeitem/', requiredAuthentication, admin, function (req, res
     // res.send("deleted");
 });
 
-
+//hrm.... purchase needs to flex...
 // app.post('/purchase', checkAppID, requiredAuthentication, function (req, res) {
 //     console.log("tryna post purchase: " + JSON.stringify(req.body));
 
@@ -5214,18 +5034,7 @@ app.get('/purchases/', requiredAuthentication, admin, function (req, res) { //al
         }
     })();
 });
-//     db_old.purchases.find({}, function(err, purchases) {
-//         if (err || !purchases || purchases == null || purchases.length == 0) {
-//             console.log("cain't get no purchases... ");
-//             res.send("no purchases");
-//         } else {
-// //            console.log(JSON.stringify(scores));
-//             var purchasesResponse = {};
-//             purchasesResponse.purchases = purchases;
-//             res.json(purchasesResponse);
-//         }
-//     });
-// });
+
 
 app.get('/purchases/:app_id/:u_id',  requiredAuthentication, function (req, res) {
 
@@ -5243,18 +5052,6 @@ app.get('/purchases/:app_id/:u_id',  requiredAuthentication, function (req, res)
         }
     })();
 });
-//     db_old.purchases.find({$and : [{userID : req.params.u_id}, {appID : req.params.app_id}]}, function(err, purchases) {
-//         if (err || !purchases || purchases == null || purchases.length == 0) {
-//             console.log("cain't get no purchases... ");
-//             res.send("no purchases");
-//         } else {
-// //            console.log(JSON.stringify(scores));
-//             var purchasesResponse = {};
-//             purchasesResponse.purchases = purchases;
-//             res.json(purchasesResponse);
-//         }
-//     });
-// });
 
 app.get('/purchases/:app_id',  checkAppID, requiredAuthentication, function (req, res) {
 
@@ -5275,17 +5072,6 @@ app.get('/purchases/:app_id',  checkAppID, requiredAuthentication, function (req
     })();
 });
 
-//     db_old.purchases.find({appID : req.params.app_id}, function(err, purchases) {
-//         if (err || !purchases || purchases == null || purchases.length == 0) {
-//             console.log("cain't get no purchases... ");
-//             res.send("no purchases");
-//         } else {
-//             var purchasesResponse = {};
-//             purchasesResponse.purchases = purchases;
-//             res.json(purchasesResponse);
-//         }
-//     });
-// });
 
 app.post('/activity', requiredAuthentication, function (req, res) { //unused?
     console.log("tryna post activity");
@@ -5300,18 +5086,6 @@ app.post('/activity', requiredAuthentication, function (req, res) { //unused?
         }
     })();
 });
-
-//     db_old.activity.save(req.body, function (err, saved) {
-//         if ( err || !saved ) {
-//             console.log('activity not saved..');
-//             res.send("nilch");
-//         } else {
-//             var item_id = saved._id.toString();
-//             console.log('new score id: ' + item_id);
-//             res.send(item_id);
-//         }
-//     });
-// });
 
 app.get('/activities/:u_id',  checkAppID, requiredAuthentication, function (req, res) {
 
@@ -5331,162 +5105,6 @@ app.get('/activities/:u_id',  checkAppID, requiredAuthentication, function (req,
         }
     })();
 });
-
-//     db_old.activity.find({$and : [{userID : req.params.u_id}, {appID : appid}]}, function(err, activities) {
-//         if (err || !activities) {
-//             console.log("cain't get no activities... " + err);
-//             res.send(err);
-//         } else {
-//             console.log(JSON.stringify(activities));
-//             var activitiesResponse = {};
-//             activitiesResponse.activities = activities;
-//             res.json(activitiesResponse);
-//         }
-//     });
-// });
-
-
-// app.get('/activitytotals/:appid', function (req, res) {
-
-//     var appid = req.params.appid.toString().replace(":", "");
-
-//     console.log("tryna get total user activities for app: " + appid);
-
-//     var scoresResponse = {};
-//     var appScores = {};
-
-    
-//     async.waterfall([
-
-//             function (callback) { //get all scores for this app
-//                 db_old.scores.find({appID : appid}, function(err, activities) {
-//                     if (err || !scores) {
-//                         console.log("cain't get no scores... " + err);
-//                         callback(err);
-//                     } else {
-
-//                         appScores = scores;
-//                         console.log("scores: " + JSON.stringify(appScores));
-//                         callback(null, scores);
-//                     }
-
-//                 });
-//             }, //pull unique userIDs
-//             function (userScores, callback) {
-//                 var items = userScores;
-//                 var uids = [];
-//                 var lookup = {};
-//                 for (var item, i = 0; item = items[i++];) {
-//                     var uid = item.userID;
-//                     if (!(uid in lookup)) {
-//                         lookup[uid] = 1;
-//                         uids.push(uid);
-//                     }
-//                 }
-//                 console.log(JSON.stringify(uids));
-//                 callback(null, userScores, uids);
-//             }, //loop through again to aggregate scores for each user
-//             function (scores, uids, callback) {
-//                 var totalscores = [];
-//                 async.each (uids, function (uid, callbackz) {
-//                     var uscores = {};
-//                     var scoretemp = 0;
-//                     for (var entry in appScores) {
-//                         if (uid == appScores[entry].userID) {
-//                             scoretemp = scoretemp + parseInt(appScores[entry].score);
-//                         }
-//                     }
-//                     uscores.user = uid;
-//                     uscores.scoreTotal = scoretemp;
-//                     totalscores.push(uscores);
-//                     callbackz();
-//                 }, function(err) {
-                   
-//                     if (err) {
-//                         console.log('A file failed to process');
-//                         callbackz(err);
-//                     } else {
-//                         console.log('All files have been processed successfully');
-//                         scoresResponse.topscores = topscores;
-//                         callback(null);
-//                     }
-//                 });
-//             }
-
-//         ], //end of async.waterfall
-//         function (err, result) { // #last function, close async
-//             res.json(scoresResponse);
-//             console.log("waterfall done: " + result);
-//         })
-// });
-
-// app.post('/newpath', checkAppID, requiredAuthentication, function (req, res) {
-
-//     db_old.paths.save(req.body, function (err, saved) {
-//         if ( err || !saved ) {
-//             console.log('path not saved..');
-//             res.send("nilch");
-//         } else {
-//             var item_id = saved._id.toString();
-//             console.log('new path id: ' + item_id);
-//             res.send(item_id);
-
-//         }
-//     });
-
-// });
-
-// app.post('/update_path/:_id', checkAppID, requiredAuthentication, function (req, res) {
-//     console.log(req.params._id);
-
-//     var o_id = ObjectId.createFromHexString(req.body._id);   
-//     console.log('path requested : ' + req.body._id);
-//     db_old.paths.find({ "_id" : o_id}, function(err, path) {
-//         if (err || !path) {
-//             console.log("error getting path items: " + err);
-//         } else {
-//             console.log("tryna update path " + req.body._id);
-//             db_old.paths.update( { "_id": o_id }, { $set: {
-
-//                 pathUserID : req.body.user_id,
-//                 pathNumber : req.body.pathNumber,
-//                 pathTitle : req.body.pathTitle,
-//                 pathMeaning : req.body.pathMeaning,
-//                 pathAttribution : req.body.pathAttribution,
-//                 pathColor1 : req.body.pathColor1,
-//                 pathColor2 : req.body.pathColor2,
-
-//                 pathMapPictureID : req.body.pathMapPictureID,
-//                 pathPictureID : req.body.pathPictureID,
-//                 pathArcanumNumber : req.body.pathArcanumNumber,
-//                 pathArcanumTitle : req.body.pathArcanumTitle,
-//                 pathArcanumPictureID : req.body.pathArcanumPictureID,
-//                 pathTriggerAudioID : req.body.pathTriggerAudioID,
-//                 pathSpokenAudioID : req.body.pathSpokenAudioID,
-//                 pathBackgroundAudioID : req.body.pathBackgroundAudioID,
-//                 pathEnvironmentAudioID : req.body.pathEnvironmentAudioID,
-//                 pathKeynote : req.body.pathKeynote,
-//                 pathDescription : req.body.pathDescription,
-//                 pathText : req.body.pathText}
-//             });
-//         } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//     });
-// });
-
-///////////////
-// app.get('/sceneinfo',  checkAppID, requiredAuthentication, function (req, res) { //get default scene info
-
-//     console.log(req.params._id);
-//     var o_id = ObjectId.createFromHexString(req.params._id);
-//     db_old.scenes.find({}, function(err, scenes) {
-//         if (err || !scenes) {
-//             console.log("cain't get no paths... " + err);
-//         } else {
-//             console.log(JSON.stringify(scenes));
-//             res.json(scenes);
-//         }
-//     });
-// });
 
 app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
 
@@ -5617,42 +5235,6 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
         }
     })();
 });
-
-// app.post('/update_scene_location/', requiredAuthentication, function (req, res) {
-
-//     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
-//     // var p_id = ObjectId.createFromHexString(req.body.location_id);   
-//     console.log('tryna add a scene obj : ' + JSON.stringify(req.body));
-
-//     (async () => {
-//         try {
-//             const saved = await RunDataQuery("activity", "insertOne", req.body);
-//             res.send("inserted activity " + JSON.stringify(saved) );
-//         } catch (e) {
-//             console.log("error inserting activity " + e);
-//             res.send("error inserting activity " + e);
-//         }
-//     })();
-
-//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {   
-//         if (err || !scene) {
-//             console.log("error getting sceneert 4 obj: " + err);
-//             res.send(err);
-//         } else {
-
-//             var sceneLocs = scene.sceneLocations;
-//             if (sceneLocs == null || !Array.isArray(sceneLocs)) {
-//                 sceneLocs = [];
-//             }
-//                 // sceneLocs
-//                     // console.log("tryna add sceneLocations: " + sceneLocations);
-//                     sceneLocs.push(req.body);
-//                     res.send(JSON.stringify(sceneLocs));
-//                     // db.scenes.update({ "_id": s_id }, { $set: {sceneLocations: sceneLocs}});
-//             }
-              
-//     });
-// });
 
 app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, res) { //update "mods" coming from webxr client, not admin pages
     if (req.params.s_id == req.body.shortID) {
@@ -5893,340 +5475,6 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
         res.send("mods not allowed for this");
     }
 });
-//             db_old.scenes.findOne({ "short_id": req.params.s_id}, function (err, scene) {
-//                 if (err || !scene) {
-//                     console.log("error getting skeen: " + err);
-//                     res.send(err);
-//                 } else {
-//                     // console.log("mods for " +req.params.s_id + " " + JSON.stringify(req.body)); 
-//                     console.log("sceneowner: " + scene.userID);
-//                     let query = {};
-//                     if (!scene.sceneTags.includes("no mods")) { //needs a param!
-//                         if (scene.user_id == req.body.userData._id) { //just scene owner for now
-
-//                         // console.log("user match for modz with colorMods " + JSON.stringify(req.body.colorMods) ); 
-//                         let query = {};
-//                         let newFiles = []; 
-
-//                         async.waterfall([
-//                             function (callback) { 
-//                                 if (req.body.localFiles != null) {
-//                                 // console.log("tryna save localfiles: " + JSON.stringify(req.body.localFiles));
-//                                 let newfile = {};
-
-//                                 async.each (req.body.localFiles, function (file, callbackz) {
-//                                     let timestamp = Math.round(Date.now() / 1000);
-//                                     console.log("gotsa uploaded localfile " + file.name);
-//                                     // (async () => {
-//                                     let buffer = Buffer.from(file.data, 'base64');
-                                    
-//                                     if (getExtension(file.name) == ".glb") { //should sniff the thing instead, but...
-//                                         // let buff = Buffer.from(file.data, 'base64');
-//                                         let awskey = 'users/' + req.session.user._id.toString() + '/gltf/' + timestamp + '_' + file.name;
-//                                         let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
-//                                             Key: awskey, 
-//                                             // ContentEncoding: 'base64',
-//                                             ContentType: 'application/octet-stream',
-//                                             Body: buffer};
-//                                             console.log("tryna upload w/key " + awskey);
-//                                             (async () => {
-//                                                 try {
-//                                                     const status = await PutObject(params.Bucket, params.Key, params.Body);
-//                                                     db_old.models.save({ //add to models collection
-//                                                         userID : req.session.user._id.toString(),
-//                                                         username : req.session.user.userName,
-//                                                         name : timestamp + "_" + file.name,
-//                                                         filename : timestamp + "_" + file.name,
-//                                                         item_type : 'glb',
-//                                                         tags: [],
-//                                                         item_status: "private",
-//                                                         otimestamp : timestamp,
-//                                                         ofilesize : file.size },
-//                                                         function (err, saved) {
-//                                                             if ( err || !saved ) {
-//                                                                 console.log('glb not saved..');
-//                                                                 callbackz (err);
-//                                                             } else {
-//                                                                 console.log("glb saved with id " + saved._id)
-//                                                                 newfile.name = file.name.replace("local_","");
-                                                                
-//                                                                 newfile._id = saved._id;
-//                                                                 newFiles.push(newfile);
-//                                                                 var s_id = ObjectId.createFromHexString(scene._id);   
-//                                                                 var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
-//                                                                 // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
-//                                                                 sceneModels.push(saved._id);
-//                                                                 db_old.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}}); //add model to scene
-//                                                                 callbackz();
-//                                                             }
-//                                                     });
-//                                                 } catch (e) {
-//                                                     callbackz (err);
-//                                                 }
-                                                
-                                            
-//                                             })();
-                                         
-                                            
-//                                         } else if (getExtension(file.name) == ".jpg" || getExtension(file.name) == ".png") { 
-//                                             let hasAlpha = false;
-//                                             if (getExtension(file.name) == ".png") {
-//                                                 hasAlpha = true;
-//                                             }
-
-//                                             db_old.image_items.save({ //do the db first for this one, bc we needs the _id for naming pattern below(really?)
-//                                                 type : "fromLocalFile",
-//                                                 userID : req.session.user._id.toString(),
-//                                                 userName : req.session.user.userName,
-//                                                 title : file.name,
-//                                                 filename : file.name,
-//                                                 item_type : 'picture',
-//                                                 tags: [],
-//                                                 item_status: "private",
-//                                                 hasAlphaChannel: hasAlpha,
-//                                                 otimestamp : timestamp,
-//                                                 ofilesize : file.size },
-//                                                 // function (err, saved) {
-//                                                 function (err, saved) {
-//                                                     if ( err || !saved ) {
-//                                                         console.log('image Item not saved..');
-//                                                         callbackz (err);
-//                                                     } else {
-//                                                         console.log("jpg saved with id " + saved._id);
-//                                                         let newfile = {};
-//                                                         newfile.name = file.name;
-//                                                         newfile.name.replace("local_","");
-//                                                         newfile._id = saved._id;
-//                                                         newFiles.push(newfile);
-                                                       
-
-//                                                         let awskey = 'users/' + req.session.user._id.toString() + '/pictures/originals/' + saved._id + '.original.' + file.name;
-
-//                                                         let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
-//                                                             Key: awskey, 
-//                                                             // ContentEncoding: 'base64',
-//                                                             ContentType: 'application/octet-stream',
-//                                                             Body: buffer};
-
-//                                                             (async () => {
-//                                                                 try {
-//                                                                     const status = await PutObject(params.Bucket, params.Key, params.Body);
-
-//                                                                     console.log("put a pic: " + JSON.stringify(status));
-//                                                                     console.log('uploaded ' + file.name);
-//                                                                 // callbackz();
-//                                                                 // console.log("tryna push pic to GS " + groupType);
-
-//                                                                     var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-//                                                                     const options = {
-//                                                                         headers: {'X-Access-Token': token}
-//                                                                     };
-//                                                                     axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+saved._id, options)
-//                                                                     .then((response) => {
-//                                                                         console.log("grabAndSqueezepic response: " + response.status);
-//                                                                         var s_id = ObjectId.createFromHexString(scene._id);   
-//                                                                         var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
-//                                                                         // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
-//                                                                         scenePictures.push(saved._id);
-//                                                                         db_old.scenes.update({ "_id": s_id }, { $set: {scenePictures: scenePictures}}); //add pictureID to scene
-//                                                                         callbackz();
-//                                                                     })                                                     
-//                                                                     .catch(function (error) {
-//                                                                         callbackz(error);
-//                                                                     });
-//                                                                 } catch (e) {
-//                                                                     console.log("Error uploading file. ", err);
-//                                                                     callbackz(err)
-//                                                                 }
-//                                                             })();
-//                                                     }
-//                                                 });
-//                                         } else {
-//                                             console.log("caint do that kinda file right now...");
-//                                             callbackz("bad file type");
-//                                         }
-                                    
-//                                     },  function(err) {
-//                                         if (err) {
-//                                             console.log('A file failed to process');
-//                                             callback(err);
-//                                         } else {
-//                                             console.log('scene mod files have been processed successfully');
-//                                             callback(null);
-//                                         }
-                                    
-                                        
-//                                     });
-//                                 }
-                              
-//                             }, 
-                          
-//                             function (callback) { 
-//                                 console.log("saving color mods " + JSON.stringify(req.body.colorMods));
-//                                 if (req.body.colorMods != null) {
-//                                     let sceneColor1 = req.body.colorMods.sceneColor1 != null ? req.body.colorMods.sceneColor1 : "";
-//                                     let sceneColor2 = req.body.colorMods.sceneColor2 != null ? req.body.colorMods.sceneColor2 : "";
-//                                     let sceneColor3 = req.body.colorMods.sceneColor3 != null ? req.body.colorMods.sceneColor3 : "";
-//                                     let sceneColor4 = req.body.colorMods.sceneColor4 != null ? req.body.colorMods.sceneColor4 : "";
-//                                     if (sceneColor1 != "") {
-//                                         query.sceneColor1 = sceneColor1;
-//                                         console.log("query is " + query.sceneColor1);
-//                                     }
-//                                     if (sceneColor2 != "") {
-//                                         query.sceneColor2 = sceneColor2;
-//                                     }
-//                                     if (sceneColor3 != "") {
-//                                         query.sceneColor3 = sceneColor3;
-//                                     }
-//                                     if (sceneColor4 != "") {
-//                                         query.sceneColor4 = sceneColor4;
-//                                     }
-//                                 }
-//                                 if (req.body.volumeMods != null) {
-//                                     query.scenePrimaryVolume = req.body.volumeMods.volumePrimary != null ? req.body.volumeMods.volumePrimary : 0;
-//                                     query.sceneAmbientVolume = req.body.volumeMods.volumeAmbient != null ? req.body.volumeMods.volumeAmbient : 0;
-//                                     query.sceneTriggerVolume = req.body.volumeMods.volumeTrigger != null ? req.body.volumeMods.volumeTrigger : 0;
-//                                 }
-//                                 if (req.body.sceneEnvironmentPreset != null) {
-//                                     console.log("enviro preset " + req.body.sceneEnvironmentPreset);
-//                                     query.sceneEnvironmentPreset = req.body.sceneEnvironmentPreset;
-//                                 }
-                                
-//                                 callback(null);
-//                             },
-//                             function (callback) { 
-//                                 console.log("saving sceneTags mods " + JSON.stringify(req.body.sceneTags));
-//                                 if (req.body.sceneTags != null) {
-//                                     query.sceneTags = req.body.sceneTags;
-//                                     console.log("query is " + query.sceneColor1);
-//                                     }
-//                                 callback(null);
-//                             },
-//                             function (callback) {
-//                                 if (req.body.locationMods != null) {
-                                     
-//                                     for (let l = 0; l < req.body.locationMods.length; l++) {
-//                                         let isMatch = false;
-//                                         // let name = req.body.locationMods[i].name;
-//                                         delete req.body.locationMods[l].isNew; //going to the cloud don't need these
-//                                         delete req.body.locationMods[l].isLocal;
-//                                         if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
-//                                             let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
-//                                             req.body.locationMods[l].name = name;
-//                                         }
-//                                         console.log("has newfile? " + req.body.locationMods[l].modelID + " Vs " + JSON.stringify(newFiles));
-//                                         if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length) {
-//                                             for (let i = 0; i < newFiles.length; i++) {
-//                                                 if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length && (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_", ""))) { //reassign modelID w/ new DB _id
-//                                                     console.log("gotsa new model file match! " + newFiles[i].name);
-//                                                     req.body.locationMods[l].modelID = newFiles[i]._id;
-//                                                     req.body.locationMods[l].model = newFiles[i].name;
-
-//                                                 }
-//                                             }
-//                                         }
-//                                         if (req.body.locationMods[l].mediaID && req.body.locationMods[l].mediaID.length) {
-//                                             for (let i = 0; i < newFiles.length; i++) {
-//                                                 if (newFiles[i].name == req.body.locationMods[l].mediaID.replace("local_", "")) { //reassign modelID w/ new DB _id
-//                                                     console.log("gotsa new media file match! " + newFiles[i].name);
-//                                                     req.body.locationMods[l].mediaID = newFiles[i]._id;
-//                                                     req.body.locationMods[l].mediaName = newFiles[i].name;
-
-//                                                 }
-//                                             }
-//                                         }
-//                                         for (let i = 0; i < scene.sceneLocations.length; i++) { //TODO check if it's actually been modded?
-//                                             if (req.body.locationMods[l].timestamp == scene.sceneLocations[i].timestamp) {
-//                                                 isMatch = true;
-//                                                 // console.log("gotsa match with existing location! " + scene.sceneLocations[i].timestamp + " vs " + req.body.locationMods[l].timestamp);
-//                                                 let tsVar = null;
-//                                                 if (Number.isInteger(scene.sceneLocations[i].timestamp)) { // shit happens
-//                                                     tsVar = parseInt(req.body.locationMods[l].timestamp);
-//                                                 } else {
-//                                                     tsVar = req.body.locationMods[l].timestamp.toString();
-//                                                 }
-//                                                 if ((scene.sceneLocations[i].tags && scene.sceneLocations[i].tags.includes("no mods"))) {
-//                                                     console.log("mods not allowed for " + scene.sceneLocations[i].timestamp)
-//                                                 } else {
-//                                                     // console.log("tryna update location item " + JSON.stringify(req.body.locationMods[l]));
-//                                                     db_old.scenes.update(
-//                                                         { 'short_id': req.params.s_id, 'sceneLocations.timestamp': tsVar}, 
-//                                                         { $set: { 'sceneLocations.$' : req.body.locationMods[l]}} //replaces whole object in array, uses positional $ operator https://docs.mongodb.com/manual/tutorial/update-documents/#Updating-The%24positionaloperator
-//                                                     );
-//                                                 }
-//                                             }
-//                                         }
-//                                         if (!isMatch) {
-//                                             // let timestamp = Math.round(Date.now() / 1000);
-//                                             // console.log("no match with existing location, must be new " + req.body.locationMods[l].timestamp);
-//                                             delete req.body.locationMods[l].isNew; //going to the cloud don't need these
-//                                             delete req.body.locationMods[l].isLocal;
-//                                             // req.body.locationMods[l].timestamp = timestamp;
-//                                             if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
-//                                                 let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
-//                                                 req.body.locationMods[l].name = name;
-//                                             }
-//                                             console.log("new loc new files? " + req.body.locationMods[l].modelID + " V " + JSON.stringify(newFiles));
-//                                             if (newFiles.includes(req.body.locationMods[l].modelID)) {
-//                                                 for (let i = 0; i < newFiles.length; i++) {
-//                                                     if (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_","")) { //reassign modelID w/ new DB _id
-//                                                         console.log("gotsa match new loc new model!");
-//                                                         req.body.locationMods[l].modelID = newFiles[i]._id;
-//                                                     }
-//                                                 }
-//                                             }
-//                                             db_old.scenes.update(
-//                                                 { 'short_id': req.params.s_id},
-//                                                 { $push: { 'sceneLocations' : req.body.locationMods[l]} } 
-//                                             )
-//                                         }
-//                                     }
-//                                 } 
-//                                 callback(null);
-//                             }
-    
-//                             ], //end of async.waterfall
-//                             function (err, result) { // #last function, close async
-//                             if (!err) {
-//                                  db_old.scenes.update(
-//                                 { 'short_id': req.params.s_id},
-//                                     { $set: query } 
-//                                 )
-//                                 res.send("ok");
-//                                 // 
-//                             } else {
-//                                 console.log("error saving scene mods : " + err );
-//                                 res.send(err);
-//                             }
-//                             });
-//                             // if (req.body.timedEventMods != null) {
-//                                 // console.log("tryna save timed events : " + JSON.stringify(query));
-//                             //     query.sceneTimedEvents = req.body.timedEventMods;
-//                             // }
-
-                           
-
-//                             // res.send("ok");
-
-
-                    //     } else {
-                    //         console.log("tryna add_scene_mnods, but you aint the scene owner!");
-                    //         res.send("must be scene owner!!");
-                    //     }
-                    // } else {
-                    //     console.log("scene mods are not allowed!");
-                    //     res.send("mods not allowed for this");
-                    // }
-//                 }
-//             });
-//         }
-//     }
-//     // let mods = JSON.parse(atob(thestring));
-//     // let json = JSON.stringify(mods);
-//     // console.log(json);
-//     // res.send(json);
-//     // console.log()
-// });
 
 app.post('/add_scene_location/', requiredAuthentication, function (req, res) { //pick from "saved" list of location
 
@@ -6251,41 +5499,6 @@ app.post('/add_scene_location/', requiredAuthentication, function (req, res) { /
     })();
 });
 
-//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-//         if (err || !scene) {
-//             console.log("error getting sceneert 4 obj: " + err);
-//         } else {
-
-//             // if (scene.sceneLocations != null && scene.sceneLocations.indexOf(req.body.location_id) > -1) {
-//             //     //In the array!
-//             //     res.send("duplicates not allowed!")
-//             // } else {
-            
-//             db_old.locations.findOne({ "_id": p_id}, function (err, obj) {
-//                 if (err || !obj) {
-//                     console.log("error getting obj items 4: " + err);
-//                 } else {
-//                     var timestamp = Math.round(Date.now() / 1000);
-//                     obj.timestamp = timestamp;
-
-//                     var sceneLocs = scene.sceneLocations;
-//                     if (sceneLocs == null || !Array.isArray(sceneLocs)) {
-//                         sceneLocs = [];
-//                     }
-//                     // console.log("tryna add sceneLocations: " + sceneLocations);
-//                     sceneLocs.push(obj);
-//                     db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocations: sceneLocs}});
-//                 }
-//                 if (err) {
-//                     res.send(error);
-//                 } else {
-//                     res.send("updated " + new Date());
-//                 }
-//             });
-//             // }
-//         }
-//     });
-// });
 
 app.post('/add_scene_model/', requiredAuthentication, function (req, res) {
 
@@ -6320,33 +5533,6 @@ app.post('/add_scene_model/', requiredAuthentication, function (req, res) {
     })();
 });
 
-//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-//         if (err || !scene) {
-//             console.log("error getting sceneert 4 obj: " + err);
-//         } else {
-//             if (scene.sceneModels != null && scene.sceneModels.indexOf(req.body.model_id) > -1) {
-//                 res.send("duplicate models not allowed!")
-//             } else {
-//                 db_old.models.findOne({ "_id": p_id}, function (err, model) {
-//                     if (err || !model) {
-//                         console.log("error getting model 4: " + err);
-//                     } else {
-//                             var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
-//                             // console.log("XXX sceneModels: " + JSON.stringify(sceneModels));
-//                             sceneModels.push(req.body.model_id);
-//                             db_old.scenes.update({ "_id": s_id }, { $set: {sceneModels: sceneModels}
-//                         });
-//                     }
-//                     if (err) {
-//                         res.send(error);
-//                     } else {
-//                         res.send("updated " + new Date());
-//                     }
-//                 });
-//             }
-//         }
-//     });
-// });
 
 app.post('/add_scene_obj/', requiredAuthentication, function (req, res) {
 
@@ -6380,78 +5566,6 @@ app.post('/add_scene_obj/', requiredAuthentication, function (req, res) {
         }
     })();
 });
-//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-//         if (err || !scene) {
-//             console.log("error getting sceneert 4 obj: " + err);
-//         } else {
-
-//             if (scene.sceneObjects != null && scene.sceneObjects.indexOf(req.body.obj_id) > -1) {
-//                 //In the array!
-//                 res.send("duplicates not allowed!")
-//             } else {
-//                 db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) {
-//                     if (err || !obj) {
-//                         console.log("error getting obj items 4: " + err);
-//                     } else {
-//                         var sceneObjs = (scene.sceneObjects != undefined && scene.sceneObjects != null && scene.sceneObjects != "") ? scene.sceneObjects : new Array();
-//                         console.log("XXX sceneObjs: " + sceneObjs);
-//                         sceneObjs.push(req.body.obj_id);
-//                         db_old.scenes.update({ "_id": s_id }, { $set: {sceneObjects: sceneObjs}
-//                         });
-//                     }
-//                     if (err) {
-//                         res.send(error)
-//                     } else {
-//                         res.send("updated " + new Date())
-//                     }
-//                 });
-//             }
-//         }
-//     });
-// });
-
-//unused?
-// app.post('/add_scenelocation_obj/', checkAppID, requiredAuthentication, function (req, res) {
-
-//     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
-//     var p_id = ObjectId.createFromHexString(req.body.obj_id);   
-
-//     console.log('tryna add a scene location obj : ' + JSON.stringify(req.body));
-
-//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-//         if (err || !scene) {
-//             console.log("error getting scene location obj: " + err);
-//         } else {
-
-//             if (scene.sceneLocations != null) {
-//                 for (var i = 0; i < scene.sceneLocations.length; i++) {
-//                     console.log("tryna find location " + req.body.location_id + " vs " + scene.sceneLocations[i].timestamp);
-//                     if  (scene.sceneLocations[i].timestamp == req.body.location_id) {
-//                         console.log("gotsa matching sceneLocation!");
-//                         db_old.obj_items.findOne({ "_id": p_id}, function (err, object) {
-//                             if (err || !object) {
-//                                 console.log("error getting object : " + err);
-//                                 res.end();
-//                             } else {
-//                                 scene.sceneLocations[i].location_object = object;
-//                                 var sceneObjs = scene.sceneObjects != undefined ? scene.sceneObjects : new Array();
-//                                 console.log("truyna push sceene location object id " + req.body.obj_id);
-//                                 sceneObjs.push(req.body.obj_id);
-
-//                                 db_old.scenes.update({ "_id": s_id }, { $set: {sceneLocations: scene.sceneLocations, sceneObjects: sceneObjs}});
-//                                 res.send("updated " + new Date());
-//                             }
-
-//                         });
-//                         break;
-//                     }
-//                 };
-//             } else {
-//                 res.send("location not found in scene")
-//             }
-//         }
-//     });
-// });
 
 app.post('/add_scene_vid/', requiredAuthentication, function (req, res) { //hrm, not hls but fullfat vids, because...?
 
@@ -6486,32 +5600,6 @@ app.post('/add_scene_vid/', requiredAuthentication, function (req, res) { //hrm,
     })();
 });
 
-//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-//         if (err || !scene) {
-//             console.log("error getting sceneert 4: " + err);
-//         } else {
-//             db_old.video_items.findOne({ "_id": p_id}, function (err, vid) {
-//                 if (err || !vid) {
-//                     console.log("error getting vid items 4: " + err);
-//                 } else {
-
-//                     var sceneVideos = new Array();
-//                     if (scene.sceneVideos) {
-//                         sceneVideos = scene.sceneVideos;
-//                     }
-//                     if (sceneVideos.indexOf(req.body.vid_id) == -1 ) {
-//                         console.log("XXX sceneVids: " + sceneVideos);
-//                         sceneVideos.push(req.body.vid_id);
-//                         db_old.scenes.update({ "_id": s_id }, { $set: {sceneVideos: sceneVideos}
-
-//                         });
-//                     }
-//                 }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//             });
-//         }
-//     });
-// });
-
 app.post('/add_scene_text_item/', requiredAuthentication, function (req, res) {
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
@@ -6544,37 +5632,6 @@ app.post('/add_scene_text_item/', requiredAuthentication, function (req, res) {
         }
     })();
 });
-
-//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-//         if (err || !scene) {
-//             console.log("error getting sceneert 4: " + err);
-//         } else {
-
-//                 db_old.text_items.findOne({ "_id": p_id}, function (err, txt) {
-//                     if (err || !txt) {
-//                         console.log("error getting image items 4: " + err);
-//                         res.send(error);
-//                     } else {
-//                         var sceneTextItems = new Array();
-//                         if (scene.sceneTextItems != undefined && scene.sceneTextItems.length > 0) {
-//                             sceneTextItems = scene.sceneTextItems;
-//                         }
-//                         if (sceneTextItems.indexOf(req.body.text_id) == -1) { //TODO DO THIS ON THE OTHER ONES!
-//                             sceneTextItems.push(req.body.text_id);
-//                             console.log("XXX sceneTexts: " + sceneTextItems);
-//                             db_old.scenes.update({ "_id": s_id }, { $set: {sceneTextItems: sceneTextItems}
-//                             });
-//                             res.send("updated " + new Date());
-//                         } else {
-//                             console.log("no dupes allowed");
-//                             res.send("that item has already been added to the scene");
-//                         }
-//                     }  //if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//                 });
-
-//         }
-//     });
-// });
 
 app.post('/scene_text_items/', function (req, res) {
     // console.log("textIDs " + JSON.stringify(req.body.textIDs) + " length " + req.body.textIDs.length );
@@ -6629,74 +5686,6 @@ app.post('/add_scene_pic/', requiredAuthentication, function (req, res) {
     })();
 });
 
-    // db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-    //     if (err || !scene) {
-    //         console.log("error getting sceneert 4: " + err);
-    //     } else {
-    //         db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-    //             if (err || !pic) {
-    //                 console.log("error getting image items 4: " + err);
-    //             } else {
-    //                 var scenePics = new Array();
-    //                 if (scene.scenePictures != undefined && scene.scenePictures.length > 0) {
-    //                     scenePics = scene.scenePictures;
-    //                 }
-
-    //                 console.log("XXX scenePics: " + scenePics);
-    //                 scenePics.push(req.body.pic_id);
-    //                 db_old.scenes.update({ "_id": s_id }, { $set: {scenePictures: scenePics}
-
-    //                 });
-    //             }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    //         });
-    //     }
-    // });
-// });
-
-// app.post('/rem_domain_pic/', requiredAuthentication, admin, function (req, res) {
-//     var s_id = ObjectId.createFromHexString(req.body.domain_id);   
-//     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
-//     console.log('tryna rm a domain pic : ' + JSON.stringify(req.body));
-
-//     (async () => {
-//         try {
-//             const domainquery = { "_id": s_id};
-//             const picquery = { "_id": p_id};
-//             const text_items = await RunDataQuery("text_items", "find", textquery);
-//             console.log('getting scene_text_items : ' + req.body.textIDs);
-//             res.send(text_items);
-//         } catch {
-//             console.log("error getting scene text " + e);
-//             res.send("error  getting scene text " + e);
-//         }
-//     })();
-
-//     db_old.apps.findOne({ "_id": s_id}, function (err, item) {
-//         if (err || !item) {
-//             console.log("error getting sceneert 4: " + err);
-//             res.send("app not found!")
-//         } else {
-//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-//                 if (err || !pic) {
-//                     console.log("error getting image items for domain: " + err);
-//                 } else {
-//                     var domainPics = item.domainPictureIDs;
-//                     if (domainPics != null) {
-//                     let index = domainPics.indexOf(req.body.pic_id);
-//                     if ( index != -1 ) {
-//                         domainPics.splice(index, 1);
-//                         db_old.domains.update({ "_id": s_id }, { $set: {domainPictureIDs: domainPics}});
-//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//                     } else {
-//                         res.send("that picture is not assigned to this app");
-//                     }
-//                     }
-//                 }  
-//             });
-//         }
-//     });
-// });
-
 app.post('/add_object_model/', requiredAuthentication, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.object_id);   
     var p_id = ObjectId.createFromHexString(req.body.model_id);   
@@ -6718,46 +5707,6 @@ app.post('/add_object_model/', requiredAuthentication, function (req, res) {
     })();
 });
 
-//     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
-//         if (err || !item) {
-//             console.log("error getting object 4: " + err);
-//             res.send("object not found!")
-//         } else {
-//             db_old.models.findOne({ "_id": p_id}, function (err, model) { //does model exist
-//                 if (err || !model) {
-//                     console.log("error getting model for object: " + err);
-//                     res.send("model for object not found");
-//                 } else {
-//                     // console.log("tryna add model info " + JSON.stringify(model));
-//                     db_old.obj_items.update({ "_id": s_id }, { $set: {modelID: model._id, modelName: model.name}}); //update object with model info
-//                     res.send("updated");
-//                 }  
-//             });
-//         }
-//     });
-// });
-// app.post('/add_obj_model/', requiredAuthentication, function (req, res) { //save to array instead
-//     var s_id = ObjectId.createFromHexString(req.body.object_id);   
-//     var p_id = ObjectId.createFromHexString(req.body.model_id);   
-//     console.log('tryna add a object model : ' + JSON.stringify(req.body));
-//     db.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
-//         if (err || !item) {
-//             console.log("error getting object 4: " + err);
-//             res.send("object not found!")
-//         } else {
-//             db.models.findOne({ "_id": p_id}, function (err, model) { //does model exist
-//                 if (err || !model) {
-//                     console.log("error getting model for object: " + err);
-//                     res.send("model for object not found");
-//                 } else {
-//                     // console.log("tryna add model info " + JSON.stringify(model));
-//                     db.obj_items.update({ "_id": s_id }, { $push: {models: {modelID: model._id, modelName: model.name}}}); //update object with model info
-//                     res.send("updated");
-//                 }  
-//             });
-//         }
-//     });
-// });
 
 app.post('/add_action_model/', requiredAuthentication, function (req, res) { //save to array instead
     var s_id = ObjectId.createFromHexString(req.body.action_id);   
@@ -6782,24 +5731,6 @@ app.post('/add_action_model/', requiredAuthentication, function (req, res) { //s
 
 });
 
-    // db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
-    //     if (err || !item) {
-    //         console.log("error getting object 4: " + err);
-    //         res.send("object not found!")
-    //     } else {
-    //         db_old.models.findOne({ "_id": p_id}, function (err, model) { //does model exist
-    //             if (err || !model) {
-    //                 console.log("error getting model for object: " + err);
-    //                 res.send("model for object not found");
-    //             } else {
-    //                 // console.log("tryna add model info " + JSON.stringify(model));
-    //                 db_old.actions.update({ "_id": s_id }, { $set: {modelID: model._id, modelName: model.name}}); //update object with model info
-    //                 res.send("updated");
-    //             }  
-    //         });
-    //     }
-    // });
-// });
 
 app.post('/add_action_object/', requiredAuthentication, function (req, res) { //save to array instead
     var s_id = ObjectId.createFromHexString(req.body.action_id);   
@@ -6822,24 +5753,7 @@ app.post('/add_action_object/', requiredAuthentication, function (req, res) { //
         }
     })();
 });
-    // db_old.actions.findOne({ "_id": s_id}, function (err, item) { //does obj exist
-    //     if (err || !item) {
-    //         console.log("error getting action 4: " + err);
-    //         res.send("action not found!")
-    //     } else {
-    //         db_old.obj_items.findOne({ "_id": p_id}, function (err, obj) { //does model exist
-    //             if (err || !obj) {
-    //                 console.log("error getting model for object: " + err);
-    //                 res.send("model for object not found");
-    //             } else {
-    //                 // console.log("tryna add model info " + JSON.stringify(model));
-    //                 db_old.actions.update({ "_id": s_id }, { $set: {objectID: obj._id, objectName: obj.name}}); //update object with object info
-    //                 res.send("updated");
-    //             }  
-    //         });
-    //     }
-    // });
-// });
+
 
 app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //save to array instead
     var o_id = ObjectId.createFromHexString(req.body.object_id);   
@@ -6871,56 +5785,6 @@ app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //sav
     })();
 });
 
-//     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
-//         if (err || !item) {
-//             console.log("error getting object 4 action: " + err);
-//             res.send("object not found!")
-//         } else {
-//             db_old.actions.findOne({ "_id": a_id}, function (err, action) { //does action exist
-//                 if (err || !action) {
-//                     console.log("error getting action for object: " + err);
-//                     res.send("action for object not found");
-//                 } else {
-//                     if (item.actionIDs == undefined || item.actionIDs.length > 0 || item.actionIDs.indexOf(action._id.toString()) == -1 ) {
-//                         db_old.obj_items.update({ "_id": s_id }, { $push: {actionIDs: action._id.toString()}}, {upsert: false}, function (err, saved) {
-//                             if (err || !saved) {
-//                                 res.send("error saving action " + err);
-//                             } else {
-//                                 console.log("saved action to object: " +JSON.stringify(saved));
-//                                 res.send("updated");
-//                             }
-//                     });
-//                 } else {
-//                     console.log("dupe action");
-//                     res.send("no duplicate actions!");
-//                 }
-//             }
-//             });
-//         }
-//     });
-// });
-// app.post('/add_object_action/', requiredAuthentication, function (req, res) { //deprecated
-//     var s_id = ObjectId.createFromHexString(req.body.object_id);   
-//     var a_id = ObjectId.createFromHexString(req.body.action_id);   
-//     console.log('tryna add a object action : ' + JSON.stringify(req.body));
-//     db.obj_items.findOne({ "_id": s_id}, function (err, item) { //does obj exist
-//         if (err || !item) {
-//             console.log("error getting object 4: " + err);
-//             res.send("object not found!")
-//         } else {
-//             db.actions.findOne({ "_id": a_id}, function (err, action) { //does model exist
-//                 if (err || !action) {
-//                     console.log("error getting action for object: " + err);
-//                     res.send("action for object not found");
-//                 } else {
-//                     // console.log("tryna add action info " + JSON.stringify(model));
-//                     db.obj_items.update({ "_id": s_id }, { $set: {actionID: action._id, actionName: action.actionName, actionType: action.actionType}}); //update object with model info
-//                     res.send("updated");
-//                 }  
-//             });
-//         }
-//     });
-// });
 app.post('/add_object_pic/', requiredAuthentication, function (req, res) {
     var o_id = ObjectId.createFromHexString(req.body.object_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
@@ -6950,31 +5814,6 @@ app.post('/add_object_pic/', requiredAuthentication, function (req, res) {
         }
     })();
 });
-    // db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
-    //     if (err || !item) {
-    //         console.log("error getting object 4: " + err);
-    //         res.send("object not found!")
-    //     } else {
-    //         db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-    //             if (err || !pic) {
-    //                 console.log("error getting image items for object: " + err);
-    //             } else {
-    //                 var objectPics = item.objectPictureIDs;
-    //                 if (objectPics == null) {
-    //                     objectPics = [];
-    //                 }
-    //                 if ( objectPics.indexOf(req.body.pic_id) == -1 ) {
-    //                     objectPics.push(req.body.pic_id);
-    //                     db_old.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
-    //                     if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    //                 } else {
-    //                     res.send("that picture is already assigned to this object");
-    //                 }
-    //             }  
-    //         });
-    //     }
-    // });
-// });
 
 app.post('/rem_object_action/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.object_id);   
@@ -7004,35 +5843,6 @@ app.post('/rem_object_action/', requiredAuthentication, admin, function (req, re
         }
     })();
 });
-//     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
-//         if (err || !item) {
-//             console.log("error getting sceneert 4: " + err);
-//             res.send("app not found!")
-//         } else {
-//             db_old.actions.findOne({ "_id": p_id}, function (err, action) {
-//                 if (err || !action) {
-//                     console.log("error getting image items for domain: " + err);
-//                 } else {
-//                     var actionIDs = item.actionIDs;
-//                     if (actionIDs != null) {
-//                     let index = actionIDs.indexOf(req.body.action_id);
-//                     if ( index != -1 ) {
-//                         actionIDs.splice(index, 1);
-//                         db_old.obj_items.update({ "_id": s_id }, { $set: {actionIDs: actionIDs}});
-//                         if (err) {
-//                             res.send(err);
-//                             } else {
-//                                 res.send("updated " + new Date())
-//                             }
-//                         } else {
-//                             res.send("that action is not assigned to this object");
-//                         }
-//                     }
-//                 }  
-//             });
-//         }
-//     });
-// });
 
 app.post('/rem_object_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.domain_id);   
@@ -7063,31 +5873,7 @@ app.post('/rem_object_pic/', requiredAuthentication, admin, function (req, res) 
         }
     })();
 });
-//     db_old.obj_items.findOne({ "_id": s_id}, function (err, item) {
-//         if (err || !item) {
-//             console.log("error getting sceneert 4: " + err);
-//             res.send("app not found!")
-//         } else {
-//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-//                 if (err || !pic) {
-//                     console.log("error getting image items for domain: " + err);
-//                 } else {
-//                     var objectPics = item.objectPictureIDs;
-//                     if (objectPics != null) {
-//                     let index = objectPics.indexOf(req.body.pic_id);
-//                     if ( index != -1 ) {
-//                         objectPics.splice(index, 1);
-//                         db_old.obj_items.update({ "_id": s_id }, { $set: {objectPictureIDs: objectPics}});
-//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//                     } else {
-//                         res.send("that picture is not assigned to this app");
-//                     }
-//                     }
-//                 }  
-//             });
-//         }
-//     });
-// });
+
 app.post('/add_domain_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.domain_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
@@ -7116,31 +5902,7 @@ app.post('/add_domain_pic/', requiredAuthentication, admin, function (req, res) 
         }
     })();
 });
-//     db_old.domains.findOne({ "_id": s_id}, function (err, item) {
-//         if (err || !item) {
-//             console.log("error getting sceneert 4: " + err);
-//             res.send("domain not found!")
-//         } else {
-//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-//                 if (err || !pic) {
-//                     console.log("error getting image items for storeitem: " + err);
-//                 } else {
-//                     var domainPics = item.domainPictureIDs;
-//                     if (domainPics == null) {
-//                         domainPics = [];
-//                     }
-//                     if ( domainPics.indexOf(req.body.pic_id) == -1 ) {
-//                         domainPics.push(req.body.pic_id);
-//                         db_old.domains.update({ "_id": s_id }, { $set: {domainPictureIDs: domainPics}});
-//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//                     } else {
-//                         res.send("that picture is already assigned to this domain");
-//                     }
-//                 }  
-//             });
-//         }
-//     });
-// });
+
 app.post('/rem_app_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.app_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
@@ -7171,31 +5933,7 @@ app.post('/rem_app_pic/', requiredAuthentication, admin, function (req, res) {
         }
     })();
 });
-//     db_old.apps.findOne({ "_id": s_id}, function (err, item) {
-//         if (err || !item) {
-//             console.log("error getting sceneert 4: " + err);
-//             res.send("app not found!")
-//         } else {
-//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-//                 if (err || !pic) {
-//                     console.log("error getting image items for storeitem: " + err);
-//                 } else {
-//                     var appPics = item.appPictureIDs;
-//                     if (appPics != null) {
-//                     let index = appPics.indexOf(req.body.pic_id);
-//                     if ( index != -1 ) {
-//                         appPics.splice(index, 1);
-//                         db_old.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
-//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//                     } else {
-//                         res.send("that picture is not assigned to this app");
-//                     }
-//                     }
-//                 }  
-//             });
-//         }
-//     });
-// });
+
 app.post('/add_app_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.app_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
@@ -7228,32 +5966,6 @@ app.post('/add_app_pic/', requiredAuthentication, admin, function (req, res) {
     })();
 });
 
-//     db_old.apps.findOne({ "_id": s_id}, function (err, item) {
-//         if (err || !item) {
-//             console.log("error getting sceneert 4: " + err);
-//             res.send("store item not found!")
-//         } else {
-//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-//                 if (err || !pic) {
-//                     console.log("error getting image items for storeitem: " + err);
-//                 } else {
-//                     var appPics = item.appPictureIDs;
-//                     if (appPics == null) {
-//                         appPics = [];
-//                     }
-//                     // console.log("XXX scenePics: " + storeItemPics);
-//                     if ( appPics.indexOf(req.body.pic_id) == -1 ) {
-//                         appPics.push(req.body.pic_id);
-//                         db_old.apps.update({ "_id": s_id }, { $set: {appPictureIDs: appPics}});
-//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//                     } else {
-//                         res.send("that picture is already assigned to this storeitem");
-//                     }
-//                 }  
-//             });
-//         }
-//     });
-// });
 
 app.post('/rem_storeitem_pic/', checkAppID, requiredAuthentication, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
@@ -7285,31 +5997,7 @@ app.post('/rem_storeitem_pic/', checkAppID, requiredAuthentication, function (re
         }
     })();
 });
-//     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
-//         if (err || !storeitem) {
-//             console.log("error getting sceneert 4: " + err);
-//             res.send("store item not found!")
-//         } else {
-//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-//                 if (err || !pic) {
-//                     console.log("error getting image items for storeitem: " + err);
-//                 } else {
-//                     var storeItemPics = storeitem.storeItemPictureIDs;
-//                     if (storeItemPics != null) {
-//                     let index = storeItemPics.indexOf(req.body.pic_id);
-//                     if ( index != -1 ) {
-//                         storeItemPics.splice(index, 1);
-//                         db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
-//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//                     } else {
-//                         res.send("that picture is not assigned to this storeitem");
-//                     }
-//                     }
-//                 }  
-//             });
-//         }
-//     });
-// });
+
 
 app.post('/add_storeitem_pic/', requiredAuthentication, function (req, res) {
     console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
@@ -7344,32 +6032,6 @@ app.post('/add_storeitem_pic/', requiredAuthentication, function (req, res) {
     })();
 });
 
-//     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
-//         if (err || !storeitem) {
-//             console.log("error getting sceneert 4: " + err);
-//             res.send("store item not found!")
-//         } else {
-//             db_old.image_items.findOne({ "_id": p_id}, function (err, pic) {
-//                 if (err || !pic) {
-//                     console.log("error getting image items for storeitem: " + err);
-//                 } else {
-//                     var storeItemPics = storeitem.storeItemPictureIDs;
-//                     if (storeItemPics == null) {
-//                         storeItemPics = [];
-//                     }
-//                     console.log("XXX scenePics: " + storeItemPics);
-//                     if ( storeItemPics.indexOf(req.body.pic_id) == -1 ) {
-//                         storeItemPics.push(req.body.pic_id);
-//                         db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemPictureIDs: storeItemPics}});
-//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//                     } else {
-//                         res.send("that picture is already assigned to this storeitem");
-//                     }
-//                 }  
-//             });
-//         }
-//     });
-// });
 
 app.post('/add_storeitem_obj/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
@@ -7393,55 +6055,6 @@ app.post('/add_storeitem_obj/', requiredAuthentication, admin, function (req, re
     })();
 });
 
-// //    
-
-// app.post('/add_storeitem_scenegroup/', requiredAuthentication, function (req, res) { //gonna rem this...
-//     var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
-//     var p_id = ObjectId.createFromHexString(req.body.group_id);   
-//     console.log('tryna add a storeitem scenegroup : ' + JSON.stringify(req.body));
-
-//     (async () => {
-//         try {
-//             const siquery = {"_id": s_id};
-//             const objquery = {"_id": p_id};
-//             // const storeitem = await RunDataQuery("storeitems", "findOne", siquery);
-//             const object = await RunDataQuery("obj_items", "findOne", objquery);
-//             const updoc = {$set: {"objectID": object._id, "objectName": object.name}};
-//             const updated = await RunDataQuery("storeitems", "updateOne", siquery, updoc);
-//             res.send("updated " + JSON.stringify(updated));
-            
-//         } catch (e) {
-//             console.log("error adding obj to store item" +e);
-//             res.send("error adding obj to store item" +e);
-//         }
-//     })();
-
-//     db_old.storeitems.findOne({ "_id": s_id}, function (err, storeitem) {
-//         if (err || !storeitem) {
-//             console.log("error getting sceneert 4: " + err);
-//             res.send("store item not found!")
-//         } else {
-//             db_old.groups.findOne({ "_id": p_id}, function (err, group) {
-//                 if (err || !group) {
-//                     console.log("error getting image items for storeitem: " + err);
-//                 } else {
-//                     var storeItemSceneGroups = storeitem.storeItemSceneGroups;
-//                     if (storeItemSceneGroups == null) {
-//                         storeItemSceneGroups = [];
-//                     }
-//                     console.log("updating storeitem sceneGroups: " + storeItemSceneGroups);
-//                     if ( storeItemSceneGroups.indexOf(req.body.group_id) == -1 ) {
-//                         storeItemSceneGroups.push(req.body.group_id);
-//                         db_old.storeitems.update({ "_id": s_id }, { $set: {storeItemSceneGroupIDs: storeItemSceneGroups}});
-//                         if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//                     } else {
-//                         res.send("that group is already assigned to this storeitem");
-//                     }
-//                 }  
-//             });
-//         }
-//     });
-// });
 
 app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
 
@@ -7514,27 +6127,7 @@ app.post('/add_scene_audio/', requiredAuthentication, function (req, res) {
         }
     })();
 });
-    // db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-    //     if (err || !scene) {
-    //         console.log("error getting sceneert 4: " + err);
-    //     } else {
-    //         db_old.audio_items.findOne({ "_id": a_id}, function (err, audio) {
-    //             if (err || !audio) {
-    //                 console.log("error getting audio items 4: " + err);
-    //             } else {
-    //                 if (req.body.audio_type === "trigger") {
-    //                     db_old.scenes.update({ "_id": s_id }, { $set: {sceneTriggerAudioID: req.body.audio_id}});
-    //                 } else if (req.body.audio_type === "ambient") {
-    //                     db_old.scenes.update({ "_id": s_id }, { $set: {sceneAmbientAudioID: req.body.audio_id}});
-    //                 } else if (req.body.audio_type === "primary") {
-    //                     db_old.scenes.update({ "_id": s_id }, { $set: {scenePrimaryAudioID: req.body.audio_id}});
-    //                 }
 
-    //             }  if (err) {res.send(error)} else {res.send("updated " + new Date())}
-    //         });
-    //     }
-    // });
-// });
 
 app.post('/import_scene_audio_timed_events/', requiredAuthentication, function (req, res) {
 
@@ -7563,44 +6156,7 @@ app.post('/import_scene_audio_timed_events/', requiredAuthentication, function (
         }
     })();
 });
-//     db_old.scenes.findOne({ "_id": s_id}, function (err, scene) {
-//         if (err || !scene) {
-//             console.log("error getting scene for audio timekey import: " + err);
-//         } else {
-//             db_old.audio_items.findOne({ "_id": a_id}, function (err, audio) {
-//                 if (err || !audio) {
-//                     console.log("error getting audio items 4: " + err);
-//                 } else {
-//                     if (audio.timekeys != undefined && audio.timekeys != null && audio.timekeys.length) {
-//                         let sceneTimedEvents = {};
-//                         sceneTimedEvents.timekeys = audio.timekeys;
-//                         db_old.scenes.update({ "_id": s_id }, { $set: {sceneTimedEvents: sceneTimedEvents}});
-                        
-//                         if (err) {
-//                             res.send(error);
-//                         } else {    
-//                             res.send("updated " + new Date());
-//                         }
-//                     } else {
-//                         res.send("no timekeys found for that audio item.");
-//                     }   
-//                 }
-//             });
-//         }
-//     });
-// });
 
-
-//
-//    db.image_items.findOne({ "_id" : o_id}, function(err, pic) {
-//        if (err || !pic) {
-//            console.log("error getting image items 4: " + err);
-//        } else {
-//
-//
-//        } if (err) {res.send(error)} else {res.send("updated " + new Date())}
-//    });
-//});
 
 app.get('/uscenes/:_id',  requiredAuthentication, usercheck, function (req, res) { //get scenes for this user
     console.log("tryna get user scenes: ",req.params._id);
@@ -7620,30 +6176,8 @@ app.get('/uscenes/:_id',  requiredAuthentication, usercheck, function (req, res)
             res.send("error getting user scenes " + e);
         }
     })();
-    // db_old.scenes.find(query, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 },  function(err, scenes) {
-    //     if (err || !scenes) {
-    //         console.log("cain't get no scenes... " + err);
-    //         res.send("noscenes");
-    //     } else { //should externalize
-    //         res.json(scenes);
-    //     }
-    // });
+    
 });
-
-// app.get('/uscenes/:appid',  requiredAuthentication, usercheck, function (req, res) { //get scenes for this user
-//     console.log("tryna get user scenes: ",req.params._id);
-//     var o_id = ObjectId.createFromHexString(req.params.appid);
-//     var scenesResponse = {};
-
-//     db_old.scenes.find({ "user_id" : req.params._id}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1,  sceneShareWithPublic: 1 },  function(err, scenes) {
-//         if (err || !scenes) {
-//             console.log("cain't get no scenes... " + err);
-//             res.send("noscenes");
-//         } else { //should externalize
-//             res.json(scenes);
-//         }
-//     });
-// });
 
 app.post('/uscenes/',  requiredAuthentication, usercheck, function (req, res) { //get scenes for app
     console.log("tryna get app scenes: ",req.params._id);
@@ -7678,14 +6212,7 @@ app.post('/appscenes/',  requiredAuthentication, function (req, res) { //get sce
         }
     })();
 
-    // db_old.scenes.find({ "sceneDomain" : req.body.sceneDomain}, { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1, sceneStickyness: 1 },  function(err, scenes) {
-    //     if (err || !scenes) {
-    //         console.log("cain't get no scenes... " + err);
-    //         res.send("noscenes");
-    //     } else { //should externalize
-    //         res.json(scenes);
-    //     }
-    // });
+ 
 });
 
 app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function (req, res) { //scene view for editing/updating scene in admin mode for this user
@@ -7945,464 +6472,6 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
     })();
 });
 
-// app.get('/uscene_OLD/:user_id/:scene_id',  requiredAuthentication, uscene, function (req, res) { //scene view for editing/updating scene in admin mode for this user
-
-//     console.log("tryna get scene id: ", req.params.scene_id + " excaped " + entities.decodeHTML(req.params.scene_id));
-//     var reqstring = entities.decodeHTML(req.params.scene_id).toString().replace(":", "");
-// //    var sceneID = req.params.scene_id.toString().replace(":", "");
-//     var audioResponse = {};
-    
-//     var pictureResponse = {};
-//     var postcardResponse = {};
-//     var objectResponse = {};
-//     var sceneResponse = {};
-//     var requestedPictureItems = [];
-//     var requestedAudioItems = [];
-//     // var requestedLocationItems = [];
-//     // sceneResponse.locations = [];
-//     sceneResponse.audio = [];
-//     sceneResponse.pictures = [];
-//     sceneResponse.postcards = [];
-//     sceneResponse.weblinx = [];
-//     sceneResponse.assets = [];
-
-//     // (async () => {
-//     //     const scenequery = {$or: [{ sceneTitle: reqstring },{ short_id : reqstring },{ _id : o_id}]};
-//     //     let sceneData = await RunDataQuery("scenes", "findOne", )
-//     // });
-//     async.waterfall([
-//         function (callback) {
-//             console.log("uscene lookup for reqstring " + reqstring);
-//             var o_id = ObjectId.createFromHexString(reqstring);
-//             // var o_id = new ObjectId.createFromHexString(reqstring);
-//             // var o_id = ObjectId.createFromHexString(req.params.scene_id);
-//             db_old.scenes.find({$or: [{ sceneTitle: reqstring },
-//                     { short_id : reqstring },
-//                     { _id : o_id}]},
-//                 function (err, sceneData) { //fetch the path info by title TODO: urlsafe string
-
-//                     if (err || !sceneData || !sceneData.length) {
-//                         console.log("3 error getting scene data: " + err);
-//                         callback(err);
-//                     } else { //make arrays of the pics and audio items and locations
-//                         if (sceneData[0].scenePictures != undefined) { 
-//                                 if (sceneData[0].scenePictures.length > 0) {
-// {                                   sceneData[0].scenePictures.forEach(function (picture) {
-//                                     var p_id = ObjectId.createFromHexString(picture); //convert to binary to search by _id beloiw
-//                                     requestedPictureItems.push(p_id); //populate array
-//                                 });
-//                             }
-//                         }
-//                     }
-//                         // sceneData[0].sceneLocationIDs.forEach(function (locationID){
-//                         //     var p_id = ObjectId.createFromHexString(locationID); //convert to binary to search by _id beloiw
-//                         //     requestedLocationItems.push(p_id); //populate array
-//                         // });
-//                         // requestedAudioItems = [ ObjectId.createFromHexString(sceneData[0].sceneTriggerAudioID), ObjectId.createFromHexString(sceneData[0].sceneAmbientAudioID), ObjectId.createFromHexString(sceneData[0].scenePrimaryAudioID)];
-//                         var triggerOID = ObjectId.isValid(sceneData[0].sceneTriggerAudioID) ? ObjectId.createFromHexString(sceneData[0].sceneTriggerAudioID) : "";
-//                         var ambientOID = ObjectId.isValid(sceneData[0].sceneAmbientAudioID) ? ObjectId.createFromHexString(sceneData[0].sceneAmbientAudioID) : "";
-//                         var primaryOID = ObjectId.isValid(sceneData[0].scenePrimaryAudioID) ? ObjectId.createFromHexString(sceneData[0].scenePrimaryAudioID) : "";
-//                         requestedAudioItems = [ triggerOID, ambientOID, primaryOID];
-//                         sceneResponse = sceneData[0];
-//                         // console.log("sceneScatterOffset is " + sceneResponse.sceneScatterOffset);
-//                         callback(null);
-//                     }
-//                 });
-//             },
-//             function (callback) { //update link pic URLs //TODO check for freshness, and rescrape if needed
-//                 if (sceneResponse.sceneWebLinks != null && sceneResponse.sceneWebLinks.length > 0) {
-//                     let weblinx = [];
-//                     for (var i = 0; i < sceneResponse.sceneWebLinks.length; i++) {
-//                         console.log("weblink: " + JSON.stringify(sceneResponse.sceneWebLinks[i]));
-//                         if (ObjectId.isValid(sceneResponse.sceneWebLinks[i])) {
-//                             // db_old.weblinks.findOne({'_id': ObjectId.createFromHexString(sceneResponse.sceneWebLinks[i].toString())}, function (err, weblink) {
-//                             //     if (err || !weblink) {
-//                             //         console.log("can't find weblink");
-//                             //     } else {
-//                                     (async () => { 
-//                                         const query = {"_id": ObjectId.createFromHexString(sceneResponse.sceneWebLinks[i])};
-//                                         const weblink = await RunDataQuery("weblinks", "findOne", query);
-//                                         if (weblink) {
-//                                         console.log(JSON.stringify(weblink));
-//                                         let link = {};
-                                        
-//                                           const urlHalf = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME,weblink._id + "/" + weblink._id + ".half.jpg",6000);
-//                                           const urlStandard = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME,weblink._id + "/" + weblink._id + ".standard.jpg",6000);
-//                                           link.urlThumb = "";
-//                                           link.urlHalf = urlHalf;
-//                                           link.urlStandard = urlStandard;
-//                                           link.link_url = weblink.link_url;
-//                                           link.link_title = weblink.link_title;
-//                                           link._id = weblink._id;
-//                                           weblinx.push(link);
-//                                         }
-//                                     })();
-//                             //     }
-//                             // });
-//                         }
-//                     }
-//                     sceneResponse.weblinx = weblinx;
-//                     console.log("weblinx " + sceneResponse.weblinx);
-//                 }
-//                 callback(null);
-//             },
-//             function (callback) { 
-//                 if (sceneResponse.sceneVideos != null && sceneResponse.sceneVideos != undefined && sceneResponse.sceneVideos.length > 0) {
-//                     const moids = sceneResponse.sceneVideos.map(convertStringToObjectID);
-//                     db_old.video_items.find({_id: {$in: moids }}, function (err, video_items){
-//                         if (err || !video_items) {
-//                             console.log("error getting video items: " + err);
-//                             callback(null);
-//                         } else {
-//                             (async () => { 
-//                                 for (let i = 0; i < video_items.length; i++) {
-//                                     let item_string_filename = JSON.stringify(video_items[i].filename);
-//                                     item_string_filename = item_string_filename.replace(/\"/g, "");
-//                                     let item_string_filename_ext = getExtension(item_string_filename);
-//                                     let expiration = new Date();
-//                                     expiration.setMinutes(expiration.getMinutes() + 30);
-
-//                                     // var urlVid = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, Expires: 60000});
-//                                     const urlVid = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename,6000 );
-//                                     video_items[i].vUrl = urlVid;
-//                                 }
-//                                 sceneResponse.sceneVideoItems = video_items;
-//                                 callback(null);
-//                              })();
-//                         }
-//                     });
-//                 } else {
-//                     callback(null);
-//                 }
-//             },
-//             function (callback) { 
-//                 if (sceneResponse.sceneTextItems != null && sceneResponse.sceneTextItems != undefined && sceneResponse.sceneTextItems.length > 0) {
-//                     const moids = sceneResponse.sceneTextItems.map(convertStringToObjectID);
-//                     db_old.text_items.find({_id: {$in: moids }}, function (err, text_items){
-//                         if (err || !text_items) {
-//                             console.log("error getting text items: " + err);
-//                             callback(null);
-//                         } else {
-//                             sceneResponse.textItems = text_items;
-//                             callback(null)
-//                         }
-//                     });
-//                 } else {
-//                     callback(null);
-//                 }
-//             },
-
-//             function (callback) { 
-//                 let allgroups = [];
-//                 if (sceneResponse.sceneVideoGroups != null) {
-//                     allgroups.push(...sceneResponse.sceneVideoGroups);
-//                 };                
-//                 if (sceneResponse.scenePictureGroups != null) {
-//                     allgroups.push(...sceneResponse.scenePictureGroups);
-//                 };
-//                 if (sceneResponse.sceneAudioGroups != null) {
-//                     allgroups.push(...sceneResponse.sceneAudioGroups);
-//                 };
-//                 if (sceneResponse.sceneLocationGroups != null) {
-//                     allgroups.push(...sceneResponse.sceneLocationGroups);
-//                 };
-//                 if (allgroups.length > 0) {
-
-//                     (async () => {
-//                       try {
-//                         const moids = allgroups.map(convertStringToObjectID);
-//                         const query = {"_id": {$in: moids }};
-//                         const items = await RunDataQuery("groups", "find", query);
-//                         if (items) {
-//                           sceneResponse.sceneGroups = items;
-//                         }
-//                         callback(null);
-//                       } catch (e) {
-//                         callback(e);
-//                       }
-//                     })();
-                    
-                 
-//                 } else {
-//                     callback(null);
-//                 }
-//             },
-//             function (callback) { //fethc audio items
-//               console.log("tryna fetch requestedAudioItems " + requestedAudioItems); //already oid?
-//               (async () => {
-//                 try {
-//                   // const aoids = requestedAudioItems.map(convertStringToObjectID);
-//                   const query = {"_id": {$in: requestedAudioItems }};
-//                   const audio_items = await RunDataQuery("audio_items", "find", query);
-//                   callback(null, audio_items);
-//                 } catch (e) {
-//                   callback(e);
-//                 }
-//               })();
-               
-//             },
-//             function(audio_items, callback) { //add the signed URLs to the obj array
-//               // console.log("audio_items: ", JSON.stringify(audio_items));
-//               (async () => {
-//                 for (var i = 0; i < audio_items.length; i++) {
-                       
-//                     var item_string_filename = JSON.stringify(audio_items[i].filename);
-//                     item_string_filename = item_string_filename.replace(/\"/g, "");
-//                     var item_string_filename_ext = getExtension(item_string_filename);
-//                     var expiration = new Date();
-//                     expiration.setMinutes(expiration.getMinutes() + 1000);
-//                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                     //console.log(baseName);
-//                     var mp3Name = baseName + '.mp3';
-//                     var oggName = baseName + '.ogg';
-//                     var pngName = baseName + '.png';
-//                     try {
-//                         if (audio_items[i]) {
-//                             console.log("audioitem " + audio_items[i].userID);
-//                             const urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, 6000);
-//                             const urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, 6000);
-//                             const urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, 6000);
-
-//         //                            audio_items.URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                             audio_items[i].URLmp3 = urlMp3; //jack in teh signed urls into the object array
-//                             audio_items[i].URLogg = urlOgg;
-//                             audio_items[i].URLpng = urlPng;
-//                             if (audio_items[i].tags != null) {
-//                                 if (audio_items[i].tags.length < 1) {
-//                                     audio_items[i].tags = [""];
-//                                 } else {
-//                                     audio_items[i].tags = [""];
-//                                 }
-//                             }
-//                         }
-//                     } catch (e) {
-//                         console.log("error in audioResponse " + e + audio_items[i]);
-//                     }
-//                 }
-//               })();
-//                 audioResponse = audio_items;
-//                 sceneResponse.audio = audioResponse;
-//                 callback(null);
-//             },
-
-//             function(callback) { //return the pic items
-//                 // console.log("requestedPictureItems:  ", requestedPictureItems);
-//                 (async () => {
-//                   try {
-//                     const query = {"_id": { $in: requestedPictureItems }};
-//                     const pic_items = await RunDataQuery("image_items", "find", query);
-//                     callback(null, pic_items);
-//                   } catch (e) {
-//                     callback(e);
-//                   }
-//                 })();
-//                 // db_old.image_items.find({_id: {$in: requestedPictureItems }}, function (err, pic_items)
-//                 // {
-//                 //     if (err || !pic_items) {
-//                 //         console.log("error getting picture items: " + err);
-//                 //         callback(null);
-//                 //     } else {
-//                 //         callback(null, pic_items)
-//                 //     }
-//                 // });
-//             },
-
-//             function (picture_items, callback) {
-//                 (async () => {
-//                     for (var i = 0; i < picture_items.length; i++) {
-//                         //    console.log("picture_item: ", picture_items[i]);
-//                         var item_string_filename = JSON.stringify(picture_items[i].filename);
-//                         item_string_filename = item_string_filename.replace(/\"/g, "");
-//                         var item_string_filename_ext = getExtension(item_string_filename);
-//                         var expiration = new Date();
-//                         expiration.setMinutes(expiration.getMinutes() + 1000);
-//                         var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                         //console.log(baseName);
-//                         var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-//                         var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-//                         var halfName = 'half.' + baseName + item_string_filename_ext;
-//                         var standardName = 'standard.' + baseName + item_string_filename_ext;
-//                         var originalName = 'original.' + baseName + item_string_filename_ext;
-
-
-//                         let urlTarget = "";
-//                         const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + thumbName,6000);
-//                         const urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + quarterName,6000);
-//                         const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + halfName,6000);
-//                         const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + standardName,6000);
-//                         if (picture_items[i].useTarget) {
-//                             urlTarget = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_items[i].userID + "/pictures/targets/" + picture_items[i]._id + ".mind",6000);
-//                         }
-
-//                         //var urlPng = knoxClient.signedUrl(audio_item[0]._id + "." + pngName, expiration); //whoa, ancient...
-
-//                         picture_items[i].urlThumb = urlThumb; //jack in teh signed urls into the object array
-//                         picture_items[i].urlQuarter = urlQuarter; //jack in teh signed urls into the object array
-//                         picture_items[i].urlHalf = urlHalf; //jack in teh signed urls into the object array
-//                         picture_items[i].urlStandard = urlStandard; //jack in teh signed urls into the object array
-//                         picture_items[i].urlTarget = urlTarget;
-//                         if (picture_items[i].orientation != null && picture_items[i].orientation.toLowerCase() == "equirectangular") { //add the big one for skyboxes
-//                             // var urlOriginal = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_items[i].userID + "/pictures/originals/" + picture_items[i]._id + "." + originalName, Expires: 6000});
-//                             const urlOriginal = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + picture_items[i].userID + "/pictures/originals/" + picture_items[i]._id + "." + originalName,6000);
-                            
-//                             picture_items[i].urlOriginal = urlOriginal;
-//                         }
-//                         if (picture_items[i].hasAlphaChannel == null) {picture_items[i].hasAlphaChannel = false}
-//                         //pathResponse.path.pictures.push(urlThumb, urlQuarter, urlHalf, urlStandard);
-//                         if (picture_items[i].tags != null && picture_items[i].tags.length < 1) {picture_items.tags = [];}
-
-//                     }
-//                     pictureResponse = picture_items ;
-//                     callback(null);
-//                 })();
-//             },
-
-//             function (callback) {
-//                 var postcards = [];
-
-//                 if (sceneResponse.scenePostcards != null && sceneResponse.scenePostcards.length > 0) {
-
-//                   const oids = sceneResponse.scenePostcards.map(convertStringToObjectID);
-//                   (async () => {
-//                     try {
-//                       const query = {"_id": { $in: oids }};
-//                       const postcard_items = await RunDataQuery("image_items", "find", query);
-//                       if (postcard_items && postcard_items.length) {
-//                         for (let i = 0; i < postcard_items.length; i++) {
-//                           const urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + postcard_items[i].userID + "/pictures/" + postcard_items[i]._id + ".thumb." + postcard_items[i].filename,6000);
-//                           const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + postcard_items[i].userID + "/pictures/" + postcard_items[i]._id + ".half." + postcard_items[i].filename,6000);
-//                           const urlStandard = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + postcard_items[i].userID + "/pictures/" + postcard_items[i]._id + ".standard." + postcard_items[i].filename,6000);
-//                           var postcard = {};
-//                           postcard.userID = postcard_items[i].userID;
-//                           postcard._id = postcard_items[i]._id;
-//                           postcard.sceneID = postcard_items[i].postcardForScene;
-//                           postcard.urlThumb = urlThumb;
-//                           postcard.urlHalf = urlHalf;
-//                           postcard.urlStandard = urlStandard;
-//                           if (postcards.length < 9) {
-//                             postcards.push(postcard);
-//                           }
-//                         } 
-//                         callback(null, postcards);
-//                       }
-//                     } catch (e) {
-//                       callback(e);
-//                     }
-//                   })();
-                  
-//                 } else {
-// //                      callback(null);
-//                     callback(null, postcards);
-//                 }
-//             },
-
-//             function (postcardResponse, callback) {
-//                 //assemble all response elements
-//                 sceneResponse.audio = audioResponse;
-//                 sceneResponse.pictures = pictureResponse;
-//                 sceneResponse.postcards = postcardResponse;
-//                 callback(null);
-//             },
-
-//             function (callback) {
-//                 var modelz = [];
-// //                console.log("sceneObjects : " + JSON.stringify(sceneResponse.sceneObjects));
-//                 if (sceneResponse.sceneModels != null) {
-
-//                   (async () => {
-//                     try {
-//                       const oids = sceneResponse.sceneModels.map(convertStringToObjectID);
-//                       const query = {"_id": { $in: oids }};
-//                       const models = await RunDataQuery("models", "find", query); //how to show missing?  
-                     
-//                         sceneResponse.sceneModelz = models;
-//                         callback(null);
-//                       // }
-                      
-//                     } catch (e) {
-//                       callback(e);
-//                     }
-//                   })();
-
-//                 } else {
-//                     callback(null);
-//                 }
-//             },
-//             function (callback) { //add object groups to scene object list
-//                 var objexgroups = [];
-                
-//                     if (sceneResponse.sceneObjectGroups != null) {
-//                       (async () => {
-//                         try {
-//                           const oids = sceneResponse.sceneObjectGroups.map(convertStringToObjectID);
-//                           const query = {"_id": { $in: oids }};
-//                           const ogroups = await RunDataQuery("groups", "find", query);
-//                           if (ogroups && ogroups.length) {
-//                             sceneResponse.sceneObjexGroups = ogroups; //hrm
-//                           }
-//                           callback(null);
-//                         } catch (e) {
-//                           callback(e);
-//                         }
-//                     })();
-                      
-//                     } else {
-//                         callback(null);
-//                     }
-//             },
-            
-
-//             function (callback) {
-//                 var objex = [];
-//                 console.log("tryna fetch all the sceneObjects: " + JSON.stringify(sceneResponse.sceneObjects));
-// //                console.log("sceneObjects : " + JSON.stringify(sceneResponse.sceneObjects));
-//                 if (sceneResponse.sceneObjects && sceneResponse.sceneObjects.length) {
-
-//                   (async () => {
-//                     try {
-//                       const oids = sceneResponse.sceneObjects.map(convertStringToObjectID);
-//                       const query = {"_id": { $in: oids }};
-//                       const objeks = await RunDataQuery("obj_items", "find", query);
-//                       // console.log("objeks:" + JSON.stringify(objeks));
-//                       sceneResponse.sceneObjex = objeks;
-//                       // objectResponse = objeks;
-//                       callback(null);
-//                     } catch (e) {
-//                       callback(e);
-//                     }
-//                 })();
-                    
-//                 } else {
-//                     callback(null);
-//                 }
-//             }
-//             // function (objex, callback) { //inject username, last step (since only id is in scene doc)
-
-//             //     if ((sceneResponse.userName == null || sceneResponse.userName.length < 1) && (sceneResponse.user_id != null)) {
-
-//             //         var oo_id = ObjectId.createFromHexString(sceneResponse.user_id);
-//             //         db_old.users.findOne({_id: oo_id}, function (err, user) {
-//             //             if (!err || user != null) {
-//             //                 console.log("tryna inject usrname: " + user.userName);
-//             //                 sceneResponse.userName = user.userName;
-//             //                 callback(null);
-//             //             }
-//             //         });
-
-//             //     } else  {
-//             //         callback(null);
-//             //     }
-//             // }
-//         ], //waterfall end
-
-//         function (err, result) { // #last function, close async
-//             // console.log("weblinx " + JSON.stringify(sceneResponse.weblinx));
-//             res.json(sceneResponse);
-//             console.log("scene response complete!");
-//         }
-//     );
-// });
-
 
 app.get('/available_domain_scenes/:domain',  function (req, res) { //public scenes for this app's domain name, used by public websites
     let availableScenesResponse = {};
@@ -8616,223 +6685,6 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
     })();
 });
 
-//     async.waterfall([
-//         function (callback) { //do the user lookup
-//             console.log("tryna lookup user id " + req.params.user_id);
-//             if (req.params.user_id != "nilch" && req.params.user_id != "guest" && req.params.user_id != "") {
-//                 var oo_id = ObjectId.createFromHexString(req.params.user_id);
-//                 db_old.users.findOne({_id: oo_id}, function (err, user) {   //check user status
-//                     if (err != null) {
-//                         console.log("error finding user " + req.params.user_id);
-//                         callback(err);
-//                     } else {
-//                         console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-//                         if (user.authLevel != null && user.authLevel != undefined &&  user.status == "validated") {
-//                         userStatus = "subscriber";
-//                         console.log("gotsa subscriber!");
-//                         }
-//                         callback();
-//                     }
-//                 });
-//             } else {
-//                 callback();
-//             }
-//         },
-//         function (calllback) {
-//             var platformString = "";
-//             if (req.params.platform_id == "1") {
-//                 platformString = "sceneWindowsOK";
-//             } else if (req.params.platform_id == "2") {
-//                 platformString = "sceneAndroidOK";
-//             } else if (req.params.platform_id == "3") {
-//                 platformString = "sceneIosOK";
-//             } else if (req.params.platform_id == "4") {
-//                 platformString = "sceneWebGLOK";
-//             }
-//             if (req.params.domain == "servicemedia.net") { //guest query?  show all public scenes for servicemedia
-//                 // query = {sceneShareWithPublic: true};
-//                 query = {$and: [{ [platformString]: true}, {sceneShareWithPublic: true }, {sceneStickyness: { $lt: 4 }}]};
-//                 // if (req.params.user_id != null && req.params.user_id.Length > 8)
-//                 // query = {$or: [{ "user_id": req.params.user_id}, {sceneShareWithPublic: true }]}; //also all scenes with this user_id
-//     // } else if (req.params.platform_id == "4") { // return all for now..
-//     //     query = {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }]};
-//                 // if (req.params.user_id != null && req.params.user_id.Length > 8)
-//                 // query = {$or: [{ "sceneDomain": req.params.domain}, { "user_id": req.params.user_id}, {sceneShareWithPublic: true }]};
-//             } else {
-//                 query = {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }, { [platformString]: true}]};
-//                 // if (req.params.user_id != null && req.params.user_id.Length > 8)
-//                 // query = {$or: [{ "sceneDomain": req.params.domain}, { "user_id": req.params.user_id}, {sceneShareWithPublic: true }]};
-//             }
-//             if (userStatus == "subscriber") { //not public
-//                 if (req.params.domain == "servicemedia.net") {
-//                     query = {$and: [{ [platformString]: true}, {$or: [{ "user_id": req.params.user_id}, {sceneShareWithSubscribers: true }, {sceneShareWithPublic: true }]}]};
-//                 } else {
-//                     query = {$and: [{ [platformString]: true}, { "sceneDomain": req.params.domain}, {$or: [{ "user_id": req.params.user_id}, {sceneShareWithSubscribers: true }, {sceneShareWithPublic: true }]}]};
-//                 }
-//             }
-
-//             console.log("scene query : " + JSON.stringify(query));
-//             db_old.scenes.find( query, function (err, scenes) {
-//             if (err || !scenes) {
-//                 console.log("cain't get no scenes... " + err);
-//                 calllback(err);
-//             } else {
-//                 console.log("gots " + scenes.length + " scenes");
-//                 async.each(scenes,
-//                     function (scene, cb) {
-//                         availableScene = {};
-//                         // console.log("scene name : " + scene.sceneTitle);
-//                         async.waterfall([ //ooo, nested waterfall
-//                                 function (callback) {
-//                                     if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
-//                                         var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
-//                                         var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-//                                         db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-//                                             if (err || !picture_item) {
-//                                                 console.log("error getting postcard for availablescenes: 2" + err);
-//                                                 if (req.params.user_id != null && req.params.user_id && req.params.user_id == scene.user_id) { //show incomplete scenes by this user
-//                                                     availableScene = {
-//                                                         sceneTitle: scene.sceneTitle,
-//                                                         sceneKey: scene.short_id,
-//                                                         sceneType: scene.sceneType,
-//                                                         sceneLastUpdate: scene.sceneLastUpdate,
-//                                                         sceneDescription: scene.sceneDescription,
-//                                                         sceneKeynote: scene.sceneKeynote,
-//                                                         sceneAndroidOK: scene.sceneAndroidOK,
-//                                                         sceneIosOK: scene.sceneIosOK,
-//                                                         sceneWindowsOK: scene.sceneWindowsOK,
-//                                                         sceneWebGLOK: scene.sceneWebGLOK,
-//                                                         sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-//                                                         sceneOwner: scene.userName ? "" : scene.userName,
-//                                                         scenePostcardQuarter: "nilch",
-//                                                         scenePostcardHalf: "nilch"
-//                                                     };
-//                                                     callback(null, availableScene);
-//                                                 } else {
-//                                                     cb(); //no postcards, next...
-//                                                 }
-//                                             } else {
-//                                                 (async () => {
-//                                                     var item_string_filename = JSON.stringify(picture_item.filename);
-//                                                     item_string_filename = item_string_filename.replace(/\"/g, "");
-//                                                     var item_string_filename_ext = getExtension(item_string_filename);
-//                                                     var expiration = new Date();
-//                                                     expiration.setMinutes(expiration.getMinutes() + 30);
-//                                                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                                     // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
-//                                                     // var standardName = 'standard.' + baseName + item_string_filename_ext;
-//                                                     var halfName = 'half.' + baseName + item_string_filename_ext;
-//                                                     var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-
-//                                                     // var urlHalf = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, Expires: 6000}); //just send back thumbnail urls for list
-//                                                     // var urlQuarter = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, Expires: 6000}); //just send back thumbnail urls for list
-//                                                     var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); //just send back thumbnail urls for list
-//                                                     var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000); //just send back thumbnail urls for list
-//                                                     availableScene = {
-//                                                         sceneTitle: scene.sceneTitle,
-//                                                         sceneKey: scene.short_id,
-//                                                         sceneType: scene.sceneType,
-//                                                         sceneLastUpdate: scene.sceneLastUpdate,
-//                                                         sceneDescription: scene.sceneDescription,
-//                                                         sceneKeynote: scene.sceneKeynote,
-//                                                         sceneAndroidOK: scene.sceneAndroidOK,
-//                                                         sceneIosOK: scene.sceneIosOK,
-//                                                         sceneWindowsOK: scene.sceneWindowsOK,
-//                                                         sceneWebGLOK: scene.sceneWebGLOK,
-//                                                         sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-//                                                         sceneOwner: scene.userName ? "" : scene.userName,
-//                                                         scenePostcardQuarter: urlQuarter,
-//                                                         scenePostcardHalf: urlHalf
-//                                                     };
-//                                                     callback(null, availableScene);
-//                                                 })();
-//                                             }
-//                                         });
-//                                     } else {
-//                                         if (req.params.user_id != null && req.params.user_id && req.params.user_id == scene.user_id) { //show incomplete scenes by this user
-//                                             availableScene = {
-//                                                 sceneTitle: scene.sceneTitle,
-//                                                 sceneKey: scene.short_id,
-//                                                 sceneType: scene.sceneType,
-//                                                 sceneLastUpdate: scene.sceneLastUpdate,
-//                                                 sceneDescription: scene.sceneDescription,
-//                                                 sceneKeynote: scene.sceneKeynote,
-//                                                 sceneAndroidOK: scene.sceneAndroidOK,
-//                                                 sceneIosOK: scene.sceneIosOK,
-//                                                 sceneWindowsOK: scene.sceneWindowsOK,
-//                                                 sceneWebGLOK: scene.sceneWebGLOK,
-//                                                 sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-//                                                 sceneOwner: scene.userName ? "" : scene.userName,
-//                                                 scenePostcardQuarter: "nilch",
-//                                                 scenePostcardHalf: "nilch"
-//                                             };
-//                                             callback(null, availableScene);
-//                                         } else {
-//                                             cb(); //no postcards, next...
-//                                         }
-//                                     }
-//                             },
-//                             function (avScene, callback) {
-//                                 // console.log ("tryna get audio " + scene.scenePrimaryAudioID + " for " + JSON.stringify(avScene) );
-//                                 if (scene.scenePrimaryAudioID != null && ObjectId.isValid(scene.scenePrimaryAudioID)) {
-//                                     var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID);
-//                                     db_old.audio_items.findOne({_id: o_id}, function (err, audio_item) {
-//                                         if (err || !audio_item) {
-//                                             console.log("error getting audio items: " + err);
-//                                             callback(null,err);
-//                                         } else {
-//                                             (async () => {
-//                                                 var item_string_filename = JSON.stringify(audio_item.filename);
-//                                                 // console.log("audio filename: " + item_string_filename);
-//                                                 item_string_filename = item_string_filename.replace(/\"/g, "");
-//                                                 var item_string_filename_ext = getExtension(item_string_filename);
-//                                                 var expiration = new Date();
-//                                                 expiration.setMinutes(expiration.getMinutes() + 1000);
-//                                                 var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                                 //console.log(baseName);
-//                                                 var mp3Name = baseName + '.mp3';
-//                                                 // var primaryAudioUrl = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + audio_item.userID + "/" + audio_item._id + "." + mp3Name, Expires: 60000});
-//                                                 var primaryAudioUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + audio_item.userID + "/" + audio_item._id + "." + mp3Name, 10000);
-//                                                 avScene.primaryAudioUrl = primaryAudioUrl;
-//                                                 // console.log("tryna push " + primaryAudioUrl + " to scene number " + availableScenesResponse.availableScenes.length);
-//                                                 availableScenesResponse.availableScenes.push(avScene);
-//                                                 callback(null, 'done');
-//                                             })();
-//                                         }
-//                                     });
-//                                 } else {
-//                                     availableScenesResponse.availableScenes.push(avScene);
-//                                     callback(null, 'done');
-//                                 }
-//                             }
-//                         ], //inner waterfall async end
-//                         function (err, result) { // #last function, close async
-//                             // console.log("available domain scene waterfall done with count: " + availableScenesResponse.availableScenes.length);
-//                                     cb();
-//                                 }
-//                             );
-//                             // calllback();
-//                         }, // each scene async end
-//                     function (err) {// outer waterfall, including user lookup
-//     //                    callbag();
-//                         availableScenesResponse.availableScenes.sort(function(a, b) {
-//                             return b.sceneLastUpdate - a.sceneLastUpdate;
-//                         });
-//                         JSON.stringify(availableScenesResponse);
-//                         res.send(availableScenesResponse);
-//                         }
-//                     );
-//                 }
-//             });
-//         }
-//     ], //waterfall async end
-//     function (err, result) { // #last function, close async
-//         console.log("available domain scene waterfall done with count: " + availableScenesResponse.availableScenes.length);
-//         // callback();
-//         }
-//     );
-// });
-
 
 app.get('/publicscenes', async (req, res) => { //works to put async in the route like so
   console.log("host is " + req.get('host'));
@@ -8902,112 +6754,6 @@ app.get('/publicscenes', async (req, res) => { //works to put async in the route
   res.send(availableScenesResponse); 
 
 });
-
-
-
-// app.get('/publicscenes_old', function (req, res) { //deprecated, see publicscenes above...
-//     console.log("host is " + req.get('host'));
-//     // if (req.get('host') == "servicemedia.net") {
-     
-//     var availableScenesResponse = {};
-//     var availableScenes = [];
-//     availableScenesResponse.availableScenes = availableScenes;
-
-//     const shuffleArray = ([...arr]) => {
-//         let m = arr.length;
-//         while (m) {
-//           const i = Math.floor(Math.random() * m--);
-//           [arr[m], arr[i]] = [arr[i], arr[m]];
-//         }
-//         return arr;
-//       };
-      
-    
-//     const sampleScenes = ([...arr], n = 1) => shuffleArray(arr).slice(0, n);
-//     // query = {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }, { [platformString]: true}]};
-//     //limit?
-//     db_old.scenes.find({$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}]}).toArray( function (err, scenes) {
-//     // db.scenes.aggregate({$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}, {$sample : {size : 15}}]}, function (err, scenes) {
-//         if (err || !scenes) {
-//             console.log("cain't get no publicscenes... " + err);
-
-//         } else {
-
-//             let count = 0;
-           
-//             async.each(sampleScenes(scenes, 30),
-//                 // 2nd param is the function that each item is passed to
-
-//                 function (scene, callback) {
-
-//                     if (scene.scenePostcards != null && scene.scenePostcards.length > 0 && scene.scenePostcards[0] != undefined) {
-//                         // console.log("count is " + count);
-//                         // count++;
-//                         let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
-//                         var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-//                         db_old.image_items.findOne({"_id": oo_id}, function (err, picture_item) {
-
-//                             if (err || !picture_item || picture_item.length == 0) {
-//                                 console.log("error getting picture items: 3" + JSON.stringify(scene.scenePostcards[postcardIndex]));
-
-//                             } else {
-//                                 var item_string_filename = JSON.stringify(picture_item.filename);
-//                                 item_string_filename = item_string_filename.replace(/\"/g, "");
-//                                 var item_string_filename_ext = getExtension(item_string_filename);
-//                                 var expiration = new Date();
-//                                 expiration.setMinutes(expiration.getMinutes() + 30);
-//                                 var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-//                                 var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-//                                 var halfName = 'half.' + baseName + item_string_filename_ext;
-//                                 var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-//                                 // var standardName = 'standard.' + baseName + item_string_filename_ext;
-
-//                                 (async () => {  // to flex with minio, etc..
-//                                     try {
-//                                         var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
-//                                         var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000);
-//                                         // console.log("tyryna get mibno urls... " + urlHalf);
-//                                         var tempOwnerName = "test"
-//                                         var availableScene = {
-//                                             sceneWindowsOK: scene.sceneWindowsOK,
-//                                             sceneAndroidOK: scene.sceneAndroidOK,
-//                                             sceneIosOK: scene.sceneIosOK,
-//                                             sceneDomain: scene.sceneDomain,
-//                                             sceneTitle: scene.sceneTitle,
-//                                             sceneKey: scene.short_id,
-//                                             sceneDescription: scene.sceneDescription,
-//                                             sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-//                                             sceneOwner: tempOwnerName,
-//                                             scenePostcardHalf: urlHalf,
-//                                             scenePostcardQuarter: urlQuarter
-//                                         };
-//                                         if (availableScene.sceneDomain != "xrswim.com") { //hrm...
-//                                             availableScenesResponse.availableScenes.push(availableScene);
-//                                         }
-//                                         callback();
-//                                     } catch (e) {
-//                                         callback(e);
-//                                     }
-//                                 })();
-//                             }
-//                         });
-//                     } else {
-//                         callback();
-//                     }
-//                 },
-//                 // 3rd param is the function to call when everything's done
-//                 function (err) {
-//                     if (err) {
-//                         res.send(err);
-//                     } else {
-//                         res.send(availableScenesResponse);
-//                     }
-//                 }
-//             );
-//         }
-//     });
-// });
-
 
 app.post('/newlocation', requiredAuthentication, function (req, res) {
 
@@ -9131,39 +6877,6 @@ app.post('/update_location/:_id', requiredAuthentication, function (req, res) {
         }
     })();
 });
-//     db_old.locations.findOne({ "_id" : o_id}, function(err, location) {
-//         if (err || !location) {
-//             console.log("error getting audio items: " + err);
-//         } else {
-//             console.log("tryna update location" + req.body._id);
-//             var timestamp = Math.round(Date.now() / 1000);
-//             location.lastUpdate = timestamp;
-//             if (location.type.toLowerCase() == "geographic") {
-//                 db_old.locations.update( { "_id": o_id }, { $set: {
-//                     tags: req.body.tags,
-//                     name: req.body.name,
-//                     description: req.body.description,
-//                     latitude: req.body.latitude,
-//                     longitude: req.body.longitude,
-//                     lastUpdate: timestamp
-//                 }});
-//                 res.send("updated");
-//             }
-//             if (location.type.toLowerCase() == "worldspace") {
-//                 db_old.locations.update( { "_id": o_id }, { $set: {
-//                     tags: req.body.tags,
-//                     name: req.body.name,
-//                     description: req.body.description,
-//                     x: req.body.x,
-//                     y: req.body.y,
-//                     z: req.body.z,
-//                     lastUpdate: timestamp
-//                 }});
-//                 res.send("updated");
-//             } 
-//         } if (err) {res.send(error)};
-//     });
-// });
 
 app.post('/newscene', requiredAuthentication, admin, function (req, res) {
     console.log(req.body);
@@ -9188,43 +6901,6 @@ app.post('/newscene', requiredAuthentication, admin, function (req, res) {
     })();
 });
 
-    // db_old.scenes.save(newScene, function (err, saved) {
-    //     if ( err || !saved ) {
-    //         console.log('scene not saved..');
-    //         res.send("nilch");
-    //     } else {
-    //         var item_id = saved._id.toString();
-    //         console.log('created new scene id: ' + item_id);
-    //         tempID = "";
-    //         newShortID = "";
-    //         tempID = item_id;
-    //         // newShortID = shortId(tempID);
-    //         newShortID = shortid.generate(); //TODO - externalize and check for collisions!
-    //         var o_id = ObjectId.createFromHexString(tempID);
-    //         console.log(tempID + " = " + newShortID);
-    //         db_old.scenes.update( { _id: o_id }, { $set: { short_id: newShortID }});
-
-    //         // db.acl.save(
-    //         //     { acl_rule: "read_scene_" + saved._id },  function (err, acl) {
-    //         //         if (err || !acl) {
-    //         //         } else {
-    //         //             db.acl.update({ 'acl_rule': "read_scene_" + saved._id},{ $push: { 'userIDs': req.session.user._id.toString() } });
-    //         //             console.log("ok saved acl");
-    //         //         }
-    //         //     });
-    //         // db.acl.save(
-    //         //     { 'acl_rule': "write_scene_" + saved._id }, function (err, acl) {
-    //         //         if (err || !acl) {
-    //         //         } else {
-    //         //             db.acl.update({ 'acl_rule': "write_scene_" + saved._id },{ $push: { 'userIDs': req.session.user._id.toString() } });
-    //         //             console.log("ok saved acl");
-    //         //         }
-    //         //     });
-    //         res.send("created new scene " + item_id);
-    //     }
-    // });
-// });
-
 
 app.post('/newgroup', requiredAuthentication, function (req, res) {
 
@@ -9247,16 +6923,6 @@ app.post('/newgroup', requiredAuthentication, function (req, res) {
         }
     })();
     
-    // db_old.groups.save(group, function (err, saved) {
-    //     if ( err || !saved ) {
-    //         // console.log('group not saved..');
-    //         res.send("error " + err );
-    //     } else {
-    //         var item_id = saved._id.toString();
-    //         console.log('new group created, id: ' + item_id);
-    //         res.send(item_id);
-    //     }
-    // });
 });
 
 app.post('/delete_group/', requiredAuthentication, function (req, res) { 
