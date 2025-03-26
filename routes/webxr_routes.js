@@ -371,7 +371,7 @@ webxr_router.get('/:_id', function (req, res) {
     
 
     let aframeScript = "<script src=\x22https://aframe.io/releases/1.7.0/aframe.min.js\x22></script>";
-    let threejsVersion = "164";
+    let threejsVersion = "173";
     let surfaceScatterScript = "";
     let locationData = "";
     let modelData = "";
@@ -524,8 +524,8 @@ webxr_router.get('/:_id', function (req, res) {
                             // physicsScripts =  "<script src=\x22https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js\x22></script>"+
                             usePhysicsType = "ammo";
                             physicsScripts =  "<script src=\x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22></script>"+
-                            "<script src=\x22../main/vendor/aframe/aframe-physics-system.min.js\x22></script>"+
-                            "<script src=\x22https://unpkg.com/aframe-haptics-component/dist/aframe-haptics-component.min.js\x22></script>";                                              
+                            "<script src=\x22../main/vendor/aframe/aframe-physics-system.js\x22></script>";
+                            // "<script src=\x22https://unpkg.com/aframe-haptics-component/dist/aframe-haptics-component.min.js\x22></script>";                                              
                         }
                         if (sceneData.sceneTags[i].toLowerCase().includes("brownian")) {
                             brownianScript =  "<script src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
@@ -5052,10 +5052,12 @@ webxr_router.get('/:_id', function (req, res) {
                             
                             // "\x22three\x22: \x22https://unpkg.com/three@0.164.0/build/three.module.js\x22,"+
                             // "\x22three/addons/\x22: \x22https://unpkg.com/browse/three@0.164.0/examples/jsm/\x22"+
-
+                            // aframe": "https://aframe.io/releases/1.7.0/aframe.module.min.js",
+                            "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/build/three.module.js\x22,"+
+                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22"+
                                                         
-                            "\x22three\x22: \x22https://unpkg.com/three@0."+threejsVersion+".0/build/three.module.js\x22,"+
-                            "\x22three/addons/\x22: \x22https://unpkg.com/three@0."+threejsVersion+".0/examples/jsm/\x22"+
+                            // "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/build/three.module.js\x22,"+
+                            // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22"+
                             // https://unpkg.com/three@0.164.0/examples/jsm/controls/TransformControls.js
                             // "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js\x22,"+
                             // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/\x22"+

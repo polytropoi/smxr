@@ -101,109 +101,96 @@ app.use(function(req, res, next) {
     }
 });
 
-    app.use(methodOverride());  //for header rewriting
+app.use(methodOverride());  //for header rewriting
 
-    var expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 2 hour
+var expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 2 hour
 
-    app.use(session({
-        resave: true,
-        saveUninitialized: true,
-        store: MongoStore.create({ mongoUrl: process.env.MONGO_SESSIONS_URL }),
-        rolling: true,
-        secret: process.env.JWT_SECRET }));
+app.use(session({
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_SESSIONS_URL }), //new way w/ mongo connect
+    rolling: true,
+    secret: process.env.JWT_SECRET }));
 
-    // app.use(session({
-    //   store: MongoStore.create({
-    //     mongoUrl: process.env.MONGO_SESSIONS_URL,
-    //     ttl: 14 * 24 * 60 * 60 // = 14 days. Default
-    //   })
-    // }));
 
-    app.use(cookieParser()); //unused?
-    app.use(bodyParser.json({ "limit": "150mb", extended: true })); //set this to route specific somehow, for add_scene_mods?
-    app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+app.use(cookieParser()); //unused?
+app.use(bodyParser.json({ "limit": "150mb", extended: true })); //set this to route specific somehow, for add_scene_mods?
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
-    var maxItems = 1000;
+var maxItems = 1000;
 
-    import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-    import {
-        S3Client, 
-        S3ServiceException, 
-        GetObjectCommand, 
-        HeadObjectCommand, 
-        CopyObjectCommand, 
-        ListObjectsV2Command,
-        PutObjectCommand,
-        DeleteObjectCommand,
-        DeleteObjectsCommand,
-    } from "@aws-sdk/client-s3";
-    
-    import {SESClient,SendEmailCommand} from "@aws-sdk/client-ses"
-    // export let s3 = new aws.S3();
-    export const s3 = new S3Client({
-        region: 'us-east-1',
-        credentials: {
-            accessKeyId: process.env.AWSKEY,
-            secretAccessKey: process.env.AWSSECRET
-        }
-    });
-    export const ses = new SESClient({
-        region: 'us-east-1',
-        credentials: {
-            accessKeyId: process.env.AWSKEY,
-            secretAccessKey: process.env.AWSSECRET
-        }
-    });
+import {
+    S3Client, 
+    S3ServiceException, 
+    GetObjectCommand, 
+    HeadObjectCommand, 
+    CopyObjectCommand, 
+    ListObjectsV2Command,
+    PutObjectCommand,
+    DeleteObjectCommand,
+    DeleteObjectsCommand,
+} from "@aws-sdk/client-s3";
 
-    ///////// minio init ///////////////////////////////
-    var minioClient = null;
-    if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
-        const minio = require('minio');
-            minioClient = new minio.Client({
-            endPoint: process.env.MINIOENDPOINT,
-            port: 9000,
-            useSSL: false,
-            accessKey: process.env.MINIOKEY,
-            secretKey: process.env.MINIOSECRET
-        });
+import {SESClient,SendEmailCommand} from "@aws-sdk/client-ses"
+// export let s3 = new aws.S3();
+export const s3 = new S3Client({
+    region: 'us-east-1',
+    credentials: {
+        accessKeyId: process.env.AWSKEY,
+        secretAccessKey: process.env.AWSSECRET
     }
-
-    if (process.env.GRAB_AND_SQUEEZE && process.env.GRAB_AND_SQUEEZE === "YES") {
-        //import the media libs...
+});
+export const ses = new SESClient({
+    region: 'us-east-1',
+    credentials: {
+        accessKeyId: process.env.AWSKEY,
+        secretAccessKey: process.env.AWSSECRET
     }
-    ////////////////////////////////////
-    var appAuth = "noauth";
-    // let docClient = new aws.DynamoDB.DocumentClient();
-    // let trafficTable = "traffic_1";
+});
 
-    var server = http.createServer(app);
-    server.timeout = 240000;
-    server.keepAliveTimeout = 24000;
-    server.listen(process.env.PORT || 3000, function() {
-        console.log("Express server listening on port 3000");
+///////// minio init ///////////////////////////////
+var minioClient = null;
+if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
+    const minio = require('minio');
+        minioClient = new minio.Client({
+        endPoint: process.env.MINIOENDPOINT,
+        port: 9000,
+        useSSL: false,
+        accessKey: process.env.MINIOKEY,
+        secretKey: process.env.MINIOSECRET
     });
-    // app.set('db', db_old);
-    // // app.set('store', store);
-    // app.set('s3', s3);
+}
 
-    // db_old.scenes.createIndex( { short_id: -1 } );
+if (process.env.GRAB_AND_SQUEEZE && process.env.GRAB_AND_SQUEEZE === "YES") {
+    //import the media libs and enabled the gs routes
+}
+////////////////////////////////////
+var appAuth = "noauth";
 
-    // INCLUDE EXTERNAL ROUTES BELOW
-    // var oculus_routes = require('./routes/oculus_routes.cjs');
+var server = http.createServer(app);
+server.timeout = 240000;
+server.keepAliveTimeout = 24000;
+server.listen(process.env.PORT || 3000, function() {
+    console.log("Express server listening on port 3000");
+});
 
-    import webxr_routes from './routes/webxr_routes.js';
-    app.use('/webxr', webxr_routes); 
-    import landing_routes from './routes/landing_routes.js';
-    app.use('/landing', landing_routes);  
-    import unity_routes from './routes/unity_routes.js';
-    app.use('/unity', unity_routes);  
-    import stripe_routes from './routes/stripe_routes.js';
-    app.use('/stripe', stripe_routes);
-    // import gs_routes from './routes/gs_routes.js';
-    // app.use('/gs', gs_routes);  
-    
-    // import oculus_routes from './routes/oculus_routes.js';
+// INCLUDE EXTERNAL ROUTES BELOW
+// var oculus_routes = require('./routes/oculus_routes.cjs');
+
+import webxr_routes from './routes/webxr_routes.js';
+app.use('/webxr', webxr_routes); 
+import landing_routes from './routes/landing_routes.js';
+app.use('/landing', landing_routes);  
+import unity_routes from './routes/unity_routes.js';
+app.use('/unity', unity_routes);  
+import stripe_routes from './routes/stripe_routes.js';
+app.use('/stripe', stripe_routes);
+// import gs_routes from './routes/gs_routes.js';
+// app.use('/gs', gs_routes);  
+
+// import oculus_routes from './routes/oculus_routes.js';
 
 /////// SHOW/HIDE Below to run socket.io on same port
 
@@ -211,7 +198,7 @@ app.use(function(req, res, next) {
 // var socketUsers = {};
 // var allUsers = [];
 // var io = require('socket.io')(server);
-// var mongoAdapter = require('socket.io-adapter-mongo');
+// var mongoAdapter = require('socket.io-adapter-mongo'); //still?
 // io.adapter(mongoAdapter( process.env.MONGO_SESSIONS_URL ));
 // io.set('origins', 'servicemedia.net');
 // io.set('transports', ['polling', 'websocket']);
@@ -254,8 +241,8 @@ io.on('connection', function(socket) {
                        room = rm; //set global room value for this socket, since we can only be in one at a time
                        io.to(room).emit('user joined', socket.uname, room);
                     } else {    //maybe do lookup on join? 
-                        // var oo_id = ObjectId.createFromHexString(payload.userId);
-                        var oo_id = ObjectId.createFromHexString(payload.userId);
+                        
+                        const oo_id = ObjectId.createFromHexString(payload.userId);
                         (async () => {
                           try {
                             const query = {"_id": oo_id};
@@ -333,33 +320,22 @@ io.on('connection', function(socket) {
     socket.on('pic frame', function(data, sid) { //sid = sender's socket.id
         console.log("tryna send a pic frame : ");
          socket.to(room).emit('getpicframe', data, sid);
- //        socket.broadcast.emit('broad',data);
      });
 
-
     socket.on('user message', function(data) {
-        // console.log(socket.uname + " user message: " + data + " for room " + room);
         socket.in(room).emit('user messages', socket.uname, data);
-//        socket.broadcast.emit('messages',data);
     });
+
     socket.on('admin message', function(data) {
-        // console.log(socket.uname + " user message: " + data + " for room " + room);
         socket.in(room).emit('admin message', data);
-//        socket.broadcast.emit('messages',data);
     });
 
     socket.on('activity message', function(data) {
         console.log("room : " + room + "activity message: " + data)
         socket.to(room).emit('messages', data);
-//        socket.broadcast.emit('messages',data);
     });
 
     socket.on('updateplayerposition', function(room, uname, posx, posy, posz, rotx, roty, rotz, sid, source) { //adding rot vals and source
-    //    console.log(uname + ' sid ' + sid + ' moved to ' + posx+","+posy+","+posz + " in room " + room);
-//        socket.to(room).emit('messages', uname + ' moved to ' + posx+","+posy+","+posz);
-        // if (source == "aframe") { //if player is in aframe scene, flip the z - what about rotations?
-        //     posz = posz * -1; 
-        // }
         socket.to(room).emit('playerposition', uname,posx,posy,posz,rotx, roty, rotz, sid, source);
     });
 

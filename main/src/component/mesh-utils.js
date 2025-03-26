@@ -8,8 +8,14 @@
 // import {MeshSurfaceSampler} from 'three/addons/math/MeshSurfaceSampler.js'; 
 // import {TransformControls} from 'three/addons/controls/TransformControls.js';
     // // import * as THREE from 'three';
+    // import AFRAME from "aframe";
+
     import { TransformControls } from 'three/addons/controls/TransformControls.js';
     import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
+    
+    // import { TransformControls } from 'three/addons/controls/';
+    // import { MeshSurfaceSampler } from 'three/addons/math/';
+
 // import { SVGLoader } from '/three/examples/jsm/loaders/SVGLoader.js'; // ref'd in import maps
 // import { Flow } from '/three/examples/jsm/modifiers/CurveModifier.js'; 
 // import { Line2 } from '/three/examples/jsm/lines/Line2.js'; //hrm..

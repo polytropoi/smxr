@@ -1,4 +1,4 @@
-
+// import AFRAME from "aframe";
     // this single js file does the whole web admin interface:
     // 1. amirite checks authentication and pops some UI
     // 2. bigSwitch does "routing" and calls "controller" functions
