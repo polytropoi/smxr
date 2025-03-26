@@ -24,7 +24,7 @@ import helmet from "helmet";
 // import ObjectID from "bson-objectid"; //nope
 // import bcrypt from "bcrypt-nodejs"; //deprecated!
 
-import async from "async";
+// import async from "async"; // whoa
 
 import bcrypt from "bcryptjs"; //just drop in replacement ?!? ok then
 import shortid from "shortid";
@@ -84,9 +84,7 @@ var databaseUrl = process.env.MONGO_URL; //main db connstring
 var collections = ["acl", "auth_req", "domains", "apps", "assets", "assetsbundles", "models", "users", "inventories", "inventory_items", "audio_items", "text_items", "audio_item_keys", "image_items", "video_items",
     "obj_items", "paths", "keys", "traffic", "scores", "attributes", "achievements", "activity", "actions", "purchases", "storeitems", "scenes", "groups", "weblinks", "locations", "iap"];
 
-export let db_old = mongojs(databaseUrl, collections); //soon you will die!
-
-
+export let db_old = mongojs(databaseUrl, collections); //soon you will die!!  VERY SOON!!  HA AHHHAA!
 app.use(express.static(path.join(__dirname, './'), { maxAge: oneDay }));
 
 app.use(function(req, res, next) {
@@ -185,11 +183,11 @@ app.use(function(req, res, next) {
     server.listen(process.env.PORT || 3000, function() {
         console.log("Express server listening on port 3000");
     });
-    app.set('db', db_old);
-    // app.set('store', store);
-    app.set('s3', s3);
+    // app.set('db', db_old);
+    // // app.set('store', store);
+    // app.set('s3', s3);
 
-    db_old.scenes.createIndex( { short_id: -1 } );
+    // db_old.scenes.createIndex( { short_id: -1 } );
 
     // INCLUDE EXTERNAL ROUTES BELOW
     // var oculus_routes = require('./routes/oculus_routes.cjs');
@@ -673,7 +671,7 @@ export function saveActivity (data) {
 // });
 
 
-///////////////////////// OBJECT STORE (S3, Minio, etc) OPS BELOW - TODO - replace all s3 getSignedUrl calls with this, promised based version, to suport minio, etc... (!)
+///////////////////////// OBJECT STORE (S3, Minio, etc) OPS BELOW - TODO - replace all s3 calls w promised based versions, to suport minio, etc... (!)
 export async function ReturnPresignedUrl(bucket, key, time) {
     
     if (minioClient) {
@@ -6580,7 +6578,7 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
     (async () => {
         try {
             if (req.params.user_id == "nilch" || req.params.user_id == "guest" && req.params.user_id == "") {
-            return null;
+                return null;
             }
             const oo_id = ObjectId.createFromHexString(req.params.user_id);
             const userquery = {"_id": oo_id}; 
@@ -6612,9 +6610,10 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
                     query = {$and: [{ [platformString]: true}, { "sceneDomain": req.params.domain}, {$or: [{ "user_id": req.params.user_id}, {sceneShareWithSubscribers: true }, {sceneShareWithPublic: true }]}]};
                 }
             }
-            console.log("scene query : " + JSON.stringify(query));
+            // console.log("scene query : " + JSON.stringify(query));
             const scenes = await RunDataQuery("scenes", "find", query);
-            for (let scene in scenes) {
+            // console.log("scenes: " + JSON.stringify(scenes));
+            for (let scene of scenes) {
                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
                     const postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
                     const pc_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
@@ -6677,6 +6676,7 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
             availableScenesResponse.availableScenes.sort(function(a, b) {
                 return b.sceneLastUpdate - a.sceneLastUpdate;
             });
+            // console.log("availablescenes " + JSON.stringify(availableScenesResponse));
             res.send(availableScenesResponse);          
         } catch (e) {
             console.log('error getting available domains scenes ' + e);

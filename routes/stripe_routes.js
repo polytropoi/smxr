@@ -14,86 +14,86 @@ import { requiredAuthentication, checkAppID } from "../server.js";
 
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 
-stripe_router.post('/stripe_testpurchase', checkAppID, requiredAuthentication, function (req, res) {
-    console.log("tryna post test purchase: " + JSON.stringify(req.body));
-    let _id = ObjectId.createFromHexString(req.body.userID);
-    let storeitemID = ObjectId.createFromHexString(req.body.storeitemID);
-    let obody = req.body;
+// stripe_router.post('/stripe_testpurchase', checkAppID, requiredAuthentication, function (req, res) {
+//     console.log("tryna post test purchase: " + JSON.stringify(req.body));
+//     let _id = ObjectId.createFromHexString(req.body.userID);
+//     let storeitemID = ObjectId.createFromHexString(req.body.storeitemID);
+//     let obody = req.body;
     
-    db_old.users.findOne({"_id" : _id}, function (err, user) {// check user
-        if (err || !user) {
-            console.log("error getting user: " + err);
-            res.send("error " + err);
-        } else {
-            db_old.storeitems.findOne({"_id" : storeitemID}, function (err, storeitem){ //check store item
-                if (err || !storeitem) {
-                    console.log("no store item error " + err);
-                    res.send("error " + err);
-                } else {
-                    let usertotal = 0;
-                    db_old.purchases.find({userID: req.body.userID, storeitemID: req.body.storeitemID}, function (err, purchases) { //check user's previous purchases of this item doesn't exceed maxPerUser
-                        if (err) {
-                            console.log("error! " + err);
-                        } else {
+//     db_old.users.findOne({"_id" : _id}, function (err, user) {// check user
+//         if (err || !user) {
+//             console.log("error getting user: " + err);
+//             res.send("error " + err);
+//         } else {
+//             db_old.storeitems.findOne({"_id" : storeitemID}, function (err, storeitem){ //check store item
+//                 if (err || !storeitem) {
+//                     console.log("no store item error " + err);
+//                     res.send("error " + err);
+//                 } else {
+//                     let usertotal = 0;
+//                     db_old.purchases.find({userID: req.body.userID, storeitemID: req.body.storeitemID}, function (err, purchases) { //check user's previous purchases of this item doesn't exceed maxPerUser
+//                         if (err) {
+//                             console.log("error! " + err);
+//                         } else {
 
-                            for (let i = 0; i < purchases.length; i++) {
-                                let quantity = (purchases[i].quantity != null) ? purchases[i].quantity : 1;
-                                usertotal += quantity;
-                            }
-                            if (usertotal >= storeitem.maxPerUser) {
-                                console.log("maxPerUser exceeded!");
-                                res.send("this user can't buy more of these!");
-                            } else {
-                                console.log("checking inventory totalSold == " + total + " maxTotal ==  " + storeitem.maxTotal );
-                                if (storeitem.maxTotal == 0 || total < storeitem.maxTotal) { //check maxTotal
-                                    var userEmail = user.email;
-                                    console.log("tryna charge " + userEmail);
-                                    obody.userEmail = userEmail;
-                                    obody.purchaseStatus = "Test Purchase"
-                                    if (obody.quantity == null) {
-                                        obody.quantity = 1;
-                                    }
-                                    // if (obody.quantity < storeitem.maxPerUser) {
-                                    db_old.purchases.save(obody, function (err, saved) {
-                                        if ( err || !saved ) {
-                                            console.log('purchase not saved..');
-                                            res.send("purchase failed");
-                                        } else {
-                                            var item_id = saved._id.toString();
-                                            console.log('new purchase id: ' + item_id);
-                                            db_old.storeitems.update( { "_id": storeitemID },{ $inc: { totalSold: obody.quantity }});
-                                            var htmlbody = "Thanks for your Purchase: " + JSON.stringify(saved);
-                                            (async () => {
-                                                try {
-                                                    const status = await SendEmail(userEmail, adminEmail, htmlbody, "Your Purchase");
-                                                    const status2 = await SendEmail(userEmail, adminEmail, htmlbody, "Your Purchase ADMIN");
-                                                } catch (e) {
-                                                     console.log("error sending! " + e);
-                                                }
+//                             for (let i = 0; i < purchases.length; i++) {
+//                                 let quantity = (purchases[i].quantity != null) ? purchases[i].quantity : 1;
+//                                 usertotal += quantity;
+//                             }
+//                             if (usertotal >= storeitem.maxPerUser) {
+//                                 console.log("maxPerUser exceeded!");
+//                                 res.send("this user can't buy more of these!");
+//                             } else {
+//                                 console.log("checking inventory totalSold == " + total + " maxTotal ==  " + storeitem.maxTotal );
+//                                 if (storeitem.maxTotal == 0 || total < storeitem.maxTotal) { //check maxTotal
+//                                     var userEmail = user.email;
+//                                     console.log("tryna charge " + userEmail);
+//                                     obody.userEmail = userEmail;
+//                                     obody.purchaseStatus = "Test Purchase"
+//                                     if (obody.quantity == null) {
+//                                         obody.quantity = 1;
+//                                     }
+//                                     // if (obody.quantity < storeitem.maxPerUser) {
+//                                     db_old.purchases.save(obody, function (err, saved) {
+//                                         if ( err || !saved ) {
+//                                             console.log('purchase not saved..');
+//                                             res.send("purchase failed");
+//                                         } else {
+//                                             var item_id = saved._id.toString();
+//                                             console.log('new purchase id: ' + item_id);
+//                                             db_old.storeitems.update( { "_id": storeitemID },{ $inc: { totalSold: obody.quantity }});
+//                                             var htmlbody = "Thanks for your Purchase: " + JSON.stringify(saved);
+//                                             (async () => {
+//                                                 try {
+//                                                     const status = await SendEmail(userEmail, adminEmail, htmlbody, "Your Purchase");
+//                                                     const status2 = await SendEmail(userEmail, adminEmail, htmlbody, "Your Purchase ADMIN");
+//                                                 } catch (e) {
+//                                                      console.log("error sending! " + e);
+//                                                 }
 
-                                            })(); 
+//                                             })(); 
                                            
-                                            res.send("purchase id: " + item_id + " charged " + saved.price);
-                                        }
-                                    });
-                                } else {
-                                    console.log("Sold Out!")
-                                    res.send("that item is sold out");
-                                }
-                            }
-                        }
-                    }); //check user's purchases for this item
-                    let total = 0;
-                    if (storeitem.totalSold != null) {
-                        total = storeitem.totalSold;
-                    }
+//                                             res.send("purchase id: " + item_id + " charged " + saved.price);
+//                                         }
+//                                     });
+//                                 } else {
+//                                     console.log("Sold Out!")
+//                                     res.send("that item is sold out");
+//                                 }
+//                             }
+//                         }
+//                     }); //check user's purchases for this item
+//                     let total = 0;
+//                     if (storeitem.totalSold != null) {
+//                         total = storeitem.totalSold;
+//                     }
 
-                } 
-            }); 
+//                 } 
+//             }); 
 
-        }
-    });
-});
+//         }
+//     });
+// });
 
 stripe_router.post('/stripe_purchase', checkAppID, requiredAuthentication, function (req, res) {
     console.log("tryna post purchase: " + JSON.stringify(req.body));
