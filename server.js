@@ -16,7 +16,7 @@ import cookieParser from "cookie-parser";
 import mongojs from "mongojs";
 import methodOverride from "method-override";
 import session from "express-session";
-import MongoStore from "connect-mongo";
+import MongoStore from "connect-mongo"; //better
 import validator from "validator"; 
 // import minio from "minio";
 import helmet from "helmet";
