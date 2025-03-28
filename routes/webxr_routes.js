@@ -1504,9 +1504,11 @@ webxr_router.get('/:_id', function (req, res) {
                     var oo_id = ObjectId.createFromHexString(sceneResponse.sceneModels[i]);
                     const query = {"_id": oo_id};
                     const model = await RunDataQuery("models", "findOne", query);
-                    const url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                    model.url = url;
-                    modelz.push(model);
+                    if (model && model.userID) {
+                        const url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                        model.url = url;
+                        modelz.push(model);
+                    }
                 }
                 var buff = Buffer.from(JSON.stringify(modelz)).toString("base64");
                 modelData = "<div id=\x22sceneModels\x22 data-models='"+buff+"'></div>";
@@ -1626,10 +1628,10 @@ webxr_router.get('/:_id', function (req, res) {
             console.log("tryna get all sceneObjects " + JSON.stringify(sceneResponse.sceneObjects));
             let objectIDs = []; //to prevent dupes in objex response below
             for (let i = 0; i < sceneResponse.sceneObjects.length; i++) {
-                let objectID = sceneResponse.sceneObjects[i];
+                let objectID = sceneResponse.sceneObjects[i].toString();
                 // if (objectID != undefined && objectID != "none" && sceneResponse.sceneObjects.indexOf(objectID) != -1 && objectIDs.indexOf(objectID) == -1) {
                 objectIDs.push(objectID);
-                console.log("objectID" + objectID);
+                console.log("objectID " + objectID);
                 const o_id = ObjectId.createFromHexString(objectID);
                 const objquery = {"_id": o_id};
                 let objekt = await RunDataQuery("obj_items", "findOne", objquery);
@@ -1638,7 +1640,7 @@ webxr_router.get('/:_id', function (req, res) {
                 if (objekt.actionIDs != undefined && objekt.actionIDs.length > 0) {
                     // console.log("tryna add obj actions " + objekt.actionIDs);
                     const aids = objekt.actionIDs.map(item => {
-                        return ObjectId.createFromHexString(item);
+                        return ObjectId.createFromHexString(item.toString());
                     });
                     const actionquery = {"_id": {$in: aids }};
                     const actions = await RunDataQuery("actions", "find", actionquery);
@@ -1657,8 +1659,8 @@ webxr_router.get('/:_id', function (req, res) {
                     const groupquery = {"_id": ObjectId.createFromHexString(objekt.audiogroupID.toString())};
                     const group = await RunDataQuery("groups", "findOne", groupquery);
                     requestedAudioItems.push(group.items);    //TODO whatabout DUPES?!?!
-                }
-                
+                }   
+
                 ////sprite sheets for object particle system // 
                 if (objekt.particles != undefined && objekt.particles != null && objekt.particles != "None" ) { //maybe a "use flames" tag?
                     if (objekt.particles.toString().includes("Fire")) {
@@ -1696,11 +1698,12 @@ webxr_router.get('/:_id', function (req, res) {
             //////// get models associated with the actions on the objects //////////
             if (actionModels.length > 0) {
                 for (let i = 0; i < actionModels.length; i++) {
-                    const m_id = ObjectId.createFromHexString(actionModel.modelID);
+                    let actionModel = actionModels[i];
+                    const m_id = ObjectId.createFromHexString(actionModel.modelID.toString());
                     const mquery = {"_id": m_id};
                     const model = await RunDataQuery("models", "findOne", mquery);
-                    if (model.item_type == "glb") {
-                        let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + asset.filename, 6000);
+                    if (model && model.userID && model.item_type == "glb") {
+                        let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
                         gltfsAssets = gltfsAssets + "<a-asset-item class=\x22gltfAssets\x22 crossorigin=\x22anonymous\x22 response-type=\x22arraybuffer\x22 id=\x22" + 
                         actionModel.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";  
                         console.log("adding actionModel :" + actionModel.modelName);
@@ -2205,6 +2208,7 @@ webxr_router.get('/:_id', function (req, res) {
             ////////////// audio //////////////////
             const audioquery = {"_id": {$in: requestedAudioItems }};
             const audio_items = await RunDataQuery("audio_items", "find", audioquery);
+            
             for (var i = 0; i < audio_items.length; i++) { 
                 var item_string_filename = JSON.stringify(audio_items[i].filename);
                 item_string_filename = item_string_filename.replace(/\"/g, "");
@@ -2438,26 +2442,35 @@ webxr_router.get('/:_id', function (req, res) {
                 
                 } else {
                     //hrm, now most vids are hls, don't really need this.../// yes but TODO need to set a single vid as hls here...
-                    if (preloadVideo) { //ugh
-                        videoAsset = "<video id=\x22video1\x22 crossOrigin=\x22anonymous\x22>"+vidSrc+"</video>";
-                    } else {// still ugh
-                        videoAsset = "<video autoplay muted loop=\x22true\x22 webkit-playsinline playsinline id=\x22video1\x22 crossOrigin=\x22anonymous\x22></video>"; 
-                    }
-                    videoEntity = "<a-entity "+videoParent+" class=\x22activeObjexGrab activeObjexRay\x22 vid_materials=\x22url: "+vidUrl+"\x22 gltf-model=\x22#movieplayer2.glb\x22 position=\x22"+videoLocation+"\x22 rotation=\x22"+videoRotation+"\x22 width='10' height='6'><a-text id=\x22videoText\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x22-.5 -1 1\x22 wrapCount=\x2240\x22 value=\x22Click to Play Video\x22></a-text>" +
-                    "</a-entity>";
+                    // if (preloadVideo) { //ugh
+                    //     videoAsset = "<video id=\x22video1\x22 crossOrigin=\x22anonymous\x22>"+vidSrc+"</video>";
+                    // } else {// still ugh
+                    //     videoAsset = "<video autoplay muted loop=\x22true\x22 webkit-playsinline playsinline id=\x22video1\x22 crossOrigin=\x22anonymous\x22></video>"; 
+                    // }
+                    // videoEntity = "<a-entity "+videoParent+" class=\x22activeObjexGrab activeObjexRay\x22 vid_materials=\x22url: "+vidUrl+"\x22 gltf-model=\x22#movieplayer2.glb\x22 position=\x22"+videoLocation+"\x22 rotation=\x22"+videoRotation+"\x22 width='10' height='6'><a-text id=\x22videoText\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x22-.5 -1 1\x22 wrapCount=\x2240\x22 value=\x22Click to Play Video\x22></a-text>" +
+                    // "</a-entity>";
                 }
-                if (sceneResponse.sceneVideoGroups != null && sceneResponse.sceneVideoGroups.length > 0) {
-                   
-                    const objectIDs = sceneResponse.sceneVideoGroups.map(convertStringToObjectID);
-                    const gquery = {"_id": {$in : objectIDs}};
-                    const group = await RunDataQuery("video_items", "findOne", gquery); //only one vid group per scene?
-                    console.log("video group " + JSON.stringify(group));
+            }
+            
+            if (sceneResponse.sceneVideoGroups != null && sceneResponse.sceneVideoGroups.length > 0) {
+                console.log("sceneResponse.sceneVideoGroups "+ sceneResponse.sceneVideoGroups);
+                const objectIDs = sceneResponse.sceneVideoGroups.map(convertStringToObjectID);
+                // const objectIDs = sceneResponse.sceneVideoGroups.map(item => {
+                //     return ObjectId.createFromHexString(item.toString());
+                // });
+                // console.log("video groups : "+objectIDs);
+                const gquery = {"_id": {$in : objectIDs}};
+                const groups = await RunDataQuery("groups", "find", gquery); //only one vid group per scene?
+                console.log("video group " + JSON.stringify(groups));
+                let group = groups[0];
+                    if (group && group._id) {
                     let vidGroup = {};
                     vidGroup._id = group._id;
                     vidGroup.name = group.name;
                     vidGroup.userID = group.userID;
                     vidGroup.tags = group.tags;
                     const o_ids = group.items.map(convertStringToObjectID);
+                    console.log("vid group items: "+o_ids);
                     const vidquery = {_id : {$in : o_ids}};
                     const videos = await RunDataQuery("video_items", "find", vidquery);
                     for (let i = 0; i < videos.length; i++) {
@@ -2472,16 +2485,16 @@ webxr_router.get('/:_id', function (req, res) {
                             videoElements = videoElements + "<video style=\x22display: none;\x22 loop=\x22true\x22 crossorigin=\x22use-credentials\x22 webkit-playsinline playsinline id=\x22"+requestedVideoGroups[v].videos[i]._id+"\x22></video>";
                         }
                     }
-
-                    var buff = Buffer.from(JSON.stringify(requestedVideoGroups)).toString("base64");
-                    if (sceneResponse.sceneWebType == "Video Landing") {
-                        videoGroupsEntity = "<div id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></div>"; 
-                    } else {
-                        videoGroupsEntity = "<a-entity video_groups_data id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></a-entity>"; 
-                    }
-                    hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>"; //v 1.0.6 client hls player ref
                 }
+                var buff = Buffer.from(JSON.stringify(requestedVideoGroups)).toString("base64");
+                if (sceneResponse.sceneWebType == "Video Landing") {
+                    videoGroupsEntity = "<div id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></div>"; 
+                } else {
+                    videoGroupsEntity = "<a-entity video_groups_data id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></a-entity>"; 
+                }
+                hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>"; //v 1.0.6 client hls player ref
             }
+            
             ////////////// cook some output, ui elements, etc. -- TODO move up or down?
             let youtubeSniffer = "";
             let iosIcon = "<span class=\x22apple_no\x22>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
@@ -2610,24 +2623,24 @@ webxr_router.get('/:_id', function (req, res) {
                 const pgquery = {"_id": {$in : pg_ids}};
                 const groups = await RunDataQuery("groups", "find", pgquery);
 
-                for (let group in groups) { 
+                for (let group of groups) { 
                         let picGroup = {};
                         picGroup._id = group._id;
                         picGroup.name = group.name;
                         picGroup.userID = group.userID;
-                        const p_ids = group.items.map(convertStringToObjectID);
+
+                        const p_ids = group.items; //.map(convertStringToObjectID);
+                        console.log("picgroup items : "+ group.items);
                         const picquery = {"_id": {$in : p_ids}};
                         let images = await RunDataQuery("image_items", "find", picquery);
                     
                         for (let image in images) { //jack in a signed url for each
                             if (image.orientation != null && image.orientation != undefined && image.orientation.toLowerCase() == "equirectangular") { 
                                 skyboxIDs.push(image._id);
-                                // image.url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + image.userID + "/pictures/originals/" + image._id + ".original." + image.filename, Expires: 6000});
                                 image.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + image.userID + "/pictures/originals/" + image._id + ".original." + image.filename, 6000);
                                 scenePictureItems.push(image);
                             
                             } else {
-                                // image.url = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: 'users/' + image.userID + "/pictures/" + image._id + ".standard." + image.filename, Expires: 6000}); //i.e. 1024
                                 image.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + image.userID + "/pictures/" + image._id + ".standard." + image.filename, 6000);
                                 scenePictureItems.push(image);
                             }
@@ -2637,9 +2650,6 @@ webxr_router.get('/:_id', function (req, res) {
                                 pictureGroupsEntity = "<a-entity scale=\x22.75 .75 .75\x22 id=\x22picGroupParent\x22 look-at=\x22#player\x22 position=\x22"+picturegroupLocation+"\x22>"+ 
                                 "<a-entity position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22pictureGroupsControl\x22 class=\x22envMap activeObjexRay\x22 "+skyboxEnvMap+" toggle-picture-group gltf-model=\x22#camera_icon\x22></a-entity>"+
                                 "<a-entity id=\x22pictureGroupPanel\x22 visible=\x22false\x22 position=\x220 -1 0\x22>"+
-                                // "<a-entity id=\x22pictureGroupHeaderText\x22 geometry=\x22primitive: plane; width: 3.25; height: 1\x22 position=\x220 1.75 0\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22" +
-                                // "text=\x22value:; wrap-count: 35;\x22></a-entity>" +
-                                
                                 "<a-entity id=\x22pictureGroupPicLandscape\x22 visible=\x22true\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatrect2\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
                                 "rotation='0 0 0'></a-entity>"+
                                 "<a-entity id=\x22pictureGroupPicPortrait\x22 visible=\x22false\x22 position=\x220 3.25 -.1\x22 gltf-model=\x22#portrait_panel\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
@@ -2648,7 +2658,6 @@ webxr_router.get('/:_id', function (req, res) {
                                 "rotation='0 0 0'></a-entity>"+
                                 "<a-entity id=\x22pictureGroupPicCircle\x22 visible=\x22false\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatcircle\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
                                 "rotation='0 0 0'></a-entity>"+
-                                // "<a-entity gltf-model=\x22#square_panel\x22 scale=\x222.25 2.25 2.25\x22 position=\x220 2.1 -.25\x22></a-entity>" +
                                 "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupFlyButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.25 .25 .25\x22 position=\x223.25 -.75 0\x22></a-entity>" +
                                 "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupLayoutButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.25 .25 .25\x22 position=\x22-3.25 -.75 0\x22></a-entity>" +
                                 "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x222.25 -.75 0\x22></a-entity>" +
