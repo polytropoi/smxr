@@ -633,16 +633,20 @@ webxr_router.get('/:_id', function (req, res) {
                         sceneResponse.sceneLocations[i].objectID != "none" && sceneResponse.sceneLocations[i].objectID.length > 8) { //attaching object to location 
                         sceneObjectLocations.push(sceneResponse.sceneLocations[i]);
                     }
-                    if (sceneResponse.sceneLocations[i].model != undefined && sceneResponse.sceneLocations[i].model != "none" && sceneResponse.sceneLocations[i].model.length > 0) { //new way of attaching gltf to location w/out object
+                    if (sceneResponse.sceneLocations[i].model != undefined && sceneResponse.sceneLocations[i].model != "none" && sceneResponse.sceneLocations[i].model) { //new way of attaching gltf to location w/out object
                         sceneModelLocations.push(sceneResponse.sceneLocations[i]);
-                    } else { //?
-                        // if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].markerType == "navmesh") { 
-                        //     sceneModelLocations.push(sceneResponse.sceneLocations[i]); // if no model will set a default below
-                        // }
-                        if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].markerType == "surface") { 
-                            sceneModelLocations.push(sceneResponse.sceneLocations[i]); // if no model will set a default below
+                    } 
+                    if (sceneResponse.sceneLocations[i].model == "none") {
+                        if (sceneResponse.sceneLocations[i].markerType == "navmesh") { 
+                            console.log("PUSSHING A CANNED NAVMESH!");
+                            sceneModelLocations.push(sceneResponse.sceneLocations[i]); // if no model will set a primitive default below
+                        }
+                        if (sceneResponse.sceneLocations[i].markerType == "surface") { 
+                            console.log("PUSSHING A CANNED SURFACE!");
+                            sceneModelLocations.push(sceneResponse.sceneLocations[i]); // if no model will set a primitive default below
                         }
                     }
+                    
                     if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].markerType == "dataviz") { 
                         if (sceneResponse.sceneLocations[i].tags.includes("traffic")) {
                             
@@ -1815,7 +1819,7 @@ webxr_router.get('/:_id', function (req, res) {
                             followCurve = "curve-follow=\x22curveData: #p_path; type: parametric_curve; reverse: "+reverse+"; duration: 64; loop: true;\x22";
                         }
                         if (locMdl.markerType && locMdl.markerType == "navmesh") { //use the same one for simple and pathfinding modes
-                            console.log("gotsa navmesh");
+                            console.log("gotsa navmesh WITH MODEL !!!!!");
                             let visible = false;
                             if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
                                 visible = true;
@@ -2061,28 +2065,7 @@ webxr_router.get('/:_id', function (req, res) {
                         } //not geo
 
                     } else {
-                        if (locMdl.markerType == "navmesh") {
-                            let visible = false;
-                            if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
-                                visible = true;
-                            }
-                            if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
-                                arChildElements = arChildElements + "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                            } else {
-                                navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                            }
-                        }
-                        if (locMdl.markerType == "surface") {
-                            let visible = false;
-                            if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
-                                visible = true;
-                            }
-                            if (useArParent || (locMdl.locationTags && (locMdl.tags.includes("ar child") || locMdl.tags.includes("archild")))) {
-                                arChildElements = arChildElements + "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                            } else {
-                                surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                            }
-                        } 
+                        
                      
                         if (model.item_type == "usdz") {//not locmdl glb
                         
@@ -2100,11 +2083,37 @@ webxr_router.get('/:_id', function (req, res) {
                         
                             //TODO SPLATTING!
                         }
+
+                        
                     }
-                   
-                } //end locmdl valid
-            
-            } //end locmdl for
+                
+                } else {//end locmdl valid 
+
+                    ///////////// set default navmesh and surface ///////////////
+
+                    } if (locMdl.modelID == "none" && locMdl.markerType == "navmesh") {
+                        let visible = false;
+                        if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
+                            visible = true;
+                        }
+                        if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
+                            arChildElements = arChildElements + "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                        } else {
+                            navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                        }
+                    }
+                    if (locMdl.modelID == "none" && locMdl.markerType == "surface") {
+                        let visible = false;
+                        if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
+                            visible = true;
+                        }
+                        if (useArParent || (locMdl.locationTags && (locMdl.tags.includes("ar child") || locMdl.tags.includes("archild")))) {
+                            arChildElements = arChildElements + "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                        } else {
+                            surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                        }
+                    } 
+            } //end locmdl for loop
             
             ///////////////////////////////
             if (attributions != null && attributions != undefined && attributions.length > 0) {
@@ -2634,7 +2643,8 @@ webxr_router.get('/:_id', function (req, res) {
                         const picquery = {"_id": {$in : p_ids}};
                         let images = await RunDataQuery("image_items", "find", picquery);
                     
-                        for (let image in images) { //jack in a signed url for each
+                        for (let image of images) { //jack in a signed url for each
+                            console.log("image.orientation " + image);
                             if (image.orientation != null && image.orientation != undefined && image.orientation.toLowerCase() == "equirectangular") { 
                                 skyboxIDs.push(image._id);
                                 image.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + image.userID + "/pictures/originals/" + image._id + ".original." + image.filename, 6000);
@@ -2682,125 +2692,134 @@ webxr_router.get('/:_id', function (req, res) {
                     const oo_id = ObjectId.createFromHexString(picID);
                     const query = {"_id": oo_id};
                     let picture_item = await RunDataQuery("image_items", "findOne", query);
-                    var version = ".standard.";
-                    if (picture_item.orientation != undefined) {
-                        // if (picture_item.orientation.toLowerCase() == "equirectangular" && sceneResponse.sceneUseSkybox) {
-                        if (picture_item.orientation.toLowerCase() == "equirectangular") {
-                            skyboxID = picID;
-                            version = ".original.";
-                            skyboxIDs.push(picID);
-                        }
-                    }
-                    let max = 30;
-                    let min = -30;
-                    let x = Math.random() * (max - min) + min;
-                    // let y = Math.random() * (max.y - min.y) + min.y;
-                    let z = Math.random() * (max - min) + min;
-                    if (z >= -15 && z <= 15) {
-                        if (z < 0) {
-                            z = -20;
-                        } else {
-                            z = 20;
-                        }
-                    
-                    }
-                    if (x >= -15 && z <= 15) {
-                        if (x < 0) {
-                            x = -20;
-                        } else {
-                            x = 20;
-                        }
-                    }
-                    index++;
-                    let position = x + " " + 2 + " " + z;
-                    let rotation = "0 90 0";
-                    let scale = 1;
-                    if (picture_item.orientation == "circle" || picture_item.orientation == "Circle" || picture_item.orientation == "square" || picture_item.orientation == "Square" ) {
-                        if (picture_item.tags.includes("old")) { //OH YEAH, snap
-                            image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item.filename, 6000);
-                        } else {
-                            
-                            image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
-                        }
+
+                    if (picture_item) {
                         
-                    } else {
-                        image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, 6000);
-                    }
-                    if (picture_item.orientation == "Tileable") {
-
-                        tilepicUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
-                        console.log("GOTSA TILEABLE PIC! " + tilepicUrl);
-                    }
-
-                    picture_item.url = image1url;
-                    scenePictureItems.push(picture_item);
-                    imageAssets = imageAssets + "<img id=\x22smimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
-                    let caption = "";
-                    if (picture_item.captionUpper != null && picture_item.captionUpper != undefined) {
-                        caption = "<a-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x220 1.3 -.1\x22 wrapCount=\x2240\x22 value=\x22"+picture_item.captionUpper+"\x22></a-text>";
-                    }
-                    let lowerCap = "";
-                    let actionCall = "";
-                    let link = "";
-                    let lookat = " look-at=\x22#player\x22 ";
-                    // console.log("picLocations taken: " + picLocationsPlaced);
-                    
-                    if (picIndex < locationPictures.length) { //now picture types use scene_pictures_control see below
-                        position = locationPictures[picIndex].loc;
-                        rotation = locationPictures[picIndex].rot;
-                        if (locationPictures[picIndex].type.includes("fixed")) {
-                            console.log("fixed pic @ " + locationPictures[picIndex].loc);
-                            lookat = "";
-                        }
-                        if (locationPictures[picIndex].scale) {
-
-                        }
-                        picIndex++;
-                    } else {
-                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("scatter pics")) {
-                            scatterPics = true; //use cooked positions above, not assigned locations
-                        }
-                    }
-                
-                    if (picture_item.linkType != undefined && picture_item.linkType.toLowerCase() != "none") {
-                        if (picture_item.linkType == "NFT") { //never mind, these are old image target fu
+                        console.log("picture_item.orientation " + JSON.stringify(picture_item));
                         
+                        var version = ".standard.";
+                        if (picture_item.orientation != undefined) {
+                            // if (picture_item.orientation.toLowerCase() == "equirectangular" && sceneResponse.sceneUseSkybox) {
+                            if (picture_item.orientation.toLowerCase() == "equirectangular") {
+                                skyboxID = picID;
+                                version = ".original.";
+                                skyboxIDs.push(picID);
+                            }
                         }
-                        if (picture_item.linkURL != undefined && !picture_item.linkURL.includes("undefined") && picture_item.linkURL.length > 6) {
-                            link = "basic-link=\x22href: "+picture_item.linkURL+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
-                        }
-                    }
-                    if (picture_item.useTarget != undefined && picture_item.useTarget != "") { //used by mindar - good stuff!
-                        console.log("GOTSA urlTarget " + picture_item.urlTarget);
-                        const targetURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind");
-                        arImageTargets.push(targetURL);
-                    
 
-                    }
-                    if (picture_item.hasAlphaChannel && scatterPics) {
-                        imageEntities = imageEntities + "<a-entity "+link+""+lookat+" geometry=\x22primitive: plane; height: 10; width: 10\x22 material=\x22shader: flat; transparent: true; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                    } else {
-                        if (picture_item.orientation != "equirectangular" && picture_item.orientation != "Equirectangular" && scatterPics) {  //what if linkType is undefined?
-
-                            if (picture_item.orientation == "portrait" || picture_item.orientation == "Portrait") {
-                                imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                                index+"\x22 gltf-model=\x22#portrait_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                                modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5c.glb\x22></a-asset-item>\n";
-                            } else if (picture_item.orientation == "square" || picture_item.orientation == "Square") {
-                                imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                                index+"\x22 gltf-model=\x22#square_panel\x22 scale=\x223 3 3\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                            } else if (picture_item.orientation == "circle" || picture_item.orientation == "Circle") {
-                                imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                                index+"\x22 gltf-model=\x22#circle_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                                modelAssets = modelAssets + "<a-asset-item id=\x22circle_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelcircle1.glb\x22></a-asset-item>\n";
+                        let max = 30;
+                        let min = -30;
+                        let x = Math.random() * (max - min) + min;
+                        // let y = Math.random() * (max.y - min.y) + min.y;
+                        let z = Math.random() * (max - min) + min;
+                        if (z >= -15 && z <= 15) {
+                            if (z < 0) {
+                                z = -20;
                             } else {
-                                imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                                index+"\x22 gltf-model=\x22#landscape_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                                z = 20;
+                            }
+                        
+                        }
+                        if (x >= -15 && z <= 15) {
+                            if (x < 0) {
+                                x = -20;
+                            } else {
+                                x = 20;
+                            }
+                        }
+                        index++;
+                        let position = x + " " + 2 + " " + z;
+                        let rotation = "0 90 0";
+                        let scale = 1;
+
+                        if (picture_item.orientation == "circle" || picture_item.orientation == "Circle" || picture_item.orientation == "square" || picture_item.orientation == "Square" ) {
+                            if (picture_item.tags.includes("old")) { //OH YEAH, snap
+                                image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item.filename, 6000);
+                            } else {
+                                
+                                image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                            }
+                            
+                        } else {
+                            image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, 6000);
+                        }
+                        if (picture_item.orientation == "Tileable") {
+
+                            tilepicUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                            console.log("GOTSA TILEABLE PIC! " + tilepicUrl);
+                        }
+
+                        picture_item.url = image1url;
+                        scenePictureItems.push(picture_item);
+                        imageAssets = imageAssets + "<img id=\x22smimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
+                        let caption = "";
+                        if (picture_item.captionUpper != null && picture_item.captionUpper != undefined) {
+                            caption = "<a-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x220 1.3 -.1\x22 wrapCount=\x2240\x22 value=\x22"+picture_item.captionUpper+"\x22></a-text>";
+                        }
+                        let lowerCap = "";
+                        let actionCall = "";
+                        let link = "";
+                        let lookat = " look-at=\x22#player\x22 ";
+                        // console.log("picLocations taken: " + picLocationsPlaced);
+                        
+                        if (picIndex < locationPictures.length) { //now picture types use scene_pictures_control see below
+                            position = locationPictures[picIndex].loc;
+                            rotation = locationPictures[picIndex].rot;
+                            if (locationPictures[picIndex].type.includes("fixed")) {
+                                console.log("fixed pic @ " + locationPictures[picIndex].loc);
+                                lookat = "";
+                            }
+                            if (locationPictures[picIndex].scale) {
+
+                            }
+                            picIndex++;
+                        } else {
+                            if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("scatter pics")) {
+                                scatterPics = true; //use cooked positions above, not assigned locations
+                            }
+                        }
+                    
+                        if (picture_item.linkType != undefined && picture_item.linkType.toLowerCase() != "none") {
+                            if (picture_item.linkType == "NFT") { //never mind, these are old image target fu
+                            
+                            }
+                            if (picture_item.linkURL != undefined && !picture_item.linkURL.includes("undefined") && picture_item.linkURL.length > 6) {
+                                link = "basic-link=\x22href: "+picture_item.linkURL+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
+                            }
+                        }
+                        if (picture_item.useTarget != undefined && picture_item.useTarget != "") { //used by mindar - good stuff!
+                            console.log("GOTSA urlTarget " + picture_item.urlTarget);
+                            const targetURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind");
+                            arImageTargets.push(targetURL);
+                        
+
+                        }
+                        if (picture_item.hasAlphaChannel && scatterPics) {
+                            imageEntities = imageEntities + "<a-entity "+link+""+lookat+" geometry=\x22primitive: plane; height: 10; width: 10\x22 material=\x22shader: flat; transparent: true; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                            " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                        } else {
+                            console.log("picture_item.orientation " + picture_item);
+                            if (picture_item.orientation != "equirectangular" && picture_item.orientation != "Equirectangular" && scatterPics) {  //what if linkType is undefined?
+
+                                if (picture_item.orientation == "portrait" || picture_item.orientation == "Portrait") {
+                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                                    index+"\x22 gltf-model=\x22#portrait_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                                    modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5c.glb\x22></a-asset-item>\n";
+                                } else if (picture_item.orientation == "square" || picture_item.orientation == "Square") {
+                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                                    index+"\x22 gltf-model=\x22#square_panel\x22 scale=\x223 3 3\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                                } else if (picture_item.orientation == "circle" || picture_item.orientation == "Circle") {
+                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                                    index+"\x22 gltf-model=\x22#circle_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                                    modelAssets = modelAssets + "<a-asset-item id=\x22circle_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelcircle1.glb\x22></a-asset-item>\n";
+                                } else {
+                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                                    index+"\x22 gltf-model=\x22#landscape_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                                }
                             }
                         }
                     }
