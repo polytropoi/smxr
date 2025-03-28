@@ -635,12 +635,13 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                     if (sceneResponse.sceneLocations[i].model != undefined && sceneResponse.sceneLocations[i].model != "none" && sceneResponse.sceneLocations[i].model.length > 0) { //new way of attaching gltf to location w/out object
                         sceneModelLocations.push(sceneResponse.sceneLocations[i]);
-                    }
-                    if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].markerType == "navmesh") { 
-                        sceneModelLocations.push(sceneResponse.sceneLocations[i]); // if no model will set a default below
-                    }
-                    if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].markerType == "surface") { 
-                        sceneModelLocations.push(sceneResponse.sceneLocations[i]); // if no model will set a default below
+                    } else { //?
+                        // if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].markerType == "navmesh") { 
+                        //     sceneModelLocations.push(sceneResponse.sceneLocations[i]); // if no model will set a default below
+                        // }
+                        if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].markerType == "surface") { 
+                            sceneModelLocations.push(sceneResponse.sceneLocations[i]); // if no model will set a default below
+                        }
                     }
                     if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].markerType == "dataviz") { 
                         if (sceneResponse.sceneLocations[i].tags.includes("traffic")) {
@@ -1703,7 +1704,8 @@ webxr_router.get('/:_id', function (req, res) {
                 }
             }
             // if (sceneModelLocations.length > 0) {
-                       
+                
+
             // async.each (sceneModelLocations, function (locMdl, callbackz) { //loop tru w/ async
             for (let i = 0; i < sceneModelLocations.length; i++) {
                 let locMdl = sceneModelLocations[i];
@@ -1806,7 +1808,7 @@ webxr_router.get('/:_id', function (req, res) {
                             followCurve = "curve-follow=\x22curveData: #p_path; type: parametric_curve; reverse: "+reverse+"; duration: 64; loop: true;\x22";
                         }
                         if (locMdl.markerType && locMdl.markerType == "navmesh") { //use the same one for simple and pathfinding modes
-
+                            console.log("gotsa navmesh");
                             let visible = false;
                             if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
                                 visible = true;
@@ -1881,6 +1883,7 @@ webxr_router.get('/:_id', function (req, res) {
                             }
                             if (locMdl.markerType == "navmesh") {
                                 // entityType = "navmesh";
+                                useNavmesh = true;
                             }
 
                         }
@@ -2026,46 +2029,70 @@ webxr_router.get('/:_id', function (req, res) {
                                 }
                             }
 
-                            if (locMdl.markerType == "navmesh") {
-                                let visible = false;
-                                if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
-                                    visible = true;
-                                }
-
-                                if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
-                                    arChildElements = arChildElements + "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                                } else {
-                                    navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                                }
-                            }
-                            if (locMdl.markerType == "surface") {
-                                let visible = false;
-                                if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
-                                    visible = true;
-                                }
-                                if (useArParent || (locMdl.locationTags && (locMdl.tags.includes("ar child") || locMdl.tags.includes("archild")))) {
-                                    arChildElements = arChildElements + "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                                } else {
-                                    surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                                }
-                            }   
+                            // if (locMdl.markerType == "navmesh") {
+                            //     let visible = false;
+                            //     if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
+                            //         visible = true;
+                            //     }
+                            //     if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
+                            //         arChildElements = arChildElements + "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            //     } else {
+                            //         navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            //     }
+                            // }
+                            // if (locMdl.markerType == "surface") {
+                            //     let visible = false;
+                            //     if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
+                            //         visible = true;
+                            //     }
+                            //     if (useArParent || (locMdl.locationTags && (locMdl.tags.includes("ar child") || locMdl.tags.includes("archild")))) {
+                            //         arChildElements = arChildElements + "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            //     } else {
+                            //         surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            //     }
+                            // }   
                         } //not geo
 
-                    } else if (model.item_type == "usdz") {//not locmdl glb
-                      
-                        let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/usdz/" + model.filename, 6000);
-                        console.log("non-gltf modelURL " + modelURL + " modelType " + asset.item_type);
-                        usdzFiles = modelURL;
+                    } else {
+                        if (locMdl.markerType == "navmesh") {
+                            let visible = false;
+                            if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
+                                visible = true;
+                            }
+                            if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
+                                arChildElements = arChildElements + "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            } else {
+                                navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            }
+                        }
+                        if (locMdl.markerType == "surface") {
+                            let visible = false;
+                            if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
+                                visible = true;
+                            }
+                            if (useArParent || (locMdl.locationTags && (locMdl.tags.includes("ar child") || locMdl.tags.includes("archild")))) {
+                                arChildElements = arChildElements + "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            } else {
+                                surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            }
+                        } 
+                     
+                        if (model.item_type == "usdz") {//not locmdl glb
                         
-                        loadUSDZ = "ready(function(){\n" +
-                        "let usdzDataEntity = document.getElementById(\x22usdzData\x22);\n"+
-                        "usdzDataEntity.setAttribute(\x22usdz\x22, \x22usdzData\x22, \x22"+usdzFiles+"\x22);\n"+ 
-                        "});";
-                        usdzModel = modelURL;
+                            let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/usdz/" + model.filename, 6000);
+                            console.log("non-gltf modelURL " + modelURL + " modelType " + asset.item_type);
+                            usdzFiles = modelURL;
+                            
+                            loadUSDZ = "ready(function(){\n" +
+                            "let usdzDataEntity = document.getElementById(\x22usdzData\x22);\n"+
+                            "usdzDataEntity.setAttribute(\x22usdz\x22, \x22usdzData\x22, \x22"+usdzFiles+"\x22);\n"+ 
+                            "});";
+                            usdzModel = modelURL;
+                            
+                        } else if (model.item_type == "splat") {//not locmdl glb
                         
-                    } else if (model.item_type == "splat") {//not locmdl glb
-                      
-                        //TODO SPLATTING!
+                            //TODO SPLATTING!
+                        }
                     }
                    
                 } //end locmdl valid
