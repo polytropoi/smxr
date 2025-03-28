@@ -1625,13 +1625,14 @@ webxr_router.get('/:_id', function (req, res) {
             let actionModels = [];
             console.log("tryna get all sceneObjects " + JSON.stringify(sceneResponse.sceneObjects));
             let objectIDs = []; //to prevent dupes in objex response below
-            for (let i = 0; i > sceneResponse.sceneObjects.length; i++) {
-                const objectID = sceneResponse.sceneObjects[i];
-                if (objectID != undefined && objectID != "none" && sceneResponse.sceneObjects.indexOf(objectID) != -1 && objectIDs.indexOf(objectID) == -1) {
+            for (let i = 0; i < sceneResponse.sceneObjects.length; i++) {
+                let objectID = sceneResponse.sceneObjects[i];
+                // if (objectID != undefined && objectID != "none" && sceneResponse.sceneObjects.indexOf(objectID) != -1 && objectIDs.indexOf(objectID) == -1) {
                 objectIDs.push(objectID);
+                console.log("objectID" + objectID);
                 const o_id = ObjectId.createFromHexString(objectID);
                 const objquery = {"_id": o_id};
-                const objekt = await RunDataQuery("obj_items", "findOne", objquery);
+                let objekt = await RunDataQuery("obj_items", "findOne", objquery);
 
                 ///////////// actions associated with this object ///////////
                 if (objekt.actionIDs != undefined && objekt.actionIDs.length > 0) {
@@ -1651,12 +1652,13 @@ webxr_router.get('/:_id', function (req, res) {
 
                 ////////// audiogroup associated with this object
                 if (objekt.audiogroupID && objekt.audiogroupID.length > 4) {
-                    // console.log("AUDIO OBJECT GROUP!!!! " + objekt.audiogroupID);
+                    console.log("AUDIO OBJECT GROUP!!!! " + objekt.audiogroupID);
                     objectAudioGroups.push(objekt.audiogroupID);
-                    const groupquery = {"_id": ObjectId.createFromHexString(objekt.audiogroupID)};
+                    const groupquery = {"_id": ObjectId.createFromHexString(objekt.audiogroupID.toString())};
                     const group = await RunDataQuery("groups", "findOne", groupquery);
                     requestedAudioItems.push(group.items);    //TODO whatabout DUPES?!?!
                 }
+                
                 ////sprite sheets for object particle system // 
                 if (objekt.particles != undefined && objekt.particles != null && objekt.particles != "None" ) { //maybe a "use flames" tag?
                     if (objekt.particles.toString().includes("Fire")) {
@@ -1671,7 +1673,7 @@ webxr_router.get('/:_id', function (req, res) {
                 }
                 /////// get the model associated with this object, if any ////////////////
                 if (objekt.modelID != undefined && objekt.modelID != null) {
-                    const m_id = ObjectId.createFromHexString(objekt.modelID);
+                    const m_id = ObjectId.createFromHexString(objekt.modelID.toString());
                     const modelquery = {"_id": m_id};
                     const model = await RunDataQuery("models", "findOne", modelquery);
 
@@ -1680,10 +1682,12 @@ webxr_router.get('/:_id', function (req, res) {
                         objekt.modelURL = modelURL;
                         gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + objekt.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
                         
-                        }
                     }
-                    objex.push(objekt);
                 }
+
+                
+                // console.log("pushing ojekt " + JSON.stringify(objekt));
+                objex.push(objekt);
             }
             var buff = Buffer.from(JSON.stringify(objex)).toString("base64");
             var buff2 = Buffer.from(JSON.stringify(sceneObjectLocations)).toString("base64");
