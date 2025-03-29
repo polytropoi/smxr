@@ -3024,7 +3024,7 @@ webxr_router.get('/:_id', function (req, res) {
                         // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
                         let xrExtras = "";
                         if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
-                            meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/component/ball_blaster_mod.js\x22></script><script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
+                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
                             xrExtras = "xr_room_physics";
                             webxrFeatures = "webxr=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
                             xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
