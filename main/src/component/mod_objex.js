@@ -3619,13 +3619,16 @@ AFRAME.registerComponent('mod_object', {
       // let initPos = this.el.getAttribute("position");
       let surface = null;
       let scatterSurface = document.getElementById("scatterSurface");
+      if (!scatterSurface) {
+        scatterSurface = document.getElementById("scatterSurface");
+      } 
       let navmesh = document.getElementById("nav-mesh");
       if (navmesh) {
         surface = navmesh;
       } else if (scatterSurface) {
         surface = scatterSurface;
       }
-      // console.log("tryna SCATTER (not instance) a object " + navmesh + "  " + scatterSurface);
+      console.log("tryna SCATTER (not instance) a object " + navmesh + "  " + surface);
       if (surface) {
         let count = 10;
         let split = this.data.eventData.split("~"); //gonna switch to tags...
@@ -3728,6 +3731,8 @@ AFRAME.registerComponent('mod_object', {
             }
           }
         }, 2000);
+      } else {
+        console.log("could not find a surface to scatter upon..");
       }
       
     },
