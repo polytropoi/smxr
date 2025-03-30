@@ -36,6 +36,7 @@ function getExtension(filename) {
 }
 
 function convertStringToObjectID (stringID) {
+    stringID = stringID.toString();
     if (ObjectId.isValid(stringID)) {
         return ObjectId.createFromHexString(stringID);
     } else {
@@ -530,13 +531,13 @@ webxr_router.get('/:_id', function (req, res) {
             let poiIndex = 0;
             if (sceneResponse.scenePictures != null && sceneResponse.scenePictures.length > 0) {
                 sceneResponse.scenePictures.forEach(function (picture) {
-                    // console.log("scenePIcture " + picture);
-                    var p_id = ObjectId.createFromHexString(picture); //convert to binary to search by _id beloiw
+                    console.log("scenePIcture " + picture);
+                    var p_id = ObjectId.createFromHexString(picture.toString()); //convert to binary to search by _id beloiw
                     requestedPictureItems.push(p_id); //populate array //hrm, unused atm...
 
                 });
             }
-            if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("debug") || sceneResponse.sceneDebugMode != null && sceneResponse.sceneDebugMode != undefined && sceneResponse.sceneDebugMode != "") {
+            if (sceneResponse.sceneTags != undefined && sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().includes("debug") || sceneResponse.sceneDebugMode != null && sceneResponse.sceneDebugMode != undefined && sceneResponse.sceneDebugMode != "") {
                 debugMode = true;
             }
             if (sceneResponse.sceneYouTubeIDs != null && sceneResponse.sceneYouTubeIDs.length > 0) {
@@ -545,6 +546,18 @@ webxr_router.get('/:_id', function (req, res) {
             ////LOCATION FU
             if (sceneResponse.sceneLocations != null) {
                 for (var i = 0; i < sceneResponse.sceneLocations.length; i++) {       
+                    
+                    if (sceneResponse.sceneLocations[i].eventData == null || sceneResponse.sceneLocations[i].eventData == undefined || sceneResponse.sceneLocations[i].eventData == "undefined") { //old scenes...
+                        sceneResponse.sceneLocations[i].eventData = "";
+                    }                  
+                    if (sceneResponse.sceneLocations[i].tags == null || sceneResponse.sceneLocations[i].tags == undefined || sceneResponse.sceneLocations[i].tags == "undefined") { //old scenes...
+                        sceneResponse.sceneLocations[i].tags = [];
+                    }
+                    if (sceneResponse.sceneLocations[i].locationTags == null || sceneResponse.sceneLocations[i].locationTags == undefined || sceneResponse.sceneLocations[i].locationTags == "undefined") { //old scenes...
+                        sceneResponse.sceneLocations[i].locationTags = [];
+                    }
+
+                    console.log("sceneResponse.sceneLocations[i].eventData "+ sceneResponse.sceneLocations[i].eventData);
                     if ((sceneResponse.sceneLocationTracking != null && sceneResponse.sceneLocationTracking == true) || sceneResponse.sceneWebType == "AR Location Tracking") {  
                         if (sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //just to set scripts and restrict to location
                             if (sceneResponse.sceneWebType == "AR Location Tracking") {
@@ -566,7 +579,7 @@ webxr_router.get('/:_id', function (req, res) {
                                 var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
                                 locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
                             } else if (sceneResponse.sceneWebType == "Model Viewer") { 
-                                // console.log("sceneResponse.sceneLocations[i].eventData : " + sceneResponse.sceneLocations[i].eventData);
+                                console.log("sceneResponse.sceneLocations[i].eventData : " + sceneResponse.sceneLocations[i].eventData);
                                 if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
                                 geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
                                 locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
@@ -648,7 +661,7 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                     
                     if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].markerType == "dataviz") { 
-                        if (sceneResponse.sceneLocations[i].tags.includes("traffic")) {
+                        if (sceneResponse.sceneLocations[i].locationTags.includes("traffic")) {
                             
                         }
                     }
@@ -743,6 +756,7 @@ webxr_router.get('/:_id', function (req, res) {
                         carLocation = sceneResponse.sceneLocations[i].x + " " + sceneResponse.sceneLocations[i].y + " " + zFix;
                     }
                     if (sceneResponse.sceneLocations[i].markerType == "picture group") {
+
                         if (sceneResponse.sceneLocations[i].tags && 
                             (sceneResponse.sceneLocations[i].tags.includes("camera") ||  
                             sceneResponse.sceneLocations[i].tags.includes("default") ||
@@ -1505,7 +1519,7 @@ webxr_router.get('/:_id', function (req, res) {
             console.log("sceneModelss : " + JSON.stringify(sceneResponse.sceneModels));
              if (sceneResponse.sceneModels != null) {
                 for (let i = 0; i < sceneResponse.sceneModels.length; i++) {
-                    var oo_id = ObjectId.createFromHexString(sceneResponse.sceneModels[i]);
+                    var oo_id = ObjectId.createFromHexString(sceneResponse.sceneModels[i].toString());
                     const query = {"_id": oo_id};
                     const model = await RunDataQuery("models", "findOne", query);
                     if (model && model.userID) {
@@ -1768,7 +1782,7 @@ webxr_router.get('/:_id', function (req, res) {
                     && locMdl.markerType != "audio"
                     && locMdl.markerType != "text") { 
                     
-                    const m_id = ObjectId.createFromHexString(locMdl.modelID);
+                    const m_id = ObjectId.createFromHexString(locMdl.modelID.toString());
                     const locmdlquery = {"_id": m_id};
                     let model = await RunDataQuery("models", "findOne", locmdlquery);
 
@@ -2178,7 +2192,7 @@ webxr_router.get('/:_id', function (req, res) {
                         if (textID && textID.length > 5) { 
                             if (sceneTextLocations[i].markerType == "svg canvas billboard") {
                             
-                                let oid = ObjectId.createFromHexString(textID);
+                                let oid = ObjectId.createFromHexString(textID.toString());
                                 const query = {"_id": oid};
                                 const text_item = await RunDataQuery("text_items", "findOne", query);    
                                 if (text_item.type == "SVG Document") {
@@ -2193,7 +2207,7 @@ webxr_router.get('/:_id', function (req, res) {
                                 }
                             } else if (sceneTextLocations[i].markerType == "svg billboard") {
                                 console.log("tryna get svg billboard " + textID);
-                                let oid = ObjectId.createFromHexString(textID);
+                                let oid = ObjectId.createFromHexString(textID.toString());
                                 const query = {"_id": oid};
                                 const text_item = await RunDataQuery("text_items", "findOne", query);
                                 
@@ -2381,6 +2395,7 @@ webxr_router.get('/:_id', function (req, res) {
             let video_items = [];
             if (sceneResponse.sceneVideos != null && sceneResponse.sceneVideos.length > 0) {
                 const v_ids = sceneResponse.sceneVideos.map(item => {
+                    item = item.toString();
                     return ObjectId.createFromHexString(item);
                 });
                 const vquery = {_id: {$in: v_ids}};
@@ -2615,7 +2630,8 @@ webxr_router.get('/:_id', function (req, res) {
 
             ///////////// postcards //////////////////////
             if (sceneResponse.scenePostcards != null && sceneResponse.scenePostcards.length > 0) {
-                var postcard = sceneResponse.scenePostcards[sceneResponse.scenePostcards.length - 1]; 
+                console.log("tryna get a postcard " + sceneResponse.scenePostcards);
+                var postcard = sceneResponse.scenePostcards[sceneResponse.scenePostcards.length - 1].toString(); 
                 var oo_id = ObjectId.createFromHexString(postcard); //only need one for this..
                 const pquery = {"_id": oo_id};
                 const picture_item = await RunDataQuery("image_items", "findOne", pquery);
@@ -2640,14 +2656,19 @@ webxr_router.get('/:_id', function (req, res) {
                         picGroup._id = group._id;
                         picGroup.name = group.name;
                         picGroup.userID = group.userID;
-
-                        const p_ids = group.items; //.map(convertStringToObjectID);
+                        let p_ids = [];
+                        if (Array.isArray(group.items)) {
+                            p_ids = group.items.map(convertStringToObjectID);
+                        } else {
+                            p_ids.push(ObjectId.createFromHexString(group.items.toString()));
+                        }
+                        // const p_ids = group.items; //.map(convertStringToObjectID);
                         console.log("picgroup items : "+ group.items);
                         const picquery = {"_id": {$in : p_ids}};
                         let images = await RunDataQuery("image_items", "find", picquery);
                     
                         for (let image of images) { //jack in a signed url for each
-                            console.log("image.orientation " + image);
+                            console.log("gots a pic in pic group w/ image.orientation " + image);
                             if (image.orientation != null && image.orientation != undefined && image.orientation.toLowerCase() == "equirectangular") { 
                                 skyboxIDs.push(image._id);
                                 image.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + image.userID + "/pictures/originals/" + image._id + ".original." + image.filename, 6000);
@@ -2691,14 +2712,14 @@ webxr_router.get('/:_id', function (req, res) {
                 let picLocationsPlaced = [];
                 let picIndex = 0;
                 for (let i = 0; i < sceneResponse.scenePictures.length; i++) {    
-                    const picID = sceneResponse.scenePictures[i];
+                    const picID = sceneResponse.scenePictures[i].toString();
                     const oo_id = ObjectId.createFromHexString(picID);
                     const query = {"_id": oo_id};
                     let picture_item = await RunDataQuery("image_items", "findOne", query);
 
                     if (picture_item) {
                         
-                        console.log("picture_item.orientation " + JSON.stringify(picture_item));
+                        // console.log("picture_item " + JSON.stringify(picture_item));
                         
                         var version = ".standard.";
                         if (picture_item.orientation != undefined) {

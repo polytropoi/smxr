@@ -1746,30 +1746,9 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
     },
     tick: function() {
       if (this.isSelected && this.mousePos != null && this.mouseDownPos != null) {
-        // console.log("meese " + JSON.stringify(this.mouseDownPos) + " " + JSON.stringify(this.mousePos));
-        // var startingTop = this.hitPosition.x,
-        //   startingLeft = this.hitPosition.y,
-        //   // math = Math.round(Math.sqrt(Math.pow(startingTop - this.clientY, 2) +Math.pow(startingLeft - this.clientX, 2))) + 'px';
+       
         this.distance = this.mousePos.distanceTo(this.mouseDownPos);
-          // console.log(this.distance); 
-    //     if (this.selectedAxis == "x_plus_handle") { //ha just use threejs transformcontrols now
-    //       this.el.object3D.translateX(this.distance / 4);
-    //     }
-    //     if (this.selectedAxis == "x_minus_handle") {
-    //       this.el.object3D.translateX(-this.distance / 4);
-    //     }
-    //     if (this.selectedAxis == "y_plus_handle") {
-    //       this.el.object3D.translateY(this.distance / 4);
-    //     }
-    //     if (this.selectedAxis == "y_minus_handle") {
-    //       this.el.object3D.translateY(-this.distance / 4);
-    //     }
-    //     if (this.selectedAxis == "z_plus_handle") {
-    //       this.el.object3D.translateZ(this.distance / 4);
-    //     }
-    //     if (this.selectedAxis == "z_minus_handle") {
-    //       this.el.object3D.translateZ(-this.distance / 4);
-    //     }
+     
       } 
     },
     beat: function (volume) {
@@ -1790,16 +1769,12 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
       }
     },
     coolDownTimer: function () {
-      // if (!this.coolDown) {
-      //   this.coolDown = true;
-        
+   
         setTimeout( () => {
           this.coolDown = false;
-          // this.calloutText.setAttribute("troika-text", {
-          //   value: "",
-          // });
+        
         }, 2000);
-      // }
+      
     },
     targetMods: function() {
       

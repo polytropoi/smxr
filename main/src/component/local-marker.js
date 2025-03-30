@@ -1542,14 +1542,23 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
       // } 
     },
     targetMods: function() {
-      console.log("chek targetElements " + this.data.targetElements);
-      if (this.data.targetElements != '' && this.data.targetElements != []) {
+      
+      if (this.data.targetElements && this.data.targetElements != undefined && this.data.targetElements != '' && this.data.targetElements != []) {
+        console.log("chek targetElements " + this.data.targetElements);
         if (this.data.markerType == "portal") {
           console.log( "tryna show somethins..." + this.data.targetElements + " length"); 
-          if (this.data.targetElements != '') {
-          for (let i = 0; i < this.data.targetElements.length; i++) {
+          
+          let targetEls = [];
+          if (this.data.targetElements.includes(",")) {
+            targetEls = this.data.targetElements.split(",");
+          } else {
+            targetEls.push(this.data.targetElements);
+          }
+          if (targetEls.length) {
+            for (let i = 0; i < targetEls.length; i++) {
+              // let targetEl = document.getElementById(targetEls[i].toString());
               if (this.data.targetElements[i] != "none") {
-                let targetEl = document.getElementById(this.data.targetElements[i].toString());
+                let targetEl = document.getElementById(targetEls[i].toString());
                 if (targetEl) {
                     console.log("tryna portal to " + targetEl);
                     GoToLocation(targetEl.id);
@@ -1559,155 +1568,126 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
             }
           }
         }
-        if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("toggle target")) {
-          console.log( "tryna toggle somethin..." + this.data.targetElements + " length"); 
-
-
-            for (let i = 0; i < this.data.targetElements.length; i++) {
-              let targetEl = document.getElementById(this.data.targetElements[i].toString());
-              if (targetEl) {
-                // let isVisible = targetEl.dataset.isVisible;
-                // targetEl.dataset.isVisible = !targetEl.dataset.isVisible;
-                console.log( targetEl.id + " element isVisible : " + targetEl.dataset.isvisible); 
-                if (targetEl.dataset.isvisible == "no") {
-                  // this.coolDown = true;
-                  
-                  targetEl.setAttribute("visible", true)
-                  targetEl.dataset.isvisible = true;
-                  targetEl.classList.add("activeObjexRay");
-                  console.log("set to visible " + targetEl.dataset.isvisible);
-                } else {
-                  // this.cooldown = true;
-                  
-                  targetEl.setAttribute("visible", false);
-                  targetEl.dataset.isvisible = "no";
-                  targetEl.classList.remove("activeObjexRay");
-                  console.log("set to visible " + targetEl.dataset.isvisible);
-                }
-              }
-            
-            // this.coolDownTimer();
+      }
+      if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("toggle target")) {
+        console.log( "tryna toggle somethin..." + this.data.targetElements.toString() + " length " + this.data.targetElements.length); 
+        
+        let targetEls = [];
+        if (Array.isArray(this.data.targetElements)) {
+          targetEls = this.data.targetElements;
+        } else {
+          if (this.data.targetElements.toString().includes(",")) {
+            targetEls = this.data.targetElements.split(",");
+          } else {
+            targetEls.push(this.data.targetElements);
           }
         }
-        if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("show target")) {
-          console.log( "tryna show somethins..." + this.data.targetElements + " length"); 
-          if (this.data.targetElements != '') {
-            for (let i = 0; i < this.data.targetElements.length; i++) {
-              let targetEl = document.getElementById(this.data.targetElements[i].toString());
-              if (targetEl) {
-                  targetEl.setAttribute("visible", true);
-                  targetEl.classList.add("activeObjexRay");
-                  targetEl.dataset.isvisible = true;
-                  console.log("show target set to visible " + targetEl.dataset.isvisible);
+       
+        if (targetEls.length) {
+          for (let i = 0; i < targetEls.length; i++) {
+            console.log( "tryna toggle targetEl." + targetEls[i] + " length"); 
+            let targetEl = document.getElementById(targetEls[i].toString());
+            if (targetEl) {
+              // let isVisible = targetEl.dataset.isVisible;
+              // targetEl.dataset.isVisible = !targetEl.dataset.isVisible;
+              console.log( targetEl.id + " element isVisible : " + targetEl.dataset.isvisible); 
+              if (targetEl.dataset.isvisible == "no") {
+                targetEl.setAttribute("visible", true)
+                targetEl.dataset.isvisible = true;
+                targetEl.classList.add("activeObjexRay");
+                console.log("set to visible " + targetEl.dataset.isvisible);
+              } else {                 
+                targetEl.setAttribute("visible", false);
+                targetEl.dataset.isvisible = "no";
+                targetEl.classList.remove("activeObjexRay");
+                console.log("set to visible " + targetEl.dataset.isvisible);
               }
-            }
-            // this.coolDownTimer();
-          }
-        }
-        if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("hide target")) {
-          
-          console.log( "tryna hide somethin..." + this.data.targetElements + " length"); 
-          if (this.data.targetElements != '') {
-            for (let i = 0; i < this.data.targetElements.length; i++) {
-              let targetEl = document.getElementById(this.data.targetElements[i].toString());
-              if (targetEl) {
-                  targetEl.setAttribute("visible", false);
-                  targetEl.classList.remove("activeObjexRay");
-                  targetEl.dataset.isvisible = false;
-                  console.log("hide target set to visible " + targetEl.dataset.isvisible);
-              }
-            }
-            // this.coolDownTimer();
-          }
-        }
-        if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("spawn target")) { //could be an object
-          
-          console.log( "tryna hide somethin..." + this.data.targetElements + " length"); 
-          if (this.data.targetElements != '') {
-            for (let i = 0; i < this.data.targetElements.length; i++) {
-              let targetEl = document.getElementById(this.data.targetElements[i].toString());
-              if (targetEl) {
-                let cloudMarker = targetEl.components.cloud_marker;
-                if (cloudMarker) {
-                  cloudMarker.loadObject();
-                }
-              }
-            }
-            // this.coolDownTimer();
+            }     
           }
         }
       }
-    },
-    // targetMods: function () {
-    //   if (this.data.targetElements != '' && this.data.targetElements != []) {
-    //     if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("toggle target")) {
-    //       console.log( "tryna toggle somethin..." + this.data.targetElements + " length"); 
-    //       if (this.data.targetElements != '') {
+      if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("show target")) {
+        console.log( "tryna show target..." + this.data.targetElements + " length"); 
+        let targetEls = [];
+        if (Array.isArray(this.data.targetElements)) {
+          targetEls = this.data.targetElements;
+        } else {
+          if (this.data.targetElements.toString().includes(",")) {
+            targetEls = this.data.targetElements.split(",");
+          } else {
+            targetEls.push(this.data.targetElements);
+          }
+        }
+        if (targetEls.length) {
+          for (let i = 0; i < targetEls.length; i++) {
+            let targetEl = document.getElementById(targetEls[i].toString());
+            if (targetEl) {
+                targetEl.setAttribute("visible", true);
+                targetEl.classList.add("activeObjexRay");
+                targetEl.dataset.isvisible = true;
+                console.log("show target set to visible " + targetEl.dataset.isvisible);
+            }
+          }
+        }
+      }
+      if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("hide target")) {
+        
+        console.log( "tryna swawn target " + this.data.targetElements); 
+        let targetEls = [];
+        if (Array.isArray(this.data.targetElements)) {
+          targetEls = this.data.targetElements;
+        } else {
+          if (this.data.targetElements.toString().includes(",")) {
+            targetEls = this.data.targetElements.split(",");
+          } else {
+            targetEls.push(this.data.targetElements);
+          }
+        }
+        if (targetEls.length) {
+          for (let i = 0; i < targetEls.length; i++) {
+            let targetEl = document.getElementById(targetEls[i].toString());
+            if (targetEl) {
+                targetEl.setAttribute("visible", false);
+                targetEl.classList.remove("activeObjexRay");
+                targetEl.dataset.isvisible = false;
+                console.log("hide target set to visible " + targetEl.dataset.isvisible);
+            }
+          }
+        }
+      }
+      if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("spawn target")) { //could be an object  
+        
+        console.log( "tryna swawn target " + this.data.targetElements); 
+        let targetEls = [];
+        if (Array.isArray(this.data.targetElements)) {
+          targetEls = this.data.targetElements;
+        } else {
+          if (this.data.targetElements.toString().includes(",")) {
+            targetEls = this.data.targetElements.split(",");
+          } else {
+            targetEls.push(this.data.targetElements);
+          }
+        }
+        if (targetEls.length) {
+          for (let i = 0; i < targetEls.length; i++) {
+            // console.log("trytna get targetEl " + targetEls[i].toString());
+            let targetEl = document.getElementById(targetEls[i].toString());
 
-    //         for (let i = 0; i < this.data.targetElements.length; i++) {
-    //           let targetEl = document.getElementById(this.data.targetElements[i].toString());
-    //           if (targetEl) {
-    //             // let isVisible = targetEl.dataset.isVisible;
-    //             // targetEl.dataset.isVisible = !targetEl.dataset.isVisible;
-    //             console.log( targetEl.id + " element isVisible : " + targetEl.dataset.isvisible); 
-    //             if (targetEl.dataset.isvisible == "no") {
-    //               // this.coolDown = true;
-                  
-    //               targetEl.setAttribute("visible", true)
-    //               targetEl.dataset.isvisible = true;
-    //               targetEl.classList.add("activeObjexRay");
-    //               console.log("set to visible " + targetEl.dataset.isvisible);
-    //             } else {
-    //               // this.cooldown = true;
-                  
-    //               targetEl.setAttribute("visible", false);
-    //               targetEl.dataset.isvisible = "no";
-    //               targetEl.classList.remove("activeObjexRay");
-    //               console.log("set to visible " + targetEl.dataset.isvisible);
-    //             }
-    //           }
-    //         }
-    //         // this.coolDownTimer();
-    //       // }
-    //     }
-    //     if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("show target")) {
-    //       console.log( "tryna show somethins..." + this.data.targetElements + " length"); 
-    //       if (this.data.targetElements != '') {
-    //         for (let i = 0; i < this.data.targetElements.length; i++) {
-    //           let targetEl = document.getElementById(this.data.targetElements[i].toString());
-    //           if (targetEl) {
-    //               targetEl.setAttribute("visible", true);
-    //               targetEl.classList.add("activeObjexRay");
-    //               targetEl.dataset.isvisible = true;
-    //               console.log("show target set to visible " + targetEl.dataset.isvisible);
-    //           }
-    //         }
-    //         // this.coolDownTimer();
-    //       }
-    //     }
-    //     if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("hide target")) {
-    //       console.log( "tryna hide somethin..." + this.data.targetElements + " length"); 
-    //       if (this.data.targetElements != '') {
-    //         for (let i = 0; i < this.data.targetElements.length; i++) {
-    //           let targetEl = document.getElementById(this.data.targetElements[i].toString());
-    //           if (targetEl) {
-    //               targetEl.setAttribute("visible", false);
-    //               targetEl.classList.remove("activeObjexRay");
-    //               targetEl.dataset.isvisible = false;
-    //               console.log("hide target set to visible " + targetEl.dataset.isvisible);
-    //           }
-    //         }
-    //         // this.coolDownTimer();
-    //         }
-    //       }
-    //     }
-    //   }
-    // },
+            if (targetEl) {
+              // console.log("gotsa targetEl!");
+              let cloudMarker = targetEl.components.cloud_marker;
+              if (cloudMarker) {
+                // console.log("on a cloudMarker! time to loadObject!");
+                cloudMarker.loadObject();
+              }
+            }
+          }
+        }
+      } 
+    },
+    
     rayhit: function (hitID, distance, hitpoint) {
-      // if (this.hitID != hitID) {
-      //   this.hitID = hitID;
-        // console.log("new hit " + hitID + " " + distance + " " + JSON.stringify(hitpoint));
-        // distance = window.playerPosition.distanceTo(hitpoint);
+      
         console.log("new hit " + hitID + " " + distance + " " + JSON.stringify(hitpoint) + " tags " + this.data.tags);
         if (this.data.tags && this.data.tags.length && !this.data.tags.toLowerCase().includes("no trigger")) {
           var triggerAudioController = document.getElementById("triggerAudio");

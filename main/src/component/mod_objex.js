@@ -1754,7 +1754,7 @@ AFRAME.registerComponent('mod_object', {
                           
                         } else {
                           console.log("no collider scale, using default...");
-                          this.el.setAttribute('ammo-shape', {type: this.data.objectData.collidertype.toLowerCase(), halfExtents: halfExtents, offset: offset});
+                          this.el.setAttribute('ammo-shape', {type: this.data.objectData.collidertype.toLowerCase()});
                         }
                        
                         console.log("ammo shape is " + JSON.stringify(that.el.getAttribute('ammo-shape')) + " applyForce " + this.data.applyForceToNewObject);

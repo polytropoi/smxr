@@ -33,6 +33,7 @@
     window.showLocation = showLocation;
     window.getApp = getApp;
 
+
     var cookie = Cookies.get();
     var type = getParameterByName("type", window.location.href); //these params used for routing in bigSwitch
     var appid = getParameterByName("appid", window.location.href);
@@ -2610,6 +2611,7 @@
                 });
             });
     }
+
     function showLocation (item_id) {
         if (item_id != undefined) {
         let tags = [];
@@ -12697,7 +12699,8 @@ function getAllPeople() {
             //      });
                 
             //  });
-            
+
+
             let sceneLocs = "";    
                 if (sceneLocations != null && sceneLocations != undefined && sceneLocations.length > 0 ) {
                 console.log(sceneLocations.length + " sceneLocations " + JSON.stringify(sceneLocations));
@@ -12717,27 +12720,14 @@ function getAllPeople() {
                         name = "";
                     }
                     let locationID = "";
-                    // if (sceneLocations[i]._id != null && sceneLocations[i]._id != undefined) {
-                    //     locationID = sceneLocations[i]._id; 
-                    // } else {
+                   
                     locationID = sceneLocations[i].timestamp; //go ahead and use timestamp, bc _ids may not be unique here, i.e. if same loc selected
                     if (locationID == undefined) { //some old ones don't have it!
                         locationID = Math.floor(Date.now()/1000);
                         sceneLocations[i].timestamp = locationID;
                     }
                     let locationTags = sceneLocations[i].locationTags != undefined ? sceneLocations[i].locationTags : "";
-                    // }
-                    // else {
-                    //     if (sceneLocations[i].timestamp != null && sceneLocations[i].timestamp != undefined) {
-                    //         locationID = sceneLocations[i].timestamp;
-                    //     } else {
-                    //         locationID = sceneLocations[i].name;
-                    //     }
-                        
-                    // }
-                    // let eX = sceneLocations[i].eulerx != undefined ? sceneLocations[i].eulerx : 0;
-                    // let eY = sceneLocations[i].eulery != undefined ? sceneLocations[i].eulery : 0;
-                    // let eZ = sceneLocations[i].eulerz != undefined ? sceneLocations[i].eulerz : 0;
+                    
                     let eX = sceneLocations[i].eulerx;
                     let eY = sceneLocations[i].eulery;
                     let eZ = sceneLocations[i].eulerz;
@@ -12745,10 +12735,7 @@ function getAllPeople() {
                     let sX = sceneLocations[i].xscale;
                     let sY = sceneLocations[i].yscale;
                     let sZ = sceneLocations[i].zscale;
-                    // eX = parseFloat(eX) != null ? parseFloat(eX) : 0; //hrm...
-                    // eY = parseFloat(eY) != null ? parseFloat(eY) : 0;
-                    // eX = parseFloat(eZ) != null ? parseFloat(eZ) : 0;
-                    // console.log("rotations " + eX + " " + eY + " " + eZ);
+                  
                     let rotations = ""+                        
                     "<div class=\x22col form-group col-md-1\x22><label for=\x22eulerx_" + locationID + "\x22>X Rot</label>" + 
                     "<input type=\x22number\x22 step=\x220.01\x22 class=\x22form-control locationObjectRotX\x22 id=\x22eulerx_" + locationID + "\x22 placeholder=\x220\x22 value=\x22" + eX + "\x22 >" +
@@ -13277,7 +13264,7 @@ function getAllPeople() {
                     "<a class=\x22btn btn-primary newSceneLocation\x22 href=\x22#\x22><i class=\x22fas fa-file-upload\x22></i> New </a>" +
                     "<a class=\x22btn btn-info\x22 href=\x22index.html?type=locations&mode=select&parent=scene&iid="+response.data._id+"\x22><i class=\x22fas fa-hand-pointer\x22></i> Select </a>" +
                     "<a class=\x22btn btn-success\x22 href=\x22index.html?type=groups&mode=locgroup&parent=scene&iid="+response.data._id+"\x22><i class=\x22fas fa-hand-pointer\x22></i> Group </a>" +
-                    "<button class=\x22btn btn-danger\x22 onclick=\x22ClearSceneLocations()\x22><i class=\x22fas fa-broom\x22></i> Clear </button></div>";
+                    "<button id=\x22clearSceneLocations\x22 class=\x22btn btn-danger\x22><i class=\x22fas fa-broom\x22></i> Clear </button></div>";
                     const textButtons = " <div style=\x22margin: 0px 10px;\x22  class=\x22btn-group float-right\x22 role=\x22group\x22 aria-label=\x22button group\x22>" +
                     "<a class=\x22btn btn-primary\x22 href=\x22index.html?type=texts\x22><i class=\x22fas fa-file-upload\x22></i> New </a>" +
                     "<a class=\x22btn btn-info\x22 href=\x22index.html?type=texts&mode=select&parent=scene&iid="+response.data._id+"\x22><i class=\x22fas fa-hand-pointer\x22></i> Select </a>" +
@@ -15577,6 +15564,13 @@ function getAllPeople() {
                 }
 
                 ////////////////////////////////////////////////
+                document.getElementById("clearSceneLocations").addEventListener("click", function(e){
+                    e.preventDefault();
+                    // alert("Hello World!");
+                    sceneLocations = [];
+                    response.data.sceneLocations = [];
+                    console.log("cleard scenelocations " + sceneLocations + " " + response.sceneLocations);
+               });
                 $(function() { 
                     let reloadOnSubmit = false;
                        
