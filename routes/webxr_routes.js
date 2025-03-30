@@ -2089,7 +2089,7 @@ webxr_router.get('/:_id', function (req, res) {
                         if (model.item_type == "usdz") {//not locmdl glb
                         
                             let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/usdz/" + model.filename, 6000);
-                            console.log("non-gltf modelURL " + modelURL + " modelType " + asset.item_type);
+                            console.log("non-gltf modelURL " + modelURL + " modelType " + model.item_type);
                             usdzFiles = modelURL;
                             
                             loadUSDZ = "ready(function(){\n" +

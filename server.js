@@ -10,7 +10,6 @@ import express, { query } from "express";
 import http from "http";
 import jwt from "jsonwebtoken";
 import axios from "axios";
-// import fs from "fs";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import mongojs from "mongojs";
@@ -23,8 +22,7 @@ import helmet from "helmet";
 
 // import ObjectID from "bson-objectid"; //nope
 // import bcrypt from "bcrypt-nodejs"; //deprecated!
-
-// import async from "async"; // whoa
+// import async from "async"; // whoa - put some flowers!
 
 import bcrypt from "bcryptjs"; //just drop in replacement ?!? ok then
 import shortid from "shortid";
@@ -32,7 +30,7 @@ import QRCode from "qrcode";
 import { ObjectId } from "mongodb";
 import { RunDataQuery } from "./connect/database.js"; //connection happens here
 
-const entities = require("entities");
+const entities = require("entities"); //hrm
 
 // const requireText = require('require-text');
 

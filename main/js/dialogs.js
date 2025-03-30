@@ -125,32 +125,6 @@ window.addEventListener( 'keydown',  ( event ) => {
   
   });
 
-  // let lastKnownScrollPosition = 0;
-  // let ticking = false;
-
-  // function doSomething(scrollPos) {
-  //   let curveDriver = document.getElementById("cameraCurve");
-  //     if (curveDriver) {
-  //       let modCurveComponent = curveDriver.components.mod_curve;
-  //       if (modCurveComponent) {
-  //         modCurveComponent.scrollMove(2);
-  //       }
-  //     }
-  // }
-
-  // window.addEventListener("scroll", (event) => {
-  //   lastKnownScrollPosition = window.scrollY;
-  //   console.log("scroll event!");
-  //   if (!ticking) {
-  //     window.requestAnimationFrame(() => {
-  //       doSomething(lastKnownScrollPosition);
-  //       ticking = false;
-  //     });
-
-  //     ticking = true;
-  //   }
-  // });
-
   function clearSelection() {
     if (window.getSelection) {
       window.getSelection().removeAllRanges();
@@ -158,76 +132,6 @@ window.addEventListener( 'keydown',  ( event ) => {
       document.selection.empty();
     }
   }
-
-  // AFRAME.registerComponent('location_picker', {
-  //   init: function () {
-  //     console.log("tryna set location_picker raycaster");
-  //     this.tick = AFRAME.utils.throttleTick(this.tick, 300, this);
-  //     this.sceneEl = document.querySelector('a-scene');
-  //     this.raycaster = new THREE.Raycaster();
-  //     this.locationPicked = null;
-  //     this.picking = false;
-  //     this.pickerEl = document.createElement("a-entity");
-  //     this.pickerEl.id = "picker";
-  //     this.el.sceneEl.appendChild(this.pickerEl);
-  //     this.pickerEl.setAttribute('gltf-model', '#poi1');
-  //     this.el.addEventListener('model-loaded', (e) => {
-  //       this.pickerEl.setAttribute("material", {color: "purple", transparent: true, opacity: .5});
-  //       // this.pickerEl.style.visibility = "hidden";
-  //       this.pickerEl.object3D.visible = false;
-  //     });
-   
-  //       window.addEventListener('mouseup', (e) => { 
-  //       e.preventDefault();
-  //       if (keydown == "X" && this.locationPicked && !this.picking) {
-  //           this.picking = true;
-  //           // this.pickerEl.style.visibility = "hidden";
-  //           this.pickerEl.object3D.visible = false;
-  //           console.log("gotsa locationPicked "+ this.locationPicked);
-  //           // keydown = 
-  //           CreateLocation(null, "poi", this.locationPicked);
-  //           this.reset();
-  //         } else {
-  //           // this.pickerEl.style.visibility = "hidden";
-  //           this.pickerEl.object3D.visible = false;
-  //         }
-  //       }); 
-  //   },
-  //   reset: function () {
-  //     setTimeout(() =>  {
-  //       this.picking = false;
-  //     }, 1000);
-  //   },
-  //   tick: function () {
-  
-  //     if (!this.raycaster || this.raycaster == null || this.raycaster == undefined || keydown != "X") {
-  //       // this.pickerEl.style.visibility = "hidden";
-  //       this.pickerEl.object3D.visible = false;
-
-  //       // return;
-  //     } else {
-  //       // console.log("tryna sert raycaster " + keydown);
-  //       // if (keydown == "x") 
-  //       this.raycaster.setFromCamera( mouse, AFRAME.scenes[0].camera ); 
-  //       // this.intersection = this.raycaster.intersectObject( this.el.sceneEl.children );
-  //       const intersects = this.raycaster.intersectObjects( this.sceneEl.object3D.children );
-  
-  //       if (intersects.length && !this.picking) {
-  //         this.locationPicked = intersects[0].point;
-  //         // this.pickerEl.style.visibility = "visible";
-  //         this.pickerEl.object3D.visible = true;
-  //         this.pickerEl.setAttribute("position", this.locationPicked);
-  //         console.log("this.locationPicked " + JSON.stringify(this.locationPicked));
-
-  //       } else {
-  //         this.locationPicked = null;
-  //         // this.pickerEl.style.visibility = "hidden";
-  //         this.pickerEl.object3D.visible = false;
-  //       }
-  //     }
-  //   }
-  // });
-
 
   $('#modalContent').on('click', '#importModsButton', function(e) {
     // console.log("color 1 changed " + e.target.value);
@@ -1893,6 +1797,7 @@ function ShowInventoryItem(objectID) {
 //   console.log("event color " + event.target.value);
 //   event.target.value = null;
 // }
+
 function GreetingModal() {
   let content = document.getElementById(modalContentElID);
   let userName = document.getElementById('userName').innerHTML;
@@ -1905,6 +1810,8 @@ function SceneManglerModal(mode, autoHide) {
 
     // ClearInputs();
     console.log("opening SceneManglerModal with location " + selectedLocationTimestamp);
+    
+    
     if (localData.settings.sceneColor1) {
       settings.sceneColor1 = localData.settings.sceneColor1;
     } else {
@@ -1954,10 +1861,11 @@ function SceneManglerModal(mode, autoHide) {
     let ownerButton = "";
     let sendAdminMessageButton = "";
     if (userData.sceneOwner == "indaehoose") {
-        ownerButton = "<button class=\x22addButton\x22 id=\x22editButton\x22 onclick=\x22window.location='../main/?type=scene&iid="+userData.sceneID+"';\x22>Edit Scene</button>"+
-        "<button style=\x22float: left;\x22 class=\x22reallySaveButton\x22 onclick=\x22SaveModsToCloud()\x22>Save to Cloud DB</button>";
-        sendAdminMessageButton = "<button style=\x22float: left;\x22 class=\x22reallySaveButton\x22 onclick=\x22SendAdminMessage()\x22>Send Admin Message</button>";
+        ownerButton = "<button id=\x22EditScene\x22 class=\x22addButton\x22 id=\x22editButton\x22 onclick=\x22window.location='../main/?type=scene&iid="+userData.sceneID+"';\x22>Edit Scene</button>"+
+        "<button id=\x22SaveModsToCloud\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 onclick=\x22SaveModsToCloud()\x22>Save to Cloud DB</button>";
+        sendAdminMessageButton = "<button id=\x22SendAdminMessage\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 onclick=\x22SendAdminMessage()\x22>Send Admin Message</button>";
     }
+
     let oculusButton = "<button style=\x22float: right;\x22 class=\x22addButton\x22 id=\x22oculusButton\x22><a href=\x22https://www.oculus.com/open_url/?url=https%3A%2F%2Fservicemedia.net/webxr/"+room+"\x22>Open on Oculus Quest</a></button>";
     let tabs ="<div class=\x22tab\x22>" +
     "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Welcome')\x22>Welcome</button>"+
@@ -2247,7 +2155,20 @@ function SceneManglerModal(mode, autoHide) {
           InitAmbientSlider();
           InitTriggerSlider();
           
+          document.getElementById("EditScene").addEventListener("click", function(e){
+            e.preventDefault();
+            window.location='../main/?type=scene&iid="+userData.sceneID+"';
+            
+        });
+        document.getElementById("SaveModsToCloud").addEventListener("click", function(e){
+          e.preventDefault();
+          SaveModsToCloud();
           
+        });
+        document.getElementById("SendAdminMessage").addEventListener("click", function(e){
+          e.preventDefault();
+          SendAdminMessage();
+        });
           // if (autoHide) {
           //   setTimeout(() =>  {
           //     ShowHideDialogPanel();
