@@ -1087,7 +1087,7 @@ webxr_router.get('/:_id', function (req, res) {
                 ///////////////// - Orbit camera - /////////////////
                 } else if (sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase().includes("orbit")) { //hrm..
                     wasd = "";
-                    cameraRigEntity = "<a-entity camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; minDistance: 0.5; maxDistance: 180; initialPosition: 0 5 5\x22>"+
+                    cameraRigEntity = "<a-entity camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; minDistance: 0.5; maxDistance: 180; initialPosition: "+playerPosition+"\x22>"+
                     "<a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
                     "</a-entity>";
                     joystickScript = "<script src=\x22https://cdn.jsdelivr.net/gh/diarmidmackenzie/superframe@fix-orbit-controls/components/orbit-controls/dist/aframe-orbit-controls.min.js\x22></script>";
@@ -2499,10 +2499,11 @@ webxr_router.get('/:_id', function (req, res) {
                     const o_ids = group.items.map(convertStringToObjectID);
                     console.log("vid group items: "+o_ids);
                     const vidquery = {_id : {$in : o_ids}};
-                    const videos = await RunDataQuery("video_items", "find", vidquery);
-                    for (let i = 0; i < videos.length; i++) {
-                        let video = videos[i];
+                    let videos = await RunDataQuery("video_items", "find", vidquery);
+                    for (let video of videos) {
+                        // let video = videos[i];
                         video.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + video.userID + "/video/" + video._id + "/" + video._id + "." + video.filename, 6000);
+                        console.log("video url " + video.url)
                     }
                     vidGroup.videos = videos;
                     requestedVideoGroups.push(vidGroup);
@@ -2510,6 +2511,7 @@ webxr_router.get('/:_id', function (req, res) {
                     for (let v = 0; v < requestedVideoGroups.length; v++) {
                         for (let i = 0; i < requestedVideoGroups[v].videos.length; i++ ) {  //TODO spin first and second level array
                             videoElements = videoElements + "<video style=\x22display: none;\x22 loop=\x22true\x22 crossorigin=\x22use-credentials\x22 webkit-playsinline playsinline id=\x22"+requestedVideoGroups[v].videos[i]._id+"\x22></video>";
+                            console.log("Video elements " + JSON.stringify(videoElements));
                         }
                     }
                 }
@@ -3739,7 +3741,7 @@ webxr_router.get('/:_id', function (req, res) {
                         "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
                         "<div class=\x22previous-button\x22 id=\x22previousButton\x22 style=\x22visibility: hidden\x22 onclick=\x22GoToPrevious()\x22><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
                         "<a href=\x22''\x22 target=\x22_blank\x22 class=\x22ar-buttoon\x22>AR</a>" + //?
-                        "<div id=\x22token\x22 data-token=\x22"+token+"\x22>\n"+
+                        "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
                         locationButton+
                         dialogButton+
                         ethereumButton+ 
@@ -3758,7 +3760,7 @@ webxr_router.get('/:_id', function (req, res) {
                     let noAccessHTML = "<html xmlns='http://www.w3.org/1999/xhtml'>" +
                     "<head> " +
                     // "<link href=\x22css/sb-admin-2.css\x22 rel=\x22stylesheet\x22>" +
-                    "<style>"+
+                    "<style>" +
                     "body {background-color: #36393d;}"+
                     "h1   {color: white;}"+
                     "a   {color: powderblue;}"+

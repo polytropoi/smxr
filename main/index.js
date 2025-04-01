@@ -1420,8 +1420,8 @@
                         };
                         axios.post(url, data)
                         .then(function (response) {
-                            console.log(response);
-                            if (response.data.includes("deleted")) {
+                            console.log(response.data);
+                            if (response.data.toString().includes("deleted")) {
                                 window.location.assign(window.location.pathname + "?type=" + redir);
                             } else if (response.data.includes("delback")) {
                                 // window.history.back();

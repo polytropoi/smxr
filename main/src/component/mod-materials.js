@@ -426,7 +426,7 @@ AFRAME.registerComponent('mod-materials', {
         // primaryVideo = video;
         let m3u8 = '/hls/'+this.data.id;
 
-        console.log("this.video is " + this.video.id + " m3u8 " + m3u8);
+        // console.log("this.video is " + this.video.id + " m3u8 " + m3u8);
 
         //settings.sceneVideoStreams is set serverside for external streams, e.g. from mux.com
         if (settings != undefined && settings.sceneVideoStreams != null && settings.sceneVideoStreams.length > 0) {
@@ -723,6 +723,8 @@ AFRAME.registerComponent('mod-materials', {
               if (this.video.paused) {
                 console.log("tryna play!");
                 playVideo(this.video);
+              } else {
+                pauseVideo(this.video);
               }
               // this.el.getObject3D('mesh').scale.set(200, 200, 200);
               // this.el.components.a-sphere.setAttribute("radius", 100);

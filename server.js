@@ -12,17 +12,13 @@ import jwt from "jsonwebtoken";
 import axios from "axios";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-import mongojs from "mongojs";
+
 import methodOverride from "method-override";
 import session from "express-session";
 import MongoStore from "connect-mongo"; //better
 import validator from "validator"; 
 // import minio from "minio";
 import helmet from "helmet";
-
-// import ObjectID from "bson-objectid"; //nope
-// import bcrypt from "bcrypt-nodejs"; //deprecated!
-// import async from "async"; // whoa - put some flowers!
 
 import bcrypt from "bcryptjs"; //just drop in replacement ?!? ok then
 import shortid from "shortid";
@@ -32,7 +28,7 @@ import { RunDataQuery } from "./connect/database.js"; //connection happens here
 
 const entities = require("entities"); //hrm
 
-// const requireText = require('require-text');
+// const requireText = require('require-text'); 
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
@@ -77,12 +73,6 @@ var corsOptions = function (origin) {
 
 var oneDay = 86400000;
 
-var databaseUrl = process.env.MONGO_URL; //main db connstring
-// console.log(databaseUrl);
-var collections = ["acl", "auth_req", "domains", "apps", "assets", "assetsbundles", "models", "users", "inventories", "inventory_items", "audio_items", "text_items", "audio_item_keys", "image_items", "video_items",
-    "obj_items", "paths", "keys", "traffic", "scores", "attributes", "achievements", "activity", "actions", "purchases", "storeitems", "scenes", "groups", "weblinks", "locations", "iap"];
-
-export let db_old = mongojs(databaseUrl, collections); //soon you will die!!  VERY SOON!!  HA AHHHAA!
 app.use(express.static(path.join(__dirname, './'), { maxAge: oneDay }));
 
 app.use(function(req, res, next) {
@@ -6411,14 +6401,17 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             sceneResponse.postcards = postcardsResponse;
             
             ///models
-            if (sceneResponse.sceneModels != null) {
+            if (sceneResponse.sceneModels && sceneResponse.sceneModels.length) {
+                
                 const oids = sceneResponse.sceneModels.map(convertStringToObjectID);
                 const query = {"_id": { $in: oids }};
                 const models = await RunDataQuery("models", "find", query); //how to show missing?  
                 sceneResponse.sceneModelz = models;
+               
             }
             //objects
             if (sceneResponse.sceneObjects && sceneResponse.sceneObjects.length) {
+                
                 const oids = sceneResponse.sceneObjects.map(convertStringToObjectID);
                 const query = {"_id": { $in: oids }};
                 const objeks = await RunDataQuery("obj_items", "find", query);
@@ -7994,8 +7987,8 @@ app.post('/delete_video/', requiredAuthentication, function (req, res){
     (async () => {
       try {
         const query = { "_id" : o_id};
-        const vid_item = await RunDataQuery("image_items", "findOne", query);
-        if (vid_item) {
+        const vid_item = await RunDataQuery("video_items", "findOne", query);
+        // if (vid_item) {
             var item_string_filename = vid_item.filename;
             item_string_filename = item_string_filename.replace(/\"/g, "");
             var item_string_filename_ext = getExtension(item_string_filename);
@@ -8014,9 +8007,9 @@ app.post('/delete_video/', requiredAuthentication, function (req, res){
                 }
             };
 
-            try {
                 const files = await ListObjects(process.env.ROOT_BUCKET_NAME,'users/'+ vid_item.userID + '/video/'+ vid_item._id +'/');
-                if (files.Contents.length == 0) {
+                console.log("files " + JSON.stringify(files));
+                if (!files || files.Contents == undefined || files.Contents.length == 0) {
                     
                     const query = { "_id" : o_id };
                     const status = await RunDataQuery("video_items", "deleteOne", query);
@@ -8038,13 +8031,10 @@ app.post('/delete_video/', requiredAuthentication, function (req, res){
                     res.send("deleted " + status);
                 }
 
-            } catch (e) {
-              res.send(e);
-            }
-          } else {
-            console.log("no video found!");
-            res.send("no video found to delete!");
-          }
+        //   } else {
+        //     console.log("no video found!");
+        //     res.send("no video found to delete!");
+        //   }
         } catch(e) {
           res.send(e);
         }
