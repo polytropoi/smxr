@@ -1352,6 +1352,9 @@ function PlayPauseMedia () {
       
     } else if (timedEventsListenerMode.toLowerCase() == "primary video") {
       var videoControllerEl = document.getElementById('primary_video_0');  
+        if (!videoControllerEl) {
+          videoControllerEl = document.getElementById('primary_video'); //i.e. it's an equirect..
+        }
         if (videoControllerEl != null) {
           console.log("gotsa video embedVideo");
           let videoController = videoControllerEl.components.vid_materials_embed;

@@ -3009,18 +3009,13 @@ AFRAME.registerComponent('skybox_dynamic', {
   },
   applyEnvMap: function () {
     console.log("tryna applyEnvMap");
-    // const envMap = this.texture;  
-    // envMap.mapping = THREE.EquirectangularReflectionMapping;
     let envMapObjex = document.getElementsByClassName('envMap');
     // console.log("envMap elements " + envMapObjex.length + " with this.texture " + this.texture);
     if (envMapObjex != null) {
-      // this.texture = new THREE.TextureLoader().load(this.skyboxData.images[this.skyboxIndex].url);
-      // this.texture.colorSpace = THREE.SRGBColorSpace;
-      // this.texture.mapping = THREE.EquirectangularReflectionMapping;
-      // this.texture.minFilter = this.texture.magFilter = THREE.LinearFilter;
+    
       this.mesh = null;
       for (let i = 0; i < envMapObjex.length; i++) {
-        // console.log("envMap element " + i + " " + envMapObjex.id);
+        
         this.mesh = envMapObjex[i].getObject3D('mesh');
 
       if (this.mesh != null) {

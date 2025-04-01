@@ -814,7 +814,8 @@ AFRAME.registerComponent('instanced_meshes_sphere', { //scattered randomly in sp
     scatterModel.addEventListener('model-loaded', (event) => {
     const sObj = scatterModel.getObject3D('mesh');
     console.log("tryna INSTANCE THE THIGNS");
-  
+      
+
     sObj.traverse(node => {
       if (node.isMesh && node.material) {
           this.sampleGeometry = node.geometry;
@@ -823,7 +824,26 @@ AFRAME.registerComponent('instanced_meshes_sphere', { //scattered randomly in sp
       });
     });
   }
+  
+  // this.sampleMaterial.envMap: 
 
+  // const material = new THREE.MeshStandardMaterial({
+  //   metalness: 1,
+  //   roughness: 0.0,
+  //   envMap: envMap,
+  //   envMapIntensity: 0.7,
+  //   onBeforeCompile: shader => {
+  //     shader.vertexShader = `
+  //        attribute vec3 offsetPos;
+  //        ${shader.vertexShader}
+  //     `.replace(
+  //       `#include <begin_vertex>`,
+  //       `#include <begin_vertex>
+  //         transformed += offsetPos;
+  //       `
+  //     );
+  //   }
+  // })
   this.particlesEl = null;
 
   if (this.data.tags && this.data.tags.toLowerCase().includes("bang")) {
@@ -942,7 +962,7 @@ AFRAME.registerComponent('instanced_meshes_sphere', { //scattered randomly in sp
           this.instance_clicked(this.instanceId); 
         }
       }); 
-    
+      this.el.setAttribute("skybox-env-map", "");
 
     },
     tick: function(time, timeDelta) {
@@ -986,7 +1006,7 @@ AFRAME.registerComponent('instanced_meshes_sphere', { //scattered randomly in sp
           // if (window.playerPosition != null && window.playerPosition != undefined && this.intersection[0].point != undefined && this.intersection[0].point != null ) {
           if (this.intersection[0].point != undefined && this.intersection[0].point != null ) {
               this.instanceId = this.intersection[ 0 ].instanceId;
-              console.log(this.instanceId);
+              // console.log(this.instanceId);
               this.iMesh.setColorAt( this.instanceId, this.highlightColor.setHex( Math.random() * 0xffffff ) );
               this.iMesh.instanceColor.needsUpdate = true;
               // console.log('windowplayerposition ' + JSON.stringify(window.playerPosition));
@@ -1015,7 +1035,7 @@ AFRAME.registerComponent('instanced_meshes_sphere', { //scattered randomly in sp
       }
     },
     rayhit: function (hitID, distance, hitpoint) {
-      console.log(hitID + " beez hit!");
+      // console.log(hitID + " beez hit!");
       if (this.hitID != hitID || !this.isInitialized) {
         
         this.intersection = null;
