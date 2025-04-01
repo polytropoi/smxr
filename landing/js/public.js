@@ -2,12 +2,35 @@ if (location.hostname !== 'localhost' && window.location.protocol === 'http:') w
 
 function getScenes() {
     console.log("tryna getScenes()");
-	var resultElement = document.getElementById('getResult1');
+	  var resultElement = document.getElementById('getResult1');
   	resultElement.innerHTML = '';
+  //   try {
+  //     const scenes = fetch('publicscenes'); //maybe later...
+  //     console.log("scenes " + JSON.stringify(scenes));
+  //     resultElement.innerHTML = generateSuccessHTMLOutput(scenes);
+  //   } catch (e) {
+  //     console.log("error " + e);
+  //   }
+   
+
+  // //   .then((response) => {
+  // //     // return response.json();
+  // //     let resp = response.json();
+  // //     console.log(resp);
+  // //     resultElement.innerHTML = generateSuccessHTMLOutput(resp);
+  // //   })
+  // //   // .then((data) => {
+  // //   //   console.log(JSON.stringify(data));
+  // //   //   resultElement.innerHTML = generateSuccessHTMLOutput(data);
+  // //   // })
+  // //   .catch(function(e) {
+  // //     console.log(e);
+  // //     resultElement.innerHTML = generateErrorHTMLOutput(e);
+  // //   });
 	axios.get('publicscenes')
   .then(function (response) {
-    console.log(JSON.stringify(response));
-	resultElement.innerHTML = generateSuccessHTMLOutput(response);
+    // console.log(JSON.stringify(response));
+	  resultElement.innerHTML = generateSuccessHTMLOutput(response);
   })
   .catch(function (error) {
     console.log(error);

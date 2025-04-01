@@ -6692,9 +6692,9 @@ app.get('/publicscenes', async (req, res) => { //works to put async in the route
           expiration.setMinutes(expiration.getMinutes() + 30);
           var baseName = path.basename(item_string_filename, (item_string_filename_ext));
           var halfName = 'half.' + baseName + item_string_filename_ext;
-          var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+        //   var quarterName = 'quarter.' + baseName + item_string_filename_ext;
           var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
-          var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000);
+        //   var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000);
           // console.log("tyryna get mibno urls... " + urlHalf);
           var tempOwnerName = "test"
           var availableScene = {
@@ -6707,8 +6707,8 @@ app.get('/publicscenes', async (req, res) => { //works to put async in the route
               sceneDescription: scene.sceneDescription,
               sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
               sceneOwner: tempOwnerName,
-              scenePostcardHalf: urlHalf,
-              scenePostcardQuarter: urlQuarter
+              scenePostcardHalf: urlHalf
+            //   scenePostcardQuarter: urlQuarter
           };
           availableScenesResponse.availableScenes.push(availableScene);
           // console.log("pushing available scene " + availableScene.sceneTitle);
@@ -6718,6 +6718,7 @@ app.get('/publicscenes', async (req, res) => { //works to put async in the route
         }
     }
   }
+//   console.log("availableScenesRsponse " + JSON.stringify(availableScenesResponse));
   res.send(availableScenesResponse); 
 
 });

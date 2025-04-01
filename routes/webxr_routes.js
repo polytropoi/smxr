@@ -3393,7 +3393,7 @@ webxr_router.get('/:_id', function (req, res) {
                         }
                        
                         if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('traffic')) {
-                            extraScripts = extraScripts + "<script src=\x22/connect/traffic.js\x22 ></script><script src=\x22/main/src/util/axios.js\x22></script>"; 
+                            extraScripts = extraScripts + "<script src=\x22/connect/traffic.js\x22 ></script><script src=\x22/main/vendor/axios/axios.min.js\x22></script>"; 
                             // extraEntities = extraEntities + "<a-entity id=\x22traffic_data\x22 traffic_data_viz=\x22init: true\x22></a-entity>";
                         }
                         let sceneQuest = "";
@@ -3519,7 +3519,7 @@ webxr_router.get('/:_id', function (req, res) {
                             "}"+
                         "}</script>"+
                         
-                        "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                        "<script src=\x22/main/vendor/jquery/jquery-3.7.1.js\x22></script>" +
                         "<script src=\x22/connect/indexedDb.js\x22></script>" +
                         "<script src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
                         
