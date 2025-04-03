@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 import express, { query } from "express";
 import http from "http";
 import jwt from "jsonwebtoken";
-import axios from "axios";
+import axios from "axios"; //you're next to go buddy
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
@@ -165,29 +165,36 @@ server.listen(process.env.PORT || 3000, function() {
 });
 
 // INCLUDE EXTERNAL ROUTES BELOW
-// var oculus_routes = require('./routes/oculus_routes.cjs');
+
 
 import webxr_routes from './routes/webxr_routes.js';
 app.use('/webxr', webxr_routes); 
 import landing_routes from './routes/landing_routes.js';
 app.use('/landing', landing_routes);  
+
+
+/// uncomment to add these optional routes
 import unity_routes from './routes/unity_routes.js';
 app.use('/unity', unity_routes);  
+
 import stripe_routes from './routes/stripe_routes.js';
 app.use('/stripe', stripe_routes);
-// import gs_routes from './routes/gs_routes.js';
-// app.use('/gs', gs_routes);  
+
+// import utility_routes from './routes/utility_routes.js'; //NOTE you must npm install sharp, ffmpeg-fluent, and ffmpeg-static!  These modules are not included in package.json
+// app.use('/utils', utils_routes);  
 
 // import oculus_routes from './routes/oculus_routes.js';
+// app.use('/oculus', oculus_routes)
 
-/////// SHOW/HIDE Below to run socket.io on same port
+
+/////// SOCKET.IO SHOW/HIDE Below to run socket.io on same port
 
 ///this one gets users through handshake
 // var socketUsers = {};
 // var allUsers = [];
 // var io = require('socket.io')(server);
-// var mongoAdapter = require('socket.io-adapter-mongo'); //still?
-// io.adapter(mongoAdapter( process.env.MONGO_SESSIONS_URL ));
+// var mongoAdapter = require('socket.io-adapter-mongo'); //still? //HRM!
+// io.adapter(mongoAdapter( process.env.MONGO_SESSIONS_URL )); 
 // io.set('origins', 'servicemedia.net');
 // io.set('transports', ['polling', 'websocket']);
 import { Server } from "socket.io";
@@ -2049,6 +2056,7 @@ app.post('/process_video_hls', requiredAuthentication, function (req, res) {
         headers: {'X-Access-Token': token}
       };
     let iID = req.body.id;
+    //TODO USE LOCAL ROUTES!
     axios.get(process.env.GS_HOST + "/process_video_hls/"+iID, options)
     .then((response) => {
     //   console.log(response.data);
@@ -2116,17 +2124,17 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
     var itemsArray = req.body.processMe.items;
     var createGroup = false;
     var groupType = "";
-    var groupID;
-    var uid;
-    // var isObj
-    // var objName;
+    // var groupID;
+    // var uid;
+    // // var isObj
+    // // var objName;
     console.log("process_staging_files : " + JSON.stringify(req.body));
     var itemsExtensions = itemsArray.map(item => {
         return getExtension(item.key).toLowerCase();
     });
     const stagingBucket = process.env.STAGING_BUCKET_NAME;
     const targetBucket = process.env.ROOT_BUCKET_NAME;
-    // var meateada = {};
+
     var groupitems = [];
     var params = {
         Bucket: process.env.STAGING_BUCKET_NAME,
@@ -2138,14 +2146,18 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
     }
     
     const allEqual = itemsExtensions => itemsExtensions.every( v => v === itemsExtensions[0] ); //if all extensions the same, then make a group (which is the point)
-    console.log("same extensions: "+ itemsExtensions[0]);
+    console.log("allEqual " + allEqual + " extensions: "+ itemsExtensions[0]);
+
 
     if (allEqual(itemsExtensions) && (itemsExtensions[0].toLowerCase() == ".usdz" || itemsExtensions[0].toLowerCase() == ".reality" || itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
      itemsExtensions[0].toLowerCase() == ".aif" || itemsExtensions[0].toLowerCase() == ".aiff" || itemsExtensions[0].toLowerCase() == ".ogg" || itemsExtensions[0].toLowerCase() == ".wav" || itemsExtensions[0].toLowerCase() == ".mp3" || 
      itemsExtensions[0].toLowerCase() == ".mp4" || itemsExtensions[0].toLowerCase() == ".webm" || itemsExtensions[0].toLowerCase() == ".mov" || itemsExtensions[0].toLowerCase() == ".mkv")) { //need to think how to flex, and use contenttype
         
         var ts = Math.round(Date.now() / 1000);
-        createGroup = true;
+        if (itemsArray.length > 1) {
+            createGroup = true;
+        }
+        
         groupType = itemsExtensions[0];
         let contentType = "";
         if (groupType.toLowerCase()  == ".jpg" || groupType.toLowerCase()  == ".jpeg" || groupType.toLowerCase()  == ".png") {
@@ -2334,6 +2346,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
         console.log("all items must be the same media type " + itemsExtensions.length); //TODO handle if they're different
     }
 }); //end app.post /process_staging
+
 
 app.post('/staging_delete', requiredAuthentication, function (req, res) {
     console.log("staging delete: " + JSON.stringify(req.body));
