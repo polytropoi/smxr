@@ -1,3 +1,5 @@
+/////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
+
 var room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
 // var posRotReader = document.getElementById("player").components.get_pos_rot; 
@@ -88,7 +90,7 @@ const camLockButton = document.getElementById("camLockToggleButton");
 let intersections = [];
 
 window.timedEventsListenerMode = timedEventsListenerMode;
-/////////////////// main onload function below, populate settings, etc.
+
 $(function() { 
    // InitIDB();
    if (avatarNameEl) {

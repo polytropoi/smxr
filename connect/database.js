@@ -17,7 +17,7 @@ const client = new MongoClient(uri, {
 });
 const db = client.db(); 
 
-export async function RunDataQuery(coll,type,query,update,sort) {  //TODO pass in sort/limit... and add Sqlite!
+export async function RunDataQuery(coll,type,query,update,sort) {  //TODO pass in sort/limit... and add Sqlite, no ferretdb!
 
     let q = JSON.stringify(query);
     let u = "...";
