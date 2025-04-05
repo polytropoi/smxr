@@ -352,6 +352,12 @@ AFRAME.registerComponent('mod_model', {
                 obj.material.reflectivity = .5;
               }
             }
+            if (this.data.tags.toLowerCase().includes("wireframe") || this.data.eventData.includes("wireframe")) {
+              console.log("tryna set mod_model to wireframe!!!!!!!!");
+              obj.material = new THREE.MeshBasicMaterial({color: Math.random() * 0xFFFFFF, side: THREE.DoubleSide, transparent: true, opacity: .75, wireframe: true});
+              // this.el.setAttribute("material", {color: "red", wireframe: true});
+              
+            }
             if (this.data.eventData.toLowerCase().includes("target")) {
               this.el.id = "target_object"; //hrm, physics doesn't like
             }
@@ -727,7 +733,7 @@ AFRAME.registerComponent('mod_model', {
   
               } else if (this.meshChildren[i].name.includes("collider")) { //for models just assume this is static
                 if (settings.usePhysicsType == "ammo") {
-                  console.log("gotsa collider " + this.meshChildren[i].name);
+                  console.log("mod_model gotsa meshchild named collider " + this.meshChildren[i].name);
                   this.el.object3D.updateMatrixWorld();
                   let child = this.el.object3D.getObjectByName(this.meshChildren[i].name, true);
                   if (child != null) { 
@@ -749,11 +755,13 @@ AFRAME.registerComponent('mod_model', {
   
                     let colliderEl = document.createElement("a-entity");
                     colliderEl.setObject3D("mesh", this.child);
+                    // colliderEl.setAttribute("material", {color: "red", wireframe: true});
+                
                     // colliderEl.setAttribute("look-at", "#player");
-                    colliderEl.setAttribute("mod_physics", "body: static; shape: mesh; bounciness: 1; isTrigger: true; model: child");
+                    colliderEl.setAttribute("mod_physics", {"body": "static", "shape": "mesh", "bounciness": 3, "isTrigger": true, "model": child, "tags": this.data.tags});
                     colliderEl.id = this.meshChildren[i].name;
   
-                    this.el.appendChild(colliderEl); //set as child of DOM heirarchy, not just parent model
+                    this.sceneEl.appendChild(colliderEl); //set as child of DOM heirarchy, not just parent model
   
                   }
                 }
@@ -1734,6 +1742,7 @@ AFRAME.registerComponent('mod_model', {
           });
   
         } //end if target or callout
+        
     },
     returnRandomNumber: function (min, max) {
       return Math.random() * (max - min) + min;

@@ -284,13 +284,15 @@ AFRAME.registerComponent('mod_physics', { //used by models, placeholders, instan
           // this.el.material.color.setHex("#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);}));
         }
         if (this.el.id.toLowerCase().includes("wall")) {
-          console.log("wall hit " + e.detail.targetEl.id);
+          console.log("wall hit " + e.detail.targetEl.id + " with tags " + this.data.tags);
           var triggerAudioController = document.getElementById("triggerAudio");
-          if (triggerAudioController != null && this.model == "spawned") {
+          // if (triggerAudioController != null && this.model == "spawned") {
+            if (triggerAudioController != null && (this.data.tags && this.data.tags.length)) {
             console.log("mod_physics TRIGGER collision "  + this.el.id + " " + e.detail.targetEl.id);
-            triggerAudioController.components.trigger_audio_control.playAudioAtPosition(e.detail.targetEl.object3D.position, window.playerPosition.distanceTo(e.detail.targetEl.object3D.position), ["bang"], 1);
+            triggerAudioController.components.trigger_audio_control.playAudioAtPosition(e.detail.targetEl.object3D.position, window.playerPosition.distanceTo(e.detail.targetEl.object3D.position), this.data.tags, 1);
           }
-          this.forwardPush();
+          
+          this.forwardPush(e.detail.targetEl);
           // const force = new Ammo.btVector3(0, 0, -5);
           // const pos = new Ammo.btVector3(e.detail.targetEl.object3D.position.x, this.el.object3D.position.y, e.detail.targetEl.object3D.position.z);
           // // const pos = new Ammo.btVector3(this.el.object3D.position.x, this.el.object3D.position.y, this.el.object3D.position.z);
@@ -324,16 +326,16 @@ AFRAME.registerComponent('mod_physics', { //used by models, placeholders, instan
   //     });
   
   },
-  forwardPush: function () {
+  forwardPush: function (targetEl) {
     console.log("forwardPush on " + this.el.id);
     const velocity = new Ammo.btVector3(0, 0, -10);
-    this.el.body.setLinearVelocity(velocity);
+    targetEl.body.setLinearVelocity(velocity);
    
     Ammo.destroy(velocity);
   },
   randomPush: function () {
     console.log("trunya push");
-    const velocity = new Ammo.btVector3(randomNumber(-20, 20), randomNumber(-20, 20), randomNumber(-40, 40));
+    const velocity = new Ammo.btVector3(randomNumber(-2, 2), randomNumber(-2, 2), randomNumber(-4, 4));
     // const velocity = new Ammo.btVector3(0, 0, 10);
     this.el.body.setLinearVelocity(velocity);
    
@@ -532,12 +534,14 @@ AFRAME.registerComponent('spawned_object', { //cooked on the fly...
   },
   
   init: function() {
+    console.log("spawned object init modelID " + this.data.modelID + " tags " + this.data.tags);
     this.el.classList.add("activeObjexRay");
     this.isTrigger = true;
     this.isSelected = false;
     if (this.data.tags.includes("beat")) {
       this.el.classList.add("beatme");
     }
+    this.clips = null;
     this.el.setAttribute('gltf-model', '#'+ this.data.modelID);
     this.el.setAttribute('scale', {x: this.data.scaleFactor, y: this.data.scaleFactor, z: this.data.scaleFactor});
     this.el.addEventListener('model-loaded', () => {  
@@ -549,19 +553,41 @@ AFRAME.registerComponent('spawned_object', { //cooked on the fly...
           console.log("tryna load spawned object body");
         // }
       // }
+    
+      const obj = this.el.getObject3D('mesh');
+      if (obj) {
+        this.clips = obj.animations;
+        if (this.clips && this.clips.length) {
+          this.el.setAttribute('animation-mixer', {
+            "clip": this.clips[0].name,
+            "loop": "repeat",
+          });
+        }
+      }
+      
+  
     });
     this.el.addEventListener('body-loaded', () => {  
       // if (this.model == "spawned") {
-        this.el.setAttribute('ammo-shape', {type: 'sphere', fit: 'manual', sphereRadius: this.data.scaleFactor });
+        this.el.setAttribute('ammo-shape', {type: 'sphere', fit: 'manual', sphereRadius: this.data.scaleFactor / 3 });
         // this.el.setAttribute('ammo-shape', {type: 'sphere'});
         // console.log("tryna load spawned object shape with trigger " + this.el.id);
         this.randomPush();
       // }
     });
 
+
+
     this.el.addEventListener("collidestart", (e) => { 
       // e.preventDefault();
-      console.log("collision on spawned object  :" + this.el.id + " by " + e.detail.targetEl.id + " isTrigger " + this.isTrigger);
+      // console.log("collision on spawned object  :" + this.el.id + " by " + e.detail.targetEl.id + " isTrigger " + this.isTrigger);
+      // if (this.clips && this.clips.length) {
+      //   this.el.setAttribute('animation-mixer', {
+      //     "clip": this.clips[0].name,
+      //     "loop": "repeat",
+      //   });
+      // }
+
       if (this.isTrigger) { 
       
         if (e.detail.targetEl.id.includes("wall")) {
@@ -636,14 +662,14 @@ AFRAME.registerComponent('spawned_object', { //cooked on the fly...
 
   },
   forwardPush: function () {
-    const velocity = new Ammo.btVector3(0, 0, -10);
+    const velocity = new Ammo.btVector3(0, 0, -30);
     this.el.body.setLinearVelocity(velocity);
    
     Ammo.destroy(velocity);
   },
   randomPush: function () {
     // console.log("trunya push");
-    const velocity = new Ammo.btVector3(randomNumber(-2, 2), randomNumber(-2, 2), randomNumber(-4, 4));
+    const velocity = new Ammo.btVector3(randomNumber(-20, 20), randomNumber(-20, 20), randomNumber(-40, 40));
     // const velocity = new Ammo.btVector3(0, 0, 10);
     this.el.body.setLinearVelocity(velocity);
    
@@ -691,49 +717,45 @@ AFRAME.registerComponent('instanced_meshes_sphere_physics', { //scattered random
     this.count = 0;
     this.radius = 20;
     // this.el.setAttribute('gltf-model', '#'+ this.data.modelID);
-    
-
-    console.log("tryna set scatter model " + this.data.modelID);
- 
+    console.log("instanced_meshes_sphere_physics tryna set scatter model " + this.data.modelID);
     this.instancedElements = [];
-        for (var i=0; i<this.data.count; i++) {
-     
-         
-          let scale = Math.random() * this.data.scaleFactor;
-          // const { height, depth, width } = this.data
-          // const pos = this.el.object3D.position
-    
-          const iEl = document.createElement('a-entity')
-          iEl.id = 'i_' + this.count;
-          this.count++
-          console.log("mesh selector " + this.el.id);
-          // iEl.setAttribute('instanced-mesh-member', {mesh:this.el.id, memberMesh: true});
-          iEl.setAttribute('instanced-mesh-member', {mesh:'#i-mesh-sphere', memberMesh: true});
+    for (var i=0; i<this.data.count; i++) {
+  
+      
+      let scale = Math.random() * this.data.scaleFactor;
+      // const { height, depth, width } = this.data
+      // const pos = this.el.object3D.position
 
-          if (this.data.tags.includes("beat")) {
-            iEl.classList.add("beatme");
-          }
-          // const material1 = new THREE.MeshPhysicalMaterial({
-          //   roughness: 0,
-          //   transmission: 1,
-          //   thickness: 2
-          // });
+      const iEl = document.createElement('a-entity')
+      iEl.id = 'i_' + this.count;
+      this.count++
+      console.log("mesh selector " + this.el.id);
+      // iEl.setAttribute('instanced-mesh-member', {mesh:this.el.id, memberMesh: true});
+      iEl.setAttribute('instanced-mesh-member', {mesh:'#i-mesh-sphere', memberMesh: true});
 
-                    
-          this.el.sceneEl.appendChild(iEl);
-          
-          this.instancedElements.push(iEl);
+      if (this.data.tags.includes("beat")) {
+        iEl.classList.add("beatme");
+      }
+      // const material1 = new THREE.MeshPhysicalMaterial({
+      //   roughness: 0,
+      //   transmission: 1,
+      //   thickness: 2
+      // });
+                
+      this.el.sceneEl.appendChild(iEl);
+      
+      this.instancedElements.push(iEl);
 
-          if (this.instancedElements.length == this.data.count) {
-            this.applyPhysics();
-          }
-        }   
+      if (this.instancedElements.length == this.data.count) {
+        this.applyPhysics();
+      }
+    }   
   }, 
 
   applyPhysics: function () {
     let radius = this.radius;
     for (var i=0; i< this.instancedElements.length; i++) {
-      this.instancedElements[i].setAttribute('mod_physics', {'model': this.data.type, 'body': 'dynamic', 'shape': 'sphere', 'fit': 'manual'});
+      this.instancedElements[i].setAttribute('mod_physics', {'model': this.data.type, 'body': 'dynamic', 'shape': 'sphere', 'fit': 'manual', 'tags': this.data.tags });
       let x = Math.random() * radius - (radius/2);
       let y = Math.random() * radius - (radius/2);
       let z = Math.random() * radius - (radius/2);

@@ -2167,7 +2167,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
         } else if (groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".mov" || groupType.toLowerCase() == ".webm")  {
             contentType = "video";
         } else if (groupType.toLowerCase()  == ".glb" || groupType.toLowerCase()  == ".usdz") {
-            contentType == "model";
+            contentType = "model";
         } else {
             console.log("invalid contentType!");
             // res.end("invalid content type!");
@@ -2187,7 +2187,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                         // let size = 0;
                         const data = await ReturnObjectMetadata(stagingBucket,"staging/" + itemUID + "/" + itemKey); 
                         const size = data.ContentLength;
-                        console.log("processing staging file type " + groupType + " id " + itemKey + "sizeOf = " + size);
+                        console.log("processing staging file type " + contentType + " id " + itemKey + "sizeOf = " + size);
                         const url = await ReturnPresignedUrl(stagingBucket, "staging/" + itemUID + "/" + itemKey, 6000);
                         if (contentType == "picture") {
                             const updoc = {   
@@ -2207,7 +2207,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             groupitems.push(item_id);
                             console.log('new picture item id: ' + item_id);
                             // console.log("transcodePictureURL request: " + tUrl);
-                            var copySource = "archive1/staging/" + updoc.userID + "/" + updoc.filename;
+                            var copySource = process.env.STAGING_BUCKET_NAME + "/staging/" + updoc.userID + "/" + updoc.filename;
                             var ck = "users/" + itemUID + "/pictures/originals/" + item_id + ".original." + updoc.filename; //path change!
                             console.log("tryna copy origiinal to " + ck);
         
@@ -2242,7 +2242,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             item_id = saved.insertedId.toString(); //id (and acknowledgement) is the only thing the insert returns now, so use the updoc values
                             groupitems.push(item_id);
                             console.log('new picture item id: ' + item_id);
-                            var copySource = "archive1/staging/" + updoc.userID + "/" + updoc.filename;
+                            var copySource = process.env.STAGING_BUCKET_NAME + "/staging/" + updoc.userID + "/" + updoc.filename;
                             var ck = "users/" + updoc.userID + "/audio/originals/" + item_id + ".original." + updoc.filename; //path change!
                             console.log("tryna copy origiinal to " + ck);
                          
@@ -2276,7 +2276,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             groupitems.push(item_id);
                             console.log('new item id: ' + item_id);
 
-                            var copySource = "archive1/staging/" + item.uid + "/" + itemKey;
+                            var copySource = process.env.STAGING_BUCKET_NAME + "/staging/" + item.uid + "/" + itemKey;
                             var ck = "users/" + updoc.userID + "/video/" + item_id + "/" + item_id + "." + itemKey; //video folder w/ id bc encoded HLS files go in there, later..
                             const status = await CopyObject(targetBucket, copySource, ck);
                             console.log(status + " copied a video file " + copySource + " to " + targetBucket + ck);
@@ -2299,13 +2299,13 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             item_id = saved.insertedId.toString();
                             groupitems.push(item_id);
 
-                            const copySource = process.env.STAGING_BUCKET_NAME + "staging/" + item.uid + "/" + itemKey;
+                            const copySource = process.env.STAGING_BUCKET_NAME + "/staging/" + item.uid + "/" + itemKey;
                             let ck = "users/" + item.uid + "/gltf/" + itemKey;
                             if (model_type == "usdz") {
                                 ck = "users/" + item.uid + "/usdz/" + itemKey;
                             }
                             const status = await CopyObject(targetBucket, copySource, ck);
-                            console.log(status + " copied a model file " + copySource + " to " + targetBucket + ck);                          
+                            console.log(status + " copied a model file " + copySource + " to " + targetBucket +"/"+ ck);                          
                         }
                         params.Delete.Objects.push({Key: 'staging/' + item.uid + '/' + item.key}); //clean up
                     } //end loop

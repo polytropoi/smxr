@@ -426,7 +426,7 @@ webxr_router.get('/:_id', function (req, res) {
                     if (sceneData.sceneTags[i].toLowerCase().includes("physics")) { 
                         usePhysicsType = "ammo";
                         physicsScripts =  "<script src=\x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22></script>"+
-                        "<script src=\x22../main/vendor/aframe/aframe-physics-system.js\x22></script>";     
+                        "<script src=\x22../main/vendor/aframe/aframe-physics-system.min.js\x22></script>";     
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("brownian")) {
                         brownianScript =  "<script src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
