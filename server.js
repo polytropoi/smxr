@@ -2187,7 +2187,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                         // let size = 0;
                         const data = await ReturnObjectMetadata(stagingBucket,"staging/" + itemUID + "/" + itemKey); 
                         const size = data.ContentLength;
-                        console.log("processing staging file type " + contentType + " id " + itemKey + "sizeOf = " + size);
+                        console.log("processing staging file type " + contentType + " id " + itemKey + " sizeOf = " + size);
                         const url = await ReturnPresignedUrl(stagingBucket, "staging/" + itemUID + "/" + itemKey, 6000);
                         if (contentType == "picture") {
                             const updoc = {   
@@ -2248,7 +2248,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                          
                             const status = await CopyObject(targetBucket, copySource, ck);
                             console.log("copied somethings " + status);
-                            console.log("copied somethings " + status);
+
                             var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET); 
                             const options = {
                                 headers: {'X-Access-Token': token}
@@ -2520,7 +2520,21 @@ app.get('/staging/:_id', requiredAuthentication, function (req, res) {
             console.log(stagedItems.length + ' staging files have been fetched');
             stagedItems.reverse();
             rezponze.stagedItems = stagedItems;
-            // console.log("files: "+ items.Contents);
+            rezponze.serverFound = true;
+            
+            if (process.env.GS_HOST) {
+                const testUrl = process.env.GS_HOST;
+                console.log("testUrl " + testUrl);
+                const testResp = await fetch(testUrl);
+                console.log(response.status);
+                if (!response.status) {
+                    // throw new Error(`Response status: ${response.status}`);
+                    console.log("no utils server found!");
+                    rezponze.serverFound = false;
+                }
+              
+            }
+           
             res.send(rezponze);
         } catch (e) {
             console.log("error getting stainging " + e);
@@ -6074,7 +6088,7 @@ app.post('/add_scene_audio/', requiredAuthentication, function (req, res) {
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
     var a_id = ObjectId.createFromHexString(req.body.audio_id);   
-    console.log('tryna import primary audio : ' + req.body);
+    console.log('tryna import scene audio : ' + JSON.stringify(req.body));
 
     (async () => {
         try {
@@ -6087,7 +6101,8 @@ app.post('/add_scene_audio/', requiredAuthentication, function (req, res) {
                 const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
                 console.log("updated scene trigger audio" + JSON.stringify(updated));
             } else if (req.body.audio_type === "ambient") {
-                const updoc = { $set: {"sceneTriggerAudioID": audio._id.toString()}};
+                
+                const updoc = { $set: {"sceneAmbientAudioID": audio._id.toString()}};
                 const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
                 console.log("updated scene ambient audio" + JSON.stringify(updated));
             } else if (req.body.audio_type === "primary") {

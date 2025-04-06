@@ -1052,7 +1052,11 @@
     }  
     function showStaging (response) {
         var arr = response.stagedItems;
-        // var html = "<script src=\x22vendor/aframe/aframe-orbit-controls.min.js\x22></script><div class=\x22row\x22>";
+        const serverFound = response.serverFound;
+        
+        if (!serverFound) {
+            console.log("UTILS SERVER NOT FOUND - SOME FILES CANNOT BE PROCESSED!");
+        }
         var html = "<div class=\x22row\x22>";
         var re = /(?:\.([^.]+))?$/;
         let glbIndex = 0;
