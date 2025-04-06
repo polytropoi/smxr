@@ -43,19 +43,21 @@ function InitIDB() {
                 // start location loop
                 if (cursor.value.locations) {
                   for (let i = 0; i < cursor.value.locations.length; i++) { //mod or create the scene elements
-                  // let loc = JSON.stringify(cursor.value.locations[i]);
-                  console.log("cursor " + i + " of " + cursor.value.locations.length);
-                  localData.locations.push(cursor.value.locations[i]);
-                  if (cursor.value.locations[i].markerType == "player") {
-                     playerPosMods.push(cursor.value.locations[i].x + " " + cursor.value.locations[i].y + " " + cursor.value.locations[i].z);
-                     console.log("PLayerPosMods :" + JSON.stringify(playerPosMods));
-                  
-                  }
-                  if (cursor.value.locations[i].isLocal != undefined && cursor.value.locations[i].isLocal) { //only update ones with local changes
+                     // let loc = JSON.stringify(cursor.value.locations[i]);
+                     console.log("cursor " + i + " of " + cursor.value.locations.length);
+                     localData.locations.push(cursor.value.locations[i]);
+                     if (cursor.value.locations[i].markerType == "player") {
+                        playerPosMods.push(cursor.value.locations[i].x + " " + cursor.value.locations[i].y + " " + cursor.value.locations[i].z);
+                        console.log("PLayerPosMods :" + JSON.stringify(playerPosMods));
+                     
+                     }
+                     if (cursor.value.locations[i].isLocal != undefined && cursor.value.locations[i].isLocal) { //only update ones with local changes
                      // console.log(cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " scale " + cursor.value.locations[i].xscale + cursor.value.locations[i].yscale + cursor.value.locations[i].zscale );
                      console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " modelID " + cursor.value.locations[i].modelID);
                      let cloudEl = document.getElementById(cursor.value.locations[i].timestamp);
+
                      if (cloudEl) { //prexisting elements (cloud_marker, mod_model, mod_object) already rendered onload
+                     
                         cloudEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
                         cloudEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
                         // cloudEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
@@ -167,10 +169,11 @@ function InitIDB() {
                                                                scale: cursor.value.locations[i].markerObjScale,
                                                                targetElements: cursor.value.locations[i].targetElements
                                                             });
-                        localEl.id = cursor.value.locations[i].timestamp.toString(); //for lookups
-                        if (cursor.value.locations[i].locationTags.includes("curve point")) {
-                           localEl.classList.add("curvepoint");
-                        }
+                           localEl.id = cursor.value.locations[i].timestamp.toString(); //for lookups
+
+                           if (cursor.value.locations[i].locationTags.includes("curve point")) {
+                              localEl.classList.add("curvepoint");
+                           }
                         }
                      }
                      locationTimestamps.push(cursor.value.locations[i].timestamp); //hrm, for ref
@@ -285,9 +288,10 @@ function InitIDB() {
        transaction.oncomplete = function () {
          db.close();
 
-         for (let i = 0; i < sceneLocations.locations.length; i++) { //top off the localdata with anything missing
-            if (locationTimestamps.indexOf(sceneLocations.locations[i].timestamp) == -1) {
-               localData.locations.push(sceneLocations.locations[i]);
+         for (let i = 0; i < sceneLocations.locations.length; i++) { //top off the localdata with anything missing//like what?
+            console.log(sceneLocations.locations[i].timestamp.toString() + " vs " + locationTimestamps );
+            if (locationTimestamps.indexOf(sceneLocations.locations[i].timestamp.toString()) == -1) {
+               localData.locations.push(sceneLocations.locations[i]); //OUCH that was dooping...
             }
          }
          InitLocalColors();

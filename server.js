@@ -102,7 +102,7 @@ app.use(session({
 
 
 app.use(cookieParser()); //unused?
-app.use(bodyParser.json({ "limit": "150mb", extended: true })); //set this to route specific somehow, for add_scene_mods?
+app.use(bodyParser.json({ "limit": "150mb", extended: true })); //TODO set this to route specific somehow, for add_scene_mods?
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 var maxItems = 1000;
@@ -5238,7 +5238,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                     if (!scene.sceneTags.includes("no mods")) { 
                         let scenequery = {};
                         let newFiles = []; 
-                        if (req.body.localFiles != null) {
+                        // if (req.body.localFiles != null) {
                            
                             for (let file in req.body.localFiles) {
                                 let timestamp = Math.round(Date.now() / 1000);
@@ -5356,10 +5356,10 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                             }
                             if (req.body.sceneTags != null) {
                                 scenequery.sceneTags = req.body.sceneTags;
-                                console.log("query is " + scenequery.sceneTags);
+                                console.log("sceneTags mods " + scenequery.sceneTags);
                             }
                             if (req.body.locationMods != null) {
-                                     
+                                console.log("REQ.BODY.LOCATIONMODS " + JSON.stringify(req.body.locationMods));
                                 for (let l = 0; l < req.body.locationMods.length; l++) {
                                     let isMatch = false;
                                     // let name = req.body.locationMods[i].name;
@@ -5392,9 +5392,11 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                     }
                                     for (let i = 0; i < scene.sceneLocations.length; i++) { //TODO check if it's actually been modded?
                                         let tsVar = null;
-                                        if (req.body.locationMods[l].timestamp == scene.sceneLocations[i].timestamp) {
+                                        if (req.body.locationMods[l].timestamp == scene.sceneLocations[i].timestamp && 
+                                            (req.body.locationMods[l].isLocal) ) {
+                                            
                                             isMatch = true;
-                                            // console.log("gotsa match with existing location! " + scene.sceneLocations[i].timestamp + " vs " + req.body.locationMods[l].timestamp);
+                                            console.log("gotsa match with existing location! " + scene.sceneLocations[i].timestamp + " vs " + req.body.locationMods[l].timestamp);
                                             
                                             if (Number.isInteger(scene.sceneLocations[i].timestamp)) { // shit happens
                                                 tsVar = parseInt(req.body.locationMods[l].timestamp);
@@ -5404,23 +5406,26 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                             if ((scene.sceneLocations[i].tags && scene.sceneLocations[i].tags.includes("no mods"))) {
                                                 console.log("mods not allowed for " + scene.sceneLocations[i].timestamp)
                                             } else {
+                                                delete req.body.locationMods[l].isLocal;
                                                 const squery = { 'short_id': req.params.s_id, 'sceneLocations.timestamp': tsVar};
                                                 const updoc = { $set: { 'sceneLocations.$' : req.body.locationMods[l]}};
                                                 const updated = await RunDataQuery("scenes", "updateOne", squery, updoc);
                                                 console.log("updated with local mods " + JSON.stringify(updated));
                                                 
                                             }
-                                        }
+                                        } else {
                                     
-                                        if (!isMatch) {
+                                        // if (!isMatch) {
                                             // let timestamp = Math.round(Date.now() / 1000);
                                             // console.log("no match with existing location, must be new " + req.body.locationMods[l].timestamp);
                                             delete req.body.locationMods[l].isNew; //going to the cloud don't need these
                                             delete req.body.locationMods[l].isLocal;
                                             // req.body.locationMods[l].timestamp = timestamp;
+                                            let unmatchedIsModded = false;
                                             if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
                                                 let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
                                                 req.body.locationMods[l].name = name;
+                                                unmatchedIsModded = true;
                                             }
                                             console.log("new loc new files? " + req.body.locationMods[l].modelID + " V " + JSON.stringify(newFiles));
                                             if (newFiles.includes(req.body.locationMods[l].modelID)) {
@@ -5428,14 +5433,19 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                                     if (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_","")) { //reassign modelID w/ new DB _id
                                                         console.log("gotsa match new loc new model!");
                                                         req.body.locationMods[l].modelID = newFiles[i]._id;
+                                                        
+                                                        unmatchedIsModded = true;
                                                     }
                                                 }
                                             }
-                                           
-                                                const squery = { 'short_id': req.params.s_id};
-                                                const updoc = { $push: { 'sceneLocations' : req.body.locationMods[l]}};
+                                            if (unmatchedIsModded) {
+                                                const squery = { 'short_id': req.params.s_id, 'sceneLocations.timestamp': scene.sceneLocations[i].timestamp};
+                                                const updoc = { $set: { 'sceneLocations.$' : req.body.locationMods[l]}};
                                                 const updated = await RunDataQuery("scenes", "updateOne", squery, updoc);
                                                 console.log("updated with local mods " + JSON.stringify(updated));
+                                            }
+                                           
+                                           
                                         }
                                        
                                         // console.log("updated with local mods " + updated);
@@ -5447,7 +5457,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                             const finalupdated = await RunDataQuery("scenes", "updateOne", finalquery, updoc);
                             console.log("updated with local mods " + JSON.stringify(finalupdated));
                             res.send("updated");
-                        }
+                        // }
                     }
        
                 } catch (e) {

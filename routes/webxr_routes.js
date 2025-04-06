@@ -557,7 +557,7 @@ webxr_router.get('/:_id', function (req, res) {
                         sceneResponse.sceneLocations[i].locationTags = [];
                     }
 
-                    console.log("sceneResponse.sceneLocations[i].eventData "+ sceneResponse.sceneLocations[i].eventData);
+                    // console.log("sceneResponse.sceneLocations[i].eventData "+ sceneResponse.sceneLocations[i].eventData);
                     if ((sceneResponse.sceneLocationTracking != null && sceneResponse.sceneLocationTracking == true) || sceneResponse.sceneWebType == "AR Location Tracking") {  
                         if (sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //just to set scripts and restrict to location
                             if (sceneResponse.sceneWebType == "AR Location Tracking") {
@@ -1518,16 +1518,24 @@ webxr_router.get('/:_id', function (req, res) {
             var modelz = [];
             console.log("sceneModelss : " + JSON.stringify(sceneResponse.sceneModels));
              if (sceneResponse.sceneModels != null) {
-                for (let i = 0; i < sceneResponse.sceneModels.length; i++) {
-                    var oo_id = ObjectId.createFromHexString(sceneResponse.sceneModels[i].toString());
-                    const query = {"_id": oo_id};
-                    const model = await RunDataQuery("models", "findOne", query);
-                    if (model && model.userID) {
-                        const url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                        model.url = url;
-                        modelz.push(model);
-                    }
+                const m_ids = sceneResponse.sceneModels.map(convertStringToObjectID);
+                const query = {"_id": m_ids};
+                const models = await RunDataQuery("models", "find", query);
+                for (let model of models) {
+                    const url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                    model.url = url;
+                    modelz.push(model);
                 }
+                // for (let i = 0; i < sceneResponse.sceneModels.length; i++) {
+                //     var oo_id = ObjectId.createFromHexString(sceneResponse.sceneModels[i].toString());
+                //     const query = {"_id": oo_id};
+                //     const model = await RunDataQuery("models", "findOne", query);
+                //     if (model && model.userID) {
+                //         const url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                //         model.url = url;
+                //         modelz.push(model);
+                //     }
+                // }
                 var buff = Buffer.from(JSON.stringify(modelz)).toString("base64");
                 modelData = "<div id=\x22sceneModels\x22 data-models='"+buff+"'></div>";
             }
@@ -2503,7 +2511,7 @@ webxr_router.get('/:_id', function (req, res) {
                     for (let video of videos) {
                         // let video = videos[i];
                         video.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + video.userID + "/video/" + video._id + "/" + video._id + "." + video.filename, 6000);
-                        console.log("video url " + video.url)
+                        // console.log("video url " + video.url)
                     }
                     vidGroup.videos = videos;
                     requestedVideoGroups.push(vidGroup);

@@ -103,7 +103,7 @@ $(function() {
    let theSettingsData = settingsEl.getAttribute('data-settings');
 
    settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
-   console.log("Settings : " + JSON.stringify(settings));
+   // console.log("Settings : " + JSON.stringify(settings));
    let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
    if (timedEventsEl) {
       let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
@@ -421,8 +421,8 @@ $('a-entity').each(function() {  //external way of getting click duration for ph
  
  });
 
-function UpdateSceneLocations () {
-   // console.log("localdata : " + JSON.stringify(localData));
+function UpdateSceneLocations () { //unused?
+   console.log("tryna UpdateSceneLocations : " + JSON.stringify(localData));
    for (let i = 0; i < sceneLocations.locations.length; i++) {
       let ts = locationTimestamps.indexOf(sceneLocations.locations[i].timestamp); //avoid having to doubleloop
       console.log("checking locIDs " + sceneLocations.locations[i].timestamp + " index " + ts);
@@ -577,10 +577,11 @@ function SaveModsToCloud() { //Save button on location modal, writes local mods 
          if (localData.localFiles[key].data) {
             mods.localFiles[key].data = arrayBufferToBase64(localData.localFiles[key].data); //might need to async...
          }
-         
+            
       }
       
       mods.locationMods = localData.locations;
+      console.log("mods.locationMods " + JSON.stringify(mods));
       for (let i = 0; i < mods.locationMods.length; i++) { //pop the properties for non-uniform scaling...
          if (mods.locationMods[i].xscale == null) {
             mods.locationMods[i].xscale = mods.locationMods[i].markerObjScale;
@@ -604,8 +605,9 @@ function SaveModsToCloud() { //Save button on location modal, writes local mods 
       mods.sceneTags = localData.settings.sceneTags;
       // console.log(JSON.stringify(mods));
 
-      
       // var encodedString = btoa(JSON.stringify(mods));
+      
+      // console.log("MODS " + JSON.stringify(mods));
       
       var xhr = new XMLHttpRequest();
       xhr.open("POST", '/add_scene_mods/'+room, true);
@@ -625,6 +627,7 @@ function SaveModsToCloud() { //Save button on location modal, writes local mods 
             }, 2000);
          } 
       };
+
    } else {
       console.log("you ain't the sceneOwner!");
    }
@@ -1322,7 +1325,7 @@ function GoToPrevious() {
 function ReturnLocationTable () { //just show em all now!
 
    let tablerows = "";
-
+   console.log("localData.locations " + JSON.stringify(localData.locations) );
    if (!localData.locations.length) {
      
       for (let i = 0; i < sceneLocations.locations.length; i++) {
