@@ -2139,7 +2139,7 @@ webxr_router.get('/:_id', function (req, res) {
                         if (useArParent || (locMdl.locationTags && (locMdl.tags.includes("ar child") || locMdl.tags.includes("archild")))) {
                             arChildElements = arChildElements + "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
                         } else {
-                            console.log("TRYNA COOK A CANNED SURFACE");
+                            // console.log("TRYNA COOK A CANNED SURFACE");
                             surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
                         }
                     } 
@@ -2657,10 +2657,12 @@ webxr_router.get('/:_id', function (req, res) {
             
             /////////////// pictures /////////////////////////
             if (sceneResponse.scenePictureGroups != null && sceneResponse.scenePictureGroups.length > 0) {
+                console.log("tryna get picture groups " +  sceneResponse.scenePictureGroups)
                 const pg_ids = sceneResponse.scenePictureGroups.map(convertStringToObjectID);
                 const pgquery = {"_id": {$in : pg_ids}};
-                const groups = await RunDataQuery("groups", "find", pgquery);
 
+                const groups = await RunDataQuery("groups", "find", pgquery);
+                // console.log("getting ")
                 for (let group of groups) { 
                         let picGroup = {};
                         picGroup._id = group._id;
@@ -2673,12 +2675,12 @@ webxr_router.get('/:_id', function (req, res) {
                             p_ids.push(ObjectId.createFromHexString(group.items.toString()));
                         }
                         // const p_ids = group.items; //.map(convertStringToObjectID);
-                        console.log("picgroup items : "+ group.items);
+                        // console.log("picgroup items : "+ p_ids);
                         const picquery = {"_id": {$in : p_ids}};
                         let images = await RunDataQuery("image_items", "find", picquery);
                     
                         for (let image of images) { //jack in a signed url for each
-                            console.log("gots a pic in pic group w/ image.orientation " + image);
+                            // console.log("gots a pic in pic group w/ image.orientation " + image);
                             if (image.orientation != null && image.orientation != undefined && image.orientation.toLowerCase() == "equirectangular") { 
                                 skyboxIDs.push(image._id);
                                 image.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + image.userID + "/pictures/originals/" + image._id + ".original." + image.filename, 6000);

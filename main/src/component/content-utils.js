@@ -3355,14 +3355,14 @@ AFRAME.registerComponent('location_picker', { //TODO toggle on if needed, off by
     this.tick = AFRAME.utils.throttleTick(this.tick, 300, this);
     this.sceneEl = document.querySelector('a-scene');
     this.raycaster = new THREE.Raycaster();
-    this.locationPicked = null;
+    this.locationPicked = new THREE.Vector3();
     this.picking = false;
     this.pickerEl = document.createElement("a-entity");
     this.pickerEl.id = "picker";
     this.el.sceneEl.appendChild(this.pickerEl);
     this.pickerEl.setAttribute('gltf-model', '#poi1');
     this.el.addEventListener('model-loaded', (e) => {
-      this.pickerEl.setAttribute("material", {color: "purple", transparent: true, opacity: .5});
+      this.pickerEl.setAttribute("material", {color: "red", transparent: true, opacity: .75});
       // this.pickerEl.style.visibility = "hidden";
       // this.pickerEl.object3D.visible = false;
     });
@@ -3373,10 +3373,10 @@ AFRAME.registerComponent('location_picker', { //TODO toggle on if needed, off by
           this.picking = true;
           // this.pickerEl.style.visibility = "hidden";
           this.pickerEl.object3D.visible = false;
-          console.log("gotsa locationPicked "+ this.locationPicked);
+          // console.log("gotsa locationPicked "+ this.locationPicked);
           // keydown = 
           if (this.locationPicked) {
-            CreateLocation(null, "poi", this.locationPicked);
+            CreateLocation(null, "placeholder", this.locationPicked);
           }
           
           this.reset();
@@ -3410,17 +3410,24 @@ AFRAME.registerComponent('location_picker', { //TODO toggle on if needed, off by
       const intersects = this.raycaster.intersectObjects( this.sceneEl.object3D.children );
 
       if (intersects.length && !this.picking) {
-        this.locationPicked = intersects[0].point;
+        // this.locationPicked = intersects[0].point;
+        // intersects[0].point.getWorldPosition(this.locationPicked)
+        // this.locationPicked = this.pickerEl.object3D.position;
         // this.pickerEl.style.visibility = "visible";
         if (!this.pickerEl.object3D.visible) {
           this.pickerEl.object3D.visible = true;
         }
         
-        this.pickerEl.setAttribute("position", this.locationPicked);
-        console.log("this.locationPicked " + JSON.stringify(this.locationPicked));
+        // this.pickerEl.setAttribute("position", this.locationPicked);
+        this.pickerEl.object3D.position.copy(intersects[0].point);
+        
+        this.pickerEl.object3D.updateMatrixWorld();
+        this.locationPicked.copy(this.pickerEl.object3D.position);
+        // this.pickerEl.object3D.position.copy(this.locationPicked);
+        console.log("this.locationPicked " + JSON.stringify(this.pickerEl.object3D.position));
 
       } else {
-        this.locationPicked = null;
+        // this.locationPicked = null;
         if (this.pickerEl.object3D.visible) {
           this.pickerEl.object3D.visible = false;
         }

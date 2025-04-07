@@ -17,15 +17,14 @@ function InitIDB() {
        const db = request.result;
        const store = db.createObjectStore("scenes", { keyPath: "shortID" });
        store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
-      //  const filestore = db.createObjectStore("localFiles", { keyPath: "fileName" });
-      //  filestore.createIndex("localFiles", ["localFiles"], { unique: true }); //multientry true?
+
      };
     request.onsuccess = function () {
        console.log("Database opened successfully");
        const db = request.result;
        const transaction = db.transaction("scenes", "readwrite");
        const store = transaction.objectStore("scenes");
-      //  const filestore = transaction.objectStore("localFiles");
+
        const saveTimeStamp = Date.now();
        const lastSceneUpdate = null;
 
@@ -45,6 +44,7 @@ function InitIDB() {
                   for (let i = 0; i < cursor.value.locations.length; i++) { //mod or create the scene elements
                      // let loc = JSON.stringify(cursor.value.locations[i]);
                      console.log("cursor " + i + " of " + cursor.value.locations.length);
+                     locationTimestamps.push(cursor.value.locations[i].timestamp.toString()); //hrm, for ref
                      localData.locations.push(cursor.value.locations[i]);
                      if (cursor.value.locations[i].markerType == "player") {
                         playerPosMods.push(cursor.value.locations[i].x + " " + cursor.value.locations[i].y + " " + cursor.value.locations[i].z);
@@ -53,99 +53,98 @@ function InitIDB() {
                      }
                      if (cursor.value.locations[i].isLocal != undefined && cursor.value.locations[i].isLocal) { //only update ones with local changes
                      // console.log(cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " scale " + cursor.value.locations[i].xscale + cursor.value.locations[i].yscale + cursor.value.locations[i].zscale );
-                     console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " modelID " + cursor.value.locations[i].modelID);
+                     console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal " + " modelID " + cursor.value.locations[i].modelID);
                      let cloudEl = document.getElementById(cursor.value.locations[i].timestamp);
 
-                     if (cloudEl) { //prexisting elements (cloud_marker, mod_model, mod_object) already rendered onload
-                     
-                        cloudEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
-                        cloudEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
-                        // cloudEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
-                        cloudEl.setAttribute("scale", {x: cursor.value.locations[i].xscale, y: cursor.value.locations[i].yscale, z: cursor.value.locations[i].zscale});
-                        let cloudMarkerComponent = cloudEl.components.cloud_marker;
-                        if (cloudMarkerComponent) {  
-                           if (
-                              (cursor.value.locations[i].mediaID && cursor.value.locations[i].mediaID.includes("local_") || 
-                              (cursor.value.locations[i].modelID && cursor.value.locations[i].modelID.includes("local_")))) {
-                                 cloudEl.classList.add("hasLocalFile");
-                                 console.log("cursor hasLocalFile: "+ JSON.stringify(cursor.value.locations[i]));
-                           }
-                           if (cursor.value.locations[i].locationTags && cursor.value.locations[i].locationTags.includes("curve point")) {
-                              cloudEl.classList.add("curvepoint");
-                           }
-                           cloudMarkerComponent.updateAndLoad(cursor.value.locations[i].name, 
-                                                            cursor.value.locations[i].description, 
-                                                            cursor.value.locations[i].locationTags, 
-                                                            cursor.value.locations[i].eventData, 
-                                                            cursor.value.locations[i].markerType, 
-                                                            cursor.value.locations[i].markerObjScale, 
-                                                            cursor.value.locations[i].x, 
-                                                            cursor.value.locations[i].y, 
-                                                            cursor.value.locations[i].z, 
-                                                            cursor.value.locations[i].eulerx, 
-                                                            cursor.value.locations[i].eulery, 
-                                                            cursor.value.locations[i].eulerz, 
-                                                            cursor.value.locations[i].xscale,
-                                                            cursor.value.locations[i].yscale,
-                                                            cursor.value.locations[i].zscale,
-                                                            cursor.value.locations[i].modelID,
-                                                            cursor.value.locations[i].objectID,
-                                                            cursor.value.locations[i].mediaID,
-                                                            cursor.value.locations[i].targetElements );   
-
-                        } else {
-                           let modModelComponent = cloudEl.components.mod_model;
-                           if (modModelComponent) {
+                        if (cloudEl) { //prexisting elements (cloud_marker, mod_model, mod_object) already rendered onload
+                        
+                           cloudEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
+                           cloudEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
+                           // cloudEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
+                           cloudEl.setAttribute("scale", {x: cursor.value.locations[i].xscale, y: cursor.value.locations[i].yscale, z: cursor.value.locations[i].zscale});
+                           let cloudMarkerComponent = cloudEl.components.cloud_marker;
+                           if (cloudMarkerComponent) {  
                               if (
-                                 cursor.value.locations[i].modelID.includes("local_")) {
-                                 cloudEl.classList.add("hasLocalFile");
+                                 (cursor.value.locations[i].mediaID && cursor.value.locations[i].mediaID.includes("local_") || 
+                                 (cursor.value.locations[i].modelID && cursor.value.locations[i].modelID.includes("local_")))) {
+                                    cloudEl.classList.add("hasLocalFile");
+                                    console.log("cursor hasLocalFile: "+ JSON.stringify(cursor.value.locations[i]));
                               }
-                              modModelComponent.updateAndLoad(cursor.value.locations[i].name, //passing in params to function, order matters!
-                                                            cursor.value.locations[i].description, 
-                                                            cursor.value.locations[i].locationTags, 
-                                                            cursor.value.locations[i].eventData, 
-                                                            cursor.value.locations[i].markerType, 
-                                                            // cursor.value.locations[i].markerObjScale, 
-                                                            cursor.value.locations[i].x, 
-                                                            cursor.value.locations[i].y, 
-                                                            cursor.value.locations[i].z, 
-                                                            cursor.value.locations[i].eulerx, 
-                                                            cursor.value.locations[i].eulery, 
-                                                            cursor.value.locations[i].eulerz, 
-                                                            cursor.value.locations[i].xscale,
-                                                            cursor.value.locations[i].yscale,
-                                                            cursor.value.locations[i].zscale,
-                                                            cursor.value.locations[i].modelID   );
+                              if (cursor.value.locations[i].locationTags && cursor.value.locations[i].locationTags.includes("curve point")) {
+                                 cloudEl.classList.add("curvepoint");
+                              }
+                              cloudMarkerComponent.updateAndLoad(cursor.value.locations[i].name, 
+                                                               cursor.value.locations[i].description, 
+                                                               cursor.value.locations[i].locationTags, 
+                                                               cursor.value.locations[i].eventData, 
+                                                               cursor.value.locations[i].markerType, 
+                                                               cursor.value.locations[i].markerObjScale, 
+                                                               cursor.value.locations[i].x, 
+                                                               cursor.value.locations[i].y, 
+                                                               cursor.value.locations[i].z, 
+                                                               cursor.value.locations[i].eulerx, 
+                                                               cursor.value.locations[i].eulery, 
+                                                               cursor.value.locations[i].eulerz, 
+                                                               cursor.value.locations[i].xscale,
+                                                               cursor.value.locations[i].yscale,
+                                                               cursor.value.locations[i].zscale,
+                                                               cursor.value.locations[i].modelID,
+                                                               cursor.value.locations[i].objectID,
+                                                               cursor.value.locations[i].mediaID,
+                                                               cursor.value.locations[i].targetElements );   
+
+                           } else {
+                              let modModelComponent = cloudEl.components.mod_model;
+                              if (modModelComponent) {
+                                 if (
+                                    cursor.value.locations[i].modelID.includes("local_")) {
+                                    cloudEl.classList.add("hasLocalFile");
+                                 }
+                                 modModelComponent.updateAndLoad(cursor.value.locations[i].name, //passing in params to function, order matters!
+                                                               cursor.value.locations[i].description, 
+                                                               cursor.value.locations[i].locationTags, 
+                                                               cursor.value.locations[i].eventData, 
+                                                               cursor.value.locations[i].markerType, 
+                                                               // cursor.value.locations[i].markerObjScale, 
+                                                               cursor.value.locations[i].x, 
+                                                               cursor.value.locations[i].y, 
+                                                               cursor.value.locations[i].z, 
+                                                               cursor.value.locations[i].eulerx, 
+                                                               cursor.value.locations[i].eulery, 
+                                                               cursor.value.locations[i].eulerz, 
+                                                               cursor.value.locations[i].xscale,
+                                                               cursor.value.locations[i].yscale,
+                                                               cursor.value.locations[i].zscale,
+                                                               cursor.value.locations[i].modelID   );
+                              }
                            }
-                        }
-                     } else {//local-only elements, not saved to cloud yet
-                        hasLocalData = true;
-                        let localEl = document.createElement("a-entity");
-                        
-                      
-                        if ( (cursor.value.locations[i].mediaID && cursor.value.locations[i].mediaID.includes("local_") || 
-                             (cursor.value.locations[i].modelID && cursor.value.locations[i].modelID.includes("local_")))) {
-                                 localEl.classList.add("hasLocalFile");
-                        }
-                        if (cursor.value.locations[i].markerType == "poi") {
-                           poiLocations.push(cursor.value.locations[i]);
-                        }
-                        if (cursor.value.locations[i].markerType == "curve point") {
-                           curveLocations.push(cursor.value.locations[i]);
-                        }
-                        if (cursor.value.locations[i].locationTags && cursor.value.locations[i].locationTags.includes("ar_parent")) {
-                           let ar_parentEl = document.getElementById("ar_parent");
-                           if (ar_parentEl) {
-                              ar_parentEl.appendChild(localEl);
+                        } else {//local-only elements, not saved to cloud yet
+                           hasLocalData = true;
+                           let localEl = document.createElement("a-entity");
+                                                   
+                           if ( (cursor.value.locations[i].mediaID && cursor.value.locations[i].mediaID.includes("local_") || 
+                              (cursor.value.locations[i].modelID && cursor.value.locations[i].modelID.includes("local_")))) {
+                                    localEl.classList.add("hasLocalFile");
                            }
-                        } else {
-                           sceneEl.appendChild(localEl);
-                        }
-                        localEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
-                        localEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
-                        // localEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
-                        
-                        localEl.setAttribute("local_marker", { timestamp: cursor.value.locations[i].timestamp,
+                           if (cursor.value.locations[i].markerType == "poi") {
+                              poiLocations.push(cursor.value.locations[i]);
+                           }
+                           if (cursor.value.locations[i].markerType == "curve point") {
+                              curveLocations.push(cursor.value.locations[i]);
+                           }
+                           if (cursor.value.locations[i].locationTags && cursor.value.locations[i].locationTags.includes("ar_parent")) {
+                              let ar_parentEl = document.getElementById("ar_parent");
+                              if (ar_parentEl) {
+                                 ar_parentEl.appendChild(localEl);
+                              }
+                           } else {
+                              sceneEl.appendChild(localEl);
+                           }
+                           localEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
+                           localEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
+                           // localEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
+                           
+                           localEl.setAttribute("local_marker", { timestamp: cursor.value.locations[i].timestamp,
                                                                name: cursor.value.locations[i].name, 
                                                                modelID: cursor.value.locations[i].modelID, 
                                                                objectID: cursor.value.locations[i].objectID, 
@@ -176,7 +175,7 @@ function InitIDB() {
                            }
                         }
                      }
-                     locationTimestamps.push(cursor.value.locations[i].timestamp); //hrm, for ref
+                     
                   } //end locations loop
                }
                //settings loop
@@ -191,18 +190,7 @@ function InitIDB() {
                         settings.sceneEnvironmentPreset = value;
                         console.log("local enviro: " + settings.sceneEnvironmentPreset);
                      }
-                     // if (key == "sceneTags") {
-                     //    let value = cursor.value.settings[key];
-                        
-                     //    // let theSceneTags = [];
-                     //    let tagSplit = value.split(",");
-
-                     //    settings.sceneTags = tagSplit;
-                        
-                     //    console.log("local sceneTags: " + settings.sceneTags.length);
-
-                     // } 
-                     // localSettings[key] = cursor.value.settings[key];
+                     
 
                   }
                }
@@ -218,12 +206,7 @@ function InitIDB() {
                if (cursor.value.timedEvents) {
                   console.log("localdata timedEvents " + JSON.stringify(cursor.value.timedEvents));
                   timeKeysData = cursor.value.timedEvents;
-                  // for (let key in cursor.value.timedEvents) {
-                  //    localData.localFiles[key] = cursor.value.localFiles[key]; 
-                  //    console.log("localfiles " + localData.localFiles[key].data);
-                  //    // localData.localFiles[key].data;
-                  //    // settings[key] = cursor.value.localFiles[key];
-                  // }  
+                
                }
 
                cursor.continue(); 
@@ -232,55 +215,9 @@ function InitIDB() {
                console.log("cursor is done...or was empty");
             }
  
-         //  transaction.oncomplete = function () {
-         //     db.close();
- 
-         //     for (let i = 0; i < sceneLocations.locations.length; i++) { //top off the localdata with anything missing
-         //        if (locationTimestamps.indexOf(sceneLocations.locations[i].timestamp) == -1) {
-         //           localData.locations.push(sceneLocations.locations[i]);
-         //        }
-         //     }
-         //     // settings.sceneColor1 = localData.settings.sceneColor1;
-         //     // settings.sceneColor2 = localData.settings.sceneColor2;
-         //     // settings.sceneColor3 = localData.settings.sceneColor3;
-         //     // settings.sceneColor4 = localData.settings.sceneColor4;
-         //     InitLocalColors();
- 
-         //     lastLocalUpdate = localData.lastUpdate;
-         //     // console.log("COPIED LOCALDATA locations length " + localData.locations.length + " " + JSON.stringify(localData) + " last cloud update " +  lastCloudUpdate + " vs last local update " + lastLocalUpdate);
-         //     if (lastCloudUpdate && lastLocalUpdate) {
-         //        if (lastCloudUpdate > lastLocalUpdate) {
-         //           console.log("MIGHTY CLOUD MODS ABOUT TO STEP ON YOUR PUNY LOCAL MODS");
-         //           this.dialogEl = document.getElementById('mod_dialog');
-         //           if (this.dialogEl) {
-         //              this.dialogEl.components.mod_dialog.showPanel("WARNING: RECENT CLOUD MODS MUST STEP ON YOUR LOCAL MODS!", null, "recentCloudMods" ); //param 2 is objID when needed
-         //           }
-                   
-         //        } else {
-         //           console.log("COPIED LOCALDATA locations length " + localData.locations.length + " last cloud update " +  lastCloudUpdate + " vs last local update " + lastLocalUpdate);
-         //        }
-         //     }
-         //     let objexEl = document.getElementById('sceneObjects');    
-         //     if (objexEl) {
-         //        objexEl.components.mod_objex.updateModdedObjects();
-         //     }
-         //      //eventdata should have the name of a location with spawn markertype
-         //      if (settings.playerPositions.length > 1) {
-         //        console.log("gots PLAYERPOSITIONS " + settings.playerPositions);
-         //        if (settings.playerPositions.length) {
-         //           PlayerToLocation(settings.playerPositions[Math.floor(Math.random() * settings.playerPositions.length)]);
-         //       }
-         //     }
-         //   }
+       
        };
-      //  fileQuery.onsuccess = function (e) {
-      //    var cursor = e.target.result;
-      //    console.log("query for localData : " + e.target.result);
-      //    // if (e.target.result) {
-      //       if (cursor) {
-      //          console.log("gotsa cursor for files!");
-      //       }
-      // }
+   
        modQuery.onerror = function () {
           console.log("no localdata found in IDB, query error");
           
@@ -288,9 +225,10 @@ function InitIDB() {
        transaction.oncomplete = function () {
          db.close();
 
-         for (let i = 0; i < sceneLocations.locations.length; i++) { //top off the localdata with anything missing//like what?
-            console.log(sceneLocations.locations[i].timestamp.toString() + " vs " + locationTimestamps );
+         for (let i = 0; i < sceneLocations.locations.length; i++) { //top off the localdata with anything missing//like what?// unmodded locations!
+            // console.log("CHCECKING LOCATION TIMESTAMPS : " +sceneLocations.locations[i].timestamp.toString() + " vs " + locationTimestamps );
             if (locationTimestamps.indexOf(sceneLocations.locations[i].timestamp.toString()) == -1) {
+               // console.log("DID NOT FIND TIMESTAMP, MUST BE NEW! " + sceneLocations.locations[i].timestamp.toString() );
                localData.locations.push(sceneLocations.locations[i]); //OUCH that was dooping...
             }
          }

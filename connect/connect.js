@@ -1325,7 +1325,7 @@ function GoToPrevious() {
 function ReturnLocationTable () { //just show em all now!
 
    let tablerows = "";
-   console.log("localData.locations " + JSON.stringify(localData.locations) );
+   // console.log("localData.locations " + JSON.stringify(localData.locations) );
    if (!localData.locations.length) {
      
       for (let i = 0; i < sceneLocations.locations.length; i++) {
@@ -1425,7 +1425,7 @@ function LocationRowClick(data) {
 
 
 function CreateLocation (filename, type, position) { //New Location button, also addToScene button for localfiles
-   console.log("trynsa createlocation with file " + filename + " type " + type + " localData is " + JSON.stringify(localData));
+   console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
    let timestamp = null;
    let markertype = "placeholder";
    
@@ -1445,7 +1445,7 @@ function CreateLocation (filename, type, position) { //New Location button, also
    
    console.log("tryna create new location type " + markertype);
    let newPosition = new THREE.Vector3(); 
-   if (!position) {
+   if (!position) { //if added from dialog instead of with picker
       let viewportHolder = document.getElementById('viewportPlaceholder');
       viewportHolder.object3D.getWorldPosition( newPosition );
    } else {
@@ -1460,11 +1460,11 @@ function CreateLocation (filename, type, position) { //New Location button, also
    timestamp = Date.now();
    timestamp = parseInt(timestamp);
    let locItem = {};
-   locItem.x = newPosition.x.toFixed(2);
+   locItem.x = newPosition.x.toFixed(2).toString();
    locItem.eulerx = 0; //maybe get look vector?
-   locItem.y = newPosition.y.toFixed(2);
+   locItem.y = newPosition.y.toFixed(2).toString();
    locItem.eulery = 0;
-   locItem.z = newPosition.z.toFixed(2);
+   locItem.z = newPosition.z.toFixed(2).toString();
    locItem.eulerz = 0;
    locItem.type = "Worldspace";
    locItem.label = 'local ' + markertype;

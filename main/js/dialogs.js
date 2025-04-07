@@ -996,12 +996,12 @@ function ShowLocationModal(timestamp) {
 
     console.log("local length " + localData.locations.length + " vs cloud length " + sceneLocations.locations.length);
     if (localData.locations.length) {
-      console.log("looking for localdata.locations");
+      // console.log("looking for localdata.locations");
       for (let i = 0; i < localData.locations.length; i++) {
         // console.log(timestamp + " vs " + localData.locations[i].timestamp);
         if (timestamp == localData.locations[i].timestamp) {
           thisLocation = localData.locations[i];
-          console.log("gotsa local location@! " + localData.locations[i].markerType);
+          // console.log("gotsa local location@! " + localData.locations[i].markerType);
           break;
         }
       }
@@ -2158,20 +2158,28 @@ function SceneManglerModal(mode, autoHide) {
           InitAmbientSlider();
           InitTriggerSlider();
           
-          document.getElementById("EditScene").addEventListener("click", function(e){
-            e.preventDefault();
-            window.location='../main/?type=scene&iid="+userData.sceneID+"';
-            
-        });
-        document.getElementById("SaveModsToCloud").addEventListener("click", function(e){
-          e.preventDefault();
-          SaveModsToCloud();
-          
-        });
-        document.getElementById("SendAdminMessage").addEventListener("click", function(e){
-          e.preventDefault();
-          SendAdminMessage();
-        });
+          const editButton = document.getElementById("EditScene");
+          if (editButton) {
+            editButton.addEventListener("click", function(e){
+              e.preventDefault();
+              window.location='../main/?type=scene&iid="+userData.sceneID+"';
+            });
+          }
+          const saveModsButton = document.getElementById("SaveModsToCloud");
+          if (saveModsButton) {
+              saveModsButton.addEventListener("click", function(e){
+              e.preventDefault();
+              SaveModsToCloud();
+            });
+          }
+          const sendAdminMessageButtonEl = document.getElementById("SendAdminMessage");
+          if (sendAdminMessageButtonEl) {
+            sendAdminMessageButtonEl.addEventListener("click", function(e){
+              e.preventDefault();
+              SendAdminMessage();
+            });
+          }
+       
           // if (autoHide) {
           //   setTimeout(() =>  {
           //     ShowHideDialogPanel();
