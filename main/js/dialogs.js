@@ -97,7 +97,8 @@ window.addEventListener( 'keydown',  ( event ) => {
       break;
 
     case 27: // Esc
-      ShowHideDialogPanel();
+      // ShowHideDialogPanel();
+      ToggleTransformControls();
       allowCameraLock = !allowCameraLock;
 
       break;
@@ -2059,7 +2060,9 @@ function SceneManglerModal(mode, autoHide) {
         "<button style=\x22float:left\x22 class=\x22saveButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22CreateLocation()\x22>Create New Location</button>"+
       
         "<br><br><br><div>"+locationTable+"</div><br>"+
-        "<button style=\x22float:left\x22 class=\x22snapButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22ToggleAllTransformControls()\x22>Toggle All Transform Controls</button>"+
+
+        "<button class=\x22deleteButton\x22 id=\x22ClearAllPlaceholdersButton\x22 onclick=\x22DeleteLocalSceneData()\x22>Delete Local Scene Data</button>"+
+        // "<button style=\x22float:left\x22 class=\x22snapButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22ToggleAllTransformControls()\x22>Toggle All Transform Controls</button>"+
       "</div>"+     
 
 

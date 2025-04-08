@@ -1252,6 +1252,7 @@ webxr_router.get('/:_id', function (req, res) {
                 sceneResponse.sceneEnvironmentPreset = sceneResponse.sceneWebXREnvironment; //the old setting is still out there!
             }
             if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) {
+
                 webxrEnv = sceneResponse.sceneEnvironmentPreset;
                 enviromentScript = "<script src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
                 let ground = "ground: hills;";
@@ -1264,6 +1265,11 @@ webxr_router.get('/:_id', function (req, res) {
                 
                 let fog = "";
                 let tweakColors = "";
+                let hasColorMods = false;
+                //if any of the default colors have changed, use them
+                if (sceneResponse.sceneColor1 != "#808080" || sceneResponse.sceneColor2 != "#808080" || sceneResponse.sceneColor3 != "#808080" || sceneResponse.sceneColor1 != "#808080") {
+                    hasColorMods = true;
+                }
                 if (webxrEnv == "none") {
                     ground = "ground: none;"
                 }
@@ -1306,17 +1312,17 @@ webxr_router.get('/:_id', function (req, res) {
                     fog = "";
                 }
                 
-                if (sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3 && sceneResponse.sceneColorizeSky) {
+                if (hasColorMods && sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3 && sceneResponse.sceneColorizeSky) {
                     skycolor = "skyColor: " + sceneResponse.sceneColor1 + ";";
                 }
                 
-                if (sceneResponse.sceneColor2 != null && sceneResponse.sceneColor2.length > 3 && sceneResponse.sceneColorizeSky) {  
+                if (hasColorMods && sceneResponse.sceneColor2 != null && sceneResponse.sceneColor2.length > 3 && sceneResponse.sceneColorizeSky) {  
                     horizoncolor = "horizonColor: " + sceneResponse.sceneColor2 + ";";
                 } 
-                if (sceneResponse.sceneColor3 != null && sceneResponse.sceneColor3.length > 3 && sceneResponse.sceneColorizeSky) { //TODO put that in
+                if (hasColorMods && sceneResponse.sceneColor3 != null && sceneResponse.sceneColor3.length > 3) { 
                     groundcolor = "groundColor: " + sceneResponse.sceneColor3 + ";";
                 }
-                if (sceneResponse.sceneColor4 != null && sceneResponse.sceneColor4.length > 3 && sceneResponse.sceneColorizeSky) {
+                if (hasColorMods && sceneResponse.sceneColor4 != null && sceneResponse.sceneColor4.length > 3) {
                     dressingcolor = "dressingColor: " + sceneResponse.sceneColor4 + ";";
                     groundcolor2 = "groundColor2: " + sceneResponse.sceneColor4 + ";";
                 }

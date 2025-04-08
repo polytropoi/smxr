@@ -114,11 +114,11 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
       this.el.classList.add("allowMods");
         this.phID = this.timestamp; //"placeholder" id, for client side location mods
         this.el.id = this.phID;
-      console.log("new localmarker with modelID " + this.data.modelID);
+      // console.log("new localmarker with modelID " + this.data.modelID);
       // if (this.data.tags && !this.data.tags.includes("no env")) {
         this.el.classList.add("envMap");
       // }
-          if (this.data.isNew && this.data.modelID == 'none' && this.data.markerType == 'placeholder') { //Create new location button, no local file
+          if (this.data.isNew && this.data.modelID == 'none' && this.data.markerType == 'placeholder') { 
             this.el.setAttribute("gltf-model", "#poi1");
             this.el.id = this.timestamp;
             
@@ -155,17 +155,25 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
             if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("spawnable")) {
               this.el.classList.add("spawnable");
             }
+
+            ///////if it's a default gizmo (not a primitive or model) and we're not hiding them....
             if ((!this.data.modelID || this.data.modelID == undefined || this.data.modelID == "" || this.data.modelID == "none") 
-              && !this.data.modelID.toString().includes("primitive")
-              && (this.data.tags && !this.data.tags.includes("hide gizmo")) || (settings && settings.hideGizmos)) {
+              && (!this.data.modelID.toString().includes("primitive"))
+              && ((this.data.tags && !this.data.tags.includes("hide gizmo")) || (settings && !settings.hideGizmos))) {
+
+                console.log("LOCALMARKER with no model showing gizmos!" )
               if (this.data.markerType.toLowerCase() == "player") {
                 this.el.removeAttribute("geometry");
                 this.el.setAttribute('gltf-model', '#poi1');
                 this.el.setAttribute("material", {color: "blue", transparent: true, opacity: .5});
+
               } else if (this.data.markerType.toLowerCase() == "placeholder") {
+                console.log("TRYNA SET LOCAL PLACEHOLDER!@")
                 this.el.setAttribute('gltf-model', '#poi1');
+                this.el.setAttribute("material", {color: "yellow", transparent: true, opacity: .5});
               } else if (this.data.markerType.toLowerCase() == "poi") {
                 this.el.setAttribute('gltf-model', '#poi1');
+                this.el.setAttribute("material", {color: "purple", transparent: true, opacity: .5});
                 let nextbuttonEl = document.getElementById('nextButton');
                 let prevbuttonEl = document.getElementById('previousButton');
                 nextbuttonEl.style.visibility = "visible";
@@ -200,9 +208,11 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
               } else if (this.data.markerType.toLowerCase() == "mailbox") {
                 // console.log("TRYNA SET MODEL TO MAILBOX!")
                 this.el.setAttribute('gltf-model', '#mailbox');
-              } else if (this.data.markerType == "3D text") {
+              } else if (this.data.markerType == "3D text") { //?
                 console.log("tryna set 3D text!");
                 this.el.setAttribute("text-geometry", {value: this.data.description, font: '#optimerBoldFont'});
+              
+              ////////////LIGHTS! ?????????????????????
               } else if (this.data.markerType == "light") {
                 console.log("tryna set a light!");
                 
@@ -300,77 +310,80 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
                 }
               } else {
                 if (this.data.modelID != "none") {
-                    if (this.data.modelID.toString().includes("primitive")) {
-                        console.log("LOCALMARKER PRIMITIVE " + this.data.modelID);
-                        if (this.data.modelID.toString().includes("cube")) {
-                            this.el.setAttribute("geometry", {"primitive": "box", "width": 1, "height": 1, "depth": 1});
-                        } else if (this.data.modelID.toString().includes("sphere")) {
-                            this.el.setAttribute("geometry", {"primitive": "sphere", "radius": 1});
-                        } else if (this.data.modelID.toString().includes("cylinder")) {
-                            this.el.setAttribute("geometry", {"primitive": "cylinder", "height": 1, "radius": .5});
-                        } else if (this.data.modelID.toString().includes("plane")) {
-                          this.el.setAttribute("geometry", {"primitive": "plane", "height": 1, "width": 1});
-                        }
-                        if (this.data.markerType == "placeholder") {
-                            this.el.setAttribute("material", {color: "yellow", transparent: true, opacity: .5});
-                            // this.el.setAttribute("color", "yellow");
-                        } else if (this.data.markerType == "poi") {
-                            this.el.setAttribute("material", {color: "purple", transparent: true, opacity: .5});
-                            
-                            // this.el.setAttribute("color", "purple");
-                        } else if (this.data.markerType == "waypoint") {
-                            this.el.setAttribute("material", {color: "green", transparent: true, opacity: .5});
-                            this.el.classList.add("waypoint");
-                            
-                            // this.el.setAttribute("color", "purple");
-                        } else if (this.data.markerType.includes("trigger")) {
-                            this.el.setAttribute("material", {color: "lime", transparent: true, opacity: .5});
-                            // this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder", scaleFactor: 1});
-                            this.el.setAttribute("obb-collider", {size: this.data.xscale * 1.5 + " " + this.data.yscale * 1.5 + " " + this.data.zscale * 1.5});
-                            // this.el.setAttribute("color", "lime");
-                            
-                        } else if (this.data.markerType.includes("collider")) {
-                          this.el.setAttribute("material", {color: "tomato", transparent: true, opacity: .5});
-                          
-                        } else if (this.data.markerType == "gate") {
-
-                          // console.log("gotsa gate truyna set mod_physics...");
-                            this.el.setAttribute("material", {color: "orange", transparent: true, opacity: .5});
-                            this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder", scaleFactor: 1});
-                            // this.el.setAttribute("color", "orange");
-                        } else if (this.data.markerType == "link") {
-                          // console.log("gotsa gate truyna set mod_physics...");
-                            this.el.setAttribute("material", {color: "Gold", transparent: true, opacity: .5});
-                            // this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder", scaleFactor: 1});
-                            // this.el.setAttribute("color", "orange");
-                        } else if (this.data.markerType.toLowerCase() == "text") {
-                          this.el.setAttribute("gltf-model", "#texticon");
-                          this.el.setAttribute("material", {color: "black", transparent: true, opacity: .5});
+                  if (this.data.modelID.toString().includes("primitive")) {
+                    console.log("LOCALMARKER PRIMITIVE " + this.data.modelID);
+                    if (this.data.modelID.toString().includes("cube")) {
+                        this.el.setAttribute("geometry", {"primitive": "box", "width": 1, "height": 1, "depth": 1});
+                    } else if (this.data.modelID.toString().includes("sphere")) {
+                        this.el.setAttribute("geometry", {"primitive": "sphere", "radius": 1});
+                    } else if (this.data.modelID.toString().includes("cylinder")) {
+                        this.el.setAttribute("geometry", {"primitive": "cylinder", "height": 1, "radius": .5});
+                    } else if (this.data.modelID.toString().includes("plane")) {
+                      this.el.setAttribute("geometry", {"primitive": "plane", "height": 1, "width": 1});
+                    }
+                    if (this.data.markerType == "placeholder") {
+                        this.el.setAttribute("material", {color: "yellow", transparent: true, opacity: .5});
+                        // this.el.setAttribute("color", "yellow");
+                    } else if (this.data.markerType == "poi") {
+                        this.el.setAttribute("material", {color: "purple", transparent: true, opacity: .5});
                         
-                        } else if (this.data.markerType == "portal") {
-                          this.el.setAttribute("material", {color: "aqua", transparent: true, opacity: .5});
-                          this.el.setAttribute("obb-collider", {size: this.data.xscale * 1.5 + " " + this.data.yscale * 1.5 + " " + this.data.zscale * 1.5});
-                        }  else if (this.data.markerType.toLowerCase() == "curve point") {
-                          this.el.setAttribute("material", {color: "blue", transparent: true, opacity: .5});
-                        } else {
-    
-                        }
-                        if (this.data.tags.includes("hide gizmo") || (settings && settings.hideGizmos)) {
-                          if (this.data.markerType != "mailbox" && this.data.markerType != "light") {
-                            this.el.object3D.visible = false;
-                          }
-                        }
+                        // this.el.setAttribute("color", "purple");
+                    } else if (this.data.markerType == "waypoint") {
+                        this.el.setAttribute("material", {color: "green", transparent: true, opacity: .5});
+                        this.el.classList.add("waypoint");
+                        
+                        // this.el.setAttribute("color", "purple");
+                    } else if (this.data.markerType.includes("trigger")) {
+                        this.el.setAttribute("material", {color: "lime", transparent: true, opacity: .5});
+                        // this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder", scaleFactor: 1});
+                        this.el.setAttribute("obb-collider", {size: this.data.xscale * 1.5 + " " + this.data.yscale * 1.5 + " " + this.data.zscale * 1.5});
+                        // this.el.setAttribute("color", "lime");
+                        
+                    } else if (this.data.markerType.includes("collider")) {
+                      this.el.setAttribute("material", {color: "tomato", transparent: true, opacity: .5});
+                      
+                    } else if (this.data.markerType == "gate") {
+
+                      // console.log("gotsa gate truyna set mod_physics...");
+                        this.el.setAttribute("material", {color: "orange", transparent: true, opacity: .5});
+                        this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder", scaleFactor: 1});
+                        // this.el.setAttribute("color", "orange");
+                    } else if (this.data.markerType == "link") {
+                      // console.log("gotsa gate truyna set mod_physics...");
+                        this.el.setAttribute("material", {color: "Gold", transparent: true, opacity: .5});
+                        // this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder", scaleFactor: 1});
+                        // this.el.setAttribute("color", "orange");
+                    } else if (this.data.markerType.toLowerCase() == "text") {
+                      this.el.setAttribute("gltf-model", "#texticon");
+                      this.el.setAttribute("material", {color: "black", transparent: true, opacity: .5});
+                    
+                    } else if (this.data.markerType == "portal") {
+                      this.el.setAttribute("material", {color: "aqua", transparent: true, opacity: .5});
+                      this.el.setAttribute("obb-collider", {size: this.data.xscale * 1.5 + " " + this.data.yscale * 1.5 + " " + this.data.zscale * 1.5});
+                    }  else if (this.data.markerType.toLowerCase() == "curve point") {
+                      this.el.setAttribute("material", {color: "blue", transparent: true, opacity: .5});
                     } else {
-                        this.loadModel(this.data.modelID);
+
                     }
                     if (this.data.tags.includes("hide gizmo") || (settings && settings.hideGizmos)) {
                       if (this.data.markerType != "mailbox" && this.data.markerType != "light") {
                         this.el.object3D.visible = false;
                       }
                     }
+                  } else { //there's a model, load her up!
+                      this.loadModel(this.data.modelID);
+                  }
+                  if (this.data.tags.includes("hide gizmo") || (settings && settings.hideGizmos)) { //just hide this el, not whole scene
+                    if (this.data.markerType != "mailbox" && this.data.markerType != "light") {
+                      this.el.object3D.visible = false;
+                    }
+                  }
                 }
+
+                /////// SET POS ROT //////////////
+
                 // let scale = parseFloat(this.data.scale);
-                console.log("localmarker with + " + this.data.scale + " rot " + this.data.xrot + this.data.yrot + this.data.zrot);
+                console.log("localmarker with scale " + this.data.xscale + " pos " + this.data.xpos + this.data.ypos + this.data.zpos);
               
                 // this.el.object3D.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
                 // this.el.object3D.position.set(this.data.xpos, this.data.ypos, this.data.zpos);
@@ -382,8 +395,7 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
                 if (this.data.markerType == "collider") {
                   this.el.setAttribute("mod_physics", {body: "static", isTrigger: false, model:"collider", scaleFactor: this.data.scale});
                 }
-                
-            }
+              }
 
               console.log("tryna set localmarker with phID " + this.timestamp + " and markerType " + this.data.markerType);
               // this.waitAndLoad();
@@ -1179,9 +1191,9 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
               }
 
               if (this.data.markerType.toLowerCase() == "placeholder") {
-                if (!modelID.includes("local")) {
+                // if (!modelID.includes("local")) {
                   this.el.setAttribute("material", {color: "yellow", transparent: true, opacity: .5});
-                }
+                // }
                   
               } else if (this.data.markerType.toLowerCase() == "poi") {
                   this.el.setAttribute("material", {color: "purple", transparent: true, opacity: .5});

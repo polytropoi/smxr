@@ -69,6 +69,7 @@ let timedEventsListenerMode = ""
 let mouseDownStarttime = 0;
 let mouseDowntime = 0;
 let isFiring = false;
+let busy = false;  //prevent double on savetocloud..
 var token = document.getElementById("token").getAttribute("data-token"); 
 // var localtoken = localStorage.getItem("smToken"); //rem all localstorage!
 let socketHost = "http://localhost:3000";
@@ -567,7 +568,8 @@ function SendAdminMessage() {
 
 function SaveModsToCloud() { //Save button on location modal, writes local mods upstairs..
 
-   if (userData.sceneOwner != null) {
+   if (userData.sceneOwner != null && !busy) {
+      busy = true;
       let mods = {};
       mods.shortID = room;
       mods.userData = userData;
@@ -624,7 +626,7 @@ function SaveModsToCloud() { //Save button on location modal, writes local mods 
             DeleteLocalSceneData();
             setTimeout(function () {
                window.location.reload();
-            }, 2000);
+            }, 1000);
          } 
       };
 
@@ -954,6 +956,7 @@ function SaveModToLocal(locationKey) { //locationKey is now just timestamp of th
                
                // modModelComponent.updateMaterials();
             } else if (cloudMarkerComponent) {
+               console.log("found the cloudmarker component!");
                type = "cloudMarkerComponent";
                cloudMarkerComponent.data.modelID = locItem.modelID;
                cloudMarkerComponent.data.modelID = locItem.mediaID;
@@ -1030,7 +1033,7 @@ function ToggleTransformControls (locationKey) {
 
    const transformEls = document.getElementsByClassName("transformControls");
    if (transformEls.length > 0) {
-      for (var i=0; i<transformEls.length; i++) {
+      for (var i=0; i<transformEls.length; i++) { //turn them all off!
          let transform_controls_component = transformEls[i].components.transform_controls;
          if (transform_controls_component) {
             transform_controls_component.detachTransformControls();
@@ -1047,12 +1050,14 @@ function ToggleTransformControls (locationKey) {
       console.log("gotsa transformEl for transform_control");
       let transform_controls_component = transformEl.components.transform_controls;
       if (transform_controls_component) {
-         if (transform_controls_component.data.isAttached) {
+         if (transform_controls_component.data.isAttached == true) {
+            console.log("tryna detach transform_control " + transform_controls_component.data.isAttached);
             transform_controls_component.detachTransformControls();
-            console.log("tryna detach transform_control");
+           
          } else {
+            console.log("tryna attach transform_control " + transform_controls_component.data.isAttached);
             transform_controls_component.attachTransformControls();
-            console.log("tryna detach transform_control");
+           
          }
       } else {
          console.log("tryna setattrribue transform_controls");

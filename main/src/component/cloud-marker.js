@@ -172,7 +172,9 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                   this.el.setAttribute("material", {color: "orange", transparent: true, opacity: .5});
                 }
                 if (this.data.markerType.toLowerCase() == "placeholder") {
+                  
                   this.el.setAttribute('gltf-model', '#poi1');
+                  this.el.setAttribute("material", {color: "yellow", transparent: true, opacity: .5});
                 } else if (this.data.markerType.toLowerCase() == "poi") {
                   this.el.setAttribute('gltf-model', '#poi1');
                 } else if (this.data.markerType.toLowerCase() == "waypoint") {
@@ -1344,13 +1346,13 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         this.el.classList.remove("waypoint");
         this.el.removeAttribute("transform_controls");
         // 
-        // this.el.removeAttribute("gltf-model");
+        this.el.removeAttribute("gltf-model");
 
         this.el.removeAttribute("mod_object");
         this.el.removeAttribute("mod_particles");
 
         this.el.removeAttribute("light");
-        this.el.removeAttribute("material");
+        // this.el.removeAttribute("material");
         // this.el.removeAttribute("obb-collider");
         // this.removeModel();
         if (this.data.markerType == "collider") {
@@ -1491,7 +1493,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
          
           
         } else { //if "none"
-            console.log("CLOUDMARKER type " + this.data.markerType+ " tryna set default model " + modelID);
+            console.log("NO MODEL CLOUDMARKER type " + this.data.markerType);
             if ((this.data.tags && !this.data.tags.includes("hide gizmo")) || (settings && !settings.hideGizmos)) {
                 // if (this.data.markerType != "mailbox" && this.data.markerType != "light"  && this.data.markerType != "gate") {
                   if (this.data.markerType.toLowerCase() == "player") {
@@ -1500,6 +1502,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                     this.el.setAttribute("material", {color: "lime", transparent: true, opacity: .5});
                   }
                   if (this.data.markerType.toLowerCase() == "placeholder") {
+                    console.log("!!gotsa placeholder cloudmarker modelLoad update!");
                       this.el.setAttribute("gltf-model", "#poi1");
                       this.el.setAttribute("material", {color: "yellow", transparent: true, opacity: .5});
                       

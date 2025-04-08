@@ -10,6 +10,7 @@
     // // import * as THREE from 'three';
     // import AFRAME from "aframe";
 
+    // import { TransformControls } from 'three/addons/controls/TransformControls.js';
     import { TransformControls } from 'three/addons/controls/TransformControls.js';
     import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
     
@@ -4271,11 +4272,14 @@ AFRAME.registerComponent('load_threesvg', {
     init: function() {
       console.log("tryna attach transform controls to el " + this.el.id );
       this.control = new TransformControls(this.el.sceneEl.camera, this.el.sceneEl);
-      this.control.attach(this.el.getObject3D('mesh'));
+
+      let obj = this.el.getObject3D('mesh');
+      console.log("transformcontrol attached to object " + obj);
+      this.control.attach(obj); 
       this.control.size = .5;
       // this.el.sceneEl.add();
-      this.el.sceneEl.object3D.add( this.control);
-      this.object = this.el.getObject3D("mesh");
+      this.el.sceneEl.object3D.add(this.control.getHelper()); //!!
+      this.object = obj;
       let that = this;
       this.position = new THREE.Vector3();
       this.quaternion = new THREE.Quaternion();
@@ -4286,6 +4290,7 @@ AFRAME.registerComponent('load_threesvg', {
       this.maxMove = new THREE.Vector3( 100, 100, 100 );
       this.minScale = new THREE.Vector3( - 10, - 10, - 10 );
       this.maxScale = new THREE.Vector3( 10, 10, 10 );
+      this.data.isAttached = true;
       // this.targetEl = null;
       // for (let i = 0; i < sceneLocations.locations.length; i++) {
       //   if (this.el.id == sceneLocations.locations[i].timestamp) {
@@ -4492,13 +4497,15 @@ AFRAME.registerComponent('load_threesvg', {
     },
     detachTransformControls: function () {
       console.log("tryna detach controls...");
-      this.control.detach();
       this.data.isAttached = false;
+      this.control.detach();
+
     },
     attachTransformControls: function () {
       console.log("tryna attach controls...");
-      this.control.attach(this.object);
       this.data.isAttached = true;
+      this.control.attach(this.object);
+
     }
   });
   AFRAME.registerComponent('loadcanvas', {
