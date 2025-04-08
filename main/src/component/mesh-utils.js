@@ -4315,7 +4315,7 @@ AFRAME.registerComponent('load_threesvg', {
       this.control.addEventListener('mouseUp',  ( event ) => {
         // this.el.getAttribute("position")
         // console.log(this.el.getAttribute("position"));
-        this.object.updateMatrix();
+       
         this.object.getWorldPosition(this.position);
         // this.object.getWorldQuaternion(this.quaternion);
         this.euler = this.object.rotation;
@@ -4327,6 +4327,7 @@ AFRAME.registerComponent('load_threesvg', {
         this.rotation.x = THREE.MathUtils.radToDeg(this.euler.x);
         this.rotation.y = THREE.MathUtils.radToDeg(this.euler.y);
         this.rotation.z = THREE.MathUtils.radToDeg(this.euler.z);
+
         console.log("transforms to : "+ JSON.stringify(this.position) + JSON.stringify(this.rotation) + JSON.stringify(this.scale));
         
         // // this.el.getObject3D('mesh').position
@@ -4339,7 +4340,7 @@ AFRAME.registerComponent('load_threesvg', {
         // if (this.rotation.z == 180 || this.rotation.z == -180) {
         //   this.rotation.z = 0;
         // } 
-        
+         this.object.updateMatrix();
 
         // this.object.position.set(0, 0, 0);
         if (localData.locations.length > 0) { 
