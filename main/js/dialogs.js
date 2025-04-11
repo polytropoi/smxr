@@ -107,7 +107,8 @@ window.addEventListener( 'keydown',  ( event ) => {
   });
 
   window.addEventListener( 'keyup',  ( event ) => {
-    keydown = "*";
+    event.preventDefault();
+    keydown = "";
     // console.log("keyup " + keydown);
 
   });

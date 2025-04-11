@@ -49,7 +49,7 @@ AFRAME.registerComponent('ar_hit_caster', {
         var session;
         // if (settings && settings.)
         // var arTargetData = [];
-        // let arTargetGroup = new THREE.Group();
+        // let arTargetGroup = new THREE.Group();`
 
         console.log("enter-vr w/ aframe checkHeadsetConnected " + AFRAME.utils.device.checkHeadsetConnected() + 
         " aframe ismobile " + AFRAME.utils.device.isMobile() +
@@ -78,12 +78,13 @@ AFRAME.registerComponent('ar_hit_caster', {
         self.el.object3D.visible = true;
         self.messageEl.textContent = "scanning for surface....";
         // this.camera = session.renderer.xr.getCamera().cameras[0];
-      // if (AFRAME.utils.device.checkHeadsetConnected() && !AFRAME.utils.device.isMobile() && !isMobile() && !isTouchDevice()) { //make sure before loading the roomscale fu
+        // if (AFRAME.utils.device.checkHeadsetConnected() && !AFRAME.utils.device.isMobile() && !isMobile() && !isTouchDevice()) { //make sure before loading the roomscale fu
         if (settings && (settings.useXrRoomPhysics || settings.useRealWorldMeshing)) {
           if (AFRAME.utils.device.checkHeadsetConnected() && !AFRAME.utils.device.isMobile() && !isMobile()) { //isTouchDevice is true on Quest3! 
             console.log("tryna do mixed!"); 
             
             this.arHitTestEnabled = true;
+            self.messageEl.textContent = "scanning for mixed reality surface....";
           } else {
             // if (settings && (settings.useXrRoomPhysics || settings.useRealWorldMeshing)) {
               self.messageEl.textContent = "Mixed Reality not supported on this device!";
@@ -95,7 +96,7 @@ AFRAME.registerComponent('ar_hit_caster', {
         } else { //just in case...
           console.log("tryna do hit test!");
           this.arHitTestEnabled = true;
-         
+          self.messageEl.textContent = "scanning for hit test surface....";
         }
 
         session.addEventListener('select', function () {
@@ -337,9 +338,9 @@ AFRAME.registerComponent('ar_hit_caster', {
               //                                       'zscale': data.zscale,
               //                                       'targetElements': data.targetElements
               //                                     });
-                spawnedEl.setAttribute("visible", true);
-                spawnedEl.object3D.visible = true;
-                this.messageEl.textContent = "spawning object at position " + JSON.stringify(position);
+              spawnedEl.setAttribute("visible", true);
+              spawnedEl.object3D.visible = true;
+              this.messageEl.textContent = "spawning object at position " + JSON.stringify(position);
             }
           }
         }

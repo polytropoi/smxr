@@ -82,7 +82,7 @@ webxr_router.get('/simple_aframe', function (req, res) {
     let response =
         "<!DOCTYPE html> <html lang=\x22en\x22>" +
         "<head>"+
-        "<script src=\x22https://aframe.io/releases/1.7.0/aframe.min.js\x22></script>"+
+        "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>"+
         "</head>"+
         "<body>"+
             "<a-scene>"+
@@ -334,7 +334,7 @@ webxr_router.get('/:_id', function (req, res) {
     let aframeExtrasScript = "<script src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
     let enviromentScript = ""; //for aframe env component
-    let aframeScript = "<script src=\x22https://aframe.io/releases/1.7.0/aframe.min.js\x22></script>";
+    let aframeScript = "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>";
     let threejsVersion = "173";
     let surfaceScatterScript = "";
     let locationData = "";

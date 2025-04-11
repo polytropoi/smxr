@@ -4291,30 +4291,9 @@ AFRAME.registerComponent('load_threesvg', {
       this.minScale = new THREE.Vector3( - 10, - 10, - 10 );
       this.maxScale = new THREE.Vector3( 10, 10, 10 );
       this.data.isAttached = true;
-      // this.targetEl = null;
-      // for (let i = 0; i < sceneLocations.locations.length; i++) {
-      //   if (this.el.id == sceneLocations.locations[i].timestamp) {
-
-      //   }
-      // }
-      // this.mod_model_component = this.el.components.mod_model;
-      // this.mod_object_component = this.el.components.mod_object
-      // this.control.addEventListener('objectChanged',  ( event ) => {
-      //   // this.el.getAttribute("position")
-      //   // console.log(this.el.getAttribute("position"));
-      //   this.object.getWorldPosition(this.position);
-      //   // this.el.setAttribute("position", this.position);
-      //   // console.log(this.position);
-      //   // this.el.getObject3D('mesh').position
-      // });
-      // this.control.addEventListener('change',  ( event ) => { 
-      //   this.control.object.position.clamp(this.minMove, this.maxMove);
-      //   this.control.object.scale.clamp(this.minScale, this.maxScale);
-      // });
+     
       this.el.classList.add("transformControls");
       this.control.addEventListener('mouseUp',  ( event ) => {
-        // this.el.getAttribute("position")
-        // console.log(this.el.getAttribute("position"));
        
         this.object.getWorldPosition(this.position);
         // this.object.getWorldQuaternion(this.quaternion);
@@ -4330,16 +4309,7 @@ AFRAME.registerComponent('load_threesvg', {
 
         console.log("transforms to : "+ JSON.stringify(this.position) + JSON.stringify(this.rotation) + JSON.stringify(this.scale));
         
-        // // this.el.getObject3D('mesh').position
-        // if (this.rotation.x == 180 || this.rotation.x == -180) {
-        //   this.rotation.x = 0;
-        // } 
-        // if (this.rotation.y == 180 || this.rotation.y == -180) {
-        //   this.rotation.z = 0;
-        // } 
-        // if (this.rotation.z == 180 || this.rotation.z == -180) {
-        //   this.rotation.z = 0;
-        // } 
+   
          this.object.updateMatrix();
 
         // this.object.position.set(0, 0, 0);
@@ -4396,7 +4366,7 @@ AFRAME.registerComponent('load_threesvg', {
         }
 
       });
-      window.addEventListener( 'keydown',  ( event ) => {
+      window.addEventListener( 'keydown',  ( event ) => { //hrm, consolidate w/ version in dialogs.js?
 
         switch ( event.keyCode ) {
 
@@ -4423,28 +4393,11 @@ AFRAME.registerComponent('load_threesvg', {
             break;
 
           case 67: // C
-            // const position = currentCamera.position.clone();
-
-            // currentCamera = currentCamera.isPerspectiveCamera ? cameraOrtho : cameraPersp;
-            // currentCamera.position.copy( position );
-
-            // orbit.object = currentCamera;
-            // this.control.camera = currentCamera;
-
-            // currentCamera.lookAt( orbit.target.x, orbit.target.y, orbit.target.z );
-            // onWindowResize();
+           
             break;
 
           case 86: // V
-            // const randomFoV = Math.random() + 0.1;
-            // const randomZoom = Math.random() + 0.1;
-
-            // cameraPersp.fov = randomFoV * 160;
-            // cameraOrtho.bottom = - randomFoV * 500;
-            // cameraOrtho.top = randomFoV * 500;
-
-            // cameraPersp.zoom = randomZoom * 5;
-            // cameraOrtho.zoom = randomZoom * 5;
+          
             onWindowResize();
             break;
 

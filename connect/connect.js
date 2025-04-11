@@ -1465,11 +1465,11 @@ function CreateLocation (filename, type, position) { //New Location button, also
    timestamp = Date.now();
    timestamp = parseInt(timestamp);
    let locItem = {};
-   locItem.x = newPosition.x.toFixed(2).toString();
+   locItem.x = newPosition.x.toString();
    locItem.eulerx = 0; //maybe get look vector?
-   locItem.y = newPosition.y.toFixed(2).toString();
+   locItem.y = newPosition.y.toString();
    locItem.eulery = 0;
-   locItem.z = newPosition.z.toFixed(2).toString();
+   locItem.z = newPosition.z.toString();
    locItem.eulerz = 0;
    locItem.type = "Worldspace";
    locItem.label = 'local ' + markertype;
@@ -1497,7 +1497,7 @@ function CreateLocation (filename, type, position) { //New Location button, also
       localData.locations.push(locItem);
    }
    
-   SaveLocalData();
+
    poiLocations.push(locItem);
 
    phEl.setAttribute('position', newPosition);
@@ -1520,10 +1520,11 @@ function CreateLocation (filename, type, position) { //New Location button, also
    nextbuttonEl.style.visibility = "visible";
    prevbuttonEl.style.visibility = "visible";
 
-   if (locItem.modelID != "none" ) {
-      // phEl.components.local_marker.loadModel(locItem.modelID);
-      window.location.reload();
-   }
+   SaveLocalData();
+   // if (locItem.modelID != "none" ) {
+   //    // phEl.components.local_marker.loadModel(locItem.modelID);
+   //    window.location.reload();
+   // }
 }
 
 function ToggleCameraLock () {

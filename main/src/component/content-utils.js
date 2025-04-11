@@ -1879,63 +1879,7 @@ AFRAME.registerComponent('model-callout', {
       this.el.addEventListener('update_pos_rot', function (event) {
         // var theEl = this.el;
         console.log('pos rot update!' + JSON.stringify(event.detail.position) + " " + JSON.stringify(event.detail.rotation));
-        // move(el.id, event.detail.position, event.detail.rotation); 
-        // if (loop != null) {
-        //   clearInterval(loop);
-        // }
-        // this.object = this.el.object3D;
-                // let newPosition = this.object3D.position;
-                // let newRotation = this.object3D.rotation;
-
-                // setInterval(function () { 
-                //     if (newPosition.distanceTo(event.detail.position) > 0) {
-                //     newPosition.lerp(event.detail.position, 0.1);
-                //     }
-                //     // console.log("tryna move!");
-                //     // this (below) may seem ugly, but the rotation is a euler, not a THREE.Vector3, 
-                //     // so to use the lerp function i'm doing some probably unnecessary conversions
-                //     // let rot = this.object3D.rotation.toVector3().lerp(event.detail.rotation, 0.1);
-                //     // newRotation.setFromVector3(rot);
-                //   }, 100);
-        // }
-
-
-        // interpolationBuffer.setPosition(new THREE.Vector3(event.detail.position.x, event.detail.position.y, event.detail.position.z));
-        // interpolationBuffer.setRotation(new THREE.Vector3(event.detail.rotation.x, event.detail.rotation.y, event.detail.rotation.z));
-
-              // this.pos = event.detail.position;
-              // this.rot = event.detail.rotation;
-        // el.setAttribute('position', event.detail.position);
-        // el.setAttribute('rotation', event.detail.rotation);
-        // let startPosition = transform.position;
        
-        // if (el != undefined) { 
-          // el.object3D.getWorldPosition(this.startPosition);
-          
-              // this.startPosition = el.getAttribute('position');
-          // this.endPosition = new THREE.Vector3(event.detail.position);
-              // this.endPosition = event.detail.position;
-
-              // console.log("startPositon " + JSON.stringify(this.startPosition) + " end position " + JSON.stringify(this.endPosition));
-          
-          // var startRotation = new THREE.Vector3();
-          // this.el.object3D.getWorldQuaternion(startRotation);
-
-          // // let startRotation = transform.eulerAngles;
-          // let endRotation = rot;
-                // this.startTime = this.currentTime;
-                //     // Calculate the journey length.
-                // // let journeyLength = Vector3.Distance(startPosition, endPosition);
-                // this.journeyLength = this.startPosition.distanceTo(this.endPosition);
-                
-                // this.speed = this.journeyLength / 2;
-                
-                // // let journeyLengthRot = Vector3.Distance(startRotation, endRotation);
-                // // let speedRot = journeyLengthRot / 2;
-                // console.log("journeyLength is " + this.journeyLength);
-                // this.data.journeyLengthData = this.journeyLength;
-
-        // }
       });
     },
     move: (function (id, pos, rot) { //called directly from connect.js 
@@ -1964,134 +1908,15 @@ AFRAME.registerComponent('model-callout', {
             lerpedPos.x = lerp(currentPos.x, pos.x, .1).toFixed(2);
             lerpedPos.y = lerp(currentPos.y, pos.y - 1, .1).toFixed(2); //because camera y is 1+
             lerpedPos.z = lerp(currentPos.z, pos.z, .1).toFixed(2);
-            // var currentRot = element.getAttribute('rotation');
-            // var currentQuat = Quaternion.fromEuler(currentRot);
-            // var lerpedRot = {};
-            // var lerpedQuat = {};
-            // var targetQuat = Quaternion.fromEuler(posRotObj.rotation);
-            // var lerpedQuat = currentQuat.slerp(targetQuat)(0), currentQuat;
-            //(q1.slerp(q2)(0), q1);
-   
-            // lerpedRot.x = 
-            // lerpedRot.x = lerp(currentRot.x, posRotObj.rotation.x, .1).toFixed(2);
-            // lerpedRot.y = lerp(currentRot.y, posRotObj.rotation.y, .1).toFixed(2);
-            // lerpedRot.z = lerp(currentRot.z, posRotObj.rotation.z, .1).toFixed(2);
-            // console.log("currentRot " + JSON.stringify(currentRot) + "updatedRot " + JSON.stringify(posRotObj.rotation), " lerpedRot " + JSON.stringify(lerpedQuat));
-            // targetQuat.setFromEuler(rot);
-            // currentEuler.setFromVector3(currentRot);
-            // targetQuat.setFromEuler(targetEuler.setFromVector3(rot));
-            // console.log("targetQuat " + JSON.stringify(targetQuat));
-            // targetQuat.setFromAxisAngle( rot, Math.PI / 2 );
-            // currentQuat.setFromAxisAngle( element.getAttribute('position'), Math.PI / 2 );
             element.setAttribute('position', lerpedPos);
-            // element.setAttribute('rotation', Quaternion.lerpedQuat.toVector());
             
-            // let lerpedRot = element.object3D.rotation.toVector3().lerp(rot, 0.1);
-            // element.object3D.rotation.setFromVector3(lerpedRot);
-
-            // targetRot.applyQuaternion(currentQuat.rotateTowards(targetQuat, 0.1));
-            
-            // THREE.Quaternion.slerp( element.object3D.quaternion, targetQuat, lerpedQuat, 0.1 );
-            // console.log("rotation " + JSON.stringify(element.object3D.quaternion), JSON.stringify(targetQuat), JSON.stringify(lerpedQuat));
-            // element.object3D.applyQuaternion(lerpedQuat);
-            // mesh.quaternion.slerp( targetQuat, 0.1 );
-              // currentQuat = mesh.quaternion;
-              // targetEuler.set(DEG2RAD * rot.x, DEG2RAD * rot.y, DEG2RAD * rot.z);
-              // targetQuat.setFromEuler(targetEuler);
-              // console.log("currentQuat" + JSON.stringify(currentQuat) + "targetQuat " + JSON.stringify(targetQuat));
-              // THREE.Quaternion.slerp( currentQuat, targetQuat, lerpedQuat, .1);
-              // mesh.quaternion = lerpedQuat;
-              // mesh.quaternion.normalize();
-            // element.object3D.quaternion = lerpedQuat;
-              // console.log("lerpedQuat " + JSON.stringify(lerpedQuat));
-            // element.object3D.quaternion.normalize();
-            // const vector = new THREE.Vector3( 1, 0, 0 );
-            // // vector.applyQuaternion( lerpedQuat );
-            // element.setAttribute('rotation', vector);
-            // element.setAttribute('position', lerpedPos);
          } else {
             clearInterval(interval);
          }
          }, 100);
     })
   });
-    // tick: function (time, timeDelta) {
-      
-          // if(this.endPosition != null && this.endRotation != null) { 
-            // console.log("this.pos " + JSON.stringify(this.pos));
-          //   return;
-          // } else {
-                  // if (this.model == undefined) {
-                  //   return;
-                  // }
-                  // if (!this.pos || !this.rot) {
-                  //     this.pos = this.model.position;
-                  //     this.rot = this.model.position;
-                  // }
-            // if (this.endRotation && this.endPosition) 
-             // if(!this.prevPosition && !this.prevRotation) { 
-            //   // there are no values to lerp from - set the initial values
-            //   this.target.setAttribute('position', this.el.getAttribute('position'))
-            //   this.target.setAttribute('rotation', this.el.getAttribute('rotation'))
-            // } else {
-                // if (this.pos && this.rot) {
-                //   this.model.position.lerp(this.pos, 0.1);
-                //   let rot = this.model.rotation.toVector3().lerp(this.rot, 0.1)
-                //     this.model.rotation.setFromVector3(rot);
-                // }
-        // this.endPosition = this.newPosition;
-        // this.endRotation = this.newRotation;
-        // this.prevPosition = this.object.position;
-        // this.prevRotation = this.object.rotation;
-     
-      // pos = this.object.position;
-      // rot = this.object.position;
-          // }
-            // use the previous values to get an approximation 
-          //   this.target.object3D.position.lerp(this.prevPosition, 0.1)
-
-          //   // this (below) may seem ugly, but the rotation is a euler, not a THREE.Vector3, 
-          //   // so to use the lerp function i'm doing some probably unnecessary conversions
-          //   let rot = this.target.object3D.rotation.toVector3().lerp(this.prevRotation, 0.1)
-          //   this.target.object3D.rotation.setFromVector3(rot)
-          // }
-          // // update the values
-          // this.prevPosition = this.el.object3D.position
-          // this.prevRotation = this.el.object3D.rotation
-              // this.currentTime = time; 
-      // console.log("journeyLength is " + this.journeyLength);
-      // var journeyLength = this.journeyLength;
-            // if (this.data.journeyLengthData > 0) {
-            //   console.log("tryna move!");
-            //   // this.startTime = time;
-            //   // this.distCovered = (time - this.startTime) * this.speed;
-            //   // this.move();
-            // //   }
-            // // },
-            // // move: (function () {
-            // //     // let distCovered = 0; //declaring outside speeds up a bit?
-                
-            //     // return function() {
-            //     // this.startTime = time;
-            //     this.distCovered = (time - this.startTime) * this.speed;
-            //     // Fraction of journey completed equals current distance divided by total distance.
-            //     this.fractionOfJourney = this.distCovered / journeyLength;
-            //     console.log("tryna move " + this.distCovered + " fraction of journey " + this.fractionOfJourney);
-            //     // Set our position as a fraction of the distance between the markers.
-            //     // newPosition.lerpVectors(startPosition, endPosition, fractionOfJourney);
-            //     // this.el.object3D.position(this.newPosition.lerpVectors(this.startPosition, this.endPosition, fractionOfJourney));
-            //     this.el.setAttribute("position", this.newPosition.lerpVectors(this.startPosition, this.endPosition, fractionOfJourney));
-            //   }
-      // })()
-      // if (journeyLengthRot > 0) {
-      //   let distCoveredRot = (Time.time - startTime) * speedRot;
-      //   // Fraction of journey completed equals current distance divided by total distance.
-      //   let fractionOfJourneyRot = distCoveredRot / journeyLengthRot;
-      //   // Set our position as a fraction of the distance between the markers.
-      //   transform.rotation = Quaternion.Lerp(Quaternion.Euler(startRotation), Quaternion.Euler(endRotation), fractionOfJourneyRot);
-      // }
-
-
+  
   //reusable lerping function for position/rotation, by #id
   AFRAME.registerComponent('player_mover', { //
     schema: {
@@ -3372,9 +3197,11 @@ AFRAME.registerComponent('location_picker', { //TODO toggle on if needed, off by
       if (keydown == "X" && !this.picking) {
           this.picking = true;
           // this.pickerEl.style.visibility = "hidden";
-          this.pickerEl.object3D.visible = false;
+          
           // console.log("gotsa locationPicked "+ this.locationPicked);
           // keydown = 
+          // this.pickerEl.object3D.getWorldPosition(this.locationPicked);
+          this.pickerEl.object3D.visible = false;
           if (this.locationPicked) {
             CreateLocation(null, "placeholder", this.locationPicked);
           }
@@ -3398,41 +3225,39 @@ AFRAME.registerComponent('location_picker', { //TODO toggle on if needed, off by
       if (this.pickerEl.object3D.visible) {
         this.pickerEl.object3D.visible = false;
       }
-      // this.pickerEl.style.visibility = "hidden";
-      // this.pickerEl.object3D.visible = false;
-
-      // return;
+   
     } else {
       // console.log("tryna sert raycaster " + keydown);
-      // if (keydown == "x") 
+     
       this.raycaster.setFromCamera( mouse, AFRAME.scenes[0].camera ); 
       // this.intersection = this.raycaster.intersectObject( this.el.sceneEl.children );
       const intersects = this.raycaster.intersectObjects( this.sceneEl.object3D.children );
 
       if (intersects.length && !this.picking) {
-        // this.locationPicked = intersects[0].point;
-        // intersects[0].point.getWorldPosition(this.locationPicked)
-        // this.locationPicked = this.pickerEl.object3D.position;
-        // this.pickerEl.style.visibility = "visible";
+       
         if (!this.pickerEl.object3D.visible) {
           this.pickerEl.object3D.visible = true;
         }
         
+        this.locationPicked.x = intersects[0].point.x.toFixed(2);
+        this.locationPicked.y = intersects[0].point.y.toFixed(2);
+        this.locationPicked.z = intersects[0].point.z.toFixed(2);
+        console.log("intersects " + JSON.stringify(this.locationPicked));
         // this.pickerEl.setAttribute("position", this.locationPicked);
-        this.pickerEl.object3D.position.copy(intersects[0].point);
+        this.pickerEl.object3D.position.copy(this.locationPicked);
         
-        this.pickerEl.object3D.updateMatrixWorld();
-        this.locationPicked.copy(this.pickerEl.object3D.position);
+
+
+        this.pickerEl.object3D.updateMatrix();
+        // this.locationPicked.copy(this.pickerEl.object3D.position);
         // this.pickerEl.object3D.position.copy(this.locationPicked);
-        console.log("this.locationPicked " + JSON.stringify(this.pickerEl.object3D.position));
+        // console.log("this.locationPicked " + JSON.stringify(this.locationPicked));
 
       } else {
         // this.locationPicked = null;
         if (this.pickerEl.object3D.visible) {
           this.pickerEl.object3D.visible = false;
         }
-        // this.pickerEl.style.visibility = "hidden";
-        // this.pickerEl.object3D.visible = false;
       }
     }
   }
