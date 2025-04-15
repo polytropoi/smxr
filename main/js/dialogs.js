@@ -114,6 +114,7 @@ window.addEventListener( 'keydown',  ( event ) => {
   });
 
   window.addEventListener("wheel", event => {
+    event.preventDefault();
     const delta = Math.sign(event.deltaY);
     console.info(delta);
     let curveDriver = document.getElementById("cameraCurve");

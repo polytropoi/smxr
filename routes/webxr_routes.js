@@ -3050,11 +3050,12 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                  
                     let webxrFeatures = "";
-                    let arHitTest = "";
+                    // let arHitTest = "";
                     let arElements = "";
                     let handsTemplate = "";
                     let aframeRenderSettings = "renderer=\x22colorManagement: true; physicallyCorrectLights: true; exposure: .2; sortObjects: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;\x22";
      
+
                     //scenetype filters below...
 
                     console.log("sceneWebType: "+ sceneResponse.sceneWebType); 
@@ -3062,6 +3063,13 @@ webxr_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneWebType == undefined || sceneResponse.sceneWebType.toLowerCase() == "default" || sceneResponse.sceneWebType.toLowerCase() == "aframe") { 
                         // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
                         let xrExtras = "";
+                        let hitCasterComponent = "";
+                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("hit test")) {
+                            xrExtras = "ar-hit-test";
+                            ARScript = "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>";
+                            hitCasterComponent = "ar_hit_caster";
+
+                        }
                         if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
                             meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
                             xrExtras = "xr_room_physics";
@@ -3073,17 +3081,19 @@ webxr_router.get('/:_id', function (req, res) {
                             webxrFeatures = " " + xrExtras;
                             xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
                         } else {
-                            webxrFeatures = "webxr=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #ar_overlay;\x22 " + xrExtras + " "; 
+                            webxrFeatures = "webxr=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
                         }
                         if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("hand controls") || sceneResponse.sceneTags.includes("hand controllers")) {
                             meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/component/hand_equip.js\x22></script>";
                         }
-                        arElements = "<a-entity material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
-                        "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></a-entity>"+
-                        "<a-entity scale=\x221 1 1\x22 id=\x22ar_parent\x22>" +
+                        // arElements = "<a-entity material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
+                        // "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></a-entity>"+
+                        // <a-light type="directional" light="castShadow:true;" position="1 1 1" intensity="1.57" shadow-camera-automatic="#ar_parent"></a-light>
+                        arElements = "<a-plane follow-shadow=\x22#ar_parent\x22 material=\x22shader:shadow\x22 shadow=\x22cast:false;\x22 rotation=\x22-90 0 0\x22 width=\x222\x22 height=\x222\x22></a-plane>"+
+                        "<a-entity scale=\x221 1 1\x22 id=\x22ar_parent\x22 "+hitCasterComponent+">" +
                         arChildElements +
-                        "</a-entity>"+
-                        "<a-entity show-in-ar-mode visible=\x22false\x22 id=\x22hitCaster\x22 ar_hit_caster=\x22targetEl: #ar_parent\x22 gltf-model=\x22#reticle2\x22></a-entity>\n";
+                        "</a-entity>";
+                        // "<a-entity show-in-ar-mode visible=\x22false\x22 id=\x22hitCaster\x22 ar_hit_caster=\x22targetEl: #ar_parent\x22 gltf-model=\x22#reticle2\x22></a-entity>\n";
                         handsTemplate = "<template id=\x22hand-template\x22><a-entity><a-box scale=\x220.1 0.1 0.1\x22 visible=false></a-box></a-entity></template>";
                        
                     } 
@@ -3561,8 +3571,8 @@ webxr_router.get('/:_id', function (req, res) {
                         "<script src=\x22../main/src/component/local-marker.js\x22></script>"+
                         "<script src=\x22../main/src/component/mod-materials.js\x22></script>"+
 
-                        "<script src=\x22../main/src/component/ar-shadow-helper.js\x22></script>"+
-                        "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>"+
+                        // "<script src=\x22../main/src/component/ar-shadow-helper.js\x22></script>"+
+                        // "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>"+
                         // "<script src=\x22../main/vendor/html2canvas/aframe-html-shader.min.js\x22></script>"+
                         primaryAudioScript +
                         ambientAudioScript +
@@ -3608,13 +3618,13 @@ webxr_router.get('/:_id', function (req, res) {
                         geoScripts +
                         "<script src=\x22../main/js/dialogs.js\x22></script>"+
 
-                        "<div id=\x22ar_overlay\x22 style=\x22visibility: hidden\x22><div id=\x22ar_overlay_message\x22></div>" +
-                        "<div><button id=\x22arLockButton\x22 style=\x22float:right; margin: auto\x22 onclick=\x22ToggleLockTargetElements()\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>toggle lock</button></div><br><br><br>"+
+                        "<div id=\x22dom-overlay\x22 style=\x22visibility: hidden\x22><div id=\x22ar_overlay_message\x22></div>" +
+                        "<div><button id=\x22arLockButton\x22 style=\x22visibility: hidden; float:right; margin: auto\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>toggle lock</button></div><br><br><br>"+
                         "<div style=\x22visibility: hidden\x22 id=\x22unlockedButtons\x22>" +
-                        "<div><button id=\x22arScaleDownButton\x22 style=\x22float:right; margin: auto\x22 onclick=\x22ScaleTargetElements('down')\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>scale -</button></div><br><br><br>"+            
-                        "<div><button id=\x22arScaleUpButton\x22 style=\x22float:right; margin: auto\x22 onclick=\x22ScaleTargetElements('up')\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>scale +</button></div><br><br><br>"+  
-                        "<div><button id=\x22arRotRightButton\x22 style=\x22float:right; margin: auto\x22 onclick=\x22RotateTargetElements('right')\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>rot ></button></div><br><br><br>"+            
-                        "<div><button id=\x22arRotLeftButton\x22 style=\x22float:right; margin: auto\x22 onclick=\x22RotateTargetElements('left')\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>rot <</button></div></div></div>"+                        
+                        "<div><button id=\x22arScaleDownButton\x22 style=\x22float:right; margin: auto\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>scale -</button></div><br><br><br>"+            
+                        "<div><button id=\x22arScaleUpButton\x22 style=\x22float:right; margin: auto\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>scale +</button></div><br><br><br>"+  
+                        "<div><button id=\x22arRotRightButton\x22 style=\x22float:right; margin: auto\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>rot -</button></div><br><br><br>"+            
+                        "<div><button id=\x22arRotLeftButton\x22 style=\x22float:right; margin: auto\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>rot +</button></div></div></div>"+                        
                         // threeDeeTextComponent +
                         aScene +
                         "<div id=\x22overlay\x22></div>"+
