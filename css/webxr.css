@@ -1350,12 +1350,12 @@ background-color: #000000;
 } 
 
 .a-dom-overlay button {
-padding: 1em;
+padding: .5em;
 appearance: none;
 background: #00000055;
-border: 3px solid white;
+border: 2px solid white;
 border-radius: 1em;
-margin: 1em 1em 0 0;
+margin: .5em .5em 0 0;
 color: white;
 }
 
@@ -1372,12 +1372,12 @@ color: white;
 
 .arOverlayButton {
 
-background-color: #545454; /* Green */
+background-color: #545454; 
 color: white;
-border-radius: 8px;
-border-width: 0px;
-font-size: 22px;
-padding: 5px 5px;
+border-radius: 4px;
+border-width: 1px;
+font-size: 18px;
+padding: 2px 2px;
 }
 #ar_overlay_message {
   position: absolute;
