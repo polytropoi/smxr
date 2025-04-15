@@ -248,7 +248,7 @@ function isMobile() {
           self.el.object3D.position.copy(self.originalPosition);
         }
         // self.el.object3D.visible = false;
-        this.disableARButtons();
+        self.disableARButtons();
       });
     },
     disableARButtons: function () {

@@ -3064,7 +3064,7 @@ webxr_router.get('/:_id', function (req, res) {
                         // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
                         let xrExtras = "";
                         let hitCasterComponent = "";
-                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("hit test")) {
+                        if ((sceneResponse.sceneTags && sceneResponse.sceneTags.includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("hit test"))) {
                             xrExtras = "ar-hit-test";
                             ARScript = "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>";
                             hitCasterComponent = "ar_hit_caster";

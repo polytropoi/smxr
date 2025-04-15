@@ -2562,9 +2562,10 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
                let createAvatarEl = document.getElementById('createAvatars');
                if (createAvatarEl) {
                   let createAvatarComponent = createAvatarEl.components.create_avatars;
-                  if (createAvatarComponent)
+                  if (createAvatarComponent) {
                      console.log("gots createAvatarComponennt, tryna createAvatar..." + key);
-                  createAvatarComponent.createAvatar(key); //YES, it's below, but...
+                     createAvatarComponent.createAvatar(key); //YES, it's below, but...
+                  }
                }
                // let avatar = document.createElement("a-entity"); //this make bad!
                // // let avatar = sceneEl.createElement("a-entity");
