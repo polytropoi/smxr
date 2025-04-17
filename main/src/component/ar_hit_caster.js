@@ -686,18 +686,20 @@ function isMobile() {
   
         this.toggleY();
       });
-      this.arHitCasterEl = document.getElementById("hitCaster");
-      this.hitCasterComponent = null;
-      if (this.arHitCasterEl) {
-        this.hitCasterComponent = this.arHitCasterEl.components.ar_hit_caster;
-      }
+      this.arHitCasterEl = document.getElementById("ar_parent");
+   
+         this.hitCasterComponent = this.arHitCasterEl.components.ar_hit_caster;
+    //   }
       this.debug = false;
     },
     toggleX: function () {
       //lock elements = disable hit test/ar-parent positioning
+    //   this.hitCasterComponent = this.arHitCasterEl.components.ar_hit_caster;
       if (this.hitCasterComponent) {
         console.log("x down..");
         this.hitCasterComponent.toggleLockElements();
+      } else {
+        this.hitCasterComponent = this.arHitCasterEl.components.ar_hit_caster;
       }
     },
     toggleY: function () {
@@ -717,12 +719,16 @@ function isMobile() {
   AFRAME.registerComponent("left_controller_thumb", {
     init: function () {
       this.el.addEventListener("thumbstickmoved", this.logThumbstick);
+      this.arHitCasterEl = document.getElementById("ar_parent");
+      this.hitCasterComponent = this.arHitCasterEl.components.ar_hit_caster;
     },
   
     logThumbstick: function (evt) {
-      this.arHitCasterEl = document.getElementById("hitCaster");
-      this.hitCasterComponent = null;
+
       if (this.arHitCasterEl) {
+        this.hitCasterComponent = this.arHitCasterEl.components.ar_hit_caster;
+      } else {
+        this.arHitCasterEl = document.getElementById("ar_parent");
         this.hitCasterComponent = this.arHitCasterEl.components.ar_hit_caster;
       }
       if (evt.detail.y > 0.95) {

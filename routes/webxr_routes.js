@@ -3065,9 +3065,9 @@ webxr_router.get('/:_id', function (req, res) {
                         let xrExtras = "";
                         let hitCasterComponent = "";
                         if ((sceneResponse.sceneTags && sceneResponse.sceneTags.includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("hit test"))) {
-                            xrExtras = "ar-hit-test";
-                            ARScript = "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>";
-                            hitCasterComponent = "ar_hit_caster";
+                            xrExtras = "ar-hit-test"; //added to a-scene
+                            ARScript = "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>"; 
+                            hitCasterComponent = "ar_hit_caster"; //added to ar_parent
 
                         }
                         if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
