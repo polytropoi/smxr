@@ -331,7 +331,7 @@ webxr_router.get('/:_id', function (req, res) {
     let meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22 defer=\x22defer\x22></script>";
     let physicsScripts = "";
     let brownianScript = "";
-    let aframeExtrasScript = "<script src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
+    let aframeExtrasScript = "<script src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
     let enviromentScript = ""; //for aframe env component
     let aframeScript = "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>";
@@ -1179,11 +1179,11 @@ webxr_router.get('/:_id', function (req, res) {
                         if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("blaster")) {
                             rightHandEquip = " equip_controller rotation=\x22-80 0 0\x22 position=\x22-0.02 0 -0.01\x22"
                         }
-                        handEntities = "<a-entity id=\x22left-hand\x22 "+blinkMod+" oculus-touch-controls=\x22hand: left;\x22 left_controller_thumb left_controller_buttons>"+
+                        handEntities = "<a-entity id=\x22left-hand\x22 "+blinkMod+" meta-touch-controls=\x22hand: left;\x22 left_controller_thumb left_controller_buttons>"+
                         
                         "<a-sphere color=\x22blue\x22 opacity=\x220.1\x22 radius=\x220.06\x22 "+ammoHands+"></a-sphere></a-entity>" +
                         // "<a-entity id=\x22right-hand\x22 hand-tracking-grab-controls=\x22hand: right\x22 oculus-touch-controls=\x22hand: right\x22 laser-controls=\x22hand: right;\x22 handModelStyle: lowPoly; color: #ffcccc\x22 raycaster=\x22objects: .activeObjexRay;\x22 grab "+hapticsHands+">"+
-                        "<a-entity id=\x22right-hand\x22 laser-controls=\x22hand: right;\x22 raycaster=\x22objects: .activeObjexRay;\x22 oculus-touch-controls=\x22hand: right\x22 >"+
+                        "<a-entity id=\x22right-hand\x22 laser-controls=\x22hand: right;\x22 raycaster=\x22objects: .activeObjexRay;\x22 meta-touch-controls=\x22hand: right\x22 >"+
                         "<a-entity id=\x22right_hand_attach\x22 "+rightHandEquip+"></a-entity>" +
                         "<a-sphere color=\x22orange\x22 opacity=\x220.1\x22 radius=\x220.06\x22 "+ammoHands+"></a-sphere>"+
                         "</a-entity>";       
