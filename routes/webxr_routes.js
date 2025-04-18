@@ -665,7 +665,13 @@ webxr_router.get('/:_id', function (req, res) {
                             
                         }
                     }
+                    if (sceneResponse.sceneLocations[i].markerType == "model" && sceneResponse.sceneLocations[i].modelID == "none") {
+                            
+                        sceneResponse.sceneLocations[i].markerType = "placeholder";
+                        console.log("Switching markertype from model to placeholder!@");
+                    }
                     if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].type.toLowerCase() != 'geographic') { //cloudmarkers, special type allows local mods
+                        
                         if (//sceneResponse.sceneLocations[i].markerType.toLowerCase() == "none" 
                             sceneResponse.sceneLocations[i].markerType.toLowerCase() == "placeholder" 
                             || sceneResponse.sceneLocations[i].markerType.toLowerCase().includes("trigger") 
@@ -1711,7 +1717,7 @@ webxr_router.get('/:_id', function (req, res) {
                     const modelquery = {"_id": m_id};
                     const model = await RunDataQuery("models", "findOne", modelquery);
 
-                    if (model.item_type == "glb") {
+                    if (model && model.item_type == "glb") {
                         let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
                         objekt.modelURL = modelURL;
                         gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + objekt.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
@@ -1734,7 +1740,7 @@ webxr_router.get('/:_id', function (req, res) {
                     const m_id = ObjectId.createFromHexString(actionModel.modelID.toString());
                     const mquery = {"_id": m_id};
                     const model = await RunDataQuery("models", "findOne", mquery);
-                    if (model && model.userID && model.item_type == "glb") {
+                    if (model && model.userID && model.item_type && model.item_type == "glb") {
                         let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
                         gltfsAssets = gltfsAssets + "<a-asset-item class=\x22gltfAssets\x22 crossorigin=\x22anonymous\x22 response-type=\x22arraybuffer\x22 id=\x22" + 
                         actionModel.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";  
@@ -1798,9 +1804,10 @@ webxr_router.get('/:_id', function (req, res) {
                     
                     const m_id = ObjectId.createFromHexString(locMdl.modelID.toString());
                     const locmdlquery = {"_id": m_id};
+                    
                     let model = await RunDataQuery("models", "findOne", locmdlquery);
-
-                    if (model.item_type == "glb") {
+                    console.log("tryna find model " + m_id + " " + JSON.stringify(model));
+                    if (model != null && model.item_type && model.item_type == "glb") {
                         let modelURL = "";
                         modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
                         
@@ -2100,7 +2107,7 @@ webxr_router.get('/:_id', function (req, res) {
                     } else {
                         
                      
-                        if (model.item_type == "usdz") {//not locmdl glb
+                        if (model != null && model.item_type == "usdz") {//not locmdl glb
                         
                             let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/usdz/" + model.filename, 6000);
                             console.log("non-gltf modelURL " + modelURL + " modelType " + model.item_type);
@@ -2112,7 +2119,7 @@ webxr_router.get('/:_id', function (req, res) {
                             "});";
                             usdzModel = modelURL;
                             
-                        } else if (model.item_type == "splat") {//not locmdl glb
+                        } else if (model != null && model.item_type == "splat") {//not locmdl glb
                         
                             //TODO SPLATTING!
                         }

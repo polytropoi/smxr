@@ -663,10 +663,10 @@ function ReturnLocationItem () {
 function ReturnLocationModelSelect () {
 
     let phID = selectedLocationTimestamp;
-    console.log("tryna return models for phID " + phID);
+
   //  let locationItem = JSON.parse(localStorage.getItem(phID));
     let locationItem = ReturnLocationItem();
-
+    console.log("tryna return models for phID " + phID + " " + JSON.stringify(locationItem));
   //  for (let i = 0; i < localData.locations.length; i++) {
   //     console.log("checking phID " + phID +  " vs " + localData.locations[i].timestamp );
   //     if (phID == localData.locations[i].timestamp) {

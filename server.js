@@ -576,6 +576,7 @@ export function getExtension(filename) {
 }
 
 export function convertStringToObjectID (stringID) {
+    stringID = stringID.toString();
     if (ObjectId.isValid(stringID)) {
         return ObjectId.createFromHexString(stringID);
     } else {
@@ -5232,7 +5233,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
             
             (async () => {
                 try {
-                    console.log("TRYNA ADD SCENE MODS mods " + JSON.stringify(req.body));
+                    console.log("TRYNA ADD SCENE MODS mods ");
                     const query = {"short_id": req.params.s_id};
                     const scene = await RunDataQuery("scenes", "findOne", query);
                     if (!scene.sceneTags.includes("no mods")) { 
@@ -5241,12 +5242,15 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                         let updatedSceneLocations = [];
 
                             for (let file in req.body.localFiles) {
+                            // for (let key in localData.localFiles) {
+                                    // let ext = localData.localFiles[key].name.split('.');
+                                console.log("file : " + JSON.stringify(req.body.localFiles[file].name));
                                 let timestamp = Math.round(Date.now() / 1000);
-                                console.log("gotsa uploaded localfile " + file.name);
-                                let buffer = Buffer.from(file.data, 'base64');
+                                console.log("gotsa uploaded localfile " + req.body.localFiles[file].name);
+                                let buffer = Buffer.from(req.body.localFiles[file].data, 'base64');
                                 //models and images only atm...
-                                if (getExtension(file.name) == ".glb") { //should sniff the thing instead, but...
-                                    let awskey = 'users/' + req.session.user._id.toString() + '/gltf/' + timestamp + '_' + file.name;
+                                if (getExtension(req.body.localFiles[file].name) == ".glb") { //should sniff the thing instead, but...
+                                    let awskey = 'users/' + req.session.user._id.toString() + '/gltf/' + timestamp + '_' + req.body.localFiles[file].name;
                                     let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
                                         Key: awskey, 
                                     // ContentEncoding: 'base64',
@@ -5257,50 +5261,53 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                     const newmodel = { //add to models collection
                                         userID : req.session.user._id.toString(),
                                         username : req.session.user.userName,
-                                        name : timestamp + "_" + file.name,
-                                        filename : timestamp + "_" + file.name,
+                                        name : timestamp + "_" + req.body.localFiles[file].name,
+                                        filename : timestamp + "_" + req.body.localFiles[file].name,
                                         item_type : 'glb',
                                         tags: [],
                                         item_status: "private",
                                         otimestamp : timestamp,
-                                        ofilesize : file.size };
+                                        ofilesize : req.body.localFiles[file].size };
                                     const saved = await RunDataQuery("models", "insertOne", newmodel);
                                     console.log("glb saved with id " + saved.insertedId); //.insertedId == ObjectId of new record
-                                    newfile.name = file.name.replace("local_","");
+                                    let newfile = {};
+                                    newfile.name = req.body.localFiles[file].name.replace("local_","");
                                     newfile._id = saved.insertedId;
                                     newFiles.push(newfile);
-                                    var s_id = ObjectId.createFromHexString(scene._id);   
+                                    var s_id = scene._id;   
                                     var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
-                                    sceneModels.push(saved._id);
+                                    sceneModels.push(saved.insertedId);
                                     const query = { "_id": s_id };
                                     const updoc = { $set: {"sceneModels": sceneModels}};
-                                    const updated = await RunDataQuery("scenes","findOne", query, updoc);
+                                    console.log("updoc " + JSON.stringify(updoc));
+                                    const updated = await RunDataQuery("scenes","updateOne", query, updoc);
+                                    console.log("updated sceneModels with " + JSON.stringify(updoc) + " " + JSON.stringify(updated));
                                 
-                                } else if (getExtension(file.name) == ".jpg" || getExtension(file.name) == ".png") { 
+                                } else if (getExtension(req.body.localFiles[file].name) == ".jpg" || getExtension(req.body.localFiles[file].name) == ".png") { 
                                     let hasAlpha = false;
-                                    if (getExtension(file.name) == ".png") {
+                                    if (getExtension(req.body.localFiles[file].name) == ".png") {
                                         hasAlpha = true;
                                     }
                                     const newimage = { 
                                         type : "fromLocalFile",
                                         userID : req.session.user._id.toString(),
                                         userName : req.session.user.userName,
-                                        title : file.name,
-                                        filename : file.name,
+                                        title : timestamp + "_" + req.body.localFiles[file].name,
+                                        filename : timestamp + "_" + req.body.localFiles[file].name,
                                         item_type : 'picture',
                                         tags: [],
                                         item_status: "private",
                                         hasAlphaChannel: hasAlpha,
                                         otimestamp : timestamp,
-                                        ofilesize : file.size };
+                                        ofilesize : req.body.localFiles[file].size };
                                     const saved = await RunDataQuery("image_items", "insertOne", newimage);
                                     console.log("image saved with id " + saved.insertedId);
                                     let newfile = {};
-                                    newfile.name = file.name;
+                                    newfile.name = req.body.localFiles[file].name;
                                     newfile.name.replace("local_","");
                                     newfile._id = saved.insertedId;
                                     newFiles.push(newfile);
-                                    let awskey = 'users/' + req.session.user._id.toString() + '/pictures/originals/' + saved.insertedId + '.original.' + file.name;
+                                    let awskey = 'users/' + req.session.user._id.toString() + '/pictures/originals/' + saved.insertedId + '.original.' + req.body.localFiles[file].name;
                                     let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
                                         Key: awskey, 
                                         // ContentEncoding: 'base64',
@@ -5308,19 +5315,19 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                         Body: buffer};
                                     const status = await PutObject(params.Bucket, params.Key, params.Body);
                                     console.log("put a pic: " + JSON.stringify(status));
-                                    console.log('uploaded ' + file.name);
+                                    console.log('uploaded ' + req.body.localFiles[file].name);
                                     var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
                                     const options = {
                                         headers: {'X-Access-Token': token}
                                     };
                                     const response = await axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+saved.insertedId, options);
                                     console.log("grabAndSqueezepic response: " + response.status);
-                                    var s_id = ObjectId.createFromHexString(scene.insertedId);   
+                                    var s_id = scene._id;   
                                     var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
                                     scenePictures.push(saved.insertedId);
                                     const updoc = { $set: {"scenePictures": scenePictures}};
                                     const query = { "_id": s_id };
-                                    const imageupdated = await RunDataQuery("scenes","findOne", query, updoc);
+                                    const imageupdated = await RunDataQuery("scenes","updateOne", query, updoc);
                                     console.log("image mod updated.." + imageupdated);
                                     // db_old.scenes.update({ "_id": s_id }, ); //add pictureID to scene
                                 }
@@ -6351,8 +6358,12 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             sceneResponse.audio = audioResponse;
             
             //get picture files
+            console.log("pids " + JSON.stringify(requestedPictureItems));
+            const pids = requestedPictureItems.map(convertStringToObjectID);
+            
             const picquery = {"_id": { $in: requestedPictureItems }};
             let picture_items = await RunDataQuery("image_items", "find", picquery);
+
             for (var i = 0; i < picture_items.length; i++) {
                 //    console.log("picture_item: ", picture_items[i]);
                 var item_string_filename = JSON.stringify(picture_items[i].filename);
@@ -6398,6 +6409,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             // console.log("picture items " + JSON.stringify(pictureResponse));
             var postcardsResponse = [];
             if (sceneResponse.scenePostcards != null && sceneResponse.scenePostcards.length > 0) {
+                console.log("sceneResponse.scenePostcards " + sceneResponse.scenePostcards);
                 const oids = sceneResponse.scenePostcards.map(convertStringToObjectID);
                 const pcquery = {"_id": { $in: oids }};
                 const postcard_items = await RunDataQuery("image_items", "find", pcquery);
