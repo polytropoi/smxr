@@ -46,7 +46,7 @@ AFRAME.registerComponent('mod_model', {
         this.hasCallout = false; //i.e. child mesh name(s) have appended "~callout" 
         this.hasLocationCallout = false; //i.e. "callout" in location.eventData or tags
         this.hasCalloutBackground = false;
-        
+        this.calloutTag = "";
         this.calloutString = "";
         this.hitpoint = null;
 
@@ -537,6 +537,14 @@ AFRAME.registerComponent('mod_model', {
                 
                 }
               }
+              if (this.nodeName.toLowerCase().includes("tag")) { //must be set in eventData and as mesh name
+                if (node instanceof THREE.Mesh) {
+                this.meshChildren.push(node);
+  
+                // console.log("gotsa callout!");
+                
+                }
+              }
               if (this.nodeName.toLowerCase().includes("hpic") || this.nodeName.toLowerCase().includes("vpic") || this.nodeName.toLowerCase().includes("spic") || this.nodeName.toLowerCase().includes("epic")) { 
                 if (node instanceof THREE.Mesh) {
                   this.meshChildren.push(node);
@@ -808,6 +816,28 @@ AFRAME.registerComponent('mod_model', {
                   this.el.appendChild(calloutChild);
                   // });
                 }
+                
+              } else if(this.meshChildren[i].name.includes("tag")) {
+               
+                let child = this.el.object3D.getObjectByName(this.meshChildren[i].name, true);
+                // console.log(child);
+                this.hasCallout = true;
+                if (child != null && child != undefined) { 
+                  //
+                  var calloutChild = document.createElement('a-entity');
+                  calloutChild.classList.add("activeObjexRay");
+                  calloutChild.setObject3D("Object3D", child);
+                  this.calloutTag = this.meshChildren[i].name.split("_")[1];
+                  console.log("gotsa tag! " + this.calloutString);
+                  // console.log("callout string is " + callout);
+  
+                  // calloutChild.addEventListener('model-loaded', () => {
+                  // console.log("callout! " +callout);
+                  calloutChild.setAttribute("model-callout", {'tag': this.calloutTag});
+                  this.el.appendChild(calloutChild);
+                  // });
+                }
+                
               } else if (this.meshChildren[i].name.includes("haudio") && hvids.length > 0) {
                 // console.log("video data " + JSON.stringify(hvids[hvidsIndex]));
                 this.mesh = this.meshChildren[i]; //mesh, not object3d type
@@ -1414,7 +1444,7 @@ AFRAME.registerComponent('mod_model', {
               
             
               if (evt.detail.intersection != null && !this.data.tags.includes("static")) {
-                console.log(this.data.markerType + " MOD_MODEL mouseovewr model " + this.data.modelName + " " + this.hasLocationCallout + " " + this.data.markerType + " " + this.hasCallout + " " + evt.detail);
+                console.log(this.data.markerType + " MOD_MODEL mouseovewr model " + this.data.modelName + " " + this.hasLocationCallout + " " + this.data.markerType + " " + this.hasCallout);
                 if (textData.length > 0) {
                   this.calloutString = textData[textIndex];
                 } else {

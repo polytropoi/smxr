@@ -1776,7 +1776,8 @@ AFRAME.registerComponent('entity-callout', {
 AFRAME.registerComponent('model-callout', {
   schema: {
       index: {default: 0},
-      calloutString: {default: ""}
+      calloutString: {default: ""},
+      tag: {default: ""}
     },
     init: function () {
       var sceneEl = document.querySelector('a-scene');
@@ -1789,6 +1790,9 @@ AFRAME.registerComponent('model-callout', {
         let calloutString = this.data.calloutString.split('~')[0];
         calloutString = calloutString.replace(/\_/g, " ");
       
+        if (this.data.tag != "") {
+          calloutString = this.data.tag;
+        } 
       let calloutEntity = document.createElement("a-entity");
       let calloutText = document.createElement("a-entity");
      
@@ -1824,7 +1828,7 @@ AFRAME.registerComponent('model-callout', {
         // this.modelHitDistance = this.modParent.returnHitDistance();
         if (evt.detail.intersection) {
           this.modelHitDistance = evt.detail.intersection.distance;
-          console.log("hit distance is " + evt.detail.intersection.distance);
+          console.log("model-callout hit distance is " + evt.detail.intersection.distance);
           
           // console.log("hit distance is " + JSON.stringify(this.modelHitDistance));
           calloutEntity.setAttribute('visible', true);
