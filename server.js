@@ -3442,65 +3442,115 @@ app.post('/remove_group_item/', requiredAuthentication, function (req, res) {
     })();
 
 });
-app.post('/update_group/', requiredAuthentication, function (req, res) {
-    // console.log(req.params._id);
-    var o_id = ObjectId.createFromHexString(req.body._id);   
-    console.log('group requested : ' + req.body._id);
-    (async () => {
-        try {
-            const query = { "_id" : o_id};
-            const updoc =  { $set: {
-                lastUpdateTimestamp: timestamp,
-                groupdata : req.body.groupdata,
-                items: req.body.items,
-                tags: req.body.tags,
-                title: req.body.title,
-                name: req.body.name
-            }};
-            const updated = await RunDataQuery("groups", "updateOne", query, updoc);
-            res.send("updated group " + updated);
-        } catch (e) {
-            console.log('error updating usergroup ' + e);
-            res.send('error updating usergroup ' + e);
+// app.post('/update_group/', requiredAuthentication, function (req, res) {
+//     // console.log(req.params._id);
+//     var o_id = ObjectId.createFromHexString(req.body._id);   
+//     console.log('group requested : ' + req.body._id);
+//     (async () => {
+//         try {
+//             const query = { "_id" : o_id};
+//             const updoc =  { $set: {
+//                 lastUpdateTimestamp: timestamp,
+//                 groupdata : req.body.groupdata,
+//                 items: req.body.items,
+//                 tags: req.body.tags,
+//                 title: req.body.title,
+//                 name: req.body.name
+//             }};
+//             const updated = await RunDataQuery("groups", "updateOne", query, updoc);
+//             res.send("updated group " + updated);
+//         } catch (e) {
+//             console.log('error updating usergroup ' + e);
+//             res.send('error updating usergroup ' + e);
 
-        }
-    })();
-});
+//         }
+//     })();
+// });
 
 app.post('/updategroup/', requiredAuthentication, function (req, res) {
     // console.log(req.body._id);
-    var o_id = ObjectId.createFromHexString(req.body._id);   
+    var o_id = ObjectId.createFromHexString(req.body._id.toString());   
     console.log('group requested : ' + req.body._id);
     (async () => {
         try {
             const query = { "_id" : o_id};
             const group = await RunDataQuery("groups", "findOne", query);
-            console.log("tryna update grup " + req.body._id);
-            let grupdata = group.groupdata;
-            var timestamp = Math.round(Date.now() / 1000);
-            if (req.body.groupdata != null && req.body.groupdata != undefined) {
-                grupdata = req.body.groupdata;
-            }
-            if (grupdata == null) {
-                grupdata = [];
-                for (let i = 0; i < group.items.length; i++) {
-                    let gditem = {};
-                    gditem.itemID = group.items[i];
-                    gditem.itemIndex = i.toString();
-                    console.log("tryna fix index " + JSON.stringify(gditem));
-                    grupdata.push(gditem);
+
+            if (req.body.tags && req.body.tags.includes("all alpha") && group.type == "picture") {
+
+                    for (const item of group.items) {
+                        var i_id = ObjectId.createFromHexString(item.toString());   
+                        const query = { "_id" : i_id};
+                        const updoc = { $set: {
+                            hasAlphaChannel: true
+                            }};
+                        const updated = await RunDataQuery("image_items", "updateOne", query, updoc);
+                        console.log("updated group item " + JSON.stringify(updated));
+                        
+                    }
+                    res.send("updated!");
+
+
+            } else if (req.body.tags && req.body.tags.includes("all square") && group.type == "picture") {
+
+                for (const item of group.items) {
+                    var i_id = ObjectId.createFromHexString(item.toString());   
+                    const query = { "_id" : i_id};
+                    const updoc = { $set: {
+                        orientation: "Square"
+                        }};
+                    const updated = await RunDataQuery("image_items", "updateOne", query, updoc);
+                    console.log("updated group item " + JSON.stringify(updated));
+                    
                 }
-                console.log("tryna fix group with no group data " + JSON.stringify(grupdata));
+                res.send("updated!");
+
+
+            } else if (req.body.tags && req.body.tags.includes("all portrait") && group.type == "picture") {
+
+                for (const item of group.items) {
+                    var i_id = ObjectId.createFromHexString(item.toString());   
+                    const query = { "_id" : i_id};
+                    const updoc = { $set: {
+                        orientation: "Portrait"
+                        }};
+                    const updated = await RunDataQuery("image_items", "updateOne", query, updoc);
+                    console.log("updated group item " + JSON.stringify(updated));
+                    
+                }
+                res.send("updated!");
+
+
+            } else {
+               
+
+                console.log("tryna update grup " + req.body._id);
+                let grupdata = group.groupdata;
+                var timestamp = Math.round(Date.now() / 1000);
+                if (req.body.groupdata != null && req.body.groupdata != undefined) {
+                    grupdata = req.body.groupdata;
+                }
+                if (grupdata == null) {
+                    grupdata = [];
+                    for (let i = 0; i < group.items.length; i++) {
+                        let gditem = {};
+                        gditem.itemID = group.items[i];
+                        gditem.itemIndex = i.toString();
+                        console.log("tryna fix index " + JSON.stringify(gditem));
+                        grupdata.push(gditem);
+                    }
+                    console.log("tryna fix group with no group data " + JSON.stringify(grupdata));
+                }
+                // const query = { "_id" : o_id};
+                const updoc =  { $set: { //items are added / removed via separate methods, eg add_group_item
+                    lastUpdateTimestamp: timestamp,
+                    tags: req.body.tags,
+                    name: req.body.name,
+                    groupdata: grupdata
+                }};
+                const updated = await RunDataQuery("groups", "updateOne", query, updoc);
+                res.send("updated group " + updated);
             }
-            // const query = { "_id" : o_id};
-            const updoc =  { $set: { //items are added / removed via separate methods, eg add_group_item
-                lastUpdateTimestamp: timestamp,
-                tags: req.body.tags,
-                name: req.body.name,
-                groupdata: grupdata
-            }};
-            const updated = await RunDataQuery("groups", "updateOne", query, updoc);
-            res.send("updated group " + updated);
         } catch (e) {
             console.log('error updating usergroup ' + e);
             res.send('error updating usergroup ' + e);

@@ -605,7 +605,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
       this.el.addEventListener('mouseenter', (evt) => {
         evt.preventDefault();
         evt.stopPropagation();
-        if (this.data.tags && this.data.tags.toLowerCase().includes("no select")) {
+        if (this.data.tags && this.data.tags.includes("no select")) {
           return;
         }
         // if (this.data.markerType == "spawn") {
@@ -990,7 +990,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
           }
           
         }
-        if (this.data.tags && this.data.tags.toLowerCase().includes("curve point") || this.data.markerType == "curve point") {
+        if (this.data.tags && this.data.tags.includes("curve point") || this.data.markerType == "curve point") {
           this.el.classList.add("curvepoint");
         }
        
@@ -1208,14 +1208,14 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
               this.picData = picGroupsControlEl.components.picture_groups_control.returnRandomPictureItem();
               if (this.picData) { //first get the proper geometry, then call the loadPicture from the model-loaded event above to ensure there's something to paint
                 // if (!this.picData.orientation) {
-                let orientation = this.picData.orientation ? this.picData.orientation : "Landscape";
-                  if (this.data.tags.toLowerCase().includes("landscape")) {
-                    orientation = "Landscape";
-                  } else if (this.data.tags.toLowerCase().includes("portrait")) {
-                    orientation = "Portrait";
-                  } else if (this.data.tags.toLowerCase().includes("square")) {
-                    orientation = "Square";
-                  } 
+                let orientation = this.picData.orientation ? this.picData.orientation : "Landscape"; 
+                  // if (this.data.tags.toLowerCase().includes("landscape")) {
+                  //   orientation = "Landscape";
+                  // } else if (this.data.tags.toLowerCase().includes("portrait")) {
+                  //   orientation = "Portrait";
+                  // } else if (this.data.tags.toLowerCase().includes("square")) {
+                  //   orientation = "Square";
+                  // } 
                 console.log("gotsaa picturegroupsdata item " + this.data.markerType +" tags "+ this.data.tags + " orientation " + orientation);  
                 if (orientation == "Landscape") {
                   this.el.setAttribute('gltf-model', '#landscape_panel'); 

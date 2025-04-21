@@ -8469,7 +8469,7 @@ function showGroup() {
                 let hasItem = false;
                 for (let i = 0; i < arr.length; i++) {
                     if (idArr[h] == arr[i]._id) {
-                    console.log(idArr[h] + " " + arr[i]._id);    
+                    // console.log(idArr[h] + " " + arr[i]._id);    
                     hasItem = true;
                     html = html + 
                         "<div class=\x22card ml-1 mr-1 mt-1 mb-1\x22 style=\x22width:256px;\x22>" +
