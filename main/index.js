@@ -5740,11 +5740,11 @@
                       console.log("done");
                   });
             });
-            $(document).on('click','#addTagButton',function(e){
+            $(document).on('click','#addTagButton',function(e) {
                 e.preventDefault();  
                 let newTag = document.getElementById("addTagInput").value;
                 console.log("tryna add tag " + newTag);
-                if (newTag.length > 1) {
+                if (newTag.length > 0) {
                 let html = "";
                 tags.push(newTag);
                 for (let i = 0; i < tags.length; i++) {
@@ -8480,6 +8480,7 @@ function showGroup() {
                                     "<input type=\x22text\x22 size=\x224\x22  class=\x22float-right\x22 id=\x22itemIndex\x22 value=\x22" + arr[i].itemIndex + "\x22>" +
                                     "<br><a href=\x22#\x22 class=\x22btn btn-xs btn-danger\x22 onclick=\x22removeItem('group','item','" + response.data._id + "','" + arr[i]._id + "')\x22>Remove</a>" +
                                     "<a href=\x22index.html?type=picture&iid="+ arr[i]._id +"\x22 class=\x22float-right btn btn-xs btn-info\x22>Edit</a>" +
+                                    "<div>"+arr[i].tags+"</div>" +
                             "</div>" +
                         "</div>";
                     break;

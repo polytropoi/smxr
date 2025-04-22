@@ -1777,7 +1777,8 @@ AFRAME.registerComponent('model-callout', {
   schema: {
       index: {default: 0},
       calloutString: {default: ""},
-      tag: {default: ""}
+      tag: {default: ""},
+      type: {default: "textCallout"}
     },
     init: function () {
       var sceneEl = document.querySelector('a-scene');
@@ -1790,12 +1791,15 @@ AFRAME.registerComponent('model-callout', {
         let calloutString = this.data.calloutString.split('~')[0];
         calloutString = calloutString.replace(/\_/g, " ");
       
-        if (this.data.tag != "") {
+        if (this.data.tag != "" && this.data.calloutString == "") {
           calloutString = this.data.tag;
         } 
       let calloutEntity = document.createElement("a-entity");
       let calloutText = document.createElement("a-entity");
-     
+        this.picData = null;
+        this.portraitEntity = null;
+        this.landscapeEntity = null;
+        this.squareEntity = null;
       // this.calloutText = calloutText;
       // calloutText.setAttribute('overlay');
       // calloutEntity.setAttribute("look-at", "#player");
@@ -1804,12 +1808,32 @@ AFRAME.registerComponent('model-callout', {
       } else {
         calloutEntity.setAttribute("look-at", "#player");
       }
-      
+      // if (this.data.type != "textCallout") {
+        this.portraitEntity = document.createElement("a-entity");
+        this.portraitEntity.setAttribute('gltf-model', '#portrait_panel'); 
+        this.portraitEntity.setAttribute('visible', false);
+        calloutEntity.appendChild(this.portraitEntity);
+        this.portraitEntity.setAttribute("position", '0 0 3');
+
+        this.landscapeEntity = document.createElement("a-entity");
+        this.landscapeEntity.setAttribute('gltf-model', '#landscape_panel'); 
+        this.landscapeEntity.setAttribute('visible', false);
+        calloutEntity.appendChild(this.landscapeEntity);
+        this.landscapeEntity.setAttribute("position", '0 0 3');
+
+        this.squareEntity = document.createElement("a-entity");
+        this.squareEntity.setAttribute('gltf-model', '#square_panel_plain'); 
+        this.squareEntity.setAttribute('visible', false);
+        calloutEntity.appendChild(this.squareEntity);
+        this.squareEntity.setAttribute("position", '0 0 3');
+        let squareAlphaEntity = document.createElement("a-entity");
+      // }
       calloutEntity.setAttribute('visible', false);
       // calloutEntity.setAttribute("render-order", "hud");
       sceneEl.appendChild(calloutEntity);
       calloutEntity.appendChild(calloutText);
-      calloutText.setAttribute("position", '0 0 3'); //offset the child on z toward camera, to prevent overlap on model
+      // calloutEntity.setAttribute("position", '0 0 3');
+      calloutText.setAttribute("position", '0 0 3.5'); //offset the child on z toward camera, to prevent overlap on model
       let font = "Acme.woff"; 
       if (settings && settings.sceneFontWeb2 && settings.sceneFontWeb2.length) {
         font = settings.sceneFontWeb2;
@@ -1824,6 +1848,7 @@ AFRAME.registerComponent('model-callout', {
         outlineWidth: "2%",
         value: calloutString
       });
+      let that = this;
       this.el.addEventListener('mouseenter', function (evt) {
         // this.modelHitDistance = this.modParent.returnHitDistance();
         if (evt.detail.intersection) {
@@ -1835,14 +1860,69 @@ AFRAME.registerComponent('model-callout', {
           let pos = evt.detail.intersection.point; //hitpoint on model
           calloutEntity.setAttribute("position", pos);
           calloutEntity.setAttribute("scale", {"x": this.modelHitDistance * .1, "y": this.modelHitDistance * .1, "z": this.modelHitDistance * .1});
+       
+          const picGroupsControlEl = document.getElementById("pictureGroupsData");
+          if (picGroupsControlEl) {
+            this.picData = picGroupsControlEl.components.picture_groups_control.returnTaggedPicture(that.data.tag);
+            if (this.picData) {
+              let picEl = null;
+              console.log("this.picData " + this.picData);
+              if (this.picData.orientation == "Landscape") {
+                that.landscapeEntity.setAttribute('visible', true);
+                that.portraitEntityEntity.setAttribute('visible', false);
+                that.squareEntity.setAttribute('visible', false);
+                picEl = that.landscapeEntity;
+
+              
+              } else if (this.picData.orientation == "Portrait") {
+                that.landscapeEntity.setAttribute('visible', false);
+                that.portraitEntityEntity.setAttribute('visible', true);
+                that.squareEntity.setAttribute('visible', false);
+                picEl = that.portraitEntity;
+              
+              } else if (this.picData.orientation == "Square") {
+                that.landscapeEntity.setAttribute('visible', false);
+                that.portraitEntity.setAttribute('visible', false);
+                that.squareEntity.setAttribute('visible', true);
+                if (this.picData.hasAlphaChannel) {
+                  picEl = that.squareEntity;
+                
+                } else {
+                  picEl = that.squareEntity;
+                  // calloutEntity.setAttribute('gltf-model', '#square_panel');
+                  // calloutEntity.setAttribute('material', {'transparent': true, 'opacity': 0});
+                  
+                }
+
+              }
+              const obj = picEl.getObject3D('mesh');
+              if (obj) {
+                console.log('gotsa mesh to show picData : '+ obj.name);
+                var texture = new THREE.TextureLoader().load(this.picData.url);
+                texture.colorSpace = THREE.SRGBColorSpace;
+                // UVs use the convention that (0, 0) corresponds to the upper left corner of a texture.
+                texture.flipY = false; 
+                // immediately use the texture for material creation
+                var material = new THREE.MeshStandardMaterial( { map: texture, transparent: this.picData.hasAlphaChannel, envMapIntensity: .1} );  
+                // Go over the submeshes and modify materials we want.
+                material.needsUpdate = true;
+                obj.traverse(node => {
+                  node.material = material;
+                  
+                });
+              }
+            }
+          }
         }
-        // calloutText.updateMatrixWorld();
       });
+      
       this.el.addEventListener('mouseleave', function (evt) {
         // console.log("tryna mouseexit");
         calloutEntity.setAttribute('visible', false);
       });
-    }
+    } 
+   
+    
   });
 
   //reusable lerping function for position/rotation, by #id, used eg for avatar movement
@@ -3825,6 +3905,21 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
         }
       }
       return group;
+    }, 
+    returnTaggedPicture: function (tag) {
+     
+      let picGroupArray = this.data.jsonData;
+      console.log("tryna find tagged pics " + tag);
+      for (let i = 0; i < picGroupArray.length; i++) {
+        for (let j = 0; j < picGroupArray[i].images.length; j++) {
+          if (picGroupArray[i].images[j].tags.includes(tag)) { //todo check tags
+            
+            return picGroupArray[i].images[j];
+            
+          }
+        }
+      }
+     
     }, 
     initFlyingPics: function () {
       this.nextPicGroupArrayIndex();

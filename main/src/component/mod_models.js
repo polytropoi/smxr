@@ -829,11 +829,12 @@ AFRAME.registerComponent('mod_model', {
                   calloutChild.setObject3D("Object3D", child);
                   this.calloutTag = this.meshChildren[i].name.split("_")[1];
                   console.log("gotsa tag! " + this.calloutString);
-                  // console.log("callout string is " + callout);
-  
-                  // calloutChild.addEventListener('model-loaded', () => {
-                  // console.log("callout! " +callout);
-                  calloutChild.setAttribute("model-callout", {'tag': this.calloutTag});
+
+                  let type = "textCallout";
+                  if (this.data.eventData && this.data.eventData.includes("pic")) {
+                    type = "picCallout";
+                  } //etc..
+                  calloutChild.setAttribute("model-callout", {'tag': this.calloutTag, 'type': type});
                   this.el.appendChild(calloutChild);
                   // });
                 }
@@ -1292,6 +1293,35 @@ AFRAME.registerComponent('mod_model', {
               || this.data.eventData.toString().toLowerCase().includes("talk")
               || this.data.tags.includes("talk")
               || this.data.tags.includes("speech")) {
+              this.hasCalloutBackground = true;
+              // bubble.setAttribute("look-at", "#player");
+              if (settings && settings.sceneCameraMode == "Third Person") {
+                this.bubble.setAttribute('look-at', '#thirdPersonCamera'); //toggle by eventData
+              } else {
+                this.bubble.setAttribute('look-at', '#player'); //first person camrig
+              }
+              this.bubbleBackground = document.createElement("a-entity");
+              this.bubbleBackground.classList.add("bubbleBackground");
+              this.bubbleBackground.setAttribute("gltf-model", "#talkbubble"); 
+              this.bubbleBackground.setAttribute("position", "0 0 0");
+              this.bubbleBackground.setAttribute("rotation", "0 0 0"); 
+              // this.bubbleBackground.setAttribute("scale", "-.1 .1 .1"); 
+              // bubble.setAttribute("material", {"color": "white", "blending": "additive", "transparent": false, "alphaTest": .5});
+              this.bubbleBackground.setAttribute("material", {"color": "white", "shader": "flat"}); //doh, doesn't work for gltfs... 
+              this.bubble.appendChild(this.bubbleBackground);
+  
+              this.bubbleBackground.addEventListener('model-loaded', () => {
+                const bubbleObj = this.bubbleBackground.getObject3D('mesh');
+                // var material = new THREE.MeshBasicMaterial({map: bubbleObj.material.map}); 
+                // material.color = "white";
+                bubbleObj.traverse(node => {
+                    // node.material = material;
+                    node.material.flatShading = true;
+                    node.material.needsUpdate = true
+                  });
+                });
+            }
+            if (this.data.eventData.toString().toLowerCase().includes("pic")) {
               this.hasCalloutBackground = true;
               // bubble.setAttribute("look-at", "#player");
               if (settings && settings.sceneCameraMode == "Third Person") {
