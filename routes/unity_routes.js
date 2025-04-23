@@ -57,7 +57,7 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////cal
             // const query = {$or: [{ "short_id" : req.params._id},{"_id": s_id}]};
             const sceneData = await RunDataQuery("scenes", "findOne", query);
             if (sceneData.scenePictures != null && sceneData.scenePictures.length > 0) {
-                sceneData.scenePictures.forEach(function (picture){
+                sceneData.scenePictures.forEach(function (picture) {
                     var p_id = ObjectId.createFromHexString(picture); //convert to binary to search by _id beloiw
                     requestedPictureItems.push(p_id); //populate array
                     });
@@ -174,6 +174,9 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////cal
                     var expiration = new Date();
                     expiration.setMinutes(expiration.getMinutes() + 1000);
                     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                    var mp3Name = baseName + '.mp3';
+                    var oggName = baseName + '.ogg';
+                    var pngName = baseName + '.png';
                     const urlMp3 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, 6000);
                     const urlOgg = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, 6000);
                     const urlPng = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, 6000);
@@ -276,7 +279,7 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////cal
                     for (let m = 0; m < sceneResponse.sceneModels.length; m++) {                    
                         var m_id = ObjectId.createFromHexString(sceneResponse.sceneModels[m]);
                         const query = {"_id": m_id};
-                        const model = await RunDataQuery("models", "findOne", query);
+                        let model = await RunDataQuery("models", "findOne", query);
                         console.log("gotsa model:" + model._id);
                         model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename,6000);
                         modelz.push(model);
@@ -293,8 +296,8 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////cal
                     for (let m = 0; m < sceneObjex.length; m++) {                    
                         var o_id = ObjectId.createFromHexString(sceneObjex[m]);
                         const query = {"_id": o_id};
-                        const obj_item = await RunDataQuery("obj_items", "findOne", query);
-                        console.log("gotsa model:" + model._id);
+                        let obj_item = await RunDataQuery("obj_items", "findOne", query);
+                        
                         
                         if (obj_item.audioEmit == null) {
                             obj_item.audioEmit = false;
@@ -303,7 +306,8 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////cal
                             obj_item.audioEmit = false;
                         }
                         objex.push(obj_item);
-                    }                                
+                    }   
+                    sceneResponse.sceneObjex = objex;                             
                 }
 
                 if ((sceneResponse.userName == null || sceneResponse.userName.length < 1) && (sceneResponse.user_id != null)) {

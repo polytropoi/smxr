@@ -1068,7 +1068,7 @@
 
         if (arr[i].url != undefined && ext != undefined) {
         // console.log("url " + arr[i].url );
-            if (ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "gif") {
+            if (ext == "jpg" || ext == "jp2" || ext == "jpeg" || ext == "png" || ext == "gif") {
                 html = html +
                 "<div class=\x22card\x22 style=\x22width:320px;\x22>" +
                     "<div class=\x22card-header\x22>"+

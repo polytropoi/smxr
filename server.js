@@ -2150,7 +2150,8 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
     console.log("allEqual " + allEqual + " extensions: "+ itemsExtensions[0]);
 
 
-    if (allEqual(itemsExtensions) && (itemsExtensions[0].toLowerCase() == ".usdz" || itemsExtensions[0].toLowerCase() == ".reality" || itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
+    if (allEqual(itemsExtensions) && (itemsExtensions[0].toLowerCase() == ".usdz" || itemsExtensions[0].toLowerCase() == ".reality" || 
+    itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jp2" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
      itemsExtensions[0].toLowerCase() == ".aif" || itemsExtensions[0].toLowerCase() == ".aiff" || itemsExtensions[0].toLowerCase() == ".ogg" || itemsExtensions[0].toLowerCase() == ".wav" || itemsExtensions[0].toLowerCase() == ".mp3" || 
      itemsExtensions[0].toLowerCase() == ".mp4" || itemsExtensions[0].toLowerCase() == ".webm" || itemsExtensions[0].toLowerCase() == ".mov" || itemsExtensions[0].toLowerCase() == ".mkv")) { //need to think how to flex, and use contenttype
         
@@ -2161,7 +2162,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
         
         groupType = itemsExtensions[0];
         let contentType = "";
-        if (groupType.toLowerCase()  == ".jpg" || groupType.toLowerCase()  == ".jpeg" || groupType.toLowerCase()  == ".png") {
+        if (groupType.toLowerCase()  == ".jpg" || groupType.toLowerCase()  == ".jp2" || groupType.toLowerCase()  == ".jpeg" || groupType.toLowerCase()  == ".png") {
             contentType = "picture";
         } else if (groupType.toLowerCase()  == ".mp3" || groupType.toLowerCase()  == ".wav" || groupType.toLowerCase()  == ".ogg" || groupType.toLowerCase()  == ".aif"  )  {
             contentType = "audio"
@@ -3571,7 +3572,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
         const query = {"_id": o_id};
 
         const group = await RunDataQuery("groups", "findOne", query);
-        console.log("group " + JSON.stringify(group));
+        // console.log("group " + JSON.stringify(group));
         // if (group && group.items) {
         if (!group.items) {
             group.items = [];
@@ -3634,10 +3635,10 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                   })[0];
                   if (obj != undefined && obj.itemIndex) {
                       video_items[i].itemIndex = obj.itemIndex;
-                      console.log(video_items[i].itemIndex + "index for " + video_items[i]._id.toString() );
+                    //   console.log(video_items[i].itemIndex + "index for " + video_items[i]._id.toString() );
                   } else {
                       video_items[i].itemIndex = i;
-                      console.log(video_items[i].itemIndex + "natchrul index for " + video_items[i]._id.toString() );
+                    //   console.log(video_items[i].itemIndex + "natchrul index for " + video_items[i]._id.toString() );
                   }
               }
               var item_string_filename = JSON.stringify(video_items[i].filename);
@@ -3646,7 +3647,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
               var expiration = new Date();
               expiration.setMinutes(expiration.getMinutes() + 30);
               var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-              console.log("tryna jack in video " + baseName + " to a group of " + group.type.toLowerCase());
+            //   console.log("tryna jack in video " + baseName + " to a group of " + group.type.toLowerCase());
               var vidName = baseName + '.mp3';
 
               video_items[i].vUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + video_items[i].userID + "/video/" + video_items[i]._id + "/" + video_items[i]._id + "." + video_items[i].filename, 6000);
@@ -3663,7 +3664,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
           ///////////////////////////// pic group  
           } else if (group.type.toLowerCase() == "pictures" || group.type.toLowerCase() == "picture") {
             const image_items = await RunDataQuery("image_items", "find", gquery);
-            console.log("gots image_items " + image_items.length);
+            // console.log("group gots image_items " + image_items.length);
             for (var i = 0; i < image_items.length; i++) {
               if (group.groupdata) {
                   var obj = group.groupdata.filter(function (obj) { //get index value from groupdata array
@@ -3671,10 +3672,10 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
                   })[0];
                   if (obj != undefined && obj.itemIndex) {
                       image_items[i].itemIndex = obj.itemIndex;
-                      console.log(image_items[i].itemIndex + "index for " + image_items[i]._id.toString() );
+                    //   console.log(image_items[i].itemIndex + "index for " + image_items[i]._id.toString() );
                   } else {
                       image_items[i].itemIndex = i;
-                      console.log(image_items[i].itemIndex + "natchrul index for " + image_items[i]._id.toString() );
+                    //   console.log(image_items[i].itemIndex + "natchrul index for " + image_items[i]._id.toString() );
                   }
               }
               var item_string_filename = JSON.stringify(image_items[i].filename);
@@ -3682,7 +3683,7 @@ app.get('/usergroup/:p_id', requiredAuthentication, function(req, res) {
               var item_string_filename_ext = getExtension(item_string_filename);
             
               var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-              console.log(baseName);
+            //   console.log(baseName);
               var thumbName = 'thumb.' + baseName + item_string_filename_ext;
               var halfName = 'half.' + baseName + item_string_filename_ext;
               
@@ -6613,7 +6614,8 @@ app.get('/available_domain_scenes/:domain',  function (req, res) { //public scen
                 });
                 res.send(availableScenesResponse);
             } catch (e) {
-
+                console.log("error getting domains scenes " +e);
+                res.send("error getting domains scenes " +e);
             }
         })();
     });
@@ -6626,20 +6628,20 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
     var query = {};
     availableScenesResponse.availableScenes = availableScenes;
     var userStatus = "nilch";
-
+    console.log("tryna get unity domains scenes " + JSON.stringify(req.params));
     (async () => {
         try {
-            if (req.params.user_id == "nilch" || req.params.user_id == "guest" && req.params.user_id == "") {
-                return null;
-            }
-            const oo_id = ObjectId.createFromHexString(req.params.user_id);
-            const userquery = {"_id": oo_id}; 
-            const user = await RunDataQuery("users", "findOne", userquery);
-            console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
-            if (user.authLevel != null && user.authLevel != undefined &&  user.status == "validated") {
-            userStatus = "subscriber";
-            console.log("gotsa subscriber!");
-            }
+            // if (req.params.user_id == "nilch" || req.params.user_id == "guest" && req.params.user_id == "") {
+            //     return null;
+            // }
+            // const oo_id = ObjectId.createFromHexString(req.params.user_id.toString());
+            // const userquery = {"_id": oo_id}; 
+            // const user = await RunDataQuery("users", "findOne", userquery);
+            // console.log("gotsa user " + user._id + " authLevel " + user.authLevel + " status " + user.status);
+            // if (user.authLevel != null && user.authLevel != undefined &&  user.status == "validated") {
+            // userStatus = "subscriber";
+            // console.log("gotsa subscriber!");
+            // }
             var platformString = "";
             if (req.params.platform_id == "1") {
                 platformString = "sceneWindowsOK";
@@ -6655,13 +6657,13 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
             } else {
                 query = {$and: [{ "sceneDomain": req.params.domain}, {sceneShareWithPublic: true }, { [platformString]: true}]};
             }
-            if (userStatus == "subscriber") { //not public
-                if (req.params.domain == "servicemedia.net") {
-                    query = {$and: [{ [platformString]: true}, {$or: [{ "user_id": req.params.user_id}, {sceneShareWithSubscribers: true }, {sceneShareWithPublic: true }]}]};
-                } else {
-                    query = {$and: [{ [platformString]: true}, { "sceneDomain": req.params.domain}, {$or: [{ "user_id": req.params.user_id}, {sceneShareWithSubscribers: true }, {sceneShareWithPublic: true }]}]};
-                }
-            }
+            // if (userStatus == "subscriber") { //not public
+            //     if (req.params.domain == "servicemedia.net") {
+            //         query = {$and: [{ [platformString]: true}, {$or: [{ "user_id": req.params.user_id}, {sceneShareWithSubscribers: true }, {sceneShareWithPublic: true }]}]};
+            //     } else {
+            //         query = {$and: [{ [platformString]: true}, { "sceneDomain": req.params.domain}, {$or: [{ "user_id": req.params.user_id}, {sceneShareWithSubscribers: true }, {sceneShareWithPublic: true }]}]};
+            //     }
+            // }
             // console.log("scene query : " + JSON.stringify(query));
             const scenes = await RunDataQuery("scenes", "find", query);
             // console.log("scenes: " + JSON.stringify(scenes));
