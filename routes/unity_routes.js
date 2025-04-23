@@ -277,12 +277,14 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////cal
 
                 if (sceneResponse.sceneModels != null) {
                     for (let m = 0; m < sceneResponse.sceneModels.length; m++) {                    
-                        var m_id = ObjectId.createFromHexString(sceneResponse.sceneModels[m]);
+                        var m_id = ObjectId.createFromHexString(sceneResponse.sceneModels[m].toString());
                         const query = {"_id": m_id};
                         let model = await RunDataQuery("models", "findOne", query);
-                        console.log("gotsa model:" + model._id);
-                        model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename,6000);
-                        modelz.push(model);
+                        if (model) {
+                            console.log("gotsa model:" + model._id);
+                            model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + model.userID + "/gltf/" + model.filename,6000);
+                            modelz.push(model);
+                        }
                     }
                     sceneResponse.sceneModelz = modelz;
                 }
@@ -298,15 +300,16 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////cal
                         const query = {"_id": o_id};
                         let obj_item = await RunDataQuery("obj_items", "findOne", query);
                         
-                        
-                        if (obj_item.audioEmit == null) {
-                            obj_item.audioEmit = false;
-                        }                                       
-                        if (obj_item.audioScale == null) {
-                            obj_item.audioEmit = false;
-                        }
-                        objex.push(obj_item);
-                    }   
+                        if (obj_item) {
+                            if (obj_item.audioEmit == null) {
+                                obj_item.audioEmit = false;
+                            }                                       
+                            if (obj_item.audioScale == null) {
+                                obj_item.audioEmit = false;
+                            }
+                            objex.push(obj_item);
+                        }   
+                    }
                     sceneResponse.sceneObjex = objex;                             
                 }
 
