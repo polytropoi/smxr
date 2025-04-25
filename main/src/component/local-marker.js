@@ -1,4 +1,6 @@
-
+/* global AFRAME, THREE */
+import { settings } from "../../../connect/connect.js";
+import { keydown } from "../../js/dialogs.js";
 
 AFRAME.registerComponent('local_marker', { //special items with local mods, not saved to cloud yet
     schema: {

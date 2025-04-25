@@ -1,10 +1,23 @@
+import { InitIDB, hasLocalData } from "../connect/indexedDb.js";
+import { youtubePlayer, youtubeIsPlaying, primaryAudioEl } from "../../main/src/component/content-utils.js";
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
-
-var room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
+export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
 // var posRotReader = document.getElementById("player").components.get_pos_rot; 
 var player = null;
-var posRotReader = null;
+export let posRotReader;
+export let lastLocalUpdate = "";
+export let lastCloudUpdate = "";
+export let localData = {locations:[], settings:{}, localFiles: {}}; //all the things
+export let locationTimestamps = [];
+export let sceneLocations = {locations: [], locationMods: []};
+export let settings; //push this to an aframe component for fetching...
+export let attributions = [];
+export var videoEl = null;
+export const mouse = new THREE.Vector2();
+export const sceneEl = document.querySelector('a-scene');
+// export let hasLocalData = false;
+
 var dateString = Date.now().toString();
 let roomUsers = {};
 let stringRoomUsers = "";
@@ -25,12 +38,12 @@ let lastPosition = "";
 let lastRotation = "";
 let cameraPosition = {"x" : 0, "y": 0, "z": 0};
 let cameraRotation = {"x" : 0, "y": 0, "z": 0};
-var sceneEl = document.querySelector('a-scene');
+
 let skyboxEl = document.getElementById('a_sky');
 let posRotRunning = false;
 let timeKeysData = {};
 let tkStarttimes = [];
-let sceneLocations = {locations: [], locationMods: []};
+
 let poiLocations = [];
 let curveLocations = [];
 let cloudMarkers = []; //???? unused>?
@@ -49,14 +62,14 @@ let sceneColor4Alt = '#000000';
 let volumePrimary = 0;
 let volumeAmbient = 0;
 let volumeTrigger = 0;
-let settings; //push this to an aframe component for fetching...
+
 let currentLocationIndex = -1;
 let currentTime = 0;  //depends on listenerMode
 let fancyTimeString = "";
 let modalTimeStatsEl = null; //stats for timekeys modal
 let transportTimeStatsEl = null;
 // let sceneType = null;
-let attributions = [];
+
 let uiVisible = true;
 let pauseLoops = false;
 let matrixClient = null;
@@ -67,7 +80,7 @@ let matrixRoomsData = null;
 let timedEventsListenerMode = ""
 
 let mouseDownStarttime = 0;
-let mouseDowntime = 0;
+export let mouseDowntime = 0;
 let isFiring = false;
 let busy = false;  //prevent double on savetocloud..
 var token = document.getElementById("token").getAttribute("data-token"); 
@@ -77,18 +90,18 @@ let liveKitHost = "http://localhost:8000";
 // let socketHost = null;
 var socket = null; //the socket.io instance below
 // let cloudData = {};
-let localData = {locations:[], settings:{}, localFiles: {}};
-let locationTimestamps = [];
-let hasLocalData = false;
+
+
 let transformAll = false;
 
 let currentLocalStorageUsed = null;
 let currentAvailableLocalStorageEstimage = null;
-let lastCloudUpdate = null;
-let lastLocalUpdate = null;
+
+
 let allowCameraLock = true;
 const camLockButton = document.getElementById("camLockToggleButton");
 let intersections = [];
+let avatarName = "";
 
 window.timedEventsListenerMode = timedEventsListenerMode;
 
@@ -125,7 +138,7 @@ $(function() {
 
    }
 
-   vidz = document.getElementsByTagName("video");
+   let vidz = document.getElementsByTagName("video");
    if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
       videoEl = vidz[0];
       console.log("videoEl " + videoEl.id);
@@ -297,7 +310,7 @@ $(function() {
       SetPrimaryAudioEventsData();
    }
 
-   sceneEl = document.querySelector('a-scene');
+   // sceneEl = document.querySelector('a-scene');
    if (sceneEl) {
       sceneEl.removeAttribute("keyboard-shortcuts"); //give me back the f key!
    }
@@ -503,7 +516,7 @@ function GetMatrixData() { //use matrix.org for... something
    }
 }
 
-function MediaTimeUpdate (fancyTimeString) {
+export function MediaTimeUpdate (fancyTimeString) {
    // console.log("MediaTimeUpdate " + fancyTimeString);
    // transportTimeStatsEl = document.getElementById("transportStats");
    if (transportTimeStatsEl == null) {
@@ -2083,12 +2096,12 @@ if (settings && !socket) {
             isMe = "*";
             // console.log("key isMe " + key);
          }
-         value = roomUsers[key];
+         const value = roomUsers[key];
          // console.log("roomUsers key:value: " + key + " " + value); 
          usercount++;
       //   $('#users').prepend($('<button class=\x22btn\x22 style=\x22margin: 5px 5px 5px 5px;\x22><h4><strong>').text( value ).append("</strong></h4></button>"));
          if (value.includes("~")) {
-            split = value.split("~"); //color is appended to username
+            let split = value.split("~"); //color is appended to username
             split[0] = split[0].replace("_", " ");
             roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
          } else {
@@ -2330,7 +2343,7 @@ function EmitSelfPosition() {
          }
       } else {
          // console.log("caint fine no player!");
-         posRotReader = document.getElementById("player").components.get_pos_rot; 
+         // posRotReader = document.getElementById("player").components.get_pos_rot; 
          // EmitSelfPosition();
       }
    }
@@ -2750,7 +2763,7 @@ function UpdateContentBox() { //nm for now
    // }
 }
 
-function InitCurves() {
+export function InitCurves() {
    console.log("tryna InitCurves() " + JSON.stringify(settings.sceneTags));
    let curvePointEls = document.querySelectorAll(".curvepoint");
    if (curvePointEls.length) {
@@ -2946,10 +2959,10 @@ function UpdateTriggerAudioVolume(newVolume) {
 
 //////////////////////////////////////////////// move to primary-audio-control ... //no!
 
-function SetPrimaryAudioEventsData () {
+export function SetPrimaryAudioEventsData () {
 
    // timeKeysData = JSON.parse(localStorage.getItem(room+ "_timeKeys"));
-   timekeysData = settings.sceneTimedEvents;
+   let timekeysData = settings.sceneTimedEvents;
    // console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
    tkStarttimes = [];
    if (timeKeysData != undefined && timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0 )
@@ -2965,7 +2978,7 @@ function SetPrimaryAudioEventsData () {
 
 }
 
-function SetVideoEventsData (type) { 
+export function SetVideoEventsData (type) { 
    console.log("tryna SetVideoEventsData");
    tkStarttimes = []; //either audio or video, not both
 
@@ -3105,7 +3118,7 @@ function TimedEventListener () {
    }
 }
 
-function PauseIntervals (pauseBool) {
+export function PauseIntervals (pauseBool) {
    
    pauseLoops = pauseBool;
    console.log("loops are paused " + pauseLoops);

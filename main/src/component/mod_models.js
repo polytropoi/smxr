@@ -1,4 +1,11 @@
+/* global AFRAME, THREE */
+// function clamp (num, min, max) {
+//   return Math.min(Math.max(num, min), max);
+// }
 
+import { settings } from "../../../connect/connect.js";
+import { clamp } from "../component/content-utils.js";
+import { keydown } from "../../js/dialogs.js";
 ////////////////////////// - MOD_MODEL - for "plain" models, these are written (aframe elements + components + assets) by the server into response, as opposed to "Objects", see mod_objex.js
 AFRAME.registerComponent('mod_model', {
     schema: {
@@ -437,7 +444,7 @@ AFRAME.registerComponent('mod_model', {
             clips = obj.animations;
   
             if (clips != null) { 
-              for (i = 0; i < clips.length; i++) { //get reference to all anims
+              for (let i = 0; i < clips.length; i++) { //get reference to all anims
                 hasAnims = true;
                 idleIndex = 0; //'whatever the default
                 console.log("mod_model named " + this.el.id + " has animation: " + clips[i].name);
@@ -630,7 +637,7 @@ AFRAME.registerComponent('mod_model', {
               let vidGroupMangler = document.getElementById("videoGroupsData");
               if (vidGroupMangler != null) {
                 // picGroupMangler.components.picture_groups_control.attach(this.meshChildren);
-                vidGroupArray = vidGroupMangler.components.video_groups_data.returnVideoData(); //it's an array of arrays
+                let vidGroupArray = vidGroupMangler.components.video_groups_data.returnVideoData(); //it's an array of arrays
                 console.log("video data: " + JSON.stringify(vidGroupArray));
                 console.log("vidGroupArray.length is " + vidGroupArray.length + " videoGroup 0 length is " + vidGroupArray[0].videos.length);
                 // let tagSplit = this.data.tags.split(",");
@@ -707,7 +714,7 @@ AFRAME.registerComponent('mod_model', {
                 console.log("caint fine no audioo_groups_control");
               }
             }
-            for (i = 0; i < this.meshChildren.length; i++) { //apply mods to the special things
+            for (let i = 0; i < this.meshChildren.length; i++) { //apply mods to the special things
               console.log("gotsa special !! meshChild " + this.meshChildren[i].name);
               if (this.meshChildren[i].name.includes("trigger")) { 
                 //ugh, nm
@@ -1622,8 +1629,11 @@ AFRAME.registerComponent('mod_model', {
                 //   this.triggerAudioController.components.trigger_audio_control.playAudio();
                 
                   if (evt.detail.intersection && this.triggerAudioController) {
-                    let distance = evt.detail.intersection.distance;
-                    this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(evt.detail.intersection.point, distance, this.data.tags, 1);//tagmangler needs an array, add vol mod 
+                    let triggerAudioControl = this.triggerAudioController.components.trigger_audio_control;
+                    if (triggerAudioControl) {
+                      let distance = evt.detail.intersection.distance;
+                      this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(evt.detail.intersection.point, distance, this.data.tags, 1);//tagmangler needs an array, add vol mod 
+                    }
                   }
                 // }
               }

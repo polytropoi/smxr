@@ -204,7 +204,7 @@ webxr_router.get('/:_id', function (req, res) {
     let styleIncludes = "";
     let synthScripts = "";
     let streamPrimaryAudio = false;
-    let audioControl = "<script src=\x22../main/src/component/audio_control.js\x22></script>";
+    let audioControl = "<script type=\x22module\x22 src=\x22../main/src/component/audio_control.js\x22></script>";
     let primaryAudioScript = "";
     let primaryAudioParams = "";
     let primaryAudioEntity = "";
@@ -239,9 +239,9 @@ webxr_router.get('/:_id', function (req, res) {
     let carLocation = "";
     let cameraEnvMap = "";
     // let cubeMapAsset = ""; //deprecated, all at runtime now..
-    let contentUtils = "<script src=\x22../main/src/component/content-utils.js\x22 defer=\x22defer\x22></script>"; 
-    let modObjex = "<script src=\x22../main/src/component/mod_objex.js\x22 defer=\x22defer\x22></script>"; 
-    let modModels = "<script src=\x22../main/src/component/mod_models.js\x22 defer=\x22defer\x22></script>"; 
+    let contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content-utils.js\x22 defer=\x22defer\x22></script>"; 
+    let modObjex = "<script type=\x22module\x22 src=\x22../main/src/component/mod_objex.js\x22 defer=\x22defer\x22></script>"; 
+    let modModels = "<script type=\x22module\x22 src=\x22../main/src/component/mod_models.js\x22 defer=\x22defer\x22></script>"; 
     let videosphereAsset = "";
     let webcamAsset = "";
     let textEntities = "";
@@ -330,8 +330,9 @@ webxr_router.get('/:_id', function (req, res) {
     let instancingEntity = "";
     let meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22 defer=\x22defer\x22></script>";
     let physicsScripts = "";
+    let blinkScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-blink-controls.min.js\x22></script>"
     let brownianScript = "";
-    let aframeExtrasScript = "<script src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
+    let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
     let enviromentScript = ""; //for aframe env component
     let aframeScript = "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>";
@@ -350,6 +351,13 @@ webxr_router.get('/:_id', function (req, res) {
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
+    let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + //TODO use new aframe module, and externalize this !!!!!!!
+                            //still causes duplicate engine loading, but...
+                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/build/three.module.js\x22,"+
+                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22"+                
+                    
+                        "}"+
+                    "}</script>";
     (async () => {
         try {
 
@@ -429,7 +437,7 @@ webxr_router.get('/:_id', function (req, res) {
                         "<script src=\x22../main/vendor/aframe/aframe-physics-system.min.js\x22></script>";     
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("brownian")) {
-                        brownianScript =  "<script src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
+                        brownianScript =  "<script type=\x22module\x22 src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("instancing")) {
                         meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22></script>"; //imports MeshSurfaceScatter
@@ -487,7 +495,24 @@ webxr_router.get('/:_id', function (req, res) {
                         aframeScript = "<script src=\x22https://cdn.jsdelivr.net/gh/aframevr/aframe@388a47f384feccad2b0d38985f67c441222388e2/dist/aframe-master.min.js\x22></script>"; //ref 20231103 (integrated hands!)
                         threejsVersion = "173";
                     }
-
+                    if (sceneData.sceneTags[i].toLowerCase().includes("webgpu")) {
+                        aframeScript = "";
+                       importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+                            
+                            "\x22aframe\x22: \x22https://cdn.jsdelivr.net/npm/aframe@1.7.1/dist/aframe-master.module.min.js\x22,"+
+                            "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
+                            "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
+                            "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.tsl.js\x22,"+
+                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/examples/jsm/\x22"+                
+                        
+                            "}"+
+                        "}</script>"+
+                        "<script type=\x22module\x22>import AFRAME from 'aframe';import THREE from 'three';"+
+                                                    "import { color, cos, float, mix, range, sin, time, uniform, uv, vec3, vec4, PI2 } from 'three/tsl';"+
+                        "</script>";
+                        
+                    }
+                    
                 }
             }
             if (socketHost != null && socketHost != "NONE") {
@@ -1030,11 +1055,15 @@ webxr_router.get('/:_id', function (req, res) {
 
                 //AFRAME CAMERA
                 let blinkMod = "blink-controls=\x22cameraRig: #cameraRig\x22";
+                
                 if (useSimpleNavmesh || useNavmesh) {
                     blinkMod = "blink-controls=\x22cameraRig: #cameraRig; collisionEntities: #nav-mesh;\x22"; //only one navmesh for now
                     wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:10; height:"+sceneResponse.scenePlayer.playerHeight+"\x22";
                 }
-                
+                if (sceneResponse.sceneTags.includes("webgpu")) {
+                    blinkMod = "";
+                    blinkScript = "";
+                } 
                 // if (useSimpleNavmesh) { //this lives in navigation.js
                 //     //simple navmesh can use 
                 //     wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:10; height:"+sceneResponse.scenePlayer.playerHeight+"\x22";
@@ -1260,7 +1289,7 @@ webxr_router.get('/:_id', function (req, res) {
             if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) {
 
                 webxrEnv = sceneResponse.sceneEnvironmentPreset;
-                enviromentScript = "<script src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
+                enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
                 let ground = "ground: hills;";
                 let dressing = "";
                 let skycolor = "";
@@ -2352,9 +2381,9 @@ webxr_router.get('/:_id', function (req, res) {
                     "primaryAudioHowl.load();</script>";
                     primaryAudioEntity = "<a-entity id=\x22primaryAudioParent\x22 look-at=\x22#player\x22 position=\x22"+audioLocation+"\x22>"+ //parent, no window click
                     
-                    "<a-entity gltf-model=\x22#backpanel_horiz1\x22 position=\x220 -1.25 0\x22 material=\x22color: black; transparent: true;\x22></a-entity>" +
+                    "<a-entity gltf-model=\x22#backpanel_horiz1\x22 position=\x220 0 0\x22 material=\x22color: black; transparent: true;\x22></a-entity>" +
                     "<a-entity position=\x220 -1.25 0\x22 primary_audio_player id=\x22primaryAudioPlayer\x22 gltf-model=\x22#audioplayer\x22></a-entity>"+
-                    "<a-entity id=\x22primaryAudioText\x22 position=\x22.5 0 -1\x22 "+
+                    "<a-entity id=\x22primaryAudioText\x22 position=\x22.75 .25 0\x22 "+
                     "text=\x22value:Click to play;\x22></a-entity>"+
                     "<a-entity id=\x22primaryAudio\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; audioID: "+sceneResponse.scenePrimaryAudioID+"; volume: "+scenePrimaryVolume+"; audioevents:"+sceneResponse.scenePrimaryAudioTriggerEvents+"; targetattach:"+sceneResponse.sceneAttachPrimaryAudioToTarget+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
                     "title: "+primaryAudioTitle+"\x22>"+
@@ -3083,7 +3112,7 @@ webxr_router.get('/:_id', function (req, res) {
                             webxrFeatures = "webxr=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
                             xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
                         } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("real world meshing")) {
-                            meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
+                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
                             xrExtras = " real_world_meshing_mod=\x22meshesEnabled: true;\x22";
                             webxrFeatures = " " + xrExtras;
                             xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
@@ -3140,8 +3169,8 @@ webxr_router.get('/:_id', function (req, res) {
                             "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>" +
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
                             extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                            "<script src=\x22../main/js/dialogs.js\x22></script>" +
-                            "<script src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>" +
+                            "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
                             geoScripts +
                             locationScripts +
                             locationData +
@@ -3236,8 +3265,8 @@ webxr_router.get('/:_id', function (req, res) {
                         "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
                        
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        "<script src=\x22/connect/indexedDb.js\x22></script>" +
-                        "<script src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
                         
                         "</head>\n" +
                         "<body "+bgstyle+">" +
@@ -3295,7 +3324,7 @@ webxr_router.get('/:_id', function (req, res) {
                             "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
                             extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                            "<script src=\x22../main/js/dialogs.js\x22></script>"+
+                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
                             "<script src=\x22/connect/indexedDb.js\x22></script>" +
                             "<script src=\x22/connect/traffic.js\x22></script>" +
                             
@@ -3339,8 +3368,8 @@ webxr_router.get('/:_id', function (req, res) {
                         "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
                        
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        "<script src=\x22/connect/indexedDb.js\x22></script>" +
-                        "<script src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
                         settingsData +
                         sceneTimedEventsData +
                         aframeScript + 
@@ -3351,7 +3380,7 @@ webxr_router.get('/:_id', function (req, res) {
                       
                         hlsScript +
                         "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js\x22></script>"+
-                        "<script src=\x22../main/src/shaders/noise.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
                         "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>"+
 
                         "<script src=\x22../main/src/util/mindar/mindar-image.js\x22></script>"+
@@ -3544,20 +3573,15 @@ webxr_router.get('/:_id', function (req, res) {
                        
                         "<script async src=\x22https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js\x22></script>"+
 
-                        "<script type=\x22importmap\x22> {\x22imports\x22: {" + //TODO use new aframe module, and externalize this !!!!!!!
-                            //still causes duplicate engine loading, but...
-                            "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/build/three.module.js\x22,"+
-                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22"+                
+                        importMap + 
                         
-                            "}"+
-                        "}</script>"+
                         
                         "<script src=\x22/main/vendor/jquery/jquery-3.7.1.js\x22></script>" +
-                        "<script src=\x22/connect/indexedDb.js\x22></script>" +
-                        "<script src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
                         
                         aframeScript +
-                        "<script src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>"+
                         physicsScripts +
                         logScripts +
                         aframeExtrasScript +
@@ -3568,15 +3592,15 @@ webxr_router.get('/:_id', function (req, res) {
                         hlsScript +
                         
                         "<script type=\x22module\x22 src=\x22../main/js/navigation.js\x22></script>" + //includes navmesh components (simple and not), and extended_wasd_controls
-                        "<script src=\x22../main/vendor/aframe/aframe-blink-controls.min.js\x22></script>" +   //TODO - check if req comes from vr headset
+                        blinkScript +   //TODO - check if req comes from vr headset
                         enviromentScript +
                         joystickScript +
-                        "<script src=\x22../main/vendor/aframe/aframe-look-at-component.js\x22></script>"+
-                        "<script src=\x22../main/vendor/aframe/aframe-layout-component.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-look-at-component.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-layout-component.js\x22></script>"+
 
-                        "<script src=\x22../main/src/component/cloud-marker.js\x22></script>"+
-                        "<script src=\x22../main/src/component/local-marker.js\x22></script>"+
-                        "<script src=\x22../main/src/component/mod-materials.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/src/component/cloud-marker.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/src/component/local-marker.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/src/component/mod-materials.js\x22></script>"+
 
                         // "<script src=\x22../main/src/component/ar-shadow-helper.js\x22></script>"+
                         // "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>"+
@@ -3600,11 +3624,11 @@ webxr_router.get('/:_id', function (req, res) {
 
                         ///TODO make these conditional
                         "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>"+
-                        "<script src=\x22../main/src/component/spawn-in-circle.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/src/component/spawn-in-circle.js\x22></script>"+
                         "<script src=\x22https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js\x22></script>"+
-                        "<script src=\x22../main/src/shaders/aframe/aframe-makewaves-shader.js\x22></script>"+
-                        "<script src=\x22/main/src/shaders/aframe/aframe-wavy-shader.js\x22></script>"+
-                        "<script src=\x22../main/src/shaders/noise.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/src/shaders/aframe/aframe-makewaves-shader.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22/main/src/shaders/aframe/aframe-wavy-shader.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
 
                         "</head>" +
                         "<body bgcolor=\x22black\x22>" +
@@ -3623,7 +3647,7 @@ webxr_router.get('/:_id', function (req, res) {
                         locationScripts +
                         locationData +
                         geoScripts +
-                        "<script src=\x22../main/js/dialogs.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
 
                         "<div id=\x22dom-overlay\x22 style=\x22visibility: hidden\x22><div id=\x22ar_overlay_message\x22></div>" +
                         "<div><button id=\x22arLockButton\x22 style=\x22visibility: hidden; float:right; margin: auto\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>toggle lock</button></div><br><br><br>"+

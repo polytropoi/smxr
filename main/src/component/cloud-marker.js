@@ -1,3 +1,8 @@
+/* global AFRAME, THREE */
+
+import { settings } from "../../../connect/connect.js";
+import { keydown } from "../../js/dialogs.js";
+
 AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
     schema: {
       phID: {default: ''}, // now just uses location timestamp

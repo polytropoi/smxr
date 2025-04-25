@@ -1,28 +1,7 @@
 
-// import {MeshSurfaceSampler} from '/three/examples/jsm/math/MeshSurfaceSampler.js'; 
-// import {TransformControls} from '/three/examples/jsm/controls/TransformControls.js';
-
-// import {MeshSurfaceSampler} from 'MeshSurfaceSampler'; 
-// import {TransformControls} from 'TransformControls';
-
-// import {MeshSurfaceSampler} from 'three/addons/math/MeshSurfaceSampler.js'; 
-// import {TransformControls} from 'three/addons/controls/TransformControls.js';
-    // // import * as THREE from 'three';
-    // import AFRAME from "aframe";
-
-    // import { TransformControls } from 'three/addons/controls/TransformControls.js';
-    import { TransformControls } from 'three/addons/controls/TransformControls.js';
-    import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
-    
-    // import { TransformControls } from 'three/addons/controls/';
-    // import { MeshSurfaceSampler } from 'three/addons/math/';
-
-// import { SVGLoader } from '/three/examples/jsm/loaders/SVGLoader.js'; // ref'd in import maps
-// import { Flow } from '/three/examples/jsm/modifiers/CurveModifier.js'; 
-// import { Line2 } from '/three/examples/jsm/lines/Line2.js'; //hrm..
-// import { LineMaterial } from '/three/examples/jsm/lines/LineMaterial.js';
-// import { LineGeometry } from '/three/examples/jsm/lines/LineGeometry.js';
-// import * as GeometryUtils from '/three/examples/jsm/utils/GeometryUtils.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
+import { settings, mouse } from "../../../connect/connect.js";
 
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');

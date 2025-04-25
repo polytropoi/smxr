@@ -1,6 +1,12 @@
+/* global AFRAME, THREE */
+
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
+
+import { keydown } from "../../js/dialogs.js";
+import { settings, videoEl, room, SetVideoEventsData } from "../../../connect/connect.js";
+
 var ua = window.navigator.userAgent;
 var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
 var webkit = !!ua.match(/WebKit/i);
@@ -10,25 +16,28 @@ let analyser = null;
 // let dataArray = [];
 let fLevels = null;
 let volume = 0;
-let primaryAudioEl = null;
-let vidz = null;
-let videoEl = null;
-var primaryAudioMangler = null; 
-let youtubeTime = 0;
-let youtubeDuration = 0;
-let youtubeData = {};
+export let primaryAudioEl = document.querySelector('#primaryAudio');;
+export let vidz = null;
+
+export var primaryAudioMangler = null; 
+export let youtubeTime = 0;
+export let youtubeDuration = 0;
+export let youtubeData = {};
 
 
 
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+export function clamp (num, min, max) {
+  return Math.min(Math.max(num, min), max);
+}
 
 function PrimaryAudioInit() {
   console.log("PRIMARY AUDIO INIT()");
-  primaryAudioEl = document.querySelector('#primaryAudio');
+  // primaryAudioEl = 
   if (primaryAudioEl != null) {
     primaryAudioMangler = document.getElementById("primaryAudio").components.primary_audio_control;
-    console.log("PRIMARY AUDIO INIT() autoplay " + primaryAudioMangler.data.autoplay +  " isplaying " + primaryAudioHowl.playing());
-    if (primaryAudioMangler.data.autoplay) {
+    
+    if (primaryAudioMangler && primaryAudioMangler.data.autoplay) {
+      console.log("PRIMARY AUDIO INIT() autoplay " + primaryAudioMangler.data.autoplay +  " isplaying " + primaryAudioHowl.playing());
       if (primaryAudioHowl != null) {
         if (!primaryAudioHowl.playing()) {
           primaryAudioMangler.playPauseToggle();
@@ -53,6 +62,23 @@ function PrimaryAudioInit() {
   }
 }
 
+export function fancyTimeFormat(duration) {   
+  // Hours, minutes and seconds
+  var hrs = ~~(duration / 3600);
+  var mins = ~~((duration % 3600) / 60);
+  var secs = ~~duration % 60;
+
+  // Output like "1:01" or "4:03:59" or "123:03:59"
+  var ret = "";
+
+  if (hrs > 0) {
+      ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+  }
+
+  ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+  ret += "" + secs;
+  return ret;
+}
 
 
 function AudioAnalyzer() {
@@ -3147,17 +3173,17 @@ AFRAME.registerComponent('enviro_mods', { //tweak properties of environment comp
    
   },
   beat: function () {
-    scale = {};
+    let scale = {};
     let v = 12;
     scale.x = v * .05;
     scale.y = v * .05;
     scale.z = v * .05;
     
-    scale2 = {};
+    let scale2 = {};
     scale2.x = 1;
     scale2.y = v * .1;
     scale2.z = 1;
-    scale3 = {};
+    let scale3 = {};
     scale3.x = v * .5;
     scale3.y = v * .5;
     scale3.z = v * .5;
@@ -3528,34 +3554,39 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
 
       pictureGroupPicLandscapeEl.addEventListener('model-loaded', (event) => {
         // event.preventDefault();
-        let landscapeMesh = pictureGroupPicLandscapeEl.getObject3D('mesh');
+        const landscapeMesh = pictureGroupPicLandscapeEl.getObject3D('mesh');
         this.landscapeMesh = landscapeMesh;
         this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
-        // console.log("tryna load initial scene pic " + this.href + " from " + JSON.stringify(this.picGroupArray));
-        this.loader.load(
-          // resource URL
-          this.href,
-          // onLoad callback
-          function ( texture ) { 
-            this.texture = texture;
-            this.texture.encoding = THREE.sRGBEncoding; 
-            this.texture.flipY = false; 
-            this.material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
-              
-            landscapeMesh.traverse(node => { 
-              console.log("gotsa obj + mat");
-              node.material = this.material;
-            });
-          },
-          function ( err ) {
-            console.error( 'An error happened.' );
-          }
-        );
+        console.log("tryna load initial scene pic " + this.href + " from " + JSON.stringify(this.picGroupArray));
+        if (this.href) {
+          
+          this.loader.load(
+            // resource URL
+            this.href,
+            // onLoad callback
+            function ( texture ) { 
+              if (texture) {
+                // this.texture = texture;
+                texture.encoding = THREE.sRGBEncoding; 
+                texture.flipY = false; 
+                let material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
+                  
+                landscapeMesh.traverse(node => { 
+                  console.log("gotsa obj + mat");
+                  node.material = material;
+                });
+              }
+            },
+            function ( err ) {
+              console.error( 'An error happened.' );
+            }
+          );
+        }
       });
 
       pictureGroupPicPortraitEl.addEventListener('model-loaded', (event) => {
         // event.preventDefault();
-        portraitMesh = pictureGroupPicPortraitEl.getObject3D('mesh');
+        const portraitMesh = pictureGroupPicPortraitEl.getObject3D('mesh');
         this.portraitMesh = portraitMesh;
         this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
         // console.log("tryna load initial scene pic " + this.href + " from " + JSON.stringify(this.picGroupArray));
@@ -3565,13 +3596,13 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
           this.href,
           // onLoad callback
           function ( texture ) { 
-            this.texture = texture;
-            this.texture.encoding = THREE.sRGBEncoding; 
-            this.texture.flipY = false; 
-            this.material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
+            // this.texture = texture;
+            texture.encoding = THREE.sRGBEncoding; 
+            texture.flipY = false; 
+            let material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
             portraitMesh.traverse(node => { 
               console.log("gotsa obj + mat");
-              node.material = this.material;
+              node.material = material;
             });
           },
           function ( err ) {
@@ -3581,7 +3612,7 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
       });
       pictureGroupPicSquareEl.addEventListener('model-loaded', (event) => {
         // event.preventDefault();
-        squareMesh = pictureGroupPicSquareEl.getObject3D('mesh');
+        const squareMesh = pictureGroupPicSquareEl.getObject3D('mesh');
         this.squareMesh = squareMesh;
         this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
         // console.log("tryna load initial scene pic " + this.href + " from " + JSON.stringify(this.picGroupArray));
@@ -3591,13 +3622,13 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
           this.href,
           // onLoad callback
           function ( texture ) { 
-            this.texture = texture;
-            this.texture.encoding = THREE.sRGBEncoding; 
-            this.texture.flipY = false; 
-            this.material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
+            // texture = texture;
+            texture.encoding = THREE.sRGBEncoding; 
+            texture.flipY = false; 
+            let material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
             squareMesh.traverse(node => { 
               // console.log("gotsa obj + mat");
-              node.material = this.material;
+              node.material = material;
             });
           },
           function ( err ) {
@@ -4283,7 +4314,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
       this.youtubeStats = document.getElementById("youtubeStats");
 
       this.duration = 0
-      this.el.object3D.position = new THREE.Vector3('0 0 0');
+      this.el.object3D.position.set(0, 0, 0);// = new THREE.Vector3('0 0 0');
       this.playerState = "";
       this.screen = null;
       this.play_button = null;  
@@ -4382,7 +4413,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
               }
               if (node.name.includes("slider_handle")) {
                   this.slider_handle = node;
-                  this.slider_handle.position = this.slider_begin.position;
+                  this.slider_handle.position.set(this.slider_begin.position);
                   // console.log("gotsa slider handle");
               }
               
@@ -4663,12 +4694,13 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 let mainTransportSlider = null;
 let transportPlayButton = null;
 let youtube_player = null; //3d version
-let youtubePlayer = null; //spawned by embed api
-let youtubeIsPlaying = false;
+export let youtubePlayer = null; //spawned by embed api
+export let youtubeIsPlaying = false;
 let youtubeState = "";
 let youtubeTitleEl = "";
+// window.youtubeIsPlaying = youtubeIsPlaying;
 
-function onYouTubeIframeAPIReady () { //must be global, called when youtube embed api is loaded
+export function onYouTubeIframeAPIReady () { //must be global, called when youtube embed api is loaded
   let youtubeEl = document.getElementById("youtubeElement");
   let yt_id = youtubeEl.getAttribute('data-yt_id');
   console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 

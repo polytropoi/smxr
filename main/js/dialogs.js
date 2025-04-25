@@ -1,4 +1,8 @@
-let showDialogPanel = false;
+import { fancyTimeFormat, youtubePlayer, youtubeIsPlaying } from "../src/component/content-utils.js";
+import { settings, room, sceneLocations, localData, PauseIntervals } from "../../connect/connect.js";
+import { hasLocalData } from "../../connect/indexedDb.js";
+
+export let showDialogPanel = false;
 let dialogInitialized = false;
 // let textItemArray = [];
 let userInventory = null;
@@ -12,7 +16,7 @@ var sceneEl = document.querySelector('a-scene');
 // let timedEventsListenerMode = null;
 let showStats = false;
 let showCurves = false;
-let keydown = "";
+export let keydown = "";
 let selectedLocationTimestamp = "";
 let colorInput_1 = null;
 let colorInput_2 = null;
@@ -1481,7 +1485,7 @@ function ReturnCurrentPlayerLocation() {
 
 
 
-function InitLocalColors() {
+export function InitLocalColors() {
   console.log("tryna InitLocalColors " + JSON.stringify(localData.settings));
   let enviroEl = document.getElementById('enviroEl');
 

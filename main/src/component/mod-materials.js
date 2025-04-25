@@ -1,5 +1,8 @@
+import { settings, mouse, MediaTimeUpdate } from "../../../connect/connect.js";
+import { fancyTimeFormat } from "../../src/component/content-utils.js";
+
 const raycaster = new THREE.Raycaster(); //reuse this!  
-const mouse = new THREE.Vector2();
+
 let primaryVideo = null;
 // let mainDiv = document.getElementById("mainDiv");
 // let videoEl = null;
@@ -971,7 +974,7 @@ AFRAME.registerComponent('mod-materials', {
             }
             if (!this.video.paused && this.slider_handle != null) {
               this.playmaterial.map.needsUpdate = true;  
-              currentTime = this.video.currentTime.toFixed(2);
+              let currentTime = this.video.currentTime.toFixed(2);
               this.percent = this.video.currentTime / this.video.duration;
               // console.log(this.percent);
               this.slider_handle.position.lerpVectors(this.slider_begin.position, this.slider_end.position, this.percent);
@@ -992,41 +995,25 @@ AFRAME.registerComponent('mod-materials', {
     });
 
     ////////////////////////////////////
-    function fancyTimeFormat(duration) {   
-        // Hours, minutes and seconds
-        var hrs = ~~(duration / 3600);
-        var mins = ~~((duration % 3600) / 60);
-        var secs = ~~duration % 60;
+    // function fancyTimeFormat(duration) {   
+    //     // Hours, minutes and seconds
+    //     var hrs = ~~(duration / 3600);
+    //     var mins = ~~((duration % 3600) / 60);
+    //     var secs = ~~duration % 60;
 
-        // Output like "1:01" or "4:03:59" or "123:03:59"
-        var ret = "";
+    //     // Output like "1:01" or "4:03:59" or "123:03:59"
+    //     var ret = "";
 
-        if (hrs > 0) {
-            ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-        }
+    //     if (hrs > 0) {
+    //         ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+    //     }
 
-        ret += "" + mins + ":" + (secs < 10 ? "0" : "");
-        ret += "" + secs;
-        return ret;
-    }
+    //     ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+    //     ret += "" + secs;
+    //     return ret;
+    // }
   
-  function fancyTimeFormat(duration) {   
-      // Hours, minutes and seconds
-      var hrs = ~~(duration / 3600);
-      var mins = ~~((duration % 3600) / 60);
-      var secs = ~~duration % 60;
 
-      // Output like "1:01" or "4:03:59" or "123:03:59"
-      var ret = "";
-
-      if (hrs > 0) {
-          ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-      }
-
-      ret += "" + mins + ":" + (secs < 10 ? "0" : "");
-      ret += "" + secs;
-      return ret;
-  }
 
 
 
@@ -1174,13 +1161,13 @@ AFRAME.registerSystem('trail', {
   },
 
   killTrail: function killTrail (object) {
-    object.userData.trails.forEach(trail=>{
-      // length = 0;
-      // width = 0;
-      resolution = 0;
-      trailHistory = [];
-      // trail.trailVertexPositions = [];
-    });
+    // object.userData.trails.forEach(trail=>{
+    //   // length = 0;
+    //   // width = 0;
+    //   // resolution = 0;
+    //   trailHistory = [];
+    //   // trail.trailVertexPositions = [];
+    // });
     this.el.sceneEl.object3D.remove( this.trailmesh );
     // object.userData.trails = [];
     // // this.isDead = true;

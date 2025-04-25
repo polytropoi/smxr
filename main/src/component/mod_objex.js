@@ -1,3 +1,8 @@
+/* global AFRAME, THREE */
+
+import { settings, localData, mouseDowntime } from "../../../connect/connect.js";
+import { keydown, showDialogPanel } from "../../js/dialogs.js";
+
 AFRAME.registerComponent('mod_scene_inventory', {
     schema: {
       
@@ -96,10 +101,10 @@ AFRAME.registerComponent('mod_objex', {
                         if (ar_parent) {
                           ar_parent.appendChild(objEl);
                         } else {
-                          sceneEl.appendChild(objEl);
+                          this.el.sceneEl.appendChild(objEl);
                         }
                       } else {
-                        sceneEl.appendChild(objEl);
+                        this.el.sceneEl.appendChild(objEl);
                       }
                       
                     // }
@@ -110,6 +115,12 @@ AFRAME.registerComponent('mod_objex', {
           }
         }
         let that = this;
+        this.posRotReader = null;
+        const player = document.getElementById("player");
+        if (player) {
+          this.posRotReader = player.components.get_pos_rot; 
+        }
+
       },
       // useArParent: function () {
       //   if (this.data.jsonLocationsData[i].locationTags && 
@@ -217,10 +228,10 @@ AFRAME.registerComponent('mod_objex', {
                 if (ar_parent) {
                   ar_parent.appendChild(objEl);
                 } else {
-                  sceneEl.appendChild(objEl);
+                  this.el.sceneEl.appendChild(objEl);
                 }
               } else {
-                sceneEl.appendChild(objEl);
+                this.el.sceneEl.appendChild(objEl);
               }
 
               if (this.triggerAudioController != null) {
@@ -259,12 +270,12 @@ AFRAME.registerComponent('mod_objex', {
                 if (ar_parent) {
                   ar_parent.appendChild(objEl);
                 } else {
-                  sceneEl.appendChild(objEl);
+                  this.el.sceneEl.appendChild(objEl);
                 }
               } else {
-                sceneEl.appendChild(objEl);
+                this.el.sceneEl.appendChild(objEl);
               }
-              // sceneEl.appendChild(objEl);
+              //this.el.sceneEl.appendChild(objEl);
               
               
               if (this.triggerAudioController != null) {
@@ -308,13 +319,13 @@ AFRAME.registerComponent('mod_objex', {
                   if (ar_parent) {
                     ar_parent.appendChild(objEl);
                   } else {
-                    sceneEl.appendChild(objEl);
+                    this.el.sceneEl.appendChild(objEl);
                   }
                 } else {
-                  sceneEl.appendChild(objEl);
+                  this.el.sceneEl.appendChild(objEl);
                 }
 
-                // sceneEl.appendChild(objEl);
+                //this.el.sceneEl.appendChild(objEl);
                 } else {
                   console.log("well shoot, that one don't have a location " + JSON.stringify(this.sceneInventoryItems[i]));
                 }
@@ -368,7 +379,7 @@ AFRAME.registerComponent('mod_objex', {
       //   this.locData.timestamp = Date.now();
       //   this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData, 'isSpawned': true});
       //   this.objEl.id = "obj" + this.objectData._id + "_" + this.locData.timestamp;
-      //   sceneEl.appendChild(this.objEl);
+      //  this.el.sceneEl.appendChild(this.objEl);
              
       // },
       
@@ -386,7 +397,7 @@ AFRAME.registerComponent('mod_objex', {
       //   this.locData.timestamp = Date.now();
       //   this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData, 'isSpawned': true});
       //   this.objEl.id = "obj" + this.objectData._id + "_" + this.locData.timestamp;
-      //   sceneEl.appendChild(this.objEl);
+      //  this.el.sceneEl.appendChild(this.objEl);
              
       // },
       
@@ -462,7 +473,7 @@ AFRAME.registerComponent('mod_objex', {
         this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData});
         // this.objEl.id = "obj" + this.objectData._id + "_" + this.locData.timestamp;
         this.objEl.id = this.locData.timestamp;
-        sceneEl.appendChild(this.objEl);
+       this.el.sceneEl.appendChild(this.objEl);
         // this.objEl.components.mod_object.applyForce();
   
         // this.el.setAttribute('gltf-model', '#' + modelID.toString());
@@ -486,12 +497,12 @@ AFRAME.registerComponent('mod_objex', {
           if (ar_parent) {
             ar_parent.appendChild(this.objEl);
           } else {
-            sceneEl.appendChild(this.objEl);
+           this.el.sceneEl.appendChild(this.objEl);
           }
         } else {
-          sceneEl.appendChild(this.objEl);
+         this.el.sceneEl.appendChild(this.objEl);
         }
-        // sceneEl.appendChild(this.objEl);
+        //this.el.sceneEl.appendChild(this.objEl);
         // this.objEl.components.mod_object.applyForce();
   
         // this.el.setAttribute('gltf-model', '#' + modelID.toString());
@@ -506,12 +517,15 @@ AFRAME.registerComponent('mod_objex', {
         if (this.equippedObject != null) {
           this.equippedObject.object3D.getWorldPosition(this.dropPos);
         }
-        if (!posRotReader) {
-          player = document.getElementById("player");
-          posRotReader = document.getElementById("player").components.get_pos_rot; 
+        if (!this.posRotReader) {
+          const player = document.getElementById("player");
+          if (player) {
+            this.posRotReader = player.components.get_pos_rot; 
+          }
+          
         } 
-        if (posRotReader) {
-          this.playerPosRot = posRotReader.returnPosRot(); 
+        if (this.posRotReader) {
+          this.playerPosRot = this.posRotReader.returnPosRot(); 
           console.log("this.playerPosRot" + JSON.stringify(this.playerPosRot));
           this.dropEuler = this.playerPosRot.rot;
           this.locData = {};
@@ -523,16 +537,16 @@ AFRAME.registerComponent('mod_objex', {
           // this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData, 'applyForceToNewObject': true, 'forceFactor': downtime, 'removeAfter': "5"});
           this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData, 'followPathNewObject': true, 'forceFactor': downtime, 'removeAfter': "5", 'isSpawned': true});
           this.objEl.id = "obj" + this.objectData._id + "_" + this.locData.timestamp;
-          // sceneEl.append(this.objEl);
+          //this.el.sceneEl.append(this.objEl);
           if (settings && settings.useArParent) {                
             let ar_parent = document.getElementById("ar_parent");
             if (ar_parent) {
               ar_parent.appendChild(this.objEl);
             } else {
-              sceneEl.appendChild(this.objEl);
+              this.el.sceneEl.appendChild(this.objEl);
             }
           } else {
-            sceneEl.appendChild(this.objEl);
+            this.el.sceneEl.appendChild(this.objEl);
           }
         }
   
@@ -552,16 +566,16 @@ AFRAME.registerComponent('mod_objex', {
         this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData, 'applyForceToNewObject': true, 'forceFactor': downtime, 'removeAfter': "5", 'isSpawned': true});
         this.objEl.id = "obj" + this.objectData._id + "_" + this.locData.timestamp;
   
-        // sceneEl.appendChild(this.objEl);
+        //this.el.sceneEl.appendChild(this.objEl);
         if (settings && settings.useArParent) {                
           let ar_parent = document.getElementById("ar_parent");
           if (ar_parent) {
             ar_parent.appendChild(this.objEl);
           } else {
-            sceneEl.appendChild(this.objEl);
+            this.el.sceneEl.appendChild(this.objEl);
           }
         } else {
-          sceneEl.appendChild(this.objEl);
+          this.el.sceneEl.appendChild(this.objEl);
         }
         // this.el.setAttribute('gltf-model', '#' + modelID.toString());
       }
@@ -1382,12 +1396,12 @@ AFRAME.registerComponent('mod_object', {
             let hasPicPositions = false;
             let hasVidPositions = false;
             let hasAudioPositions = false;
-            camera = AFRAME.scenes[0].camera; 
-            mixer = new THREE.AnimationMixer( obj );
-            clips = obj.animations;
+            let camera = AFRAME.scenes[0].camera; 
+            let mixer = new THREE.AnimationMixer( obj );
+            let clips = obj.animations;
   
             if (clips != null) { 
-              for (i = 0; i < clips.length; i++) { //get reference to all anims
+              for (let i = 0; i < clips.length; i++) { //get reference to all anims
                 hasAnims = true
                 // console.log("mod_object " + this.data.objectData.name + " has animation: " + clips[i].name);
                 
@@ -1474,7 +1488,7 @@ AFRAME.registerComponent('mod_object', {
              
             });         
             
-            for (i = 0; i < this.meshChildren.length; i++) { //apply mods to the special things
+            for (let i = 0; i < this.meshChildren.length; i++) { //apply mods to the special things
               console.log("gotsa special !! meshChild " + this.meshChildren[i].name);
               // if (this.meshChildren[i].name.includes("trigger")) { 
               //   //ugh, nm
@@ -1600,7 +1614,7 @@ AFRAME.registerComponent('mod_object', {
               // if (eventData.includes("agent")) {
                 this.el.appendChild(bubble); //make it a child if
               // } else {
-              //   sceneEl.appendChild(bubble); //or else put at top
+              //  this.el.sceneEl.appendChild(bubble); //or else put at top
               // }
              
               
@@ -1930,7 +1944,7 @@ AFRAME.registerComponent('mod_object', {
                       //           this.locData.timestamp = Date.now();
                       //           this.objEl.setAttribute("mod_object", {'locationData': this.locData, 'objectData': objectData, 'isSpawned': false});
                       //           this.objEl.id = "obj" + objectData._id + "_" + this.locData.timestamp;
-                      //           sceneEl.appendChild(this.objEl);
+                      //          this.el.sceneEl.appendChild(this.objEl);
                       //         } else {
                       //           console.log("caint find object "+ this.killAction.objectID +", tryna fetch it..");
                       //           FetchSceneInventoryObject(this.killAction.objectID);
@@ -1945,7 +1959,7 @@ AFRAME.registerComponent('mod_object', {
                       //           this.locData.timestamp = Date.now();
                       //           this.objEl.setAttribute("mod_object", {'locationData': this.locData, 'objectData': objectData, 'isSpawned': false});
                       //           this.objEl.id = "obj" + objectData._id + "_" + this.locData.timestamp;
-                      //           sceneEl.appendChild(this.objEl);
+                      //          this.el.sceneEl.appendChild(this.objEl);
                       //         }
                       //       }
                       //   } else {
@@ -2030,12 +2044,12 @@ AFRAME.registerComponent('mod_object', {
                               if (ar_parent) {
                                 ar_parent.appendChild(this.objEl);
                               } else {
-                                sceneEl.appendChild(this.objEl);
+                               this.el.sceneEl.appendChild(this.objEl);
                               }
                             } else {
-                              sceneEl.appendChild(this.objEl);
+                             this.el.sceneEl.appendChild(this.objEl);
                             }
-                            // sceneEl.appendChild(this.objEl);
+                            //this.el.sceneEl.appendChild(this.objEl);
                           } else {
                             console.log("caint find object "+ targetModObjComponent.data.objectData.actions[i].objectID +", tryna fetch it..");
                             FetchSceneInventoryObject(targetModObjComponent.data.objectData.actions[i].objectID);
@@ -2083,12 +2097,12 @@ AFRAME.registerComponent('mod_object', {
                             if (ar_parent) {
                               ar_parent.appendChild(this.objEl);
                             } else {
-                              sceneEl.appendChild(this.objEl);
+                             this.el.sceneEl.appendChild(this.objEl);
                             }
                           } else {
-                            sceneEl.appendChild(this.objEl);
+                           this.el.sceneEl.appendChild(this.objEl);
                           }
-                          // sceneEl.appendChild(this.objEl);
+                          //this.el.sceneEl.appendChild(this.objEl);
                         } else {
                           console.log("caint find object "+ targetModObjComponent.data.objectData.actions[i].objectID +", tryna fetch it..");
                           FetchSceneInventoryObject(targetModObjComponent.data.objectData.actions[i].objectID);
@@ -2153,12 +2167,12 @@ AFRAME.registerComponent('mod_object', {
         console.log("mouse enter mod_object name " + this.data.objectData.name + " id " + this.el.id + " " + this.data.markerType + " " + this.data.objectData.objtype + " this.textData " + this.textData);
         evt.preventDefault();
         if (!this.data.isEquipped) {
-          if (posRotReader != null) {
-            this.playerPosRot = posRotReader.returnPosRot(); 
+          if (this.posRotReader != null) {
+            this.playerPosRot = this.posRotReader.returnPosRot(); 
             window.playerPosition = this.playerPosRot.pos; 
           } else {
-            posRotReader = document.getElementById("player").components.get_pos_rot; 
-            this.playerPosRot = posRotReader.returnPosRot(); 
+            this.posRotReader = document.getElementById("player").components.get_pos_rot; 
+            this.playerPosRot = this.posRotReader.returnPosRot(); 
             window.playerPosition = this.playerPosRot.pos; 
           }
           
@@ -2372,7 +2386,7 @@ AFRAME.registerComponent('mod_object', {
           if (this.calloutEntity != null) {
             this.calloutEntity.setAttribute('visible', false);
           }
-          this.bubble = sceneEl.querySelector('.bubble');
+          this.bubble = this.el.sceneEl.querySelector('.bubble');
           if (this.bubble) {
             this.bubble.setAttribute('visible', false);
           }
@@ -2671,16 +2685,16 @@ AFRAME.registerComponent('mod_object', {
                 this.locData.timestamp = Date.now();
                 this.objEl.setAttribute("mod_object", {'locationData': this.locData, 'objectData': objectData, 'isSpawned': false});
                 this.objEl.id = "obj" + objectData._id + "_" + this.locData.timestamp;
-                // sceneEl.appendChild(this.objEl);
+                //this.el.sceneEl.appendChild(this.objEl);
                 if (settings && settings.useArParent) {                
                   let ar_parent = document.getElementById("ar_parent");
                   if (ar_parent) {
                     ar_parent.appendChild(this.objEl);
                   } else {
-                    sceneEl.appendChild(this.objEl);
+                    this.el.sceneEl.appendChild(this.objEl);
                   }
                 } else {
-                  sceneEl.appendChild(this.objEl);
+                  this.el.sceneEl.appendChild(this.objEl);
                 }
               } else {
                 console.log("caint find object "+ this.killAction.objectID +", tryna fetch it..");
@@ -2696,16 +2710,16 @@ AFRAME.registerComponent('mod_object', {
                 this.locData.timestamp = Date.now();
                 this.objEl.setAttribute("mod_object", {'locationData': this.locData, 'objectData': objectData, 'isSpawned': false});
                 this.objEl.id = "obj" + objectData._id + "_" + this.locData.timestamp;
-                // sceneEl.appendChild(this.objEl);
+                //this.el.sceneEl.appendChild(this.objEl);
                 if (settings && settings.useArParent) {                
                   let ar_parent = document.getElementById("ar_parent");
                   if (ar_parent) {
                     ar_parent.appendChild(this.objEl);
                   } else {
-                    sceneEl.appendChild(this.objEl);
+                    this.el.sceneEl.appendChild(this.objEl);
                   }
                 } else {
-                  sceneEl.appendChild(this.objEl);
+                  this.el.sceneEl.appendChild(this.objEl);
                 }
               }
             }
@@ -3310,16 +3324,16 @@ AFRAME.registerComponent('mod_object', {
       objEl.id = "obj" + objectData._id + "_" + this.data.locationData.timestamp;
 
       
-      // sceneEl.appendChild(objEl);
+      //this.el.sceneEl.appendChild(objEl);
       if (settings && settings.useArParent) {                
         let ar_parent = document.getElementById("ar_parent");
         if (ar_parent) {
           ar_parent.appendChild(objEl);
         } else {
-          sceneEl.appendChild(objEl);
+         this.el.sceneEl.appendChild(objEl);
         }
       } else {
-        sceneEl.appendChild(objEl);
+       this.el.sceneEl.appendChild(objEl);
       }
       // this.el.setAttribute('gltf-model', '#' + modelID.toString());
     },

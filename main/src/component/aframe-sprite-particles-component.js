@@ -1,3 +1,5 @@
+/* global AFRAME, THREE */
+
 // Copyright 2018 harlyq
 // License MIT
 

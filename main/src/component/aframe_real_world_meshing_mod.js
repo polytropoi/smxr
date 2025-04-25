@@ -6,6 +6,9 @@
  * It requires a browser with support for the WebXR Mesh and Plane detection modules.
  *
  */
+
+import { settings } from "../../../connect/connect.js"; 
+
 AFRAME.registerComponent('real_world_meshing_mod', {
   schema: {
 

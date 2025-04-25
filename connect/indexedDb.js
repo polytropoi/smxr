@@ -1,6 +1,9 @@
+import { InitLocalColors } from "../main/js/dialogs.js";
+import { settings, room, sceneLocations, locationTimestamps, localData, lastCloudUpdate, InitCurves, sceneEl } from "../connect/connect.js";
 
+export let hasLocalData = false;
 //////////////////////indexedDB functions...
-function InitIDB() {
+export function InitIDB() {
    let playerPosMods = [];
    // let localSettings = {};
     console.log("tryna connect to SMXR indexeddb");
@@ -234,7 +237,7 @@ function InitIDB() {
          }
          InitLocalColors();
 
-         lastLocalUpdate = localData.lastUpdate;
+         let lastLocalUpdate = localData.lastUpdate;
          // console.log("COPIED LOCALDATA locations length " + localData.locations.length + " " + JSON.stringify(localData) + " last cloud update " +  lastCloudUpdate + " vs last local update " + lastLocalUpdate);
          if (lastCloudUpdate && lastLocalUpdate) {
             if (lastCloudUpdate > lastLocalUpdate) {

@@ -1,3 +1,7 @@
+import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "../component/content-utils.js";
+import { settings, attributions, PauseIntervals } from "../../../connect/connect.js";
+
+
 let params = document.querySelector(".primaryAudioParams").id;
 console.log("audioParames: " +params);
 let stream = params.split("_")[0];
@@ -31,6 +35,9 @@ var getJSON = function(url, callback) { //netradio details //nm
     xhr.send('url=' + encodeURI(audiourl));
 };
 
+function clamp (num, min, max) {
+    return Math.min(Math.max(num, min), max);
+  }
 // function PrimaryAudioInit() {
 //     console.log("tryna PrimaryAudioInit vizzlers " + document.querySelector(".primaryAudioParams").getAttribute('data-audiovizzler'));
 //     vidz = document.getElementsByTagName("video");
@@ -66,7 +73,7 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
         this.hitpoint = this.data.hitpoint;
         // this.el.visible = false;
         // this.el.object3D.visible = false;
-        this.el.object3D.position = new THREE.Vector3('0 0 0');
+        this.el.object3D.position.set(0,0,0);// = new THREE.Vector3('0 0 0');
         this.screen = null;
         this.play_button = null;
         this.play_icon = null;
@@ -936,6 +943,7 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
                 this.percentComplete = ((seek / this.duration) * 100).toFixed(2);
                 var el = this.el; 
                 var seeking = true;
+                let fancyTimeString = "";
                 if (!isNaN(seek) && seek != 0) {
 
                     if (this.primaryAudioHowl.playing()) {
@@ -1093,17 +1101,17 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
         },
         timekey_beat: function(vol) {
             
-            scale = {};
+            let scale = {};
             let v = 25;
             scale.x = v * .05;
             scale.y = v * .05;
             scale.z = v * .05;
             
-            scale2 = {};
+            let scale2 = {};
             scale2.x = 1;
             scale2.y = v * .1;
             scale2.z = 1;
-            scale3 = {};
+            let scale3 = {};
             scale3.x = v * .5;
             scale3.y = v * .5;
             scale3.z = v * .5;

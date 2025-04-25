@@ -1,4 +1,8 @@
+import { settings } from "../../../connect/connect.js";
+
 (function () {
+
+
 	'use strict';
 
 	/* jshint esversion: 9, varstmt:true */
