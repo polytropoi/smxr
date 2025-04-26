@@ -1,5 +1,6 @@
 import { InitIDB, hasLocalData } from "../connect/indexedDb.js";
 import { youtubePlayer, youtubeIsPlaying, primaryAudioEl } from "../../main/src/component/content-utils.js";
+
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
@@ -1169,17 +1170,15 @@ function GoToLocation(locationKey) {
       } 
    }
 }
-function PlayerToLocation(worldPos) {
-   // if (player == null) {
-   //    player = document.getElementById('player');
-   // }
-   // let worldPos = new THREE.Vector3();
-   //       // location.getWorldPosition(worldPos);
-   // worldPos = {'x': targetLocation.x, 'y': targetLocation.y + 1, 'z': targetLocation.z + 3};
+
+export function PlayerToLocation(worldPos) {
+   
    console.log("tryna set PlayerToLocation " + JSON.stringify(worldPos));
-   player.setAttribute('position', worldPos);
-   // console.log("target "+JSON.stringify(targetLocation)+ " vs. player " + JSON.stringify(player.getAttribute('position')));
-   // window.playerPosition = worldPos;
+   if (player) {
+      player.setAttribute('position', worldPos);
+   }
+   
+  
 }
 
 function GoToNext() {

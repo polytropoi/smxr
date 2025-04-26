@@ -1094,15 +1094,15 @@ AFRAME.registerComponent('mod_model', {
                       this.pic_href,
                       // onLoad callback
                       function ( texture ) { 
-                        this.pictexture = texture;
-                        this.pictexture.colorSpace = THREE.SRGBColorSpace;
-                        this.pictexture.flipY = true; 
-                        this.picmaterial = new THREE.MeshBasicMaterial( { map: this.pictexture } ); 
+                        // this.pictexture = texture;
+                        texture.colorSpace = THREE.SRGBColorSpace;
+                        texture .flipY = true; 
+                        const picmaterial = new THREE.MeshBasicMaterial( { map: texture } ); 
                           
                         mesh.traverse(node => { //needs a callback here to insure it gets painted the first time
                           // console.log("gotsa obj + mat");
                           if (node.isMesh) {
-                            node.material = this.picmaterial;
+                            node.material = picmaterial;
                           }
                         });
                       },
@@ -1175,24 +1175,24 @@ AFRAME.registerComponent('mod_model', {
                   if (vpics[vpicsIndex].linkURL != null && vpics[vpicsIndex].linkURL != undefined && vpics[vpicsIndex].linkURL != 'undefined' && vpics[vpicsIndex].linkURL.length > 6) {
                     childEnt.setAttribute('basic-link', {href: vpics[vpicsIndex].linkURL});
                   }
-                    this.pic_href = vpics[vpicsIndex].url;
+                    let pic_href = vpics[vpicsIndex].url;
                     // console.log("tryna load gallerypic " + this.meshChildren[i].name);
                     var loader = new THREE.TextureLoader();
                     // load a resource
                     loader.load(
                       // resource URL
-                      this.pic_href,
+                      pic_href,
                       // onLoad callback
                       function ( texture ) { 
-                        this.pictexture = texture;
-                        this.pictexture.colorSpace = THREE.SRGBColorSpace;
-                        this.pictexture.flipY = true; 
-                        this.picmaterial = new THREE.MeshBasicMaterial( { map: this.pictexture } ); 
+                        // this.pictexture = texture;
+                        texture.colorSpace = THREE.SRGBColorSpace;
+                        texture.flipY = true; 
+                        const picmaterial = new THREE.MeshBasicMaterial( { map: texture } ); 
                           
                         mesh.traverse(node => { //needs a callback here to insure it gets painted the first time
                           // console.log("gotsa obj + mat");
                           if (node.isMesh) {
-                            node.material = this.picmaterial;
+                            node.material = picmaterial;
                           }
                         });
                       },

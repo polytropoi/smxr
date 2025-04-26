@@ -1,5 +1,5 @@
 import { InitLocalColors } from "../main/js/dialogs.js";
-import { settings, room, sceneLocations, locationTimestamps, localData, lastCloudUpdate, InitCurves, sceneEl } from "../connect/connect.js";
+import { settings, room, sceneLocations, locationTimestamps, localData, lastCloudUpdate, InitCurves, sceneEl, PlayerToLocation } from "../connect/connect.js";
 
 export let hasLocalData = false;
 //////////////////////indexedDB functions...
