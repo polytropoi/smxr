@@ -24,7 +24,7 @@ export let youtubeTime = 0;
 export let youtubeDuration = 0;
 export let youtubeData = {};
 
-let fancyTimeString = "";
+export let fancyTimeString = "";
 
 export function clamp (num, min, max) {
   return Math.min(Math.max(num, min), max);
@@ -2270,7 +2270,7 @@ function getRandomIntInclusive(min, max) {
 
 
 
-function Drop (data) {
+export function Drop (data) {
   var xhr = new XMLHttpRequest();
   xhr.open("POST", '/drop/', true);
   xhr.setRequestHeader('Content-Type', 'application/json');
@@ -2295,7 +2295,7 @@ function Drop (data) {
     } 
   };
 }
-function Pickup (data, id) {
+export function Pickup (data, id) {
   console.log("tryna act on " + id);
   let objEl = document.getElementById(id);
   if (objEl != null) {
@@ -3069,27 +3069,21 @@ AFRAME.registerComponent('mod_sky', { //
     this.startColor = new THREE.Color('blue');
     this.endColor = new THREE.Color('red');
     this.lerpedColor = new THREE.Color();
-    // this.startColor.set(color1);
-    // this.endColor.set(color2);
-    // var geometry = new THREE.SphereGeometry(100, 60, 40);  
-    // var material = new THREE.MeshBasicMaterial({ 
-    //   'color': this.startColor
-    //   // 'side': 'back',
-    // });
-    // this.skySphereMat = this.el.getObject3D('mesh').material;
-    // this.skySphere.scale.set(-1, 1, 1);  
-    // this.el.sceneEl.object3D.add(this.skySphere);
-    // this.el.setObject3D(this.skySphere);
-    this.skySphereMat = null;
-    this.mesh = this.el.getObject3D('mesh');
+   
+    this.skySphereMat = new THREE.MeshBasicMaterial({ 
+      'color': this.startColor
+      // 'side': 'back',
+    });
 
+    this.mesh = this.el.getObject3D('mesh');
+    let that = this;
     if (this.mesh != null) {
       this.mesh.traverse(function (node) {
 
       if (node.material) {
       // if (node.material) {
-        console.log("skymaterial color is " + JSON.stringify(node.material.color));
-          this.skySphereMat = node.material;
+          console.log("skymaterial color is " + JSON.stringify(node.material.color));
+          that.skySphereMat = node.material;
           }
         });
       }
@@ -3118,6 +3112,7 @@ AFRAME.registerComponent('mod_sky', { //
     if (this.tweakMe) {
       let s = Math.sin(time * 2.0) * 0.5 + 0.5;
       this.el.object3D.material.color.copy(this.startColor).lerp(this.endColor, s);
+      console.log("tweakin sky " + s);
     } else if (this.lerpMe) {
       // let s = Math.sin(time * 2.0) * 0.5 + 0.5;
       // this.mesh.material.color.setColor(this.startColor).lerpHSL(this.endColor, s);

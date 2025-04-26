@@ -1,6 +1,7 @@
-import { fancyTimeFormat, youtubePlayer, youtubeIsPlaying } from "../src/component/content-utils.js";
-import { settings, room, sceneLocations, localData, PauseIntervals, timedEventsListenerMode } from "../../connect/connect.js";
-import { hasLocalData } from "../../connect/indexedDb.js";
+import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying } from "../src/component/content-utils.js";
+import { settings, room, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
+  userData, stringRoomUsers, timeKeysData, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, tkStarttimes } from "../../connect/connect.js";
+import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles } from "../../connect/indexedDb.js";
 
 export let showDialogPanel = false;
 let dialogInitialized = false;
@@ -13,7 +14,7 @@ let theModal = null;
 let theRenderCanvas = null;
 let locationModalIsOn = false;
 var sceneEl = document.querySelector('a-scene');
-// let timedEventsListenerMode = null;
+let timedEventsListenerMode = "";
 let showStats = false;
 let showCurves = false;
 export let keydown = "";
@@ -22,10 +23,21 @@ let colorInput_1 = null;
 let colorInput_2 = null;
 let colorInput_3 = null;
 let colorInput_4 = null;
+let sceneColor1 = '#808080';
+let sceneColor2 = '#808080';
+let sceneColor3 = '#808080';
+let sceneColor4 = '#808080';
+let sceneColor1Alt = '#000000';
+let sceneColor2Alt = '#000000';
+let sceneColor3Alt = '#000000';
+let sceneColor4Alt = '#000000';
+let sceneEnvironmentPreset;
 
 window.PlayPauseMedia = PlayPauseMedia;
 
-
+// if (settings.timedEventsListenerMode) {
+//   timedEventsListenerMode = settings.timedEventsListenerMode;
+// }
 window.addEventListener( 'keydown',  ( event ) => {
   // console.log("keydown code " + event.keyCode);
   switch ( event.keyCode ) {
@@ -139,6 +151,29 @@ window.addEventListener( 'keydown',  ( event ) => {
       document.selection.empty();
     }
   }
+
+
+  $('#overlayContent').on('click', '#events_dialog_button', function(e) {
+    SceneManglerModal("Events");
+  });
+  $('#overlayContent').on('click', '#locations_dialog_button', function(e) {
+    SceneManglerModal("Locations");
+  });
+  $('#overlayContent').on('click', '#tools_dialog_button', function(e) {
+    SceneManglerModal("Tools");
+  });
+  $('#overlayContent').on('click', '#inventory_dialog_button', function(e) {
+    SceneManglerModal("Inventory");
+  });
+  $('#overlayContent').on('click', '#messages_dialog_button', function(e) {
+    SceneManglerModal("Messages");
+  });
+
+  $('#modalContent').on('click', '#modalCloser', function(e) {
+    console.log("tryna showHideDialogPanel");
+    ShowHideDialogPanel();
+  });
+
 
   $('#modalContent').on('click', '#importModsButton', function(e) {
     // console.log("color 1 changed " + e.target.value);
@@ -999,7 +1034,7 @@ function ShowLocationModal(timestamp) {
     selectedLocationTimestamp = timestamp;
     // console.log("loaded and looking for " + phID);
     console.log("ShowLocationModal looking for " + timestamp);
-    phID = timestamp;
+    const phID = timestamp;
 
     console.log("local length " + localData.locations.length + " vs cloud length " + sceneLocations.locations.length);
     if (localData.locations.length) {
@@ -1049,7 +1084,7 @@ function ShowLocationModal(timestamp) {
         }
         let phID = thisLocation.timestamp;
         let title = label + " : " + thisLocation.timestamp;
-        // let content = "<span id='modalCloser' onclick=\x22ShowHideDialogPanel()\x22 class='close-modal'>&times;</span><div><h3>"+title+"</h3><hr>" + //populate modal
+
         let content = "<div><div><h3>"+title+"</h3><span id=\x22detailModMessage\x22 style=\x22float:right; color:pink; margin: auto\x22></span></div><hr>" + //populate modal
         // "<form>"+aa
         // "<table><tr>"
@@ -1290,9 +1325,9 @@ function AddTimekey() {
   // ShowTimekeysModal();
 }
 
-function ReturnFancyTimeString () {
-  return fancyTimeString;  
-}
+// function ReturnFancyTimeString () {
+//   return fancyTimeString;  
+// }
 
 function ShowTimekeysModal() {    //nerp, now in scenemanglermodal
   console.log("tryna SHowTImekyesMoodla");
@@ -1303,7 +1338,7 @@ function ShowTimekeysModal() {    //nerp, now in scenemanglermodal
 
   if (tkStarttimes != null)  {
      
-      let content = "<span id='modalCloser' onclick=\x22ShowHideDialogPanel()\x22 class='close-modal'>&times;</span><div><h3>Timed Events</h3><hr>" + //populate modal
+      let content = "<span id='modalCloser' class='close-modal'>&times;</span><div><h3>Timed Events</h3><hr>" + //populate modal
 
       "<div class=\x22row\x22>"+
 
@@ -1466,7 +1501,7 @@ function ReturnTimeKeys() {
       }
       var tableFoot =  "</tbody>" +
       "</table>";
-      timeKeysHtml = tableHead + tableBody + tableFoot;
+      const timeKeysHtml = tableHead + tableBody + tableFoot;
       return timeKeysHtml;
     } else {
         return "<br><br>No Timekeys Found";
@@ -1813,10 +1848,10 @@ function GreetingModal() {
   let userName = document.getElementById('userName').innerHTML;
   let greeting = document.getElementById('sceneGreeting').innerHTML;
   console.log("greeting modal: " + greeting);
-  $(content).html("<span id='modalCloser' onclick=\x22ShowHideDialogPanel()\x22 class='close-modal'>&times;</span><div><h3>" +userName + "!</h3><hr><p>" + greeting + "</p></div>");
+  $(content).html("<span id='modalCloser' class='close-modal'>&times;</span><div><h3>" +userName + "!</h3><hr><p>" + greeting + "</p></div>");
 
 }
-function SceneManglerModal(mode, autoHide) {
+export function SceneManglerModal(mode, autoHide) {
 
     // ClearInputs();
     console.log("opening SceneManglerModal with location " + selectedLocationTimestamp);
@@ -1935,7 +1970,7 @@ function SceneManglerModal(mode, autoHide) {
     if (mode == "click") {
       ShowHideDialogPanel("<div>playing stream</div>");
     } else {
-      let content = "<span id='modalCloser' onclick=\x22ShowHideDialogPanel()\x22 class='close-modal'>&times;</span>" +
+      let content = "<span id='modalCloser' class='close-modal'>&times;</span>" +
                   "<div><span id=\x22modalTitle\x22><h3>Scene Mangler</h3></span>" + //populate modal
       tabs+
       "<div "+welcomeDisplay+" id=\x22Welcome\x22 class=\x22modalMain tabcontent\x22>" + ////////////////////WELCOME
@@ -2074,7 +2109,7 @@ function SceneManglerModal(mode, autoHide) {
 
       "<div "+eventsDisplay+" id=\x22Events\x22 class=\x22tabcontent\x22>"+ 
           
-        // let content = "<span id='modalCloser' onclick=\x22ShowHideDialogPanel()\x22 class='close-modal'>&times;</span><div><h3>Timed Events</h3><hr>" + //populate modal
+
 
         "<div class=\x22row\x22>"+
 
@@ -2102,7 +2137,7 @@ function SceneManglerModal(mode, autoHide) {
             "<button class=\x22deleteButton\x22 onclick=\x22PlayPauseMedia()\x22>Play/Pause</button>"+
             "<button class=\x22deleteButton\x22 onclick=\x22FastForwardButton()\x22>>></button>"+
             "<button class=\x22deleteButton\x22 onclick=\x22NextButton()\x22>End</button>"+
-            "<div class=\x22\x22 style=\x22margin: 20px; padding: 20px;\x22 id=\x22modalTimeStats\x22>"+ReturnFancyTimeString()+"</div>" +
+            "<div class=\x22\x22 style=\x22margin: 20px; padding: 20px;\x22 id=\x22modalTimeStats\x22>"+fancyTimeString+"</div>" +
             "</div>"+
             ReturnTimeKeys() +
             "</div>"+
@@ -2161,6 +2196,7 @@ function SceneManglerModal(mode, autoHide) {
                 // }
             }
             GetUserInventory();
+            DisplayLocalFiles();
             InitLocalFiles();
           }
           InitPrimarySlider();
@@ -2241,7 +2277,7 @@ function ToggleShowCurves () {
     }
   }
 }
-function ShowHideDialogPanel (htmlString) {
+export function ShowHideDialogPanel (htmlString) {
 //   console.log("tryna ShowHideDialogPanel " + window.sceneType + " htmlString: " + htmlString);
   
   if (window.sceneType == undefined) {
@@ -2293,7 +2329,7 @@ function ShowHideDialogPanel (htmlString) {
             let userName = document.getElementById('userName').innerHTML;
             let greeting = document.getElementById('sceneGreeting').innerHTML;
             console.log("GREETING: " + greeting);
-            $(content).html("<span id='modalCloser' onclick=\x22ShowHideDialogPanel()\x22 class='close-modal'>&times;</span><div><h3>" +userName + "!</h3><hr><p>" + greeting + "</p></div>");
+            $(content).html("<span id='modalCloser' class='close-modal'>&times;</span><div><h3>" +userName + "!</h3><hr><p>" + greeting + "</p></div>");
 
             // console.log("userName: " + userName);
             // const iframe = document.createElement( 'iframe' );
@@ -2316,7 +2352,7 @@ function ShowHideDialogPanel (htmlString) {
                   let userName = document.getElementById('userName').innerHTML;
                   let greeting = document.getElementById('sceneGreeting').innerHTML;
                   console.log("GREETING: " + greeting);
-                  $(content).html("<span id='modalCloser' onclick=\x22ShowHideDialogPanel()\x22 class='close-modal'>&times;</span>"+
+                  $(content).html("<span id='modalCloser' class='close-modal'>&times;</span>"+
                   "<div><h3>" +userName + "!</h3><hr><p>" + greeting + "</p></div>");
             }
         }

@@ -1,6 +1,6 @@
 import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "../component/content-utils.js";
 import { settings, attributions, PauseIntervals } from "../../../connect/connect.js";
-
+import { SceneManglerModal } from "../../js/dialogs.js";
 
 let params = document.querySelector(".primaryAudioParams").id;
 console.log("audioParames: " +params);
@@ -515,7 +515,7 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
             modVolume: function(newVolume) {
                 // console.log("tryna mod primaryAUdioStreamVolume to " + newVolume);
                 // primaryAudioHowl.volume(normalizedVolume);
-                normalizedVolume = ((newVolume - -80) * 100) / (20 - -80) * .01;
+                const normalizedVolume = ((newVolume - -80) * 100) / (20 - -80) * .01;
                 console.log("normalizedVolume is " + normalizedVolume);
                 primaryAudioHowl.volume(normalizedVolume);
             },
@@ -943,7 +943,7 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
                 this.percentComplete = ((seek / this.duration) * 100).toFixed(2);
                 var el = this.el; 
                 var seeking = true;
-                let fancyTimeString = "";
+                let timeString = "";
                 if (!isNaN(seek) && seek != 0) {
 
                     if (this.primaryAudioHowl.playing()) {
@@ -959,10 +959,10 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
                         align: "left",
                         value: data.title + "\n playing - " + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " = " + this.percentComplete + "%\n\n\n"
                         });
-                        fancyTimeString = ""+data.title + "<br><span style='color: lightgreen'><strong> playing </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " - " + this.percentComplete + "%";
+                        timeString = ""+data.title + "<br><span style='color: lightgreen'><strong> playing </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " - " + this.percentComplete + "%";
                         if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-                            // this.statsDiv.innerHTML = fancyTimeString;
-                            if (AudioTimeUpdate) { AudioTimeUpdate(fancyTimeString); }
+                            // this.statsDiv.innerHTML = timeString;
+                            if (AudioTimeUpdate) { AudioTimeUpdate(timeString); }
                             currentTime = seek;
                         }
 
@@ -994,11 +994,11 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
                             align: "left",
                             value: data.title + "\n paused - " + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " = " + this.percentComplete + "%\n\n\n"
                         });
-                        fancyTimeString = ""+data.title + "<br><span style='color: yellow'><strong> loading </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " - " + this.percentComplete + "%";
+                        timeString = ""+data.title + "<br><span style='color: yellow'><strong> loading </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " - " + this.percentComplete + "%";
                         if (this.statsDiv != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-                            // this.statsDiv.innerHTML = fancyTimeString;
-                            // if (AudioTimeUpdate) { AudioTimeUpdate(fancyTimeString); }
-                            if (AudioTimeUpdate) { AudioTimeUpdate(fancyTimeString); }
+                            // this.statsDiv.innerHTML = timeString;
+                            // if (AudioTimeUpdate) { AudioTimeUpdate(timeString); }
+                            if (AudioTimeUpdate) { AudioTimeUpdate(timeString); }
                             currentTime = seek;
                         }
                         if (this.transportPlayButton != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
@@ -1031,11 +1031,11 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
                             intensity: 1.0,
                             color: 'yellow'
                         }, true);
-                        fancyTimeString = ""+data.title + "<br><span style='color: yellow'><strong> loading </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " - " + this.percentComplete + "%";
+                        timeString = ""+data.title + "<br><span style='color: yellow'><strong> loading </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " - " + this.percentComplete + "%";
                         if (this.statsDiv != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-                            // this.statsDiv.innerHTML = fancyTimeString;
-                            // if (AudioTimeUpdate) { AudioTimeUpdate(fancyTimeString); }
-                            if (AudioTimeUpdate) { AudioTimeUpdate(fancyTimeString); }
+                            // this.statsDiv.innerHTML = timeString;
+                            // if (AudioTimeUpdate) { AudioTimeUpdate(timeString); }
+                            if (AudioTimeUpdate) { AudioTimeUpdate(timeString); }
                         }
                         if (this.transportPlayButton != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
                             this.transportPlayButton.style.color = 'yellow';
@@ -1050,10 +1050,10 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
                             intensity: 1.0,
                             color: 'blue'
                         }, true);
-                        fancyTimeString = ""+data.title + "<br><span style='color: blue'><strong> ready </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " - " + this.percentComplete + "%";
+                        timeString = ""+data.title + "<br><span style='color: blue'><strong> ready </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(this.duration) + " - " + this.percentComplete + "%";
                         if (this.statsDiv != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-                            // this.statsDiv.innerHTML = fancyTimeString;
-                            if (AudioTimeUpdate) { AudioTimeUpdate(fancyTimeString); }
+                            // this.statsDiv.innerHTML = timeString;
+                            if (AudioTimeUpdate) { AudioTimeUpdate(timeString); }
                             currentTime = seek;
                         }
                         if (this.transportPlayButton != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
@@ -1165,18 +1165,18 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
         }); //end register
     }
 
-    function AudioTimeUpdate (fancyTimeString) {
-        // console.log("AudioTimeUpdate " + fancyTimeString);
+    function AudioTimeUpdate (timeString) {
+        // console.log("AudioTimeUpdate " + timeString);
         transportTimeStatsEl = document.getElementById("transportStats");
         if (transportTimeStatsEl == null) {
             transportTimeStatsEl = document.getElementById("transportStats");
         } else {
-            transportTimeStatsEl.innerHTML = fancyTimeString;
+            transportTimeStatsEl.innerHTML = timeString;
         }
         modalTimeStatsEl = document.getElementById('modalTimeStats');
         if (modalTimeStatsEl == null) {
             } else {
-                modalTimeStatsEl.innerHTML = fancyTimeString;
+                modalTimeStatsEl.innerHTML = timeString;
             }
             
         }

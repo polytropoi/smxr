@@ -1451,7 +1451,7 @@ AFRAME.registerComponent('sky_particles', {
           // const positions = this.points.geometry.attributes.position.array;
           // console.log("Positions length is " + positions.length);
           const posAttribute = this.points.geometry.getAttribute('position');
-          positions = posAttribute.array;
+          let positions = posAttribute.array;
           for (let i = 0; i < positions.length; i++) {
             if (positions[ i + 1 ] < -1) {
               // console.log('positoin ' + positions[i + 1]);

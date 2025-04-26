@@ -1,7 +1,8 @@
 /* global AFRAME, THREE */
 
-import { settings, localData, mouseDowntime } from "../../../connect/connect.js";
+import { room, settings, localData, userData, mouseDowntime } from "../../../connect/connect.js";
 import { keydown, showDialogPanel } from "../../js/dialogs.js";
+import { Pickup, Drop } from "../../src/component/content-utils.js";
 
 AFRAME.registerComponent('mod_scene_inventory', {
     schema: {
@@ -748,6 +749,7 @@ AFRAME.registerComponent('mod_object', {
       // let textData = [];
       let moIndex = -1;
       let idleIndex = -1;
+      let talkIndex = -1;
       let danceIndex = -1;
       let walkIndex = -1;
       let runIndex = -1;

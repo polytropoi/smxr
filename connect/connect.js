@@ -1,5 +1,6 @@
 import { InitIDB, hasLocalData } from "../connect/indexedDb.js";
 import { youtubePlayer, youtubeIsPlaying, primaryAudioEl } from "../../main/src/component/content-utils.js";
+import { ShowHideDialogPanel } from "../main/js/dialogs.js";
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
@@ -21,7 +22,7 @@ export const sceneEl = document.querySelector('a-scene');
 
 var dateString = Date.now().toString();
 let roomUsers = {};
-let stringRoomUsers = "";
+export let stringRoomUsers = "";
 var trimmedString = dateString.substring(dateString.length - 4, 4);
 var username;
 var pics = [];
@@ -32,7 +33,7 @@ let avatarNameEl = document.querySelector(".avatarName"); //make this actual uid
 // let avatarName = "";
 let playFrames = false;
 let isConnected = false;
-let userData = {};
+export let userData = {};
 let mySocketID = "";
 let emitInterval = null;
 let lastPosition = "";
@@ -42,8 +43,8 @@ let cameraRotation = {"x" : 0, "y": 0, "z": 0};
 
 let skyboxEl = document.getElementById('a_sky');
 let posRotRunning = false;
-let timeKeysData = {};
-let tkStarttimes = [];
+export let timeKeysData = {};
+export let tkStarttimes = [];
 
 let poiLocations = [];
 let curveLocations = [];
@@ -52,14 +53,7 @@ let sceneModels = [];
 let sceneObjects = [];
 let sceneTextItems = [];
 let localKeys = [];
-let sceneColor1 = '#808080';
-let sceneColor2 = '#808080';
-let sceneColor3 = '#808080';
-let sceneColor4 = '#808080';
-let sceneColor1Alt = '#000000';
-let sceneColor2Alt = '#000000';
-let sceneColor3Alt = '#000000';
-let sceneColor4Alt = '#000000';
+
 let volumePrimary = 0;
 let volumeAmbient = 0;
 let volumeTrigger = 0;
@@ -78,7 +72,7 @@ let matrixRoomsData = null;
 // let vidz = null;
 // let videoEl = null;
 
-export let timedEventsListenerMode = ""
+let timedEventsListenerMode = ""
 
 let mouseDownStarttime = 0;
 export let mouseDowntime = 0;
@@ -104,7 +98,7 @@ const camLockButton = document.getElementById("camLockToggleButton");
 let intersections = [];
 let avatarName = "";
 
-window.timedEventsListenerMode = timedEventsListenerMode;
+
 
 $(function() { 
    // InitIDB();
@@ -124,6 +118,7 @@ $(function() {
       let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
       timeKeysData =  JSON.parse(atob(theTimedEventsData));
       timedEventsListenerMode = timeKeysData.listenTo;
+      window.timedEventsListenerMode = timedEventsListenerMode;
       console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
    }
    lastCloudUpdate = settings.sceneLastUpdate;
@@ -517,18 +512,18 @@ function GetMatrixData() { //use matrix.org for... something
    }
 }
 
-export function MediaTimeUpdate (fancyTimeString) {
+export function MediaTimeUpdate (timeString) {
    // console.log("MediaTimeUpdate " + fancyTimeString);
    // transportTimeStatsEl = document.getElementById("transportStats");
    if (transportTimeStatsEl == null) {
       transportTimeStatsEl = document.getElementById("transportStats");
    } else {
-      transportTimeStatsEl.innerHTML = fancyTimeString;
+      transportTimeStatsEl.innerHTML = timeString;
    }
    modalTimeStatsEl = document.getElementById('modalTimeStats');
    if (modalTimeStatsEl == null) {
       } else {
-         modalTimeStatsEl.innerHTML = fancyTimeString;
+         modalTimeStatsEl.innerHTML = timeString;
       }
       
    }
@@ -556,7 +551,7 @@ function ReturnObjectName (_id) {
    }
 }
 
-function ReturnAttributions () {
+export function ReturnAttributions () {
    let attribString = "";
    if (attributions.length > 0) {
       for (let i = 0; i < attributions.length; i++) {
@@ -568,7 +563,7 @@ function ReturnAttributions () {
    return attribString;
 }
 
-function SendAdminMessage() {
+export function SendAdminMessage() {
    let aMessage = $('#chat_input').val();
    console.log(socket + " " + userData.sceneOwner + " " + $('#chat_input').val())
    if (socket && userData.sceneOwner && aMessage.length > 0) {
@@ -580,7 +575,7 @@ function SendAdminMessage() {
    }
 }
 
-function SaveModsToCloud() { //Save button on location modal, writes local mods upstairs..
+export function SaveModsToCloud() { //Save button on location modal, writes local mods upstairs..
 
    if (userData.sceneOwner != null && !busy) {
       busy = true;
@@ -750,6 +745,9 @@ function ExportMods () {
    var encodedString = btoa(JSON.stringify(mods));
    download(room+"_mods_"+currentTimestamp+".txt", encodedString);
 }
+// export function ReturnSceneColors() {
+//    return scene
+// }
 
 function ImportMods (event) {
    console.log("tryna import mods " + event.target.files[0].name);
@@ -1103,7 +1101,7 @@ function ToggleAllTransformControls () {
    // ShowHideDialogPanel();
 }
 
-function SnapLocation(locationKey) { //snap selected object to player loc
+export function SnapLocation(locationKey) { //snap selected object to player loc
   
    this.snapEl = document.getElementById(locationKey);
    this.cameraPosition = new THREE.Vector3(); 
@@ -1129,7 +1127,7 @@ function SnapLocation(locationKey) { //snap selected object to player loc
       } 
 }
 
-function GoToLocation(locationKey) {
+export function GoToLocation(locationKey) {
    console.log("tryna goat locatioKey " + locationKey);
    // let location = JSON.parse(localStorage.getItem(locationKey));
    let targetEl = document.getElementById(locationKey);
@@ -1339,7 +1337,7 @@ function GoToPrevious() {
    }
 }
 
-function ReturnLocationTable () { //just show em all now!
+export function ReturnLocationTable () { //just show em all now!
 
    let tablerows = "";
    // console.log("localData.locations " + JSON.stringify(localData.locations) );
@@ -1362,7 +1360,7 @@ function ReturnLocationTable () { //just show em all now!
          let namestring = "<span style=\x22color: white; \x22>"+namelabel+"</span>";
          if (localData.locations[i].isLocal != null && localData.locations[i].isLocal === true) {
             namestring = "<span style=\x22color: pink; \x22>"+namelabel+"</span>";
-            hasLocalData = true;
+            // hasLocalData = true;
          }  
 
          let markerString = "<span style=\x22color: white; font-weight: bold;\x22>"+localData.locations[i].markerType+"</span>";
@@ -2872,7 +2870,7 @@ function PlayPausePrimaryAudio() {
    var primaryAudioController = document.getElementById("primaryAudio").components.primary_audio_control; 
    primaryAudioController.playPauseToggle(); 
 }
-function InitPrimarySlider() {
+export function InitPrimarySlider() {
 // let modal = document.getElementById('modalContent');
 let primaryAudioSlider = document.getElementById("primaryAudioVolumeSlider");
    if (primaryAudioSlider != undefined) {
@@ -2890,7 +2888,7 @@ let primaryAudioSlider = document.getElementById("primaryAudioVolumeSlider");
       }
    }
 }
-function InitAmbientSlider () {
+export function InitAmbientSlider () {
    // let modal = document.getElementById('modalContent');
  let ambientAudioSlider = document.getElementById("ambientAudioVolumeSlider");
    if (ambientAudioSlider != null) {
@@ -2906,7 +2904,7 @@ function InitAmbientSlider () {
       }
    }
 }
-function InitTriggerSlider () {
+export function InitTriggerSlider () {
    // let modal = document.getElementById('modalContent');
  let triggerAudioSlider = document.getElementById("triggerAudioVolumeSlider");
    if (triggerAudioSlider != null) {

@@ -536,7 +536,7 @@ const getFileFromInput = () => {
 	});
 };
 
-const ConvertAndSaveLocalFile = async () => {
+export const ConvertAndSaveLocalFile = async () => {
    let file = await getFileFromInput();
    if (getExtension(file.name) == ".glb" || getExtension(file.name) == ".jpg") {
       console.log("tryna save a local file " + file.name);
@@ -550,11 +550,11 @@ const ConvertAndSaveLocalFile = async () => {
    }
 
 }
-const InitLocalFiles = async () => {
+export const InitLocalFiles = async () => {
 	// filedb = await initIndexedDb('SMXR', [{ name: storeName, keyPath: storeKey }]);
 	// renderAvailableImagesFromDb();
 
-   DisplayLocalFiles();
+
    await renderStorageQuotaInfo();
 
 }
