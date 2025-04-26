@@ -5,7 +5,7 @@ if (typeof AFRAME === 'undefined') {
 }
 
 import { keydown } from "../../js/dialogs.js";
-import { settings, videoEl, room, SetVideoEventsData } from "../../../connect/connect.js";
+import { settings, videoEl, room, SetVideoEventsData, MediaTimeUpdate, PauseIntervals } from "../../../connect/connect.js";
 
 var ua = window.navigator.userAgent;
 var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
@@ -24,7 +24,7 @@ export let youtubeTime = 0;
 export let youtubeDuration = 0;
 export let youtubeData = {};
 
-
+let fancyTimeString = "";
 
 export function clamp (num, min, max) {
   return Math.min(Math.max(num, min), max);
@@ -4694,13 +4694,15 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 let mainTransportSlider = null;
 let transportPlayButton = null;
 let youtube_player = null; //3d version
-export let youtubePlayer = null; //spawned by embed api
+export let youtubePlayer; //spawned by embed api
 export let youtubeIsPlaying = false;
 let youtubeState = "";
 let youtubeTitleEl = "";
 // window.youtubeIsPlaying = youtubeIsPlaying;
 
-export function onYouTubeIframeAPIReady () { //must be global, called when youtube embed api is loaded
+window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+function onYouTubeIframeAPIReady () { //must be global, called when youtube embed api is loaded
   let youtubeEl = document.getElementById("youtubeElement");
   let yt_id = youtubeEl.getAttribute('data-yt_id');
   console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
@@ -4757,12 +4759,12 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
       SetVideoEventsData();
     }
     if (youtube_player == null || youtube_player == undefined) {
-          this.interval = setInterval(() => {
+          let interval = setInterval(() => {
             // console.log("youtube_player is null " + youtube_player == null);
             youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
             if (youtube_player != null) {
               youtube_player.player_status_update("ready");
-              clearInterval(this.interval);
+              clearInterval(interval);
             }
           }, 500); 
         } else {
@@ -4823,6 +4825,7 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
     // currentTime = event.target.getCurrentTime();
     // console.log("current time youtube " + currentTime + " listenrMode " + timedEventsListenerMode);
     let duration = event.target.getDuration();
+    let interval;
     if (event.data == YT.PlayerState.PLAYING) {
       // alert('video started');
         console.log("youtube is playing");
@@ -4838,9 +4841,9 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
         
         // this.el.emit('youtubeToggle', {isPlaying : true}, true);
 
-        this.interval = setInterval(() => {
-          time = event.target.getCurrentTime();
-          currentTime = time.toFixed(2);
+        interval = setInterval(() => {
+          const time = event.target.getCurrentTime();
+          const currentTime = time.toFixed(2);
           // console.log(time.toFixed(2));
           let percent = time / duration;
           fancyTimeString = fancyTimeFormat(time)  + " / "+ fancyTimeFormat(duration.toFixed(2)) + " - " + (percent * 100).toFixed(2) +" %";
@@ -4861,7 +4864,7 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
         //  alert('video paused');
         youtubeIsPlaying = false;
         console.log("youtube is not playing");
-        clearInterval(this.interval);
+        clearInterval(interval);
         // this.el.emit('youtubeToggle', {isPlaying : false}, true);
       }
       // let interval = setInterval(() => {

@@ -65,7 +65,7 @@ let volumeTrigger = 0;
 
 let currentLocationIndex = -1;
 let currentTime = 0;  //depends on listenerMode
-let fancyTimeString = "";
+
 let modalTimeStatsEl = null; //stats for timekeys modal
 let transportTimeStatsEl = null;
 // let sceneType = null;
@@ -77,7 +77,7 @@ let matrixRoomsData = null;
 // let vidz = null;
 // let videoEl = null;
 
-let timedEventsListenerMode = ""
+export let timedEventsListenerMode = ""
 
 let mouseDownStarttime = 0;
 export let mouseDowntime = 0;

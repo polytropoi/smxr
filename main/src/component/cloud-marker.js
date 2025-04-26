@@ -931,7 +931,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                 
                 objEl.setAttribute("mod_object", {'locationData': this.locData, 'objectData': this.objectData});
                 objEl.id = Date.now();
-                sceneEl.appendChild(objEl);
+                this.el.sceneEl.appendChild(objEl);
 
 
               }

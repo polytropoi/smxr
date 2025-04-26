@@ -1,5 +1,5 @@
 import { fancyTimeFormat, youtubePlayer, youtubeIsPlaying } from "../src/component/content-utils.js";
-import { settings, room, sceneLocations, localData, PauseIntervals } from "../../connect/connect.js";
+import { settings, room, sceneLocations, localData, PauseIntervals, timedEventsListenerMode } from "../../connect/connect.js";
 import { hasLocalData } from "../../connect/indexedDb.js";
 
 export let showDialogPanel = false;
