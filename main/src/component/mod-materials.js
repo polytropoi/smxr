@@ -1,4 +1,4 @@
-import { settings, mouse, MediaTimeUpdate } from "../../../connect/connect.js";
+import { settings, mouse, MediaTimeUpdate, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/connect.js";
 import { fancyTimeFormat } from "../../src/component/content-utils.js";
 
 const raycaster = new THREE.Raycaster(); //reuse this!  
@@ -613,8 +613,8 @@ AFRAME.registerComponent('mod-materials', {
           // playVideo(this.video);
           //apple needs a click
             // if (!this.isInitialized) {
-              if (timedEventsListenerMode == null) {
-                timedEventsListenerMode = "Primary Video";
+              if (!timedEventsListenerMode || timedEventsListenerMode == "") {
+                  SetTimedEventsListenerMode("Primary Video")
               }
 
               this.vidtexture = new THREE.VideoTexture( this.video );

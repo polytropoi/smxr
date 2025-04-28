@@ -5,7 +5,7 @@ if (typeof AFRAME === 'undefined') {
 }
 
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
-import { settings, videoEl, room, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, mouse, CreateLocation } from "../../../connect/connect.js";
+import { settings, videoEl, room, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, mouse, CreateLocation, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/connect.js";
 import { DeleteLocalSceneData } from "../../../connect/indexedDb.js";
 
 var ua = window.navigator.userAgent;
@@ -2868,12 +2868,12 @@ AFRAME.registerComponent('skybox_dynamic', {
           let envMapObjex = document.getElementsByClassName('envMap');
           // console.log("envMap elements " + envMapObjex.length);
           if (envMapObjex != null) {
-            this.mesh = null;
+            let envmesh;
             for (let i = 0; i < envMapObjex.length; i++) {
               // console.log("envMap element " + i + " " + envMapObjex.id);
-            this.mesh = envMapObjex[i].getObject3D('mesh');
-            if (this.mesh != null) {
-              this.mesh.traverse(function (node) {
+            envmesh = envMapObjex[i].getObject3D('mesh');
+            if (envmesh) {
+              envmesh.traverse(function (node) {
               if (node.material && 'envMap' in node.material) {
               // if (node.material) {
                 // console.log("tryna set envmap on " + node.material.name);
@@ -2947,6 +2947,7 @@ AFRAME.registerComponent('skybox_dynamic', {
     console.log("tryna applyEnvMap");
     let envMapObjex = document.getElementsByClassName('envMap');
     // console.log("envMap elements " + envMapObjex.length + " with this.texture " + this.texture);
+    let that = this;
     if (envMapObjex != null) {
     
       this.mesh = null;
@@ -2954,15 +2955,15 @@ AFRAME.registerComponent('skybox_dynamic', {
         
         this.mesh = envMapObjex[i].getObject3D('mesh');
 
-      if (this.mesh != null) {
-        this.mesh.traverse(function (node) {
+        if (this.mesh != null) {
+          this.mesh.traverse(function (node) {
 
-        if (node.material && 'envMap' in node.material) {
-        // if (node.material) {
-          // console.log("tryna set envmap on " + node.material.name);
-            node.material.envMap = this.texture;
-            // node.material.envMap.intensity = .5;
-            node.material.needsUpdate = true;
+          if (node.material && 'envMap' in node.material && that.texture) {
+          // if (node.material) {
+            // console.log("tryna set envmap on " + node.material.name);
+              node.material.envMap = that.texture;
+              // node.material.envMap.intensity = .5;
+              node.material.needsUpdate = true;
             }
           });
         }
@@ -3553,7 +3554,7 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
         const landscapeMesh = pictureGroupPicLandscapeEl.getObject3D('mesh');
         this.landscapeMesh = landscapeMesh;
         this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
-        console.log("tryna load initial scene pic " + this.href + " from " + JSON.stringify(this.picGroupArray));
+        console.log("tryna load initial scene pic " + this.href + " from " + this.picGroupArray[this.picGroupArrayIndex].name);
         if (this.href) {
           
           this.loader.load(
@@ -4171,7 +4172,8 @@ AFRAME.registerComponent('video_groups_data', {
     tkObject.listenTo = "Primary Video";
     tkObject.timekeys = vids[0].timekeys;
     // localStorage.setItem(room + "_timeKeys", JSON.stringify(vids[0].timekeys)); 
-    timedEventsListenerMode = "Primary Video"
+    SetTimedEventsListenerMode("Primary Video");
+    // timedEventsListenerMode = "Primary Video"
     // localStorage.setItem(room + "_timeKeys", JSON.stringify(tkObject)); 
     } else {
       timeKeysData = JSON.parse(vtk);
@@ -4726,8 +4728,11 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
   function onPlayerReady(event) {
     
     console.log("youtubePlayer is re4ady!");
-    if (timedEventsListenerMode == null) {
-      timedEventsListenerMode = "Youtube";
+    // if (timedEventsListenerMode == null) {
+    //   timedEventsListenerMode = "Youtube";
+    // }
+    if (!timedEventsListenerMode || timedEventsListenerMode == "") {
+        SetTimedEventsListenerMode("Youtube");
     }
     // document.getElementById('youtubeElement').style.borderColor = '#FF6D00';
     // youtube_player.player_status_update("ready");
@@ -4815,7 +4820,7 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
   //   }
   // }
 
-  function onPlayerStateChange(event) {
+  function onPlayerStateChange(event) { //youtube player events
 
     // // let interval = null;
     // currentTime = event.target.getCurrentTime();
@@ -4839,7 +4844,7 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
 
         interval = setInterval(() => {
           const time = event.target.getCurrentTime();
-          const currentTime = time.toFixed(2);
+          // const currentTime = time.toFixed(2);
           // console.log(time.toFixed(2));
           let percent = time / duration;
           fancyTimeString = fancyTimeFormat(time)  + " / "+ fancyTimeFormat(duration.toFixed(2)) + " - " + (percent * 100).toFixed(2) +" %";

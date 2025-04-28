@@ -1,5 +1,5 @@
 import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "../component/content-utils.js";
-import { settings, attributions, PauseIntervals } from "../../../connect/connect.js";
+import { settings, attributions, PauseIntervals, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/connect.js";
 import { SceneManglerModal } from "../../js/dialogs.js";
 
 let params = document.querySelector(".primaryAudioParams").id;
@@ -18,6 +18,7 @@ let title = "";
 let listeners = 0;
 let bitrate = 0;
 
+let currentTime = 0;
 var getJSON = function(url, callback) { //netradio details //nm
     var xhr = new XMLHttpRequest();  
     xhr.open('POST', url, true);
@@ -362,8 +363,8 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
                     primaryAudioParent.setAttribute('position', audioElPosition); //snap to audio posiition if there is one...
 
                 }
-                if (timedEventsListenerMode == null) {
-                    timedEventsListenerMode = "Primary Audio";
+                if (!timedEventsListenerMode || timedEventsListenerMode == "") {
+                    SetTimedEventsListenerMode("Primary Audio")
                 }
                 primaryAudioHowl.load();
                 primaryAudioParent.setAttribute("visible",true);
@@ -686,8 +687,8 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
             //     volume: 1.0  
             // });
             // this.initHowl(data.url);
-            if (timedEventsListenerMode == null) {
-                timedEventsListenerMode = 'Primary Audio'
+            if (!timedEventsListenerMode || timedEventsListenerMode == "") {
+                SetTimedEventsListenerMode("Primary Audio")
             }
             this.enviroDressing = document.querySelector('.environmentDressing');
             let primaryAudioText = this.primaryAudioText;
@@ -1165,21 +1166,22 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
         }); //end register
     }
 
-    function AudioTimeUpdate (timeString) {
-        // console.log("AudioTimeUpdate " + timeString);
+function AudioTimeUpdate (timeString) {
+    // console.log("AudioTimeUpdate " + timeString);
+    let transportTimeStatsEl = document.getElementById("transportStats");
+    if (transportTimeStatsEl == null) {
         transportTimeStatsEl = document.getElementById("transportStats");
-        if (transportTimeStatsEl == null) {
-            transportTimeStatsEl = document.getElementById("transportStats");
-        } else {
-            transportTimeStatsEl.innerHTML = timeString;
-        }
-        modalTimeStatsEl = document.getElementById('modalTimeStats');
-        if (modalTimeStatsEl == null) {
-            } else {
-                modalTimeStatsEl.innerHTML = timeString;
-            }
-            
-        }
+    } else {
+        transportTimeStatsEl.innerHTML = timeString;
+    }
+    let modalTimeStatsEl = document.getElementById('modalTimeStats');
+    
+    if (modalTimeStatsEl) {
+
+        modalTimeStatsEl.innerHTML = timeString;
+    }
+}
+
 AFRAME.registerComponent('primary_audio_events', {
 
     // schema: {

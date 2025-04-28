@@ -72,7 +72,7 @@ let matrixRoomsData = null;
 // let vidz = null;
 // let videoEl = null;
 
-let timedEventsListenerMode = ""
+export let timedEventsListenerMode = ""
 
 let mouseDownStarttime = 0;
 export let mouseDowntime = 0;
@@ -118,8 +118,9 @@ $(function() {
    if (timedEventsEl) {
       let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
       timeKeysData =  JSON.parse(atob(theTimedEventsData));
-      timedEventsListenerMode = timeKeysData.listenTo;
-      window.timedEventsListenerMode = timedEventsListenerMode;
+      SetTimedEventsListenerMode(timeKeysData.listenTo);
+      // timedEventsListenerMode = ;
+      // window.timedEventsListenerMode = timedEventsListenerMode;
       console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
    }
    lastCloudUpdate = settings.sceneLastUpdate;
@@ -413,6 +414,9 @@ $(function() {
 
 }); //end onload
 
+export function SetTimedEventsListenerMode(mode) {
+   timedEventsListenerMode = mode;
+}
 
 $('#nextButton').on('click', function(e) {
    GoToNext();
@@ -2982,8 +2986,8 @@ export function SetPrimaryAudioEventsData () {
    tkStarttimes.sort(function(a, b){
       return a - b;
    });
-
-   timedEventsListenerMode = "Primary Audio"; 
+   SetTimedEventsListenerMode("Primary Audio");
+   
    TimedEventListener();
 
 }

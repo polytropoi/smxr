@@ -1,7 +1,8 @@
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton } from "../src/component/content-utils.js";
 import { settings, room, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
-  userData, stringRoomUsers, timeKeysData, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
-  tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, SendChatMessage } from "../../connect/connect.js";
+  userData, stringRoomUsers, timeKeysData, timedEventsListenerMode, SetTimedEventsListenerMode, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
+  tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, SendChatMessage
+  } from "../../connect/connect.js";
 import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData } from "../../connect/indexedDb.js";
 
 export let showDialogPanel = false;
@@ -15,7 +16,7 @@ let theModal = null;
 let theRenderCanvas = null;
 let locationModalIsOn = false;
 var sceneEl = document.querySelector('a-scene');
-let timedEventsListenerMode = "";
+// let timedEventsListenerMode = "";
 let showStats = false;
 let showCurves = false;
 export let keydown = "";
@@ -668,7 +669,8 @@ window.addEventListener( 'keydown',  ( event ) => {
 
 
   $('#modalContent').on('change', '#listenToTimelineSelector', function(e) {
-    timedEventsListenerMode = e.target.value;
+    SetTimedEventsListenerMode(e.target.value);
+    // timedEventsListenerMode = e.target.value;
     timeKeysData.listenTo = timedEventsListenerMode;
     console.log('timedEventsListenerMode ' + timedEventsListenerMode);
   });
@@ -1317,7 +1319,8 @@ function ReturnTimedEventSelectors (selectedType) {
  function ReturnListenToTimelineSelectors (selectedType) {
    
    if (timeKeysData != null && timeKeysData.listenTo != undefined) {
-     timedEventsListenerMode = timeKeysData.listenTo;
+      SetTimedEventsListenerMode(timeKeysData.listenTo);
+    //  timedEventsListenerMode = ;
    }
    if (selectedType == null && timedEventsListenerMode != null) { 
      selectedType = timedEventsListenerMode;
@@ -1342,7 +1345,8 @@ function ReturnTimedEventSelectors (selectedType) {
           "<option>" + typesArray[i] + "</option>";
       }
       if (selectedType == "None") {
-        timedEventsListenerMode = null;
+        SetTimedEventsListenerMode("");
+        
       }
     } else {
       if (typesArray[i] == timedEventsListenerMode) {
@@ -1517,10 +1521,12 @@ function ReturnTimeKeys() {
     // console.log("timedEvents:  " +JSON.stringify(timeKeysData));
     if (localData.timedEvents) {
       timeKeysData = localData.timedEvents;
-      timedEventsListenerMode = timeKeysData.listenTo; 
+    
+      SetTimedEventsListenerMode(timeKeysData.listenTo);
     } else if (settings && settings.sceneTimedEvents) {
       timeKeysData = settings.sceneTimedEvents;
-      timedEventsListenerMode = timeKeysData.listenTo; 
+      SetTimedEventsListenerMode(timeKeysData.listenTo);
+      
     }
     // console.log("timedEvents:  " +JSON.stringify(timeKeysData));
     if (timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys != null && timeKeysData.timekeys.length > 0) {
