@@ -1,5 +1,5 @@
 import { InitLocalColors } from "../main/js/dialogs.js";
-import { settings, room, sceneLocations, locationTimestamps, localData, lastCloudUpdate, InitCurves, sceneEl, PlayerToLocation } from "../connect/connect.js";
+import { settings, room, sceneLocations, locationTimestamps, localData, lastCloudUpdate, InitCurves, sceneEl, PlayerToLocation, SetTimeKeysData } from "../connect/connect.js";
 
 export let hasLocalData = false;
 //////////////////////indexedDB functions...
@@ -208,7 +208,8 @@ export function InitIDB() {
                }
                if (cursor.value.timedEvents) {
                   console.log("localdata timedEvents " + JSON.stringify(cursor.value.timedEvents));
-                  timeKeysData = cursor.value.timedEvents;
+                  SetTimeKeysData(cursor.value.timedEvents);
+                  
                 
                }
 

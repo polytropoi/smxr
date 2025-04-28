@@ -1777,10 +1777,7 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                 }
             }
-            // if (sceneModelLocations.length > 0) {
-                
 
-            // async.each (sceneModelLocations, function (locMdl, callbackz) { //loop tru w/ async
             for (let i = 0; i < sceneModelLocations.length; i++) {
                 let locMdl = sceneModelLocations[i];
                 var scale = 1;
@@ -1828,7 +1825,6 @@ webxr_router.get('/:_id', function (req, res) {
                     && locMdl.markerType != "mailbox"
                     && locMdl.markerType != "portal" 
                     && locMdl.markerType != "collider"
-                    && locMdl.markerType != "audio"
                     && locMdl.markerType != "text") { 
                     
                     const m_id = ObjectId.createFromHexString(locMdl.modelID.toString());

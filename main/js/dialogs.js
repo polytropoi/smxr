@@ -1,7 +1,10 @@
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "../src/component/content-utils.js";
 import { settings, room, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
   userData, stringRoomUsers, timeKeysData, timedEventsListenerMode, SetTimedEventsListenerMode, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
-  tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal
+  tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
+  SetTimeKeysData,
+  GoToNext,
+  GoToPrevious
   } from "../../connect/connect.js";
 import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData } from "../../connect/indexedDb.js";
 
@@ -232,6 +235,12 @@ window.addEventListener( 'keydown',  ( event ) => {
     TabMangler(e, "About");
   });
 
+  $('#modalContent').on('click', '#gotoNextButton', function(e) {
+    GoToNext();
+  });
+  $('#modalContent').on('click', '#gotoPreviousButton', function(e) {
+    GoToPrevious();
+  });
 
 
   
@@ -1530,7 +1539,8 @@ function ReturnTimeKeys() {
     
       SetTimedEventsListenerMode(timeKeysData.listenTo);
     } else if (settings && settings.sceneTimedEvents) {
-      timeKeysData = settings.sceneTimedEvents;
+      SetTimeKeysData(settings.sceneTimedEvents);
+      // timeKeysData = settings.sceneTimedEvents;
       SetTimedEventsListenerMode(timeKeysData.listenTo);
       
     }
@@ -2161,8 +2171,8 @@ export function SceneManglerModal(mode, autoHide) {
       
       "<div "+locationsDisplay+" id=\x22Locations\x22 class=\x22modalMain tabcontent\x22>"+ /////////////LOCATIONS TABLE
 
-      "<button class=\x22goToButton\x22 id=\x22nextButton\x22 onclick=\x22GoToNext()\x22>GoTo Next</button>" +
-      "<button class=\x22goToButton\x22 id=\x22prevButton\x22 onclick=\x22GoToPrevious()\x22>GoTo Previous</button>" +
+      "<button class=\x22goToButton\x22 id=\x22gotoNextButton\x22 >GoTo Next</button>" +
+      "<button class=\x22goToButton\x22 id=\x22gotoPreviousButton\x22 >GoTo Previous</button>" +
         ReturnCurrentPlayerLocation() +
         hasModsMessage +
         "<button style=\x22float:left\x22 class=\x22saveButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22CreateLocation()\x22>Create New Location</button>"+

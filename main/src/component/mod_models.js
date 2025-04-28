@@ -290,15 +290,15 @@ AFRAME.registerComponent('mod_model', {
               
             }
           } 
-          if (this.data.markerType == "navmesh" 
-            || this.data.markerType == "surface" 
-            || (this.data.eventData && this.data.eventData.toLowerCase().includes("surface"))
-            || (this.data.eventData && this.data.eventData.toLowerCase().includes("navmesh"))) { //no, this is set on the server (webxr_routes.js) ~line 2600
-              this.el.object3D.visible = false;
-            if ((this.data.tags && this.data.tags.includes("show")) || (this.data.eventData && this.data.eventData.toLowerCase().includes("show"))) {
-              this.el.object3D.visible = true;
-            }
-          }
+          // if (this.data.markerType == "navmesh" 
+          //   || this.data.markerType == "surface" 
+          //   || (this.data.eventData && this.data.eventData.toLowerCase().includes("surface"))
+          //   || (this.data.eventData && this.data.eventData.toLowerCase().includes("navmesh"))) { //no, this is set on the server (webxr_routes.js) ~line 2600
+          //     this.el.object3D.visible = false;
+          //   if ((this.data.tags && this.data.tags.includes("show")) || (this.data.eventData && this.data.eventData.toLowerCase().includes("show"))) {
+          //     this.el.object3D.visible = true;
+          //   }
+          // }
           if ((this.data.eventData && this.data.eventData.toLowerCase().includes("agent")) || this.data.markerType == "character" || this.data.tags.includes("agent")) { 
             if (settings.useNavmesh) {
               // this.el.setAttribute("nav-agent", "");
@@ -1225,7 +1225,7 @@ AFRAME.registerComponent('mod_model', {
             let tdata = document.getElementById("mainText").getAttribute("main-text-control", "mainTextString"); 
             // console.log("target eventData : "+ JSON.stringify(this.data.eventData));
             textData = tdata.mainTextString.split("~");
-            hasCallout = true;
+            this.hasCallout = true;
           } else {
             
             textData = this.data.description.split("~");

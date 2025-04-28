@@ -374,6 +374,7 @@ $(function() {
          picGroupIconEl.setAttribute("visible", false);
       }
    }
+
    // } 
 
    document.body.addEventListener("obbcollisionstarted", function (e) {
@@ -527,6 +528,9 @@ function GetMatrixData() { //use matrix.org for... something
    }
 }
 
+export function SetTimeKeysData (tkData) {
+   timeKeysData = tkData;
+}
 export function MediaTimeUpdate (timeString) {
    // console.log("MediaTimeUpdate " + fancyTimeString);
    // transportTimeStatsEl = document.getElementById("transportStats");
@@ -1195,7 +1199,7 @@ export function PlayerToLocation(worldPos) {
   
 }
 
-function GoToNext() {
+export function GoToNext() {
    console.log("tryna gotonext " + settings.sceneType);
 // if (currentLocationIndex > 0) {
    if (settings.sceneType == "mapbox") {
@@ -1226,7 +1230,7 @@ function GoToNext() {
                }
                
                if (localData.locations) {
-                  for (i = 0; i < localData.locations.length; i++) {
+                  for (let i = 0; i < localData.locations.length; i++) {
                      if (localData.locations[i].timestamp == curveLocations[currentLocationIndex].timestamp) {
                         curveLocations[currentLocationIndex] = localData.locations[i];
                         console.log("curve currentLocationIndex " +  currentLocationIndex  +" curveLocations"  + JSON.stringify(curveLocations[currentLocationIndex]));
@@ -1298,7 +1302,7 @@ function GoToNext() {
    }
 }
 // }
-function GoToPrevious() {
+export function GoToPrevious() {
 
    if (settings.sceneType == "mapbox") {
       
@@ -2744,7 +2748,7 @@ function playByteArray(byteArray) {
 
    var arrayBuffer = new ArrayBuffer(byteArray.length);
    var bufferView = new Uint8Array(arrayBuffer);
-   for (i = 0; i < byteArray.length; i++) {
+   for (let i = 0; i < byteArray.length; i++) {
      bufferView[i] = byteArray[i];
    }
 
@@ -2976,7 +2980,7 @@ function UpdateTriggerAudioVolume(newVolume) {
 export function SetPrimaryAudioEventsData () {
 
    // timeKeysData = JSON.parse(localStorage.getItem(room+ "_timeKeys"));
-   let timekeysData = settings.sceneTimedEvents;
+   // let timekeysData = settings.sceneTimedEvents;
    // console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
    tkStarttimes = [];
    if (timeKeysData != undefined && timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0 )

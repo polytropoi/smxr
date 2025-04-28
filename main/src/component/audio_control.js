@@ -712,14 +712,14 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
             this.el.addEventListener('eventData', function (event) {  //custom event from primary_audio_events, below //STILL?
                 console.log("gots eventData!: " + event.detail);
                 let timekeys = [];
-                let timeKeysData = event.detail;
-                console.log("timekeys length " + JSON.stringify(timeKeysData));   
+                let eventTimeKeysData = event.detail;
+                console.log("timekeys length " + JSON.stringify(eventTimeKeysData));   
                 if (data.audioevents) {
                     // for (let i = 0; i < timeKeysData.Length; i++) {
                     //     // timekeys.push(timeKeysData[i].keystarttime);
                     //     console.log("timekey " + JSON.stringify(timeKeysData[i]));    
                     // }        
-                        timeKeysData.forEach(function (timekey) {
+                    eventTimeKeysData.forEach(function (timekey) {
                         console.log("timekey " + timekey.keystarttime);
                         timekeys.push(parseFloat(timekey.keystarttime).toFixed(2));
                     });

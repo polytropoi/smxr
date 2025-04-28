@@ -17506,7 +17506,7 @@ function getAllPeople() {
         // var jsonResponse = response.data;
         //  var jsonResponse = response.data;
         var arr = response.data;
-        console.log(JSON.stringify(arr[0]));
+        console.log("getting scene pictures..");
         var tableHead = "<table id=\x22dataTable1\x22 class=\x22table table-striped table-bordered\x22 style=\x22width:100%\x22>" +
             "<thead>"+
             "<tr>"+
@@ -17526,7 +17526,7 @@ function getAllPeople() {
             if ( date.toString().includes("-")) {
                
                 date = new Date(date).getTime();
-                console.log(date);
+                // console.log(date);
             } else {
                 // date.toLocaleString()
             }

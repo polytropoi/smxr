@@ -145,6 +145,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             //   primaryAudioPlayer.setAttribute("visible", false); //
             // }
             this.primaryAudioMangler.hideDefault();
+            this.loadModel();
           
           }
         }

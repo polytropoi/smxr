@@ -5,7 +5,7 @@ if (typeof AFRAME === 'undefined') {
 }
 
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
-import { settings, videoEl, room, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, mouse, CreateLocation, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/connect.js";
+import { settings, videoEl, room, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, mouse, CreateLocation, timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData } from "../../../connect/connect.js";
 import { DeleteLocalSceneData } from "../../../connect/indexedDb.js";
 
 var ua = window.navigator.userAgent;
@@ -4178,7 +4178,8 @@ AFRAME.registerComponent('video_groups_data', {
     // timedEventsListenerMode = "Primary Video"
     // localStorage.setItem(room + "_timeKeys", JSON.stringify(tkObject)); 
     } else {
-      timeKeysData = JSON.parse(vtk);
+      SetTimeKeysData(JSON.parse(vtk));
+      // timeKeysData = ;
       
     }
 
