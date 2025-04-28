@@ -1,4 +1,4 @@
-import { InitIDB, SaveLocalData, DeleteLocalSceneData } from "../connect/indexedDb.js";
+import { InitIDB, SaveLocalData, DeleteLocalSceneData, hasLocalData, SetHasLocalData } from "../connect/indexedDb.js";
 import { youtubePlayer, youtubeIsPlaying, primaryAudioEl } from "../../main/src/component/content-utils.js";
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
 
@@ -51,7 +51,6 @@ let curveLocations = [];
 let cloudMarkers = []; //???? unused>?
 export let sceneModels = [];
 
-let sceneTextItems = [];
 let localKeys = [];
 
 let volumePrimary = 0;
@@ -461,7 +460,7 @@ function UpdateSceneLocations () { //unused?
    }
 }
 
-function getExtension(filename) {
+export function getExtension(filename) {
    // console.log("tryna get extension of " + filename);
    var i = filename.lastIndexOf('.');
    return (i < 0) ? '' : filename.substr(i);
@@ -832,7 +831,7 @@ export function ImportMods (event) {
       console.log("wrong room!")
    }
 }
-function SaveTimekeysToLocal () {
+export function SaveTimekeysToLocal () {
    console.log(JSON.stringify(timeKeysData));
    localData.timedEvents = timeKeysData;
    SaveLocalData();
@@ -840,10 +839,11 @@ function SaveTimekeysToLocal () {
 }
 
 
-function SaveModToLocal(locationKey) { //locationKey is now just timestamp of the location item and element id, unique enough
+export function SaveModToLocal(locationKey) { //locationKey is now just timestamp of the location item and element id, unique enough
    let name = document.getElementById('locationName').value;
    console.log("tryna save mod to local with key " + locationKey + " named " +name);
-   hasLocalData = true;
+   
+   SetHasLocalData(true);
    let locItem = {};
    
    
@@ -901,7 +901,7 @@ function SaveModToLocal(locationKey) { //locationKey is now just timestamp of th
    // localStorage.setItem(locationKey, JSON.stringify(locItem));
    let hasLocal = false;
    for (let i = 0; i < localData.locations.length; i++) {
-      console.log("chck : " + localData.locations[i].timestamp.toString() + " vs " +locationKey.toString());
+      // console.log("chck : " + localData.locations[i].timestamp.toString() + " vs " +locationKey.toString());
       if (localData.locations[i].timestamp.toString() == locationKey.toString() ) {
          console.log("gotsa match for localData.locations " + locationKey.toString() + " modelID " +locItem.modelID);
          // localData.locations[i] = Object.assign(locItem); //merge?

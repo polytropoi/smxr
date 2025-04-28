@@ -2,6 +2,7 @@
 
 import { settings, GoToLocation, sceneModels, ToggleTransformControls } from "../../../connect/connect.js";
 import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
+import { sceneTextItems } from "./content-utils.js";
 
 AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
     schema: {

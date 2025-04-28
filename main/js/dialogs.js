@@ -1,7 +1,7 @@
-import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton } from "../src/component/content-utils.js";
+import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "../src/component/content-utils.js";
 import { settings, room, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
   userData, stringRoomUsers, timeKeysData, timedEventsListenerMode, SetTimedEventsListenerMode, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
-  tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, SendChatMessage
+  tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal
   } from "../../connect/connect.js";
 import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData } from "../../connect/indexedDb.js";
 
@@ -250,7 +250,13 @@ window.addEventListener( 'keydown',  ( event ) => {
   
   $('#modalContent').on('click', '#sendAdminMessageButton', function(e) {
     SendAdminMessage();
-});
+  });
+
+  $('#modalContent').on('click', '#saveModToLocalButton', function(e) {
+      let phID = $(this).attr("data-phID");
+      console.log("saving local mod for " + phID);
+      SaveModToLocal(phID);
+  });
 
   $('#modalContent').on('click', '#importModsButton', function(e) {
     // console.log("color 1 changed " + e.target.value);
@@ -1262,7 +1268,7 @@ function ShowLocationModal(timestamp) {
 
 
 
-        "<button class=\x22addButton\x22 style=\x22float:right;\x22 onclick=\x22SaveModToLocal('"+phID+"')\x22>Save to Local DB</button>"+
+        "<button id=\x22saveModToLocalButton\x22 class=\x22addButton\x22 style=\x22float:right;\x22 data-phID=\x22"+phID+"\x22 >Save to Local DB</button>"+
         cloudSaveButton +
 
         // "<button class=\x22snapButton\x22 onclick=\x22SnapLocation('"+phID+"')\x22>Snap</button>"+

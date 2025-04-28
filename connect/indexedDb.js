@@ -350,7 +350,7 @@ export function InitIDB() {
       //  scene.localFiles = localData.localfiles;
        // scene.locations = JSON.parse(JSON.stringify(sceneLocations.locations));
        scene.lastUpdate = saveTimeStamp;
-       console.log("writing localdata " + JSON.stringify(scene));
+       console.log("writing localdata for scene id " + scene.shortID);
        store.put(scene); //write the local version
        transaction.oncomplete = function () {
          db.close();
@@ -421,6 +421,10 @@ export function InitIDB() {
             DisplayLocalFiles(); //in dialogs.js
          };
       };
+   }
+
+   export function SetHasLocalData (has) {
+      hasLocalData = has;
    }
    export function DeleteLocalSceneData() {  //kill everything for this scene
 

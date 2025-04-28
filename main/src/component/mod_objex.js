@@ -850,40 +850,19 @@ AFRAME.registerComponent('mod_object', {
         }
       }
   
+      // console.log(this.data.objectData.name + "this.data.locationData: " + JSON.stringify(this.data.locationData) + " objectData: " + JSON.stringify(this.data.objectData));
+      if (this.data.locationData && this.data.locationData.locationTags != undefined  && this.data.locationData.locationTags != 'undefined' && this.data.locationData.locationTags.length > 0) {
+        // console.log(this.data.objectData.name + " gotsome location tags: " + this.data.locationData.locationTags);
+        this.tags = this.data.locationData.locationTags;
         
-      // if (this.tags == null && this.tags != "" && this.tags.length > 0) {
-        console.log(this.data.objectData.name + "this.data.locationData: " + JSON.stringify(this.data.locationData) + " objectData: " + JSON.stringify(this.data.objectData));
-        // this.tags = [];  
-        if (this.data.locationData && this.data.locationData.locationTags != undefined  && this.data.locationData.locationTags != 'undefined' && this.data.locationData.locationTags.length > 0) {
-          // console.log(this.data.objectData.name + " gotsome location tags: " + this.data.locationData.locationTags);
-          this.tags = this.data.locationData.locationTags;
-          
-        } 
-        if (this.data.objectData.tags != undefined && this.data.objectData.tags != null && this.data.objectData.tags != "undefined" && this.data.objectData.tags.length > 0) {
-          // console.log(this.data.objectData.name + " gotsome tags: " + this.data.objectData.tags);
-          this.tags = [...this.tags, ...this.data.objectData.tags]; //spread operator!
-        }
-        // if (this.data.locationData && this.data.locationData.markerType) {
-          console.log("NEW OBJECT: " +this.data.objectData.name + " gots tags: " + this.tags + " markerType : "+ this.data.locationData.markerType);
+      } 
+      if (this.data.objectData.tags != undefined && this.data.objectData.tags != null && this.data.objectData.tags != "undefined" && this.data.objectData.tags.length > 0) {
+        // console.log(this.data.objectData.name + " gotsome tags: " + this.data.objectData.tags);
+        this.tags = [...this.tags, ...this.data.objectData.tags]; //spread operator!
+      }
+      // if (this.data.locationData && this.data.locationData.markerType) {
+        console.log("NEW OBJECT: " +this.data.objectData.name + " gots tags: " + this.tags + " markerType : "+ this.data.locationData.markerType);
 
-          // for (let i = 0; i < this.tags.length; i++) {  //nm, bad idea?
-          //   console.log("adding class with tag " + this.tags[i]);
-          //   if (this.tags[i].includes(" ")) {
-          //     console.log("cain't put space in classname : " + this.tags[i]);
-          //   } else {
-          //     this.el.classList.add(this.tags[i]);
-          //   }
-            
-          // }
-        // }
-      // } else {
-      //   console.log("this.data.tags is not null " + this.tags);
-      //   // if (this.tags.toLowerCase().includes("equippable")) {
-      //   //   this.data.isEquippable = true;
-      //   // } else if (this.tags.toLowerCase().includes("equipped")) {
-      //   //   this.data.isEquipped = true;
-      //   // } 
-      // }
       if (this.data.objectData.tags) {
         if (this.data.objectData.tags.includes("equippable")) {
           this.data.isEquippable = true;

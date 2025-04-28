@@ -1,6 +1,7 @@
 /* global AFRAME, THREE */
 import { settings, ToggleTransformControls, GoToLocation } from "../../../connect/connect.js";
 import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
+import { sceneTextItems } from "./content-utils.js";
 
 AFRAME.registerComponent('local_marker', { //special items with local mods, not saved to cloud yet
     schema: {
@@ -467,7 +468,7 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
           
             this.el.object3D.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
             this.el.object3D.position.set(this.data.xpos, this.data.ypos, this.data.zpos);
-            // this.el.setAttribute("visible", true);
+            this.el.setAttribute("visible", true);
             const obj = this.el.getObject3D('mesh');
 
           
@@ -488,6 +489,8 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
                   } 
                 }
               });
+
+              obj.visible = true;
               // this.el.setObject3D('mesh', obj);
               if (this.data.markerType == "gate" || this.data.markerType == "trigger") {
                 if (this.data.modelID && this.data.modelID != '' & this.data.modelID != 'none') {
@@ -513,9 +516,9 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
               if (this.data.markerType.toLowerCase().includes("picture")) {
                this.loadPicture();
               }
-              if (this.data.tags.includes("hide gizmo") ||  this.data.tags.includes("highlight") || (settings && settings.hideGizmos)) {
+              if (this.data.tags.includes("hide gizmo") ||  this.data.tags.includes("highlight") || (settings && settings.hideGizmos == true)) {
                 if (this.data.markerType != "mailbox" && this.data.markerType != "light") {
-                  console.log(this.data.markerType + " hiding gizmos because");
+                  console.log(this.data.markerType + " hiding gizmos because " + settings.hideGizmos);
                   this.el.object3D.visible = false;
                 }
               }

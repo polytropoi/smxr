@@ -27,6 +27,8 @@ export let youtubeData = {};
 
 export let fancyTimeString = "";
 
+export let sceneTextItems = [];
+
 export function clamp (num, min, max) {
   return Math.min(Math.max(num, min), max);
 }
@@ -3405,7 +3407,7 @@ $.ajax({
             }),
           success: function( data, textStatus, xhr ){
 
-              sceneTextItems = [];
+             
               for (let i = 0; i < data.length; i++) { //check for text type?
                 console.log("sceneTextItem : " +data[i]);
                 sceneTextItems.push(data[i]); //textstring should be a valid json, from defined template//not, just an array of objex saved in global
