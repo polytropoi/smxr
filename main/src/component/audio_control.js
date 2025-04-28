@@ -582,17 +582,17 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
             },
             timekey_beat: function(vol) {
             
-                scale = {};
+                let scale = {};
                 let v = 25;
                 scale.x = v * .05;
                 scale.y = v * .05;
                 scale.z = v * .05;
                 
-                scale2 = {};
+                let scale2 = {};
                 scale2.x = 1;
                 scale2.y = v * .1;
                 scale2.z = 1;
-                scale3 = {};
+                let scale3 = {};
                 scale3.x = v * .5;
                 scale3.y = v * .5;
                 scale3.z = v * .5;
@@ -824,7 +824,7 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
         modVolume: function(newVolume) {
             // console.log("tryna mod primaryAUdioVolume to " + newVolume);
             // this.primaryAudioHowl.volume(normalizedVolume);
-            normalizedVolume = ((newVolume - -80) * 100) / (20 - -80) * .01;
+            const normalizedVolume = ((newVolume - -80) * 100) / (20 - -80) * .01;
             console.log("normalizedVolume is " + normalizedVolume);
             this.primaryAudioHowl.volume(normalizedVolume);
             // this.cam = document.querySelector("#head");

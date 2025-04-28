@@ -308,7 +308,7 @@ export function InitIDB() {
    return string.trim();
  }
 
- function SaveLocalData() {  //persist mods an alt "~" version of the data
+ export function SaveLocalData() {  //persist mods an alt "~" version of the data
     console.log("tryna connect to SMXR indexeddb");
     if (!('indexedDB' in window)) {
        console.log("This browser doesn't support IndexedDB");
@@ -422,7 +422,7 @@ export function InitIDB() {
          };
       };
    }
-   function DeleteLocalSceneData() {  //kill everything for this scene
+   export function DeleteLocalSceneData() {  //kill everything for this scene
 
         console.log("tryna connect to SMXR indexeddb");
         if (!('indexedDB' in window)) {

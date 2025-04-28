@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 
-import { settings, GoToLocation } from "../../../connect/connect.js";
-import { keydown } from "../../js/dialogs.js";
+import { settings, GoToLocation, sceneModels, ToggleTransformControls } from "../../../connect/connect.js";
+import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
 
 AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
     schema: {
@@ -695,7 +695,8 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         if (keydown == "T") {
           ToggleTransformControls(this.timestamp);
         } else if (keydown == "Shift") {
-            selectedLocationTimestamp = this.timestamp;
+          SetSelectedLocationTimestamp(this.timestamp);
+            // selectedLocationTimestamp = this.timestamp;
             // ShowLocationModal(that.timestamp);
             SceneManglerModal('Location');
         } else { 
@@ -1469,15 +1470,17 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                 }
               }
             } else {
-              for (let i = 0; i < sceneModels.length; i++) {
-                if (sceneModels[i]._id == modelID) {
-                    this.el.setAttribute('gltf-model', sceneModels[i].url);
-                    if (this.data.markerType.toLowerCase() == "gate") {
-                      this.el.setAttribute("obb-collider", {size: this.data.xscale * 1.5 + " " + this.data.yscale * 1.5 + " " + this.data.zscale * 1.5});
-                      // this.el.setAttribute("material", {color: "orange", transparent: true, opacity: .5});
-                      // this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder"});
-                    }
-                    break;
+              if (sceneModels) {
+                for (let i = 0; i < sceneModels.length; i++) {
+                  if (sceneModels[i]._id == modelID) {
+                      this.el.setAttribute('gltf-model', sceneModels[i].url);
+                      if (this.data.markerType.toLowerCase() == "gate") {
+                        this.el.setAttribute("obb-collider", {size: this.data.xscale * 1.5 + " " + this.data.yscale * 1.5 + " " + this.data.zscale * 1.5});
+                        // this.el.setAttribute("material", {color: "orange", transparent: true, opacity: .5});
+                        // this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder"});
+                      }
+                      break;
+                  }
                 }
               }
             }

@@ -1,6 +1,6 @@
 /* global AFRAME, THREE */
-import { settings } from "../../../connect/connect.js";
-import { keydown } from "../../js/dialogs.js";
+import { settings, ToggleTransformControls, GoToLocation } from "../../../connect/connect.js";
+import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
 
 AFRAME.registerComponent('local_marker', { //special items with local mods, not saved to cloud yet
     schema: {
@@ -708,7 +708,8 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
           ToggleTransformControls(this.timestamp);
         } else if (keydown == "Shift") {
         //   ShowLocationModal(this.timestamp);
-            selectedLocationTimestamp = this.timestamp;
+        SetSelectedLocationTimestamp(this.timestamp);
+            // selectedLocationTimestamp = this.timestamp;
             // ShowLocationModal(this.timestamp);
             SceneManglerModal('Location');
         } else {

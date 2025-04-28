@@ -938,13 +938,13 @@ webxr_router.get('/:_id', function (req, res) {
                             
             } else if (sceneData.sceneWebType == 'Mapbox') { 
                 
-                dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 onclick=\x22SceneManglerModal('Welcome')\x22><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
+                dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
                 locationButton = "<div id=\x22loc_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
                 if (!sceneData.sceneTextUseModals) {
                     //renderPanel = "<a-entity visible=\x22false\x22 render_canvas id=\x22renderCanvas\x22 look-at=\x22#player\x22 geometry=\x22primitive: plane; width:1; height:1;\x22 scale=\x221 1 1\x22 position=\x220 3.5 -.25\x22 material=\x22shader: html; transparent: true; width:1024; height:1024; fps: 10; target: #renderPanel;\x22></a-entity>\n";
                 }
                 transportButtons = "<div class=\x22transport_buttons\x22><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
-                "<div class=\x22play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22TransportPlayButton()\x22><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
+                "<div class=\x22transport_play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
                 // "<div visible=\x22false\x22 class=\x22pause_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PauseButton()\x22><i class=\x22fas fa-pause-circle fa-2x\x22></i></div>" +
 
                 "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>";
@@ -1014,12 +1014,12 @@ webxr_router.get('/:_id', function (req, res) {
 
                 "<div class=\x22next_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div>"+
                 "<div class=\x22ffwd_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22FastForwardButton()\x22><i class=\x22fas fa-forward fa-2x\x22></i></div>"+
-                "<div class=\x22play_button\x22 id=\x22transportPlayButton\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22TransportPlayButton()\x22><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
+                "<div class=\x22play_button\x22 id=\x22transport_play_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
                 "<div class=\x22rewind_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22RewindButton()\x22><i class=\x22fas fa-backward fa-2x\x22></i></div>"+
                 "<div class=\x22previous_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
                 "<div id=\x22transportStats\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px; text-align: left\x22></div></div>";                                
 
-                dialogButton = "<div class=\x22dialog_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: left; margin: 10px 10px;\x22 onclick=\x22SceneManglerModal('Welcome')\x22><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
+                dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
                
                 sceneManglerButtons = "<div class=\x22show-ui-button\x22 onclick=\x22ShowHideUI()\x22><i class=\x22far fa-eye fa-2x\x22></i></div>";
                 if (!sceneResponse.sceneTextUseModals) {
@@ -1558,7 +1558,7 @@ webxr_router.get('/:_id', function (req, res) {
             ///////////////// scene models //////////////////
             var modelz = [];
             console.log("sceneModelss : " + JSON.stringify(sceneResponse.sceneModels));
-             if (sceneResponse.sceneModels != null) {
+             if (sceneResponse.sceneModels != null && sceneResponse.sceneModels.length) {
                 const m_ids = sceneResponse.sceneModels.map(convertStringToObjectID);
                 const query = {"_id": m_ids};
                 const models = await RunDataQuery("models", "find", query);
@@ -2337,7 +2337,7 @@ webxr_router.get('/:_id', function (req, res) {
                 console.log("hasPrimaryAudioStream " + sceneResponse.scenePrimaryAudioStreamURL);
                 hasPrimaryAudioStream = true;
                 hasPrimaryAudio = false;
-                transportButtons = "<div class=\x22dialog_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: left; margin: 10px 50px;\x22 onclick=\x22TransportPlayButton()\x22><i class=\x22fas fa-play-circle fa-2x\x22></i></div>";
+                transportButtons = "<div id=\x22transport_play_button\x22 class=\x22dialog_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: left; margin: 10px 50px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>";
 
             }
             if (hasPrimaryAudioStream || hasPrimaryAudio) {
@@ -3799,9 +3799,9 @@ webxr_router.get('/:_id', function (req, res) {
                         audioSliders +
                         mapOverlay + 
                         adSquareOverlay +
-                        "<div class=\x22next-button\x22 id=\x22nextButton\x22 style=\x22visibility: hidden\x22 onclick=\x22GoToNext()\x22><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div>"+
+                        "<div class=\x22next-button\x22 id=\x22nextButton\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div>"+
                         "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
-                        "<div class=\x22previous-button\x22 id=\x22previousButton\x22 style=\x22visibility: hidden\x22 onclick=\x22GoToPrevious()\x22><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
+                        "<div class=\x22previous-button\x22 id=\x22previousButton\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
                         "<a href=\x22''\x22 target=\x22_blank\x22 class=\x22ar-buttoon\x22>AR</a>" + //?
                         "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
                         locationButton+

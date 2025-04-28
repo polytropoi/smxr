@@ -1,7 +1,8 @@
-import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying } from "../src/component/content-utils.js";
+import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton } from "../src/component/content-utils.js";
 import { settings, room, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
-  userData, stringRoomUsers, timeKeysData, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, tkStarttimes } from "../../connect/connect.js";
-import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles } from "../../connect/indexedDb.js";
+  userData, stringRoomUsers, timeKeysData, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
+  tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, SendChatMessage } from "../../connect/connect.js";
+import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData } from "../../connect/indexedDb.js";
 
 export let showDialogPanel = false;
 let dialogInitialized = false;
@@ -18,7 +19,8 @@ let timedEventsListenerMode = "";
 let showStats = false;
 let showCurves = false;
 export let keydown = "";
-let selectedLocationTimestamp = "";
+export let selectedLocationTimestamp = "";
+export let sceneObjects = [];
 let colorInput_1 = null;
 let colorInput_2 = null;
 let colorInput_3 = null;
@@ -34,6 +36,7 @@ let sceneColor4Alt = '#000000';
 let sceneEnvironmentPreset;
 
 window.PlayPauseMedia = PlayPauseMedia;
+window.PlayerToLocation = PlayerToLocation;
 
 // if (settings.timedEventsListenerMode) {
 //   timedEventsListenerMode = settings.timedEventsListenerMode;
@@ -152,7 +155,44 @@ window.addEventListener( 'keydown',  ( event ) => {
     }
   }
 
+  export function SetSelectedLocationTimestamp(timestamp) {
+    selectedLocationTimestamp = timestamp;
+  }
 
+  // $(function (){ //needs onload for class to pop
+    $('#modalContent').on('click', '#deleteLocalSceneData', function(e) {
+      console.log("tryna delete local scenedata!");
+      DeleteLocalSceneData();
+  
+    });
+    $('#modalContent').on('click', '#exportButton', function(e) {
+      console.log("tryna exportMods!");
+      ExportMods();
+  
+    });
+    $('#modalContent').on('click', '#importButton', function(e) {
+      console.log("tryna ImportMods!");
+      ImportMods();
+  
+    });
+  // })
+
+  // $('#__deleteLocalSceneData').on('click', function(e) {
+  //   console.log("tryna delete local scenedata!");
+  //   DeleteLocalSceneData();
+
+  // });
+  $('#dialog_button').on('click', function(e) {
+    SceneManglerModal("Welcome");
+  });
+
+  $('#transport_play_button').on('click', function(e) {
+    TransportPlayButton();
+  });
+
+  $('#overlayContent').on('click', '#events_dialog_button', function(e) {
+    SceneManglerModal("Events");
+  });
   $('#overlayContent').on('click', '#events_dialog_button', function(e) {
     SceneManglerModal("Events");
   });
@@ -169,11 +209,47 @@ window.addEventListener( 'keydown',  ( event ) => {
     SceneManglerModal("Messages");
   });
 
+  $('#modalContent').on('click', '#messages_tab', function(e) {
+    TabMangler(e, "Messages");
+  });
+  $('#modalContent').on('click', '#events_tab', function(e) {
+    TabMangler(e, "Events");
+  });
+  $('#modalContent').on('click', '#settings_tab', function(e) {
+    TabMangler(e, "Tools");
+  });
+  $('#modalContent').on('click', '#inventory_tab', function(e) {
+    TabMangler(e, "Inventory");
+  });
+  $('#modalContent').on('click', '#locations_tab', function(e) {
+    TabMangler(e, "Locations");
+  });
+  $('#modalContent').on('click', '#welcome_tab', function(e) {
+    TabMangler(e, "Welcome");
+  });
+  $('#modalContent').on('click', '#about_tab', function(e) {
+    TabMangler(e, "About");
+  });
+
+
+
+  
+
   $('#modalContent').on('click', '#modalCloser', function(e) {
     console.log("tryna showHideDialogPanel");
     ShowHideDialogPanel();
   });
 
+  $('#modalContent').on('click', '#sendInvitationButton', function(e) {
+      SendInvitation();
+  });
+  $('#modalContent').on('click', '#sendInvitationButton', function(e) {
+    SendInvitation();
+  });
+  
+  $('#modalContent').on('click', '#sendAdminMessageButton', function(e) {
+    SendAdminMessage();
+});
 
   $('#modalContent').on('click', '#importModsButton', function(e) {
     // console.log("color 1 changed " + e.target.value);
@@ -780,7 +856,7 @@ function ReturnLocationObjectSelect (phID) {
    }
    if (objexEl.components.mod_objex) {
       sceneObjects = objexEl.components.mod_objex.returnObjexData(); //!
-    
+      // objexEl.components.mod_objex.refreshObjexData();
       let objectSelect = "<option value=\x22none\x22>none</option>";
 
         for (let i = 0; i < sceneObjects.length; i++) {
@@ -1348,7 +1424,7 @@ function ShowTimekeysModal() {    //nerp, now in scenemanglermodal
      
       // "<button class=\x22deleteButton\x22 onclick=\x22PlayPauseMedia()\x22>Play/Pause Media</button>"+
       "<div class=\x22transport_buttons\x22><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
-      "<div class=\x22play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22TransportPlayButton()\x22><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
+      "<div id=\x22transport_play_button\x22 class=\x22play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
       "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>"+
 
       "<div style=\x22float: right; width: 166px;\x22>Listen To Timeline:"+
@@ -1646,7 +1722,7 @@ function GetUserInventory () {
   
 }
 
-function DropInventoryItem(objectID) {
+export function DropInventoryItem(objectID) {
   console.log("tryna drop " + objectID);
   let action = null;
   let objexEl = document.getElementById('sceneObjects');
@@ -1674,7 +1750,7 @@ function DropInventoryItem(objectID) {
   }
 }
 
-function DequipAndDropItem () {
+export function DequipAndDropItem () {
   console.log("tryna dequip");
   let objexEl = document.getElementById('sceneObjects');
   if (objexEl != null) {
@@ -1692,7 +1768,7 @@ function DequipAndDropItem () {
   // ShowHideDialogPanel();
 }
 
-function DequipInventoryItem () {
+export function DequipInventoryItem () {
   console.log("tryna dequip");
 
   document.querySelectorAll('.equipped').forEach(function(el) {
@@ -1701,12 +1777,12 @@ function DequipInventoryItem () {
   ShowHideDialogPanel();
 }
 
-function EquipDefaultItem (objectID) {
+export function EquipDefaultItem (objectID) {
   console.log("tryna equip " + objectID);
-  let action = null;
+  // let action = null;
   let objexEl = document.getElementById('sceneObjects');
   if (objexEl != null) {
-    objectData = objexEl.components.mod_objex.returnObjectData(objectID);
+    // objectData = objexEl.components.mod_objex.returnObjectData(objectID);
     objexEl.components.mod_objex.equipInventoryObject(objectID);
     
   }
@@ -1750,7 +1826,7 @@ function EquipInventoryItem (objectID) {
   }
 }
 
-function ShowInventoryItem(objectID) {
+export function ShowInventoryItem(objectID) {
   let objexEl = document.getElementById('sceneObjects');
   let objectData = null;
     if (objexEl != null) {
@@ -1851,6 +1927,7 @@ function GreetingModal() {
   $(content).html("<span id='modalCloser' class='close-modal'>&times;</span><div><h3>" +userName + "!</h3><hr><p>" + greeting + "</p></div>");
 
 }
+
 export function SceneManglerModal(mode, autoHide) {
 
     // ClearInputs();
@@ -1908,7 +1985,7 @@ export function SceneManglerModal(mode, autoHide) {
     if (userData.sceneOwner == "indaehoose") {
         ownerButton = "<button id=\x22EditScene\x22 class=\x22addButton\x22 id=\x22editButton\x22 onclick=\x22window.location='../main/?type=scene&iid="+userData.sceneID+"';\x22>Edit Scene</button>"+
         "<button id=\x22SaveModsToCloud\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 onclick=\x22SaveModsToCloud()\x22>Save to Cloud DB</button>";
-        sendAdminMessageButton = "<button id=\x22SendAdminMessage\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 onclick=\x22SendAdminMessage()\x22>Send Admin Message</button>";
+        sendAdminMessageButton = "<button id=\x22sendAdminMessageButton\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 >Send Admin Message</button>";
     }
 
     let oculusButton = "<button style=\x22float: right;\x22 class=\x22addButton\x22 id=\x22oculusButton\x22><a href=\x22https://www.oculus.com/open_url/?url=https%3A%2F%2Fservicemedia.net/webxr/"+room+"\x22>Open on Oculus Quest</a></button>";
@@ -1916,12 +1993,12 @@ export function SceneManglerModal(mode, autoHide) {
     "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Welcome')\x22>Welcome</button>"+
     // "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Quests')\x22>Quests</button>"+
     
-    "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Messages')\x22>Messaging</button>"+
-    "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Inventory')\x22>Assets</button>"+
-    "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Tools')\x22>Settings</button>"+
-    "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Locations')\x22>Locations</button>"+
-    "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Events')\x22>Events</button>"+
-    "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'About')\x22>About</button>"+
+    "<button id=\x22messages_tab\x22 class=\x22tablinks\x22 >Messaging</button>"+
+    "<button id=\x22inventory_tab\x22 class=\x22tablinks\x22 >Inventory</button>"+
+    "<button id=\x22settings_tab\x22 class=\x22tablinks\x22 >Settings</button>"+
+    "<button id=\x22locations_tab\x22 class=\x22tablinks\x22 >Locations</button>"+
+    "<button id=\x22events_tab\x22 class=\x22tablinks\x22 >Events</button>"+
+    "<button id=\x22about_tab\x22 class=\x22tablinks\x22 >About</button>"+
 
     "</div>";
     let welcomeDisplay = "";
@@ -2005,13 +2082,13 @@ export function SceneManglerModal(mode, autoHide) {
         // "<form id=\x22form\x22 id=\x22chat_form\x22>"+
         // "<span style=\x22float: left;\x22><h4>Message:</h4></span><span style=\x22float: left;\x22 id=\x22users\x22>"+stringRoomUsers+"</span>"+
         "<div id=\x22emailContainer\x22 style=\x22display: none;\x22><input class=\x22email_input\x22 id=\x22email_input\x22  type=\x22email\x22 placeholder=\x22Email to invite\x22></input>"+
-        "<button class=\x22saveButton\x22 id=\x22sendInvitationButton\x22 onclick=\x22SendInvitation()\x22>Send Invitation</button></div><br>"+
+        "<button class=\x22saveButton\x22 id=\x22sendInvitationButton\x22 >Send Invitation</button></div><br>"+
         // "<a class=\x22saveButton\x22 id=\x22requestInvitationButton\x22 onclick=\x22SendInvitation()\x22>Request Invitation</a></div><br>"+
         // "<button class=\x22infoButton\x22 id=\x22sendMessageButton\x22><a href=\x22mailto:"+room+"@servicemedia.net\x22>Send Email</a></button>"+
         "<textarea class=\x22chat_input\x22 id=\x22chat_input\x22 type=\x22textarea\x22 style=\x22font-size:10pt;rows:4;cols:200;\x22 placeholder=\x22Message...\x22></textarea><br><br>"+
         "<br><span style=\x22float: left;\x22 id=\x22users\x22>"+stringRoomUsers+"</span>"+
         sendAdminMessageButton +
-        "<button class=\x22saveButton\x22 id=\x22sendMessageButton\x22 onclick=\x22SendChatMessage()\x22>Send Chat</button><br>"+
+        "<button class=\x22saveButton\x22 id=\x22sendMessageButton\x22 >Send Chat</button><br>"+
         
 
         // "</form>"+
@@ -2019,39 +2096,17 @@ export function SceneManglerModal(mode, autoHide) {
         "<p>scene mailbox: <a style=\x22color: lightblue;\x22 href=\x22mailto:"+room+"@servicemedia.net\x22>"+room+"@servicemedia.net</a></p>"+
       "</div>"+
 
-
-
-      // "<div "+locationsDisplay+" id=\x22Locations\x22 class=\x22modalMain tabcontent\x22>"+
-      // "<button class=\x22goToButton\x22 id=\x22nextButton\x22 onclick=\x22GoToNext()\x22>GoTo Next</button>"+
-      // "<button class=\x22goToButton\x22 id=\x22prevButton\x22 onclick=\x22GoToPrevious()\x22>GoTo Previous</button>"+
-      
-      //   "<button style=\x22float:left\x22 class=\x22saveButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22CreateLocation()\x22>New Local Placeholder</button>"+
-      //   "<br><br><br><div>"+locationTable+"</div><br>"+
-      // "</div>"+     
-
       "<div "+toolsDisplay+" id=\x22Tools\x22 class=\x22modalMain tabcontent\x22>"+ /////////////////TOOLS
       // "<div class=\x22\x22>"+
       "<div class=\x22row\x22>"+
-      // oculusButton +
-        // "<button class=\x22saveButton\x22 id=\x22exportButton\x22 onclick=\x22ExportMods()\x22>Export Mods</button>"+
-        // "<label for=\x22file-upload\x22 class=\x22custom-file-upload\x22>Import Mods</label>"+
-        // "<input type=\x22file\x22 id=\x22file-upload\x22 accept=\x22.txt\x22 onchange=\x22ImportMods(event)\x22></input>"+
-          // ownerButton +
-          // "<label style=\x22float: left;\x22 for=\x22importMods\x22 class=\x22custom-file-upload\x22>Import Mods</label>"+
-          // "<input type=\x22file\x22 id=\x22file-upload2\x22 accept=\x22.txt\x22 onchange=\x22ImportMods(event)\x22>"+ 
+    
           "<input type=\x22file\x22 id=\x22importMods\x22 accept=\x22.txt\x22>"+ 
           "<button style=\x22float: left;\x22 class=\x22infoButton\x22 id=\x22importModsButton\x22>Import Mods</button>"+  
-          "<button style=\x22float: left;\x22 class=\x22saveButton\x22 id=\x22exportButton\x22 onclick=\x22ExportMods()\x22>Export Mods</button>"+   
+          "<button id=\x22exportButton\x22 style=\x22float: left;\x22 class=\x22saveButton\x22 id=\x22exportButton\x22 >Export Mods</button>"+   
           ownerButton +
           hasModsMessage +
         "<button style=\x22float: right;\x22 class=\x22goToButton\x22 id=\x22statsButton\x22 onclick=\x22ToggleStats()\x22>Show Stats</button>"+
-        // "<button class=\x22goToButton\x22 id=\x22statsButton\x22 onclick=\x22ToggleStats()\x22>Show Raycasts</button>"+
-        // "<button class=\x22goToButton\x22 id=\x22statsButton\x22 onclick=\x22ToggleStats()\x22>Show Colliders</button>"+
-        // "<button class=\x22uploadButton\x22 id=\x22curvesButton\x22 onclick=\x22ToggleShowCurves()\x22>Show Curves</button>"+
-        // "<div class=\x22row\x22><div class=\x22threecolumn\x22><label for=\x22sceneEnvironmentPreset\x22>Location Type</label>"+
-        // "<select id=\x22sceneEnvironmentPreset\x22 name=\x22sceneEnvironmentPreset\x22>"+
-        // ReturnAFrameEnviromentSelect(sceneEnvironmentPreset) + 
-        // "</select></div>"+
+      
       "</div><hr>"+
       // "<button class=\x22addButton\x22 id=\x22TimekeysButton\x22 onclick=\x22ShowTimekeysModal()\x22>Edit Timekeys</button>"+
       audioSliders +
@@ -2084,7 +2139,7 @@ export function SceneManglerModal(mode, autoHide) {
 
       "<hr><div class=\x22row\x22>"+
 
-      "<button class=\x22deleteButton\x22 id=\x22ClearAllPlaceholdersButton\x22 onclick=\x22DeleteLocalSceneData()\x22>Delete Local Scene Data</button>"+
+      "<button class=\x22deleteLocalSceneDataButton\x22 id=\x22deleteLocalSceneData\x22 >Delete Local Scene Data</button>"+
       "<button style=\x22float: right;\x22 class=\x22addButton\x22 onclick=\x22SaveLocalAndClose()\x22>Save Local Scene Data</button>"+
 
       "</div>"+
@@ -2094,15 +2149,15 @@ export function SceneManglerModal(mode, autoHide) {
       
       "<div "+locationsDisplay+" id=\x22Locations\x22 class=\x22modalMain tabcontent\x22>"+ /////////////LOCATIONS TABLE
 
-      "<button class=\x22goToButton\x22 id=\x22nextButton\x22 onclick=\x22GoToNext()\x22>GoTo Next</button>"+
-      "<button class=\x22goToButton\x22 id=\x22prevButton\x22 onclick=\x22GoToPrevious()\x22>GoTo Previous</button>"+
-      ReturnCurrentPlayerLocation() +
-      hasModsMessage +
+      "<button class=\x22goToButton\x22 id=\x22nextButton\x22 onclick=\x22GoToNext()\x22>GoTo Next</button>" +
+      "<button class=\x22goToButton\x22 id=\x22prevButton\x22 onclick=\x22GoToPrevious()\x22>GoTo Previous</button>" +
+        ReturnCurrentPlayerLocation() +
+        hasModsMessage +
         "<button style=\x22float:left\x22 class=\x22saveButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22CreateLocation()\x22>Create New Location</button>"+
       
         "<br><br><br><div>"+locationTable+"</div><br>"+
 
-        "<button class=\x22deleteButton\x22 id=\x22ClearAllPlaceholdersButton\x22 onclick=\x22DeleteLocalSceneData()\x22>Delete Local Scene Data</button>"+
+        "<button class=\x22deleteLocalSceneDataButton\x22 id=\x22deleteLocalSceneData\x22 >Delete Local Scene Data</button>"+
         // "<button style=\x22float:left\x22 class=\x22snapButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22ToggleAllTransformControls()\x22>Toggle All Transform Controls</button>"+
       "</div>"+     
 
@@ -2217,7 +2272,7 @@ export function SceneManglerModal(mode, autoHide) {
               SaveModsToCloud();
             });
           }
-          const sendAdminMessageButtonEl = document.getElementById("SendAdminMessage");
+          const sendAdminMessageButtonEl = document.getElementById("sendAdminMessageButton");
           if (sendAdminMessageButtonEl) {
             sendAdminMessageButtonEl.addEventListener("click", function(e){
               e.preventDefault();

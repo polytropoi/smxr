@@ -1,3 +1,5 @@
+import { SetSelectedLocationTimestamp } from "../../js/dialogs";
+
 AFRAME.registerComponent('mod_el', { //special items saved upstairs
     schema: {
         isLocal: {default:false},
@@ -672,7 +674,8 @@ AFRAME.registerComponent('mod_el', { //special items saved upstairs
         if (keydown == "T") {
           ToggleTransformControls(this.timestamp);
         } else if (keydown == "Shift") {
-            selectedLocationTimestamp = this.timestamp;
+          SetSelectedLocationTimestamp(this.timestamp);
+            // selectedLocationTimestamp = this.timestamp;
             // ShowLocationModal(that.timestamp);
             SceneManglerModal('Location');
         } else { 
@@ -2625,7 +2628,8 @@ AFRAME.registerComponent('local_el', { //special items with local mods, not save
           ToggleTransformControls(this.timestamp);
         } else if (keydown == "Shift") {
         //   ShowLocationModal(this.timestamp);
-            selectedLocationTimestamp = this.timestamp;
+            // selectedLocationTimestamp = this.timestamp;
+            SetSelectedLocationTimestamp(this.timestamp)
             // ShowLocationModal(this.timestamp);
             SceneManglerModal('Location');
         } else {

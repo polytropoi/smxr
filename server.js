@@ -6770,7 +6770,7 @@ app.get('/publicscenes', async (req, res) => { //works to put async in the route
           let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
           var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //? still confused w/ mongojs driver?
           const query = {"_id": oo_id};
-          const picture_item = await RunDataQuery("image_items", "findOne" , query);
+          const picture_item = await RunDataQuery("image_items", "findOne" , query); //TODO make this one call!!!!!
 
           var item_string_filename = JSON.stringify(picture_item.filename);
           item_string_filename = item_string_filename.replace(/\"/g, "");

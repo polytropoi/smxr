@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 
 import { room, settings, localData, userData, mouseDowntime } from "../../../connect/connect.js";
-import { keydown, showDialogPanel } from "../../js/dialogs.js";
+import { keydown, SetSelectedLocationTimestamp, showDialogPanel } from "../../js/dialogs.js";
 import { Pickup, Drop } from "../../src/component/content-utils.js";
 
 AFRAME.registerComponent('mod_scene_inventory', {
@@ -2420,6 +2420,7 @@ AFRAME.registerComponent('mod_object', {
   
       this.el.addEventListener('click', (e) => { 
         e.preventDefault();
+
         // let downtime = (Date.now() / 1000) - this.mouseDownStarttime;
         console.log("mousedown on " +this.el.id+ " time "+ this.mouseDowntime + "  on mod_object type: " + this.data.objectData.objtype + " hasEquip " + this.hasEquipAction + " hasPickup " + this.hasPickupAction + 
                     " equipped " + this.data.isEquipped + " equippable " + this.data.isEquippable);
@@ -2427,7 +2428,11 @@ AFRAME.registerComponent('mod_object', {
           ToggleTransformControls(this.data.timestamp);
         } else if (keydown == "Shift") {
         //   ShowLocationModal(that.timestamp);
-            selectedLocationTimestamp = this.data.timestamp;
+            if (!this.data.timestamp) {
+              return;
+            }
+            // selectedLocationTimestamp = this.data.timestamp;
+            SetSelectedLocationTimestamp(this.data.timestamp);
             // ShowLocationModal(that.timestamp);
             SceneManglerModal('Location');
         } else {

@@ -4,8 +4,9 @@ if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
 
-import { keydown } from "../../js/dialogs.js";
-import { settings, videoEl, room, SetVideoEventsData, MediaTimeUpdate, PauseIntervals } from "../../../connect/connect.js";
+import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
+import { settings, videoEl, room, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, mouse, CreateLocation } from "../../../connect/connect.js";
+import { DeleteLocalSceneData } from "../../../connect/indexedDb.js";
 
 var ua = window.navigator.userAgent;
 var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
@@ -4319,7 +4320,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
      this.slider_handle = null;
       this.meshArray = []; //nm
       this.statsDiv = document.getElementById("transportStats");
-      this.transportPlayButton = document.getElementById("transportPlayButton");
+      this.transportPlayButton = document.getElementById("transport_play_button");
       
       this.mainTransportSlider = document.getElementById("mainTransportSlider");
       // this.youtubePlayer = null;
@@ -4872,7 +4873,7 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
     changeBorderColor(event.data);
   }
 
-function TransportPlayButton () {
+export function TransportPlayButton () {
   // console.log("TransportPlayButton clcik! " + JSON.stringify(youtubePlayer));
   console.log("TransportPlayButton clcik! " + primaryAudioMangler);
   if (youtubePlayer != null) {

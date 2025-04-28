@@ -1,6 +1,6 @@
-import { InitIDB, hasLocalData } from "../connect/indexedDb.js";
+import { InitIDB, SaveLocalData, DeleteLocalSceneData } from "../connect/indexedDb.js";
 import { youtubePlayer, youtubeIsPlaying, primaryAudioEl } from "../../main/src/component/content-utils.js";
-import { ShowHideDialogPanel } from "../main/js/dialogs.js";
+import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
@@ -49,8 +49,8 @@ export let tkStarttimes = [];
 let poiLocations = [];
 let curveLocations = [];
 let cloudMarkers = []; //???? unused>?
-let sceneModels = [];
-let sceneObjects = [];
+export let sceneModels = [];
+
 let sceneTextItems = [];
 let localKeys = [];
 
@@ -96,9 +96,10 @@ let currentAvailableLocalStorageEstimage = null;
 let allowCameraLock = true;
 const camLockButton = document.getElementById("camLockToggleButton");
 let intersections = [];
-let avatarName = "";
+export let avatarName = "";
 
 
+window.LocationRowClick = LocationRowClick;
 
 $(function() { 
    // InitIDB();
@@ -408,7 +409,18 @@ $(function() {
       console.log("obb collision end with " + e.detail.withEl.id + " intersect index " + index + " " + intersections);
     }); 
     
+
+
 }); //end onload
+
+
+$('#nextButton').on('click', function(e) {
+   GoToNext();
+});
+$('#previousButton').on('click', function(e) {
+   GoToPrevious();
+});
+
 $('a-entity').each(function() {  //external way of getting click duration for physics
 
    $(this).bind('mousedown', function() {
@@ -719,7 +731,7 @@ function arrayBufferToBase64(arrayBuffer) { //works for large files too?
    }
    return bytes.buffer;
 }
-function ExportMods () {
+export function ExportMods () {
    let currentTimestamp = Math.round(Date.now() / 1000).toString();
    let mods = {};
    // mods.localFiles = localData.localFiles;
@@ -749,7 +761,7 @@ function ExportMods () {
 //    return scene
 // }
 
-function ImportMods (event) {
+export function ImportMods (event) {
    console.log("tryna import mods " + event.target.files[0].name);
    if (event.target.files[0].name.includes(room.toString())) { //file is imported text file, all base64
       var selectedFile = event.target.files[0];
@@ -1041,7 +1053,7 @@ function GrabLocation(locationKey) {
    console.log("tryna grablocation : " +locationKey);  
 }
 
-function ToggleTransformControls (locationKey) {
+export function ToggleTransformControls (locationKey) {
 
    const transformEls = document.getElementsByClassName("transformControls");
    if (transformEls.length > 0) {
@@ -1053,7 +1065,7 @@ function ToggleTransformControls (locationKey) {
       }
    }
 
-   this.transformEl = document.getElementById(locationKey);
+   const transformEl = document.getElementById(locationKey);
    console.log("tryna transform a location " + locationKey);
 
    
@@ -1073,7 +1085,7 @@ function ToggleTransformControls (locationKey) {
          }
       } else {
          console.log("tryna setattrribue transform_controls");
-         this.transformEl.setAttribute("transform_controls", "");
+         transformEl.setAttribute("transform_controls", "");
       }
    }
 }
@@ -1432,14 +1444,15 @@ function LocationRowClick(data) {
    console.log("location row click: " + data);
    ShowHideDialogPanel();
    // ShowLocationModal(data);
-   selectedLocationTimestamp = data;
+   // selectedLocationTimestamp = data;
+   SetSelectedLocationTimestamp(data);
    SceneManglerModal('Location');
    // ShowLocationModal(isCloud, data);
 }
 
 
 
-function CreateLocation (filename, type, position) { //New Location button, also addToScene button for localfiles
+export function CreateLocation (filename, type, position) { //New Location button, also addToScene button for localfiles
    console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
    let timestamp = null;
    let markertype = "placeholder";
@@ -2374,7 +2387,7 @@ function shallowEqual(object1, object2) {
 //     UpdateContentBox();
 //     document.getElementById("chat_input").value = "";
 // });
-function SendChatMessage() {
+export function SendChatMessage() {
    if (socket) {
       var message = $('#chat_input').val();
       if (message.length > 0) {
@@ -2397,7 +2410,7 @@ function SendChatMessage() {
       $('#future').prepend("<div class=\x22messageBubbleOut\x22 style=\x22float: right;\x22></span>Socket Not Connected!</div><br><br><br>");
    }
 }
-function ValidateEmail(mail) 
+export function ValidateEmail(mail) 
 {
  if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))
   {
@@ -2406,7 +2419,7 @@ function ValidateEmail(mail)
     alert("You have entered an invalid email address!")
     return (false)
 }
-function SendInvitation() {
+export function SendInvitation() {
    if (!userData.isGuest) {
       let data = {};
       let inviteEmail = document.getElementById("email_input").value;

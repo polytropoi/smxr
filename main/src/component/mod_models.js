@@ -5,7 +5,7 @@
 
 import { settings } from "../../../connect/connect.js";
 import { clamp } from "../component/content-utils.js";
-import { keydown } from "../../js/dialogs.js";
+import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
 ////////////////////////// - MOD_MODEL - for "plain" models, these are written (aframe elements + components + assets) by the server into response, as opposed to "Objects", see mod_objex.js
 AFRAME.registerComponent('mod_model', {
     schema: {
@@ -1453,7 +1453,8 @@ AFRAME.registerComponent('mod_model', {
                   ToggleTransformControls(this.timestamp);
                 } else if (keydown == "Shift") {
                   // ShowLocationModal(this.timestamp);
-                  selectedLocationTimestamp = this.timestamp;
+                  SetSelectedLocationTimestamp(this.timestamp);
+                  // selectedLocationTimestamp = this.timestamp;
                   // ShowLocationModal(that.timestamp);
                   SceneManglerModal('Location');
                 } 
