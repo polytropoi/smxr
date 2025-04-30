@@ -1808,6 +1808,7 @@ AFRAME.registerComponent('model-callout', {
       calloutString: {default: ""},
       tag: {default: ""},
       type: {default: "textCallout"}
+
     },
     init: function () {
       var sceneEl = document.querySelector('a-scene');
@@ -1877,7 +1878,10 @@ AFRAME.registerComponent('model-callout', {
         outlineWidth: "2%",
         value: calloutString
       });
+      
+      this.triggerAudioController = document.getElementById("triggerAudio");
       let that = this;
+
       this.el.addEventListener('mouseenter', function (evt) {
         // this.modelHitDistance = this.modParent.returnHitDistance();
         if (evt.detail.intersection) {
@@ -1892,20 +1896,21 @@ AFRAME.registerComponent('model-callout', {
        
           const picGroupsControlEl = document.getElementById("pictureGroupsData");
           if (picGroupsControlEl) {
-            this.picData = picGroupsControlEl.components.picture_groups_control.returnTaggedPicture(that.data.tag);
+            let picsData = picGroupsControlEl.components.picture_groups_control.returnTaggedPicture(that.data.tag);
+            this.picData = picsData[Math.floor((Math.random()*picsData.length))];
             if (this.picData) {
               let picEl = null;
               console.log("this.picData " + this.picData);
               if (this.picData.orientation == "Landscape") {
                 that.landscapeEntity.setAttribute('visible', true);
-                that.portraitEntityEntity.setAttribute('visible', false);
+                that.portraitEntity.setAttribute('visible', false);
                 that.squareEntity.setAttribute('visible', false);
                 picEl = that.landscapeEntity;
 
               
               } else if (this.picData.orientation == "Portrait") {
                 that.landscapeEntity.setAttribute('visible', false);
-                that.portraitEntityEntity.setAttribute('visible', true);
+                that.portraitEntity.setAttribute('visible', true);
                 that.squareEntity.setAttribute('visible', false);
                 picEl = that.portraitEntity;
               
@@ -1940,6 +1945,13 @@ AFRAME.registerComponent('model-callout', {
                   
                 });
               }
+            }
+          }
+          if (that.triggerAudioController) {
+            let triggerAudioControl = that.triggerAudioController.components.trigger_audio_control;
+            if (triggerAudioControl) {
+              let distance = evt.detail.intersection.distance;
+              triggerAudioControl.playAudioAtPosition(evt.detail.intersection.point, distance, that.data.tag, 1);//tagmangler needs an array, add vol mod 
             }
           }
         }
@@ -3940,15 +3952,18 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
      
       let picGroupArray = this.data.jsonData;
       console.log("tryna find tagged pics " + tag);
+      // let picGroupArrayIndex = Math.floor((Math.random()*picGroupArray.length));
+      let matchedPics = [];
       for (let i = 0; i < picGroupArray.length; i++) {
         for (let j = 0; j < picGroupArray[i].images.length; j++) {
           if (picGroupArray[i].images[j].tags.includes(tag)) { //todo check tags
             
-            return picGroupArray[i].images[j];
-            
+            // return picGroupArray[i].images[j];
+            matchedPics.push(picGroupArray[i].images[j]);
           }
         }
       }
+      return matchedPics;
      
     }, 
     initFlyingPics: function () {

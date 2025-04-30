@@ -2164,7 +2164,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
         let contentType = "";
         if (groupType.toLowerCase()  == ".jpg" || groupType.toLowerCase()  == ".jp2" || groupType.toLowerCase()  == ".jpeg" || groupType.toLowerCase()  == ".png") {
             contentType = "picture";
-        } else if (groupType.toLowerCase()  == ".mp3" || groupType.toLowerCase()  == ".wav" || groupType.toLowerCase()  == ".ogg" || groupType.toLowerCase()  == ".aif"  )  {
+        } else if (groupType.toLowerCase()  == ".mp3" || groupType.toLowerCase()  == ".wav" || groupType.toLowerCase()  == ".ogg" || groupType.toLowerCase()  == ".aif" || groupType.toLowerCase()  == ".aiff"  )  {
             contentType = "audio"
         } else if (groupType.toLowerCase() == ".mp4" || groupType.toLowerCase() == ".mkv" || groupType.toLowerCase() == ".mov" || groupType.toLowerCase() == ".webm")  {
             contentType = "video";
@@ -2528,8 +2528,8 @@ app.get('/staging/:_id', requiredAuthentication, function (req, res) {
                 const testUrl = process.env.GS_HOST;
                 console.log("testUrl " + testUrl);
                 const testResp = await fetch(testUrl);
-                console.log(response.status);
-                if (!response.status) {
+                console.log("util server response : " + response);
+                if (!response) {
                     // throw new Error(`Response status: ${response.status}`);
                     console.log("no utils server found!");
                     rezponze.serverFound = false;

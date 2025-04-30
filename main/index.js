@@ -1085,7 +1085,7 @@
                         "<br>" + convertTimestamp(dateSplitter(arr[i].name)) +
                     "</div>" +
                 "</div>";
-            } else if (ext.toLowerCase() == "mp3" || ext.toLowerCase() == "aif" || ext.toLowerCase() == "wav" || ext.toLowerCase() == "ogg") {
+            } else if (ext.toLowerCase() == "mp3" || ext.toLowerCase() == "aif" || ext.toLowerCase() == "aiff" || ext.toLowerCase() == "wav" || ext.toLowerCase() == "ogg") {
             html = html + 
                 "<div class=\x22card\x22 style=\x22width:320px;\x22>" +
                     "<div class=\x22card-header\x22>"+
@@ -2743,7 +2743,7 @@
                     e.preventDefault();  
                     let newTag = document.getElementById("addTagInput").value;
                     console.log("tryna add tag " + newTag);
-                    if (newTag.length > 2) {
+                    if (newTag.length > 0) {
                     let html = "";
                     tags.push(newTag);
                     for (let i = 0; i < tags.length; i++) {
@@ -3439,7 +3439,7 @@
                         e.preventDefault();  
                         let newTag = document.getElementById("addTagInput").value;
                         console.log("tryna add tag " + newTag);
-                        if (newTag.length > 2) {
+                        if (newTag.length > 0) {
                         let html = "";
                         tags.push(newTag);
                         for (let i = 0; i < tags.length; i++) {
@@ -4405,7 +4405,7 @@
                 e.preventDefault();  
                 let newTag = document.getElementById("addTagInput").value;
                 console.log("tryna add tag " + newTag);
-                if (newTag.length > 2) {
+                if (newTag.length > 0) {
                 let html = "";
                 tags.push(newTag);
                 for (let i = 0; i < tags.length; i++) {
@@ -5087,7 +5087,7 @@
                 e.preventDefault();  
                 let newTag = document.getElementById("addTagInput").value;
                 console.log("tryna add tag " + newTag);
-                if (newTag.length > 2) {
+                if (newTag.length > 0) {
                 let html = "";
                 tags.push(newTag);
                 for (let i = 0; i < tags.length; i++) {
@@ -6381,7 +6381,7 @@
                         e.preventDefault();  
                         let newTag = document.getElementById("addTagInput").value;
                         console.log("tryna add tag " + newTag);
-                        if (newTag.length > 2) {
+                        if (newTag.length > 0) {
                         let html = "";
                         tags.push(newTag);
                         for (let i = 0; i < tags.length; i++) {
@@ -7071,7 +7071,7 @@
                     e.preventDefault();  
                     let newTag = document.getElementById("addTagInput").value;
                     console.log("tryna add tag " + newTag);
-                    if (newTag.length > 2) {
+                    if (newTag.length > 0) {
                     let html = "";
                     tags.push(newTag);
                     for (let i = 0; i < tags.length; i++) {
@@ -8965,7 +8965,7 @@ function showGroup() {
                 e.preventDefault();  
                 let newTag = document.getElementById("addTagInput").value;
                 console.log("tryna add tag " + newTag);
-                if (newTag.length > 2) {
+                if (newTag.length > 0) {
                 let html = "";
                 tags.push(newTag);
                 for (let i = 0; i < tags.length; i++) {
@@ -11879,7 +11879,7 @@ function getAllPeople() {
                     e.preventDefault();  
                     let newTag = document.getElementById("addTagInput").value;
                     console.log("tryna add tag " + newTag);
-                    if (newTag.length > 2) {
+                    if (newTag.length > 0) {
                         let html = "";
                         tags.push(newTag);
                         for (let i = 0; i < tags.length; i++) {

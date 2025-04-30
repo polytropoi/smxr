@@ -556,15 +556,17 @@ webxr_router.get('/:_id', function (req, res) {
             let poiIndex = 0;
             if (sceneResponse.scenePictures != null && sceneResponse.scenePictures.length > 0) {
                 sceneResponse.scenePictures.forEach(function (picture) {
-                    console.log("scenePIcture " + picture);
+                    console.log("scenePIcture " + picture + sceneResponse.sceneTags);
+                    
                     var p_id = ObjectId.createFromHexString(picture.toString()); //convert to binary to search by _id beloiw
                     requestedPictureItems.push(p_id); //populate array //hrm, unused atm...
 
-                });
+                });//includes
             }
-            if (sceneResponse.sceneTags != undefined && sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().includes("debug") || sceneResponse.sceneDebugMode != null && sceneResponse.sceneDebugMode != undefined && sceneResponse.sceneDebugMode != "") {
+            if ((sceneResponse.sceneTags && sceneResponse.sceneTags != undefined && sceneResponse.sceneTags != "null" && sceneResponse.sceneTags.includes("debug")) || sceneResponse.sceneDebugMode != null && sceneResponse.sceneDebugMode != undefined && sceneResponse.sceneDebugMode != "") {
                 debugMode = true;
             }
+            
             if (sceneResponse.sceneYouTubeIDs != null && sceneResponse.sceneYouTubeIDs.length > 0) {
                 youtubes = sceneResponse.sceneYouTubeIDs;
             }
@@ -696,7 +698,7 @@ webxr_router.get('/:_id', function (req, res) {
                         console.log("Switching markertype from model to placeholder!@");
                     }
                     if (sceneResponse.sceneLocations[i].markerType != undefined && sceneResponse.sceneLocations[i].type.toLowerCase() != 'geographic') { //cloudmarkers, special type allows local mods
-                        
+                        // console.log(JSON.stringify(sceneResponse.sceneLocations[i]));
                         if (//sceneResponse.sceneLocations[i].markerType.toLowerCase() == "none" 
                             sceneResponse.sceneLocations[i].markerType.toLowerCase() == "placeholder" 
                             || sceneResponse.sceneLocations[i].markerType.toLowerCase().includes("trigger") 
@@ -905,7 +907,9 @@ webxr_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneLocations[i].markerType == "svg billboard") {
                         sceneTextLocations.push(sceneResponse.sceneLocations[i]);
                     }
+                    // console.log(JSON.stringify(sceneResponse.sceneLocations[i]));
                 } //end location loop
+                console.log("sceneResponse " + JSON.stringify(sceneResponse));
                 var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations)).toString("base64");
                 loadLocations = "<a-entity location_data id=\x22locationData\x22 data-locations='"+buff+"'></a-entity>";
             } else {
@@ -962,10 +966,10 @@ webxr_router.get('/:_id', function (req, res) {
                         "</a-camera>";
                 let doBuildings = false;
                 let doTerrain = false;        
-                if (sceneData.sceneTags!= null && sceneData.sceneTags.includes("buildings")) {
+                if (sceneData.sceneTags != null && sceneData.sceneTags.includes("buildings")) {
                     doBuildings = true;
                 } 
-                if (sceneData.sceneTags!= null && sceneData.sceneTags.includes("terrain")) {
+                if (sceneData.sceneTags != null && sceneData.sceneTags.includes("terrain")) {
                     doTerrain = true;
                 }
                 locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_mapbox=\x22zoomLevel: "+sceneData.sceneMapZoom+"; doBuildings: "+doBuildings+"; doTerrain: "+doTerrain+"; mbid: "+process.env.MAPBOX_KEY+";\x22 position=\x220 2 -5\x22>"+
@@ -1060,7 +1064,8 @@ webxr_router.get('/:_id', function (req, res) {
                     blinkMod = "blink-controls=\x22cameraRig: #cameraRig; collisionEntities: #nav-mesh;\x22"; //only one navmesh for now
                     wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:10; height:"+sceneResponse.scenePlayer.playerHeight+"\x22";
                 }
-                if (sceneResponse.sceneTags.includes("webgpu")) {
+                console.log("sceneResponse.sceneTags " + sceneResponse.sceneTags);
+                if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("webgpu")) {
                     blinkMod = "";
                     blinkScript = "";
                 } 
@@ -1075,7 +1080,8 @@ webxr_router.get('/:_id', function (req, res) {
                     playerPosition = playerPositions[Math.floor(Math.random() * playerPositions.length)];
                 }
                 ////////////////////////// - THIRD PERSON CAMERA SETUP - //////////////////////////////
-                if (sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase().includes("third person")) {
+                console.log("sceneCameraMode " + sceneResponse.sceneCameraMode);
+                if (sceneResponse.sceneCameraMode != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase().includes("third person")) {
                     let lookcontrols = "look-controls=\x22magicWindowTrackingEnabled: false; reverseTouchDrag: true\x22";
                     if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags.includes('magic window'))) {
                         lookcontrols = "look-controls=\x22reverseTouchDrag: true\x22"; // because magicwinders enabled by default
@@ -1120,7 +1126,7 @@ webxr_router.get('/:_id', function (req, res) {
                         "</a-entity></a-entity>";
 
                 ///////////////// - Orbit camera - /////////////////
-                } else if (sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase().includes("orbit")) { //hrm..
+                } else if (sceneResponse.sceneCameraMode != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase().includes("orbit")) { //hrm..
                     wasd = "";
                     cameraRigEntity = "<a-entity camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; minDistance: 0.5; maxDistance: 180; initialPosition: "+playerPosition+"\x22>"+
                     "<a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
@@ -1128,7 +1134,7 @@ webxr_router.get('/:_id', function (req, res) {
                     joystickScript = "<script src=\x22https://cdn.jsdelivr.net/gh/diarmidmackenzie/superframe@fix-orbit-controls/components/orbit-controls/dist/aframe-orbit-controls.min.js\x22></script>";
                 
                 ///////////////// - Fixed camera - /////////////////
-                } else if (sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase() == "fixed rotate") { //hrm..
+                } else if (sceneResponse.sceneCameraMode != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase() == "fixed rotate") { //hrm..
                     let lookcontrols = "look-controls=\x22magicWindowTrackingEnabled: false; reverseTouchDrag: true\x22";
                     if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags.includes('magic window'))) {
                         lookcontrols = "look-controls=\x22reverseTouchDrag: true\x22"; // because magicwinders enabled by default
@@ -1153,7 +1159,7 @@ webxr_router.get('/:_id', function (req, res) {
                     "</a-entity>"+
                     
                     "</a-entity></a-entity>";
-                } else if (sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase() == "fixed") { //hrm..
+                } else if (sceneResponse.sceneCameraMode  != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase() == "fixed") { //hrm..
                     let lookcontrols = "look-controls=\x22magicWindowTrackingEnabled: false; reverseTouchDrag: true\x22";
                     if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags.includes('magic window'))) {
                         lookcontrols = "look-controls=\x22reverseTouchDrag: true\x22"; // because magicwinders enabled by default
@@ -1180,12 +1186,13 @@ webxr_router.get('/:_id', function (req, res) {
 
                 ///////////////// - First Person camera - /////////////////        
                 } else { 
+                    
                     let lookcontrols = "look-controls=\x22magicWindowTrackingEnabled: false;\x22";
                     let console = "";
                     if (logScripts != "") {
                         console = "<a-console id=\x22consoleEntity\x22 position=\x220\ .13 -.36\x22 scale=\x22.33 .33 .33\x22 rotation=\x22-70.7 -1.77\x22></a-console>";   
                     }
-                    if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags.includes('magic window'))) {
+                    if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('magic window'))) {
                         lookcontrols = "look-controls"; // because magicwinders enabled by default
                     }
                     let ammoHands = "";
@@ -1194,14 +1201,15 @@ webxr_router.get('/:_id', function (req, res) {
                         ammoHands = " ammo-body=\x22type: kinematic; emitCollisionEvents: true;\x22 ammo-shape=\x22type: sphere\x22 ";
                         hapticsHands = "haptics"
                     }
-                    if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("hand controls")  || sceneResponse.sceneTags.includes("hand controllers")) {
+                    
+                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("hand controls")  || sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("hand controllers")) {
                         handEntities = "<a-entity id=\x22left-hand\x22 hand-controls=\x22hand: left\x22 left_controller_buttons></a-entity>" +
                         "<a-sphere color=\x22blue\x22 opacity=\x220.1\x22 radius=\x220.06\x22 "+ammoHands+"></a-sphere></a-entity>" +
                         "<a-entity id=\x22right-hand\x22 hand-controls=\x22hand: right\x22>" +
                         "<a-sphere color=\x22orange\x22 opacity=\x220.1\x22 radius=\x220.06\x22 "+ammoHands+"></a-sphere>"+
                         "<a-entity id=\x22rightHandEquip\x22 equip_controller rotation=\x22-80 0 0\x22 position=\x22-0.02 0 -0.01\x22></a-entity>" +
                         "</a-entity>";
-                    } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("hand tracking")) { 
+                    } else if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("hand tracking")) { 
                         handEntities = "<a-entity id=\x22left-hand\x22 hand-tracking-controls=\x22hand: left; hoverEnabled: true;\x22 pinch_fu>" +
                         "<a-sphere color=\x22blue\x22 opacity=\x221\x22 radius=\x220.05\x22 "+ammoHands+"></a-sphere>"+
                         "</a-entity>" +
@@ -1211,7 +1219,7 @@ webxr_router.get('/:_id', function (req, res) {
                     } else {
                         let rightHandEquip = "";
                         let leftHandEquip = "";
-                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("blaster")) {
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("blaster")) {
                             rightHandEquip = " equip_controller rotation=\x22-80 0 0\x22 position=\x22-0.02 0 -0.01\x22"
                         }
                         handEntities = "<a-entity id=\x22left-hand\x22 "+blinkMod+" meta-touch-controls=\x22hand: left;\x22 left_controller_thumb left_controller_buttons>"+
@@ -1229,6 +1237,7 @@ webxr_router.get('/:_id', function (req, res) {
                         sceneResponse.scenePlayer = {};
                         sceneResponse.scenePlayer.playerSpeed = 2;
                     }
+
                     wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22";
                     if (useSimpleNavmesh || useNavmesh) {
                         wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:10; height: 1.6\x22";
@@ -1309,7 +1318,7 @@ webxr_router.get('/:_id', function (req, res) {
                     ground = "ground: none;"
                 }
 
-                if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes('no dressing')) {
+                if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
                     dressing = "dressing: none;"
                 }
                 
@@ -2618,9 +2627,9 @@ webxr_router.get('/:_id', function (req, res) {
 
                     "<a-entity id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayer\x22 youtube_player=\x22yt_id: "+
                     sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></a-entity>"+
-                    "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 .65 1.1\x22 id=\x22youtubeTitle\x22></a-text>"+
-                    "<a-text width=\x223\x22 position=\x22-.95 -.3 1.1\x22 id=\x22youtubeState\x22></a-text>"+
-                    "<a-text width=\x223\x22 position=\x22-.95 -.4 1.1\x22 id=\x22youtubeStats\x22></a-text>"+
+                    "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 1.7 .1\x22 id=\x22youtubeTitle\x22></a-text>"+
+                    "<a-text width=\x223\x22 position=\x22-.95 .7 .1\x22 id=\x22youtubeState\x22></a-text>"+
+                    "<a-text width=\x223\x22 position=\x22-.95 .6 .1\x22 id=\x22youtubeStats\x22></a-text>"+
                     "</a-entity>";
                 }
             }
@@ -3090,14 +3099,15 @@ webxr_router.get('/:_id', function (req, res) {
                     // let arHitTest = "";
                     let arElements = "";
                     let handsTemplate = "";
-                    let aframeRenderSettings = "renderer=\x22colorManagement: true; physicallyCorrectLights: true; exposure: .2; sortObjects: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;\x22";
+                    let aframeRenderSettings = "renderer=\x22colorManagement: true; physicallyCorrectLights: true; exposure: 2; sortObjects: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;\x22";
      
 
                     //scenetype filters below...
 
                     console.log("sceneWebType: "+ sceneResponse.sceneWebType); 
                     ////////DEFAULT/AFRAME Scene type:
-                    if (sceneResponse.sceneWebType == undefined || sceneResponse.sceneWebType.toLowerCase() == "default" || sceneResponse.sceneWebType.toLowerCase() == "aframe") { 
+                    if (sceneResponse.sceneWebType == null || sceneResponse.sceneWebType == undefined || (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "default") || 
+                        (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "aframe")) { 
                         // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
                         let xrExtras = "";
                         let hitCasterComponent = "";
@@ -3469,12 +3479,12 @@ webxr_router.get('/:_id', function (req, res) {
                         if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
                             sceneGreeting = sceneResponse.sceneGreeting;
 
-                            if (sceneResponse.sceneTags.includes("greeting")) {
+                            if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("greeting")) {
                                 console.log("greeting is " + sceneResponse.sceneGreeting);
                                 textEntities = textEntities + "<a-entity id=\x22sceneGreetingDialog\x22 class=\x22activeObjexRay\x22 look-at=\x22#player\x22 scene_greeting_dialog=\x22fillColor : "+sceneResponse.sceneFontFillColor+
                                 "; outlineColor : "+sceneResponse.sceneFontOutlineColor+"; backgroundColor : "+sceneResponse.sceneTextBackgroundColor+"; font1 : "+sceneResponse.sceneFontWeb1+"; font2 : "+sceneResponse.sceneFontWeb2+"; greetingText : "+sceneResponse.sceneGreeting+"; questText : "+sceneQuest+";\x22></a-entity>";
                             }
-                            if (sceneResponse.sceneTags.includes("greeting hide")) {
+                            if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("greeting hide")) {
                                 console.log("greeting is " + sceneResponse.sceneGreeting);
                                 textEntities = textEntities + "<a-entity id=\x22sceneGreetingDialog\x22 class=\x22activeObjexRay\x22 look-at=\x22#player\x22 scene_greeting_dialog=\x22behavior: hide; fillColor : "+sceneResponse.sceneFontFillColor+
                                 "; outlineColor : "+sceneResponse.sceneFontOutlineColor+"; backgroundColor : "+sceneResponse.sceneTextBackgroundColor+"; font1 : "+sceneResponse.sceneFontWeb1+"; font2 : "+sceneResponse.sceneFontWeb2+"; greetingText : "+sceneResponse.sceneGreeting+"; questText : "+sceneQuest+";\x22></a-entity>";
@@ -3507,7 +3517,7 @@ webxr_router.get('/:_id', function (req, res) {
                             joystickContainer = "";
                             joystickScript = "";
                         }
-
+                        
                         if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('vrmode') || sceneResponse.sceneTags.includes('vr mode'))) {
                             xrmode =  "xr-mode-ui=\x22XRMode: vr\x22";
                         } 

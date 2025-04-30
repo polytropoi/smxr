@@ -54,7 +54,7 @@ export async function RunDataQuery(coll,type,query,update,sort) {  //TODO pass i
                 return (null); 
             }
         ////////////////////////////////
-        case "update": //return only one
+        case "update": //many
             try {
                 return await db.collection(coll).update(query);
             } catch (e) {
