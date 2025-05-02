@@ -2,11 +2,10 @@ import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, Tran
 import { settings, room, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
   userData, stringRoomUsers, timeKeysData, timedEventsListenerMode, SetTimedEventsListenerMode, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
   tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
-  SetTimeKeysData,
-  GoToNext,
-  GoToPrevious
+  SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation,
+  SaveModsToCloud
   } from "../../connect/connect.js";
-import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData } from "../../connect/indexedDb.js";
+import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile } from "../../connect/indexedDb.js";
 
 export let showDialogPanel = false;
 let dialogInitialized = false;
@@ -177,6 +176,11 @@ window.addEventListener( 'keydown',  ( event ) => {
     $('#modalContent').on('click', '#importButton', function(e) {
       console.log("tryna ImportMods!");
       ImportMods();
+  
+    });
+    $('#modalContent').on('click', '#saveModsToCloudButton', function(e) {
+      console.log("tryna savemods!");
+      SaveModsToCloud();
   
     });
   // })
@@ -2006,7 +2010,7 @@ export function SceneManglerModal(mode, autoHide) {
     let sendAdminMessageButton = "";
     if (userData.sceneOwner == "indaehoose") {
         ownerButton = "<button id=\x22EditScene\x22 class=\x22addButton\x22 id=\x22editButton\x22 onclick=\x22window.location='../main/?type=scene&iid="+userData.sceneID+"';\x22>Edit Scene</button>"+
-        "<button id=\x22SaveModsToCloud\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 onclick=\x22SaveModsToCloud()\x22>Save to Cloud DB</button>";
+        "<button id=\x22SaveModsToCloud\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 >Save to Cloud DB</button>";
         sendAdminMessageButton = "<button id=\x22sendAdminMessageButton\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 >Send Admin Message</button>";
     }
 
@@ -2916,7 +2920,7 @@ var PlayDialogLoop = function(arr) {
     }
 
 
-    function DisplayLocalFiles() {
+    export function DisplayLocalFiles() {
       const galleryContainer = document.getElementById('localFilesContainer');
       // console.log("tryna display local files");
       if (galleryContainer) {

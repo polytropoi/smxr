@@ -1,6 +1,6 @@
 /* global AFRAME, THREE */
 
-import { settings, GoToLocation, sceneModels, ToggleTransformControls } from "../../../connect/connect.js";
+import { settings, GoToLocation, sceneModels, ToggleTransformControls, localData } from "../../../connect/connect.js";
 import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
 import { sceneTextItems } from "./content-utils.js";
 

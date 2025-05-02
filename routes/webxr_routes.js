@@ -2388,7 +2388,7 @@ webxr_router.get('/:_id', function (req, res) {
                     
                     "<a-entity gltf-model=\x22#backpanel_horiz1\x22 position=\x220 0 0\x22 material=\x22color: black; transparent: true;\x22></a-entity>" +
                     "<a-entity position=\x220 -1.25 0\x22 primary_audio_player id=\x22primaryAudioPlayer\x22 gltf-model=\x22#audioplayer\x22></a-entity>"+
-                    "<a-entity id=\x22primaryAudioText\x22 position=\x22.75 .25 0\x22 "+
+                    "<a-entity id=\x22primaryAudioText\x22 position=\x22.75 .6 -1\x22 "+
                     "text=\x22value:Click to play;\x22></a-entity>"+
                     "<a-entity id=\x22primaryAudio\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; audioID: "+sceneResponse.scenePrimaryAudioID+"; volume: "+scenePrimaryVolume+"; audioevents:"+sceneResponse.scenePrimaryAudioTriggerEvents+"; targetattach:"+sceneResponse.sceneAttachPrimaryAudioToTarget+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
                     "title: "+primaryAudioTitle+"\x22>"+

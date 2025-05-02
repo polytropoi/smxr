@@ -1,5 +1,5 @@
-import { InitLocalColors } from "../main/js/dialogs.js";
-import { settings, room, sceneLocations, locationTimestamps, localData, lastCloudUpdate, InitCurves, sceneEl, PlayerToLocation, SetTimeKeysData } from "../connect/connect.js";
+import { InitLocalColors, DisplayLocalFiles } from "../main/js/dialogs.js";
+import { settings, room, sceneLocations, locationTimestamps, localData, lastCloudUpdate, InitCurves, sceneEl, PlayerToLocation, SetTimeKeysData, getExtension } from "../connect/connect.js";
 
 export let hasLocalData = false;
 //////////////////////indexedDB functions...
@@ -465,7 +465,7 @@ export function InitIDB() {
         };
      }
 
-     function DeleteFile(filename) {  //delete single file from db
+     export function DeleteFile(filename) {  //delete single file from db
 
       console.log("tryna connect to SMXR indexeddb");
       if (!('indexedDB' in window)) {
@@ -591,7 +591,7 @@ const renderStorageQuotaInfo = async () => {
 }
 
 // Util functions
-const formatAsByteString = (bytes) => {
+export const formatAsByteString = (bytes) => {
    // console.log("tryna format " + bytes);
 	const oneGigabyte = 1024 * 1024 * 1024;
 	const oneMegabyte = 1024 * 1024;
