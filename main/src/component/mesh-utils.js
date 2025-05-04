@@ -1,7 +1,7 @@
 
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
-import { settings, mouse, localData, GoToNext, GoToPrevious, timedEventsListenerMode } from "../../../connect/connect.js";
+import { settings, mouse, localData, GoToNext, GoToPrevious, timedEventsListenerMode, GetMatrixData } from "../../../connect/connect.js";
 import { SaveLocalData } from "../../../connect/indexedDb.js";
 
 if (typeof AFRAME === 'undefined') {
@@ -1001,7 +1001,7 @@ AFRAME.registerComponent('instanced_meshes_sphere', { //scattered randomly in sp
             }
             this.el.sceneEl.object3D.add( this.arrow );
           } else {
-            this.raycaster.setFromCamera( mouse, AFRAME.scenes[0].camera );
+            this.raycaster.setFromCamera( mouse, this.camera );
             this.intersection = this.raycaster.intersectObject( this.iMesh );
           }
         }
@@ -1201,14 +1201,13 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         this.sampleMats = [];
         sObj.visible = false;
         sObj.traverse(node => {
-        if (node.isMesh && node.material) {
-            this.sampleGeometry = node.geometry;
-            this.sampleGeos.push(this.sampleGeometry);
-            this.sampleMaterial = node.material;
-            this.sampleMats.push(this.sampleMaterial);
-            
-            }
-          });
+          if (node.isMesh && node.material) {
+              this.sampleGeometry = node.geometry;
+              this.sampleGeos.push(this.sampleGeometry);
+              this.sampleMaterial = node.material;
+              this.sampleMats.push(this.sampleMaterial);
+          }
+        });
 
         if (!this.scatterFinished) {
           
@@ -1232,6 +1231,8 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       // this.particlesEl.setAttribute("mod_particles", {"enabled": false});
       this.el.sceneEl.appendChild(this.particlesEl); //hrm...
     }
+
+    this.camera = document.getElementById("player").querySelector(["camera"]);
 /*  this way doesn't work with instanced meshes fsr...  
     this.el.addEventListener('raycaster-intersected', (e) => {  
 
@@ -1426,6 +1427,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
                       this.iMesh_4 = iMesh_4;
                     }
                     this.count++;
+                    console.log("instance count " + this.count);
                     }
                   }
               } else {
@@ -1529,8 +1531,10 @@ AFRAME.registerComponent('instanced_surface_meshes', {
 
 
           } else { //first person use mouse for raycast
-            this.raycaster.setFromCamera( mouse, AFRAME.scenes[0].camera ); 
-            this.intersection = this.raycaster.intersectObject( this.iMesh );
+            // if (this.camera) {
+              this.raycaster.setFromCamera( mouse, AFRAME.scenes[0].camera ); 
+              this.intersection = this.raycaster.intersectObject( this.iMesh );
+            // }
           }
          
         }
@@ -1566,7 +1570,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         this.intersection = null;
         
         this.hitID = hitID;
-        // console.log("new hit " + hitID + " " + distance + " " + JSON.stringify(hitpoint) + " interaction:" + this.data.interaction + " eventData " + this.data.eventData.toLowerCase());
+        console.log("new hit " + hitID + " " + distance + " " + JSON.stringify(hitpoint) + " interaction:" + this.data.interaction + " eventData " + this.data.eventData.toLowerCase() + " tags " + this.data.tags);
         var triggerAudioController = document.getElementById("triggerAudio");
         if (triggerAudioController != null) {
           triggerAudioController.components.trigger_audio_control.playInstanceAudioAtPosition(this.instanceId, hitpoint, distance, this.data.tags);

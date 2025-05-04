@@ -2522,20 +2522,20 @@ app.get('/staging/:_id', requiredAuthentication, function (req, res) {
             console.log(stagedItems.length + ' staging files have been fetched');
             stagedItems.reverse();
             rezponze.stagedItems = stagedItems;
-            rezponze.serverFound = true;
+            // rezponze.serverFound = true;
             
-            if (process.env.GS_HOST) {
-                const testUrl = process.env.GS_HOST;
-                console.log("testUrl " + testUrl);
-                const testResp = await fetch(testUrl);
-                console.log("util server response : " + response);
-                if (!response) {
-                    // throw new Error(`Response status: ${response.status}`);
-                    console.log("no utils server found!");
-                    rezponze.serverFound = false;
-                }
+            // if (process.env.GS_HOST) {
+            //     const testUrl = process.env.GS_HOST;
+            //     console.log("testUrl " + testUrl);
+            //     const testResp = await fetch(testUrl);
+            //     console.log("util server response : " + response);
+            //     if (!response) {
+            //         // throw new Error(`Response status: ${response.status}`);
+            //         console.log("no utils server found!");
+            //         rezponze.serverFound = false;
+            //     }
               
-            }
+            // }
            
             res.send(rezponze);
         } catch (e) {

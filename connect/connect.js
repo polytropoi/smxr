@@ -467,7 +467,7 @@ export function getExtension(filename) {
    return (i < 0) ? '' : filename.substr(i);
 }
 
-function GetMatrixData() { //use matrix.org for... something
+export function GetMatrixData() { //use matrix.org for... something
    if (!matrixClient) {
       matrixClient = matrixcs.createClient("https://matrix.org");
    }
@@ -479,9 +479,9 @@ function GetMatrixData() { //use matrix.org for... something
          }
          matrixRoomsData = data;
          console.log("Congratulations! The matrix client got " + data.chunk.length + " rooms.");
-         let matrixMeshEl = document.getElementById("matrix_meshes");
+         const matrixMeshEl = document.getElementById("matrix_meshes");
          if (matrixMeshEl != null) {
-            matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
+            const matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
             if (matrixMeshComponent != null) {  
                let length = data.chunk.length;
                let trimToLength = 99;
@@ -503,9 +503,9 @@ function GetMatrixData() { //use matrix.org for... something
          }
       });
    } else {
-      let matrixMeshEl = document.getElementById("matrix_meshes");
+      const matrixMeshEl = document.getElementById("matrix_meshes");
       if (matrixMeshEl != null) {
-         matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
+         const matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
          if (matrixMeshComponent != null) {  
             let length = matrixRoomsData.chunk.length;
             let trimToLength = 99;

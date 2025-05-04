@@ -1042,7 +1042,7 @@
     function getStaging() {
         console.log("tryna reload staging");
         $.get( "/staging/" + cookie._id, function( data ) {
-            // console.log("tryna get staging data : " + JSON.stringify(data));
+            console.log("tryna get staging data : " + JSON.stringify(data));
             $( "#staging-area" ).html( showStaging(data) );
             let newButton = "<a href=\x22index.html?type=bulkup\x22 class=\x22btn btn-info  float-right\x22 >Upload Files</a>";
             $("#newButton").html(newButton);

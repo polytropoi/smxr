@@ -2,8 +2,7 @@ import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, Tran
 import { settings, room, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
   userData, stringRoomUsers, timeKeysData, timedEventsListenerMode, SetTimedEventsListenerMode, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
   tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
-  SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation,
-  SaveModsToCloud
+  SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud
   } from "../../connect/connect.js";
 import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile } from "../../connect/indexedDb.js";
 
@@ -274,6 +273,10 @@ window.addEventListener( 'keydown',  ( event ) => {
   $('#modalContent').on('click', '#importModsButton', function(e) {
     // console.log("color 1 changed " + e.target.value);
     document.querySelector("#importMods").showPicker();
+  });
+
+  $('#modalContent').on('click', '#createLocationButton', function(e) {
+      CreateLocation();
   });
 
   $('#modalContent').on('change', '#importMods', function(e) {
@@ -2179,7 +2182,7 @@ export function SceneManglerModal(mode, autoHide) {
       "<button class=\x22goToButton\x22 id=\x22gotoPreviousButton\x22 >GoTo Previous</button>" +
         ReturnCurrentPlayerLocation() +
         hasModsMessage +
-        "<button style=\x22float:left\x22 class=\x22saveButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22CreateLocation()\x22>Create New Location</button>"+
+        "<button style=\x22float:left\x22 class=\x22saveButton\x22 id=\x22createLocationButton\x22>Create New Location</button>"+
       
         "<br><br><br><div>"+locationTable+"</div><br>"+
 
