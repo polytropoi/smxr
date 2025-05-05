@@ -18,8 +18,9 @@ const minio = require('minio');
 import { MongoClient, ServerApiVersion, ObjectId } from "mongodb";
 // import { db } from "../server.js";
 // import { s3 } from "../server.js";
-import { ReturnPresignedUrl, saveTraffic } from "../server.js";
+import { saveTraffic } from "../server.js";
 import { RunDataQuery } from "../connect/database.js";
+import { ReturnPresignedUrl } from "../connect/objectStore.js";
 
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;

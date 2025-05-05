@@ -1,6 +1,7 @@
 //copyright 2025 Service Media, Inc
 
 import { createRequire } from "module";
+
 const require = createRequire(import.meta.url);
 
 import path from 'path';
@@ -25,16 +26,17 @@ import shortid from "shortid";
 import QRCode from "qrcode";
 import { ObjectId } from "mongodb";
 import { RunDataQuery } from "./connect/database.js"; //connection happens here
+import { ReturnPresignedUrl, ReturnPresignedUrlPut, DeleteObject, DeleteObjects, ReturnObjectExists, ReturnObjectMetadata, ListObjects, GetObject, PutObject, CopyObject } from "./connect/objectStore.js";
 
 const entities = require("entities"); //hrm
-
+require('dotenv').config();
 // const requireText = require('require-text'); 
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
     
 export let app = express();
-require('dotenv').config();
+
 
 export let googleMapsKey = process.env.GOOGLEMAPS_KEY;
 
@@ -107,29 +109,29 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 var maxItems = 1000;
 
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+// import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-import {
-    S3Client, 
-    S3ServiceException, 
-    GetObjectCommand, 
-    HeadObjectCommand, 
-    CopyObjectCommand, 
-    ListObjectsV2Command,
-    PutObjectCommand,
-    DeleteObjectCommand,
-    DeleteObjectsCommand,
-} from "@aws-sdk/client-s3";
+// import {
+//     S3Client, 
+//     S3ServiceException, 
+//     GetObjectCommand, 
+//     HeadObjectCommand, 
+//     CopyObjectCommand, 
+//     ListObjectsV2Command,
+//     PutObjectCommand,
+//     DeleteObjectCommand,
+//     DeleteObjectsCommand,
+// } from "@aws-sdk/client-s3";
 
 import {SESClient,SendEmailCommand} from "@aws-sdk/client-ses"
 // export let s3 = new aws.S3();
-export const s3 = new S3Client({
-    region: 'us-east-1',
-    credentials: {
-        accessKeyId: process.env.AWSKEY,
-        secretAccessKey: process.env.AWSSECRET
-    }
-});
+// export const s3 = new S3Client({
+//     region: 'us-east-1',
+//     credentials: {
+//         accessKeyId: process.env.AWSKEY,
+//         secretAccessKey: process.env.AWSSECRET
+//     }
+// });
 export const ses = new SESClient({
     region: 'us-east-1',
     credentials: {
@@ -139,17 +141,18 @@ export const ses = new SESClient({
 });
 
 ///////// minio init ///////////////////////////////
-var minioClient = null;
-if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
-    const minio = require('minio');
-        minioClient = new minio.Client({
-        endPoint: process.env.MINIOENDPOINT,
-        port: 9000,
-        useSSL: false,
-        accessKey: process.env.MINIOKEY,
-        secretKey: process.env.MINIOSECRET
-    });
-}
+// var minioClient = null;
+// if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
+//     const minio = require('minio');
+//         minioClient = new minio.Client({
+//         endPoint: process.env.MINIOENDPOINT,
+//         port: 9000,
+//         useSSL: false,
+//         accessKey: process.env.MINIOKEY,
+//         secretKey: process.env.MINIOSECRET
+//     });
+// }
+
 
 if (process.env.GRAB_AND_SQUEEZE && process.env.GRAB_AND_SQUEEZE === "YES") {
     //import the media libs and enabled the gs routes
@@ -643,274 +646,274 @@ export function saveActivity (data) {
 // });
 
 
-///////////////////////// OBJECT STORE (S3, Minio, etc) OPS BELOW - TODO - replace all s3 calls w promised based versions, to suport minio, etc... (!)
-export async function ReturnPresignedUrl(bucket, key, time) {
+// ///////////////////////// OBJECT STORE (S3, Minio, etc) OPS BELOW - TODO - replace all s3 calls w promised based versions, to suport minio, etc... (!)
+// export async function ReturnPresignedUrl(bucket, key, time) {
     
-    if (minioClient) {
-        return minioClient.presignedGetObject(bucket, key, time);
-    } else {
-        // return s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time}); //returns a promise if called in async function?
-        const command = new GetObjectCommand({
-            Bucket: bucket,
-            Key: key,
-          });
-        return await getSignedUrl(s3, command, {expiresIn : time});
-        // return url;
-    } 
-}
+//     if (minioClient) {
+//         return minioClient.presignedGetObject(bucket, key, time);
+//     } else {
+//         // return s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time}); //returns a promise if called in async function?
+//         const command = new GetObjectCommand({
+//             Bucket: bucket,
+//             Key: key,
+//           });
+//         return await getSignedUrl(s3, command, {expiresIn : time});
+//         // return url;
+//     } 
+// }
 
-export async function ReturnPresignedUrlPut(bucket, key, time) {
+// export async function ReturnPresignedUrlPut(bucket, key, time) {
     
-    if (minioClient) {
-        return minioClient.presignedPutObject(bucket, key, time);
-    } else {
-        // return s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time}); //returns a promise if called in async function?
-        const command = new PutObjectCommand({
-            Bucket: bucket,
-            Key: key,
-          });
-        return await getSignedUrl(s3, command, {expiresIn : time});
-        // return url;
-    } 
-}
+//     if (minioClient) {
+//         return minioClient.presignedPutObject(bucket, key, time);
+//     } else {
+//         // return s3.getSignedUrl('getObject', {Bucket: bucket, Key: key, Expires: time}); //returns a promise if called in async function?
+//         const command = new PutObjectCommand({
+//             Bucket: bucket,
+//             Key: key,
+//           });
+//         return await getSignedUrl(s3, command, {expiresIn : time});
+//         // return url;
+//     } 
+// }
 
-export async function DeleteObjects(bucket, objectKeys) { //s3.headObject == minio.statObject
-    if (minioClient) {
-                //todo!
-    } else {
+// export async function DeleteObjects(bucket, objectKeys) { //s3.headObject == minio.statObject
+//     if (minioClient) {
+//                 //todo!
+//     } else {
 
-        const command = new DeleteObjectsCommand({
-            Bucket: bucket,
-            Delete: objectKeys,
-        });
+//         const command = new DeleteObjectsCommand({
+//             Bucket: bucket,
+//             Delete: objectKeys,
+//         });
         
-        try {
-            const response = await s3.send(command);
-            // await s3.waitUntilObjectNotExists(
-            //     { Bucket: bucket, Key: key },
-            //   );
-            console.log("delete objects resp: " + response );
-            return response;
-            // return true;
-        } catch (error) {
-            if (error.name === 'NotFound') {
-                console.log("File does not exist: " + key);
-                return "not found";
-                // return false;
-            }
-            console.error(`Error checking file existence: ${error}`);
-            return error;
-            // return false;
-        }
-    }
-}
+//         try {
+//             const response = await s3.send(command);
+//             // await s3.waitUntilObjectNotExists(
+//             //     { Bucket: bucket, Key: key },
+//             //   );
+//             console.log("delete objects resp: " + response );
+//             return response;
+//             // return true;
+//         } catch (error) {
+//             if (error.name === 'NotFound') {
+//                 console.log("File does not exist: " + key);
+//                 return "not found";
+//                 // return false;
+//             }
+//             console.error(`Error checking file existence: ${error}`);
+//             return error;
+//             // return false;
+//         }
+//     }
+// }
 
-export async function DeleteObject(bucket, key) { //s3.headObject == minio.statObject
-    if (minioClient) {
-                //todo!
-    } else {
+// export async function DeleteObject(bucket, key) { //s3.headObject == minio.statObject
+//     if (minioClient) {
+//                 //todo!
+//     } else {
 
-        const command = new DeleteObjectCommand({
-            Bucket: bucket,
-            Key: key,
-        });
+//         const command = new DeleteObjectCommand({
+//             Bucket: bucket,
+//             Key: key,
+//         });
         
-        try {
-            await s3.send(command);
-            await s3.waitUntilObjectNotExists(
-                { Bucket: bucket, Key: key },
-              );
-            console.log("File deleted: " + JSON.stringify(data));
-            return "deleted";
-            // return true;
-        } catch (error) {
-            if (error.name === 'NotFound') {
-                console.log("File does not exist: " + key);
-                return "not found";
-                // return false;
-            }
-            console.error(`Error checking file existence: ${error}`);
-            return error;
-            // return false;
-        }
-    }
-}
+//         try {
+//             await s3.send(command);
+//             await s3.waitUntilObjectNotExists(
+//                 { Bucket: bucket, Key: key },
+//               );
+//             console.log("File deleted: " + JSON.stringify(data));
+//             return "deleted";
+//             // return true;
+//         } catch (error) {
+//             if (error.name === 'NotFound') {
+//                 console.log("File does not exist: " + key);
+//                 return "not found";
+//                 // return false;
+//             }
+//             console.error(`Error checking file existence: ${error}`);
+//             return error;
+//             // return false;
+//         }
+//     }
+// }
 
-export async function ReturnObjectExists(bucket, key) { //s3.headObject == minio.statObject
-    if (minioClient) {
-                //todo!
-    } else {
+// export async function ReturnObjectExists(bucket, key) { //s3.headObject == minio.statObject
+//     if (minioClient) {
+//                 //todo!
+//     } else {
 
-        const command = new HeadObjectCommand({
-            Bucket: bucket,
-            Key: key,
-        });
+//         const command = new HeadObjectCommand({
+//             Bucket: bucket,
+//             Key: key,
+//         });
         
-        try {
-            let data = await s3.send(command);
-            console.log("File exists: " + JSON.stringify(data));
-            return { exists: true, error: null };
-            // return true;
-        } catch (error) {
-            if (error.name === 'NotFound') {
-                console.log("File does not exist: " + key);
-                return { exists: false, error: null };
-                // return false;
-            }
-            console.error(`Error checking file existence: ${error}`);
-            return { exists: false, error };
-            // return false;
-        }
-    }
-}
+//         try {
+//             let data = await s3.send(command);
+//             console.log("File exists: " + JSON.stringify(data));
+//             return { exists: true, error: null };
+//             // return true;
+//         } catch (error) {
+//             if (error.name === 'NotFound') {
+//                 console.log("File does not exist: " + key);
+//                 return { exists: false, error: null };
+//                 // return false;
+//             }
+//             console.error(`Error checking file existence: ${error}`);
+//             return { exists: false, error };
+//             // return false;
+//         }
+//     }
+// }
 
-export async function ReturnObjectMetadata(bucket, key) { //s3.headObject == minio.statObject
-    if (minioClient) {
-                //todo!
-    } else {
+// export async function ReturnObjectMetadata(bucket, key) { //s3.headObject == minio.statObject
+//     if (minioClient) {
+//                 //todo!
+//     } else {
 
-        const command = new HeadObjectCommand({
-            Bucket: bucket,
-            Key: key,
-        });
+//         const command = new HeadObjectCommand({
+//             Bucket: bucket,
+//             Key: key,
+//         });
     
-        try {
-            let data = await s3.send(command);
-            console.log("File exists:" + data);
-            // return { exists: true, error: null };
-            return data;
-        } catch (error) {
-            if (error.name === 'NotFound') {
-                console.log("File does not exist: "  + key);
-                // return { exists: false, error: null };
-                return error;
-            }
-            console.error(`Error checking file existence: ${error}`);
-            // return { exists: false, error };
-            return error;
-        }
+//         try {
+//             let data = await s3.send(command);
+//             console.log("File exists:" + data);
+//             // return { exists: true, error: null };
+//             return data;
+//         } catch (error) {
+//             if (error.name === 'NotFound') {
+//                 console.log("File does not exist: "  + key);
+//                 // return { exists: false, error: null };
+//                 return error;
+//             }
+//             console.error(`Error checking file existence: ${error}`);
+//             // return { exists: false, error };
+//             return error;
+//         }
       
-    }
-}
-export async function ListObjects(bucket, prefix) {
-    try {
+//     }
+// }
+// export async function ListObjects(bucket, prefix) {
+//     try {
     
-      const response = await s3.send(
-        new ListObjectsV2Command({
-            Bucket: bucket,
-            MaxKeys: 1000000,
-            Prefix: prefix
-          }),
-      );
-      return await response;
-    } catch (caught) {
-        if (caught instanceof NoSuchKey) {
-          console.error(
-            `Error from S3 listing objects from "${bucket}". no such bucket exists.`,
-          );
-          return "error";
-        } else if (caught instanceof S3ServiceException) {
-          console.error(
-            `Error from S3 while getting object from ${bucket}.  ${caught.name}: ${caught.message}`,
-          );
-          return "error";
-        } else {
-          throw caught;
-        //   return caught;
-        }
-      }
-}
-export async function GetObject(bucket, key) {
+//       const response = await s3.send(
+//         new ListObjectsV2Command({
+//             Bucket: bucket,
+//             MaxKeys: 1000000,
+//             Prefix: prefix
+//           }),
+//       );
+//       return await response;
+//     } catch (caught) {
+//         if (caught instanceof NoSuchKey) {
+//           console.error(
+//             `Error from S3 listing objects from "${bucket}". no such bucket exists.`,
+//           );
+//           return "error";
+//         } else if (caught instanceof S3ServiceException) {
+//           console.error(
+//             `Error from S3 while getting object from ${bucket}.  ${caught.name}: ${caught.message}`,
+//           );
+//           return "error";
+//         } else {
+//           throw caught;
+//         //   return caught;
+//         }
+//       }
+// }
+// export async function GetObject(bucket, key) {
 
-    try {
-        const response = await s3.send(
-          new GetObjectCommand({
-            Bucket: bucket,
-            Key: key,
-          }),
-        );
-        // The Body object also has 'transformToByteArray' and 'transformToWebStream' methods.
-        const str = await response.Body.transformToString();
-        // console.log(str);
-        return str;
-      } catch (caught) {
-        if (caught instanceof NoSuchKey) {
-          console.error(
-            `Error from S3 while getting object "${key}" from "${bucket}". No such key exists.`,
-          );
-          return "error";
-        } else if (caught instanceof S3ServiceException) {
-          console.error(
-            `Error from S3 while getting object from ${bucket}.  ${caught.name}: ${caught.message}`,
-          );
-          return "error";
-        } else {
-          throw caught;
-        //   return caught;
-        }
-      }
+//     try {
+//         const response = await s3.send(
+//           new GetObjectCommand({
+//             Bucket: bucket,
+//             Key: key,
+//           }),
+//         );
+//         // The Body object also has 'transformToByteArray' and 'transformToWebStream' methods.
+//         const str = await response.Body.transformToString();
+//         // console.log(str);
+//         return str;
+//       } catch (caught) {
+//         if (caught instanceof NoSuchKey) {
+//           console.error(
+//             `Error from S3 while getting object "${key}" from "${bucket}". No such key exists.`,
+//           );
+//           return "error";
+//         } else if (caught instanceof S3ServiceException) {
+//           console.error(
+//             `Error from S3 while getting object from ${bucket}.  ${caught.name}: ${caught.message}`,
+//           );
+//           return "error";
+//         } else {
+//           throw caught;
+//         //   return caught;
+//         }
+//       }
 
-}
-export async function PutObject(bucket, key, body) {
+// }
+// export async function PutObject(bucket, key, body) {
 
-    const command = new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        Body: body,
-      });
+//     const command = new PutObjectCommand({
+//         Bucket: bucket,
+//         Key: key,
+//         Body: body,
+//       });
     
-      try {
-        const response = await s3.send(command);
-        console.log(response);
-        return response;
-      } catch (caught) {
-        if (
-          caught instanceof S3ServiceException &&
-          caught.name === "EntityTooLarge"
-        ) {
-          console.error(
-            `Error from S3 while uploading object to ${bucketName}. \
-    The object was too large. To upload objects larger than 5GB, use the S3 console (160GB max) \
-    or the multipart upload API (5TB max).`,
-          );
+//       try {
+//         const response = await s3.send(command);
+//         console.log(response);
+//         return response;
+//       } catch (caught) {
+//         if (
+//           caught instanceof S3ServiceException &&
+//           caught.name === "EntityTooLarge"
+//         ) {
+//           console.error(
+//             `Error from S3 while uploading object to ${bucketName}. \
+//     The object was too large. To upload objects larger than 5GB, use the S3 console (160GB max) \
+//     or the multipart upload API (5TB max).`,
+//           );
           
-        } else if (caught instanceof S3ServiceException) {
-          console.error(
-            `Error from S3 while uploading object to ${bucketName}.  ${caught.name}: ${caught.message}`,
-          );
-        } else {
-          throw caught;
-        }
-        return caught;
-      }
+//         } else if (caught instanceof S3ServiceException) {
+//           console.error(
+//             `Error from S3 while uploading object to ${bucketName}.  ${caught.name}: ${caught.message}`,
+//           );
+//         } else {
+//           throw caught;
+//         }
+//         return caught;
+//       }
 
-}
-export async function CopyObject(targetBucket, copySource, key) {
-    if (minioClient) {
+// }
+// export async function CopyObject(targetBucket, copySource, key) {
+//     if (minioClient) {
 
-    } else {
+//     } else {
       
-        const command = new CopyObjectCommand({
-            Bucket: targetBucket,
-            CopySource: copySource,
-            Key: key
-        });
-        try {
-            let data = await s3.send(command);
+//         const command = new CopyObjectCommand({
+//             Bucket: targetBucket,
+//             CopySource: copySource,
+//             Key: key
+//         });
+//         try {
+//             let data = await s3.send(command);
 
-            return data;
-        } catch (error) {
-            if (error.name === 'NotFound') {
-                console.log(`File does not exist: ${filePath}`);
-                // return { exists: false, error: null };
-                return error;
-            }
-            console.error(`Error copying: ${error}`);
-            // return { exists: false, error };
-            return error;
-        }
-    }
-} 
+//             return data;
+//         } catch (error) {
+//             if (error.name === 'NotFound') {
+//                 console.log(`File does not exist: ${filePath}`);
+//                 // return { exists: false, error: null };
+//                 return error;
+//             }
+//             console.error(`Error copying: ${error}`);
+//             // return { exists: false, error };
+//             return error;
+//         }
+//     }
+// } 
 
 export async function SendEmail(toAddress, fromAddress, htmlbody, subject) {
     console.log("tryna send email " + toAddress + fromAddress);
@@ -5276,6 +5279,25 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
         }
     })();
 });
+
+app.post('/scenedata/', function (req, res) {
+
+
+    (async () => {
+        try {
+            const query = {"sceneTags": req.body.tag}; //array of strings...
+            let scene = await RunDataQuery("scenes", "findOne", query);
+            console.log("scene with tag "+ req.body.tag + " " + scene.short_id);
+            if (!scene) {
+               scene = {};
+            }
+            res.send(scene);
+        } catch (e) {    
+            res.send(e);
+        }
+    })();
+
+}); 
 
 app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, res) { //update "mods" coming from webxr client, not admin pages
     if (req.params.s_id == req.body.shortID) {

@@ -841,8 +841,10 @@ AFRAME.registerComponent('mod_model', {
                   if (this.data.eventData && this.data.eventData.includes("pic")) {
                     type = "picCallout";
                   } //etc..
-                  calloutChild.setAttribute("model-callout", {'tag': this.calloutTag, 'type': type});
+                  // if (this.data.tags.includes("link")) 
+                  calloutChild.setAttribute("model-callout", {'calloutTag': this.calloutTag, 'type': type, 'parentTags': this.data.tags, 'parentEventData': this.data.eventData});
                   this.el.appendChild(calloutChild);
+                  
                   // });
                 }
                 

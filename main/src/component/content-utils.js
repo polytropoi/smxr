@@ -89,7 +89,7 @@ function AudioAnalyzer() {
   if (analyser == null) {
       console.log("tryna create analyser from media");
   
-  
+  let beatDetectionDecay, beatDetectionMinVolume, beatDetectionThrottle;
   if (vidz != null && vidz.length > 0) { //wire up the analyzer to the video if present
     var context = new AudioContext();
     var source = context.createMediaElementSource(vidz[0]);
@@ -100,7 +100,7 @@ function AudioAnalyzer() {
     analyser.connect(context.destination);
     analyser.fftSize = 1024;
     analyser.smoothingTimeConstant = 0.8;
-    bufferLength = analyser.frequencyBinCount;
+    let bufferLength = analyser.frequencyBinCount;
     fLevels = new Uint8Array(analyser.fftSize);
     beatDetectionDecay = .99;
     beatDetectionMinVolume = 12;
@@ -113,7 +113,7 @@ function AudioAnalyzer() {
 
     analyser.fftSize = 1024;
     analyser.smoothingTimeConstant = 0.8;
-    bufferLength = analyser.frequencyBinCount;
+    let bufferLength = analyser.frequencyBinCount;
     fLevels = new Uint8Array(analyser.fftSize);
     beatDetectionDecay = .99;
     beatDetectionMinVolume = 10;
@@ -1806,9 +1806,10 @@ AFRAME.registerComponent('model-callout', {
   schema: {
       index: {default: 0},
       calloutString: {default: ""},
-      tag: {default: ""},
-      type: {default: "textCallout"}
-
+      calloutTag: {default: ""},//rename to calloutTag!
+      type: {default: "textCallout"},
+      parentTags: {default: ""},
+      parentEventData: {default: ""}
     },
     init: function () {
       var sceneEl = document.querySelector('a-scene');
@@ -1821,8 +1822,8 @@ AFRAME.registerComponent('model-callout', {
         let calloutString = this.data.calloutString.split('~')[0];
         calloutString = calloutString.replace(/\_/g, " ");
       
-        if (this.data.tag != "" && this.data.calloutString == "") {
-          calloutString = this.data.tag;
+        if (this.data.calloutTag != "" && this.data.calloutString == "") {
+          calloutString = this.data.calloutTag;
         } 
       let calloutEntity = document.createElement("a-entity");
       let calloutText = document.createElement("a-entity");
@@ -1862,6 +1863,7 @@ AFRAME.registerComponent('model-callout', {
       // calloutEntity.setAttribute("render-order", "hud");
       sceneEl.appendChild(calloutEntity);
       calloutEntity.appendChild(calloutText);
+      this.dialogEl = document.getElementById('mod_dialog');
       // calloutEntity.setAttribute("position", '0 0 3');
       calloutText.setAttribute("position", '0 0 3.5'); //offset the child on z toward camera, to prevent overlap on model
       let font = "Acme.woff"; 
@@ -1896,7 +1898,7 @@ AFRAME.registerComponent('model-callout', {
        
           const picGroupsControlEl = document.getElementById("pictureGroupsData");
           if (picGroupsControlEl) {
-            let picsData = picGroupsControlEl.components.picture_groups_control.returnTaggedPicture(that.data.tag);
+            let picsData = picGroupsControlEl.components.picture_groups_control.returnTaggedPicture(that.data.calloutTag);
             this.picData = picsData[Math.floor((Math.random()*picsData.length))];
             if (this.picData) {
               let picEl = null;
@@ -1932,7 +1934,7 @@ AFRAME.registerComponent('model-callout', {
               const obj = picEl.getObject3D('mesh');
               if (obj) {
                 console.log('gotsa mesh to show picData : '+ obj.name);
-                var texture = new THREE.TextureLoader().load(this.picData.url);
+                let texture = new THREE.TextureLoader().load(this.picData.url);
                 texture.colorSpace = THREE.SRGBColorSpace;
                 // UVs use the convention that (0, 0) corresponds to the upper left corner of a texture.
                 texture.flipY = false; 
@@ -1951,7 +1953,7 @@ AFRAME.registerComponent('model-callout', {
             let triggerAudioControl = that.triggerAudioController.components.trigger_audio_control;
             if (triggerAudioControl) {
               let distance = evt.detail.intersection.distance;
-              triggerAudioControl.playAudioAtPosition(evt.detail.intersection.point, distance, that.data.tag, 1);//tagmangler needs an array, add vol mod 
+              triggerAudioControl.playAudioAtPosition(evt.detail.intersection.point, distance, that.data.calloutTag, 1);//tagmangler needs an array, add vol mod 
             }
           }
         }
@@ -1960,6 +1962,47 @@ AFRAME.registerComponent('model-callout', {
       this.el.addEventListener('mouseleave', function (evt) {
         // console.log("tryna mouseexit");
         calloutEntity.setAttribute('visible', false);
+      });
+      this.el.addEventListener('click', function (evt) {
+
+        (async () => {
+          try {
+            const response = await fetch('/scenedata', {
+             method: 'POST',
+             headers: {
+               'Content-Type': 'application/json'
+               },
+               body: JSON.stringify({
+         // your expected POST request payload goes here
+                 tag: that.data.calloutTag
+                })
+             });
+
+             const data = await response.json();
+             if (data.short_id) {
+              let url = "/webxr/" + data.short_id;
+     
+              that.dialogEl.components.mod_dialog.showPanel("Go to " + data.sceneTitle +" ?", "href~"+ url, "gatePass", 5000 );
+             } else {
+              console.log("scene not found!");
+             }
+           } catch(error) {
+         // enter your logic for when there is an error (ex. error toast)
+
+              console.log(error);
+             } 
+        
+
+          // try {   
+          //   const sceneData = await fetch("/scenedata");
+          //   let url = "/scenedata/" + sceneData.shortID;
+          //     // window.location.href = url; 
+          //   that.dialogEl.components.mod_dialog.showPanel("Go to " + sceneData.sceneTitle +" ?", "href~"+ url, "gatePass", 5000 );
+          // } catch (e) {
+          //   console.log("error getting sceneID for "+ that.data.calloutTag);
+          // }
+        })();
+        
       });
     } 
    

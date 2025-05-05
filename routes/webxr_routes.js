@@ -11,8 +11,9 @@ const validator = require('validator');
 const jwt = require("jsonwebtoken");
 const requireText = require('require-text');
 
-import { ReturnPresignedUrl, saveTraffic} from "../server.js";
+import { saveTraffic} from "../server.js";
 import { RunDataQuery } from "../connect/database.js";
+import { ReturnPresignedUrl } from "../connect/objectStore.js";
 
 import { ObjectId } from "mongodb";
 
@@ -363,6 +364,11 @@ webxr_router.get('/:_id', function (req, res) {
 
             const scenequery = {"short_id": reqstring};
             let sceneData = await RunDataQuery("scenes", "findOne", scenequery);
+
+            // console.log("sceneData is " + sceneData._id);
+            if (!sceneData) {
+                throw ("scene not found!");
+            }
             let accessScene = true;
             //TODO conditional on ?
             saveTraffic(req, sceneData.sceneDomain, sceneData.short_id);
@@ -1715,7 +1721,7 @@ webxr_router.get('/:_id', function (req, res) {
                 let objekt = await RunDataQuery("obj_items", "findOne", objquery);
 
                 ///////////// actions associated with this object ///////////
-                if (objekt.actionIDs != undefined && objekt.actionIDs.length > 0) {
+                if (objekt && objekt.actionIDs && objekt.actionIDs != undefined && objekt.actionIDs.length > 0) {
                     // console.log("tryna add obj actions " + objekt.actionIDs);
                     const aids = objekt.actionIDs.map(item => {
                         return ObjectId.createFromHexString(item.toString());
@@ -1731,7 +1737,7 @@ webxr_router.get('/:_id', function (req, res) {
                 }
 
                 ////////// audiogroup associated with this object
-                if (objekt.audiogroupID && objekt.audiogroupID.length > 4) {
+                if (objekt && objekt.audiogroupID && objekt.audiogroupID.length > 4) {
                     console.log("AUDIO OBJECT GROUP!!!! " + objekt.audiogroupID);
                     objectAudioGroups.push(objekt.audiogroupID);
                     const groupquery = {"_id": ObjectId.createFromHexString(objekt.audiogroupID.toString())};
@@ -1740,7 +1746,7 @@ webxr_router.get('/:_id', function (req, res) {
                 }   
 
                 ////sprite sheets for object particle system // 
-                if (objekt.particles != undefined && objekt.particles != null && objekt.particles != "None" ) { //maybe a "use flames" tag?
+                if (objekt && objekt.particles != undefined && objekt.particles != null && objekt.particles != "None" ) { //maybe a "use flames" tag?
                     if (objekt.particles.toString().includes("Fire")) {
                         imageAssets = imageAssets + "<img id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>";
                     }
@@ -1752,7 +1758,7 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                 }
                 /////// get the model associated with this object, if any ////////////////
-                if (objekt.modelID != undefined && objekt.modelID != null) {
+                if (objekt && objekt.modelID != undefined && objekt.modelID != null) {
                     const m_id = ObjectId.createFromHexString(objekt.modelID.toString());
                     const modelquery = {"_id": m_id};
                     const model = await RunDataQuery("models", "findOne", modelquery);
@@ -1767,7 +1773,9 @@ webxr_router.get('/:_id', function (req, res) {
 
                 
                 // console.log("pushing ojekt " + JSON.stringify(objekt));
-                objex.push(objekt);
+                if (objekt) {
+                   objex.push(objekt);
+                }
             }
             var buff = Buffer.from(JSON.stringify(objex)).toString("base64");
             var buff2 = Buffer.from(JSON.stringify(sceneObjectLocations)).toString("base64");
