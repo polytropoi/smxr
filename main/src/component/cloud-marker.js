@@ -607,6 +607,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         if (this.data.markerType.toLowerCase().includes("picture")) {
           this.loadPicture();
          }
+         this.el.object3D.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
       });
        
       this.el.addEventListener('mouseenter', (evt) => {
@@ -784,7 +785,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
               }
             }
             } else {
-              console.log("bad distance ");
+              console.log("bad distance " + evt.detail.intersection.distance);
             }
           
           } else if (that.data.markerType == "poi") {

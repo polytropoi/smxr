@@ -522,9 +522,9 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
                   this.el.object3D.visible = false;
                 }
               }
-
-              obj.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
-              obj.position.set(this.data.xpos, this.data.ypos, this.data.zpos);
+              // this.el.object3D.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
+              this.el.object3D.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
+              this.el.object3D.position.set(this.data.xpos, this.data.ypos, this.data.zpos);
               //   console.log("localmarker tryna load media with mediaID " + this.data.mediaID);
                 
               //   if (this.data.mediaID && this.data.mediaID.includes("local_")) {
