@@ -1281,7 +1281,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
     // console.log("instanced_surface_meshes.surfaceLoaded call");
         if (!this.surfaceMesh) {
           this.surfaces = document.getElementsByClassName("surface");
-          // console.log("surfaces found " + this.surfaces.length);
+          console.log("surfaces found " + this.surfaces.length + " id " + this.surfaces[0].id);
           if (this.surfaces.length > 0) {
             this.surface = this.surfaces[0];
             if (this.surface.getObject3D('mesh') != null) {
@@ -1565,7 +1565,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       }
     },
     rayhit: function (hitID, distance, hitpoint) {
-      if (this.hitID != hitID && this.data.tags) {
+      if (this.hitID != hitID && this.data.tags && !this.data.tags.toString().toLowerCase().includes("static")) {
         
         this.intersection = null;
         

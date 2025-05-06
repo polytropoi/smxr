@@ -3,7 +3,7 @@
 //   return Math.min(Math.max(num, min), max);
 // }
 
-import { settings, localData } from "../../../connect/connect.js";
+import { settings, localData, ToggleTransformControls } from "../../../connect/connect.js";
 import { clamp } from "../component/content-utils.js";
 import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
 ////////////////////////// - MOD_MODEL - for "plain" models, these are written (aframe elements + components + assets) by the server into response, as opposed to "Objects", see mod_objex.js
@@ -844,7 +844,7 @@ AFRAME.registerComponent('mod_model', {
                   // if (this.data.tags.includes("link")) 
                   calloutChild.setAttribute("model-callout", {'calloutTag': this.calloutTag, 'type': type, 'parentTags': this.data.tags, 'parentEventData': this.data.eventData});
                   this.el.appendChild(calloutChild);
-                  
+
                   // });
                 }
                 

@@ -1065,7 +1065,7 @@ webxr_router.get('/:_id', function (req, res) {
 
                 //AFRAME CAMERA
                 let blinkMod = "blink-controls=\x22cameraRig: #cameraRig\x22";
-                sceneResponse.scenePlayer.playerHeight = 10;
+                // sceneResponse.scenePlayer.playerHeight = 10;
                 if (useSimpleNavmesh || useNavmesh) {
                     blinkMod = "blink-controls=\x22cameraRig: #cameraRig; collisionEntities: #nav-mesh;\x22"; //only one navmesh for now
                     wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:"+
@@ -2112,15 +2112,15 @@ webxr_router.get('/:_id', function (req, res) {
                                         if (locMdl.eventData.toLowerCase().includes("physics")) {
                                             instancingEntity = instancingEntity + "<a-entity scatter_physics=\x22_id: "+locMdl.modelID+"; count: "+split[1]+"; scaleFactor: "+scale+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
                                     
+                                        }
                                     }
-                                }
-                                let modelString = "gltf-model=\x22#" + m_assetID + "\x22";
-                                
-                                gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+modelString+" "+instancing+" class=\x22"+entityType+
-                                " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+
-                                " position=\x220 -200 0\x22></a-entity>";//scatter model below //nm, just load it from here w/ modelString
-                                gltfModel = modelURL;
-                                
+                                    let modelString = "gltf-model=\x22#" + m_assetID + "\x22";
+                                    
+                                    gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+modelString+" "+instancing+" class=\x22"+entityType+
+                                    " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+
+                                    " position=\x220 -200 0\x22></a-entity>";//scatter model below //nm, just load it from here w/ modelString
+                                    gltfModel = modelURL;
+                                    
                                 }
                             }
 

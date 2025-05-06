@@ -53,6 +53,7 @@ app.use(helmet.referrerPolicy());
 app.use(helmet.xssFilter());
 
 
+let minioClient = null;
 var rootHost = process.env.ROOT_HOST
 var topName = process.env.ROOT_NAME;
 var requirePayment = true; //if subscription is required to login, true for servicemedia
@@ -2365,7 +2366,7 @@ app.post('/staging_delete', requiredAuthentication, function (req, res) {
     // });
     console.log("delete params: " + JSON.stringify(params));
 
-    (async () => {
+    (async () => {  
         try {
             const status = await DeleteObjects(process.env.STAGING_BUCKET_NAME, params.Delete);
             res.send("files deleted from staging..." + status);
@@ -2378,23 +2379,23 @@ app.post('/staging_delete', requiredAuthentication, function (req, res) {
 app.post('/staging_delete_array', requiredAuthentication, function (req, res) {
     console.log("staging delete: " + JSON.stringify(req.body));
 
-    if (minioClient) {
-        var keys = []
+    // if (minioClient) {
+    //     var keys = []
       
-        req.body.deleteMe.items.forEach(function(content) {
-            keys.push('staging/' + content.uid + '/' + content.key);
-        });    
-        minioClient.removeObjects(process.env.STAGING_BUCKET_NAME, keys, function(e) {
-            if (e) {
-                console.log('Unable to remove Objects ',e);
-                res.send('Unable to remove Objects ',e);
-            } else {
-                console.log('Removed the objects successfully');
-                res.send("deleted");
-            }
+    //     req.body.deleteMe.items.forEach(function(content) {
+    //         keys.push('staging/' + content.uid + '/' + content.key);
+    //     });    
+    //     minioClient.removeObjects(process.env.STAGING_BUCKET_NAME, keys, function(e) {
+    //         if (e) {
+    //             console.log('Unable to remove Objects ',e);
+    //             res.send('Unable to remove Objects ',e);
+    //         } else {
+    //             console.log('Removed the objects successfully');
+    //             res.send("deleted");
+    //         }
 
-        });
-    } else {
+    //     });
+    // } else {
         const params = {
                 Bucket: process.env.STAGING_BUCKET_NAME,
                 // Prefix: 'staging/' + u_id + '/'
@@ -2418,7 +2419,7 @@ app.post('/staging_delete_array', requiredAuthentication, function (req, res) {
         })();
 
         
-    }
+    // }
 });
 
 

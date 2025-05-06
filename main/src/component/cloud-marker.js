@@ -355,14 +355,14 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             if (this.data.modelID != "none") {
               if (this.data.modelID.toString().includes("primitive")) {   
                 console.log("CLOUDMARKER PRIMITIVE " + this.data.modelID);
-                if (this.data.modelID.toString().includes("cube")) {
+                if (this.data.modelID.toString().toLowerCase().includes("cube")) {
                   console.log("CLOUDMARKER PRIMITIVE cube " + this.data.name + " " + this.data.xscale + " " +  this.data.yscale + " " +  this.data.zscale);
                   this.el.setAttribute("geometry", {"primitive": "box", "width": this.data.xscale, "height": this.data.yscale, "depth": this.data.zscale});;
 
-                } else if (this.data.modelID.toString().includes("sphere")) {
+                } else if (this.data.modelID.toString().toLowerCase().includes("sphere")) {
                     this.el.setAttribute("geometry", {"primitive": "sphere", "radius": 1});
                     console.log("CLOUDMARKER PRIMITIVE " + this.data.modelID + this.el.getAttribute("geometry"));
-                } else if (this.data.modelID.toString().includes("cylinder")) {
+                } else if (this.data.modelID.toString().toLowerCase().includes("cylinder")) {
                     this.el.setAttribute("geometry", {"primitive": "cylinder", "height": 1, "radius": .5});
                 } else {
 
@@ -785,7 +785,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
               }
             }
             } else {
-              console.log("bad distance " + evt.detail.intersection.distance);
+              console.log("bad distance ");
             }
           
           } else if (that.data.markerType == "poi") {
@@ -1374,15 +1374,15 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             // if (this.data.tags && this.data.tags.includes("hide gizmo")) {
             //   this.el.classList.remove("activeObjexRay");
             // } else {
-              if (modelID.toString().includes("cube")) {
+              if (modelID.toString().toLowerCase().includes("cube")) {
                   this.el.setAttribute("geometry", {"primitive": "box", "width": this.data.xscale, "height": this.data.yscale, "depth": this.data.zscale});
                   console.log("CLOUDMARKER PRIMITIVE box " + modelID +" scale " + this.data.xscale * 1.5 + " " + this.data.yscale  * 1.5+ " " + this.data.zscale * 1.5);
                   // this.el.setAttribute("obb-collider", {size: this.data.xscale * 1.5 + " " + this.data.yscale  * 1.5+ " " + this.data.zscale * 1.5});
                   
-              } else if (modelID.toString().includes("sphere")) {
+              } else if (modelID.toString().toLowerCase().includes("sphere")) {
                   this.el.setAttribute("geometry", {"primitive": "sphere", "radius": 1});
                   console.log("CLOUDMARKER PRIMITIVE sphere " + modelID +" scale " + this.data.xscale + " " + this.data.yscale + " " + this.data.zscale);
-              } else if (modelID.toString().includes("cylinder")) {
+              } else if (modelID.toString().toLowerCase().includes("cylinder")) {
                   this.el.setAttribute("geometry", {"primitive": "cylinder", "height": 1, "radius": 1 / 2});
                   console.log("CLOUDMARKER PRIMITIVE cylinder " + modelID +" scale " + this.data.xscale + " " + this.data.yscale + " " + this.data.zscale);
               } else {
