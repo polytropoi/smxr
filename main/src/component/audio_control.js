@@ -2,6 +2,7 @@ import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "../compone
 import { settings, attributions, PauseIntervals, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/connect.js";
 import { SceneManglerModal } from "../../js/dialogs.js";
 
+
 let params = document.querySelector(".primaryAudioParams").id;
 console.log("audioParames: " +params);
 let stream = params.split("_")[0];
@@ -2100,13 +2101,13 @@ AFRAME.registerComponent('audio_groups_control', { //element and component are a
         this.data.ambientGroups = settings.audioGroups.ambientGroups;
         this.data.primaryGroups = settings.audioGroups.primaryGroups;
         this.data.objectGroups = settings.audioGroups.objectGroups;
-     
+        console.log("Tryna load audio groups " + settings.audioGroups);
         this.LoadAudioGroups(settings.audioGroups);
 
     },
 
     SetAudioGroupsData: function (data) {
-        // console.log("audiogroups data: " +JSON.stringify(data));
+        console.log("audiogroups data: " +JSON.stringify(data));
         this.data.audioGroupsData = data;
         this.audioGroupsDataIsReady = true;
         // console.log("objectGroups : " + JSON.stringify(this.data.audioGroupsData));
@@ -2237,35 +2238,57 @@ AFRAME.registerComponent('audio_groups_control', { //element and component are a
     returnTriggerAudioIDWithTag: function (tag) { //find an audio item in audiogroup with specified tag
         
         if (tag && this.data.audioGroupsData && this.data.audioGroupsData.triggerGroupItems) {
-            let triggerGroup = this.data.audioGroupsData.triggerGroupItems[0];
-            // console.log("looking for audio trigger with tag " + tag + " in files " + triggerGroup.items.length);
-            let matchingItems = [];
-            for (let i = 0; i < triggerGroup.items.length; i++) {
-                // console.log("looking for triggerGroup.item " + triggerGroup.items[i]);
-                for (let j = 0; j < this.data.audioGroupsData.audioItems.length; j++) {
-                    // console.log("Ccchekin trigger group item " +triggerGroup.items[i]+ " vs " + this.data.audioGroupsData.audioItems[j]._id);
-                    if (triggerGroup.items[i] == this.data.audioGroupsData.audioItems[j]._id) {
-                        // console.log("found audio item tags are " + this.data.audioGroupsData.audioItems[j].tags); //not ideal, maybe the groupitems can store tags? or cache them when loaded below?
-                        if (this.data.audioGroupsData.audioItems[j].tags && this.data.audioGroupsData.audioItems[j].tags.includes(tag)) {
-                            // console.log("tag match to " + tag);
-                            // return triggerGroup.items[i];
-                            matchingItems.push(triggerGroup.items[i]);
-                        }
+            // let matchingItems = [];
+            // let triggerGroup = this.data.audioGroupsData.triggerGroupItems[0];
+            console.log("looking for audio trigger with tag " + tag + " in groups " + this.data.audioGroupsData.triggerGroupItems.length);
+            // (async () => {
+            //     try {
+                    for (const triggerGroup of this.data.audioGroupsData.triggerGroupItems) {
+                    // for (let a = 0; a < this.data.audioGroupsData.triggerGroupItems.length; a++) {
+                        for (let i = 0; i < triggerGroup.items.length; i++) {
+                            // console.log("looking for triggerGroup.item " + triggerGroup.items[i]);
+                            for (let j = 0; j < this.data.audioGroupsData.audioItems.length; j++) { //MAYBE SHUFFLE?
+                                // console.log("Ccchekin trigger group item " +triggerGroup.items[i]+ " vs " + this.data.audioGroupsData.audioItems[j]._id);
+                                if (triggerGroup.items[i] === this.data.audioGroupsData.audioItems[j]._id) {
+                                    // console.log(triggerGroup._id + " match trigger group item " +triggerGroup.items[i]+ " vs " + this.data.audioGroupsData.audioItems[j]._id);
+                                    //not ideal, maybe the groupitems can store tags? or cache them when loaded below?
+                                    if (this.data.audioGroupsData.audioItems[j].tags && this.data.audioGroupsData.audioItems[j].tags.toString().toLowerCase().includes(tag)) {
+                                        // console.log("tag match to " + tag);
+                                        // return triggerGroup.items[i];
+                                        console.log("matched triggeraudiotem w/ tag " + tag);
+                                        // matchingItems.push(triggerGroup.items[i]);
+                                        return triggerGroup.items[i]; //ok to not return?
+                                    }
+                                }
+                            }
+  
+                     }
                     }
-                }
-                if (i == triggerGroup.items.length - 1) {
-                    if (matchingItems.length) {
-                        return matchingItems[Math.floor(Math.random()*matchingItems.length)];
-                    } else {
-                        return null;
-                    }
-                   
-                }
-            }
+                    // console.log("matching iotems " + matchingItems);
+                    // if (matchingItems.length) {
+                    //     // return matchingItems[Math.floor(Math.random()*matchingItems.length)];
+                    // } else {
+                    //     return null;
+                    // }
+               
+        //     } catch (e) {
+        //         return null;
+        //     }
+        // })();
+            // if (i == triggerGroup.items.length - 1) {
+                // if (matchingItems.length) {
+                //     // return matchingItems[Math.floor(Math.random()*matchingItems.length)];
+                // } else {
+                //     console.log("matching audio id not found for tag " + tag);
+                //     return null;
+                // }
+               
+            // }
 
-        } else {
-            // console.log("trigger audio not found!");
-            return null;
+
+        // } else {
+        //     // console.log("trigger audio not found!");
+        //     return null;
         }
     }
 });

@@ -1189,6 +1189,8 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       this.iMesh_3 = null;
       this.iMesh_4 = null;
 
+      this.jsonData = null;
+      
       this.highlightColor = new THREE.Color();
       console.log("instanced_surface_meshes model _id " + this.data._id + " tryna instance " + this.data.count + " with tags " + this.data.tagss);
       // this.el.setAttribute("visible",false);
@@ -1233,6 +1235,9 @@ AFRAME.registerComponent('instanced_surface_meshes', {
     }
 
     this.camera = document.getElementById("player").querySelector(["camera"]);
+
+    
+    // this.jsonData = JSON.parse(atob(theData));
 /*  this way doesn't work with instanced meshes fsr...  
     this.el.addEventListener('raycaster-intersected', (e) => {  
 
@@ -1327,6 +1332,22 @@ AFRAME.registerComponent('instanced_surface_meshes', {
           this.scatterMeshes();
         }
       }
+      
+      const jsonID = this.el.getAttribute('data-json');
+      console.log("jsonID for instanced meshes " + jsonID);
+      if (jsonID != "") {
+      const sceneTextDataEl = document.getElementById("sceneTextData");
+        if (sceneTextDataEl) {
+          const scene_text_control = sceneTextDataEl.components.scene_text_control;
+          if (scene_text_control) {
+            this.jsonData = JSON.parse(sceneTextDataEl.components.scene_text_control.returnTextData(jsonID)); //fah, it's already a global...hrm...
+            console.log("textData :  " + JSON.stringify(jsonData));
+          }
+        }
+     
+      // console.log("json data" + theData);
+      }
+
   },
 
     scatterMeshes: function () {
@@ -1427,7 +1448,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
                       this.iMesh_4 = iMesh_4;
                     }
                     this.count++;
-                    console.log("instance count " + this.count);
+                    // console.log("instance count " + this.count);
                     }
                   }
               } else {
@@ -1570,7 +1591,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         this.intersection = null;
         
         this.hitID = hitID;
-        console.log("new hit " + hitID + " " + distance + " " + JSON.stringify(hitpoint) + " interaction:" + this.data.interaction + " eventData " + this.data.eventData.toLowerCase() + " tags " + this.data.tags);
+        console.log("INSTANCED MESH new hit " + hitID + " " + distance + " " + JSON.stringify(hitpoint) + " interaction:" + this.data.interaction + " eventData " + this.data.eventData.toLowerCase() + " tags " + this.data.tags);
         var triggerAudioController = document.getElementById("triggerAudio");
         if (triggerAudioController != null) {
           triggerAudioController.components.trigger_audio_control.playInstanceAudioAtPosition(this.instanceId, hitpoint, distance, this.data.tags);
@@ -2686,10 +2707,11 @@ AFRAME.registerComponent("rotate-with-camera", { //unused
 
   },
   loadRoomData(roomData) {
-  
-    this.roomData = roomData.chunk;
-    this.roomData.sort((a, b) => (a.num_joined_members < b.num_joined_members) ? 1 : -1);
-    console.log("gots " + this.roomData.length + " rooms from matrix.org :" + JSON.stringify(this.roomData));
+    if (roomData) {
+      console.log("gots rooms from matrix.org :" + JSON.stringify(roomData));
+      this.roomData = roomData.chunk;
+      this.roomData.sort((a, b) => (a.num_joined_members < b.num_joined_members) ? 1 : -1);
+    }
 
     // for (let i = 0; i < this.roomData.length; i++) {
     //   // console.log(this.roomData[i].name);
@@ -2715,7 +2737,7 @@ AFRAME.registerComponent("rotate-with-camera", { //unused
       if (this.roomData) {
         roomName = this.roomData[instanceID].name;
       } else {
-        GetMatrixData();
+        this.loadRoomData(GetMatrixData());
       }
       // this.matrixCalloutText.setAttribute("value", roomName);
       this.matrixCalloutText.setAttribute('troika-text', {
@@ -2735,7 +2757,7 @@ AFRAME.registerComponent("rotate-with-camera", { //unused
       this.dialogEl.components.mod_dialog.showPanel("Join the matrix room " + this.roomData[instanceID].name + "?", "href~https://matrix.to/#/" + this.roomData[instanceID].room_id, "linkOpen", 5000, "#" );
     } else {
       if (!this.roomData) {
-        GetMatrixData(); //in connect.js
+        this.loadRoomData(GetMatrixData()); //in connect.js
       }
     }
   }

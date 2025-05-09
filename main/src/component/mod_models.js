@@ -55,6 +55,7 @@ AFRAME.registerComponent('mod_model', {
         this.hasCalloutBackground = false;
         this.calloutTag = "";
         this.calloutString = "";
+        this.hasChildTags = false;  //i.e. this object has child mesh names with tags
         this.hitpoint = null;
 
         console.log("MOD MODEL modelID : " + this.data.modelID + " name " + this.data.modelName);
@@ -547,7 +548,7 @@ AFRAME.registerComponent('mod_model', {
               if (this.nodeName.toLowerCase().includes("tag")) { //must be set in eventData and as mesh name
                 if (node instanceof THREE.Mesh) {
                 this.meshChildren.push(node);
-  
+                this.hasChildTags = true;
                 // console.log("gotsa callout!");
                 
                 }
@@ -835,7 +836,7 @@ AFRAME.registerComponent('mod_model', {
                   calloutChild.classList.add("activeObjexRay");
                   calloutChild.setObject3D("Object3D", child);
                   this.calloutTag = this.meshChildren[i].name.split("_")[1];
-                  console.log("gotsa tag! " + this.calloutString);
+                  // console.log("gotsa tag! " + this.calloutString);
 
                   let type = "textCallout";
                   if (this.data.eventData && this.data.eventData.includes("pic")) {
@@ -1626,7 +1627,8 @@ AFRAME.registerComponent('mod_model', {
               }
     
                 // console.log("tryna play audiotrigger " + JSON.stringify(this.data.eventData));
-              if (this.data.tags != undefined && this.data.tags != null && this.data.tags != "undefined" && !this.data.tags.includes("grass") && !this.data.tags.includes("static") && !this.data.eventData.includes("static")) {
+              if (this.data.tags != undefined && this.data.tags != null && this.data.tags != "undefined" && 
+                !this.data.tags.includes("grass") && !this.data.tags.includes("static") && !this.data.eventData.includes("static") && !this.hasChildTags) {
                 console.log("tryna play audio with tags " + this.data.tags);
                 // if (this.triggerAudioController != null) {
                 //   this.triggerAudioController.components.trigger_audio_control.playAudio();
@@ -2316,9 +2318,13 @@ AFRAME.registerComponent('mod_model', {
       } 
       
       if (!this.isTarget) { //to do filter tags?
-        if (this.triggerAudioController != null && !this.data.isEquipped && this.tags && this.tags.length && !this.data.tags.includes("grass") && !this.data.tags.includes("static") && !this.data.eventData.includes("static")) {
-          console.log("tryna play audio with tags " + this.tags);
-          this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(hitpoint, distance, this.tags);
+        if (this.triggerAudioController != null && !this.data.isEquipped && this.tags && this.tags.length && 
+          !this.data.tags.includes("grass") && !this.data.tags.includes("static") && !this.data.eventData.includes("static") && !this.hasChildTags) {
+            console.log("tryna play audio with tags " + this.tags);
+            const trigger_audio_control = this.triggerAudioController.components.trigger_audio_control;
+            if (trigger_audio_control) {
+              this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(hitpoint, distance, this.tags);
+            }
         }
     
         if (this.hasSynth) {

@@ -1844,19 +1844,19 @@ AFRAME.registerComponent('model-callout', {
         this.portraitEntity.setAttribute('gltf-model', '#portrait_panel'); 
         this.portraitEntity.setAttribute('visible', false);
         calloutEntity.appendChild(this.portraitEntity);
-        this.portraitEntity.setAttribute("position", '0 0 3');
+        this.portraitEntity.setAttribute("position", '0 1 3');
 
         this.landscapeEntity = document.createElement("a-entity");
         this.landscapeEntity.setAttribute('gltf-model', '#landscape_panel'); 
         this.landscapeEntity.setAttribute('visible', false);
         calloutEntity.appendChild(this.landscapeEntity);
-        this.landscapeEntity.setAttribute("position", '0 0 3');
+        this.landscapeEntity.setAttribute("position", '0 1 3');
 
         this.squareEntity = document.createElement("a-entity");
         this.squareEntity.setAttribute('gltf-model', '#square_panel_plain'); 
         this.squareEntity.setAttribute('visible', false);
         calloutEntity.appendChild(this.squareEntity);
-        this.squareEntity.setAttribute("position", '0 0 3');
+        this.squareEntity.setAttribute("position", '0 1 3');
         let squareAlphaEntity = document.createElement("a-entity");
       // }
       calloutEntity.setAttribute('visible', false);
@@ -1865,7 +1865,7 @@ AFRAME.registerComponent('model-callout', {
       calloutEntity.appendChild(calloutText);
       this.dialogEl = document.getElementById('mod_dialog');
       // calloutEntity.setAttribute("position", '0 0 3');
-      calloutText.setAttribute("position", '0 0 3.5'); //offset the child on z toward camera, to prevent overlap on model
+      calloutText.setAttribute("position", '0 1 3.5'); //offset the child on z toward camera, to prevent overlap on model
       let font = "Acme.woff"; 
       if (settings && settings.sceneFontWeb2 && settings.sceneFontWeb2.length) {
         font = settings.sceneFontWeb2;
@@ -1890,6 +1890,19 @@ AFRAME.registerComponent('model-callout', {
           this.modelHitDistance = evt.detail.intersection.distance;
           console.log("model-callout hit distance is " + evt.detail.intersection.distance);
           
+          if (that.data.parentTags.toString().toLowerCase().includes("select_toggle_vis")) {
+            that.el.parentEl.object3D.traverse(node => { 
+              if (node instanceof THREE.Mesh) {
+                const nameSplit = node.name.split("_");
+                const name = nameSplit[1];
+                if (name === that.data.calloutTag) { 
+                    console.log("matched nodename " + node.name);
+                    node.visible = true;
+                } 
+              }
+            });
+          }
+          that.el.parentEl.object3D.updateMatrix();
           // console.log("hit distance is " + JSON.stringify(this.modelHitDistance));
           calloutEntity.setAttribute('visible', true);
           let pos = evt.detail.intersection.point; //hitpoint on model
@@ -1950,9 +1963,11 @@ AFRAME.registerComponent('model-callout', {
             }
           }
           if (that.triggerAudioController) {
+            console.log("gotsa triggerAudioController");
             let triggerAudioControl = that.triggerAudioController.components.trigger_audio_control;
             if (triggerAudioControl) {
               let distance = evt.detail.intersection.distance;
+              console.log("gotsa triggerAudioController " + that.data.calloutTag);
               triggerAudioControl.playAudioAtPosition(evt.detail.intersection.point, distance, that.data.calloutTag, 1);//tagmangler needs an array, add vol mod 
             }
           }
@@ -1962,6 +1977,25 @@ AFRAME.registerComponent('model-callout', {
       this.el.addEventListener('mouseleave', function (evt) {
         // console.log("tryna mouseexit");
         calloutEntity.setAttribute('visible', false);
+
+      if (that.data.parentTags.toString().toLowerCase().includes("select_toggle_vis")) {
+        that.el.parentEl.object3D.traverse(node => { //spin through object heirarchy to sniff for special names, e.g. "eye"
+          // node.visible = false;
+          // const nameSplit = node.name.split("_");
+          //     const name = nameSplit[1];
+          //     if (name === that.data.calloutTag) { 
+                // console.log("matched nodename " + node.name);
+                if (node instanceof THREE.Mesh) {
+                  node.visible = false;
+                }
+                // } else {
+                //   // console.log("hiding unmatched nodename " + node.name);
+                //   node.visible = false;
+                // }
+        });
+      }
+      that.el.parentEl.object3D.updateMatrix();
+
       });
       this.el.addEventListener('click', function (evt) {
 
@@ -3452,7 +3486,7 @@ AFRAME.registerComponent('scene_text_control', { //hold the parsed text data
         this.textData = JSON.stringify({
           textIDs: data //just send the ids
         }),
-$.ajax({
+        $.ajax({
         url: "/scene_text_items",
         type: 'POST',
         contentType: "application/json; charset=utf-8",
@@ -3473,6 +3507,7 @@ $.ajax({
           }
         });
       
+        this.data.jsonData = sceneTextItems;
         setTimeout(() =>{
           this.loadTextData();
         }, 3000);
@@ -3483,9 +3518,10 @@ $.ajax({
     // this.textItems = data;
   },
   returnTextData: function (mediaID) {
+    console.log("tryna get text media for " + mediaID);
       for (let i = 0; i < this.data.jsonData.length; i++) {
         if (mediaID == this.data.jsonData[i]._id) {
-          return this.data.jsonData[i];
+          return this.data.jsonData[i].textstring;
         }
       }
     }

@@ -3278,8 +3278,11 @@ app.post('/return_audiogroups/', function(req, res) {
                 const group_ids = req.body.triggerGroups.map(item => { return ObjectId.createFromHexString(item); });
                 const query = {"_id": {$in: group_ids}};
                 const group_items = await RunDataQuery("groups", "find", query);
-                let groupdata = group_items[0].groupdata;
-                groupItems.push.apply(groupItems, groupdata); //concat arrays
+                for (let g = 0; g < group_items.length; g++) {
+                    const groupdata = group_items[g].groupdata;
+                    groupItems.push.apply(groupItems, groupdata); //concat arrays
+                    
+                }
                 response.triggerGroupItems = group_items;
             }
             if (req.body.ambientGroups != null && req.body.ambientGroups.length > 0) {

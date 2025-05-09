@@ -1,4 +1,5 @@
 import { InitIDB, SaveLocalData, DeleteLocalSceneData, hasLocalData, SetHasLocalData } from "../connect/indexedDb.js";
+// import { matrixClient } from "../connect/matrix.js";
 import { youtubePlayer, youtubeIsPlaying, primaryAudioEl } from "../../main/src/component/content-utils.js";
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
 
@@ -46,8 +47,8 @@ let posRotRunning = false;
 export let timeKeysData = {};
 export let tkStarttimes = [];
 
-let poiLocations = [];
-let curveLocations = [];
+export let poiLocations = [];
+export let curveLocations = [];
 let cloudMarkers = []; //???? unused>?
 export let sceneModels = [];
 
@@ -467,66 +468,77 @@ export function getExtension(filename) {
    return (i < 0) ? '' : filename.substr(i);
 }
 
-export function GetMatrixData() { //use matrix.org for... something
+export async function GetMatrixData() { //use matrix.org for... something
    if (!matrixClient) {
+      let opts = {}; //um no
       matrixClient = matrixcs.createClient("https://matrix.org");
    }
-   if (!matrixRoomsData) {
-      matrixClient.publicRooms(function (err, data) { //pulls 100 random rooms
-         if (err) {
-            console.error("err %s", JSON.stringify(err));
-            return;
-         }
-         matrixRoomsData = data;
-         console.log("Congratulations! The matrix client got " + data.chunk.length + " rooms.");
+   await matrixClient.startClient({ initialSyncLimit: 10 });
+      if (!matrixRoomsData) {
+         matrixClient.publicRooms(function (err, data) { //pulls 100 random rooms
+            if (err) {
+               console.error("err %s", JSON.stringify(err));
+               return;
+            }
+            // matrixRoomsData = data;
+            console.log("Congratulations! The matrix client got " + data.chunk.length + " rooms.");
+      
+            // const matrixMeshEl = document.getElementById("matrix_meshes");
+            // if (matrixMeshEl != null) {
+            //    const matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
+            //    if (matrixMeshComponent != null) {  
+                  let length = data.chunk.length;
+                  console.log("matrix length " + length);
+                  let trimToLength = length < 100 ? length : 75;
+                  let trimmedLength = length;
+                  let trimmedIndexes = [];
+                  let randomIndex = 0;
+                  for (let i = 0; i < length; i++) {
+                     randomIndex = Math.floor(Math.random()*data.chunk.length);
+                     // console.log("pushing randomIndex " + randomIndex);
+                     // trimmedIndexes.push(randomIndex);
+                     data.chunk.splice(randomIndex, 1)
+                     if (i === length - 1) {
+                        //sweeeet...
+                        // matrixMeshComponent.loadRoomData(data.chunk.splice(trimmedIndexes, 1)); 
+                        console.log("returning data " + JSON.stringify(data));
+                        return data;
+                     }
+                  } 
+            //    } else {
+            //       console.log("matrix component not found!");
+            //    }
+            // } else {
+            //    console.log("matrixEl not found!");
+            // }
+         });
+      } else {
          const matrixMeshEl = document.getElementById("matrix_meshes");
          if (matrixMeshEl != null) {
             const matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
             if (matrixMeshComponent != null) {  
-               let length = data.chunk.length;
+               let length = matrixRoomsData.chunk.length;
                let trimToLength = 99;
                let trimmedLength = length - trimToLength;
                let trimmedIndexes = [];
                let randomIndex = 0;
                for (let i = 0; i < trimmedLength; i++) {
-                  randomIndex = Math.floor(Math.random()*data.chunk.length);
+                  randomIndex = Math.floor(Math.random()*matrixRoomsData.chunk.length);
                   // console.log("pushing randomIndex " + randomIndex);
                   // trimmedIndexes.push(randomIndex);
-                  data.chunk.splice(randomIndex, 1)
+                  matrixRoomsData.chunk.splice(randomIndex, 1)
                   if (i === trimmedLength - 1) {
                      //sweeeet...
                      // matrixMeshComponent.loadRoomData(data.chunk.splice(trimmedIndexes, 1)); 
-                     matrixMeshComponent.loadRoomData(data);   
+                     matrixMeshComponent.loadRoomData(matrixRoomsData);   
                   }
                } 
             }
          }
-      });
-   } else {
-      const matrixMeshEl = document.getElementById("matrix_meshes");
-      if (matrixMeshEl != null) {
-         const matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
-         if (matrixMeshComponent != null) {  
-            let length = matrixRoomsData.chunk.length;
-            let trimToLength = 99;
-            let trimmedLength = length - trimToLength;
-            let trimmedIndexes = [];
-            let randomIndex = 0;
-            for (let i = 0; i < trimmedLength; i++) {
-               randomIndex = Math.floor(Math.random()*matrixRoomsData.chunk.length);
-               // console.log("pushing randomIndex " + randomIndex);
-               // trimmedIndexes.push(randomIndex);
-               matrixRoomsData.chunk.splice(randomIndex, 1)
-               if (i === trimmedLength - 1) {
-                  //sweeeet...
-                  // matrixMeshComponent.loadRoomData(data.chunk.splice(trimmedIndexes, 1)); 
-                  matrixMeshComponent.loadRoomData(matrixRoomsData);   
-               }
-            } 
-         }
-      }
+
+      }   
    }
-}
+// }
 
 export function SetTimeKeysData (tkData) {
    timeKeysData = tkData;

@@ -12862,7 +12862,7 @@ function getAllPeople() {
                                 "<label for=\x22\x22>Location Model: </label>" + 
                                 "<select class=\x22form-control modelSelector\x22 id=\x22modelSelect_"+locationID+"\x22>" +
                                 "<option value=\x22none\x22 selected>none</option>" +
-                                "<option value=\x22none\x22>none</option>" +
+                                // "<option value=\x22none\x22>none</option>" +
                                 "<option value=\x22primitive_cube\x22>cube</option>" +
                                 "<option value=\x22primitive_sphere\x22>sphere</option>" +
                                 "<option value=\x22primitive_cylinder\x22>cylinder</option>" +
@@ -12872,14 +12872,14 @@ function getAllPeople() {
                                 "<label for=\x22\x22>Location Object: </label>" + 
                                 "<select class=\x22form-control objectSelector\x22 id=\x22objectSelect_"+locationID+"\x22>" +
                                 "<option value=\x22none\x22 selected>none</option>" +
-                                "<option value=\x22none\x22> none</option>" +
+                                // "<option value=\x22none\x22> none</option>" +
                                 "</select>" +
                             "</div>" +
                             "<div id=\x22selectLocationMedia_" + locationID + "\x22>" +
                                 "<label for=\x22\x22>Location Media: </label>" + 
                                 "<select class=\x22form-control mediaSelector\x22 id=\x22mediaSelect_"+locationID+"\x22>" +
                                 "<option value=\x22none\x22 selected>none</option>" +
-                                "<option value=\x22none\x22> none</option>" +
+                                // "<option value=\x22none\x22> none</option>" +
                                 "</select>" +
                             "</div>" +
                             // "<label for=\x22markerObjectScale_" + locationID + "\x22>Object Scale</label>" + 
@@ -15728,7 +15728,7 @@ function getAllPeople() {
 
                             // console.log("textitems: " +JSON.stringify(textItems));
                             for (let k = 0; k < sceneLocations.length; k++) {
-                                if (sceneLocations[k].markerType == "text") {
+                                // if (sceneLocations[k].markerType == "text") {
                                     console.log ("gotsa text location with mediaID : "+ sceneLocations[k].mediaID);
                                     const z = document.getElementById("mediaSelect_" + sceneLocations[k].timestamp);
                                     for (let l = 0; l < textItems.length; l++) {
@@ -15746,7 +15746,7 @@ function getAllPeople() {
                                         z.add(option);
                                         }
                                     }
-                                }
+                                // }
                             }
                         }
                     //asset bundle crap
@@ -16591,7 +16591,7 @@ function getAllPeople() {
                         for (let s = 0; s < sceneLocations.length; s++) {   
                             let locid = this.id.split("_")[1];
                             if (locid == sceneLocations[s].timestamp || this.id == sceneLocations[s].timestamp) {
-                                if (sceneLocations[s].markerType == "picture" || sceneLocations[s].markerType == "text") { //todo model, vid?
+                                if (sceneLocations[s].markerType == "picture" || sceneLocations[s].markerType == "text" || sceneLocations[s].markerType == "model") { //todo model, vid?
 
                                     sceneLocations[s].mediaName = $(this).find('option:selected').text();
                                     sceneLocations[s].mediaID = this.value;

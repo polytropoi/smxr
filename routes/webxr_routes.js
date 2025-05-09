@@ -749,7 +749,7 @@ webxr_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneLocations[i].markerType == "text") {
                         if (sceneResponse.sceneLocations[i].locationTags && sceneResponse.sceneLocations[i].locationTags.includes("main")) {
                            textLocation = sceneResponse.sceneLocations[i].x + " " + sceneResponse.sceneLocations[i].y + " " + zFix; //single location that will use main text
-                        } else if (sceneResponse.sceneLocations[i].mediaID && sceneResponse.sceneLocations[i].mediaID.length > 6) {
+                        } else if (sceneResponse.sceneLocations[i].mediaID && sceneResponse.sceneLocations[i].mediaID.length > 4) {
                             console.log("text mediaID is " + sceneResponse.sceneLocations[i].mediaID);
                         }
                     }
@@ -2115,9 +2115,20 @@ webxr_router.get('/:_id', function (req, res) {
                                         }
                                     }
                                     let modelString = "gltf-model=\x22#" + m_assetID + "\x22";
-                                    
+                                    let jsonDataBuff = "";
+                                    let jsonID = "";
+                                    if (locMdl.mediaID) {
+                                        jsonID = locMdl.mediaID;
+                                        // const mID = convertStringToObjectID(locMdl.mediaID);
+                                        // const mediaquery = {"_id": mID};
+                                        // let mediaData = await RunDataQuery("text_items", "findOne", mediaquery);
+
+                                        // console.log("mediaData " + JSON.stringify(mediaData));
+                                        // jsonDataBuff = Buffer.from(JSON.stringify(mediaData)).toString("base64");
+                                    }
+                                    // let jsonData = "data-json=" + buff
                                     gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+modelString+" "+instancing+" class=\x22"+entityType+
-                                    " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+
+                                    " activeObjexGrab activeObjexRay\x22 data-json=\x22"+jsonID+"\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+
                                     " position=\x220 -200 0\x22></a-entity>";//scatter model below //nm, just load it from here w/ modelString
                                     gltfModel = modelURL;
                                     
@@ -3359,10 +3370,10 @@ webxr_router.get('/:_id', function (req, res) {
                             dialogButton = "";
                             socketScripts = "";
                         }
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix')) {
-                            extraScripts = extraScripts + "<script src=\x22../main/js/browser-matrix.min.js\x22></script>"; 
-                            extraEntities = "<a-entity matrix_meshes=\x22init: true\x22></a-entity>";
-                        }
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix')) {
+                        //     extraScripts = extraScripts + "<script src=\x22../main/js/browser-matrix.min.js\x22></script>"; 
+                        //     extraEntities = "<a-entity matrix_meshes=\x22init: true\x22></a-entity>";
+                        // }
                       
                         htmltext = "<!DOCTYPE html>\n" +
                         "<head> " +
