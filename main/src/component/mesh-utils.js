@@ -1340,8 +1340,11 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         if (sceneTextDataEl) {
           const scene_text_control = sceneTextDataEl.components.scene_text_control;
           if (scene_text_control) {
-            this.jsonData = JSON.parse(sceneTextDataEl.components.scene_text_control.returnTextData(jsonID)); 
-            console.log("textData :  " + JSON.stringify(this.jsonData));
+            const jsonData = sceneTextDataEl.components.scene_text_control.returnTextData(jsonID);
+            if (jsonData) {
+              this.jsonData = JSON.parse(jsonData); 
+              console.log("textData :  " + JSON.stringify(this.jsonData));
+            }
           }
         }
      
