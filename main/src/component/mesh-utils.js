@@ -1190,7 +1190,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       this.iMesh_4 = null;
 
       this.jsonData = null;
-      
+
       this.highlightColor = new THREE.Color();
       console.log("instanced_surface_meshes model _id " + this.data._id + " tryna instance " + this.data.count + " with tags " + this.data.tagss);
       // this.el.setAttribute("visible",false);
@@ -1340,8 +1340,8 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         if (sceneTextDataEl) {
           const scene_text_control = sceneTextDataEl.components.scene_text_control;
           if (scene_text_control) {
-            this.jsonData = JSON.parse(sceneTextDataEl.components.scene_text_control.returnTextData(jsonID)); //fah, it's already a global...hrm...
-            console.log("textData :  " + JSON.stringify(jsonData));
+            this.jsonData = JSON.parse(sceneTextDataEl.components.scene_text_control.returnTextData(jsonID)); 
+            console.log("textData :  " + JSON.stringify(this.jsonData));
           }
         }
      
@@ -1405,6 +1405,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
                   let scale = Math.random() * this.data.scaleFactor;
                   // console.log("scale " + scale);
                   if (position.y > waterLevel && (Math.abs(position.x) > 10 && Math.abs(position.z) > 10)) { //loop through till all of them are above the 0, and outside the center play area
+                    
                     
                     // console.log("instance pos " + JSON.stringify(position));
                     dummy.position.set( position.x, position.y + this.data.yMod, position.z );
