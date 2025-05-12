@@ -32,6 +32,7 @@
     window.newLocation = newLocation;
     window.showLocation = showLocation;
     window.getApp = getApp;
+    window.newObject = newObject;
 
 
     var cookie = Cookies.get();

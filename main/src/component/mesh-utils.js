@@ -1190,6 +1190,18 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       this.iMesh_4 = null;
 
       this.jsonData = null;
+      this.instanceTags = {};
+
+      this.portraitEntity = null;
+      this.landscapeEntity = null;
+      this.squareEntity = null;
+
+      this.calloutEntity = null;
+      this.calloutText = null;
+      this.font = "Acme.woff"; 
+      if (settings && settings.sceneFontWeb2 && settings.sceneFontWeb2.length) {
+        this.font = settings.sceneFontWeb2;
+      }
 
       this.highlightColor = new THREE.Color();
       console.log("instanced_surface_meshes model _id " + this.data._id + " tryna instance " + this.data.count + " with tags " + this.data.tagss);
@@ -1237,7 +1249,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
     this.camera = document.getElementById("player").querySelector(["camera"]);
 
     
-    // this.jsonData = JSON.parse(atob(theData));
+
 /*  this way doesn't work with instanced meshes fsr...  
     this.el.addEventListener('raycaster-intersected', (e) => {  
 
@@ -1333,23 +1345,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         }
       }
       
-      const jsonID = this.el.getAttribute('data-json');
-      console.log("jsonID for instanced meshes " + jsonID);
-      if (jsonID != "") {
-      const sceneTextDataEl = document.getElementById("sceneTextData");
-        if (sceneTextDataEl) {
-          const scene_text_control = sceneTextDataEl.components.scene_text_control;
-          if (scene_text_control) {
-            const jsonData = sceneTextDataEl.components.scene_text_control.returnTextData(jsonID);
-            if (jsonData) {
-              this.jsonData = JSON.parse(jsonData); 
-              console.log("textData :  " + JSON.stringify(this.jsonData));
-            }
-          }
-        }
-     
-      // console.log("json data" + theData);
-      }
+
 
   },
 
@@ -1369,7 +1365,81 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         var dummy = new THREE.Object3D();
         dummy.visible = false;
         const count = this.data.count;
-    
+
+        const jsonID = this.el.getAttribute('data-json');
+        console.log("jsonID for instanced meshes " + jsonID);
+        if (jsonID != "") {
+        const sceneTextDataEl = document.getElementById("sceneTextData");
+          if (sceneTextDataEl) {
+            const scene_text_control = sceneTextDataEl.components.scene_text_control;
+            if (scene_text_control) {
+              const jsonData = sceneTextDataEl.components.scene_text_control.returnTextData(jsonID);
+              if (jsonData) {
+                this.jsonData = JSON.parse(jsonData); 
+                console.log("textData :  " + JSON.stringify(this.jsonData));
+                // this.el.setAttribute("model-callout", {"type": "instanced"})
+                this.calloutEntity = document.createElement("a-entity");
+                this.calloutEntity.id = "instancedCallout";
+                this.calloutText = document.createElement("a-entity");
+                  this.picData = null;
+
+                  this.portraitEntity = document.createElement("a-entity");
+                  this.portraitEntity.setAttribute('gltf-model', '#portrait_panel'); 
+                  this.portraitEntity.setAttribute('visible', false);
+                  this.calloutEntity.appendChild(this.portraitEntity);
+                  this.portraitEntity.setAttribute("position", '0 .5 .5');
+                  this.portraitEntity.setAttribute("scale", '.6 .6 .6');
+                 
+
+                  this.landscapeEntity = document.createElement("a-entity");
+                  this.landscapeEntity.setAttribute('gltf-model', '#landscape_panel'); 
+                  this.landscapeEntity.setAttribute('visible', false);
+                  this.calloutEntity.appendChild(this.landscapeEntity);
+                  this.landscapeEntity.setAttribute("position", '0 .5 .5');
+                  this.landscapeEntity.setAttribute("scale", '.6 .6 .6');
+          
+
+                  this.squareEntity = document.createElement("a-entity");
+                  this.squareEntity.setAttribute('gltf-model', '#square_panel_plain'); 
+                  this.squareEntity.setAttribute('visible', false);
+                  this.calloutEntity.appendChild(this.squareEntity);
+                  this.squareEntity.setAttribute("position", '0 .5 .5');
+                  this.squareEntity.setAttribute("scale", '.6 .6 .6');
+                  // this.calloutEntity.appendChild(this.squareEntity);
+                  // let squareAlphaEntity = document.createElement("a-entity");
+                // }
+                this.calloutEntity.setAttribute('visible', false);
+                // calloutEntity.setAttribute("render-order", "hud");
+                this.el.sceneEl.appendChild(this.calloutEntity);
+                this.calloutEntity.appendChild(this.calloutText);
+                this.calloutText.setAttribute("position", '0 .25 1'); //offset the child on z toward camera, to prevent overlap on model
+
+                this.calloutText.setAttribute('troika-text', {
+                  baseline: "bottom",
+                  align: "center",
+                  font: "/fonts/web/" + this.font,
+                  anchor: "center",
+                  color: "white",
+                  outlineColor: "black",
+                  outlineWidth: "2%",
+                  value: ""
+                });
+                if (settings && settings.sceneCameraMode == "Third Person") {
+                  this.calloutEntity.setAttribute("look-at", "#thirdPersonCamera");
+                } else {
+                  this.calloutEntity.setAttribute("look-at", "#player");
+                }
+              }
+            }
+          }
+        // console.log("json data" + theData);
+        }
+        let tagLength = 0; 
+        if (this.jsonData) {
+          tagLength = this.jsonData.length;
+        }
+        console.log("instanced tagLength is " + tagLength);
+        let tagIndex = -1;
         const sampler = new MeshSurfaceSampler( this.surfaceMesh ) // noice!  
         .build();
 
@@ -1408,8 +1478,22 @@ AFRAME.registerComponent('instanced_surface_meshes', {
                   let scale = Math.random() * this.data.scaleFactor;
                   // console.log("scale " + scale);
                   if (position.y > waterLevel && (Math.abs(position.x) > 10 && Math.abs(position.z) > 10)) { //loop through till all of them are above the 0, and outside the center play area
-                    
-                    
+                    let tag = "";
+                    if (tagLength > 0) {
+                      if (tagIndex == tagLength - 1) {
+                        tagIndex = 0;
+                      } else {
+                        tagIndex++;
+                      }
+                      console.log("JSON DATA " + JSON.stringify(this.jsonData[tagIndex]));
+                      // tag = this.jsonData[tagIndex].key;
+                      tag = Object.keys(this.jsonData[tagIndex])[0]; // key of the key: value is the tag
+                      
+                      let stringkey = this.count.toString();
+                      console.log(stringkey + " tryna set instanced mesh tag " + tag + " on instanceID" + this.count); 
+                      this.instanceTags[stringkey] = tag;
+                    }
+
                     // console.log("instance pos " + JSON.stringify(position));
                     dummy.position.set( position.x, position.y + this.data.yMod, position.z );
                     dummy.scale.set(scale,scale,scale);
@@ -1526,11 +1610,34 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       }
 
     },
+    returnTagFromID: function (instanceID) {
+      // console.log("instanceTags " + JSON.stringify(this.instanceTags) );
+      
+      // console.log("instance gotsa tag: " +tag);
+      let tag = this.instanceTags[instanceID].toString();
+      if (this.jsonData) {
+      for (let i = 0; i < this.jsonData.length; i++) {
+        const key = Object.keys(this.jsonData[i]);
+        // console.log("tag " + tag + " vs " +key);
+        if (tag == key) {
+          console.log(instanceID + " matched tag " + tag);
+          return this.jsonData[i];
+        }
+      }
+    }
+      // if (this.jsonData) {
+      //   if (instanceID < this.jsonData.length) {
+      //     return 
+      //   } else {
+
+      //   }
+      // }
+    },
     tick: function(time, timeDelta) {
       // this.timeDelta = timeDelta;
       this.time = time;
 
-      if (this.iMesh != null && this.data.tags != undefined  && this.data.tags != 'undefined') {
+      if (this.iMesh != null && this.data.tags != undefined  && this.data.tags != 'undefined' && !this.data.tags.toLowerCase().includes("static")) {
         // console.log(this.posRotReader );
         if (!this.raycaster || this.raycaster == null || this.raycaster == undefined || this.data.tags == undefined) {
             return;
@@ -1590,12 +1697,21 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       }
     },
     rayhit: function (hitID, distance, hitpoint) {
+
+      // const tagnumber = this.returnTagFromID(hitID);
+      // const tag = "" + tagnumber;
+      // // tag = tag.toString();
+      // console.log(hitID + " tag is " + tag);
       if (this.hitID != hitID && this.data.tags && !this.data.tags.toString().toLowerCase().includes("static")) {
         
         this.intersection = null;
-        
         this.hitID = hitID;
-        console.log("INSTANCED MESH new hit " + hitID + " " + distance + " " + JSON.stringify(hitpoint) + " interaction:" + this.data.interaction + " eventData " + this.data.eventData.toLowerCase() + " tags " + this.data.tags);
+        console.log(" INSTANCED MESH new hit " + hitID + " " + distance + " " + JSON.stringify(hitpoint) + " interaction:" + this.data.interaction + " eventData " + this.data.eventData.toLowerCase() + " tags " + this.data.tags);
+        // const modelCalloutComponent = this.el.components.model-callout;
+        // if (tag) {
+        //   this.el.setAttribute("model-callout", {"type": "instanced", "calloutTag": tag});
+        // }
+        
         var triggerAudioController = document.getElementById("triggerAudio");
         if (triggerAudioController != null) {
           triggerAudioController.components.trigger_audio_control.playInstanceAudioAtPosition(this.instanceId, hitpoint, distance, this.data.tags);
@@ -1607,15 +1723,94 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       }
       if (this.matrixMeshComponent != null) {
         this.matrixMeshComponent.showRoomData(this.instanceId, distance, hitpoint);
-        } else {
-          let matrixMeshEl = document.getElementById("matrix_meshes");
-          if (matrixMeshEl != null) {
-            this.matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
-            if (this.matrixMeshComponent != null && this.intersection != null) {
-              this.matrixMeshComponent.selectRoomData(this.instanceId);
+      } else {
+        let matrixMeshEl = document.getElementById("matrix_meshes");
+        if (matrixMeshEl != null) {
+          this.matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
+          if (this.matrixMeshComponent != null && this.intersection != null) {
+            this.matrixMeshComponent.selectRoomData(this.instanceId);
+          }
+        }
+      }
+      if (this.jsonData) {
+        let tagJson = this.returnTagFromID(hitID);
+        if (tagJson) {
+          const tag = Object.keys(tagJson)[0];
+          const props = Object.values(tagJson)[0];
+          
+          console.log("tagData " + JSON.stringify(props));
+          const name = props["name"];
+          this.calloutEntity.setAttribute('visible', true);
+          // let pos = evt.detail.intersection.point; //hitpoint on model
+          this.calloutEntity.setAttribute("position", hitpoint);
+          this.calloutEntity.setAttribute("scale", {"x": distance * .2, "y": distance * .2, "z": distance * .2});
+          this.calloutText.setAttribute('troika-text', {
+            baseline: "bottom",
+            align: "center",
+            font: "/fonts/web/" + this.font,
+            anchor: "center",
+            color: "white",
+            outlineColor: "black",
+            outlineWidth: "2%",
+            value: tag
+          });
+          const picGroupsControlEl = document.getElementById("pictureGroupsData");
+          if (picGroupsControlEl) {
+            let picsData = picGroupsControlEl.components.picture_groups_control.returnTaggedPicture(tag);
+            this.picData = picsData[Math.floor((Math.random()*picsData.length))];
+            if (this.picData) {
+              let picEl = null;
+              console.log("this.picData " + this.picData);
+              if (this.picData.orientation == "Landscape") {
+                this.landscapeEntity.setAttribute('visible', true);
+                this.portraitEntity.setAttribute('visible', false);
+                this.squareEntity.setAttribute('visible', false);
+                picEl = this.landscapeEntity;
+
+              
+              } else if (this.picData.orientation == "Portrait") {
+                this.landscapeEntity.setAttribute('visible', false);
+                this.portraitEntity.setAttribute('visible', true);
+                this.squareEntity.setAttribute('visible', false);
+                picEl = this.portraitEntity;
+              
+              } else if (this.picData.orientation == "Square") {
+                this.landscapeEntity.setAttribute('visible', false);
+                this.portraitEntity.setAttribute('visible', false);
+                this.squareEntity.setAttribute('visible', true);
+                if (this.picData.hasAlphaChannel) {
+                  picEl = this.squareEntity;
+                
+                } else {
+                  picEl = that.squareEntity;
+                  // calloutEntity.setAttribute('gltf-model', '#square_panel');
+                  // calloutEntity.setAttribute('material', {'transparent': true, 'opacity': 0});
+                  
+                }
+
+              }
+              const obj = picEl.getObject3D('mesh');
+              if (obj) {
+                console.log('gotsa mesh to show picData : '+ obj.name);
+                let texture = new THREE.TextureLoader().load(this.picData.url);
+                texture.colorSpace = THREE.SRGBColorSpace;
+                // UVs use the convention that (0, 0) corresponds to the upper left corner of a texture.
+                texture.flipY = false; 
+                // immediately use the texture for material creation
+                var material = new THREE.MeshStandardMaterial( { map: texture, transparent: this.picData.hasAlphaChannel, envMapIntensity: .1} );  
+                // Go over the submeshes and modify materials we want.
+                material.needsUpdate = true;
+                obj.traverse(node => {
+                  node.material = material;
+                  
+                });
+              }
             }
           }
-        }    
+        
+        
+        }
+      }    
     },
     instance_clicked: function (id) {
       console.log("clicked instance: "+ id);  
@@ -1627,6 +1822,12 @@ AFRAME.registerComponent('instanced_surface_meshes', {
             triggerAudioController.components.trigger_audio_control.playAudioAtPosition(this.hitpoint, this.distance, this.data.tags);
           }
           // this.iMesh.position.set(id, 0, 0, -100);
+          if (!this.dialogEl) {
+            this.dialogEl = document.getElementById('mod_dialog');
+          } 
+          if (this.dialogEl) { 
+          // this.dialogEl.components.mod_dialog.showPanel("Equip " + this.data.objectData.name + "?\n\n" + this.promptSplit[Math.floor(Math.random()*this.promptSplit.length)], this.data.objectData._id, "equipMe", 3333, this.el.id );
+          }
           if (this.useMatrix) {
             let matrixMeshEl = document.getElementById("matrix_meshes");
             if (matrixMeshEl != null) {
@@ -1868,7 +2069,7 @@ AFRAME.registerComponent('scatter-surface-default', { //cook one up on the fly i
       
       // setTimeout(function(){ that.el.emit('surfaceLoaded', true);   }, 2000);// put some fudge, wait a bit for scatter meshes to load before firing
       let imeshes = document.querySelectorAll("[instanced_surface_meshes]");
-      console.log("gots SCATTER SURFACE imeshes " + imeshes);
+      console.log("gots SURFACE for instancing imeshes " + imeshes);
       for (let i = 0; i < imeshes.length; i++) {
         console.log("imesh " + imeshes[i]);
         imeshes[i].components.instanced_surface_meshes.surfaceLoaded();

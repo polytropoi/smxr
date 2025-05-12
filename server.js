@@ -7651,7 +7651,7 @@ app.post('/newobj', requiredAuthentication, function (req, res) {
     (async () => {
         try {
             const saved = await RunDataQuery("obj_items", "insertOne", newobj);
-            var item_id = saved._id.toString();
+            var item_id = saved.insertedId.toString();
             console.log('new object created, id: ' + item_id);
             res.send("created: " + item_id);
         } catch (e) {
@@ -7840,7 +7840,7 @@ app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
         // const obj_item = await RunDataQuery("obj_items", "findOne", query, req.originalUrl);
         // if (obj_item) {
         
-          const actionIDs = req.body.actionIDs.map(convertStringToObjectID);
+          const actionIDs = req.body.actionIDs.length ? req.body.actionIDs.map(convertStringToObjectID) : [];
           const query = {"_id": ObjectId.createFromHexString(id)};
           const updateDoc = { $set: {
             actionIDs: actionIDs != null ? actionIDs : [],
@@ -7947,7 +7947,7 @@ app.post('/update_obj/:_id', requiredAuthentication, function (req, res) {
             const status = await RunDataQuery("obj_items", "updateOne", query, updateDoc);
             res.send("update status " + status);
       } catch (e) {
-        res.send("update obj error " + e);
+        res.send("upd obj error " + e);
       }
     })();
   });

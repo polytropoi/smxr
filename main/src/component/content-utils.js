@@ -3498,7 +3498,7 @@ AFRAME.registerComponent('scene_text_control', { //hold the parsed text data
 
              
               for (let i = 0; i < data.length; i++) { //check for text type?
-                console.log("sceneTextItem : " +data[i]);
+                // console.log("sceneTextItem : " +data[i]);
                 sceneTextItems.push(data[i]); //textstring should be a valid json, from defined template//not, just an array of objex saved in global
               }
           },
