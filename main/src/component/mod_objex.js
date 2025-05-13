@@ -63,8 +63,9 @@ AFRAME.registerComponent('mod_objex', {
         for (let i = 0; i < this.data.jsonLocationsData.length; i++) {
           // let equippable = "";
           for (let k = 0; k < this.data.jsonObjectData.length; k++) {
-            if (this.data.jsonLocationsData[i].objectID != undefined && this.data.jsonLocationsData[i].objectID != null && this.data.jsonLocationsData[i].objectID == this.data.jsonObjectData[k]._id) {
-              // console.log("location/object match " + this.data.jsonLocationsData[i].objectID);
+                          // console.log("tryna match location w/object markerType " + this.data.jsonLocationsData[i].markerType);
+            if (this.data.jsonLocationsData[i].markerType == "object" && this.data.jsonLocationsData[i].objectID != undefined && this.data.jsonLocationsData[i].objectID != null && this.data.jsonLocationsData[i].objectID == this.data.jsonObjectData[k]._id) {
+
               
               if (this.data.jsonObjectData[k].modelID != undefined && this.data.jsonObjectData[k].modelID != null) {
             
@@ -432,7 +433,7 @@ AFRAME.registerComponent('mod_objex', {
       equipInventoryObject: function (objectID, tags, eventData) {
         console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
         this.objectData = this.returnObjectData(objectID);
-        // console.log("tryna equip model " + JSON.stringify(this.objectData));  
+        console.log("tryna equip object " + JSON.stringify(this.objectData));  
         // console.log("tryna equip object " + this.el.id);
         this.dropPos = new THREE.Vector3();
         this.objEl = document.createElement("a-entity");
@@ -2453,6 +2454,21 @@ AFRAME.registerComponent('mod_object', {
                   this.dialogEl.components.mod_dialog.showPanel("Pick up " + this.data.objectData.name + "?\n\n" + this.promptSplit[Math.floor(Math.random()*this.promptSplit.length)], this.el.id, "pickMeUp", 5000, this.el.id );
                 } else {
                   this.dialogEl.components.mod_dialog.showPanel("Pick up " + this.data.objectData.name + "?", this.el.id, "pickMeUp", 5000, this.el.id );
+                }
+              }
+              
+            }
+            if (this.data.objectData.objtype.toLowerCase() == "drop" || this.hasDropAction) {
+              // this.el.setAttribute('visible', false);
+              if (!this.data.isEquippable) { //i.e. does not skip inventory
+                if (this.data.objectData.prompttext != undefined && this.data.objectData.prompttext != null && this.data.objectData.prompttext != "") {
+                  if (this.data.objectData.prompttext.includes('~')) {
+                    this.promptSplit = this.data.objectData.prompttext.split('~'); 
+                  }
+                  //this calls back to Pickup method from .activated (?), but it doesn't have to, could just pass object _id as above
+                  this.dialogEl.components.mod_dialog.showPanel("Drop " + this.data.objectData.name + "?\n\n", this.el.id, "dropMe", 5000, this.el.id );
+                } else {
+                  this.dialogEl.components.mod_dialog.showPanel("Drop " + this.data.objectData.name + "?", this.el.id, "dropMe", 5000, this.el.id );
                 }
               }
               

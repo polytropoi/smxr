@@ -1169,7 +1169,8 @@ AFRAME.registerComponent('instanced_surface_meshes', {
     // yWater: {default: 0},
     eventData: {default: ''},
     interaction: {default: ''},
-    tags: {default: ''}
+    tags: {default: ''},
+    objectID: {default: ''} //to swap out on instance interaction
   },
   init: function () {
     this.scatterFinished = false;
@@ -1204,7 +1205,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       }
 
       this.highlightColor = new THREE.Color();
-      console.log("instanced_surface_meshes model _id " + this.data._id + " tryna instance " + this.data.count + " with tags " + this.data.tagss);
+      console.log("instanced_surface_meshes model _id " + this.data._id + " tryna instance " + this.data.count + " with tags " + this.data.tagss + " INTERACTION " + this.data.interaction);
       // this.el.setAttribute("visible",false);
       this.el.addEventListener('model-loaded', (event) => {
         event.preventDefault();;
@@ -1271,26 +1272,27 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         this.raycaster = null;
     });
 */
-    window.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (this.instanceId) {
-        console.log("clicked on instance "+ this.instanceId);
-        this.instance_clicked(this.instanceId); 
-      }
-    }); 
-
-    if (this.useMatrix) {
-      let matrixMeshEl = document.getElementById("matrix_meshes");
-      if (matrixMeshEl != null) {
-        this.matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
-        if (this.matrixMeshComponent != null && this.intersection != null) {
-          this.matrixMeshComponent.selectRoomData(this.instanceId);
+    if (this.data.interaction != '') {
+      window.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (this.instanceId) {
+          console.log("clicked on instance "+ this.instanceId);
+          this.instance_clicked(this.instanceId); 
         }
-      } else {
-        matrixMeshEl = document.getElementById("matrix_meshes");
+      }); 
+
+      if (this.useMatrix) {
+        let matrixMeshEl = document.getElementById("matrix_meshes");
+        if (matrixMeshEl != null) {
+          this.matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
+          if (this.matrixMeshComponent != null && this.intersection != null) {
+            this.matrixMeshComponent.selectRoomData(this.instanceId);
+          }
+        } else {
+          matrixMeshEl = document.getElementById("matrix_meshes");
+        }
       }
     }
-    
   },
   
   surfaceLoaded: function () {  //called from scatter-surface when loaded
@@ -1367,7 +1369,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         const count = this.data.count;
 
         const jsonID = this.el.getAttribute('data-json');
-        console.log("jsonID for instanced meshes " + jsonID);
+
         if (jsonID != "") {
         const sceneTextDataEl = document.getElementById("sceneTextData");
           if (sceneTextDataEl) {
@@ -1375,6 +1377,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
             if (scene_text_control) {
               const jsonData = sceneTextDataEl.components.scene_text_control.returnTextData(jsonID);
               if (jsonData) {
+                console.log("jsonID for instanced meshes " + jsonData);
                 this.jsonData = JSON.parse(jsonData); 
                 console.log("textData :  " + JSON.stringify(this.jsonData));
                 // this.el.setAttribute("model-callout", {"type": "instanced"})
@@ -1637,7 +1640,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       // this.timeDelta = timeDelta;
       this.time = time;
 
-      if (this.iMesh != null && this.data.tags != undefined  && this.data.tags != 'undefined' && !this.data.tags.toLowerCase().includes("static")) {
+      if (this.data.interaction != '' && this.iMesh != null && this.data.tags != undefined  && this.data.tags != 'undefined' && !this.data.tags.toLowerCase().includes("static")) {
         // console.log(this.posRotReader );
         if (!this.raycaster || this.raycaster == null || this.raycaster == undefined || this.data.tags == undefined) {
             return;
@@ -1736,10 +1739,14 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         let tagJson = this.returnTagFromID(hitID);
         if (tagJson) {
           const tag = Object.keys(tagJson)[0];
-          const props = Object.values(tagJson)[0];
-          
+          let props = Object.values(tagJson)[0];
           console.log("tagData " + JSON.stringify(props));
-          const name = props["name"];
+          let names = props["names"].split(",");
+          names.push(tag);
+          const name = names[Math.floor((Math.random()*names.length))];
+          
+          
+          // const name = props["name"];
           this.calloutEntity.setAttribute('visible', true);
           // let pos = evt.detail.intersection.point; //hitpoint on model
           this.calloutEntity.setAttribute("position", hitpoint);
@@ -1820,13 +1827,21 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         var triggerAudioController = document.getElementById("triggerAudio");
           if (triggerAudioController != null) {
             triggerAudioController.components.trigger_audio_control.playAudioAtPosition(this.hitpoint, this.distance, this.data.tags);
-          }
+          } 
           // this.iMesh.position.set(id, 0, 0, -100);
           if (!this.dialogEl) {
             this.dialogEl = document.getElementById('mod_dialog');
           } 
           if (this.dialogEl) { 
-          // this.dialogEl.components.mod_dialog.showPanel("Equip " + this.data.objectData.name + "?\n\n" + this.promptSplit[Math.floor(Math.random()*this.promptSplit.length)], this.data.objectData._id, "equipMe", 3333, this.el.id );
+            console.log("objectID is " + this.data.objectID);
+            let tagJson = this.returnTagFromID(id);  
+            const tag = Object.keys(tagJson)[0];
+            let props = Object.values(tagJson)[0];
+            console.log("tagData " + JSON.stringify(props));
+            let names = props["names"].split(",");
+            names.push(tag);
+            const name = names[Math.floor((Math.random()*names.length))];
+              this.dialogEl.components.mod_dialog.showPanel("Equip " + name + "?\n\n ", this.data.objectID, "equipMe", 3333, null );
           }
           if (this.useMatrix) {
             let matrixMeshEl = document.getElementById("matrix_meshes");

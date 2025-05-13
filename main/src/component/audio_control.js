@@ -2252,8 +2252,10 @@ AFRAME.registerComponent('audio_groups_control', { //element and component are a
                                 if (triggerGroup.items[i] === this.data.audioGroupsData.audioItems[j]._id) {
                                     // console.log(triggerGroup._id + " match trigger group item " +triggerGroup.items[i]+ " vs " + this.data.audioGroupsData.audioItems[j]._id);
                                     //not ideal, maybe the groupitems can store tags? or cache them when loaded below?
+                                    
+                                    //TODO need to split the string and match eggzackly!!!!!
                                     if (this.data.audioGroupsData.audioItems[j].tags && this.data.audioGroupsData.audioItems[j].tags.toString().toLowerCase().includes(tag)) {
-                                        // console.log("tag match to " + tag);
+                                        // console.log("tag match to " + tag);  
                                         // return triggerGroup.items[i];
                                         console.log("matched triggeraudiotem w/ tag " + tag);
                                         // matchingItems.push(triggerGroup.items[i]);

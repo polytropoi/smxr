@@ -16564,8 +16564,8 @@ function getAllPeople() {
                             if (locid == sceneLocations[s].timestamp || this.id == sceneLocations[s].timestamp)   {
                                 sceneLocations[s].model = $(this).find('option:selected').text();
                                 sceneLocations[s].modelID = this.value;
-                                sceneLocations[s].objectName = '';
-                                sceneLocations[s].objectID = 'none';
+                                // sceneLocations[s].objectName = '';
+                                // sceneLocations[s].objectID = 'none';
                                 console.log("location gltf set " + $(this).find('option:selected').text());
                                 if (sceneLocations[s].model == null || sceneLocations[s].model == undefined) {
                                     sceneLocations[s].model = 'none';
@@ -16579,8 +16579,8 @@ function getAllPeople() {
                             if (locid == sceneLocations[s].timestamp || this.id == sceneLocations[s].timestamp) {
                                 sceneLocations[s].objectName = $(this).find('option:selected').text();
                                 sceneLocations[s].objectID = this.value;
-                                sceneLocations[s].model = '';
-                                sceneLocations[s].modelID = 'none';
+                                // sceneLocations[s].model = '';
+                                // sceneLocations[s].modelID = 'none';
                                 console.log("location obj set " + $(this).find('option:selected').text());
                                 if (sceneLocations[s].objectName == null || sceneLocations[s].objectName == undefined) {
                                     sceneLocations[s].objectName = 'none';

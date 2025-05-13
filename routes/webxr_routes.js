@@ -2081,8 +2081,18 @@ webxr_router.get('/:_id', function (req, res) {
                             } else { 
                                 console.log("tryna instance so0methings!@ " + locMdl.eventData.toLowerCase());
                                 let instancing = "instanced_meshes_mod=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+";\x22";
-                                let interaction = "";
+                                let interaction = " interaction: '' ";
+                                if (locMdl.tags.includes("select") || locMdl.tags.includes("click")){
+                                    interaction = " interaction: select; ";
+                                }
+                                console.log("instancing interaction " + interaction);
+                                let objectRef = "";
                                 scale = locMdl.yscale != null ? locMdl.yscale : 1;
+
+                                //TODO if there's a mediaID w/ tagMap, do that length... and use locations?
+                                if (locMdl.objectID) {
+                                    console.log("locMdl WITH OBJECT ID!!!" + locMdl.objectID);
+                                } 
                                 if (locMdl.eventData.toLowerCase().includes("everywhere")) {
                                     
                                     if (locMdl.tags && locMdl.tags.includes('growpop')) { //tags not eventdata?
@@ -2104,7 +2114,7 @@ webxr_router.get('/:_id', function (req, res) {
                                 } else if (locMdl.eventData.toLowerCase().includes("~")) {
                                     let split = locMdl.eventData.split("~");
                                     if (split.length) {
-                                        instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: "+split[1]+"; scaleFactor: "+scale+"; tags: "+locMdl.locationTags+"\x22";
+                                        instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" objectID: "+locMdl.objectID+"; yMod: "+locMdl.y+"; count: "+split[1]+"; scaleFactor: "+scale+"; tags: "+locMdl.locationTags+"\x22";
                                         // console.log("!!!tryna spoolit scatter dasta..." + instancing);
                                         if (locMdl.eventData.toLowerCase().includes("everywhere")) {
                                             instancingEntity = instancingEntity + "<a-entity instanced_meshes_sphere=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";

@@ -245,8 +245,10 @@ window.addEventListener( 'keydown',  ( event ) => {
     GoToPrevious();
   });
 
-
-  
+  $('#modalContent').on('click', '#dequipButton', function(e) {
+    console.log("tryna dequip");
+    DequipInventoryItem()
+  });
 
   $('#modalContent').on('click', '#modalCloser', function(e) {
     console.log("tryna showHideDialogPanel");
@@ -595,13 +597,13 @@ window.addEventListener( 'keydown',  ( event ) => {
           }
             
             if (!localData.locations[i].isLocal) {
-              localMarkerComponent = theEl.components.local_marker;
+              let localMarkerComponent = theEl.components.local_marker;
               if (localMarkerComponent) {
                 localMarkerComponent.data.markerType = e.target.value;
                 localMarkerComponent.loadModel(); 
               }
             } else {
-              cloudMarkerComponent = theEl.components.cloud_marker;
+              let cloudMarkerComponent = theEl.components.cloud_marker;
               if (cloudMarkerComponent) {
                 cloudMarkerComponent.data.markerType = e.target.value;
                 cloudMarkerComponent.loadModel(); 
@@ -1694,7 +1696,7 @@ function GetUserInventory () {
   let inventoryDisplayEl = document.getElementById('inventory_display');
   if (!userData.isGuest) {
     console.log("getuserprofile " + userData._id);
-    let response = "<button class=\x22uploadButton \x22 style=\x22float: right;\x22 onclick=\x22DequipInventoryItem()\x22>Dequip</button>Items in player inventory:<br><hr>";
+    let response = "<button id=\x22dequipButton\x22 class=\x22uploadButton \x22 style=\x22float: right;\x22 >Dequip</button>Items in player inventory:<br><hr>";
     var xhr = new XMLHttpRequest();
     xhr.open("get", '/user_inventory/' + userData._id, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
