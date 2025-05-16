@@ -1617,7 +1617,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       // console.log("instanceTags " + JSON.stringify(this.instanceTags) );
       
       // console.log("instance gotsa tag: " +tag);
-      if (instanceID && this.instanceTags.length) {
+      if (instanceID && this.instanceTags) {
         let tag = this.instanceTags[instanceID].toString();
         if (this.jsonData) {
           for (let i = 0; i < this.jsonData.length; i++) {

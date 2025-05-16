@@ -32,8 +32,13 @@ if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPO
 const nonLocalDomains = ["regalrooms.tv", "bishopstudiosaustin.com"]; //TODO you know what! (put this in sceneDomain object)
 
 function getExtension(filename) {
-    var i = filename.lastIndexOf('.');
-    return (i < 0) ? '' : filename.substr(i);
+    if (filename) {
+        console.log("tryna get extension of " + filename)
+        var i = filename.lastIndexOf('.');
+        return (i < 0) ? '' : filename.substr(i);
+    } else {
+        return null;
+    }
 }
 
 function convertStringToObjectID (stringID) {
@@ -1612,35 +1617,39 @@ webxr_router.get('/:_id', function (req, res) {
                     var i_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
                     const imgquery = {"_id": i_id};
                     let picture_item = await RunDataQuery("image_items", "findOne", imgquery);
-                    var item_string_filename = JSON.stringify(picture_item.filename);
-                    item_string_filename = item_string_filename.replace(/\"/g, "");
-                    var item_string_filename_ext = getExtension(item_string_filename);
-                    var expiration = new Date();
-                    expiration.setMinutes(expiration.getMinutes() + 30);
-                    var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                    if (picture_item && picture_item.filename) {
 
-                    var halfName = 'half.' + baseName + item_string_filename_ext;
-                    var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-
-                    var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); //just send back thumbnail urls for list
-                    var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000); //just send back thumbnail urls for list
                     
-                    availableScene = {
-                        sceneTitle: scene.sceneTitle,
-                        sceneKey: scene.short_id,
-                        sceneType: scene.sceneType,
-                        sceneLastUpdate: scene.sceneLastUpdate,
-                        sceneDescription: scene.sceneDescription,
-                        sceneKeynote: scene.sceneKeynote,
-                        sceneAndroidOK: scene.sceneAndroidOK,
-                        sceneIosOK: scene.sceneIosOK,
-                        sceneWindowsOK: scene.sceneWindowsOK,
-                        sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-                        sceneOwner: scene.userName ? "" : scene.userName,
-                        scenePostcardQuarter: urlQuarter,
-                        scenePostcardHalf: urlHalf
-                    };
-                    availableScenesResponse.availableScenes.push(availableScene);
+                        var item_string_filename = picture_item.filename;
+                        item_string_filename = item_string_filename.replace(/\"/g, "");
+                        var item_string_filename_ext = getExtension(item_string_filename);
+                        var expiration = new Date();
+                        expiration.setMinutes(expiration.getMinutes() + 30);
+                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+
+                        var halfName = 'half.' + baseName + item_string_filename_ext;
+                        var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+
+                        var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); //just send back thumbnail urls for list
+                        var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000); //just send back thumbnail urls for list
+                        
+                        availableScene = {
+                            sceneTitle: scene.sceneTitle,
+                            sceneKey: scene.short_id,
+                            sceneType: scene.sceneType,
+                            sceneLastUpdate: scene.sceneLastUpdate,
+                            sceneDescription: scene.sceneDescription,
+                            sceneKeynote: scene.sceneKeynote,
+                            sceneAndroidOK: scene.sceneAndroidOK,
+                            sceneIosOK: scene.sceneIosOK,
+                            sceneWindowsOK: scene.sceneWindowsOK,
+                            sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+                            sceneOwner: scene.userName ? "" : scene.userName,
+                            scenePostcardQuarter: urlQuarter,
+                            scenePostcardHalf: urlHalf
+                        };
+                        availableScenesResponse.availableScenes.push(availableScene);
+                    }
                 }
             }
             // console.log("availableScenes : " +JSON.stringify(availableScenes));
@@ -1852,7 +1861,7 @@ webxr_router.get('/:_id', function (req, res) {
                     
                     let model = await RunDataQuery("models", "findOne", locmdlquery);
                     console.log("tryna find model " + m_id + " " + JSON.stringify(model));
-                    if (model != null && model.item_type && model.item_type == "glb") {
+                    if (model != null && model.item_type && model.item_type == "glb" && model.filename) {
                         let modelURL = "";
                         modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
                         
@@ -2174,7 +2183,7 @@ webxr_router.get('/:_id', function (req, res) {
                     } else {
                         
                      
-                        if (model != null && model.item_type == "usdz") {//not locmdl glb
+                        if (model != null && model.item_type == "usdz" && model.filename) {//not locmdl glb
                         
                             let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/usdz/" + model.filename, 6000);
                             console.log("non-gltf modelURL " + modelURL + " modelType " + model.item_type);
@@ -2736,8 +2745,10 @@ webxr_router.get('/:_id', function (req, res) {
                     bucketFolder = "realitymangler.com";  //THIS! 
                     console.log("NONLOCALDOMAIN WTF!");
                 }
-                postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ 
-                                    picture_item._id + ".standard." + picture_item.filename, 6000); //just return a single             
+                if (picture_item && picture_item.filename) {
+                    postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ 
+                    picture_item._id + ".standard." + picture_item.filename, 6000); //just return a single             
+                }
             }
             
             /////////////// pictures /////////////////////////
@@ -2765,7 +2776,8 @@ webxr_router.get('/:_id', function (req, res) {
                         let images = await RunDataQuery("image_items", "find", picquery);
                     
                         for (let image of images) { //jack in a signed url for each
-                            // console.log("gots a pic in pic group w/ image.orientation " + image);
+                            console.log("gots a pic in pic group w/ image.orientation " + image.filename);
+
                             if (image.orientation != null && image.orientation != undefined && image.orientation.toLowerCase() == "equirectangular") { 
                                 skyboxIDs.push(image._id);
                                 image.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + image.userID + "/pictures/originals/" + image._id + ".original." + image.filename, 6000);
