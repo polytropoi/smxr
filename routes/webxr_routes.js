@@ -1598,13 +1598,14 @@ webxr_router.get('/:_id', function (req, res) {
                 modelData = "<div id=\x22sceneModels\x22 data-models='"+buff+"'></div>";
             }
             ///////////////// available scenes /////////////////////
-            const query = {$and: [{ "sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
+            const query = {$and: [{"sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
             const scenes = await RunDataQuery("scenes", "find", query);
 
             let availableScenes = [];
             availableScenesResponse.availableScenes = availableScenes;
             // async.each(scenes, function (scene, cb) {
-            for (let scene in scenes) {
+            console.log("availableScenes response " + scenes.length);
+            for (let scene of scenes) {
                 let availableScene = {};
                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
                     var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
@@ -1642,7 +1643,7 @@ webxr_router.get('/:_id', function (req, res) {
                     availableScenesResponse.availableScenes.push(availableScene);
                 }
             }
-
+            // console.log("availableScenes : " +JSON.stringify(availableScenes));
             if (availableScenes != null && availableScenes != undefined && availableScenes.length > 0) { //need it for random gates, etc...
                 const buff = Buffer.from(JSON.stringify(availableScenesResponse)).toString("base64");
                 availableScenesEntity = "<a-entity scale=\x22.75 .75 .75\x22 look-at=\x22#player\x22 position=\x22"+scenesKeyLocation+"\x22>"+ 
@@ -1763,7 +1764,7 @@ webxr_router.get('/:_id', function (req, res) {
                     const modelquery = {"_id": m_id};
                     const model = await RunDataQuery("models", "findOne", modelquery);
 
-                    if (model && model.item_type == "glb") {
+                    if (model && model.item_type == "glb" && model.filename) {
                         let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
                         objekt.modelURL = modelURL;
                         gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + objekt.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
@@ -1788,7 +1789,7 @@ webxr_router.get('/:_id', function (req, res) {
                     const m_id = ObjectId.createFromHexString(actionModel.modelID.toString());
                     const mquery = {"_id": m_id};
                     const model = await RunDataQuery("models", "findOne", mquery);
-                    if (model && model.userID && model.item_type && model.item_type == "glb") {
+                    if (model && model.userID && model.item_type && model.item_type == "glb" && model.filename) {
                         let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
                         gltfsAssets = gltfsAssets + "<a-asset-item class=\x22gltfAssets\x22 crossorigin=\x22anonymous\x22 response-type=\x22arraybuffer\x22 id=\x22" + 
                         actionModel.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";  

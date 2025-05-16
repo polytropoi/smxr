@@ -761,6 +761,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             // }
           }
           if (this.data.markerType == "gate" && !this.data.tags.includes("no prompt")) {
+            console.log("gate click! " +evt.detail.intersection.distance);
             if (evt.detail.intersection && evt.detail.intersection.distance > 1 && evt.detail.intersection.distance < 20) {
             this.dialogEl = document.getElementById('mod_dialog');
             if (this.dialogEl) {
@@ -774,6 +775,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                 if (asControl) {
                   if (asControl) {
                     let scene = asControl.returnRandomScene();
+                    console.log("randome scene " + scene.sceneKey);
                     let url = "/webxr/" + scene.sceneKey;
                     // window.location.href = url; 
                     this.dialogEl.components.mod_dialog.showPanel("Go to " + scene.sceneTitle +" ?", "href~"+ url, "gatePass", 5000 ); //param 2 is objID when needed

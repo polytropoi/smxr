@@ -64,7 +64,7 @@ AFRAME.registerComponent('mod_objex', {
           // let equippable = "";
           for (let k = 0; k < this.data.jsonObjectData.length; k++) {
                           // console.log("tryna match location w/object markerType " + this.data.jsonLocationsData[i].markerType);
-            if (this.data.jsonLocationsData[i].markerType == "object" && this.data.jsonLocationsData[i].objectID != undefined && this.data.jsonLocationsData[i].objectID != null && this.data.jsonLocationsData[i].objectID == this.data.jsonObjectData[k]._id) {
+            if ((this.data.jsonLocationsData[i].markerType == "character" || this.data.jsonLocationsData[i].markerType == "object") && this.data.jsonLocationsData[i].objectID != undefined && this.data.jsonLocationsData[i].objectID != null && this.data.jsonLocationsData[i].objectID == this.data.jsonObjectData[k]._id) {
 
               
               if (this.data.jsonObjectData[k].modelID != undefined && this.data.jsonObjectData[k].modelID != null) {
@@ -2499,8 +2499,8 @@ AFRAME.registerComponent('mod_object', {
           } else { //if equipped
             if (this.data.objectData.objtype.toLowerCase() == "drop" || this.hasDropAction) {
               console.log("tryna drop this object! " + this.data.objectData._id);
-              DequipAndDropItem();
-            }
+              // DequipAndDropItem();
+            } 
 
             if (this.hasThrowAction) {
               console.log("throw action " + JSON.stringify(this.throwAction));
@@ -3636,7 +3636,7 @@ AFRAME.registerComponent('mod_object', {
       } else if (scatterSurface) {
         surface = scatterSurface;
       }
-      console.log("tryna SCATTER (not instance) a object " + navmesh + "  " + surface);
+      console.log("tryna SCATTER (not instance) a object " + this.data.objectData.name + " " + navmesh + "  " + surface);
       if (surface) {
         let count = 10;
         let split = this.data.eventData.split("~"); //gonna switch to tags...
@@ -3697,9 +3697,10 @@ AFRAME.registerComponent('mod_object', {
             if (location.tags && location.tags.includes("equippable")) {
               equippable = true;
             }
-            console.log("gotsa scatterPosition for object " + this.data.objectData.objectID + " intersect: " + results.length + " " +results[0].object.name + 
-              "scatterCount " + scatterCount + " vs count " + count +  " scale " + this.scale + " equippable " + equippable + " locationData " + JSON.stringify(this.data.locationData));
-            console.log("scattered scale " + scale + " ymod " + yMod + " test.y " + testPosition.y  + " location.y " + location.y + " location " + JSON.stringify(location));
+            // console.log("gotsa scatterPosition for object " + this.data.objectData.name + " intersect: " + results.length + " " +results[0].object.name + 
+            //   "scatterCount " + scatterCount + " vs count " + count +  " scale " + this.scale + " equippable " + equippable + " locationData " + JSON.stringify(this.data.locationData));
+            // console.log("scattered scale " + scale + " ymod " + yMod + " test.y " + testPosition.y  + " location.y " + location.y + " location " + JSON.stringify(location));
+            console.log("tryna scatter " + JSON.stringify(this.data.objectData));
             scatteredEl.setAttribute("mod_object", {eventData: eventData, markerType: this.data.markerType, xscale: location.xscale * scale, yscale: location.yscale * scale, zscale: location.zscale * scale, ypos: location.y, tags: this.data.tags, 
                                                     description: this.data.description, locationData: location, objectData: this.data.objectData, isEquippable: equippable, tags: this.data.locationData.locationTags});
             scatteredEl.setAttribute("shadow", {cast: true, receive: true});

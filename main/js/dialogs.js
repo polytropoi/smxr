@@ -1791,7 +1791,7 @@ export function DequipAndDropItem () {
 
       el.removeAttribute("ammo-shape");
       el.removeAttribute("ammo-nody");
-      el.parentNode.removeChild(el);
+      el.parentNode.removeChild(el);``
       objexEl.components.mod_objex.dropObject(objectID);
       
     });

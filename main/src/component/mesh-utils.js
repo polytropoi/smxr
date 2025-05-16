@@ -1617,17 +1617,21 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       // console.log("instanceTags " + JSON.stringify(this.instanceTags) );
       
       // console.log("instance gotsa tag: " +tag);
-      let tag = this.instanceTags[instanceID].toString();
-      if (this.jsonData) {
-      for (let i = 0; i < this.jsonData.length; i++) {
-        const key = Object.keys(this.jsonData[i]);
-        // console.log("tag " + tag + " vs " +key);
-        if (tag == key) {
-          console.log(instanceID + " matched tag " + tag);
-          return this.jsonData[i];
+      if (instanceID && this.instanceTags.length) {
+        let tag = this.instanceTags[instanceID].toString();
+        if (this.jsonData) {
+          for (let i = 0; i < this.jsonData.length; i++) {
+            const key = Object.keys(this.jsonData[i]);
+            // console.log("tag " + tag + " vs " +key);
+            if (tag == key) {
+              console.log(instanceID + " matched tag " + tag);
+              return this.jsonData[i];
+            }
+          }
         }
+      } else {
+        return null;
       }
-    }
       // if (this.jsonData) {
       //   if (instanceID < this.jsonData.length) {
       //     return 
@@ -1833,15 +1837,17 @@ AFRAME.registerComponent('instanced_surface_meshes', {
             this.dialogEl = document.getElementById('mod_dialog');
           } 
           if (this.dialogEl) { 
-            console.log("objectID is " + this.data.objectID);
-            let tagJson = this.returnTagFromID(id);  
-            const tag = Object.keys(tagJson)[0];
-            let props = Object.values(tagJson)[0];
-            console.log("tagData " + JSON.stringify(props));
-            let names = props["names"].split(",");
-            names.push(tag);
-            const name = names[Math.floor((Math.random()*names.length))];
-              this.dialogEl.components.mod_dialog.showPanel("Equip " + name + "?\n\n ", this.data.objectID, "equipMe", 3333, null, tag, props );
+            if (this.jsonData) {
+              console.log("objectID is " + this.data.objectID);
+              let tagJson = this.returnTagFromID(id);  
+              const tag = Object.keys(tagJson)[0];
+              let props = Object.values(tagJson)[0];
+              console.log("tagData " + JSON.stringify(props));
+              let names = props["names"].split(",");
+              names.push(tag);
+              const name = names[Math.floor((Math.random()*names.length))];
+                this.dialogEl.components.mod_dialog.showPanel("Equip " + name + "?\n\n ", this.data.objectID, "equipMe", 3333, null, tag, props );
+            }
           } else {
             // console.log("")
           }
