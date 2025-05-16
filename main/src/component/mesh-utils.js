@@ -1169,8 +1169,8 @@ AFRAME.registerComponent('instanced_surface_meshes', {
     // yWater: {default: 0},
     eventData: {default: ''},
     interaction: {default: ''},
-    tags: {default: ''},
-    objectID: {default: ''} //to swap out on instance interaction
+    tags: {default: ''}
+    // objectID: {default: ''} //to swap out on instance interaction
   },
   init: function () {
     this.scatterFinished = false;
@@ -1205,7 +1205,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       }
 
       this.highlightColor = new THREE.Color();
-      console.log("instanced_surface_meshes model _id " + this.data._id + " tryna instance " + this.data.count + " with tags " + this.data.tagss + " INTERACTION " + this.data.interaction);
+      console.log("instanced_surface_meshes model _id " + this.data._id + " objectID " + this.data.objectID + " tryna instance " + this.data.count + " with tags " + this.data.tagss + " INTERACTION " + this.data.interaction);
       // this.el.setAttribute("visible",false);
       this.el.addEventListener('model-loaded', (event) => {
         event.preventDefault();;
@@ -1745,7 +1745,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
           names.push(tag);
           const name = names[Math.floor((Math.random()*names.length))];
           
-          
+
           // const name = props["name"];
           this.calloutEntity.setAttribute('visible', true);
           // let pos = evt.detail.intersection.point; //hitpoint on model
@@ -1820,7 +1820,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       }    
     },
     instance_clicked: function (id) {
-      console.log("clicked instance: "+ id);  
+      console.log("clicked instance: "+ id + " objectID is " + this.data.objectID);  
       if (id != null && id != this.lastClickedID && this.intersection != null && this.data.tags != 'undefined') {
         this.lastClickedID = id; //bc double triggering....ugh
         console.log(this.data.tags + " clicked id " + id);
@@ -1841,7 +1841,9 @@ AFRAME.registerComponent('instanced_surface_meshes', {
             let names = props["names"].split(",");
             names.push(tag);
             const name = names[Math.floor((Math.random()*names.length))];
-              this.dialogEl.components.mod_dialog.showPanel("Equip " + name + "?\n\n ", this.data.objectID, "equipMe", 3333, null );
+              this.dialogEl.components.mod_dialog.showPanel("Equip " + name + "?\n\n ", this.data.objectID, "equipMe", 3333, null, tag, props );
+          } else {
+            // console.log("")
           }
           if (this.useMatrix) {
             let matrixMeshEl = document.getElementById("matrix_meshes");

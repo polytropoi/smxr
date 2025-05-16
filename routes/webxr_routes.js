@@ -915,7 +915,7 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                     // console.log(JSON.stringify(sceneResponse.sceneLocations[i]));
                 } //end location loop
-                console.log("sceneResponse " + JSON.stringify(sceneResponse));
+                // console.log("sceneResponse " + JSON.stringify(sceneResponse));
                 var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations)).toString("base64");
                 loadLocations = "<a-entity location_data id=\x22locationData\x22 data-locations='"+buff+"'></a-entity>";
             } else {
@@ -2024,7 +2024,7 @@ webxr_router.get('/:_id', function (req, res) {
                             locMdl.name+"; description:"+locMdl.description+"; eventData:"+locMdl.eventData+"; modelID:"+m_assetID+";\x22";
                             
                             //////////   DEFAULT not instanced, normal placement
-                            if (!locMdl.eventData.toLowerCase().includes("instance")) {  //NOT "scatter" anymore, see mod_models
+                            if (!locMdl.eventData.toLowerCase().includes("instanc")) {  //NOT "scatter" anymore, see mod_models
                                 let physicsMod = "";
                                 let shape = 'hull';
                                 let groundMod = "";
@@ -2079,13 +2079,14 @@ webxr_router.get('/:_id', function (req, res) {
                                 }
                                 //INSTANCING (cloned) placement instancing + surface scattering
                             } else { 
-                                console.log("tryna instance so0methings!@ " + locMdl.eventData.toLowerCase());
+                                console.log("!!!!tryna instance so0methings!@ " + JSON.stringify(locMdl));
                                 let instancing = "instanced_meshes_mod=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+";\x22";
-                                let interaction = " interaction: '' ";
-                                if (locMdl.tags.includes("select") || locMdl.tags.includes("click")){
+
+                                let interaction = "";
+                                if ((locMdl.locationTags && locMdl.locationTags.includes("select")) || (locMdl.locationTags && locMdl.locationTags.includes("click"))){
                                     interaction = " interaction: select; ";
                                 }
-                                console.log("instancing interaction " + interaction);
+                                console.log("instancing interaction " + interaction + " TAGS " + locMdl.locationTags);
                                 let objectRef = "";
                                 scale = locMdl.yscale != null ? locMdl.yscale : 1;
 
@@ -2103,7 +2104,7 @@ webxr_router.get('/:_id', function (req, res) {
                                         interaction = " interaction: wiggle; ";
                                     }
                                 }
-                                if (locMdl.eventData.toLowerCase().includes("grass") || (locMdl.tags && locMdl.tags.includes("grass")) ) {
+                                if (locMdl.eventData.toLowerCase().includes("grass") || (locMdl.locationTags && locMdl.locationTags.includes("grass")) ) {
                                     instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; tags: grass; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 3000; scaleFactor: "+scale+"\x22";
                                 } else if (locMdl.eventData.toLowerCase().includes("plants")) {
                                     instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 500; scaleFactor: 8\x22";

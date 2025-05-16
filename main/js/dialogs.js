@@ -1758,7 +1758,7 @@ export function DropInventoryItem(objectID) {
   let action = null;
   let objexEl = document.getElementById('sceneObjects');
   if (objexEl != null) {
-    objectData = objexEl.components.mod_objex.returnObjectData(objectID);
+    const objectData = objexEl.components.mod_objex.returnObjectData(objectID);
     // console.log("chekin objectData: " + JSON.stringify(objectData));
     if (objectData.actions != undefined && objectData.actions.length > 0) {
       for (let i = 0; i < objectData.actions.length; i++) {
@@ -1808,13 +1808,13 @@ export function DequipInventoryItem () {
   ShowHideDialogPanel();
 }
 
-export function EquipDefaultItem (objectID) {
+export function EquipDefaultItem (objectID, tags, eventData) {
   console.log("tryna equip " + objectID);
   // let action = null;
   let objexEl = document.getElementById('sceneObjects');
   if (objexEl != null) {
     // objectData = objexEl.components.mod_objex.returnObjectData(objectID);
-    objexEl.components.mod_objex.equipInventoryObject(objectID);
+    objexEl.components.mod_objex.equipInventoryObject(objectID, tags, eventData);
     
   }
 }

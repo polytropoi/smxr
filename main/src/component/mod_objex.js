@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 
 import { room, settings, localData, userData, mouseDowntime } from "../../../connect/connect.js";
-import { keydown, SetSelectedLocationTimestamp, showDialogPanel } from "../../js/dialogs.js";
+import { keydown, SetSelectedLocationTimestamp, showDialogPanel, DropInventoryItem, DequipAndDropItem } from "../../js/dialogs.js";
 import { Pickup, Drop } from "../../src/component/content-utils.js";
 
 AFRAME.registerComponent('mod_scene_inventory', {
@@ -816,7 +816,7 @@ AFRAME.registerComponent('mod_object', {
   
       this.thirdPersonPlaceholder = null;
       // this.sceneInventoryID = null;
-      if (this.data.locationData && this.data.locationData.eventData && this.data.locationData.eventData.toLowerCase().includes("driveable")) {
+      if (this.data.locationData && this.data.locationData.eventData && this.data.locationData.eventData.toString().toLowerCase().includes("driveable")) {
         this.thirdPersonPlaceholder = document.getElementById("thirdPersonPlaceholder"); //it's in the server response
   
         if (this.thirdPersonPlaceholder) {
@@ -2402,7 +2402,8 @@ AFRAME.registerComponent('mod_object', {
         e.preventDefault();
 
         // let downtime = (Date.now() / 1000) - this.mouseDownStarttime;
-        console.log("mousedown on " +this.el.id+ " time "+ this.mouseDowntime + "  on mod_object type: " + this.data.objectData.objtype + " hasEquip " + this.hasEquipAction + " hasPickup " + this.hasPickupAction + 
+        console.log("mousedown on " +this.el.id+ " time "+ this.mouseDowntime + "  on mod_object type: " + this.data.objectData.objtype + " hasEquip " + this.hasEquipAction + 
+          " hasPickup " + this.hasPickupAction + " hasDrop " + this.hasDropAction + 
                     " equipped " + this.data.isEquipped + " equippable " + this.data.isEquippable);
         if (keydown == "T") {
           ToggleTransformControls(this.data.timestamp);
@@ -2458,21 +2459,7 @@ AFRAME.registerComponent('mod_object', {
               }
               
             }
-            if (this.data.objectData.objtype.toLowerCase() == "drop" || this.hasDropAction) {
-              // this.el.setAttribute('visible', false);
-              if (!this.data.isEquippable) { //i.e. does not skip inventory
-                if (this.data.objectData.prompttext != undefined && this.data.objectData.prompttext != null && this.data.objectData.prompttext != "") {
-                  if (this.data.objectData.prompttext.includes('~')) {
-                    this.promptSplit = this.data.objectData.prompttext.split('~'); 
-                  }
-                  //this calls back to Pickup method from .activated (?), but it doesn't have to, could just pass object _id as above
-                  this.dialogEl.components.mod_dialog.showPanel("Drop " + this.data.objectData.name + "?\n\n", this.el.id, "dropMe", 5000, this.el.id );
-                } else {
-                  this.dialogEl.components.mod_dialog.showPanel("Drop " + this.data.objectData.name + "?", this.el.id, "dropMe", 5000, this.el.id );
-                }
-              }
-              
-            }
+
             if (this.selectAction) {
               console.log("select action " + JSON.stringify(this.selectAction));
               if (this.selectAction.actionResult.toLowerCase() == "trigger fx") {
@@ -2510,6 +2497,11 @@ AFRAME.registerComponent('mod_object', {
             }
             
           } else { //if equipped
+            if (this.data.objectData.objtype.toLowerCase() == "drop" || this.hasDropAction) {
+              console.log("tryna drop this object! " + this.data.objectData._id);
+              DequipAndDropItem();
+            }
+
             if (this.hasThrowAction) {
               console.log("throw action " + JSON.stringify(this.throwAction));
               if (this.throwAction.sourceObjectMod.toLowerCase() == "persist") { //transfer to scene inventory

@@ -2464,6 +2464,8 @@ AFRAME.registerComponent('mod_dialog', { //there should only be one of these, un
   this.messageType = null;
   this.meshObj = null;
   this.panelString = "";
+  this.tags = "";
+  this.eventData = "";
 
   this.font2 = "Acme.woff";
 
@@ -2517,8 +2519,9 @@ AFRAME.registerComponent('mod_dialog', { //there should only be one of these, un
   // this.dial
   // let that = this;
   },
-  showPanel: function (panelString, objectID, messageType, duration, sourceElementID) { //objectID = referenced elementID
-
+  showPanel: function (panelString, objectID, messageType, duration, sourceElementID, tags, eventData) { //objectID = referenced elementID
+    this.tags = tags;
+    this.eventData = eventData;
     this.objID = objectID;
     this.messageType = messageType;
     this.sourceElementID = sourceElementID;
@@ -2598,7 +2601,7 @@ AFRAME.registerComponent('mod_dialog', { //there should only be one of these, un
                 objEl.parentNode.removeChild(objEl);
               }
 
-              EquipDefaultItem(this.objID);
+              EquipDefaultItem(this.objID, this.tags, this.eventData);
             // } else {
             //   console.log("din't fine no equipMe element");
             // }
