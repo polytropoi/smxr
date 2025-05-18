@@ -64,7 +64,7 @@ AFRAME.registerComponent('mod_objex', {
           // let equippable = "";
           for (let k = 0; k < this.data.jsonObjectData.length; k++) {
                           // console.log("tryna match location w/object markerType " + this.data.jsonLocationsData[i].markerType);
-            if ((this.data.jsonLocationsData[i].markerType == "character" || this.data.jsonLocationsData[i].markerType == "object") && this.data.jsonLocationsData[i].objectID != undefined && this.data.jsonLocationsData[i].objectID != null && this.data.jsonLocationsData[i].objectID == this.data.jsonObjectData[k]._id) {
+            if ((this.data.jsonLocationsData[i].markerType == "player" || this.data.jsonLocationsData[i].markerType == "character" || this.data.jsonLocationsData[i].markerType == "object") && this.data.jsonLocationsData[i].objectID != undefined && this.data.jsonLocationsData[i].objectID != null && this.data.jsonLocationsData[i].objectID == this.data.jsonObjectData[k]._id) {
 
               
               if (this.data.jsonObjectData[k].modelID != undefined && this.data.jsonObjectData[k].modelID != null) {
@@ -82,7 +82,7 @@ AFRAME.registerComponent('mod_objex', {
                    
                     let objEl = document.createElement("a-entity");
                    
-                      objEl.setAttribute("mod_object", {'tags': this.data.jsonLocationsData[i].tags, 
+                      objEl.setAttribute("mod_object", {'tags': this.data.jsonLocationsData[i].locationTags, 
                                                         'eventData': this.data.jsonLocationsData[i].eventData, 
                                                         'locationData': this.data.jsonLocationsData[i], 
                                                         'objectData': this.data.jsonObjectData[k],
@@ -841,6 +841,7 @@ AFRAME.registerComponent('mod_object', {
             this.thirdPersonPlaceholder.setAttribute("rotation", rot);
           }
           // this.thirdPersonPlaceholder.setAttribute("object_raycaster", true);
+          // this.el.setAttribute("mod_line", {"init": true, "tags": this.data.tags});
         }
         
       } else {
@@ -859,11 +860,13 @@ AFRAME.registerComponent('mod_object', {
       } 
       if (this.data.objectData.tags != undefined && this.data.objectData.tags != null && this.data.objectData.tags != "undefined" && this.data.objectData.tags.length > 0) {
         // console.log(this.data.objectData.name + " gotsome tags: " + this.data.objectData.tags);
-        this.tags = [...this.tags, ...this.data.objectData.tags]; //spread operator!
+        // this.tags = [...this.tags, ...this.data.objectData.tags]; //spread operator!
       }
       // if (this.data.locationData && this.data.locationData.markerType) {
-        console.log("NEW OBJECT: " +this.data.objectData.name + " gots tags: " + this.tags + " markerType : "+ this.data.locationData.markerType);
+    console.log("NEW OBJECT: " +this.data.objectData.name + " gots tags: " + this.tags + " markerType : "+ this.data.locationData.markerType);
 
+     
+    
       if (this.data.objectData.tags) {
         if (this.data.objectData.tags.includes("equippable")) {
           this.data.isEquippable = true;
@@ -932,78 +935,14 @@ AFRAME.registerComponent('mod_object', {
       this.hasTriggerAction = false;
       this.hasThrowAction = false;
       this.hasShootAction = false;
-  
-      // if ((this.tags != null && !this.tags.includes("thoughtbubble")) && !this.tags.includes("hide callout")) { //TODO implement Callout Options!
-      
-      // if (!this.tags.includes("hide callout")) { //TODO implement Callout Options!
-          // if (this.data.objectData.callouttext != undefined && this.data.objectData.callouttext != null && this.data.objectData.callouttext.length > 0) {
-          //   this.hasCallout = true;
-          // }
+ 
         if (this.data.objectData.callouttext && this.data.objectData.callouttext.includes('~')) {
           this.calloutLabelSplit = this.data.objectData.callouttext.split('~'); 
           this.textData = this.calloutLabelSplit;
         } else {
           this.textData = this.data.objectData.callouttext;
         }
-          // console.log(this.data.objectData.name + "callouttext " + this.data.objectData.callouttext );
-          // this.calloutEntity = document.createElement("a-entity");
-        
-          // this.calloutText = document.createElement("a-entity");
-          //         // this.calloutEntity.appendChild(this.calloutPanel);
-          // this.calloutEntity.appendChild(this.calloutText);
-          // this.calloutEntity.id = "objCalloutEntity_" + this.el._id;
-        
-          // this.calloutText.id = "objCalloutText_" + this.el._id;
-            
-          // // TODO flex with sceneTextBackground
-          // // this.calloutPanel.id = "objCalloutPanel_" + this.data.objectData._id;
-          // // this.calloutPanel = document.createElement("a-entity"); 
-          // // this.calloutPanel.setAttribute("gltf-model", "#landscape_panel");
-          // // this.calloutPanel.setAttribute("scale", ".125 .1 .125");
-          // // this.calloutPanel.setAttribute("material", {'color': 'black', 'roughness': 1});
-          // // this.calloutPanel.setAttribute("overlay");
-          // // this.calloutEntity.setAttribute("look-at", "#player");
-          // if (settings && settings.sceneCameraMode == "Third Person") {
-          //   this.calloutEntity.setAttribute("look-at", "#thirdPersonCamera");
-          // } else {
-          //   this.calloutEntity.setAttribute("look-at", "#player");
-          // }
-          
-          // this.calloutEntity.setAttribute('visible', false);
-        
-          // // calloutEntity.setAttribute("render-order", "hud");
-          // // if (this.isNavAgent || this.data.markerType == "Character") {
-          //   this.el.appendChild(this.calloutEntity);
-          //   let y = this.data.objectData.yPosFudge + 1;
-          //   this.calloutEntity.setAttribute("position", "0 "+y+" .75");
-          // // } 
-          // // else {
-          // //   this.el.sceneEl.appendChild(this.calloutEntity);
-          // // }
-  
-  
-          // let font = "Acme.woff"; 
-          // if (settings && settings.sceneFontWeb2 && settings.sceneFontWeb2.length) {
-          //   font = settings.sceneFontWeb2;
-          // }
-          // // this.calloutPanel.setAttribute("position", '0 0 1'); 
-          // if (!this.isNavAgent) {
-          //   this.calloutText.setAttribute("position", '0 0 1.25'); //offset the child on z toward camera, to prevent overlap on model
-          // }
-          // this.calloutText.setAttribute('troika-text', {
-          //   fontSize: .1,
-          //   baseline: "bottom",
-          //   align: "left",
-          //   font: "/fonts/web/" + font,
-          //   anchor: "center",
-          //   color: "white",
-          //   outlineColor: "black",
-          //   outlineWidth: "2%",
-          //   value: ""
-          // });
-          // this.calloutText.setAttribute("overlay");
-        // } 
-      // }
+         
       // if (this.data.objectData.synthNotes != undefined && this.data.objectData.synthNotes != null && this.data.objectData.synthNotes.length > 0) {
       if (this.data.objectData.tonejsPatch1 != undefined && this.data.objectData.tonejsPatch1 != null) {  
         this.el.setAttribute("mod_synth", "init");
@@ -1086,59 +1025,81 @@ AFRAME.registerComponent('mod_object', {
         }
       }
   
-    if (this.data.isEquipped) {
-        if (this.hasTriggerAction) {
-        this.el.setAttribute("raycaster", {"objects": ".target", "far": "50", "position": "0 -0.5 0", "rotation": "90 0 0"});
-        this.equippedRaycaster = this.el.components.raycaster;
-        this.triggerAudioController = document.getElementById("triggerAudio");
-        console.log("triggerAudio loop "+ this.tags);
-        if (this.triggerAudioController != null) {
-            this.triggerAudioController.components.trigger_audio_control.loopAndFollow(this.el.id, this.tags, false); //don't autoplay if hastriggeraction
-            // this.triggerAudioController.components.trigger_audio_control.loopToggle(true);
-        } 
-        window.addEventListener('mousedown', (e) => {
-          if (!showDialogPanel) {
-            e.preventDefault();
-            //if mod_line
-            let modLine = this.el.components.mod_line;
-            if (modLine) {
-              modLine.toggleShowLine(true);
-              this.triggerAudioController = document.getElementById("triggerAudio");
-              console.log("equipped triggerAudio "+ this.tags);
-              if (this.triggerAudioController != null) {
-                if (!this.triggerAudioController.components.trigger_audio_control.hasLoopHowl()) {
-                  this.triggerAudioController.components.trigger_audio_control.loopAndFollow(this.el.id, this.tags, false); //don't autoplay if hastriggeraction
-                }
-                this.triggerAudioController.components.trigger_audio_control.loopToggle(true);
-                  
-              } 
+    if (this.data.isEquipped) { 
+        if (this.hasTriggerAction) { //e.g. a raygun or powertool
+          this.el.setAttribute("raycaster", {"objects": ".target", "far": "50", "position": "0 -0.5 0", "rotation": "90 0 0"});
+          this.equippedRaycaster = this.el.components.raycaster;
+          this.triggerAudioController = document.getElementById("triggerAudio");
+          console.log("triggerAudio loop "+ this.tags);
+          if (this.triggerAudioController != null) {
+              this.triggerAudioController.components.trigger_audio_control.loopAndFollow(this.el.id, this.tags, false); //don't autoplay if hastriggeraction
+              // this.triggerAudioController.components.trigger_audio_control.loopToggle(true);
+          } 
+          window.addEventListener('mousedown', (e) => {
+            if (!showDialogPanel) {
+              e.preventDefault();
+              //if mod_line
+              let modLine = this.el.components.mod_line;
+              if (modLine) {
+                modLine.toggleShowLine(true);
+                this.triggerAudioController = document.getElementById("triggerAudio");
+                console.log("equipped triggerAudio "+ this.tags);
+                if (this.triggerAudioController != null) {
+                  if (!this.triggerAudioController.components.trigger_audio_control.hasLoopHowl()) {
+                    this.triggerAudioController.components.trigger_audio_control.loopAndFollow(this.el.id, this.tags, false); //don't autoplay if hastriggeraction
+                  }
+                  this.triggerAudioController.components.trigger_audio_control.loopToggle(true);
+                    
+                } 
+              }
+              window.isFiring = true;
             }
-            window.isFiring = true;
-          }
-        });
-        window.addEventListener('mouseup', (e) => {
-          if (!showDialogPanel) {
-            e.preventDefault();
-            let modLine = this.el.components.mod_line;
-            if (modLine) {
-              modLine.toggleShowLine(false);
-              this.triggerAudioController = document.getElementById("triggerAudio");
-              console.log("equipped triggerAudio "+ this.tags);
-              if (this.triggerAudioController != null) {
-                this.triggerAudioController.components.trigger_audio_control.loopToggle(false);
-                  
-              } 
+          });
+          window.addEventListener('mouseup', (e) => {
+            if (!showDialogPanel) {
+              e.preventDefault();
+              let modLine = this.el.components.mod_line;
+              if (modLine) {
+                modLine.toggleShowLine(false);
+                this.triggerAudioController = document.getElementById("triggerAudio");
+                console.log("equipped triggerAudio "+ this.tags);
+                if (this.triggerAudioController != null) {
+                  this.triggerAudioController.components.trigger_audio_control.loopToggle(false);
+                    
+                } 
+              }
+              window.isFiring = false;
             }
-            window.isFiring = false;
-          }
-        }); 
-        
-      }
-        if (this.hasShootAction || this.hasThrowAction) {
-          this.el.classList.add("activeObjexRay");
+          }); 
+          
+        } else {
+          // if (this.tags && this.tags.includes("loop")){
+          //   console.log("tryna audio trigger mod_object loop");
+          //   // setTimeout(() => { //to make sure audio group data is loaded   
+
+          //       var triggerAudioController = document.getElementById("triggerAudio");
+          //       if (triggerAudioController != null) {
+          //           triggerAudioController.components.trigger_audio_control.loopAndFollow(this.el.id, this.tags, false); //don't autoplay if hastriggeraction
+          //       }   
+          //       // }, 5000);
+          // }
         }
+      
+      if (this.hasShootAction || this.hasThrowAction) {
+        this.el.classList.add("activeObjexRay");
+      }
     } else {
         this.el.classList.add("activeObjexRay");
+        if (this.tags && this.tags.includes("loop")){
+            console.log("tryna audio trigger mod_object loop");
+            // setTimeout(() => { //to make sure audio group data is loaded   
+
+                var triggerAudioController = document.getElementById("triggerAudio");
+                if (triggerAudioController != null) {
+                    triggerAudioController.components.trigger_audio_control.loopAndFollow(this.el.id, this.tags, false); //don't autoplay if hastriggeraction
+                }   
+                // }, 5000);
+        }
         
     }
     if (this.data.removeAfter != "") { //cleanup if timeout set
@@ -1157,16 +1118,7 @@ AFRAME.registerComponent('mod_object', {
           
         }, 5000);
       }
-    if (this.data.tags && this.data.tags.includes("loop")){
-      console.log("tryna audio trigger mod_object loop");
-        setTimeout(() => { //to make sure audio group data is loaded   
 
-            var triggerAudioController = document.getElementById("triggerAudio");
-            if (triggerAudioController != null) {
-                triggerAudioController.components.trigger_audio_control.loopAndFollow(this.el.id, this.tags, !this.hasTriggerAction); //don't autoplay if hastriggeraction
-            }   
-            }, 3000);
-        }
     if (this.data.objectData.audiogroupID && this.data.objectData.audiogroupID.length > 4) { //it's an objectID
         console.log("tryna set object_audio_controller id " + this.data.objectData.audiogroupID);
         this.objectAudioController = this.el.setAttribute("object_audio_controller", {_id: this.data.objectData.audiogroupID});
@@ -1175,12 +1127,13 @@ AFRAME.registerComponent('mod_object', {
       let that = this;
   
   
-      this.el.addEventListener('model-loaded', () => {
+    this.el.addEventListener('model-loaded', () => {
 
+        console.log(this.data.objectData.name + " mod_object " + this.tags + " model-loaded pos: "+ JSON.stringify(this.data.locationData));
 
         
   
-        console.log(this.data.objectData.name + " mod_object model-loaded pos: "+ JSON.stringify(this.data.locationData));
+
 
         this.data.xscale = this.data.locationData.xscale != null ? this.data.locationData.xscale : 1;
         this.data.yscale = this.data.locationData.yscale != null ? this.data.locationData.yscale : 1;
@@ -1282,18 +1235,25 @@ AFRAME.registerComponent('mod_object', {
           // this.el.sceneEl.appendChild(this.lineEl);
           // this.lineEl.setAttribute("mod_line", {"init": true});
           // this.lineEl.setAttribute("position", pos);
+          // this.el.setAttribute("mod_line", {"init": true, "tags": this.data.tags});
+          
           if (this.hasTriggerAction) {
             this.el.setAttribute("mod_line", {"init": true, "tags": this.data.tags});
           }
   
+          // if (this.triggerAudioController != null) {
+          //   if (this.hasTriggerAction || this.data) {
+          //     this.triggerAudioController = document.getElementById("triggerAudio");
+          //       console.log("triggerAudio loop "+ this.tags);
 
-          if (this.hasTriggerAction) {
-            this.triggerAudioController = document.getElementById("triggerAudio");
-            console.log("triggerAudio loop "+ this.tags);
-          if (this.triggerAudioController != null) {
-              this.triggerAudioController.components.trigger_audio_control.loopAndFollow(this.el.id, this.tags, false); //don't autoplay if hastriggeraction
-          } 
-          }
+          //       this.triggerAudioController.components.trigger_audio_control.loopAndFollow(this.el.id, this.tags, false); //don't autoplay if hastriggeraction
+          //     } 
+          //     if (this.tags && this.tags.toString().toLowerCase().includes("motor")) {
+          //       this.triggerAudioController.components.trigger_audio_control.loopToggle(true);
+          //     }
+          
+          // }
+          
           if (this.hasShootAction || this.hasThrowAction) {
             this.el.classList.add("activeObjexRay");
           }
@@ -3546,16 +3506,16 @@ AFRAME.registerComponent('mod_object', {
      
         if (this.equippedRaycaster != null) {
   
-          // if (this.isTriggered) {
-          //   this.el.components.mod_line.showLine(true);
-          // }
-            // if (this.arrow) { //show helper arrow, TODO toggle from dialogs.js
-            //   this.el.sceneEl.object3D.remove(this.arrow);
-            // }
-            // // console.log("tryna show equippedRaycaster...");
-            // this.arrow = new THREE.ArrowHelper( this.directionMe, this.positionMe, 10, 0xff0000 );
-            // this.arrow = new THREE.ArrowHelper( this.equippedRaycaster.direction, this.equippedRaycaster.origin, 10, 0xff0000 );
-            // this.el.sceneEl.object3D.add( this.arrow );
+          if (this.isTriggered) {
+            this.el.components.mod_line.showLine(true);
+          }
+            if (this.arrow) { //show helper arrow, TODO toggle from dialogs.js
+              this.el.sceneEl.object3D.remove(this.arrow);
+            }
+            // console.log("tryna show equippedRaycaster...");
+            this.arrow = new THREE.ArrowHelper( this.directionMe, this.positionMe, 10, 0xff0000 );
+            this.arrow = new THREE.ArrowHelper( this.equippedRaycaster.direction, this.equippedRaycaster.origin, 10, 0xff0000 );
+            this.el.sceneEl.object3D.add( this.arrow );
         } 
   
         // if (this.lineGeometry && this.lineObject && this.lineStart) { //for testing

@@ -1098,6 +1098,8 @@ webxr_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags.includes('magic window'))) {
                         lookcontrols = "look-controls=\x22reverseTouchDrag: true\x22"; // because magicwinders enabled by default
                     }
+                    // let audioType = '';
+                    // if ()
                     // wasd = "wasd-controls=\x22fly: true; acceleration: "+sceneResponse.scenePlayer.playerSpeed+"\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:0;\x22";
                     // wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: 4; inputType: keyboard\x22";
                     // let navConstraint = "";
@@ -2106,11 +2108,11 @@ webxr_router.get('/:_id', function (req, res) {
                                 } 
                                 if (locMdl.eventData.toLowerCase().includes("everywhere")) {
                                     
-                                    if (locMdl.tags && locMdl.tags.includes('growpop')) { //tags not eventdata?
+                                    if (locMdl.locationTags && locMdl.locationTags.includes('growpop')) { //tags not eventdata?
                                         interaction = " interaction: growpop; ";
-                                    } else if (locMdl.tags && locMdl.tags.includes('shrinkpop')) {
+                                    } else if (locMdl.locationTags && locMdl.locationTags.includes('shrinkpop')) {
                                         interaction = " interaction: shrinkpop; ";
-                                    } else if (locMdl.tags && locMdl.tags.includes('wiggle')) {
+                                    } else if (locMdl.locationTags && locMdl.locationTags.includes('wiggle')) {
                                         interaction = " interaction: wiggle; ";
                                     }
                                 }

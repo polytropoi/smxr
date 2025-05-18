@@ -1300,8 +1300,9 @@ AFRAME.registerComponent('instanced_surface_meshes', {
     // console.log("instanced_surface_meshes.surfaceLoaded call");
         if (!this.surfaceMesh) {
           this.surfaces = document.getElementsByClassName("surface");
-          console.log("surfaces found " + this.surfaces.length + " id " + this.surfaces[0].id);
+
           if (this.surfaces.length > 0) {
+            console.log("surfaces found " + this.surfaces.length + " id " + this.surfaces[0].id);
             this.surface = this.surfaces[0];
             if (this.surface.getObject3D('mesh') != null) {
               this.surface.getObject3D('mesh').traverse(node => {

@@ -608,7 +608,8 @@ AFRAME.registerComponent('extended_wasd_thirdperson', {
 		lookSpeed: {type: 'number', default: 30},  // degrees/second
 
 		// use keyboard or other (e.g. joystick) to activate these controls
-		inputType: {type: 'string', default: "keyboard"}
+		inputType: {type: 'string', default: "keyboard"},
+		audioType: {default: ''}
 	},
 
 	convertKeyName: function(keyName)
@@ -860,6 +861,8 @@ AFRAME.registerComponent('extended_wasd_thirdperson', {
 
 		if (this.triggerAudioController) {
 			if (this.isKeyPressed(this.data.moveForwardKey)) {
+				this.triggerAudioController.loopToggle(true);
+				// console.log("tryna mod audio Loop " + this.movePercent.z);
 				this.triggerAudioController.modLoop("rate", this.movePercent.z );
 			}
 			// } else {
