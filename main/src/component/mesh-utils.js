@@ -1562,10 +1562,11 @@ AFRAME.registerComponent('instanced_surface_meshes', {
             }
 
         
-        if (this.data.tags.includes("grass")) { //TODO active/inactive conf? hrm 
+        if (this.data.tags.includes("grass") || this.data.tags.includes("wave") || this.data.tags.includes("wind") || this.data.tags.includes("leaves")) { //TODO active/inactive conf? hrm 
           console.log("tryna set grass shader!");
           this.el.setAttribute("wavy_shader", "");
-        } else {
+        } 
+        if (this.data.interaction != '') {
           this.el.classList.add('activeObjexRay');
         }
         this.initialized = true;
