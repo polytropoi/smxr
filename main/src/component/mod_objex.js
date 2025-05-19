@@ -968,6 +968,7 @@ AFRAME.registerComponent('mod_object', {
           if (this.data.objectData.actions[a].actionType.toLowerCase() == "onload") {
             // this.hasSelectAction = true;
             this.loadAction = this.data.objectData.actions[a];
+            console.log("object has loadAction! " + this.data.objectData.name);
           }
           if (this.data.objectData.actions[a].actionType.toLowerCase() == "select") {
             this.hasSelectAction = true;
@@ -1273,7 +1274,7 @@ AFRAME.registerComponent('mod_object', {
               if (this.data.objectData.yPosFudge != null && this.data.objectData.yPosFudge != "") {
                 worldPosition.y += this.data.objectData.yPosFudge;
               }
-              console.log("triggering fx at " + JSON.stringify(worldPosition) + " plus" + this.data.objectData.yPosFudge);
+              console.log("loadAction triggering fx at " + JSON.stringify(worldPosition) + " plus" + this.data.objectData.yPosFudge);
               particleSpawner.components.particle_spawner.spawnParticles(worldPosition, this.data.objectData.particles, 5, this.el.id, this.data.objectData.yPosFudge, this.data.objectData.color1, this.data.objectData.triggerScale);
             }
           }
@@ -1848,89 +1849,7 @@ AFRAME.registerComponent('mod_object', {
                         }
                       }
                       targetModObjComponent.killMe();
-                      // this.killAction = 
-                      // if (this.killAction) {
-                      
-                      //   if (this.killAction.actionResult.toLowerCase() == "trigger fx") {
-                      //     if (!this.isTriggered) {
-                      //       this.isTriggered = true;
-                      //       let particleSpawner = document.getElementById('particleSpawner');
-                      //       if (particleSpawner != null) {
-                      //         var worldPosition = new THREE.Vector3();
-                      //         this.el.object3D.getWorldPosition(worldPosition);
-                      //         if (this.data.objectData.yPosFudge != null && this.data.objectData.yPosFudge != "") {
-                      //           worldPosition.y += this.data.objectData.yPosFudge;
-                      //         }
-                      //         console.log("triggering fx at " + JSON.stringify(worldPosition) + " plus" + this.data.objectData.yPosFudge);
-                      //         particleSpawner.components.particle_spawner.spawnParticles(worldPosition, this.data.objectData.particles, 5, null, this.data.objectData.yPosFudge, this.data.objectData.color1, this.data.objectData.triggerScale);
-                      //       }
-                      //     } else {
-                      //       console.log("already triggered - make it a toggle!");
-                      //     }
-                      //   }
-                      //   if (this.killAction.actionResult.toLowerCase() == "spawn") {
-                      //     if (!this.isTriggered) {
-                      //       this.isTriggered = true;
-
-                      //         let objectData = this.objexEl.components.mod_objex.returnObjectData(this.killAction.objectID);
-                      //         if (objectData == null) {
-                      //           objectData = this.objexEl.components.mod_objex.returnObjectData(this.killAction.objectID);
-                      //         }
-                      //         if (objectData != null) {
-                      //           console.log("killed object spawning object with " + JSON.stringify(objectData));
-                      //           this.objEl = document.createElement("a-entity");
-                      //           this.locData = {};
-                      //           this.locData.x = this.el.object3D.position.x;
-                      //           this.locData.y = this.el.object3D.position.y + 1;
-                      //           this.locData.z = this.el.object3D.position.z;
-                      //           this.locData.timestamp = Date.now();
-                      //           this.objEl.setAttribute("mod_object", {'locationData': this.locData, 'objectData': objectData, 'isSpawned': false});
-                      //           this.objEl.id = "obj" + objectData._id + "_" + this.locData.timestamp;
-                      //          this.el.sceneEl.appendChild(this.objEl);
-                      //         } else {
-                      //           console.log("caint find object "+ this.killAction.objectID +", tryna fetch it..");
-                      //           FetchSceneInventoryObject(this.killAction.objectID);
-                      //           objectData = this.objexEl.components.mod_objex.returnObjectData(this.killAction.objectID);
-                               
-                      //           console.log("killed object spawning object with " + JSON.stringify(objectData));
-                      //           this.objEl = document.createElement("a-entity");
-                      //           this.locData = {};
-                      //           this.locData.x = this.el.object3D.position.x;
-                      //           this.locData.y = this.el.object3D.position.y + 1;
-                      //           this.locData.z = this.el.object3D.position.z;
-                      //           this.locData.timestamp = Date.now();
-                      //           this.objEl.setAttribute("mod_object", {'locationData': this.locData, 'objectData': objectData, 'isSpawned': false});
-                      //           this.objEl.id = "obj" + objectData._id + "_" + this.locData.timestamp;
-                      //          this.el.sceneEl.appendChild(this.objEl);
-                      //         }
-                      //       }
-                      //   } else {
-                      //     console.log("already triggered - make it a toggle!");
-                      //   }
-                      //   //well, just do death particles everywhere for now...
-                      //     this.particlesEl = null;
-                      //     this.particlesEl = document.createElement("a-entity");
-                      //     // this.particlesEl.setAttribute("mod_particles", {"enabled": false});
-                      //     this.el.sceneEl.appendChild(this.particlesEl); //hrm...
-                      //     this.particlesEl.setAttribute("position", this.el.object3D.position);
-                      //     this.particlesEl.setAttribute('sprite-particles', {
-                      //       enable: true, 
-                      //       texture: '#smoke1', 
-                      //       color: settings.sceneColor3+".."+settings.sceneColor4, 
-                      //       blending: 'additive', 
-                      //       textureFrame: '6 5', 
-                      //       textureLoop: '1', 
-                      //       spawnRate: '1', 
-                      //       lifeTime: '3', 
-                      //       scale: '100,1000'});
-                      //     this.particlesEl.setAttribute('sprite-particles', {"duration": 3});
-                      //     // }
-
-                      //     this.el.classList.remove('activeObjexRay');
-                      //     this.el.removeAttribute('ammo-shape');
-                      //     this.el.removeAttribute('ammo-body');
-                      //     this.el.parentNode.removeChild(this.el); //actually kill it
-                      // } //end kill action
+                    
 
 
                     } //end if is dead

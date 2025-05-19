@@ -1739,6 +1739,16 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         }
       }
     },
+    playerTriggerExit: function () {
+      if (this.data.tags.includes("click only") || (this.data.markerType == "trigger" && this.data.tags && this.data.tags.toLowerCase().includes("no enter") && this.data.tags.toLowerCase().includes("no collision"))) { //disable the player contact of trigger
+        return;
+      }
+      if (!this.data.tags.includes("click only")) { //portal needs playertriggerhit, not just mouseenter
+        this.targetMods();
+      }
+    },
+
+    
     physicsTriggerHit: function () {  
     //   console.log("gotsa physics trigger hit!"); //maybe check the layer of colliding entity or something...
       var triggerAudioController = document.getElementById("triggerAudio");
@@ -1780,7 +1790,15 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
       
     },
     targetMods: function() {
-      
+      // if (this.data.tags && this.data.tags.length) {
+      //     var triggerAudioControllerEl = document.getElementById("triggerAudio");  
+      //     if (triggerAudioControllerEl != null) {
+      //       let triggerAudioController = triggerAudioControllerEl.components.trigger_audio_control;
+      //       if (triggerAudioController  != null) {
+      //         triggerAudioController.playAudioAtPosition(this.el.getAttribute("position"), 1, this.data.tags);
+      //       }
+      //     }
+      //   }
       if (this.data.targetElements && this.data.targetElements != undefined && this.data.targetElements != '' && this.data.targetElements != []) {
         console.log("chek targetElements " + this.data.targetElements);
         if (this.data.markerType == "portal") {
@@ -1808,7 +1826,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         }
       }
       if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("toggle target")) {
-        console.log( "tryna toggle somethin..." + this.data.targetElements.toString() + " length " + this.data.targetElements.length); 
+        // console.log( "tryna toggle somethin..." + this.data.targetElements.toString() + " length " + this.data.targetElements.length); 
         
         let targetEls = [];
         if (Array.isArray(this.data.targetElements)) {
@@ -1823,15 +1841,15 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
        
         if (targetEls.length) {
           for (let i = 0; i < targetEls.length; i++) {
-            console.log( "tryna toggle targetEl." + targetEls[i] + " length"); 
+            // console.log( "tryna toggle targetEl." + targetEls[i] + " length"); 
             let targetEl = document.getElementById(targetEls[i].toString());
             if (targetEl) {
               // let isVisible = targetEl.dataset.isVisible;
               // targetEl.dataset.isVisible = !targetEl.dataset.isVisible;
-              console.log( targetEl.id + " element isVisible : " + targetEl.dataset.isvisible); 
-              if (targetEl.dataset.isvisible == "no") {
-                targetEl.setAttribute("visible", true)
-                targetEl.dataset.isvisible = true;
+              console.log("tryna toggle target " + targetEl.id + " element isVisible : " + targetEl.dataset.isvisible); 
+              if (targetEl.dataset.isvisible && targetEl.dataset.isvisible == "no") {
+                targetEl.setAttribute("visible", true);
+                targetEl.dataset.isvisible = "yes";
                 targetEl.classList.add("activeObjexRay");
                 console.log("set to visible " + targetEl.dataset.isvisible);
               } else {                 
@@ -1933,20 +1951,14 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         distance = window.playerPosition.distanceTo(hitpoint);
         console.log("cloudmarker hit " + hitID + " " + distance + " " + JSON.stringify(hitpoint));
         if (this.data.tags && this.data.tags.length && !this.data.tags.toLowerCase().includes("no trigger")) {
-          // console.log("gotsa audio trigger hit");
-          var triggerAudioControllerEl = document.getElementById("triggerAudio");
-          
+          var triggerAudioControllerEl = document.getElementById("triggerAudio");  
           if (triggerAudioControllerEl != null) {
-            // console.log("gotsa audio trigger controller el");
             let triggerAudioController = triggerAudioControllerEl.components.trigger_audio_control;
             if (triggerAudioController  != null) {
-              // console.log("gotsa audio trigger controller " + distance);
-              // let triggertags = this.data.tags != null && this.data.tags != "" ? this.data.tags : "click";
               triggerAudioController.playAudioAtPosition(hitpoint, distance, this.data.tags);
             }
-           
           }
-        if (this.data.markerType != "portal" && !this.data.tags.includes("click only")) { //portal needs playertriggerhit, not just mouseenter
+        if (this.data.markerType != "portal" && !this.data.tags.includes("click only") && !this.data.tags.includes("no select")) { // needs playertriggerhit, not just mouseenter
           this.targetMods();
         }
         }

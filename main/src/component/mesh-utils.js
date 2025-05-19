@@ -2154,14 +2154,14 @@ AFRAME.registerComponent('particle_spawner',
 	// },
   spawnParticles: function (location, type, lifetime, parentID, yFudge, pColor, pScale) {
     
- 
+    
     this.particle = document.createElement("a-entity");
     if (pScale == NaN || pScale == null || pScale == undefined) {
       pScale = 10;
     } else {
       pScale = pScale * 10;
     } 
-    console.log("particle_spawner mod_particles location data: " + JSON.stringify(location) + " scale " + pScale + " parentID " + parentID );
+    console.log("particle_spawner mod_particles location data: " + JSON.stringify(location) + " scale " + pScale + " parentID " + parentID + " lifetime " + lifetime + " yFudge " + yFudge);
     
     if (parentID != null && parentID != '') { 
       let pparent = document.getElementById(parentID);
@@ -2171,21 +2171,22 @@ AFRAME.registerComponent('particle_spawner',
           // box.getCenter(center);
           // let pos =  obj.worldToLocal(center);
           let pos = new THREE.Vector3(0, 0, 0);
-          // console.log("premod pos " + JSON.stringify(pos));
+          // console.log("particle_spawner premod pos " + JSON.stringify(pos) + " parent " + pparent.id);
       pparent.appendChild(this.particle);
       // this.particle.setAttribute("position", JSON.stringify(pos));
 
-      if (yFudge != null) {
+      if (yFudge != null && yFudge != "") {
         let newPos = {};
         newPos.x = pos.x;
         newPos.y = pos.y + parseFloat(yFudge);
         newPos.z = pos.z;
-        console.log("tryna mod "+JSON.stringify(newPos)+" yfudge " + yFudge);
+        // console.log("particle_spawner tryna mod "+JSON.stringify(newPos)+" yfudge " + yFudge);
         this.particle.setAttribute("position", newPos);
         this.particle.setAttribute("mod_particles", {'location': location, 'type': type, 'lifetime': lifetime, 'parentID': parentID, 'yFudge': yFudge, 'color': pColor, 'scale': pScale});
       } else {
         this.particle.setAttribute("position", pos);
         this.particle.setAttribute("mod_particles", {'location': location, 'type': type, 'lifetime': lifetime, 'parentID': parentID, 'yFudge': yFudge, 'color': pColor, 'scale': pScale});
+        // console.log("particle_spawner nomod pos");
       }
       
     } else {
