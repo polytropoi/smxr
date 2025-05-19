@@ -2,7 +2,7 @@ import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, Tran
 import { settings, room, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
   userData, stringRoomUsers, timeKeysData, timedEventsListenerMode, SetTimedEventsListenerMode, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
   tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
-  SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud
+  SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation
   } from "../../connect/connect.js";
 import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile } from "../../connect/indexedDb.js";
 
@@ -270,6 +270,11 @@ window.addEventListener( 'keydown',  ( event ) => {
       let phID = $(this).attr("data-phID");
       console.log("saving local mod for " + phID);
       SaveModToLocal(phID);
+  });
+    $('#modalContent').on('click', '#snapLocationButton', function(e) {
+      let phID = $(this).attr("data-phID");
+      console.log("tryna snap to location for " + phID);
+      SnapLocation(phID);
   });
 
   $('#modalContent').on('click', '#importModsButton', function(e) {
@@ -1191,7 +1196,7 @@ function ShowLocationModal(timestamp) {
         // "<form>"+aa
         // "<table><tr>"
         "<div class=\x22row\x22>"+
-        "<button class=\x22snapButton\x22 style=\x22float:left;\x22 onclick=\x22SnapLocation('"+phID+"')\x22>SnapTo</button>"+
+        "<button id=\x22snapLocationButton\x22 class=\x22snapButton\x22 data-phID=\x22"+phID+"\x22 style=\x22float:left;\x22 >SnapTo</button>"+
         // "<button class=\x22grabButton\x22 style=\x22float:left;\x22 onclick=\x22ToggleTransformControls('"+phID+"')\x22>Toggle Transform Controls</button>"+
         // "<button class=\x22goToButton\x22 style=\x22float:left;\x22 onclick=\x22GoToLocation('"+phID+"')\x22>Go To</button>"+
         "<button class=\x22goToButton\x22 style=\x22float:left;\x22 onclick=\x22PlayerToLocation('"+thisLocation.x+ " " + thisLocation.y + " " + thisLocation.z +"')\x22>GoTo</button>"+
@@ -2199,7 +2204,7 @@ export function SceneManglerModal(mode, autoHide) {
 
         "<div class=\x22row\x22>"+
 
-        "<button class=\x22snapButton\x22 style=\x22float:left;\x22 onclick=\x22AddTimekey()\x22>Add Timed Event Key</button>"+
+        "<button id=\x22snapLocationButton\x22 class=\x22snapButton\x22 style=\x22float:left;\x22 onclick=\x22AddTimekey()\x22>Add Timed Event Key</button>"+
         // "<button class=\x22infoButton\x22 onclick=\x22SceneManglerModal('Tools')\x22>Tools</button>"+
         "<button class=\x22saveButton\x22 onclick=\x22SaveTimekeysToLocal()\x22>Save (local)</button>"+
       

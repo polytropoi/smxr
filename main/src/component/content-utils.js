@@ -4425,7 +4425,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
       this.transportPlayButton = document.getElementById("transport_play_button");
       
       this.mainTransportSlider = document.getElementById("mainTransportSlider");
-      // this.youtubePlayer = null;
+
       this.redmat = new THREE.MeshStandardMaterial({
           color: "red"    // red (can also use a CSS color string here)
           // flatShading: true,

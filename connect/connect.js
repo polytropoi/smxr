@@ -1135,27 +1135,27 @@ function ToggleAllTransformControls () {
 
 export function SnapLocation(locationKey) { //snap selected object to player loc
   
-   this.snapEl = document.getElementById(locationKey);
-   this.cameraPosition = new THREE.Vector3(); 
-   this.viewportHolder = document.getElementById('equipPlaceholder');
-   this.viewportHolder.object3D.getWorldPosition( this.cameraPosition );
+   const snapEl = document.getElementById(locationKey);
+   const cameraPosition = new THREE.Vector3(); 
+   const viewportHolder = document.getElementById('viewportPlaceholder3');
+   viewportHolder.object3D.getWorldPosition( cameraPosition );
 
-   console.log("tryna snaplocation : " +locationKey + " to " + JSON.stringify(this.cameraPosition));
-   if (this.snapEl != null) {
-      // let scale = this.snapEl.getAttribute("scale");
-      // this.snapEl.setAttribute("scale", 1);
-      let snapx = this.cameraPosition.x.toFixed(2);
-      let snapy = this.cameraPosition.y.toFixed(2);
-      let snapz = this.cameraPosition.z.toFixed(2);
-      // this.snapEl.setAttribute("scale", scale);
+   console.log("tryna snaplocation : " +locationKey + " to " + JSON.stringify(cameraPosition));
+   if (snapEl != null) {
+      // let scale = snapEl.getAttribute("scale");
+      // snapEl.setAttribute("scale", 1);
+      let snapx = cameraPosition.x.toFixed(2);
+      let snapy = cameraPosition.y.toFixed(2);
+      let snapz = cameraPosition.z.toFixed(2);
+      // snapEl.setAttribute("scale", scale);
          document.getElementById('xpos').value = snapx; //update elements in the modal dialog
          document.getElementById('ypos').value = snapy;
          document.getElementById('zpos').value = snapz;
          // 
-         this.snapEl.setAttribute('position', {"x": snapx, "y": snapy, "z": snapz});
+         snapEl.setAttribute('position', {"x": snapx, "y": snapy, "z": snapz});
          SaveModToLocal(locationKey);
       } else {
-         console.log("couldnot find this.snapEl " + locationKey);
+         console.log("couldnot find snapEl " + locationKey);
       } 
 }
 
