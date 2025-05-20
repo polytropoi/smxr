@@ -1,5 +1,5 @@
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "../src/component/content-utils.js";
-import { settings, room, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
+import { settings, room, lerp, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
   userData, stringRoomUsers, timeKeysData, timedEventsListenerMode, SetTimedEventsListenerMode, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
   tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation
@@ -266,15 +266,41 @@ window.addEventListener( 'keydown',  ( event ) => {
     SendAdminMessage();
   });
 
+  $('#modalContent').on('click', '#equipInventoryButton', function(e) {
+      const oID = $(this).attr("data-objectID");
+      console.log("equipping " + oID);
+      EquipInventoryItem(oID);
+  });
+  $('#modalContent').on('click', '#dropInventoryButton', function(e) {
+      const oID = $(this).attr("data-objectID");
+      console.log("dropping " + oID);
+      DropInventoryItem(oID);
+  });
+  $('#modalContent').on('click', '#consumeInventoryButton', function(e) {
+      const oID = $(this).attr("data-objectID");
+      console.log("consuming " + oID);
+      ConsumeInventoryItem(oID);
+  });
+  $('#modalContent').on('click', '#inspectInventoryButton', function(e) {
+      const oID = $(this).attr("data-objectID");
+      console.log("inspecting " + oID);
+      InspectInventoryItem(oID);
+  });
+
   $('#modalContent').on('click', '#saveModToLocalButton', function(e) {
       let phID = $(this).attr("data-phID");
       console.log("saving local mod for " + phID);
       SaveModToLocal(phID);
   });
-    $('#modalContent').on('click', '#snapLocationButton', function(e) {
+  $('#modalContent').on('click', '#snapLocationButton', function(e) {
       let phID = $(this).attr("data-phID");
       console.log("tryna snap to location for " + phID);
       SnapLocation(phID);
+  });
+  $('#modalContent').on('click', '.btnInventory', function(e) {
+      let inventoryID = $(this).attr("data-inventoryID");
+      console.log("tryna inventory item " + inventoryID);
+      ShowInventoryItem(inventoryID);
   });
 
   $('#modalContent').on('click', '#importModsButton', function(e) {
@@ -1723,7 +1749,7 @@ function GetUserInventory () {
             if (!uniqueItems.includes(inventoryObjs.inventoryItems[i].objectID)) {
               uniqueItems.push(inventoryObjs.inventoryItems[i].objectID);
               itemCounts[inventoryObjs.inventoryItems[i].objectID] = 1;
-              itemNames[inventoryObjs.inventoryItems[i].objectID] = inventoryObjs.inventoryItems[i].objectName;
+              itemNames[inventoryObjs.inventoryItems[i].objectID] = inventoryObjs.inventoryItems[i].objectData.name;
             } else {
               itemCounts[inventoryObjs.inventoryItems[i].objectID] = itemCounts[inventoryObjs.inventoryItems[i].objectID] + 1;
             }
@@ -1732,7 +1758,7 @@ function GetUserInventory () {
               for (let u = 0; u < uniqueItems.length; u++) {
                 let buttonNameString = itemNames[uniqueItems[u]] + " (" + itemCounts[uniqueItems[u]]+ ")";
                 // console.log("buttonNameStirng: " + buttonNameString);
-                response = response + "<button class=\x22btnInventory\x22 onclick=\x22ShowInventoryItem('"+uniqueItems[u]+"')\x22>"+buttonNameString+"</button>";
+                response = response + "<button class=\x22btnInventory\x22 data-inventoryID=\x22"+uniqueItems[u]+"\x22 >"+buttonNameString+"</button>";
                 inventoryDisplayEl.innerHTML = response;
               }
               
@@ -1839,7 +1865,7 @@ function EquipInventoryItem (objectID) {
   let action = null;
   let objexEl = document.getElementById('sceneObjects');
   if (objexEl != null) {
-    objectData = objexEl.components.mod_objex.returnObjectData(objectID);
+    let objectData = objexEl.components.mod_objex.returnObjectData(objectID);
     // console.log("chekin objectData: " + JSON.stringify(objectData));
     if (objectData.actions != undefined && objectData.actions.length > 0) {
       for (let i = 0; i < objectData.actions.length; i++) {
@@ -1865,61 +1891,57 @@ function EquipInventoryItem (objectID) {
 export function ShowInventoryItem(objectID) {
   let objexEl = document.getElementById('sceneObjects');
   let objectData = null;
-    if (objexEl != null) {
-      objectData = objexEl.components.mod_objex.returnObjectData(objectID);
-    }
+  if (objexEl != null) {
+    objectData = objexEl.components.mod_objex.returnObjectData(objectID);
+  }
 
-    if (objectData != null) {
-      // console.log("found object " + objectData);
-      // console.log("object data " + JSON.stringify(objectData));
-      let response = "<button class=\x22addButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 onclick=\x22ConsumeInventoryItem('"+objectData._id+"')\x22>Consume Item</button>"+
-     
-      "<button class=\x22uploadButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 onclick=\x22InspectInventoryItem('"+objectData._id+"')\x22>Inspect Item</button>"+
-      "<button class=\x22saveButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 onclick=\x22DropInventoryItem('"+objectData._id+"')\x22>Drop Item</button>"+
-      "<button class=\x22reallySaveButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 onclick=\x22EquipInventoryItem('"+objectData._id+"')\x22>Equip Item</button>"+
+  if (objectData != null) {
+    // console.log("found object " + objectData);
+    // console.log("object data " + JSON.stringify(objectData));
+    let response = "<button id=\x22consumeInventoryButton\x22 data-objectID=\x22"+objectData._id+"\x22 class=\x22addButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22>Consume Item</button>"+
+    
+    "<button id=\x22inspectInventoryButton\x22 data-objectID=\x22"+objectData._id+"\x22 class=\x22uploadButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 >Inspect Item</button>"+
+    "<button id=\x22dropInventoryButton\x22 data-objectID=\x22"+objectData._id+"\x22 class=\x22saveButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 >Drop Item</button>"+
+    "<button id=\x22equipInventoryButton\x22 data-objectID=\x22"+objectData._id+"\x22 class=\x22reallySaveButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 >Equip Item</button>"+
+    "Inventory Item: <hr><div class=\x22row\x22>"+
+    "<div class=\x22twocolumn\x22><div style=\x22padding: 5px; margin: 5px\x22>Name: "+objectData.name+"</div><div style=\x22padding: 5px; margin: 5px\x22>Title: "+objectData.title+" </div>"+
+    "<div style=\x22padding: 5px; margin: 5px\x22>Type: "+objectData.objtype+"</div><div style=\x22padding: 5px; margin: 5px\x22>Category: "+objectData.objcat+" </div>"+
+    "<div style=\x22padding: 5px; margin: 5px\x22>Name: "+objectData.objsubcat+"</div><div style=\x22padding: 5px; margin: 5px\x22>Class: "+objectData.objclass+" </div>"+
+    "</div>"+
+  
+    "<div class=\x22twocolumn\x22><div style=\x22padding: 5px; margin: 5px\x22>Description: "+objectData.description+" </div>"+
+    "</div>"+
+    "</div>";
+    let inventoryDisplayEl = document.getElementById('inventory_display');
+    inventoryDisplayEl.innerHTML = response;
+  } else { //fetch and cache if we don't have the data for this object (i.e. it wasn't included in the scene)
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", '/userobj/' + objectID, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send();
+    xhr.onload = function () {
+      // do something to response
+      // console.log("fetched obj resp: " +this.responseText);
+      objectData = JSON.parse(this.responseText);
+      console.log("object data " + objectData);
+      let response = "<button id=\x22consumeInventoryButton\x22class=\x22addButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 >Consume Item</button>"+
+        "<button id=\x22inspectInventoryButton\x22 class=\x22uploadButton\x22 data-objectID=\x22"+objectData._id+"\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 >Inspect Item</button>"+
+      "<button id=\x22dropInventoryButton\x22 class=\x22saveButton\x22 data-objectID=\x22"+objectData._id+"\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 >Drop Item</button>"+
+      "<button id=\x22equipInventoryButton\x22 data-objectID=\x22"+objectData._id+"\x22 class=\x22reallySaveButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22>Equip Item</button>"+
+      
       "Inventory Item: <hr><div class=\x22row\x22>"+
-      "<div class=\x22twocolumn\x22><div style=\x22padding: 5px; margin: 5px\x22>Name: "+objectData.name+"</div><div style=\x22padding: 5px; margin: 5px\x22>Title: "+objectData.title+" </div>"+
-      "<div style=\x22padding: 5px; margin: 5px\x22>Type: "+objectData.objtype+"</div><div style=\x22padding: 5px; margin: 5px\x22>Category: "+objectData.objcat+" </div>"+
-      "<div style=\x22padding: 5px; margin: 5px\x22>Name: "+objectData.objsubcat+"</div><div style=\x22padding: 5px; margin: 5px\x22>Class: "+objectData.objclass+" </div>"+
+      "<div class=\x22twocolumn\x22><div style=\x22padding: 10px; margin: 5px\x22>Name: "+objectData.name+"</div><div style=\x22padding: 5px; margin: 5px\x22>Title: "+objectData.title+" </div>"+
       "</div>"+
     
       "<div class=\x22twocolumn\x22><div style=\x22padding: 5px; margin: 5px\x22>Description: "+objectData.description+" </div>"+
-      "</div>"+
-      "</div>";
+      "</div></div>";
       let inventoryDisplayEl = document.getElementById('inventory_display');
       inventoryDisplayEl.innerHTML = response;
-    } else { //fetch and cache if we don't have the data for this object (i.e. it wasn't included in the scene)
-      var xhr = new XMLHttpRequest();
-      xhr.open("get", '/userobj/' + objectID, true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send();
-      xhr.onload = function () {
-        // do something to response
-        // console.log("fetched obj resp: " +this.responseText);
-        objectData = JSON.parse(this.responseText);
-        console.log("object data " + objectData);
-        let response = "<button class=\x22addButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 onclick=\x22ConsumeInventoryItem('"+objectData._id+"')\x22>Consume Item</button>"+
-         "<button class=\x22uploadButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 onclick=\x22ConsumeInventoryItem('"+objectData._id+"')\x22>Consume Item</button>"+
-        "<button class=\x22saveButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 onclick=\x22DropInventoryItem('"+objectData._id+"')\x22>Drop Item</button>"+
-        "<button class=\x22reallySaveButton\x22 style=\x22float: right; padding: 10px; margin: 5px\x22 onclick=\x22EquipInventoryItem('"+objectData._id+"')\x22>Equip Item</button>"+
-       
-        "Inventory Item: <hr><div class=\x22row\x22>"+
-        "<div class=\x22twocolumn\x22><div style=\x22padding: 10px; margin: 5px\x22>Name: "+objectData.name+"</div><div style=\x22padding: 5px; margin: 5px\x22>Title: "+objectData.title+" </div>"+
-        "</div>"+
-      
-        "<div class=\x22twocolumn\x22><div style=\x22padding: 5px; margin: 5px\x22>Description: "+objectData.description+" </div>"+
-        "</div></div>";
-        let inventoryDisplayEl = document.getElementById('inventory_display');
-        inventoryDisplayEl.innerHTML = response;
-        if (objexEl != null) {
-          objectData = objexEl.components.mod_objex.addFetchedObject(objectData); //add to scene object collection, so don't have to fetch again
-        }
+      if (objexEl != null) {
+        objectData = objexEl.components.mod_objex.addFetchedObject(objectData); //add to scene object collection, so don't have to fetch again
       }
     }
-  // }
- 
-
-  
+  }
 }
 // function ClearInputs () { //hrm/// nah
 

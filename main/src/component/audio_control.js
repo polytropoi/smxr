@@ -1,5 +1,5 @@
 import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "../component/content-utils.js";
-import { settings, attributions, PauseIntervals, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/connect.js";
+import { settings, attributions, lerp, PauseIntervals, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/connect.js";
 import { SceneManglerModal } from "../../js/dialogs.js";
 
 
@@ -37,7 +37,7 @@ var getJSON = function(url, callback) { //netradio details //nm
     xhr.send('url=' + encodeURI(audiourl));
 };
 
-const lerp = (x, y, a) => x * (1 - a) + y * a;
+
 function clamp (num, min, max) {
     return Math.min(Math.max(num, min), max);
   }

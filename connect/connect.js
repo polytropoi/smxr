@@ -20,6 +20,7 @@ export var videoEl = null;
 export const mouse = new THREE.Vector2();
 export const sceneEl = document.querySelector('a-scene');
 // export let hasLocalData = false;
+export const lerp = (x, y, a) => x * (1 - a) + y * a;
 
 var dateString = Date.now().toString();
 let roomUsers = {};
@@ -93,7 +94,7 @@ let currentLocalStorageUsed = null;
 let currentAvailableLocalStorageEstimage = null;
 
 
-let allowCameraLock = true;
+export let allowCameraLock = true;
 const camLockButton = document.getElementById("camLockToggleButton");
 let intersections = [];
 export let avatarName = "";
@@ -2355,9 +2356,9 @@ function MoveElement(id,posRotObj) { //jesjus wweeeeped//nopr
 // function lerp (start, end, amt){
 //    return (1-amt)*start+amt*end
 //  }
-function lerp(v0, v1, t) { //used in content-utils, why here?
-   return v0*(1-t)+v1*t
-}
+// function lerp(v0, v1, t) { //used in content-utils, why here?
+//    return v0*(1-t)+v1*t
+// }
 
 function SetLastPosition () {
    setTimeout(function () {

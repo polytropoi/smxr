@@ -232,16 +232,17 @@
     },
 
     remove() {
+      const data = this.data;
       if (this.mesh) {
         this.el.removeObject3D(this.mesh.name)
       }
-      if (data.model) {
+      if (data && data.model) {
         data.model.removeEventListener("object3dset", this.handleObject3DSet)
       }
     },
 
     update(oldData) {
-      const data = this.data
+      const data = this.data;
       
       let boundsDirty = data.particleSize !== oldData.particleSize
       let overTimeDirty = false

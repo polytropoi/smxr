@@ -5,7 +5,7 @@ if (typeof AFRAME === 'undefined') {
 }
 
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
-import { settings, videoEl, room, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, mouse, CreateLocation, timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData } from "../../../connect/connect.js";
+import { settings, videoEl, room, lerp, allowCameraLock, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, mouse, CreateLocation, timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData } from "../../../connect/connect.js";
 import { DeleteLocalSceneData } from "../../../connect/indexedDb.js";
 
 var ua = window.navigator.userAgent;

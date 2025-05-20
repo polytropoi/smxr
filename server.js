@@ -1772,14 +1772,30 @@ app.get('/profile/:_id', requiredAuthentication, usercheck, function (req, res) 
 
 app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
     if (req.params._id != undefined && req.params._id != null && ObjectId.isValid(req.params._id)) { 
-        var u_id = ObjectId.createFromHexString(req.params._id);
+        const u_id = ObjectId.createFromHexString(req.params._id.toString());
 
         (async () => {
             try {
+                let inventoryItems = [];
                 const query = {"userID": u_id};
                 const inventory_items = await RunDataQuery("inventory_items", "find", query);
+                for (let i = 0; i < inventory_items.length; i++) { 
+                    console.log("looking up objectID " + inventory_items[i].objectID)
+                    // const o_id = ObjectId.createFromHexString(inventory_items[i].objectID.toString());
+                    const oquery = {"_id" : inventory_items[i].objectID};
+                    let object = await RunDataQuery("obj_items", "findOne", oquery);
+                    let inventory_item = {};
+                    inventory_item._id = inventory_items[i]._id;
+                    inventory_item.userID = inventory_items[i].userID;
+                    inventory_item.objectID = inventory_items[i].objectID;
+                    inventory_item.timestamp = inventory_items[i].timestamp; //creation?
+                    inventory_item.fromScene = inventory_items[i].fromScene; //short id
+                    inventory_item.objectData = object;
+                    inventoryItems.push(inventory_item);
+
+                }
                 let profileResponse = {};
-                profileResponse.inventoryItems = inventory_items;
+                profileResponse.inventoryItems = inventoryItems;
                 res.json(profileResponse);;
             } catch (e) {
                 console.log("error getting user inventory " + e);

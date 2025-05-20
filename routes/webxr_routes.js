@@ -3154,25 +3154,29 @@ webxr_router.get('/:_id', function (req, res) {
 
                     //scenetype filters below...
 
-                    console.log("sceneWebType: "+ sceneResponse.sceneWebType); 
+                    console.log("sceneWebType: "+ sceneResponse.sceneWebType + " sceneTags " + sceneResponse.sceneTags); 
                     ////////DEFAULT/AFRAME Scene type:
                     if (sceneResponse.sceneWebType == null || sceneResponse.sceneWebType == undefined || (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "default") || 
                         (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "aframe")) { 
+
                         // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
+                        if (sceneResponse.sceneTags == null) {
+                            sceneResponse.sceneTags = "";
+                        }
                         let xrExtras = "";
                         let hitCasterComponent = "";
-                        if ((sceneResponse.sceneTags && sceneResponse.sceneTags.includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("hit test"))) {
+                        if ((sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hit test"))) {
                             xrExtras = "ar-hit-test"; //added to a-scene
                             ARScript = "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>"; 
                             hitCasterComponent = "ar_hit_caster"; //added to ar_parent
 
                         }
-                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
+                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("xr room physics")) {
                             meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
                             xrExtras = "xr_room_physics";
                             webxrFeatures = "webxr=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
                             xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
-                        } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("real world meshing")) {
+                        } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("real world meshing")) {
                             meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
                             xrExtras = " real_world_meshing_mod=\x22meshesEnabled: true;\x22";
                             webxrFeatures = " " + xrExtras;
@@ -3180,7 +3184,7 @@ webxr_router.get('/:_id', function (req, res) {
                         } else {
                             webxrFeatures = "webxr=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
                         }
-                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("hand controls") || sceneResponse.sceneTags.includes("hand controllers")) {
+                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hand controls") || sceneResponse.sceneTags.toString().toLowerCase().includes("hand controllers")) {
                             meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/component/hand_equip.js\x22></script>";
                         }
                         // arElements = "<a-entity material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
@@ -3202,16 +3206,16 @@ webxr_router.get('/:_id', function (req, res) {
                         }  
                         let planeDetectMode = "floor";
                         let arScaleMode = "";
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("wall")) {
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("wall")) {
                             planeDetectMode = "wall";
                         } 
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("scale fixed")) {
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale fixed")) {
                             arScaleMode = "fixed";
                         }
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("scale auto")) {
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale auto")) {
                             arScaleMode = "auto";
                         } 
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show overlay")) {
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("show overlay")) {
                             canvasOverlay = canvasOverlay + socketScripts;
                         } else {
                             canvasOverlay = "";
@@ -3224,7 +3228,7 @@ webxr_router.get('/:_id', function (req, res) {
                         if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
                             sceneQuest = sceneResponse.sceneQuest;
                         }
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('show dialog')) {
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes('show dialog')) {
                             dialogButton = dialogButton +  //set with the actual button above?
                             "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>" +
                             "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>" +
