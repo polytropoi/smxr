@@ -2116,7 +2116,7 @@ webxr_router.get('/:_id', function (req, res) {
                                         interaction = " interaction: wiggle; ";
                                     }
                                 }
-                                if (locMdl.eventData.toLowerCase().includes("grass") || (locMdl.locationTags && locMdl.locationTags.includes("grass")) ) {
+                                if (locMdl.locationTags && locMdl.locationTags.includes("grass") ) {
                                     instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; tags: grass; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 3000; scaleFactor: "+scale+"\x22";
                                 } else if (locMdl.eventData.toLowerCase().includes("plants")) {
                                     instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 500; scaleFactor: 8\x22";
@@ -2124,7 +2124,8 @@ webxr_router.get('/:_id', function (req, res) {
                                     instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 50; scaleFactor: 2\x22";
                                 } else if (locMdl.eventData.toLowerCase().includes("rocks")) {
                                     instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 200; scaleFactor: 32\x22";
-                                } else if (locMdl.eventData.toLowerCase().includes("~")) {
+                                } 
+                                if (locMdl.eventData.toLowerCase().includes("~")) {
                                     let split = locMdl.eventData.split("~");
                                     if (split.length) {
                                         instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" objectID: "+locMdl.objectID+"; yMod: "+locMdl.y+"; count: "+split[1]+"; scaleFactor: "+scale+"; tags: "+locMdl.locationTags+"\x22";
@@ -2137,6 +2138,7 @@ webxr_router.get('/:_id', function (req, res) {
                                     
                                         }
                                     }
+                                }
                                     let modelString = "gltf-model=\x22#" + m_assetID + "\x22";
                                     let jsonDataBuff = "";
                                     let jsonID = "";
@@ -2155,7 +2157,7 @@ webxr_router.get('/:_id', function (req, res) {
                                     " position=\x220 -200 0\x22></a-entity>";//scatter model below //nm, just load it from here w/ modelString
                                     gltfModel = modelURL;
                                     
-                                }
+                                // }
                             }
 
                             // if (locMdl.markerType == "navmesh") {
