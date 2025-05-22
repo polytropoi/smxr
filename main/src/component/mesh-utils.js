@@ -1183,7 +1183,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
       this.sampleMats = [];
       this.lastClickedID = 0;
       this.raycaster = new THREE.Raycaster();
-
+      // this.raycaster = this.raycaster.bind(this);
       this.iMesh = null;
       this.iMesh_1 = null;
       this.iMesh_2 = null;
@@ -1251,7 +1251,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
 
     
 
-/*  this way doesn't work with instanced meshes fsr...  
+///*  this way doesn't work with instanced meshes fsr...  
     this.el.addEventListener('raycaster-intersected', (e) => {  
 
         this.raycaster = e.detail.el;
@@ -1259,7 +1259,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         this.intersection = this.raycaster.components.raycaster.getIntersection(this.el, true);
         this.hitpoint = this.intersection.point;
         
-        console.log('ray hit', this.intersection.object.name);
+        console.log('instanced ray hit', this.intersection.object.name);
 
             // thiz.mouseOverObject = this.intersection.object.name;      
             // this.hitpoint = intersection.point;   
@@ -1271,7 +1271,7 @@ AFRAME.registerComponent('instanced_surface_meshes', {
         // thiz.mouseOverObject = null;
         this.raycaster = null;
     });
-*/
+//*/
     if (this.data.interaction != '') {
       window.addEventListener('click', (e) => {
         e.preventDefault();

@@ -388,7 +388,7 @@ export function InitIDB() {
          const store = db.createObjectStore("scenes", { keyPath: "shortID" });
          store.createIndex("scene", ["scene"], { unique: true });
        };
-       request.onsuccess = function () {
+      request.onsuccess = function () {
          console.log("Saving local data, IDB opened successfully");
          const db = request.result;
          const transaction = db.transaction("scenes", "readwrite");
@@ -422,6 +422,11 @@ export function InitIDB() {
             DisplayLocalFiles(); //in dialogs.js
          };
       };
+   }
+
+   export function SaveLocalProfile () {
+
+   
    }
 
    export function SetHasLocalData (has) {

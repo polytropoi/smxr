@@ -11,6 +11,7 @@
         Webcam,
         AwsS3
       } from 'https://releases.transloadit.com/uppy/v4.13.2/uppy.min.mjs'  //mmm. copy locally
+
     // new Uppy().use(Dashboard, { inline: true, target: '#drag-drop-area' });
 
     // import {googleMapsKey} from "../server.js";
@@ -10204,6 +10205,7 @@ function getAllPeople() {
     //         return error;
     //     });
     // }
+
     function returnObjectTypes(selectedType) {
         let types = "";
         const typesArray = [
@@ -12572,6 +12574,25 @@ function getAllPeople() {
             //         console.log(error);
             // });
             // console.log("SCENE GREETING IS " + sceneGreeting);
+            function ReturnSelectedTargetsLabel (elID) {
+               
+
+                if (elID != "none" && elID != undefined) { 
+                    let targetString = "";
+                    let idSplit = elID.toString().split(",");
+                    console.log("tryna return label for " + elID);
+                    for (let i = 0; i < sceneLocations.length; i++) {
+                        for (let s = 0; s < idSplit.length; s++) {
+                            if (idSplit[s] == sceneLocations[i].timestamp) {
+                                targetString = targetString + sceneLocations[i].name + "-" + idSplit[s] + " ";
+                                console.log("target el lable " + targetString);
+                                
+                            }
+                        }
+                    }
+                    return targetString;
+                }
+            }
 
             sceneYouTubeIDs = [].concat(sceneYouTubeIDs); //force to array "type"
             sceneVideoStreamUrls = [].concat(sceneVideoStreamUrls);
@@ -12851,7 +12872,7 @@ function getAllPeople() {
                             "<label for=\x22locationTags_" + locationID + "\x22>Tags</label>" + 
                             "<input type=\x22text\x22 class=\x22form-control locationTags\x22 id=\x22locationTags_" + locationID + "\x22 value=\x22" + locationTags + "\x22 >" +
                             
-                            "<br><span>selected targets: "+ sceneLocations[i].targetElements +"</span>" +
+                            "<br><span id=\x22selectedTargetsLabel_"+locationID+"\x22>selected targets: "+ ReturnSelectedTargetsLabel(sceneLocations[i].targetElements) +"</span>" +
                         "</div>" +
 
 
@@ -15730,10 +15751,10 @@ function getAllPeople() {
                             // console.log("textitems: " +JSON.stringify(textItems));
                             for (let k = 0; k < sceneLocations.length; k++) {
                                 // if (sceneLocations[k].markerType == "text") {
-                                    console.log ("gotsa text location with mediaID : "+ sceneLocations[k].mediaID);
+                                    // console.log ("gotsa text location with mediaID : "+ sceneLocations[k].mediaID);
                                     const z = document.getElementById("mediaSelect_" + sceneLocations[k].timestamp);
                                     for (let l = 0; l < textItems.length; l++) {
-                                        console.log(textItems[l].title);
+                                        console.log("text item title "+ textItems[l].title);
                                         if (textItems[l]._id != undefined) {
                                             // console.log(sceneObjex[l]._id + " vs " + sceneLocations[k].objectID);
                                             
@@ -16609,8 +16630,8 @@ function getAllPeople() {
                         for (let s = 0; s < sceneLocations.length; s++) {   
                             let locid = this.id.split("_")[1];
                             if (locid == sceneLocations[s].timestamp || this.id == sceneLocations[s].timestamp) {
-                                sceneLocations[s].targetElements = $(this).find('option:selected').text();
-                                console.log("location target set " + $(this).find('option:selected').text());
+                                sceneLocations[s].targetElements = $(this).find('option:selected').val();
+                                console.log("location target set " + $(this).find('option:selected').val());
                                 if (sceneLocations[s].targetElements == null || sceneLocations[s].targetElements == undefined) {
                                     sceneLocations[s].targetElements = 'none';
                                 }

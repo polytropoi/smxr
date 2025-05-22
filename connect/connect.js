@@ -378,66 +378,71 @@ $(function() {
    }
 
    // } 
-
-   document.body.addEventListener("obbcollisionstarted", function (e) {
+   // let player = document.getElementById("player");
+   // document.body.addEventListener("obbcollisionstarted", function (e) {
+   player.addEventListener("obbcollisionstarted", function (e) {
       if (e.detail) {
-         console.log(e.detail.withEl.id); 
-         if ((e.detail.withEl.id.toString() == "player") || (e.detail.withEl.components && (e.detail.withEl.components.cloud_marker || e.detail.withEl.components.local_marker))) {
-            console.log("got obb player hit");
-            let index = intersections.indexOf(e.detail.withEl.id);
-            if (index == -1) {
-               intersections.push(e.detail.withEl.id);
-               console.log("obb collision start with " + e.detail.withEl.id + " intersect index " + index + " " + intersections);
-               if (intersections.indexOf("player") != -1) {
-                  for (let i = 0; i < intersections.length; i++) {
-                     if (intersections[i] != "player") {
-                        let el = document.getElementById(intersections[i]);
-                        if (el) {
-                           if (el.components.cloud_marker) {
-                              el.components.cloud_marker.playerTriggerHit();
-                           } else if (el.components.local_marker) {
-                              el.components.local_marker.playerTriggerHit();
-                           }
-                        }
-                     }
-                  }
-               }
-           }  
+         console.log("player obbcollision start  " + e.detail.withEl.id); 
+         let el = document.getElementById(e.detail.withEl.id);
+         if (el) {
+            if (el.components.cloud_marker) {
+               el.components.cloud_marker.playerTriggerHit();
+                                       
+            } else if (el.components.local_marker) {
+               el.components.local_marker.playerTriggerHit();
+                                       
+            }
          }
       }
-    });
-    document.body.addEventListener("obbcollisionended", function (e) {
-      // console.log("collision end " + e.detail.withEl.id); 
-      let index = intersections.indexOf(e.detail.withEl.id);
-      
-      console.log("obb collision end with " + e.detail.withEl.id + " intersect index " + index + " " + intersections);
+   });
 
-      // if (e.detail) {
-         // console.log(e.detail.withEl.id); 
-         if ((e.detail.withEl.id.toString() == "player") || (e.detail.withEl.components && (e.detail.withEl.components.cloud_marker || e.detail.withEl.components.local_marker))) {
-            // console.log("got obb player exit")
-            // let index = intersections.indexOf(e.detail.withEl.id);
-            // if (index == -1) {
-            //    intersections.push(e.detail.withEl.id);
-            //    console.log("obb collision start with " + e.detail.withEl.id + " intersect index " + index + " " + intersections);
-            //    if (intersections.indexOf("player") != -1) {
-                  for (let i = 0; i < intersections.length; i++) {
-                     if (intersections[i] != "player") {
-                        let el = document.getElementById(intersections[i]);
-                        if (el) {
-                           if (el.components.cloud_marker) {
-                              el.components.cloud_marker.playerTriggerExit();
-                           } else if (el.components.local_marker) {
-                              el.components.local_marker.playerTriggerExit();
-                           }
-                        }
-                     }
-                  }
-               }
-         //   }  
-         // }
-      // }
-      intersections.splice(index, 1);
+   // player.addEventListener("obbcollisionstarted", function (e) {
+   //    if (e.detail) {
+   //       console.log("obbcollision start  " + e.detail.withEl.id); 
+   //       if ((e.detail.withEl.id.toString() == "player") || (e.detail.withEl.components && (e.detail.withEl.components.cloud_marker || e.detail.withEl.components.local_marker))) {
+   //       // if (e.detail.withEl.id.toString() == "player") {
+            
+   //          let index = intersections.indexOf(e.detail.withEl.id);
+   //          console.log("got obbcollision hit " + e.detail.withEl.id + " index " + index);
+   //          if (index == -1) {
+   //             intersections.push(e.detail.withEl.id);
+   //             console.log("obb collision start with " + e.detail.withEl.id + " intersect index " + index + " " + intersections);
+   //             if (intersections.indexOf("player") != -1) {
+   //                for (let i = 0; i < intersections.length; i++) {
+   //                   if (intersections[i] != "player") {
+   //                      let el = document.getElementById(intersections[i]);
+   //                      if (el) {
+   //                         if (el.components.cloud_marker) {
+   //                            el.components.cloud_marker.playerTriggerHit();
+   //                                                    break;
+   //                         } else if (el.components.local_marker) {
+   //                            el.components.local_marker.playerTriggerHit();
+   //                                                    break;
+   //                         }
+   //                      }
+
+   //                   }
+   //                }
+   //             }
+   //          }
+   //       //   }  
+   //       }
+   //    }
+   //  });
+    player.addEventListener("obbcollisionended", function (e) {
+      if (e.detail) {
+      console.log("player obbcollision end  " + e.detail.withEl.id); 
+         let el = document.getElementById(e.detail.withEl.id);
+         if (el) {
+            if (el.components.cloud_marker) {
+               el.components.cloud_marker.playerTriggerExit();
+                                      
+            } else if (el.components.local_marker) {
+               el.components.local_marker.playerTriggerExit();
+                                       
+            }
+         }
+      }
     }); 
     
 

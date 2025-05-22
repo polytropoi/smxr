@@ -1525,6 +1525,14 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
         }
       }
     },
+    playerTriggerExit: function () {
+      if (this.data.tags.includes("click only") || (this.data.markerType == "trigger" && this.data.tags && this.data.tags.toLowerCase().includes("no enter") && this.data.tags.toLowerCase().includes("no collision"))) { //disable the player contact of trigger
+        return;
+      }
+      if (!this.data.tags.includes("click only")) { //portal needs playertriggerhit, not just mouseenter
+        this.targetMods();
+      }
+    },
     physicsTriggerHit: function (id) {  
       console.log("gotsa physics trigger hit on " + id); //maybe check the layer of colliding entity or something...
       var triggerAudioController = document.getElementById("triggerAudio");

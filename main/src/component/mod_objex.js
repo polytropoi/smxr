@@ -1646,7 +1646,7 @@ AFRAME.registerComponent('mod_object', {
                 });        
               }
             } 
-            if (this.data.objectData.physics != undefined && this.data.objectData.physics != null && this.data.objectData.physics.toLowerCase() != "none" && !this.data.fromSceneInventory) {
+            if (this.data.objectData.physics != "" && this.data.objectData.physics != undefined && this.data.objectData.physics != null && this.data.objectData.physics.toLowerCase() != "none" && !this.data.fromSceneInventory) {
               console.log("tryna add physics to new mod_object " + this.data.objectData.name + " is equipped " + this.data.isEquipped + " body " +
                                         this.data.objectData.physics + " hasShoot " + this.hasShootAction + " hasThrow " + this.hasThrowAction + " isSpawned " + this.data.isSpawned);
               //  setTimeout(function(){  

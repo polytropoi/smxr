@@ -134,20 +134,21 @@ window.addEventListener( 'keydown',  ( event ) => {
 
   });
 
-  window.addEventListener("wheel", event => {
-    // event.preventDefault();
-    const delta = Math.sign(event.deltaY);
-    console.info(delta);
-    let curveDriver = document.getElementById("cameraCurve");
+  let curveDriver = document.getElementById("cameraCurve");
+  if (curveDriver) {
+    window.addEventListener("wheel", event => {
+      // event.preventDefault();
+      const delta = Math.sign(event.deltaY);
+      console.info(delta);
+      let curveDriver = document.getElementById("cameraCurve");
         if (curveDriver) {
           let modCurveComponent = curveDriver.components.mod_curve;
           if (modCurveComponent) {
             modCurveComponent.scrollMove(delta);
           }
-        }
-    
-  
-  });
+        }   
+    });
+  }
 
   function clearSelection() {
     if (window.getSelection) {
@@ -243,6 +244,9 @@ window.addEventListener( 'keydown',  ( event ) => {
   });
   $('#modalContent').on('click', '#gotoPreviousButton', function(e) {
     GoToPrevious();
+  });
+    $('#modalContent').on('click', '#saveLocalAndCloseButton', function(e) {
+    SaveLocalAndClose();
   });
 
   $('#modalContent').on('click', '#dequipButton', function(e) {
@@ -391,6 +395,7 @@ window.addEventListener( 'keydown',  ( event ) => {
   });
 
   $('#modalContent').on('change', '#targetElements', function(e) { 
+    e.preventDefault();
     console.log("targetElements changed " + e.target.value + " for id " + selectedLocationTimestamp);
     let locEl = document.getElementById(selectedLocationTimestamp);
  
@@ -427,7 +432,7 @@ window.addEventListener( 'keydown',  ( event ) => {
         }
       }
     // }  
-  }
+    }
       
   });
 
@@ -1301,7 +1306,7 @@ function ShowLocationModal(timestamp) {
         // ReturnOtherLocations();
 
         "<div class=\x22row\x22><div class=\x22threecolumn\x22><label for=\x22targetElements\x22>Target Location(s)</label>"+
-        "<select id=\x22targetElements\x22 name=\x22targetElements\x22 multiple size=\x223\x22>"+
+        "<select id=\x22targetElements\x22 name=\x22targetElements\x22 multiple size=\x224\x22>"+
         ReturnOtherLocations(thisLocation.targetElements) +
         "</select>"+thisLocation.targetElements+"</div>"+
 
@@ -2198,7 +2203,7 @@ export function SceneManglerModal(mode, autoHide) {
       "<hr><div class=\x22row\x22>"+
 
       "<button class=\x22deleteLocalSceneDataButton\x22 id=\x22deleteLocalSceneData\x22 >Delete Local Scene Data</button>"+
-      "<button style=\x22float: right;\x22 class=\x22addButton\x22 onclick=\x22SaveLocalAndClose()\x22>Save Local Scene Data</button>"+
+      "<button id=\x22saveLocalAndCloseButton\x22 style=\x22float: right;\x22 class=\x22addButton\x22>Save Local and Close</button>"+
 
       "</div>"+
 

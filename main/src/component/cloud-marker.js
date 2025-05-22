@@ -528,13 +528,6 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
   
       let that = this;
 
-      this.el.addEventListener('obbcollisionstarted	', (evt) => {
-          // this.obbHit(evt);
-          console.log(evt.detail.withEl);
-      });
-      this.el.addEventListener('obbcollisionended	', (evt) => {
-          this.obbHit(evt.detail.withEl);
-      });
 
       if (this.data.markerType.toLowerCase().includes("picture")) {
         this.loadMedia(); //if tags == etc...
@@ -610,6 +603,16 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
          this.el.object3D.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
       });
        
+
+
+      // this.el.addEventListener('	', (evt) => {
+      //     // this.obbHit(evt);
+      //     console.log("OBB COLLISION WITH " + evt.detail.withEl);
+      // });
+      // this.el.addEventListener('obbcollisionended	', (evt) => {
+      //     // this.obbHit(evt.detail.withEl);
+      // });
+
       this.el.addEventListener('mouseenter', (evt) => {
         evt.preventDefault();
         evt.stopPropagation();
@@ -1863,7 +1866,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         }
       }
       if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("show target")) {
-        console.log( "tryna show target..." + this.data.targetElements + " length"); 
+        console.log( "tryna show target(s)..." + this.data.targetElements); 
         let targetEls = [];
         if (Array.isArray(this.data.targetElements)) {
           targetEls = this.data.targetElements;
