@@ -6178,7 +6178,7 @@
                         selectButton +
                     "<td>" + detailsPicLink + "</td>" +
                     "<td>" + detailsLink + "</td>" +
-                    "<td>" + convertTimestamp(timestamp) + "</td>" +
+                    "<td>" + convertTimestamp(timestamp) + " "+ timestamp +"</td>" +
                     "<td>" + timestamp + "</td>" +
                     "<td>" + arr[i].orientation + "</td>" +
                     "<td>" + arr[i].tags + "</td>" +
@@ -17702,7 +17702,7 @@ function getAllPeople() {
             "<td><a href=\x22/landing/" + arr[i].short_id + "\x22 target=\x22_blank\x22>" + arr[i].short_id + "</a></td>" +
             "<td>" + arr[i].sceneDomain + "</td>" +
             "<td>" + arr[i].sceneShareWithPublic + "</td>" +
-            "<td>" + new Date(arr[i].sceneLastUpdate).toLocaleString() + "</td>" +
+            "<td>" + new Date(arr[i].sceneLastUpdate).toLocaleString() + " " +arr[i].sceneLastUpdate +" </td>" +
             "<td>" + android + ios + windows + webgl +"</td>" +
             "</tr>";
         }
@@ -17721,7 +17721,7 @@ function getAllPeople() {
         var resultElement = document.getElementById('table1Data');
         resultElement.innerHTML = tableHead + tableBody + tableFoot;
         $('#dataTable1').DataTable(
-            {"order": [[ 4, "asc" ]]}
+            {"order": [[ 4, "desc" ]]}
         );
     })
     .catch(function (error) {

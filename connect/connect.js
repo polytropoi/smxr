@@ -1682,6 +1682,10 @@ function tcheck () {
                   // userid = data._id;
                   avatarName = data.userName;
                   userData = data;
+                  if (data.authLevel == "domain_admin") {
+                     userData.sceneOwner = "indaehoose";
+                  }
+                  console.log("userData " + JSON.stringify(userData));
                   if (socket != null && socket != undefined) {
                      if (!socket.connected) {
                         socket.connect(socketHost);

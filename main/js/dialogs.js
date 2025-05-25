@@ -2,7 +2,7 @@ import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, Tran
 import { settings, room, lerp, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
   userData, stringRoomUsers, timeKeysData, timedEventsListenerMode, SetTimedEventsListenerMode, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
   tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
-  SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation
+  SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, allowCameraLock
   } from "../../connect/connect.js";
 import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile } from "../../connect/indexedDb.js";
 
@@ -283,12 +283,12 @@ window.addEventListener( 'keydown',  ( event ) => {
   $('#modalContent').on('click', '#consumeInventoryButton', function(e) {
       const oID = $(this).attr("data-objectID");
       console.log("consuming " + oID);
-      ConsumeInventoryItem(oID);
+      // ConsumeInventoryItem(oID);
   });
   $('#modalContent').on('click', '#inspectInventoryButton', function(e) {
       const oID = $(this).attr("data-objectID");
       console.log("inspecting " + oID);
-      InspectInventoryItem(oID);
+      // InspectInventoryItem(oID);
   });
 
   $('#modalContent').on('click', '#saveModToLocalButton', function(e) {

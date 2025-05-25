@@ -5302,16 +5302,28 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
 
 app.post('/scenedata/', function (req, res) {
 
+    console.log("tryna get scenedata for tags " + req.body.tags);
 
     (async () => {
         try {
-            const query = {"sceneTags": req.body.tag}; //array of strings...
-            let scene = await RunDataQuery("scenes", "findOne", query);
-            console.log("scene with tag "+ req.body.tag + " " + scene.short_id);
-            if (!scene) {
-               scene = {};
+            let tags = [];
+            if (req.body.tags.toString().includes(",")) {
+                tags = req.body.tags.split(",");
+            } else {
+                tags.push(req.body.tags);
             }
-            res.send(scene);
+            // console.log("tryna find scene with tag "+ tags);
+            // const query = {"sceneTags": req.body.tags}; //array of strings...
+            const query = {"sceneTags": {$in: tags}};
+            const scenes = await RunDataQuery("scenes", "find", query);
+
+            // console.log("scene with tag "+ req.body.tags + " " + JSON.stringify(scenes));
+
+            const theScene = scenes[Math.floor((Math.random()*scenes.length))]; //return random one if more than one
+            // if (!scene) {
+            //    scenes = {};
+            // }
+            res.send(theScene);
         } catch (e) {    
             res.send(e);
         }

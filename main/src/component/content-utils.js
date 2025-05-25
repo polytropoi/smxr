@@ -1995,10 +1995,9 @@ AFRAME.registerComponent('model-callout', {
         });
       }
       that.el.parentEl.object3D.updateMatrix();
-
       });
-      this.el.addEventListener('click', function (evt) {
 
+      this.el.addEventListener('click', function (evt) {
         (async () => {
           try {
             const response = await fetch('/scenedata', {
@@ -2007,11 +2006,9 @@ AFRAME.registerComponent('model-callout', {
                'Content-Type': 'application/json'
                },
                body: JSON.stringify({
-         // your expected POST request payload goes here
-                 tag: that.data.calloutTag
+                 tags: that.data.calloutTag
                 })
              });
-
              const data = await response.json();
              if (data.short_id) {
               let url = "/webxr/" + data.short_id;
@@ -2021,26 +2018,11 @@ AFRAME.registerComponent('model-callout', {
               console.log("scene not found!");
              }
            } catch(error) {
-         // enter your logic for when there is an error (ex. error toast)
-
               console.log(error);
-             } 
-        
-
-          // try {   
-          //   const sceneData = await fetch("/scenedata");
-          //   let url = "/scenedata/" + sceneData.shortID;
-          //     // window.location.href = url; 
-          //   that.dialogEl.components.mod_dialog.showPanel("Go to " + sceneData.sceneTitle +" ?", "href~"+ url, "gatePass", 5000 );
-          // } catch (e) {
-          //   console.log("error getting sceneID for "+ that.data.calloutTag);
-          // }
-        })();
-        
+          } 
+        })();  
       });
     } 
-   
-    
   });
 
   //reusable lerping function for position/rotation, by #id, used eg for avatar movement
@@ -3511,13 +3493,13 @@ AFRAME.registerComponent('scene_text_control', { //hold the parsed text data
         });
       
         this.data.jsonData = sceneTextItems;
-        setTimeout(() =>{
-          this.loadTextData();
-        }, 3000);
+        // setTimeout(() =>{
+        //   this.loadTextData();
+        // }, 3000);
       }
   },
   loadTextData: function (data) {
-    console.log("loading sceneTextItems " + JSON.stringify(sceneTextItems));
+    // console.log("loading sceneTextItems " + JSON.stringify(sceneTextItems));
     // this.textItems = data;
   },
   returnTextData: function (mediaID) {
