@@ -16,15 +16,31 @@ export function InitIDB() {
        console.error("could not connect to iDB " + event);
        return "error"
     };
-    request.onupgradeneeded = function () {
+    request.onupgradeneeded = function (event) {
        const db = request.result;
-       const store = db.createObjectStore("scenes", { keyPath: "shortID" });
-       store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
 
-      const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
-      pstore.createIndex("profile", ["profile"], { unique: true });
+      if (event.oldVersion < 1) {
+         console.log("is there a version 0")
+            // const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+            // store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
+      }
+      if (event.oldVersion < 2) {
+         
+         const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+         store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
+      }
+      if (event.oldVersion < 3) {
+         const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
+            pstore.createIndex("profile", ["profile"], { unique: true });
+      }
+      //  const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+      //  store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
+
+      // const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
+      // pstore.createIndex("profile", ["profile"], { unique: true });
 
    };
+
     request.onsuccess = function () {
        console.log("Database opened successfully");
        const db = request.result;
