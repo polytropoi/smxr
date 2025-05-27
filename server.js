@@ -5307,6 +5307,8 @@ app.post('/scenedata/', function (req, res) {
     (async () => {
         try {
             let tags = [];
+
+
             if (req.body.tags.toString().includes(",")) {
                 tags = req.body.tags.split(",");
             } else {
@@ -5320,9 +5322,9 @@ app.post('/scenedata/', function (req, res) {
             // console.log("scene with tag "+ req.body.tags + " " + JSON.stringify(scenes));
 
             const theScene = scenes[Math.floor((Math.random()*scenes.length))]; //return random one if more than one
-            // if (!scene) {
-            //    scenes = {};
-            // }
+            if (!theScene) {
+               theScene = {};
+            }
             res.send(theScene);
         } catch (e) {    
             res.send(e);

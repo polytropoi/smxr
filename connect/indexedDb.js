@@ -1,5 +1,5 @@
 import { InitLocalColors, DisplayLocalFiles } from "../main/js/dialogs.js";
-import { settings, room, sceneLocations, locationTimestamps, localData, lastCloudUpdate, InitCurves, sceneEl, PlayerToLocation, SetTimeKeysData, getExtension, poiLocations, curveLocations } from "../connect/connect.js";
+import { settings, room, sceneLocations, locationTimestamps, localData, userData, lastCloudUpdate, InitCurves, sceneEl, PlayerToLocation, SetTimeKeysData, getExtension, poiLocations, curveLocations } from "../connect/connect.js";
 
 export let hasLocalData = false;
 //////////////////////indexedDB functions...
@@ -11,7 +11,7 @@ export function InitIDB() {
        console.log("This browser doesn't support IndexedDB");
        return;
      }
-    const request = indexedDB.open("SMXR", 1);
+    const request = indexedDB.open("SMXR", 2);
     request.onerror = (event) => {
        console.error("could not connect to iDB " + event);
        return "error"
@@ -21,7 +21,10 @@ export function InitIDB() {
        const store = db.createObjectStore("scenes", { keyPath: "shortID" });
        store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
 
-     };
+      const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
+      pstore.createIndex("profile", ["profile"], { unique: true });
+
+   };
     request.onsuccess = function () {
        console.log("Database opened successfully");
        const db = request.result;
@@ -294,6 +297,9 @@ export function InitIDB() {
             }
          }
          InitCurves();
+         if (userData) {
+            SaveLocalProfile(userData);
+         }
 
        }
 
@@ -309,22 +315,119 @@ export function InitIDB() {
    return string.trim();
  }
 
- export function SaveLocalData() {  //persist mods an alt "~" version of the data
+//  export function InitProfile() {
+
+//     console.log("tryna connect to SMXR indexeddb");
+//     if (!('indexedDB' in window)) {
+//        console.log("This browser doesn't support IndexedDB");
+//        return;
+//      }
+//     const request = indexedDB.open("SMXR", 2);
+//     request.onerror = (event) => {
+//        console.error("could not connect to iDB " + event);
+//        return "error"
+//     };
+//     request.onupgradeneeded = function () {
+//        const db = request.result;
+//        const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+//        store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
+
+//      };
+//     request.onsuccess = function () {
+//        console.log("Database opened successfully");
+//        const db = request.result;
+//        const transaction = db.transaction("profiles", "readwrite");
+//        const store = transaction.objectStore("profiles");
+
+//        const saveTimeStamp = Date.now();
+//        const lastSceneUpdate = null;
+
+//        //first check if there are localmods, version saved with tilde
+//        // const modQuery = store.get(room + "~"); //nope, needs cursor
+//        const modQuery = store.openCursor(room + "~"); //use cursor mode so it's iterable below
+//       //  const fileQuery = filestore.openCursor();
+//        modQuery.onsuccess = function (e) {
+//           var cursor = e.target.result;
+//           console.log("query for localData : " + e.target.result);
+//           // if (e.target.result) {
+//              if (cursor) {
+//                 localData.lastUpdate = cursor.value.lastUpdate;
+
+//                 // start location loop
+//                 if (cursor.value.locations) {
+//                 }
+//          }
+//       }
+//    }
+//  }
+
+ export function SaveLocalProfile(userData) {
+   console.log("tryna saveLocalProfile " + JSON.stringify(userData));
+   let profile = {};
     console.log("tryna connect to SMXR indexeddb");
     if (!('indexedDB' in window)) {
        console.log("This browser doesn't support IndexedDB");
        return;
     }
-    const request = indexedDB.open("SMXR", 1);
+    const request = indexedDB.open("SMXR", 2);
     request.onerror = (event) => {
        console.error("could not connect to iDB " + event);
        return "error"
     };
     request.onupgradeneeded = function () {
        const db = request.result;
-       const store = db.createObjectStore("scenes", { keyPath: "shortID" });
-       store.createIndex("scene", ["scene"], { unique: true });
+       const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
+       pstore.createIndex("profile", ["profile"], { unique: true });
+
+      const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+       store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
      };
+     request.onsuccess = function () {
+       console.log("Saving local profile, IDB opened successfully");
+              let profile = {};
+            //   profile.userID = userData.userID; //with tilde = the local version
+        profile = userData;      
+      const db = request.result;
+      const transaction = db.transaction("profiles", "readwrite");
+      const pstore = transaction.objectStore("profiles");
+
+       const saveTimeStamp = Date.now();
+       console.log("writing localprofile for user " + userData.userID);
+       pstore.put(profile); //write the local version
+       transaction.oncomplete = function () {
+         db.close();
+         console.log("localprofile saved!");
+         // hasLocalData = true;
+       //   ShowHideDialogPanel();
+          // InitLocalData();
+         // let mSpan = document.getElementById("modMessage");
+         // if (mSpan) {
+         //    mSpan.innerText = "Profile Saved to Local Database!";
+         // }
+         // let dSpan = document.getElementById("detailModMessage");
+         // if (dSpan) {
+         //    dSpan.innerText = "Profile Saved to Local Database!";
+         // }
+       };
+     };
+ }
+
+ export function SaveLocalData() {  //local mods to iDB
+    console.log("tryna connect to SMXR indexeddb");
+    if (!('indexedDB' in window)) {
+       console.log("This browser doesn't support IndexedDB");
+       return;
+    }
+    const request = indexedDB.open("SMXR", 2);
+    request.onerror = (event) => {
+       console.error("could not connect to iDB " + event);
+       return "error"
+    };
+   //  request.onupgradeneeded = function () {
+   //     const db = request.result;
+   //     const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+   //     store.createIndex("scene", ["scene"], { unique: true });
+   //   };
      request.onsuccess = function () {
        console.log("Saving local data, IDB opened successfully");
        const db = request.result;
@@ -378,16 +481,16 @@ export function InitIDB() {
          console.log("This browser doesn't support IndexedDB");
          return;
       }
-      const request = indexedDB.open("SMXR", 1);
+      const request = indexedDB.open("SMXR", 2);
       request.onerror = (event) => {
          console.error("could not connect to iDB " + event);
          return "error"
       };
-      request.onupgradeneeded = function () {
-         const db = request.result;
-         const store = db.createObjectStore("scenes", { keyPath: "shortID" });
-         store.createIndex("scene", ["scene"], { unique: true });
-       };
+      // request.onupgradeneeded = function () {
+      //    const db = request.result;
+      //    const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+      //    store.createIndex("scene", ["scene"], { unique: true });
+      //  };
       request.onsuccess = function () {
          console.log("Saving local data, IDB opened successfully");
          const db = request.result;
@@ -424,11 +527,6 @@ export function InitIDB() {
       };
    }
 
-   export function SaveLocalProfile () {
-
-   
-   }
-
    export function SetHasLocalData (has) {
       hasLocalData = has;
    }
@@ -439,7 +537,7 @@ export function InitIDB() {
            console.log("This browser doesn't support IndexedDB");
            return;
         }
-        const request = indexedDB.open("SMXR", 1);
+        const request = indexedDB.open("SMXR", 2);
         request.onerror = (event) => {
            console.error("could not connect to iDB " + event);
            return "error"
@@ -477,7 +575,7 @@ export function InitIDB() {
          console.log("This browser doesn't support IndexedDB");
          return;
       }
-      const request = indexedDB.open("SMXR", 1);
+      const request = indexedDB.open("SMXR", 2);
       request.onerror = (event) => {
          console.error("could not connect to iDB " + event);
          return "error"

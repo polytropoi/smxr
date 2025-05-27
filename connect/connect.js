@@ -1,4 +1,4 @@
-import { InitIDB, SaveLocalData, DeleteLocalSceneData, hasLocalData, SetHasLocalData } from "../connect/indexedDb.js";
+import { InitIDB, SaveLocalData, DeleteLocalSceneData, hasLocalData, SetHasLocalData, SaveLocalProfile } from "../connect/indexedDb.js";
 // import { matrixClient } from "../connect/matrix.js";
 import { youtubePlayer, youtubeIsPlaying, primaryAudioEl } from "../../main/src/component/content-utils.js";
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
@@ -1669,6 +1669,11 @@ function tcheck () {
                }
             }
             userData.isGuest = true;
+            userData.avatarName = avatarName;
+            userData.userID = "00000";
+                              // const profile = {"userID": "00000", "userName": avatarName}
+            // SaveLocalProfile(userData);
+            // SaveLocalProfile(userData);
             // if (getParameterByName('p') != null) {
             //    console.log("GOTSA PIN!");
             // }
@@ -1681,7 +1686,9 @@ function tcheck () {
                   // console.log("gotsa user token" + JSON.stringify(data));
                   // userid = data._id;
                   avatarName = data.userName;
-                  userData = data;
+                  userData.userName = data.userName;
+                  // userData = data;
+                  userData.userID = data._id;
                   if (data.authLevel == "domain_admin") {
                      userData.sceneOwner = "indaehoose";
                   }
@@ -1691,6 +1698,8 @@ function tcheck () {
                         socket.connect(socketHost);
                      }
                   }
+                  const profile = {"userID": data._id, "userName": data.userName}
+                  // SaveLocalProfile(userData);
             
                   //socket.connect(socketHost);
                // }

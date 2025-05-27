@@ -768,9 +768,48 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             if (evt.detail.intersection && evt.detail.intersection.distance > 1 && evt.detail.intersection.distance < 20) {
             this.dialogEl = document.getElementById('mod_dialog');
             if (this.dialogEl) {
-              if (that.data.eventData && that.data.eventData.length > 2) {
-                let url = "/webxr/" + that.data.eventData;
+              
+              if (that.data.eventData && that.data.eventData.length) {
+
+                if (this.data.eventData.toString().toLowerCase().includes("tag")) { //if it's a tag look up matches
+                  if (this.data.eventData.toString().toLowerCase().includes("~")) {
+                    const tagSplit = this.data.eventData.toString().toLowerCase().split("~");
+                      (async () => { //hrm where to put this?
+                        try {
+                          console.log("tryna fetch scenes with tags " + tagSplit[1]);
+                          const response = await fetch('/scenedata', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                              tags: tagSplit[1]
+                              })
+                          });
+                          const data = await response.json();
+                          if (data.short_id) {
+                            // let url = "/webxr/" + data.short_id;
+                            // window.location.href = "/webxr/" + data.short_id;
+                            let url = "/webxr/" + data.short_id;
+                            this.dialogEl.components.mod_dialog.showPanel("Enter " + data.sceneTitle + " ?", "href~"+ url, "gatePass", 5000 );
+                            // that.dialogEl.components.mod_dialog.showPanel("Go to " + data.sceneTitle +" ?", "href~"+ url, "gatePass", 5000 );
+                          } else {
+                            console.log("no scenes found with tags " + this.data.eventData);
+                          }
+                        } catch(error) {
+                            console.log(error);
+                        } 
+                      })();  
+                  }
+                } else { //if not a tag assume it's a short_id
+                  console.log("no tags but going to " + this.data.eventData);
+                  // window.location.href = "/webxr/" + this.data.eventData;
+                  // let url = "/webxr/" + this.data.eventData;
+                                  let url = "/webxr/" + that.data.eventData;
                 this.dialogEl.components.mod_dialog.showPanel("Enter " + this.data.name + " ?", "href~"+ url, "gatePass", 5000 );
+                  // window.location.href = this.data.eventData;
+                }
+
               } else {
               let ascenesEl = document.getElementById("availableScenesControl");
               if (ascenesEl) {
