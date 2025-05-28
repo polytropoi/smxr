@@ -1606,13 +1606,24 @@ webxr_router.get('/:_id', function (req, res) {
                 modelData = "<div id=\x22sceneModels\x22 data-models='"+buff+"'></div>";
             }
             ///////////////// available scenes /////////////////////
-            const query = {$and: [{"sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
-            const scenes = await RunDataQuery("scenes", "find", query);
 
+
+            const query = {$and: [{"sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
+            const available_scenes = await RunDataQuery("scenes", "find", query);
+            let scenes = [];
+            if (!available_scenes.length) {
+                return;
+            }
+            for (let i = 0; i < 3; i++) { //just get a few for random gates, too many now...
+                const index = Math.floor(Math.random() * available_scenes.length);
+                console.log("setting available scene "+ index + of + available_scenes.length);
+                scenes.push(available_scenes[index]);
+            }
             let availableScenes = [];
             availableScenesResponse.availableScenes = availableScenes;
             // async.each(scenes, function (scene, cb) {
-            console.log("availableScenes response " + scenes.length);
+
+            console.log("availableScenes response " + scenes.length + " e.g. " + JSON.stringify(scenes[0].sceneTitle));
             for (let scene of scenes) {
                 let availableScene = {};
                 if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard

@@ -917,7 +917,7 @@ export function saveActivity (data) {
 // } 
 
 export async function SendEmail(toAddress, fromAddress, htmlbody, subject) {
-    console.log("tryna send email " + toAddress + fromAddress);
+    console.log("tryna send email to " + toAddress + " from " + fromAddress);
     const command = new SendEmailCommand({
         Destination: {
           /* required */
@@ -3127,7 +3127,7 @@ app.post('/share_scene/', function (req, res) { //yep! //make it public?
                     console.log("email status "+ JSON.stringify(status));
                 }
                 console.log("scene sharing complete!");
-                res.send("You invited " + lastMails + " to the scene!");
+                res.send("invitation sent to " + lastMails);
             } else {
                 console.log("no valid emails!");
                 res.send("no valid emails, no sharing for you");

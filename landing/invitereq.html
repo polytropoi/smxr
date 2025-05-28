@@ -81,7 +81,7 @@
                     console.log(response.data);
                     
                     if (response.data.toString().toLowerCase().includes("invitations sent")) {
-                        main.innerHTML = "Thanks, an invitation was sent to your email!";
+                        main.innerHTML = "Thanks, " + response.data.toString();
                     } else {
                         if (response.data.toString().toLowerCase().includes("not verified")) {
                             main.innerHTML = "Sorry, that account has not been verified";

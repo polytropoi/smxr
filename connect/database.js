@@ -34,6 +34,18 @@ export async function RunDataQuery(coll,type,query,update,sort) {  //TODO pass i
     console.log("tryna RunDataQuery " + coll + " " + type  + " " + q + " " + u + " " + s);
     switch  (type) {
 
+        case "findRandom": //hrm...
+        try {
+            if (sort) {
+                return await db.collection(coll).aggregate(query).sort(sort).toArray();
+            } else {
+                return await db.collection(coll).aggregate(query).toArray();
+            }
+        } catch (e) {
+            console.log("db find error " + e);
+            return ([]); //? or empty string or array? 
+        }
+        ////////////////////////////////   
         case "find": //i.e. more than one
             try {
                 if (sort) {
