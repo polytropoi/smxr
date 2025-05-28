@@ -23,15 +23,16 @@ export function InitIDB() {
          console.log("is there a version 0")
             // const store = db.createObjectStore("scenes", { keyPath: "shortID" });
             // store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
-      }
-      if (event.oldVersion < 2) {
-         
-         const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+             const store = db.createObjectStore("scenes", { keyPath: "shortID" });
          store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
       }
-      if (event.oldVersion < 3) {
+      if (event.oldVersion < 2) { //version 1
          const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
             pstore.createIndex("profile", ["profile"], { unique: true });
+        
+      }
+      if (event.oldVersion < 3) { //version 2
+         //nyet
       }
       //  const store = db.createObjectStore("scenes", { keyPath: "shortID" });
       //  store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
