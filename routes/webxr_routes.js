@@ -1616,7 +1616,7 @@ webxr_router.get('/:_id', function (req, res) {
             }
             for (let i = 0; i < 3; i++) { //just get a few for random gates, too many now...
                 const index = Math.floor(Math.random() * available_scenes.length);
-                console.log("setting available scene "+ index + of + available_scenes.length);
+                console.log("setting available scene "+ index +" of "+ available_scenes.length);
                 scenes.push(available_scenes[index]);
             }
             let availableScenes = [];
