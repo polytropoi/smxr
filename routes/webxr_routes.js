@@ -3844,6 +3844,7 @@ webxr_router.get('/:_id', function (req, res) {
                         "<a-entity id=\x22youtube_element\x22 youtube_element_aframe=\x22init: ''\x22></a-entity>"+
 
                         //create these at runtime now...//nm
+                        "<a-entity id=\x22player_hud\x22 visible=\x22false\x22 look-at=\x22#player\x22 player_hud=\x22mode: 'info'\x22></a-entity>"+
                         "<a-entity id=\x22mod_dialog\x22 visible=\x22false\x22 look-at=\x22#player\x22 mod_dialog=\x22mode: 'confirm'\x22>"+
                         "<a-entity id=\x22mod_dialog_text\x22 position=\x22.05 .05 .05\x22></a-entity>"+
                         "<a-entity id=\x22mod_dialog_panel\x22 class=\x22gltf activeObjexRay\x22 gltf-model=\x22#dialog_panel\x22></a-entity>" +

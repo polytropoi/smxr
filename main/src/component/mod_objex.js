@@ -432,38 +432,46 @@ AFRAME.registerComponent('mod_objex', {
         }
       },
       equipInventoryObject: function (objectID, tags, eventData) {
+
         console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
+        
         this.objectData = this.returnObjectData(objectID);
-        console.log("tryna equip object " + JSON.stringify(this.objectData));  
-        // console.log("tryna equip object " + this.el.id);
-        this.dropPos = new THREE.Vector3();
-        this.objEl = document.createElement("a-entity");
-        this.equipHolder = document.getElementById("equipPlaceholder");
-        // this.equipHolder.object3D.getWorldPosition( this.dropPos );
-        this.locData = {};
-        // this.locData.x = this.dropPos.x;
-        // this.locData.y = this.dropPos.y;
-        // this.locData.z = this.dropPos.z;
-        this.locData.x = 0;
-        this.locData.y = 0;
-        this.locData.z = 0;
-        this.locData.locationTags = tags;
-        this.locData.eventData = eventData;
-        this.locData.markerObjScale = (this.objectData.objScale != undefined && this.objectData.objScale != "") ? this.objectData.objScale : 1; //these come from objectData, not locData
-        this.locData.eulerx = (this.objectData.eulerx != undefined && this.objectData.eulerx != "") ? this.objectData.eulerx : 0;
-        this.locData.eulery = (this.objectData.eulery != undefined && this.objectData.eulery != "") ? this.objectData.eulery : 0;
-        this.locData.eulerz = (this.objectData.eulerz != undefined && this.objectData.eulerz != "") ? this.objectData.eulerz : 0;
-        this.locData.timestamp = Date.now();
-        this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData, 'isEquipped': true, 'isSpawned': true});
-        this.objEl.id = "obj" + this.objectData._id + "_" + this.locData.timestamp;
-        
-        this.objEl.classList.add('equipped');
-        
-        this.objEl.classList.add('activeObjexRay');
-        this.equipHolder.appendChild(this.objEl); //parent to equip holder instead of scene as below
-        const updoc = {"equipped": true, "objectID": objectID};
-        UpdateLocalPlayerState(updoc);
+        if (this.objectData) {        
+          console.log("tryna equip object " + JSON.stringify(this.objectData));  
+          // console.log("tryna equip object " + this.el.id);
+          this.dropPos = new THREE.Vector3();
+          this.objEl = document.createElement("a-entity");
+          this.equipHolder = document.getElementById("equipPlaceholder");
+          // this.equipHolder.object3D.getWorldPosition( this.dropPos );
+          this.locData = {};
+          // this.locData.x = this.dropPos.x;
+          // this.locData.y = this.dropPos.y;
+          // this.locData.z = this.dropPos.z;
+          this.locData.x = 0;
+          this.locData.y = 0;
+          this.locData.z = 0;
+          this.locData.locationTags = tags;
+          this.locData.eventData = eventData;
+          this.locData.markerObjScale = (this.objectData.objScale != undefined && this.objectData.objScale != "") ? this.objectData.objScale : 1; //these come from objectData, not locData
+          this.locData.eulerx = (this.objectData.eulerx != undefined && this.objectData.eulerx != "") ? this.objectData.eulerx : 0;
+          this.locData.eulery = (this.objectData.eulery != undefined && this.objectData.eulery != "") ? this.objectData.eulery : 0;
+          this.locData.eulerz = (this.objectData.eulerz != undefined && this.objectData.eulerz != "") ? this.objectData.eulerz : 0;
+          this.locData.timestamp = Date.now();
+          this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData, 'isEquipped': true, 'isSpawned': true});
+          this.objEl.id = "obj" + this.objectData._id + "_" + this.locData.timestamp;
+          
+          this.objEl.classList.add('equipped');
+          
+          this.objEl.classList.add('activeObjexRay');
+          this.equipHolder.appendChild(this.objEl); //parent to equip holder instead of scene as below
+          const updoc = {"equipped": true, "objectID": objectID, "tags": tags, "eventData": eventData};
+          UpdateLocalPlayerState(updoc);
+        } else {
+          
+            FetchSceneInventoryObject(objectID, true, tags, eventData);
+        }
         // this.el.setAttribute('gltf-model', '#' + modelID.toString());
+
       },
       selectObject: function (objectID) { //hrm...
         console.log("tryna select object " + objectID);  
@@ -586,7 +594,7 @@ AFRAME.registerComponent('mod_objex', {
       }
   });
   
-  function FetchSceneInventoryObject(oID) { //add a single scene inventory object, e.g. child object spawn that isn't in initial collection, but don't init everything
+  function FetchSceneInventoryObject(oID, equip, tags, eventData) { //add a single scene inventory object, e.g. child object spawn that isn't in initial collection, but don't init everything
     let objexEl = document.getElementById('sceneObjects');   
 
     if (objexEl && !objexEl.components.mod_objex.returnObjectExists(oID)) {
@@ -606,7 +614,11 @@ AFRAME.registerComponent('mod_objex', {
         // console.log("gotsome objex: " + response.objex.length);
         if (response.objex.length > 0) {
             objexEl.components.mod_objex.addFetchedObject(response.objex[0]); //add to scene object collection, so don't have to fetch again
-        } 
+            if (equip) {
+              objexEl.components.mod_objex.equipInventoryObject(oID, tags, eventData)
+            } 
+        }
+       
       }
     } else {
       console.log("already have that object...");

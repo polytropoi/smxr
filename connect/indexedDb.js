@@ -380,11 +380,39 @@ export function InitIDB() {
                   const event = {"event": "init_scene", "timestamp": timestamp, "id": room}
                   updoc.events.push(event);
                   // updoc.events = events;
+
+
                   pstore.put(updoc);
                   transaction.oncomplete = function () {
                      db.close();
                      console.log("localprofile found and updated! " + JSON.stringify(updoc));
                   }
+                  if (pcursor.value.playerState) {
+                     if (pcursor.value.playerState.equipped) {
+                        console.log("player is equipped!");
+                        const modObjexEl = document.getElementById("sceneObjects");
+                        if (modObjexEl) {
+                           modObjexEl.components.mod_objex.equipInventoryObject(pcursor.value.playerState.objectID, pcursor.value.playerState.tags, pcursor.value.playerState.eventData);
+                             const playerHudEl = document.getElementById("player_hud");
+                              if (playerHudEl) {
+                                 playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!\nYou are equipped with an item tagged " + pcursor.value.playerState.tags);
+                              }
+                        } else {
+                           console.log("cain't find mod_objex");
+                        }
+                     } else {
+                        const playerHudEl = document.getElementById("player_hud");
+                        if (playerHudEl) {
+                           playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!");
+                        }
+                     }
+                  } else {
+                     const playerHudEl = document.getElementById("player_hud");
+                     if (playerHudEl) {
+                        playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!");
+                     }
+                  }
+                 
                }
             } else {
                const saveTimeStamp = Date.now();
@@ -398,6 +426,10 @@ export function InitIDB() {
                   db.close();
                   console.log("new localprofile saved! " + JSON.stringify(profile));
                }
+                const playerHudEl = document.getElementById("player_hud");
+                  if (playerHudEl) {
+                     playerHudEl.components.player_hud.ShowMessageAndHide("Welcome " + profile.avatarName + "!");
+                  }
             }
        };
      };

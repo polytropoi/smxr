@@ -4,7 +4,7 @@ import { settings, room, lerp, sceneLocations, localData, PauseIntervals, Return
   tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, allowCameraLock
   } from "../../connect/connect.js";
-import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile } from "../../connect/indexedDb.js";
+import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile, UpdateLocalPlayerState } from "../../connect/indexedDb.js";
 
 export let showDialogPanel = false;
 let dialogInitialized = false;
@@ -251,7 +251,7 @@ window.addEventListener( 'keydown',  ( event ) => {
 
   $('#modalContent').on('click', '#dequipButton', function(e) {
     console.log("tryna dequip");
-    DequipInventoryItem()
+    DequipInventoryItem();
   });
 
   $('#modalContent').on('click', '#modalCloser', function(e) {
@@ -315,6 +315,12 @@ window.addEventListener( 'keydown',  ( event ) => {
   $('#modalContent').on('click', '#createLocationButton', function(e) {
       CreateLocation();
   });
+
+  $('#modalContent').on('click', '#dequipButton', function(e) {
+      DequipInventoryItem();
+  });
+
+
 
   $('#modalContent').on('change', '#importMods', function(e) {
     console.log("importMods change event! " + e.target.value);
@@ -1783,7 +1789,7 @@ function GetUserInventory () {
        inviteInput.style.display = "block";
     }
   } else {
-    inventoryDisplayEl.innerHTML = "You must be <a href=\x22../main/login.html\x22>logged in</a> to access your inventory <button class=\x22uploadButton \x22 style=\x22float: right;\x22 onclick=\x22DequipInventoryItem()\x22>Dequip</button>";
+    inventoryDisplayEl.innerHTML = "You must be <a href=\x22../main/login.html\x22>logged in</a> to access your inventory <button id=\x22dequipButton\x22 class=\x22uploadButton \x22 style=\x22float: right;\x22>Dequip</button>";
   }
   DisplayLocalFiles();
   
@@ -1841,7 +1847,13 @@ export function DequipInventoryItem () {
   document.querySelectorAll('.equipped').forEach(function(el) {
     el.parentNode.removeChild(el);
   });
-  ShowHideDialogPanel();
+  // ShowHideDialogPanel();
+  const playerHudEl = document.getElementById("player_hud");
+  if (playerHudEl) {
+    playerHudEl.components.player_hud.ShowMessageAndHide("Item has been dequipped!");
+  }
+  const updoc = {"equipped": false, "objectID": "", "tags": "", "eventData": ""};
+      UpdateLocalPlayerState(updoc);
 }
 
 export function EquipDefaultItem (objectID, tags, eventData) {

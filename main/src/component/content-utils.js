@@ -5,7 +5,7 @@ if (typeof AFRAME === 'undefined') {
 }
 
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
-import { settings, videoEl, room, lerp, allowCameraLock, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, mouse, CreateLocation, timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData } from "../../../connect/connect.js";
+import { settings, videoEl, room, lerp, allowCameraLock, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, mouse, CreateLocation, timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData, userData, avatarName } from "../../../connect/connect.js";
 import { DeleteLocalSceneData } from "../../../connect/indexedDb.js";
 
 var ua = window.navigator.userAgent;
@@ -2420,6 +2420,55 @@ export function Pickup (data, id) {
     };
   }
 }
+
+AFRAME.registerComponent('player_hud', { 
+  schema: {
+    mode: {default: 'confirm'},
+    shader: {default: ''},
+    color: {default: ''} 
+  },
+  init: function () {
+    this.font2 = "Acme.woff";
+
+    if (settings && settings.sceneFontWeb2) {
+        this.font2 = settings.sceneFontWeb2;
+    }
+
+    this.placeholder = document.getElementById("equipPlaceholder"); 
+    this.hudText = document.createElement("a-entity");
+    this.placeholder.appendChild(this.hudText);
+    this.hudText.setAttribute("position", {"x": 0, "y": .5, "z": 0});
+        this.hudText.setAttribute("visible", false);
+    this.el.setAttribute("overlay");
+    
+    // if (duration > 0) {
+    //   this.waitAndHide(duration);
+    // }
+
+
+  },
+  ShowMessageAndHide: function (message) {
+    this.hudText.setAttribute("visible", true);
+    const that = this;
+    this.hudText.setAttribute('troika-text', {
+      maxWidth: .9,
+      baseline: "bottom",
+      align: "center",
+      fontSize: .03,
+      font: "/fonts/web/"+ this.font2,
+      anchor: "center",
+      color: "white",
+      outlineColor: "black",
+      outlineWidth: "2%",
+      value: message
+      });
+
+      setTimeout(() => {
+        this.hudText.setAttribute("visible", false);
+      }, 5000);
+
+  }
+});
 
 AFRAME.registerComponent('mod_dialog', { //there should only be one of these, unlike callouts
   schema: {
