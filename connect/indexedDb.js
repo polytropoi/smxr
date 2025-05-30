@@ -373,11 +373,9 @@ export function InitIDB() {
                   console.log("overwriting avatar name " + avatarName + " with " + pcursor.value.avatarName);
                   UpdateAvatarName(pcursor.value.avatarName);
                   let updoc = pcursor.value;
-
-                  // let events = [];
-                  // if (updoc.events) {
-                  //    events = pcursor.value.history;
-                  // }
+                  if (!updoc.events) {
+                     updoc.events = [];
+                  }
                   
                   const event = {"event": "init_scene", "timestamp": timestamp, "id": room}
                   updoc.events.push(event);
