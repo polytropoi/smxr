@@ -1,5 +1,6 @@
 import { InitLocalColors, DisplayLocalFiles } from "../main/js/dialogs.js";
-import { settings, room, sceneLocations, locationTimestamps, localData, userData, lastCloudUpdate, InitCurves, sceneEl, PlayerToLocation, SetTimeKeysData, getExtension, poiLocations, curveLocations } from "../connect/connect.js";
+import { settings, room, sceneLocations, locationTimestamps, localData, userData, lastCloudUpdate, InitCurves, 
+   sceneEl, PlayerToLocation, SetTimeKeysData, getExtension, poiLocations, curveLocations, avatarName, UpdateAvatarName } from "../connect/connect.js";
 
 export let hasLocalData = false;
 //////////////////////indexedDB functions...
@@ -314,8 +315,12 @@ export function InitIDB() {
             }
          }
          InitCurves();
-         if (userData) {
-            SaveLocalProfile(userData);
+
+         //// now check for / save local profile
+         if (userData) { //set in connect.js after token check
+
+            InitLocalProfile(userData);
+
          }
 
        }
@@ -332,53 +337,8 @@ export function InitIDB() {
    return string.trim();
  }
 
-//  export function InitProfile() {
 
-//     console.log("tryna connect to SMXR indexeddb");
-//     if (!('indexedDB' in window)) {
-//        console.log("This browser doesn't support IndexedDB");
-//        return;
-//      }
-//     const request = indexedDB.open("SMXR", 2);
-//     request.onerror = (event) => {
-//        console.error("could not connect to iDB " + event);
-//        return "error"
-//     };
-//     request.onupgradeneeded = function () {
-//        const db = request.result;
-//        const store = db.createObjectStore("scenes", { keyPath: "shortID" });
-//        store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
-
-//      };
-//     request.onsuccess = function () {
-//        console.log("Database opened successfully");
-//        const db = request.result;
-//        const transaction = db.transaction("profiles", "readwrite");
-//        const store = transaction.objectStore("profiles");
-
-//        const saveTimeStamp = Date.now();
-//        const lastSceneUpdate = null;
-
-//        //first check if there are localmods, version saved with tilde
-//        // const modQuery = store.get(room + "~"); //nope, needs cursor
-//        const modQuery = store.openCursor(room + "~"); //use cursor mode so it's iterable below
-//       //  const fileQuery = filestore.openCursor();
-//        modQuery.onsuccess = function (e) {
-//           var cursor = e.target.result;
-//           console.log("query for localData : " + e.target.result);
-//           // if (e.target.result) {
-//              if (cursor) {
-//                 localData.lastUpdate = cursor.value.lastUpdate;
-
-//                 // start location loop
-//                 if (cursor.value.locations) {
-//                 }
-//          }
-//       }
-//    }
-//  }
-
- export function SaveLocalProfile(userData) {
+ export function InitLocalProfile(userData) {
    console.log("tryna saveLocalProfile " + JSON.stringify(userData));
    let profile = {};
     console.log("tryna connect to SMXR indexeddb");
@@ -391,15 +351,7 @@ export function InitIDB() {
        console.error("could not connect to iDB " + event);
        return "error"
     };
-    request.onupgradeneeded = function () {
-       const db = request.result;
-       const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
-       pstore.createIndex("profile", ["profile"], { unique: true });
-
-      const store = db.createObjectStore("scenes", { keyPath: "shortID" });
-       store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
-     };
-     request.onsuccess = function () {
+   request.onsuccess = function () {
        console.log("Saving local profile, IDB opened successfully");
               let profile = {};
             //   profile.userID = userData.userID; //with tilde = the local version
@@ -408,26 +360,137 @@ export function InitIDB() {
       const transaction = db.transaction("profiles", "readwrite");
       const pstore = transaction.objectStore("profiles");
 
-       const saveTimeStamp = Date.now();
-       console.log("writing localprofile for user " + userData.userID);
-       pstore.put(profile); //write the local version
-       transaction.oncomplete = function () {
-         db.close();
-         console.log("localprofile saved!");
-         // hasLocalData = true;
-       //   ShowHideDialogPanel();
-          // InitLocalData();
-         // let mSpan = document.getElementById("modMessage");
-         // if (mSpan) {
-         //    mSpan.innerText = "Profile Saved to Local Database!";
-         // }
-         // let dSpan = document.getElementById("detailModMessage");
-         // if (dSpan) {
-         //    dSpan.innerText = "Profile Saved to Local Database!";
-         // }
+         const modQuery = pstore.openCursor(userData.userID); //use cursor mode so it's iterable below
+         //  const fileQuery = filestore.openCursor();
+         modQuery.onsuccess = function (e) {
+            var pcursor = e.target.result;
+            console.log("query for localData : " + e.target.result);
+         // if (e.target.result) {
+         const timestamp = Date.now();
+            if (pcursor) {
+               // console.log("existing profile " + JSON.stringify(pcursor.value));
+               if (pcursor.value.avatarName) {
+                  console.log("overwriting avatar name " + avatarName + " with " + pcursor.value.avatarName);
+                  UpdateAvatarName(pcursor.value.avatarName);
+                  let updoc = pcursor.value;
+
+                  // let events = [];
+                  // if (updoc.events) {
+                  //    events = pcursor.value.history;
+                  // }
+                  
+                  const event = {"event": "init_scene", "timestamp": timestamp, "id": room}
+                  updoc.events.push(event);
+                  // updoc.events = events;
+                  pstore.put(updoc);
+                  transaction.oncomplete = function () {
+                     db.close();
+                     console.log("localprofile found and updated! " + JSON.stringify(updoc));
+                  }
+               }
+            } else {
+               const saveTimeStamp = Date.now();
+               console.log("writing localprofile for user " + userData.userID);
+               let events = [];
+               const event = {"event": "init_localprofile", "timestamp": timestamp, "id": room};
+               profile.events = events;
+               profile.events.push(event);
+               pstore.put(profile); //write the local version
+               transaction.oncomplete = function () {
+                  db.close();
+                  console.log("new localprofile saved! " + JSON.stringify(profile));
+               }
+            }
        };
      };
- }
+   }
+
+
+   export function ReturnLocalPlayerState () {
+      if (!('indexedDB' in window)) {
+       console.log("This browser doesn't support IndexedDB");
+       return;
+      }
+      const request = indexedDB.open("SMXR", 2);
+      request.onerror = (event) => {
+         console.error("could not connect to iDB " + event);
+         return "error" + event;
+      };
+      request.onsuccess = function () {
+         console.log("Saving local profile, IDB opened successfully");
+         let profile = {};
+               //   profile.userID = userData.userID; //with tilde = the local version
+         profile = userData;      
+         const db = request.result;
+         const transaction = db.transaction("profiles", "readwrite");
+         const pstore = transaction.objectStore("profiles");
+         const modQuery = pstore.openCursor(userData.userID); //use cursor mode so it's iterable below
+            //  const fileQuery = filestore.openCursor();
+            modQuery.onsuccess = function (e) {
+               var pcursor = e.target.result;
+               console.log("query for localData : " + e.target.result);
+            // if (e.target.result) {
+            const timestamp = Date.now();
+            if (pcursor) {
+               console.log("existing profile " + JSON.stringify(pcursor.value));
+               if (pcursor.value) {
+                  return pcursor.value;
+               }
+            } else {
+               return null;
+            }
+         }
+         transaction.oncomplete = function () {
+            db.close();
+            console.log("localPlayerState updated! ");
+         }
+      }
+   }
+
+   export function UpdateLocalPlayerState (playerState) { 
+      if (!('indexedDB' in window)) {
+       console.log("This browser doesn't support IndexedDB");
+       return;
+      }
+      const request = indexedDB.open("SMXR", 2);
+      request.onerror = (event) => {
+         console.error("could not connect to iDB " + event);
+         return "error"
+      };
+      request.onsuccess = function () {
+         console.log("updating localPlayerState " + JSON.stringify(playerState));
+         let profile = {};
+               //   profile.userID = userData.userID; //with tilde = the local version
+         // profile = userData;      
+         const db = request.result;
+         const transaction = db.transaction("profiles", "readwrite");
+         const pstore = transaction.objectStore("profiles");
+         const modQuery = pstore.openCursor(userData.userID); //use cursor mode so it's iterable below
+         //  const fileQuery = filestore.openCursor();
+         modQuery.onsuccess = function (e) {
+            var pcursor = e.target.result;
+            console.log("query for localData : " + e.target.result);
+         // if (e.target.result) {
+         const timestamp = Date.now();
+            if (pcursor) {
+               
+               if (pcursor.value) {
+                  profile = pcursor.value;
+                  if (playerState) {
+                     profile.playerState = playerState;
+                     console.log("updating profile " + JSON.stringify(profile));
+                     pstore.put(profile);
+                     
+                  }
+               }
+            }
+         }
+         transaction.oncomplete = function () {
+            db.close();
+            console.log("localPlayerState updated! ");
+         }
+      }
+   }
 
  export function SaveLocalData() {  //local mods to iDB
     console.log("tryna connect to SMXR indexeddb");
@@ -454,13 +517,13 @@ export function InitIDB() {
        // const lastSceneUpdate = null;
        let scene = {};
        scene.shortID = room + "~"; //with tilde = the local version
-         if (localData.settings && localData.settings.sceneTags) {
-            for (let i = 0; i < localData.settings.sceneTags.length; i++) {
-               localData.settings.sceneTags[i] = localData.settings.sceneTags[i].trim();
-               console.log("localData.settings.sceneTag + " +localData.settings.sceneTags[i]);
-            }
-            document.getElementById("sceneTagsField").value = localData.settings.sceneTags;
+      if (localData.settings && localData.settings.sceneTags) {
+         for (let i = 0; i < localData.settings.sceneTags.length; i++) {
+            localData.settings.sceneTags[i] = localData.settings.sceneTags[i].trim();
+            console.log("localData.settings.sceneTag + " +localData.settings.sceneTags[i]);
          }
+         document.getElementById("sceneTagsField").value = localData.settings.sceneTags;
+      }
 
        scene.settings = localData.settings;
        scene.locations = localData.locations;
@@ -487,6 +550,7 @@ export function InitIDB() {
          if (dSpan) {
             dSpan.innerText = "Mods Saved to Local Database!";
          }
+         return "mods saved to local";
        };
     };
     

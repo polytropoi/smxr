@@ -1,4 +1,4 @@
-import { InitIDB, SaveLocalData, DeleteLocalSceneData, hasLocalData, SetHasLocalData, SaveLocalProfile } from "../connect/indexedDb.js";
+import { InitIDB, SaveLocalData, DeleteLocalSceneData, hasLocalData, SetHasLocalData } from "../connect/indexedDb.js";
 // import { matrixClient } from "../connect/matrix.js";
 import { youtubePlayer, youtubeIsPlaying, primaryAudioEl } from "../../main/src/component/content-utils.js";
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
@@ -448,6 +448,12 @@ $(function() {
 
 
 }); //end onload
+
+export function UpdateAvatarName(name) {
+   avatarName = name;
+   const usernameEl = document.getElementById("userName");
+   usernameEl.innerText = avatarName;
+}
 
 export function SetTimedEventsListenerMode(mode) {
    timedEventsListenerMode = mode;

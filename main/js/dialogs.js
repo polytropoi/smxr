@@ -2053,9 +2053,9 @@ export function SceneManglerModal(mode, autoHide) {
 
     let oculusButton = "<button style=\x22float: right;\x22 class=\x22addButton\x22 id=\x22oculusButton\x22><a href=\x22https://www.oculus.com/open_url/?url=https%3A%2F%2Fservicemedia.net/webxr/"+room+"\x22>Open on Oculus Quest</a></button>";
     let tabs ="<div class=\x22tab\x22>" +
-    "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Welcome')\x22>Welcome</button>"+
+    // "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Welcome')\x22>Welcome</button>"+
     // "<button class=\x22tablinks\x22 onclick=\x22TabMangler(event, 'Quests')\x22>Quests</button>"+
-    
+    "<button id=\x22welcome_tab\x22 class=\x22tablinks\x22 >Welcome</button>"+
     "<button id=\x22messages_tab\x22 class=\x22tablinks\x22 >Messaging</button>"+
     "<button id=\x22inventory_tab\x22 class=\x22tablinks\x22 >Inventory</button>"+
     "<button id=\x22settings_tab\x22 class=\x22tablinks\x22 >Settings</button>"+
