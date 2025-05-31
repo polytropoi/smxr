@@ -1694,6 +1694,7 @@ function tcheck () {
                   avatarName = data.userName;
                   userData.userName = data.userName;
                   // userData = data;
+                  userData.avatarName = data.userName;
                   userData.userID = data._id;
                   if (data.authLevel == "domain_admin") {
                      userData.sceneOwner = "indaehoose";
