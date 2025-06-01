@@ -2437,7 +2437,7 @@ AFRAME.registerComponent('player_hud', {
     this.placeholder = document.getElementById("equipPlaceholder"); 
     this.hudText = document.createElement("a-entity");
     this.placeholder.appendChild(this.hudText);
-    this.hudText.setAttribute("position", {"x": 0, "y": .5, "z": 0});
+    this.hudText.setAttribute("position", {"x": 0, "y": .4, "z": 0});
         this.hudText.setAttribute("visible", false);
     this.el.setAttribute("overlay");
     

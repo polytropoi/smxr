@@ -4,7 +4,7 @@ import { settings, room, lerp, sceneLocations, localData, PauseIntervals, Return
   tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, allowCameraLock
   } from "../../connect/connect.js";
-import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile, UpdateLocalPlayerState } from "../../connect/indexedDb.js";
+import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
 
 export let showDialogPanel = false;
 let dialogInitialized = false;
@@ -1737,10 +1737,10 @@ function GetUserInventory () {
   // data.userData = userData;
   let inventoryDisplayEl = document.getElementById('inventory_display');
   if (!userData.isGuest) {
-    console.log("getuserprofile " + userData._id);
+    console.log("getuserprofile " + userData.userID);
     let response = "<button id=\x22dequipButton\x22 class=\x22uploadButton \x22 style=\x22float: right;\x22 >Dequip</button>Items in player inventory:<br><hr>";
     var xhr = new XMLHttpRequest();
-    xhr.open("get", '/user_inventory/' + userData._id, true);
+    xhr.open("get", '/user_inventory/' + userData.userID, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send();
     xhr.onload = function () {
@@ -1847,13 +1847,15 @@ export function DequipInventoryItem () {
   document.querySelectorAll('.equipped').forEach(function(el) {
     el.parentNode.removeChild(el);
   });
-  // ShowHideDialogPanel();
+
   const playerHudEl = document.getElementById("player_hud");
   if (playerHudEl) {
     playerHudEl.components.player_hud.ShowMessageAndHide("Item has been dequipped!");
   }
   const updoc = {"equipped": false, "objectID": "", "tags": "", "eventData": ""};
-      UpdateLocalPlayerState(updoc);
+      UpdateLocalEquipment(updoc);
+
+        ShowHideDialogPanel();
 }
 
 export function EquipDefaultItem (objectID, tags, eventData) {

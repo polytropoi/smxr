@@ -369,9 +369,11 @@ export function InitIDB() {
          const timestamp = Date.now();
             if (pcursor) {
                // console.log("existing profile " + JSON.stringify(pcursor.value));
-               if (pcursor.value.avatarName) {
-                  console.log("overwriting avatar name " + avatarName + " with " + pcursor.value.avatarName);
-                  UpdateAvatarName(pcursor.value.avatarName);
+               const name = pcursor.value.avatarName ? pcursor.value.avatarName : pcursor.value.userName;
+               if (pcursor.value.avatarName || pcursor.value.userName) {
+                  
+                  console.log("overwriting avatar name " + avatarName + " with " + name);
+                  UpdateAvatarName(name);
                   let updoc = pcursor.value;
                   if (!updoc.events) {
                      updoc.events = [];
@@ -387,15 +389,16 @@ export function InitIDB() {
                      db.close();
                      console.log("localprofile found and updated! " + JSON.stringify(updoc));
                   }
-                  if (pcursor.value.playerState) {
-                     if (pcursor.value.playerState.equipped) {
+                  if (pcursor.value.equipment && pcursor.value.equipment.main) {
+                     if (pcursor.value.equipment.main.equipped) {
                         console.log("player is equipped!");
                         const modObjexEl = document.getElementById("sceneObjects");
                         if (modObjexEl) {
-                           modObjexEl.components.mod_objex.equipInventoryObject(pcursor.value.playerState.objectID, pcursor.value.playerState.tags, pcursor.value.playerState.eventData);
+                           modObjexEl.components.mod_objex.equipInventoryObject(pcursor.value.equipment.main.objectID, pcursor.value.equipment.main.tags, pcursor.value.equipment.main.eventData);
                              const playerHudEl = document.getElementById("player_hud");
                               if (playerHudEl) {
-                                 playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!\nYou are equipped with an item tagged " + pcursor.value.playerState.tags);
+                                 playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!\nYou are equipped with a " +
+                                    pcursor.value.equipment.main.objectName + " tagged " + pcursor.value.equipment.main.tags);
                               }
                         } else {
                            console.log("cain't find mod_objex");
@@ -436,7 +439,7 @@ export function InitIDB() {
    }
 
 
-   export function ReturnLocalPlayerState () {
+   export function ReturnLocalProfile () { //
       if (!('indexedDB' in window)) {
        console.log("This browser doesn't support IndexedDB");
        return;
@@ -508,6 +511,51 @@ export function InitIDB() {
                   profile = pcursor.value;
                   if (playerState) {
                      profile.playerState = playerState;
+                     console.log("updating profile " + JSON.stringify(profile));
+                     pstore.put(profile);
+                     
+                  }
+               }
+            }
+         }
+         transaction.oncomplete = function () {
+            db.close();
+            console.log("localPlayerState updated! ");
+         }
+      }
+   }
+
+   export function UpdateLocalEquipment (equipment) { 
+      if (!('indexedDB' in window)) {
+       console.log("This browser doesn't support IndexedDB");
+       return;
+      }
+      const request = indexedDB.open("SMXR", 2);
+      request.onerror = (event) => {
+         console.error("could not connect to iDB " + event);
+         return "error"
+      };
+      request.onsuccess = function () {
+         console.log("updating local player equipment " + JSON.stringify(equipment));
+         let profile = {};
+               //   profile.userID = userData.userID; //with tilde = the local version
+         // profile = userData;      
+         const db = request.result;
+         const transaction = db.transaction("profiles", "readwrite");
+         const pstore = transaction.objectStore("profiles");
+         const modQuery = pstore.openCursor(userData.userID); //use cursor mode so it's iterable below
+         //  const fileQuery = filestore.openCursor();
+         modQuery.onsuccess = function (e) {
+            var pcursor = e.target.result;
+            console.log("query for localData : " + e.target.result);
+         // if (e.target.result) {
+         const timestamp = Date.now();
+            if (pcursor) {
+               
+               if (pcursor.value) {
+                  profile = pcursor.value;
+                  if (equipment) {
+                     profile.equipment.main = equipment;
                      console.log("updating profile " + JSON.stringify(profile));
                      pstore.put(profile);
                      

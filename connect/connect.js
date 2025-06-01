@@ -1676,6 +1676,7 @@ function tcheck () {
             }
             userData.isGuest = true;
             userData.avatarName = avatarName;
+            userData.userName = avatarName;
             userData.userID = "00000";
                               // const profile = {"userID": "00000", "userName": avatarName}
             // SaveLocalProfile(userData);

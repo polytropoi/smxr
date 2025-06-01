@@ -1,6 +1,6 @@
 /* global AFRAME, THREE */
 
-import { UpdateLocalPlayerState } from "../../../connect/indexedDb.js";
+import { UpdateLocalPlayerState, UpdateLocalEquipment } from "../../../connect/indexedDb.js";
 import { room, settings, localData, userData, mouseDowntime } from "../../../connect/connect.js";
 import { keydown, SetSelectedLocationTimestamp, showDialogPanel, DropInventoryItem, DequipAndDropItem } from "../../js/dialogs.js";
 import { Pickup, Drop } from "../../src/component/content-utils.js";
@@ -464,8 +464,8 @@ AFRAME.registerComponent('mod_objex', {
           
           this.objEl.classList.add('activeObjexRay');
           this.equipHolder.appendChild(this.objEl); //parent to equip holder instead of scene as below
-          const updoc = {"equipped": true, "objectID": objectID, "tags": tags, "eventData": eventData};
-          UpdateLocalPlayerState(updoc);
+          const updoc = {"equipped": true, "objectID": objectID, "objectName": this.objectData.name , "tags": tags, "eventData": eventData}; //saved to profile.equipment.main
+          UpdateLocalEquipment(updoc);
         } else {
           
             FetchSceneInventoryObject(objectID, true, tags, eventData);
