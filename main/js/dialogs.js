@@ -1852,9 +1852,10 @@ export function DequipInventoryItem () {
   if (playerHudEl) {
     playerHudEl.components.player_hud.ShowMessageAndHide("Item has been dequipped!");
   }
-  const updoc = {"equipped": false, "objectID": "", "tags": "", "eventData": ""};
+  const updoc = {"equipped": false};
       UpdateLocalEquipment(updoc);
 
+      showDialogPanel = true; //hrm, so it turns off
         ShowHideDialogPanel();
 }
 

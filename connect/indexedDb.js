@@ -378,7 +378,12 @@ export function InitIDB() {
                   if (!updoc.events) {
                      updoc.events = [];
                   }
-                  
+                  let playerstate = "\n";
+                  if (pcursor.value.playerState && pcursor.value.playerState.health) {
+                     playerstate = "player health is " + pcursor.value.playerState.health + " - mana is " + pcursor.value.playerState.mana + "\n";
+                  } else {
+                     updoc.playerState = {"health": 100, "mana": 100, "xp": 0, "armor": 1, "hungry": 0, "thirsty": 0, "sleepy": 0};
+                  }
                   const event = {"event": "init_scene", "timestamp": timestamp, "id": room}
                   updoc.events.push(event);
                   // updoc.events = events;
@@ -389,6 +394,9 @@ export function InitIDB() {
                      db.close();
                      console.log("localprofile found and updated! " + JSON.stringify(updoc));
                   }
+
+                  const greeting = "Welcome back " + pcursor.value.avatarName + "!\n"
+ 
                   if (pcursor.value.equipment && pcursor.value.equipment.main) {
                      if (pcursor.value.equipment.main.equipped) {
                         console.log("player is equipped!");
@@ -397,8 +405,12 @@ export function InitIDB() {
                            modObjexEl.components.mod_objex.equipInventoryObject(pcursor.value.equipment.main.objectID, pcursor.value.equipment.main.tags, pcursor.value.equipment.main.eventData);
                              const playerHudEl = document.getElementById("player_hud");
                               if (playerHudEl) {
-                                 playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!\nYou are equipped with a " +
-                                    pcursor.value.equipment.main.objectName + " tagged " + pcursor.value.equipment.main.tags);
+                               
+                                 const equipment = "You are equipped with a " + pcursor.value.equipment.main.objectName + " tagged " + pcursor.value.equipment.main.tags;
+                                 
+                                 playerHudEl.components.player_hud.ShowMessageAndHide(greeting + playerstate + equipment);
+                                 // playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!\nYou are equipped with a " +
+                                 //    pcursor.value.equipment.main.objectName + " tagged " + pcursor.value.equipment.main.tags);
                               }
                         } else {
                            console.log("cain't find mod_objex");
@@ -406,13 +418,13 @@ export function InitIDB() {
                      } else {
                         const playerHudEl = document.getElementById("player_hud");
                         if (playerHudEl) {
-                           playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!");
+                           playerHudEl.components.player_hud.ShowMessageAndHide(greeting + playerstate);
                         }
                      }
                   } else {
                      const playerHudEl = document.getElementById("player_hud");
                      if (playerHudEl) {
-                        playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!");
+                        playerHudEl.components.player_hud.ShowMessageAndHide(greeting + playerstate);
                      }
                   }
                  
@@ -423,7 +435,9 @@ export function InitIDB() {
                let events = [];
                const event = {"event": "init_localprofile", "timestamp": timestamp, "id": room};
                profile.events = events;
+               const playerState = {"health": 100, "mana": 100, "xp": 0, "armor": 1, "hungry": 0, "thirsty": 0, "sleepy": 0};
                profile.events.push(event);
+               profile.playerState = playerState;
                pstore.put(profile); //write the local version
                transaction.oncomplete = function () {
                   db.close();
@@ -554,7 +568,8 @@ export function InitIDB() {
                
                if (pcursor.value) {
                   profile = pcursor.value;
-                  if (equipment) {
+                  if (equipment && profile.equipment) {
+                     profile.equipment = {};
                      profile.equipment.main = equipment;
                      console.log("updating profile " + JSON.stringify(profile));
                      pstore.put(profile);
