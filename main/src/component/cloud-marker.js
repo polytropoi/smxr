@@ -1801,6 +1801,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
           }
           
         } else { //otherwise go to a random domain scene
+          console.log("tryna go to random domain scene");
           let ascenesEl = document.getElementById("availableScenesControl");
           if (ascenesEl) {
             let asControl = ascenesEl.components.available_scenes_control; //available scenes in this domain

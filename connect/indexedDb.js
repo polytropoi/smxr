@@ -568,9 +568,11 @@ export function InitIDB() {
                
                if (pcursor.value) {
                   profile = pcursor.value;
-                  if (equipment && profile.equipment) {
-                     profile.equipment = {};
-                     profile.equipment.main = equipment;
+                  if (equipment) {
+                     if (!profile.equipment) {
+                        profile.equipment = {};
+                     }
+                     profile.equipment.main = equipment; //so can support multiple equip points later...
                      console.log("updating profile " + JSON.stringify(profile));
                      pstore.put(profile);
                      

@@ -360,10 +360,11 @@ webxr_router.get('/:_id', function (req, res) {
     let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + //TODO use new aframe module, and externalize this !!!!!!!
                             //still causes duplicate engine loading, but...
                         "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/build/three.module.js\x22,"+
-                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22"+                
-                    
+                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22"+
                         "}"+
                     "}</script>";
+
+    
     (async () => {
         try {
 
@@ -428,6 +429,17 @@ webxr_router.get('/:_id', function (req, res) {
             // } 
             if (sceneData.sceneTags != null) {        
                 for (let i = 0; i < sceneData.sceneTags.length; i++) { //not ideal, but it's temporary... //no it isn't
+                    if (sceneData.sceneTags[i].toLowerCase().includes("forge")) {    
+                        
+                        importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + //TODO use new aframe module, and externalize this !!!!!!!
+                            //still causes duplicate engine loading, but...
+                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/build/three.module.js\x22,"+
+                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22"+
+                        "\x22@forge-gfx/forge\x22: \x22https://forge.dev/releases/forge/0.1.0/forge.module.js\x22"+                
+                    
+                        "}"+
+                        "}</script>";
+                    }
                     if (sceneData.sceneTags[i].toLowerCase().includes("show camera")) {
                         sceneResponse.showCameraIcon = true;
                     } else {

@@ -2190,6 +2190,8 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
             contentType = "video";
         } else if (groupType.toLowerCase()  == ".glb" || groupType.toLowerCase()  == ".usdz") {
             contentType = "model";
+        } else if (groupType.toLowerCase()  == ".ply" || groupType.toLowerCase()  == ".spz" || groupType.toLowerCase()  == ".splat" || groupType.toLowerCase()  == ".ksplat") {
+            contentType = "splat";
         } else {
             console.log("invalid contentType!");
             // res.end("invalid content type!");
@@ -2326,6 +2328,27 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             if (model_type == "usdz") {
                                 ck = "users/" + item.uid + "/usdz/" + itemKey;
                             }
+                            const status = await CopyObject(targetBucket, copySource, ck);
+                            console.log(status + " copied a model file " + copySource + " to " + targetBucket +"/"+ ck);                          
+                        } else if (contentType == "splat") {
+                            
+                            const updoc = {
+                                "userID" : req.session.user._id.toString(),
+                                "username" : req.session.user.userName,
+                                "name" : ts + "_" + originalName(item.key),
+                                "filename" : itemKey,
+                                "item_type" : "splat",
+                                "tags": [],
+                                "item_status": "private",
+                                "otimestamp" : ts,
+                                "ofilesize" : size };
+                            const saved = await RunDataQuery("models", "insertOne", updoc);
+                            item_id = saved.insertedId.toString();
+                            groupitems.push(item_id);
+
+                            const copySource = process.env.STAGING_BUCKET_NAME + "/staging/" + item.uid + "/" + itemKey;
+                            let ck = "users/" + item.uid + "/splat/" + itemKey;
+                          
                             const status = await CopyObject(targetBucket, copySource, ck);
                             console.log(status + " copied a model file " + copySource + " to " + targetBucket +"/"+ ck);                          
                         }
@@ -5371,6 +5394,41 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                         name : timestamp + "_" + req.body.localFiles[file].name,
                                         filename : timestamp + "_" + req.body.localFiles[file].name,
                                         item_type : 'glb',
+                                        tags: [],
+                                        item_status: "private",
+                                        otimestamp : timestamp,
+                                        ofilesize : req.body.localFiles[file].size };
+                                    const saved = await RunDataQuery("models", "insertOne", newmodel);
+                                    console.log("glb saved with id " + saved.insertedId); //.insertedId == ObjectId of new record
+                                    let newfile = {};
+                                    newfile.name = req.body.localFiles[file].name.replace("local_","");
+                                    newfile._id = saved.insertedId;
+                                    newFiles.push(newfile);
+                                    var s_id = scene._id;   
+                                    var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
+                                    sceneModels.push(saved.insertedId);
+                                    const query = { "_id": s_id };
+                                    const updoc = { $set: {"sceneModels": sceneModels}};
+                                    console.log("updoc " + JSON.stringify(updoc));
+                                    const updated = await RunDataQuery("scenes","updateOne", query, updoc);
+                                    console.log("updated sceneModels with " + JSON.stringify(updoc) + " " + JSON.stringify(updated));
+                                
+                                } else if (getExtension(req.body.localFiles[file].name) == ".ply" || getExtension(req.body.localFiles[file].name) == ".spz" ||
+                                             getExtension(req.body.localFiles[file].name) == ".splat" || getExtension(req.body.localFiles[file].name) == ".ksplat"  ) { //should sniff the thing instead, but...
+                                    let awskey = 'users/' + req.session.user._id.toString() + '/splat/' + timestamp + '_' + req.body.localFiles[file].name;
+                                    let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
+                                        Key: awskey, 
+                                    // ContentEncoding: 'base64',
+                                        ContentType: 'application/octet-stream',
+                                        Body: buffer};
+                                    const status = await PutObject(params.Bucket, params.Key, params.Body);
+                                    console.log("uploaded file " + awskey + " " + JSON.stringify(status));
+                                    const newmodel = { //add to models collection
+                                        userID : req.session.user._id.toString(),
+                                        username : req.session.user.userName,
+                                        name : timestamp + "_" + req.body.localFiles[file].name,
+                                        filename : timestamp + "_" + req.body.localFiles[file].name,
+                                        item_type : 'splat',
                                         tags: [],
                                         item_status: "private",
                                         otimestamp : timestamp,
