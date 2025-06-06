@@ -1146,6 +1146,24 @@
                         "<br>" + convertTimestamp(dateSplitter(arr[i].name)) +
                     "</div>" +
                 "</div>";
+            }  else if (ext == "spz" || ext == "ply" || ext == "splat" || ext == "ksplat") {
+                // glbIndex++;
+                const splatObj = arr[i];
+                html = html + 
+                "<div class=\x22card\x22 style=\x22width:320px;\x22>" +
+                    "<div class=\x22card-header\x22>"+
+                    "<span class=\x22float-left\x22><i class=\x22fas fa-cubes fa-3x\x22 style=\x22color:green;\x22></i></span>"+
+                    "<div style=\x22margin: 5px\x22 class=\x22float-right custom-control custom-checkbox\x22>" +
+                        "<input name=\x22select\x22 type=\x22checkbox\x22 class=\x22custom-control-input\x22 id="+arr[i].name+">" +
+                        "<label class=\x22custom-control-label\x22 for=\x22"+arr[i].name+"\x22>Select</label>" +
+                    "</div>" +
+                    "</div>" +
+                    "<div class=\x22card-body\x22 style=\x22width:300px; height:200;\x22>" + //embedded
+                        "<button class=\x22btn btn-md btn-info\x22 onclick=previewSplat("+JSON.stringify(splatObj)+")>Preview Splat</button><br><br>"+
+                        "<strong>" + nameSplitter(arr[i].name) +"</strong>" + 
+                        "<br>" + convertTimestamp(dateSplitter(arr[i].name)) +
+                    "</div>" +
+                "</div>";
             }  else if (ext == "usdz") {
                 usdzIndex++;
                 // const usdzObj = arr[i];
@@ -1259,25 +1277,42 @@
             camera +
             "<a-assets>" +
                 "<a-asset-item id='glb' src='"+ jsonObj.url +"' response-type='arraybuffer'></a-asset-item>" +
-                // "<a-cubemap><img id='envMap_1' crossorigin='anonymous' src='https://archive1.s3.amazonaws.com/staging/5150540ab038969c24000008/cubemaps/5ec29e986757cf21f5633c89_1.jpg'>" +
-                //     "<img id='envMap_2' crossorigin='anonymous' src='https://archive1.s3.amazonaws.com/staging/5150540ab038969c24000008/cubemaps/5ec29e986757cf21f5633c89_2.jpg'>" +
-                //     "<img id='envMap_3' crossorigin='anonymous' src='https://archive1.s3.amazonaws.com/staging/5150540ab038969c24000008/cubemaps/5ec29e986757cf21f5633c89_3.jpg'>" +
-                //     "<img id='envMap_4' crossorigin='anonymous' src='https://archive1.s3.amazonaws.com/staging/5150540ab038969c24000008/cubemaps/5ec29e986757cf21f5633c89_4.jpg'>" +
-                //     "<img id='envMap_5' crossorigin='anonymous' src='https://archive1.s3.amazonaws.com/staging/5150540ab038969c24000008/cubemaps/5ec29e986757cf21f5633c89_5.jpg'>" +
-                //     "<img id='envMap_6' crossorigin='anonymous' src='https://archive1.s3.amazonaws.com/staging/5150540ab038969c24000008/cubemaps/5ec29e986757cf21f5633c89_6.jpg'>" +
-                // "</a-cubemap>" +
+               
             "</a-assets>" + 
             "<a-entity position='0 4 0' gltf-model='#glb' skybox-env-map shadow='receive: true'></a-entity>" +
             "<a-light type='ambient'></a-light>"+
             "<a-light type='directional' 'castShadow=true' position='1 11 1'></a-light>"+
             // "<a-light type='ambient'></a-light>"+
             "</a-scene></div>";
-            // "<a-entity geometry=\x22primitive: plane; height: auto; width: auto\x22 material=\x22color: blue\x22 "+
-            //     "text=\x22width: 4; value: "+jsonObj.name+"\x22></a-entity>";
-            // "</a-scene></div>";
+
             console.log(aframeScene);
-        // $("#aframeModal").modal();
-        // $("#aframeScene").html(aframeScene);
+
+        $("#topPage").show();
+        $("#topPage").html(aframeScene);
+    }
+    function previewSplat(objectString) {
+        console.log(objectString);
+        let jsonObj = objectString;
+        // let jsonObj = JSON.parse(objectString);
+        console.log(jsonObj.name + " " + jsonObj.url);
+        let camera = "<a-entity id='cameraRig' position='0 6 6'>"+  
+        "<a-entity camera touch-controls wasd-controls='fly: true;' look-controls position='0 0 0'></a-entity>"+
+        "</a-entity>";
+        let aframeScene = "<div style='width: 100%; height: 1000px;'>"+jsonObj.name+"<a-scene disable-magicwindow device-orientation-permission-ui=\x22enabled: false\x22 embedded environment='preset: default;'>" +
+            // "<a-entity camera look-controls orbit-controls='target: 0 1 -5; minDistance: 0.5; maxDistance: 100; initialPosition: 0 0 0'></a-entity>"+
+            camera +
+            "<a-assets>" +
+                "<a-asset-item id='splat' src='"+ jsonObj.url +"' response-type='arraybuffer'></a-asset-item>" +
+               
+            "</a-assets>" + 
+            "<a-entity position='0 4 0' gltf-model='#glb' skybox-env-map shadow='receive: true'></a-entity>" +
+            "<a-light type='ambient'></a-light>"+
+            "<a-light type='directional' 'castShadow=true' position='1 11 1'></a-light>"+
+            // "<a-light type='ambient'></a-light>"+
+            "</a-scene></div>";
+
+            console.log(aframeScene);
+
         $("#topPage").show();
         $("#topPage").html(aframeScene);
     }

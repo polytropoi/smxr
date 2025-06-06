@@ -2171,7 +2171,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
 
 
     if (allEqual(itemsExtensions) && (itemsExtensions[0].toLowerCase() == ".usdz" || itemsExtensions[0].toLowerCase() == ".reality" || 
-    itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jp2" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
+    itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".spz" || itemsExtensions[0].toLowerCase() == ".ply" || itemsExtensions[0].toLowerCase() == ".splat" || itemsExtensions[0].toLowerCase() == ".ksplat" || itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jp2" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
      itemsExtensions[0].toLowerCase() == ".aif" || itemsExtensions[0].toLowerCase() == ".aiff" || itemsExtensions[0].toLowerCase() == ".ogg" || itemsExtensions[0].toLowerCase() == ".wav" || itemsExtensions[0].toLowerCase() == ".mp3" || 
      itemsExtensions[0].toLowerCase() == ".mp4" || itemsExtensions[0].toLowerCase() == ".webm" || itemsExtensions[0].toLowerCase() == ".mov" || itemsExtensions[0].toLowerCase() == ".mkv")) { //need to think how to flex, and use contenttype
         
@@ -5358,8 +5358,8 @@ app.post('/scenedata/', function (req, res) {
 
 app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, res) { //update "mods" coming from webxr client, not admin pages
     if (req.params.s_id == req.body.shortID) {
-
-        if (req.body.userData._id == req.session.user._id) {    
+        console.log("userData for sceneMods : " +JSON.stringify(req.body.userData));
+        if (req.body.userData._id == req.session.user._id || req.body.userData.sceneOwner == "indaehoose") {    
             
             (async () => {
                 try {

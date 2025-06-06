@@ -196,6 +196,7 @@ webxr_router.get('/:_id', function (req, res) {
   
     var gltfsAssets = "";
     var gltfsEntities = "";
+    let splatEls = "";
     let weblinkAssets = "";
     let weblinkEntities = "";
     let shaderScripts = "";
@@ -248,6 +249,7 @@ webxr_router.get('/:_id', function (req, res) {
     let contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content-utils.js\x22 defer=\x22defer\x22></script>"; 
     let modObjex = "<script type=\x22module\x22 src=\x22../main/src/component/mod_objex.js\x22 defer=\x22defer\x22></script>"; 
     let modModels = "<script type=\x22module\x22 src=\x22../main/src/component/mod_models.js\x22 defer=\x22defer\x22></script>"; 
+    let modSplats = "<script type=\x22module\x22 src=\x22../main/src/component/mod_splats.js\x22 defer=\x22defer\x22></script>"; 
     let videosphereAsset = "";
     let webcamAsset = "";
     let textEntities = "";
@@ -434,7 +436,7 @@ webxr_router.get('/:_id', function (req, res) {
                         importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + //TODO use new aframe module, and externalize this !!!!!!!
                             //still causes duplicate engine loading, but...
                         "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/build/three.module.js\x22,"+
-                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22"+
+                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22,"+
                         "\x22@forge-gfx/forge\x22: \x22https://forge.dev/releases/forge/0.1.0/forge.module.js\x22"+                
                     
                         "}"+
@@ -515,8 +517,8 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("aframe master")) {
                         // aframeScript = "<script src=\x22https://cdn.jsdelivr.net/gh/aframevr/aframe@744e2b869e281f840cff7d9cb02e95750ce90920/dist/aframe-master.min.js\x22></script>"; //ref 20220715// nope!
-                        aframeScript = "<script src=\x22https://cdn.jsdelivr.net/gh/aframevr/aframe@388a47f384feccad2b0d38985f67c441222388e2/dist/aframe-master.min.js\x22></script>"; //ref 20231103 (integrated hands!)
-                        threejsVersion = "173";
+                        aframeScript = "<script src=\x22https://cdn.jsdelivr.net/gh/aframevr/aframe@edca48b2e71a0838690c7541fab5ede279def7a1/dist/aframe-master.min.js\x22></script>"; //ref 20231103 (integrated hands!)
+                        threejsVersion = "175";
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("webgpu")) {
                         aframeScript = "";
@@ -696,6 +698,7 @@ webxr_router.get('/:_id', function (req, res) {
                         sceneResponse.sceneLocations[i].objectID != "none" && sceneResponse.sceneLocations[i].objectID.length > 8) { //attaching object to location 
                         sceneObjectLocations.push(sceneResponse.sceneLocations[i]);
                     }
+                    // console.log("sceneResponse.sceneLocations[i].model : "+ sceneResponse.sceneLocations[i].model);
                     if (sceneResponse.sceneLocations[i].model != undefined && sceneResponse.sceneLocations[i].model != "none" && sceneResponse.sceneLocations[i].model) { //new way of attaching gltf to location w/out object
                         sceneModelLocations.push(sceneResponse.sceneLocations[i]);
                     } 
@@ -1868,7 +1871,7 @@ webxr_router.get('/:_id', function (req, res) {
                 // if ((locMdl.eventData != null && locMdl.eventData != undefined && locMdl.eventData.length > 1) && (!locMdl.eventData.includes("noweb"))) {
 
                 //filter out cloudmarker types
-                // console.log(locMdl.modelID + " locname " + locMdl.name + " timestamp " + locMdl.timestamp + " markerType " + locMdl.markerType + " sceneModels " + JSON.stringify(sceneResponse.sceneModels));
+                console.log(locMdl.modelID + " locname " + locMdl.name + " timestamp " + locMdl.timestamp + " markerType " + locMdl.markerType + " sceneModels " + JSON.stringify(sceneResponse.sceneModels));
                 if (locMdl.modelID != undefined && locMdl.modelID != "undefined" && locMdl.modelID != "none" && locMdl.modelID != "" && locMdl.markerType != "placeholder"
                     && ObjectId.isValid(locMdl.modelID) //easier to say what it is rather than isn't...
                     && locMdl.markerType != "poi"
@@ -2223,8 +2226,10 @@ webxr_router.get('/:_id', function (req, res) {
                             usdzModel = modelURL;
                             
                         } else if (model != null && model.item_type == "splat") {//not locmdl glb
-                        
-                            //TODO SPLATTING!
+                            let splatURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
+                            console.log("splatURL " + splatURL + " modelType " + model.item_type);
+                            splatEls = splatEls + "<a-entity mod_splat=\x22url: "+splatURL+"\x22></a-entity>";
+
                         }
 
                         
@@ -3463,6 +3468,7 @@ webxr_router.get('/:_id', function (req, res) {
                         aframeScript + 
                         modObjex +
                         modModels +
+                        modSplats +
                         extraScripts + 
                         contentUtils +
                       
@@ -3700,6 +3706,7 @@ webxr_router.get('/:_id', function (req, res) {
                         ARScript +
                         // cameraEnvMap +
                         modModels +
+                        modSplats +
                         modObjex +
 
                         contentUtils +
@@ -3819,6 +3826,7 @@ webxr_router.get('/:_id', function (req, res) {
                         renderPanel +
                         weblinkEntities +
                         gltfsEntities + 
+                        splatEls +
                         skyParticles +
                         imageEntities +
                         externalEntities +

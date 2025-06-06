@@ -121,6 +121,10 @@ AFRAME.registerComponent('mod_model', {
         if (this.data.tags.toLowerCase().includes('beat') || this.data.eventData.toLowerCase().includes('beat')) {
           this.el.classList.add('beatme');
         }
+        if (this.data.tags.toLowerCase().includes('splat') || this.data.eventData.toLowerCase().includes('splat')) {
+          console.log("tryna load a splat!");
+          this.el.setAttribute("mod_splat", "");
+        }
         // if (JSON.stringify(this.data.eventData).includes("beat")) {
         //   console.log ("adding class beatmee");
         //   this.el.classList.add("beatme");
