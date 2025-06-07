@@ -1,6 +1,10 @@
-import { InitIDB, SaveLocalData, DeleteLocalSceneData, hasLocalData, SetHasLocalData } from "../connect/indexedDb.js";
+/* global AFRAME, THREE */
+// import * as THREE from "three";
+// import AFRAME from 'aframe';
+
+import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData } from "../connect/indexedDb.js";
 // import { matrixClient } from "../connect/matrix.js";
-import { youtubePlayer, youtubeIsPlaying, primaryAudioEl } from "../../main/src/component/content-utils.js";
+import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
@@ -17,7 +21,7 @@ export let sceneLocations = {locations: [], locationMods: []};
 export let settings; //push this to an aframe component for fetching...
 export let attributions = [];
 export var videoEl = null;
-export const mouse = new THREE.Vector2();
+// export const mouse = new THREE.Vector2();
 export const sceneEl = document.querySelector('a-scene');
 // export let hasLocalData = false;
 export const lerp = (x, y, a) => x * (1 - a) + y * a;
@@ -50,7 +54,7 @@ export let tkStarttimes = [];
 
 export let poiLocations = [];
 export let curveLocations = [];
-let cloudMarkers = []; //???? unused>?
+export let cloudMarkers = []; //???? unused>?//nope
 export let sceneModels = [];
 
 let localKeys = [];
@@ -1729,115 +1733,115 @@ function tcheck () {
 
 if (sceneEl != null) {
 
-   AFRAME.registerComponent('location_data', { //initial loading of "official" location data from cloud, embedded in server response
-      schema: {
-      initialized: {default: ''},
-      jsonData: {default: ''},
-      youtubePosition: {type: 'vec3', default: {x: 0, y: 1, z: -5}} 
+   // AFRAME.registerComponent('location_data', { //initial loading of "official" location data from cloud, embedded in server response
+   //    schema: {
+   //    initialized: {default: ''},
+   //    jsonData: {default: ''},
+   //    youtubePosition: {type: 'vec3', default: {x: 0, y: 1, z: -5}} 
        
-      },
-      init: function() {
+   //    },
+   //    init: function() {
 
-            let theData = this.el.getAttribute('data-locations');
-            // console.log("location_data el" + this.el.id);
-            // let locations = [];
-            this.data.jsonData = JSON.parse(atob(theData)); //convert from base64
-            // this.rEl = null;
-            // if (localData != "") {
-            if (this.data.jsonData.length) {
-            for (let i = 0; i < this.data.jsonData.length; i++) {
-               let locItem = this.data.jsonData[i];
-               sceneLocations.locations.push(locItem);
-               // localData.locations.push(locItem);
-               if (locItem.markerType != undefined) {
-                  if (locItem.markerType.toLowerCase().includes("youtube")) {
-                     this.data.youtubePosition.x = locItem.x;
-                     this.data.youtubePosition.y = locItem.y; 
-                     this.data.youtubePosition.z = locItem.z;
-                     // console.log("YOTUBE POSOTION: " +JSON.stringify(this.data.youtubePosition));
-                  }
-                  if (locItem.markerType == "poi") {
-                     let nextbuttonEl = document.getElementById('nextButton');
-                     let prevbuttonEl = document.getElementById('previousButton');
-                     nextbuttonEl.style.visibility = "visible";
-                     prevbuttonEl.style.visibility = "visible";
-                     poiLocations.push(locItem);
-                  }
-                  if (locItem.markerType == "curve point") {
-                     // let nextbuttonEl = document.getElementById('nextButton');
-                     // let prevbuttonEl = document.getElementById('previousButton');
-                     // nextbuttonEl.style.visibility = "visible";
-                     // prevbuttonEl.style.visibility = "visible";
-                     curveLocations.push(locItem);
-                  }
-                  if (locItem.markerType.toLowerCase().includes("placeholder") ||
-                     locItem.markerType.toLowerCase().includes("poi") ||
-                     // locItem.markerType.toLowerCase().includes("poi") ||
-                     locItem.markerType.toLowerCase().includes("gate") || 
-                     locItem.markerType.toLowerCase().includes("portal") || 
-                     locItem.markerType.toLowerCase().includes("mailbox") || 
-                     locItem.markerType.toLowerCase().includes("waypoint")) {
-                     cloudMarkers.push(locItem);
+   //          let theData = this.el.getAttribute('data-locations');
+   //          // console.log("location_data el" + this.el.id);
+   //          // let locations = [];
+   //          this.data.jsonData = JSON.parse(atob(theData)); //convert from base64
+   //          // this.rEl = null;
+   //          // if (localData != "") {
+   //          if (this.data.jsonData.length) {
+   //          for (let i = 0; i < this.data.jsonData.length; i++) {
+   //             let locItem = this.data.jsonData[i];
+   //             sceneLocations.locations.push(locItem);
+   //             // localData.locations.push(locItem);
+   //             if (locItem.markerType != undefined) {
+   //                if (locItem.markerType.toLowerCase().includes("youtube")) {
+   //                   this.data.youtubePosition.x = locItem.x;
+   //                   this.data.youtubePosition.y = locItem.y; 
+   //                   this.data.youtubePosition.z = locItem.z;
+   //                   // console.log("YOTUBE POSOTION: " +JSON.stringify(this.data.youtubePosition));
+   //                }
+   //                if (locItem.markerType == "poi") {
+   //                   let nextbuttonEl = document.getElementById('nextButton');
+   //                   let prevbuttonEl = document.getElementById('previousButton');
+   //                   nextbuttonEl.style.visibility = "visible";
+   //                   prevbuttonEl.style.visibility = "visible";
+   //                   poiLocations.push(locItem);
+   //                }
+   //                if (locItem.markerType == "curve point") {
+   //                   // let nextbuttonEl = document.getElementById('nextButton');
+   //                   // let prevbuttonEl = document.getElementById('previousButton');
+   //                   // nextbuttonEl.style.visibility = "visible";
+   //                   // prevbuttonEl.style.visibility = "visible";
+   //                   curveLocations.push(locItem);
+   //                }
+   //                if (locItem.markerType.toLowerCase().includes("placeholder") ||
+   //                   locItem.markerType.toLowerCase().includes("poi") ||
+   //                   // locItem.markerType.toLowerCase().includes("poi") ||
+   //                   locItem.markerType.toLowerCase().includes("gate") || 
+   //                   locItem.markerType.toLowerCase().includes("portal") || 
+   //                   locItem.markerType.toLowerCase().includes("mailbox") || 
+   //                   locItem.markerType.toLowerCase().includes("waypoint")) {
+   //                   cloudMarkers.push(locItem);
                   
-                  }
+   //                }
             
-               }
-               if (i == this.data.jsonData.length - 1) {
-                  sceneEl.removeAttribute("keyboard-shortcuts");
-                  // if (settings.allowMods) {
-                     this.waitAndInitLocalDB();     
-                     console.log("poiLocations " + JSON.stringify(poiLocations));        
-                     // InitIDB();
-                  // }
-               }
-            }
-         } else {
-            if (!AFRAME.utils.device.isMobile()) {
-               InitIDB();
-            } else {
-               InitCurves(); //this is called from InitDB above if not mobile
-            }
-         }
+   //             }
+   //             if (i == this.data.jsonData.length - 1) {
+   //                sceneEl.removeAttribute("keyboard-shortcuts");
+   //                // if (settings.allowMods) {
+   //                   this.waitAndInitLocalDB();     
+   //                   console.log("poiLocations " + JSON.stringify(poiLocations));        
+   //                   // InitIDB();
+   //                // }
+   //             }
+   //          }
+   //       } else {
+   //          if (!AFRAME.utils.device.isMobile()) {
+   //             InitIDB();
+   //          } else {
+   //             InitCurves(); //this is called from InitDB above if not mobile
+   //          }
+   //       }
           
-      }, 
-      returnYouTubePosition: function() {
-         return this.data.youtubePosition;
-      },
-      waitAndInitLocalDB: function () {
-         setTimeout( function() {
-            if (settings && settings.allowMods && !AFRAME.utils.device.isMobile()) {
-               InitIDB();
-            }
-         }, 3000);
-      },
-      // applyLocalDataToCloudElement: function (locationKey) {
-      //    for 
-      // },
-      updateSceneLocationData: function() {
+   //    }, 
+   //    returnYouTubePosition: function() {
+   //       return this.data.youtubePosition;
+   //    },
+   //    waitAndInitLocalDB: function () {
+   //       setTimeout( function() {
+   //          if (settings && settings.allowMods && !AFRAME.utils.device.isMobile()) {
+   //             InitIDB();
+   //          }
+   //       }, 3000);
+   //    },
+   //    // applyLocalDataToCloudElement: function (locationKey) {
+   //    //    for 
+   //    // },
+   //    updateSceneLocationData: function() {
 
-         let thedata = JSON.parse(JSON.stringify(localData.locations));
-      // let length = thedata.length;
-      console.log(thedata.length + " local sceneLocations " + JSON.stringify(thedata));
-      //    console.log(JSON.stringify(sceneLocations));
-         for (let i = 0; thedata.length; i++) {
-            // UpdateLocation(sceneLocations.locations[i]);
-            if (thedata[i] != undefined) {
-               let ts = sceneLocations.locations[i].phID;
-               let rEl = document.getElementById(ts);
-               if (rEl) {
-                  console.log("gotsa element with id " + JSON.stringify(thedata[i]));
-                  // let obj = rEl.getObject3D('mesh');
-                  // obj.position.set({x: sceneLocations.locations[i].x, y: sceneLocations.locations[i].y, z: sceneLocations.locations[i].z });
-                  // obj.rotation.set({x: sceneLocations.locations[i].eulerx, y: sceneLocations.locations[i].eulery, z: sceneLocations.locations[i].eulerz });
-                  //    // obj.scale.set({x: sceneLocations.locations[i].markerObjScale, y: sceneLocations.locations[i].markerObjScale, z: sceneLocations.locations[i].markerObjScale});
-                  // rEl.setAttribute("position", {x: sceneLocations.locations[i].x, y: sceneLocations.locations[i].y, z: sceneLocations.locations[i].z });
-                  // rEl.setAttribute("rotation", {x: sceneLocations.locations[i].eulerx, y: sceneLocations.locations[i].eulery, z: sceneLocations.locations[i].eulerz });
-                  // rEl.setAttribute("scale", {x: sceneLocations.locations[i].markerObjScale, y: sceneLocations.locations[i].markerObjScale, z: sceneLocations.locations[i].markerObjScale});
-               }
-            }
-         }
-      }
-   });
+   //       let thedata = JSON.parse(JSON.stringify(localData.locations));
+   //    // let length = thedata.length;
+   //    console.log(thedata.length + " local sceneLocations " + JSON.stringify(thedata));
+   //    //    console.log(JSON.stringify(sceneLocations));
+   //       for (let i = 0; thedata.length; i++) {
+   //          // UpdateLocation(sceneLocations.locations[i]);
+   //          if (thedata[i] != undefined) {
+   //             let ts = sceneLocations.locations[i].phID;
+   //             let rEl = document.getElementById(ts);
+   //             if (rEl) {
+   //                console.log("gotsa element with id " + JSON.stringify(thedata[i]));
+   //                // let obj = rEl.getObject3D('mesh');
+   //                // obj.position.set({x: sceneLocations.locations[i].x, y: sceneLocations.locations[i].y, z: sceneLocations.locations[i].z });
+   //                // obj.rotation.set({x: sceneLocations.locations[i].eulerx, y: sceneLocations.locations[i].eulery, z: sceneLocations.locations[i].eulerz });
+   //                //    // obj.scale.set({x: sceneLocations.locations[i].markerObjScale, y: sceneLocations.locations[i].markerObjScale, z: sceneLocations.locations[i].markerObjScale});
+   //                // rEl.setAttribute("position", {x: sceneLocations.locations[i].x, y: sceneLocations.locations[i].y, z: sceneLocations.locations[i].z });
+   //                // rEl.setAttribute("rotation", {x: sceneLocations.locations[i].eulerx, y: sceneLocations.locations[i].eulery, z: sceneLocations.locations[i].eulerz });
+   //                // rEl.setAttribute("scale", {x: sceneLocations.locations[i].markerObjScale, y: sceneLocations.locations[i].markerObjScale, z: sceneLocations.locations[i].markerObjScale});
+   //             }
+   //          }
+   //       }
+   //    }
+   // });
 
 
 }
@@ -2591,54 +2595,54 @@ function Disconnect() {
 
 if (sceneEl != null) {
 
-AFRAME.registerComponent("hide-on-hit-test-start", {
-init: function() {
-   var self = this;
-   this.el.sceneEl.addEventListener("ar-hit-test-start", function() {
-      console.log("tryna hide for ar " + this.el.id);
-      self.el.object3D.visible = false;
-   });
-   this.el.sceneEl.addEventListener("exit-vr", function() {
-      self.el.object3D.visible = true;
-   });
-}
-});
+// AFRAME.registerComponent("hide-on-hit-test-start", {
+// init: function() {
+//    var self = this;
+//    this.el.sceneEl.addEventListener("ar-hit-test-start", function() {
+//       console.log("tryna hide for ar " + this.el.id);
+//       self.el.object3D.visible = false;
+//    });
+//    this.el.sceneEl.addEventListener("exit-vr", function() {
+//       self.el.object3D.visible = true;
+//    });
+// }
+// });
 
-AFRAME.registerComponent('create_avatars', {
-   schema: {
-     isNew: {default: ''}
-   },
-   init: function() {
+// AFRAME.registerComponent('create_avatars', {
+//    schema: {
+//      isNew: {default: ''}
+//    },
+//    init: function() {
      
-   },
-   createAvatar: function (key) {
-     console.log("tryna createAvatar");
-   //   var sceneEl = document.querySelector('a-scene');
-   //   let phEl = document.createElement("a-entity");
+//    },
+//    createAvatar: function (key) {
+//      console.log("tryna createAvatar");
+//    //   var sceneEl = document.querySelector('a-scene');
+//    //   let phEl = document.createElement("a-entity");
      
-   //   phEl.setAttribute('moveable-placeholder', {isNew: true, name: 'new location'});
-   //   // phEl.setAttribute('isNew', true);
-   //   sceneEl.appendChild(phEl);
-   let avatar = document.createElement("a-entity"); //this make bad!
-   // let avatar = sceneEl.createElement("a-entity");
-   // avatar.setAttribute('avatar-pos-rot');
-   avatar.classList.add("avatar");
-   let userSplit = roomUsers[key].split("~"); //color appended to username after tilde on server
-   let color = "blue";
-   if (userSplit.length > 1) {
-      color = userSplit[1];
-      if (!color.includes("#")) {
-         color = "#" + color;
-      }
-   }
-   avatar.setAttribute('avatar-callout', {'calloutString': userSplit[0], 'hexColor': color});
-   // avatar.setAttribute('lerp', {});
-   avatar.setAttribute('mover', 'eltype', 'avatar');   
-   avatar.id = key; //assign id for #lookups
-   this.el.sceneEl.appendChild(avatar);
+//    //   phEl.setAttribute('moveable-placeholder', {isNew: true, name: 'new location'});
+//    //   // phEl.setAttribute('isNew', true);
+//    //   sceneEl.appendChild(phEl);
+//    let avatar = document.createElement("a-entity"); //this make bad!
+//    // let avatar = sceneEl.createElement("a-entity");
+//    // avatar.setAttribute('avatar-pos-rot');
+//    avatar.classList.add("avatar");
+//    let userSplit = roomUsers[key].split("~"); //color appended to username after tilde on server
+//    let color = "blue";
+//    if (userSplit.length > 1) {
+//       color = userSplit[1];
+//       if (!color.includes("#")) {
+//          color = "#" + color;
+//       }
+//    }
+//    avatar.setAttribute('avatar-callout', {'calloutString': userSplit[0], 'hexColor': color});
+//    // avatar.setAttribute('lerp', {});
+//    avatar.setAttribute('mover', 'eltype', 'avatar');   
+//    avatar.id = key; //assign id for #lookups
+//    this.el.sceneEl.appendChild(avatar);
    
-   }
- });
+//    }
+//  });
 }
 function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, just make this a component function, to avoid creating a-entities outside of aframe
    console.log("tryna UpdatePlayerAvatars" + JSON.stringify(roomUsers));

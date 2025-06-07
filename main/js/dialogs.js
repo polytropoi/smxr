@@ -120,7 +120,7 @@ window.addEventListener( 'keydown',  ( event ) => {
     case 27: // Esc
       // ShowHideDialogPanel();
       ToggleTransformControls();
-      allowCameraLock = !allowCameraLock;
+      // allowCameraLock = !allowCameraLock;
 
       break;
     }

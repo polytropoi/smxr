@@ -246,10 +246,12 @@ webxr_router.get('/:_id', function (req, res) {
     let carLocation = "";
     let cameraEnvMap = "";
     // let cubeMapAsset = ""; //deprecated, all at runtime now..
-    let contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content-utils.js\x22 defer=\x22defer\x22></script>"; 
+    let ts = Date.now();
+    // let contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content-utils.js?v="+ts+"\x22></script>"; 
+    let contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content-utils.js\x22></script>"; 
     let modObjex = "<script type=\x22module\x22 src=\x22../main/src/component/mod_objex.js\x22 defer=\x22defer\x22></script>"; 
     let modModels = "<script type=\x22module\x22 src=\x22../main/src/component/mod_models.js\x22 defer=\x22defer\x22></script>"; 
-    let modSplats = "<script type=\x22module\x22 src=\x22../main/src/component/mod_splats.js\x22 defer=\x22defer\x22></script>"; 
+    let modSplats = ""; 
     let videosphereAsset = "";
     let webcamAsset = "";
     let textEntities = "";
@@ -435,12 +437,15 @@ webxr_router.get('/:_id', function (req, res) {
                         
                         importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + //TODO use new aframe module, and externalize this !!!!!!!
                             //still causes duplicate engine loading, but...
-                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/build/three.module.js\x22,"+
-                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22,"+
+                        "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  
+                        "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
+                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
                         "\x22@forge-gfx/forge\x22: \x22https://forge.dev/releases/forge/0.1.0/forge.module.js\x22"+                
                     
                         "}"+
                         "}</script>";
+                        aframeScript = "";
+                        contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content_utils_esm.js\x22 defer=\x22defer\x22></script>"; 
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("show camera")) {
                         sceneResponse.showCameraIcon = true;
@@ -535,6 +540,8 @@ webxr_router.get('/:_id', function (req, res) {
                         "<script type=\x22module\x22>import AFRAME from 'aframe';import THREE from 'three';"+
                                                     "import { color, cos, float, mix, range, sin, time, uniform, uv, vec3, vec4, PI2 } from 'three/tsl';"+
                         "</script>";
+                        aframeScript = "";
+                        contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
                         
                     }
                     
@@ -1157,7 +1164,7 @@ webxr_router.get('/:_id', function (req, res) {
                 ///////////////// - Orbit camera - /////////////////
                 } else if (sceneResponse.sceneCameraMode != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase().includes("orbit")) { //hrm..
                     wasd = "";
-                    cameraRigEntity = "<a-entity camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; minDistance: 0.5; maxDistance: 180; initialPosition: "+playerPosition+"\x22>"+
+                    cameraRigEntity = "<a-entity camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; enablePan: true; screenSpacePanning: true; minDistance: 0.5; maxDistance: 180; initialPosition: "+playerPosition+"\x22>"+
                     "<a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
                     "</a-entity>";
                     joystickScript = "<script src=\x22https://cdn.jsdelivr.net/gh/diarmidmackenzie/superframe@fix-orbit-controls/components/orbit-controls/dist/aframe-orbit-controls.min.js\x22></script>";
@@ -2226,9 +2233,10 @@ webxr_router.get('/:_id', function (req, res) {
                             usdzModel = modelURL;
                             
                         } else if (model != null && model.item_type == "splat") {//not locmdl glb
+                            modSplats = "<script type=\x22module\x22 src=\x22../main/src/component/mod_splats.js\x22 defer=\x22defer\x22></script>"; 
                             let splatURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
                             console.log("splatURL " + splatURL + " modelType " + model.item_type);
-                            splatEls = splatEls + "<a-entity mod_splat=\x22url: "+splatURL+"\x22></a-entity>";
+                            splatEls = splatEls + "<a-entity mod_splat=\x22url: "+splatURL+"; xpos: "+locMdl.x+"; ypos: "+locMdl.y+"; zpos: "+locMdl.z+"; xscale: "+locMdl.xscale+"; yscale: "+locMdl.yscale+"; zscale: "+locMdl.zscale+"\x22></a-entity>";
 
                         }
 
@@ -3466,11 +3474,12 @@ webxr_router.get('/:_id', function (req, res) {
                         settingsData +
                         sceneTimedEventsData +
                         aframeScript + 
+                        contentUtils +
                         modObjex +
                         modModels +
                         modSplats +
                         extraScripts + 
-                        contentUtils +
+
                       
                         hlsScript +
                         "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js\x22></script>"+
@@ -3517,6 +3526,13 @@ webxr_router.get('/:_id', function (req, res) {
                         let hasParametricCurve = false;
                         let obbDebug = ""; //to show obb colliders, physics collider debug set elsewhere...
                        
+                        let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
+                        let particleScript = "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>";
+                        if (aframeScript == "") { //i.e. it's in the importmap!
+                            particleScript = "";
+                            aframeExtrasScript = "";
+                            blinkScript = "";
+                        }
                         if (!showTransport) {
                             transportButtons = "";
                         }
@@ -3675,7 +3691,8 @@ webxr_router.get('/:_id', function (req, res) {
                         "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
                         
                         aframeScript +
-                        "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>"+
+                        contentUtils +
+                        troikaScript +
                         physicsScripts +
                         logScripts +
                         aframeExtrasScript +
@@ -3709,7 +3726,7 @@ webxr_router.get('/:_id', function (req, res) {
                         modSplats +
                         modObjex +
 
-                        contentUtils +
+
                         audioVizScript +
                         meshUtilsScript +
                         synthScripts +
@@ -3718,7 +3735,8 @@ webxr_router.get('/:_id', function (req, res) {
                       
 
                         ///TODO make these conditional
-                        "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>"+
+
+                        particleScript +
                         "<script type=\x22module\x22 src=\x22../main/src/component/spawn-in-circle.js\x22></script>"+
                         "<script src=\x22https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js\x22></script>"+
                         "<script type=\x22module\x22 src=\x22../main/src/shaders/aframe/aframe-makewaves-shader.js\x22></script>"+

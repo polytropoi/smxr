@@ -1204,9 +1204,21 @@ app.get("/qrcode_url/:code", function (req, res) {
 });
 app.get("/qrcode_tls/:code", function (req, res) {
     var options = {scale: 10, width: 1024}
-    var s = "https://" + encodeURI(req.params.code);
-    console.log(s);
+    
+    let fullpath = req.url.toString();
+     let s = "https://" + fullpath.substring(12);
+
+    // var s = "https://" + encodeURI(req.params.code);
+    console.log(fullpath + " qr fr " + s);
     QRCode.toDataURL(s, options, function (err, url) {
+        var imgLink = "<div style=\x22width: 100%; top-margin: 10px; text-align: center;\x22><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
+        res.send(imgLink);
+    });
+});
+app.post("/qrcode_post", function (req, res) {
+        var options = {scale: 10, width: 1024}
+    console.log("qrcode for " + req.body.url);
+        QRCode.toDataURL(req.body.url, options, function (err, url) {
         var imgLink = "<div style=\x22width: 100%; top-margin: 10px; text-align: center;\x22><img width=\x22auto\x22 height=\x22100%\x22 style=\x22display: block;\x22 alt=\x22qrcode\x22 src=\x22" + url + "\x22/></div>"
         res.send(imgLink);
     });

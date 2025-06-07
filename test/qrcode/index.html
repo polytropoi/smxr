@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>qrcode</title>
+  <style> body {margin: 0;} </style>
+</head>
+  <body>
+
+  <script>
+    
+    fetchQRCode("https://www.meta.com/experiences/app/24403887615923503/?utm_source=oculus&utm_medium=share");
+function fetchQRCode (url) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", '/qrcode_post/', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(JSON.stringify({url: url}));
+  xhr.onload = function () {
+    // do something to response
+    console.log("qrcode " + this.responseText);
+    // this.loadTextData(this.responseText);
+    const imageDiv = document.getElementById("qrcode_image");
+    imageDiv.innerHTML = this.responseText;
+    // this.responseText;
+
+  };
+}
+  </script>
+  <div id="qrcode_image"></div>
+  </body>
+</html>

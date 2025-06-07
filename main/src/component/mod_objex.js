@@ -442,30 +442,34 @@ AFRAME.registerComponent('mod_objex', {
           this.dropPos = new THREE.Vector3();
           this.objEl = document.createElement("a-entity");
           this.equipHolder = document.getElementById("equipPlaceholder");
-          // this.equipHolder.object3D.getWorldPosition( this.dropPos );
-          this.locData = {};
-          // this.locData.x = this.dropPos.x;
-          // this.locData.y = this.dropPos.y;
-          // this.locData.z = this.dropPos.z;
-          this.locData.x = 0;
-          this.locData.y = 0;
-          this.locData.z = 0;
-          this.locData.locationTags = tags;
-          this.locData.eventData = eventData;
-          this.locData.markerObjScale = (this.objectData.objScale != undefined && this.objectData.objScale != "") ? this.objectData.objScale : 1; //these come from objectData, not locData
-          this.locData.eulerx = (this.objectData.eulerx != undefined && this.objectData.eulerx != "") ? this.objectData.eulerx : 0;
-          this.locData.eulery = (this.objectData.eulery != undefined && this.objectData.eulery != "") ? this.objectData.eulery : 0;
-          this.locData.eulerz = (this.objectData.eulerz != undefined && this.objectData.eulerz != "") ? this.objectData.eulerz : 0;
-          this.locData.timestamp = Date.now();
-          this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData, 'isEquipped': true, 'isSpawned': true});
-          this.objEl.id = "obj" + this.objectData._id + "_" + this.locData.timestamp;
-          
-          this.objEl.classList.add('equipped');
-          
-          this.objEl.classList.add('activeObjexRay');
-          this.equipHolder.appendChild(this.objEl); //parent to equip holder instead of scene as below
-          const updoc = {"equipped": true, "objectID": objectID, "objectName": this.objectData.name , "tags": tags, "eventData": eventData}; //saved to profile.equipment.main
-          UpdateLocalEquipment(updoc);
+          if (this.equipHolder) {
+            // this.equipHolder.object3D.getWorldPosition( this.dropPos );
+            this.locData = {};
+            // this.locData.x = this.dropPos.x;
+            // this.locData.y = this.dropPos.y;
+            // this.locData.z = this.dropPos.z;
+            this.locData.x = 0;
+            this.locData.y = 0;
+            this.locData.z = 0;
+            this.locData.locationTags = tags;
+            this.locData.eventData = eventData;
+            this.locData.markerObjScale = (this.objectData.objScale != undefined && this.objectData.objScale != "") ? this.objectData.objScale : 1; //these come from objectData, not locData
+            this.locData.eulerx = (this.objectData.eulerx != undefined && this.objectData.eulerx != "") ? this.objectData.eulerx : 0;
+            this.locData.eulery = (this.objectData.eulery != undefined && this.objectData.eulery != "") ? this.objectData.eulery : 0;
+            this.locData.eulerz = (this.objectData.eulerz != undefined && this.objectData.eulerz != "") ? this.objectData.eulerz : 0;
+            this.locData.timestamp = Date.now();
+            this.objEl.setAttribute("mod_object", {'eventData': null, 'locationData': this.locData, 'objectData': this.objectData, 'isEquipped': true, 'isSpawned': true});
+            this.objEl.id = "obj" + this.objectData._id + "_" + this.locData.timestamp;
+            
+            this.objEl.classList.add('equipped');
+            
+            this.objEl.classList.add('activeObjexRay');
+            this.equipHolder.appendChild(this.objEl); //parent to equip holder instead of scene as below
+            const updoc = {"equipped": true, "objectID": objectID, "objectName": this.objectData.name , "tags": tags, "eventData": eventData}; //saved to profile.equipment.main
+            UpdateLocalEquipment(updoc);
+          } else {
+            console.log("caint equip!");
+          }
         } else {
           
             FetchSceneInventoryObject(objectID, true, tags, eventData);
@@ -1284,6 +1288,8 @@ AFRAME.registerComponent('mod_object', {
           if (this.loadAction.actionResult.toLowerCase() == "trigger fx") {
             let particleSpawner = document.getElementById('particleSpawner');
             if (particleSpawner != null) {
+              const particleSpawnerComponent = particleSpawner.components.particle_spawner;
+              if (particleSpawnerComponent) {
               var worldPosition = new THREE.Vector3();
               this.el.object3D.getWorldPosition(worldPosition);
               if (this.data.objectData.yPosFudge != null && this.data.objectData.yPosFudge != "") {
@@ -1291,6 +1297,7 @@ AFRAME.registerComponent('mod_object', {
               }
               console.log("loadAction triggering fx at " + JSON.stringify(worldPosition) + " plus" + this.data.objectData.yPosFudge);
               particleSpawner.components.particle_spawner.spawnParticles(worldPosition, this.data.objectData.particles, 5, this.el.id, this.data.objectData.yPosFudge, this.data.objectData.color1, this.data.objectData.triggerScale);
+              }
             }
           }
         }

@@ -4,7 +4,7 @@
 //   throw new Error('Component attempted to register before AFRAME was available.');
 // }
 
-// import AFRAME from 'aframe'; 
+import AFRAME from 'aframe'; //these must be declared here if the aframe is loaded as import map, so it's an alt of content-utils.js
 import * as THREE from "three";
 
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";

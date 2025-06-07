@@ -1,7 +1,8 @@
 
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
-import { settings, mouse, lerp, localData, GoToNext, GoToPrevious, timedEventsListenerMode, GetMatrixData } from "../../../connect/connect.js";
+import { mouse } from "../../src/component/content-utils.js";
+import { settings, lerp, localData, GoToNext, GoToPrevious, timedEventsListenerMode, GetMatrixData } from "../../../connect/connect.js";
 import { SaveLocalData } from "../../../connect/indexedDb.js";
 
 if (typeof AFRAME === 'undefined') {
