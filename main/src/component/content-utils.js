@@ -1,10 +1,10 @@
-/* global AFRAME, THREE */
+// global AFRAME
 
 // if (typeof AFRAME === 'undefined') {
 //   throw new Error('Component attempted to register before AFRAME was available.');
 // }
 
-// import AFRAME from 'aframe'; 
+import AFRAME from 'aframe'; 
 import * as THREE from "three";
 
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
@@ -502,7 +502,7 @@ AFRAME.registerComponent('location_data', { //initial loading of "official" loca
       // },
       updateSceneLocationData: function() {
 
-         let thedata = JSON.parse(JSON.stringify(localData.locations));
+      let thedata = JSON.parse(JSON.stringify(localData.locations));
       // let length = thedata.length;
       console.log(thedata.length + " local sceneLocations " + JSON.stringify(thedata));
       //    console.log(JSON.stringify(sceneLocations));

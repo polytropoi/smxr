@@ -2,6 +2,8 @@
 
 // Copyright 2018 harlyq
 // License MIT
+import AFRAME from 'aframe'; 
+import * as THREE from "three";
 
 (function() {
 
@@ -846,7 +848,7 @@
         RANDOM_REPEAT_COUNT,
         USE_MAP: true,
       }
-      for (key of domDefines) {
+      for (let key of domDefines) {
         defines[key] = true
       }
 
@@ -995,7 +997,7 @@
         let index = startIndex
         let id = this.nextID
 
-        modelFillFn = randomPointInTriangle
+        let modelFillFn = randomPointInTriangle
         switch (data.modelFill) {
           case "edge": modelFillFn = randomPointOnTriangleEdge; break
           case "vertex": modelFillFn = randomVertex; break

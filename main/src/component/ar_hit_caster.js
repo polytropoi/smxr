@@ -1,4 +1,5 @@
 /* global AFRAME, THREE */
+import AFRAME from 'aframe'; 
 
 function isMobile() {
     if (

@@ -3632,7 +3632,7 @@ AFRAME.registerComponent('mod_object', {
               }
                 
             } else {
-              console.log('bad testPosition ' + JSON.stringify(testPosition));
+              // console.log('bad testPosition ' + JSON.stringify(testPosition));
               // waypoints.splice(i, 1);
             }
             // console.log("randomWaypoint : " + position);

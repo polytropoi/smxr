@@ -4,7 +4,8 @@
 
 import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData } from "../connect/indexedDb.js";
 // import { matrixClient } from "../connect/matrix.js";
-import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
+// import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
+import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "content-utils";
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions

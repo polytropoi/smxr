@@ -1,4 +1,5 @@
-import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "../component/content-utils.js";
+// import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "../component/content-utils.js";
+import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "content-utils";
 import { settings, attributions, lerp, PauseIntervals, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/connect.js";
 import { SceneManglerModal } from "../../js/dialogs.js";
 

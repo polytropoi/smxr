@@ -173,6 +173,10 @@ server.listen(process.env.PORT || 3000, function() {
 
 import webxr_routes from './routes/webxr_routes.js';
 app.use('/webxr', webxr_routes); 
+
+// import aframe_esm_routes from './routes/aframe_esm_routes.js';
+// app.use('/esm', aframe_esm_routes); 
+
 import landing_routes from './routes/landing_routes.js';
 app.use('/landing', landing_routes);  
 
