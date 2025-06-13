@@ -144,7 +144,7 @@ webxr_router.get('/:_id', function (req, res) {
     var image1url = "";
     var short_id = "";
     var picArray = [];
-    var imageAssets = "";
+    let imageAssets = "";
     var modelAssets = "";
     var externalAssets = "";
     var externalEntities = "";
@@ -3039,8 +3039,9 @@ webxr_router.get('/:_id', function (req, res) {
                     // if (!ReturnObjectExists(process.env.ROOT_BUCKET_NAME, theKey)) {
                     //     theKey = 'users/' + picture_item.userID + '/pictures/originals/' + picture_item.filename;
                     // } 
-                    skyboxUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, theKey, 6000);
-                    skyboxAsset = "<img id=\x22sky\x22 crossorigin=\x22anonymous\x22 src='" + skyboxUrl + "'>";
+                    const skyboxUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, theKey, 6000);
+                    console.log("single skybox url " + skyboxUrl);
+                    imageAssets = imageAssets + "<img id=\x22sky\x22 crossorigin=\x22anonymous\x22 src='" + skyboxUrl + "'>";
                     if (sceneResponse.sceneUseSkybox) {
                         skySettings = "<a-sky id=\x22a_sky\x22 crossorigin=\x22anonymous\x22 hide-on-enter-ar skybox_dynamic></a-sky>";
                     }

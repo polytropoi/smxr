@@ -266,6 +266,7 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
       if (settings && settings.allowMods) {
         this.el.setAttribute("location_picker", {'enabled': true});
       }
+      
       if (settings && settings.sceneTags && settings.sceneTags.includes("webcam")) {
         // let webcamObj = document.createElement("a-box");
         // // webcamObj.setAttribute("scale", "2 1 2")
@@ -274,11 +275,20 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
 
         // this.el.sceneEl.appendChild(webcamObj);
       }
+      
       if (settings && settings.sceneTags && settings.sceneTags.includes("traffic")) {
         let datamgr = document.getElementById("traffic_data");
         if (datamgr) {
 
           datamgr.components.traffic_data_viz.initMe(settings.sceneDomain);
+        }
+      }
+
+      const skyEl = document.getElementById("a_sky");
+      if (skyEl) {
+        const skyboxDynamicComponent = skyEl.components.skybox_dynamic;
+        if (skyboxDynamicComponent) {
+          skyEl.components.skybox_dynamic.initMe();
         }
       }
       // this.el.addEventListener('obbcollisionstarted	', (evt) => {
@@ -3001,12 +3011,12 @@ AFRAME.registerComponent('skybox-env-map', {
       if (skyEl != null) {
         let url = skyEl.src;
         this.texture = null;
-        // console.log("gotsa sky ref " + url);
-        let dynSkyEl = document.getElementById('skybox_dynamic');
+        console.log("gotsa sky ref " + url);
+        let dynSkyEl = document.getElementById('a_sky');
         if (dynSkyEl != null) {
           // console.log("gotsa sky ref " + url);
           this.texture = dynSkyEl.components.skybox_dynamic.returnEnvMap();
-          // console.log("gotsa sky ref " + this.texture);
+          console.log("gotsa sky ref " + this.texture);
         } 
         if (this.texture == null) {
           this.texture = new THREE.TextureLoader().load(url);
@@ -3796,15 +3806,15 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
 
       let orientation = this.picGroupArray[this.picGroupArrayIndex].images[0].orientation;
 
-      // if (orientation && orientation == "Equirectangular") {
-      //   const skyEl = document.getElementById("a_sky");
-      //   if (skyEl) {
-      //     const skyboxDynamicComponent = skyEl.components.skybox_dynamic;
-      //     // if (skyboxDynamicComponent) {
-      //       skyEl.components.skybox_dynamic.initMe();
-      //     // }
-      //   }
-      // }
+      if (orientation && orientation.toString().toLowerCase() == "equirectangular") {
+        // const skyEl = document.getElementById("a_sky");
+        // // if (skyEl) {
+        //   const skyboxDynamicComponent = skyEl.components.skybox_dynamic;
+        //   // if (skyboxDynamicComponent) {
+        //     skyEl.components.skybox_dynamic.initMe();
+        //   // }
+        // // }
+      }
       this.setPanelVisibility(orientation);
 
 
@@ -4158,25 +4168,29 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
     },
     returnSkyboxData: function (skyboxID) {
       //find the group with the skyboxID, if there is one, and return that (can't mix in scene vs. in group skyboxen..?)
-      let group = null;
-      let picGroupArray = this.data.jsonData;
-      if (picGroupArray.length > 0) { //todo if pois or multiple equirects
-       
-      }
-      console.log("tryna find skybox id " + skyboxID);
-      for (let i = 0; i < picGroupArray.length; i++) {
-        for (let j = 0; j < picGroupArray[i].images.length; j++) {
-          if (picGroupArray[i].images[j]._id == skyboxID) { //todo sniff for equirect
-            group = picGroupArray[i];
-            let nextbuttonEl = document.getElementById('nextButton');
-            let prevbuttonEl = document.getElementById('previousButton');
-            nextbuttonEl.style.visibility = "visible";
-            prevbuttonEl.style.visibility = "visible";
-            break;
+      if (skyboxID) {
+        let group = null;
+        let picGroupArray = this.data.jsonData;
+        if (picGroupArray.length > 0) { //todo if pois or multiple equirects
+        
+        }
+        console.log("tryna find skybox id " + skyboxID);
+        for (let i = 0; i < picGroupArray.length; i++) {
+          for (let j = 0; j < picGroupArray[i].images.length; j++) {
+            if (picGroupArray[i].images[j]._id == skyboxID) { //todo sniff for equirect
+              group = picGroupArray[i];
+              let nextbuttonEl = document.getElementById('nextButton');
+              let prevbuttonEl = document.getElementById('previousButton');
+              nextbuttonEl.style.visibility = "visible";
+              prevbuttonEl.style.visibility = "visible";
+              break;
+            }
           }
         }
+        return group;
+      } else {
+        return null;
       }
-      return group;
     },
     returnTileableData: function () {
 

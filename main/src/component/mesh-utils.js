@@ -4074,7 +4074,8 @@ AFRAME.registerComponent('mod_line', {
 AFRAME.registerComponent('skybox_dynamic', {
   schema: {
     enabled: {default: false},
-    id: {default: ''}
+    id: {default: ''},
+    skyboxURL: {default: ''}
     // sceneType: {default: 'defaut'}
     // path: {default: ''},
     // extension: {default: 'jpg'},
@@ -4087,11 +4088,17 @@ AFRAME.registerComponent('skybox_dynamic', {
     this.skyEl = document.getElementById('a_sky');
     this.skyboxData = null;
     this.texture = null;
+    this.url;
     let picGroupMangler = document.getElementById("pictureGroupsData");
 
+    let skyEl = document.querySelector("#sky");
+    if (skyEl != null) {
+        this.url = skyEl.src;
+    }
+
     if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
-      this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(this.data.id);
-      // console.log(JSON.stringify(this.skyboxData));
+      this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(settings.skyboxIDs[0]);
+      console.log(this.data.id + " skybox data from pictureGroups : " + JSON.stringify(this.skyboxData));
       this.nextSkybox();
     } else {
       // this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(this.data.id);
@@ -4106,50 +4113,88 @@ AFRAME.registerComponent('skybox_dynamic', {
 
     if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
       this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(settings.skyboxIDs[0]);
-      // console.log(JSON.stringify(this.skyboxData));
+
+      
+      console.log("nextSkybox : " +this.url);
       this.nextSkybox();
     } else {
       // this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(settings.skyboxIDs[0]);
       // this.nextSkybox();
+      // console.log()
       this.singleSkybox(); //maybe tryna do this before models are loaded, is the problem..
     }
   },
   singleSkybox: function () {
 
     // const ref = document.getElementById("sky");
-    console.log("single skyboxURL : " + settings.skyboxURL);
+    // console.log("single skyboxURL : " + settings.skyboxURL);
+    // let skyEl = document.querySelector("#sky");
+    // if (skyEl != null) {
+    //     let url = skyEl.src;
+    console.log("single skyboxURL : " + this.url);
+  //  this.texture = new THREE.TextureLoader().load(url);
+  //   this.texture.colorSpace = THREE.SRGBColorSpace;
+  //   this.texture.mapping = THREE.EquirectangularReflectionMapping;
+  //   this.texture.minFilter = this.texture.magFilter = THREE.LinearFilter;
 
-   this.texture = new THREE.TextureLoader().load(settings.skyboxURL);
-    this.texture.colorSpace = THREE.SRGBColorSpace;
-    this.texture.mapping = THREE.EquirectangularReflectionMapping;
-    this.texture.minFilter = this.texture.magFilter = THREE.LinearFilter;
+        const mesh = this.el.object3DMap.mesh;
+    const loader = new THREE.TextureLoader();
+    // load a resource
+    loader.load(
+      // resource URL
+      this.url,
+      function ( texture ) {
+        if (mesh) {
+          // this.texture = texture;
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.mapping = THREE.EquirectangularReflectionMapping;
+          mesh.material.map = texture;
+          mesh.material.needsUpdate = true;
+          applyEnvMap(texture);
+          }
+          
+      },
+      undefined, //proogreeess no has
+      function ( err ) {
+        console.error( 'skybox texture load error happened.' );
+      }
+    );
+
     // if (window.sceneType != undefined && !window.sceneType.toLower().includes('ar')) {
       // this.el.sceneEl.object3D.background = this.texture;
     // }
-    this.el.setAttribute("src", settings.skyboxURL);
+    // this.el.setAttribute("src", this.url);
+
+    // }
     // this.texture = this.texture;
     // this.applyEnvMap();
-    if (this.skyEl != null) {
-      // this.skyEl.remove();
-      // this.skyEl.setAttribute('visible', false);
-      }
+    // if (this.skyEl != null) {
+    //   // this.skyEl.remove();
+    //   // this.skyEl.setAttribute('visible', false);
+    //   }
   },
   nextSkybox: function () {
     
     console.log("tryna get next skybox");
+    let url = "";
     if (this.skyboxData != null && this.skyboxData != undefined) {
       if (this.skyboxIndex < this.skyboxData.images.length - 1) {
         this.skyboxIndex++;
       } else {
         this.skyboxIndex = 0;
       }
-    console.log("skybod index : " + this.skyboxIndex + " url " + this.skyboxData.images[this.skyboxIndex].url);
+      url = this.skyboxData.images[this.skyboxIndex].url;
+          console.log("skybox index : " + this.skyboxIndex + " url " + url);
+    } else {
+      url = this.url;
+    }
+    console.log("skybox next url " + url);
     const mesh = this.el.object3DMap.mesh;
     const loader = new THREE.TextureLoader();
     // load a resource
     loader.load(
       // resource URL
-      this.skyboxData.images[this.skyboxIndex].url,
+      url,
       function ( texture ) {
         if (mesh) {
           
@@ -4186,7 +4231,7 @@ AFRAME.registerComponent('skybox_dynamic', {
     );
     
     this.applyEnvMap();
-    }
+    
   },
   previousSkybox: function () {
     if (this.skyboxData != null && this.skyboxData != undefined) {
