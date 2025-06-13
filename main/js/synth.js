@@ -1,4 +1,5 @@
 /* global Tone, AFRAME, Tonal */
+import AFRAME from 'aframe'; 
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);

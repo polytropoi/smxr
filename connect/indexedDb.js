@@ -380,7 +380,7 @@ export function InitIDB() {
                   }
                   let playerstate = "\n";
                   if (pcursor.value.playerState && pcursor.value.playerState.health) {
-                     playerstate = "player health is " + pcursor.value.playerState.health + " - mana is " + pcursor.value.playerState.mana + "\n";
+                     playerstate = "health: " + pcursor.value.playerState.health + "% - mana: " + pcursor.value.playerState.mana + "%\n";
                   } else {
                      updoc.playerState = {"health": 100, "mana": 100, "xp": 0, "armor": 1, "hungry": 0, "thirsty": 0, "sleepy": 0};
                   }

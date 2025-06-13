@@ -533,7 +533,7 @@ webxr_router.get('/:_id', function (req, res) {
                         cameraLockButton = "<div class=\x22camlock_button_locked\x22 id=\x22camLockToggleButton\x22 style=\x22margin: 10px 10px;\x22><i class=\x22fa-solid fa-lock fa-2x\x22></i></div>";
                     }
                     if (sceneData.sceneTags[i].includes("synth")) {
-                        synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script src=\x22../main/js/synth.js\x22></script>";
+                        synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script type=\x22module\x22 src=\x22../main/js/synth.js\x22></script>";
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("aframe 1.6")) {
                         aframeScript = "<script src=\x22https://aframe.io/releases/1.6.0/aframe.min.js\x22></script>";

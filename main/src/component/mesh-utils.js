@@ -4069,6 +4069,191 @@ AFRAME.registerComponent('mod_line', {
     }
 });
 
+
+
+AFRAME.registerComponent('skybox_dynamic', {
+  schema: {
+    enabled: {default: false},
+    id: {default: ''}
+    // sceneType: {default: 'defaut'}
+    // path: {default: ''},
+    // extension: {default: 'jpg'},
+    // format: {default: 'RGBFormat'},
+    // enableBackground: {default: false}
+  },
+
+  init: function () {
+    this.skyboxIndex = 0;
+    this.skyEl = document.getElementById('a_sky');
+    this.skyboxData = null;
+    this.texture = null;
+    let picGroupMangler = document.getElementById("pictureGroupsData");
+
+    if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
+      this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(this.data.id);
+      // console.log(JSON.stringify(this.skyboxData));
+      this.nextSkybox();
+    } else {
+      // this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(this.data.id);
+      // this.nextSkybox();
+      this.singleSkybox(); //maybe tryna do this before models are loaded, is the problem..
+    }
+    // let that = this;
+    this.initMe();
+  },
+  initMe: function () {
+    let picGroupMangler = document.getElementById("pictureGroupsData");
+
+    if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
+      this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(settings.skyboxIDs[0]);
+      // console.log(JSON.stringify(this.skyboxData));
+      this.nextSkybox();
+    } else {
+      // this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(settings.skyboxIDs[0]);
+      // this.nextSkybox();
+      this.singleSkybox(); //maybe tryna do this before models are loaded, is the problem..
+    }
+  },
+  singleSkybox: function () {
+
+    // const ref = document.getElementById("sky");
+    console.log("single skyboxURL : " + settings.skyboxURL);
+
+   this.texture = new THREE.TextureLoader().load(settings.skyboxURL);
+    this.texture.colorSpace = THREE.SRGBColorSpace;
+    this.texture.mapping = THREE.EquirectangularReflectionMapping;
+    this.texture.minFilter = this.texture.magFilter = THREE.LinearFilter;
+    // if (window.sceneType != undefined && !window.sceneType.toLower().includes('ar')) {
+      // this.el.sceneEl.object3D.background = this.texture;
+    // }
+    this.el.setAttribute("src", settings.skyboxURL);
+    // this.texture = this.texture;
+    // this.applyEnvMap();
+    if (this.skyEl != null) {
+      // this.skyEl.remove();
+      // this.skyEl.setAttribute('visible', false);
+      }
+  },
+  nextSkybox: function () {
+    
+    console.log("tryna get next skybox");
+    if (this.skyboxData != null && this.skyboxData != undefined) {
+      if (this.skyboxIndex < this.skyboxData.images.length - 1) {
+        this.skyboxIndex++;
+      } else {
+        this.skyboxIndex = 0;
+      }
+    console.log("skybod index : " + this.skyboxIndex + " url " + this.skyboxData.images[this.skyboxIndex].url);
+    const mesh = this.el.object3DMap.mesh;
+    const loader = new THREE.TextureLoader();
+    // load a resource
+    loader.load(
+      // resource URL
+      this.skyboxData.images[this.skyboxIndex].url,
+      function ( texture ) {
+        if (mesh) {
+          
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.mapping = THREE.EquirectangularReflectionMapping;
+          mesh.material.map = texture;
+          mesh.material.needsUpdate = true;
+          //apply new envmap to appropriate geos
+          let envMapObjex = document.getElementsByClassName('envMap');
+          // console.log("envMap elements " + envMapObjex.length);
+          if (envMapObjex != null) {
+            let envmesh;
+            for (let i = 0; i < envMapObjex.length; i++) {
+              // console.log("envMap element " + i + " " + envMapObjex.id);
+            envmesh = envMapObjex[i].getObject3D('mesh');
+            if (envmesh) {
+              envmesh.traverse(function (node) {
+              if (node.material && 'envMap' in node.material) {
+              // if (node.material) {
+                // console.log("tryna set envmap on " + node.material.name);
+                  node.material.envMap = texture;
+                  // node.material.needsUpdate = true;
+                  }
+                });
+              }
+            }
+          }
+          }
+      },
+      undefined,
+      function ( err ) {
+        console.error( 'skybox texture load error happened.' );
+      }
+    );
+    
+    this.applyEnvMap();
+    }
+  },
+  previousSkybox: function () {
+    if (this.skyboxData != null && this.skyboxData != undefined) {
+    if (this.skyboxIndex  > 0) {
+      this.skyboxIndex++;
+      // GoToLocation(sceneLocations.locationMods[currentLocationIndex].phID);
+    } else {
+      this.skyboxIndex  = this.skyboxData.images.length - 1;
+    }  
+    
+    const mesh = this.el.object3DMap.mesh;
+    const loader = new THREE.TextureLoader();
+    // load a resource
+    loader.load(
+      // resource URL
+      this.skyboxData.images[this.skyboxIndex].url,
+      function ( texture ) {
+        if (mesh) {
+          // this.texture = texture;
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.mapping = THREE.EquirectangularReflectionMapping;
+          mesh.material.map = texture;
+          mesh.material.needsUpdate = true;
+          applyEnvMap(texture);
+          }
+          
+      },
+      undefined, //proogreeess no has
+      function ( err ) {
+        console.error( 'skybox texture load error happened.' );
+      }
+    );
+
+    }
+  },
+  applyEnvMap: function () {
+    console.log("tryna applyEnvMap");
+    let envMapObjex = document.getElementsByClassName('envMap');
+    // console.log("envMap elements " + envMapObjex.length + " with this.texture " + this.texture);
+    let that = this;
+    if (envMapObjex != null) {
+    
+      this.mesh = null;
+      for (let i = 0; i < envMapObjex.length; i++) {
+        
+        this.mesh = envMapObjex[i].getObject3D('mesh');
+
+        if (this.mesh != null) {
+          this.mesh.traverse(function (node) {
+
+          if (node.material && 'envMap' in node.material && that.texture) {
+          // if (node.material) {
+            // console.log("tryna set envmap on " + node.material.name);
+              node.material.envMap = that.texture;
+              // node.material.envMap.intensity = .5;
+              node.material.needsUpdate = true;
+            }
+          });
+        }
+      }
+    }
+    // }
+  },
+  returnEnvMap () {
+    return this.texture;
+  }
+});
 // AFRAME.registerShader('gradient', {
 //   schema: {
 //     topColor: {type: 'vec3', default: '1 0 0', is: 'uniform'},

@@ -9,7 +9,7 @@ import * as THREE from "three";
 
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
 import { settings, videoEl, room, lerp, allowCameraLock, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, CreateLocation, 
-  timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData, userData, avatarName, sceneLocations, poiLocations, cloudMarkers } from "../../../connect/connect.js";
+  timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData, userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations } from "../../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
 
 var ua = window.navigator.userAgent;
@@ -3070,229 +3070,190 @@ AFRAME.registerComponent('skybox-env-map', {
   }
 });
 
-AFRAME.registerComponent('skybox_dynamic', {
-  schema: {
-    enabled: {default: false},
-    id: {default: ''}
-    // sceneType: {default: 'defaut'}
-    // path: {default: ''},
-    // extension: {default: 'jpg'},
-    // format: {default: 'RGBFormat'},
-    // enableBackground: {default: false}
-  },
+// AFRAME.registerComponent('skybox_dynamic', {
+//   schema: {
+//     enabled: {default: false},
+//     id: {default: ''}
+//     // sceneType: {default: 'defaut'}
+//     // path: {default: ''},
+//     // extension: {default: 'jpg'},
+//     // format: {default: 'RGBFormat'},
+//     // enableBackground: {default: false}
+//   },
 
-  init: function () {
-    this.skyboxIndex = 0;
-    this.skyEl = document.getElementById('a_sky');
-    this.skyboxData = null;
-    this.texture = null;
-    let picGroupMangler = document.getElementById("pictureGroupsData");
+//   init: function () {
+//     this.skyboxIndex = 0;
+//     this.skyEl = document.getElementById('a_sky');
+//     this.skyboxData = null;
+//     this.texture = null;
+//     let picGroupMangler = document.getElementById("pictureGroupsData");
 
-    if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
-      this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(this.data.id);
-      // console.log(JSON.stringify(this.skyboxData));
-      this.nextSkybox();
-    } else {
-      // this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(this.data.id);
-      // this.nextSkybox();
-      this.singleSkybox(); //maybe tryna do this before models are loaded, is the problem..
-    }
-    // let that = this;
-  },
-  initMe: function () {
-    let picGroupMangler = document.getElementById("pictureGroupsData");
+//     if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
+//       this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(this.data.id);
+//       // console.log(JSON.stringify(this.skyboxData));
+//       this.nextSkybox();
+//     } else {
+//       // this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(this.data.id);
+//       // this.nextSkybox();
+//       this.singleSkybox(); //maybe tryna do this before models are loaded, is the problem..
+//     }
+//     // let that = this;
+//   },
+//   initMe: function () {
+//     let picGroupMangler = document.getElementById("pictureGroupsData");
 
-    if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
-      this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(settings.skyboxIDs[0]);
-      // console.log(JSON.stringify(this.skyboxData));
-      this.nextSkybox();
-    } else {
-      // this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(settings.skyboxIDs[0]);
-      // this.nextSkybox();
-      this.singleSkybox(); //maybe tryna do this before models are loaded, is the problem..
-    }
-  },
-  singleSkybox: function () {
+//     if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
+//       this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(settings.skyboxIDs[0]);
+//       // console.log(JSON.stringify(this.skyboxData));
+//       this.nextSkybox();
+//     } else {
+//       // this.skyboxData = picGroupMangler.components.picture_groups_control.returnSkyboxData(settings.skyboxIDs[0]);
+//       // this.nextSkybox();
+//       this.singleSkybox(); //maybe tryna do this before models are loaded, is the problem..
+//     }
+//   },
+//   singleSkybox: function () {
 
-    // const ref = document.getElementById("sky");
-    console.log("single skyboxURL : " + settings.skyboxURL);
+//     // const ref = document.getElementById("sky");
+//     console.log("single skyboxURL : " + settings.skyboxURL);
 
-   this.texture = new THREE.TextureLoader().load(settings.skyboxURL);
-    this.texture.colorSpace = THREE.SRGBColorSpace;
-    this.texture.mapping = THREE.EquirectangularReflectionMapping;
-    this.texture.minFilter = this.texture.magFilter = THREE.LinearFilter;
-    // if (window.sceneType != undefined && !window.sceneType.toLower().includes('ar')) {
-      // this.el.sceneEl.object3D.background = this.texture;
-    // }
-    this.el.setAttribute("src", settings.skyboxURL);
-    // this.texture = this.texture;
-    // this.applyEnvMap();
-    if (this.skyEl != null) {
-      // this.skyEl.remove();
-      // this.skyEl.setAttribute('visible', false);
-      }
-  },
-  nextSkybox: function () {
+//    this.texture = new THREE.TextureLoader().load(settings.skyboxURL);
+//     this.texture.colorSpace = THREE.SRGBColorSpace;
+//     this.texture.mapping = THREE.EquirectangularReflectionMapping;
+//     this.texture.minFilter = this.texture.magFilter = THREE.LinearFilter;
+//     // if (window.sceneType != undefined && !window.sceneType.toLower().includes('ar')) {
+//       // this.el.sceneEl.object3D.background = this.texture;
+//     // }
+//     this.el.setAttribute("src", settings.skyboxURL);
+//     // this.texture = this.texture;
+//     // this.applyEnvMap();
+//     if (this.skyEl != null) {
+//       // this.skyEl.remove();
+//       // this.skyEl.setAttribute('visible', false);
+//       }
+//   },
+//   nextSkybox: function () {
     
-    console.log("tryna get next skybox");
-    if (this.skyboxData != null && this.skyboxData != undefined) {
-      if (this.skyboxIndex < this.skyboxData.images.length - 1) {
-        this.skyboxIndex++;
-      } else {
-        this.skyboxIndex = 0;
-      }
-    console.log("skybod index : " + this.skyboxIndex + " url " + this.skyboxData.images[this.skyboxIndex].url);
-    const mesh = this.el.object3DMap.mesh;
-    const loader = new THREE.TextureLoader();
-    // load a resource
-    loader.load(
-      // resource URL
-      this.skyboxData.images[this.skyboxIndex].url,
-      function ( texture ) {
-        if (mesh) {
+//     console.log("tryna get next skybox");
+//     if (this.skyboxData != null && this.skyboxData != undefined) {
+//       if (this.skyboxIndex < this.skyboxData.images.length - 1) {
+//         this.skyboxIndex++;
+//       } else {
+//         this.skyboxIndex = 0;
+//       }
+//     console.log("skybod index : " + this.skyboxIndex + " url " + this.skyboxData.images[this.skyboxIndex].url);
+//     const mesh = this.el.object3DMap.mesh;
+//     const loader = new THREE.TextureLoader();
+//     // load a resource
+//     loader.load(
+//       // resource URL
+//       this.skyboxData.images[this.skyboxIndex].url,
+//       function ( texture ) {
+//         if (mesh) {
           
-          texture.colorSpace = THREE.SRGBColorSpace;
-          texture.mapping = THREE.EquirectangularReflectionMapping;
-          mesh.material.map = texture;
-          mesh.material.needsUpdate = true;
-          //apply new envmap to appropriate geos
-          let envMapObjex = document.getElementsByClassName('envMap');
-          // console.log("envMap elements " + envMapObjex.length);
-          if (envMapObjex != null) {
-            let envmesh;
-            for (let i = 0; i < envMapObjex.length; i++) {
-              // console.log("envMap element " + i + " " + envMapObjex.id);
-            envmesh = envMapObjex[i].getObject3D('mesh');
-            if (envmesh) {
-              envmesh.traverse(function (node) {
-              if (node.material && 'envMap' in node.material) {
-              // if (node.material) {
-                // console.log("tryna set envmap on " + node.material.name);
-                  node.material.envMap = texture;
-                  // node.material.needsUpdate = true;
-                  }
-                });
-              }
-            }
-          }
-          }
-      },
-      undefined,
-      function ( err ) {
-        console.error( 'skybox texture load error happened.' );
-      }
-    );
-    
-    this.applyEnvMap();
-    }
-  },
-  previousSkybox: function () {
-    if (this.skyboxData != null && this.skyboxData != undefined) {
-    if (this.skyboxIndex  > 0) {
-      this.skyboxIndex++;
-      // GoToLocation(sceneLocations.locationMods[currentLocationIndex].phID);
-    } else {
-      this.skyboxIndex  = this.skyboxData.images.length - 1;
-    }  
-    // let askyEl = document.getElementById('a_sky');
-    // askyEl.setAttribute("a-sky", {"src": this.skyboxData.images[this.skyboxIndex].url});
-    // // skyEl.setAttribute('visible', false);
-    // console.log(this.skyboxData.images[this.skyboxIndex].url);
-    // this.texture = new THREE.TextureLoader().load(this.skyboxData.images[this.skyboxIndex].url);
-    // this.texture.encoding = THREE.sRGBEncoding;
-    // this.texture.mapping = THREE.EquirectangularReflectionMapping;
-    // this.texture.minFilter = this.texture.magFilter = THREE.LinearFilter;
-    // this.el.sceneEl.object3D.background = this.texture;
-    // // this.texture = this.texture;
-    // this.applyEnvMap();
-    // if (this.skyEl != null) {
-    //   // this.skyEl.remove();
-    //   this.skyEl.setAttribute('visible', false);
-    //   }
-    const mesh = this.el.object3DMap.mesh;
-    const loader = new THREE.TextureLoader();
-    // load a resource
-    loader.load(
-      // resource URL
-      this.skyboxData.images[this.skyboxIndex].url,
-      function ( texture ) {
-        if (mesh) {
-          // this.texture = texture;
-          texture.colorSpace = THREE.SRGBColorSpace;
-          texture.mapping = THREE.EquirectangularReflectionMapping;
-          mesh.material.map = texture;
-          mesh.material.needsUpdate = true;
-          applyEnvMap(texture);
-          }
-          
-      },
-      undefined, //proogreeess no has
-      function ( err ) {
-        console.error( 'skybox texture load error happened.' );
-      }
-    );
-
-    }
-  },
-  applyEnvMap: function () {
-    console.log("tryna applyEnvMap");
-    let envMapObjex = document.getElementsByClassName('envMap');
-    // console.log("envMap elements " + envMapObjex.length + " with this.texture " + this.texture);
-    let that = this;
-    if (envMapObjex != null) {
-    
-      this.mesh = null;
-      for (let i = 0; i < envMapObjex.length; i++) {
-        
-        this.mesh = envMapObjex[i].getObject3D('mesh');
-
-        if (this.mesh != null) {
-          this.mesh.traverse(function (node) {
-
-          if (node.material && 'envMap' in node.material && that.texture) {
-          // if (node.material) {
-            // console.log("tryna set envmap on " + node.material.name);
-              node.material.envMap = that.texture;
-              // node.material.envMap.intensity = .5;
-              node.material.needsUpdate = true;
-            }
-          });
-        }
-      }
-    }
-    // }
-  },
-  returnEnvMap () {
-    return this.texture;
-  }
-});
-
-// function applyEnvMap(envMap) {
-//   // const envMap = texture;  
-//   // envMap.mapping = THREE.EquirectangularReflectionMapping;
-//   let envMapObjex = document.getElementsByClassName('envMap');
-//   console.log("envMap elements " + envMapObjex.length + " with this.texture " + envMap);
-//   if (envMap && envMapObjex != null) {
-//     this.mesh = null;
-//     for (let i = 0; i < envMapObjex.length; i++) {
-//       // console.log("envMap element " + i + " " + envMapObjex.id);
-//       this.mesh = envMapObjex[i].getObject3D('mesh');
-
-//     if (this.mesh != null) {
-//       this.mesh.traverse(function (node) {
-
-//       if (node.material && 'envMap' in node.material) {
-//       // if (node.material) {
-//         console.log("tryna set envmap on " + node.material.name);
-//           node.material.envMap = envMap;
-//           // node.material.envMap.intensity = .5;
-//           node.material.needsUpdate = true;
+//           texture.colorSpace = THREE.SRGBColorSpace;
+//           texture.mapping = THREE.EquirectangularReflectionMapping;
+//           mesh.material.map = texture;
+//           mesh.material.needsUpdate = true;
+//           //apply new envmap to appropriate geos
+//           let envMapObjex = document.getElementsByClassName('envMap');
+//           // console.log("envMap elements " + envMapObjex.length);
+//           if (envMapObjex != null) {
+//             let envmesh;
+//             for (let i = 0; i < envMapObjex.length; i++) {
+//               // console.log("envMap element " + i + " " + envMapObjex.id);
+//             envmesh = envMapObjex[i].getObject3D('mesh');
+//             if (envmesh) {
+//               envmesh.traverse(function (node) {
+//               if (node.material && 'envMap' in node.material) {
+//               // if (node.material) {
+//                 // console.log("tryna set envmap on " + node.material.name);
+//                   node.material.envMap = texture;
+//                   // node.material.needsUpdate = true;
+//                   }
+//                 });
+//               }
+//             }
 //           }
-//         });
+//           }
+//       },
+//       undefined,
+//       function ( err ) {
+//         console.error( 'skybox texture load error happened.' );
+//       }
+//     );
+    
+//     this.applyEnvMap();
+//     }
+//   },
+//   previousSkybox: function () {
+//     if (this.skyboxData != null && this.skyboxData != undefined) {
+//     if (this.skyboxIndex  > 0) {
+//       this.skyboxIndex++;
+//       // GoToLocation(sceneLocations.locationMods[currentLocationIndex].phID);
+//     } else {
+//       this.skyboxIndex  = this.skyboxData.images.length - 1;
+//     }  
+    
+//     const mesh = this.el.object3DMap.mesh;
+//     const loader = new THREE.TextureLoader();
+//     // load a resource
+//     loader.load(
+//       // resource URL
+//       this.skyboxData.images[this.skyboxIndex].url,
+//       function ( texture ) {
+//         if (mesh) {
+//           // this.texture = texture;
+//           texture.colorSpace = THREE.SRGBColorSpace;
+//           texture.mapping = THREE.EquirectangularReflectionMapping;
+//           mesh.material.map = texture;
+//           mesh.material.needsUpdate = true;
+//           applyEnvMap(texture);
+//           }
+          
+//       },
+//       undefined, //proogreeess no has
+//       function ( err ) {
+//         console.error( 'skybox texture load error happened.' );
+//       }
+//     );
+
+//     }
+//   },
+//   applyEnvMap: function () {
+//     console.log("tryna applyEnvMap");
+//     let envMapObjex = document.getElementsByClassName('envMap');
+//     // console.log("envMap elements " + envMapObjex.length + " with this.texture " + this.texture);
+//     let that = this;
+//     if (envMapObjex != null) {
+    
+//       this.mesh = null;
+//       for (let i = 0; i < envMapObjex.length; i++) {
+        
+//         this.mesh = envMapObjex[i].getObject3D('mesh');
+
+//         if (this.mesh != null) {
+//           this.mesh.traverse(function (node) {
+
+//           if (node.material && 'envMap' in node.material && that.texture) {
+//           // if (node.material) {
+//             // console.log("tryna set envmap on " + node.material.name);
+//               node.material.envMap = that.texture;
+//               // node.material.envMap.intensity = .5;
+//               node.material.needsUpdate = true;
+//             }
+//           });
+//         }
 //       }
 //     }
+//     // }
+//   },
+//   returnEnvMap () {
+//     return this.texture;
 //   }
-// }
+// });
+
+
 
 AFRAME.registerComponent('mod_background', { //nosky bg mods
   schema: {
@@ -3835,12 +3796,15 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
 
       let orientation = this.picGroupArray[this.picGroupArrayIndex].images[0].orientation;
 
-      if (orientation && orientation == "Equirectangular") {
-        let skyEl = document.getElementById("a_sky");
-        if (skyEl) {
-          skyEl.components.skybox_dynamic.initMe();
-        }
-      }
+      // if (orientation && orientation == "Equirectangular") {
+      //   const skyEl = document.getElementById("a_sky");
+      //   if (skyEl) {
+      //     const skyboxDynamicComponent = skyEl.components.skybox_dynamic;
+      //     // if (skyboxDynamicComponent) {
+      //       skyEl.components.skybox_dynamic.initMe();
+      //     // }
+      //   }
+      // }
       this.setPanelVisibility(orientation);
 
 
