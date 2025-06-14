@@ -1,7 +1,9 @@
-
+import AFRAME from 'aframe'; 
+import * as THREE from 'three';
 
 import { showDialogPanel } from "../js/dialogs.js";
 import { settings } from "../../../connect/connect.js";
+import {} from "content-utils";
 
 if (location.hostname !== 'localhost' && window.location.protocol === 'http:') window.location.protocol = 'https:';
 
@@ -1707,7 +1709,7 @@ AFRAME.registerComponent('nav_agent_controller', {
 		}, 1000);
 
 	//   console.log("gotsome waypoints " + this.navMeshController.waypoints.length);
-	let modModelComponent = this.el.components.mod_model; //in content-utils.js
+	let modModelComponent = this.el.components.mod_model; 
 
 	if (modModelComponent) {
 		// this.updateAgentState(this.currentState);
@@ -1734,7 +1736,7 @@ AFRAME.registerComponent('nav_agent_controller', {
 			
 		});		
 	} else {
-		let modObjectComponent = this.el.components.mod_object; //in content-utils.js
+		let modObjectComponent = this.el.components.mod_object; 
 		if (modObjectComponent) {
 			this.modObjectComponent = modModelComponent;
 			// this.updateAgentState(this.currentState);

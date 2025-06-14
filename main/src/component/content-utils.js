@@ -5,7 +5,7 @@
 // }
 
 import AFRAME from 'aframe'; 
-import * as THREE from "three";
+import * as THREE from 'three';
 
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
 import { settings, videoEl, room, lerp, allowCameraLock, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, CreateLocation, 
