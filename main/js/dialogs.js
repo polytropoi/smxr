@@ -250,7 +250,11 @@ window.addEventListener( 'keydown',  ( event ) => {
     SaveLocalAndClose();
   });
 
-  $('#modalContent').on('click', '#dequipButton', function(e) {
+  $('#modalContent').on('click', '#toggleStatsButton', function(e) {
+    console.log("tryna toggleStats");
+    ToggleStats();
+  });
+    $('#modalContent').on('click', '#dequipButton', function(e) {
     console.log("tryna dequip");
     DequipInventoryItem();
   });
@@ -2184,7 +2188,7 @@ export function SceneManglerModal(mode, autoHide) {
           "<button id=\x22exportButton\x22 style=\x22float: left;\x22 class=\x22saveButton\x22 id=\x22exportButton\x22 >Export Mods</button>"+   
           ownerButton +
           hasModsMessage +
-        "<button style=\x22float: right;\x22 class=\x22goToButton\x22 id=\x22statsButton\x22 onclick=\x22ToggleStats()\x22>Show Stats</button>"+
+        "<button id=\x22toggleStatsButton\x22 style=\x22float: right;\x22 class=\x22goToButton\x22 id=\x22statsButton\x22>Show Stats</button>"+
       
       "</div><hr>"+
       // "<button class=\x22addButton\x22 id=\x22TimekeysButton\x22 onclick=\x22ShowTimekeysModal()\x22>Edit Timekeys</button>"+
@@ -2380,7 +2384,7 @@ function SaveLocalAndClose() {
   // ShowHideDialogPanel();
 }
 
-function ToggleStats () {
+export function ToggleStats () {
   // let sceneEl = document.querySelector('a-scene');
   let camEl = document.getElementById('cameraRig');
   if (camEl) {

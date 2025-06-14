@@ -8,7 +8,7 @@ import AFRAME from 'aframe';
 import * as THREE from 'three';
 
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
-import { settings, videoEl, room, lerp, allowCameraLock, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, CreateLocation, 
+import { settings, videoEl, room, roomUsers, lerp, allowCameraLock, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, CreateLocation, 
   timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData, userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations } from "../../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
 
@@ -352,9 +352,9 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
   },
   toggleStats: function (showStats) {
     if (showStats) {
-      sceneEl.setAttribute('stats', '');
+      this.el.sceneEl.setAttribute('stats', '');
     } else {
-      sceneEl.removeAttribute('stats');
+      this.el.sceneEl.removeAttribute('stats');
     }
   },
   toggleShowCurves: function (showCurves) {

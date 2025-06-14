@@ -2288,6 +2288,9 @@ webxr_router.get('/:_id', function (req, res) {
                         } else {
                             // console.log("TRYNA COOK A CANNED SURFACE");
                             surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            if (locMdl.locationTags.includes("physics")) {
+                                surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22physics: true\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; 
+                            }
                         }
                     } 
             } //end locmdl for loop

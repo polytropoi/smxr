@@ -28,7 +28,7 @@ export const sceneEl = document.querySelector('a-scene');
 export const lerp = (x, y, a) => x * (1 - a) + y * a;
 
 var dateString = Date.now().toString();
-let roomUsers = {};
+export let roomUsers = {};
 export let stringRoomUsers = "";
 var trimmedString = dateString.substring(dateString.length - 4, 4);
 var username;

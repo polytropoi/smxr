@@ -113,14 +113,14 @@ AFRAME.registerComponent('mod_physics', { //used by models, placeholders, instan
           // console.log("tryna load agent  " + this.isTrigger);
       
       }  else if (this.data.model == "collider") { //static geo for worldbuilding, needs nonu scaling..
-
+        console.log("tryna do a surface collider! ");
         if (settings && settings.usePhysicsType == "ammo") {
           
-          console.log("statoc mod_physics for id " + this.el.id + " model " + this.model +" isTrigger "+ this.isTrigger + " body " + this.data.body );
+          console.log("static mod_physics for id " + this.el.id + " model " + this.model +" isTrigger "+ this.isTrigger + " body " + this.data.body );
           setTimeout(() => {
             this.el.setAttribute('ammo-body', {type: 'static', emitCollisionEvents: this.isTrigger}); 
             this.el.setAttribute("ammo-shape", {type: "box"});
-          }, 1000);
+          }, 2000);
          
           // const scalefactor = this.data.scaleFactor + ' ' +
           // this.el.setAttribute('ammo-shape', {type: 'box', fit: 'manual', halfExtents: '1 1 1' });
@@ -2069,7 +2069,8 @@ AFRAME.registerComponent('instanced_meshes_mod2', {
 
 AFRAME.registerComponent('scatter-surface-default', { //cook one up on the fly if needed
   schema: {
-    arChild: {default: false}
+    arChild: {default: false},
+    physics: {default: false}
   },
   init: function () {
     let that = this;
@@ -2101,6 +2102,10 @@ AFRAME.registerComponent('scatter-surface-default', { //cook one up on the fly i
         imeshes[i].components.instanced_surface_meshes.surfaceLoaded();
       }
     // });
+    if (this.data.physics != false) {
+      console.log("tryna set physics on default surface");
+      this.el.setAttribute('mod_physics', {'model': 'collider'});
+    }
   }
 });
 
