@@ -5,7 +5,7 @@ import { settings, room, lerp, sceneLocations, localData, PauseIntervals, Return
   tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, allowCameraLock
   } from "../../connect/connect.js";
-import { hasLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
+import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
 
 export let showDialogPanel = false;
 let dialogInitialized = false;

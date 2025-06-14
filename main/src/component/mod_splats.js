@@ -22,14 +22,19 @@ AFRAME.registerComponent('mod_splat', {
             
     },
     init() {
+
         console.log("TRYNA LOAD A SPLAT!");
         this.splat = new SplatMesh({ url: this.data.url });
         // this.el.setObject3D('SplatMesh', this.splat);
+        this.splat.quaternion.set(1, 0, 0, 0);
         this.el.sceneEl.object3D.add(this.splat);
+
         this.splat.position.set(this.data.xpos, this.data.ypos, this.data.zpos);
-                let scale = {x: this.data.xscale, y: this.data.yscale, z: this.data.zscale};
+        let scale = {x: this.data.xscale, y: this.data.yscale, z: this.data.zscale};
+
+                        this.el.removeAttribute("geometry");
         // this.splat.setAttribute('scale', scale);
-        // this.splat.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
+        this.splat.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
 
 
     //   const splatURL = "https://forge.dev/assets/splats/butterfly.spz"

@@ -3252,6 +3252,13 @@ AFRAME.registerComponent('world_transport_buttons', {
       viewportHolder.appendChild(this.worldButtons);
     }
 
+    //  "<img visible=\x22false\x22 id=\x22n_button\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/next_button_128.png\x22 crossorigin=\x22anonymous\x22>"+
+    //                     "<img visible=\x22false\x22 id=\x22p_button\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/previous_button_128.png\x22 crossorigin=\x22anonymous\x22>"+
+    //                     "<img visible=\x22false\x22 id=\x22fly_button\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fly_button_128.png\x22 crossorigin=\x22anonymous\x22>"+
+    //                     "<img visible=\x22false\x22 id=\x22camlock_button\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/camlock_button_128.png\x22 crossorigin=\x22anonymous\x22>"+
+    //                     "<img visible=\x22false\x22 id=\x22play_button\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/play_button_128.png\x22 crossorigin=\x22anonymous\x22>"+
+
+    
     this.previousButton.setAttribute("position", "-.5 -.85 0");
     this.previousButton.setAttribute("geometry", {"primitive": "plane", "height": .2, "width": .2});
     this.previousButton.setAttribute("material", {shader: "flat", src: "#p_button", transparent: true});
@@ -4106,7 +4113,7 @@ AFRAME.registerComponent('skybox_dynamic', {
       this.singleSkybox(); //maybe tryna do this before models are loaded, is the problem..
     }
     // let that = this;
-    this.initMe();
+    // this.initMe();
   },
   initMe: function () {
     let picGroupMangler = document.getElementById("pictureGroupsData");

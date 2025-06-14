@@ -1144,7 +1144,11 @@ AFRAME.registerComponent('mod_object', {
         this.objectAudioController = this.el.setAttribute("object_audio_controller", {_id: this.data.objectData.audiogroupID});
     }
         
-      let that = this;
+    this.usePhysicsType = "none";
+    if (settings && settings.usePhysicsType) {
+      this.usePhysicsType = settings.usePhysicsType;
+    }
+    let that = this;
   
   
     this.el.addEventListener('model-loaded', () => {
@@ -3373,7 +3377,7 @@ AFRAME.registerComponent('mod_object', {
         // }
 
       }
-      if (this.pushForward && this.camera != null) {
+      if (this.usePhysicsType == "ammo" && this.pushForward && this.camera != null) {
         // console.log("tryna apply force shoot action " + this.hasShootAction);
         // this.lookVector.applyQuaternion(this.camera.quaternion);
         if (this.hasThrowAction) {
