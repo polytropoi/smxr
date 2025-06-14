@@ -11,7 +11,7 @@ import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneM
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
-// var posRotReader = document.getElementById("player").components.get_pos_rot; 
+// export let posRotReader = document.getElementById("player").components.get_pos_rot; 
 var player = null;
 export let posRotReader;
 export let lastLocalUpdate = "";
@@ -2413,7 +2413,7 @@ function EmitSelfPosition() {
                var posRotObj = posRotReader.returnPosRot();
                cameraPosition = posRotObj.pos;
                cameraRotation = posRotObj.rot;
-               // console.log(cameraPosition.x.toString() + " vs " + window.playerPosition.x.toString());
+               console.log(cameraPosition.x.toString() + " vs " + window.playerPosition.x.toString());
                // if (JSON.stringify(cameraPosition) != lastPosition && JSON.stringify(cameraRotation) != lastRotation) {
                if (JSON.stringify(cameraPosition) != lastPosition) {
                      // console.log('emitting!');
@@ -2432,8 +2432,8 @@ function EmitSelfPosition() {
          //    emitInterval = null;
          }
       } else {
-         // console.log("caint fine no player!");
-         // posRotReader = document.getElementById("player").components.get_pos_rot; 
+         console.log("caint fine no player!");
+         posRotReader = document.getElementById("player").components.get_pos_rot; 
          // EmitSelfPosition();
       }
    }

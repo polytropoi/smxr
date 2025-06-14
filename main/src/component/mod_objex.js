@@ -2171,7 +2171,7 @@ AFRAME.registerComponent('mod_object', {
                   // let y = '0 2 1';
                   let yScale = this.data.locationData.yscale ? this.data.locationData.yscale : 1;
                   let yFudge = this.data.objectData.yPosFudge ? this.data.objectData.yPosFudge : 0;
-                  let y = ((yScale * 1.75) + parseFloat(yFudge)); // tweaky scale + fudgefactor
+                  let y = ((yScale * 1.25) + parseFloat(yFudge)); // tweaky scale + fudgefactor
                   console.log("tryna fudge y " + yScale + " + " + yFudge);
                   this.calloutEntity.setAttribute("position", "0 "+y+" .75");
                   // console.log('tryna fudge y '+ y);
