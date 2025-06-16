@@ -137,68 +137,68 @@ class Joystick
 	}
 }
 
-AFRAME.registerComponent('screen-controls-nilch', //deprecated
-{
-	schema: 
-	{
-		isMobile: {default: false},
-		camType: {default: "first"}
-	},
-    init: function () 
-    {
+// AFRAME.registerComponent('screen-controls-nilch', //deprecated
+// {
+// 	schema: 
+// 	{
+// 		isMobile: {default: false},
+// 		camType: {default: "first"}
+// 	},
+//     init: function () 
+//     {
 
-        // let isIOS = DetectiOS();
-		this.component = null;
-		this.jsContainer = null;
-		this.isMobile = false;
+//         // let isIOS = DetectiOS();
+// 		this.component = null;
+// 		this.jsContainer = null;
+// 		this.isMobile = false;
 		
-		this.el.addEventListener('loaded', (e) => {
-		e.preventDefault();	
-		this.component = null;
-		this.jsContainer = document.getElementById('joystickContainer');
-		this.isMobile = AFRAME.utils.device.isMobile();
+// 		this.el.addEventListener('loaded', (e) => {
+// 		e.preventDefault();	
+// 		this.component = null;
+// 		this.jsContainer = document.getElementById('joystickContainer');
+// 		this.isMobile = AFRAME.utils.device.isMobile();
 		
-			if (this.isMobile) {  //passed in above//nm	
-				if (this.jsContainer != null) {
-					this.jsContainer.style.visibility = 'visible';
-					this.component = this.el.components.extended_wasd_controls;
-					if (this.component == null) {
-						this.component = this.el.components.extended_wasd_thirdperson;
-						if (this.component) {
-							this.component.setJoystickInput();
-						} else {
-							console.log("caint find no ewasd component!");
-						}
-					} else {
-						this.component.setJoystickInput();
-					}
-					this.joystick1 = new Joystick("joystickEl", 64, 8);
+// 			if (this.isMobile) {  //passed in above//nm	
+// 				if (this.jsContainer != null) {
+// 					this.jsContainer.style.visibility = 'visible';
+// 					this.component = this.el.components.extended_wasd_controls;
+// 					if (this.component == null) {
+// 						this.component = this.el.components.extended_wasd_thirdperson;
+// 						if (this.component) {
+// 							this.component.setJoystickInput();
+// 						} else {
+// 							console.log("caint find no ewasd component!");
+// 						}
+// 					} else {
+// 						this.component.setJoystickInput();
+// 					}
+// 					this.joystick1 = new Joystick("joystickEl", 64, 8);
 					
-					console.log("controls initialized : JOYSTICK" );
-				//   this.isMobile = true;
-				}
-			} else {
-				// let jsContainer = document.getElementById('joystickContainer');
-				if (this.jsContainer != null) {
-					this.jsContainer.style.display = 'none';
-				}
-				console.log("controls initialized : KEYBOID" );
+// 					console.log("controls initialized : JOYSTICK" );
+// 				//   this.isMobile = true;
+// 				}
+// 			} else {
+// 				// let jsContainer = document.getElementById('joystickContainer');
+// 				if (this.jsContainer != null) {
+// 					this.jsContainer.style.display = 'none';
+// 				}
+// 				console.log("controls initialized : KEYBOID" );
 				
-			}
-		});
-      },
+// 			}
+// 		});
+//       },
 
-      tick: function(time, deltaTime)
-      {
+//       tick: function(time, deltaTime)
+//       {
           
-          if (this.isMobile && this.component != null && this.jsContainer) {
+//           if (this.isMobile && this.component != null && this.jsContainer) {
 
-            this.component.movePercent.x =  this.joystick1.value.x;
-            this.component.movePercent.z = -this.joystick1.value.y;
-          }
+//             this.component.movePercent.x =  this.joystick1.value.x;
+//             this.component.movePercent.z = -this.joystick1.value.y;
+//           }
           
-      }
-});
+//       }
+// });
 AFRAME.registerComponent('screen-controls-thirdperson', 
 {
 	schema: 
@@ -308,14 +308,24 @@ AFRAME.registerComponent('screen-controls-firstperson',
 				}
 				console.log("controls initialized : KEYBOID" );
 			}
+
+
+			// this.jsContainer.style.visibility = 'visible';
+			// 		this.component = this.el.components.extended_wasd_controls;
+				
+			// 		this.joystick1 = new Joystick("joystickEl", 64, 8);
+			// 		this.component.setJoystickInput();
+			// 		console.log("controls initialized : JOYSTICK" );
 		// });
       },
 
       tick: function(time, deltaTime)
       {
-          if (this.isMobile && this.component != null && this.jsContainer) {
-            this.component.movePercent.x =  this.joystick1.value.x;
-            this.component.movePercent.z = -this.joystick1.value.y;
+          if (this.component != null && this.jsContainer && ((this.joystick1.value.x != 0) || (this.joystick1.value.y != 0))) {
+			// console.log("tryna move " + this.joystick1.value.x + " " + this.joystick1.value.y);
+            // this.component.movePercent.x =  this.joystick1.value.x;
+            // this.component.movePercent.z = -this.joystick1.value.y;
+			this.component.joystickMove(this.joystick1.value.x, -this.joystick1.value.y);
           }
       }
 });
@@ -386,6 +396,18 @@ AFRAME.registerComponent('extended_wasd_controls', {
 	{
        	return this.keyPressedSet.has(keyName);
 	},
+
+	joystickMove: function(x, z) {
+		this.movePercent.x = x;
+		this.movePercent.z = z;
+		// console.log("this.movePercent " + JSON.stringify(this.movePercent));
+		this.data.inputType = "joystick";
+	},
+
+	// update: function (oldData) {
+    // 	this.movePercent = this.data;
+  	
+	// },
 
 	init: function()
 	{
@@ -535,7 +557,7 @@ AFRAME.registerComponent('extended_wasd_controls', {
 		{
 			// need to reset movePercent values
 			//   when querying which keys are currently pressed
-			this.movePercent.set(0,0,0)
+			this.movePercent.set(0,0,0) //reset before
 
 			if (this.isKeyPressed(this.data.moveForwardKey))
 				this.movePercent.z += 1;
@@ -554,10 +576,28 @@ AFRAME.registerComponent('extended_wasd_controls', {
 				if (this.isKeyPressed(this.data.moveDownKey))
 					this.movePercent.y -= 1;
 			}
+				this.moveVector.set( -s * this.movePercent.z + c * this.movePercent.x,
+							  1 * this.movePercent.y,
+							 -c * this.movePercent.z - s * this.movePercent.x ).multiplyScalar( moveAmount );
+
+				this.el.object3D.position.add( this.moveVector );
+				console.log("keybvoard this.moveVector " + JSON.stringify(this.movePercent));
+
+
 		}
 		else // other, e.g. "joystick"
 		{
 			// assume this.movePercent values have been set/reset elsewhere (outside of this function)
+			if (this.movePercent.x != 0 && this.movePercent.z != 0) {
+				console.log("joystick this.moveVector " + JSON.stringify(this.moveVector));
+								this.moveVector.set( -s * this.movePercent.z + c * this.movePercent.x,
+							1 * this.movePercent.y,
+							-c * this.movePercent.z - s * this.movePercent.x ).multiplyScalar( moveAmount );
+
+				this.el.object3D.position.add( this.moveVector );
+				console.log("joystick this.moveVector " + JSON.stringify(this.moveVector));
+				this.movePercent.set(0,0,0); //reset after
+			}
 		}
 
 		// forward(z) direction: [ -s,  0, -c ]
@@ -565,11 +605,12 @@ AFRAME.registerComponent('extended_wasd_controls', {
 		//      up(y) direction: [  0,  1,  0 ]
 		// multiply each by (maximum) movement amount and percentages (how much to move in that direction)
 
-		this.moveVector.set( -s * this.movePercent.z + c * this.movePercent.x,
-							  1 * this.movePercent.y,
-							 -c * this.movePercent.z - s * this.movePercent.x ).multiplyScalar( moveAmount );
+		// this.moveVector.set( -s * this.movePercent.z + c * this.movePercent.x,
+		// 					  1 * this.movePercent.y,
+		// 					 -c * this.movePercent.z - s * this.movePercent.x ).multiplyScalar( moveAmount );
 
-		this.el.object3D.position.add( this.moveVector );
+		// this.el.object3D.position.add( this.moveVector );
+		// console.log("this.moveVector " + JSON.stringify(this.movePercent));
 	}
 });
 
@@ -825,7 +866,7 @@ AFRAME.registerComponent('extended_wasd_thirdperson', {
 		{
 			// need to reset movePercent values
 			//   when querying which keys are currently pressed
-			this.movePercent.set(0,0,0)
+			this.movePercent.set(0,0,0);
 
 			if (this.isKeyPressed(this.data.moveForwardKey))
 				this.movePercent.z += 1;

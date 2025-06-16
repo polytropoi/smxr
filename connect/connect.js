@@ -2413,7 +2413,7 @@ function EmitSelfPosition() {
                var posRotObj = posRotReader.returnPosRot();
                cameraPosition = posRotObj.pos;
                cameraRotation = posRotObj.rot;
-               console.log(cameraPosition.x.toString() + " vs " + window.playerPosition.x.toString());
+               // console.log(cameraPosition.x.toString() + " vs " + window.playerPosition.x.toString());
                // if (JSON.stringify(cameraPosition) != lastPosition && JSON.stringify(cameraRotation) != lastRotation) {
                if (JSON.stringify(cameraPosition) != lastPosition) {
                      // console.log('emitting!');

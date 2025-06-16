@@ -353,9 +353,7 @@ AFRAME.registerComponent('mod_model', {
         if (obj) {
             if (this.data.shader != "") {
               console.log("gotsa shader " + this.data.shader);
-             
               this.recursivelySetChildrenShader(obj);
-  
             }
           // let dynSkybox = document.getElementById('')
             for (let e = 0; e < textData.length; e++) {

@@ -1087,7 +1087,7 @@ webxr_router.get('/:_id', function (req, res) {
                 if (sceneResponse.sceneCameraMode == "Orbit") {
                     // joystickScript = "<script src=\x22../main/vendor/aframe/aframe-orbit-controls.min.js\x22></script>";
                     // joystickScript = "<script src=\x22../main/src/component/aframe-orbit-controls.min.js\x22></script>";
-                    joystickScript = "<script src=\x22../main/vendor/aframe/aframe-orbit-controls.min.js\x22></script>";
+                    joystickScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-orbit-controls.min.js\x22></script>";
                     
                     // wasd = "orbit-controls=\x22target: 0 0 0; minDistance: .5; maxDistance: 100; initialPosition: 0 1 -5; enableDamping: true;\x22";
                 }
@@ -1185,7 +1185,7 @@ webxr_router.get('/:_id', function (req, res) {
                     cameraRigEntity = "<a-entity camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; enablePan: true; screenSpacePanning: true; minDistance: 0.5; maxDistance: 180; initialPosition: "+playerPosition+"\x22>"+
                     "<a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
                     "</a-entity>";
-                    joystickScript = "<script src=\x22https://cdn.jsdelivr.net/gh/diarmidmackenzie/superframe@fix-orbit-controls/components/orbit-controls/dist/aframe-orbit-controls.min.js\x22></script>";
+                    joystickScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/diarmidmackenzie/superframe@fix-orbit-controls/components/orbit-controls/dist/aframe-orbit-controls.min.js\x22></script>";
                 
                 ///////////////// - Fixed camera - /////////////////
                 } else if (sceneResponse.sceneCameraMode != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase() == "fixed rotate") { //hrm..

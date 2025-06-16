@@ -4162,7 +4162,7 @@ AFRAME.registerComponent('skybox_dynamic', {
           texture.mapping = THREE.EquirectangularReflectionMapping;
           mesh.material.map = texture;
           mesh.material.needsUpdate = true;
-          applyEnvMap(texture);
+          // this.applyEnvMap(texture);
           }
           
       },
@@ -4171,6 +4171,7 @@ AFRAME.registerComponent('skybox_dynamic', {
         console.error( 'skybox texture load error happened.' );
       }
     );
+    this.applyEnvMap();
 
     // if (window.sceneType != undefined && !window.sceneType.toLower().includes('ar')) {
       // this.el.sceneEl.object3D.background = this.texture;
@@ -4204,6 +4205,7 @@ AFRAME.registerComponent('skybox_dynamic', {
     const mesh = this.el.object3DMap.mesh;
     const loader = new THREE.TextureLoader();
     // load a resource
+    let that = this;
     loader.load(
       // resource URL
       url,
