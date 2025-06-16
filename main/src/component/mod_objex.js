@@ -569,7 +569,7 @@ AFRAME.registerComponent('mod_objex', {
   
       },
       throwObject: function (objectID, downtime) {
-        console.log("tryna set model to " + objectID);  
+        console.log("tryna throw object " + objectID);  
         this.objectData = this.returnObjectData(objectID);
         this.dropPos = new THREE.Vector3();
         this.objEl = document.createElement("a-entity");
@@ -1749,6 +1749,7 @@ AFRAME.registerComponent('mod_object', {
                     }
                       if (this.data.applyForceToNewObject) {
                         // this.el.setAttribute("aabb-collider", {objects: ".activeObjexRay"});
+                        console.log("tryna applyForceToNewObject!");
                         this.applyForce();
                         this.el.setAttribute('trail', "");
                         this.el.setAttribute('obb-collider', {'size': this.data.xscale * 1.5 + ' ' + this.data.yscale * 1.5 + ' ' +this.data.zscale * 1.5});

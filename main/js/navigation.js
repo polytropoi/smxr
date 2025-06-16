@@ -576,21 +576,24 @@ AFRAME.registerComponent('extended_wasd_controls', {
 				if (this.isKeyPressed(this.data.moveDownKey))
 					this.movePercent.y -= 1;
 			}
+
+			if (this.movePercent.x != 0 || this.movePercent.y != 0 || this.movePercent.z != 0) {
 				this.moveVector.set( -s * this.movePercent.z + c * this.movePercent.x,
 							  1 * this.movePercent.y,
 							 -c * this.movePercent.z - s * this.movePercent.x ).multiplyScalar( moveAmount );
 
 				this.el.object3D.position.add( this.moveVector );
-				console.log("keybvoard this.moveVector " + JSON.stringify(this.movePercent));
+				console.log("keyboard this.movePercent " + JSON.stringify(this.movePercent));
+			}
 
 
 		}
 		else // other, e.g. "joystick"
 		{
 			// assume this.movePercent values have been set/reset elsewhere (outside of this function)
-			if (this.movePercent.x != 0 && this.movePercent.z != 0) {
+			if (this.movePercent.x != 0 || this.movePercent.z != 0) {
 				console.log("joystick this.moveVector " + JSON.stringify(this.moveVector));
-								this.moveVector.set( -s * this.movePercent.z + c * this.movePercent.x,
+				this.moveVector.set( -s * this.movePercent.z + c * this.movePercent.x,
 							1 * this.movePercent.y,
 							-c * this.movePercent.z - s * this.movePercent.x ).multiplyScalar( moveAmount );
 

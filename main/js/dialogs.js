@@ -3,7 +3,7 @@ import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, Tran
 import { settings, room, lerp, sceneLocations, localData, PauseIntervals, ReturnLocationTable, 
   userData, stringRoomUsers, timeKeysData, timedEventsListenerMode, SetTimedEventsListenerMode, ReturnAttributions, InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, 
   tkStarttimes, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
-  SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, allowCameraLock
+  SetTimeKeysData, GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage
   } from "../../connect/connect.js";
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
 
@@ -323,6 +323,10 @@ window.addEventListener( 'keydown',  ( event ) => {
 
   $('#modalContent').on('click', '#dequipButton', function(e) {
       DequipInventoryItem();
+  });
+
+  $('#modalContent').on('click', '#sendMessageButton', function(e) {
+      SendChatMessage();
   });
 
 
