@@ -346,6 +346,8 @@ webxr_router.get('/:_id', function (req, res) {
     let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
     let enviromentScript = ""; //for aframe env component
+    let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
+    let particleScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>";    
     // let aframeScript = "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>";
     let threejsVersion = "173";
     let surfaceScatterScript = "";
@@ -362,19 +364,14 @@ webxr_router.get('/:_id', function (req, res) {
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
-    let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + //TODO use new aframe module, and externalize this !!!!!!!
-                            //still causes duplicate engine loading, but...
-
-                        "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  
+    let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+                          
+                        "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
                        
                         "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
                         "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-                        "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
-                        // "\x22content-utils\x22: \x22../main/src/component/c_utils_esm.js?v=1\x22"+    
-
-                        // "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/build/three.module.js\x22,"+
-                        // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.4/examples/jsm/\x22,"+
-                        
+                        // "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
+                                               
                         "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
                         "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
                         "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
@@ -448,20 +445,24 @@ webxr_router.get('/:_id', function (req, res) {
             // } 
             if (sceneData.sceneTags != null) {        
                 for (let i = 0; i < sceneData.sceneTags.length; i++) { //not ideal, but it's temporary... //no it isn't
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("forge___")) {    
+                    if (sceneData.sceneTags[i].toLowerCase().includes("spark") || sceneData.sceneTags[i].toLowerCase().includes("splat")) {    
                         
-                    //     importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + //TODO use new aframe module, and externalize this !!!!!!!// or just make a new route...
-                    //         //still causes duplicate engine loading, but...
-                    //     "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  
-                    //     "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-                    //     "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-                    //     "\x22@forge-gfx/forge\x22: \x22https://forge.dev/releases/forge/0.1.0/forge.module.js\x22"+                
-                    
-                    //     "}"+
-                    //     "}</script>";
-                    //     aframeScript = "";
-                    //     contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/c_utils_esm.js\x22 defer=\x22defer\x22></script>"; 
-                    // }
+                        importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+                          
+                        "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+                       
+                        "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
+                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
+                        "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
+                                               
+                        "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                        "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                        "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                        
+                        "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
+                        "}"+
+                    "}</script>";
+                    }
 
                     // aframe-physics-system.min
 
@@ -543,25 +544,39 @@ webxr_router.get('/:_id', function (req, res) {
                         aframeScript = "<script src=\x22https://cdn.jsdelivr.net/gh/aframevr/aframe@edca48b2e71a0838690c7541fab5ede279def7a1/dist/aframe-master.min.js\x22></script>"; //ref 20231103 (integrated hands!)
                         threejsVersion = "175";
                     }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("webgpu____")) { //this approach is ouch
-                    //     aframeScript = "";
-                    //    importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+                    if (sceneData.sceneTags[i].toLowerCase().includes("webgpu")) { 
+                                                // aframeScript = "";
+                       importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+
+
+                       
+                            "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+                       
+                        // "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
+                        // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
                             
-                    //         "\x22aframe\x22: \x22https://cdn.jsdelivr.net/npm/aframe@1.7.1/dist/aframe-master.module.min.js\x22,"+
-                    //         "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
-                    //         "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
-                    //         "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.tsl.js\x22,"+
-                    //         "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/examples/jsm/\x22"+                
+                            // "\x22aframe\x22: \x22https://cdn.jsdelivr.net/npm/aframe@1.7.1/dist/aframe-master.module.min.js\x22,"+
+                            "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
+                            "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
+                            "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.tsl.js\x22,"+
+                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/examples/jsm/\x22,"+
+                            "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                            "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                            "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                            
+                            "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+                  
                         
-                    //         "}"+
-                    //     "}</script>"+
-                    //     "<script type=\x22module\x22>import AFRAME from 'aframe';import THREE from 'three';"+
-                    //                                 "import { color, cos, float, mix, range, sin, time, uniform, uv, vec3, vec4, PI2 } from 'three/tsl';"+
-                    //     "</script>";
-                    //     aframeScript = "";
-                    //     contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
+                            "}"+
+                        "}</script>"+
+                        "<script type=\x22module\x22>import AFRAME from 'aframe';"+
+                                                    "import { color, cos, float, mix, range, sin, time, uniform, uv, vec3, vec4, PI2 } from 'three/tsl';"+
+                        "</script>";
+                        troikaScript = "";
+                        particleScript = "";
+                        // aframeScript = "";
+                        // contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
                         
-                    // }
+                    }
                     
                 }
             }
@@ -1388,7 +1403,7 @@ webxr_router.get('/:_id', function (req, res) {
                 }
 
                 if (sceneResponse.sceneUseDynamicShadows) {
-                    shadow = "shadow: true; shadowSize: 10;"
+                    shadow = "shadow: true; shadowSize: 50;"
                 } else {
                     shadow = " shadow: false ";
                 }
@@ -3548,8 +3563,8 @@ webxr_router.get('/:_id', function (req, res) {
                         let hasParametricCurve = false;
                         let obbDebug = ""; //to show obb colliders, physics collider debug set elsewhere...
                        
-                        let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
-                        let particleScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>";
+                        // let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
+                        // let particleScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>";
                         // if (aframeScript == "") { //i.e. it's in the importmap!
                         //     particleScript = "";
                         //     aframeExtrasScript = "";

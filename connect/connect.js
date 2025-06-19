@@ -1912,12 +1912,12 @@ function ShowHideUI () {
 }
 
 
-$(document).on("click",".cw-canvas-overlay",function(){ 
+$(document).on("click",".cw-canvas-overlay",function() { 
    this.element.classList.toggle("cw-show-canvas");
 });
 
 
-$(document).on("click",".picbutton",function(){ 
+$(document).on("click",".picbutton",function() { 
    let picbuttonID = this.id;
    console.log("picbutton clicked from " + picbuttonID);
    // $(".screen-overlay").backstretch("Destroy", true);
@@ -1925,7 +1925,7 @@ $(document).on("click",".picbutton",function(){
    $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});
 });
 
-$(document).on("click","#play",function(){ 
+$(document).on("click","#play",function() { 
    console.log("play clicked");
    // $(".screen-overlay").backstretch("Destroy", true);
    $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});

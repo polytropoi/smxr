@@ -329,12 +329,11 @@ window.addEventListener( 'keydown',  ( event ) => {
       SendChatMessage();
   });
 
-
-
   $('#modalContent').on('change', '#importMods', function(e) {
     console.log("importMods change event! " + e.target.value);
     ImportMods(e);
   });
+  
   $('#modalContent').on('click', '#importFileButton', function(e) {
     console.log("importFileButton clicked " + e.target.value);
     document.querySelector("#importFile").showPicker();
