@@ -17,19 +17,19 @@ import { ReturnPresignedUrl } from "../connect/objectStore.js";
 
 import { ObjectId } from "mongodb";
 
-// var minioClient = null;
-// if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
-//         const minio = require('minio');
-//         minioClient = new minio.Client({
-//         endPoint: process.env.MINIOENDPOINT,
-//         port: 9000,
-//         useSSL: false,
-//         accessKey: process.env.MINIOKEY,
-//         secretKey: process.env.MINIOSECRET
-//     });
-// }
+var minioClient = null;
+if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
+        const minio = require('minio');
+        minioClient = new minio.Client({
+        endPoint: process.env.MINIOENDPOINT,
+        port: 9000,
+        useSSL: false,
+        accessKey: process.env.MINIOKEY,
+        secretKey: process.env.MINIOSECRET
+    });
+}
 
-const nonLocalDomains = ["regalrooms.tv"]; //TODO you know what! (put this in sceneDomain object)
+const nonLocalDomains = ["regalrooms.tv", "bishopstudiosaustin.com"]; //TODO you know what! (put this in sceneDomain object)
 
 function getExtension(filename) {
     if (filename) {
@@ -59,7 +59,7 @@ function UppercaseFirst(s) {
         }
     };
     
-landing_router.get("/test", function (req, res) {
+webxr_router.get("/test", function (req, res) {
     res.send("OK!");
 });    
 
@@ -106,10 +106,10 @@ landing_router.get('/simple_aframe', function (req, res) {
 );
 
 ////////////////////PRIMARY /WEBXR ROUTE  e.g. /webxr/<short_id> ///////////////////
-landing_router.get('/:_id', function (req, res) { 
+webxr_router.get('/:_id', function (req, res) { 
     
     var reqstring = entities.decodeHTML(req.params._id);
-    console.log("NEW LANDING SCENE REQUEST : " + reqstring);
+    console.log("NEW WEBXR SCENE REQUEST : " + reqstring);
     if (!reqstring || reqstring == undefined || reqstring == '') {
         return null;
     }
@@ -365,22 +365,22 @@ landing_router.get('/:_id', function (req, res) {
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
-    // let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+    let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
-    //                     "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+                        "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
                        
-    //                     "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-    //                     "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-    //                     // "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
+                        "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
+                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
+                        // "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
                                                
-    //                     "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
-    //                     "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-    //                     "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                        "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                        "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                        "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
                         
-    //                     "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
-    //                     "}"+
-    //                 "}</script>";
-    let importMap = "";
+                        "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
+                        "}"+
+                    "}</script>";
+
     
     (async () => {
         try {
@@ -448,21 +448,21 @@ landing_router.get('/:_id', function (req, res) {
                 for (let i = 0; i < sceneData.sceneTags.length; i++) { //not ideal, but it's temporary... //no it isn't
                     if (sceneData.sceneTags[i].toLowerCase().includes("spark") || sceneData.sceneTags[i].toLowerCase().includes("splat")) {    
                         
-                    //     importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+                        importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
-                    //     "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+                        "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
                        
-                    //     "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-                    //     "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-                    //     "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
+                        "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
+                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
+                        "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
                                                
-                    //     "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
-                    //     "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                    //     "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                        "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                        "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                        "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
                         
-                    //     "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
-                    //     "}"+
-                    // "}</script>";
+                        "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
+                        "}"+
+                    "}</script>";
                     }
 
                     // aframe-physics-system.min
@@ -481,21 +481,21 @@ landing_router.get('/:_id', function (req, res) {
                     if (sceneData.sceneTags[i].toLowerCase().includes("webcam")) {
                         webcamAsset = "<video id=\x22webcam\x22 src=\x22''\x22 playsinline></video>";
                     }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("physics")) { 
-                    //     usePhysicsType = "ammo";
-                    //     physicsScripts =  "<script src=\x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22></script>"+
-                    //     "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-physics-system.min.js\x22></script>";     
-                    // }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("brownian")) {
-                    //     brownianScript =  "<script type=\x22module\x22 src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
-                    // }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("instancing")) {
-                    //     meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22></script>"; //imports MeshSurfaceScatter
-                    //     instancingEntity = "";
-                    // } 
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("grid effects" )) {
-                    //     meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/shaders/grid_shaders.js\x22></script><script src=\x22../main/src/component/grid_effects.js\x22></script>"; //imports MeshSurfaceScatter
-                    // } 
+                    if (sceneData.sceneTags[i].toLowerCase().includes("physics")) { 
+                        usePhysicsType = "ammo";
+                        physicsScripts =  "<script src=\x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-physics-system.min.js\x22></script>";     
+                    }
+                    if (sceneData.sceneTags[i].toLowerCase().includes("brownian")) {
+                        brownianScript =  "<script type=\x22module\x22 src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
+                    }
+                    if (sceneData.sceneTags[i].toLowerCase().includes("instancing")) {
+                        meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22></script>"; //imports MeshSurfaceScatter
+                        instancingEntity = "";
+                    } 
+                    if (sceneData.sceneTags[i].toLowerCase().includes("grid effects" )) {
+                        meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/shaders/grid_shaders.js\x22></script><script src=\x22../main/src/component/grid_effects.js\x22></script>"; //imports MeshSurfaceScatter
+                    } 
                     if (sceneData.sceneTags[i] == "show transport") {
                         showTransport = true;
                     }
@@ -516,8 +516,69 @@ landing_router.get('/:_id', function (req, res) {
                         console.log("GOTS USENAVMESH TAG: " + sceneData.sceneTags[i]);
                         useNavmesh = true;
                     }
+                    if (sceneData.sceneTags[i].toLowerCase().includes("ammo test")) {
+                        externalEntities = externalEntities + requireText('../main/includes/ammoTestEntities.html', require);
+                    }
+                    if (sceneData.sceneTags[i].toLowerCase().includes("ammo no nav")) {
+                        externalEntities = externalEntities + requireText('../main/includes/ammoTestEntities2.html', require);
+                    }
+                    if (sceneData.sceneTags[i].toLowerCase().includes("cannon test")) {
+                        externalEntities = externalEntities + requireText('../main/includes/cannonTestEntities.html', require);
+                    }
+                    if (sceneData.sceneTags[i].toLowerCase().includes("physx test")) {
+                        externalEntities = externalEntities + requireText('../main/includes/physxTestEntities.html', require);
+                    }
+                    if (sceneData.sceneTags[i] == "show ethereum") {
+                        ethereumButton = "<div class=\x22ethereum_button\x22 id=\x22ethereumButton\x22 style=\x22margin: 10px 10px;\x22><i class=\x22fab fa-ethereum fa-2x\x22></i></div>";
+                    }
+                    if (sceneData.sceneTags[i] == "show camera lock") {
+                        cameraLockButton = "<div class=\x22camlock_button_locked\x22 id=\x22camLockToggleButton\x22 style=\x22margin: 10px 10px;\x22><i class=\x22fa-solid fa-lock fa-2x\x22></i></div>";
+                    }
+                    if (sceneData.sceneTags[i].includes("synth")) {
+                        synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script type=\x22module\x22 src=\x22../main/js/synth.js\x22></script>";
+                    }
+                    if (sceneData.sceneTags[i].toLowerCase().includes("aframe 1.6")) {
+                        aframeScript = "<script src=\x22https://aframe.io/releases/1.6.0/aframe.min.js\x22></script>";
+                    }
+                    if (sceneData.sceneTags[i].toLowerCase().includes("aframe master")) {
+                        // aframeScript = "<script src=\x22https://cdn.jsdelivr.net/gh/aframevr/aframe@744e2b869e281f840cff7d9cb02e95750ce90920/dist/aframe-master.min.js\x22></script>"; //ref 20220715// nope!
+                        aframeScript = "<script src=\x22https://cdn.jsdelivr.net/gh/aframevr/aframe@edca48b2e71a0838690c7541fab5ede279def7a1/dist/aframe-master.min.js\x22></script>"; //ref 20231103 (integrated hands!)
+                        threejsVersion = "175";
+                    }
+                    if (sceneData.sceneTags[i].toLowerCase().includes("webgpu")) { 
+                                                // aframeScript = "";
+                       importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
 
 
+                       
+                            "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+                       
+                        // "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
+                        // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
+                            
+                            // "\x22aframe\x22: \x22https://cdn.jsdelivr.net/npm/aframe@1.7.1/dist/aframe-master.module.min.js\x22,"+
+                            "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
+                            "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
+                            "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.tsl.js\x22,"+
+                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/examples/jsm/\x22,"+
+                            "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                            "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                            "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                            
+                            "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+                  
+                        
+                            "}"+
+                        "}</script>"+
+                        "<script type=\x22module\x22>import AFRAME from 'aframe';"+
+                                                    "import { color, cos, float, mix, range, sin, time, uniform, uv, vec3, vec4, PI2 } from 'three/tsl';"+
+                        "</script>";
+                        troikaScript = "";
+                        particleScript = "";
+                        // aframeScript = "";
+                        // contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
+                        
+                    }
+                    
                 }
             }
             if (socketHost != null && socketHost != "NONE") {
@@ -591,86 +652,86 @@ landing_router.get('/:_id', function (req, res) {
 
                     // console.log("sceneResponse.sceneLocations[i].eventData "+ sceneResponse.sceneLocations[i].eventData);
                     if ((sceneResponse.sceneLocationTracking != null && sceneResponse.sceneLocationTracking == true) || sceneResponse.sceneWebType == "AR Location Tracking") {  
-                        // if (sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //just to set scripts and restrict to location
-                        //     if (sceneResponse.sceneWebType == "AR Location Tracking") {
-                        //         if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict_ar position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>";
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 ><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         } else {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_ar position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>"; 
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         }
-                        //         geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                        //         locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
-                        //         var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                        //         locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                        //     } else if (sceneResponse.sceneWebType == "Model Viewer") { 
-                        //         console.log("sceneResponse.sceneLocations[i].eventData : " + sceneResponse.sceneLocations[i].eventData);
-                        //         if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //         geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                        //         locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
-                        //         var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                        //         locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                        //         }
-                        //     } else if (sceneResponse.sceneWebType == "Mapbox") { //just location tracking, for any sceneWebType
-                        //         if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>";
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         } else {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_init position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>"; 
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         }
-                        //     } else {
-                        //         console.log("tryna set geo loc " + sceneResponse.sceneLocations[i].eventData);
-                        //         if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //             geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                        //             locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
-                        //             var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                        //             locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                        //         }
-                        //     }
-                        // }
+                        if (sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //just to set scripts and restrict to location
+                            if (sceneResponse.sceneWebType == "AR Location Tracking") {
+                                if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
+                                    locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict_ar position=\x220 2 -5\x22>"+
+                                        "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
+                                        "</a-entity>"+
+                                    "</a-entity>";
+                                    locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 ><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                                } else {
+                                    locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_ar position=\x220 2 -5\x22>"+
+                                        "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
+                                        "</a-entity>"+
+                                    "</a-entity>"; 
+                                    locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                                }
+                                geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
+                                locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
+                                var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
+                                locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
+                            } else if (sceneResponse.sceneWebType == "Model Viewer") { 
+                                console.log("sceneResponse.sceneLocations[i].eventData : " + sceneResponse.sceneLocations[i].eventData);
+                                if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
+                                geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
+                                locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
+                                var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
+                                locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
+                                }
+                            } else if (sceneResponse.sceneWebType == "Mapbox") { //just location tracking, for any sceneWebType
+                                if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
+                                    locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict position=\x220 2 -5\x22>"+
+                                        "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
+                                        "</a-entity>"+
+                                    "</a-entity>";
+                                    locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                                } else {
+                                    locationEntity = "<a-entity id=\x22youAreHere\x22 location_init position=\x220 2 -5\x22>"+
+                                        "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
+                                        "</a-entity>"+
+                                    "</a-entity>"; 
+                                    locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                                }
+                            } else {
+                                console.log("tryna set geo loc " + sceneResponse.sceneLocations[i].eventData);
+                                if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
+                                    geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
+                                    locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
+                                    var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
+                                    locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
+                                }
+                            }
+                        }
                     }
                     if (sceneResponse.sceneLocations[i].type != undefined && sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //set actual locs below
-                        // // let id = sceneResponse.sceneLocations[i]._id != undefined ? 
-                        // if (sceneResponse.sceneLocations[i].markerType == "poi") {
-                        //     poiIndex++;
-                        //     if (sceneResponse.sceneWebType == "AR Location Tracking") {
-                        //         //TODO jack in models / objs here?
-                        //         geoEntities = geoEntities + "<a-entity look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
-                        //         "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><a-entity scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></a-entity></a-entity>";
+                        // let id = sceneResponse.sceneLocations[i]._id != undefined ? 
+                        if (sceneResponse.sceneLocations[i].markerType == "poi") {
+                            poiIndex++;
+                            if (sceneResponse.sceneWebType == "AR Location Tracking") {
+                                //TODO jack in models / objs here?
+                                geoEntities = geoEntities + "<a-entity look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
+                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><a-entity scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></a-entity></a-entity>";
                             
-                        //     } else if (sceneResponse.sceneWebType != "Mapbox") {
-                        //         geoEntities = geoEntities + "<a-entity look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
-                        //         "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><a-entity scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></a-entity></a-entity>";
-                        //         // console.log(geoEntities);
-                        //     } else {
-                        //         //for mapbox just using aframe to pass data
-                        //         geoEntities = geoEntities + "<a-entity class=\x22geo poi\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
-                        //         "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></a-entity>";
-                        //         // console.log("mapbox geoEntities: " + geoEntities);
-                        //     }
-                        // } else {
-                        //     if (sceneResponse.sceneLocations[i].modelID != null) {
-                        //         console.log("gotsa modelID at a geographic location " + sceneResponse.sceneLocations[i].modelID );
-                        //         geoEntities = geoEntities + "<a-entity class=\x22geo\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
-                        //         "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></a-entity>";
-                        //     } else {
-                        //         console.log("modelID is null at this location"); 
-                        //     }
-                        // }
+                            } else if (sceneResponse.sceneWebType != "Mapbox") {
+                                geoEntities = geoEntities + "<a-entity look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
+                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><a-entity scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></a-entity></a-entity>";
+                                // console.log(geoEntities);
+                            } else {
+                                //for mapbox just using aframe to pass data
+                                geoEntities = geoEntities + "<a-entity class=\x22geo poi\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
+                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></a-entity>";
+                                // console.log("mapbox geoEntities: " + geoEntities);
+                            }
+                        } else {
+                            if (sceneResponse.sceneLocations[i].modelID != null) {
+                                console.log("gotsa modelID at a geographic location " + sceneResponse.sceneLocations[i].modelID );
+                                geoEntities = geoEntities + "<a-entity class=\x22geo\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
+                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></a-entity>";
+                            } else {
+                                console.log("modelID is null at this location"); 
+                            }
+                        }
                     }
                     let zFix = parseFloat(sceneResponse.sceneLocations[i].z); //does nothing    
                     
@@ -2763,8 +2824,8 @@ landing_router.get('/:_id', function (req, res) {
                 }
                 if (picture_item && picture_item.filename) {
                     postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ 
-                    picture_item._id + ".standard." + picture_item.filename, 6000); //just return a single         
-                    postcardImages.push(postcard1);    
+                    picture_item._id + ".standard." + picture_item.filename, 6000); //just return a single            
+                    postcardImages.push(postcard1); 
                 }
             }
             
@@ -2807,32 +2868,30 @@ landing_router.get('/:_id', function (req, res) {
                             picGroup.images = images;
                             requestedPictureGroups.push(picGroup);
                         }
-                            // if (picturegroupLocation != "") {
-                            //     pictureGroupsEntity = "<a-entity scale=\x22.75 .75 .75\x22 id=\x22picGroupParent\x22 look-at=\x22#player\x22 position=\x22"+picturegroupLocation+"\x22>"+ 
-                            //     "<a-entity position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22pictureGroupsControl\x22 class=\x22envMap activeObjexRay\x22 "+skyboxEnvMap+" toggle-picture-group gltf-model=\x22#camera_icon\x22></a-entity>"+
-                            //     "<a-entity id=\x22pictureGroupPanel\x22 visible=\x22false\x22 position=\x220 -1 0\x22>"+
-                            //     "<a-entity id=\x22pictureGroupPicLandscape\x22 visible=\x22true\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatrect2\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                            //     "rotation='0 0 0'></a-entity>"+
-                            //     "<a-entity id=\x22pictureGroupPicPortrait\x22 visible=\x22false\x22 position=\x220 3.25 -.1\x22 gltf-model=\x22#portrait_panel\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                            //     "rotation='0 0 0'></a-entity>"+
-                            //     "<a-entity id=\x22pictureGroupPicSquare\x22 visible=\x22false\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatsquare\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                            //     "rotation='0 0 0'></a-entity>"+
-                            //     "<a-entity id=\x22pictureGroupPicCircle\x22 visible=\x22false\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatcircle\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                            //     "rotation='0 0 0'></a-entity>"+
-                            //     "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupFlyButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.25 .25 .25\x22 position=\x223.25 -.75 0\x22></a-entity>" +
-                            //     "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupLayoutButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.25 .25 .25\x22 position=\x22-3.25 -.75 0\x22></a-entity>" +
-                            //     "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x222.25 -.75 0\x22></a-entity>" +
-                            //     "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupPreviousButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-2.25  -.75 0\x22></a-entity>" +
-                            //     "</a-entity></a-entity>";
-                            // }
-                            // var buff = Buffer.from(JSON.stringify(requestedPictureGroups)).toString("base64");
-                            // pictureGroupsData = "<a-entity id=\x22pictureGroupsData\x22 data-picture-groups='"+buff+"'></a-entity>"; //to be picked up by aframe, but data is in data-attribute
-                            // modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatrect2_portrait.glb\x22></a-asset-item>\n" +
-                            // "<a-asset-item id=\x22flatrect2\x22 crossorigin=\x22anonymous\x22 id=\x22flatrect2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatrect2.glb\x22></a-asset-item>"+
-                            // "\n<a-asset-item id=\x22camera_icon\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/camera1.glb\x22></a-asset-item>\n";
-                            // "});";
+                            if (picturegroupLocation != "") {
+                                pictureGroupsEntity = "<a-entity scale=\x22.75 .75 .75\x22 id=\x22picGroupParent\x22 look-at=\x22#player\x22 position=\x22"+picturegroupLocation+"\x22>"+ 
+                                "<a-entity position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22pictureGroupsControl\x22 class=\x22envMap activeObjexRay\x22 "+skyboxEnvMap+" toggle-picture-group gltf-model=\x22#camera_icon\x22></a-entity>"+
+                                "<a-entity id=\x22pictureGroupPanel\x22 visible=\x22false\x22 position=\x220 -1 0\x22>"+
+                                "<a-entity id=\x22pictureGroupPicLandscape\x22 visible=\x22true\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatrect2\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                                "rotation='0 0 0'></a-entity>"+
+                                "<a-entity id=\x22pictureGroupPicPortrait\x22 visible=\x22false\x22 position=\x220 3.25 -.1\x22 gltf-model=\x22#portrait_panel\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                                "rotation='0 0 0'></a-entity>"+
+                                "<a-entity id=\x22pictureGroupPicSquare\x22 visible=\x22false\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatsquare\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                                "rotation='0 0 0'></a-entity>"+
+                                "<a-entity id=\x22pictureGroupPicCircle\x22 visible=\x22false\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatcircle\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                                "rotation='0 0 0'></a-entity>"+
+                                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupFlyButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.25 .25 .25\x22 position=\x223.25 -.75 0\x22></a-entity>" +
+                                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupLayoutButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.25 .25 .25\x22 position=\x22-3.25 -.75 0\x22></a-entity>" +
+                                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x222.25 -.75 0\x22></a-entity>" +
+                                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupPreviousButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-2.25  -.75 0\x22></a-entity>" +
+                                "</a-entity></a-entity>";
+                            }
                             var buff = Buffer.from(JSON.stringify(requestedPictureGroups)).toString("base64");
-                            pictureGroupsData = "<div id=\x22pictureGroupsData\x22 data-picture-groups='"+buff+"'></a-entity>";
+                            pictureGroupsData = "<a-entity picture_groups_control id=\x22pictureGroupsData\x22 data-picture-groups='"+buff+"'></a-entity>"; //to be picked up by aframe, but data is in data-attribute
+                            modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatrect2_portrait.glb\x22></a-asset-item>\n" +
+                            "<a-asset-item id=\x22flatrect2\x22 crossorigin=\x22anonymous\x22 id=\x22flatrect2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatrect2.glb\x22></a-asset-item>"+
+                            "\n<a-asset-item id=\x22camera_icon\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/camera1.glb\x22></a-asset-item>\n";
+                            "});";
                         // }
                     }
                 }
@@ -2907,7 +2966,7 @@ landing_router.get('/:_id', function (req, res) {
                         imageAssets = imageAssets + "<img id=\x22smimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
                         let caption = "";
                         if (picture_item.captionUpper != null && picture_item.captionUpper != undefined) {
-                            // caption = "<a-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x220 1.3 -.1\x22 wrapCount=\x2240\x22 value=\x22"+picture_item.captionUpper+"\x22></a-text>";
+                            caption = "<a-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x220 1.3 -.1\x22 wrapCount=\x2240\x22 value=\x22"+picture_item.captionUpper+"\x22></a-text>";
                         }
                         let lowerCap = "";
                         let actionCall = "";
@@ -2937,7 +2996,7 @@ landing_router.get('/:_id', function (req, res) {
                             
                             }
                             if (picture_item.linkURL != undefined && !picture_item.linkURL.includes("undefined") && picture_item.linkURL.length > 6) {
-                                // link = "basic-link=\x22href: "+picture_item.linkURL+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
+                                link = "basic-link=\x22href: "+picture_item.linkURL+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
                             }
                         }
                         if (picture_item.useTarget != undefined && picture_item.useTarget != "") { //used by mindar - good stuff!
@@ -2947,66 +3006,66 @@ landing_router.get('/:_id', function (req, res) {
                         
 
                         }
-                        // if (picture_item.hasAlphaChannel && scatterPics) {
-                        //     imageEntities = imageEntities + "<a-entity "+link+""+lookat+" geometry=\x22primitive: plane; height: 10; width: 10\x22 material=\x22shader: flat; transparent: true; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        // } else {
-                        //     console.log("picture_item.orientation " + picture_item);
-                        //     if (picture_item.orientation != "equirectangular" && picture_item.orientation != "Equirectangular" && scatterPics) {  //what if linkType is undefined?
+                        if (picture_item.hasAlphaChannel && scatterPics) {
+                            imageEntities = imageEntities + "<a-entity "+link+""+lookat+" geometry=\x22primitive: plane; height: 10; width: 10\x22 material=\x22shader: flat; transparent: true; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                            " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                        } else {
+                            console.log("picture_item.orientation " + picture_item);
+                            if (picture_item.orientation != "equirectangular" && picture_item.orientation != "Equirectangular" && scatterPics) {  //what if linkType is undefined?
 
-                        //         if (picture_item.orientation == "portrait" || picture_item.orientation == "Portrait") {
-                        //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                        //             index+"\x22 gltf-model=\x22#portrait_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        //             modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5c.glb\x22></a-asset-item>\n";
-                        //         } else if (picture_item.orientation == "square" || picture_item.orientation == "Square") {
-                        //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                        //             index+"\x22 gltf-model=\x22#square_panel\x22 scale=\x223 3 3\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        //         } else if (picture_item.orientation == "circle" || picture_item.orientation == "Circle") {
-                        //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                        //             index+"\x22 gltf-model=\x22#circle_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        //             modelAssets = modelAssets + "<a-asset-item id=\x22circle_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelcircle1.glb\x22></a-asset-item>\n";
-                        //         } else {
-                        //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                        //             index+"\x22 gltf-model=\x22#landscape_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        //         }
-                        //     }
-                        // }
+                                if (picture_item.orientation == "portrait" || picture_item.orientation == "Portrait") {
+                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                                    index+"\x22 gltf-model=\x22#portrait_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                                    modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5c.glb\x22></a-asset-item>\n";
+                                } else if (picture_item.orientation == "square" || picture_item.orientation == "Square") {
+                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                                    index+"\x22 gltf-model=\x22#square_panel\x22 scale=\x223 3 3\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                                } else if (picture_item.orientation == "circle" || picture_item.orientation == "Circle") {
+                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                                    index+"\x22 gltf-model=\x22#circle_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                                    modelAssets = modelAssets + "<a-asset-item id=\x22circle_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelcircle1.glb\x22></a-asset-item>\n";
+                                } else {
+                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                                    index+"\x22 gltf-model=\x22#landscape_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                                }
+                            }
+                        }
                     }
-                    // var buff = Buffer.from(JSON.stringify(scenePictureItems)).toString("base64");
-                    // scenePictureData = "<a-entity scene_pictures_control id=\x22scenePictureData\x22 data-scene-pictures='"+buff+"'></a-entity>";
+                    var buff = Buffer.from(JSON.stringify(scenePictureItems)).toString("base64");
+                    scenePictureData = "<a-entity scene_pictures_control id=\x22scenePictureData\x22 data-scene-pictures='"+buff+"'></a-entity>";
                 }
                 /////////////// skyboxen /////////////////////
-                // var oo_id = null;
-                // console.log("skybox ids beez " + JSON.stringify(skyboxIDs) + " vs single skyboxID " + skyboxID);
-                // if (skyboxIDs.length > 0) { //umm...
-                //     // skyboxID = skyboxIDs[Math.floor(Math.random() * skyboxIDs.length)];
-                //     // oo_id =  ObjectID(skyboxID);
-                // } 
-                // if (skyboxID != "") {
-                //     oo_id = ObjectId.createFromHexString(skyboxID); //set if there's an equirect pic, above
-                // } else {
-                //     if (sceneResponse.sceneSkybox != null && sceneResponse.sceneSkybox != "") //old way
-                //     oo_id = ObjectId.createFromHexString(sceneResponse.sceneSkybox);
-                // }
-                // if (oo_id) {
-                //     const query = {"_id": oo_id};
-                //     const picture_item = await RunDataQuery("image_items", "findOne", query); 
-                //     const theKey = 'users/' + picture_item.userID + '/pictures/originals/' + picture_item._id + '.original.' + picture_item.filename; //TODO cook smaller equirect versions?
-                //     //some old skyboxen aren't saved with .original. in filename, check for that
-                //     // if (!ReturnObjectExists(process.env.ROOT_BUCKET_NAME, theKey)) {
-                //     //     theKey = 'users/' + picture_item.userID + '/pictures/originals/' + picture_item.filename;
-                //     // } 
-                //     const skyboxUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, theKey, 6000);
-                //     console.log("single skybox url " + skyboxUrl);
-                //     imageAssets = imageAssets + "<img id=\x22sky\x22 crossorigin=\x22anonymous\x22 src='" + skyboxUrl + "'>";
-                //     if (sceneResponse.sceneUseSkybox) {
-                //         skySettings = "<a-sky id=\x22a_sky\x22 crossorigin=\x22anonymous\x22 hide-on-enter-ar skybox_dynamic></a-sky>";
-                //     }
-                // }
+                var oo_id = null;
+                console.log("skybox ids beez " + JSON.stringify(skyboxIDs) + " vs single skyboxID " + skyboxID);
+                if (skyboxIDs.length > 0) { //umm...
+                    // skyboxID = skyboxIDs[Math.floor(Math.random() * skyboxIDs.length)];
+                    // oo_id =  ObjectID(skyboxID);
+                } 
+                if (skyboxID != "") {
+                    oo_id = ObjectId.createFromHexString(skyboxID); //set if there's an equirect pic, above
+                } else {
+                    if (sceneResponse.sceneSkybox != null && sceneResponse.sceneSkybox != "") //old way
+                    oo_id = ObjectId.createFromHexString(sceneResponse.sceneSkybox);
+                }
+                if (oo_id) {
+                    const query = {"_id": oo_id};
+                    const picture_item = await RunDataQuery("image_items", "findOne", query); 
+                    const theKey = 'users/' + picture_item.userID + '/pictures/originals/' + picture_item._id + '.original.' + picture_item.filename; //TODO cook smaller equirect versions?
+                    //some old skyboxen aren't saved with .original. in filename, check for that
+                    // if (!ReturnObjectExists(process.env.ROOT_BUCKET_NAME, theKey)) {
+                    //     theKey = 'users/' + picture_item.userID + '/pictures/originals/' + picture_item.filename;
+                    // } 
+                    const skyboxUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, theKey, 6000);
+                    console.log("single skybox url " + skyboxUrl);
+                    imageAssets = imageAssets + "<img id=\x22sky\x22 crossorigin=\x22anonymous\x22 src='" + skyboxUrl + "'>";
+                    if (sceneResponse.sceneUseSkybox) {
+                        skySettings = "<a-sky id=\x22a_sky\x22 crossorigin=\x22anonymous\x22 hide-on-enter-ar skybox_dynamic></a-sky>";
+                    }
+                }
 
                 /////////////////// build the response! ///////////////////////////////
 
@@ -3153,19 +3212,19 @@ landing_router.get('/:_id', function (req, res) {
 
                     let playerAvatarTemplate = "";
                     if (sceneResponse.sceneWebType != undefined && (sceneResponse.sceneWebType.toLowerCase() == "aframe" || sceneResponse.sceneWebType.toLowerCase() == "default")) { // and what else?  networking isOn?
-                        // playerAvatarTemplate = "<template id=\x22avatar-template\x22>"+ 
+                        playerAvatarTemplate = "<template id=\x22avatar-template\x22>"+ 
                         
-                        // "<a-entity "+skyboxEnvMap+" gltf-model=\x22#avatar_model\x22>"+
-                        // "<a-text class=\x22playerName\x22 look-at=\x22#player\x22 rotation=\x220 0 0\x22 position=\x22.5 .75 -.15\x22 value=\x22"+avatarName+"\x22></a-text>"+
-                        // "</a-entity>"+
-                        // "</template>";
+                        "<a-entity "+skyboxEnvMap+" gltf-model=\x22#avatar_model\x22>"+
+                        "<a-text class=\x22playerName\x22 look-at=\x22#player\x22 rotation=\x220 0 0\x22 position=\x22.5 .75 -.15\x22 value=\x22"+avatarName+"\x22></a-text>"+
+                        "</a-entity>"+
+                        "</template>";
                     }
                  
-                    // let webxrFeatures = "";
-                    // // let arHitTest = "";
-                    // let arElements = "";
-                    // let handsTemplate = "";
-                    // let aframeRenderSettings = "renderer=\x22colorManagement: true; physicallyCorrectLights: true; exposure: 2; sortObjects: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;\x22";
+                    let webxrFeatures = "";
+                    // let arHitTest = "";
+                    let arElements = "";
+                    let handsTemplate = "";
+                    let aframeRenderSettings = "renderer=\x22colorManagement: true; physicallyCorrectLights: true; exposure: 2; sortObjects: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;\x22";
      
 
                     //scenetype filters below...
@@ -3176,139 +3235,139 @@ landing_router.get('/:_id', function (req, res) {
                         (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "aframe")) { 
 
                         // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
-                        // if (sceneResponse.sceneTags == null) {
-                        //     sceneResponse.sceneTags = "";
-                        // }
-                        // let xrExtras = "";
-                        // let hitCasterComponent = "";
-                        // if ((sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hit test"))) {
-                        //     xrExtras = "ar-hit-test"; //added to a-scene
-                        //     // ARScript = "<script type=\x22module\x22 src=\x22../main/src/component/ar_hit_caster.js\x22></script>"; 
-                        //     hitCasterComponent = "ar_hit_caster"; //added to ar_parent
+                        if (sceneResponse.sceneTags == null) {
+                            sceneResponse.sceneTags = "";
+                        }
+                        let xrExtras = "";
+                        let hitCasterComponent = "";
+                        if ((sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hit test"))) {
+                            xrExtras = "ar-hit-test"; //added to a-scene
+                            // ARScript = "<script type=\x22module\x22 src=\x22../main/src/component/ar_hit_caster.js\x22></script>"; 
+                            hitCasterComponent = "ar_hit_caster"; //added to ar_parent
 
-                        // }
-                        // if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("xr room physics")) {
-                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
-                        //     xrExtras = "xr_room_physics";
-                        //     webxrFeatures = "webxr=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
-                        //     xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
-                        // } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("real world meshing")) {
-                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
-                        //     xrExtras = " real_world_meshing_mod=\x22meshesEnabled: true;\x22";
-                        //     webxrFeatures = " " + xrExtras;
-                        //     xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
-                        // } else {
-                        //     webxrFeatures = "webxr=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
-                        // }
-                        // if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hand controls") || sceneResponse.sceneTags.toString().toLowerCase().includes("hand controllers")) {
-                        //     meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/component/hand_equip.js\x22></script>";
-                        // }
-                        // // arElements = "<a-entity material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
-                        // // "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></a-entity>"+
-                        // // <a-light type="directional" light="castShadow:true;" position="1 1 1" intensity="1.57" shadow-camera-automatic="#ar_parent"></a-light>
-                        // arElements = "<a-plane follow-shadow=\x22#ar_parent\x22 material=\x22shader:shadow\x22 shadow=\x22cast:false;\x22 rotation=\x22-90 0 0\x22 width=\x222\x22 height=\x222\x22></a-plane>"+
-                        // "<a-entity scale=\x221 1 1\x22 id=\x22ar_parent\x22 "+hitCasterComponent+">" +
-                        // arChildElements +
-                        // "</a-entity>";
-                        // // "<a-entity show-in-ar-mode visible=\x22false\x22 id=\x22hitCaster\x22 ar_hit_caster=\x22targetEl: #ar_parent\x22 gltf-model=\x22#reticle2\x22></a-entity>\n";
-                        // handsTemplate = "<template id=\x22hand-template\x22><a-entity><a-box scale=\x220.1 0.1 0.1\x22 visible=false></a-box></a-entity></template>";
+                        }
+                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("xr room physics")) {
+                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
+                            xrExtras = "xr_room_physics";
+                            webxrFeatures = "webxr=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
+                            xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
+                        } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("real world meshing")) {
+                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
+                            xrExtras = " real_world_meshing_mod=\x22meshesEnabled: true;\x22";
+                            webxrFeatures = " " + xrExtras;
+                            xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
+                        } else {
+                            webxrFeatures = "webxr=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
+                        }
+                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hand controls") || sceneResponse.sceneTags.toString().toLowerCase().includes("hand controllers")) {
+                            meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/component/hand_equip.js\x22></script>";
+                        }
+                        // arElements = "<a-entity material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
+                        // "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></a-entity>"+
+                        // <a-light type="directional" light="castShadow:true;" position="1 1 1" intensity="1.57" shadow-camera-automatic="#ar_parent"></a-light>
+                        arElements = "<a-plane follow-shadow=\x22#ar_parent\x22 material=\x22shader:shadow\x22 shadow=\x22cast:false;\x22 rotation=\x22-90 0 0\x22 width=\x222\x22 height=\x222\x22></a-plane>"+
+                        "<a-entity scale=\x221 1 1\x22 id=\x22ar_parent\x22 "+hitCasterComponent+">" +
+                        arChildElements +
+                        "</a-entity>";
+                        // "<a-entity show-in-ar-mode visible=\x22false\x22 id=\x22hitCaster\x22 ar_hit_caster=\x22targetEl: #ar_parent\x22 gltf-model=\x22#reticle2\x22></a-entity>\n";
+                        handsTemplate = "<template id=\x22hand-template\x22><a-entity><a-box scale=\x220.1 0.1 0.1\x22 visible=false></a-box></a-entity></template>";
                        
                     } 
                     if (sceneResponse.sceneWebType == "Model Viewer") {
-                        // let extraScripts = "";
-                        // let sky = "environment-image=\x22neutral\x22";
-                        // if (skyboxUrl != null) {
-                        //     sky = "skybox-image=\x22"+skyboxUrl+"\x22";
-                        // }  
-                        // let planeDetectMode = "floor";
-                        // let arScaleMode = "";
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("wall")) {
-                        //     planeDetectMode = "wall";
-                        // } 
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale fixed")) {
-                        //     arScaleMode = "fixed";
-                        // }
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale auto")) {
-                        //     arScaleMode = "auto";
-                        // } 
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("show overlay")) {
-                        //     canvasOverlay = canvasOverlay + socketScripts;
-                        // } else {
-                        //     canvasOverlay = "";
-                        // }   
-                        // let sceneGreeting = sceneResponse.sceneDescription;
-                        // if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
-                        //     sceneGreeting = sceneResponse.sceneGreeting;
-                        // }      
-                        // let sceneQuest = "No quests for this scene... yet!";
-                        // if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
-                        //     sceneQuest = sceneResponse.sceneQuest;
-                        // }
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes('show dialog')) {
-                        //     // dialogButton = dialogButton +  //set with the actual button above?
-                        //     // "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>" +
-                        //     // "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>" +
-                        //     // "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
-                        //     // extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        //     // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>" +
-                        //     // "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
-                        //     // geoScripts +
-                        //     // locationScripts +
-                        //     // locationData +
-                        //     // modelData;
-                        //     // inventoryData;
-                        // } else {
-                        //     dialogButton = "";
-                        //     socketScripts = "";
-                        // }
-                        // htmltext = "<!DOCTYPE html>\n" +
-                        //     "<head> " +
-                        //     "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        //     "<meta charset=\x22UTF-8\x22>"+
-                        //     "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        //     "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        //     "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        //     "<meta charset='utf-8'/>" +
-                        //     "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
-                        //     "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
-                        //     "<meta property='og:type' content='website' /> " +
-                        //     "<meta property='og:image' content='" + postcard1 + "' /> " +
-                        //     "<meta property='og:image:height' content='1024' /> " +
-                        //     "<meta property='og:image:width' content='1024' /> " +
-                        //     "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
-                        //     "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
-                        //     "<meta property='name' content='modelviewer' /> " +
-                        //     "<title>" + sceneResponse.sceneTitle + "</title>" +
-                        //     "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
-                        //     "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        //     "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        //     "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        //     "<link href=\x22/css/modelviewer.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                        //     "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                        //     "<script type=\x22module\x22 src=\x22https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js\x22></script>"+
-                        //     extraScripts + 
-                        //     "</head>\n" +
-                        //     "<body style=\x22background-color: black;\x22>\n" +
-                        //     "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                        //     "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                        //     "<model-viewer autoplay shadow-intensity=\x221\x22 camera-controls camera-target=\x220m 0m 0m\x22 src=\x22"+gltfModel+"\x22"+ 
-                        //     " ar ar-placement=\x22"+planeDetectMode+"\x22 ar-modes=\x22webxr scene-viewer quick-look\x22 ar-scale=\x22"+arScaleMode+"\x22 alt=\x22Viewer for single 3D Model\x22"+ 
-                        //     sky +
-                        //     "ios-src=\x22"+usdzModel+"\x22>"+
-                        //     "<button slot=\x22ar-button\x22 style=\x22background-color: red; color: white; font-size: 36px; border-radius: 4px; border: 1px; position: absolute; bottom: 16px; right: 16px; z-index: 100;\x22>"+
-                        //     "AR"+
-                        //     "</button>"+
-                        //     "</model-viewer>" +
-                        //     audioSliders +
-                        //     canvasOverlay +
-                        //     dialogButton +
+                        let extraScripts = "";
+                        let sky = "environment-image=\x22neutral\x22";
+                        if (skyboxUrl != null) {
+                            sky = "skybox-image=\x22"+skyboxUrl+"\x22";
+                        }  
+                        let planeDetectMode = "floor";
+                        let arScaleMode = "";
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("wall")) {
+                            planeDetectMode = "wall";
+                        } 
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale fixed")) {
+                            arScaleMode = "fixed";
+                        }
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale auto")) {
+                            arScaleMode = "auto";
+                        } 
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("show overlay")) {
+                            canvasOverlay = canvasOverlay + socketScripts;
+                        } else {
+                            canvasOverlay = "";
+                        }   
+                        let sceneGreeting = sceneResponse.sceneDescription;
+                        if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
+                            sceneGreeting = sceneResponse.sceneGreeting;
+                        }      
+                        let sceneQuest = "No quests for this scene... yet!";
+                        if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
+                            sceneQuest = sceneResponse.sceneQuest;
+                        }
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes('show dialog')) {
+                            dialogButton = dialogButton +  //set with the actual button above?
+                            "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>" +
+                            "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>" +
+                            "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
+                            extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>" +
+                            "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
+                            geoScripts +
+                            locationScripts +
+                            locationData +
+                            modelData;
+                            // inventoryData;
+                        } else {
+                            dialogButton = "";
+                            socketScripts = "";
+                        }
+                        htmltext = "<!DOCTYPE html>\n" +
+                            "<head> " +
+                            "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
+                            "<meta charset=\x22UTF-8\x22>"+
+                            "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
+                            "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
+                            "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
+                            "<meta charset='utf-8'/>" +
+                            "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
+                            "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
+                            "<meta property='og:type' content='website' /> " +
+                            "<meta property='og:image' content='" + postcard1 + "' /> " +
+                            "<meta property='og:image:height' content='1024' /> " +
+                            "<meta property='og:image:width' content='1024' /> " +
+                            "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
+                            "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
+                            "<meta property='name' content='modelviewer' /> " +
+                            "<title>" + sceneResponse.sceneTitle + "</title>" +
+                            "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
+                            "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                            "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                            "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                            "<link href=\x22/css/modelviewer.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
+                            "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
+                            "<script type=\x22module\x22 src=\x22https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js\x22></script>"+
+                            extraScripts + 
+                            "</head>\n" +
+                            "<body style=\x22background-color: black;\x22>\n" +
+                            "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
+                            "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
+                            "<model-viewer autoplay shadow-intensity=\x221\x22 camera-controls camera-target=\x220m 0m 0m\x22 src=\x22"+gltfModel+"\x22"+ 
+                            " ar ar-placement=\x22"+planeDetectMode+"\x22 ar-modes=\x22webxr scene-viewer quick-look\x22 ar-scale=\x22"+arScaleMode+"\x22 alt=\x22Viewer for single 3D Model\x22"+ 
+                            sky +
+                            "ios-src=\x22"+usdzModel+"\x22>"+
+                            "<button slot=\x22ar-button\x22 style=\x22background-color: red; color: white; font-size: 36px; border-radius: 4px; border: 1px; position: absolute; bottom: 16px; right: 16px; z-index: 100;\x22>"+
+                            "AR"+
+                            "</button>"+
+                            "</model-viewer>" +
+                            audioSliders +
+                            canvasOverlay +
+                            dialogButton +
                            
-                        //     attributionsTextEntity +
-                        //     "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
-                        //     "</body>\n" +
-                        //     socketScripts +
-                        //     "</html>";
-                        //     console.log("Tryna do a model viewer");
+                            attributionsTextEntity +
+                            "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
+                            "</body>\n" +
+                            socketScripts +
+                            "</html>";
+                            console.log("Tryna do a model viewer");
                     } else if (sceneResponse.sceneWebType == "HTML from Text Item") {
 
                         htmltext = sceneTextItemData;
@@ -3371,297 +3430,58 @@ landing_router.get('/:_id', function (req, res) {
                         console.log("Tryna do a Video Landing scene");
 
                     } else if (sceneResponse.sceneWebType == "AR Image Tracking") { //aframe plus mindar
-                        // // dialogButton = "";
-                        // let extraScripts = "";
-                        // let sky = "environment-image=\x22neutral\x22";
-                        // if (skyboxUrl != null) {
-                        //     sky = "skybox-image=\x22"+skyboxUrl+"\x22";
-                        // }  
-                        // let planeDetectMode = "floor";
-                        // let arScaleMode = "auto";
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("wall")) {
-                        //     planeDetectMode = "wall";
-                        // } 
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("scale fixed")) {
-                        //     arScaleMode = "fixed";
-                        // } 
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show overlay")) {
-                        //     canvasOverlay = canvasOverlay + socketScripts;
+                        // dialogButton = "";
+                        let extraScripts = "";
+                        let sky = "environment-image=\x22neutral\x22";
+                        if (skyboxUrl != null) {
+                            sky = "skybox-image=\x22"+skyboxUrl+"\x22";
+                        }  
+                        let planeDetectMode = "floor";
+                        let arScaleMode = "auto";
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("wall")) {
+                            planeDetectMode = "wall";
+                        } 
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("scale fixed")) {
+                            arScaleMode = "fixed";
+                        } 
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show overlay")) {
+                            canvasOverlay = canvasOverlay + socketScripts;
 
-                        // } else {
-                        //     canvasOverlay = "";
-                        // }   
-                        // let sceneGreeting = sceneResponse.sceneDescription;
-                        // if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
-                        //     sceneGreeting = sceneResponse.sceneGreeting;
-                        // }      
-                        // let sceneQuest = "No quests for this scene... yet!";
-                        //  if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
-                        //      sceneQuest = sceneResponse.sceneQuest;
-                        //  }
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('show dialog')) {
-                        //     // dialogButton = dialogButton +  //set with the actual button above?
-                        //     // "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>"+
-                        //     // "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
-                        //     // "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
-                        //     // extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        //     // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
-                        //     // "<script src=\x22/connect/indexedDb.js\x22></script>" +
-                        //     // "<script src=\x22/connect/traffic.js\x22></script>" +
-                            
-                        //     // geoScripts +
-                        //     // locationScripts +
-                        //     // locationData +
-                        //     // modelData;
-                                            
-                        // } else {
-                        //     dialogButton = "";
-                        //     socketScripts = "";
-                        // }
-                        // // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix')) {
-                        // //     extraScripts = extraScripts + "<script src=\x22../main/js/browser-matrix.min.js\x22></script>"; 
-                        // //     extraEntities = "<a-entity matrix_meshes=\x22init: true\x22></a-entity>";
-                        // // }
-                      
-                        // htmltext = "<!DOCTYPE html>\n" +
-                        // "<head> " +
-                        // "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
-                        // "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        // "<meta charset=\x22UTF-8\x22>"+
-                        // "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        // "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        // "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        // "<meta charset='utf-8'/>" +
-                        // "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
-                        // "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
-                        // "<meta property='og:type' content='website' /> " +
-                        // "<meta property='og:image' content='" + postcard1 + "' /> " +
-                        // "<meta property='og:image:height' content='1024' /> " +
-                        // "<meta property='og:image:width' content='1024' /> " +
-                        // "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
-                        // "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
-                        // "<meta property='name' content='modelviewer' /> " +
-                        // "<title>" + sceneResponse.sceneTitle + "</title>" +
-                        // "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
-                        // "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        // "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
-                        // "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        // "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                       
-                        // "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
-                        // "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
-                        // settingsData +
-                        // sceneTimedEventsData +
-                        // // aframeScript + 
-                        // // contentUtils +
-                        // modObjex +
-                        // modModels +
-                        // modSplats +
-                        // extraScripts + 
-
-                      
-                        // hlsScript +
-                        // "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js\x22></script>"+
-                        // "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
-                        // "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>"+
-
-                        // "<script src=\x22../main/src/util/mindar/mindar-image.js\x22></script>"+
-                        // "<script src=\x22../main/src/util/mindar/mindar-image-aframe.js\x22></script>"+
-                        // "<script src=\x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22></script>"+
-                        // "<script src=\x22../main/src/component/mod-materials.js\x22></script>"+
-                        // "</head>\n" +
-                        // "<body>\n" +
-                        // "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                        // "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                        // "<div class=\x22ar-container\x22>"+
-                        // "<a-scene mindar-image=\x22imageTargetSrc: "+arImageTargets[0]+";\x22 embedded color-space=\x22sRGB\x22"+    
-                        //     " renderer=\x22colorManagement: true, physicallyCorrectLights\x22 xr-mode-ui=\x22enabled: false\x22 device-orientation-permission-ui=\x22enabled: false\x22>"+
-                        // "<a-assets>"+
-                        // videoAsset +
-                        // gltfsAssets +    
-                        // "</a-assets>"+
-                        // videoGroupsEntity+
-                        // "<a-entity mindar-image-target=\x22targetIndex: 0\x22>" +
-                        //     "<a-gltf-model rotation=\x2290 0 0\x22 position=\x220 0 0.1\x22 scale=\x220.25 0.25 0.25\x22 src=\x22#gltfasset2\x22>"+
-                        // "</a-entity>"+
-                        // "<a-camera id=\x22player\x22 position=\x220 0 0\x22 look-controls=\x22enabled: false\x22></a-camera>"
-                        // "</a-scene>"+
-                        // "</div>"+    
-                        
-                        // audioSliders +
-                        // canvasOverlay +
-                        // dialogButton +
-                        // attributionsTextEntity +
-                       
-                        // "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
-                        // "</body>\n" +
-                        // socketScripts + //?
-                        // "</html>";
-                        // console.log("Tryna do a AR Image Tracking scene");
-
-                    } else { /////////////////////////////////////////////////////////------------- Default / AFrame response below ------------------------------
-                       let settings = {};  //TODO move this lower down? 
-                                              
-                        settings._id = sceneResponse._id;
-                        settings.sceneType = "landing";
-                        settings.sceneTags = sceneResponse.sceneTags;
-                        settings.sceneTitle = sceneResponse.sceneTitle;
-                        settings.sceneKeynote = sceneResponse.sceneKeynote;
-                        settings.sceneDescription = sceneResponse.sceneDescription;
-                        settings.sceneEventStart = sceneResponse.sceneEventStart;
-                        settings.sceneEventEnd = sceneResponse.sceneEventEnd;
-                        settings.hideAvatars = true;
-                        settings.sceneSkyRadius = sceneResponse.sceneSkyRadius != undefined ? sceneResponse.sceneSkyRadius : 202;
-                        settings.sceneFontWeb1 = sceneResponse.sceneFontWeb1;
-                        settings.sceneFontWeb2 = sceneResponse.sceneFontWeb2;
-                        settings.sceneFontWeb3 = sceneResponse.sceneFontWeb3;
-                        settings.sceneFontFillColor = sceneResponse.sceneFontFillColor;
-                        settings.sceneFontOutlineColor = sceneResponse.sceneFontOutlineColor;
-                        settings.sceneTextBackground = sceneResponse.sceneTextBackground;
-                        settings.sceneTextBackgroundColor = sceneResponse.sceneTextBackgroundColor;
-                        settings.sceneColor1 = sceneResponse.sceneColor1;
-                        settings.sceneColor2 = sceneResponse.sceneColor2;
-                        settings.sceneColor3 = sceneResponse.sceneColor3;
-                        settings.sceneColor4 = sceneResponse.sceneColor4;
-                        settings.sceneColor1Alt = sceneResponse.sceneColor1Alt;
-                        settings.sceneColor2Alt = sceneResponse.sceneColor2Alt;
-                        settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
-                        settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
-                        settings.volumePrimary = sceneResponse.scenePrimaryVolume;
-                        settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
-                        settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
-                        settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
-                        settings.skyboxIDs = skyboxIDs;
-                        settings.skyboxID = skyboxID;
-                        settings.skyboxURL = skyboxUrl;
-                        settings.useSynth = hasSynth;
-                        // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
-                        // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
-                        // settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
-                        // settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
-                        let audioGroups = {};
-                        audioGroups.triggerGroups = sceneResponse.sceneTriggerAudioGroups;
-                        audioGroups.ambientGroups = sceneResponse.sceneAmbientAudioGroups;
-                        audioGroups.primaryGroups = sceneResponse.scenePrimaryAudioGroups;
-                        settings.audioGroups = audioGroups; 
-                        settings.clearLocalMods = false;
-                        settings.sceneVideoStreams = sceneResponse.sceneVideoStreamUrls;
-                        settings.socketHost = process.env.SOCKET_HOST;
-                        settings.networking = sceneResponse.sceneNetworking;
-                        // settings.playerStartPosition = playerPosition;
-
-                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
-                        settings.hideAvatars = false;
-                    }
-                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("clear localmods")) {
-                        settings.clearLocalMods = true;
-                    }
-                    
-                    if (sceneResponse.triggerAudioGroups != null && sceneResponse.triggerAudioGroups.length > 0) {
-                        hasTriggerAudio = true;
-                    }
-                    if (sceneResponse.ambientAudioGroups != null && sceneResponse.ambientAudioGroups.length > 0) {
-                        hasAmbientAudio = true;
-                    }
-                    if (sceneResponse.primayAudioGroups != null && sceneResponse.primayAudioGroups.length > 0) {
-                        hasPrimaryAudio = true;
-                    }
-
-                    // settings.sceneAmbientAudioGroups = sceneResponse.sceneAmbientAudioGroups;
-                    // settings.scenePrimaryAudioGroups = sceneResponse.scenePrimaryAudioGroups;
-                    var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
-                    settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
-                    // settingsDataEntity = "<a-entity id=\x22settingsDataEntity\x22 data-settings=\x22"+sbuff+"\x22></a-entity>"; ? maybe
-
-                    let picGroups = "";
-                    let sceneGreeting = sceneResponse.sceneDescription;
-                    if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
-                        sceneGreeting = sceneResponse.sceneGreeting;
-                    }      
-                    let sceneQuest = "No quests for this scene... yet!";
-                    if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
-                        sceneQuest = sceneResponse.sceneQuest;
-                    }
-                    
-
-                    
-                    
-                    if (sceneResponse.sceneWebType != "Video Landinggggg") {
-                        // if (!sceneGreeting || !sceneGreeting.length) {
-                        //     sceneGreeting = "Welcome!";
-                        // } 
-                        // let hasTile = false;
-                        // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
-
-                        let availableScenesHTML = ""; 
-                        let bgstyle = "style=\x22height:100%; width:100%; overflow:auto;\x22";
-                        let sceneAccess = "Access Open to Public"
-                        // if (sceneResponse.sceneShareWithSubscribers) {
-                        //     sceneAccess ="<span>Access Requires Subscription</span><br>";
-                        // }
-                        // bgcolor=\x22"+sceneResponse.sceneColor1+"\x22>\n
-                        if (tilepicUrl != "") {
-                            bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
-                        }
-                        let sceneOwner = "";
-                        let sceneEditButton = "";
-                        if (sceneOwner != "" || (!isGuest && req.session.user && req.session.user.authLevel.includes("domain_admin"))) { //hrm..
-                            sceneEditButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../main/index.html?type=scene&iid="+sceneResponse._id+"\x22>Edit Scene</a>";
-                        }
-
-                        if (sceneResponse.sceneShareWithSubscribers) {
-                            if (isGuest) {
-                                sceneAccess ="<span>Access Requires Subscription</span><br>"+
-                                // "<form action=\x22../create-checkout-session\x22 method=\x22POST\x22>"+
-                                // "<button class=\x22mx-auto btn btn-xl btn-success \x22 type=\x22submit\x22>Become a Subscriber!</button>"+
-                                // "</form>";
-                                
-                                "<a class=\x22mx-auto btn btn-xl btn-info \x22 href=\x22../main/sign_in.html\x22>Subscriber Login</a> "+
-                                "<p>Login if you're a subscriber, or </p>" +
-                                "<p><a class=\x22mx-auto btn btn-xl btn-success \x22 href=\x22https://buy.stripe.com/test_fZe6pdebx9vB7LO8wx\x22>Become a Subscriber!</a> </p>";
-                            } else {
-                                sceneAccess ="<span>Access Requires Subscription</span><br>"+
-                                "<h4 class=\x22text-success\x22>Welcome <strong>" + avatarName + "</strong>!</h4>";
-                            }
-                            //  "Subscribe or Login to access this scene - "
                         } else {
-                            if (!isGuest) {
-                                sceneAccess += "<p><h4 class=\x22text-success\x22>Welcome <strong>" + avatarName + "</strong>!</h4></p>";
-                            }
+                            canvasOverlay = "";
+                        }   
+                        let sceneGreeting = sceneResponse.sceneDescription;
+                        if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
+                            sceneGreeting = sceneResponse.sceneGreeting;
+                        }      
+                        let sceneQuest = "No quests for this scene... yet!";
+                         if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
+                             sceneQuest = sceneResponse.sceneQuest;
+                         }
+                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('show dialog')) {
+                            dialogButton = dialogButton +  //set with the actual button above?
+                            "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>"+
+                            "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
+                            "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
+                            extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
+                            "<script src=\x22/connect/indexedDb.js\x22></script>" +
+                            "<script src=\x22/connect/traffic.js\x22></script>" +
                             
+                            geoScripts +
+                            locationScripts +
+                            locationData +
+                            modelData;
+                                            
+                        } else {
+                            dialogButton = "";
+                            socketScripts = "";
+                        }
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix')) {
+                        //     extraScripts = extraScripts + "<script src=\x22../main/js/browser-matrix.min.js\x22></script>"; 
+                        //     extraEntities = "<a-entity matrix_meshes=\x22init: true\x22></a-entity>";
                         // }
-                        }
-                        let styleTheme = "slate";
-                        if (sceneResponse.sceneStyleTheme != null && sceneResponse.sceneStyleTheme != undefined && sceneResponse.sceneStyleTheme.length > 0 && sceneResponse.sceneStyleTheme != 'undefined') {
-                            styleTheme = sceneResponse.sceneStyleTheme;
-                        }
-
-                        // platformButtons = "";
-                        let buttonLabel = sceneResponse.sceneWebType == "Video Landing" ? "Watch Video" : "Enter WebXR Scene"
-
-                        let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22>"+buttonLabel+"</a>"+
-                        "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22>Send to Quest</a>"
-                        if (sceneResponse.sceneShareWithSubscribers) {
-                            if (isGuest) {
-                                platformButtons = "";
-                            }
-                            
-                            //  "Subscribe or Login to access this scene - "
-                        }
-                        if (!sceneResponse.sceneShareWithSubscribers && sceneResponse.sceneWebGLOK) {
-                            platformButtons += "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../unity/"+ sceneResponse.short_id + "\x22>Enter Unity Scene</a> ";
-                        }
-                        var audioHtml = "";
-                        let uid = "0000000000000";
-                        if (req.session.user) {
-                            uid = req.session.user._id;
-                        }
-                        if (mp3url != undefined && mp3url.length > 6) {
-                            audioHtml = '<div><audio controls><source src=\x22' + mp3url + '\x22 type=\x22audio/mp3\x22></audio></div>';
-                        }
-                        var token=jwt.sign({userId:uid,shortID:sceneResponse.short_id},process.env.JWT_SECRET, { expiresIn: '1h' }); 
-                        // console.log("avatar name: " + avatarName + " token " + token);
+                      
                         htmltext = "<!DOCTYPE html>\n" +
                         "<head> " +
                         "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
@@ -3669,14 +3489,11 @@ landing_router.get('/:_id', function (req, res) {
                         "<meta charset=\x22UTF-8\x22>"+
                         "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
                         "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        // googleAnalytics +
-                        
                         "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
                         "<meta charset='utf-8'/>" +
                         "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
                         "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
                         "<meta property='og:type' content='website' /> " +
-                        // "<meta property='og:image' content='" + postcard1 + "' /> " +
                         "<meta property='og:image' content='" + postcard1 + "' /> " +
                         "<meta property='og:image:height' content='1024' /> " +
                         "<meta property='og:image:width' content='1024' /> " +
@@ -3685,118 +3502,354 @@ landing_router.get('/:_id', function (req, res) {
                         "<meta property='name' content='modelviewer' /> " +
                         "<title>" + sceneResponse.sceneTitle + "</title>" +
                         "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
-                        // "<meta name=\x22monetization\x22 content=\x22"+process.env.COIL_PAYMENT_POINTER+"\x22>" +
                         "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        
-                        importMap +
-
+                        "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
                         "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        // "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                        // "<link href=\x22https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css\x22 rel=\x22stylesheet\x22 integrity=\x22sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN\x22 crossorigin=\x22anonymous\x22></link>"+
-                        "<link href=\x22https://cdn.jsdelivr.net/npm/bootswatch@5.3.1/dist/"+styleTheme.toLowerCase()+"/bootstrap.min.css\x22 rel=\x22stylesheet\x22 crossorigin=\x22anonymous\x22></link>"+
-                        "<script src=\x22https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js\x22 integrity=\x22sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL\x22 crossorigin=\x22anonymous\x22></script>"+                       
-                        
+                        "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
+                       
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                        settingsData +
+                        sceneTimedEventsData +
+                        // aframeScript + 
+                        // contentUtils +
+                        modObjex +
+                        modModels +
+                        modSplats +
+                        extraScripts + 
 
-                        // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>" +
-                        
-                        // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+                      
+                        hlsScript +
+                        "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
+                        "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>"+
 
-                        // settingsData +
-    
-
-                        // "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
-
-                        // "\x22content-utils\x22: \x22/main/src/component/content-utils.js\x22"+  
-                        
-                        // "}"+
-
-                        // "}</script>"+
-                        "<script type=\x22module\x22 src=\x22/connect/landing.js\x22 defer=\x22defer\x22></script>" +
-                        "<style> audio {"+
-                                "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 
-                                "width: 100%;"+
-                                "height: 66px;"+
-                            "}"+
-                        "</style>"+ 
-                        
+                        "<script src=\x22../main/src/util/mindar/mindar-image.js\x22></script>"+
+                        "<script src=\x22../main/src/util/mindar/mindar-image-aframe.js\x22></script>"+
+                        "<script src=\x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22></script>"+
+                        "<script src=\x22../main/src/component/mod-materials.js\x22></script>"+
                         "</head>\n" +
-                        "<body "+bgstyle+">" +
-                    
+                        "<body>\n" +
                         "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
                         "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                        settingsData +
-                    
-                        "<div class=\x22container px-4 px-lg-5 my-5\x22>"+
-                            "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
-                                "<div class=\x22col-md-6\x22>"+
-                                "<a href=\x22../webxr/"+ sceneResponse.short_id + "\x22>" +
-                                "<img class=\x22img-fluid\x22 src=\x22"+postcardImages[0]+"\x22 alt=\x22...\x22 /></a>"+
-                                audioHtml +
-                                // "<img class=\x22card-img-top mb-5 mb-md-0\x22 src=\x22"+postcard1+"\x22 alt=\x22...\x22 />"+
-                                "<p class=\x22lead\x22>"+sceneResponse.sceneDescription+"</p>"+
-                                
-                                        // "<p class=\x22lead\x22>"+sceneResponse.sceneText+"</p>"+                      
-                                
-                                "</div>"+
-                                "<div class=\x22col-md-6\x22>"+
-                                
-                                    "<div class=\x22small mb-1\x22>"+sceneResponse.sceneKeynote+"</div>"+
-                                    "<h1 class=\x22display-5 fw-bolder\x22>"+sceneResponse.sceneTitle+"</h1>"+
-                                    "<div class=\x22fs-5 mb-5\x22>"+
-                                        
-                                    "<p class=\x22lead\x22>"+sceneAccess+"</p>"+
-                                    
-                                        "<p class=\x22lead\x22>"+sceneGreeting+"</p>"+ 
-                                        
-                                        "<p class=\x22lead\x22>"+sceneQuest+"</p>"+
-                                        // "<span>"+sceneQuest+"</span>"+
-
-                                    platformButtons +
-                                    sceneEditButton + 
-                                    "</div>"+
-                                    
-                                    "<div class=\x22d-flex\x22>"+
-                                        // "<input class=\x22form-control text-center me-3\x22 id=\x22inputQuantity\x22 type=\x22num\x22 value=\x221\x22 style=\x22max-width: 3rem\x22 />"+
-                                            // "<button class=\x22btn btn-outline-dark flex-shrink-0\x22 type=\x22button\x22>"+
-                                            //     "<i class=\x22bi-cart-fill me-1\x22></i>"+
-                                            //     "Add to cart"+
-                                            // "</button>"+
-                                            "<a href=\x22http://"+ sceneResponse.sceneDomain + "\x22>More at "+sceneResponse.sceneDomain+"!</a>" +
-
-                                    "</div>"+
-                                "</div>"+
-                            "</div>"+
-                            "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
-                                "<div class=\x22col-md-12\x22>"+
-                                "<hr>"+
-                                
-                                "<p class=\x22lead\x22>"+sceneResponse.sceneText+"</p>"+
-                                "</div>"+
-                            "</div>"+
-                            "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
-                                "<div id=\x22picGroupsContainer\x22 class=\x22col-md-12\x22>"+
-                                // picGroups +
-                                "</div>"+
-                            "</div>"+
-                            "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
-                                "<div class=\x22col-md-12\x22>"+
-                                availableScenesHTML +
-                                "</div>"+
-                            "</div>"+
-                        "</div>"+
-                        pictureGroupsData +
+                        "<div class=\x22ar-container\x22>"+
+                        "<a-scene mindar-image=\x22imageTargetSrc: "+arImageTargets[0]+";\x22 embedded color-space=\x22sRGB\x22"+    
+                            " renderer=\x22colorManagement: true, physicallyCorrectLights\x22 xr-mode-ui=\x22enabled: false\x22 device-orientation-permission-ui=\x22enabled: false\x22>"+
+                        "<a-assets>"+
+                        videoAsset +
+                        gltfsAssets +    
+                        "</a-assets>"+
+                        videoGroupsEntity+
+                        "<a-entity mindar-image-target=\x22targetIndex: 0\x22>" +
+                            "<a-gltf-model rotation=\x2290 0 0\x22 position=\x220 0 0.1\x22 scale=\x220.25 0.25 0.25\x22 src=\x22#gltfasset2\x22>"+
+                        "</a-entity>"+
+                        "<a-camera id=\x22player\x22 position=\x220 0 0\x22 look-controls=\x22enabled: false\x22></a-camera>"
+                        "</a-scene>"+
+                        "</div>"+    
                         
-                        
-                        
+                        audioSliders +
+                        canvasOverlay +
+                        dialogButton +
+                        attributionsTextEntity +
+                       
+                        "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
                         "</body>\n" +
-                    
+                        socketScripts + //?
                         "</html>";
-                                        
-                    } 
-                                                                
-                }
+                        console.log("Tryna do a AR Image Tracking scene");
+
+                    } else { /////////////////////////////////////////////////////////------------- Default / AFrame response below ------------------------------
+                       let settings = {};  //TODO move this lower down? 
+                       
+                                           settings._id = sceneResponse._id;
+                                           settings.sceneType = "landing";
+                                           settings.sceneTags = sceneResponse.sceneTags;
+                                           settings.sceneTitle = sceneResponse.sceneTitle;
+                                           settings.sceneKeynote = sceneResponse.sceneKeynote;
+                                           settings.sceneDescription = sceneResponse.sceneDescription;
+                                           settings.sceneEventStart = sceneResponse.sceneEventStart;
+                                           settings.sceneEventEnd = sceneResponse.sceneEventEnd;
+                                           settings.hideAvatars = true;
+                                           settings.sceneSkyRadius = sceneResponse.sceneSkyRadius != undefined ? sceneResponse.sceneSkyRadius : 202;
+                                           settings.sceneFontWeb1 = sceneResponse.sceneFontWeb1;
+                                           settings.sceneFontWeb2 = sceneResponse.sceneFontWeb2;
+                                           settings.sceneFontWeb3 = sceneResponse.sceneFontWeb3;
+                                           settings.sceneFontFillColor = sceneResponse.sceneFontFillColor;
+                                           settings.sceneFontOutlineColor = sceneResponse.sceneFontOutlineColor;
+                                           settings.sceneTextBackground = sceneResponse.sceneTextBackground;
+                                           settings.sceneTextBackgroundColor = sceneResponse.sceneTextBackgroundColor;
+                                           settings.sceneColor1 = sceneResponse.sceneColor1;
+                                           settings.sceneColor2 = sceneResponse.sceneColor2;
+                                           settings.sceneColor3 = sceneResponse.sceneColor3;
+                                           settings.sceneColor4 = sceneResponse.sceneColor4;
+                                           settings.sceneColor1Alt = sceneResponse.sceneColor1Alt;
+                                           settings.sceneColor2Alt = sceneResponse.sceneColor2Alt;
+                                           settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
+                                           settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
+                                           settings.volumePrimary = sceneResponse.scenePrimaryVolume;
+                                           settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
+                                           settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
+                                           settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
+                                           settings.skyboxIDs = skyboxIDs;
+                                           settings.skyboxID = skyboxID;
+                                           settings.skyboxURL = skyboxUrl;
+                                           settings.useSynth = hasSynth;
+                                           settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
+                                           settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
+                                           settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
+                                           settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
+                                           let audioGroups = {};
+                                           audioGroups.triggerGroups = sceneResponse.sceneTriggerAudioGroups;
+                                           audioGroups.ambientGroups = sceneResponse.sceneAmbientAudioGroups;
+                                           audioGroups.primaryGroups = sceneResponse.scenePrimaryAudioGroups;
+                                           settings.audioGroups = audioGroups; 
+                                           settings.clearLocalMods = false;
+                                           settings.sceneVideoStreams = sceneResponse.sceneVideoStreamUrls;
+                                           settings.socketHost = process.env.SOCKET_HOST;
+                                           settings.networking = sceneResponse.sceneNetworking;
+                                           settings.playerStartPosition = playerPosition;
+                       
+                                           if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
+                                               settings.hideAvatars = false;
+                                           }
+                                           if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("clear localmods")) {
+                                               settings.clearLocalMods = true;
+                                           }
+                                           
+                                           if (sceneResponse.triggerAudioGroups != null && sceneResponse.triggerAudioGroups.length > 0) {
+                                               hasTriggerAudio = true;
+                                           }
+                                           if (sceneResponse.ambientAudioGroups != null && sceneResponse.ambientAudioGroups.length > 0) {
+                                               hasAmbientAudio = true;
+                                           }
+                                           if (sceneResponse.primayAudioGroups != null && sceneResponse.primayAudioGroups.length > 0) {
+                                               hasPrimaryAudio = true;
+                                           }
+                       
+                                           // settings.sceneAmbientAudioGroups = sceneResponse.sceneAmbientAudioGroups;
+                                           // settings.scenePrimaryAudioGroups = sceneResponse.scenePrimaryAudioGroups;
+                                           var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
+                                           settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
+                                           // settingsDataEntity = "<a-entity id=\x22settingsDataEntity\x22 data-settings=\x22"+sbuff+"\x22></a-entity>"; ? maybe
+                       
+                                           let picGroups = "";
+                                           let sceneGreeting = sceneResponse.sceneDescription;
+                                           if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
+                                               sceneGreeting = sceneResponse.sceneGreeting;
+                                           }      
+                                           let sceneQuest = "No quests for this scene... yet!";
+                                           if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
+                                               sceneQuest = sceneResponse.sceneQuest;
+                                           }
+                                           
+                       
+                                          
+                                           
+                                          if (sceneResponse.sceneWebType != "Video Landinggggg") {
+                                               // if (!sceneGreeting || !sceneGreeting.length) {
+                                               //     sceneGreeting = "Welcome!";
+                                               // } 
+                                               // let hasTile = false;
+                                               // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
+                       
+                                               let availableScenesHTML = ""; 
+                                               let bgstyle = "style=\x22height:100%; width:100%; overflow:auto;\x22";
+                                               let sceneAccess = "Access Open to Public"
+                                               // if (sceneResponse.sceneShareWithSubscribers) {
+                                               //     sceneAccess ="<span>Access Requires Subscription</span><br>";
+                                               // }
+                                               // bgcolor=\x22"+sceneResponse.sceneColor1+"\x22>\n
+                                               if (tilepicUrl != "") {
+                                                   bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
+                                               }
+                                               let sceneOwner = "";
+                                               let sceneEditButton = "";
+                                               if (sceneOwner != "" || (!isGuest && req.session.user && req.session.user.authLevel.includes("domain_admin"))) { //hrm..
+                                                  sceneEditButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../main/index.html?type=scene&iid="+sceneResponse._id+"\x22>Edit Scene</a>";
+                                               }
+                       
+                                               if (sceneResponse.sceneShareWithSubscribers) {
+                                                   if (isGuest) {
+                                                       sceneAccess ="<span>Access Requires Subscription</span><br>"+
+                                                       // "<form action=\x22../create-checkout-session\x22 method=\x22POST\x22>"+
+                                                       // "<button class=\x22mx-auto btn btn-xl btn-success \x22 type=\x22submit\x22>Become a Subscriber!</button>"+
+                                                       // "</form>";
+                                                       
+                                                       "<a class=\x22mx-auto btn btn-xl btn-info \x22 href=\x22../main/sign_in.html\x22>Subscriber Login</a> "+
+                                                       "<p>Login if you're a subscriber, or </p>" +
+                                                       "<p><a class=\x22mx-auto btn btn-xl btn-success \x22 href=\x22https://buy.stripe.com/test_fZe6pdebx9vB7LO8wx\x22>Become a Subscriber!</a> </p>";
+                                                   } else {
+                                                       sceneAccess ="<span>Access Requires Subscription</span><br>"+
+                                                       "<h4 class=\x22text-success\x22>Welcome <strong>" + avatarName + "</strong>!</h4>";
+                                                   }
+                                                   //  "Subscribe or Login to access this scene - "
+                                               } else {
+                                                   if (!isGuest) {
+                                                       sceneAccess += "<p><h4 class=\x22text-success\x22>Welcome <strong>" + avatarName + "</strong>!</h4></p>";
+                                                   }
+                                                   
+                                               // }
+                                               }
+                                               let styleTheme = "slate";
+                                               if (sceneResponse.sceneStyleTheme != null && sceneResponse.sceneStyleTheme != undefined && sceneResponse.sceneStyleTheme.length > 0 && sceneResponse.sceneStyleTheme != 'undefined') {
+                                                   styleTheme = sceneResponse.sceneStyleTheme;
+                                               }
+                       
+                                               // platformButtons = "";
+                                               let buttonLabel = sceneResponse.sceneWebType == "Video Landing" ? "Watch Video" : "Enter WebXR Scene"
+                       
+                                               let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22>"+buttonLabel+"</a>"+
+                                               "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22>Send to Quest</a>"
+                                               if (sceneResponse.sceneShareWithSubscribers) {
+                                                   if (isGuest) {
+                                                       platformButtons = "";
+                                                   }
+                                                   
+                                                   //  "Subscribe or Login to access this scene - "
+                                               }
+                                               if (!sceneResponse.sceneShareWithSubscribers && sceneResponse.sceneWebGLOK) {
+                                                  platformButtons += "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../unity/"+ sceneResponse.short_id + "\x22>Enter Unity Scene</a> ";
+                                               }
+                                               var audioHtml = "";
+                                               let uid = "0000000000000";
+                                               if (req.session.user) {
+                                                   uid = req.session.user._id;
+                                               }
+                                               if (mp3url != undefined && mp3url.length > 6) {
+                                                   audioHtml = '<div><audio controls><source src=\x22' + mp3url + '\x22 type=\x22audio/mp3\x22></audio></div>';
+                                               }
+                                               var token=jwt.sign({userId:uid,shortID:sceneResponse.short_id},process.env.JWT_SECRET, { expiresIn: '1h' }); 
+                                               // console.log("avatar name: " + avatarName + " token " + token);
+                                               htmltext = "<!DOCTYPE html>\n" +
+                                               "<head> " +
+                                               "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
+                                               "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
+                                               "<meta charset=\x22UTF-8\x22>"+
+                                               "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
+                                               "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
+                                               // googleAnalytics +
+                                               
+                                               "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
+                                               "<meta charset='utf-8'/>" +
+                                               "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
+                                               "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
+                                               "<meta property='og:type' content='website' /> " +
+                                               // "<meta property='og:image' content='" + postcard1 + "' /> " +
+                                               "<meta property='og:image' content='" + postcard1 + "' /> " +
+                                               "<meta property='og:image:height' content='1024' /> " +
+                                               "<meta property='og:image:width' content='1024' /> " +
+                                               "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
+                                               "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
+                                               "<meta property='name' content='modelviewer' /> " +
+                                               "<title>" + sceneResponse.sceneTitle + "</title>" +
+                                               "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
+                                               // "<meta name=\x22monetization\x22 content=\x22"+process.env.COIL_PAYMENT_POINTER+"\x22>" +
+                                               "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                                               "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
+                                               "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                                               // "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
+                                               // "<link href=\x22https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css\x22 rel=\x22stylesheet\x22 integrity=\x22sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN\x22 crossorigin=\x22anonymous\x22></link>"+
+                                               "<link href=\x22https://cdn.jsdelivr.net/npm/bootswatch@5.3.1/dist/"+styleTheme.toLowerCase()+"/bootstrap.min.css\x22 rel=\x22stylesheet\x22 crossorigin=\x22anonymous\x22></link>"+
+                                               "<script src=\x22https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js\x22 integrity=\x22sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL\x22 crossorigin=\x22anonymous\x22></script>"+                       
+                                               
+                                               "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                       
+                                               // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>" +
+                                               
+                                               "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                                               
+                                               "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+                        
+                                               "\x22content-utils\x22: \x22/main/src/component/content-utils.js\x22"+  
+                                               
+                                               "}"+
+                       
+                                               "}</script>"+
+                                               
+                                               "<style> audio {"+
+                                                       "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 
+                                                       "width: 100%;"+
+                                                       "height: 66px;"+
+                                                   "}"+
+                                               "</style>"+ 
+                                              
+                                               "</head>\n" +
+                                               "<body "+bgstyle+">" +
+                                             
+                                               "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
+                                               "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
+                                               settingsData +
+                                             
+                                               "<div class=\x22container px-4 px-lg-5 my-5\x22>"+
+                                                   "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
+                                                       "<div class=\x22col-md-6\x22>"+
+                                                       "<a href=\x22../webxr/"+ sceneResponse.short_id + "\x22>" +
+                                                       "<img class=\x22img-fluid\x22 src=\x22"+postcardImages[0]+"\x22 alt=\x22...\x22 /></a>"+
+                                                       audioHtml +
+                                                       // "<img class=\x22card-img-top mb-5 mb-md-0\x22 src=\x22"+postcard1+"\x22 alt=\x22...\x22 />"+
+                                                       "<p class=\x22lead\x22>"+sceneResponse.sceneDescription+"</p>"+
+                                                      
+                                                               // "<p class=\x22lead\x22>"+sceneResponse.sceneText+"</p>"+                      
+                                                      
+                                                       "</div>"+
+                                                       "<div class=\x22col-md-6\x22>"+
+                                                       
+                                                           "<div class=\x22small mb-1\x22>"+sceneResponse.sceneKeynote+"</div>"+
+                                                           "<h1 class=\x22display-5 fw-bolder\x22>"+sceneResponse.sceneTitle+"</h1>"+
+                                                           "<div class=\x22fs-5 mb-5\x22>"+
+                                                              
+                                                           "<p class=\x22lead\x22>"+sceneAccess+"</p>"+
+                                                           
+                                                               "<p class=\x22lead\x22>"+sceneGreeting+"</p>"+ 
+                                                               
+                                                               "<p class=\x22lead\x22>"+sceneQuest+"</p>"+
+                                                               // "<span>"+sceneQuest+"</span>"+
+                       
+                                                           platformButtons +
+                                                           sceneEditButton + 
+                                                           "</div>"+
+                                                          
+                                                           "<div class=\x22d-flex\x22>"+
+                                                               // "<input class=\x22form-control text-center me-3\x22 id=\x22inputQuantity\x22 type=\x22num\x22 value=\x221\x22 style=\x22max-width: 3rem\x22 />"+
+                                                                   // "<button class=\x22btn btn-outline-dark flex-shrink-0\x22 type=\x22button\x22>"+
+                                                                   //     "<i class=\x22bi-cart-fill me-1\x22></i>"+
+                                                                   //     "Add to cart"+
+                                                                   // "</button>"+
+                                                                   "<a href=\x22http://"+ sceneResponse.sceneDomain + "\x22>More at "+sceneResponse.sceneDomain+"!</a>" +
+                       
+                                                           "</div>"+
+                                                       "</div>"+
+                                                   "</div>"+
+                                                   "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
+                                                       "<div class=\x22col-md-12\x22>"+
+                                                       "<hr>"+
+                                                       
+                                                       "<p class=\x22lead\x22>"+sceneResponse.sceneText+"</p>"+
+                                                       "</div>"+
+                                                   "</div>"+
+                                                   "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
+                                                       "<div id=\x22picGroupsContainer\x22 class=\x22col-md-12\x22>"+
+                                                       // picGroups +
+                                                       "</div>"+
+                                                   "</div>"+
+                                                   "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
+                                                       "<div class=\x22col-md-12\x22>"+
+                                                       availableScenesHTML +
+                                                       "</div>"+
+                                                   "</div>"+
+                                               "</div>"+
+                                               pictureGroupsData +
+                                               
+                                              
+                                               
+                                               "</body>\n" +
+                                             
+                                               "</html>";
+                                                                 
+                                           } 
+                                        //    callback(null);
+                                        }
                 if (!accessScene) {
                     let noAccessHTML = "<html xmlns='http://www.w3.org/1999/xhtml'>" +
                     "<head> " +

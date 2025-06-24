@@ -3857,7 +3857,7 @@ webxr_router.get('/:_id', function (req, res) {
                         "<img hidden visible=\x22false\x22 id=\x22camlock_button\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/camlock_button_128.png\x22 crossorigin=\x22anonymous\x22>"+
                         "<img hidden visible=\x22false\x22 id=\x22play_button\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/play_button_128.png\x22 crossorigin=\x22anonymous\x22>"+
 
-                        "<img hidden visible=\x22false\x22 d=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>"+
+                        "<img hidden visible=\x22false\x22 id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>"+
                         "<img hidden visible=\x22false\x22 id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>"+
                         "<img hidden visible=\x22false\x22 id=\x22smoke1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>"+
                         "<img hidden visible=\x22false\x22 id=\x22explosion1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/explosion1.png\x22 crossorigin=\x22anonymous\x22>"+

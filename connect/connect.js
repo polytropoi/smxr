@@ -1,11 +1,9 @@
-/* global AFRAME, THREE */
-// import * as THREE from "three";
-// import AFRAME from 'aframe';
+
 
 import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData } from "../connect/indexedDb.js";
 // import { matrixClient } from "../connect/matrix.js";
 // import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
-import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "content-utils";
+import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
@@ -103,7 +101,7 @@ export let allowCameraLock = true;
 const camLockButton = document.getElementById("camLockToggleButton");
 let intersections = [];
 export let avatarName = "";
-
+let primaryAudioEl = document.querySelector('#primaryAudio');
 
 window.LocationRowClick = LocationRowClick;
 
@@ -385,21 +383,23 @@ $(function() {
    // } 
    // let player = document.getElementById("player");
    // document.body.addEventListener("obbcollisionstarted", function (e) {
-   player.addEventListener("obbcollisionstarted", function (e) {
-      if (e.detail) {
-         console.log("player obbcollision start  " + e.detail.withEl.id); 
-         let el = document.getElementById(e.detail.withEl.id);
-         if (el) {
-            if (el.components.cloud_marker) {
-               el.components.cloud_marker.playerTriggerHit();
-                                       
-            } else if (el.components.local_marker) {
-               el.components.local_marker.playerTriggerHit();
-                                       
+   if (player) {
+      player.addEventListener("obbcollisionstarted", function (e) {
+         if (e.detail) {
+            console.log("player obbcollision start  " + e.detail.withEl.id); 
+            let el = document.getElementById(e.detail.withEl.id);
+            if (el) {
+               if (el.components.cloud_marker) {
+                  el.components.cloud_marker.playerTriggerHit();
+                                          
+               } else if (el.components.local_marker) {
+                  el.components.local_marker.playerTriggerHit();
+                                          
+               }
             }
          }
-      }
-   });
+      });
+   }
 
    // player.addEventListener("obbcollisionstarted", function (e) {
    //    if (e.detail) {
@@ -434,21 +434,24 @@ $(function() {
    //       }
    //    }
    //  });
+   
+   if (player) {
     player.addEventListener("obbcollisionended", function (e) {
-      if (e.detail) {
-      console.log("player obbcollision end  " + e.detail.withEl.id); 
-         let el = document.getElementById(e.detail.withEl.id);
-         if (el) {
-            if (el.components.cloud_marker) {
-               el.components.cloud_marker.playerTriggerExit();
-                                      
-            } else if (el.components.local_marker) {
-               el.components.local_marker.playerTriggerExit();
+         if (e.detail) {
+         console.log("player obbcollision end  " + e.detail.withEl.id); 
+            let el = document.getElementById(e.detail.withEl.id);
+            if (el) {
+               if (el.components.cloud_marker) {
+                  el.components.cloud_marker.playerTriggerExit();
                                        
+               } else if (el.components.local_marker) {
+                  el.components.local_marker.playerTriggerExit();
+                                          
+               }
             }
          }
-      }
-    }); 
+      }); 
+   }
     
 
 
@@ -2594,57 +2597,6 @@ function Disconnect() {
    // document.querySelector("avatar").style.visibility = "hidden";
 }
 
-if (sceneEl != null) {
-
-// AFRAME.registerComponent("hide-on-hit-test-start", {
-// init: function() {
-//    var self = this;
-//    this.el.sceneEl.addEventListener("ar-hit-test-start", function() {
-//       console.log("tryna hide for ar " + this.el.id);
-//       self.el.object3D.visible = false;
-//    });
-//    this.el.sceneEl.addEventListener("exit-vr", function() {
-//       self.el.object3D.visible = true;
-//    });
-// }
-// });
-
-// AFRAME.registerComponent('create_avatars', {
-//    schema: {
-//      isNew: {default: ''}
-//    },
-//    init: function() {
-     
-//    },
-//    createAvatar: function (key) {
-//      console.log("tryna createAvatar");
-//    //   var sceneEl = document.querySelector('a-scene');
-//    //   let phEl = document.createElement("a-entity");
-     
-//    //   phEl.setAttribute('moveable-placeholder', {isNew: true, name: 'new location'});
-//    //   // phEl.setAttribute('isNew', true);
-//    //   sceneEl.appendChild(phEl);
-//    let avatar = document.createElement("a-entity"); //this make bad!
-//    // let avatar = sceneEl.createElement("a-entity");
-//    // avatar.setAttribute('avatar-pos-rot');
-//    avatar.classList.add("avatar");
-//    let userSplit = roomUsers[key].split("~"); //color appended to username after tilde on server
-//    let color = "blue";
-//    if (userSplit.length > 1) {
-//       color = userSplit[1];
-//       if (!color.includes("#")) {
-//          color = "#" + color;
-//       }
-//    }
-//    avatar.setAttribute('avatar-callout', {'calloutString': userSplit[0], 'hexColor': color});
-//    // avatar.setAttribute('lerp', {});
-//    avatar.setAttribute('mover', 'eltype', 'avatar');   
-//    avatar.id = key; //assign id for #lookups
-//    this.el.sceneEl.appendChild(avatar);
-   
-//    }
-//  });
-}
 function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, just make this a component function, to avoid creating a-entities outside of aframe
    console.log("tryna UpdatePlayerAvatars" + JSON.stringify(roomUsers));
    
@@ -2963,6 +2915,7 @@ function PlayPausePrimaryAudio() {
    var primaryAudioController = document.getElementById("primaryAudio").components.primary_audio_control; 
    primaryAudioController.playPauseToggle(); 
 }
+
 export function InitPrimarySlider() {
 // let modal = document.getElementById('modalContent');
 let primaryAudioSlider = document.getElementById("primaryAudioVolumeSlider");

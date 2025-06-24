@@ -21,7 +21,7 @@ let analyser = null;
 // let dataArray = [];
 let fLevels = null;
 let volume = 0;
-export let primaryAudioEl = document.querySelector('#primaryAudio');;
+let primaryAudioEl = document.querySelector('#primaryAudio');
 export let vidz = null;
 
 export var primaryAudioMangler = null; 
@@ -3762,7 +3762,8 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
     //   parse: JSON.parse,
     //   stringify: JSON.stringify
     //   }
-    jsonData: {default: []}
+    jsonData: {default: []},
+    context: {default: "webxr"}
     },
 
   init: function () {
@@ -3815,119 +3816,128 @@ AFRAME.registerComponent('picture_groups_control', { //has all the picgroup data
         //   // }
         // // }
       }
-      this.setPanelVisibility(orientation);
 
+      if (settings && settings.sceneType != "landing") {
+        this.setPanelVisibility(orientation);
+      }
 
-      pictureGroupPicLandscapeEl.addEventListener('model-loaded', (event) => {
-        // event.preventDefault();
-        const landscapeMesh = pictureGroupPicLandscapeEl.getObject3D('mesh');
-        this.landscapeMesh = landscapeMesh;
-        this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
-        console.log("tryna load initial scene pic " + this.href + " from " + this.picGroupArray[this.picGroupArrayIndex].name);
-        if (this.href) {
-          
+      if (pictureGroupPicLandscapeEl) {
+        pictureGroupPicLandscapeEl.addEventListener('model-loaded', (event) => {
+          // event.preventDefault();
+          const landscapeMesh = pictureGroupPicLandscapeEl.getObject3D('mesh');
+          this.landscapeMesh = landscapeMesh;
+          this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
+          console.log("tryna load initial scene pic " + this.href + " from " + this.picGroupArray[this.picGroupArrayIndex].name);
+          if (this.href) {
+            
+            this.loader.load(
+              // resource URL
+              this.href,
+              // onLoad callback
+              function ( texture ) { 
+                if (texture) {
+                  // this.texture = texture;
+                  texture.encoding = THREE.sRGBEncoding; 
+                  texture.flipY = false; 
+                  let material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
+                    
+                  landscapeMesh.traverse(node => { 
+                    console.log("gotsa obj + mat");
+                    node.material = material;
+                  });
+                }
+              },
+              function ( err ) {
+                console.error( 'An error happened.' );
+              }
+            );
+          }
+        });
+      }
+      if (pictureGroupPicPortraitEl) {
+        pictureGroupPicPortraitEl.addEventListener('model-loaded', (event) => {
+          // event.preventDefault();
+          const portraitMesh = pictureGroupPicPortraitEl.getObject3D('mesh');
+          this.portraitMesh = portraitMesh;
+          this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
+          // console.log("tryna load initial scene pic " + this.href + " from " + JSON.stringify(this.picGroupArray));
+          this.texture = null;
           this.loader.load(
             // resource URL
             this.href,
             // onLoad callback
             function ( texture ) { 
-              if (texture) {
-                // this.texture = texture;
-                texture.encoding = THREE.sRGBEncoding; 
-                texture.flipY = false; 
-                let material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
-                  
-                landscapeMesh.traverse(node => { 
-                  console.log("gotsa obj + mat");
-                  node.material = material;
-                });
-              }
+              // this.texture = texture;
+              texture.encoding = THREE.sRGBEncoding; 
+              texture.flipY = false; 
+              let material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
+              portraitMesh.traverse(node => { 
+                console.log("gotsa obj + mat");
+                node.material = material;
+              });
             },
             function ( err ) {
               console.error( 'An error happened.' );
             }
           );
-        }
-      });
+        });
+      }
+      if (pictureGroupPicSquareEl) {
+        pictureGroupPicSquareEl.addEventListener('model-loaded', (event) => {
+          // event.preventDefault();
+          const squareMesh = pictureGroupPicSquareEl.getObject3D('mesh');
+          this.squareMesh = squareMesh;
+          this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
+          // console.log("tryna load initial scene pic " + this.href + " from " + JSON.stringify(this.picGroupArray));
+          this.texture = null;
+          this.loader.load(
+            // resource URL
+            this.href,
+            // onLoad callback
+            function ( texture ) { 
+              // texture = texture;
+              texture.encoding = THREE.sRGBEncoding; 
+              texture.flipY = false; 
+              let material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
+              squareMesh.traverse(node => { 
+                // console.log("gotsa obj + mat");
+                node.material = material;
+              });
+            },
+            function ( err ) {
+              console.error( 'An error happened.' );
+            }
+          );
+        });
+      }
 
-      pictureGroupPicPortraitEl.addEventListener('model-loaded', (event) => {
-        // event.preventDefault();
-        const portraitMesh = pictureGroupPicPortraitEl.getObject3D('mesh');
-        this.portraitMesh = portraitMesh;
-        this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
-        // console.log("tryna load initial scene pic " + this.href + " from " + JSON.stringify(this.picGroupArray));
-        this.texture = null;
-        this.loader.load(
-          // resource URL
-          this.href,
-          // onLoad callback
-          function ( texture ) { 
-            // this.texture = texture;
-            texture.encoding = THREE.sRGBEncoding; 
-            texture.flipY = false; 
-            let material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
-            portraitMesh.traverse(node => { 
-              console.log("gotsa obj + mat");
-              node.material = material;
-            });
-          },
-          function ( err ) {
-            console.error( 'An error happened.' );
-          }
-        );
-      });
-      pictureGroupPicSquareEl.addEventListener('model-loaded', (event) => {
-        // event.preventDefault();
-        const squareMesh = pictureGroupPicSquareEl.getObject3D('mesh');
-        this.squareMesh = squareMesh;
-        this.href = this.picGroupArray[this.picGroupArrayIndex].images[0].url;
-        // console.log("tryna load initial scene pic " + this.href + " from " + JSON.stringify(this.picGroupArray));
-        this.texture = null;
-        this.loader.load(
-          // resource URL
-          this.href,
-          // onLoad callback
-          function ( texture ) { 
-            // texture = texture;
-            texture.encoding = THREE.sRGBEncoding; 
-            texture.flipY = false; 
-            let material = new THREE.MeshBasicMaterial( { map: texture, transparent: true} ); 
-            squareMesh.traverse(node => { 
-              // console.log("gotsa obj + mat");
-              node.material = material;
-            });
-          },
-          function ( err ) {
-            console.error( 'An error happened.' );
-          }
-        );
-      });
-      nextButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        // this.pictureGroupPicEl.removeAttribute('gltf-model');
-        this.NextButtonClick();
-      });
+      if (pictureGroupPicLandscapeEl) {
+        nextButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          // this.pictureGroupPicEl.removeAttribute('gltf-model');
+          this.NextButtonClick();
+        });
 
-      previousButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        // this.pictureGroupPicEl.removeAttribute('gltf-model');
-        this.PreviousButtonClick();
-      });
-      flyButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        
-        this.FlyButtonClick();
-      });
-      layoutButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        
-        this.LayoutButtonClick();
-      });
-
+        previousButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          // this.pictureGroupPicEl.removeAttribute('gltf-model');
+          this.PreviousButtonClick();
+        });
+        flyButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          
+          this.FlyButtonClick();
+        });
+        layoutButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          
+          this.LayoutButtonClick();
+        });
+      }
     }
     },
     setPanelVisibility: function (orientation) {
-      if (!orientation || orientation.includes("Landscape") || orientation.includes("Equirectangular")) {
+      if ((!orientation || orientation.includes("Landscape") || orientation.includes("Equirectangular")) && this.pictureGroupPicLandscapeEl) {
         this.pictureGroupPicLandscapeEl.setAttribute('visible', true);
         this.pictureGroupPicPortraitEl.setAttribute('visible', false);
         this.pictureGroupPicSquareEl.setAttribute('visible', false);
