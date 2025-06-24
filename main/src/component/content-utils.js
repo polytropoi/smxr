@@ -21,7 +21,7 @@ let analyser = null;
 // let dataArray = [];
 let fLevels = null;
 let volume = 0;
-let primaryAudioEl = document.querySelector('#primaryAudio');
+export let primaryAudioEl = document.querySelector('#primaryAudio');
 export let vidz = null;
 
 export var primaryAudioMangler = null; 

@@ -2280,7 +2280,8 @@ webxr_router.get('/:_id', function (req, res) {
 
                     ///////////// set default navmesh and surface ///////////////
 
-                    } if ((locMdl.model == null || locMdl.modelID == "none") && locMdl.markerType == "navmesh") {
+                    // }
+                     if ((locMdl.model == null || locMdl.modelID == "none") && locMdl.markerType == "navmesh") {
                         let visible = false;
                         if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
                             visible = true;
@@ -2308,6 +2309,7 @@ webxr_router.get('/:_id', function (req, res) {
                             }
                         }
                     } 
+                }
             } //end locmdl for loop
             
             ///////////////////////////////
