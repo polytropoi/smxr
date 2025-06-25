@@ -3224,7 +3224,7 @@ webxr_router.get('/:_id', function (req, res) {
                     // let arHitTest = "";
                     let arElements = "";
                     let handsTemplate = "";
-                    let aframeRenderSettings = "renderer=\x22colorManagement: true; physicallyCorrectLights: true; exposure: 2; sortObjects: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;\x22";
+                    let aframeRenderSettings = "renderer=\x22colorManagement: true; physicallyCorrectLights: true; exposure: 4; sortObjects: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;\x22";
      
 
                     //scenetype filters below...

@@ -180,6 +180,8 @@ app.use('/webxr', webxr_routes);
 import landing_routes from './routes/landing_routes.js';
 app.use('/landing', landing_routes);  
 
+import vtt_routes from './routes/vtt_routes.js';
+app.use('/vtt', vtt_routes);  
 
 /// uncomment to add these optional routes
 import unity_routes from './routes/unity_routes.js';

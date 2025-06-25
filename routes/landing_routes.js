@@ -3295,6 +3295,7 @@ landing_router.get('/:_id', function (req, res) {
                         // "}"+
 
                         // "}</script>"+
+                        socketScripts +
                         "<script type=\x22module\x22 src=\x22/connect/landing.js\x22 defer=\x22defer\x22></script>" +
                         "<style> audio {"+
                                 "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 
