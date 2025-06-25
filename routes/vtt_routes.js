@@ -3339,7 +3339,12 @@ vtt_router.get('/:_id', function (req, res) {
                         //     "</div>"+
                         // "</div>"+
                         // pictureGroupsData +
-                                                "<script type=\x22module\x22 src=\x22/vtt/map.js\x22 defer=\x22defer\x22></script>" +
+                                                
+                                                "<script type=\x22module\x22 src=\x22/vtt/addBackground.mjs\x22></script>" +
+                                                "<script type=\x22module\x22 src=\x22/vtt/addElements.mjs\x22></script>" +
+                                                "<script type=\x22module\x22 src=\x22/vtt/addOverlay.mjs\x22></script>" +
+                                                "<script type=\x22module\x22 src=\x22/vtt/addDisplacement.mjs\x22></script>" +  
+                                                "<script type=\x22module\x22 src=\x22/vtt/main.js\x22 defer=\x22defer\x22></script>" +
                         
                         
                         "</body>\n" +
