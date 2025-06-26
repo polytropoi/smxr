@@ -1,11 +1,6 @@
-//loaded with landing pages, instead of connect.js
+//loaded with landing pages, instead of connect.js (w/out aframe/three)
 
-// import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData } from "../connect/indexedDb.js";
-// import { matrixClient } from "../connect/matrix.js";
-// import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
-// import { youtubePlayer, youtubeIsPlaying } from "content-utils";
-// import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
-
+import { GoWithIt } from "../vtt/main.mjs";
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
@@ -56,6 +51,8 @@ export let curveLocations = [];
 export let cloudMarkers = []; //???? unused>?//nope
 export let sceneModels = [];
 
+export let mappicURL = "";
+
 let localKeys = [];
 
 let volumePrimary = 0;
@@ -88,8 +85,6 @@ let socketHost = "http://localhost:3000";
 let liveKitHost = "http://localhost:8000";
 // let socketHost = null;
 var socket = null; //the socket.io instance below
-// let cloudData = {};
-
 
 let transformAll = false;
 
@@ -151,6 +146,11 @@ $(function() {
    console.log("room: " +room + " vid " + settings.sceneVideoStreams + " type " + settings.sceneType);
 
    $('#room_id').append($('<button><h4><strong>').text("Welcome to scene " + room).append("</strong></h4></button>"));
+
+//    if (settings && settings.mappicURL) {
+    
+
+//    }
 //    if (settings.sceneType == "Default" || settings.sceneType == "AFrame" || settings.sceneType == "default" || settings.sceneType == "aframe") {
 //       // window.sceneType == "aframe";
 //       if (settings.hideAvatars) {
@@ -226,6 +226,11 @@ $(function() {
          }
       }
    
+    console.log("settings " + JSON.stringify(settings));
+    mappicURL = settings.mappicURL;
+    if (mappicURL) {
+        GoWithIt();
+    }
    if (settings.useMatrix) {
       console.log("Loading browser MATRIX sdk!!!");
       GetMatrixData();
@@ -331,6 +336,12 @@ $(function() {
    }
 
 }); //end onload
+
+export async function ReturnBackgroundMap () {
+    await settings;
+    console.log("tryna return mappicURL " + settings.mappicURL);
+    return settings.mappicURL;
+}
 
 export function UpdateAvatarName(name) {
    avatarName = name;
@@ -1161,13 +1172,13 @@ if (settings && !socket) {
       console.log("room user " + data + 'joined room ' + room);
       socket.emit('room users', room);
       UpdatePlayerAvatars(roomUsers);
-      EmitSelfPosition();
+    //   EmitSelfPosition();
    });
 
    socket.on('admin message', function (data) {
       console.log('recieved admin message : ' + data + ' in room ' + room);
       if (data.toString().toLowerCase() == "next") {
-         GoToNext();
+        //  GoToNext();
       }
    });
 
@@ -1220,7 +1231,7 @@ if (settings && !socket) {
       $('#users').html(roomUsersString);
       stringRoomUsers = roomUsersString;
       // $('#users_2').html(roomUsersString);
-      EmitSelfPosition();
+    //   EmitSelfPosition();
    });
 
    socket.on('getbytes', function (data, metadata) {
@@ -1589,7 +1600,26 @@ function UpdatePlayerPosition(sid, px, py, pz) { //nevermind
    }
 }
 
-// InitContentBox();
+InitContentBox();
+
+function InitContentBox () {
+   console.log("tryna InitContentBox");
+   var coll = document.getElementsByClassName("collapsible");
+   var i;
+
+   for (i = 0; i < coll.length; i++) {
+   coll[i].addEventListener("click", function() {
+      console.log("collapsible click");
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+      if (content.style.maxHeight){
+         content.style.maxHeight = null;
+      } else {
+         content.style.maxHeight = content.scrollHeight + "px";
+      }
+   });
+   }
+}
 // window.onload = init;
 // if (document.querySelector(".avatarName")) {
 //    avatarName = document.querySelector(".avatarName").id;

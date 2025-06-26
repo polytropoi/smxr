@@ -16,6 +16,7 @@ import { RunDataQuery } from "../connect/database.js";
 import { ReturnPresignedUrl } from "../connect/objectStore.js";
 
 import { ObjectId } from "mongodb";
+// import { mappicURL } from "../connect/landing.js";
 
 
 
@@ -170,6 +171,7 @@ landing_router.get('/:_id', function (req, res) {
     var videoEntity = "";
     let youtubes = [];
     let mapOverlay = "";
+    let mappicURL = "";
     let canvasOverlay = "";
     let audioSliders = "";
     let screenOverlay = "";
@@ -2703,6 +2705,11 @@ landing_router.get('/:_id', function (req, res) {
                             tilepicUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
                             console.log("GOTSA TILEABLE PIC! " + tilepicUrl);
                         }
+                        if (picture_item.tags.includes("map")) {
+
+                            mappicURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                            console.log("GOTSA MAP PIC! " + mappicURL);
+                        }
 
                         picture_item.url = image1url;
                         scenePictureItems.push(picture_item);
@@ -3188,10 +3195,15 @@ landing_router.get('/:_id', function (req, res) {
                         }
                         let sceneOwner = "";
                         let sceneEditButton = "";
+                        let vttButton = "";
                         if (sceneOwner != "" || (!isGuest && req.session.user && req.session.user.authLevel.includes("domain_admin"))) { //hrm..
                             sceneEditButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../main/index.html?type=scene&iid="+sceneResponse._id+"\x22>Edit Scene</a>";
                         }
 
+                        if (mappicURL != "") {
+                            vttButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22>Virtual Table Top</a> ";
+                        }
+                        // }
                         if (sceneResponse.sceneShareWithSubscribers) {
                             if (isGuest) {
                                 sceneAccess ="<span>Access Requires Subscription</span><br>"+
@@ -3338,6 +3350,7 @@ landing_router.get('/:_id', function (req, res) {
 
                                     platformButtons +
                                     sceneEditButton + 
+                                    vttButton +
                                     "</div>"+
                                     
                                     "<div class=\x22d-flex\x22>"+

@@ -19,6 +19,7 @@ import { ObjectId } from "mongodb";
 
 
 
+
 const nonLocalDomains = ["regalrooms.tv"]; //TODO you know what! (put this in sceneDomain object)
 
 function getExtension(filename) {
@@ -115,6 +116,7 @@ vtt_router.get('/:_id', function (req, res) {
     sceneResponse.audio = [];
     sceneResponse.pictures = [];
     sceneResponse.postcards = [];
+
     var sceneOwnerID = "";
     let primaryAudioTitle = "";
     let primaryAudioObject = {};
@@ -130,6 +132,7 @@ vtt_router.get('/:_id', function (req, res) {
     let ambientUrl = "";
     let triggerUrl = "";
     var vidUrl = "";
+
     var postcard1 = "";
     let postcardImages = [];
     var image1url = "";
@@ -288,6 +291,7 @@ vtt_router.get('/:_id', function (req, res) {
     let hlsScript = "";
     // let loadPictureGroups = "";
     let tilepicUrl = "";
+    let mappicURL = "";
    
     let isGuest = true;
     let socketScripts = "";
@@ -357,7 +361,7 @@ vtt_router.get('/:_id', function (req, res) {
 
     let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
-                        "\x22pixi\x22: \x22../main/js/pixi/pixi.min.mjs\x22"+  //ok, then
+                        "\x22pixi\x22: \x22../main/js/pixi/pixi.min.mjs?v=1\x22"+  //ok, then
                        
                      
                         "}"+
@@ -543,7 +547,7 @@ vtt_router.get('/:_id', function (req, res) {
             let poiIndex = 0;
             if (sceneResponse.scenePictures != null && sceneResponse.scenePictures.length > 0) {
                 sceneResponse.scenePictures.forEach(function (picture) {
-                    console.log("scenePIcture " + picture + sceneResponse.sceneTags);
+                    // console.log("scenePIcture " + JSON.stringify(picture));
                     
                     var p_id = ObjectId.createFromHexString(picture.toString()); //convert to binary to search by _id beloiw
                     requestedPictureItems.push(p_id); //populate array //hrm, unused atm...
@@ -2629,178 +2633,156 @@ vtt_router.get('/:_id', function (req, res) {
                             pictureGroupsData = "<div id=\x22pictureGroupsData\x22 data-picture-groups='"+buff+"'></a-entity>";
                         // }
                     }
-                }
-                let scatterPics = false;
-                var index = 0;
-                let picLocationsPlaced = [];
-                let picIndex = 0;
-                for (let i = 0; i < sceneResponse.scenePictures.length; i++) {    
-                    const picID = sceneResponse.scenePictures[i].toString();
-                    const oo_id = ObjectId.createFromHexString(picID);
-                    const query = {"_id": oo_id};
-                    let picture_item = await RunDataQuery("image_items", "findOne", query);
+            }
+            let scatterPics = false;
+            var index = 0;
+            let picLocationsPlaced = [];
+            let picIndex = 0;
+            for (let i = 0; i < sceneResponse.scenePictures.length; i++) {    
+                const picID = sceneResponse.scenePictures[i].toString();
+                const oo_id = ObjectId.createFromHexString(picID);
+                const query = {"_id": oo_id};
+                let picture_item = await RunDataQuery("image_items", "findOne", query);
 
-                    if (picture_item) {
-                        
-                        // console.log("picture_item " + JSON.stringify(picture_item));
-                        
-                        var version = ".standard.";
-                        if (picture_item.orientation != undefined) {
-                            // if (picture_item.orientation.toLowerCase() == "equirectangular" && sceneResponse.sceneUseSkybox) {
-                            if (picture_item.orientation.toLowerCase() == "equirectangular") {
-                                skyboxID = picID;
-                                version = ".original.";
-                                skyboxIDs.push(picID);
-                            }
+                if (picture_item) {
+                    
+                    console.log("scenePicture picture_item " + JSON.stringify(picture_item));
+                    
+                    var version = ".standard.";
+                    if (picture_item.orientation != undefined) {
+                        // if (picture_item.orientation.toLowerCase() == "equirectangular" && sceneResponse.sceneUseSkybox) {
+                        if (picture_item.orientation.toLowerCase() == "equirectangular") {
+                            skyboxID = picID;
+                            version = ".original.";
+                            skyboxIDs.push(picID);
                         }
+                    }
 
-                        let max = 30;
-                        let min = -30;
-                        let x = Math.random() * (max - min) + min;
-                        // let y = Math.random() * (max.y - min.y) + min.y;
-                        let z = Math.random() * (max - min) + min;
-                        if (z >= -15 && z <= 15) {
-                            if (z < 0) {
-                                z = -20;
-                            } else {
-                                z = 20;
-                            }
-                        
-                        }
-                        if (x >= -15 && z <= 15) {
-                            if (x < 0) {
-                                x = -20;
-                            } else {
-                                x = 20;
-                            }
-                        }
-                        index++;
-                        let position = x + " " + 2 + " " + z;
-                        let rotation = "0 90 0";
-                        let scale = 1;
-
-                        if (picture_item.orientation == "circle" || picture_item.orientation == "Circle" || picture_item.orientation == "square" || picture_item.orientation == "Square" ) {
-                            if (picture_item.tags.includes("old")) { //OH YEAH, snap
-                                image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item.filename, 6000);
-                            } else {
-                                
-                                image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
-                            }
-                            
+                    let max = 30;
+                    let min = -30;
+                    let x = Math.random() * (max - min) + min;
+                    // let y = Math.random() * (max.y - min.y) + min.y;
+                    let z = Math.random() * (max - min) + min;
+                    if (z >= -15 && z <= 15) {
+                        if (z < 0) {
+                            z = -20;
                         } else {
-                            image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, 6000);
-                        }
-                        if (picture_item.orientation == "Tileable") {
-
-                            tilepicUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
-                            console.log("GOTSA TILEABLE PIC! " + tilepicUrl);
-                        }
-
-                        picture_item.url = image1url;
-                        scenePictureItems.push(picture_item);
-                        imageAssets = imageAssets + "<img id=\x22smimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
-                        let caption = "";
-                        if (picture_item.captionUpper != null && picture_item.captionUpper != undefined) {
-                            // caption = "<a-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x220 1.3 -.1\x22 wrapCount=\x2240\x22 value=\x22"+picture_item.captionUpper+"\x22></a-text>";
-                        }
-                        let lowerCap = "";
-                        let actionCall = "";
-                        let link = "";
-                        let lookat = " look-at=\x22#player\x22 ";
-                        // console.log("picLocations taken: " + picLocationsPlaced);
-                        
-                        if (picIndex < locationPictures.length) { //now picture types use scene_pictures_control see below
-                            position = locationPictures[picIndex].loc;
-                            rotation = locationPictures[picIndex].rot;
-                            if (locationPictures[picIndex].type.includes("fixed")) {
-                                console.log("fixed pic @ " + locationPictures[picIndex].loc);
-                                lookat = "";
-                            }
-                            if (locationPictures[picIndex].scale) {
-
-                            }
-                            picIndex++;
-                        } else {
-                            if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("scatter pics")) {
-                                scatterPics = true; //use cooked positions above, not assigned locations
-                            }
+                            z = 20;
                         }
                     
-                        if (picture_item.linkType != undefined && picture_item.linkType.toLowerCase() != "none") {
-                            if (picture_item.linkType == "NFT") { //never mind, these are old image target fu
-                            
-                            }
-                            if (picture_item.linkURL != undefined && !picture_item.linkURL.includes("undefined") && picture_item.linkURL.length > 6) {
-                                // link = "basic-link=\x22href: "+picture_item.linkURL+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
-                            }
-                        }
-                        if (picture_item.useTarget != undefined && picture_item.useTarget != "") { //used by mindar - good stuff!
-                            console.log("GOTSA urlTarget " + picture_item.urlTarget);
-                            const targetURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind");
-                            arImageTargets.push(targetURL);
-                        
-
-                        }
-                        // if (picture_item.hasAlphaChannel && scatterPics) {
-                        //     imageEntities = imageEntities + "<a-entity "+link+""+lookat+" geometry=\x22primitive: plane; height: 10; width: 10\x22 material=\x22shader: flat; transparent: true; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        // } else {
-                        //     console.log("picture_item.orientation " + picture_item);
-                        //     if (picture_item.orientation != "equirectangular" && picture_item.orientation != "Equirectangular" && scatterPics) {  //what if linkType is undefined?
-
-                        //         if (picture_item.orientation == "portrait" || picture_item.orientation == "Portrait") {
-                        //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                        //             index+"\x22 gltf-model=\x22#portrait_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        //             modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5c.glb\x22></a-asset-item>\n";
-                        //         } else if (picture_item.orientation == "square" || picture_item.orientation == "Square") {
-                        //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                        //             index+"\x22 gltf-model=\x22#square_panel\x22 scale=\x223 3 3\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        //         } else if (picture_item.orientation == "circle" || picture_item.orientation == "Circle") {
-                        //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                        //             index+"\x22 gltf-model=\x22#circle_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        //             modelAssets = modelAssets + "<a-asset-item id=\x22circle_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelcircle1.glb\x22></a-asset-item>\n";
-                        //         } else {
-                        //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                        //             index+"\x22 gltf-model=\x22#landscape_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                        //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                        //         }
-                        //     }
-                        // }
                     }
-                    // var buff = Buffer.from(JSON.stringify(scenePictureItems)).toString("base64");
-                    // scenePictureData = "<a-entity scene_pictures_control id=\x22scenePictureData\x22 data-scene-pictures='"+buff+"'></a-entity>";
+                    if (x >= -15 && z <= 15) {
+                        if (x < 0) {
+                            x = -20;
+                        } else {
+                            x = 20;
+                        }
+                    }
+                    index++;
+                    let position = x + " " + 2 + " " + z;
+                    let rotation = "0 90 0";
+                    let scale = 1;
+
+                    if (picture_item.orientation == "circle" || picture_item.orientation == "Circle" || picture_item.orientation == "square" || picture_item.orientation == "Square" ) {
+                        if (picture_item.tags.includes("old")) { //OH YEAH, snap
+                            image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item.filename, 6000);
+                        } else {
+                            
+                            image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                        }
+                        
+                    } else {
+                        image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, 6000);
+                    }
+                    if (picture_item.orientation == "Tileable") {
+
+                        tilepicUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                        console.log("GOTSA TILEABLE PIC! " + tilepicUrl);
+                    }
+                    if (picture_item.tags.includes("map")) {
+
+                        mappicURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                        console.log("GOTSA MAP PIC! " + mappicURL);
+                    }
+
+                    picture_item.url = image1url;
+                    scenePictureItems.push(picture_item);
+                    imageAssets = imageAssets + "<img id=\x22smimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
+                    let caption = "";
+                    if (picture_item.captionUpper != null && picture_item.captionUpper != undefined) {
+                        // caption = "<a-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x220 1.3 -.1\x22 wrapCount=\x2240\x22 value=\x22"+picture_item.captionUpper+"\x22></a-text>";
+                    }
+                    let lowerCap = "";
+                    let actionCall = "";
+                    let link = "";
+                    let lookat = " look-at=\x22#player\x22 ";
+                    // console.log("picLocations taken: " + picLocationsPlaced);
+                    
+                    if (picIndex < locationPictures.length) { //now picture types use scene_pictures_control see below
+                        position = locationPictures[picIndex].loc;
+                        rotation = locationPictures[picIndex].rot;
+                        if (locationPictures[picIndex].type.includes("fixed")) {
+                            console.log("fixed pic @ " + locationPictures[picIndex].loc);
+                            lookat = "";
+                        }
+                        if (locationPictures[picIndex].scale) {
+
+                        }
+                        picIndex++;
+                    } else {
+                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("scatter pics")) {
+                            scatterPics = true; //use cooked positions above, not assigned locations
+                        }
+                    }
+                
+                    if (picture_item.linkType != undefined && picture_item.linkType.toLowerCase() != "none") {
+                        if (picture_item.linkType == "NFT") { //never mind, these are old image target fu
+                        
+                        }
+                        if (picture_item.linkURL != undefined && !picture_item.linkURL.includes("undefined") && picture_item.linkURL.length > 6) {
+                            // link = "basic-link=\x22href: "+picture_item.linkURL+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
+                        }
+                    }
+                    if (picture_item.useTarget != undefined && picture_item.useTarget != "") { //used by mindar - good stuff!
+                        console.log("GOTSA urlTarget " + picture_item.urlTarget);
+                        const targetURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/targets/" + picture_item._id + ".mind");
+                        arImageTargets.push(targetURL);
+                    
+
+                    }
+                    // if (picture_item.hasAlphaChannel && scatterPics) {
+                    //     imageEntities = imageEntities + "<a-entity "+link+""+lookat+" geometry=\x22primitive: plane; height: 10; width: 10\x22 material=\x22shader: flat; transparent: true; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                    //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                    // } else {
+                    //     console.log("picture_item.orientation " + picture_item);
+                    //     if (picture_item.orientation != "equirectangular" && picture_item.orientation != "Equirectangular" && scatterPics) {  //what if linkType is undefined?
+
+                    //         if (picture_item.orientation == "portrait" || picture_item.orientation == "Portrait") {
+                    //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                    //             index+"\x22 gltf-model=\x22#portrait_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                    //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                    //             modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5c.glb\x22></a-asset-item>\n";
+                    //         } else if (picture_item.orientation == "square" || picture_item.orientation == "Square") {
+                    //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                    //             index+"\x22 gltf-model=\x22#square_panel\x22 scale=\x223 3 3\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                    //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                    //         } else if (picture_item.orientation == "circle" || picture_item.orientation == "Circle") {
+                    //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                    //             index+"\x22 gltf-model=\x22#circle_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                    //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                    //             modelAssets = modelAssets + "<a-asset-item id=\x22circle_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelcircle1.glb\x22></a-asset-item>\n";
+                    //         } else {
+                    //             imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
+                    //             index+"\x22 gltf-model=\x22#landscape_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                    //             " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                    //         }
+                    //     }
+                    // }
                 }
-                /////////////// skyboxen /////////////////////
-                // var oo_id = null;
-                // console.log("skybox ids beez " + JSON.stringify(skyboxIDs) + " vs single skyboxID " + skyboxID);
-                // if (skyboxIDs.length > 0) { //umm...
-                //     // skyboxID = skyboxIDs[Math.floor(Math.random() * skyboxIDs.length)];
-                //     // oo_id =  ObjectID(skyboxID);
-                // } 
-                // if (skyboxID != "") {
-                //     oo_id = ObjectId.createFromHexString(skyboxID); //set if there's an equirect pic, above
-                // } else {
-                //     if (sceneResponse.sceneSkybox != null && sceneResponse.sceneSkybox != "") //old way
-                //     oo_id = ObjectId.createFromHexString(sceneResponse.sceneSkybox);
-                // }
-                // if (oo_id) {
-                //     const query = {"_id": oo_id};
-                //     const picture_item = await RunDataQuery("image_items", "findOne", query); 
-                //     const theKey = 'users/' + picture_item.userID + '/pictures/originals/' + picture_item._id + '.original.' + picture_item.filename; //TODO cook smaller equirect versions?
-                //     //some old skyboxen aren't saved with .original. in filename, check for that
-                //     // if (!ReturnObjectExists(process.env.ROOT_BUCKET_NAME, theKey)) {
-                //     //     theKey = 'users/' + picture_item.userID + '/pictures/originals/' + picture_item.filename;
-                //     // } 
-                //     const skyboxUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, theKey, 6000);
-                //     console.log("single skybox url " + skyboxUrl);
-                //     imageAssets = imageAssets + "<img id=\x22sky\x22 crossorigin=\x22anonymous\x22 src='" + skyboxUrl + "'>";
-                //     if (sceneResponse.sceneUseSkybox) {
-                //         skySettings = "<a-sky id=\x22a_sky\x22 crossorigin=\x22anonymous\x22 hide-on-enter-ar skybox_dynamic></a-sky>";
-                //     }
-                // }
+                // var buff = Buffer.from(JSON.stringify(scenePictureItems)).toString("base64");
+                // scenePictureData = "<a-entity scene_pictures_control id=\x22scenePictureData\x22 data-scene-pictures='"+buff+"'></a-entity>";
+            }
+                
 
                 /////////////////// build the response! ///////////////////////////////
 
@@ -2839,6 +2821,7 @@ vtt_router.get('/:_id', function (req, res) {
                     settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
                     settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
                     // settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
+                    settings.mappicURL = mappicURL;
                     settings.skyboxIDs = skyboxIDs;
                     settings.skyboxID = skyboxID;
                     settings.skyboxURL = skyboxUrl;
@@ -3110,6 +3093,7 @@ vtt_router.get('/:_id', function (req, res) {
                         settings.skyboxID = skyboxID;
                         settings.skyboxURL = skyboxUrl;
                         settings.useSynth = hasSynth;
+                        settings.mappicURL = mappicURL;
                         // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
                         // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
                         // settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
@@ -3169,7 +3153,11 @@ vtt_router.get('/:_id', function (req, res) {
                         // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
 
                         let availableScenesHTML = ""; 
-                        let bgstyle = "style=\x22height:100%; width:100%; overflow:auto;\x22";
+                        // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto;\x22";
+                        let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
+                        if (tilepicUrl != "") {
+                            bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
+                        }
                         let sceneAccess = "Access Open to Public"
                         // if (sceneResponse.sceneShareWithSubscribers) {
                         //     sceneAccess ="<span>Access Requires Subscription</span><br>";
@@ -3262,10 +3250,12 @@ vtt_router.get('/:_id', function (req, res) {
                         // "<meta name=\x22monetization\x22 content=\x22"+process.env.COIL_PAYMENT_POINTER+"\x22>" +
                         "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
                         "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                        "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                        socketScripts +
                         
                         importMap +
 
-
+                        "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
                         "<style> audio {"+
                                 "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 
                                 "width: 100%;"+
@@ -3340,12 +3330,13 @@ vtt_router.get('/:_id', function (req, res) {
                         // "</div>"+
                         // pictureGroupsData +
                                                 
-                                                "<script type=\x22module\x22 src=\x22/vtt/addBackground.mjs\x22></script>" +
-                                                "<script type=\x22module\x22 src=\x22/vtt/addElements.mjs\x22></script>" +
-                                                "<script type=\x22module\x22 src=\x22/vtt/addOverlay.mjs\x22></script>" +
-                                                "<script type=\x22module\x22 src=\x22/vtt/addDisplacement.mjs\x22></script>" +  
-                                                "<script type=\x22module\x22 src=\x22/vtt/main.js\x22 defer=\x22defer\x22></script>" +
-                        
+                        "<script type=\x22module\x22 src=\x22/vtt/addBackground.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/vtt/addElements.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/vtt/addOverlay.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/vtt/addDisplacement.mjs\x22></script>" +  
+                        "<script type=\x22module\x22 src=\x22/vtt/main.mjs\x22 ></script>" +
+                        canvasOverlay +
+                        transportButtons+ 
                         
                         "</body>\n" +
                     
