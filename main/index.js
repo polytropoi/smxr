@@ -1070,7 +1070,7 @@
 
         if (arr[i].url != undefined && ext != undefined) {
         // console.log("url " + arr[i].url );
-            if (ext == "jpg" || ext == "jp2" || ext == "jpeg" || ext == "png" || ext == "gif") {
+            if (ext == "webp" || ext == "jpg" || ext == "jp2" || ext == "jpeg" || ext == "png" || ext == "gif") {
                 html = html +
                 "<div class=\x22card\x22 style=\x22width:320px;\x22>" +
                     "<div class=\x22card-header\x22>"+
@@ -5485,10 +5485,10 @@
                         "<option>Spritesheet</option>" +
                         "</select>" +
                     "</div>" +
-                    "<div class=\x22col form-group col-md-2\x22>" +
-                        "<label for=\x22siName\x22>Image Data</label>" +
-                        "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22imageData\x22 placeholder=\x22Enter Image Data\x22 value=\x22" + imageData + "\x22 >" +
-                    "</div>" +
+                    // "<div class=\x22col form-group col-md-2\x22>" +
+                    //     "<label for=\x22siName\x22>Image Data</label>" +
+                    //     "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22imageData\x22 placeholder=\x22Enter Image Data\x22 value=\x22" + imageData + "\x22 >" +
+                    // "</div>" +
                     "<div class=\x22col form-group col-md-2\x22>" +
                         "<label for=\x22siName\x22>Upper Caption</label>" +
                         "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22captionUpper\x22 placeholder=\x22Enter Upper Caption\x22 value=\x22" + captionUpper + "\x22 >" +
@@ -5567,15 +5567,15 @@
                                 "<option>Public Domain</option>" +
                                 "</select>" +
                             "</div>" +
-                    "<div class=\x22col form-group col-md-3\x22>" +
+                    "<div class=\x22col form-group col-md-4\x22>" +
                         "<label for=\x22source\x22>Modifications </label>" +
                         "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22mods\x22 placeholder=\x22Modifications to original\x22 value=\x22" + mods + "\x22 >" +
                     "</div>" +
-                    "<div class=\x22col form-group col-md-3\x22>" +
+                    "<div class=\x22col form-group col-md-4\x22>" +
                         "<label for=\x22source\x22>Source Text</label>" +
                         "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22sourceText\x22 placeholder=\x22Full Text of Source(s)\x22 value=\x22" + sourceText + "\x22 >" +
                     "</div>" +
-                    "<div class=\x22col form-group col-md-3\x22>" +
+                    "<div class=\x22col form-group col-md-4\x22>" +
                         "<label for=\x22source\x22>NFT</label>" +
                         "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22nft\x22 placeholder=\x22NFT string\x22 value=\x22" + nft + "\x22 >" +
                     "</div>" +
@@ -5595,7 +5595,10 @@
                         "<div class=\x22\x22><label for=\x22useTarget\x22>Use Image Target</label><br>" + //public
                         "<input type=\x22checkbox\x22  id=\x22useTarget\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
                     "</div>" + 
-
+                    "<div class=\x22col form-group col-md-4\x22>" +
+                        "<label for=\x22source\x22>Image Data</label>" +
+                        "<textarea type=\x22textarea\x22 class=\x22form-control\x22 id=\x22imageData\x22 value=\x22" + imageData + "\x22 >" + imageData + "</textarea>" +
+                    "</div>" +
                     "<div class=\x22col form-group col-md-12\x22>" + 
                         
                     "<a target=\x22_blank\x22 href=\x22" +response.data.URLstandard+ "\x22><img class=\x22rounded img-fluid mr-3\x22 src=\x22" + response.data.URLhalf+ "\x22></a><br><br>" +
@@ -5625,6 +5628,7 @@
             "</div>" +
         "</div>" +
         "</div>";
+        console.log("imageData " + imageData);
         $("#cardrow").html(card);
         $('#orientation').find('option').each(function(i,e){
             // let orientation = $(e).val();
@@ -5633,7 +5637,7 @@
             }
         });
         $('#linkType').find('option').each(function(i,e){
-            console.log($(e).val());
+            // console.log($(e).val());
             if($(e).val() === response.data.linkType){
                 $('#linkType').prop('selectedIndex',i);
             }
@@ -5838,7 +5842,7 @@
                 let description = document.getElementById("description").value;
                 let status = $("#isPublic").prop("checked");
 
-                console.log("description: " + description);
+                console.log("description: " + imageData);
                 let item_status = (status == true) ? "private" : "public";
                 let hasAlphaChannel = (hasAlpha == true) ? true : false;
                 // console.log("tryna submit");

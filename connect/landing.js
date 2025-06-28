@@ -15,6 +15,7 @@ export let sceneLocations = {locations: [], locationMods: []};
 export let settings; //push this to an aframe component for fetching...
 export let attributions = [];
 export var videoEl = null;
+let sprites;
 // export const mouse = new THREE.Vector2();
 export const sceneEl = document.querySelector('a-scene');
 // export let hasLocalData = false;
@@ -110,8 +111,12 @@ $(function() {
    // player = document.getElementById("cameraRig");
    let settingsEl = document.getElementById('settingsDataElement'); //volume, color, etc...
    let theSettingsData = settingsEl.getAttribute('data-settings');
-
    settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
+
+    let spritesEl = document.getElementById('spritesDataElement'); //volume, color, etc...
+   let theSpritesData = spritesEl.getAttribute('data-sprites');
+   sprites = JSON.parse(atob(theSpritesData)); //gets copied to localdata ifn mods are 'llowed
+
    // console.log("Settings : " + JSON.stringify(settings));
    let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
    if (timedEventsEl) {
@@ -227,6 +232,8 @@ $(function() {
       }
    
     console.log("settings " + JSON.stringify(settings));
+    console.log("sprites " + JSON.stringify(sprites));
+
     mappicURL = settings.mappicURL;
     if (mappicURL) {
         GoWithIt();
@@ -342,6 +349,13 @@ export async function ReturnBackgroundMap () {
     console.log("tryna return mappicURL " + settings.mappicURL);
     return settings.mappicURL;
 }
+
+export async function ReturnSprites () {
+    await sprites;
+    // console.log("tryna return sprites " + sprites);
+    return sprites;
+}
+
 
 export function UpdateAvatarName(name) {
    avatarName = name;

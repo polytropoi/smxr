@@ -2189,7 +2189,8 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
 
 
     if (allEqual(itemsExtensions) && (itemsExtensions[0].toLowerCase() == ".usdz" || itemsExtensions[0].toLowerCase() == ".reality" || 
-    itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".spz" || itemsExtensions[0].toLowerCase() == ".ply" || itemsExtensions[0].toLowerCase() == ".splat" || itemsExtensions[0].toLowerCase() == ".ksplat" || itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jp2" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
+    itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".spz" || itemsExtensions[0].toLowerCase() == ".ply" || itemsExtensions[0].toLowerCase() == ".splat" || itemsExtensions[0].toLowerCase() == ".ksplat" || 
+    itemsExtensions[0].toLowerCase() == ".webp" ||  itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jp2" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
      itemsExtensions[0].toLowerCase() == ".aif" || itemsExtensions[0].toLowerCase() == ".aiff" || itemsExtensions[0].toLowerCase() == ".ogg" || itemsExtensions[0].toLowerCase() == ".wav" || itemsExtensions[0].toLowerCase() == ".mp3" || 
      itemsExtensions[0].toLowerCase() == ".mp4" || itemsExtensions[0].toLowerCase() == ".webm" || itemsExtensions[0].toLowerCase() == ".mov" || itemsExtensions[0].toLowerCase() == ".mkv")) { //need to think how to flex, and use contenttype
         
@@ -2200,7 +2201,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
         
         groupType = itemsExtensions[0];
         let contentType = "";
-        if (groupType.toLowerCase()  == ".jpg" || groupType.toLowerCase()  == ".jp2" || groupType.toLowerCase()  == ".jpeg" || groupType.toLowerCase()  == ".png") {
+        if (groupType.toLowerCase()  == ".webp" || groupType.toLowerCase()  == ".jpg" || groupType.toLowerCase()  == ".jp2" || groupType.toLowerCase()  == ".jpeg" || groupType.toLowerCase()  == ".png") {
             contentType = "picture";
         } else if (groupType.toLowerCase()  == ".mp3" || groupType.toLowerCase()  == ".wav" || groupType.toLowerCase()  == ".ogg" || groupType.toLowerCase()  == ".aif" || groupType.toLowerCase()  == ".aiff"  )  {
             contentType = "audio"
@@ -7788,7 +7789,7 @@ app.post('/delete_obj/', requiredAuthentication, function (req, res) {
 
 
 app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
-    console.log(req.params._id);
+    console.log("update_pic imageData "+ JSON.stringify(req.body.imageData));
 
     var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('pic requested : ' + req.body._id);
@@ -7822,6 +7823,7 @@ app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
                 mods: req.body.mods,
                 license: req.body.license,
                 description: req.body.description,
+                imageData: req.body.imageData,
                 linkType: req.body.linkType,
                 linkURL: req.body.linkURL,
                 sourceText: req.body.sourceText,

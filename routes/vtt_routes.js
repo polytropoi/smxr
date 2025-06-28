@@ -257,6 +257,7 @@ vtt_router.get('/:_id', function (req, res) {
     let trackMarker = false;
     let joystickScript = "";
     let settingsData = "";
+    let spriteData = "";
     let sceneTimedEventsData = "";
     let carScript = "";
     let networkingEntity = "";
@@ -2205,7 +2206,6 @@ vtt_router.get('/:_id', function (req, res) {
                 if (sceneResponse.scenePrimaryAudioTitle != null && sceneResponse.scenePrimaryAudioTitle != undefined && sceneResponse.scenePrimaryAudioTitle.length > 0) {
                     primaryAudioTitle = sceneResponse.scenePrimaryAudioTitle;    
                 } 
-                
             }
             if (sceneResponse.sceneAmbientAudioID != null && sceneResponse.sceneAmbientAudioID.length > 4) {
                 hasAmbientAudio = true;
@@ -2215,7 +2215,6 @@ vtt_router.get('/:_id', function (req, res) {
             }
             if (sceneResponse.scenePrimaryAudioTitle != null && sceneResponse.scenePrimaryAudioTitle != undefined && sceneResponse.scenePrimaryAudioTitle.length > 0) {
                 primaryAudioTitle = sceneResponse.scenePrimaryAudioTitle;
-               
             }
             if (sceneResponse.scenePrimaryVolume != null) {
                 scenePrimaryVolume = sceneResponse.scenePrimaryVolume;
@@ -2638,6 +2637,7 @@ vtt_router.get('/:_id', function (req, res) {
             var index = 0;
             let picLocationsPlaced = [];
             let picIndex = 0;
+            let sprites = [];
             for (let i = 0; i < sceneResponse.scenePictures.length; i++) {    
                 const picID = sceneResponse.scenePictures[i].toString();
                 const oo_id = ObjectId.createFromHexString(picID);
@@ -2646,7 +2646,7 @@ vtt_router.get('/:_id', function (req, res) {
 
                 if (picture_item) {
                     
-                    console.log("scenePicture picture_item " + JSON.stringify(picture_item));
+                    // console.log("scenePicture picture_item " + JSON.stringify(picture_item));
                     
                     var version = ".standard.";
                     if (picture_item.orientation != undefined) {
@@ -2655,6 +2655,8 @@ vtt_router.get('/:_id', function (req, res) {
                             skyboxID = picID;
                             version = ".original.";
                             skyboxIDs.push(picID);
+                        } else if (picture_item.orientation.toLowerCase() == "spritesheet") {
+                            
                         }
                     }
 
@@ -2698,6 +2700,19 @@ vtt_router.get('/:_id', function (req, res) {
 
                         tilepicUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
                         console.log("GOTSA TILEABLE PIC! " + tilepicUrl);
+                    }
+                     if (picture_item.orientation == "Spritesheet") {
+                        // let spriteSheetJson = {};
+                        if (picture_item.imageData) {
+                            let spriteSheetJson = JSON.parse(picture_item.imageData);
+                            
+                            const spriteSheetURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                            
+                            spriteSheetJson.meta.image = spriteSheetURL;
+                            spriteSheetJson._id = picture_item._id;
+                            sprites.push(spriteSheetJson);
+                            console.log("GOTSA SPRITESHEET PIC! " + spriteSheetJson);
+                        }
                     }
                     if (picture_item.tags.includes("map")) {
 
@@ -2910,6 +2925,8 @@ vtt_router.get('/:_id', function (req, res) {
                     }
                     var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
                     settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
+                    var spritebuff = Buffer.from(JSON.stringify(sprites)).toString("base64");
+                    spriteData = "<div id=\x22spritesDataElement\x22 data-sprites=\x22"+spritebuff+"\x22></div>";
 
                     if (sceneResponse.sceneTimedEvents) {
                         var tebuff = Buffer.from(JSON.stringify(sceneResponse.sceneTimedEvents)).toString("base64");
@@ -3269,6 +3286,7 @@ vtt_router.get('/:_id', function (req, res) {
                         "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
                         "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
                         settingsData +
+                        spriteData + 
                     
                         // "<div class=\x22container px-4 px-lg-5 my-5\x22>"+
                         //     "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+

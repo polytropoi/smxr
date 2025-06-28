@@ -1,15 +1,19 @@
-import { Application, Assets, Graphics } from 'pixi';
+import { Application, Assets, Graphics, Texture } from 'pixi';
 import { addBackground } from './addBackground.mjs';
-import { addFishes, animateFishes } from './addElements.mjs';
+import { addFishes, addSpriteAnimation, animateFishes } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
-import { ReturnBackgroundMap } from '../connect/landing.js';
+import { ReturnBackgroundMap, ReturnSprites } from '../connect/landing.js';
 // Create a PixiJS application.
 const app = new Application();
 // Store an array of fish sprites for animation.
 const fishes = [];
+
 let mappicURL = "";
 
+let spritesData;
+
+let sprites
 
 async function setup() {
   // Intialize the application.
@@ -21,12 +25,15 @@ async function setup() {
 async function prePreLoader () {
   mappicURL = await ReturnBackgroundMap();
   console.log("mappicURL " + mappicURL);
+  spritesData = await ReturnSprites();
+  // console.log("spritesData " + JSON.stringify(spritesData));
 }
 
 
 async function preload() {
 
   // Create an array of asset data to load.
+
   const assets = [
     { alias: 'background', src: mappicURL },
     { alias: 'fish1', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish1.png' },
@@ -36,6 +43,8 @@ async function preload() {
     { alias: 'fish5', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish5.png' },
     { alias: 'overlay', src: 'https://pixijs.com/assets/tutorials/fish-pond/wave_overlay.png' },
     { alias: 'displacement', src: 'https://pixijs.com/assets/tutorials/fish-pond/displacement_map.png' },
+    { alias: 'sprite1', src: spritesData[0].meta.image },
+    
   ];
 
   // Load the assets defined above.
@@ -52,6 +61,7 @@ export async function GoWithIt() { //called from landing.js
 
   addBackground(app);
     addFishes(app, fishes);
+    
 
   // Add the fish animation callback to the application's ticker.
   app.ticker.add((time) => animateFishes(app, fishes, time));
@@ -60,11 +70,15 @@ export async function GoWithIt() { //called from landing.js
   // addDisplacementEffect(app);
   addGridOverlay(app);
 
+    const sprite1 = Texture.from('sprite1');
+
+  addSpriteAnimation(app, sprite1, spritesData[0]);
   // Add the animation callbacks to the application's ticker.
   app.ticker.add((time) => {
     animateFishes(app, fishes, time);
     animateWaterOverlay(app, time);
   });
+
 
   //
 

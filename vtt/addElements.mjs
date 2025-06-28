@@ -1,4 +1,4 @@
-import { Container, Sprite } from 'pixi';
+import { Assets, AnimatedSprite, Container, Sprite, Texture, Spritesheet } from 'pixi';
 
 export function addFishes(app, fishes) {
   // Create a container to hold all the fish sprites.
@@ -77,3 +77,71 @@ export function animateFishes(app, fishes, time) {
     }
   });
 }
+
+export async function addSpriteAnimation (app, texture, spriteData) {
+
+// const sprite = 'sprites1';
+    // let asset = sprites.
+    console.log("spritesData " + JSON.stringify(spriteData));
+
+    const sheet = new Spritesheet(texture, spriteData);
+    await sheet.parse();
+    console.log('Spritesheet ready to use!');
+        //     await Assets.load(spriteData);
+                    const frames = [];
+        var count = 0;
+        for(var key in spriteData.frames) {
+        if(spriteData.frames.hasOwnProperty(key)) {
+            console.log(key);
+            // frames.push(Texture.from(key));
+                        frames.push(sheet.textures[key]);
+                count++;
+            }
+        }
+
+        // let length = spriteData.frames.length;
+        console.log("frames " + count);
+        
+
+        // Create an array of textures from the sprite sheet
+
+
+        // for (let i = 0; i < count + 1; i++) {
+        //     const val = i < count + 1 ? `0${i}` : i;
+
+        //     // Magically works since the spritesheet was loaded with the pixi loader
+        //     frames.push(Texture.from(`0${val}.webp`));
+        // }
+        // Load the animation sprite sheet
+//   await Assets.load('https://pixijs.com/assets/spritesheet/fighter.json');
+
+//   // Create an array of textures from the sprite sheet
+//   const frames = [];
+
+//   for (let i = 0; i < 30; i++) {
+//     const val = i < 10 ? `0${i}` : i;
+
+//     // Magically works since the spritesheet was loaded with the pixi loader
+//     frames.push(Texture.from(`rollSequence00${val}.png`));
+//   }
+
+  // Create an AnimatedSprite (brings back memories from the days of Flash, right ?)
+  const anim = new AnimatedSprite(frames);
+
+  /*
+   * An AnimatedSprite inherits all the properties of a PIXI sprite
+   * so you can change its position, its anchor, mask it, etc
+   */
+  anim.x = app.screen.width / 2;
+  anim.y = app.screen.height / 2;
+  anim.anchor.set(0.5);
+  anim.animationSpeed = 1;
+  anim.width = 256;
+  anim.height = 256;
+  anim.play();
+
+  app.stage.addChild(anim);
+
+
+}
+
