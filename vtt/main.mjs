@@ -4,7 +4,7 @@ import { addBackground } from './addBackground.mjs';
 import { addFishes, addSpriteAnimation, animateElements, animateFishes } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
-import { ReturnBackgroundMap, ReturnSprites } from '../connect/landing.js';
+import { ReturnBackgroundMap, ReturnSprites } from '../connect/vtt.js';
 // Create a PixiJS application.
 const app = new Application();
 // Store an array of fish sprites for animation.
@@ -55,7 +55,7 @@ async function preload() {
 // Asynchronous IIFE
 
 // (async () => {
-export async function GoWithIt() { //called from landing.js
+export async function GoWithIt() { //called from vtt.js
   await setup();
   await prePreLoader();
   await preload();

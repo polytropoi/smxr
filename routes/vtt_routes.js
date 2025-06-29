@@ -3078,7 +3078,7 @@ vtt_router.get('/:_id', function (req, res) {
                        let settings = {};  //TODO move this lower down? 
                                               
                         settings._id = sceneResponse._id;
-                        settings.sceneType = "landing";
+                        settings.sceneType = "vtt";
                         settings.sceneTags = sceneResponse.sceneTags;
                         settings.sceneTitle = sceneResponse.sceneTitle;
                         settings.sceneKeynote = sceneResponse.sceneKeynote;
@@ -3271,7 +3271,7 @@ vtt_router.get('/:_id', function (req, res) {
                         socketScripts +
                         
                         importMap +
-
+                        "<script type=\x22module\x22 src=\x22/connect/vtt.js\x22 defer=\x22defer\x22></script>" +
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
                         "<style> audio {"+
                                 "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 

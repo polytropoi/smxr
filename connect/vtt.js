@@ -1,6 +1,7 @@
-//loaded with landing pages, instead of connect.js (w/out aframe/three)
+//loaded with landing pages, instead of connect.js, or landing.js (w/out aframe/three, with pixi refs)
 
-// import { GoWithIt } from "../vtt/main.mjs";
+import { GoWithIt } from "../vtt/main.mjs"; //pixi fu here!@
+
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
@@ -15,7 +16,7 @@ export let sceneLocations = {locations: [], locationMods: []};
 export let settings; //push this to an aframe component for fetching...
 export let attributions = [];
 export var videoEl = null;
-
+let sprites;
 // export const mouse = new THREE.Vector2();
 export const sceneEl = document.querySelector('a-scene');
 // export let hasLocalData = false;
@@ -113,6 +114,9 @@ $(function() {
    let theSettingsData = settingsEl.getAttribute('data-settings');
    settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
 
+    let spritesEl = document.getElementById('spritesDataElement'); //volume, color, etc...
+   let theSpritesData = spritesEl.getAttribute('data-sprites');
+   sprites = JSON.parse(atob(theSpritesData)); //gets copied to localdata ifn mods are 'llowed
 
    // console.log("Settings : " + JSON.stringify(settings));
    let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
@@ -229,7 +233,12 @@ $(function() {
       }
    
     console.log("settings " + JSON.stringify(settings));
+    console.log("sprites " + JSON.stringify(sprites));
 
+    mappicURL = settings.mappicURL;
+    if (mappicURL) {
+        GoWithIt();
+    }
    if (settings.useMatrix) {
       console.log("Loading browser MATRIX sdk!!!");
       GetMatrixData();
@@ -342,6 +351,11 @@ export async function ReturnBackgroundMap () {
     return settings.mappicURL;
 }
 
+export async function ReturnSprites () {
+    await sprites;
+    // console.log("tryna return sprites " + sprites);
+    return sprites;
+}
 
 
 export function UpdateAvatarName(name) {
