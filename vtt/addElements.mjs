@@ -140,6 +140,7 @@ export async function addSpriteAnimation (app, texture, spriteData) {
   anim.height = 256;
   anim.play();
 
+  
   app.stage.addChild(anim);
 
 
