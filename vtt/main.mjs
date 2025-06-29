@@ -43,11 +43,14 @@ async function preload() {
     { alias: 'fish4', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish4.png' },
     { alias: 'fish5', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish5.png' },
     { alias: 'overlay', src: 'https://pixijs.com/assets/tutorials/fish-pond/wave_overlay.png' },
-    { alias: 'displacement', src: 'https://pixijs.com/assets/tutorials/fish-pond/displacement_map.png' },
-    { alias: 'sprite1', src: spritesData[0].meta.image },
+    { alias: 'displacement', src: 'https://pixijs.com/assets/tutorials/fish-pond/displacement_map.png' }
+    
     
   ];
 
+  if (spritesData && spritesData.length) {
+    assets.push({ alias: 'sprite1', src: spritesData[0].meta.image });
+  } 
   // Load the assets defined above.
   await Assets.load(assets);
 }
