@@ -1,3 +1,5 @@
+
+
 import { Assets, AnimatedSprite, Container, Sprite, Texture, Spritesheet } from 'pixi';
 
 export function addFishes(app, fishes) {
@@ -78,23 +80,28 @@ export function animateFishes(app, fishes, time) {
   });
 }
 
-export async function addSpriteAnimation (app, texture, spriteData) {
+export async function addSpriteAnimation (app, texture, spriteData, elements) {
 
 // const sprite = 'sprites1';
     // let asset = sprites.
     console.log("spritesData " + JSON.stringify(spriteData));
 
-    const sheet = new Spritesheet(texture, spriteData);
-    await sheet.parse();
-    console.log('Spritesheet ready to use!');
-        //     await Assets.load(spriteData);
-                    const frames = [];
+    const elementCount = 30;
+    const elementContainer = new Container();
+    app.stage.addChild(elementContainer);
+    let anims = [];
+    for (let i = 0; i < elementCount; i++) {
+        const sheet = new Spritesheet(texture, spriteData);
+        await sheet.parse();
+        console.log('Spritesheet ready to use!');
+            //     await Assets.load(spriteData);
+        const frames = [];
         var count = 0;
         for(var key in spriteData.frames) {
         if(spriteData.frames.hasOwnProperty(key)) {
             console.log(key);
             // frames.push(Texture.from(key));
-                        frames.push(sheet.textures[key]);
+                frames.push(sheet.textures[key]);
                 count++;
             }
         }
@@ -103,46 +110,75 @@ export async function addSpriteAnimation (app, texture, spriteData) {
         console.log("frames " + count);
         
 
-        // Create an array of textures from the sprite sheet
+        const anim = new AnimatedSprite(frames);
 
+        /*
+        * An AnimatedSprite inherits all the properties of a PIXI sprite
+        * so you can change its position, its anchor, mask it, etc
+        */
+        // anim.x = app.screen.width / 2;
+        // anim.y = app.screen.height / 2;
+        anim.anchor.set(0.5);
+        anim.animationSpeed = Math.random();
+        anim.width = 256;
+        anim.height = 256;
+        anim.play();
 
-        // for (let i = 0; i < count + 1; i++) {
-        //     const val = i < count + 1 ? `0${i}` : i;
+         // Assign additional properties for the animation.
+        // anim.direction = Math.random() * Math.PI * 2;
+        anim.direction = Math.random() * Math.PI * 2; 
+        anim.speed = Math.random();
+        anim.turnSpeed = Math.random() - 0.8;
 
-        //     // Magically works since the spritesheet was loaded with the pixi loader
-        //     frames.push(Texture.from(`0${val}.webp`));
-        // }
-        // Load the animation sprite sheet
-//   await Assets.load('https://pixijs.com/assets/spritesheet/fighter.json');
+        // Randomly position the fish sprite around the stage.
+        anim.x = Math.random() * app.screen.width;
+        anim.y = Math.random() * app.screen.height;
 
-//   // Create an array of textures from the sprite sheet
-//   const frames = [];
+        // Randomly scale the fish sprite to create some variety.
+        anim.scale.set(0.5 + Math.random() * 0.2);
 
-//   for (let i = 0; i < 30; i++) {
-//     const val = i < 10 ? `0${i}` : i;
-
-//     // Magically works since the spritesheet was loaded with the pixi loader
-//     frames.push(Texture.from(`rollSequence00${val}.png`));
-//   }
-
-  // Create an AnimatedSprite (brings back memories from the days of Flash, right ?)
-  const anim = new AnimatedSprite(frames);
-
-  /*
-   * An AnimatedSprite inherits all the properties of a PIXI sprite
-   * so you can change its position, its anchor, mask it, etc
-   */
-  anim.x = app.screen.width / 2;
-  anim.y = app.screen.height / 2;
-  anim.anchor.set(0.5);
-  anim.animationSpeed = 1;
-  anim.width = 256;
-  anim.height = 256;
-  anim.play();
-
-  
-  app.stage.addChild(anim);
-
-
+        // Add the fish sprite to the fish container.
+        elementContainer.addChild(anim);
+        elements.push(anim);
+        // app.stage.addChild(anim);
+    }
+    // animateElements(app, anims);
 }
 
+export function animateElements(app, elements, time) {
+  // Extract the delta time from the Ticker object.
+  const delta = time.deltaTime;
+
+  // Define the padding around the stage where fishes are considered out of sight.
+  const stagePadding = 100;
+  const boundWidth = app.screen.width + stagePadding * 2;
+  const boundHeight = app.screen.height + stagePadding * 2;
+
+  // Iterate through each fish sprite.
+  elements.forEach((element) => {
+    // Animate the fish movement direction according to the turn speed.
+    element.direction += element.turnSpeed * 0.01;
+
+    // Animate the fish position according to the direction and speed.
+    element.x += Math.sin(element.direction) * element.speed;
+    element.y += Math.cos(element.direction) * element.speed;
+
+    // Apply the fish rotation according to the direction.
+    // element.rotation = -element.direction - Math.PI;
+    element.rotation = -element.direction - Math.PI / 2;
+
+    // Wrap the fish position when it goes out of bounds.
+    if (element.x < -stagePadding) {
+      element.x += boundWidth;
+    }
+    if (element.x > app.screen.width + stagePadding) {
+      element.x -= boundWidth;
+    }
+    if (element.y < -stagePadding) {
+      element.y += boundHeight;
+    }
+    if (element.y > app.screen.height + stagePadding) {
+      element.y -= boundHeight;
+    }
+  });
+}

@@ -1,6 +1,7 @@
+
 import { Application, Assets, Graphics, Texture } from 'pixi';
 import { addBackground } from './addBackground.mjs';
-import { addFishes, addSpriteAnimation, animateFishes } from './addElements.mjs';
+import { addFishes, addSpriteAnimation, animateElements, animateFishes } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
 import { ReturnBackgroundMap, ReturnSprites } from '../connect/landing.js';
@@ -8,7 +9,7 @@ import { ReturnBackgroundMap, ReturnSprites } from '../connect/landing.js';
 const app = new Application();
 // Store an array of fish sprites for animation.
 const fishes = [];
-
+let elements = [];
 let mappicURL = "";
 
 let spritesData;
@@ -60,11 +61,8 @@ export async function GoWithIt() { //called from landing.js
   await preload();
 
   addBackground(app);
-    addFishes(app, fishes);
-    
 
-  // Add the fish animation callback to the application's ticker.
-  app.ticker.add((time) => animateFishes(app, fishes, time));
+  app.ticker.add((time) => animateElements(app, elements, time));
 
   addWaterOverlay(app);
   // addDisplacementEffect(app);
@@ -72,17 +70,13 @@ export async function GoWithIt() { //called from landing.js
 
     const sprite1 = Texture.from('sprite1');
 
-  addSpriteAnimation(app, sprite1, spritesData[0]);
+  addSpriteAnimation(app, sprite1, spritesData[0], elements);
   // Add the animation callbacks to the application's ticker.
   app.ticker.add((time) => {
-    animateFishes(app, fishes, time);
+    // animateFishes(app, fishes, time);
+    animateElements(app, elements, time);
     animateWaterOverlay(app, time);
   });
 
 
-  //
-
-// Even if we scale the Graphics object, the line remains 1 pixel wide
-// graphics.scale.set(2);
-// })()
 }
