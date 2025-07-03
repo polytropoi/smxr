@@ -336,11 +336,11 @@ $(function() {
 
 }); //end onload
 
-export async function ReturnBackgroundMap () {
-    await settings;
-    console.log("tryna return mappicURL " + settings.mappicURL);
-    return settings.mappicURL;
-}
+// export async function ReturnBackgroundMap () {
+//     await settings;
+//     console.log("tryna return mappicURL " + settings.mappicURL);
+//     return settings.mappicURL;
+// }
 
 
 

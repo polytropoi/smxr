@@ -4976,6 +4976,8 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
    }
 
 });
+
+
 let mainTransportSlider = null;
 let transportPlayButton = null;
 let youtube_player = null; //3d version

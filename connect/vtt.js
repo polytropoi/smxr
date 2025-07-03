@@ -53,7 +53,8 @@ export let curveLocations = [];
 export let cloudMarkers = []; //???? unused>?//nope
 export let sceneModels = [];
 
-export let mappicURL = "";
+export let mappicURL;
+export let backgroundURL;
 
 let localKeys = [];
 
@@ -236,7 +237,8 @@ $(function() {
     console.log("sprites " + JSON.stringify(sprites));
 
     mappicURL = settings.mappicURL;
-    if (mappicURL) {
+    backgroundURL = settings.backgroundURL;
+    if (mappicURL || backgroundURL) {
         GoWithIt();
     }
    if (settings.useMatrix) {
@@ -345,10 +347,16 @@ $(function() {
 
 }); //end onload
 
-export async function ReturnBackgroundMap () {
+export async function ReturnMap () {
     await settings;
     console.log("tryna return mappicURL " + settings.mappicURL);
     return settings.mappicURL;
+}
+
+export async function ReturnBackground () {
+    await settings;
+    console.log("tryna return backgroundURL " + settings.backgroundURL);
+    return settings.backgroundURL;
 }
 
 export async function ReturnSprites () {

@@ -304,6 +304,7 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
 
 }); //end primary_audio_player 
 
+
 // console.log("params" +params+ "url " + audiourl + " stream " + stream);
 // if (audiourl != null) {
     if (stream != "false") { //streaming mode

@@ -293,7 +293,7 @@ vtt_router.get('/:_id', function (req, res) {
     // let loadPictureGroups = "";
     let tilepicUrl = "";
     let mappicURL = "";
-   
+    let backgroundURL = "";
     let isGuest = true;
     let socketScripts = "";
     let navmeshScripts = "";
@@ -2239,19 +2239,20 @@ vtt_router.get('/:_id', function (req, res) {
                             "src: [\x22"+oggurl+"\x22,\x22"+mp3url+"\x22], "+html5+" ctx: true, volume: 0," + loopable +
                         "});" +
                     "primaryAudioHowl.load();</script>";
-                    primaryAudioEntity = "<a-entity id=\x22primaryAudioParent\x22 look-at=\x22#player\x22 position=\x22"+audioLocation+"\x22>"+ //parent, no window click
+                    primaryAudioEntity = "<div id=\x22primaryAudioParent\x22></div>"; //parent, no window click
                     
-                    "<a-entity gltf-model=\x22#backpanel_horiz1\x22 position=\x220 0 0\x22 material=\x22color: black; transparent: true;\x22></a-entity>" +
-                    "<a-entity position=\x220 -1.25 0\x22 primary_audio_player id=\x22primaryAudioPlayer\x22 gltf-model=\x22#audioplayer\x22></a-entity>"+
-                    "<a-entity id=\x22primaryAudioText\x22 position=\x22.75 .6 -1\x22 "+
-                    "text=\x22value:Click to play;\x22></a-entity>"+
-                    "<a-entity id=\x22primaryAudio\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; audioID: "+sceneResponse.scenePrimaryAudioID+"; volume: "+scenePrimaryVolume+"; audioevents:"+sceneResponse.scenePrimaryAudioTriggerEvents+"; targetattach:"+sceneResponse.sceneAttachPrimaryAudioToTarget+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
-                    "title: "+primaryAudioTitle+"\x22>"+
+                    // "<a-entity gltf-model=\x22#backpanel_horiz1\x22 position=\x220 0 0\x22 material=\x22color: black; transparent: true;\x22></a-entity>" +
+                    // "<a-entity position=\x220 -1.25 0\x22 primary_audio_player id=\x22primaryAudioPlayer\x22 gltf-model=\x22#audioplayer\x22></a-entity>"+
+                    // "<a-entity id=\x22primaryAudioText\x22 position=\x22.75 .6 -1\x22 "+
+                    // "text=\x22value:Click to play;\x22></a-entity>"+
+                    // "<a-entity id=\x22primaryAudio\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; audioID: "+sceneResponse.scenePrimaryAudioID+"; volume: "+scenePrimaryVolume+"; audioevents:"+sceneResponse.scenePrimaryAudioTriggerEvents+"; targetattach:"+sceneResponse.sceneAttachPrimaryAudioToTarget+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
+                    // "title: "+primaryAudioTitle+"\x22>"+
                     
-                    "</a-entity>"+
+                    // "</a-entity>"+
                     
-                    "</a-entity>";
-                    modelAssets = modelAssets + "<a-asset-item id=\x22backpanel_horiz1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/backpanel_horiz1.glb\x22></a-asset-item>\n";
+                    // "</a-entity>";
+                    // modelAssets = modelAssets + "<a-asset-item id=\x22backpanel_horiz1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/backpanel_horiz1.glb\x22></a-asset-item>\n";
+                    
                     if (sceneResponse.scenePrimaryAudioTriggerEvents) {
                         var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
                         loadAudioEvents = "<a-entity primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></a-entity>"; 
@@ -2267,12 +2268,12 @@ vtt_router.get('/:_id', function (req, res) {
                         "src: \x22"+sceneResponse.scenePrimaryAudioStreamURL+"\x22, html5: true, volume: 0, format: ['mp3', 'aac']" +
                     "});" +
                 "</script>";
-                primaryAudioEntity = "<a-entity id=\x22primaryAudioParent\x22 look-at=\x22#player\x22 position=\x22"+audioLocation+"\x22>"+ //parent
-                "<a-entity id=\x22primaryAudioText\x22 geometry=\x22primitive: plane; width: 1; height: .5\x22 position=\x220 .5 2.5\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22"+
-                "text=\x22value:Click to play;\x22></a-entity>"+
-                "<a-entity id=\x22primaryAudioTextBackground\x22 gltf-model=\x22#landscape_panel\x22 scale=\x22.2 .1 .1\x22 position=\x220 .5 2.4\x22 material=\x22color: black; transparent: true; opacity: 0.1\x22></a-entity>" +
-                "<a-entity id=\x22primaryAudio\x22 mixin=\x22grabmix\x22 class=\x22activeObjexGrab activeObjexRay\x22 entity-callout=\x22calloutString: play/pause\n" + primaryAudioTitle+ ";\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; volume: "+scenePrimaryVolume+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
-                "title: "+primaryAudioTitle+"\x22  geometry=\x22primitive: sphere; radius: .25;\x22 material=\x22shader: noise;\x22 position=\x220 0 2.6\x22></a-entity></a-entity>";
+                primaryAudioEntity = "<div id=\x22primaryAudioParent\x22></div>"; //parent
+                // "<a-entity id=\x22primaryAudioText\x22 geometry=\x22primitive: plane; width: 1; height: .5\x22 position=\x220 .5 2.5\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22"+
+                // "text=\x22value:Click to play;\x22></a-entity>"+
+                // "<a-entity id=\x22primaryAudioTextBackground\x22 gltf-model=\x22#landscape_panel\x22 scale=\x22.2 .1 .1\x22 position=\x220 .5 2.4\x22 material=\x22color: black; transparent: true; opacity: 0.1\x22></a-entity>" +
+                // "<a-entity id=\x22primaryAudio\x22 mixin=\x22grabmix\x22 class=\x22activeObjexGrab activeObjexRay\x22 entity-callout=\x22calloutString: play/pause\n" + primaryAudioTitle+ ";\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; volume: "+scenePrimaryVolume+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
+                // "title: "+primaryAudioTitle+"\x22  geometry=\x22primitive: sphere; radius: .25;\x22 material=\x22shader: noise;\x22 position=\x220 0 2.6\x22></a-entity></a-entity>";
                 if (sceneResponse.scenePrimaryAudioTriggerEvents) { //maybe pass a do not listen?
                     var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
                     loadAudioEvents = "<a-entity primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></a-entity>"; 
@@ -2284,16 +2285,16 @@ vtt_router.get('/:_id', function (req, res) {
                         "src: [\x22"+ambientOggUrl+"\x22,\x22"+ambientMp3Url+"\x22], volume: 0, loop: true" + 
                     "});" +
                 "ambientAudioHowl.load();</script>";
-                let ambientPosAnim = "animation__yoyo=\x22property: position; to: -25 1 0; dur: 60000; dir: alternate; easing: easeInSine; loop: true;\x22 ";
-                let ambientRotAnim = "animation__rot=\x22property:rotation; dur:60000; to: 0 360 0; loop: true; easing:linear;\x22 ";        
-                ambientAudioEntity = "<a-entity "+ambientRotAnim+"><a-entity id=\x22ambientAudio\x22 ambient_audio_control=\x22oggurl: "+ambientOggUrl+"; mp3url: "+ambientMp3Url+";\x22 volume: "+sceneAmbientVolume+"; "+
-                ambientPosAnim+" position=\x2225 1 0\x22>" +
-                "</a-entity></a-entity>";
+                // let ambientPosAnim = "animation__yoyo=\x22property: position; to: -25 1 0; dur: 60000; dir: alternate; easing: easeInSine; loop: true;\x22 ";
+                // let ambientRotAnim = "animation__rot=\x22property:rotation; dur:60000; to: 0 360 0; loop: true; easing:linear;\x22 ";        
+                // ambientAudioEntity = "<a-entity "+ambientRotAnim+"><a-entity id=\x22ambientAudio\x22 ambient_audio_control=\x22oggurl: "+ambientOggUrl+"; mp3url: "+ambientMp3Url+";\x22 volume: "+sceneAmbientVolume+"; "+
+                // ambientPosAnim+" position=\x2225 1 0\x22>" +
+                // "</a-entity></a-entity>";
                 
             }
             if (hasTriggerAudio) {
-                triggerAudioEntity = "<a-entity id=\x22triggerAudio\x22 trigger_audio_control=\x22volume: "+sceneTriggerVolume+"\x22>"+
-                "</a-entity>";
+                triggerAudioEntity = "<div id=\x22triggerAudio\x22 trigger_audio_control=\x22volume: "+sceneTriggerVolume+"\x22></div>";
+                // "</a-entity>";
                 triggerAudioScript = "<script>" +      
                 "let triggerAudioHowl = new Howl({" + //inject howler for non-streaming
                         "src: [\x22"+triggerOggUrl+"\x22,\x22"+triggerMp3Url+"\x22], volume: 1, loop: false" + 
@@ -2719,6 +2720,11 @@ vtt_router.get('/:_id', function (req, res) {
                         mappicURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
                         console.log("GOTSA MAP PIC! " + mappicURL);
                     }
+                    if (picture_item.tags.includes("background")) {
+
+                        backgroundURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                        console.log("GOTSA BACKGROUND PIC! " + backgroundURL);
+                    }
 
                     picture_item.url = image1url;
                     scenePictureItems.push(picture_item);
@@ -3111,6 +3117,7 @@ vtt_router.get('/:_id', function (req, res) {
                         settings.skyboxURL = skyboxUrl;
                         settings.useSynth = hasSynth;
                         settings.mappicURL = mappicURL;
+                        settings.backgroundURL = backgroundURL;
                         // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
                         // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
                         // settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
@@ -3237,7 +3244,7 @@ vtt_router.get('/:_id', function (req, res) {
                             uid = req.session.user._id;
                         }
                         if (mp3url != undefined && mp3url.length > 6) {
-                            audioHtml = '<div><audio controls><source src=\x22' + mp3url + '\x22 type=\x22audio/mp3\x22></audio></div>';
+                            audioHtml = '<div id=\z22primaryAudioControls\x22><audio controls><source src=\x22' + mp3url + '\x22 type=\x22audio/mp3\x22></audio></div>';
                         }
                         var token=jwt.sign({userId:uid,shortID:sceneResponse.short_id},process.env.JWT_SECRET, { expiresIn: '1h' }); 
                         // console.log("avatar name: " + avatarName + " token " + token);
@@ -3268,17 +3275,29 @@ vtt_router.get('/:_id', function (req, res) {
                         "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
                         "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
                         "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                        "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
                         socketScripts +
                         
                         importMap +
                         "<script type=\x22module\x22 src=\x22/connect/vtt.js\x22 defer=\x22defer\x22></script>" +
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+
+                            // "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>"+
+                            // "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
+                            // "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
+
+                            // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
+                            // "<script src=\x22/connect/indexedDb.js\x22></script>" +
+                            // "<script src=\x22/connect/traffic.js\x22></script>"+
+                        
+                        
                         "<style> audio {"+
                                 "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 
                                 "width: 100%;"+
                                 "height: 66px;"+
                             "}"+
                         "</style>"+ 
+
                         
                         "</head>\n" +
                         "<body "+bgstyle+">" +
@@ -3287,6 +3306,12 @@ vtt_router.get('/:_id', function (req, res) {
                         "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
                         settingsData +
                         spriteData + 
+
+                        "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div>" +
+
+                        // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
+                        // "<script src=\x22/connect/indexedDb.js\x22></script>" +
+                        // "<script src=\x22/connect/traffic.js\x22></script>"+
                     
                         // "<div class=\x22container px-4 px-lg-5 my-5\x22>"+
                         //     "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
@@ -3355,7 +3380,7 @@ vtt_router.get('/:_id', function (req, res) {
                         "<script type=\x22module\x22 src=\x22/vtt/main.mjs\x22 ></script>" +
                         canvasOverlay +
                         transportButtons+ 
-                        
+                        // audioHtml +
                         "</body>\n" +
                     
                         "</html>";

@@ -172,6 +172,7 @@ landing_router.get('/:_id', function (req, res) {
     let youtubes = [];
     let mapOverlay = "";
     let mappicURL = "";
+    let backgroundURL = "";
     let canvasOverlay = "";
     let audioSliders = "";
     let screenOverlay = "";
@@ -2710,6 +2711,11 @@ landing_router.get('/:_id', function (req, res) {
                             mappicURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
                             console.log("GOTSA MAP PIC! " + mappicURL);
                         }
+                        if (picture_item.tags.includes("background")) {
+
+                            backgroundURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                            console.log("GOTSA MAP PIC! " + backgroundURL);
+                        }
 
                         picture_item.url = image1url;
                         scenePictureItems.push(picture_item);
@@ -3200,7 +3206,7 @@ landing_router.get('/:_id', function (req, res) {
                             sceneEditButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../main/index.html?type=scene&iid="+sceneResponse._id+"\x22>Edit Scene</a>";
                         }
 
-                        if (mappicURL != "") {
+                        if (mappicURL != "" || backgroundURL != "") {
                             vttButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22>Virtual Table Top</a> ";
                         }
                         // }
@@ -3308,6 +3314,7 @@ landing_router.get('/:_id', function (req, res) {
 
                         // "}</script>"+
                         socketScripts +
+                        
                         "<script type=\x22module\x22 src=\x22/connect/landing.js\x22 defer=\x22defer\x22></script>" +
                         "<style> audio {"+
                                 "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 
