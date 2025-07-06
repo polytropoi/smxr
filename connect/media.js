@@ -1,14 +1,28 @@
 
+import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData} from "../../connect/events.js";
+import { settings } from "../../connect/connect.js";
+
 let mainTransportSlider = null;
 let transportPlayButton = null;
-let youtube_player = null; //3d version
+let youtubePlayerEl = document.getElementById("youtubePlayer");
+let youtube_player; //3d version
+let youtubeTime = 0;
+let youtubeDuration = 0;
 export let youtubePlayer; //spawned by embed api
 export let youtubeIsPlaying = false;
 export let fancyTimeString = "";
 export let sceneTextItems = [];
 
+// export let timedEventsListenerMode = "";
+export var primaryAudioMangler = null; 
+export let primaryAudioEl = document.querySelector('#primaryAudio');
+
+let modalTimeStatsEl = null; //stats for timekeys modal
+let transportTimeStatsEl = null;
+
 let youtubeState = "";
 let youtubeTitleEl = "";
+let youtubeData;
 // window.youtubeIsPlaying = youtubeIsPlaying;
 
 window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
@@ -31,13 +45,27 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
     });
     // youtubePlayer.h.attributes.sandbox.value = "allow-presentation";
    
-
-    youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
-    youtubeTitleEl = document.getElementById("youtubeTitle");
+    //needs to wait... 
+    // if (settings && (settings.sceneType == "aframe" || settings.sceneType == "AFrame" || settings.sceneType == "Default")) {
+    //   if (youtubePlayerEl) {
+    //     youtube_player = youtubePlayerEl.components.youtube_player;
+    //     youtubeTitleEl = document.getElementById("youtubeTitle");
+    //   }
+    // }
     // https://stackoverflow.com/questions/55724586/youtube-iframe-without-allow-presentation
     // youtubePlayer.h.attributes.sandbox.value = "allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation";
   }
 
+  export function InitAFrameYouTubePlayer () {  
+    console.log("tryna initaframeyoutubeplayer");
+
+    if (youtubePlayer && settings && (settings.sceneType == "aframe" || settings.sceneType == "AFrame" || settings.sceneType == "Default")) {
+      if (!youtube_player && youtubePlayerEl) {
+        youtube_player = youtubePlayerEl.components.youtube_player;
+        youtubeTitleEl = document.getElementById("youtubeTitle");
+      }
+    }
+  }
   function onPlayerReady(event) {
     
     console.log("youtubePlayer is re4ady!");
@@ -73,9 +101,11 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
       SetVideoEventsData();
     }
     if (youtube_player == null || youtube_player == undefined) {
+
           let interval = setInterval(() => {
             // console.log("youtube_player is null " + youtube_player == null);
-            youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+            // youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+            InitAFrameYouTubePlayer();
             if (youtube_player != null) {
               youtube_player.player_status_update("ready");
               clearInterval(interval);
@@ -191,6 +221,22 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
     changeBorderColor(event.data);
   }
 
+  export function MediaTimeUpdate (timeString) {
+   // console.log("MediaTimeUpdate " + fancyTimeString);
+   // transportTimeStatsEl = document.getElementById("transportStats");
+   if (transportTimeStatsEl == null) {
+      transportTimeStatsEl = document.getElementById("transportStats");
+   } else {
+      transportTimeStatsEl.innerHTML = timeString;
+   }
+   modalTimeStatsEl = document.getElementById('modalTimeStats');
+   if (modalTimeStatsEl == null) {
+      } else {
+         modalTimeStatsEl.innerHTML = timeString;
+      }
+      
+   }
+
 export function TransportPlayButton () {
   // console.log("TransportPlayButton clcik! " + JSON.stringify(youtubePlayer));
   console.log("TransportPlayButton clcik! " + primaryAudioMangler);
@@ -292,4 +338,129 @@ function PreviousButton () {
   ret += "" + mins + ":" + (secs < 10 ? "0" : "");
   ret += "" + secs;
   return ret;
+}
+
+
+
+function PlayPausePrimaryAudio() {
+   
+   var primaryAudioController = document.getElementById("primaryAudio").components.primary_audio_control; 
+   primaryAudioController.playPauseToggle(); 
+}
+
+export function InitPrimarySlider() {
+// let modal = document.getElementById('modalContent');
+let primaryAudioSlider = document.getElementById("primaryAudioVolumeSlider");
+   if (primaryAudioSlider != undefined) {
+      // let storedPrimaryVolume = localStorage.getItem(room+"_primaryVolume");
+      // if (storedPrimaryVolume != null) {
+      //    primaryAudioSlider.value = storedPrimaryVolume;
+      // }
+
+      UpdatePrimaryAudioVolume(primaryAudioSlider.value);
+      primaryAudioSlider.oninput = function() {
+      // output.innerHTML = this.value;
+      UpdatePrimaryAudioVolume(this.value);
+      volumePrimary = this.value;
+      // localStorage.setItem(room+"_primaryVolume", this.value);
+      }
+   }
+}
+export function InitAmbientSlider () {
+   // let modal = document.getElementById('modalContent');
+ let ambientAudioSlider = document.getElementById("ambientAudioVolumeSlider");
+   if (ambientAudioSlider != null) {
+      // let storedAmbientVolume = localStorage.getItem(room+"_ambientVolume");
+      // if (storedAmbientVolume != null) {
+      //    ambientAudioSlider.value = storedAmbientVolume;
+      // }
+      // UpdateAmbientAudioVolume(ambientAudioSlider.value);
+         ambientAudioSlider.oninput = function() {
+         UpdateAmbientAudioVolume(this.value);
+         volumeAmbient = this.value;
+         // localStorage.setItem(room+"_ambientVolume", this.value);
+      }
+   }
+}
+export function InitTriggerSlider () {
+   // let modal = document.getElementById('modalContent');
+ let triggerAudioSlider = document.getElementById("triggerAudioVolumeSlider");
+   if (triggerAudioSlider != null) {
+      // let storedTriggerVolume = localStorage.getItem(room+"_triggerVolume");
+      // if (storedTriggerVolume != null) {
+      //    triggerAudioSlider.value = storedTriggerVolume;
+      // }
+      UpdateTriggerAudioVolume(triggerAudioSlider.value);
+      triggerAudioSlider.oninput = function() {
+         volumeTrigger = this.value;
+         UpdateTriggerAudioVolume(this.value);
+         // localStorage.setItem(room+"_triggerVolume", this.value);
+      } 
+   }
+}
+   // function SetLocationData(locationData) {
+   //    console.log("locationData " + JSON.stringify(locationData));
+   //    // let locations = locationData;
+   //    sceneLocations.locations = locationData;
+      
+   //    // console.log("locationData " + JSON.stringify(sceneLocations));
+   // }
+
+export function UpdatePrimaryAudioVolume(newVolume) {
+   var primaryAudio = document.getElementById("primaryAudio");
+   if (primaryAudio != null) {
+      var primaryAudioController = document.getElementById("primaryAudio").components.primary_audio_control; 
+      if (primaryAudioController != null) {
+         primaryAudioController.modVolume(newVolume);
+      }   
+   }
+   // localStorage.setItem(room+"_primaryVolume", newVolume);
+}
+export function UpdateAmbientAudioVolume(newVolume) {
+   var ambientAudioController = document.getElementById("ambientAudio").components.ambient_audio_control; 
+   if (ambientAudioController != null) {
+      ambientAudioController.modVolume(newVolume);
+   }
+}
+export function UpdateTriggerAudioVolume(newVolume) {
+   var triggerAudioEl = document.getElementById("triggerAudio");
+   if (triggerAudioEl) {
+      var triggerAudioController = triggerAudioEl.components.trigger_audio_control;
+      if (triggerAudioController != null) {
+         triggerAudioController.modVolume(newVolume);
+      }
+   }
+}
+
+
+export function PrimaryAudioInit() {
+  console.log("PRIMARY AUDIO INIT()");
+  // primaryAudioEl = 
+  if (primaryAudioEl != null) {
+    primaryAudioMangler = document.getElementById("primaryAudio").components.primary_audio_control;
+    
+    if (primaryAudioMangler && primaryAudioMangler.data.autoplay) {
+      console.log("PRIMARY AUDIO INIT() autoplay " + primaryAudioMangler.data.autoplay +  " isplaying " + primaryAudioHowl.playing());
+      if (primaryAudioHowl != null) {
+        if (!primaryAudioHowl.playing()) {
+          primaryAudioMangler.playPauseToggle();
+        }
+      }
+    }
+  }
+  let avz = document.getElementById("audiovizzler");
+  if (avz != null) {
+    vidz = document.getElementsByTagName("video"); //vidz declared in content-utils?
+    if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
+      videoEl = vidz[0];
+      console.log("videoEl " + videoEl.src);
+        AudioAnalyzer();
+    } else {
+        if (primaryAudioMangler != null) {
+        AudioAnalyzer();
+      } 
+    }
+  } else {
+    console.log("didn't find no audiovizzler");
+  }
 }

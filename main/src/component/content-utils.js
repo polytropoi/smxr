@@ -6,11 +6,16 @@
 
 import AFRAME from 'aframe'; 
 import * as THREE from 'three';
+import 'troika-text';
 
+
+import {  PauseIntervals, SetVideoEventsData, SetTimeKeysData, SetTimedEventsListenerMode } from "../../../connect/events.js";
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
-import { settings, videoEl, room, roomUsers, lerp, allowCameraLock, SetVideoEventsData, MediaTimeUpdate, PauseIntervals, CreateLocation, 
-  timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData, userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations } from "../../../connect/connect.js";
+// import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
+import { settings, videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation, 
+      userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations } from "../../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
+import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat } from '../../../connect/media.js';
 
 var ua = window.navigator.userAgent;
 var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
@@ -24,7 +29,7 @@ let volume = 0;
 export let primaryAudioEl = document.querySelector('#primaryAudio');
 export let vidz = null;
 
-export var primaryAudioMangler = null; 
+
 export let youtubeTime = 0;
 export let youtubeDuration = 0;
 export let youtubeData = {};
@@ -38,55 +43,55 @@ export function clamp (num, min, max) {
 }
 export const mouse = new THREE.Vector2();
 
-function PrimaryAudioInit() {
-  console.log("PRIMARY AUDIO INIT()");
-  // primaryAudioEl = 
-  if (primaryAudioEl != null) {
-    primaryAudioMangler = document.getElementById("primaryAudio").components.primary_audio_control;
+// function PrimaryAudioInit() {
+//   console.log("PRIMARY AUDIO INIT()");
+//   // primaryAudioEl = 
+//   if (primaryAudioEl != null) {
+//     primaryAudioMangler = document.getElementById("primaryAudio").components.primary_audio_control;
     
-    if (primaryAudioMangler && primaryAudioMangler.data.autoplay) {
-      console.log("PRIMARY AUDIO INIT() autoplay " + primaryAudioMangler.data.autoplay +  " isplaying " + primaryAudioHowl.playing());
-      if (primaryAudioHowl != null) {
-        if (!primaryAudioHowl.playing()) {
-          primaryAudioMangler.playPauseToggle();
-        }
-      }
-    }
-  }
-  let avz = document.getElementById("audiovizzler");
-  if (avz != null) {
-    vidz = document.getElementsByTagName("video"); //vidz declared in content-utils?
-    if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
-      videoEl = vidz[0];
-      console.log("videoEl " + videoEl.src);
-        AudioAnalyzer();
-    } else {
-        if (primaryAudioMangler != null) {
-        AudioAnalyzer();
-      } 
-    }
-  } else {
-    console.log("didn't find no audiovizzler");
-  }
-}
+//     if (primaryAudioMangler && primaryAudioMangler.data.autoplay) {
+//       console.log("PRIMARY AUDIO INIT() autoplay " + primaryAudioMangler.data.autoplay +  " isplaying " + primaryAudioHowl.playing());
+//       if (primaryAudioHowl != null) {
+//         if (!primaryAudioHowl.playing()) {
+//           primaryAudioMangler.playPauseToggle();
+//         }
+//       }
+//     }
+//   }
+//   let avz = document.getElementById("audiovizzler");
+//   if (avz != null) {
+//     vidz = document.getElementsByTagName("video"); //vidz declared in content-utils?
+//     if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
+//       videoEl = vidz[0];
+//       console.log("videoEl " + videoEl.src);
+//         AudioAnalyzer();
+//     } else {
+//         if (primaryAudioMangler != null) {
+//         AudioAnalyzer();
+//       } 
+//     }
+//   } else {
+//     console.log("didn't find no audiovizzler");
+//   }
+// }
 
-export function fancyTimeFormat(duration) {   
-  // Hours, minutes and seconds
-  var hrs = ~~(duration / 3600);
-  var mins = ~~((duration % 3600) / 60);
-  var secs = ~~duration % 60;
+// export function fancyTimeFormat(duration) {   
+//   // Hours, minutes and seconds
+//   var hrs = ~~(duration / 3600);
+//   var mins = ~~((duration % 3600) / 60);
+//   var secs = ~~duration % 60;
 
-  // Output like "1:01" or "4:03:59" or "123:03:59"
-  var ret = "";
+//   // Output like "1:01" or "4:03:59" or "123:03:59"
+//   var ret = "";
 
-  if (hrs > 0) {
-      ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-  }
+//   if (hrs > 0) {
+//       ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+//   }
 
-  ret += "" + mins + ":" + (secs < 10 ? "0" : "");
-  ret += "" + secs;
-  return ret;
-}
+//   ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+//   ret += "" + secs;
+//   return ret;
+// }
 
 
 function AudioAnalyzer() {
@@ -398,7 +403,7 @@ AFRAME.registerComponent('create_avatars', {
      
    },
    createAvatar: function (key) {
-     console.log("tryna createAvatar");
+     console.log("tryna createAvatar " + roomUsers[key]);
    //   var sceneEl = document.querySelector('a-scene');
    //   let phEl = document.createElement("a-entity");
      
@@ -2125,6 +2130,7 @@ AFRAME.registerComponent('model-callout', {
                 // UVs use the convention that (0, 0) corresponds to the upper left corner of a texture.
                 texture.flipY = false; 
                 // immediately use the texture for material creation
+                // var material = new THREE.MeshStandardMaterial( { map: texture, transparent: this.picData.hasAlphaChannel, emissive: '#bababa', emissiveIntensity: .1, envMapIntensity: .05} );  
                 var material = new THREE.MeshStandardMaterial( { map: texture, transparent: this.picData.hasAlphaChannel, envMapIntensity: .1} );  
                 // Go over the submeshes and modify materials we want.
                 material.needsUpdate = true;
@@ -4588,6 +4594,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
       // console.log("sceneTItle: " + this.data.sceneTitle);
       // let primaryAudioEl = document.querySelector('#primaryAudio');
       // let this = this; //?
+      InitAFrameYouTubePlayer();
       this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
       // this.el.setAttribute('gltf-model', '#audioplayer');
       this.el.classList.add('activeObjexRay');
@@ -4634,6 +4641,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
           this.el.addEventListener('model-loaded', () => {
             // console.log("YOUTUBE MODEL LOADED!");
           this.model = this.el.getObject3D('mesh');
+            InitAFrameYouTubePlayer();
           // this.ref = document.querySelector("#primaryAudioWaveform");
           // let theUrl = "https://img.youtube.com/vi/"+this.data.yt_id+"/mqdefault.jpg";
           let loadingTextureUrl = "https://servicemedia.s3.amazonaws.com/assets/pics/yotubeicon4.png";
@@ -4978,288 +4986,288 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 });
 
 
-let mainTransportSlider = null;
-let transportPlayButton = null;
-let youtube_player = null; //3d version
-export let youtubePlayer; //spawned by embed api
-export let youtubeIsPlaying = false;
-let youtubeState = "";
-let youtubeTitleEl = "";
-// window.youtubeIsPlaying = youtubeIsPlaying;
+// let mainTransportSlider = null;
+// let transportPlayButton = null;
+// let youtube_player = null; //3d version
+// // export let youtubePlayer; //spawned by embed api
+// // export let youtubeIsPlaying = false;
+// let youtubeState = "";
+// let youtubeTitleEl = "";
+// // window.youtubeIsPlaying = youtubeIsPlaying;
 
-window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+// window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 
-function onYouTubeIframeAPIReady () { //must be global, called when youtube embed api is loaded
-  let youtubeEl = document.getElementById("youtubeElement");
-  let yt_id = youtubeEl.getAttribute('data-yt_id');
-  console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
-    youtubePlayer = new YT.Player('youtubeElement', {
-      height: '200',
-      width: '240',
-      videoId: yt_id,
-      // playerVars: {
-      //   'playsinline': 1
-      // },
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange
-        }
-    });
-    // youtubePlayer.h.attributes.sandbox.value = "allow-presentation";
+// function onYouTubeIframeAPIReady () { //must be global, called when youtube embed api is loaded
+//   let youtubeEl = document.getElementById("youtubeElement");
+//   let yt_id = youtubeEl.getAttribute('data-yt_id');
+//   console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
+//     youtubePlayer = new YT.Player('youtubeElement', {
+//       height: '200',
+//       width: '240',
+//       videoId: yt_id,
+//       // playerVars: {
+//       //   'playsinline': 1
+//       // },
+//         events: {
+//           'onReady': onPlayerReady,
+//           'onStateChange': onPlayerStateChange
+//         }
+//     });
+//     // youtubePlayer.h.attributes.sandbox.value = "allow-presentation";
    
 
-    youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
-    youtubeTitleEl = document.getElementById("youtubeTitle");
-    // https://stackoverflow.com/questions/55724586/youtube-iframe-without-allow-presentation
-    // youtubePlayer.h.attributes.sandbox.value = "allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation";
-  }
+//     youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+//     youtubeTitleEl = document.getElementById("youtubeTitle");
+//     // https://stackoverflow.com/questions/55724586/youtube-iframe-without-allow-presentation
+//     // youtubePlayer.h.attributes.sandbox.value = "allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation";
+//   }
 
-  function onPlayerReady(event) {
+//   function onPlayerReady(event) {
     
-    console.log("youtubePlayer is re4ady!");
-    // if (timedEventsListenerMode == null) {
-    //   timedEventsListenerMode = "Youtube";
-    // }
-    if (!timedEventsListenerMode || timedEventsListenerMode == "") {
-        SetTimedEventsListenerMode("Youtube");
-    }
-    // document.getElementById('youtubeElement').style.borderColor = '#FF6D00';
-    // youtube_player.player_status_update("ready");
-    // youtube_player.set_duration(event.target.getDuration());
-    // youtube_player.set_player(event.target);
-    // youtube_player.update_stats("");
-    // youtube_player.slider_update(0);
-    mainTransportSlider = document.getElementById("mainTransportSlider");
-    // changeBorderColor(5);
-    // event.target.playVideo(); //TODO detect and toggle
-    // let sniffer = setInterval()
-    // if (youtube_player == null) {
-      // youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
-    // }
-    // if (youtube_player != null) {
-    //     youtube_player.player_status_update("ready");
-    // }
-    youtubeData = youtubePlayer.getVideoData();
-    if (youtubeData && youtubeTitleEl) {
-      console.log("gots youtubedata for " + JSON.stringify(youtubeData));
-      // let titlestring = youtubeData.author + "\n" + youtubeData.title;
-      youtubeTitleEl.setAttribute('text', {'value': youtubeData.author + "\n" + youtubeData.title});
-    }
-    if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
-      SetVideoEventsData();
-    }
-    if (youtube_player == null || youtube_player == undefined) {
-          let interval = setInterval(() => {
-            // console.log("youtube_player is null " + youtube_player == null);
-            youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
-            if (youtube_player != null) {
-              youtube_player.player_status_update("ready");
-              clearInterval(interval);
-            }
-          }, 500); 
-        } else {
-          youtube_player.player_status_update("ready");
-        }  
-        // } else {
-        //   clearInterval(this.interval);
-        // }
+//     console.log("youtubePlayer is re4ady!");
+//     // if (timedEventsListenerMode == null) {
+//     //   timedEventsListenerMode = "Youtube";
+//     // }
+//     if (!timedEventsListenerMode || timedEventsListenerMode == "") {
+//         SetTimedEventsListenerMode("Youtube");
+//     }
+//     // document.getElementById('youtubeElement').style.borderColor = '#FF6D00';
+//     // youtube_player.player_status_update("ready");
+//     // youtube_player.set_duration(event.target.getDuration());
+//     // youtube_player.set_player(event.target);
+//     // youtube_player.update_stats("");
+//     // youtube_player.slider_update(0);
+//     mainTransportSlider = document.getElementById("mainTransportSlider");
+//     // changeBorderColor(5);
+//     // event.target.playVideo(); //TODO detect and toggle
+//     // let sniffer = setInterval()
+//     // if (youtube_player == null) {
+//       // youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+//     // }
+//     // if (youtube_player != null) {
+//     //     youtube_player.player_status_update("ready");
+//     // }
+//     youtubeData = youtubePlayer.getVideoData();
+//     if (youtubeData && youtubeTitleEl) {
+//       console.log("gots youtubedata for " + JSON.stringify(youtubeData));
+//       // let titlestring = youtubeData.author + "\n" + youtubeData.title;
+//       youtubeTitleEl.setAttribute('text', {'value': youtubeData.author + "\n" + youtubeData.title});
+//     }
+//     if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
+//       SetVideoEventsData();
+//     }
+//     if (youtube_player == null || youtube_player == undefined) {
+//           let interval = setInterval(() => {
+//             // console.log("youtube_player is null " + youtube_player == null);
+//             youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+//             if (youtube_player != null) {
+//               youtube_player.player_status_update("ready");
+//               clearInterval(interval);
+//             }
+//           }, 500); 
+//         } else {
+//           youtube_player.player_status_update("ready");
+//         }  
+//         // } else {
+//         //   clearInterval(this.interval);
+//         // }
 
-  }
-      // youtube_player.player_status_update("ready");
-    // }
+//   }
+//       // youtube_player.player_status_update("ready");
+//     // }
 
-  // }
+//   // }
 
-  function changeBorderColor(playerStatus) { 
-    if (youtube_player != null) {
-      var color;
-      if (playerStatus == -1) {
-        color = "#37474F"; // unstarted = gray
-        youtube_player.player_status_update("ready");
-      } else if (playerStatus == 0) {
-        color = "#FFFF00"; // ended = yellow
-        youtube_player.player_status_update("ready");
-      } else if (playerStatus == 1) {
-        color = "#33691E"; // playing = green
-        youtube_player.player_status_update("playing");
-      } else if (playerStatus == 2) {
-        color = "#DD2C00"; // paused = red
-        youtube_player.player_status_update("paused");
-      } else if (playerStatus == 2) {
-      } else if (playerStatus == 3) {
-        color = "#AA00FF"; // buffering = purple
-        // youtube_player.player_status_update("loading");
-      } else if (playerStatus == 5) {
-        color = "#FF6DOO"; // video cued = orange
-        youtube_player.player_status_update("ready");
-      }
-      if (color) {
-        document.getElementById('youtubeElement').style.borderColor = color;
-      }
-    }
-  }
+//   function changeBorderColor(playerStatus) { 
+//     if (youtube_player != null) {
+//       var color;
+//       if (playerStatus == -1) {
+//         color = "#37474F"; // unstarted = gray
+//         youtube_player.player_status_update("ready");
+//       } else if (playerStatus == 0) {
+//         color = "#FFFF00"; // ended = yellow
+//         youtube_player.player_status_update("ready");
+//       } else if (playerStatus == 1) {
+//         color = "#33691E"; // playing = green
+//         youtube_player.player_status_update("playing");
+//       } else if (playerStatus == 2) {
+//         color = "#DD2C00"; // paused = red
+//         youtube_player.player_status_update("paused");
+//       } else if (playerStatus == 2) {
+//       } else if (playerStatus == 3) {
+//         color = "#AA00FF"; // buffering = purple
+//         // youtube_player.player_status_update("loading");
+//       } else if (playerStatus == 5) {
+//         color = "#FF6DOO"; // video cued = orange
+//         youtube_player.player_status_update("ready");
+//       }
+//       if (color) {
+//         document.getElementById('youtubeElement').style.borderColor = color;
+//       }
+//     }
+//   }
   
-  // function youtubeCurrentTime(isPlaying) {
-  //   if (isPlaying) {
-  //     this.interval = setInterval(() => {
-  //       console.log(event.target.getCurrentTime());
-  //     }, 100);    
-  //   } else {
-  //     clearInterval(this.interval);
-  //   }
-  // }
+//   // function youtubeCurrentTime(isPlaying) {
+//   //   if (isPlaying) {
+//   //     this.interval = setInterval(() => {
+//   //       console.log(event.target.getCurrentTime());
+//   //     }, 100);    
+//   //   } else {
+//   //     clearInterval(this.interval);
+//   //   }
+//   // }
 
-  function onPlayerStateChange(event) { //youtube player events
+//   function onPlayerStateChange(event) { //youtube player events
 
-    // // let interval = null;
-    // currentTime = event.target.getCurrentTime();
-    // console.log("current time youtube " + currentTime + " listenrMode " + timedEventsListenerMode);
-    let duration = event.target.getDuration();
-    let interval;
-    if (event.data == YT.PlayerState.PLAYING) {
-      // alert('video started');
-        console.log("youtube is playing");
-        youtubeIsPlaying = true;
-        youtubeTime = youtubePlayer.getCurrentTime();
-        youtubeDuration = youtubePlayer.getDuration();
+//     // // let interval = null;
+//     // currentTime = event.target.getCurrentTime();
+//     // console.log("current time youtube " + currentTime + " listenrMode " + timedEventsListenerMode);
+//     let duration = event.target.getDuration();
+//     let interval;
+//     if (event.data == YT.PlayerState.PLAYING) {
+//       // alert('video started');
+//         console.log("youtube is playing");
+//         youtubeIsPlaying = true;
+//         youtubeTime = youtubePlayer.getCurrentTime();
+//         youtubeDuration = youtubePlayer.getDuration();
 
 
-        console.log("youtube getVideoData " + JSON.stringify(youtubeData));
-        // youtubePlayer(youtubeIsPlaying);
-        let time = 0;
-        // let statsDiv = document.getElementById("transportStats");
+//         console.log("youtube getVideoData " + JSON.stringify(youtubeData));
+//         // youtubePlayer(youtubeIsPlaying);
+//         let time = 0;
+//         // let statsDiv = document.getElementById("transportStats");
         
-        // this.el.emit('youtubeToggle', {isPlaying : true}, true);
+//         // this.el.emit('youtubeToggle', {isPlaying : true}, true);
 
-        interval = setInterval(() => {
-          const time = event.target.getCurrentTime();
-          // const currentTime = time.toFixed(2);
-          // console.log(time.toFixed(2));
-          let percent = time / duration;
-          fancyTimeString = fancyTimeFormat(time)  + " / "+ fancyTimeFormat(duration.toFixed(2)) + " - " + (percent * 100).toFixed(2) +" %";
-          // if (statsDiv != null) {
-          //   statsDiv.innerHTML = timeString;
-          //   }
-          if (mainTransportSlider != null) {
-            // console.log("tryna set slider to " + percent);
-            mainTransportSlider.value = percent * 100;
-          }  
-          if (youtube_player != null) {
-            youtube_player.update_stats(fancyTimeString);
-            youtube_player.slider_update(percent);
-          }
-          MediaTimeUpdate(fancyTimeString);  //updates stats div and modal stats div
-        }, 100); 
-      } else if(event.data == YT.PlayerState.PAUSED) {
-        //  alert('video paused');
-        youtubeIsPlaying = false;
-        console.log("youtube is not playing");
-        clearInterval(interval);
-        // this.el.emit('youtubeToggle', {isPlaying : false}, true);
-      }
-      // let interval = setInterval(() => {
-      //   if (youtubeIsPlaying) {
-      //     console.log(event.target.getCurrentTime());
-      //   } else {
-      //     clearInterval(interval);
-      //   }
-      // }, 100);
-    changeBorderColor(event.data);
-  }
+//         interval = setInterval(() => {
+//           const time = event.target.getCurrentTime();
+//           // const currentTime = time.toFixed(2);
+//           // console.log(time.toFixed(2));
+//           let percent = time / duration;
+//           fancyTimeString = fancyTimeFormat(time)  + " / "+ fancyTimeFormat(duration.toFixed(2)) + " - " + (percent * 100).toFixed(2) +" %";
+//           // if (statsDiv != null) {
+//           //   statsDiv.innerHTML = timeString;
+//           //   }
+//           if (mainTransportSlider != null) {
+//             // console.log("tryna set slider to " + percent);
+//             mainTransportSlider.value = percent * 100;
+//           }  
+//           if (youtube_player != null) {
+//             youtube_player.update_stats(fancyTimeString);
+//             youtube_player.slider_update(percent);
+//           }
+//           MediaTimeUpdate(fancyTimeString);  //updates stats div and modal stats div
+//         }, 100); 
+//       } else if(event.data == YT.PlayerState.PAUSED) {
+//         //  alert('video paused');
+//         youtubeIsPlaying = false;
+//         console.log("youtube is not playing");
+//         clearInterval(interval);
+//         // this.el.emit('youtubeToggle', {isPlaying : false}, true);
+//       }
+//       // let interval = setInterval(() => {
+//       //   if (youtubeIsPlaying) {
+//       //     console.log(event.target.getCurrentTime());
+//       //   } else {
+//       //     clearInterval(interval);
+//       //   }
+//       // }, 100);
+//     changeBorderColor(event.data);
+//   }
 
-export function TransportPlayButton () {
-  // console.log("TransportPlayButton clcik! " + JSON.stringify(youtubePlayer));
-  console.log("TransportPlayButton clcik! " + primaryAudioMangler);
-  if (youtubePlayer != null) {
-    if (!youtubeIsPlaying) {
-      console.log("tryna play youtube");
-      youtubePlayer.playVideo();
-      PauseIntervals(false);
-    } else {
-      console.log("tryna pauze youtube");
-      youtubePlayer.pauseVideo();
-      PauseIntervals(true);
-    }
-  } else if (primaryAudioMangler != null) {
-    console.log("play button for audio");
-    primaryAudioMangler.playPauseToggle();
-  }
-}
-function FastForwardButton () {
-  console.log("ffwdButton Clicked");
-  if (youtubePlayer != null) {
-    youtubeTime = youtubePlayer.getCurrentTime();
-    youtubeDuration = youtubePlayer.getDuration();
-    if (youtubeTime < youtubeDuration - 10) {
-      youtubePlayer.seekTo(youtubeTime + 10);
-    } else {
-      youtubePlayer.seekTo(0);
-    }
-  } else if (primaryAudioMangler != null) {
-    console.log("play button for audio");
-    primaryAudioMangler.fastForward();
-  } 
+// export function TransportPlayButton () {
+//   // console.log("TransportPlayButton clcik! " + JSON.stringify(youtubePlayer));
+//   console.log("TransportPlayButton clcik! " + primaryAudioMangler);
+//   if (youtubePlayer != null) {
+//     if (!youtubeIsPlaying) {
+//       console.log("tryna play youtube");
+//       youtubePlayer.playVideo();
+//       PauseIntervals(false);
+//     } else {
+//       console.log("tryna pauze youtube");
+//       youtubePlayer.pauseVideo();
+//       PauseIntervals(true);
+//     }
+//   } else if (primaryAudioMangler != null) {
+//     console.log("play button for audio");
+//     primaryAudioMangler.playPauseToggle();
+//   }
+// }
+// function FastForwardButton () {
+//   console.log("ffwdButton Clicked");
+//   if (youtubePlayer != null) {
+//     youtubeTime = youtubePlayer.getCurrentTime();
+//     youtubeDuration = youtubePlayer.getDuration();
+//     if (youtubeTime < youtubeDuration - 10) {
+//       youtubePlayer.seekTo(youtubeTime + 10);
+//     } else {
+//       youtubePlayer.seekTo(0);
+//     }
+//   } else if (primaryAudioMangler != null) {
+//     console.log("play button for audio");
+//     primaryAudioMangler.fastForward();
+//   } 
 
-}
-function RewindButton () {
-  console.log("rewindButton Clicked");
+// }
+// function RewindButton () {
+//   console.log("rewindButton Clicked");
 
-  if (youtubePlayer != null) {
-    youtubeTime = youtubePlayer.getCurrentTime();
-    youtubeDuration = youtubePlayer.getDuration();
-    if (youtubeTime > 10) {
-      youtubePlayer.seekTo(youtubeTime - 10);
-    } else {
-      youtubePlayer.seekTo(youtubeDuration - 10);
-    }
-  } else if (primaryAudioMangler != null) {
-    console.log("play button for audio");
-    primaryAudioMangler.rewind();
-  }
-  ClearIntervals();
-  // timeKeysIndex = 0;
-}
+//   if (youtubePlayer != null) {
+//     youtubeTime = youtubePlayer.getCurrentTime();
+//     youtubeDuration = youtubePlayer.getDuration();
+//     if (youtubeTime > 10) {
+//       youtubePlayer.seekTo(youtubeTime - 10);
+//     } else {
+//       youtubePlayer.seekTo(youtubeDuration - 10);
+//     }
+//   } else if (primaryAudioMangler != null) {
+//     console.log("play button for audio");
+//     primaryAudioMangler.rewind();
+//   }
+//   ClearIntervals();
+//   // timeKeysIndex = 0;
+// }
 
-function NextButton () {
-  console.log("NextButton Clicked " + timedEventsListenerMode);
-  if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
-    if (youtubePlayer != null) {
-      let youtubeDuration = youtubePlayer.getDuration();
-      youtubePlayer.seekTo(youtubeDuration - 2);
-    }
-  } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-      if (primaryAudioMangler != null) {
-      console.log("end button for audio");
-      primaryAudioMangler.end();
-    }
-  }
-}
+// function NextButton () {
+//   console.log("NextButton Clicked " + timedEventsListenerMode);
+//   if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
+//     if (youtubePlayer != null) {
+//       let youtubeDuration = youtubePlayer.getDuration();
+//       youtubePlayer.seekTo(youtubeDuration - 2);
+//     }
+//   } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
+//       if (primaryAudioMangler != null) {
+//       console.log("end button for audio");
+//       primaryAudioMangler.end();
+//     }
+//   }
+// }
 
-function PreviousButton () {
-  console.log("PrevButton Clicked " + timedEventsListenerMode);
-  if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
-    if (youtubePlayer != null) {
-    youtubePlayer.seekTo(0);
-    timeKeysIndex = 0;
-  }
-  } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-      if (primaryAudioMangler != null) {
-        console.log("start button for audio");
-        primaryAudioMangler.start();
-        timeKeysIndex = 0;
-      }
-    }
-    ClearIntervals();
-  }
+// function PreviousButton () {
+//   console.log("PrevButton Clicked " + timedEventsListenerMode);
+//   if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
+//     if (youtubePlayer != null) {
+//     youtubePlayer.seekTo(0);
+//     timeKeysIndex = 0;
+//   }
+//   } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
+//       if (primaryAudioMangler != null) {
+//         console.log("start button for audio");
+//         primaryAudioMangler.start();
+//         timeKeysIndex = 0;
+//       }
+//     }
+//     ClearIntervals();
+//   }
 
-function CaptureVideo(video) {
-  var canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  var canvasContext = canvas.getContext("2d");
-  canvasContext.drawImage(video, 0, 0);
-  return canvas.toDataURL('image/png');
-}
+// function CaptureVideo(video) {
+//   var canvas = document.createElement("canvas");
+//   canvas.width = video.videoWidth;
+//   canvas.height = video.videoHeight;
+//   var canvasContext = canvas.getContext("2d");
+//   canvasContext.drawImage(video, 0, 0);
+//   return canvas.toDataURL('image/png');
+// }
 
 ///////////////////// end YOUTUBE PLAYER ABOVE ////////////////////
 

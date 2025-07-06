@@ -3,8 +3,12 @@
 import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData } from "../connect/indexedDb.js";
 // import { matrixClient } from "../connect/matrix.js";
 // import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
-import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
+// import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
+// import { youtubePlayer, youtubeIsPlaying } from "../connect/media.js"; //move to ?
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
+import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData } from "../connect/events.js";
+// import { SetTimeKeysData } from "./landing.js";
+
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
@@ -48,8 +52,8 @@ let cameraRotation = {"x" : 0, "y": 0, "z": 0};
 
 let skyboxEl = document.getElementById('a_sky');
 let posRotRunning = false;
-export let timeKeysData = {};
-export let tkStarttimes = [];
+// export let timeKeysData = {};
+// export let tkStarttimes = [];
 
 export let poiLocations = [];
 export let curveLocations = [];
@@ -70,13 +74,13 @@ let transportTimeStatsEl = null;
 // let sceneType = null;
 
 let uiVisible = true;
-let pauseLoops = false;
+
 let matrixClient = null;
 let matrixRoomsData = null;
 // let vidz = null;
 // let videoEl = null;
 
-export let timedEventsListenerMode = ""
+// export let timedEventsListenerMode = "";
 
 let mouseDownStarttime = 0;
 export let mouseDowntime = 0;
@@ -101,7 +105,7 @@ export let allowCameraLock = true;
 const camLockButton = document.getElementById("camLockToggleButton");
 let intersections = [];
 export let avatarName = "";
-let primaryAudioEl = document.querySelector('#primaryAudio');
+// let primaryAudioEl = document.querySelector('#primaryAudio');
 
 window.LocationRowClick = LocationRowClick;
 
@@ -121,7 +125,8 @@ $(function() {
    let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
    if (timedEventsEl) {
       let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
-      timeKeysData =  JSON.parse(atob(theTimedEventsData));
+      SetTimeKeysData(JSON.parse(atob(theTimedEventsData)));
+      // timeKeysData =  JSON.parse(atob(theTimedEventsData));
       SetTimedEventsListenerMode(timeKeysData.listenTo);
       // timedEventsListenerMode = ;
       // window.timedEventsListenerMode = timedEventsListenerMode;
@@ -463,10 +468,6 @@ export function UpdateAvatarName(name) {
    usernameEl.innerText = avatarName;
 }
 
-export function SetTimedEventsListenerMode(mode) {
-   timedEventsListenerMode = mode;
-}
-
 $('#nextButton').on('click', function(e) {
    GoToNext();
 });
@@ -588,24 +589,24 @@ export async function GetMatrixData() { //use matrix.org for... something
    }
 // }
 
-export function SetTimeKeysData (tkData) {
-   timeKeysData = tkData;
-}
-export function MediaTimeUpdate (timeString) {
-   // console.log("MediaTimeUpdate " + fancyTimeString);
-   // transportTimeStatsEl = document.getElementById("transportStats");
-   if (transportTimeStatsEl == null) {
-      transportTimeStatsEl = document.getElementById("transportStats");
-   } else {
-      transportTimeStatsEl.innerHTML = timeString;
-   }
-   modalTimeStatsEl = document.getElementById('modalTimeStats');
-   if (modalTimeStatsEl == null) {
-      } else {
-         modalTimeStatsEl.innerHTML = timeString;
-      }
+// export function SetTimeKeysData (tkData) {
+//    timeKeysData = tkData;
+// }
+// export function MediaTimeUpdate (timeString) {
+//    // console.log("MediaTimeUpdate " + fancyTimeString);
+//    // transportTimeStatsEl = document.getElementById("transportStats");
+//    if (transportTimeStatsEl == null) {
+//       transportTimeStatsEl = document.getElementById("transportStats");
+//    } else {
+//       transportTimeStatsEl.innerHTML = timeString;
+//    }
+//    modalTimeStatsEl = document.getElementById('modalTimeStats');
+//    if (modalTimeStatsEl == null) {
+//       } else {
+//          modalTimeStatsEl.innerHTML = timeString;
+//       }
       
-   }
+//    }
    
 function ReturnModelName (_id) {
    if (_id.toString().includes("primitive_")) {
@@ -2910,615 +2911,615 @@ function ShowHideContentBox () {
 //    sceneLocations.locations;
 // }
 
-function PlayPausePrimaryAudio() {
+// function PlayPausePrimaryAudio() {
    
-   var primaryAudioController = document.getElementById("primaryAudio").components.primary_audio_control; 
-   primaryAudioController.playPauseToggle(); 
-}
+//    var primaryAudioController = document.getElementById("primaryAudio").components.primary_audio_control; 
+//    primaryAudioController.playPauseToggle(); 
+// }
 
-export function InitPrimarySlider() {
-// let modal = document.getElementById('modalContent');
-let primaryAudioSlider = document.getElementById("primaryAudioVolumeSlider");
-   if (primaryAudioSlider != undefined) {
-      // let storedPrimaryVolume = localStorage.getItem(room+"_primaryVolume");
-      // if (storedPrimaryVolume != null) {
-      //    primaryAudioSlider.value = storedPrimaryVolume;
-      // }
+// export function InitPrimarySlider() {
+// // let modal = document.getElementById('modalContent');
+// let primaryAudioSlider = document.getElementById("primaryAudioVolumeSlider");
+//    if (primaryAudioSlider != undefined) {
+//       // let storedPrimaryVolume = localStorage.getItem(room+"_primaryVolume");
+//       // if (storedPrimaryVolume != null) {
+//       //    primaryAudioSlider.value = storedPrimaryVolume;
+//       // }
 
-      UpdatePrimaryAudioVolume(primaryAudioSlider.value);
-      primaryAudioSlider.oninput = function() {
-      // output.innerHTML = this.value;
-      UpdatePrimaryAudioVolume(this.value);
-      volumePrimary = this.value;
-      // localStorage.setItem(room+"_primaryVolume", this.value);
-      }
-   }
-}
-export function InitAmbientSlider () {
-   // let modal = document.getElementById('modalContent');
- let ambientAudioSlider = document.getElementById("ambientAudioVolumeSlider");
-   if (ambientAudioSlider != null) {
-      // let storedAmbientVolume = localStorage.getItem(room+"_ambientVolume");
-      // if (storedAmbientVolume != null) {
-      //    ambientAudioSlider.value = storedAmbientVolume;
-      // }
-      // UpdateAmbientAudioVolume(ambientAudioSlider.value);
-         ambientAudioSlider.oninput = function() {
-         UpdateAmbientAudioVolume(this.value);
-         volumeAmbient = this.value;
-         // localStorage.setItem(room+"_ambientVolume", this.value);
-      }
-   }
-}
-export function InitTriggerSlider () {
-   // let modal = document.getElementById('modalContent');
- let triggerAudioSlider = document.getElementById("triggerAudioVolumeSlider");
-   if (triggerAudioSlider != null) {
-      // let storedTriggerVolume = localStorage.getItem(room+"_triggerVolume");
-      // if (storedTriggerVolume != null) {
-      //    triggerAudioSlider.value = storedTriggerVolume;
-      // }
-      UpdateTriggerAudioVolume(triggerAudioSlider.value);
-      triggerAudioSlider.oninput = function() {
-         volumeTrigger = this.value;
-         UpdateTriggerAudioVolume(this.value);
-         // localStorage.setItem(room+"_triggerVolume", this.value);
-      } 
-   }
-}
-   // function SetLocationData(locationData) {
-   //    console.log("locationData " + JSON.stringify(locationData));
-   //    // let locations = locationData;
-   //    sceneLocations.locations = locationData;
+//       UpdatePrimaryAudioVolume(primaryAudioSlider.value);
+//       primaryAudioSlider.oninput = function() {
+//       // output.innerHTML = this.value;
+//       UpdatePrimaryAudioVolume(this.value);
+//       volumePrimary = this.value;
+//       // localStorage.setItem(room+"_primaryVolume", this.value);
+//       }
+//    }
+// }
+// export function InitAmbientSlider () {
+//    // let modal = document.getElementById('modalContent');
+//  let ambientAudioSlider = document.getElementById("ambientAudioVolumeSlider");
+//    if (ambientAudioSlider != null) {
+//       // let storedAmbientVolume = localStorage.getItem(room+"_ambientVolume");
+//       // if (storedAmbientVolume != null) {
+//       //    ambientAudioSlider.value = storedAmbientVolume;
+//       // }
+//       // UpdateAmbientAudioVolume(ambientAudioSlider.value);
+//          ambientAudioSlider.oninput = function() {
+//          UpdateAmbientAudioVolume(this.value);
+//          volumeAmbient = this.value;
+//          // localStorage.setItem(room+"_ambientVolume", this.value);
+//       }
+//    }
+// }
+// export function InitTriggerSlider () {
+//    // let modal = document.getElementById('modalContent');
+//  let triggerAudioSlider = document.getElementById("triggerAudioVolumeSlider");
+//    if (triggerAudioSlider != null) {
+//       // let storedTriggerVolume = localStorage.getItem(room+"_triggerVolume");
+//       // if (storedTriggerVolume != null) {
+//       //    triggerAudioSlider.value = storedTriggerVolume;
+//       // }
+//       UpdateTriggerAudioVolume(triggerAudioSlider.value);
+//       triggerAudioSlider.oninput = function() {
+//          volumeTrigger = this.value;
+//          UpdateTriggerAudioVolume(this.value);
+//          // localStorage.setItem(room+"_triggerVolume", this.value);
+//       } 
+//    }
+// }
+//    // function SetLocationData(locationData) {
+//    //    console.log("locationData " + JSON.stringify(locationData));
+//    //    // let locations = locationData;
+//    //    sceneLocations.locations = locationData;
       
-   //    // console.log("locationData " + JSON.stringify(sceneLocations));
-   // }
+//    //    // console.log("locationData " + JSON.stringify(sceneLocations));
+//    // }
 
-function UpdatePrimaryAudioVolume(newVolume) {
-   var primaryAudio = document.getElementById("primaryAudio");
-   if (primaryAudio != null) {
-      var primaryAudioController = document.getElementById("primaryAudio").components.primary_audio_control; 
-      if (primaryAudioController != null) {
-         primaryAudioController.modVolume(newVolume);
-      }   
-   }
-   // localStorage.setItem(room+"_primaryVolume", newVolume);
-}
-function UpdateAmbientAudioVolume(newVolume) {
-   var ambientAudioController = document.getElementById("ambientAudio").components.ambient_audio_control; 
-   if (ambientAudioController != null) {
-      ambientAudioController.modVolume(newVolume);
-   }
-}
-function UpdateTriggerAudioVolume(newVolume) {
-   var triggerAudioEl = document.getElementById("triggerAudio");
-   if (triggerAudioEl) {
-      var triggerAudioController = triggerAudioEl.components.trigger_audio_control;
-      if (triggerAudioController != null) {
-         triggerAudioController.modVolume(newVolume);
-      }
-   }
-}
+// function UpdatePrimaryAudioVolume(newVolume) {
+//    var primaryAudio = document.getElementById("primaryAudio");
+//    if (primaryAudio != null) {
+//       var primaryAudioController = document.getElementById("primaryAudio").components.primary_audio_control; 
+//       if (primaryAudioController != null) {
+//          primaryAudioController.modVolume(newVolume);
+//       }   
+//    }
+//    // localStorage.setItem(room+"_primaryVolume", newVolume);
+// }
+// function UpdateAmbientAudioVolume(newVolume) {
+//    var ambientAudioController = document.getElementById("ambientAudio").components.ambient_audio_control; 
+//    if (ambientAudioController != null) {
+//       ambientAudioController.modVolume(newVolume);
+//    }
+// }
+// function UpdateTriggerAudioVolume(newVolume) {
+//    var triggerAudioEl = document.getElementById("triggerAudio");
+//    if (triggerAudioEl) {
+//       var triggerAudioController = triggerAudioEl.components.trigger_audio_control;
+//       if (triggerAudioController != null) {
+//          triggerAudioController.modVolume(newVolume);
+//       }
+//    }
+// }
 
-//////////////////////////////////////////////// move to primary-audio-control ... //no!
+// //////////////////////////////////////////////// move to primary-audio-control ... //no!
 
-export function SetPrimaryAudioEventsData () {
+// export function SetPrimaryAudioEventsData () {
 
-   // timeKeysData = JSON.parse(localStorage.getItem(room+ "_timeKeys"));
-   // let timekeysData = settings.sceneTimedEvents;
-   // console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
-   tkStarttimes = [];
-   if (timeKeysData != undefined && timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0 )
-      timeKeysData.timekeys.forEach(function (timekey) {
-      tkStarttimes.push(parseFloat(timekey.keystarttime).toFixed(2));
-   });
-   tkStarttimes.sort(function(a, b){
-      return a - b;
-   });
-   SetTimedEventsListenerMode("Primary Audio");
+//    // timeKeysData = JSON.parse(localStorage.getItem(room+ "_timeKeys"));
+//    // let timekeysData = settings.sceneTimedEvents;
+//    // console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
+//    tkStarttimes = [];
+//    if (timeKeysData != undefined && timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0 )
+//       timeKeysData.timekeys.forEach(function (timekey) {
+//       tkStarttimes.push(parseFloat(timekey.keystarttime).toFixed(2));
+//    });
+//    tkStarttimes.sort(function(a, b){
+//       return a - b;
+//    });
+//    SetTimedEventsListenerMode("Primary Audio");
    
-   TimedEventListener();
+//    TimedEventListener();
 
-}
+// }
 
-export function SetVideoEventsData (type) { 
-   console.log("tryna SetVideoEventsData");
-   tkStarttimes = []; //either audio or video, not both
+// export function SetVideoEventsData (type) { 
+//    console.log("tryna SetVideoEventsData");
+//    tkStarttimes = []; //either audio or video, not both
 
    
-   if (timeKeysData != undefined && timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0 ) {
-     timeKeysData.timekeys.forEach(function (timekey) {
-     tkStarttimes.push(parseFloat(timekey.keystarttime).toFixed(2));
-   });
-   tkStarttimes.sort(function(a, b){
-     return a - b;
-   });
+//    if (timeKeysData != undefined && timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0 ) {
+//      timeKeysData.timekeys.forEach(function (timekey) {
+//      tkStarttimes.push(parseFloat(timekey.keystarttime).toFixed(2));
+//    });
+//    tkStarttimes.sort(function(a, b){
+//      return a - b;
+//    });
    
 
-   if (tkStarttimes.length > 0) {
-      let teMode = "Primary Video";
-      if (!timedEventsListenerMode) {
-         teMode = timedEventsListenerMode;
-      }
-     console.log("tryna run video events listenr with timedEventsListenerMode : " + teMode);
-     TimedEventListener();
-   }
- }
-}
-function SetYoutubeEventsData() {
-
-}
-
-
-
-let timeKeysIndex = 0;
-let listenerInterval = null;
-let loopIntervals = [];
-
-////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
-
-function TimedEventListener () { 
-//  console.log("TimedEventsListener" + timedEventsListenerMode + JSON.stringify(timeKeysData) );
- // let primaryAudioTime = 0;
- timeKeysIndex = 0;
- let timekey = 0;
-//  let vidz = document.getElementsByTagName("video");
-//  let videoEl = null;
-//  if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
-//    videoEl = vidz[0];
-//    console.log("videoEl " + videoEl.id);
+//    if (tkStarttimes.length > 0) {
+//       let teMode = "Primary Video";
+//       if (!timedEventsListenerMode) {
+//          teMode = timedEventsListenerMode;
+//       }
+//      console.log("tryna run video events listenr with timedEventsListenerMode : " + teMode);
+//      TimedEventListener();
+//    }
 //  }
- if (timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0) {
-   
-   let listenerInterval = setInterval(function () {
-      timekey = parseFloat(tkStarttimes[timeKeysIndex]);
-      //  console.log(timekey);
-      if (timekey && timekey != NaN) {//not not a number
-      if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-         // if (hasPrimaryAudio) {
-            // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
-            //    timeKeysIndex = 0;
-            // }
-            if (primaryAudioHowl != undefined && primaryAudioHowl != null && primaryAudioHowl.playing()) {
-               
-               // primaryAudioEl.components.primary_audio_control.updateStatus(true);
+// }
+// function SetYoutubeEventsData() {
 
-               let primaryAudioTime = primaryAudioHowl.seek();
+// }
+
+
+
+// let timeKeysIndex = 0;
+// let listenerInterval = null;
+// let loopIntervals = [];
+
+// ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
+
+// function TimedEventListener () { 
+// //  console.log("TimedEventsListener" + timedEventsListenerMode + JSON.stringify(timeKeysData) );
+//  // let primaryAudioTime = 0;
+//  timeKeysIndex = 0;
+//  let timekey = 0;
+// //  let vidz = document.getElementsByTagName("video");
+// //  let videoEl = null;
+// //  if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
+// //    videoEl = vidz[0];
+// //    console.log("videoEl " + videoEl.id);
+// //  }
+//  if (timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0) {
+   
+//    let listenerInterval = setInterval(function () {
+//       timekey = parseFloat(tkStarttimes[timeKeysIndex]);
+//       //  console.log(timekey);
+//       if (timekey && timekey != NaN) {//not not a number
+//       if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
+//          // if (hasPrimaryAudio) {
+//             // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
+//             //    timeKeysIndex = 0;
+//             // }
+//             if (primaryAudioHowl != undefined && primaryAudioHowl != null && primaryAudioHowl.playing()) {
                
-               if (primaryAudioTime != 0 && primaryAudioTime < .2) { //fudge in case
-                  timeKeysIndex = 0; 
-                  console.log("resetting timekeysindex!");
-               }
-               if (primaryAudioTime != 0 && primaryAudioTime < timekey) {
-                     // console.log(primaryAudioTime + "less than " + timekey);
-                     //just waiting...
-               } else {
-                  if (timeKeysIndex < tkStarttimes.length) {
-                     // console.log("TRYNA PLAY TIMEKEY "+ JSON.stringify(timeKeysData.timekeys[timeKeysIndex]) +" at primaryAudioTime "+ primaryAudioTime.toString() );
-                     PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
-                     timeKeysIndex++;
-                  } else {
-                     console.log("end");
-                     clearInterval(listenerInterval);
+//                // primaryAudioEl.components.primary_audio_control.updateStatus(true);
+
+//                let primaryAudioTime = primaryAudioHowl.seek();
+               
+//                if (primaryAudioTime != 0 && primaryAudioTime < .2) { //fudge in case
+//                   timeKeysIndex = 0; 
+//                   console.log("resetting timekeysindex!");
+//                }
+//                if (primaryAudioTime != 0 && primaryAudioTime < timekey) {
+//                      // console.log(primaryAudioTime + "less than " + timekey);
+//                      //just waiting...
+//                } else {
+//                   if (timeKeysIndex < tkStarttimes.length) {
+//                      // console.log("TRYNA PLAY TIMEKEY "+ JSON.stringify(timeKeysData.timekeys[timeKeysIndex]) +" at primaryAudioTime "+ primaryAudioTime.toString() );
+//                      PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
+//                      timeKeysIndex++;
+//                   } else {
+//                      console.log("end");
+//                      clearInterval(listenerInterval);
                      
-                  }
-               }
-            }
-            // }
-         } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
-            if (videoEl != null && !videoEl.paused && timekey > 0) {
-             console.log(videoEl.currentTime + " timeKeysIndex " + timeKeysIndex + " type " + timeKeysData.timekeys[timeKeysIndex].keytype);
-               // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
-               //    timeKeysIndex = 0;
-               //    // videoEl.currentTime = 0;
-               // }
-               if (videoEl.currentTime < 1) {
-                  timeKeysIndex = 0; 
-                  console.log("resetting timekeysindex!");
-               }
-               if (videoEl.currentTime <= timekey) {
-                  //prease stanby...
-               } else {
-                  if (timeKeysIndex < tkStarttimes.length) {
-                     // console.log("vid event " + timeKeysData[timeKeysIndex]);
-                     PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
-                     timeKeysIndex++;
-                  } else {
-                     console.log("end");
-                     clearInterval(listenerInterval);
-                  }
+//                   }
+//                }
+//             }
+//             // }
+//          } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
+//             if (videoEl != null && !videoEl.paused && timekey > 0) {
+//              console.log(videoEl.currentTime + " timeKeysIndex " + timeKeysIndex + " type " + timeKeysData.timekeys[timeKeysIndex].keytype);
+//                // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
+//                //    timeKeysIndex = 0;
+//                //    // videoEl.currentTime = 0;
+//                // }
+//                if (videoEl.currentTime < 1) {
+//                   timeKeysIndex = 0; 
+//                   console.log("resetting timekeysindex!");
+//                }
+//                if (videoEl.currentTime <= timekey) {
+//                   //prease stanby...
+//                } else {
+//                   if (timeKeysIndex < tkStarttimes.length) {
+//                      // console.log("vid event " + timeKeysData[timeKeysIndex]);
+//                      PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
+//                      timeKeysIndex++;
+//                   } else {
+//                      console.log("end");
+//                      clearInterval(listenerInterval);
+//                   }
                
-               }
-            }
-         } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') { 
-            // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
-            //    timeKeysIndex = 0;
-            // }
-            if (youtubePlayer != null && youtubeIsPlaying && timekey > 0) {
-               if (youtubePlayer.getCurrentTime() <= .1) {
-                  timeKeysIndex = 0; 
-                  console.log("resetting timekeysindex!");
-               }
-            if (youtubePlayer.getCurrentTime() <= timekey) {
-               //    wait a scootch
-               //    console.log(youtubePlayer.getCurrentTime() + " vs " + timekey);
-               } else { 
+//                }
+//             }
+//          } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') { 
+//             // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
+//             //    timeKeysIndex = 0;
+//             // }
+//             if (youtubePlayer != null && youtubeIsPlaying && timekey > 0) {
+//                if (youtubePlayer.getCurrentTime() <= .1) {
+//                   timeKeysIndex = 0; 
+//                   console.log("resetting timekeysindex!");
+//                }
+//             if (youtubePlayer.getCurrentTime() <= timekey) {
+//                //    wait a scootch
+//                //    console.log(youtubePlayer.getCurrentTime() + " vs " + timekey);
+//                } else { 
                   
-                  if(timeKeysIndex < tkStarttimes.length) {
-                        // console.log("FIRING " + youtubePlayer.time + " vs " + timekey);
-                     //    console.log("youtube event index " + timeKeysIndex + " " + JSON.stringify(timeKeysData.timekeys[timeKeysIndex]));
-                     PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
-                     timeKeysIndex++;
-                     } else {
-                        console.log("end");
-                        clearInterval(listenerInterval);
-                     }
-                  }
-               }
-            }
-         }
-      }, 50);
-   }
-}
+//                   if(timeKeysIndex < tkStarttimes.length) {
+//                         // console.log("FIRING " + youtubePlayer.time + " vs " + timekey);
+//                      //    console.log("youtube event index " + timeKeysIndex + " " + JSON.stringify(timeKeysData.timekeys[timeKeysIndex]));
+//                      PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
+//                      timeKeysIndex++;
+//                      } else {
+//                         console.log("end");
+//                         clearInterval(listenerInterval);
+//                      }
+//                   }
+//                }
+//             }
+//          }
+//       }, 50);
+//    }
+// }
 
-export function PauseIntervals (pauseBool) {
+// export function PauseIntervals (pauseBool) {
    
-   pauseLoops = pauseBool;
-   console.log("loops are paused " + pauseLoops);
+//    pauseLoops = pauseBool;
+//    console.log("loops are paused " + pauseLoops);
 
-}
-function ClearIntervals () {
-   for (let i = 0; i < loopIntervals.length; i++) {
-      console.log("clearing interval " + i);
-      clearInterval(loopIntervals[i]);
-   }
-   // clearInterval(listenerInterval);
-}
+// }
+// function ClearIntervals () {
+//    for (let i = 0; i < loopIntervals.length; i++) {
+//       console.log("clearing interval " + i);
+//       clearInterval(loopIntervals[i]);
+//    }
+//    // clearInterval(listenerInterval);
+// }
 
 
 
-function LoopTimedEvent(keyType, duration, keydata, keytags) {
+// function LoopTimedEvent(keyType, duration, keydata, keytags) {
    
-   duration = parseFloat(duration).toFixed(2) * 1000;
-   // console.log("tryna looop " + keyType  + " " +duration);
-   let beatElements = document.getElementsByClassName("beatme");
-   let envEl = document.getElementById('enviroEl');
-   let skyEl = document.getElementById('skyEl');
+//    duration = parseFloat(duration).toFixed(2) * 1000;
+//    // console.log("tryna looop " + keyType  + " " +duration);
+//    let beatElements = document.getElementsByClassName("beatme");
+//    let envEl = document.getElementById('enviroEl');
+//    let skyEl = document.getElementById('skyEl');
    
-   let theInterval = setInterval(function () {
-      if (!pauseLoops) {
-         if (keyType == "Next") {
-            console.log("next loop " + duration);
-            GoToNext();
-         } 
-         if (keyType.toLowerCase().includes("beat")) {
-            // console.log("beat loop " + duration);
-            if (beatElements != null) {
-               // console.log("beat objex " + beatElements.length)
+//    let theInterval = setInterval(function () {
+//       if (!pauseLoops) {
+//          if (keyType == "Next") {
+//             console.log("next loop " + duration);
+//             GoToNext();
+//          } 
+//          if (keyType.toLowerCase().includes("beat")) {
+//             // console.log("beat loop " + duration);
+//             if (beatElements != null) {
+//                // console.log("beat objex " + beatElements.length)
                
-            for (let i = 0; i < beatElements.length; i++) {
-               // if (Math.random() > .5) { //hrm, toggle how?
-                  if (beatElements[i].components.mod_model != undefined) {
-                     beatElements[i].components.mod_model.beat(.75, duration);
-                  } else if (beatElements[i].components.mod_object != undefined) {
-                     beatElements[i].components.mod_object.beat(.75, duration);
-                  } else if (beatElements[i].components.cloud_marker != undefined) {
-                     beatElements[i].components.cloud_marker.beat(.15, duration);
-                  } else if (beatElements[i].components.mod_physics != undefined) {
-                     beatElements[i].components.mod_physics.randomPush();
-                  }
-               // }
-            }
-            }
-            if (envEl != null) {
-               // console.log("beat volume " + volume);
-               // if (!settings.sceneUseSkybox) {
-                  envEl.components.enviro_mods.beat(.5);
-               // }
+//             for (let i = 0; i < beatElements.length; i++) {
+//                // if (Math.random() > .5) { //hrm, toggle how?
+//                   if (beatElements[i].components.mod_model != undefined) {
+//                      beatElements[i].components.mod_model.beat(.75, duration);
+//                   } else if (beatElements[i].components.mod_object != undefined) {
+//                      beatElements[i].components.mod_object.beat(.75, duration);
+//                   } else if (beatElements[i].components.cloud_marker != undefined) {
+//                      beatElements[i].components.cloud_marker.beat(.15, duration);
+//                   } else if (beatElements[i].components.mod_physics != undefined) {
+//                      beatElements[i].components.mod_physics.randomPush();
+//                   }
+//                // }
+//             }
+//             }
+//             if (envEl != null) {
+//                // console.log("beat volume " + volume);
+//                // if (!settings.sceneUseSkybox) {
+//                   envEl.components.enviro_mods.beat(.5);
+//                // }
                
-            }
-         }
-         if (keyType.toLowerCase().includes("random time")) {
-            if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-               if (primaryAudioEl != null) {
-                  // console.log("beat volume " + volume);
-                  primaryAudioEl.components.primary_audio_control.randomTime();
-               }
-            } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
-               var videoControllerEl = document.getElementById('primary_video_0');  
-               if (videoControllerEl != null) {
-                  console.log("gotsa video embedVideo");
-                  let videoController = videoControllerEl.components.vid_materials_embed;
-                  if (videoController) {
-                     videoController.randomTime();
-                  }
-               }
-            } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
-               let youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
-               if (youtube_player) {
-                  youtube_player.randomTime();
-               }
-            }
-         }
+//             }
+//          }
+//          if (keyType.toLowerCase().includes("random time")) {
+//             if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
+//                if (primaryAudioEl != null) {
+//                   // console.log("beat volume " + volume);
+//                   primaryAudioEl.components.primary_audio_control.randomTime();
+//                }
+//             } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
+//                var videoControllerEl = document.getElementById('primary_video_0');  
+//                if (videoControllerEl != null) {
+//                   console.log("gotsa video embedVideo");
+//                   let videoController = videoControllerEl.components.vid_materials_embed;
+//                   if (videoController) {
+//                      videoController.randomTime();
+//                   }
+//                }
+//             } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
+//                let youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+//                if (youtube_player) {
+//                   youtube_player.randomTime();
+//                }
+//             }
+//          }
 
-         if (keyType.toLowerCase().includes("color tweak")) {
-            console.log("tryna beat loop");
-            if (envEl != null) {
-               // console.log("beat volume " + volume);
-               envEl.components.enviro_mods.colortweak();
-            }
-         }
-         if (keyType.toLowerCase().includes("color lerp")) {
-            console.log("tryna color lerp");
-            if (envEl != null) {
-               // console.log("beat volume " + volume);
-               envEl.components.enviro_mods.colorlerp(duration);
-            } else if (skyEl != null) {
+//          if (keyType.toLowerCase().includes("color tweak")) {
+//             console.log("tryna beat loop");
+//             if (envEl != null) {
+//                // console.log("beat volume " + volume);
+//                envEl.components.enviro_mods.colortweak();
+//             }
+//          }
+//          if (keyType.toLowerCase().includes("color lerp")) {
+//             console.log("tryna color lerp");
+//             if (envEl != null) {
+//                // console.log("beat volume " + volume);
+//                envEl.components.enviro_mods.colorlerp(duration);
+//             } else if (skyEl != null) {
                
-               skyEl.components.mod_sky.colorlerp();
-            }
-         }
-         if (keyType.toLowerCase().includes("picture next")) {
-            let picGroupMangler = document.getElementById("pictureGroupsData");
+//                skyEl.components.mod_sky.colorlerp();
+//             }
+//          }
+//          if (keyType.toLowerCase().includes("picture next")) {
+//             let picGroupMangler = document.getElementById("pictureGroupsData");
 
-            if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
-            console.log("picture next event!");
-            //    document.querySelector("#pictureGroupPanel").setAttribute('visible', true);
-            //   picGroupMangler.components.picture_groups_control.toggleOnPicGroup();
-            //   picGroupMangler.components.picture_groups_control.NextButtonClick();
-              // console.log(JSON.stringify(this.skyboxData));
-            }
-            let picGroupEls = document.querySelectorAll(".picgroup");
-            for (let i = 0; i < picGroupEls.length; i++) {
-               let cloudmarker = picGroupEls[i].components.cloud_marker;
-               if (cloudmarker) {
-                  cloudmarker.loadMedia();
-               } else {
-                  let localmarker = picGroupEls[i].components.local_marker;
-                  if (localmarker) {
-                     localmarker.loadMedia();
-                  }
-               }
+//             if (picGroupMangler != null && picGroupMangler != undefined && picGroupMangler.components.picture_groups_control) {
+//             console.log("picture next event!");
+//             //    document.querySelector("#pictureGroupPanel").setAttribute('visible', true);
+//             //   picGroupMangler.components.picture_groups_control.toggleOnPicGroup();
+//             //   picGroupMangler.components.picture_groups_control.NextButtonClick();
+//               // console.log(JSON.stringify(this.skyboxData));
+//             }
+//             let picGroupEls = document.querySelectorAll(".picgroup");
+//             for (let i = 0; i < picGroupEls.length; i++) {
+//                let cloudmarker = picGroupEls[i].components.cloud_marker;
+//                if (cloudmarker) {
+//                   cloudmarker.loadMedia();
+//                } else {
+//                   let localmarker = picGroupEls[i].components.local_marker;
+//                   if (localmarker) {
+//                      localmarker.loadMedia();
+//                   }
+//                }
                
-            }
-         }
-         if (keyType == "Player Look") {
+//             }
+//          }
+//          if (keyType == "Player Look") {
 
-            if (keytags && keytags.length && keytags != "undefined") {
-              //otherwise check the tags against classes
-            //   camLockButton
-               console.log("checking tags for Player Look timedevent " + keytags);
-               let theQuery = "." + keytags;
-               let taggedEls = document.querySelectorAll(theQuery);  //need to split!
-               let randomIndex = Math.floor(Math.random()*taggedEls.length);
+//             if (keytags && keytags.length && keytags != "undefined") {
+//               //otherwise check the tags against classes
+//             //   camLockButton
+//                console.log("checking tags for Player Look timedevent " + keytags);
+//                let theQuery = "." + keytags;
+//                let taggedEls = document.querySelectorAll(theQuery);  //need to split!
+//                let randomIndex = Math.floor(Math.random()*taggedEls.length);
                
-               if (taggedEls[randomIndex] && taggedEls[randomIndex].id) {
-                  console.log("tryna get random index " + randomIndex +" of taggedEls "+ taggedEls.length + " id "+ taggedEls[randomIndex].id) ;
-                  player.components.player_mover.lookAt(0, "#" +CSS.escape(taggedEls[randomIndex].id));
-               }
+//                if (taggedEls[randomIndex] && taggedEls[randomIndex].id) {
+//                   console.log("tryna get random index " + randomIndex +" of taggedEls "+ taggedEls.length + " id "+ taggedEls[randomIndex].id) ;
+//                   player.components.player_mover.lookAt(0, "#" +CSS.escape(taggedEls[randomIndex].id));
+//                }
                
-               // for (let i = 0; i < taggedEls.length; i++) {
+//                // for (let i = 0; i < taggedEls.length; i++) {
 
-               // }
+//                // }
                
-            }
+//             }
 
-         } 
-      } else {
-         console.log("loops are paused");
-      }
-   }, duration);
-   loopIntervals.push(theInterval);
-}  //end loop event
+//          } 
+//       } else {
+//          console.log("loops are paused");
+//       }
+//    }, duration);
+//    loopIntervals.push(theInterval);
+// }  //end loop event
 
-function PlayTimedEvent(timeKey) {
-//  console.log("tryna play timed event: " + JSON.stringify(timeKey));
+// function PlayTimedEvent(timeKey) {
+// //  console.log("tryna play timed event: " + JSON.stringify(timeKey));
 
- let duration = 1;
- if (timeKey.keyduration) {
-   duration = timeKey.keyduration * 1000;
- }
+//  let duration = 1;
+//  if (timeKey.keyduration) {
+//    duration = timeKey.keyduration * 1000;
+//  }
 
- let posObj = {};
- let rotObj = {};
- let tempLabel = "";
-   if (timeKey.keydata.toLowerCase().includes('loop')) {
-      LoopTimedEvent(timeKey.keytype, timeKey.keyduration, timeKey.keydata, timeKey.keytags);
-      // return null;
-      if (timeKey.keytype.toLowerCase().includes("color lerp")) {
-         console.log("tryna beat loop");
-         let envEl = document.getElementById('enviroEl');
-         if (envEl != null && envEl.components.enviro_mods) {
-            // console.log("beat volume " + volume);
-            duration = timeKey.keyduration * 1000;
-            envEl.components.enviro_mods.colorlerp(duration); //does loop on arg
-         }
-      }
-   }
-   if (timeKey.keytype.toLowerCase().includes("Player Follow Path")) {
-      let curveDriver = document.getElementById("cameraCurve");
-      if (curveDriver && settings && timedEventsListenerMode ) {
-        let modCurveComponent = curveDriver.components.mod_curve;
-        if (modCurveComponent) {
-          modCurveComponent.toggleMove(true);
-          // PlayPauseMedia();
-        }
-      }
-   }
-   if (timeKey.keytype.toLowerCase().includes("beat")) {
-      if (primaryAudioEl != null) {
-         // console.log("beat volume " + volume);
-         primaryAudioEl.components.primary_audio_control.timekey_beat(.5);
-      }
-   }
-   if (timeKey.keytype.toLowerCase().includes("stop trigger audio")) {
-      var triggerAudioController = document.getElementById("triggerAudio");
-      if (triggerAudioController != null) {
-        triggerAudioController.components.trigger_audio_control.stopTriggerAudio();
-      }
-   }
+//  let posObj = {};
+//  let rotObj = {};
+//  let tempLabel = "";
+//    if (timeKey.keydata.toLowerCase().includes('loop')) {
+//       LoopTimedEvent(timeKey.keytype, timeKey.keyduration, timeKey.keydata, timeKey.keytags);
+//       // return null;
+//       if (timeKey.keytype.toLowerCase().includes("color lerp")) {
+//          console.log("tryna beat loop");
+//          let envEl = document.getElementById('enviroEl');
+//          if (envEl != null && envEl.components.enviro_mods) {
+//             // console.log("beat volume " + volume);
+//             duration = timeKey.keyduration * 1000;
+//             envEl.components.enviro_mods.colorlerp(duration); //does loop on arg
+//          }
+//       }
+//    }
+//    if (timeKey.keytype.toLowerCase().includes("Player Follow Path")) {
+//       let curveDriver = document.getElementById("cameraCurve");
+//       if (curveDriver && settings && timedEventsListenerMode ) {
+//         let modCurveComponent = curveDriver.components.mod_curve;
+//         if (modCurveComponent) {
+//           modCurveComponent.toggleMove(true);
+//           // PlayPauseMedia();
+//         }
+//       }
+//    }
+//    if (timeKey.keytype.toLowerCase().includes("beat")) {
+//       if (primaryAudioEl != null) {
+//          // console.log("beat volume " + volume);
+//          primaryAudioEl.components.primary_audio_control.timekey_beat(.5);
+//       }
+//    }
+//    if (timeKey.keytype.toLowerCase().includes("stop trigger audio")) {
+//       var triggerAudioController = document.getElementById("triggerAudio");
+//       if (triggerAudioController != null) {
+//         triggerAudioController.components.trigger_audio_control.stopTriggerAudio();
+//       }
+//    }
 
-   if (timeKey.keytype.toLowerCase().includes("random time")) {
-      if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-         if (primaryAudioEl != null) {
-            // console.log("beat volume " + volume);
-            primaryAudioEl.components.primary_audio_control.randomTime();
-         }
-      } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
-         var videoControllerEl = document.getElementById('primary_video_0');  
-         if (videoControllerEl != null) {
-            console.log("gotsa video embedVideo");
-            let videoController = videoControllerEl.components.vid_materials_embed;
-            if (videoController) {
-               videoController.randomTime();
-            }
-         }
-      } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
-         let youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
-         if (youtube_player) {
-            youtube_player.randomTime();
-         }
-      }
-   }
-   if (timeKey.keytype.toLowerCase().includes("goto time")) {
-      if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-         if (primaryAudioEl != null) {
-            // console.log("beat volume " + volume);
-            primaryAudioEl.components.primary_audio_control.gotoTime(timeKey.keydata);
-         }
-      } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
-         if (settings.sceneType == "Default" || settings.sceneType == "AFrame") {
-            var videoControllerEl = document.getElementById('primary_video_0');  
-            if (videoControllerEl != null) {
-               console.log("gotsa video embedVideo");
-               let videoController = videoControllerEl.components.vid_materials_embed;
-               if (videoController) {
-                  videoController.gotoTime(timeKey.keydata);
-               }
-            }
-         } else { //normal html, just ?
-            video.currentTime = timeKey.keydata;
-         }
-      } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
-         let youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
-         if (youtube_player) {
-            youtube_player.goToTime(timeKey.keydata);
-         }
-      }
-   }
-   if (timeKey.keytype.toLowerCase().includes("text show")) {
-      console.log("tryna text show ");
-      let greetingDialogEl = document.getElementById("sceneGreetingDialog");
-      if (greetingDialogEl) {
-         let dialogComponent = greetingDialogEl.components.scene_greeting_dialog;
-         if (dialogComponent) {
-            console.log("tryna modGreeting " + timeKey.keydata);
-            dialogComponent.setLocation();
-            dialogComponent.modQuest(timeKey.keydata);
-         } else {
-            console.log("caint find no dangblurn dialog component!");
-         }
-      } else {
-         console.log("sceneGreetingDialog element missing!");
-      }
-   }
-   if (timeKey.keytype.toLowerCase().includes("text index")) {
-      let greetingDialogEl = document.getElementById("sceneGreetingDialog");
-      if (greetingDialogEl) {
-         let dialogComponent = greetingDialogEl.components.scene_greeting_dialog;
-         if (dialogComponent) {
-            console.log("tryna modGreeting " + timeKey.keydata);
-            dialogComponent.setLocation();
-            dialogComponent.modQuest(timeKey.keydata);
-         } else {
-            console.log("caint find no dangblurn dialog component!");
-         }
-      }
-   }
-   if (timeKey.keytype.toLowerCase().includes("text next")) {
-      let greetingDialogEl = document.getElementById("sceneGreetingDialog");
-      if (greetingDialogEl) {
-         let dialogComponent = greetingDialogEl.components.scene_greeting_dialog;
-         if (dialogComponent) {
-            console.log("tryna modGreeting " + timeKey.keydata);
-            dialogComponent.setLocation();
-            dialogComponent.modQuest(timeKey.keydata);
-         } else {
-            console.log("caint find no dangblurn dialog component!");
-         }
-      }
-   }
-   if (timeKey.keytype.toLowerCase().includes("clear")) {
-      ClearIntervals();
-   } 
-   if (timeKey.keytype == "Next") {
-      GoToNext();
-   } 
-   if (timeKey.keytype == "Previous") {
-      GoToPrevious();
-   } 
-   if (timeKey.keytype == "Player Look") {
-      let tkElID = null;
-      if (timeKey.keydata) {
-         tkElID = document.getElementById(timeKey.keydata.toString());
-      }
-      if (tkElID) { //has a specific element ID (timestamp)
-         posObj = tkElID.getAttribute("position");
-         player.components.player_mover.lookAt(duration, "#" +CSS.escape(timeKey.keydata.toString()));
-      } else if (timeKey.tags && timeKey.keytags.length) { //otherwise check the tags against classes
-         console.log("checking tags for Player Look timedevent " + timeKey.keytags);
+//    if (timeKey.keytype.toLowerCase().includes("random time")) {
+//       if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
+//          if (primaryAudioEl != null) {
+//             // console.log("beat volume " + volume);
+//             primaryAudioEl.components.primary_audio_control.randomTime();
+//          }
+//       } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
+//          var videoControllerEl = document.getElementById('primary_video_0');  
+//          if (videoControllerEl != null) {
+//             console.log("gotsa video embedVideo");
+//             let videoController = videoControllerEl.components.vid_materials_embed;
+//             if (videoController) {
+//                videoController.randomTime();
+//             }
+//          }
+//       } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
+//          let youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+//          if (youtube_player) {
+//             youtube_player.randomTime();
+//          }
+//       }
+//    }
+//    if (timeKey.keytype.toLowerCase().includes("goto time")) {
+//       if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
+//          if (primaryAudioEl != null) {
+//             // console.log("beat volume " + volume);
+//             primaryAudioEl.components.primary_audio_control.gotoTime(timeKey.keydata);
+//          }
+//       } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
+//          if (settings.sceneType == "Default" || settings.sceneType == "AFrame") {
+//             var videoControllerEl = document.getElementById('primary_video_0');  
+//             if (videoControllerEl != null) {
+//                console.log("gotsa video embedVideo");
+//                let videoController = videoControllerEl.components.vid_materials_embed;
+//                if (videoController) {
+//                   videoController.gotoTime(timeKey.keydata);
+//                }
+//             }
+//          } else { //normal html, just ?
+//             video.currentTime = timeKey.keydata;
+//          }
+//       } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
+//          let youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+//          if (youtube_player) {
+//             youtube_player.goToTime(timeKey.keydata);
+//          }
+//       }
+//    }
+//    if (timeKey.keytype.toLowerCase().includes("text show")) {
+//       console.log("tryna text show ");
+//       let greetingDialogEl = document.getElementById("sceneGreetingDialog");
+//       if (greetingDialogEl) {
+//          let dialogComponent = greetingDialogEl.components.scene_greeting_dialog;
+//          if (dialogComponent) {
+//             console.log("tryna modGreeting " + timeKey.keydata);
+//             dialogComponent.setLocation();
+//             dialogComponent.modQuest(timeKey.keydata);
+//          } else {
+//             console.log("caint find no dangblurn dialog component!");
+//          }
+//       } else {
+//          console.log("sceneGreetingDialog element missing!");
+//       }
+//    }
+//    if (timeKey.keytype.toLowerCase().includes("text index")) {
+//       let greetingDialogEl = document.getElementById("sceneGreetingDialog");
+//       if (greetingDialogEl) {
+//          let dialogComponent = greetingDialogEl.components.scene_greeting_dialog;
+//          if (dialogComponent) {
+//             console.log("tryna modGreeting " + timeKey.keydata);
+//             dialogComponent.setLocation();
+//             dialogComponent.modQuest(timeKey.keydata);
+//          } else {
+//             console.log("caint find no dangblurn dialog component!");
+//          }
+//       }
+//    }
+//    if (timeKey.keytype.toLowerCase().includes("text next")) {
+//       let greetingDialogEl = document.getElementById("sceneGreetingDialog");
+//       if (greetingDialogEl) {
+//          let dialogComponent = greetingDialogEl.components.scene_greeting_dialog;
+//          if (dialogComponent) {
+//             console.log("tryna modGreeting " + timeKey.keydata);
+//             dialogComponent.setLocation();
+//             dialogComponent.modQuest(timeKey.keydata);
+//          } else {
+//             console.log("caint find no dangblurn dialog component!");
+//          }
+//       }
+//    }
+//    if (timeKey.keytype.toLowerCase().includes("clear")) {
+//       ClearIntervals();
+//    } 
+//    if (timeKey.keytype == "Next") {
+//       GoToNext();
+//    } 
+//    if (timeKey.keytype == "Previous") {
+//       GoToPrevious();
+//    } 
+//    if (timeKey.keytype == "Player Look") {
+//       let tkElID = null;
+//       if (timeKey.keydata) {
+//          tkElID = document.getElementById(timeKey.keydata.toString());
+//       }
+//       if (tkElID) { //has a specific element ID (timestamp)
+//          posObj = tkElID.getAttribute("position");
+//          player.components.player_mover.lookAt(duration, "#" +CSS.escape(timeKey.keydata.toString()));
+//       } else if (timeKey.tags && timeKey.keytags.length) { //otherwise check the tags against classes
+//          console.log("checking tags for Player Look timedevent " + timeKey.keytags);
          
-      } else { //try to match element name
-         console.log("caint find el " + timeKey.keydata);
-         for (let s = 0; s < sceneLocations.locations.length; s++) {
-            if (timeKey.keydata.toString() == sceneLocations.locations[s].name) {
-               tkElID = document.getElementById(sceneLocations.locations[s].timestamp);
-               if (tkElID) {
-                  posObj = tkElID.getAttribute("position");
-                  player.components.player_mover.lookAt(duration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
-               }
-            }
-         }  
-      }
-   } 
-   if (timeKey.keytype == "Player Snap") {
-      console.log("tryna play a Player Snap event " + timeKey.keydata.toString());
+//       } else { //try to match element name
+//          console.log("caint find el " + timeKey.keydata);
+//          for (let s = 0; s < sceneLocations.locations.length; s++) {
+//             if (timeKey.keydata.toString() == sceneLocations.locations[s].name) {
+//                tkElID = document.getElementById(sceneLocations.locations[s].timestamp);
+//                if (tkElID) {
+//                   posObj = tkElID.getAttribute("position");
+//                   player.components.player_mover.lookAt(duration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
+//                }
+//             }
+//          }  
+//       }
+//    } 
+//    if (timeKey.keytype == "Player Snap") {
+//       console.log("tryna play a Player Snap event " + timeKey.keydata.toString());
     
-      let tkElID = document.getElementById(timeKey.keydata.toString());
-      if (tkElID) {
-         posObj = tkElID.getAttribute("position");
-         player.components.player_mover.move('player', posObj, rotObj, 0, "#" +CSS.escape(timeKey.keydata.toString()));
-      } else {
-         console.log("caint find el " + timeKey.keydata);
-         for (let s = 0; s < sceneLocations.locations.length; s++) {
-            if (timeKey.keydata.toString() == sceneLocations.locations[s].name) {
-               tkElID = document.getElementById(sceneLocations.locations[s].timestamp);
-               if (tkElID) {
-                  posObj = tkElID.getAttribute("position");
-                  player.components.player_mover.move('player', posObj, rotObj, 0, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
-               }
-            }
-         }  
-      }
-   } 
-   if (timeKey.keytype == "Player Lerp") {
-      console.log("trynba lerp to " + timeKey.keydata.toString());
-      let tkElID = document.getElementById(timeKey.keydata.toString());
-      // duration = timeKey.keyduration;
-      if (tkElID) {
-         posObj = tkElID.getAttribute("position");
-         player.components.player_mover.move('player', posObj, rotObj, timeKey.keyduration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
-      } else {
-         console.log("caint find timeKey.keyData el " + timeKey.keydata);
-         for (let s = 0; s < sceneLocations.locations.length; s++) {
-            if (timeKey.keydata.toString() == sceneLocations.locations[s].name) {
-               tkElID = document.getElementById(sceneLocations.locations[s].timestamp);
-               if (tkElID) {
-                  posObj = tkElID.getAttribute("position");
-                  player.components.player_mover.move('player', posObj, rotObj, timeKey.keyduration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
-               }
-            }
-         }
-      }
-   } 
-}
+//       let tkElID = document.getElementById(timeKey.keydata.toString());
+//       if (tkElID) {
+//          posObj = tkElID.getAttribute("position");
+//          player.components.player_mover.move('player', posObj, rotObj, 0, "#" +CSS.escape(timeKey.keydata.toString()));
+//       } else {
+//          console.log("caint find el " + timeKey.keydata);
+//          for (let s = 0; s < sceneLocations.locations.length; s++) {
+//             if (timeKey.keydata.toString() == sceneLocations.locations[s].name) {
+//                tkElID = document.getElementById(sceneLocations.locations[s].timestamp);
+//                if (tkElID) {
+//                   posObj = tkElID.getAttribute("position");
+//                   player.components.player_mover.move('player', posObj, rotObj, 0, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
+//                }
+//             }
+//          }  
+//       }
+//    } 
+//    if (timeKey.keytype == "Player Lerp") {
+//       console.log("trynba lerp to " + timeKey.keydata.toString());
+//       let tkElID = document.getElementById(timeKey.keydata.toString());
+//       // duration = timeKey.keyduration;
+//       if (tkElID) {
+//          posObj = tkElID.getAttribute("position");
+//          player.components.player_mover.move('player', posObj, rotObj, timeKey.keyduration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
+//       } else {
+//          console.log("caint find timeKey.keyData el " + timeKey.keydata);
+//          for (let s = 0; s < sceneLocations.locations.length; s++) {
+//             if (timeKey.keydata.toString() == sceneLocations.locations[s].name) {
+//                tkElID = document.getElementById(sceneLocations.locations[s].timestamp);
+//                if (tkElID) {
+//                   posObj = tkElID.getAttribute("position");
+//                   player.components.player_mover.move('player', posObj, rotObj, timeKey.keyduration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
+//                }
+//             }
+//          }
+//       }
+//    } 
+// }

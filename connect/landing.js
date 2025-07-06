@@ -22,8 +22,8 @@ export const sceneEl = document.querySelector('a-scene');
 export const lerp = (x, y, a) => x * (1 - a) + y * a;
 
 var dateString = Date.now().toString();
-export let roomUsers = {};
-export let stringRoomUsers = "";
+// export let roomUsers = {};
+// export let stringRoomUsers = "";
 var trimmedString = dateString.substring(dateString.length - 4, 4);
 var username;
 var pics = [];
@@ -232,7 +232,7 @@ $(function() {
 
    if (settings.useMatrix) {
       console.log("Loading browser MATRIX sdk!!!");
-      GetMatrixData();
+      // GetMatrixData();
    }
    // if (settings.clearLocalMods) { //??????
    //    for (var i=0; i < localStorage.length; i++)  {
@@ -248,7 +248,7 @@ $(function() {
    if (settings.networking == 'SocketIO' && settings.socketHost) {
       if (settings.socketHost.length > 6) { //i.e. not "none" or empty
          socketHost = settings.socketHost;
-         InitSocket();
+         // InitSocket();
       }
    } else if (settings.networking == 'WebRTC') {
       console.log("TRYNA INIT LIVEKIT");
@@ -475,24 +475,24 @@ export async function GetMatrixData() { //use matrix.org for... something
    }
 // }
 
-export function SetTimeKeysData (tkData) {
-   timeKeysData = tkData;
-}
-export function MediaTimeUpdate (timeString) {
-   // console.log("MediaTimeUpdate " + fancyTimeString);
-   // transportTimeStatsEl = document.getElementById("transportStats");
-   if (transportTimeStatsEl == null) {
-      transportTimeStatsEl = document.getElementById("transportStats");
-   } else {
-      transportTimeStatsEl.innerHTML = timeString;
-   }
-   modalTimeStatsEl = document.getElementById('modalTimeStats');
-   if (modalTimeStatsEl == null) {
-      } else {
-         modalTimeStatsEl.innerHTML = timeString;
-      }
+// export function SetTimeKeysData (tkData) {
+//    timeKeysData = tkData;
+// }
+// export function MediaTimeUpdate (timeString) {
+//    // console.log("MediaTimeUpdate " + fancyTimeString);
+//    // transportTimeStatsEl = document.getElementById("transportStats");
+//    if (transportTimeStatsEl == null) {
+//       transportTimeStatsEl = document.getElementById("transportStats");
+//    } else {
+//       transportTimeStatsEl.innerHTML = timeString;
+//    }
+//    modalTimeStatsEl = document.getElementById('modalTimeStats');
+//    if (modalTimeStatsEl == null) {
+//       } else {
+//          modalTimeStatsEl.innerHTML = timeString;
+//       }
       
-   }
+//    }
    
 function ReturnModelName (_id) {
    if (_id.toString().includes("primitive_")) {
@@ -1144,228 +1144,228 @@ function RandomHexColor() {
 
 
 
-function InitSocket () {
-if (settings && !socket) {
+// function InitSocket () {
+// if (settings && !socket) {
 
-   socket = io.connect(socketHost, {
-         query : {
-            token: token,
-            uname: avatarName,
-            color: RandomHexColor(),
-            room: room
-         },
-         url: socketHost + "/socket.io/?EIO=4&transport=polling&t=NNjNltH",
-         autoConnect: false,  //connection is opened if token checks out above
-         reconnection: false
-         });      
-      }
+//    socket = io.connect(socketHost, {
+//          query : {
+//             token: token,
+//             uname: avatarName,
+//             color: RandomHexColor(),
+//             room: room
+//          },
+//          url: socketHost + "/socket.io/?EIO=4&transport=polling&t=NNjNltH",
+//          autoConnect: false,  //connection is opened if token checks out above
+//          reconnection: false
+//          });      
+//       }
 
-   socket.on('connect', function() {
+//    socket.on('connect', function() {
    
-      isConnected = true;
-      console.log("tryna join " + avatarName + " socketID " + socket.id);
-      mySocketID = socket.id;
-      socket.emit('join', room, avatarName, "web");
+//       isConnected = true;
+//       console.log("tryna join " + avatarName + " socketID " + socket.id);
+//       mySocketID = socket.id;
+//       socket.emit('join', room, avatarName, "web");
    
-   });
+//    });
 
-   socket.on('user joined', function(data) {
-      console.log("room user " + data + 'joined room ' + room);
-      socket.emit('room users', room);
-      UpdatePlayerAvatars(roomUsers);
-    //   EmitSelfPosition();
-   });
+//    socket.on('user joined', function(data) {
+//       console.log("room user " + data + 'joined room ' + room);
+//       socket.emit('room users', room);
+//       UpdatePlayerAvatars(roomUsers);
+//     //   EmitSelfPosition();
+//    });
 
-   socket.on('admin message', function (data) {
-      console.log('recieved admin message : ' + data + ' in room ' + room);
-      if (data.toString().toLowerCase() == "next") {
-        //  GoToNext();
-      }
-   });
+//    socket.on('admin message', function (data) {
+//       console.log('recieved admin message : ' + data + ' in room ' + room);
+//       if (data.toString().toLowerCase() == "next") {
+//         //  GoToNext();
+//       }
+//    });
 
-   socket.on('room users', function (data) {
-    console.log("room users data : " + data);
-   $('#users').html("");
+//    socket.on('room users', function (data) {
+//     console.log("room users data : " + data);
+//    $('#users').html("");
 
-      roomUsers = JSON.parse(data);
+//       roomUsers = JSON.parse(data);
 
-      UpdatePlayerAvatars(roomUsers);
-      let roomUsersString = "";
-      // console.log("room users count = " +roomUsers.length);
-      let usercount = 0;
-         // for (let value of Object.values(roomUsers)) { //key = socket.id, value= username
+//       UpdatePlayerAvatars(roomUsers);
+//       let roomUsersString = "";
+//       // console.log("room users count = " +roomUsers.length);
+//       let usercount = 0;
+//          // for (let value of Object.values(roomUsers)) { //key = socket.id, value= username
       
-         // console.log(value); 
-         // usercount++;
-         // //   $('#users').prepend($('<button class=\x22btn\x22 style=\x22margin: 5px 5px 5px 5px;\x22><h4><strong>').text( value ).append("</strong></h4></button>"));
-         //    if (value.includes("~")) {
-         //       split = value.split("~"); //color is appended to username
-         //       roomUsersString += "<a href=\x22#\x22 style=\x22color:"+split[1]+"\x22>"+split[0]+"</a>, ";
-         //    } else {
-         //       roomUsersString += value + ", ";
-         //    }   
-         // }
-      var keys = Object.keys(roomUsers);
-      for(var i=0; i<keys.length; i++){
-         var key = keys[i];
-         var isMe = "";
-         // console.log(key, roomUsers[key]);
-         if (key === socket.id) {
-            isMe = "*";
-            // console.log("key isMe " + key);
-         }
-         const value = roomUsers[key];
-         // console.log("roomUsers key:value: " + key + " " + value); 
-         usercount++;
-      //   $('#users').prepend($('<button class=\x22btn\x22 style=\x22margin: 5px 5px 5px 5px;\x22><h4><strong>').text( value ).append("</strong></h4></button>"));
-         if (value.includes("~")) {
-            let split = value.split("~"); //color is appended to username
-            split[0] = split[0].replace("_", " ");
-            roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
-         } else {
-            roomUsersString += value + ", ";
-         }   
-      }
-      roomUsersString = roomUsersString.substring(0, roomUsersString.length - 2); //trim last comma and trailing space
-      roomUsersString = usercount + " users connected: " + roomUsersString;
-      // console.log(roomUsersString);
-      $('#users').html(roomUsersString);
-      stringRoomUsers = roomUsersString;
-      // $('#users_2').html(roomUsersString);
-    //   EmitSelfPosition();
-   });
+//          // console.log(value); 
+//          // usercount++;
+//          // //   $('#users').prepend($('<button class=\x22btn\x22 style=\x22margin: 5px 5px 5px 5px;\x22><h4><strong>').text( value ).append("</strong></h4></button>"));
+//          //    if (value.includes("~")) {
+//          //       split = value.split("~"); //color is appended to username
+//          //       roomUsersString += "<a href=\x22#\x22 style=\x22color:"+split[1]+"\x22>"+split[0]+"</a>, ";
+//          //    } else {
+//          //       roomUsersString += value + ", ";
+//          //    }   
+//          // }
+//       var keys = Object.keys(roomUsers);
+//       for(var i=0; i<keys.length; i++){
+//          var key = keys[i];
+//          var isMe = "";
+//          // console.log(key, roomUsers[key]);
+//          if (key === socket.id) {
+//             isMe = "*";
+//             // console.log("key isMe " + key);
+//          }
+//          const value = roomUsers[key];
+//          // console.log("roomUsers key:value: " + key + " " + value); 
+//          usercount++;
+//       //   $('#users').prepend($('<button class=\x22btn\x22 style=\x22margin: 5px 5px 5px 5px;\x22><h4><strong>').text( value ).append("</strong></h4></button>"));
+//          if (value.includes("~")) {
+//             let split = value.split("~"); //color is appended to username
+//             split[0] = split[0].replace("_", " ");
+//             roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
+//          } else {
+//             roomUsersString += value + ", ";
+//          }   
+//       }
+//       roomUsersString = roomUsersString.substring(0, roomUsersString.length - 2); //trim last comma and trailing space
+//       roomUsersString = usercount + " users connected: " + roomUsersString;
+//       // console.log(roomUsersString);
+//       $('#users').html(roomUsersString);
+//       stringRoomUsers = roomUsersString;
+//       // $('#users_2').html(roomUsersString);
+//     //   EmitSelfPosition();
+//    });
 
-   socket.on('getbytes', function (data, metadata) {
-         //TODO split the incoming wad and build array(s) of pics, audio, etc based on metadata
-         console.log("tryna parse some bytes");
-   });
+//    socket.on('getbytes', function (data, metadata) {
+//          //TODO split the incoming wad and build array(s) of pics, audio, etc based on metadata
+//          console.log("tryna parse some bytes");
+//    });
 
-   socket.on('getpicframe', function (data, sid) {
+//    socket.on('getpicframe', function (data, sid) {
 
       
-      console.log("getting pic frame from " + sid + " roomUsers " + JSON.stringify(roomUsers));
-      let userName = "";
-      var keys = Object.keys(roomUsers);
-      for(var i=0; i<keys.length; i++){
-         var key = keys[i];
-         console.log(key, roomUsers[key]);
-         if (keys[i] === sid) {
-            console.log(roomUsers[key] + " sent a pic frame!");
-            userName = roomUsers[key];
-         }
-      }   
-      // foreach(var user in roomUsers) {
-      //    if (user.key == socket.id) {
-      //       console.log(user.value + " sent a pic frame!");
-      //    }
+//       console.log("getting pic frame from " + sid + " roomUsers " + JSON.stringify(roomUsers));
+//       let userName = "";
+//       var keys = Object.keys(roomUsers);
+//       for(var i=0; i<keys.length; i++){
+//          var key = keys[i];
+//          console.log(key, roomUsers[key]);
+//          if (keys[i] === sid) {
+//             console.log(roomUsers[key] + " sent a pic frame!");
+//             userName = roomUsers[key];
+//          }
+//       }   
+//       // foreach(var user in roomUsers) {
+//       //    if (user.key == socket.id) {
+//       //       console.log(user.value + " sent a pic frame!");
+//       //    }
       
-      // }
-      var instance = $('body').data('backstretch');
-      var base64 = _arrayBufferToBase64(data);
-      var imgSrc = "data:image/jpg;base64," + base64;
-      // if (instance === undefined) {
-      //     pics.push(imgSrc);
-      //     // $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});
-      //         $(".screen-overlay").backstretch(imgSrc);
-      // } 
-      // $(".screen-overlay").backstretch("destroy", true);
-      // $(".screen-overlay").backstretch(pics);
-      // $(".screen-overlay").backstretch(imgSrc, {fade: 250});
-      // $('#future').prepend($('<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>').text( "<"+ userName + " <a id="+socket.id+" href=\x22#\x22>sent a pic</a>").append("</span><hr>"));
-      $('#future').prepend($("<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>-"+ userName + " <button class=\x22btn picbutton\x22 id="+sid+" href=\x22#\x22>sent a pic</button></span><hr>"));
-      UpdateContentBox();
-         if (pics.length < 1) {
+//       // }
+//       var instance = $('body').data('backstretch');
+//       var base64 = _arrayBufferToBase64(data);
+//       var imgSrc = "data:image/jpg;base64," + base64;
+//       // if (instance === undefined) {
+//       //     pics.push(imgSrc);
+//       //     // $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});
+//       //         $(".screen-overlay").backstretch(imgSrc);
+//       // } 
+//       // $(".screen-overlay").backstretch("destroy", true);
+//       // $(".screen-overlay").backstretch(pics);
+//       // $(".screen-overlay").backstretch(imgSrc, {fade: 250});
+//       // $('#future').prepend($('<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>').text( "<"+ userName + " <a id="+socket.id+" href=\x22#\x22>sent a pic</a>").append("</span><hr>"));
+//       $('#future').prepend($("<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>-"+ userName + " <button class=\x22btn picbutton\x22 id="+sid+" href=\x22#\x22>sent a pic</button></span><hr>"));
+//       UpdateContentBox();
+//          if (pics.length < 1) {
             
-            pics.push(imgSrc);
-            // picsBuffer = pics;
-            // console.log("pushing pic # " + pics.length);
-            if (!instance) {
-                  $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});
-            }
-         } 
+//             pics.push(imgSrc);
+//             // picsBuffer = pics;
+//             // console.log("pushing pic # " + pics.length);
+//             if (!instance) {
+//                   $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});
+//             }
+//          } 
 
-      if (picArrayIndex < 20) {
-      if (pics < picArrayIndex) {
-         pics.push(imgSrc);
-         // $(".screen-overlay").backstretch(imgSrc);
-      } else {
-         pics.splice(picArrayIndex, 1, imgSrc);  
-      }
-      picArrayIndex++;
-      } else {
-      picArrayIndex = 0;
-      pics.splice(picArrayIndex, 1, imgSrc);
-      picArrayIndex++;
-      }
+//       if (picArrayIndex < 20) {
+//       if (pics < picArrayIndex) {
+//          pics.push(imgSrc);
+//          // $(".screen-overlay").backstretch(imgSrc);
+//       } else {
+//          pics.splice(picArrayIndex, 1, imgSrc);  
+//       }
+//       picArrayIndex++;
+//       } else {
+//       picArrayIndex = 0;
+//       pics.splice(picArrayIndex, 1, imgSrc);
+//       picArrayIndex++;
+//       }
 
-   });
+//    });
 
-   socket.on('getaudiochunk', function (data){
-      console.log("messages data : " + data);
+//    socket.on('getaudiochunk', function (data){
+//       console.log("messages data : " + data);
 
-   });
+//    });
 
-   socket.on('user messages', function(data1, data2) {
-         console.log("messages data : " + data1 + data2);
-         // $('#future').prepend($('<div class=\x22row bubble pull-left\x22 style=\x22margin: 5px 5px 5px 5px;\x22><span class=\x22smallfont_yellow\x22>').text( data1 + ": " + data2).append("</span></div>"));
-         // $('#future').prepend($('<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>').text( "<"+ data1 + ": " + data2).append("</span>"));
-         $('#future').prepend("<div class=\x22messageBubbleIn\x22 style=\x22float: left;\x22>"+ data1 + ": " + data2 + "</div><br><br><br>");
-         if ($('#future li').length > 555) {
-            $('#future li').last().remove();
-         }
-         // UpdateContentBox();
-   });
+//    socket.on('user messages', function(data1, data2) {
+//          console.log("messages data : " + data1 + data2);
+//          // $('#future').prepend($('<div class=\x22row bubble pull-left\x22 style=\x22margin: 5px 5px 5px 5px;\x22><span class=\x22smallfont_yellow\x22>').text( data1 + ": " + data2).append("</span></div>"));
+//          // $('#future').prepend($('<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>').text( "<"+ data1 + ": " + data2).append("</span>"));
+//          $('#future').prepend("<div class=\x22messageBubbleIn\x22 style=\x22float: left;\x22>"+ data1 + ": " + data2 + "</div><br><br><br>");
+//          if ($('#future li').length > 555) {
+//             $('#future li').last().remove();
+//          }
+//          // UpdateContentBox();
+//    });
 
-   socket.on('playerposition', function(uname, posX, posY, posZ, rotX, rotY, rotZ, socketID, source) {
-      // console.log("player position data : " + uname + "x " + posX + " y " + posY + " z " + posZ + " rx " + rotX + " ry " + rotY + " rz " + rotZ + " sid " + socketID + " from " + source);
-      let pAvatar = document.getElementById(socketID);
-      // console.log("pAvatar is " + JSON.stringify(pAvatar));
-      // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
-      if (pAvatar != null) { //TODO Interpolation!
-         if (source == "unity") {
-            posZ = posZ * -1;
-         }
-         const posObj = {};
-         posObj.x = posX;
-         posObj.y = posY;
-         posObj.z = posZ;
-         const rotObj = {};
-         rotObj.x = rotX;
-         rotObj.y = rotY;
-         rotObj.z = rotZ;
-         // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
-         // const posRotObj = {position: posX + "," + posY + "," + posZ, rotation: rotX + "," + rotY + "," + rotZ};
-               const posRotObj = {}
-               posRotObj.position = posObj;
-               posRotObj.rotation = rotObj;
-               var mover = pAvatar.components.mover; //much easier
-               // MoveElement(socketID, posRotObj);
-               // const event = new CustomEvent('update_pos_rot', {detail: posRotObj}, false);
-               // console.log("tryna dispatchEvent " + event);
-               // pAvatar.dispatchEvent(event);
-               mover.move(socketID, posObj, rotObj);
-         // pAvatar.setAttribute('position', posX + " " + posY + " " + posZ);
-         // pAvatar.setAttribute('rotation', rotX + " " + rotY + " " + rotZ);
-      } else {
-         UpdatePlayerAvatars(roomUsers);
-      }
-      EmitSelfPosition();
-   });
+//    socket.on('playerposition', function(uname, posX, posY, posZ, rotX, rotY, rotZ, socketID, source) {
+//       // console.log("player position data : " + uname + "x " + posX + " y " + posY + " z " + posZ + " rx " + rotX + " ry " + rotY + " rz " + rotZ + " sid " + socketID + " from " + source);
+//       let pAvatar = document.getElementById(socketID);
+//       // console.log("pAvatar is " + JSON.stringify(pAvatar));
+//       // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
+//       if (pAvatar != null) { //TODO Interpolation!
+//          if (source == "unity") {
+//             posZ = posZ * -1;
+//          }
+//          const posObj = {};
+//          posObj.x = posX;
+//          posObj.y = posY;
+//          posObj.z = posZ;
+//          const rotObj = {};
+//          rotObj.x = rotX;
+//          rotObj.y = rotY;
+//          rotObj.z = rotZ;
+//          // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
+//          // const posRotObj = {position: posX + "," + posY + "," + posZ, rotation: rotX + "," + rotY + "," + rotZ};
+//                const posRotObj = {}
+//                posRotObj.position = posObj;
+//                posRotObj.rotation = rotObj;
+//                var mover = pAvatar.components.mover; //much easier
+//                // MoveElement(socketID, posRotObj);
+//                // const event = new CustomEvent('update_pos_rot', {detail: posRotObj}, false);
+//                // console.log("tryna dispatchEvent " + event);
+//                // pAvatar.dispatchEvent(event);
+//                mover.move(socketID, posObj, rotObj);
+//          // pAvatar.setAttribute('position', posX + " " + posY + " " + posZ);
+//          // pAvatar.setAttribute('rotation', rotX + " " + rotY + " " + rotZ);
+//       } else {
+//          UpdatePlayerAvatars(roomUsers);
+//       }
+//       EmitSelfPosition();
+//    });
 
-   socket.on('selfplayerposition', function() {
-      let pAvatar = document.getElementById(mySocketID);
-      if (pAvatar != null) {
-         pAvatar.setAttribute('position', cameraPosition.x + " " + cameraPosition.y + " " + cameraPosition.z);
-      }
-   });
+//    socket.on('selfplayerposition', function() {
+//       let pAvatar = document.getElementById(mySocketID);
+//       if (pAvatar != null) {
+//          pAvatar.setAttribute('position', cameraPosition.x + " " + cameraPosition.y + " " + cameraPosition.z);
+//       }
+//    });
 
-   socket.on('disconnect', function() {
-      UpdatePlayerAvatars(roomUsers);
-   });
-   socket.on('user left', function(id) {
-      console.log("user left with socket id " + id);
-   });
-} //InitSocket end
+//    socket.on('disconnect', function() {
+//       UpdatePlayerAvatars(roomUsers);
+//    });
+//    socket.on('user left', function(id) {
+//       console.log("user left with socket id " + id);
+//    });
+// } //InitSocket end
 
 // socket.on('selfplayerposition', function() {
 //    let pAvatar = document.getElementById(mySocketID);
@@ -1389,29 +1389,29 @@ if (settings && !socket) {
 
 
 
-export function SendChatMessage() {
-   if (socket) {
-      var message = $('#chat_input').val();
-      if (message.length > 0) {
-      message = $('<div>').text(message).html(); //sanitize with wierd jquery fu
-      console.log("tryna send " + message);
-      if (message.includes("https://")) {
-         message = "<a href=\x22"+message+"\x22 target=\x22_blank\x22>"+message+"</a>";
-      }
-      $('#future').prepend("<div class=\x22messageBubbleOut\x22 style=\x22float: right;\x22>you:</span> " +  message +"</div><br><br><br>");
-      // $('#future').prepend($('<div style=\x22float: right;\x22><span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightgreen\x22>').html( ">you:</span> " +  message +"</div>").append("<hr>"));
-      if (socket) {
-         socket.emit('user message', message); //but not to ourselfs
-      }
+// export function SendChatMessage() {
+//    if (socket) {
+//       var message = $('#chat_input').val();
+//       if (message.length > 0) {
+//       message = $('<div>').text(message).html(); //sanitize with wierd jquery fu
+//       console.log("tryna send " + message);
+//       if (message.includes("https://")) {
+//          message = "<a href=\x22"+message+"\x22 target=\x22_blank\x22>"+message+"</a>";
+//       }
+//       $('#future').prepend("<div class=\x22messageBubbleOut\x22 style=\x22float: right;\x22>you:</span> " +  message +"</div><br><br><br>");
+//       // $('#future').prepend($('<div style=\x22float: right;\x22><span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightgreen\x22>').html( ">you:</span> " +  message +"</div>").append("<hr>"));
+//       if (socket) {
+//          socket.emit('user message', message); //but not to ourselfs
+//       }
       
-      UpdateContentBox();
-      document.getElementById("chat_input").value = "";
-      }
-   } else {
-      console.log("socket not connected..");
-      $('#future').prepend("<div class=\x22messageBubbleOut\x22 style=\x22float: right;\x22></span>Socket Not Connected!</div><br><br><br>");
-   }
-}
+//       UpdateContentBox();
+//       document.getElementById("chat_input").value = "";
+//       }
+//    } else {
+//       console.log("socket not connected..");
+//       $('#future').prepend("<div class=\x22messageBubbleOut\x22 style=\x22float: right;\x22></span>Socket Not Connected!</div><br><br><br>");
+//    }
+// }
 export function ValidateEmail(mail) 
 {
  if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))
@@ -1601,26 +1601,26 @@ function UpdatePlayerPosition(sid, px, py, pz) { //nevermind
    }
 }
 
-InitContentBox();
+// InitContentBox();
 
-function InitContentBox () {
-   console.log("tryna InitContentBox");
-   var coll = document.getElementsByClassName("collapsible");
-   var i;
+// function InitContentBox () {
+//    console.log("tryna InitContentBox");
+//    var coll = document.getElementsByClassName("collapsible");
+//    var i;
 
-   for (i = 0; i < coll.length; i++) {
-   coll[i].addEventListener("click", function() {
-      console.log("collapsible click");
-      this.classList.toggle("active");
-      var content = this.nextElementSibling;
-      if (content.style.maxHeight){
-         content.style.maxHeight = null;
-      } else {
-         content.style.maxHeight = content.scrollHeight + "px";
-      }
-   });
-   }
-}
+//    for (i = 0; i < coll.length; i++) {
+//    coll[i].addEventListener("click", function() {
+//       console.log("collapsible click");
+//       this.classList.toggle("active");
+//       var content = this.nextElementSibling;
+//       if (content.style.maxHeight){
+//          content.style.maxHeight = null;
+//       } else {
+//          content.style.maxHeight = content.scrollHeight + "px";
+//       }
+//    });
+//    }
+// }
 // window.onload = init;
 // if (document.querySelector(".avatarName")) {
 //    avatarName = document.querySelector(".avatarName").id;

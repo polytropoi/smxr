@@ -1,5 +1,6 @@
 /* global AFRAME, THREE */
 
+// import 'Ammo';
 import { UpdateLocalPlayerState, UpdateLocalEquipment } from "../../../connect/indexedDb.js";
 import { room, settings, localData, userData, mouseDowntime } from "../../../connect/connect.js";
 import { keydown, SetSelectedLocationTimestamp, showDialogPanel, DropInventoryItem, DequipAndDropItem } from "../../js/dialogs.js";

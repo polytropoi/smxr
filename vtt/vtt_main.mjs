@@ -24,6 +24,7 @@ async function setup() {
   // Then adding the application's canvas to the DOM body.
   document.body.appendChild(app.canvas);
 }
+
 async function prePreLoader () {
   mappicURL = await ReturnMap();
   backgroundURL = await ReturnBackground();

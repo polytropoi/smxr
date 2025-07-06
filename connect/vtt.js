@@ -1,6 +1,6 @@
 //loaded with landing pages, instead of connect.js, or landing.js (w/out aframe/three, with pixi refs)
 
-import { GoWithIt } from "../vtt/main.mjs"; //pixi fu here!@
+import { GoWithIt } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)

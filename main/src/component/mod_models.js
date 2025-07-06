@@ -2,7 +2,7 @@
 // function clamp (num, min, max) {
 //   return Math.min(Math.max(num, min), max);
 // }
-
+import 'aframe-extras';
 import { settings, localData, ToggleTransformControls } from "../../../connect/connect.js";
 import { clamp } from "../component/content-utils.js";
 import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
@@ -498,6 +498,7 @@ AFRAME.registerComponent('mod_model', {
                         "loop": "repeat",
                       });
                     } else if (danceClips.length) {
+                      console.log("tryna play dance " + danceClips[0].name);
                       this.el.setAttribute('animation-mixer', {
                         "clip": danceClips[0].name,
                         "loop": "repeat",

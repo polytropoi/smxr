@@ -1,5 +1,7 @@
-import { settings, MediaTimeUpdate, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/connect.js";
-import { fancyTimeFormat, mouse } from "../../src/component/content-utils.js";
+import { timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/events.js";
+import { settings } from "../../../connect/connect.js";
+import { MediaTimeUpdate, fancyTimeFormat } from "../../../connect/media.js";
+import { mouse } from "../../src/component/content-utils.js";
 
 const raycaster = new THREE.Raycaster(); //reuse this!  
 

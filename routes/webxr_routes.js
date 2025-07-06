@@ -343,10 +343,12 @@ webxr_router.get('/:_id', function (req, res) {
     // let blinkScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-blink-controls.min.js\x22></script>"
     let blinkScript = "";
     let brownianScript = "";
-    let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
+    let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
     let enviromentScript = ""; //for aframe env component
-    let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
+    // let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
+    let troikaScript = "<script src=\x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22></script>";
+    
     let particleScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>";    
     // let aframeScript = "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>";
     let threejsVersion = "173";
@@ -374,6 +376,13 @@ webxr_router.get('/:_id', function (req, res) {
                                                
                         "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
                         "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                        "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
+                        // "\x22aframe-physics-system\x22: \x22../main/vendor/aframe/aframe-physics-system.min.js\x22,"+ 
+                        // "\x22Ammo\x22: \x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22,"+ 
+                        "\x22aframe-extras\x22: \x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22,"+ 
+                        
+                        
+                        
                         "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
                         
                         "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
@@ -454,9 +463,18 @@ webxr_router.get('/:_id', function (req, res) {
                         "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
                         "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
                         "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
-                                               
+                        
                         "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
                         "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                        "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
+                        // "\x22aframe-physics-system\x22: \x22../main/vendor/aframe/aframe-physics-system.min.js\x22,"+ 
+                        // "\x22Ammo\x22: \x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22,"+ 
+                        
+                        "\x22aframe-extras\x22: \x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22,"+ 
+
+                        
+                        // "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                        // "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
                         "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
                         
                         "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
@@ -483,7 +501,9 @@ webxr_router.get('/:_id', function (req, res) {
                     if (sceneData.sceneTags[i].toLowerCase().includes("physics")) { 
                         usePhysicsType = "ammo";
                         physicsScripts =  "<script src=\x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-physics-system.min.js\x22></script>";     
+                        // "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.3/dist/aframe-physics-system.js\x22></script>";     
+                        "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-physics-system_mod.js\x22></script>";     
+                       
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("brownian")) {
                         brownianScript =  "<script type=\x22module\x22 src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
@@ -2745,7 +2765,7 @@ webxr_router.get('/:_id', function (req, res) {
                     
                     youtubeEntity = "<a-entity id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
 
-                    "<a-entity id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayer\x22 youtube_player=\x22yt_id: "+
+                    "<a-entity id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayerModel\x22 youtube_player=\x22yt_id: "+
                     sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></a-entity>"+
                     "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 1.7 .1\x22 id=\x22youtubeTitle\x22></a-text>"+
                     "<a-text width=\x223\x22 position=\x22-.95 .7 .1\x22 id=\x22youtubeState\x22></a-text>"+
@@ -3731,10 +3751,10 @@ webxr_router.get('/:_id', function (req, res) {
                         
                         // aframeScript +
                         // contentUtils +
-                        troikaScript +
+                        // troikaScript +
                         physicsScripts +
                         logScripts +
-                        aframeExtrasScript +
+                        // aframeExtrasScript +
                         extraScripts + //catch all...
 
                         "<script src=\x22../main/vendor/howler/src/howler.core.js\x22></script>"+
@@ -3846,7 +3866,7 @@ webxr_router.get('/:_id', function (req, res) {
                         "<a-asset-item id=\x22key\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/key1b.glb\x22></a-asset-item>\n"+
                         "<a-asset-item id=\x22talkbubble\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/talkbubble1b.glb\x22></a-asset-item>\n"+
                         "<a-asset-item id=\x22thoughtbubble\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/thoughtbubble1.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22youtubeplayer\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/youtubeplayer2.glb\x22></a-asset-item>\n"+
+                        "<a-asset-item id=\x22youtubeplayerModel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/youtubeplayer2.glb\x22></a-asset-item>\n"+
                         "<a-asset-item id=\x22audioplayer\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/audioplayer_3x1_d.glb\x22></a-asset-item>\n"+
                         "<a-asset-item id=\x22reticle2\x22 response-type=\x22arraybuffer\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/reticle2.glb\x22></a-asset-item>\n"+
                         "<a-mixin id=\x22bar\x22 geometry=\x22primitive: box\x22 material=\x22color: black\x22 scale-y-color=\x22from: 10 60 10; to: 180 255 180; maxScale: 15\x22></a-mixin>\n"+
