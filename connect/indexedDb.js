@@ -33,15 +33,6 @@ export function InitIDB() {
          pstore.createIndex("profile", ["profile"], { unique: true });
         
       }
-      // if (event.oldVersion < 3) { //version 2
-      //    //nyet
-      // }
-      //  const store = db.createObjectStore("scenes", { keyPath: "shortID" });
-      //  store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
-
-      // const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
-      // pstore.createIndex("profile", ["profile"], { unique: true });
-
    };
 
     request.onsuccess = function () {
@@ -352,6 +343,20 @@ export function InitIDB() {
        console.error("could not connect to iDB " + event);
        return "error"
     };
+   request.onupgradeneeded = function (event) {
+      const db = request.result;
+      console.log("onupgradeneeded fired, indexedDB oldversion is " + event.oldVersion);
+
+      if (event.oldVersion < 1) {
+         console.log("is there a version 0")
+         const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+         store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
+      }
+      if (event.oldVersion < 2) { //version 1
+         const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
+         pstore.createIndex("profile", ["profile"], { unique: true });
+      }
+   };
    request.onsuccess = function () {
        console.log("Saving local profile, IDB opened successfully");
               let profile = {};
@@ -464,6 +469,20 @@ export function InitIDB() {
          console.error("could not connect to iDB " + event);
          return "error" + event;
       };
+      request.onupgradeneeded = function (event) {
+         const db = request.result;
+         console.log("onupgradeneeded fired, indexedDB oldversion is " + event.oldVersion);
+
+         if (event.oldVersion < 1) {
+            console.log("is there a version 0")
+            const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+            store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
+         }
+         if (event.oldVersion < 2) { //version 1
+            const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
+            pstore.createIndex("profile", ["profile"], { unique: true });
+         }
+      };
       request.onsuccess = function () {
          console.log("Saving local profile, IDB opened successfully");
          let profile = {};
@@ -504,6 +523,20 @@ export function InitIDB() {
       request.onerror = (event) => {
          console.error("could not connect to iDB " + event);
          return "error"
+      };
+      request.onupgradeneeded = function (event) {
+         const db = request.result;
+         console.log("onupgradeneeded fired, indexedDB oldversion is " + event.oldVersion);
+
+         if (event.oldVersion < 1) {
+            console.log("is there a version 0")
+            const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+            store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
+         }
+         if (event.oldVersion < 2) { //version 1
+            const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
+            pstore.createIndex("profile", ["profile"], { unique: true });
+         }
       };
       request.onsuccess = function () {
          console.log("updating localPlayerState " + JSON.stringify(playerState));
@@ -549,6 +582,20 @@ export function InitIDB() {
       request.onerror = (event) => {
          console.error("could not connect to iDB " + event);
          return "error"
+      };
+      request.onupgradeneeded = function (event) {
+         const db = request.result;
+         console.log("onupgradeneeded fired, indexedDB oldversion is " + event.oldVersion);
+
+         if (event.oldVersion < 1) {
+            console.log("is there a version 0")
+            const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+            store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
+         }
+         if (event.oldVersion < 2) { //version 1
+            const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
+            pstore.createIndex("profile", ["profile"], { unique: true });
+         }
       };
       request.onsuccess = function () {
          console.log("updating local player equipment " + JSON.stringify(equipment));
