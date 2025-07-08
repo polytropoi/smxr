@@ -93,13 +93,13 @@ export async function addSpriteAnimation (app, texture, spriteData, elements) {
     for (let i = 0; i < elementCount; i++) {
         const sheet = new Spritesheet(texture, spriteData);
         await sheet.parse();
-        console.log('Spritesheet ready to use!');
+        // console.log('Spritesheet ready to use!');
             //     await Assets.load(spriteData);
         const frames = [];
         var count = 0;
         for(var key in spriteData.frames) {
         if(spriteData.frames.hasOwnProperty(key)) {
-            console.log(key);
+            // console.log(key);
             // frames.push(Texture.from(key));
                 frames.push(sheet.textures[key]);
                 count++;
@@ -107,7 +107,7 @@ export async function addSpriteAnimation (app, texture, spriteData, elements) {
         }
 
         // let length = spriteData.frames.length;
-        console.log("frames " + count);
+        // console.log("frames " + count);
         
 
         const anim = new AnimatedSprite(frames);

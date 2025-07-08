@@ -4,12 +4,12 @@ import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData } from "../connect
 // import { matrixClient } from "../connect/matrix.js";
 // import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
 // import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
-// import { youtubePlayer, youtubeIsPlaying } from "../connect/media.js"; //move to ?
+
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
 import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData } from "../connect/events.js";
 // import { SetTimeKeysData } from "./landing.js";
 
-
+import { settings } from "../connect/settings.js";
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
@@ -21,7 +21,7 @@ export let lastCloudUpdate = "";
 export let localData = {locations:[], settings:{}, localFiles: {}}; //all the things
 export let locationTimestamps = [];
 export let sceneLocations = {locations: [], locationMods: []};
-export let settings; //push this to an aframe component for fetching...
+// export let settings; //push this to an aframe component for fetching...
 export let attributions = [];
 export var videoEl = null;
 // export const mouse = new THREE.Vector2();
@@ -117,10 +117,10 @@ $(function() {
 
    player = document.getElementById("player");
    // player = document.getElementById("cameraRig");
-   let settingsEl = document.getElementById('settingsDataElement'); //volume, color, etc...
-   let theSettingsData = settingsEl.getAttribute('data-settings');
+   // let settingsEl = document.getElementById('settingsDataElement'); //volume, color, etc...
+   // let theSettingsData = settingsEl.getAttribute('data-settings');
 
-   settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
+   // settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
    // console.log("Settings : " + JSON.stringify(settings));
    let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
    if (timedEventsEl) {

@@ -1,6 +1,13 @@
+// import { createRequire } from 'module';
+// const require = createRequire(import.meta.url);
+// const {Howl, Howler} = require('../node_modules/howler/dist/howler.js');
 
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData} from "../../connect/events.js";
-import { settings } from "../../connect/connect.js";
+import { settings } from "../../connect/settings.js";
+// import { Howl, Howler } from '../node_modules/howler/dist/howler.js';
+// import {Howl} from '../main/vendor/howler/src/howler.js';
+
+// import {Howl} from 'howler';
 
 let mainTransportSlider = null;
 let transportPlayButton = null;
@@ -16,6 +23,10 @@ export let sceneTextItems = [];
 // export let timedEventsListenerMode = "";
 export var primaryAudioMangler = null; 
 export let primaryAudioEl = document.querySelector('#primaryAudio');
+
+export let primaryAudioHowl;
+
+export let audioGroupsData = {};
 
 let modalTimeStatsEl = null; //stats for timekeys modal
 let transportTimeStatsEl = null;
@@ -253,6 +264,8 @@ export function TransportPlayButton () {
   } else if (primaryAudioMangler != null) {
     console.log("play button for audio");
     primaryAudioMangler.playPauseToggle();
+  } else {
+    PrimaryAudioPlayPauseToggle();
   }
 }
 function FastForwardButton () {
@@ -432,6 +445,33 @@ export function UpdateTriggerAudioVolume(newVolume) {
    }
 }
 
+export function PrimaryAudioPlayPauseToggle () {
+
+  if (primaryAudioHowl && primaryAudioHowl != undefined) {
+    // primaryAudioHowl;
+    if (!primaryAudioHowl.playing()) {
+            console.log("tryna play " + settings.primary_mp3url);
+        primaryAudioHowl.play();
+        // this.el.emit('primaryAudioToggle', {isPlaying : true}, true);
+        // this.isPlaying = true;
+        PauseIntervals(false);
+        return true;
+    } else {    
+        console.log("tryna pause");
+        primaryAudioHowl.pause();
+        // this.el.emit('primaryAudioToggle', {isPlaying : false}, true);
+        // this.isPlaying = false;
+        PauseIntervals(true);
+        return false;
+    }
+  } else {
+    console.log("tryna load " + settings.primary_mp3url);
+    primaryAudioHowl = new Howl({
+      src: [settings.primary_mp3url]
+    });
+  }
+}
+
 
 export function PrimaryAudioInit() {
   console.log("PRIMARY AUDIO INIT()");
@@ -463,4 +503,53 @@ export function PrimaryAudioInit() {
   } else {
     console.log("didn't find no audiovizzler");
   }
+}
+
+export function FetchAudioGroupsData(groupArray) { //sets data in aframe component
+    console.log("tryna fetch audioGroups: " +JSON.stringify(groupArray));
+    var posting = $.ajax({
+        url: "/return_audiogroups",
+        type: 'POST',
+          contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(groupArray),
+            success: function( data, textStatus, xhr ){
+                // console.log("audiogroups data: " + JSON.stringify(data));
+                // return  JSON.stringify(data);
+                // if (settings && settings.sceneType == "aframe") {
+                    let audioGroupsControllerEl = document.getElementById('audioGroupsEl');
+                    let audioGroupsController = audioGroupsControllerEl.components.audio_groups_control;
+                    audioGroupsController.SetAudioGroupsData(data);
+                // }
+                // audioGroupsData = data;
+
+            },
+            error: function( xhr, textStatus, errorThrown ){
+                console.log("error! " + errorThrown);
+                // return null;
+                // document.cookie = "expires=Thu, 01 Jan 1970 00:00:00"; //set to expired date to delete?
+                }
+            });
+
+}
+
+export async function ReturnAudioGroupsData() { //use outside aframe 
+  await settings;
+  let groupArray = settings.audioGroups;
+    console.log("tryna fetch audioGroups: " +JSON.stringify(groupArray));
+
+    try {
+      const response = await fetch('/return_audiogroups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(groupArray)
+        });
+        const data = await response.json();
+        console.log(data);
+        return data;
+      } catch(error) {
+        console.log("error returning audiogroups " +error);
+      } 
 }

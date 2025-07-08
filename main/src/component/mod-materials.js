@@ -1,5 +1,5 @@
 import { timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/events.js";
-import { settings } from "../../../connect/connect.js";
+import { settings  } from "../../../connect/settings.js";
 import { MediaTimeUpdate, fancyTimeFormat } from "../../../connect/media.js";
 import { mouse } from "../../src/component/content-utils.js";
 

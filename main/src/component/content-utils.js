@@ -12,9 +12,10 @@ import 'troika-text';
 import {  PauseIntervals, SetVideoEventsData, SetTimeKeysData, SetTimedEventsListenerMode } from "../../../connect/events.js";
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
 // import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
-import { settings, videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation, 
+import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation, 
       userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations } from "../../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
+import { settings } from "../../../connect/settings.js";
 import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat } from '../../../connect/media.js';
 
 var ua = window.navigator.userAgent;

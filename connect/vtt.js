@@ -2,6 +2,16 @@
 
 import { GoWithIt } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 
+// import { ReturnAudioGroupsData } from "../connect/media.js";
+
+// import { Howl, Howler } from "howler";
+
+// import { Howl } from 'howler'
+
+// var sound = new Howl({
+// //   src: ['/static/sounds/clock.ogg']
+// });
+
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
@@ -101,6 +111,8 @@ let intersections = [];
 export let avatarName = "";
 let primaryAudioEl = document.querySelector('#primaryAudio');
 
+export let audioGroupsData = {};
+
 // window.LocationRowClick = LocationRowClick;
 
 $(function() { 
@@ -153,6 +165,8 @@ $(function() {
    console.log("room: " +room + " vid " + settings.sceneVideoStreams + " type " + settings.sceneType);
 
    $('#room_id').append($('<button><h4><strong>').text("Welcome to scene " + room).append("</strong></h4></button>"));
+
+
 
 //    if (settings && settings.mappicURL) {
     
@@ -245,6 +259,10 @@ $(function() {
       console.log("Loading browser MATRIX sdk!!!");
       GetMatrixData();
    }
+   // if (settings.audioGroups) {
+   //    ReturnAudioGroupsData(settings.audioGroups);
+   //    // console.log("audioGroupsData  " + JSON.stringify(audioGroupsData));
+   // }
    // if (settings.clearLocalMods) { //??????
    //    for (var i=0; i < localStorage.length; i++)  {
       
@@ -358,6 +376,13 @@ export async function ReturnBackground () {
     console.log("tryna return backgroundURL " + settings.backgroundURL);
     return settings.backgroundURL;
 }
+
+// export async function ReturnAudioGroups () {
+//     await settings;
+//     console.log("tryna return audioData " + settings.audioGroups);
+//     let audioGroupDataResponse = await ReturnAudioGroupsData();
+//     return audioGroupDataResponse;
+// }
 
 export async function ReturnSprites () {
     await sprites;

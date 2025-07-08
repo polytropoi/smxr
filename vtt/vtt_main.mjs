@@ -1,10 +1,12 @@
 
 import { Application, Assets, Graphics, Texture } from 'pixi';
 import { addBackground, addMap } from './addBackground.mjs';
+import { addText } from './addText.mjs';
 import { addFishes, addSpriteAnimation, animateElements, animateFishes } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
 import { ReturnMap, ReturnBackground, ReturnSprites } from '../connect/vtt.js';
+import { ReturnAudioGroupsData } from '../connect/media.js';
 // Create a PixiJS application.
 const app = new Application();
 // Store an array of fish sprites for animation.
@@ -13,6 +15,7 @@ let elements = [];
 let mappicURL;
 let backgroundURL;
 let spritesData;
+let audioGroupsData;
 
 let sprites
 
@@ -30,6 +33,8 @@ async function prePreLoader () {
   backgroundURL = await ReturnBackground();
   console.log("backgroundURL " + backgroundURL);
   spritesData = await ReturnSprites();
+  audioGroupsData = await ReturnAudioGroupsData();
+  console.log("audioGroupsData " + JSON.stringify(audioGroupsData));
   // console.log("spritesData " + JSON.stringify(spritesData));
 }
 
@@ -76,6 +81,7 @@ export async function GoWithIt() { //called from vtt.js
     addGridOverlay(app);
   }
 
+  addText(app);
   app.ticker.add((time) => animateElements(app, elements, time));
 
   addWaterOverlay(app);

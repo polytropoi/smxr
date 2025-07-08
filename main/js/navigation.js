@@ -2,7 +2,7 @@ import AFRAME from 'aframe';
 import * as THREE from 'three';
 
 import { showDialogPanel } from "../js/dialogs.js";
-import { settings } from "../../../connect/connect.js";
+import { settings } from "../../../connect/settings.js";
 import {} from "content-utils";
 
 if (location.hostname !== 'localhost' && window.location.protocol === 'http:') window.location.protocol = 'https:';

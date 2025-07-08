@@ -17,9 +17,6 @@ import { ReturnPresignedUrl } from "../connect/objectStore.js";
 
 import { ObjectId } from "mongodb";
 
-
-
-
 const nonLocalDomains = ["regalrooms.tv"]; //TODO you know what! (put this in sceneDomain object)
 
 function getExtension(filename) {
@@ -126,9 +123,9 @@ vtt_router.get('/:_id', function (req, res) {
     let sceneTriggerVolume = .8;
     let objectAudioGroups = []; //audio groups attached to objex, not scene (i.e. primary, ambient, trigger)
     // let ambienturl = "";
-    var mp3url = "";
-    var oggurl = "";
-    var pngurl = "";
+    var primary_mp3url = "";
+    var primary_oggurl = "";
+    var primary_pngurl = "";
     let ambientUrl = "";
     let triggerUrl = "";
     var vidUrl = "";
@@ -363,8 +360,11 @@ vtt_router.get('/:_id', function (req, res) {
     let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
                         "\x22pixi\x22: \x22../main/js/pixi/pixi.min.mjs?v=1\x22"+  //ok, then
+                        // "\x22howler\x22: \x22../main/vendor/howler/src/howler.mjs\x22"+
+                        // "\x22howlerspatial\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.spatial.min.js\x22"+  //ok, then
                        
                      
+                    
                         "}"+
                     "}</script>";
     // let importMap = "";
@@ -2162,10 +2162,10 @@ vtt_router.get('/:_id', function (req, res) {
                 if (sceneResponse.scenePrimaryAudioID != undefined && audio_items[i]._id == sceneResponse.scenePrimaryAudioID) {
                     primaryAudioTitle = audio_items[i].title;
                     primaryAudioObject = audio_items[i];
-                    mp3url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, 6000);
-                    oggurl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, 6000);
-                    pngurl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, 6000);
-                    primaryAudioWaveform = pngurl;
+                    primary_mp3url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + mp3Name, 6000);
+                    primary_oggurl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + oggName, 6000);
+                    primary_pngurl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + audio_items[i].userID + "/audio/" + audio_items[i]._id + "." + pngName, 6000);
+                    primaryAudioWaveform = primary_pngurl;
                     pAudioWaveform = "<img id=\x22primaryAudioWaveform\x22 crossorigin=\x22anonymous\x22 src=\x22"+primaryAudioWaveform+"\x22>";
                 }
                 if (sceneResponse.sceneAmbientAudioID != undefined && audio_items[i]._id == sceneResponse.sceneAmbientAudioID) {
@@ -2229,14 +2229,14 @@ vtt_router.get('/:_id', function (req, res) {
                 synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script src=\x22../main/js/synth.js\x22></script>";
             }
             if (hasPrimaryAudio) {
-                if (mp3url.length > 8) {
+                if (primary_mp3url.length > 8) {
                     let html5 = "html5: true,";
                     if (sceneResponse.scenePrimaryAudioVisualizer == true) {  //audio analysis won't work in html5 mode
                         html5 = "html5: false,";
                     } 
                     primaryAudioScript = "<script>\n" +      
                     "let primaryAudioHowl = new Howl({" + //inject howler for non-streaming
-                            "src: [\x22"+oggurl+"\x22,\x22"+mp3url+"\x22], "+html5+" ctx: true, volume: 0," + loopable +
+                            "src: [\x22"+primary_oggurl+"\x22,\x22"+primary_mp3url+"\x22], "+html5+" ctx: true, volume: 0," + loopable +
                         "});" +
                     "primaryAudioHowl.load();</script>";
                     primaryAudioEntity = "<div id=\x22primaryAudioParent\x22></div>"; //parent, no window click
@@ -2260,8 +2260,8 @@ vtt_router.get('/:_id', function (req, res) {
                 }
             }
             if (hasPrimaryAudioStream) {
-                mp3url = sceneResponse.scenePrimaryAudioStreamURL;   
-                oggurl = sceneResponse.scenePrimaryAudioStreamURL;                    
+                primary_mp3url = sceneResponse.scenePrimaryAudioStreamURL;   
+                primary_oggurl = sceneResponse.scenePrimaryAudioStreamURL;                    
                 streamPrimaryAudio = true;
                 primaryAudioScript = "<script>Howler.autoUnlock = false;" + //override if streaming url
                 "let primaryAudioHowl = new Howl({" + //inject howler for non-streaming
@@ -2276,7 +2276,7 @@ vtt_router.get('/:_id', function (req, res) {
                 // "title: "+primaryAudioTitle+"\x22  geometry=\x22primitive: sphere; radius: .25;\x22 material=\x22shader: noise;\x22 position=\x220 0 2.6\x22></a-entity></a-entity>";
                 if (sceneResponse.scenePrimaryAudioTriggerEvents) { //maybe pass a do not listen?
                     var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
-                    loadAudioEvents = "<a-entity primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></a-entity>"; 
+                    loadAudioEvents = "<div primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></div>"; 
                 }
             }
             if (hasAmbientAudio) {
@@ -2842,6 +2842,8 @@ vtt_router.get('/:_id', function (req, res) {
                     settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
                     settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
                     // settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
+
+                    settings.primary_mp3url = primary_mp3url;
                     settings.mappicURL = mappicURL;
                     settings.skyboxIDs = skyboxIDs;
                     settings.skyboxID = skyboxID;
@@ -3070,7 +3072,7 @@ vtt_router.get('/:_id', function (req, res) {
                         "</div></center>"+
                         audioSliders +
                         canvasOverlay +
-                        "<div id=\x22theModal\x22 class=\x22modal\x22 ><div id=\x22modalContent\x22 class=\x22modal-content\x22></div>";
+                        "<div id=\x22theModal\x22 class=\x22modal\x22 ><div id=\x22modalContent\x22 class=\x22modal-content\x22></div>" +
                         attributionsTextEntity +
                         "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
                         "</body>\n" +
@@ -3118,6 +3120,7 @@ vtt_router.get('/:_id', function (req, res) {
                         settings.useSynth = hasSynth;
                         settings.mappicURL = mappicURL;
                         settings.backgroundURL = backgroundURL;
+                        settings.primary_mp3url = primary_mp3url;
                         // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
                         // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
                         // settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
@@ -3243,8 +3246,8 @@ vtt_router.get('/:_id', function (req, res) {
                         if (req.session.user) {
                             uid = req.session.user._id;
                         }
-                        if (mp3url != undefined && mp3url.length > 6) {
-                            audioHtml = '<div id=\z22primaryAudioControls\x22><audio controls><source src=\x22' + mp3url + '\x22 type=\x22audio/mp3\x22></audio></div>';
+                        if (primary_mp3url != undefined && primary_mp3url.length > 6) {
+                            audioHtml = '<div id=\z22primaryAudioControls\x22><audio controls><source src=\x22' + primary_mp3url + '\x22 type=\x22audio/mp3\x22></audio></div>';
                         }
                         var token=jwt.sign({userId:uid,shortID:sceneResponse.short_id},process.env.JWT_SECRET, { expiresIn: '1h' }); 
                         // console.log("avatar name: " + avatarName + " token " + token);
@@ -3279,6 +3282,9 @@ vtt_router.get('/:_id', function (req, res) {
                         socketScripts +
                         
                         importMap +
+
+                        
+                        "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +
                         "<script type=\x22module\x22 src=\x22/connect/vtt.js\x22 defer=\x22defer\x22></script>" +
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
 
@@ -3286,11 +3292,14 @@ vtt_router.get('/:_id', function (req, res) {
                             // "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
                             // "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
 
-                            // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
-                            // "<script src=\x22/connect/indexedDb.js\x22></script>" +
+                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
+                            "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+
+                            "<script type=\x22module\x22 src=\x22/connect/media.js\x22></script>" +
                             // "<script src=\x22/connect/traffic.js\x22></script>"+
                         
-                        
+                        // "<script src=\x22../main/vendor/howler/src/howler.core.js\x22></script>"+
+                        // "<script src=\x22../main/vendor/howler/src/howler.mjs\x22></script>"+
                         "<style> audio {"+
                                 "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 
                                 "width: 100%;"+
@@ -3307,10 +3316,15 @@ vtt_router.get('/:_id', function (req, res) {
                         settingsData +
                         spriteData + 
 
-                        "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div>" +
+                        "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +
 
                         // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
-                        // "<script src=\x22/connect/indexedDb.js\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+
+                        // primaryAudioScript +
+                        primaryAudioEntity +
+
+
                         // "<script src=\x22/connect/traffic.js\x22></script>"+
                     
                         // "<div class=\x22container px-4 px-lg-5 my-5\x22>"+

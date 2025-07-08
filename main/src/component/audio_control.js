@@ -1,11 +1,13 @@
 // import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "../component/content-utils.js";
 // import { fancyTimeFormat, primaryAudioMangler } from "content-utils";
-import { fancyTimeFormat, primaryAudioMangler } from "../../../connect/media.js";
+import { fancyTimeFormat, primaryAudioMangler, FetchAudioGroupsData } from "../../../connect/media.js";
 import { PauseIntervals, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/events.js";
-
-import { settings, attributions, lerp } from "../../../connect/connect.js";
+import { settings  } from "../../../connect/settings.js";
+import { attributions, lerp } from "../../../connect/connect.js";
 import { SceneManglerModal } from "../../js/dialogs.js";
 
+
+// import {Howl, Howler} from '../main/vendor/howler/src/howler.mjs';
 
 let params = document.querySelector(".primaryAudioParams").id;
 console.log("audioParames: " +params);
@@ -388,51 +390,11 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
                     // primaryAudioHowl.volume(normalizedVolume);
                     // el.emit('primaryAudioToggle', {isPlaying : true}, true);
 
-
                 } 
                 if (!this.data.useDefaultPlayer) {
                     document.querySelector("#primaryAudioText").setAttribute('visible', true);
                 }
                 
-                // document.querySelector("#primaryAudioText").setAttribute("look-at", "#player");
-                
-                        // getJSON('/netradiodetails', function(err, data) { //deprecated for now, bad vuln
-                        //     if (data != null) {
-                        //         if (err !== null) {
-                        //             console.log('Something went wrong: ' + data);
-                        //         } else {
-                        //             console.log('streamdata ' + data.title);
-                        //             document.querySelector("#primaryAudioText").setAttribute('text', {
-                        //                 // width: 4, 
-                        //                 align: "left",
-                        //                 value: "Stream: "+hostname+"\nPlaying: "+ data.title + "\n\nListeners: " + data.listeners + "\nBitrate: " + data.bitrate
-                        //             });
-                        //         }
-                        //     }
-                        // });
-
-                // let that = this;
-                // el.addEventListener('mouseenter', () => {
-                //     if (!this.data.useDefaultPlayer) {
-                //         document.querySelector("#primaryAudioText").setAttribute('visible', true);
-                //     }
-                //     // document.querySelector("#primaryAudioText").setAttribute("look-at", "#player");
-                //         // getJSON('/netradiodetails', function(err, data) { //deprecated for now, bad vuln
-                //         //     if (data != null) {
-                //         //         if (err !== null) {
-                //         //             console.log('Something went wrong: ' + data);
-                //         //         } else {
-                //         //             console.log('streamdata ' + data.title);
-                //         //             document.querySelector("#primaryAudioText").setAttribute('text', {
-                //         //                 // width: 4, 
-                //         //                 align: "left",
-                //         //                 value: "Stream: "+hostname+"\nPlaying: "+ data.title + "\n\nListeners: " + data.listeners + "\nBitrate: " + data.bitrate
-                //         //             });
-                //         //         }
-                //         //     }
-                //         // });
-                //     // console.log('mousenter primary_audio_control');
-                // });
                 el.setAttribute('light', {
                     type: 'point',
                     distance: 30,
@@ -1172,6 +1134,25 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
         //   }
         }); //end register
     }
+
+// export function PrimaryAudioPlayPauseToggle () {
+//     this.primaryAudioHowl = primaryAudioHowl;
+//     if (!this.primaryAudioHowl.playing()) {
+//         console.log("tryna play");
+//         this.primaryAudioHowl.play();
+//         this.el.emit('primaryAudioToggle', {isPlaying : true}, true);
+//         this.isPlaying = true;
+//         PauseIntervals(false);
+//         return true;
+//     } else {    
+//         console.log("tryna pause");
+//         this.primaryAudioHowl.pause();
+//         this.el.emit('primaryAudioToggle', {isPlaying : false}, true);
+//         this.isPlaying = false;
+//         PauseIntervals(true);
+//         return false;
+//     }
+// }
 
 function AudioTimeUpdate (timeString) {
     // console.log("AudioTimeUpdate " + timeString);
@@ -2312,27 +2293,30 @@ AFRAME.registerComponent('audio_groups_control', { //element and component are a
     }
 });
 
-function FetchAudioGroupsData(groupArray) {
-    console.log("tryna fetch audioGroups: " +JSON.stringify(groupArray));
-    var posting = $.ajax({
-        url: "/return_audiogroups",
-        type: 'POST',
-          contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: JSON.stringify(groupArray),
-            success: function( data, textStatus, xhr ){
-                // console.log("audiogroups data: " + JSON.stringify(data));
-                // return  JSON.stringify(data);
-                let audioGroupsControllerEl = document.getElementById('audioGroupsEl');
-                let audioGroupsController = audioGroupsControllerEl.components.audio_groups_control;
-                audioGroupsController.SetAudioGroupsData(data);
+// export function FetchAudioGroupsData(groupArray) {
+//     console.log("tryna fetch audioGroups: " +JSON.stringify(groupArray));
+//     var posting = $.ajax({
+//         url: "/return_audiogroups",
+//         type: 'POST',
+//           contentType: "application/json; charset=utf-8",
+//         dataType: "json",
+//         data: JSON.stringify(groupArray),
+//             success: function( data, textStatus, xhr ){
+//                 // console.log("audiogroups data: " + JSON.stringify(data));
+//                 // return  JSON.stringify(data);
+//                 if (settings && settings.sceneType == "aframe") {
+//                     let audioGroupsControllerEl = document.getElementById('audioGroupsEl');
+//                     let audioGroupsController = audioGroupsControllerEl.components.audio_groups_control;
+//                     audioGroupsController.SetAudioGroupsData(data);
+//                 }
+//                 audioGroupsData = data;
 
-            },
-            error: function( xhr, textStatus, errorThrown ){
-                console.log("error! " + errorThrown);
-                // return null;
-                // document.cookie = "expires=Thu, 01 Jan 1970 00:00:00"; //set to expired date to delete?
-                }
-            });
+//             },
+//             error: function( xhr, textStatus, errorThrown ){
+//                 console.log("error! " + errorThrown);
+//                 // return null;
+//                 // document.cookie = "expires=Thu, 01 Jan 1970 00:00:00"; //set to expired date to delete?
+//                 }
+//             });
 
-}
+// }
