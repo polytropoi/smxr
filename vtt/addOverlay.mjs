@@ -50,7 +50,7 @@ export function animateWaterOverlay(app, time) {
 }
 
 
-export function addGridOverlay(app) {
+export function addGridOverlay(app, viewport) {
     //Create a Graphics object and draw a pixel-perfect line
   // let graphics = new Graphics().moveTo(0, 0).lineTo(window.width, window.height).stroke({ color: 0xff0000, pixelLine: true });
   const gridPixel = buildGrid(app, new Graphics()).stroke({ color: 0x8a8a8a, pixelLine: true, width: 1 });
@@ -84,5 +84,6 @@ export function addGridOverlay(app) {
   // container.y = app.screen.height / 2;
     container.x = 0;
   container.y = 0;
-  app.stage.addChild(container);
+  // app.stage.addChild(container);
+          viewport.addChild(container);
 }

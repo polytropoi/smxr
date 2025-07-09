@@ -1,11 +1,14 @@
 
-import { Application, Assets, Graphics, Texture } from 'pixi';
+import { Application, Assets, Graphics, Texture, Container } from 'pixi';
+import { Viewport } from 'pixi-viewport';
+import { Button } from '@pixi/ui';
+    
 import { addBackground, addMap } from './addBackground.mjs';
 import { addText } from './addText.mjs';
 import { addFishes, addSpriteAnimation, animateElements, animateFishes } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
-import { ReturnMap, ReturnBackground, ReturnSprites } from '../connect/vtt.js';
+import { ReturnMap, ReturnBackground, ReturnSprites, ReturnText  } from '../connect/vtt.js';
 import { ReturnAudioGroupsData } from '../connect/media.js';
 // Create a PixiJS application.
 const app = new Application();
@@ -16,6 +19,7 @@ let mappicURL;
 let backgroundURL;
 let spritesData;
 let audioGroupsData;
+let textData;
 
 let sprites
 
@@ -35,7 +39,8 @@ async function prePreLoader () {
   spritesData = await ReturnSprites();
   audioGroupsData = await ReturnAudioGroupsData();
   console.log("audioGroupsData " + JSON.stringify(audioGroupsData));
-  // console.log("spritesData " + JSON.stringify(spritesData));
+  textData = await ReturnText();
+  console.log("text " + JSON.stringify(textData));
 }
 
 
@@ -72,31 +77,74 @@ export async function GoWithIt() { //called from vtt.js
   await prePreLoader();
   await preload();
 
+    const viewport = new Viewport({
+    screenWidth: window.innerWidth,
+    screenHeight: window.innerHeight,
+    worldWidth: 1000,
+    worldHeight: 1000,
+    events: app.renderer.events, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+  });
+
+    // add the viewport to the stage
+  app.stage.addChild(viewport);
+
+  // activate plugins
+  viewport
+      .drag()
+      .pinch()
+      .wheel()
+      .decelerate();
+
 
   if (backgroundURL) {
-    addBackground(app);
+    addBackground(app, viewport);
   }
   if (mappicURL) {
-    addMap(app);
-    addGridOverlay(app);
+    addMap(app, viewport);
+    addGridOverlay(app, viewport);
   }
 
-  addText(app);
+
   app.ticker.add((time) => animateElements(app, elements, time));
 
-  addWaterOverlay(app);
+  // addWaterOverlay(app);
   // addDisplacementEffect(app);
+
 
 
   const sprite1 = Texture.from('sprite1');
 
-  addSpriteAnimation(app, sprite1, spritesData[0], elements);
+  addSpriteAnimation(app, sprite1, spritesData[0], elements, viewport);
   // Add the animation callbacks to the application's ticker.
   app.ticker.add((time) => {
     // animateFishes(app, fishes, time);
     animateElements(app, elements, time);
-    animateWaterOverlay(app, time);
+    // animateWaterOverlay(app, time);
   });
 
 
+ const uicontainer = new Container();
+ const button = new Button(
+      new Graphics()
+          .rect(0, 0, 100, 50, 15)
+          .fill(0xFFFFFF)
+ );
+
+  uicontainer.addChild(button.view);
+
+  uicontainer.x = app.screen.width / 2;
+  uicontainer.y = app.screen.height / 2;
+  // uicontainer.width = app.screen.width;
+  // uicontainer.height = app.screen.height;
+// // const button = new Button();
+//   // uicontainer.x = app.screen.width / 2;
+//   // uicontainer.y = app.screen.height / 2;
+//     uicontainer.x = app.screen.width / 2;
+//   uicontainer.y = app.screen.height / 2;
+
+  // app.stage.addChild(uicontainer);
+
+    addText(textData, uicontainer);
+      viewport.addChild(uicontainer);
+  button.onPress.connect(() => console.log('Button pressed!'));
 }

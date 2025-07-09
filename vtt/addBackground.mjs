@@ -1,6 +1,6 @@
 import { Sprite } from 'pixi';
 
-export function addBackground(app) {
+export function addBackground(app, viewport) {
   
     const background = Sprite.from('background');
 
@@ -23,11 +23,12 @@ export function addBackground(app) {
       background.y = app.screen.height / 2;
 
     // Add the background to the stage.
-    app.stage.addChild(background);
+    // app.stage.addChild(background);
+        viewport.addChild(background);
 }
 
 
-export function addMap(app) {
+export function addMap(app, viewport) {
   // Create a background sprite.
 
     const map = Sprite.from('map');
@@ -41,7 +42,7 @@ export function addMap(app) {
      */
 
     if (app.screen.width > app.screen.height) {
-      map.width = app.screen.width - (app.screen.width * .2);
+      map.width = app.screen.width - (app.screen.width * .1);
           // background.width = app.screen.width;
       map.scale.y = map.scale.x;
     } else {
@@ -49,7 +50,7 @@ export function addMap(app) {
        * If the preview is square or portrait, then fill the height of the screen instead
        * and apply the scaling to the horizontal scale accordingly.
        */
-      map.height = app.screen.height - (app.screen.height * .2);
+      map.height = app.screen.height - (app.screen.height * .1);
       map.scale.x = background.scale.y;
     }
 
@@ -58,6 +59,7 @@ export function addMap(app) {
     map.y = app.screen.height / 2;
 
     // Add the background to the stage.
-    app.stage.addChild(map);
+    // app.stage.addChild(map);
+            viewport.addChild(map);
   
 }

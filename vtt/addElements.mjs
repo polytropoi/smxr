@@ -80,15 +80,16 @@ export function animateFishes(app, fishes, time) {
   });
 }
 
-export async function addSpriteAnimation (app, texture, spriteData, elements) {
+export async function addSpriteAnimation (app, texture, spriteData, elements, viewport) {
 
 // const sprite = 'sprites1';
     // let asset = sprites.
     console.log("spritesData " + JSON.stringify(spriteData));
 
-    const elementCount = 30;
+    const elementCount = 10;
     const elementContainer = new Container();
-    app.stage.addChild(elementContainer);
+    // app.stage.addChild(elementContainer);
+    viewport.addChild(elementContainer);
     let anims = [];
     for (let i = 0; i < elementCount; i++) {
         const sheet = new Spritesheet(texture, spriteData);

@@ -178,7 +178,7 @@ vtt_router.get('/:_id', function (req, res) {
     var prevSceneLink = "";
     var loopable = "";
   
-    var sceneGLTFLocations = [];
+    // var sceneGLTFLocations = [];
     var sceneModelLocations = [];
     var sceneObjectLocations = [];
     var sceneTextLocations = [];
@@ -359,8 +359,13 @@ vtt_router.get('/:_id', function (req, res) {
 
     let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
-                        "\x22pixi\x22: \x22../main/js/pixi/pixi.min.mjs?v=1\x22"+  //ok, then
-                        // "\x22howler\x22: \x22../main/vendor/howler/src/howler.mjs\x22"+
+                        "\x22pixi\x22: \x22../main/js/pixi/pixi.min.mjs?v=1\x22,"+  //ok, then
+                        // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/dist/pixi_viewport.min.js\x22"+
+                        "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
+                        "\x22@pixi/ui\x22: \x22../main/js/pixi/pixi.ui.mjs\x22"+
+
+                        // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22"+
+                        
                         // "\x22howlerspatial\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.spatial.min.js\x22"+  //ok, then
                        
                      
@@ -3155,8 +3160,7 @@ vtt_router.get('/:_id', function (req, res) {
 
                     // settings.sceneAmbientAudioGroups = sceneResponse.sceneAmbientAudioGroups;
                     // settings.scenePrimaryAudioGroups = sceneResponse.scenePrimaryAudioGroups;
-                    var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
-                    settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
+
                     // settingsDataEntity = "<a-entity id=\x22settingsDataEntity\x22 data-settings=\x22"+sbuff+"\x22></a-entity>"; ? maybe
 
                     let picGroups = "";
@@ -3168,7 +3172,11 @@ vtt_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
                         sceneQuest = sceneResponse.sceneQuest;
                     }
+                    settings.sceneGreeting = sceneGreeting;
+                    settings.sceneQuest = sceneQuest;
                     
+                    var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
+                    settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
 
                     
                     
@@ -3283,7 +3291,7 @@ vtt_router.get('/:_id', function (req, res) {
                         
                         importMap +
 
-                        
+                        // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +
                         "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +
                         "<script type=\x22module\x22 src=\x22/connect/vtt.js\x22 defer=\x22defer\x22></script>" +
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
