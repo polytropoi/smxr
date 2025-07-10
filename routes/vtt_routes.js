@@ -363,6 +363,7 @@ vtt_router.get('/:_id', function (req, res) {
                         // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/dist/pixi_viewport.min.js\x22"+
                         "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
                         "\x22@pixi/ui\x22: \x22../main/js/pixi/pixi.ui.mjs\x22"+
+                        // "\x22@pixi/layout\x22: \x22../main/js/pixi/layout.min.mjs\x22"+
 
                         // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22"+
                         
@@ -3403,6 +3404,11 @@ vtt_router.get('/:_id', function (req, res) {
                         canvasOverlay +
                         transportButtons+ 
                         // audioHtml +
+
+                        "<div id=\x22pixi-container\x22>"+
+                        // "<canvas id=\x22pixi-canvas\x22></canvas>"+
+                        "</div>"+
+
                         "</body>\n" +
                     
                         "</html>";

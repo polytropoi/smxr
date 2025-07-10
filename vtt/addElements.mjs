@@ -1,6 +1,7 @@
 
 
 import { Assets, AnimatedSprite, Container, Sprite, Texture, Spritesheet } from 'pixi';
+import { PlayTriggerWithTag } from '../connect/media.js';
 
 export function addFishes(app, fishes) {
   // Create a container to hold all the fish sprites.
@@ -88,8 +89,14 @@ export async function addSpriteAnimation (app, texture, spriteData, elements, vi
 
     const elementCount = 10;
     const elementContainer = new Container();
+
+     if (viewport) {
+      viewport.addChild(elementContainer);
+    } else {
+      app.stage.addChild(elementContainer);
+    }
     // app.stage.addChild(elementContainer);
-    viewport.addChild(elementContainer);
+    // viewport.addChild(elementContainer);
     let anims = [];
     for (let i = 0; i < elementCount; i++) {
         const sheet = new Spritesheet(texture, spriteData);
@@ -181,5 +188,38 @@ export function animateElements(app, elements, time) {
     if (element.y > app.screen.height + stagePadding) {
       element.y -= boundHeight;
     }
+
+
   });
+
+    for(let i=0;i<elements.length;i++){
+        for(let j=i+1;j<elements.length;j++){
+            //are the sprites closer than 40px together 
+            if(calculateDistanceBetweenTwoPoints(elements[i],elements[j])<100){
+              console.log("gotsa collision!");
+                elements[i].tint = getRandomColor();
+                elements[j].tint = getRandomColor();
+                PlayTriggerWithTag('hit');
+            }
+        }
+    }
+  
+}
+
+
+
+
+function calculateDistanceBetweenTwoPoints(point1, point2) {
+    let xx = point1.x - point2.x;
+    let yy = point1.y - point2.y;
+    let distance = Math.sqrt((xx * xx) + (yy * yy));
+    return distance
+}
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }

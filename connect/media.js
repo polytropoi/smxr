@@ -9,6 +9,7 @@ import { settings } from "../../connect/settings.js";
 
 // import {Howl} from 'howler';
 
+let triggerAudioHowl;
 let mainTransportSlider = null;
 let transportPlayButton = null;
 let youtubePlayerEl = document.getElementById("youtubePlayer");
@@ -548,8 +549,79 @@ export async function ReturnAudioGroupsData() { //use outside aframe
         });
         const data = await response.json();
         console.log(data);
+        audioGroupsData = data;
         return data;
       } catch(error) {
         console.log("error returning audiogroups " +error);
       } 
 }
+
+export function PlayTriggerWithTag(tag) {
+  console.log("tryna play trigger with tag " + tag);
+  const audioID = returnTriggerAudioIDWithTag(tag);
+    console.log("gotsa trigger audio id " + audioID);
+  const audioItem = returnAudioItem(audioID);
+  triggerAudioHowl = null;
+                        triggerAudioHowl = new Howl({
+                            src: [audioItem.URLogg, audioItem.URLmp3],
+                            format: ["ogg", "mp3"]
+                        });
+                        // triggerAudioHowl.format = ["ogg", "mp3"];
+                        // triggerAudioHowl.src = [audioItem.URLogg, audioItem.URLmp3];
+                        triggerAudioHowl.load();
+                        triggerAudioHowl.play();
+}
+
+export function returnTriggerAudioIDWithTag (tag) { //find an audio item in audiogroup with specified tag
+                    
+    if (tag && audioGroupsData && audioGroupsData.triggerGroupItems) {
+        console.log("looking for audio trigger with tag " + tag + " in groups " + audioGroupsData.triggerGroupItems.length);
+        for (const triggerGroup of audioGroupsData.triggerGroupItems) {
+        // for (let a = 0; a < this.data.audioGroupsData.triggerGroupItems.length; a++) {
+          for (let i = 0; i < triggerGroup.items.length; i++) {
+              // console.log("looking for triggerGroup.item " + triggerGroup.items[i]);
+            for (let j = 0; j < audioGroupsData.audioItems.length; j++) { //MAYBE SHUFFLE?
+                // console.log("Ccchekin trigger group item " +triggerGroup.items[i]+ " vs " + this.data.audioGroupsData.audioItems[j]._id);
+              if (triggerGroup.items[i] === audioGroupsData.audioItems[j]._id) {
+                  // console.log(triggerGroup._id + " match trigger group item " +triggerGroup.items[i]+ " vs " + this.data.audioGroupsData.audioItems[j]._id);
+                  //not ideal, maybe the groupitems can store tags? or cache them when loaded below?
+                  //TODO need to split the string and match eggzackly!!!!!
+                if (audioGroupsData.audioItems[j].tags && audioGroupsData.audioItems[j].tags.toString().toLowerCase().includes(tag)) {
+                    // console.log("tag match to " + tag);  
+                    // return triggerGroup.items[i];
+                    console.log("matched triggeraudiotem w/ tag " + tag);
+                    // matchingItems.push(triggerGroup.items[i]);
+                    return triggerGroup.items[i]; //ok to not return?
+                }
+              }
+            }
+          }
+        } 
+      }
+  }
+
+
+export function returnAudioItem (id) {
+        let index = -1;
+        // console.log("tryna get audio item id " + id);
+        if (id && audioGroupsData && audioGroupsData.audioItems) {
+            for (var i = 0; i < audioGroupsData.audioItems.length; i++){
+                if (id == audioGroupsData.audioItems[i]._id) {
+                    index = i;
+
+                    break;
+                }
+            }
+        } else {
+            // console.log("cain't find audioItem with id " + id);
+        }
+        // console.log("tryna get audio index " + index);
+        if (index != -1) {
+            // console.log("gotsa audio item from object_audio_group at index " + index);
+            return audioGroupsData.audioItems[index];
+            // return null;
+        } else {
+            return null;
+        }
+       
+  }

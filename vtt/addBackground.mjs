@@ -24,7 +24,12 @@ export function addBackground(app, viewport) {
 
     // Add the background to the stage.
     // app.stage.addChild(background);
-        viewport.addChild(background);
+    if (viewport) {
+      viewport.addChild(background);
+    } else {
+      app.stage.addChild(background);
+    }
+       
 }
 
 
