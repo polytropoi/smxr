@@ -64,6 +64,10 @@ async function setup() {
 
 async function prePreLoader () {
   mappicURL = await ReturnMap();
+
+  if (mappicURL) {
+
+  }
   backgroundURL = await ReturnBackground();
   console.log("backgroundURL " + backgroundURL);
   spritesData = await ReturnSprites();

@@ -6,10 +6,10 @@ export function addBackground(app, viewport) {
 
     // Center background sprite anchor.
     background.anchor.set(0.5);
-      if (app.screen.width > app.screen.height) {
+    if (app.screen.width > app.screen.height) {
       background.width = app.screen.width * 1.05;
       background.scale.y = background.scale.x;
-      } else {
+    } else {
       /**
        * If the preview is square or portrait, then fill the height of the screen instead
        * and apply the scaling to the horizontal scale accordingly.
@@ -17,13 +17,11 @@ export function addBackground(app, viewport) {
       background.height = app.screen.height * 1.05;
       background.scale.x = background.scale.y;
     }
-
       // Position the background sprite in the center of the stage.
       background.x = app.screen.width / 2;
       background.y = app.screen.height / 2;
-
-    // Add the background to the stage.
-    // app.stage.addChild(background);
+      // Add the background to the stage.
+      // app.stage.addChild(background);
     if (viewport) {
       viewport.addChild(background);
     } else {
@@ -36,8 +34,10 @@ export function addBackground(app, viewport) {
 export function addMap(app, viewport) {
   // Create a background sprite.
 
+
     const map = Sprite.from('map');
 
+    console.log(map.texture.width + " " + map.texture.height);
     // Center background sprite anchor.
     map.anchor.set(0.5);
 
