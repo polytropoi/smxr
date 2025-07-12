@@ -361,8 +361,12 @@ vtt_router.get('/:_id', function (req, res) {
                           
                         "\x22pixi\x22: \x22../main/js/pixi/pixi.min.mjs?v=1\x22,"+  //ok, then
                         // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/dist/pixi_viewport.min.js\x22"+
+                            // "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
+                        
+                        "\x22pixi-contstants\x22: \x22../main/js/pixi/pixi.constants.min.mjs\x22,"+
                         "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
-                        "\x22@pixi/ui\x22: \x22../main/js/pixi/pixi.ui.mjs\x22"+
+                        "\x22@pixi/ui\x22: \x22../main/js/pixi/pixi.ui.mjs\x22,"+
+                        "\x22pixi-tilemap\x22: \x22../main/js/pixi/tilemap.min.mjs\x22"+
                         // "\x22@pixi/layout\x22: \x22../main/js/pixi/layout.min.mjs\x22"+
 
                         // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22"+

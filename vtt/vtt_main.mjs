@@ -19,7 +19,7 @@ let viewport;
 // Store an array of fish sprites for animation.
 const fishes = [];
 let elements = [];
-let mappicURL;
+export let mappicURL;
 let backgroundURL;
 let spritesData;
 let audioGroupsData;

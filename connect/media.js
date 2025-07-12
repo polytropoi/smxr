@@ -79,7 +79,7 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
       }
     }
   }
-  function onPlayerReady(event) {//youtube embed event
+  function onPlayerReady(event) {
     
     console.log("youtubePlayer is re4ady!");
     // if (timedEventsListenerMode == null) {
@@ -558,32 +558,22 @@ export async function ReturnAudioGroupsData() { //use outside aframe
 }
 
 function cooldown () {
-  setTimeout( () => {
-      isCooling = false;
-      // this.calloutText.setAttribute("troika-text", {
-      //   value: "",
-      // });
-    }, 1000);
-    
+  
 }
 export function PlayTriggerWithTag(tag) {
-  if (!isCooling) {
-    isCooling = true;
-    cooldown();
-    console.log("tryna play trigger with tag " + tag);
-    const audioID = returnTriggerAudioIDWithTag(tag);
-      console.log("gotsa trigger audio id " + audioID);
-    const audioItem = returnAudioItem(audioID);
-    triggerAudioHowl = null;
-    triggerAudioHowl = new Howl({
-        src: [audioItem.URLogg, audioItem.URLmp3],
-        format: ["ogg", "mp3"]
-    });
-    // triggerAudioHowl.format = ["ogg", "mp3"];
-    // triggerAudioHowl.src = [audioItem.URLogg, audioItem.URLmp3];
-    triggerAudioHowl.load();
-    triggerAudioHowl.play();
-  }
+  console.log("tryna play trigger with tag " + tag);
+  const audioID = returnTriggerAudioIDWithTag(tag);
+    console.log("gotsa trigger audio id " + audioID);
+  const audioItem = returnAudioItem(audioID);
+  triggerAudioHowl = null;
+                        triggerAudioHowl = new Howl({
+                            src: [audioItem.URLogg, audioItem.URLmp3],
+                            format: ["ogg", "mp3"]
+                        });
+                        // triggerAudioHowl.format = ["ogg", "mp3"];
+                        // triggerAudioHowl.src = [audioItem.URLogg, audioItem.URLmp3];
+                        triggerAudioHowl.load();
+                        triggerAudioHowl.play();
 }
 
 export function returnTriggerAudioIDWithTag (tag) { //find an audio item in audiogroup with specified tag

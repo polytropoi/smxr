@@ -52,7 +52,7 @@ export let curveLocations = [];
 export let cloudMarkers = []; //???? unused>?//nope
 export let sceneModels = [];
 
-export let mappicURL = "";
+// export let mappicURL = "";
 
 let localKeys = [];
 
