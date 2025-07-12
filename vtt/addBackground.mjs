@@ -47,7 +47,7 @@ export async function addMap(app, viewport) {
     const spritesContainer = new Container();
 
 
-    let tilesize = 32;
+    let tilesize = 128;
 
     const picwidth = map.texture.width;
     const picheight = map.texture.height;
@@ -55,15 +55,18 @@ export async function addMap(app, viewport) {
     const yCount = picheight / tilesize;
     console.log("xCount : " + xCount + " yCount : " + yCount);
 
+    
     for (let i = 0; i < xCount; i++) {
       const xpos = (i * tilesize);
       for (let k = 0; k < yCount; k++) {
         const tileID = "tile_" + i + "_" + k;
         const ypos = (k * tilesize);
+        //cook the spritesheet json!
         mapSpritesData.frames[tileID] = {frame: { x: xpos, y: ypos, w: tilesize, h: tilesize },
                                         sourceSize: { w: tilesize, h: tilesize },
                                         trimmed: false,
                                         spriteSourceSize: { x: 0, y: 0, w: tilesize, h: tilesize },
+
                                         anchor: { x: 0, y: 0 }};
                                         
       }
@@ -104,11 +107,21 @@ export async function addMap(app, viewport) {
           sprite.anchor.set(0);
           sprite.interactive = true;
           sprite.buttonMode = true;
+                                          sprite.label = key;
           sprite.on('pointerenter', () => {
-            sprite.tint = Math.random() * 0xffffff;
-
-              console.log("Sprite entered at " + sprite.position.x + " " + sprite.position.y);
+            sprite.tint = .3 * 0xffffff;
+            console.log(sprite.label +  " tile entered at " + sprite.position.x + " " + sprite.position.y);
           });
+          sprite.on('pointerleave', () => {
+            sprite.tint = 0xffffff;
+            // console.log("Sprite exit at " + sprite.position.x + " " + sprite.position.y);
+          });
+          sprite.on('pointerdown', () => {
+            // sprite.tint = 0xffffff;
+
+            console.log(sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+          });
+
           spritesContainer.addChild(sprite);
           }
         }
