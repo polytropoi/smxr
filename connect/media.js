@@ -572,17 +572,19 @@ export function PlayTriggerWithTag(tag) {
     cooldown();
     console.log("tryna play trigger with tag " + tag);
     const audioID = returnTriggerAudioIDWithTag(tag);
-      console.log("gotsa trigger audio id " + audioID);
-    const audioItem = returnAudioItem(audioID);
-    triggerAudioHowl = null;
-    triggerAudioHowl = new Howl({
-        src: [audioItem.URLogg, audioItem.URLmp3],
-        format: ["ogg", "mp3"]
-    });
-    // triggerAudioHowl.format = ["ogg", "mp3"];
-    // triggerAudioHowl.src = [audioItem.URLogg, audioItem.URLmp3];
-    triggerAudioHowl.load();
-    triggerAudioHowl.play();
+    if (audioID) {
+        console.log("gotsa trigger audio id " + audioID);
+      const audioItem = returnAudioItem(audioID);
+      triggerAudioHowl = null;
+      triggerAudioHowl = new Howl({
+          src: [audioItem.URLogg, audioItem.URLmp3],
+          format: ["ogg", "mp3"]
+      });
+      // triggerAudioHowl.format = ["ogg", "mp3"];
+      // triggerAudioHowl.src = [audioItem.URLogg, audioItem.URLmp3];
+      triggerAudioHowl.load();
+      triggerAudioHowl.play();
+    }
   }
 }
 export function returnTriggerAudioIDWithTag (tag) { //find an audio item in audiogroup with specified tag

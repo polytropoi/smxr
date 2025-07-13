@@ -38,9 +38,7 @@ export function addBackground(app, viewport) {
 export async function addMap(app, viewport) {
   // Create a background sprite.
 
-
     const map = Sprite.from('map'); //need to ref it for w/h below
-
     let mapSpritesData = {};
     mapSpritesData.meta = {};
     mapSpritesData.frames = {};
@@ -53,8 +51,7 @@ export async function addMap(app, viewport) {
     const yCount = picheight / tilesize;
 
     console.log("map xCount : " + xCount + " yCount : " + yCount);
-
-    
+  
     //cook the spritesheet json based on image rez and tilesize
     for (let i = 0; i < xCount; i++) {
       const xpos = (i * tilesize);
@@ -69,6 +66,7 @@ export async function addMap(app, viewport) {
                                         anchor: { x: 0, y: 0 }};
       }
     }
+
     mapSpritesData.meta.images = mappicURL;
     console.log("mapSpritesData " + JSON.stringify(mapSpritesData));
     
@@ -76,7 +74,6 @@ export async function addMap(app, viewport) {
     const spritesheet = new Spritesheet(sheetTexture, mapSpritesData);
     await spritesheet.parse();
    
-
     for(var key in mapSpritesData.frames) {
 
         if(mapSpritesData.frames.hasOwnProperty(key)) {
@@ -136,10 +133,10 @@ export async function addMap(app, viewport) {
     spritesContainer.x = app.screen.width * .05;
     spritesContainer.y = app.screen.height * .05;
 
-        addGridOverlay(app, tilesize, xCount, yCount, picwidth, picheight, spritesContainer, viewport);
+    addGridOverlay(app, tilesize, xCount, yCount, picwidth, picheight, spritesContainer, viewport);
     // Add the background to the stage.
     // app.stage.addChild(map);
-            viewport.addChild(spritesContainer);
-
+    viewport.addChild(spritesContainer);
+    // spritesContainer.zIndex = 10;
             
 }

@@ -54,11 +54,8 @@ export function addText(textData, uicontainer) {
     });
     // greetingText.width = 500;
     // greetingText.height = 300;
-    greetingText.y -= 200;
-    questText.y -= 150
+    greetingText.y -= 100;
+    questText.y -= 50
     uicontainer.addChild(greetingText, questText);
-
-
-
 
 }

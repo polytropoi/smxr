@@ -149,6 +149,11 @@ export async function addSpriteAnimation (app, texture, spriteData, elements, vi
         elementContainer.addChild(anim);
         elements.push(anim);
         // app.stage.addChild(anim);
+      if (viewport) {
+        viewport.addChild(elementContainer);
+      } else {
+        app.stage.addChild(elementContainer);
+      }
     }
     // animateElements(app, anims);
 }
