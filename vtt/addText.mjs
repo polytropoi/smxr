@@ -22,7 +22,7 @@ export function addText(textData, uicontainer) {
         text: textData.split("~")[0],
         style: {
         fill: '#ffffff',
-        fontSize: 100,
+        fontSize: 50,
         fontFamily: 'Acme',
         stroke: { color: '#4a1850', width: 5, join: 'round' },
             dropShadow: {
@@ -40,7 +40,7 @@ export function addText(textData, uicontainer) {
         text: textData.split("~")[1],
         style: {
         fill: '#ffffff',
-        fontSize: 50,
+        fontSize: 25,
         fontFamily: 'Acme',
         stroke: { color: '#4a1850', width: 5, join: 'round' },
             dropShadow: {
@@ -55,7 +55,7 @@ export function addText(textData, uicontainer) {
     // greetingText.width = 500;
     // greetingText.height = 300;
     greetingText.y -= 200;
-    questText.y -= 100
+    questText.y -= 150
     uicontainer.addChild(greetingText, questText);
 
 

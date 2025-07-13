@@ -3,23 +3,23 @@ import { Texture, TilingSprite, Graphics, Container } from 'pixi';
 // Reference to the water overlay.
 let overlay;
 
-function buildGrid(app, graphics) {
+function buildGrid(app, tilesize, xCount, yCount, mapwidth, mapheight, graphics) {
   // Draw 10 vertical lines spaced 10 pixels apart
-  for (let i = 0; i < 101; i++) {
+  for (let i = 0; i < xCount; i++) {
     // Move to top of each line (x = i*10, y = 0)
     graphics
-      .moveTo(i * 40, 0)
+      .moveTo(i * tilesize, 0)
       // Draw down to bottom (x = i*10, y = 100)
-      .lineTo(i * 40, app.screen.height);
+      .lineTo(i * tilesize, mapheight);
   }
 
   // Draw 10 horizontal lines spaced 10 pixels apart
-  for (let i = 0; i < 101; i++) {
+  for (let i = 0; i < yCount; i++) {
     // Move to start of each line (x = 0, y = i*10)
     graphics
-      .moveTo(0, i * 40)
+      .moveTo(0, i * tilesize)
       // Draw across to end (x = 100, y = i*10)
-      .lineTo(app.screen.width, i * 40);
+      .lineTo(mapwidth, i * tilesize);
   }
 
   return graphics;
@@ -50,17 +50,17 @@ export function animateWaterOverlay(app, time) {
 }
 
 
-export function addGridOverlay(app, viewport) {
+export function addGridOverlay(app, tilesize, xcount, ycount, mapwidth, mapheight, spritesContainer, viewport) {
     //Create a Graphics object and draw a pixel-perfect line
   // let graphics = new Graphics().moveTo(0, 0).lineTo(window.width, window.height).stroke({ color: 0xff0000, pixelLine: true });
-  const gridPixel = buildGrid(app, new Graphics()).stroke({ color: 0x8a8a8a, pixelLine: true, width: 1 });
+  const gridPixel = buildGrid(app, tilesize, xcount, ycount, mapwidth, mapheight, new Graphics()).stroke({ color: 0x8a8a8a, pixelLine: true, width: 1 });
 
   // Add it to the stage
   // app.stage.addChild(graphics);
     // Create a container to hold both grids
-  const container = new Container();
+  // const container = new Container();
 
-  container.addChild(gridPixel);
+  spritesContainer.addChild(gridPixel);
   // if (app.screen.width > app.screen.height) {
   //   // background.width = app.screen.width - (app.screen.width * .2);
   //   container.x = app.screen.width - (app.screen.width * .2);
@@ -82,8 +82,8 @@ export function addGridOverlay(app, viewport) {
   // // Center the container on screen
   // container.x = app.screen.width / 2;
   // container.y = app.screen.height / 2;
-    container.x = 0;
-  container.y = 0;
+  //   container.x = 0;
+  // container.y = 0;
   // app.stage.addChild(container);
-          viewport.addChild(container);
+          // viewport.addChild(container);
 }

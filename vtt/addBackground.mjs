@@ -1,6 +1,7 @@
 import { Sprite, Container, Assets, Spritesheet } from 'pixi';
 // import { CompositeTilemap } from 'pixi-tilemap';
 import { mappicURL } from './vtt_main.mjs';
+import { addGridOverlay } from './addOverlay.mjs';
 
 
 export function addBackground(app, viewport) {
@@ -38,37 +39,34 @@ export async function addMap(app, viewport) {
   // Create a background sprite.
 
 
-    const map = Sprite.from('map');
+    const map = Sprite.from('map'); //need to ref it for w/h below
 
     let mapSpritesData = {};
     mapSpritesData.meta = {};
     mapSpritesData.frames = {};
 
-    const spritesContainer = new Container();
-
-
-    let tilesize = 128;
-
     const picwidth = map.texture.width;
     const picheight = map.texture.height;
+    const spritesContainer = new Container();
+    let tilesize = 128;
     const xCount = picwidth / tilesize;
     const yCount = picheight / tilesize;
-    console.log("xCount : " + xCount + " yCount : " + yCount);
+
+    console.log("map xCount : " + xCount + " yCount : " + yCount);
 
     
+    //cook the spritesheet json based on image rez and tilesize
     for (let i = 0; i < xCount; i++) {
       const xpos = (i * tilesize);
       for (let k = 0; k < yCount; k++) {
         const tileID = "tile_" + i + "_" + k;
         const ypos = (k * tilesize);
-        //cook the spritesheet json!
+        //add object the spritesheet json!
         mapSpritesData.frames[tileID] = {frame: { x: xpos, y: ypos, w: tilesize, h: tilesize },
                                         sourceSize: { w: tilesize, h: tilesize },
                                         trimmed: false,
                                         spriteSourceSize: { x: 0, y: 0, w: tilesize, h: tilesize },
-
                                         anchor: { x: 0, y: 0 }};
-                                        
       }
     }
     mapSpritesData.meta.images = mappicURL;
@@ -77,19 +75,7 @@ export async function addMap(app, viewport) {
     const sheetTexture = await Assets.load(mappicURL);
     const spritesheet = new Spritesheet(sheetTexture, mapSpritesData);
     await spritesheet.parse();
-    // Assets.add({
-    //     alias: 'mapsprites',
-    //     src: mapSpritesData,
-    //     data: {texture: sheetTexture} // using of preloaded texture
-    // });
-    
-    // const spritesheet = await Assets.load('mapsprites')
-
-    // const spritesheet = new PIXI.Spritesheet(PIXI.BaseTexture.from(mapSpritesData.meta.image), mapSpritesData);
-
-// Generate all the Textures asynchronously
-    await spritesheet.parse();
-
+   
 
     for(var key in mapSpritesData.frames) {
 
@@ -126,30 +112,31 @@ export async function addMap(app, viewport) {
           }
         }
     // Center background sprite anchor.
-    map.anchor.set(0.5);
-
+    spritesContainer.anchor = 0.5;
+    
     /**
      * If the preview is landscape, fill the width of the screen
      * and apply horizontal scale to the vertical scale for a uniform fit.
      */
 
     if (app.screen.width > app.screen.height) {
-      map.width = app.screen.width - (app.screen.width * .1);
+      spritesContainer.width = app.screen.width - (app.screen.width * .1);
           // background.width = app.screen.width;
-      map.scale.y = map.scale.x;
+      spritesContainer.scale.y = spritesContainer.scale.x;
     } else {
       /**
        * If the preview is square or portrait, then fill the height of the screen instead
        * and apply the scaling to the horizontal scale accordingly.
        */
-      map.height = app.screen.height - (app.screen.height * .1);
-      map.scale.x = map.scale.y;
+      spritesContainer.height = app.screen.height - (app.screen.height * .1);
+      spritesContainer.scale.x = spritesContainer.scale.y;
     }
 
     // Position the background sprite in the center of the stage.
-    map.x = app.screen.width / 2;
-    map.y = app.screen.height / 2;
+    spritesContainer.x = app.screen.width * .05;
+    spritesContainer.y = app.screen.height * .05;
 
+        addGridOverlay(app, tilesize, xCount, yCount, picwidth, picheight, spritesContainer, viewport);
     // Add the background to the stage.
     // app.stage.addChild(map);
             viewport.addChild(spritesContainer);

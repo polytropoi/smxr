@@ -1,7 +1,7 @@
 // import '@pixi/layout'; 
 import { Application, Assets, Graphics, Texture, Container } from 'pixi';
 import { Viewport } from 'pixi-viewport';
-import { Button } from '@pixi/ui';
+import { Button, ButtonContainer } from '@pixi/ui';
 
 // import { LayoutSystem } from '@pixi/layout';
 import { addBackground, addMap } from './addBackground.mjs';
@@ -121,6 +121,24 @@ export async function GoWithIt() { //called from vtt.js
       events: app.renderer.events, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
     });
     // add the viewport to the stage
+    if (app.screen.width > app.screen.height) {
+      viewport.width = app.screen.width - (app.screen.width * .1);
+          // background.width = app.screen.width;
+      viewport.scale.y = viewport.scale.x;
+    } else {
+      /**
+       * If the preview is square or portrait, then fill the height of the screen instead
+       * and apply the scaling to the horizontal scale accordingly.
+       */
+      viewport.height = app.screen.height - (app.screen.height * .1);
+      viewport.scale.x = viewport.scale.y;
+    }
+    // viewport.x = app.screen.width * .01;
+    // viewport.y = app.screen.height * .01;
+
+    viewport.x = 0;
+    viewport.y = 0;
+    // 
 
     app.stage.addChild(viewport);
     // activate plugins
@@ -156,8 +174,9 @@ export async function GoWithIt() { //called from vtt.js
     addBackground(app);
   }
   if (mappicURL) {
+
     addMap(app, viewport);
-    addGridOverlay(app, viewport);
+
   }
 
   app.ticker.add((time) => animateElements(app, elements, time));
@@ -184,16 +203,74 @@ export async function GoWithIt() { //called from vtt.js
   }
 
  const uicontainer = new Container();
- const button = new Button(
-      new Graphics()
-          .rect(0, 0, 100, 50, 15)
-          .fill(0xFFFFFF)
- );
+//  const button = new Button(
+//       new Graphics()
+//           .rect(0, 0, 100, 50, 15)
+//           .fill(0xFFFFFF)
+//  );
 
+//   const button = new FancyButton({
+//      new Graphics()
+//           .fill(0xFFFFFF)
+//           .roundRect(0, 0, 100, 50, 15),
+//      text: 'Click me!',
+//      animations: {
+//           hover: {
+//               props: {
+//                   scale: {
+//                       x: 1.1,
+//                       y: 1.1,
+//                   }
+//               },
+//               duration: 100,
+//           },
+//           pressed: {
+//               props: {
+//                   scale: {
+//                       x: 0.9,
+//                       y: 0.9,
+//                   }
+//               },
+//               duration: 100,
+//           }
+//       }
+//  });
+// //  button.x 
+//  button.x = app.screen.width / 2;
+//   button.y = app.screen.height * .2;
+            // const buttonView = new Container();
+            // const buttonBg = new Graphics().roundRect(0, 0, 200, 300, 300).fill(.3 * 0xffffff);
+            // // const text = new Text({ text: '🤙', style: { fontSize: 70 } });
+            //   const text = new Text({ text: 'whoa', style: { fontSize: 70 } });
+
+            // text.anchor = 0.5;
+            // text.x = buttonBg.width / 2;
+            // text.y = buttonBg.height / 2;
+
+            // buttonView.addChild(buttonBg, text);
+
+            // // Component usage !!!
+            // const button = new Button(buttonView);
+
+            // button.enabled = !disabled;
+
+            // button.onPress.connect(() => action('onPress'));
+            // button.onDown.connect(() => action('onDown'));
+            // button.onUp.connect(() => action('onUp'));
+            // button.onHover.connect(() => action('onHover'));
+            // button.onOut.connect(() => action('onOut'));
+            // button.onUpOut.connect(() => action('onUpOut'));
+      const button = new Button(
+        new Graphics()
+          .fill(0xFFFFFF)
+          .roundRect(0, 0, 100, 50, 15)
+      );
+ button.x = app.screen.width / 2;
+  button.y = app.screen.height * .2;
   uicontainer.addChild(button.view);
 
   uicontainer.x = app.screen.width / 2;
-  uicontainer.y = app.screen.height / 2;
+  uicontainer.y = app.screen.height * .2;
   // uicontainer.width = app.screen.width;
   // uicontainer.height = app.screen.height;
   // // const button = new Button();
@@ -206,11 +283,11 @@ export async function GoWithIt() { //called from vtt.js
 
   addText(textData, uicontainer);
   
-  if (viewport) {
-      viewport.addChild(uicontainer); 
-  } else {
+  // if (viewport) {
+  //     viewport.addChild(uicontainer); 
+  // } else {
     app.stage.addChild(uicontainer);
-  }
+  // }
 
   button.onPress.connect(() => console.log('Button pressed!'));
 
