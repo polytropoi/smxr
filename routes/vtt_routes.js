@@ -1010,11 +1010,11 @@ vtt_router.get('/:_id', function (req, res) {
 
                 transportButtons = "<div class=\x22transport_buttons\x22>"+
 
-                "<div class=\x22next_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div>"+
-                "<div class=\x22ffwd_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22FastForwardButton()\x22><i class=\x22fas fa-forward fa-2x\x22></i></div>"+
+                "<div id=\x22transport_next_button\x22 class=\x22next_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 ><i class=\x22fas fa-step-forward fa-2x\x22></i></div>"+
+                "<div id=\x22transport_forward_button\x22 class=\x22ffwd_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 ><i class=\x22fas fa-forward fa-2x\x22></i></div>"+
                 "<div class=\x22play_button\x22 id=\x22transport_play_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
-                "<div class=\x22rewind_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22RewindButton()\x22><i class=\x22fas fa-backward fa-2x\x22></i></div>"+
-                "<div class=\x22previous_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
+                "<div id=\x22transport_rewind_button\x22 class=\x22rewind_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 ><i class=\x22fas fa-backward fa-2x\x22></i></div>"+
+                "<div id=\x22transport_previous_button\x22 class=\x22previous_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
                 "<div id=\x22transportStats\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px; text-align: left\x22></div></div>";                                
 
                 dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
@@ -2825,6 +2825,7 @@ vtt_router.get('/:_id', function (req, res) {
                     settings.sceneTitle = sceneResponse.sceneTitle;
                     settings.sceneKeynote = sceneResponse.sceneKeynote;
                     settings.sceneDescription = sceneResponse.sceneDescription;
+
                     settings.sceneEventStart = sceneResponse.sceneEventStart;
                     settings.sceneEventEnd = sceneResponse.sceneEventEnd;
                     settings.hideAvatars = true;
@@ -3336,7 +3337,7 @@ vtt_router.get('/:_id', function (req, res) {
 
                         // primaryAudioScript +
                         primaryAudioEntity +
-
+                        audioSliders +
 
                         // "<script src=\x22/connect/traffic.js\x22></script>"+
                     

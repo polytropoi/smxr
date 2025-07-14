@@ -2,7 +2,9 @@
 
 import { GoWithIt } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 
-// import { ReturnAudioGroupsData } from "../connect/media.js";
+import {settings} from "../../connect/settings.js"
+
+import {userProfile} from "../../connect/connect.js"
 
 // import { Howl, Howler } from "howler";
 
@@ -23,7 +25,7 @@ export let lastCloudUpdate = "";
 export let localData = {locations:[], settings:{}, localFiles: {}}; //all the things
 export let locationTimestamps = [];
 export let sceneLocations = {locations: [], locationMods: []};
-export let settings; //push this to an aframe component for fetching...
+// export let settings; //push this to an aframe component for fetching...
 export let attributions = [];
 export var videoEl = null;
 let sprites;
@@ -116,16 +118,16 @@ export let audioGroupsData = {};
 // window.LocationRowClick = LocationRowClick;
 
 $(function() { 
-   // InitIDB();
+
    if (avatarNameEl) {
       avatarName = avatarNameEl.id;
    }
 
    player = document.getElementById("player");
    // player = document.getElementById("cameraRig");
-   let settingsEl = document.getElementById('settingsDataElement'); //volume, color, etc...
-   let theSettingsData = settingsEl.getAttribute('data-settings');
-   settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
+   // let settingsEl = document.getElementById('settingsDataElement'); //volume, color, etc...
+   // let theSettingsData = settingsEl.getAttribute('data-settings');
+   // settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
 
     let spritesEl = document.getElementById('spritesDataElement'); //volume, color, etc...
    let theSpritesData = spritesEl.getAttribute('data-sprites');
@@ -385,6 +387,12 @@ export async function ReturnText () {
 //     let audioGroupDataResponse = await ReturnAudioGroupsData();
 //     return audioGroupDataResponse;
 // }
+export async function ReturnUserProfile () {
+   
+   await userProfile; 
+   console.log("tryna return userProfile " + userProfile.avatarName);
+   return userProfile;
+}
 
 export async function ReturnSprites () {
     await sprites;

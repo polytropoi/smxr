@@ -1,7 +1,7 @@
 import { InitLocalColors, DisplayLocalFiles } from "../main/js/dialogs.js";
 
 import { room, sceneLocations, locationTimestamps, localData, userData, lastCloudUpdate, InitCurves, 
-   sceneEl, PlayerToLocation, getExtension, poiLocations, curveLocations, avatarName, UpdateAvatarName } from "../connect/connect.js";
+   sceneEl, PlayerToLocation, getExtension, poiLocations, curveLocations, avatarName, UpdateAvatarName, UpdateUserProfile } from "../connect/connect.js";
 
 import { settings } from "../../connect/settings.js";
 import { SetTimeKeysData } from "../connect/events.js";
@@ -401,9 +401,10 @@ export function InitIDB() {
                   pstore.put(updoc);
                   transaction.oncomplete = function () {
                      db.close();
-                     console.log("localprofile found and updated! " + JSON.stringify(updoc));
+                     // console.log("localprofile found and updated! " + JSON.stringify(updoc));
                   }
 
+                  UpdateUserProfile(updoc);
                   const greeting = "Welcome back " + pcursor.value.avatarName + "!\n"
  
                   if (pcursor.value.equipment && pcursor.value.equipment.main) {

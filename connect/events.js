@@ -11,6 +11,9 @@ export let tkStarttimes = [];
 export let timedEventsListenerMode = "";
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
 
+export function ResetTimedEvents () {
+    timeKeysIndex = 0;
+}
 function TimedEventListener () { 
 //  console.log("TimedEventsListener" + timedEventsListenerMode + JSON.stringify(timeKeysData) );
  // let primaryAudioTime = 0;

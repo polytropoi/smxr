@@ -11,6 +11,7 @@ import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
 import { ReturnMap, ReturnBackground, ReturnSprites, ReturnText  } from '../connect/vtt.js';
 import { ReturnAudioGroupsData } from '../connect/media.js';
+
 // Create a PixiJS application.
 const app = new Application();
 let viewport;

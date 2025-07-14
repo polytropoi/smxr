@@ -93,7 +93,7 @@ export async function addMap(app, viewport) {
                                           sprite.label = key;
           sprite.on('pointerenter', () => {
             sprite.tint = .3 * 0xffffff;
-            console.log(sprite.label +  " tile entered at " + sprite.position.x + " " + sprite.position.y);
+            // console.log(sprite.label +  " tile entered at " + sprite.position.x + " " + sprite.position.y);
           });
           sprite.on('pointerleave', () => {
             sprite.tint = 0xffffff;
@@ -103,6 +103,7 @@ export async function addMap(app, viewport) {
             // sprite.tint = 0xffffff;
 
             console.log(sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+            // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
           });
 
           spritesContainer.addChild(sprite);

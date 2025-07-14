@@ -1,7 +1,7 @@
 // import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "../src/component/content-utils.js";
 // import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "content-utils";
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
-          InitAmbientSlider, InitPrimarySlider, InitTriggerSlider } from "../../connect/media.js";
+          InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, RewindButton } from "../../connect/media.js";
 import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData } from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
@@ -200,6 +200,22 @@ window.addEventListener( 'keydown',  ( event ) => {
 
   $('#transport_play_button').on('click', function(e) {
     TransportPlayButton();
+  });
+
+  $('#transport_next_button').on('click', function(e) {
+    NextButton();
+  });
+
+  $('#transport_previous_button').on('click', function(e) {
+    PreviousButton();
+  });
+
+
+  $('#transport_forward_button').on('click', function(e) {
+    FastForwardButton();
+  });
+  $('#transport_rewind_button').on('click', function(e) {
+    RewindButton();
   });
 
   $('#overlayContent').on('click', '#events_dialog_button', function(e) {
@@ -2055,8 +2071,8 @@ export function SceneManglerModal(mode, autoHide) {
 
     // let userName = userData.userName;
     // if (userName != null)
-    let greeting = document.getElementById('sceneGreeting').innerHTML;
-    let quest = document.getElementById('sceneQuest').innerHTML;
+    let greeting = settings.sceneGreeting; //document.getElementById('sceneGreeting').innerHTML;
+    let quest = settings.sceneQuest; //document.getElementById('sceneQuest').innerHTML;
     let inventory = "";
     // console.log("inventory " + inventory);
     let audioSliders = document.getElementById('audioSliders').innerHTML;

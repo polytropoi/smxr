@@ -1,6 +1,6 @@
 
 
-import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData } from "../connect/indexedDb.js";
+import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB } from "../connect/indexedDb.js";
 // import { matrixClient } from "../connect/matrix.js";
 // import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
 // import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
@@ -32,6 +32,7 @@ export const lerp = (x, y, a) => x * (1 - a) + y * a;
 var dateString = Date.now().toString();
 export let roomUsers = {};
 export let stringRoomUsers = "";
+export let userProfile;
 var trimmedString = dateString.substring(dateString.length - 4, 4);
 var username;
 var pics = [];
@@ -133,11 +134,7 @@ $(function() {
       console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
    }
    lastCloudUpdate = settings.sceneLastUpdate;
-   setTimeout(function () {
-      // localStorage.setItem("last_page", room);
-      tcheck(); //token auth
 
-   }, 1000);
    if (typeof window.ethereum !== 'undefined') {
       console.log('MetaMask is installed!');
       ShowEnableEthereumButton();  //bullshit enabled!
@@ -155,7 +152,13 @@ $(function() {
 
    console.log("room: " +room + " vid " + settings.sceneVideoStreams + " type " + settings.sceneType);
 
+   setTimeout(function () {
+      // localStorage.setItem("last_page", room);
+      tcheck(); //token auth
+
+   }, 1000);
    $('#room_id').append($('<button><h4><strong>').text("Welcome to scene " + room).append("</strong></h4></button>"));
+
    if (settings.sceneType == "Default" || settings.sceneType == "AFrame" || settings.sceneType == "default" || settings.sceneType == "aframe") {
       // window.sceneType == "aframe";
       if (settings.hideAvatars) {
@@ -229,8 +232,11 @@ $(function() {
                }
             }
          }
-      }
+      }   
+      // InitIDB();
    }
+
+
    if (settings.useMatrix) {
       console.log("Loading browser MATRIX sdk!!!");
       GetMatrixData();
@@ -461,6 +467,14 @@ $(function() {
 
 
 }); //end onload
+
+export function UpdateUserProfile (profile) {
+   userProfile = profile;
+   console.log("userProfile for " + profile.avatarName);
+   
+}
+
+
 
 export function UpdateAvatarName(name) {
    avatarName = name;
@@ -1666,6 +1680,10 @@ async function ShowEnableEthereumButton ()  {
    }
 }
 
+export function UpdateUserData(userData) {
+
+}
+
 function tcheck () {
    let pin = getParameterByName('p');
    if (pin != null) {
@@ -1687,6 +1705,10 @@ function tcheck () {
             userData.avatarName = avatarName;
             userData.userName = avatarName;
             userData.userID = "00000";
+            if (settings.sceneType != "aframe" && settings.sceneType != "default") {
+               InitIDB();  
+            }
+            
                               // const profile = {"userID": "00000", "userName": avatarName}
             // SaveLocalProfile(userData);
             // SaveLocalProfile(userData);
@@ -1699,6 +1721,7 @@ function tcheck () {
          
             // if (data.userID  > 1) {
                if (data._id != null) {
+
                   // console.log("gotsa user token" + JSON.stringify(data));
                   // userid = data._id;
                   avatarName = data.userName;
@@ -1710,6 +1733,9 @@ function tcheck () {
                      userData.sceneOwner = "indaehoose";
                   }
                   console.log("userData " + JSON.stringify(userData));
+                  if (settings.sceneType != "aframe" && settings.sceneType != "default") {
+                     InitIDB();  
+                  }
                   if (socket != null && socket != undefined) {
                      if (!socket.connected) {
                         socket.connect(socketHost);

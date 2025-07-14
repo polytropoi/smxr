@@ -4,6 +4,7 @@
 
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData} from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
+import { ResetTimedEvents } from "./events.js";
 // import { Howl, Howler } from '../node_modules/howler/dist/howler.js';
 // import {Howl} from '../main/vendor/howler/src/howler.js';
 
@@ -118,12 +119,14 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
           let interval = setInterval(() => {
             // console.log("youtube_player is null " + youtube_player == null);
             // youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
-            InitAFrameYouTubePlayer();
-            if (youtube_player != null) {
+            
+            if (youtube_player) {
               youtube_player.player_status_update("ready");
               clearInterval(interval);
+            } else {
+              // InitAFrameYouTubePlayer();
             }
-          }, 500); 
+          }, 1000); 
         } else {
           youtube_player.player_status_update("ready");
         }  
@@ -270,7 +273,7 @@ export function TransportPlayButton () {
     PrimaryAudioPlayPauseToggle();
   }
 }
-function FastForwardButton () {
+export function FastForwardButton () {
   console.log("ffwdButton Clicked");
   if (youtubePlayer != null) {
     youtubeTime = youtubePlayer.getCurrentTime();
@@ -286,7 +289,7 @@ function FastForwardButton () {
   } 
 
 }
-function RewindButton () {
+export function RewindButton () {
   console.log("rewindButton Clicked");
 
   if (youtubePlayer != null) {
@@ -305,7 +308,7 @@ function RewindButton () {
   // timeKeysIndex = 0;
 }
 
-function NextButton () {
+export function NextButton () {
   console.log("NextButton Clicked " + timedEventsListenerMode);
   if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
     if (youtubePlayer != null) {
@@ -320,18 +323,20 @@ function NextButton () {
   }
 }
 
-function PreviousButton () {
+export function PreviousButton () {
   console.log("PrevButton Clicked " + timedEventsListenerMode);
   if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
     if (youtubePlayer != null) {
     youtubePlayer.seekTo(0);
-    timeKeysIndex = 0;
+    // timeKeysIndex = 0;
+    ResetTimedEvents();
   }
   } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
       if (primaryAudioMangler != null) {
         console.log("start button for audio");
         primaryAudioMangler.start();
-        timeKeysIndex = 0;
+        // timeKeysIndex = 0;
+        ResetTimedEvents();
       }
     }
     ClearIntervals();

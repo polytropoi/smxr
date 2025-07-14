@@ -4642,7 +4642,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
           this.el.addEventListener('model-loaded', () => {
             // console.log("YOUTUBE MODEL LOADED!");
           this.model = this.el.getObject3D('mesh');
-            InitAFrameYouTubePlayer();
+            // InitAFrameYouTubePlayer();
           // this.ref = document.querySelector("#primaryAudioWaveform");
           // let theUrl = "https://img.youtube.com/vi/"+this.data.yt_id+"/mqdefault.jpg";
           let loadingTextureUrl = "https://servicemedia.s3.amazonaws.com/assets/pics/yotubeicon4.png";

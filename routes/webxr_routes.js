@@ -3163,24 +3163,35 @@ webxr_router.get('/:_id', function (req, res) {
                     settings.sceneEnvironmentPreset = sceneResponse.sceneEnvironmentPreset;
                     settings.showCameraIcon = sceneResponse.showCameraIcon; //for picture group mgr
                     settings.useArParent = useArParent;
-                
-                    if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
-                        settings.useXrRoomPhysics = true;
-                    } else {
-                        settings.useXrRoomPhysics = false;
-                    }
-                    if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("right hand blaster")) {
-                        settings.useRightHandBlaster = true;
-                    }
-                    if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("left hand blaster")) {
-                        settings.useLeftHandBlaster = true;
-                    }
 
-                    if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("real world meshing")) {
-                        settings.useRealWorldMeshing = true;
-                    } else {
-                        settings.useRealWorldMeshing = false;
-                    } 
+                    let sceneGreeting = sceneResponse.sceneDescription;
+                    if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
+                        sceneGreeting = sceneResponse.sceneGreeting;
+                    }      
+                    let sceneQuest = "No quests for this scene... yet!";
+                    if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
+                        sceneQuest = sceneResponse.sceneQuest;
+                    }
+                    settings.sceneGreeting = sceneGreeting;
+                    settings.sceneQuest = sceneQuest;
+                
+                    // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
+                    //     settings.useXrRoomPhysics = true;
+                    // } else {
+                    //     settings.useXrRoomPhysics = false;
+                    // }
+                    // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("right hand blaster")) {
+                    //     settings.useRightHandBlaster = true;
+                    // }
+                    // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("left hand blaster")) {
+                    //     settings.useLeftHandBlaster = true;
+                    // }
+
+                    // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("real world meshing")) {
+                    //     settings.useRealWorldMeshing = true;
+                    // } else {
+                    //     settings.useRealWorldMeshing = false;
+                    // } 
 
                     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("no mods")) {
                         settings.allowMods = false;
