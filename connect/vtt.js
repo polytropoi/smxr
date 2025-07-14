@@ -2,9 +2,11 @@
 
 import { GoWithIt } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 
-import {settings} from "../../connect/settings.js"
+import {settings, profile} from "../../connect/settings.js";
 
-import {userProfile} from "../../connect/connect.js"
+// import {userProfile} from "../../connect/connect.js";
+
+
 
 // import { Howl, Howler } from "howler";
 
@@ -381,18 +383,22 @@ export async function ReturnText () {
     return settings.sceneGreeting + "~" + settings.sceneQuest;
 }
 
+
+
 // export async function ReturnAudioGroups () {
 //     await settings;
 //     console.log("tryna return audioData " + settings.audioGroups);
 //     let audioGroupDataResponse = await ReturnAudioGroupsData();
 //     return audioGroupDataResponse;
-// }
-export async function ReturnUserProfile () {
+// // }
+export async function ReturnProfile () { //bounce through here so pixi don't load in this scope...
    
-   await userProfile; 
+   await profile;
    console.log("tryna return userProfile " + userProfile.avatarName);
-   return userProfile;
+   // return userProfile
+   playerProfileLoaded(profile);
 }
+
 
 export async function ReturnSprites () {
     await sprites;

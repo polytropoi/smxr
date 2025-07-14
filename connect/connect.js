@@ -10,6 +10,8 @@ import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAu
 // import { SetTimeKeysData } from "./landing.js";
 
 import { settings } from "../connect/settings.js";
+// import { profileLoaded } from "../connect/vtt.js";
+// import { profileLoaded } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
@@ -468,11 +470,11 @@ $(function() {
 
 }); //end onload
 
-export function UpdateUserProfile (profile) {
-   userProfile = profile;
-   console.log("userProfile for " + profile.avatarName);
-   
-}
+// export function UpdateUserProfile (profile) {
+//    userProfile = profile;
+//    console.log("userProfile for " + profile.avatarName);
+//    // profileLoaded(profile);
+// }
 
 
 
