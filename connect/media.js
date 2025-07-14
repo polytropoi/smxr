@@ -486,8 +486,8 @@ export function PrimaryAudioInit() {
   if (primaryAudioEl != null) {
     primaryAudioMangler = document.getElementById("primaryAudio").components.primary_audio_control;
     
-    if (primaryAudioMangler && primaryAudioMangler.data.autoplay) {
-      console.log("PRIMARY AUDIO INIT() autoplay " + primaryAudioMangler.data.autoplay +  " isplaying " + primaryAudioHowl.playing());
+    if (primaryAudioMangler && primaryAudioMangler.data && primaryAudioMangler.data.autoplay) {
+      console.log("PRIMARY AUDIO INIT() autoplay " + primaryAudioMangler.data.autoplay );
       if (primaryAudioHowl != null) {
         if (!primaryAudioHowl.playing()) {
           primaryAudioMangler.playPauseToggle();

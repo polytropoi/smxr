@@ -13,7 +13,7 @@ import {  PauseIntervals, SetVideoEventsData, SetTimeKeysData, SetTimedEventsLis
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
 // import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
 import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation, 
-      userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations } from "../../../connect/connect.js";
+      userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations, AvatarClicked } from "../../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
 import { settings } from "../../../connect/settings.js";
 import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat } from '../../../connect/media.js';

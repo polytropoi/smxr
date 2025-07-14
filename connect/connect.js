@@ -2692,8 +2692,8 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
    }
 }
 
-function AvatarClicked(sid) {
-   console.log("AvatarClicked " +sid);
+export function AvatarClicked(sid) {
+   console.log("AvatarClicked " + sid);
    SceneManglerModal('Messages');
 }
 

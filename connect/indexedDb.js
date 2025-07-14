@@ -270,7 +270,11 @@ export function InitIDB() {
          }
          let objexEl = document.getElementById('sceneObjects');    
          if (objexEl) {
-            objexEl.components.mod_objex.updateModdedObjects();
+            const modObjectComponent = objexEl.components.mod_objex;
+            if (modObjectComponent) {
+               modObjectComponent.updateModdedObjects();
+            }
+            
          }
           //eventdata should have the name of a location with spawn markertype
          if (playerPosMods.length) {
