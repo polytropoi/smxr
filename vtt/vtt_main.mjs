@@ -1,12 +1,12 @@
 // import '@pixi/layout'; 
-import { Application, Assets, Graphics, Texture, Container } from 'pixi';
+import { Application, Assets, Graphics, Texture, Container, RenderLayer } from 'pixi';
 import { Viewport } from 'pixi-viewport';
 import { Button, ButtonContainer } from '@pixi/ui';
 
 // import { LayoutSystem } from '@pixi/layout';
 import { addBackground, addMap } from './addBackground.mjs';
 import { addText, addPlayerProfileText } from './addText.mjs';
-import { addFishes, addSpriteAnimation, animateElements, animateFishes } from './addElements.mjs';
+import { addAnimatedSprite, animateElements } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
 import { ReturnMap, ReturnBackground, ReturnSprites, ReturnText, ReturnProfile  } from '../connect/vtt.js';
@@ -14,9 +14,10 @@ import { ReturnAudioGroupsData } from '../connect/media.js';
 import { settings, profile } from '../connect/settings.js';
 
 // Create a PixiJS application.
-const app = new Application();
+export const app = new Application();
 let viewport;
-
+const spritesContainer = new Container();
+const spriteLayer = new RenderLayer();
 const uicontainer = new Container( {layout: {
             width: '80%',
             height: '80%',
@@ -205,7 +206,7 @@ export async function GoWithIt() { //called from vtt.js
   }
   if (mappicURL) {
 
-    addMap(app, viewport);
+    addMap(app, viewport, spritesContainer);
 
   }
 
@@ -220,16 +221,19 @@ export async function GoWithIt() { //called from vtt.js
   const sprite1 = Texture.from('sprite1');
 
     if (mappicURL) {
-      addSpriteAnimation(app, sprite1, spritesData[0], elements, viewport);
+      addAnimatedSprite(app, sprite1, spritesData[0], 15, elements, viewport, spritesContainer);
     } else {
-      addSpriteAnimation(app, sprite1, spritesData[0], elements, null);
+      addAnimatedSprite(app, sprite1, spritesData[0], 15, elements, null, spritesContainer);
     }
     // Add the animation callbacks to the application's ticker.
+
+
     app.ticker.add((time) => {
       // animateFishes(app, fishes, time);
-      animateElements(app, elements, time);
+      // animateElements(app, elements, time);
       // animateWaterOverlay(app, time);
     });
+  
   }
 
 //  const button = new Button(

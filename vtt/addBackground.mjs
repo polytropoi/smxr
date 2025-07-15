@@ -3,6 +3,7 @@ import { Sprite, Container, Assets, Spritesheet } from 'pixi';
 import { mappicURL } from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 
+export let mapsize = {};
 
 export function addBackground(app, viewport) {
   
@@ -35,7 +36,7 @@ export function addBackground(app, viewport) {
 }
 
 
-export async function addMap(app, viewport) {
+export async function addMap(app, viewport, spritesContainer) {
   // Create a background sprite.
 
     const map = Sprite.from('map'); //need to ref it for w/h below
@@ -45,7 +46,9 @@ export async function addMap(app, viewport) {
 
     const picwidth = map.texture.width;
     const picheight = map.texture.height;
-    const spritesContainer = new Container();
+    mapsize.x = picwidth;
+    mapsize.y = picheight;
+
     let tilesize = 128;
     const xCount = picwidth / tilesize;
     const yCount = picheight / tilesize;
