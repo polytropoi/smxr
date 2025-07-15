@@ -2489,14 +2489,14 @@ vtt_router.get('/:_id', function (req, res) {
                         "firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);\n"+
                     "</script>";
                     
-                    youtubeEntity = "<a-entity id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
+                    // youtubeEntity = "<a-entity id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
 
-                    "<a-entity id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayer\x22 youtube_player=\x22yt_id: "+
-                    sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></a-entity>"+
-                    "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 1.7 .1\x22 id=\x22youtubeTitle\x22></a-text>"+
-                    "<a-text width=\x223\x22 position=\x22-.95 .7 .1\x22 id=\x22youtubeState\x22></a-text>"+
-                    "<a-text width=\x223\x22 position=\x22-.95 .6 .1\x22 id=\x22youtubeStats\x22></a-text>"+
-                    "</a-entity>";
+                    // "<a-entity id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayer\x22 youtube_player=\x22yt_id: "+
+                    // sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></a-entity>"+
+                    // "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 1.7 .1\x22 id=\x22youtubeTitle\x22></a-text>"+
+                    // "<a-text width=\x223\x22 position=\x22-.95 .7 .1\x22 id=\x22youtubeState\x22></a-text>"+
+                    // "<a-text width=\x223\x22 position=\x22-.95 .6 .1\x22 id=\x22youtubeStats\x22></a-text>"+
+                    // "</a-entity>";
                 }
             }
             if (hasPrimaryAudio || hasPrimaryAudioStream) {
@@ -3324,6 +3324,8 @@ vtt_router.get('/:_id', function (req, res) {
                         
                         "</head>\n" +
                         "<body "+bgstyle+">" +
+                        canvasOverlay +
+                        transportButtons+ 
                     
                         "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
                         "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
@@ -3406,8 +3408,7 @@ vtt_router.get('/:_id', function (req, res) {
                         "<script type=\x22module\x22 src=\x22/vtt/addOverlay.mjs\x22></script>" +
                         "<script type=\x22module\x22 src=\x22/vtt/addDisplacement.mjs\x22></script>" +  
                         "<script type=\x22module\x22 src=\x22/vtt/vtt_main.mjs\x22 ></script>" +
-                        canvasOverlay +
-                        transportButtons+ 
+
                         // audioHtml +
 
                         "<div id=\x22pixi-container\x22>"+
