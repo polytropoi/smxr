@@ -83,9 +83,7 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
   function onPlayerReady(event) {
     
     console.log("youtubePlayer is re4ady!");
-    // if (timedEventsListenerMode == null) {
-    //   timedEventsListenerMode = "Youtube";
-    // }
+
     if (!timedEventsListenerMode || timedEventsListenerMode == "") {
         SetTimedEventsListenerMode("Youtube");
     }
