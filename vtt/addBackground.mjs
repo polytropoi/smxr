@@ -49,7 +49,7 @@ export async function addMap(app, viewport, spritesContainer) {
     mapsize.x = picwidth;
     mapsize.y = picheight;
 
-    let tilesize = 128;
+    let tilesize = 64;
     const xCount = picwidth / tilesize;
     const yCount = picheight / tilesize;
 

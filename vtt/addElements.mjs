@@ -237,9 +237,18 @@ export async function addAnimatedSprite (app, texture, spriteData, count, elemen
         app.stage.addChild(elementContainer);
       }
     }
+}
 
-
-
+export function addSprite (app, sprite, location_id, viewport) {
+  console.log("tryna addSprite for location " + location_id);
+  sprite.anchor.set(0.5);
+sprite.position.set(app.screen.width / 2, app.screen.height / 2);
+// sprite.scale.set(2);
+    if (viewport) {
+      viewport.addChild(sprite);
+    } else {
+      app.stage.addChild(sprite);
+    }
 }
 
 export function animateElements(app, elements, time, viewport) {

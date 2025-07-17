@@ -281,7 +281,7 @@ vtt_router.get('/:_id', function (req, res) {
     let availableScenesEntity = "";
     let pictureGroupsEntity = "";
     let pictureGroupsData = "";
-    let scenePictureData = "";
+    let scenePicturesData = "";
     let sceneTextData = "";
    
     let videoGroupsEntity = "";
@@ -914,10 +914,10 @@ vtt_router.get('/:_id', function (req, res) {
                 } //end location loop
                 // console.log("sceneResponse " + JSON.stringify(sceneResponse));
                 var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations)).toString("base64");
-                loadLocations = "<a-entity location_data id=\x22locationData\x22 data-locations='"+buff+"'></a-entity>";
+                loadLocations = "<div id=\x22locationData\x22 data-locations='"+buff+"'></div>";
             } else {
                 var buff = Buffer.from(JSON.stringify([])).toString("base64");
-                loadLocations = "<a-entity location_data id=\x22locationData\x22 data-locations='"+buff+"'></a-entity>";
+                loadLocations = "<div id=\x22locationData\x22 data-locations='"+buff+"'><div>";
             } //end locations
 
             ///scene types/////////
@@ -995,18 +995,7 @@ vtt_router.get('/:_id', function (req, res) {
             } else { //"sceneWebType == "Default or AFrame"
                                 
 
-                let physicsMod = "";
                 
-                if (useSimpleNavmesh) {
-                    // wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: 5; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:.1;\x22";                 
-                } 
-                
-                if (physicsScripts.length > 0 && !useSuperHands && !useStarterKit) { //inject into player for collider
-                    // physicsMod = "geometry=\x22primitive: cylinder; height: 2; radius: 0.5;\x22 ammo-body=\x22type: kinematic;\x22 ammo-shape=\x22type: capsule\x22"                 
-                }
-                 if (physicsScripts.length > 0 && useNavmesh && !useSuperHands && !useStarterKit) {
-                    // physicsMod = "geometry=\x22primitive: cylinder; height: 2; radius: 0.5;\x22 ammo-body=\x22type: kinematic;\x22 ammo-shape=\x22type: capsule\x22";
-                }
 
                 transportButtons = "<div class=\x22transport_buttons\x22>"+
 
@@ -2810,8 +2799,8 @@ vtt_router.get('/:_id', function (req, res) {
                     //     }
                     // }
                 }
-                // var buff = Buffer.from(JSON.stringify(scenePictureItems)).toString("base64");
-                // scenePictureData = "<a-entity scene_pictures_control id=\x22scenePictureData\x22 data-scene-pictures='"+buff+"'></a-entity>";
+                var buff = Buffer.from(JSON.stringify(scenePictureItems)).toString("base64");
+                scenePicturesData = "<div id=\x22scenePicturesData\x22 data-scene-pictures='"+buff+"'></div>";
             }
                 
 
@@ -3331,7 +3320,9 @@ vtt_router.get('/:_id', function (req, res) {
                         "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
                         settingsData +
                         spriteData + 
-
+                        scenePicturesData +
+                        pictureGroupsData +
+                        loadLocations +
                         "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +
 
                         // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+

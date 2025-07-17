@@ -25,6 +25,8 @@ export let posRotReader;
 export let lastLocalUpdate = "";
 export let lastCloudUpdate = "";
 export let localData = {locations:[], settings:{}, localFiles: {}}; //all the things
+
+let locationData;
 export let locationTimestamps = [];
 export let sceneLocations = {locations: [], locationMods: []};
 // export let settings; //push this to an aframe component for fetching...
@@ -40,16 +42,19 @@ var dateString = Date.now().toString();
 export let roomUsers = {};
 export let stringRoomUsers = "";
 var trimmedString = dateString.substring(dateString.length - 4, 4);
-var username;
-var pics = [];
-var picsBuffer = [];
-var picArrayIndex = 0;
-var currentIndex = 0;
+// var username;
+// var pics = [];
+// var picsBuffer = [];
+// var picArrayIndex = 0;
+// var currentIndex = 0;
 let avatarNameEl = document.querySelector(".avatarName"); //make this actual uid?  
 // let avatarName = "";
-let playFrames = false;
-let isConnected = false;
+// let playFrames = false;
+// let isConnected = false;
 export let userData = {};
+let pictureGroupsData;
+let scenePicturesData;
+
 let mySocketID = "";
 let emitInterval = null;
 let lastPosition = "";
@@ -103,19 +108,19 @@ let liveKitHost = "http://localhost:8000";
 // let socketHost = null;
 var socket = null; //the socket.io instance below
 
-let transformAll = false;
+// let transformAll = false;
 
-let currentLocalStorageUsed = null;
-let currentAvailableLocalStorageEstimage = null;
+// let currentLocalStorageUsed = null;
+// let currentAvailableLocalStorageEstimage = null;
 
 
 export let allowCameraLock = true;
 const camLockButton = document.getElementById("camLockToggleButton");
-let intersections = [];
+// let intersections = [];
 export let avatarName = "";
-let primaryAudioEl = document.querySelector('#primaryAudio');
+// let primaryAudioEl = document.querySelector('#primaryAudio');
 
-export let audioGroupsData = {};
+// export let audioGroupsData = {};
 
 // window.LocationRowClick = LocationRowClick;
 
@@ -131,9 +136,32 @@ $(function() {
    // let theSettingsData = settingsEl.getAttribute('data-settings');
    // settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
 
-    let spritesEl = document.getElementById('spritesDataElement'); //volume, color, etc...
+   let spritesEl = document.getElementById('spritesDataElement'); //volume, color, etc...
    let theSpritesData = spritesEl.getAttribute('data-sprites');
    sprites = JSON.parse(atob(theSpritesData)); //gets copied to localdata ifn mods are 'llowed
+
+
+   let pictureGroupsDataEl = document.getElementById('pictureGroupsData');
+   if (pictureGroupsDataEl) {
+      let thePictureGroupsData = pictureGroupsDataEl.getAttribute('data-picture-groups');
+      pictureGroupsData = JSON.parse(atob(thePictureGroupsData));
+   }
+
+   let scenePicturesDataEl = document.getElementById('scenePicturesData');
+   if (scenePicturesDataEl) {
+      let theScenePicturesData = scenePicturesDataEl.getAttribute('data-scene-pictures');
+      scenePicturesData = JSON.parse(atob(theScenePicturesData));
+
+   }
+
+   let locationDataEl = document.getElementById('locationData');
+   if (locationDataEl) {
+      let theLocationData = locationDataEl.getAttribute('data-locations');
+
+      locationData = JSON.parse(atob(theLocationData));
+      console.log("locationData " + JSON.stringify(locationData));
+
+   }
 
    // console.log("Settings : " + JSON.stringify(settings));
    let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
@@ -227,28 +255,22 @@ $(function() {
 //    } else {
     //   console.log("not aframe or default scenetype!");
       // GetTextItems(); //only for plain pages or text adventure, scene_text_control fetches for aframe
-      if (settings.sceneType == "landing") {
-         if (settings.sceneTags && settings.sceneTags.includes("landing pics")) {
+
+      // if (settings.sceneType == "landing") {
+      //    if (settings.sceneTags && settings.sceneTags.includes("landing pics")) {
             let picGroupMgr = document.getElementById("pictureGroupsData");
             if (picGroupMgr) {
                let theData = picGroupMgr.getAttribute('data-picture-groups');
-               let theJSONData = JSON.parse(atob(theData)); //convert from base64
-               console.log(JSON.stringify(theJSONData));
-               let picResp = "";
-               for (let i = 0; i < theJSONData[0].images.length; i++) { //todo ++ groups
-                  picResp = picResp + "<a href=\x22"+theJSONData[0].images[i].url+"\x22 target=\x22_blank\x22><img src=\x22"+theJSONData[0].images[i].url+"\x22 class=\x22cropped1 image-fluid\x22 style=\x22object-fit: cover;\x22 width=\x22512\x22 height=\x22256\x22></a>";
-                }
-
-               let picGroupsContainer = document.getElementById("picGroupsContainer");
-               if (picGroupsContainer) {
-                  picGroupsContainer.innerHTML = picResp;
-               }
+               pictureGroupsData = JSON.parse(atob(theData)); //convert from base64
+               console.log("pictureGroups data :" +JSON.stringify(pictureGroupsData));
+              
             }
-         }
-      }
+      //    }
+      // } else if (settings.sceneType)
    
     console.log("settings " + JSON.stringify(settings));
     console.log("sprites " + JSON.stringify(sprites));
+    console.log("scenepictures " + JSON.stringify(scenePicturesData));
 
     mappicURL = settings.mappicURL;
     backgroundURL = settings.backgroundURL;
@@ -259,20 +281,7 @@ $(function() {
       console.log("Loading browser MATRIX sdk!!!");
       GetMatrixData();
    }
-   // if (settings.audioGroups) {
-   //    ReturnAudioGroupsData(settings.audioGroups);
-   //    // console.log("audioGroupsData  " + JSON.stringify(audioGroupsData));
-   // }
-   // if (settings.clearLocalMods) { //??????
-   //    for (var i=0; i < localStorage.length; i++)  {
-      
-   //       let theKey = localStorage.key(i);
-   //       if (theKey.includes(room) && theKey.includes("localmarker")) {
-   //          localStorage.removeItem(theKey);
-   //          console.log("removed " + theKey);
-   //       }
-   //    }
-   // }
+  
 
    if (settings.networking == 'SocketIO' && settings.socketHost) {
       if (settings.socketHost.length > 6) { //i.e. not "none" or empty
@@ -383,14 +392,23 @@ export async function ReturnText () {
     return settings.sceneGreeting + "~" + settings.sceneQuest;
 }
 
+export async function ReturnScenePictures () {
+   await scenePicturesData != null;
+         console.log("scenePicturesData " + JSON.stringify(scenePicturesData));
+   return scenePicturesData;
+}
 
+export async function ReturnPictureGroups () {
+   await pictureGroupsData;
+   return pictureGroupsData;
+}
 
-// export async function ReturnAudioGroups () {
-//     await settings;
-//     console.log("tryna return audioData " + settings.audioGroups);
-//     let audioGroupDataResponse = await ReturnAudioGroupsData();
-//     return audioGroupDataResponse;
-// // }
+export async function ReturnLocations () {
+      await locationData;
+      console.log("locationData " + JSON.stringify(locationData));
+      return locationData;
+}
+
 export async function ReturnProfile () { //bounce through here so pixi don't load in this scope...
    
    await profile;

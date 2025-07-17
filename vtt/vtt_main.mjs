@@ -1,15 +1,15 @@
 // import '@pixi/layout'; 
-import { Application, Assets, Graphics, Texture, Container, RenderLayer } from 'pixi';
+import { Application, Assets, Graphics, Texture, Container, RenderLayer, Sprite } from 'pixi';
 import { Viewport } from 'pixi-viewport';
 import { Button, ButtonContainer } from '@pixi/ui';
 
 // import { LayoutSystem } from '@pixi/layout';
 import { addBackground, addMap } from './addBackground.mjs';
 import { addText, addPlayerProfileText } from './addText.mjs';
-import { addAnimatedSprite, animateElements } from './addElements.mjs';
+import { addAnimatedSprite, addSprite, animateElements } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
-import { ReturnMap, ReturnBackground, ReturnSprites, ReturnText, ReturnProfile  } from '../connect/vtt.js';
+import { ReturnMap, ReturnBackground, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
 import { ReturnAudioGroupsData } from '../connect/media.js';
 import { settings, profile } from '../connect/settings.js';
 
@@ -30,6 +30,7 @@ const uicontainer = new Container( {layout: {
 
 
 // Store an array of fish sprites for animation.
+let assetAliases = [];
 const fishes = [];
 let elements = [];
 export let mappicURL;
@@ -37,9 +38,12 @@ let backgroundURL;
 let spritesData;
 let audioGroupsData;
 let textData;
+let scenePicturesData;
+let pictureGroupsData;
+let locationData;
 // let profile;
 
-let sprites
+// let sprites
 
 
 function onResize () {
@@ -47,7 +51,7 @@ function onResize () {
   console.log("tryna resize..." + window.innerWidth + " " + window.innerHeight);
   // app.resizeTo = window;
   // viewport.resizeTo = window;
-// Resize the pixi app's renderer
+  // Resize the pixi app's renderer
     // app.renderer.resize(
     //     window.innerWidth,
     //     window.innerHeight
@@ -55,17 +59,14 @@ function onResize () {
   // app.resize();
   //       viewport.resize();
 
-        let parent = document.getElementById("pixi-container");
-        parent.style.width = window.innerWidth;
-        parent.style.height = window.innerHeight;
+  let parent = document.getElementById("pixi-container");
+  parent.style.width = window.innerWidth;
+  parent.style.height = window.innerHeight;
     // Resize the pixi viewport
     // viewport.screenWidth = window.innerWidth;
     // viewport.screenHeight = window.innerHeight;
-        // viewport.worldWidth,
-        // viewport.worldHeight
- 
-
-
+    // viewport.worldWidth,
+    // viewport.worldHeight
 }
 
 async function setup() {
@@ -96,6 +97,12 @@ async function prePreLoader () {
   textData = await ReturnText();
   console.log("text " + JSON.stringify(textData));
 
+  scenePicturesData = await ReturnScenePictures();
+  console.log("scenePicturesData " + scenePicturesData);
+  pictureGroupsData = await ReturnPictureGroups();
+  locationData = await ReturnLocations();
+  
+  console.log("locationData " + JSON.stringify(locationData));
   let interval = setInterval(() => { //wait a shake for iDB to get localprofile..
     if (profile) {
       playerProfileLoaded(profile)
@@ -113,12 +120,12 @@ async function preload() {
 
   const assets = [
     { alias: 'background', src: backgroundURL },
-        { alias: 'map', src: mappicURL },
-    { alias: 'fish1', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish1.png' },
-    { alias: 'fish2', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish2.png' },
-    { alias: 'fish3', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish3.png' },
-    { alias: 'fish4', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish4.png' },
-    { alias: 'fish5', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish5.png' },
+    { alias: 'map', src: mappicURL },
+    // { alias: 'fish1', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish1.png' },
+    // { alias: 'fish2', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish2.png' },
+    // { alias: 'fish3', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish3.png' },
+    // { alias: 'fish4', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish4.png' },
+    // { alias: 'fish5', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish5.png' },
     { alias: 'overlay', src: 'https://pixijs.com/assets/tutorials/fish-pond/wave_overlay.png' },
     { alias: 'displacement', src: 'https://pixijs.com/assets/tutorials/fish-pond/displacement_map.png' }
     
@@ -128,6 +135,15 @@ async function preload() {
   if (spritesData && spritesData.length) {
     assets.push({ alias: 'sprite1', src: spritesData[0].meta.image });
   } 
+
+  if (scenePicturesData && scenePicturesData.length) {
+    for (let i = 0; i < scenePicturesData.length; i++) {
+      // if (scenePicturesData[i].tags && scenePicturesData[i].tags.includes("logo")) {
+      console.log("add scenepicture to assets " + scenePicturesData[i]._id + " " + scenePicturesData[i].url);
+        assets.push({ alias: scenePicturesData[i]._id, src: scenePicturesData[i].url })
+      // } 
+    }
+  }
   // Load the assets defined above.
   await Assets.load(assets);
 }
@@ -149,27 +165,18 @@ export async function GoWithIt() { //called from vtt.js
       screenHeight: window.innerHeight,
       worldWidth: 1000,
       worldHeight: 1000,
-      events: app.renderer.events, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+      events: app.renderer.events, 
     });
-    // add the viewport to the stage
     if (app.screen.width > app.screen.height) {
       viewport.width = app.screen.width - (app.screen.width * .1);
-          // background.width = app.screen.width;
       viewport.scale.y = viewport.scale.x;
-    } else {
-      /**
-       * If the preview is square or portrait, then fill the height of the screen instead
-       * and apply the scaling to the horizontal scale accordingly.
-       */
+      } else {
       viewport.height = app.screen.height - (app.screen.height * .1);
       viewport.scale.x = viewport.scale.y;
     }
-    // viewport.x = app.screen.width * .01;
-    // viewport.y = app.screen.height * .01;
 
     viewport.x = 0;
     viewport.y = 0;
-    // 
 
     app.stage.addChild(viewport);
     // activate plugins
@@ -178,36 +185,29 @@ export async function GoWithIt() { //called from vtt.js
         .pinch()
         .wheel()
         .decelerate();
-    } else {
 
-    }
-
-  //   viewport = new Viewport({
-  //       screenWidth: window.innerWidth,
-  //       screenHeight: window.innerHeight,
-  //       worldWidth: 1000,
-  //       worldHeight: 1000,
-  //       events: app.renderer.events, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
-  //   });
-  //   // add the viewport to the stage
-
-  // app.stage.addChild(viewport);
-
-  // // activate plugins
-  // viewport
-  //     .drag()
-  //     .pinch()
-  //     .wheel()
-  //     .decelerate();
-
-
+    viewport.zoomPercent(.75, true);    
+  } else {
+    //no viewport, normal background
+  }
   if (backgroundURL) {
     addBackground(app);
   }
   if (mappicURL) {
-
     addMap(app, viewport, spritesContainer);
+  }
 
+  if (locationData) {
+    for (let i = 0; i < locationData.length; i++) {
+      console.log("location " + locationData[i]);
+      if (locationData[i].markerType == "picture") {
+        if (locationData[i].mediaID && locationData[i].mediaID != "" & locationData[i].mediaID != "none") {
+          const texture = Texture.from(locationData[i].mediaID);
+          const newSprite = new Sprite(texture);
+          addSprite(app, newSprite, locationData[i].timestamp, viewport );
+        }
+      }
+    }
   }
 
   app.ticker.add((time) => animateElements(app, elements, time));
@@ -220,6 +220,8 @@ export async function GoWithIt() { //called from vtt.js
   if (spritesData && spritesData.length) {
   const sprite1 = Texture.from('sprite1');
 
+  // const logoSprite
+
     if (mappicURL) {
       addAnimatedSprite(app, sprite1, spritesData[0], 15, elements, viewport, spritesContainer);
     } else {
@@ -228,11 +230,11 @@ export async function GoWithIt() { //called from vtt.js
     // Add the animation callbacks to the application's ticker.
 
 
-    app.ticker.add((time) => {
-      // animateFishes(app, fishes, time);
-      // animateElements(app, elements, time);
-      // animateWaterOverlay(app, time);
-    });
+    // app.ticker.add((time) => {
+    //   // animateFishes(app, fishes, time);
+    //   // animateElements(app, elements, time);
+    //   // animateWaterOverlay(app, time);
+    // });
   
   }
 

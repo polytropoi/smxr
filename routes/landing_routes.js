@@ -3206,9 +3206,9 @@ landing_router.get('/:_id', function (req, res) {
                             sceneEditButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../main/index.html?type=scene&iid="+sceneResponse._id+"\x22>Edit Scene</a>";
                         }
 
-                        if (mappicURL != "" || backgroundURL != "") {
+                        // if (mappicURL != "" || backgroundURL != "") {
                             vttButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22>Virtual Table Top</a> ";
-                        }
+                        // }
                         // }
                         if (sceneResponse.sceneShareWithSubscribers) {
                             if (isGuest) {

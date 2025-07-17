@@ -482,7 +482,7 @@ function PlayTimedEvent(timeKey) {
 
 
 
-//////////////////////////////////////////////// move to primary-audio-control ... //no!
+//////////////////////////////////////////////// set events data //////////////
 
 export function SetPrimaryAudioEventsData () {
 

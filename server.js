@@ -5335,7 +5335,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                     }
                 }
                 res.send("updated scene with group");
-        } catch {
+        } catch (e) {
             console.log('error adding group to scene ' +e);
             res.send('error adding group to scene ' +e);
         }
@@ -5667,7 +5667,7 @@ app.post('/add_scene_location/', requiredAuthentication, function (req, res) { /
             const updoc ={$addToSet: { "sceneLocations": location}};
             const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc);
             res.send("updated " + JSON.stringify(updated));
-        } catch {
+        } catch (e) {
             console.log("error addding scene location " + e);
             res.send("error addding scene location " + e);
         }
@@ -5701,7 +5701,7 @@ app.post('/add_scene_model/', requiredAuthentication, function (req, res) {
                 console.log("duplicate model ids not allowed!");
                 res.send("no dupes - the scene already has that model reference!");
             }
-        } catch {
+        } catch (e) {
             console.log("error addding scene model " + e);
             res.send("error addding scene location " + e);
         }
@@ -5735,7 +5735,7 @@ app.post('/add_scene_obj/', requiredAuthentication, function (req, res) {
                 console.log("duplicate obj ids not allowed!");
                 res.send("no dupes - the scene already has that object reference!");
             }
-        } catch {
+        } catch (e) {
             console.log("error addding scene model " + e);
             res.send("error addding scene location " + e);
         }
@@ -5768,7 +5768,7 @@ app.post('/add_scene_vid/', requiredAuthentication, function (req, res) { //hrm,
                 console.log("duplicate obj ids not allowed!");
                 res.send("no dupes - the scene already has that object reference!");
             }
-        } catch {
+        } catch (e) {
             console.log("error addding scene viodeo " + e);
             res.send("error addding scene viodeo " + e);
         }
@@ -5779,7 +5779,7 @@ app.post('/add_scene_text_item/', requiredAuthentication, function (req, res) {
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
     var p_id = ObjectId.createFromHexString(req.body.text_id);   
-    console.log('tryna add a scene pic : ' + req.body);
+    console.log('tryna add a scene text item : ' + req.body);
 
     (async () => {
         try {
@@ -5801,7 +5801,7 @@ app.post('/add_scene_text_item/', requiredAuthentication, function (req, res) {
                 console.log("duplicate text ids not allowed!");
                 res.send("no dupes - the scene already has that object reference!");
             }
-        } catch {
+        } catch (e) {
             console.log("error addding scene text " + e);
             res.send("error addding scene text " + e);
         }
@@ -5819,7 +5819,7 @@ app.post('/scene_text_items/', function (req, res) {
                 const text_items = await RunDataQuery("text_items", "find", textquery);
                 console.log('getting scene_text_items : ' + req.body.textIDs);
                 res.send(text_items);
-            } catch {
+            } catch (e) {
                 console.log("error getting scene text " + e);
                 res.send("error  getting scene text " + e);
             }
@@ -5840,8 +5840,8 @@ app.post('/add_scene_pic/', requiredAuthentication, function (req, res) {
             const scenequery = { "_id": s_id};
             const picquery = { "_id": p_id};
             const scene = await RunDataQuery("scenes", "findOne", scenequery);
-            const hasPic = (scene.scenePictures.length && scene.scenePictures.indexOf(req.body.pic_id) > -1) ? true : false;
-            console.log("sceneObjects " + JSON.stringify(scene.scenePictures) +" vs "+req.body.pic_id + " " + hasPic );
+            const hasPic = (scene.scenePictures && scene.scenePictures.length && scene.scenePictures.indexOf(req.body.pic_id) > -1) ? true : false;
+            console.log("checking scenePictures for dupes " + JSON.stringify(scene.scenePictures) +" vs "+req.body.pic_id + " " + hasPic );
             if (scene.scenePictures == "" || !hasPic) {
                 let picture = await RunDataQuery("image_items", "findOne", picquery); 
                 let scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
@@ -5854,9 +5854,9 @@ app.post('/add_scene_pic/', requiredAuthentication, function (req, res) {
                 console.log("duplicate obj ids not allowed!");
                 res.send("no dupes - the scene already has that object reference!");
             }
-        } catch {
-            console.log("error addding scene viodeo " + e);
-            res.send("error addding scene viodeo " + e);
+        } catch (e) {
+            console.log("error scene pic " + e);
+            res.send("error addding scene pic " + e);
         }
     })();
 });
@@ -5875,7 +5875,7 @@ app.post('/add_object_model/', requiredAuthentication, function (req, res) {
             const updated = await RunDataQuery("obj_items", "updateOne", objquery, updoc);
             console.log('getting scene_text_items : ' + req.body.textIDs);
             res.send("updated object " + updated );
-        } catch {
+        } catch (e) {
             console.log("error updating object model " + e);
             res.send("error updating object modek " + e);
         }
@@ -5898,7 +5898,7 @@ app.post('/add_action_model/', requiredAuthentication, function (req, res) { //s
             const updated = await RunDataQuery("actions", "updateOne", actionquery, updoc);
             console.log('getting scene_text_items : ' + req.body.textIDs);
             res.send("updated object " + updated );
-        } catch {
+        } catch (e) {
             console.log("error updating object model " + e);
             res.send("error updating object modek " + e);
         }
@@ -5922,7 +5922,7 @@ app.post('/add_action_object/', requiredAuthentication, function (req, res) { //
             const updated = await RunDataQuery("actions", "updateOne", actionquery, updoc);
             console.log('getting scene_text_items : ' + req.body.textIDs);
             res.send("updated object " + updated );
-        } catch {
+        } catch (e) {
             console.log("error updating object model " + e);
             res.send("error updating object modek " + e);
         }
@@ -5953,7 +5953,7 @@ app.post('/add_obj_action/', requiredAuthentication, function (req, res) { //sav
             } else {
                 res.send("object already has that action attached!");
             }
-        } catch {
+        } catch (e) {
             console.log("error updating object model " + e);
             res.send("error updating object modek " + e);
         }
@@ -5983,7 +5983,7 @@ app.post('/add_object_pic/', requiredAuthentication, function (req, res) {
             } else {
                 res.send("object already has that picture attached!");
             }
-        } catch {
+        } catch (e) {
             console.log("error updating object picture " + e);
             res.send("error updating object picture " + e);
         }
@@ -5993,7 +5993,7 @@ app.post('/add_object_pic/', requiredAuthentication, function (req, res) {
 app.post('/rem_object_action/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.object_id);   
     // var p_id = ObjectId.createFromHexString(req.body.action_id);   
-    console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
+    console.log('tryna remove an object action : ' + JSON.stringify(req.body));
     (async () => {
         try {
             const objquery = {"_id": s_id};
@@ -6022,7 +6022,7 @@ app.post('/rem_object_action/', requiredAuthentication, admin, function (req, re
 app.post('/rem_object_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.domain_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
-    console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
+    console.log('tryna remove an object pic : ' + JSON.stringify(req.body));
 
     (async () => {
         try {
@@ -6081,7 +6081,7 @@ app.post('/add_domain_pic/', requiredAuthentication, admin, function (req, res) 
 app.post('/rem_app_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.app_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
-    console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
+    console.log('tryna remove an app pic : ' + JSON.stringify(req.body));
 
     (async () => {
         try {
@@ -6112,7 +6112,7 @@ app.post('/rem_app_pic/', requiredAuthentication, admin, function (req, res) {
 app.post('/add_app_pic/', requiredAuthentication, admin, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.app_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
-    console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
+    console.log('tryna add an app pic : ' + JSON.stringify(req.body));
 
     (async () => {
         try {
@@ -6145,7 +6145,7 @@ app.post('/add_app_pic/', requiredAuthentication, admin, function (req, res) {
 app.post('/rem_storeitem_pic/', checkAppID, requiredAuthentication, function (req, res) {
     var s_id = ObjectId.createFromHexString(req.body.storeitem_id);   
     var p_id = ObjectId.createFromHexString(req.body.pic_id);   
-    console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
+    console.log('tryna remove a store item pic : ' + JSON.stringify(req.body));
     (async () => {
         try {
             const siquery = {"_id": s_id};
@@ -6175,7 +6175,7 @@ app.post('/rem_storeitem_pic/', checkAppID, requiredAuthentication, function (re
 
 
 app.post('/add_storeitem_pic/', requiredAuthentication, function (req, res) {
-    console.log('tryna add a scene pic : ' + JSON.stringify(req.body));
+    console.log('tryna add a store item pic : ' + JSON.stringify(req.body));
     var s_id = ObjectId.createFromHexString(req.body.storeitem_id.toString());   
     var p_id = ObjectId.createFromHexString(req.body.pic_id.toString());   
 

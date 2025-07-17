@@ -418,13 +418,6 @@ export function InitTriggerSlider () {
       } 
    }
 }
-   // function SetLocationData(locationData) {
-   //    console.log("locationData " + JSON.stringify(locationData));
-   //    // let locations = locationData;
-   //    sceneLocations.locations = locationData;
-      
-   //    // console.log("locationData " + JSON.stringify(sceneLocations));
-   // }
 
 export function UpdatePrimaryAudioVolume(newVolume) {
    var primaryAudio = document.getElementById("primaryAudio");

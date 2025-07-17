@@ -5482,6 +5482,7 @@
                         "<option>Heightmap</option>" +
                         "<option>Cubemap</option>" +
                         "<option>Tileable</option>" +
+                        "<option>Sprite</option>" +
                         "<option>Spritesheet</option>" +
                         "</select>" +
                     "</div>" +

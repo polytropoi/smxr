@@ -4411,30 +4411,6 @@ AFRAME.registerComponent('toggle-picture-group', {
 });
 
 
-
-// AFRAME.registerComponent('primary_audio_events', {
-
-//   // schema: {
-//   //   jsonData: {
-//   //     parse: JSON.parse,
-//   //     stringify: JSON.stringify
-//   //   }
-//   // },
-//   schema: {
-//       jsonData: {default: ""}
-//       },
-//   init: function() {
-//       let theData = this.el.getAttribute('data-audio-events');
-//       this.data.jsonData = JSON.parse(atob(theData)); //convert from base64;
-//       let timekeys = this.data.jsonData.timekeys;
-//       console.log("timekeys: " + timekeys);
-//       SetPrimaryAudioEventsData(timekeys);
-//   },
-//   currentAudioTime: function(audioTime) {
-//       console.log("audiotime : " + audioTime);
-//   }
-// });
-
 AFRAME.registerComponent('video_groups_data', {
   schema: {
     jsonData: {default: ""}
