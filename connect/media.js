@@ -83,9 +83,7 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
   function onPlayerReady(event) {
     
     console.log("youtubePlayer is re4ady!");
-    // if (timedEventsListenerMode == null) {
-    //   timedEventsListenerMode = "Youtube";
-    // }
+
     if (!timedEventsListenerMode || timedEventsListenerMode == "") {
         SetTimedEventsListenerMode("Youtube");
     }
@@ -115,30 +113,18 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
       SetVideoEventsData();
     }
     if (youtube_player == null || youtube_player == undefined) {
-
-          let interval = setInterval(() => {
-            // console.log("youtube_player is null " + youtube_player == null);
-            // youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
-            
-            if (youtube_player) {
-              youtube_player.player_status_update("ready");
-              clearInterval(interval);
-            } else {
-              // InitAFrameYouTubePlayer();
-            }
-          }, 1000); 
-        } else {
+      let interval = setInterval(() => {    
+        if (youtube_player) {
           youtube_player.player_status_update("ready");
-        }  
-        // } else {
-        //   clearInterval(this.interval);
-        // }
-
+          clearInterval(interval);
+        } else {
+          // InitAFrameYouTubePlayer();
+        }
+      }, 1000); 
+    } else {
+      youtube_player.player_status_update("ready");
+    }  
   }
-      // youtube_player.player_status_update("ready");
-    // }
-
-  // }
 
   function changeBorderColor(playerStatus) { 
     if (youtube_player != null) {
