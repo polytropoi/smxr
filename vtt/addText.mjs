@@ -72,7 +72,7 @@ export function addPlayerProfileText (app, userProfile, uicontainer) {
         playerGreeting = "Welcome back " + userProfile.avatarName + "!\n"
     } 
     const playerText = new Text({
-        text: playerGreeting + "\n" + localPlayerState,
+        text: playerGreeting + "  " + localPlayerState,
         style: {
         fill: '#ffffff',
         fontSize: 25,
@@ -87,7 +87,7 @@ export function addPlayerProfileText (app, userProfile, uicontainer) {
         }
     });
     playerText.anchor.x = .5;
-    playerText.y = app.screen.height * .2;
+    playerText.y = app.screen.height - (app.screen.height * .2);
     uicontainer.addChild(playerText);
 }
 

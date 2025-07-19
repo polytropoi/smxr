@@ -6,7 +6,7 @@ import { Button, ButtonContainer } from '@pixi/ui';
 // import { LayoutSystem } from '@pixi/layout';
 import { addBackground, addMap } from './addBackground.mjs';
 import { addText, addPlayerProfileText } from './addText.mjs';
-import { addAnimatedSprite, addSprite, animateElements } from './addElements.mjs';
+import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
 import { ReturnMap, ReturnBackground, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
@@ -119,8 +119,8 @@ async function preload() {
   // Create an array of asset data to load.
 
   const assets = [
-    { alias: 'background', src: backgroundURL },
-    { alias: 'map', src: mappicURL },
+    { alias: 'background', src: backgroundURL, crossOrigin: 'anonymous' },
+    { alias: 'map', src: mappicURL, crossOrigin: 'anonymous' },
     // { alias: 'fish1', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish1.png' },
     // { alias: 'fish2', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish2.png' },
     // { alias: 'fish3', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish3.png' },
@@ -133,14 +133,14 @@ async function preload() {
   ];
 
   if (spritesData && spritesData.length) {
-    assets.push({ alias: 'sprite1', src: spritesData[0].meta.image });
+    assets.push({ alias: 'sprite1', src: spritesData[0].meta.image, crossOrigin: 'anonymous' });
   } 
 
   if (scenePicturesData && scenePicturesData.length) {
     for (let i = 0; i < scenePicturesData.length; i++) {
       // if (scenePicturesData[i].tags && scenePicturesData[i].tags.includes("logo")) {
       console.log("add scenepicture to assets " + scenePicturesData[i]._id + " " + scenePicturesData[i].url);
-        assets.push({ alias: scenePicturesData[i]._id, src: scenePicturesData[i].url })
+        assets.push({ alias: scenePicturesData[i]._id, src: scenePicturesData[i].url, crossOrigin: 'anonymous' });
       // } 
     }
   }
@@ -191,7 +191,8 @@ export async function GoWithIt() { //called from vtt.js
     //no viewport, normal background
   }
   if (backgroundURL) {
-    addBackground(app);
+    addBackground(app, null, true);
+
   }
   if (mappicURL) {
     addMap(app, viewport, spritesContainer);
@@ -199,12 +200,14 @@ export async function GoWithIt() { //called from vtt.js
 
   if (locationData) {
     for (let i = 0; i < locationData.length; i++) {
-      console.log("location " + locationData[i]);
+      console.log("location " + JSON.stringify(locationData[i]));
       if (locationData[i].markerType == "picture") {
         if (locationData[i].mediaID && locationData[i].mediaID != "" & locationData[i].mediaID != "none") {
           const texture = Texture.from(locationData[i].mediaID);
           const newSprite = new Sprite(texture);
-          addSprite(app, newSprite, locationData[i].timestamp, viewport );
+          newSprite.locationData = locationData[i];
+          addSprite(app, newSprite, viewport );
+          spriteFilter(newSprite, "HardMixBlend");
         }
       }
     }
@@ -213,7 +216,10 @@ export async function GoWithIt() { //called from vtt.js
   app.ticker.add((time) => animateElements(app, elements, time));
 
   // addWaterOverlay(app);
-  // addDisplacementEffect(app);
+  if (settings && settings.sceneTags.includes("displacement")) {
+        // addDisplacementEffect(app);
+  }
+
 
 
 

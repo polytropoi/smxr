@@ -291,6 +291,7 @@ vtt_router.get('/:_id', function (req, res) {
     let tilepicUrl = "";
     let mappicURL = "";
     let backgroundURL = "";
+    let backgroundIsTileable = false;
     let isGuest = true;
     let socketScripts = "";
     let navmeshScripts = "";
@@ -366,7 +367,7 @@ vtt_router.get('/:_id', function (req, res) {
                         "\x22pixi-contstants\x22: \x22../main/js/pixi/pixi.constants.min.mjs\x22,"+
                         "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
                         "\x22@pixi/ui\x22: \x22../main/js/pixi/pixi.ui.mjs\x22,"+
-                        // "\x22pixi-tilemap\x22: \x22../main/js/pixi/tilemap.min.mjs\x22"+
+                        "\x22@pixi/filters\x22: \x22../main/js/pixi/pixi-filters.mjs\x22,"+
                         "\x22@pixi/layout\x22: \x22../main/js/pixi/layout.min.mjs\x22"+
 
                         // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22"+
@@ -2723,6 +2724,9 @@ vtt_router.get('/:_id', function (req, res) {
 
                         backgroundURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
                         console.log("GOTSA BACKGROUND PIC! " + backgroundURL);
+                        if (picture_item.orientation.toLowerCase() == "tileable") {
+                            backgroundIsTileable = true;
+                        }
                     }
 
                     picture_item.url = image1url;
@@ -3120,6 +3124,7 @@ vtt_router.get('/:_id', function (req, res) {
                         settings.useSynth = hasSynth;
                         settings.mappicURL = mappicURL;
                         settings.backgroundURL = backgroundURL;
+                        settings.backgroundIsTileable = backgroundIsTileable;
                         settings.primary_mp3url = primary_mp3url;
                         // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
                         // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;

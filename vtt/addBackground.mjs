@@ -1,36 +1,64 @@
-import { Sprite, Container, Assets, Spritesheet } from 'pixi';
+import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture } from 'pixi';
 // import { CompositeTilemap } from 'pixi-tilemap';
 import { mappicURL } from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 
 export let mapsize = {};
 
-export function addBackground(app, viewport) {
-  
-    const background = Sprite.from('background');
+export let background;
 
-    // Center background sprite anchor.
-    background.anchor.set(0.5);
-    if (app.screen.width > app.screen.height) {
-      background.width = app.screen.width * 1.05;
-      background.scale.y = background.scale.x;
+export function addBackground(app, viewport, isTileable) {
+
+
+    if (isTileable) {
+      // const texture = Assets.load('background');
+        background = new TilingSprite({
+        texture: Texture.from('background'),
+        width: app.screen.width,
+        height: app.screen.height,
+      });
     } else {
-      /**
-       * If the preview is square or portrait, then fill the height of the screen instead
-       * and apply the scaling to the horizontal scale accordingly.
-       */
-      background.height = app.screen.height * 1.05;
-      background.scale.x = background.scale.y;
+      background = Sprite.from('background');
+    
+      // Center background sprite anchor.
+      background.anchor.set(0.5);
+      if (app.screen.width > app.screen.height) {
+        background.width = app.screen.width * 1.05;
+        background.scale.y = background.scale.x;
+      } else {
+        /**
+         * If the preview is square or portrait, then fill the height of the screen instead
+         * and apply the scaling to the horizontal scale accordingly.
+         */
+        background.height = app.screen.height * 1.05;
+        background.scale.x = background.scale.y;
+      }
+        // Position the background sprite in the center of the stage.
+        background.x = app.screen.width / 2;
+        background.y = app.screen.height / 2;
+        // Add the background to the stage.
+        // app.stage.addChild(background);
     }
-      // Position the background sprite in the center of the stage.
-      background.x = app.screen.width / 2;
-      background.y = app.screen.height / 2;
-      // Add the background to the stage.
-      // app.stage.addChild(background);
     if (viewport) {
       viewport.addChild(background);
     } else {
       app.stage.addChild(background);
+    }
+           let count = 0;
+    if (isTileable) {
+
+      app.ticker.add(() => {
+          count += 0.0005;
+
+          background.tileScale.x = 1.5 + Math.sin(count);
+          background.tileScale.y = 1.5 + Math.cos(count);
+
+          background.tilePosition.x += .1;
+          background.tilePosition.y += .2;
+          if (count > 1) {
+            count = 0;
+          }
+        });
     }
        
 }

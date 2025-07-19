@@ -1,8 +1,38 @@
 
 
-import { Point, AnimatedSprite, Container, Sprite, Texture, Spritesheet } from 'pixi';
+import { Application, Assets, Point, AnimatedSprite, Container, Sprite, Spritesheet } from 'pixi';
+import { AdvancedBloomFilter, ReflectionFilter } from '@pixi/filters';
 import { PlayTriggerWithTag } from '../connect/media.js';
 import { mapsize } from './addBackground.mjs';
+
+  const allBlendModes = [
+    'normal',
+    'add',
+    'screen',
+    'darken',
+    'lighten',
+    'color-dodge',
+    'color-burn',
+    'linear-burn',
+    'linear-dodge',
+    'linear-light',
+    'hard-light',
+    'soft-light',
+    'pin-light',
+    'difference',
+    'exclusion',
+    'overlay',
+    'saturation',
+    'color',
+    'luminosity',
+    'add-npm',
+    'subtract',
+    'divide',
+    'vivid-light',
+    'hard-mix',
+    'negation',
+  ];
+
 
 // export function addFishes(app, fishes) {
 //   // Create a container to hold all the fish sprites.
@@ -239,16 +269,38 @@ export async function addAnimatedSprite (app, texture, spriteData, count, elemen
     }
 }
 
-export function addSprite (app, sprite, location_id, viewport) {
-  console.log("tryna addSprite for location " + location_id);
+export function addSprite (app, sprite, viewport) {
+  console.log("tryna addSprite for location " + sprite.locationData.name);
   sprite.anchor.set(0.5);
-sprite.position.set(app.screen.width / 2, app.screen.height / 2);
+  sprite.position.set(app.screen.width / 2 + (sprite.locationData.x * 10), app.screen.height / 2 + (sprite.locationData.y * 10));
 // sprite.scale.set(2);
+    // sprite.x = sprite.locationData.x;
+    // sprite.y = sprite.locationData.y;
+      const filter = new AdvancedBloomFilter();
+      filter.bloomScale = 2;
+      // const filter2 = new ReflectionFilter();
+      // filter2.alpha = [1, .5];
+    // sprite.blendMode = 'add';
+    sprite.filters = [filter];
+    sprite.alpha = .85;
     if (viewport) {
       viewport.addChild(sprite);
     } else {
       app.stage.addChild(sprite);
     }
+
+    let count = 0;
+    app.ticker.add(() => {
+      count += .05;
+        sprite.scale.x = 1 + Math.sin(count) * 0.04;
+        sprite.scale.y = 1 + Math.cos(count) * 0.04;
+    });
+}
+
+export function spriteFilter (app, sprite, filter, blendmode) {
+  // if (filter == "HardMixBlend") {
+  //   sprite.n; = [new HardMixBlend()];
+  // }
 }
 
 export function animateElements(app, elements, time, viewport) {
