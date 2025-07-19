@@ -73,6 +73,7 @@ async function setup() {
   // Intialize the application.
   await app.init({ background: '#243a54', resizeTo: window });
   
+
   app.stage.layout = {
         width: 'auto',
         height: 'auto',
@@ -117,10 +118,16 @@ async function prePreLoader () {
 async function preload() {
 
   // Create an array of asset data to load.
+ await Assets.init({
+    preferences: {
+        crossOrigin: 'anonymous',
+        parseAsGraphicsContext: false
+    }
+  });
 
   const assets = [
-    { alias: 'background', src: backgroundURL, crossOrigin: 'anonymous' },
-    { alias: 'map', src: mappicURL, crossOrigin: 'anonymous' },
+    { alias: 'background', src: backgroundURL },
+    { alias: 'map', src: mappicURL },
     // { alias: 'fish1', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish1.png' },
     // { alias: 'fish2', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish2.png' },
     // { alias: 'fish3', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish3.png' },
@@ -128,23 +135,23 @@ async function preload() {
     // { alias: 'fish5', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish5.png' },
     { alias: 'overlay', src: 'https://pixijs.com/assets/tutorials/fish-pond/wave_overlay.png' },
     { alias: 'displacement', src: 'https://pixijs.com/assets/tutorials/fish-pond/displacement_map.png' }
-    
-    
   ];
 
   if (spritesData && spritesData.length) {
-    assets.push({ alias: 'sprite1', src: spritesData[0].meta.image, crossOrigin: 'anonymous' });
+    assets.push({ alias: 'sprite1', src: spritesData[0].meta.image });
   } 
 
   if (scenePicturesData && scenePicturesData.length) {
     for (let i = 0; i < scenePicturesData.length; i++) {
       // if (scenePicturesData[i].tags && scenePicturesData[i].tags.includes("logo")) {
       console.log("add scenepicture to assets " + scenePicturesData[i]._id + " " + scenePicturesData[i].url);
-        assets.push({ alias: scenePicturesData[i]._id, src: scenePicturesData[i].url, crossOrigin: 'anonymous' });
+        assets.push({ alias: scenePicturesData[i]._id, src: scenePicturesData[i].url });
       // } 
     }
   }
   // Load the assets defined above.
+
+ 
   await Assets.load(assets);
 }
 
