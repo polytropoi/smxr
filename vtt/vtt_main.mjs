@@ -120,14 +120,13 @@ async function preload() {
   // Create an array of asset data to load.
  await Assets.init({
     preferences: {
-        crossOrigin: 'anonymous',
-        parseAsGraphicsContext: false
+        crossOrigin: 'anonymous'
     }
   });
 
   const assets = [
-    { alias: 'background', src: backgroundURL },
-    { alias: 'map', src: mappicURL },
+    { alias: 'background', src: backgroundURL, crossOrigin: 'anonymous' },
+    { alias: 'map', src: mappicURL, crossOrigin: 'anonymous' },
     // { alias: 'fish1', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish1.png' },
     // { alias: 'fish2', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish2.png' },
     // { alias: 'fish3', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish3.png' },
@@ -138,14 +137,14 @@ async function preload() {
   ];
 
   if (spritesData && spritesData.length) {
-    assets.push({ alias: 'sprite1', src: spritesData[0].meta.image });
+    assets.push({ alias: 'sprite1', src: spritesData[0].meta.image, crossOrigin: 'anonymous' });
   } 
 
   if (scenePicturesData && scenePicturesData.length) {
     for (let i = 0; i < scenePicturesData.length; i++) {
       // if (scenePicturesData[i].tags && scenePicturesData[i].tags.includes("logo")) {
       console.log("add scenepicture to assets " + scenePicturesData[i]._id + " " + scenePicturesData[i].url);
-        assets.push({ alias: scenePicturesData[i]._id, src: scenePicturesData[i].url });
+        assets.push({ alias: scenePicturesData[i]._id, src: scenePicturesData[i].url, crossOrigin: 'anonymous'});
       // } 
     }
   }
@@ -198,7 +197,7 @@ export async function GoWithIt() { //called from vtt.js
     //no viewport, normal background
   }
   if (backgroundURL) {
-    addBackground(app, null, true);
+    addBackground(app, null, false);
 
   }
   if (mappicURL) {
@@ -224,7 +223,7 @@ export async function GoWithIt() { //called from vtt.js
 
   // addWaterOverlay(app);
   if (settings && settings.sceneTags.includes("displacement")) {
-        // addDisplacementEffect(app);
+        addDisplacementEffect(app);
   }
 
 

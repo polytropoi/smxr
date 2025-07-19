@@ -273,7 +273,9 @@ export function addSprite (app, sprite, viewport) {
   console.log("tryna addSprite for location " + sprite.locationData.name);
   sprite.anchor.set(0.5);
   sprite.position.set(app.screen.width / 2 + (sprite.locationData.x * 10), app.screen.height / 2 + (sprite.locationData.y * 10));
-// sprite.scale.set(2);
+  sprite.scale.x = sprite.locationData.xscale;
+  sprite.scale.y = sprite.locationData.yscale;
+
     // sprite.x = sprite.locationData.x;
     // sprite.y = sprite.locationData.y;
       const filter = new AdvancedBloomFilter();
@@ -292,8 +294,8 @@ export function addSprite (app, sprite, viewport) {
     let count = 0;
     app.ticker.add(() => {
       count += .05;
-        sprite.scale.x = 1 + Math.sin(count) * 0.04;
-        sprite.scale.y = 1 + Math.cos(count) * 0.04;
+        sprite.scale.x = (1 + Math.sin(count) * 0.04) * sprite.locationData.xscale;
+        sprite.scale.y = (1 + Math.cos(count) * 0.04) * sprite.locationData.yscale;
     });
 }
 
