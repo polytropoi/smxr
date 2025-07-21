@@ -9,7 +9,7 @@ import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneM
 import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData } from "../connect/events.js";
 // import { SetTimeKeysData } from "./landing.js";
 
-import { settings } from "../connect/settings.js";
+import { settings, profile } from "../connect/settings.js";
 // import { profileLoaded } from "../connect/vtt.js";
 // import { profileLoaded } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
@@ -449,6 +449,7 @@ $(function() {
    //  });
    
    if (player) {
+      
     player.addEventListener("obbcollisionended", function (e) {
          if (e.detail) {
          console.log("player obbcollision end  " + e.detail.withEl.id); 
@@ -1707,9 +1708,9 @@ function tcheck () {
             userData.avatarName = avatarName;
             userData.userName = avatarName;
             userData.userID = "00000";
-            if (settings.sceneType != "aframe" && settings.sceneType != "default") {
-               InitIDB();  
-            }
+            // if (settings.sceneType != "aframe" && settings.sceneType != "default") {
+            InitIDB();  
+            // }
             
                               // const profile = {"userID": "00000", "userName": avatarName}
             // SaveLocalProfile(userData);
@@ -1734,16 +1735,19 @@ function tcheck () {
                   if (data.authLevel == "domain_admin") {
                      userData.sceneOwner = "indaehoose";
                   }
+                  userData.authLevel = data.authLevel;
                   console.log("userData " + JSON.stringify(userData));
-                  if (settings.sceneType != "aframe" && settings.sceneType != "default") {
-                     InitIDB();  
-                  }
+                  // if (settings.sceneType != "aframe" && settings.sceneType != "default") {
+                  //    InitIDB();  
+                  // }
+                  InitIDB();
                   if (socket != null && socket != undefined) {
                      if (!socket.connected) {
                         socket.connect(socketHost);
                      }
                   }
                   const profile = {"userID": data._id, "userName": data.userName}
+                  
                   // SaveLocalProfile(userData);
             
                   //socket.connect(socketHost);
@@ -2436,7 +2440,7 @@ function EmitSelfPosition() {
 
    if (!settings.hideAvatars) {   
       console.log("tryna EmitSelfPosition()");
-      if (posRotReader != null) {   
+      if (posRotReader != null) {   //used by aframe
          if (!posRotRunning) {
             posRotRunning = true;
             // if (emitInterval == null) { 
@@ -2452,10 +2456,17 @@ function EmitSelfPosition() {
                   // window.playerPosition = cameraPosition;
                   if (socket) {
                      socket.emit("updateplayerposition", room, avatarName, cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y, cameraRotation.z, mySocketID, "aframe"); 
+                     
                   }
                   
                   lastPosition = JSON.stringify(cameraPosition);
-                  // lastRotation = JSON.stringify(cameraRotation);                     
+                  // lastRotation = cameraRotation;
+                  if (profile) {
+                     profile.lastPosition = cameraPosition;
+                     profile.lastRotation = cameraRotation;
+                     console.log("userData with position " + JSON.stringify(profile));
+                  }   // lastRotation = JSON.stringify(cameraRotation);                     
+               
                }
 
             }, 250);
@@ -2464,8 +2475,14 @@ function EmitSelfPosition() {
          //    emitInterval = null;
          }
       } else {
-         console.log("caint fine no player!");
-         posRotReader = document.getElementById("player").components.get_pos_rot; 
+         if (settings && (settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default")) {
+            console.log("caint fine no player!");
+            posRotReader = document.getElementById("player").components.get_pos_rot; 
+         } else { //for vtt maps
+
+
+
+         }
          // EmitSelfPosition();
       }
    }

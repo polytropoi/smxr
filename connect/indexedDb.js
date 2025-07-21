@@ -34,7 +34,12 @@ export function InitIDB() {
       if (event.oldVersion < 2) { //version 1
          const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
          pstore.createIndex("profile", ["profile"], { unique: true });
-        
+      }
+      if (event.oldVersion < 3) { //version 2
+         // const estore = db.createObjectStore("events", { keyPath: "userID" });
+         // estore.createIndex("event", ["event"], { unique: true });
+         // const rstore = db.createObjectStore("recordings", { keyPath: "userID" });
+         // estore.createIndex("recording", ["recording"], { unique: true });
       }
    };
 
@@ -316,7 +321,7 @@ export function InitIDB() {
          InitCurves();
 
          //// now check for / save local profile
-         if (userData) { //set in connect.js after token check
+         if (userData && userData != {}) { //set in connect.js after token check
 
             InitLocalProfile(userData);
 
@@ -336,10 +341,13 @@ export function InitIDB() {
    return string.trim();
  }
 
+//  export function InitLocalEvents(userData) {
+
+//  }
 
  export function InitLocalProfile(userData) {
    console.log("tryna saveLocalProfile " + JSON.stringify(userData));
-   let profile = {};
+   // let profile = {};
     console.log("tryna connect to SMXR indexeddb");
     if (!('indexedDB' in window)) {
        console.log("This browser doesn't support IndexedDB");
@@ -365,7 +373,7 @@ export function InitIDB() {
       }
    };
    request.onsuccess = function () {
-       console.log("Saving local profile, IDB opened successfully");
+       console.log("Saving local profile, IDB opened successfully with userdata " + JSON.stringify(userData));
               let profile = {};
             //   profile.userID = userData.userID; //with tilde = the local version
         profile = userData;      
@@ -390,6 +398,31 @@ export function InitIDB() {
                   let updoc = pcursor.value;
                   if (!updoc.events) {
                      updoc.events = [];
+                  } else {
+                     console.log(name + " local events length " + updoc.events.length);
+                     if (!updoc.history) {
+                           updoc.history = {};
+                           updoc.history.init_scene = {};
+                     }
+                     for (let i = 0; i < updoc.events.length; i++) {
+                        console.log("event " + JSON.stringify(updoc.events.length));
+                        if (updoc.events[i].event == "init_scene") {
+                           console.log("tryna put event into history " + JSON.stringify(updoc.events[i]));
+                           if (!updoc.history.init_scene[updoc.events[i].id]) {
+                              updoc.history.init_scene[updoc.events[i].id] = {};
+                              updoc.history.init_scene[updoc.events[i].id].firstTimestamp = timestamp;
+                              updoc.history.init_scene[updoc.events[i].id].lastTimestamp = timestamp;
+                              updoc.history.init_scene[updoc.events[i].id].count = 1;
+                           } else {
+                              updoc.history.init_scene[updoc.events[i].id].lastTimestamp = timestamp;
+                              updoc.history.init_scene[updoc.events[i].id].count++;
+                           }
+                        }
+                     }
+                     if (updoc.events.length > 100) { //TODO push to backend DB
+                        
+                        updoc.events = [];
+                     }
                   }
                   let playerstate = "\n";
                   if (pcursor.value.playerState && pcursor.value.playerState.health) {
@@ -405,7 +438,7 @@ export function InitIDB() {
                   pstore.put(updoc);
                   transaction.oncomplete = function () {
                      db.close();
-                     // console.log("localprofile found and updated! " + JSON.stringify(updoc));
+                     console.log("localprofile found and updated! " + JSON.stringify(updoc));
                   }
 
                   UpdateUserProfile(updoc);
@@ -492,7 +525,7 @@ export function InitIDB() {
          }
       };
       request.onsuccess = function () {
-         console.log("Saving local profile, IDB opened successfully");
+         console.log("returning local profile, IDB opened successfully");
          let profile = {};
                //   profile.userID = userData.userID; //with tilde = the local version
          profile = userData;      
@@ -606,7 +639,7 @@ export function InitIDB() {
          }
       };
       request.onsuccess = function () {
-         console.log("updating local player equipment " + JSON.stringify(equipment));
+         // console.log("updating local player equipment " + JSON.stringify(equipment));
          let profile = {};
                //   profile.userID = userData.userID; //with tilde = the local version
          // profile = userData;      
@@ -629,7 +662,7 @@ export function InitIDB() {
                         profile.equipment = {};
                      }
                      profile.equipment.main = equipment; //so can support multiple equip points later...
-                     console.log("updating profile " + JSON.stringify(profile));
+                     console.log("updating local equipment " + JSON.stringify(profile.equipment));
                      pstore.put(profile);
                      
                   }

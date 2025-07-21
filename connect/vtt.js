@@ -284,10 +284,7 @@ $(function() {
   
 
    if (settings.networking == 'SocketIO' && settings.socketHost) {
-      if (settings.socketHost.length > 6) { //i.e. not "none" or empty
-         socketHost = settings.socketHost;
-         InitSocket();
-      }
+
    } else if (settings.networking == 'WebRTC') {
       console.log("TRYNA INIT LIVEKIT");
       // InitLiveKit();

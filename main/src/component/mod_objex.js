@@ -439,7 +439,7 @@ AFRAME.registerComponent('mod_objex', {
         
         this.objectData = this.returnObjectData(objectID);
         if (this.objectData) {        
-          console.log("tryna equip object " + JSON.stringify(this.objectData));  
+          console.log("tryna equip object " + this.objectData.name);  
           // console.log("tryna equip object " + this.el.id);
           this.dropPos = new THREE.Vector3();
           this.objEl = document.createElement("a-entity");

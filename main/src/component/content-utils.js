@@ -488,7 +488,7 @@ AFRAME.registerComponent('location_data', { //initial loading of "official" loca
                if (i == this.data.jsonData.length - 1) {
                   this.el.sceneEl.removeAttribute("keyboard-shortcuts");
                   // if (settings.allowMods) {
-                     this.waitAndInitLocalDB();     
+                    //  this.waitAndInitLocalDB();     
                      console.log("poiLocations " + JSON.stringify(poiLocations));        
                      // InitIDB();
                   // }
@@ -496,7 +496,7 @@ AFRAME.registerComponent('location_data', { //initial loading of "official" loca
             }
          } else {
             if (!AFRAME.utils.device.isMobile()) {
-               InitIDB();
+              //  InitIDB();
             } else {
                InitCurves(); //this is called from InitDB above if not mobile
             }
