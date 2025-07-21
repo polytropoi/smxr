@@ -3,34 +3,29 @@
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
           InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, RewindButton } from "../../connect/media.js";
 import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData } from "../../connect/events.js";
-import { settings } from "../../connect/settings.js";
+import { settings, profile } from "../../connect/settings.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
   userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions
   } from "../../connect/connect.js";
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
+// import shortid from "shortid";
 
 export let showDialogPanel = false;
 let dialogInitialized = false;
-// let textItemArray = [];
+
 let userInventory = null;
-// let renderPanel = null;
-// let useModals = true;
+
 let modalContentElID = 'modalContent';
 let theModal = null;
 let theRenderCanvas = null;
-// let locationModalIsOn = false;
-// var sceneEl = document.querySelector('a-scene');
-// let timedEventsListenerMode = "";
+
 let showStats = false;
 let showCurves = false;
 export let keydown = "";
 export let selectedLocationTimestamp = "";
 export let sceneObjects = [];
-// let colorInput_1 = null;
-// let colorInput_2 = null;
-// let colorInput_3 = null;
-// let colorInput_4 = null;
+
 let sceneColor1 = '#808080';
 let sceneColor2 = '#808080';
 let sceneColor3 = '#808080';
@@ -44,9 +39,7 @@ let sceneEnvironmentPreset;
 window.PlayPauseMedia = PlayPauseMedia;
 window.PlayerToLocation = PlayerToLocation;
 
-// if (settings.timedEventsListenerMode) {
-//   timedEventsListenerMode = settings.timedEventsListenerMode;
-// }
+
 window.addEventListener( 'keydown',  ( event ) => {
   // console.log("keydown code " + event.keyCode);
   switch ( event.keyCode ) {
@@ -2152,12 +2145,28 @@ export function SceneManglerModal(mode, autoHide) {
     if (mode == "click") {
       ShowHideDialogPanel("<div>playing stream</div>");
     } else {
+      let userString = profile.isGuest ? "Unregistered guest" : "Registered user";
+      let lastVisit = "first visit to this scene!";
+      if (profile.history.init_scene[room]) {
+        lastVisit = profile.history.init_scene[room].count + " total visits to this scene, most recently : " + new Date(profile.history.init_scene[room].lastTimestamp);
+      }
       let content = "<span id='modalCloser' class='close-modal'>&times;</span>" +
                   "<div><span id=\x22modalTitle\x22><h3>Scene Mangler</h3></span>" + //populate modal
       tabs+
       "<div "+welcomeDisplay+" id=\x22Welcome\x22 class=\x22modalMain tabcontent\x22>" + ////////////////////WELCOME
-        "<div><p>" + greeting + "</p></div>"+
-        "<div><p>" + quest + "</p></div>"+
+        "<div><p>Scene : " + greeting + "</p></div>"+
+        "<div><p>Quest : " + quest + "</p></div>"+
+        "<div><p>Connection : " + stringRoomUsers + "</p></div>"+
+        // 
+        
+        "<div>Player name : " + profile.avatarName + "</div><br>"+
+        "<div>Player status : "+ userString + "</div><br>"+
+        "<div>History : " + lastVisit + "</div><br>"+
+        "<div>Health : " + profile.playerState.health + "%</div><br>"+
+        "<div>Mana : " + profile.playerState.mana + "%<br></div><br>"+
+        "<div>XP : " + profile.playerState.xp + "<br></div><br>"+
+        "<div>Armor : " + profile.playerState.armor + "</div><br>"+
+  "</div>"+    
       "</div>"+    
       // "<div "+questsDisplay+" id=\x22Quests\x22 class=\x22modalMain tabcontent\x22>"+
       //   "<div><p>" + quest + "</p></div>"+

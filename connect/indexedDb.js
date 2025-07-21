@@ -415,11 +415,11 @@ export function InitIDB() {
                               updoc.history.init_scene[updoc.events[i].id].count = 1;
                            } else {
                               updoc.history.init_scene[updoc.events[i].id].lastTimestamp = timestamp;
-                              updoc.history.init_scene[updoc.events[i].id].count++;
+                              updoc.history.init_scene[updoc.events[i].id].count = updoc.history.init_scene[updoc.events[i].id].count + 1;
                            }
                         }
                      }
-                     if (updoc.events.length > 100) { //TODO push to backend DB
+                     if (updoc.events.length > 1) { //TODO push to backend DB
                         
                         updoc.events = [];
                      }
