@@ -1,6 +1,6 @@
 
 
-import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB } from "../connect/indexedDb.js";
+import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLocalPlayerState } from "../connect/indexedDb.js";
 // import { matrixClient } from "../connect/matrix.js";
 // import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
 // import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
@@ -10,6 +10,7 @@ import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAu
 // import { SetTimeKeysData } from "./landing.js";
 
 import { settings, profile } from "../connect/settings.js";
+// import { playerPosition, playerRotation } from "../main/js/navigation.js";
 // import { profileLoaded } from "../connect/vtt.js";
 // import { profileLoaded } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
@@ -35,6 +36,12 @@ var dateString = Date.now().toString();
 export let roomUsers = {};
 export let stringRoomUsers = "";
 export let userProfile;
+
+export let playerPosition;
+export let playerRotation = {x: 0, y: 0, z: 0};
+// let playerQuaternion = new THREE.Quaternion();
+
+
 var trimmedString = dateString.substring(dateString.length - 4, 4);
 var username;
 var pics = [];
@@ -110,6 +117,7 @@ let intersections = [];
 export let avatarName = "";
 // let primaryAudioEl = document.querySelector('#primaryAudio');
 
+let writeCount = 0;
 window.LocationRowClick = LocationRowClick;
 
 $(function() { 
@@ -1225,6 +1233,13 @@ export function SnapLocation(locationKey) { //snap selected object to player loc
       } 
 }
 
+export function GoToPosRot (pos, rot) {
+   console.log("tryna send player to " + JSON.stringify(pos));
+   if (player) {
+      player.setAttribute("position", {x: pos.x, y: pos.y, z: pos.z} );
+   }
+}
+
 export function GoToLocation(locationKey) {
    console.log("tryna goat locatioKey " + locationKey);
    // let location = JSON.parse(localStorage.getItem(locationKey));
@@ -1374,7 +1389,7 @@ export function GoToNext() {
          }
       }
       if (socket) {
-         EmitSelfPosition();
+         // EmitSelfPosition();
       }
          
    }
@@ -2154,12 +2169,13 @@ function RandomHexColor() {
 
 function InitSocket () {
 if (settings && !socket) {
-
+   const aColor = RandomHexColor();
+   console.log ("tryna InitSocket with color " + aColor);
    socket = io.connect(socketHost, {
          query : {
             token: token,
             uname: avatarName,
-            color: RandomHexColor(),
+            color: aColor,
             room: room
          },
          url: socketHost + "/socket.io/?EIO=4&transport=polling&t=NNjNltH",
@@ -2181,7 +2197,7 @@ if (settings && !socket) {
       console.log("room user " + data + 'joined room ' + room);
       socket.emit('room users', room);
       UpdatePlayerAvatars(roomUsers);
-      EmitSelfPosition();
+      // EmitSelfPosition();
    });
 
    socket.on('admin message', function (data) {
@@ -2240,8 +2256,10 @@ if (settings && !socket) {
       $('#users').html(roomUsersString);
       stringRoomUsers = roomUsersString;
       // $('#users_2').html(roomUsersString);
-      EmitSelfPosition();
+      // EmitSelfPosition();
    });
+
+   
 
    socket.on('getbytes', function (data, metadata) {
          //TODO split the incoming wad and build array(s) of pics, audio, etc based on metadata
@@ -2357,7 +2375,7 @@ if (settings && !socket) {
       } else {
          UpdatePlayerAvatars(roomUsers);
       }
-      EmitSelfPosition();
+      // EmitSelfPosition();
    });
 
    socket.on('selfplayerposition', function() {
@@ -2427,66 +2445,136 @@ function MoveElement(id,posRotObj) { //jesjus wweeeeped//nopr
 //    return v0*(1-t)+v1*t
 // }
 
-function SetLastPosition () {
-   setTimeout(function () {
-      lastPosition = cameraPosition;
-      lastRotation = cameraRotation;
-   }, 1000);
-}
+// function SetLastPosition () {
+//    setTimeout(function () {
+//       lastPosition = cameraPosition;
+//       lastRotation = cameraRotation;
+//    }, 1000);
+// }
 
+export function UpdatePlayerPosRot (position, rotation) { //called from navigation when player moves
+   playerPosition = position;
+   playerRotation = rotation;
+   console.log("tryna UpdatePlayerPosition " + JSON.stringify(position) + " rot " + JSON.stringify(rotation));
+   EmitSelfPosition();
+   if (profile) {
+      // if (profile.lastPosition != lastPosition) {
+         profile.lastPosition = position;
+         profile.lastRotation = rotation;
+         // console.log("userData with position " + JSON.stringify(profile));
+         UpdateLocalPlayerState(profile);
+      // }
+   } 
+   // if (socket) {
+      
+   // }  // lastRotation = JSON.stringify(cameraRotation);       
+}
 
 function EmitSelfPosition() {
 
-
    if (!settings.hideAvatars) {   
-      console.log("tryna EmitSelfPosition()");
-      if (posRotReader != null) {   //used by aframe
-         if (!posRotRunning) {
-            posRotRunning = true;
-            // if (emitInterval == null) { 
-            emitInterval = setInterval(function(){
+      
+      // if (posRotReader != null) {   //used by aframe
+      //    if (!posRotRunning) {
+      //       posRotRunning = true;
+      //       // if (emitInterval == null) { 
+      //       // emitInterval = setInterval(function(){
 
-               var posRotObj = posRotReader.returnPosRot();
-               cameraPosition = posRotObj.pos;
-               cameraRotation = posRotObj.rot;
-               // console.log(cameraPosition.x.toString() + " vs " + window.playerPosition.x.toString());
-               // if (JSON.stringify(cameraPosition) != lastPosition && JSON.stringify(cameraRotation) != lastRotation) {
-               if (JSON.stringify(cameraPosition) != lastPosition) {
+      //          var posRotObj = posRotReader.returnPosRot();
+      //          cameraPosition = posRotObj.pos;
+      //          cameraRotation = posRotObj.rot;
+      //          // console.log(cameraPosition.x.toString() + " vs " + window.playerPosition.x.toString());
+      //          // if (JSON.stringify(cameraPosition) != lastPosition && JSON.stringify(cameraRotation) != lastRotation) {
+      //          if (JSON.stringify(cameraPosition) != lastPosition) {
                      // console.log('emitting!');
                   // window.playerPosition = cameraPosition;
+                  // if (!playerRotation) {
+                  //    playerRotation = {x: 0, y: 0, z: 0};
+                  // }
                   if (socket) {
-                     socket.emit("updateplayerposition", room, avatarName, cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y, cameraRotation.z, mySocketID, "aframe"); 
+                     // console.log("tryna emit self! " + JSON.stringify(playerPosition));
+                     socket.emit("updateplayerposition", room, avatarName, playerPosition.x, playerPosition.y, playerPosition.z, playerRotation.x, playerRotation.y, playerRotation.z, mySocketID, "aframe"); 
                      
                   }
-                  
-                  lastPosition = JSON.stringify(cameraPosition);
-                  // lastRotation = cameraRotation;
-                  if (profile) {
-                     profile.lastPosition = cameraPosition;
-                     profile.lastRotation = cameraRotation;
-                     console.log("userData with position " + JSON.stringify(profile));
-                  }   // lastRotation = JSON.stringify(cameraRotation);                     
-               
                }
-
-            }, 250);
-         // } else {
-         //    clearInterval(emitInterval);
-         //    emitInterval = null;
-         }
-      } else {
-         if (settings && (settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default")) {
-            console.log("caint fine no player!");
-            posRotReader = document.getElementById("player").components.get_pos_rot; 
-         } else { //for vtt maps
-
+            }
+                  
+                  
+               // }
+         // }
+   //    } else {
+   //       if (settings && (settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default")) {
+   //          console.log("caint fine no player!");
+   //          posRotReader = document.getElementById("player").components.get_pos_rot; 
+   //       } else { //for vtt maps
 
 
-         }
-         // EmitSelfPosition();
-      }
-   }
-}
+
+   //       }
+   //    }
+   // }
+// }
+
+// function EmitSelfPosition() {
+
+
+//    if (!settings.hideAvatars) {   
+      
+//       if (posRotReader != null) {   //used by aframe
+//          if (!posRotRunning) {
+//             posRotRunning = true;
+//             // if (emitInterval == null) { 
+            // emitInterval = setInterval(function(){
+
+//                var posRotObj = posRotReader.returnPosRot();
+//                cameraPosition = posRotObj.pos;
+//                cameraRotation = posRotObj.rot;
+//                // console.log(cameraPosition.x.toString() + " vs " + window.playerPosition.x.toString());
+//                // if (JSON.stringify(cameraPosition) != lastPosition && JSON.stringify(cameraRotation) != lastRotation) {
+//                if (JSON.stringify(cameraPosition) != lastPosition) {
+//                      // console.log('emitting!');
+//                   // window.playerPosition = cameraPosition;
+//                   if (socket) {
+//                      socket.emit("updateplayerposition", room, avatarName, cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y, cameraRotation.z, mySocketID, "aframe"); 
+                     
+//                   }
+                  
+//                   if (writeCount > 2) {
+//                      console.log("tryna write " + writeCount);
+//                      lastPosition = JSON.stringify(cameraPosition);
+//                      // lastRotation = cameraRotation;
+//                      if (profile) {
+
+//                         // if (profile.lastPosition != lastPosition) {
+//                            profile.lastPosition = cameraPosition;
+//                            profile.lastRotation = cameraRotation;
+//                            // console.log("userData with position " + JSON.stringify(profile));
+//                            UpdateLocalPlayerState(profile);
+//                         // }
+//                      }   // lastRotation = JSON.stringify(cameraRotation);       
+//                   }              
+//                writeCount++;
+//                }
+
+            // }, 250);
+//          // } else {
+//          //    clearInterval(emitInterval);
+//          //    emitInterval = null;
+//          }
+//       } else {
+//          if (settings && (settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default")) {
+//             console.log("caint fine no player!");
+//             posRotReader = document.getElementById("player").components.get_pos_rot; 
+//          } else { //for vtt maps
+
+
+
+//          }
+//          // EmitSelfPosition();
+//       }
+//    }
+// }
+
 function shallowEqual(object1, object2) {
    const keys1 = Object.keys(object1);
    const keys2 = Object.keys(object2);
@@ -2716,17 +2804,17 @@ export function AvatarClicked(sid) {
    SceneManglerModal('Messages');
 }
 
-function UpdatePlayerPosition(sid, px, py, pz) { //nevermind
-   var keys = Object.keys(roomUsers);
-   for(var i=0; i<keys.length; i++){
-      var key = keys[i];
-      console.log(key, roomUsers[key]);
-      if (keys[i] === sid) {
-         console.log(roomUsers[key] + " is moving!");
+// function UpdatePlayerPosition(sid, px, py, pz) { //nevermind
+//    var keys = Object.keys(roomUsers);
+//    for(var i=0; i<keys.length; i++){
+//       var key = keys[i];
+//       console.log(key, roomUsers[key]);
+//       if (keys[i] === sid) {
+//          console.log(roomUsers[key] + " is moving!");
          
-      }
-   }
-}
+//       }
+//    }
+// }
 
 InitContentBox();
 // window.onload = init;

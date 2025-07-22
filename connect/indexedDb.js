@@ -1,7 +1,8 @@
 import { InitLocalColors, DisplayLocalFiles } from "../main/js/dialogs.js";
 
 import { room, sceneLocations, locationTimestamps, localData, userData, lastCloudUpdate, InitCurves, 
-   sceneEl, PlayerToLocation, getExtension, poiLocations, curveLocations, avatarName, UpdateAvatarName } from "../connect/connect.js";
+   sceneEl, PlayerToLocation, getExtension, poiLocations, curveLocations, avatarName, UpdateAvatarName, GoToPosRot, 
+   playerPosition, playerRotation} from "../connect/connect.js";
 
 import { settings, UpdateUserProfile } from "../../connect/settings.js";
 import { SetTimeKeysData } from "../connect/events.js";
@@ -465,16 +466,25 @@ export function InitIDB() {
                      } else {
                         const playerHudEl = document.getElementById("player_hud");
                         if (playerHudEl) {
-                           playerHudEl.components.player_hud.ShowMessageAndHide(greeting + playerstate);
+                           if (playerHudEl.components.player_hud) {
+                             playerHudEl.components.player_hud.ShowMessageAndHide(greeting + playerstate);
+                           }
                         }
                      }
                   } else {
                      const playerHudEl = document.getElementById("player_hud");
                      if (playerHudEl) {
-                        playerHudEl.components.player_hud.ShowMessageAndHide(greeting + playerstate);
+                        if (playerHudEl.components.player_hud) {
+                           playerHudEl.components.player_hud.ShowMessageAndHide(greeting + playerstate);
+                        }
                      }
                   }
-                 
+
+                  if (profile.lastPosition && profile.lastRotation) {
+                     GoToPosRot(profile.lastPosition, profile.lastRotation); 
+                  }
+                   //if ?
+               
                }
             } else {
                const saveTimeStamp = Date.now();
@@ -580,7 +590,7 @@ export function InitIDB() {
          }
       };
       request.onsuccess = function () {
-         console.log("updating localPlayerState " + JSON.stringify(playerState));
+         // console.log("updating localPlayerState " + playerState.avatarName);
          let profile = {};
                //   profile.userID = userData.userID; //with tilde = the local version
          // profile = userData;      
@@ -591,7 +601,7 @@ export function InitIDB() {
          //  const fileQuery = filestore.openCursor();
          modQuery.onsuccess = function (e) {
             var pcursor = e.target.result;
-            console.log("query for localData : " + e.target.result);
+            // console.log("query for localData : " + e.target.result);
          // if (e.target.result) {
          const timestamp = Date.now();
             if (pcursor) {
@@ -600,7 +610,9 @@ export function InitIDB() {
                   profile = pcursor.value;
                   if (playerState) {
                      profile.playerState = playerState;
-                     console.log("updating profile " + JSON.stringify(profile));
+                     profile.lastPosition = playerPosition;
+                     profile.lastRotation = playerRotation;
+                     // console.log("updating profile for " + profile.avatarName);
                      pstore.put(profile);
                      
                   }
@@ -609,7 +621,7 @@ export function InitIDB() {
          }
          transaction.oncomplete = function () {
             db.close();
-            console.log("localPlayerState updated! ");
+            // console.log("localPlayerState updated! ");
          }
       }
    }

@@ -227,7 +227,7 @@ io.on('connection', function(socket) {
     }
 
     socket.on('join', function(rm) {
-        console.log(socket.uname + " tryna join " + rm);
+        console.log(socket.uname + " " + socket.color + " tryna join " + rm);
         socket.join(rm);
         socket.room = room;
         room = rm; //set global room value for this socket, since we can only be in one at a time
@@ -315,7 +315,7 @@ io.on('connection', function(socket) {
                 
             for (const user of roomUsers) {
                 console.log("room user : " +user + " name "+ io.sockets.sockets.get(user).uname); //the new way get the user's socket
-                const namePlusColor = io.sockets.sockets.get(user).uname + "~" + io.sockets.sockets.get(user).uname.color;
+                const namePlusColor = io.sockets.sockets.get(user).uname + "~" + io.sockets.sockets.get(user).color;
                 returnObj[user] = namePlusColor;
             }
            
@@ -1797,18 +1797,30 @@ app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
                 let inventoryItems = [];
                 const query = {"userID": u_id};
                 const inventory_items = await RunDataQuery("inventory_items", "find", query);
+                // let addedObjects = [];
+                let addedObjects = {};
                 for (let i = 0; i < inventory_items.length; i++) { 
-                    console.log("looking up objectID " + inventory_items[i].objectID)
+                    
                     // const o_id = ObjectId.createFromHexString(inventory_items[i].objectID.toString());
                     const oquery = {"_id" : inventory_items[i].objectID};
-                    let object = await RunDataQuery("obj_items", "findOne", oquery);
+ 
+                    // console.log("addedObjects " + JSON.stringify(addedObjects)); 
+                    if (inventory_items[i].objectID in addedObjects) {
+                    //    console.log("already stashed objectID " + inventory_items[i].objectID);
+                        // addedIt.push(addedObject);
+                    } else {
+                        console.log("looking up inventory item with objectID " + inventory_items[i].objectID);
+                        let object = await RunDataQuery("obj_items", "findOne", oquery); //unnecessary?
+                        addedObjects[inventory_items[i].objectID] = object;
+                    }
+                    
                     let inventory_item = {};
                     inventory_item._id = inventory_items[i]._id;
                     inventory_item.userID = inventory_items[i].userID;
                     inventory_item.objectID = inventory_items[i].objectID;
                     inventory_item.timestamp = inventory_items[i].timestamp; //creation?
                     inventory_item.fromScene = inventory_items[i].fromScene; //short id
-                    inventory_item.objectData = object;
+                    inventory_item.objectData = addedObjects[inventory_items[i].objectID];
                     inventoryItems.push(inventory_item);
 
                 }

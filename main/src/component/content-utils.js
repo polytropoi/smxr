@@ -11,9 +11,9 @@ import 'troika-text';
 
 import {  PauseIntervals, SetVideoEventsData, SetTimeKeysData, SetTimedEventsListenerMode } from "../../../connect/events.js";
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
-// import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
+// import {  } from "../../js/navigation.js";
 import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation, 
-      userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations, AvatarClicked } from "../../../connect/connect.js";
+      userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations, AvatarClicked, playerPosition, playerRotation } from "../../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
 import { settings } from "../../../connect/settings.js";
 import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat } from '../../../connect/media.js';
@@ -416,6 +416,7 @@ AFRAME.registerComponent('create_avatars', {
    // avatar.setAttribute('avatar-pos-rot');
    avatar.classList.add("avatar");
    let userSplit = roomUsers[key].split("~"); //color appended to username after tilde on server
+   
    let color = "blue";
    if (userSplit.length > 1) {
       color = userSplit[1];
@@ -2272,7 +2273,15 @@ AFRAME.registerComponent('model-callout', {
             lerpedPos.x = lerp(currentPos.x, pos.x, .1).toFixed(2);
             lerpedPos.y = lerp(currentPos.y, pos.y - 1, .1).toFixed(2); //because camera y is 1+
             lerpedPos.z = lerp(currentPos.z, pos.z, .1).toFixed(2);
-            element.setAttribute('position', lerpedPos);
+            
+            if (currentPos.distanceTo(pos) < 1.5) {
+               element.setAttribute('position', pos);
+               clearInterval(interval);
+            } else {
+                element.setAttribute('position', lerpedPos);
+            }
+            
+            // console.log(currentPos.distanceTo(pos));
             
          } else {
             clearInterval(interval);

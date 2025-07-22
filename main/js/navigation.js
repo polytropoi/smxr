@@ -3,7 +3,10 @@ import * as THREE from 'three';
 
 import { showDialogPanel } from "../js/dialogs.js";
 import { settings } from "../../../connect/settings.js";
+import { UpdatePlayerPosRot } from "../../../connect/connect.js";
 import {} from "content-utils";
+
+
 
 if (location.hostname !== 'localhost' && window.location.protocol === 'http:') window.location.protocol = 'https:';
 
@@ -416,6 +419,8 @@ AFRAME.registerComponent('extended_wasd_controls', {
 		this.el.setAttribute('screen-controls-firstperson', true);
 
 		this.keyPressedSet = new Set();
+
+		this.mouseDown = false;
 				
 		let self = this;
 		
@@ -432,6 +437,34 @@ AFRAME.registerComponent('extended_wasd_controls', {
 				self.registerKeyUp( self.convertKeyName(eventData.key) );
 			} 
 		);
+
+		document.addEventListener( "mousedown", 
+			function(eventData) 
+			{
+				self.mouseDown = true;
+				
+			}
+		);
+		document.addEventListener( "mouseup", 
+			function(eventData) 
+			{
+				self.mouseDown = false;
+				
+			}
+		);
+
+		document.addEventListener( "mousemove", 
+			function(eventData) 
+			{
+				if (self.el.object3D && self.mouseDown) {
+					// if (JSON.stringify(playerRotation) != )
+					UpdatePlayerPosRot(self.el.object3D.position,self.el.getAttribute("rotation"));
+				}
+				
+			}
+		);
+
+		
 
 		// movement-related data
 
@@ -583,6 +616,15 @@ AFRAME.registerComponent('extended_wasd_controls', {
 							 -c * this.movePercent.z - s * this.movePercent.x ).multiplyScalar( moveAmount );
 
 				this.el.object3D.position.add( this.moveVector );
+				if (this.el.object3D.position) {
+					// playerPosition = this.el.object3D.position;
+					// pQuaternion = this.el.object3D.getWorldQuaternion();
+					// playerRotation.setFromQuaternion(playerQuaternion);
+					// console.log("position " +JSON.stringify(this.el.object3D.position));
+					// playerRotation = this.el.object3D.rotation.copy();
+
+					UpdatePlayerPosRot(this.el.object3D.position,this.el.getAttribute("rotation"));
+				}
 				// console.log("keyboard this.movePercent " + JSON.stringify(this.movePercent));
 			}
 
