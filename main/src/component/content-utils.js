@@ -416,7 +416,7 @@ AFRAME.registerComponent('create_avatars', {
    // avatar.setAttribute('avatar-pos-rot');
    avatar.classList.add("avatar");
    let userSplit = roomUsers[key].split("~"); //color appended to username after tilde on server
-   
+
    let color = "blue";
    if (userSplit.length > 1) {
       color = userSplit[1];
@@ -2261,10 +2261,13 @@ AFRAME.registerComponent('model-callout', {
       var currentPos = element.getAttribute('position');
       var currentRot = element.getAttribute('rotation');
       element.setAttribute('rotation', rot); //fuckit!
+      let isMoving = false;
       // var mesh = element.getObject3D('mesh');
       // console.log("mesh " + JSON.stringify(mesh));
-      var interval = setInterval(function() {
-         iteration++
+      if (!isMoving) {
+         var interval = setInterval(function() {
+         isMoving = true;
+          iteration++
          if (iteration < 10) { 
             currentPos = element.getAttribute('position');
             currentRot =  element.getAttribute('rotation');
@@ -2274,19 +2277,23 @@ AFRAME.registerComponent('model-callout', {
             lerpedPos.y = lerp(currentPos.y, pos.y - 1, .1).toFixed(2); //because camera y is 1+
             lerpedPos.z = lerp(currentPos.z, pos.z, .1).toFixed(2);
             
-            if (currentPos.distanceTo(pos) < 1.5) {
+            if (currentPos.distanceTo(pos) < .5) {
                element.setAttribute('position', pos);
                clearInterval(interval);
+               isMoving = false;
             } else {
                 element.setAttribute('position', lerpedPos);
+                // isMoving = false;
             }
             
             // console.log(currentPos.distanceTo(pos));
             
          } else {
             clearInterval(interval);
+            isMoving = false;
          }
          }, 100);
+      }
     })
   });
   

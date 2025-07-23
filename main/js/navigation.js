@@ -414,6 +414,7 @@ AFRAME.registerComponent('extended_wasd_controls', {
 
 	init: function()
 	{
+				// this.tick = AFRAME.utils.throttleTick(this.tick, 250, this);
 		// register key down/up events 
 		//  and keep track of all keys currently pressed
 		this.el.setAttribute('screen-controls-firstperson', true);

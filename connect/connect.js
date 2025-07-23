@@ -261,7 +261,7 @@ $(function() {
    //       }
    //    }
    // }
-
+   console.log("socketfu" + settings.networking + " " + settings.socketHost);
    if (settings.networking == 'SocketIO' && settings.socketHost) {
       if (settings.socketHost.length > 6) { //i.e. not "none" or empty
          socketHost = settings.socketHost;
@@ -2455,49 +2455,36 @@ function MoveElement(id,posRotObj) { //jesjus wweeeeped//nopr
 export function UpdatePlayerPosRot (position, rotation) { //called from navigation when player moves
    playerPosition = position;
    playerRotation = rotation;
-   console.log("tryna UpdatePlayerPosition " + JSON.stringify(position) + " rot " + JSON.stringify(rotation));
    EmitSelfPosition();
-   if (profile) {
-      // if (profile.lastPosition != lastPosition) {
-         profile.lastPosition = position;
-         profile.lastRotation = rotation;
-         // console.log("userData with position " + JSON.stringify(profile));
-         UpdateLocalPlayerState(profile);
-      // }
-   } 
-   // if (socket) {
-      
-   // }  // lastRotation = JSON.stringify(cameraRotation);       
 }
 
 function EmitSelfPosition() {
 
    if (!settings.hideAvatars) {   
       
-      // if (posRotReader != null) {   //used by aframe
-      //    if (!posRotRunning) {
-      //       posRotRunning = true;
-      //       // if (emitInterval == null) { 
-      //       // emitInterval = setInterval(function(){
-
-      //          var posRotObj = posRotReader.returnPosRot();
-      //          cameraPosition = posRotObj.pos;
-      //          cameraRotation = posRotObj.rot;
-      //          // console.log(cameraPosition.x.toString() + " vs " + window.playerPosition.x.toString());
-      //          // if (JSON.stringify(cameraPosition) != lastPosition && JSON.stringify(cameraRotation) != lastRotation) {
-      //          if (JSON.stringify(cameraPosition) != lastPosition) {
-                     // console.log('emitting!');
-                  // window.playerPosition = cameraPosition;
-                  // if (!playerRotation) {
-                  //    playerRotation = {x: 0, y: 0, z: 0};
-                  // }
+      if (emitInterval == null && playerPosition && playerRotation) { 
+         let count = 0;
+         emitInterval = setInterval(function(){
+               if (count <= 10) { 
+                  count++;
                   if (socket) {
-                     // console.log("tryna emit self! " + JSON.stringify(playerPosition));
+                     console.log("tryna emit self pos " + JSON.stringify(playerPosition) + " rot " +JSON.stringify(playerRotation));
                      socket.emit("updateplayerposition", room, avatarName, playerPosition.x, playerPosition.y, playerPosition.z, playerRotation.x, playerRotation.y, playerRotation.z, mySocketID, "aframe"); 
                      
                   }
+                  if (profile) {
+                        profile.lastPosition = playerPosition;
+                        profile.lastRotation = playerRotation;
+                        UpdateLocalPlayerState(profile);
+                  } 
+               } else {
+                  clearInterval(emitInterval);
+                  emitInterval = null;
                }
-            }
+            }, 500);
+         }
+      }
+   }
                   
                   
                // }
@@ -2524,7 +2511,7 @@ function EmitSelfPosition() {
 //          if (!posRotRunning) {
 //             posRotRunning = true;
 //             // if (emitInterval == null) { 
-            // emitInterval = setInterval(function(){
+//             emitInterval = setInterval(function(){
 
 //                var posRotObj = posRotReader.returnPosRot();
 //                cameraPosition = posRotObj.pos;
@@ -2556,7 +2543,7 @@ function EmitSelfPosition() {
 //                writeCount++;
 //                }
 
-            // }, 250);
+//             }, 250);
 //          // } else {
 //          //    clearInterval(emitInterval);
 //          //    emitInterval = null;
