@@ -2869,12 +2869,12 @@ webxr_router.get('/:_id', function (req, res) {
                             p_ids.push(ObjectId.createFromHexString(group.items.toString()));
                         }
                         // const p_ids = group.items; //.map(convertStringToObjectID);
-                        // console.log("picgroup items : "+ p_ids);
+                        console.log("about to get picgroup items : "+ p_ids.length);
                         const picquery = {"_id": {$in : p_ids}};
                         let images = await RunDataQuery("image_items", "find", picquery);
                     
                         for (let image of images) { //jack in a signed url for each
-                            console.log("gots a pic in pic group w/ image.orientation " + image.filename);
+                            // console.log("gots a pic in pic group w/ image.orientation " + image.filename);
 
                             if (image.orientation != null && image.orientation != undefined && image.orientation.toLowerCase() == "equirectangular") { 
                                 skyboxIDs.push(image._id);
@@ -3997,16 +3997,16 @@ webxr_router.get('/:_id', function (req, res) {
                         sceneManglerButtons +
                         videoElements +
 
-                        // "<a-entity position=\x220 20 0\x22 rotation=\x220 90 0\x22>"+        
-                        // "<a-entity camrender id=\x22topCam\x22 camera=\x22active: false\x22></a-entity></a-entity>"+
+                        "<a-entity position=\x220 20 0\x22 rotation=\x220 90 0\x22>"+        
+                        "<a-entity camrender id=\x22topCam\x22 camera=\x22active: false\x22></a-entity></a-entity>"+
                          
                          
-                        // "<a-entity " +
-                        //     "geometry=\x22primitive: plane; width: 16; height: 9\x22"+
-                        //     "position=\x220 5 -10\x22 rotation=\x220 90 0\x22"+
-                        //     " canvas-updater"+
-                        //     // "draw-canvas-rectangles=\x22canvas: #topCameraCanvas\x22>"+
-                        // "</a-entity>"+
+                        "<a-entity " +
+                            "geometry=\x22primitive: plane; width: 16; height: 9\x22"+
+                            "position=\x220 5 -10\x22 rotation=\x220 0 0\x22"+
+                            " canvas-updater"+
+                            // "draw-canvas-rectangles=\x22canvas: #topCameraCanvas\x22>"+
+                        "</a-entity>"+
 
                         "</body>" +
                     "</html>";

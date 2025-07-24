@@ -15,7 +15,7 @@ $(function() {
 export function UpdateUserProfile (userProfile) { //called from indexedDB.js
    profile = userProfile;
    console.log("userProfile is ready for " + profile.avatarName);
-//    SetPlayerToLastPosition();
+   SetPlayerToLastPosition();
 
 
    // profileLoaded(profile);

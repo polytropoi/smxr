@@ -486,9 +486,11 @@ $(function() {
 // }
 
 export function SetPlayerToLastPosition () {
-   player.setAttribute("position", profile.lastPosition);
-   player.setAttribute("rotation", {x: profile.lastRotation.x, y: profile.lastRotation.y, z: profile.lastRotation.z});
-   UpdatePlayerAvatars();
+   if (profile.history && profile.history.init_scene && profile.history.init_scene[room] && profile.history.init_scene[room].lastPosition) {         
+      player.setAttribute("position", profile.history.init_scene[room].lastPosition);
+      player.setAttribute("rotation", profile.history.init_scene[room].lastRotation);
+      UpdatePlayerAvatars();
+   }
 }
 
 export function UpdateAvatarName(name) {
@@ -2391,6 +2393,7 @@ if (settings && !socket) {
    });
 
    socket.on('disconnect', function() {
+      console.log("disconnect event! " + socket + "connected user count is now " + roomUsers.length);
       UpdatePlayerAvatars(roomUsers);
    });
    socket.on('user left', function(id) {
@@ -2461,6 +2464,11 @@ export function UpdatePlayerPosRot (position, rotation) { //called from navigati
    playerPosition = position;
    playerRotation = rotation;
    EmitSelfPosition();
+   
+   if (profile && !emitInterval) {
+      UpdateLocalPlayerState(profile, room);
+      console.log("writing profile posrot to localdb");
+   } 
 }
 
 function EmitSelfPosition() {
@@ -2477,11 +2485,7 @@ function EmitSelfPosition() {
                      socket.emit("updateplayerposition", room, avatarName, playerPosition.x, playerPosition.y, playerPosition.z, playerRotation.x, playerRotation.y, playerRotation.z, mySocketID, "aframe"); 
                      
                   }
-                  if (profile) {
-                        profile.lastPosition = playerPosition;
-                        profile.lastRotation = playerRotation;
-                        UpdateLocalPlayerState(profile);
-                  } 
+                 
                } else {
                   clearInterval(emitInterval);
                   emitInterval = null;
@@ -3020,4 +3024,3 @@ function ShowHideContentBox () {
    coll[0].click();
 
 }
-

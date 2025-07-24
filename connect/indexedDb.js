@@ -565,7 +565,7 @@ export function InitIDB() {
       }
    }
 
-   export function UpdateLocalPlayerState (playerState) { 
+   export function UpdateLocalPlayerState (playerState, room) { 
       if (!('indexedDB' in window)) {
        console.log("This browser doesn't support IndexedDB");
        return;
@@ -610,11 +610,16 @@ export function InitIDB() {
                   profile = pcursor.value;
                   if (playerState) {
                      profile.playerState = playerState;
-                     profile.lastPosition = playerPosition;
-                     profile.lastRotation = playerRotation;
+                     
+                     if (profile.history && profile.history.init_scene && profile.history.init_scene[room]) {
+                     profile.history.init_scene[room].lastPosition = playerPosition;
+                     profile.history.init_scene[room].lastRotation = playerRotation;
+                     // profile.lastRotation = playerRotation;
+                     // profile.lastPosition = playerPosition;
+                     // profile.lastRotation = playerRotation;
                      // console.log("updating profile for " + profile.avatarName);
                      pstore.put(profile);
-                     
+                     }
                   }
                }
             }
