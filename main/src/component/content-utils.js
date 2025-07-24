@@ -5672,3 +5672,129 @@ AFRAME.registerComponent('scene_greeting_dialog', {  //if "greeting" scenetag + 
 //     message.textContent = "Exited Immersive Mode";
 //   });
 // });
+
+/////// TOP DOWN CAM VIEW
+AFRAME.registerComponent("top_camera", {
+  init: function() {
+    // grab the canvas
+    var canvas = document.querySelector("#topCameraCanvas");
+    this.ctx = canvas.getContext("2d");
+    // grab the secondary camera (the THREEjs cam within the camera component)
+    this.secondaryCam = document.querySelector("#topCam").components.camera.camera;
+    },
+    tick: function() {
+      // wait until init is done
+      if (!this.secondaryCam) return;
+      console.log("GOTS THE TOP CAM");
+      // render the secondary camera view
+      this.el.renderer.render(this.el.sceneEl.object3D, this.secondaryCam);
+      // draw the render on the canvas
+      this.ctx.drawImage(this.el.renderer.domElement, 0, 0, 256, 256);
+      
+    }
+  });
+
+  AFRAME.registerComponent('canvas-updater', {
+  dependencies: ['geometry', 'material'],
+
+  tick: function () {
+    var el = this.el;
+    var material;
+
+    material = el.getObject3D('mesh').material;
+    if (!material.map) { return; }
+    material.map.needsUpdate = true;
+  }
+});
+
+AFRAME.registerComponent('camrender',{
+    'schema': {
+       // desired FPS
+       fps: {
+            type: 'number',
+            default: 90.0
+       },
+       // Id of the canvas element used for rendering the camera
+       cid: {
+            type: 'string',
+            default: 'topCameraCanvas'
+       },
+       // Height of the renderer element
+       height: {
+            type: 'number',
+            default: 300
+       },
+       // Width of the renderer element
+       width: {
+            type: 'number',
+            default: 400
+       }
+    },
+    'update': function(oldData) {
+        var data = this.data
+        if (oldData.cid !== data.cid) {
+            // Find canvas element to be used for rendering
+            var canvasEl = document.getElementById(this.data.cid);
+            // Create renderer
+            this.renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                canvas: canvasEl
+            });
+            // Set properties for renderer DOM element
+            this.renderer.setPixelRatio( window.devicePixelRatio );
+            this.renderer.domElement.crossorigin = "anonymous";
+        };
+        if (oldData.width !== data.width || oldData.height !== data.height) {
+            // Set size of canvas renderer
+            this.renderer.setSize(data.width, data.height);
+            this.renderer.domElement.height = data.height;
+            this.renderer.domElement.width = data.width;
+        };
+        if (oldData.fps !== data.fps) {
+            // Set how often to call tick
+            this.tick = AFRAME.utils.throttleTick(this.tick, 1000 / data.fps , this);
+        };
+    },
+    'tick': function(time, timeDelta) {
+        this.renderer.render( this.el.sceneEl.object3D , this.el.object3DMap.camera );
+    }
+});
+
+
+AFRAME.registerComponent('draw-canvas-rectangles', {
+  schema: {canvas: {type: 'selector'}},
+
+  init: function () {
+    var canvas = this.canvas = this.data.canvas;
+    var ctx = this.ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgb(0, 0, 0)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  },
+
+  tick: function (t) {
+    var canvas = this.canvas;
+    var ctx = this.ctx;
+    var x;
+    var y;
+    var hue = t / 10;
+
+    // Bottom layer rectangle.
+    ctx.fillStyle = 'hsl(' + hue + ', 50%, 80%)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Middle layer rectangle.
+    hue = t / 15;
+    ctx.fillStyle = 'hsl(' + hue + ', 50%, 60%)';
+    x = canvas.width / 10;
+    y = canvas.height / 10;
+    ctx.fillRect(x, y, canvas.width - x * 2, canvas.height - y * 2);
+
+    // Top layer rectangle.
+    hue = t / 20;
+    ctx.fillStyle = 'hsl(' + hue + ', 50%, 40%)';
+    x = canvas.width / 5;
+    y = canvas.height / 5;
+    ctx.fillRect(x, y, canvas.width - x * 2, canvas.height - y * 2);
+  }
+});
+

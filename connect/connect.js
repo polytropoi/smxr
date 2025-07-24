@@ -261,7 +261,7 @@ $(function() {
    //       }
    //    }
    // }
-   console.log("socketfu" + settings.networking + " " + settings.socketHost);
+   console.log("socketfu: " + settings.networking + " " + settings.socketHost);
    if (settings.networking == 'SocketIO' && settings.socketHost) {
       if (settings.socketHost.length > 6) { //i.e. not "none" or empty
          socketHost = settings.socketHost;
@@ -485,7 +485,11 @@ $(function() {
 //    // profileLoaded(profile);
 // }
 
-
+export function SetPlayerToLastPosition () {
+   player.setAttribute("position", profile.lastPosition);
+   player.setAttribute("rotation", {x: profile.lastRotation.x, y: profile.lastRotation.y, z: profile.lastRotation.z});
+   UpdatePlayerAvatars();
+}
 
 export function UpdateAvatarName(name) {
    avatarName = name;
@@ -2180,7 +2184,8 @@ if (settings && !socket) {
          },
          url: socketHost + "/socket.io/?EIO=4&transport=polling&t=NNjNltH",
          autoConnect: false,  //connection is opened if token checks out above
-         reconnection: false
+         reconnection: false,
+         transports: ['websocket']
          });      
       }
 
@@ -2779,7 +2784,7 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
             }
          }
          if (!active) {
-            console.log("tryna remove " + roomAvatars[a].id)
+            console.log("tryna remove duplicate " + roomAvatars[a].id)
             roomAvatars[a].remove();
          }
       }

@@ -208,7 +208,9 @@ app.use('/stripe', stripe_routes);
 // io.set('origins', 'servicemedia.net');
 // io.set('transports', ['polling', 'websocket']);
 import { Server } from "socket.io";
-const io = new Server(server);
+const io = new Server(server, {
+  transports: ['websocket']
+});
 
 io.serveClient(true);
 // socket = io;

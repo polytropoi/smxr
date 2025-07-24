@@ -3847,7 +3847,7 @@ webxr_router.get('/:_id', function (req, res) {
                         ////////////////ASSETS/////////////
                         // "<a-assets timeout=\x222000\x22>" +
                         "<a-assets>" +
-                       
+                        "<canvas id=\x22topCameraCanvas\x22 crossOrigin=\x22anonymous\x22></canvas>"+
                         playerAvatarTemplate +
                         handsTemplate + 
                         pAudioWaveform +
@@ -3902,6 +3902,7 @@ webxr_router.get('/:_id', function (req, res) {
                         grabMix +
                         skyboxAsset +
                         navmeshAsset +
+
                         "</a-assets>\n"+
 
                         //////////////ENTITIES////////////////////
@@ -3995,6 +3996,18 @@ webxr_router.get('/:_id', function (req, res) {
                         activityPubScripts +
                         sceneManglerButtons +
                         videoElements +
+
+                        // "<a-entity position=\x220 20 0\x22 rotation=\x220 90 0\x22>"+        
+                        // "<a-entity camrender id=\x22topCam\x22 camera=\x22active: false\x22></a-entity></a-entity>"+
+                         
+                         
+                        // "<a-entity " +
+                        //     "geometry=\x22primitive: plane; width: 16; height: 9\x22"+
+                        //     "position=\x220 5 -10\x22 rotation=\x220 90 0\x22"+
+                        //     " canvas-updater"+
+                        //     // "draw-canvas-rectangles=\x22canvas: #topCameraCanvas\x22>"+
+                        // "</a-entity>"+
+
                         "</body>" +
                     "</html>";
                 }
