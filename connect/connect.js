@@ -490,6 +490,8 @@ export function SetPlayerToLastPosition () {
       player.setAttribute("position", profile.history.init_scene[room].lastPosition);
       player.setAttribute("rotation", profile.history.init_scene[room].lastRotation);
       UpdatePlayerAvatars();
+   } else {
+      console.log("last position not found!");
    }
 }
 
@@ -2216,7 +2218,7 @@ if (settings && !socket) {
 
    socket.on('room users', function (data) {
     console.log("room users data : " + data);
-   $('#users').html("");
+      $('#users').html("");
 
       roomUsers = JSON.parse(data);
 
@@ -2465,9 +2467,9 @@ export function UpdatePlayerPosRot (position, rotation) { //called from navigati
    playerRotation = rotation;
    EmitSelfPosition();
    
-   if (profile && !emitInterval) {
+   if (profile) {
       UpdateLocalPlayerState(profile, room);
-      console.log("writing profile posrot to localdb");
+      // console.log("writing profile posrot to localdb");
    } 
 }
 
@@ -2478,7 +2480,7 @@ function EmitSelfPosition() {
       if (emitInterval == null && playerPosition && playerRotation) { 
          let count = 0;
          emitInterval = setInterval(function(){
-               if (count <= 10) { 
+               if (count <= 6) { 
                   count++;
                   if (socket) {
                      console.log("tryna emit self pos " + JSON.stringify(playerPosition) + " rot " +JSON.stringify(playerRotation));

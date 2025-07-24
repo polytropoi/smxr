@@ -612,13 +612,13 @@ export function InitIDB() {
                      profile.playerState = playerState;
                      
                      if (profile.history && profile.history.init_scene && profile.history.init_scene[room]) {
-                     profile.history.init_scene[room].lastPosition = playerPosition;
-                     profile.history.init_scene[room].lastRotation = playerRotation;
-                     // profile.lastRotation = playerRotation;
-                     // profile.lastPosition = playerPosition;
-                     // profile.lastRotation = playerRotation;
-                     // console.log("updating profile for " + profile.avatarName);
-                     pstore.put(profile);
+                        profile.history.init_scene[room].lastPosition = playerPosition;
+                        profile.history.init_scene[room].lastRotation = playerRotation;
+                        // profile.lastRotation = playerRotation;
+                        // profile.lastPosition = playerPosition;
+                        // profile.lastRotation = playerRotation;
+                        // console.log("updating profile for " + profile.avatarName + " lastPosition " + profile.history.init_scene[room].lastPosition);
+                        pstore.put(profile);
                      }
                   }
                }
