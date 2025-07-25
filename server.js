@@ -209,7 +209,8 @@ app.use('/stripe', stripe_routes);
 // io.set('transports', ['polling', 'websocket']);
 import { Server } from "socket.io";
 const io = new Server(server, {
-  transports: ['websocket']
+  transports: ['websocket'],
+  connectionStateRecovery: {}
 });
 
 io.serveClient(true);
@@ -266,7 +267,7 @@ io.on('connection', function(socket) {
                           } catch (e) {
                             console.log("user not found error! " + e);
                             socket.on("disconnect", (reason) => {
-                              console.log("closing connection because userlookup failed");
+                              console.log("closing connection because userlookup failed " + reason);
                             });
                           }
                         })();
@@ -285,8 +286,8 @@ io.on('connection', function(socket) {
         });
     });
 
-    socket.on('disconnect', function() {
-        console.log('Got disconnect: ' + socket.handshake.query.room);
+    socket.on('disconnect', function(reason) {
+        console.log('Got disconnect: ' + socket.handshake.query.room + ' because why ' + reason);
         
         socket.leave(socket.handshake.query.room);
         socket.to(socket.handshake.query.room).emit('user left', socket.id);

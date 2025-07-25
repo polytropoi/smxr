@@ -450,8 +450,9 @@ export function InitIDB() {
                         console.log("player is equipped!");
                         const modObjexEl = document.getElementById("sceneObjects");
                         if (modObjexEl) {
-                           modObjexEl.components.mod_objex.equipInventoryObject(pcursor.value.equipment.main.objectID, pcursor.value.equipment.main.tags, pcursor.value.equipment.main.eventData);
-                             const playerHudEl = document.getElementById("player_hud");
+                           if (modObjexEl.components.mod_objex) {
+                              modObjexEl.components.mod_objex.equipInventoryObject(pcursor.value.equipment.main.objectID, pcursor.value.equipment.main.tags, pcursor.value.equipment.main.eventData);
+                              const playerHudEl = document.getElementById("player_hud");
                               if (playerHudEl) {
                                
                                  const equipment = "You are equipped with a " + pcursor.value.equipment.main.objectName + " tagged " + pcursor.value.equipment.main.tags;
@@ -460,6 +461,7 @@ export function InitIDB() {
                                  // playerHudEl.components.player_hud.ShowMessageAndHide("Welcome back " + pcursor.value.avatarName + "!\nYou are equipped with a " +
                                  //    pcursor.value.equipment.main.objectName + " tagged " + pcursor.value.equipment.main.tags);
                               }
+                           }
                         } else {
                            console.log("cain't find mod_objex");
                         }
