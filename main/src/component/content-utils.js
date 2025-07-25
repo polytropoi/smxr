@@ -2665,8 +2665,60 @@ AFRAME.registerComponent('player_hud', {
         this.hudText.setAttribute("visible", false);
       }, 5000);
     }
+  },
+  ShowConnectedUsersAndHide: function (count, connectedUsers) {
 
-  }
+    console.log("tryna show connected users " + connectedUsers.length);
+    // if (this.placeholder) {
+      let userstring = count + " connected users : ";
+    //   let username = ""
+      let colorRanges = {};
+      colorRanges[0] = 'white';
+      // let characterIndex = 17;
+      // let colorRanges = {0: 'white', 17: };
+
+      let currentIndex = 18;
+      for (let i = 0; i < connectedUsers.length; i++) {
+            // console.log("tryna split " + connectedUsers[i]);       
+            // userstring += userSplit[0];
+            // username = userSplit[0];
+            if (i == 0) {
+              userstring = userstring + connectedUsers[i].name;
+
+              colorRanges[currentIndex] = connectedUsers[i].color;
+              currentIndex += connectedUsers[i].name.length + 2;
+            } else {
+              userstring = userstring + ", " + connectedUsers[i].name;
+              colorRanges[currentIndex] = connectedUsers[i].color;
+              currentIndex += connectedUsers[i].name.length + 2;
+            }
+          
+       
+      }
+
+
+
+
+      const that = this;
+      this.hudText.setAttribute('troika-text', {
+        maxWidth: .9,
+        baseline: "bottom",
+        align: "center",
+        fontSize: .03,
+        font: "/fonts/web/"+ this.font2,
+        anchor: "center",
+        color: "white",
+        outlineColor: "black",
+        outlineWidth: "2%",
+        value: userstring,
+        colorRanges: colorRanges//{0: "white", 17: connectedUsers[0].color}
+        });
+      this.hudText.setAttribute("visible", true);
+      setTimeout(() => {
+        this.hudText.setAttribute("visible", false);
+      }, 8000);
+    }
+  // }
 });
 
 AFRAME.registerComponent('mod_dialog', { //there should only be one of these, unlike callouts

@@ -6,7 +6,8 @@ import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, Se
 import { settings, profile } from "../../connect/settings.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
   userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
-  GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions
+  GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
+  Disconnect
   } from "../../connect/connect.js";
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
 // import shortid from "shortid";
@@ -228,6 +229,14 @@ window.addEventListener( 'keydown',  ( event ) => {
   });
   $('#overlayContent').on('click', '#messages_dialog_button', function(e) {
     SceneManglerModal("Messages");
+  });
+    $('#overlayContent').on('click', '#welcome_dialog_button', function(e) {
+    SceneManglerModal("Welcome");
+  });
+
+
+  $('#overlayContent').on('click', '#disconnect_button', function(e) {
+    Disconnect();
   });
 
   $('#modalContent').on('click', '#messages_tab', function(e) {

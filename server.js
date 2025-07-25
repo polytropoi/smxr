@@ -213,6 +213,12 @@ const io = new Server(server, {
   connectionStateRecovery: {}
 });
 
+async function getSocketsInRoom(roomID) {
+  const sockets = await io.in(roomID).fetchSockets();
+  // 'sockets' will be an array of Socket instances in the specified room
+  return sockets;
+}
+
 io.serveClient(true);
 // socket = io;
 io.on('connection', function(socket) {
@@ -223,7 +229,7 @@ io.on('connection', function(socket) {
     // let tokenAuth = tokenAuthentication(socket.token);
     if (socket.token != null && socket.uname != null && socket.color != null){
         socket.on("disconnect", (reason) => {
-            console.log("closing connection because bad query from " + socket);
+            console.log("closing connection because bad query from " + socket + " reason " + reason);
         });
     } else {
         console.log(socket.uname + " " + socket.color + "connected");
@@ -286,27 +292,49 @@ io.on('connection', function(socket) {
         });
     });
 
-    socket.on('disconnect', function(reason) {
+    socket.on('disconnect', async function(reason) {
         console.log('Got disconnect: ' + socket.handshake.query.room + ' because why ' + reason);
         
         socket.leave(socket.handshake.query.room);
         socket.to(socket.handshake.query.room).emit('user left', socket.id);
         // io.in(room).emit('disconnected', socket.uname);
-        if (io.sockets.adapter.rooms[room] != undefined) {
-            var roomUsers = io.sockets.adapter.rooms[room].sockets;
-            // console.log("roomUsers after disconnect " + JSON.stringify(roomUsers));
+        const roomUsers = await getSocketsInRoom(socket.handshake.query.room);
+        // for (const key of sockets) {
+            // console.log(`Socket ID in ${socket.handshake.query.room}: ${socket.id}`);
+
             var returnObj = {};
-            Object.keys(roomUsers).forEach(function(key) {
-               
-                let namePlusColor = io.sockets.connected[key].uname + "~" + io.sockets.connected[key].color;
-                returnObj[key] = namePlusColor;
+            // Object.keys(roomUsers).forEach(function(key) {
+            for (const key of roomUsers) {
+                if (key.connected) {
+                let namePlusColor = key.uname + "~" + key.color;
+                returnObj[key.id] = namePlusColor;
                 // returnObj[io.sockets.connected[key].uname] = key; //cook up a nice dict for client to use
-            });
-            Object.keys(roomUsers).forEach(function(key) {
+                }
+            }
+            
+            // Object.keys(roomUsers).forEach(function(key) {
               
-                io.sockets.connected[key].emit('room users', JSON.stringify(returnObj));
-            });
-        }
+            //     io.sockets.connected[key].emit('room users', JSON.stringify(returnObj));
+            // });
+        // }
+        console.log("room sockets after discon " + JSON.stringify(returnObj)); 
+        io.to(room).emit('room users', JSON.stringify(returnObj));
+
+        // if (io.sockets.adapter.rooms[room] != undefined) {
+        //     var roomUsers = io.sockets.adapter.rooms[room].sockets;
+        //     console.log("roomUsers after disconnect " + JSON.stringify(roomUsers));
+        //     var returnObj = {};
+        //     Object.keys(roomUsers).forEach(function(key) {
+               
+        //         let namePlusColor = io.sockets.connected[key].uname + "~" + io.sockets.connected[key].color;
+        //         returnObj[key] = namePlusColor;
+        //         // returnObj[io.sockets.connected[key].uname] = key; //cook up a nice dict for client to use
+        //     });
+        //     Object.keys(roomUsers).forEach(function(key) {
+              
+        //         io.sockets.connected[key].emit('room users', JSON.stringify(returnObj));
+        //     });
+        // }
     });
     socket.on('room users', function (room) {
         io.sockets.adapter.rooms.get(room);

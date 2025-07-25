@@ -2220,6 +2220,7 @@ if (settings && !socket) {
     console.log("room users data : " + data);
       $('#users').html("");
 
+
       roomUsers = JSON.parse(data);
 
       UpdatePlayerAvatars(roomUsers);
@@ -2239,6 +2240,7 @@ if (settings && !socket) {
          //    }   
          // }
       var keys = Object.keys(roomUsers);
+      let simpleUsers = [];
       for(var i=0; i<keys.length; i++){
          var key = keys[i];
          var isMe = "";
@@ -2249,21 +2251,43 @@ if (settings && !socket) {
          }
          const value = roomUsers[key];
          // console.log("roomUsers key:value: " + key + " " + value); 
-         usercount++;
+         
       //   $('#users').prepend($('<button class=\x22btn\x22 style=\x22margin: 5px 5px 5px 5px;\x22><h4><strong>').text( value ).append("</strong></h4></button>"));
          if (value.includes("~")) {
             let split = value.split("~"); //color is appended to username
             split[0] = split[0].replace("_", " ");
             roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
+            let u = {};
+            u.name = split[0];
+            u.color = split[1];
+
+            simpleUsers.push(u);
          } else {
             roomUsersString += value + ", ";
-         }   
+         } 
+
+         // if (usercount == 0) { 
+         //    simpleUsers = simpleUsers + value;  
+         // } else {
+         //    simpleUsers = simpleUsers + ", " + value;
+         // }
+         usercount++;
       }
+
       roomUsersString = roomUsersString.substring(0, roomUsersString.length - 2); //trim last comma and trailing space
       roomUsersString = usercount + " users connected: " + roomUsersString;
       // console.log(roomUsersString);
       $('#users').html(roomUsersString);
       stringRoomUsers = roomUsersString;
+
+      if (usercount > 0) {
+         const playerHudEl = document.getElementById("player_hud");
+         if (playerHudEl) {
+            if (playerHudEl.components.player_hud) {
+              playerHudEl.components.player_hud.ShowConnectedUsersAndHide(usercount, simpleUsers);
+            }
+         }
+      }
       // $('#users_2').html(roomUsersString);
       // EmitSelfPosition();
    });
@@ -2399,7 +2423,9 @@ if (settings && !socket) {
       UpdatePlayerAvatars(roomUsers);
    });
    socket.on('user left', function(id) {
-      console.log("user left with socket id " + id);
+      console.log("user left with socket id " + id + " vs roomUsers " + JSON.stringify(roomUsers));
+
+
    });
 } //InitSocket end
 // } //end if settings.hideAvatars
@@ -2718,7 +2744,7 @@ function ReturnPlayerData() { //return my un/color to set marker at current map 
       }
    }
 }
-function Disconnect() {
+export function Disconnect() {
    console.log("tryna disconnect..");
    socket.disconnect();
    let roomAvatars = sceneEl.querySelectorAll('.avatar');

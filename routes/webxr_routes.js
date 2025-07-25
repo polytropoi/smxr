@@ -2790,11 +2790,11 @@ webxr_router.get('/:_id', function (req, res) {
                 sceneTriggerVolume+"\x22 class=\x22slider\x22 id=\x22triggerAudioVolumeSlider\x22></div>";
             }
             let userText = "<div class=\x22smallfont\x22><span id=\x22userName\x22 class=\x22\x22>Welcome " + 
-            avatarName+ "</span>!&nbsp;&nbsp;<button onclick=\x22Disconnect()\x22 type=\x22button\x22 class=\x22btn\x22>Disconnect</button></div><hr>";
+            avatarName+ "</span>!&nbsp;&nbsp;<button id=\x22disconnect_button\x22 type=\x22button\x22 class=\x22btn\x22>Disconnect</button></div><hr>";
             if (isGuest) {
                 userText = "<div><span id=\x22userName\x22 class=\x22smallfont\x22>Welcome Guest known as " + avatarName+ "</span>"+
                 //loginLink +
-                "<button onclick=\x22Disconnect()\x22 type=\x22button\x22 class=\x22btn\x22>Disconnect</button></div>\n"+
+                "<button id=\x22disconnect_button\x22 type=\x22button\x22 class=\x22btn\x22>Disconnect</button></div>\n"+
                 "<hr>";
             }
             let fromBy = "<div><span class=\x22smallfont\x22>From: <a href=\x22http://"+sceneResponse.sceneDomain+"\x22>" +
@@ -2820,7 +2820,8 @@ webxr_router.get('/:_id', function (req, res) {
             "<div id=\x22locations_dialog_button\x22 style=\x22float:right; margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-globe \x22></i></div>"+
             "<div id=\x22tools_dialog_button\x22 style=\x22float:right; margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-tools \x22></i></div>"+
             "<div id=\x22inventory_dialog_button\x22 style=\x22float:right;margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-suitcase \x22></i></div>"+
-            "<div id=\x22messages_dialog_button\x22 style=\x22float:right;margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-comments \x22></i></div></div><br><hr>"+
+            "<div id=\x22messages_dialog_button\x22 style=\x22float:right;margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-comments \x22></i></div>" +
+            "<div id=\x22welcome_dialog_button\x22 style=\x22float:right;margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-user \x22></i></div></div><br><hr>"+
             mapStyleSelector +
             "</div>"+
             "<div>"+
