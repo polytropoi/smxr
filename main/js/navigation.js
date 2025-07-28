@@ -349,6 +349,10 @@ AFRAME.registerComponent('extended_wasd_controls', {
 		moveBackwardKey: {type: 'string', default: "S"},
 		moveLeftKey:     {type: 'string', default: "A"},
 		moveRightKey:    {type: 'string', default: "D"},
+		moveForwardKeyAlt:  {type: 'string', default: "ArrowUp"},
+		moveBackwardKeyAlt: {type: 'string', default: "ArrowDown"},
+		moveLeftKeyAlt:     {type: 'string', default: "ArrowLeft"},
+		moveRightKeyAlt:    {type: 'string', default: "ArrowRight"},
 		moveUpKey:       {type: 'string', default: "R"},
 		moveDownKey:     {type: 'string', default: "F"},
 		turnLeftKey:     {type: 'string', default: "Q"},
@@ -387,6 +391,7 @@ AFRAME.registerComponent('extended_wasd_controls', {
 	{
 		// avoid adding duplicates of keys
 		if ( !this.keyPressedSet.has(keyName) )
+			console.log("keyname is " + keyName);
         	this.keyPressedSet.add(keyName);
 	},
 
@@ -593,14 +598,18 @@ AFRAME.registerComponent('extended_wasd_controls', {
 			//   when querying which keys are currently pressed
 			this.movePercent.set(0,0,0) //reset before
 
-			if (this.isKeyPressed(this.data.moveForwardKey))
+			if (this.isKeyPressed(this.data.moveForwardKey) || this.isKeyPressed(this.data.moveForwardKeyAlt)) {
 				this.movePercent.z += 1;
-			if (this.isKeyPressed(this.data.moveBackwardKey))
+			}
+				
+			if (this.isKeyPressed(this.data.moveBackwardKey) || this.isKeyPressed(this.data.moveBackwardKeyAlt)) {
 				this.movePercent.z -= 1;
+			}
+				
 
-			if (this.isKeyPressed(this.data.moveRightKey))
+			if (this.isKeyPressed(this.data.moveRightKey) || this.isKeyPressed(this.data.moveRightKeyAlt))
 				this.movePercent.x += 1;
-			if (this.isKeyPressed(this.data.moveLeftKey))
+			if (this.isKeyPressed(this.data.moveLeftKey) || this.isKeyPressed(this.data.moveLeftKeyAlt))
 				this.movePercent.x -= 1;
 
 			if ( this.data.flyEnabled )
