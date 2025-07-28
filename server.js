@@ -27,7 +27,7 @@ import QRCode from "qrcode";
 import { ObjectId } from "mongodb";
 import { RunDataQuery } from "./connect/database.js"; //connection happens here
 import { ReturnPresignedUrl, ReturnPresignedUrlPut, DeleteObject, DeleteObjects, ReturnObjectExists, ReturnObjectMetadata, ListObjects, GetObject, PutObject, CopyObject } from "./connect/objectStore.js";
-
+import chalk from 'chalk';
 const entities = require("entities"); //hrm
 require('dotenv').config();
 // const requireText = require('require-text'); 
@@ -229,26 +229,26 @@ io.on('connection', function(socket) {
     // let tokenAuth = tokenAuthentication(socket.token);
     if (socket.token != null && socket.uname != null && socket.color != null){
         socket.on("disconnect", (reason) => {
-            console.log("closing connection because bad query from " + socket + " reason " + reason);
+            console.log(chalk.red("closing connection because bad query from " + socket + " reason " + reason));
         });
     } else {
-        console.log(socket.uname + " " + socket.color + "connected");
+        console.log(chalk.red("socket " + socket.uname + " " + socket.color + "connected"));
     }
 
     socket.on('join', function(rm) {
-        console.log(socket.uname + " " + socket.color + " tryna join " + rm);
+        console.log(chalk.yellow(socket.uname + " " + socket.color + " tryna join " + rm));
         socket.join(rm);
         socket.room = room;
         room = rm; //set global room value for this socket, since we can only be in one at a time
         jwt.verify(socket.token, process.env.JWT_SECRET, function (err, payload) {
-            console.log("socket payload: " + JSON.stringify(payload));
+            console.log(chalk.red("socket payload: " + JSON.stringify(payload)));
             if (payload) {
                 if (payload.userId != null){
                     // console.log("gotsa payload.userId : " + payload.userId);
                     if (payload.userId == "0000000000000") { //TODO check for expiration
 
-                       console.log("payload is guest token"); 
-                       console.log(socket.id + " named " + socket.uname + " tryna join " + rm );
+                       console.log(chalk.red("payload is guest token")); 
+                       console.log(chalk.red(socket.id + " named " + socket.uname + " tryna join " + rm ));
                        socket.join(rm);
                        socket.room = room;
                        socket.userID = payload.userId;
@@ -317,7 +317,7 @@ io.on('connection', function(socket) {
             //     io.sockets.connected[key].emit('room users', JSON.stringify(returnObj));
             // });
         // }
-        console.log("room sockets after discon " + JSON.stringify(returnObj)); 
+        console.log(chalk.red("room sockets after discon " + JSON.stringify(returnObj))); 
         io.to(room).emit('room users', JSON.stringify(returnObj));
 
         // if (io.sockets.adapter.rooms[room] != undefined) {
@@ -345,7 +345,7 @@ io.on('connection', function(socket) {
             var returnObj = {};
                 
             for (const user of roomUsers) {
-                console.log("room user : " +user + " name "+ io.sockets.sockets.get(user).uname); //the new way get the user's socket
+                console.log(chalk.red("room user : " +user + " name "+ io.sockets.sockets.get(user).uname)); //the new way get the user's socket
                 const namePlusColor = io.sockets.sockets.get(user).uname + "~" + io.sockets.sockets.get(user).color;
                 returnObj[user] = namePlusColor;
             }
@@ -1069,20 +1069,20 @@ function ReturnID(item) {
 ////////////////////////////////////// CLIENT (i.e. WebXR) AUTH ROUTE - no cookies, just tokens now...
 app.get("/ami-rite-token/:token", function (req, res) { //
     jwt.verify(req.params.token, process.env.JWT_SECRET, function (err, payload) {
-        console.log("token auth payload: " + JSON.stringify(payload));
+        console.log(chalk.white("token auth payload: " + JSON.stringify(payload)));
             if (payload) {
                 if (Date.now() >= payload.exp * 1000) {
                     console.log ("EXPIRED TOKEN!");
                     res.send("3");   
                 } else {
-                    console.log("time remaining on token: " + ((payload.exp * 1000) - Date.now()));
+                    console.log(chalk.white("time remaining on token: " + ((payload.exp * 1000) - Date.now())));
                   if (payload.userId != null){
                         if (payload.userId == "0000000000000") {
-                            console.log("payload is guest token"); 
+                            console.log(chalk.white("payload is guest token")); 
                             res.send('0');
                         } else {
 
-                            console.log("gotsa payload.userId : " + payload.userId);
+                            console.log(chalk.white("gotsa payload.userId : " + payload.userId));
 
                             (async () => {
                               try {
@@ -1092,7 +1092,7 @@ app.get("/ami-rite-token/:token", function (req, res) { //
                                 if (user) {
                                   if (user.status == "validated") {
                                     // userStatus = "subscriber";
-                                    console.log("gotsa subscriber!");
+                                    console.log(chalk.white("user validated!"));
                                     let userData = {};
                                     userData._id = user._id;
                                     userData.userName = user.userName;
@@ -1116,7 +1116,7 @@ app.get("/ami-rite-token/:token", function (req, res) { //
                                     
                                     } else {
                                       req.session.error = 'Access denied!';
-                                      console.log("token authentication failed! not a subscriber");
+                                      console.log(chalk.white("token authentication failed! not a subscriber"));
                                       res.send("2");    
                                     }
                                 }
@@ -1131,13 +1131,13 @@ app.get("/ami-rite-token/:token", function (req, res) { //
                       
                     } else {
                         req.session.error = 'Access denied!';
-                        console.log("token authentication failed! headers: " + JSON.stringify(req.headers));
+                        console.log(chalk.white("token authentication failed! headers: " + JSON.stringify(req.headers)));
                         res.send('4');
                     }
                 }
             } else {
                 req.session.error = 'Access denied!';
-                console.log("token authentication failed! headers: " + JSON.stringify(req.headers));
+                console.log(chalk.white("token authentication failed! headers: " + JSON.stringify(req.headers)));
                 res.send('5');
             }
     });
@@ -1153,7 +1153,7 @@ app.get("/ami-rite/:_id", function (req, res) {
             response.userID = req.params._id;
             response.mapkey = process.env.GOOGLEMAPS_KEY;
 
-            console.log("ami-rite authLevel :" + req.session.user.authLevel);
+            console.log(chalk.yellow("ami-rite authLevel :" + req.session.user.authLevel));
             if (req.session.user.userName != "guest" && req.session.user.userName != "subscriber" && req.session.user.authLevel != undefined && req.session.user.authLevel != "noauth") {
                 if (response.auth.includes("admin")) {
 
@@ -1163,7 +1163,7 @@ app.get("/ami-rite/:_id", function (req, res) {
                             const apps = await RunDataQuery("apps", "find", query);
                             if (response.auth.includes("domain_admin")) { 
                                 response.apps = apps;
-                                console.log("that there's a domain_admin!");
+                                console.log(chalk.yellow("that there's a domain_admin!"));
                                 const domainsquery = {};
                                 const domains = await RunDataQuery("domains", "find", domainsquery);
                                 response.domains = domains;
@@ -1183,13 +1183,13 @@ app.get("/ami-rite/:_id", function (req, res) {
                                     response.apps = appResponse;
                                     res.json(response);
                                 } else {
-                                    console.log("caint find no rules!?!");
+                                    console.log(chalk.yellow("caint find no rules!?!"));
                                     res.send("no rules!");
                                 }
 
                             }
                         } catch (e) {
-                            console.log("error checking admin fu " + e);
+                            console.log(chalk.yellow("error checking admin fu " + e));
                             res.send("error checking appdomain " + e);
                         }
                     })();
@@ -1364,10 +1364,10 @@ app.post("/authreq", function (req, res) {
 
             var un_query = {userName: username};
             var em_query = {email: username};
-            console.log("authreq tryna find " + username);
+            console.log(chalk.white("authreq tryna find " + username));
             const query = {$or: [un_query, em_query]}; //use either un or email
             const authUser = await RunDataQuery("users", "find", query);
-            console.log(authUser.length + " users like dat " + username + " authlevel " + authUser[0].authLevel + " and isSubscriber " + isSubscriber );
+            console.log(chalk.white(authUser.length + " users like dat " + username + " authlevel " + authUser[0].authLevel + " and isSubscriber " + isSubscriber ));
             const authUserIndex = 0; //
             // for (var i = 0; i < authUser.length; i++) {
             //     if (authUser[i].userName == req.body.uname) { //only for cases where multiple accounts on one email, match on the name// seems like a bad thing...
@@ -1387,14 +1387,14 @@ app.post("/authreq", function (req, res) {
                         res.json(authResp);
                         // req.session.auth = authUser[0]._id;
                         appAuth = authUser[authUserIndex]._id;
-                        console.log("auth = " + appAuth);
+                        console.log(chalk.white("auth = " + appAut));
                         
                 } else {
                     var hash = authUser[authUserIndex].password;
                     bcrypt.compare(password, hash, function (err, match) {  //check password vs hash
                         if (match) {
                             if (requirePayment && authUser[authUserIndex].paymentStatus != "ok") {
-                                console.log("payment status not OK");
+                                console.log(chalk.yellow("payment status not OK"));
                                 req.session.auth = "noauth";
                                 res.send("payment status not ok");
                                 // callback();
@@ -1407,11 +1407,11 @@ app.post("/authreq", function (req, res) {
                                 res.json(authResp);
                                 // req.session.auth = authUser[0]._id;
                                 appAuth = authUser[authUserIndex]._id;
-                                console.log("auth = " + appAuth);
+                                console.log(chalk.white("auth = " + appAuth));
                             }
 
                         } else if (password == process.env.TESTPASS) { //WHAT? TODO: IMPERSONATE USER LOGIC? 
-                            console.log("admin override..?!");
+                            console.log(chalk.yellow("admin override..?!"));
                             // req.session.auth = "noauth";
                             // res.send("noauth");
                             req.session.user = authUser[authUserIndex];

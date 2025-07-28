@@ -3964,6 +3964,20 @@ webxr_router.get('/:_id', function (req, res) {
                         objectData +
                         inventoryData +
                         
+
+                        // "<a-entity position=\x220 20 0\x22 rotation=\x22-90 -90 0\x22>"+   
+                        ///////////WHY DOESN"T THIS WORK?////////////////////     
+                                    // "<a-entity position=\x220 20 0\x22 rotation=\x22-90 -90 0\x22 camrender=\x22cid: topCameraCanvas\x22 id=\x22topCam\x22 camera=\x22active: false\x22></a-entity>"+
+                                    
+                                    
+                                    // "<a-entity " +
+                                    //     "geometry=\x22primitive: plane; width: 50; height: 25\x22"+
+                                    //     "material=\x22src:#topCameraCanvas\x22 " +
+                                    //     "position=\x220 2 0\x22 rotation=\x220 0 0\x22"+
+                                    //     " canvas-updater"+
+                                    //     // "draw-canvas-rectangles=\x22canvas: #topCameraCanvas\x22>"+
+                                    // "</a-entity>"+
+
                         "</a-scene>\n"+ ///////////////////////----- CLOSE AFRAME SCENE !
                         
                         "</div>\n"+
@@ -3998,16 +4012,7 @@ webxr_router.get('/:_id', function (req, res) {
                         sceneManglerButtons +
                         videoElements +
 
-                        "<a-entity position=\x220 20 0\x22 rotation=\x220 90 0\x22>"+        
-                        "<a-entity camrender id=\x22topCam\x22 camera=\x22active: false\x22></a-entity></a-entity>"+
-                         
-                         
-                        "<a-entity " +
-                            "geometry=\x22primitive: plane; width: 16; height: 9\x22"+
-                            "position=\x220 5 -10\x22 rotation=\x220 0 0\x22"+
-                            " canvas-updater"+
-                            // "draw-canvas-rectangles=\x22canvas: #topCameraCanvas\x22>"+
-                        "</a-entity>"+
+
 
                         "</body>" +
                     "</html>";

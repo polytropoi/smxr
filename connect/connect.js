@@ -265,8 +265,10 @@ $(function() {
    if (settings.networking == 'SocketIO' && settings.socketHost) {
       if (settings.socketHost.length > 6) { //i.e. not "none" or empty
          socketHost = settings.socketHost;
-         InitSocket();
+         if (!socket) {
+         // //InitSocket();
       }
+   }
    } else if (settings.networking == 'WebRTC') {
       console.log("TRYNA INIT LIVEKIT");
       // InitLiveKit();
@@ -490,6 +492,9 @@ export function SetPlayerToLastPosition () {
       player.setAttribute("position", profile.history.init_scene[room].lastPosition);
       player.setAttribute("rotation", profile.history.init_scene[room].lastRotation);
       UpdatePlayerAvatars();
+      userData.avatarName = profile.avatarName;
+      // userData = profile;
+      userData.userName = profile.avatarName;
    } else {
       console.log("last position not found!");
    }
@@ -2175,10 +2180,11 @@ function RandomHexColor() {
 
 
 
-function InitSocket () {
+export function InitSocket () {
 if (settings && !socket) {
    const aColor = RandomHexColor();
    console.log ("tryna InitSocket with color " + aColor);
+
    socket = io.connect(socketHost, {
          query : {
             token: token,
@@ -2187,8 +2193,8 @@ if (settings && !socket) {
             room: room
          },
          url: socketHost + "/socket.io/?EIO=4&transport=polling&t=NNjNltH",
-         autoConnect: false,  //connection is opened if token checks out above
-         reconnection: false,
+         autoConnect: true,  //connection is opened if token checks out above
+         reconnection: true,
          transports: ['websocket']
          });      
       }
@@ -2284,7 +2290,7 @@ if (settings && !socket) {
          const playerHudEl = document.getElementById("player_hud");
          if (playerHudEl) {
             if (playerHudEl.components.player_hud) {
-              playerHudEl.components.player_hud.ShowConnectedUsersAndHide(usercount, simpleUsers);
+            playerHudEl.components.player_hud.ShowConnectedUsersAndHide(usercount, simpleUsers);
             }
          }
       }

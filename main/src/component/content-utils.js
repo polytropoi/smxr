@@ -2478,6 +2478,7 @@ AFRAME.registerComponent('model-callout', {
         }
         calloutEntity.setAttribute('visible', false);
         
+
         // calloutEntity.setAttribute("render-order", "hud");
         sceneEl.appendChild(calloutEntity);
         calloutEntity.setAttribute("position", '0 0 0');
@@ -2507,6 +2508,8 @@ AFRAME.registerComponent('model-callout', {
           calloutEntity.setAttribute('visible', true);
           let pos = evt.detail.intersection.point; //hitpoint on model
           calloutEntity.setAttribute("position", pos);
+          this.distance = evt.detail.intersection.distance;
+          calloutEntity.setAttribute('scale', {x: this.distance * .15, y: this.distance * .15, z: this.distance * .15} );
           // calloutText.updateMatrixWorld();
         });
       this.el.addEventListener('mouseleave', function () {
@@ -5782,10 +5785,35 @@ AFRAME.registerComponent('camrender',{
             default: 400
        }
     },
+    // 'init': function() {
+    //     // Counter for ticks since last render
+    //     this.counter = 0;
+    //     // Find canvas element to be used for rendering
+    //     var canvasEl = document.getElementById(this.data.cid);
+    //     // Create renderer
+    //     this.renderer = new THREE.WebGLRenderer( { antialias: true, canvas: canvasEl } );
+    //     this.renderer.setPixelRatio( window.devicePixelRatio );
+    //     this.renderer.setSize( this.data.width, this.data.height );
+    //     // Set properties for renderer DOM element
+    //     this.renderer.domElement.crossorigin = "anonymous"
+    //     this.renderer.domElement.height = this.data.height;
+    //     this.renderer.domElement.width = this.data.width;
+    // },
+    // 'tick': function(time, timeDelta) {
+    //     var loopFPS = 1000.0 / timeDelta;
+    //     var hmdIsXFasterThanDesiredFPS = loopFPS / this.data.fps;
+    //     var renderEveryNthFrame = Math.round(hmdIsXFasterThanDesiredFPS);
+    //     if(this.counter % renderEveryNthFrame === 0) {
+    //       this.renderer.render( this.el.sceneEl.object3D , this.el.object3DMap.camera );
+    //     }
+    //     this.counter += 1;
+    // }
     'update': function(oldData) {
         var data = this.data
+
         if (oldData.cid !== data.cid) {
-            // Find canvas element to be used for rendering
+          console.log("tryna init Canvas cam...");
+          // Find canvas element to be used for rendering
             var canvasEl = document.getElementById(this.data.cid);
             // Create renderer
             this.renderer = new THREE.WebGLRenderer({

@@ -2,7 +2,8 @@ export let settings;
 
 export let profile;
 
-import { SetPlayerToLastPosition } from "../connect/connect.js";
+import { SetPlayerToLastPosition, InitSocket } from "../connect/connect.js";
+
 $(function() { 
 
     let settingsEl = document.getElementById('settingsDataElement'); //volume, color, etc...
@@ -16,6 +17,12 @@ export function UpdateUserProfile (userProfile) { //called from indexedDB.js
    profile = userProfile;
    console.log("userProfile is ready for " + profile.avatarName);
    SetPlayerToLastPosition();
+      if (settings.networking == 'SocketIO' && settings.socketHost) {
+         if (settings.socketHost.length > 6) { //i.e. not "none" or empty
+            InitSocket(); //hrm
+            
+         }
+      } 
 
 
    // profileLoaded(profile);

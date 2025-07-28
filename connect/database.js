@@ -5,7 +5,7 @@ const require = createRequire(import.meta.url);
 require('dotenv').config();
 
 import { MongoClient, ServerApiVersion, ObjectId } from "mongodb";
-
+import chalk from 'chalk';
 /////////// official mongo driver, going here...
 const uri = process.env.MONGO_URL || "";
 const client = new MongoClient(uri, {
@@ -31,7 +31,7 @@ export async function RunDataQuery(coll,type,query,update,sort) {  //TODO pass i
     if (sort) {
         s = "sorted";
     }
-    console.log("tryna RunDataQuery " + coll + " " + type  + " " + q + " " + u + " " + s);
+    console.log(chalk.cyan("tryna RunDataQuery " + coll + " " + type  + " " + q + " " + u + " " + s));
     switch  (type) {
 
         case "findRandom": //hrm...
