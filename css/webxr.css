@@ -1173,6 +1173,19 @@ background-color: #000000;
         font-size: 12px;
         font-weight: bold;
       }
+      .deleteLocalProfileDataButton {
+        float: left;
+        /* width: 100px; */
+        background-color: #c52700;
+        color: white;
+        padding: 10px 10px;
+        margin: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+      }
       /* Style the tab */
     .tab {
         overflow: hidden;

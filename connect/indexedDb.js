@@ -814,9 +814,57 @@ export function InitIDB() {
    export function SetHasLocalData (has) {
       hasLocalData = has;
    }
+
+   export function DeleteLocalProfileData() {  
+      console.log("tryna delete the current local profile...");
+              console.log("tryna connect to SMXR indexeddb");
+        if (!('indexedDB' in window)) {
+           console.log("This browser doesn't support IndexedDB");
+           return;
+        }
+        const request = indexedDB.open("SMXR", 2);
+        request.onerror = (event) => {
+           console.error("could not connect to iDB " + event);
+           return "error"
+        };
+        request.onupgradeneeded = function () {
+            const db = request.result;
+            console.log("onupgradeneeded fired, indexedDB oldversion is " + event.oldVersion);
+
+            if (event.oldVersion < 1) {
+               console.log("is there a version 0")
+               const store = db.createObjectStore("scenes", { keyPath: "shortID" });
+               store.createIndex("scene", ["scene"], { unique: true }); //multientry true?
+            }
+            if (event.oldVersion < 2) { //version 1
+               const pstore = db.createObjectStore("profiles", { keyPath: "userID" });
+               pstore.createIndex("profile", ["profile"], { unique: true });
+            }
+        };
+        request.onsuccess = function () {
+           console.log("tryna delete indexedDB localdata for this scene!");
+           const db = request.result;
+           const transaction = db.transaction("profiles", "readwrite");
+  
+           let deleterequest = transaction.objectStore("profiles").delete(userData.userID);
+           deleterequest.onerror = function () {
+              console.log("cain't delete local profile datas!?!?");
+           }
+        
+           // report that the data item has been deleted
+           transaction.oncomplete = () => {
+           console.log("profile deleted - reload to confirm!");
+           setTimeout(function () {
+              window.location.reload();
+           }, 2000);
+  
+           };
+        };
+   }
+
    export function DeleteLocalSceneData() {  //kill everything for this scene
 
-        console.log("tryna connect to SMXR indexeddb");
+        console.log("tryna delete local scene data");
         if (!('indexedDB' in window)) {
            console.log("This browser doesn't support IndexedDB");
            return;

@@ -9,7 +9,7 @@ import { room, lerp, sceneLocations, localData, ReturnLocationTable,
   GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
   Disconnect
   } from "../../connect/connect.js";
-import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
+import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
 // import shortid from "shortid";
 
 export let showDialogPanel = false;
@@ -161,6 +161,12 @@ window.addEventListener( 'keydown',  ( event ) => {
   }
 
   // $(function (){ //needs onload for class to pop
+      $('#modalContent').on('click', '#deleteLocalProfileData', function(e) {
+      console.log("tryna delete local profile data!");
+      DeleteLocalProfileData();
+  
+    });
+
     $('#modalContent').on('click', '#deleteLocalSceneData', function(e) {
       console.log("tryna delete local scenedata!");
       DeleteLocalSceneData();
@@ -2262,7 +2268,8 @@ export function SceneManglerModal(mode, autoHide) {
 
       "<hr><div class=\x22row\x22>"+
 
-      "<button class=\x22deleteLocalSceneDataButton\x22 id=\x22deleteLocalSceneData\x22 >Delete Local Scene Data</button>"+
+      "<button class=\x22deleteLocalSceneDataButton\x22 style=\x22float: left;\x22 id=\x22deleteLocalSceneData\x22 >Delete Local Scene Data</button>"+
+      "<button class=\x22deleteLocalProfileDataButton\x22 style=\x22float: left;\x22 id=\x22deleteLocalProfileData\x22 >Delete Local Profile Data</button>"+
       "<button id=\x22saveLocalAndCloseButton\x22 style=\x22float: right;\x22 class=\x22addButton\x22>Save Local and Close</button>"+
 
       "</div>"+
@@ -2281,6 +2288,8 @@ export function SceneManglerModal(mode, autoHide) {
         "<br><br><br><div>"+locationTable+"</div><br>"+
 
         "<button class=\x22deleteLocalSceneDataButton\x22 id=\x22deleteLocalSceneData\x22 >Delete Local Scene Data</button>"+
+
+
         // "<button style=\x22float:left\x22 class=\x22snapButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22ToggleAllTransformControls()\x22>Toggle All Transform Controls</button>"+
       "</div>"+     
 
