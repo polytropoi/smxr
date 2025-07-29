@@ -5748,20 +5748,11 @@ AFRAME.registerComponent("top_camera", {
       
     }
   });
-
-  AFRAME.registerComponent('canvas-updater', {
-  dependencies: ['geometry', 'material'],
-
-  tick: function () {
-    var el = this.el;
-    var material;
-
-    material = el.getObject3D('mesh').material;
-    if (!material.map) { return; }
-    material.map.needsUpdate = true;
-  }
-});
-
+// Code for a component implementing texture coming from a camera
+//
+// Original code:
+//   https://wirewhiz.com/how-to-use-a-cameras-output-as-a-texture-in-aframe/
+//
 AFRAME.registerComponent('camrender',{
     'schema': {
        // desired FPS
@@ -5772,7 +5763,7 @@ AFRAME.registerComponent('camrender',{
        // Id of the canvas element used for rendering the camera
        cid: {
             type: 'string',
-            default: 'topCameraCanvas'
+            default: 'camRenderer'
        },
        // Height of the renderer element
        height: {
@@ -5785,35 +5776,10 @@ AFRAME.registerComponent('camrender',{
             default: 400
        }
     },
-    // 'init': function() {
-    //     // Counter for ticks since last render
-    //     this.counter = 0;
-    //     // Find canvas element to be used for rendering
-    //     var canvasEl = document.getElementById(this.data.cid);
-    //     // Create renderer
-    //     this.renderer = new THREE.WebGLRenderer( { antialias: true, canvas: canvasEl } );
-    //     this.renderer.setPixelRatio( window.devicePixelRatio );
-    //     this.renderer.setSize( this.data.width, this.data.height );
-    //     // Set properties for renderer DOM element
-    //     this.renderer.domElement.crossorigin = "anonymous"
-    //     this.renderer.domElement.height = this.data.height;
-    //     this.renderer.domElement.width = this.data.width;
-    // },
-    // 'tick': function(time, timeDelta) {
-    //     var loopFPS = 1000.0 / timeDelta;
-    //     var hmdIsXFasterThanDesiredFPS = loopFPS / this.data.fps;
-    //     var renderEveryNthFrame = Math.round(hmdIsXFasterThanDesiredFPS);
-    //     if(this.counter % renderEveryNthFrame === 0) {
-    //       this.renderer.render( this.el.sceneEl.object3D , this.el.object3DMap.camera );
-    //     }
-    //     this.counter += 1;
-    // }
     'update': function(oldData) {
         var data = this.data
-
         if (oldData.cid !== data.cid) {
-          console.log("tryna init Canvas cam...");
-          // Find canvas element to be used for rendering
+            // Find canvas element to be used for rendering
             var canvasEl = document.getElementById(this.data.cid);
             // Create renderer
             this.renderer = new THREE.WebGLRenderer({
@@ -5840,6 +5806,18 @@ AFRAME.registerComponent('camrender',{
     }
 });
 
+AFRAME.registerComponent('canvas-updater', {
+    dependencies: ['geometry', 'material'],
+
+    tick: function () {
+	    var el = this.el;
+	    var material;
+
+	    material = el.getObject3D('mesh').material;
+	    if (!material.map) { return; }
+        material.map.needsUpdate = true;
+    }
+});
 
 AFRAME.registerComponent('draw-canvas-rectangles', {
   schema: {canvas: {type: 'selector'}},

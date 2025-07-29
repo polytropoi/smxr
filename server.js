@@ -6726,61 +6726,63 @@ app.get('/available_domain_scenes/:domain',  function (req, res) { //public scen
                         var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]);
                         const postcardquery = {"_id": oo_id};
                         const picture_item = await RunDataQuery("image_items", "findOne", postcardquery);
-                        var item_string_filename = JSON.stringify(picture_item.filename);
-                        item_string_filename = item_string_filename.replace(/\"/g, "");
-                        var item_string_filename_ext = getExtension(item_string_filename);
-                        var expiration = new Date();
-                        expiration.setMinutes(expiration.getMinutes() + 30);
-                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                        // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
-                        // var standardName = 'standard.' + baseName + item_string_filename_ext;
-                        var halfName = 'half.' + baseName + item_string_filename_ext;
-                        var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-                        var originalName = 'original.' + baseName + item_string_filename_ext;
-                        const urlOrig = "";
-                        const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
-                        const urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
-                        availableScene = {
-                            sceneTitle: scene.sceneTitle,
-                            sceneKey: scene.short_id,
-                            sceneType: scene.sceneType,
-                            sceneWebType: scene.sceneWebType,
-                            sceneAltURL: scene.sceneAltURL,
-                            sceneLastUpdate: scene.sceneLastUpdate,
-                            sceneDescription: scene.sceneDescription,
-                            sceneKeynote: scene.sceneKeynote,
-                            sceneCategory: scene.sceneCategory,
-                            sceneSource: scene.sceneSource,
-                            sceneTags: scene.sceneTags,
-                            sceneWebGLOK: scene.sceneWebGLOK,
-                            sceneAndroidOK: scene.sceneAndroidOK,
-                            sceneIosOK: scene.sceneIosOK,
-                            sceneWindowsOK: scene.sceneWindowsOK,
-                            sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-                            sceneOwner: scene.userName,
-                            scenePostcardQuarter: urlQuarter,
-                            scenePostcardHalf: urlHalf,
-                            scenePostcardOriginal: urlOrig
-                        };
-                        //nope, the domain pages don't use the audiolink...
-                        // if (scene.scenePrimaryAudioID != null && scene.scenePrimaryAudioID != "" && scene.scenePrimaryAudioID.length > 8) {
-                        //     var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID );
-                        //     const query = {"_id": o_id};
-                        //     const audio_item = await RunDataQuery("audio_items", "findOne", query);
-                        //     var item_string_filename = JSON.stringify(audio_item.filename);
-                            
-                        //     item_string_filename = item_string_filename.replace(/\"/g, "");
-                        //     var item_string_filename_ext = getExtension(item_string_filename);
-                        //     var expiration = new Date();
-                        //     expiration.setMinutes(expiration.getMinutes() + 1000);
-                        //     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-                            
-                        //     var mp3Name = baseName + '.mp3';
-                            
-                        //     const primaryAudioUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name,6000);
-                        //     availableScene.primaryAudioUrl = primaryAudioUrl;
-                        // }
-                        availableScenesResponse.availableScenes.push(availableScene);
+                        if (picture_item) {
+                            var item_string_filename = JSON.stringify(picture_item.filename);
+                            item_string_filename = item_string_filename.replace(/\"/g, "");
+                            var item_string_filename_ext = getExtension(item_string_filename);
+                            var expiration = new Date();
+                            expiration.setMinutes(expiration.getMinutes() + 30);
+                            var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                            // var thumbName = 'thumb.' + baseName + item_string_filename_ext;  //unused for now
+                            // var standardName = 'standard.' + baseName + item_string_filename_ext;
+                            var halfName = 'half.' + baseName + item_string_filename_ext;
+                            var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+                            var originalName = 'original.' + baseName + item_string_filename_ext;
+                            const urlOrig = "";
+                            const urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+                            const urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+                            availableScene = {
+                                sceneTitle: scene.sceneTitle,
+                                sceneKey: scene.short_id,
+                                sceneType: scene.sceneType,
+                                sceneWebType: scene.sceneWebType,
+                                sceneAltURL: scene.sceneAltURL,
+                                sceneLastUpdate: scene.sceneLastUpdate,
+                                sceneDescription: scene.sceneDescription,
+                                sceneKeynote: scene.sceneKeynote,
+                                sceneCategory: scene.sceneCategory,
+                                sceneSource: scene.sceneSource,
+                                sceneTags: scene.sceneTags,
+                                sceneWebGLOK: scene.sceneWebGLOK,
+                                sceneAndroidOK: scene.sceneAndroidOK,
+                                sceneIosOK: scene.sceneIosOK,
+                                sceneWindowsOK: scene.sceneWindowsOK,
+                                sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+                                sceneOwner: scene.userName,
+                                scenePostcardQuarter: urlQuarter,
+                                scenePostcardHalf: urlHalf,
+                                scenePostcardOriginal: urlOrig
+                            };
+                            //nope, the domain pages don't use the audiolink...
+                            // if (scene.scenePrimaryAudioID != null && scene.scenePrimaryAudioID != "" && scene.scenePrimaryAudioID.length > 8) {
+                            //     var o_id = ObjectId.createFromHexString(scene.scenePrimaryAudioID );
+                            //     const query = {"_id": o_id};
+                            //     const audio_item = await RunDataQuery("audio_items", "findOne", query);
+                            //     var item_string_filename = JSON.stringify(audio_item.filename);
+                                
+                            //     item_string_filename = item_string_filename.replace(/\"/g, "");
+                            //     var item_string_filename_ext = getExtension(item_string_filename);
+                            //     var expiration = new Date();
+                            //     expiration.setMinutes(expiration.getMinutes() + 1000);
+                            //     var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                                
+                            //     var mp3Name = baseName + '.mp3';
+                                
+                            //     const primaryAudioUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME,"users/" + audio_item.userID + "/audio/" + audio_item._id + "." + mp3Name,6000);
+                            //     availableScene.primaryAudioUrl = primaryAudioUrl;
+                            // }
+                            availableScenesResponse.availableScenes.push(availableScene);
+                        }
                     } else {
                         console.log("availahle scene needs a postcard ! " + scene.short_id);
                     }
