@@ -4,12 +4,12 @@ import { Viewport } from 'pixi-viewport';
 import { Button, ButtonContainer } from '@pixi/ui';
 
 // import { LayoutSystem } from '@pixi/layout';
-import { addBackground, addMap } from './addBackground.mjs';
+import { addBackground, addMap, addBackgroundVideo } from './addBackground.mjs';
 import { addText, addPlayerProfileText } from './addText.mjs';
 import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
-import { ReturnMap, ReturnBackground, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
+import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
 import { ReturnAudioGroupsData } from '../connect/media.js';
 import { settings, profile } from '../connect/settings.js';
 
@@ -35,6 +35,8 @@ const fishes = [];
 let elements = [];
 export let mappicURL;
 let backgroundURL;
+export let backgroundVideoURL;
+let bgvideoTexture;
 let spritesData;
 let audioGroupsData;
 let textData;
@@ -71,7 +73,8 @@ function onResize () {
 
 async function setup() {
   // Intialize the application.
-  await app.init({ background: '#243a54', resizeTo: window });
+  console.log("background color " + settings.sceneColor1);
+  await app.init({ background: '#000000', resizeTo: window });
   
 
   app.stage.layout = {
@@ -92,6 +95,8 @@ async function prePreLoader () {
   }
   backgroundURL = await ReturnBackground();
   console.log("backgroundURL " + backgroundURL);
+  backgroundVideoURL = await ReturnBackgroundVideo();
+    console.log("backgroundVideoURL " + settings.backgroundVideoURL);
   spritesData = await ReturnSprites();
   audioGroupsData = await ReturnAudioGroupsData();
   console.log("audioGroupsData " + JSON.stringify(audioGroupsData));
@@ -103,7 +108,9 @@ async function prePreLoader () {
   pictureGroupsData = await ReturnPictureGroups();
   locationData = await ReturnLocations();
   
-  console.log("locationData " + JSON.stringify(locationData));
+// app.renderer.background.color = settings.sceneColor1;
+
+  console.log("sceneColor1 " + settings.sceneColor1);
   let interval = setInterval(() => { //wait a shake for iDB to get localprofile..
     if (profile) {
       playerProfileLoaded(profile)
@@ -112,6 +119,8 @@ async function prePreLoader () {
       console.log("no profile yet...");
     }
   }, 1000); 
+
+
 }
 
 
@@ -126,6 +135,7 @@ async function preload() {
 
   const assets = [
     { alias: 'background', src: backgroundURL, crossOrigin: 'anonymous' },
+    { alias: 'backgroundVideo', src: backgroundVideoURL, crossOrigin: 'anonymous' },
     { alias: 'map', src: mappicURL, crossOrigin: 'anonymous' },
     // { alias: 'fish1', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish1.png' },
     // { alias: 'fish2', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish2.png' },
@@ -140,6 +150,7 @@ async function preload() {
     assets.push({ alias: 'sprite1', src: spritesData[0].meta.image, crossOrigin: 'anonymous' });
   } 
 
+
   if (scenePicturesData && scenePicturesData.length) {
     for (let i = 0; i < scenePicturesData.length; i++) {
       // if (scenePicturesData[i].tags && scenePicturesData[i].tags.includes("logo")) {
@@ -152,6 +163,12 @@ async function preload() {
 
  
   await Assets.load(assets);
+
+  // if (backgroundVideoURL) {
+  //   bgvideoTexture = await Assets.load(backgroundVideoURL);     
+  //   bgvideoTexture.baseTexture.resource.source.loop = true;
+  // }
+
 }
 
 
@@ -163,8 +180,9 @@ export async function GoWithIt() { //called from vtt.js
   await setup();
   await prePreLoader();
   await preload();
-
-  if (mappicURL) {
+  console.log("sceneColor1 " + settings.sceneColor1 );
+  app.renderer.background.color = settings.sceneColor1;
+  if (mappicURL || backgroundVideoURL) {
 
     viewport = new Viewport({
       screenWidth: window.innerWidth,
@@ -192,7 +210,7 @@ export async function GoWithIt() { //called from vtt.js
         .wheel()
         .decelerate();
 
-    viewport.zoomPercent(.75, true);    
+
   } else {
     //no viewport, normal background
   }
@@ -202,6 +220,10 @@ export async function GoWithIt() { //called from vtt.js
   }
   if (mappicURL) {
     addMap(app, viewport, spritesContainer);
+  }
+  if (backgroundVideoURL) {
+    console.log("gotsa backgroundVideoURL "+ backgroundVideoURL);
+    addBackgroundVideo(app, viewport, spritesContainer);
   }
 
   if (locationData) {

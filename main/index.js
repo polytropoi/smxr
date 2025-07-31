@@ -6704,6 +6704,8 @@
         if (cid != "") {
             ipfsLink = " | <a href=\x22https://ipfs.io/ipfs/"+cid+"\x22>IPFS CID: "+cid+"</a>";
         }
+
+
         var card = "<div class=\x22col-lg-12\x22>" +
             "<div class=\x22card shadow mb-4\x22>" +
                 "<div class=\x22card-header py-3 d-flex flex-row align-items-center justify-content-between\x22>" +
@@ -6843,7 +6845,8 @@
                             "<div class=\x22\x22><label for=\x22Public\x22>Share with Public</label><br>" + //public
                             "<input type=\x22checkbox\x22  id=\x22isPublic\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
                         "</div>" + 
-                        "<div class=\x22col form-group col-md-8\x22>" + 
+                         "<div id=\x22videoStats\x22 class=\x22col form-group col-md-4\x22></div>" +
+                        "<div class=\x22col form-group col-md-10\x22>" + 
                             "<div class=\x22embed-responsive embed-responsive-16by9\x22><video id=\x22selectedVideo\x22 crossorigin=\x22anonymous\x22 class=\x22embed-responsive-item\x22 controls>" +
                                 // "<source src=/hls/" + response.data._id + " type='application/x-mpegURL'>" +
                                 "<source src=" + response.data.URLvid + " type='video/mp4'>" +
@@ -6877,6 +6880,8 @@
                 "</div>" +
             "</div>" +
             "</div>";
+
+
 
             $("#cardrow").html(card);
             $('#orientation').find('option').each(function(i,e){
@@ -7002,6 +7007,23 @@
                         $("#tk_type_" + i).val(timekeys[i].keytype).change();
                     }
                 });
+
+            var v = document.getElementById("selectedVideo");
+            v.addEventListener( "loadedmetadata", function (e) {
+                //  const file = e.target.files[0];
+                // if (file) {
+                //     const fileSizeInBytes = file.size;
+                //     const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2); // Convert to MB and format
+                //     document.getElementById('fileSizeDisplay').textContent = `File size: ${fileSizeInMB} MB`;
+                // }
+                var width = this.videoWidth,
+                    height = this.videoHeight;
+                const videoStats = "video resolution is " + width + " x " + height + " aspect ratio " + calculateAspectRatio(width, height) + " filesize " + (response.data.ofilesize / (1024 * 1024)).toFixed(1) + " mb";
+                    console.log(videoStats);
+                    document.getElementById("videoStats").innerText = videoStats;
+
+            }, false );
+
                 $(document).on('click', '#grabVideoFrame', function (e) {
                     e.preventDefault(); 
                     // let sourceImage = document.getElementById('sky').getAttribute("src");
@@ -18380,6 +18402,13 @@ function getAllPeople() {
         });
 
     } 
+
+    function calculateAspectRatio(width, height) {
+        const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+        const commonDivisor = gcd(width, height);
+        return `${width / commonDivisor}:${height / commonDivisor}`;
+    }
+
     function convertTimestamp(unixtimestamp){
         var months_arr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         var date = new Date(unixtimestamp*1000);

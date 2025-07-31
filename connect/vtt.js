@@ -74,6 +74,7 @@ export let sceneModels = [];
 
 export let mappicURL;
 export let backgroundURL;
+export let backgroundVideoURL;
 
 let localKeys = [];
 
@@ -154,12 +155,26 @@ $(function() {
 
    }
 
+   let videoGroupsDataEl = document.getElementById('videoGroupsData');
+   if (videoGroupsDataEl) {
+      let theVideoGroupsData = videoGroupsDataEl.getAttribute('data-video-groups');
+      videoGroupsData = JSON.parse(atob(theVideoGroupsData));
+   }
+
+   let sceneVideoDataEl = document.getElementById('sceneVideoData');
+   if (sceneVideoDataEl) {
+      let theSceneVideoData = sceneVideoDataEl.getAttribute('data-scene-video');
+      sceneVideoData = JSON.parse(atob(theSceneVideoData));
+
+   }
+
+
    let locationDataEl = document.getElementById('locationData');
    if (locationDataEl) {
       let theLocationData = locationDataEl.getAttribute('data-locations');
 
       locationData = JSON.parse(atob(theLocationData));
-      console.log("locationData " + JSON.stringify(locationData));
+      // console.log("locationData " + JSON.stringify(locationData));
 
    }
 
@@ -271,10 +286,12 @@ $(function() {
     console.log("settings " + JSON.stringify(settings));
     console.log("sprites " + JSON.stringify(sprites));
     console.log("scenepictures " + JSON.stringify(scenePicturesData));
+        console.log("background video " + settings.backgroundVideoURL);
 
     mappicURL = settings.mappicURL;
     backgroundURL = settings.backgroundURL;
-    if (mappicURL || backgroundURL) {
+    backgroundVideoURL = settings.backgroundVideoURL;
+    if (mappicURL || backgroundURL || backgroundVideoURL) {
         GoWithIt();
     }
    if (settings.useMatrix) {
@@ -381,6 +398,11 @@ export async function ReturnBackground () {
     await settings;
     console.log("tryna return backgroundURL " + settings.backgroundURL);
     return settings.backgroundURL;
+}
+export async function ReturnBackgroundVideo () {
+    await settings;
+    console.log("tryna return backgroundVideoURL " + settings.backgroundVideoURL);
+    return settings.backgroundVideoURL;
 }
 
 export async function ReturnText () {

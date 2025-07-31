@@ -488,7 +488,7 @@ $(function() {
 // }
 
 export function SetPlayerToLastPosition () {
-   if (profile.history && profile.history.init_scene && profile.history.init_scene[room] && profile.history.init_scene[room].lastPosition) {         
+   if (player && profile.history && profile.history.init_scene && profile.history.init_scene[room] && profile.history.init_scene[room].lastPosition) {         
       player.setAttribute("position", profile.history.init_scene[room].lastPosition);
       player.setAttribute("rotation", profile.history.init_scene[room].lastRotation);
       UpdatePlayerAvatars();
