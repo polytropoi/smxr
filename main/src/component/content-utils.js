@@ -316,13 +316,23 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
         const geometry = new THREE.PlaneGeometry( modWidth, modHeight );
         const material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.FrontSide, map: texture} );
         const plane = new THREE.Mesh( geometry, material );
-        const vttPlaneEl = document.createElement("a-entity");
 
+        const size = modWidth;
+        const divisions = modHeight;
+        const gridHelper = new THREE.GridHelper(size, divisions);
+        const vttPlaneEl = document.createElement("a-entity");
+        const vttGrid = document.createElement("a-entity");
+        vttGrid.setObject3D('mesh', gridHelper);
         // vttPlaneEl.object3D = plane;
         vttPlaneEl.setObject3D('mesh', plane);
+
         sceneEl.appendChild(vttPlaneEl); 
-        vttPlaneEl.setAttribute("position", "0 .1 0");
+
+        vttPlaneEl.setAttribute("position", "0 0 0");
         vttPlaneEl.setAttribute("rotation", "-90 0 0");
+                // vttGrid.setAttribute("rotation", "-90 0 0");
+              vttGrid.setAttribute("position", "0 .1 0");
+                      sceneEl.appendChild(vttGrid);
         vttPlaneEl.id = "vttPlane";
         backgroundVideoEl.play();
 
