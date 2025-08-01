@@ -14,6 +14,7 @@ let triggerAudioHowl;
 let mainTransportSlider = null;
 let transportPlayButton = null;
 let youtubePlayerEl = document.getElementById("youtubePlayer");
+let youtubeParentEl = document.getElementById("youtubeParent");
 let youtube_player; //3d version
 let youtubeTime = 0;
 let youtubeDuration = 0;
@@ -77,6 +78,12 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
       if (!youtube_player && youtubePlayerEl) {
         youtube_player = youtubePlayerEl.components.youtube_player;
         youtubeTitleEl = document.getElementById("youtubeTitle");
+        if (settings.sceneTags && settings.sceneTags.includes("hide youtube")) {
+          youtubeParentEl.setAttribute("visible", false);
+          // youtubeTitleEl.setAttribute("visible", false);
+          youtubeParentEl.classList.remove("activeObjexRay");
+          youtubeParentEl.setAttribute("position", "0 -100 0");
+        }
       }
     }
   }

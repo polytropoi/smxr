@@ -255,17 +255,16 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
             console.log("tryna remove redundant a-sky");
             // this.asky[i].remove();
             
+            }
+          }
+          if (settings.sceneGroundLevel != 0) {
+            // let enviroEl = document.getElementById("enviroEl");
+            // if (enviroEl) {
+              this.asky[i].setAttribute("position", {x: 0, y: settings.sceneGroundLevel * -1, z: 0});
+            // }
           }
         }
-        if (settings.sceneGroundLevel != 0) {
-          // let enviroEl = document.getElementById("enviroEl");
-          // if (enviroEl) {
-            this.asky[i].setAttribute("position", {x: 0, y: settings.sceneGroundLevel * -1, z: 0});
-          // }
-        }
-
-          }
-        }
+      }
 
         
       // }
@@ -296,6 +295,37 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
         if (skyboxDynamicComponent) {
           skyEl.components.skybox_dynamic.initMe();
         }
+      }
+
+      const backgroundVideoEl = document.getElementById("bgVideo");
+              // console.log("GOTSA BACKGROUND VIDEO!@" + backgroundVideoEl);
+      if (backgroundVideoEl) {
+        console.log("GOTSA BACKGROUND VIDEO!@");
+        const texture = new THREE.VideoTexture( backgroundVideoEl );
+
+        const width = backgroundVideoEl.videoWidth;
+        const height = backgroundVideoEl.videoHeight;
+
+        const modWidth = width / 64;
+        const modHeight= height / 64;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+                
+            // texture.flipY = this.data.flipY; 
+        texture.colorSpace = THREE.SRGBColorSpace;
+        const geometry = new THREE.PlaneGeometry( modWidth, modHeight );
+        const material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.FrontSide, map: texture} );
+        const plane = new THREE.Mesh( geometry, material );
+        const vttPlaneEl = document.createElement("a-entity");
+
+        // vttPlaneEl.object3D = plane;
+        vttPlaneEl.setObject3D('mesh', plane);
+        sceneEl.appendChild(vttPlaneEl); 
+        vttPlaneEl.setAttribute("position", "0 .1 0");
+        vttPlaneEl.setAttribute("rotation", "-90 0 0");
+        vttPlaneEl.id = "vttPlane";
+        backgroundVideoEl.play();
+
       }
       // this.el.addEventListener('obbcollisionstarted	', (evt) => {
       //   console.log("obb player hit : " + evt.target.withEl.id);

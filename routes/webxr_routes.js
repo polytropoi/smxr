@@ -295,6 +295,7 @@ webxr_router.get('/:_id', function (req, res) {
     let videoGroupsEntity = "";
     let videoElements = "";
     let hlsScript = "";
+    let bgVideoEl = "";
     // let loadPictureGroups = "";
     let tilepicUrl = "";
    
@@ -1217,7 +1218,7 @@ webxr_router.get('/:_id', function (req, res) {
                 ///////////////// - Orbit camera - /////////////////
                 } else if (sceneResponse.sceneCameraMode != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase().includes("orbit")) { //hrm..
                     wasd = "";
-                    cameraRigEntity = "<a-entity camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; enablePan: true; screenSpacePanning: true; minDistance: 0.5; maxDistance: 180; initialPosition: "+playerPosition+"\x22>"+
+                    cameraRigEntity = "<a-entity initializer camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; enablePan: true; screenSpacePanning: true; minDistance: 0.5; maxDistance: 90; initialPosition: "+playerPosition+"\x22>"+
                     "<a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
                     "</a-entity>";
                     joystickScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/diarmidmackenzie/superframe@fix-orbit-controls/components/orbit-controls/dist/aframe-orbit-controls.min.js\x22></script>";
@@ -2663,14 +2664,12 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                 
                 } else {
-                    //hrm, now most vids are hls, don't really need this.../// yes but TODO need to set a single vid as hls here...
-                    // if (preloadVideo) { //ugh
-                    //     videoAsset = "<video id=\x22video1\x22 crossOrigin=\x22anonymous\x22>"+vidSrc+"</video>";
-                    // } else {// still ugh
-                    //     videoAsset = "<video autoplay muted loop=\x22true\x22 webkit-playsinline playsinline id=\x22video1\x22 crossOrigin=\x22anonymous\x22></video>"; 
-                    // }
-                    // videoEntity = "<a-entity "+videoParent+" class=\x22activeObjexGrab activeObjexRay\x22 vid_materials=\x22url: "+vidUrl+"\x22 gltf-model=\x22#movieplayer2.glb\x22 position=\x22"+videoLocation+"\x22 rotation=\x22"+videoRotation+"\x22 width='10' height='6'><a-text id=\x22videoText\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x22-.5 -1 1\x22 wrapCount=\x2240\x22 value=\x22Click to Play Video\x22></a-text>" +
-                    // "</a-entity>";
+                    if (video_items[0].tags && video_items[0].tags.includes("background")) { //use for vtt
+                    
+                        // backgroundVideoURL = vidUrl;
+                        console.log(vid.tags + " backgroundVideo is " + vidUrl);
+                        bgVideoEl = "<video hidden autoplay muted loop=\x22true\x22 webkit-playsinline playsinline id=\x22bgVideo\x22 crossOrigin=\x22anonymous\x22><source src=" + vidUrl + " type=\x22video/mp4\x22/></video>"; 
+                    }
                 }
             }
             
@@ -4007,8 +4006,7 @@ webxr_router.get('/:_id', function (req, res) {
                         activityPubScripts +
                         sceneManglerButtons +
                         videoElements +
-
-
+                        bgVideoEl +
 
                         "</body>" +
                     "</html>";
