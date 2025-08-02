@@ -4,7 +4,7 @@ import { Viewport } from 'pixi-viewport';
 import { Button, ButtonContainer } from '@pixi/ui';
 
 // import { LayoutSystem } from '@pixi/layout';
-import { addBackground, addMap, addBackgroundVideo } from './addBackground.mjs';
+import { addBackground, addMap, addBackgroundVideo, addBackgroundPictures } from './addBackground.mjs';
 import { addText, addPlayerProfileText } from './addText.mjs';
 import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
@@ -41,8 +41,10 @@ let spritesData;
 let audioGroupsData;
 let textData;
 let scenePicturesData;
-let pictureGroupsData;
+export let pictureGroupsData;
 let locationData;
+
+let hasBackgroundPictureGroup = false;
 // let profile;
 
 // let sprites
@@ -104,8 +106,9 @@ async function prePreLoader () {
   console.log("text " + JSON.stringify(textData));
 
   scenePicturesData = await ReturnScenePictures();
-  console.log("scenePicturesData " + scenePicturesData);
-  pictureGroupsData = await ReturnPictureGroups();
+  // console.log("scenePicturesData " + scenePicturesData);
+  // pictureGroupsData = await ReturnPictureGroups();
+  console.log("pictureGroups " + pictureGroupsData);
   locationData = await ReturnLocations();
   
 // app.renderer.background.color = settings.sceneColor1;
@@ -120,6 +123,13 @@ async function prePreLoader () {
     }
   }, 1000); 
 
+   let picGroupMgr = document.getElementById("pictureGroupsData");
+    if (picGroupMgr) {
+      let theData = picGroupMgr.getAttribute('data-picture-groups');
+      pictureGroupsData = JSON.parse(atob(theData)); //convert from base64
+      // console.log("pictureGroups data :" +JSON.stringify(pictureGroupsData));  
+     console.log("pictureGroups " + JSON.stringify(pictureGroupsData));
+    }
 
 }
 
@@ -159,6 +169,16 @@ async function preload() {
       // } 
     }
   }
+  if (pictureGroupsData && pictureGroupsData[0].images.length) {
+    if (pictureGroupsData[0].tags.includes("background") ) {
+      hasBackgroundPictureGroup = true;
+    for (let i = 0; i < pictureGroupsData[0].images.length; i++) {
+      // if (scenePicturesData[i].tags && scenePicturesData[i].tags.includes("logo")) {
+      console.log("add grouppicture to assets " + pictureGroupsData[0].images[i]._id + " " + pictureGroupsData[0].images[i].url);
+        assets.push({ alias: pictureGroupsData[0].images[i]._id, src: pictureGroupsData[0].images[i].url, crossOrigin: 'anonymous'});
+      } 
+    }
+  }
   // Load the assets defined above.
 
  
@@ -182,7 +202,7 @@ export async function GoWithIt() { //called from vtt.js
   await preload();
   console.log("sceneColor1 " + settings.sceneColor1 );
   app.renderer.background.color = settings.sceneColor1;
-  if (mappicURL || backgroundVideoURL) {
+  if (mappicURL || backgroundVideoURL || hasBackgroundPictureGroup) {
 
     viewport = new Viewport({
       screenWidth: window.innerWidth,
@@ -216,7 +236,6 @@ export async function GoWithIt() { //called from vtt.js
   }
   if (backgroundURL) {
     addBackground(app, null, false);
-
   }
   if (mappicURL) {
     addMap(app, viewport, spritesContainer);
@@ -224,6 +243,10 @@ export async function GoWithIt() { //called from vtt.js
   if (backgroundVideoURL) {
     console.log("gotsa backgroundVideoURL "+ backgroundVideoURL);
     addBackgroundVideo(app, viewport, spritesContainer);
+  }
+
+  if (hasBackgroundPictureGroup) {
+    addBackgroundPictures(app, viewport, spritesContainer);
   }
 
   if (locationData) {

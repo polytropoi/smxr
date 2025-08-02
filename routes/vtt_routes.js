@@ -2550,7 +2550,8 @@ vtt_router.get('/:_id', function (req, res) {
             "<div id=\x22locations_dialog_button\x22 style=\x22float:right; margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-globe \x22></i></div>"+
             "<div id=\x22tools_dialog_button\x22 style=\x22float:right; margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-tools \x22></i></div>"+
             "<div id=\x22inventory_dialog_button\x22 style=\x22float:right;margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-suitcase \x22></i></div>"+
-            "<div id=\x22messages_dialog_button\x22 style=\x22float:right;margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-comments \x22></i></div></div><br><hr>"+
+            "<div id=\x22messages_dialog_button\x22 style=\x22float:right;margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-comments \x22></i></div>" +
+            "<div id=\x22welcome_dialog_button\x22 style=\x22float:right;margin: 5px 10px 5px; 0px;\x22 ><i class=\x22fas fa-user \x22></i></div></div><br><hr>"+
             mapStyleSelector +
             "</div>"+
             "<div>"+
@@ -2593,6 +2594,8 @@ vtt_router.get('/:_id', function (req, res) {
                         picGroup._id = group._id;
                         picGroup.name = group.name;
                         picGroup.userID = group.userID;
+                        picGroup.tags = group.tags;
+                        picGroup.items = group.items;
                         let p_ids = [];
                         if (Array.isArray(group.items)) {
                             p_ids = group.items.map(convertStringToObjectID);

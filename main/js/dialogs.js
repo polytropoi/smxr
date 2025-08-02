@@ -2033,6 +2033,7 @@ export function ShowInventoryItem(objectID) {
 // }
 
 function GreetingModal() {
+  
   let content = document.getElementById(modalContentElID);
   let userName = document.getElementById('userName').innerHTML;
   let greeting = document.getElementById('sceneGreeting').innerHTML;
@@ -2045,8 +2046,7 @@ export function SceneManglerModal(mode, autoHide) {
 
     // ClearInputs();
     console.log("opening SceneManglerModal with location " + selectedLocationTimestamp);
-    
-    
+        
     if (localData.settings.sceneColor1) {
       settings.sceneColor1 = localData.settings.sceneColor1;
     } else {
@@ -2163,7 +2163,7 @@ export function SceneManglerModal(mode, autoHide) {
       let userString = profile.isGuest ? "Unregistered guest" : "Registered user";
       let lastVisit = "first visit to this scene!";
       if (profile.history.init_scene[room]) {
-        lastVisit = profile.history.init_scene[room].count + " total visits to this scene, most recently : " + new Date(profile.history.init_scene[room].lastTimestamp);
+        lastVisit = profile.history.init_scene[room].count + " total visits to this scene, most recently : " + new Date(profile.history.init_scene[room].lts);
       }
       let content = "<span id='modalCloser' class='close-modal'>&times;</span>" +
                   "<div><span id=\x22modalTitle\x22><h3>Scene Mangler</h3></span>" + //populate modal

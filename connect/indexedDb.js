@@ -411,11 +411,11 @@ export function InitIDB() {
                            console.log("tryna put event into history " + JSON.stringify(updoc.events[i]));
                            if (!updoc.history.init_scene[updoc.events[i].id]) {
                               updoc.history.init_scene[updoc.events[i].id] = {};
-                              updoc.history.init_scene[updoc.events[i].id].firstTimestamp = timestamp;
-                              updoc.history.init_scene[updoc.events[i].id].lastTimestamp = timestamp;
+                              updoc.history.init_scene[updoc.events[i].id].ots = timestamp;
+                              updoc.history.init_scene[updoc.events[i].id].lts = timestamp;
                               updoc.history.init_scene[updoc.events[i].id].count = 1;
                            } else {
-                              updoc.history.init_scene[updoc.events[i].id].lastTimestamp = timestamp;
+                              updoc.history.init_scene[updoc.events[i].id].lts = timestamp;
                               updoc.history.init_scene[updoc.events[i].id].count = updoc.history.init_scene[updoc.events[i].id].count + 1;
                            }
                         }

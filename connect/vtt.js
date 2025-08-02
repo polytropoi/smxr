@@ -209,91 +209,24 @@ $(function() {
 
    $('#room_id').append($('<button><h4><strong>').text("Welcome to scene " + room).append("</strong></h4></button>"));
 
-
-
-//    if (settings && settings.mappicURL) {
-    
-
-//    }
-//    if (settings.sceneType == "Default" || settings.sceneType == "AFrame" || settings.sceneType == "default" || settings.sceneType == "aframe") {
-//       // window.sceneType == "aframe";
-//       if (settings.hideAvatars) {
-//          player.setAttribute("player_mover", "init", true);
-//          EmitSelfPosition();
-//       }
-//       posRotReader = document.getElementById("player").components.get_pos_rot; 
-//       if (player != null) {
-//          player.setAttribute("player_mover", "init", true);
-//       }
-//       let modelDataEl = document.getElementById('sceneModels');
-//       if (modelDataEl) {
-//          let modelData = modelDataEl.getAttribute('data-models');
-//          sceneModels = JSON.parse(atob(modelData)); //convert from base64
-//          // console.log("sceneModels " + JSON.stringify(sceneModels));
-//          for (let i = 0; i < sceneModels.length; i++) {
-//             if (sceneModels[i].sourceText != undefined && sceneModels[i].sourceText != 'undefined' && sceneModels[i].sourceText != null && sceneModels[i].sourceText.length > 0) {
-//                attributions.push("Name: " + sceneModels[i].name + " - Type: " + sceneModels[i].item_type + " - Source: " + sceneModels[i].sourceText);
-//             }
-//          }
-//       }
-//       // console.log("settings: " + JSON.stringify(settings));
-//       if (settings.skyboxIDs != null && settings.skyboxIDs.length > 0) {
-         
-//          // skyboxEl = document.createElement('a-entity');
-//          // sceneEl = document.querySelector('a-scene');
-//          // skyboxEl.setAttribute('skybox_dynamic', {enabled: true, id: settings.skyboxIDs[0]});
-//          // skyboxEl.id = 'skybox_dynamic';
-//          // sceneEl.appendChild(skyboxEl);
-         
-//       }
-   
-//       if (settings.skyboxID == "") {
-//          // skyboxEl.components.skybox_dynamic.nextSkybox();
-//       }
-//     //   if (settings.audioGroups && settings.audioGroups.objectGroups && settings.audioGroups.objectGroups.length > 0 || 
-//     //      settings.audioGroups && settings.audioGroups.triggerGroups && settings.audioGroups.triggerGroups.length > 0 || 
-//     //      settings.audioGroups && settings.audioGroups.ambientGroups && settings.audioGroups.ambientGroups.length > 0 ||
-//     //      settings.audioGroups && settings.audioGroups.primaryGroups &&  settings.audioGroups.primaryGroups.length > 0) {
-//     //      // audioGroupsEl = document.getElementById('audioGroupsEl');
-//     //      // if (audioGroupsEl != null) {
-//     //      //    let audioGroupsController = audioGroupsEl.components.audio_groups_control;
-//     //      //    if (audioGroupsController != null) {
-//     //      //       audioGroupsController.LoadAudioGroups(settings.audioGroups);
-//     //      //    }
-//     //      // }
-//     //      // audioGroupsEl.components.audio_groups_control.LoadAudioGroups(settings.audioGroups);
-//     //      let audioGroupsEl = document.createElement('a-entity');
-//     //      audioGroupsEl.setAttribute("id","audioGroupsEl");
-//     //      audioGroupsEl.setAttribute("audio_groups_control", {init: ''});
-//     //      sceneEl.appendChild(audioGroupsEl);
-//     //   }
-//    } else {
-    //   console.log("not aframe or default scenetype!");
-      // GetTextItems(); //only for plain pages or text adventure, scene_text_control fetches for aframe
-
-      // if (settings.sceneType == "landing") {
-      //    if (settings.sceneTags && settings.sceneTags.includes("landing pics")) {
-            let picGroupMgr = document.getElementById("pictureGroupsData");
-            if (picGroupMgr) {
-               let theData = picGroupMgr.getAttribute('data-picture-groups');
-               pictureGroupsData = JSON.parse(atob(theData)); //convert from base64
-               console.log("pictureGroups data :" +JSON.stringify(pictureGroupsData));
-              
-            }
-      //    }
-      // } else if (settings.sceneType)
-   
+   // let picGroupMgr = document.getElementById("pictureGroupsData");
+   // if (picGroupMgr) {
+   //    let theData = picGroupMgr.getAttribute('data-picture-groups');
+   //    pictureGroupsData = JSON.parse(atob(theData)); //convert from base64
+   //    // console.log("pictureGroups data :" +JSON.stringify(pictureGroupsData));  
+   // }
     console.log("settings " + JSON.stringify(settings));
     console.log("sprites " + JSON.stringify(sprites));
     console.log("scenepictures " + JSON.stringify(scenePicturesData));
+      //   console.log("picturegroups " + JSON.stringify(pictureGroupsData));
         console.log("background video " + settings.backgroundVideoURL);
 
     mappicURL = settings.mappicURL;
     backgroundURL = settings.backgroundURL;
     backgroundVideoURL = settings.backgroundVideoURL;
-    if (mappicURL || backgroundURL || backgroundVideoURL) {
+   //  if (mappicURL || backgroundURL || backgroundVideoURL) {
         GoWithIt();
-    }
+   //  }
    if (settings.useMatrix) {
       console.log("Loading browser MATRIX sdk!!!");
       GetMatrixData();
@@ -306,8 +239,6 @@ $(function() {
       console.log("TRYNA INIT LIVEKIT");
       // InitLiveKit();
    }
-
-
 
    if (settings.sceneType == "Video Landing" && settings.sceneVideoStreams && settings.sceneVideoStreams.length) {
       SetVideoEventsData();
@@ -419,6 +350,7 @@ export async function ReturnScenePictures () {
 
 export async function ReturnPictureGroups () {
    await pictureGroupsData;
+            console.log("scenePicturesData " + JSON.stringify(pictureGroupsData));
    return pictureGroupsData;
 }
 
