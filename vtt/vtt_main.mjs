@@ -16,6 +16,8 @@ import { settings, profile } from '../connect/settings.js';
 // Create a PixiJS application.
 export const app = new Application();
 let viewport;
+export let viewportVerticalCenter = 2; //i.e. /2 = center
+export let viewportHorizontalCenter = 2; //i.e. /2 = center
 const spritesContainer = new Container();
 const spriteLayer = new RenderLayer();
 const uicontainer = new Container( {layout: {
@@ -50,6 +52,26 @@ let hasBackgroundPictureGroup = false;
 // let sprites
 
 
+export function SetViewportHorizontalCenter (hcenter) {
+  viewportHorizontalCenter = hcenter;
+}
+export function SetViewportVerticalCenter (vcenter) {
+  viewportVerticalCenter = vcenter;
+}
+function onDragEnd (e) {
+  console.log("dragend! screen " + JSON.stringify(e.screen) + " world " + JSON.stringify(e.world) + " center " + viewportVerticalCenter);
+  // console.log(viewport.fitWorld(e.world.x, e.world.y));
+  // viewport.fitWorld();
+  viewport.animate({
+    // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+    position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
+    scale: 1.1, // Target zoom level
+    time: 1000, // Animation duration of 1 second
+    ease: 'easeInOutQuad' // Using a common easing function
+
+  });
+  
+}
 function onResize () {
 
   console.log("tryna resize..." + window.innerWidth + " " + window.innerHeight);
@@ -90,15 +112,15 @@ async function setup() {
 }
 
 async function prePreLoader () {
+  
   mappicURL = await ReturnMap();
+  // if (mappicURL) {
 
-  if (mappicURL) {
-
-  }
+  // }
   backgroundURL = await ReturnBackground();
   console.log("backgroundURL " + backgroundURL);
   backgroundVideoURL = await ReturnBackgroundVideo();
-    console.log("backgroundVideoURL " + settings.backgroundVideoURL);
+  // console.log("backgroundVideoURL " + settings.backgroundVideoURL);
   spritesData = await ReturnSprites();
   audioGroupsData = await ReturnAudioGroupsData();
   console.log("audioGroupsData " + JSON.stringify(audioGroupsData));
@@ -111,8 +133,6 @@ async function prePreLoader () {
   console.log("pictureGroups " + pictureGroupsData);
   locationData = await ReturnLocations();
   
-// app.renderer.background.color = settings.sceneColor1;
-
   console.log("sceneColor1 " + settings.sceneColor1);
   let interval = setInterval(() => { //wait a shake for iDB to get localprofile..
     if (profile) {
@@ -123,20 +143,19 @@ async function prePreLoader () {
     }
   }, 1000); 
 
-   let picGroupMgr = document.getElementById("pictureGroupsData");
-    if (picGroupMgr) {
-      let theData = picGroupMgr.getAttribute('data-picture-groups');
-      pictureGroupsData = JSON.parse(atob(theData)); //convert from base64
-      // console.log("pictureGroups data :" +JSON.stringify(pictureGroupsData));  
-     console.log("pictureGroups " + JSON.stringify(pictureGroupsData));
-    }
+  let picGroupMgr = document.getElementById("pictureGroupsData"); //hrm, should do this here for all the ones in vtt.js
+  if (picGroupMgr) {
+    let theData = picGroupMgr.getAttribute('data-picture-groups');
+    pictureGroupsData = JSON.parse(atob(theData)); //convert from base64
+    // console.log("pictureGroups data :" +JSON.stringify(pictureGroupsData));  
+    console.log("pictureGroups " + JSON.stringify(pictureGroupsData));
+  }
 
 }
 
 
 async function preload() {
 
-  // Create an array of asset data to load.
  await Assets.init({
     preferences: {
         crossOrigin: 'anonymous'
@@ -147,16 +166,11 @@ async function preload() {
     { alias: 'background', src: backgroundURL, crossOrigin: 'anonymous' },
     { alias: 'backgroundVideo', src: backgroundVideoURL, crossOrigin: 'anonymous' },
     { alias: 'map', src: mappicURL, crossOrigin: 'anonymous' },
-    // { alias: 'fish1', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish1.png' },
-    // { alias: 'fish2', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish2.png' },
-    // { alias: 'fish3', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish3.png' },
-    // { alias: 'fish4', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish4.png' },
-    // { alias: 'fish5', src: 'https://pixijs.com/assets/tutorials/fish-pond/fish5.png' },
-    { alias: 'overlay', src: 'https://pixijs.com/assets/tutorials/fish-pond/wave_overlay.png' },
-    { alias: 'displacement', src: 'https://pixijs.com/assets/tutorials/fish-pond/displacement_map.png' }
+    { alias: 'overlay', src: '/vtt/files/wave_overlay.png' },
+    { alias: 'displacement', src: '/vtt/files/displacement_map.png' }
   ];
 
-  if (spritesData && spritesData.length) {
+  if (spritesData && spritesData.length) { //must flex to +++
     assets.push({ alias: 'sprite1', src: spritesData[0].meta.image, crossOrigin: 'anonymous' });
   } 
 
@@ -172,7 +186,12 @@ async function preload() {
   if (pictureGroupsData && pictureGroupsData[0].images.length) {
     if (pictureGroupsData[0].tags.includes("background") ) {
       hasBackgroundPictureGroup = true;
+
+      if (pictureGroupsData[0].tags.includes("center down")) {
+        // viewportVerticalCenter = .75;
+      }
     for (let i = 0; i < pictureGroupsData[0].images.length; i++) {
+      
       // if (scenePicturesData[i].tags && scenePicturesData[i].tags.includes("logo")) {
       console.log("add grouppicture to assets " + pictureGroupsData[0].images[i]._id + " " + pictureGroupsData[0].images[i].url);
         assets.push({ alias: pictureGroupsData[0].images[i]._id, src: pictureGroupsData[0].images[i].url, crossOrigin: 'anonymous'});
@@ -181,13 +200,7 @@ async function preload() {
   }
   // Load the assets defined above.
 
- 
   await Assets.load(assets);
-
-  // if (backgroundVideoURL) {
-  //   bgvideoTexture = await Assets.load(backgroundVideoURL);     
-  //   bgvideoTexture.baseTexture.resource.source.loop = true;
-  // }
 
 }
 
@@ -195,20 +208,21 @@ async function preload() {
 export function playerProfileLoaded (playerProfile) {
   addPlayerProfileText(app, playerProfile, uicontainer);
 }
-// (async () => {
+
 export async function GoWithIt() { //called from vtt.js
   await setup();
   await prePreLoader();
   await preload();
   console.log("sceneColor1 " + settings.sceneColor1 );
   app.renderer.background.color = settings.sceneColor1;
-  if (mappicURL || backgroundVideoURL || hasBackgroundPictureGroup) {
+  if (mappicURL || backgroundVideoURL || hasBackgroundPictureGroup) { // just use a tag
 
     viewport = new Viewport({
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
       worldWidth: 1000,
       worldHeight: 1000,
+      disableOnContextMenu: true,
       events: app.renderer.events, 
     });
     if (app.screen.width > app.screen.height) {
@@ -219,9 +233,11 @@ export async function GoWithIt() { //called from vtt.js
       viewport.scale.x = viewport.scale.y;
     }
 
+
     viewport.x = 0;
     viewport.y = 0;
-
+    viewport.scale = 1.5
+    viewport.position = { x: 0, y: 0 }
     app.stage.addChild(viewport);
     // activate plugins
     viewport
@@ -230,7 +246,19 @@ export async function GoWithIt() { //called from vtt.js
         .wheel()
         .decelerate();
 
+  // viewport.animate({
+  //   // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+  //   position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
+  //   scale: 1.1, // Target zoom level
+  //   time: 1000, // Animation duration of 1 second
+  //   ease: 'easeInOutQuad' // Using a common easing function
 
+  // });
+
+    viewport.addEventListener("drag-end", onDragEnd);
+
+
+    // viewport.bounce();
   } else {
     //no viewport, normal background
   }
@@ -247,6 +275,22 @@ export async function GoWithIt() { //called from vtt.js
 
   if (hasBackgroundPictureGroup) {
     addBackgroundPictures(app, viewport, spritesContainer);
+    let elapsed = 0.0;
+
+    // app.ticker.add((ticker) => {
+    //     // Run every frame, delta is the time since last update
+    //     sprite.rotation += 0.1 * ticker.deltaTime;
+    // });
+    app.ticker.add((ticker) => {
+      // Add the time to our total elapsed time
+      elapsed += ticker.deltaTime;
+      console.log(elapsed);
+      if (elapsed > 300) {
+        elapsed = 0;
+        addBackgroundPictures(app, viewport, spritesContainer);
+
+      }
+    });
   }
 
   if (locationData) {
@@ -278,7 +322,6 @@ export async function GoWithIt() { //called from vtt.js
   const sprite1 = Texture.from('sprite1');
 
   // const logoSprite
-
     if (mappicURL) {
       addAnimatedSprite(app, sprite1, spritesData[0], 15, elements, viewport, spritesContainer);
     } else {

@@ -1,6 +1,6 @@
 import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, VideoSource } from 'pixi';
 // import { CompositeTilemap } from 'pixi-tilemap';
-import { mappicURL, backgroundVideoURL, pictureGroupsData } from './vtt_main.mjs';
+import { mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter } from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 
 export let mapsize = {};
@@ -222,12 +222,23 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
 export function addBackgroundPictures(app, viewport, spritesContainer) {
   
   let randomIndex = Math.floor(Math.random()*pictureGroupsData[0].items.length);
+  let id = pictureGroupsData[0].items[randomIndex];
+
+  const picdata = pictureGroupsData[0].images.find(obj => obj._id === id);
+// console.log(foundObjectByName);
+  // const picdata  = pictureGroupsData.images[id];
+  
+  console.log("picData " + JSON.stringify(picdata));
   const sprite = Sprite.from(pictureGroupsData[0].items[randomIndex]);
    spritesContainer.addChild(sprite);
-        
-    // Center background sprite anchor.
 
-    
+   if (picdata.tags.includes("center down")) {
+    SetViewportVerticalCenter(.75);
+   } else {
+    SetViewportVerticalCenter(2);
+   }
+        
+    // Center background sprite anchor.    
     /**
      * If the preview is landscape, fill the width of the screen
      * and apply horizontal scale to the vertical scale for a uniform fit.
@@ -254,6 +265,14 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
     // Add the background to the stage.
     // app.stage.addChild(map);
     viewport.addChild(spritesContainer);
+    viewport.animate({
+        // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+        position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
+        scale: 1.1, // Target zoom level
+        time: 1000, // Animation duration of 1 second
+        ease: 'easeInOutQuad' // Using a common easing function
+    
+      });
     // viewport.zoomPercent(.95, true);   
     spritesContainer.anchor = .5;
 
