@@ -38,6 +38,7 @@ let elements = [];
 export let mappicURL;
 let backgroundURL;
 export let backgroundVideoURL;
+
 let bgvideoTexture;
 let spritesData;
 let audioGroupsData;
@@ -46,7 +47,7 @@ let scenePicturesData;
 export let pictureGroupsData;
 let locationData;
 
-let hasBackgroundPictureGroup = false;
+export let hasBackgroundPictureGroup = false;
 // let profile;
 
 // let sprites
@@ -62,15 +63,17 @@ function onDragEnd (e) {
   console.log("dragend! screen " + JSON.stringify(e.screen) + " world " + JSON.stringify(e.world) + " center " + viewportVerticalCenter);
   // console.log(viewport.fitWorld(e.world.x, e.world.y));
   // viewport.fitWorld();
-  viewport.animate({
-    // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-    position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
-    scale: 1.1, // Target zoom level
-    time: 1000, // Animation duration of 1 second
-    ease: 'easeInOutQuad' // Using a common easing function
+  if (hasBackgroundPictureGroup) {
+    viewport.animate({
+      // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+      position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
+      scale: 1.1, // Target zoom level
+      time: 1000, // Animation duration of 1 second
+      ease: 'easeInOutQuad' // Using a common easing function
 
-  });
-  
+    });
+  }
+    
 }
 function onResize () {
 
@@ -187,9 +190,7 @@ async function preload() {
     if (pictureGroupsData[0].tags.includes("background") ) {
       hasBackgroundPictureGroup = true;
 
-      if (pictureGroupsData[0].tags.includes("center down")) {
-        // viewportVerticalCenter = .75;
-      }
+
     for (let i = 0; i < pictureGroupsData[0].images.length; i++) {
       
       // if (scenePicturesData[i].tags && scenePicturesData[i].tags.includes("logo")) {
@@ -246,18 +247,7 @@ export async function GoWithIt() { //called from vtt.js
         .wheel()
         .decelerate();
 
-  // viewport.animate({
-  //   // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-  //   position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
-  //   scale: 1.1, // Target zoom level
-  //   time: 1000, // Animation duration of 1 second
-  //   ease: 'easeInOutQuad' // Using a common easing function
-
-  // });
-
     viewport.addEventListener("drag-end", onDragEnd);
-
-
     // viewport.bounce();
   } else {
     //no viewport, normal background
@@ -284,7 +274,7 @@ export async function GoWithIt() { //called from vtt.js
     app.ticker.add((ticker) => {
       // Add the time to our total elapsed time
       elapsed += ticker.deltaTime;
-      console.log(elapsed);
+      // console.log(elapsed);
       if (elapsed > 300) {
         elapsed = 0;
         addBackgroundPictures(app, viewport, spritesContainer);

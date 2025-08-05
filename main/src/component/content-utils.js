@@ -319,10 +319,11 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
 
         const size = modWidth;
         const divisions = modHeight;
-        const gridHelper = new THREE.GridHelper(size, divisions);
+
+        // const gridHelper = new THREE.GridHelper(size, divisions);
         const vttPlaneEl = document.createElement("a-entity");
-        const vttGrid = document.createElement("a-entity");
-        vttGrid.setObject3D('mesh', gridHelper);
+        // const vttGrid = document.createElement("a-entity");
+        // vttGrid.setObject3D('mesh', gridHelper);
         // vttPlaneEl.object3D = plane;
         vttPlaneEl.setObject3D('mesh', plane);
 
@@ -331,8 +332,8 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
         vttPlaneEl.setAttribute("position", "0 0 0");
         vttPlaneEl.setAttribute("rotation", "-90 0 0");
                 // vttGrid.setAttribute("rotation", "-90 0 0");
-              vttGrid.setAttribute("position", "0 .1 0");
-                      sceneEl.appendChild(vttGrid);
+              // vttGrid.setAttribute("position", "0 .1 0");
+              //         sceneEl.appendChild(vttGrid);
         vttPlaneEl.id = "vttPlane";
         backgroundVideoEl.play();
 
