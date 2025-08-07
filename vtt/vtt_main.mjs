@@ -1,7 +1,7 @@
 // import '@pixi/layout'; 
 import { Application, Assets, Graphics, Texture, Container, RenderLayer, Sprite } from 'pixi';
 import { Viewport } from 'pixi-viewport';
-import { Button, ButtonContainer } from '@pixi/ui';
+
 
 // import { LayoutSystem } from '@pixi/layout';
 import { addBackground, addMap, addBackgroundVideo, addBackgroundPictures } from './addBackground.mjs';
@@ -12,6 +12,7 @@ import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverl
 import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
 import { ReturnAudioGroupsData } from '../connect/media.js';
 import { settings, profile } from '../connect/settings.js';
+import { addButtons } from './addButtons.mjs';
 
 // Create a PixiJS application.
 export const app = new Application();
@@ -78,24 +79,12 @@ function onDragEnd (e) {
 function onResize () {
 
   console.log("tryna resize..." + window.innerWidth + " " + window.innerHeight);
-  // app.resizeTo = window;
-  // viewport.resizeTo = window;
-  // Resize the pixi app's renderer
-    // app.renderer.resize(
-    //     window.innerWidth,
-    //     window.innerHeight
-    // );
-  // app.resize();
-  //       viewport.resize();
+
 
   let parent = document.getElementById("pixi-container");
   parent.style.width = window.innerWidth;
   parent.style.height = window.innerHeight;
-    // Resize the pixi viewport
-    // viewport.screenWidth = window.innerWidth;
-    // viewport.screenHeight = window.innerHeight;
-    // viewport.worldWidth,
-    // viewport.worldHeight
+
 }
 
 async function setup() {
@@ -328,71 +317,6 @@ export async function GoWithIt() { //called from vtt.js
   
   }
 
-//  const button = new Button(
-//       new Graphics()
-//           .rect(0, 0, 100, 50, 15)
-//           .fill(0xFFFFFF)
-//  );
-
-//   const button = new FancyButton({
-//      new Graphics()
-//           .fill(0xFFFFFF)
-//           .roundRect(0, 0, 100, 50, 15),
-//      text: 'Click me!',
-//      animations: {
-//           hover: {
-//               props: {
-//                   scale: {
-//                       x: 1.1,
-//                       y: 1.1,
-//                   }
-//               },
-//               duration: 100,
-//           },
-//           pressed: {
-//               props: {
-//                   scale: {
-//                       x: 0.9,
-//                       y: 0.9,
-//                   }
-//               },
-//               duration: 100,
-//           }
-//       }
-//  });
-// //  button.x 
-//  button.x = app.screen.width / 2;
-//   button.y = app.screen.height * .2;
-            // const buttonView = new Container();
-            // const buttonBg = new Graphics().roundRect(0, 0, 200, 300, 300).fill(.3 * 0xffffff);
-            // // const text = new Text({ text: '🤙', style: { fontSize: 70 } });
-            //   const text = new Text({ text: 'whoa', style: { fontSize: 70 } });
-
-            // text.anchor = 0.5;
-            // text.x = buttonBg.width / 2;
-            // text.y = buttonBg.height / 2;
-
-            // buttonView.addChild(buttonBg, text);
-
-            // // Component usage !!!
-            // const button = new Button(buttonView);
-
-            // button.enabled = !disabled;
-
-            // button.onPress.connect(() => action('onPress'));
-            // button.onDown.connect(() => action('onDown'));
-            // button.onUp.connect(() => action('onUp'));
-            // button.onHover.connect(() => action('onHover'));
-            // button.onOut.connect(() => action('onOut'));
-            // button.onUpOut.connect(() => action('onUpOut'));
-      const button = new Button(
-        new Graphics()
-          .fill(0xFFFFFF)
-          .roundRect(0, 0, 100, 50, 15)
-      );
-//  button.x = app.screen.width / 2;
-//   button.y = app.screen.height / 2;
-  uicontainer.addChild(button.view);
 
   // uicontainer.x = app.screen.width / 2;
   // uicontainer.y = app.screen.height / 2;
@@ -406,7 +330,9 @@ export async function GoWithIt() { //called from vtt.js
 
   // app.stage.addChild(uicontainer);
 
+  const buttonData = {};
   addText(app, textData, uicontainer);
+  addButtons(app, buttonData, uicontainer);
   
   // if (viewport) {
   //     viewport.addChild(uicontainer); 
@@ -414,7 +340,7 @@ export async function GoWithIt() { //called from vtt.js
     app.stage.addChild(uicontainer);
   // }
 
-  button.onPress.connect(() => console.log('Button pressed!'));
+
 
   // window.addEventListener('resize', onResize);
 }

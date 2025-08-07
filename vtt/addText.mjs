@@ -16,7 +16,7 @@ import { Text, TextStyle, Assets, Container } from 'pixi';
 // let userProfile;
 await Assets.loadBundle('fonts');
     // const text3 = new Text({ text: 'Dotrice Regular.woff', style: { fontFamily: 'Dotrice Regular', fontSize: 50 } });
-export async function addText(app, textData, uicontainer) {
+export function addText(app, textData, uicontainer) {
 
     const greetingText = new Text({
         text: textData.split("~")[0],
