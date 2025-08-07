@@ -178,16 +178,19 @@ $(function() {
 
    }
 
-   // console.log("Settings : " + JSON.stringify(settings));
-   let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
-   if (timedEventsEl) {
-      let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
-      timeKeysData =  JSON.parse(atob(theTimedEventsData));
-      SetTimedEventsListenerMode(timeKeysData.listenTo);
-      // timedEventsListenerMode = ;
-      // window.timedEventsListenerMode = timedEventsListenerMode;
-      console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
-   }
+   // // console.log("Settings : " + JSON.stringify(settings));
+   // let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
+   // if (timedEventsEl) {
+   //    let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
+   //    timeKeysData =  JSON.parse(atob(theTimedEventsData));
+   //    SetTimedEventsListenerMode(timeKeysData.listenTo);
+   //    // timedEventsListenerMode = ;
+   //    // window.timedEventsListenerMode = timedEventsListenerMode;
+   //    console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
+   // } else if (settings && settings.sceneTimedEvents) {
+   //    console.log("timedEventsListenerMode " + settings.sceneTimedEvents.listenTo);
+   //    SetTimedEventsListenerMode(settings.sceneTimedEvents.listenTo);
+   // }
    lastCloudUpdate = settings.sceneLastUpdate;
 
    if (typeof window.ethereum !== 'undefined') {

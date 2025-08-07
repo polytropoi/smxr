@@ -10,9 +10,11 @@ import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './a
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
 import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
-import { ReturnAudioGroupsData } from '../connect/media.js';
+import { LoadPrimaryAudioHowl, ReturnAudioGroupsData } from '../connect/media.js';
 import { settings, profile } from '../connect/settings.js';
-import { addButtons } from './addButtons.mjs';
+import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode} from "../../connect/events.js";
+import { addButtons, addFancyButtons, isPlaying } from './addButtons.mjs';
+
 
 // Create a PixiJS application.
 export const app = new Application();
@@ -90,7 +92,7 @@ function onResize () {
 async function setup() {
   // Intialize the application.
   console.log("background color " + settings.sceneColor1);
-  await app.init({ background: '#000000', resizeTo: window });
+  await app.init({ background: '#000000', resizeTo: window, antialias: true });
   
 
   app.stage.layout = {
@@ -142,6 +144,22 @@ async function prePreLoader () {
     // console.log("pictureGroups data :" +JSON.stringify(pictureGroupsData));  
     console.log("pictureGroups " + JSON.stringify(pictureGroupsData));
   }
+     // console.log("Settings : " + JSON.stringify(settings));
+   let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
+   if (timedEventsEl) {
+      let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
+      timeKeysData =  JSON.parse(atob(theTimedEventsData));
+      SetTimedEventsListenerMode(timeKeysData.listenTo);
+      // timedEventsListenerMode = ;
+      // window.timedEventsListenerMode = timedEventsListenerMode;
+      console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
+   } else if (settings && settings.sceneTimedEvents) {
+      console.log("timedEventsListenerMode " + settings.sceneTimedEvents.listenTo);
+      SetTimedEventsListenerMode(settings.sceneTimedEvents.listenTo);
+   }
+   if (settings && settings.primary_mp3url) {
+      LoadPrimaryAudioHowl();
+   }
 
 }
 
@@ -261,13 +279,15 @@ export async function GoWithIt() { //called from vtt.js
     //     sprite.rotation += 0.1 * ticker.deltaTime;
     // });
     app.ticker.add((ticker) => {
-      // Add the time to our total elapsed time
-      elapsed += ticker.deltaTime;
-      // console.log(elapsed);
-      if (elapsed > 300) {
-        elapsed = 0;
-        addBackgroundPictures(app, viewport, spritesContainer);
+      if (isPlaying) {
+        // Add the time to our total elapsed time
+        elapsed += ticker.deltaTime;
+        // console.log(elapsed);
+        if (elapsed > 300) {
+          elapsed = 0;
+          addBackgroundPictures(app, viewport, spritesContainer);
 
+        }
       }
     });
   }
@@ -332,7 +352,7 @@ export async function GoWithIt() { //called from vtt.js
 
   const buttonData = {};
   addText(app, textData, uicontainer);
-  addButtons(app, buttonData, uicontainer);
+  addFancyButtons(app, buttonData, uicontainer);
   
   // if (viewport) {
   //     viewport.addChild(uicontainer); 

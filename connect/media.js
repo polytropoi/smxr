@@ -246,6 +246,11 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
       
    }
 
+   export function ReturnTimedEventsListenerMode () {
+    // console.log("timedEventsListenerMode " + timedEventsListenerMode);
+    return timedEventsListenerMode;
+   }
+
 export function TransportPlayButton () {
   // console.log("TransportPlayButton clcik! " + JSON.stringify(youtubePlayer));
   console.log("TransportPlayButton clcik! " + primaryAudioMangler);
@@ -437,31 +442,47 @@ export function UpdateTriggerAudioVolume(newVolume) {
       }
    }
 }
+export async function PrimaryAudioIsPlaying () {
+  await primaryAudioHowl
+  // if (primaryAudioHowl && primaryAudioHowl != undefined) {
+    return primaryAudioHowl.playing();
+  // }
+}
+export function LoadPrimaryAudioHowl () {
+    primaryAudioHowl = new Howl({
+        src: [settings.primary_mp3url]
+    });
+}
 
 export function PrimaryAudioPlayPauseToggle () {
 
-  if (primaryAudioHowl && primaryAudioHowl != undefined) {
-    // primaryAudioHowl;
-    if (!primaryAudioHowl.playing()) {
-            console.log("tryna play " + settings.primary_mp3url);
-        primaryAudioHowl.play();
-        // this.el.emit('primaryAudioToggle', {isPlaying : true}, true);
-        // this.isPlaying = true;
-        PauseIntervals(false);
-        return true;
-    } else {    
-        console.log("tryna pause");
-        primaryAudioHowl.pause();
-        // this.el.emit('primaryAudioToggle', {isPlaying : false}, true);
-        // this.isPlaying = false;
-        PauseIntervals(true);
-        return false;
+  if (timedEventsListenerMode && timedEventsListenerMode == "Primary Audio") {
+    if (primaryAudioHowl && primaryAudioHowl != undefined) {
+      // primaryAudioHowl;
+      if (!primaryAudioHowl.playing()) {
+              console.log("tryna play " + settings.primary_mp3url);
+          primaryAudioHowl.play();
+          // this.el.emit('primaryAudioToggle', {isPlaying : true}, true);
+          // this.isPlaying = true;
+          PauseIntervals(false);
+          return true;
+      } else {    
+          console.log("tryna pause");
+          primaryAudioHowl.pause();
+          // this.el.emit('primaryAudioToggle', {isPlaying : false}, true);
+          // this.isPlaying = false;
+          PauseIntervals(true);
+          return false;
+      }
+    } else {
+      console.log("tryna load " + settings.primary_mp3url);
+      primaryAudioHowl = new Howl({
+        src: [settings.primary_mp3url]
+      });
+      if (primaryAudioHowl && primaryAudioHowl != undefined) {
+        PrimaryAudioPlayPauseToggle();
+      }
     }
-  } else {
-    console.log("tryna load " + settings.primary_mp3url);
-    primaryAudioHowl = new Howl({
-      src: [settings.primary_mp3url]
-    });
   }
 }
 
