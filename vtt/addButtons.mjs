@@ -52,10 +52,11 @@ console.log("tryna add buttons!");
             }
         }
     });
+    const fontsize = Math.max(16, window.innerWidth / 30); 
     const text = new Text({
         text: 'Play',
         style: {
-        fontSize: 42,
+        fontSize: fontsize,
         fill: 'white', // Red color
         fontFamily: 'Acme',
         align: 'center', // Center alignment
@@ -68,8 +69,11 @@ console.log("tryna add buttons!");
         }
     });
 
-    const width = 200;
-    const height = 100;
+   
+
+    const scaleFactor = app.stage.width / 1000;
+    const width = 100 * scaleFactor;
+    const height = 50 * scaleFactor;
 
     playButton = new FancyButton({
     defaultView: new Graphics()
@@ -172,12 +176,12 @@ export async function addButtons(app, buttonData, uicontainer) {
     const disabledButton = new Graphics()
     .roundRect(0, 0, width, height, 25)
     .fill({ color: "DarkGray", alpha: .75 });
-
+    const fontsize = Math.max(16, window.innerWidth / 20); 
     const buttonText = new Text({
         text: "Click Me",
         style: {
         fill: '#ffffff',
-        fontSize: 25,
+        fontSize: fontsize,
         fontFamily: 'Acme',
         stroke: { color: '#4a1850', width: 5, join: 'round' },
             dropShadow: {

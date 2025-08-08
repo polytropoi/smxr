@@ -18,11 +18,13 @@ await Assets.loadBundle('fonts');
     // const text3 = new Text({ text: 'Dotrice Regular.woff', style: { fontFamily: 'Dotrice Regular', fontSize: 50 } });
 export function addText(app, textData, uicontainer) {
 
+        const newFontSize = Math.max(16, window.innerWidth / 20); 
+                const newSmallFontSize = Math.max(16, window.innerWidth / 30); 
     const greetingText = new Text({
         text: textData.split("~")[0],
         style: {
         fill: '#ffffff',
-        fontSize: 50,
+        fontSize: newFontSize,
         fontFamily: 'Acme',
         stroke: { color: '#4a1850', width: 5, join: 'round' },
             dropShadow: {
@@ -39,7 +41,7 @@ export function addText(app, textData, uicontainer) {
         text: textData.split("~")[1],
         style: {
         fill: '#ffffff',
-        fontSize: 25,
+        fontSize: newSmallFontSize,
         fontFamily: 'Acme',
         stroke: { color: '#4a1850', width: 5, join: 'round' },
             dropShadow: {
@@ -55,7 +57,9 @@ export function addText(app, textData, uicontainer) {
    
 
     greetingText.y = app.screen.height * .075;
-    questText.y = app.screen.height * .125;
+    questText.y = app.screen.height * .2;
+
+
     // playerText.y += 20;
 
     uicontainer.addChild(greetingText, questText);
@@ -71,11 +75,12 @@ export function addPlayerProfileText (app, userProfile, uicontainer) {
         localPlayerState = "health: " + userProfile.playerState.health.toString() + "% - mana: " + userProfile.playerState.mana.toString() + "%\n";
         playerGreeting = "Welcome back " + userProfile.avatarName + "!\n"
     } 
+    const newSmallFontSize = Math.max(16, window.innerWidth / 50); 
     const playerText = new Text({
         text: playerGreeting + "  " + localPlayerState,
         style: {
         fill: '#ffffff',
-        fontSize: 25,
+        fontSize: newSmallFontSize,
         fontFamily: 'Acme',
         stroke: { color: '#4a1850', width: 5, join: 'round' },
             dropShadow: {
@@ -88,7 +93,7 @@ export function addPlayerProfileText (app, userProfile, uicontainer) {
     });
     playerText.anchor.x = .5;
     // playerText.y = app.screen.height - (app.screen.height * .2);
-    playerText.y = app.screen.height * .2;
+    playerText.y = app.screen.height * .5;
     uicontainer.addChild(playerText);
 
             setTimeout(() =>  {

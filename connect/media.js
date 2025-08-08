@@ -452,6 +452,7 @@ export function LoadPrimaryAudioHowl () {
     primaryAudioHowl = new Howl({
         src: [settings.primary_mp3url]
     });
+    primaryAudioHowl.load();
 }
 
 export function PrimaryAudioPlayPauseToggle () {
