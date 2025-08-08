@@ -92,7 +92,7 @@ function onResize () {
 async function setup() {
   // Intialize the application.
   console.log("background color " + settings.sceneColor1);
-  await app.init({ background: '#000000', resizeTo: window, antialias: true });
+  await app.init({ background: '#000000', resizeTo: window, antialias: true});
   
 
   app.stage.layout = {

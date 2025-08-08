@@ -22,9 +22,10 @@ console.log("tryna add buttons!");
  
   const container = new Container();
 
-    container.y = app.screen.height / 2;
+    container.y = app.screen.height - (app.screen.height * .1);
     container.x = app.screen.width / 2;
-
+// container.height = app.screen.height;
+// container.width = app.screen.width;
 //  const button = new Button(
 //       new Graphics()
 //           .rect(0, 0, 100, 50, 15)
@@ -116,8 +117,12 @@ console.log("tryna add buttons!");
     });
 
     container.addChild(playButton);
-    playButton.y = container.height / .2;
+
     app.stage.addChild(container);
+    // playButton.y = container.height + 300;
+
+    // playButton.y = window.innerHeight - (window.innerHeight  * .1);;
+
     playButton.onPress.connect(() => 
         // console.log('onPress');
     PlayPauseToggle()

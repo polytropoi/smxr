@@ -87,7 +87,8 @@ export function addPlayerProfileText (app, userProfile, uicontainer) {
         }
     });
     playerText.anchor.x = .5;
-    playerText.y = app.screen.height - (app.screen.height * .2);
+    // playerText.y = app.screen.height - (app.screen.height * .2);
+    playerText.y = app.screen.height * .2;
     uicontainer.addChild(playerText);
 
             setTimeout(() =>  {
