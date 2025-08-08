@@ -12,8 +12,10 @@ import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverl
 import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
 import { LoadPrimaryAudioHowl, ReturnAudioGroupsData } from '../connect/media.js';
 import { settings, profile } from '../connect/settings.js';
-import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode} from "../../connect/events.js";
+import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData} from "../../connect/events.js";
 import { addButtons, addFancyButtons, isPlaying } from './addButtons.mjs';
+import { SetTimeKeysData } from '../connect/events.js';
+// import {  } from '../connect/events.js';
 
 
 // Create a PixiJS application.
@@ -49,7 +51,7 @@ let textData;
 let scenePicturesData;
 export let pictureGroupsData;
 let locationData;
-
+// export let timeKeysData;
 export let hasBackgroundPictureGroup = false;
 // let profile;
 
@@ -148,7 +150,8 @@ async function prePreLoader () {
    let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...
    if (timedEventsEl) {
       let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
-      timeKeysData =  JSON.parse(atob(theTimedEventsData));
+      const tkData =  JSON.parse(atob(theTimedEventsData));
+
       SetTimedEventsListenerMode(timeKeysData.listenTo);
       // timedEventsListenerMode = ;
       // window.timedEventsListenerMode = timedEventsListenerMode;
@@ -201,7 +204,7 @@ async function preload() {
     for (let i = 0; i < pictureGroupsData[0].images.length; i++) {
       
       // if (scenePicturesData[i].tags && scenePicturesData[i].tags.includes("logo")) {
-      console.log("add grouppicture to assets " + pictureGroupsData[0].images[i]._id + " " + pictureGroupsData[0].images[i].url);
+      // console.log("add grouppicture to assets " + pictureGroupsData[0].images[i]._id + " " + pictureGroupsData[0].images[i].url);
         assets.push({ alias: pictureGroupsData[0].images[i]._id, src: pictureGroupsData[0].images[i].url, crossOrigin: 'anonymous'});
       } 
     }

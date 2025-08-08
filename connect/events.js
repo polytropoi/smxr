@@ -1,6 +1,6 @@
 
-import { sceneLocations, GoToNext, GoToPrevious, videoEl } from "../../connect/connect.js";
-import { primaryAudioEl, youtubePlayer, youtubeIsPlaying } from "../../connect/media.js";
+import { sceneLocations, GoToNext, GoToPrevious, videoEl, localData } from "../../connect/connect.js";
+import { primaryAudioEl, youtubePlayer, youtubeIsPlaying, primaryAudioHowl } from "../../connect/media.js";
 
 let timeKeysIndex = 0;
 let listenerInterval = null;
@@ -14,6 +14,8 @@ export let timedEventsListenerMode = "";
 export function ResetTimedEvents () {
     timeKeysIndex = 0;
 }
+
+
 function TimedEventListener () { 
 //  console.log("TimedEventsListener" + timedEventsListenerMode + JSON.stringify(timeKeysData) );
  // let primaryAudioTime = 0;
@@ -36,7 +38,7 @@ function TimedEventListener () {
             // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
             //    timeKeysIndex = 0;
             // }
-            if (primaryAudioHowl != undefined && primaryAudioHowl != null && primaryAudioHowl.playing()) {
+            if (primaryAudioHowl && primaryAudioHowl != undefined && primaryAudioHowl != null && primaryAudioHowl.playing()) {
                
                // primaryAudioEl.components.primary_audio_control.updateStatus(true);
 
@@ -51,7 +53,7 @@ function TimedEventListener () {
                      //just waiting...
                } else {
                   if (timeKeysIndex < tkStarttimes.length) {
-                     // console.log("TRYNA PLAY TIMEKEY "+ JSON.stringify(timeKeysData.timekeys[timeKeysIndex]) +" at primaryAudioTime "+ primaryAudioTime.toString() );
+                     console.log("TRYNA PLAY TIMEKEY "+ JSON.stringify(timeKeysData.timekeys[timeKeysIndex]) +" at primaryAudioTime "+ primaryAudioTime.toString() );
                      PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
                      timeKeysIndex++;
                   } else {
@@ -488,7 +490,7 @@ export function SetPrimaryAudioEventsData () {
 
    // timeKeysData = JSON.parse(localStorage.getItem(room+ "_timeKeys"));
    // let timekeysData = settings.sceneTimedEvents;
-   // console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
+   console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
    tkStarttimes = [];
    if (timeKeysData != undefined && timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0 )
       timeKeysData.timekeys.forEach(function (timekey) {
@@ -538,5 +540,9 @@ export function SetTimedEventsListenerMode(mode) {
 
 export function SetTimeKeysData (tkData) {
    timeKeysData = tkData;
+   console.log("SetTimeKeysData!");
+   // SetPrimaryAudioEventsData();
+   localData.timedEvents = timeKeysData;
+  
 }
 

@@ -4,7 +4,7 @@
 
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData} from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
-import { ResetTimedEvents } from "./events.js";
+import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
 // import { Howl, Howler } from '../node_modules/howler/dist/howler.js';
 // import {Howl} from '../main/vendor/howler/src/howler.js';
 
@@ -453,6 +453,15 @@ export function LoadPrimaryAudioHowl () {
         src: [settings.primary_mp3url]
     });
     primaryAudioHowl.load();
+    if (timedEventsListenerMode == "Primary Audio") {
+      SetPrimaryAudioEventsData();
+    }
+}
+
+export function GetCurrentPrimaryAudioTime() {
+  if (primaryAudioHowl) {
+    return primaryAudioHowl.seek();
+  }
 }
 
 export function PrimaryAudioPlayPauseToggle () {

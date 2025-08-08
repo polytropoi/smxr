@@ -52,7 +52,7 @@ console.log("tryna add buttons!");
             }
         }
     });
-    const fontsize = Math.max(16, window.innerWidth / 30); 
+    const fontsize = Math.max(16, window.innerWidth / 50); 
     const text = new Text({
         text: 'Play',
         style: {
@@ -71,7 +71,7 @@ console.log("tryna add buttons!");
 
    
 
-    const scaleFactor = app.stage.width / 1000;
+    const scaleFactor = app.stage.width / 1500;
     const width = 100 * scaleFactor;
     const height = 50 * scaleFactor;
 

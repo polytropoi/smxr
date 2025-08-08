@@ -70,17 +70,17 @@ export let curveLocations = [];
 export let cloudMarkers = []; //???? unused>?//nope
 export let sceneModels = [];
 
-let localKeys = [];
+// let localKeys = [];
 
 let volumePrimary = 0;
 let volumeAmbient = 0;
 let volumeTrigger = 0;
 
 let currentLocationIndex = -1;
-let currentTime = 0;  //depends on listenerMode
+// let currentTime = 0;  //depends on listenerMode
 
-let modalTimeStatsEl = null; //stats for timekeys modal
-let transportTimeStatsEl = null;
+// let modalTimeStatsEl = null; //stats for timekeys modal
+// let transportTimeStatsEl = null;
 // let sceneType = null;
 
 let uiVisible = true;

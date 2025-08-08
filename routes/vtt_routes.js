@@ -3347,6 +3347,7 @@ vtt_router.get('/:_id', function (req, res) {
                         scenePicturesData +
                         pictureGroupsData +
                         loadLocations +
+                        sceneTimedEventsData +
                         "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +
 
                         // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+

@@ -1,13 +1,15 @@
 // import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "../src/component/content-utils.js";
 // import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "content-utils";
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
-          InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, RewindButton } from "../../connect/media.js";
-import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData } from "../../connect/events.js";
+          InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, 
+          RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime } from "../../connect/media.js";
+import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData } from "../../connect/events.js";
 import { settings, profile } from "../../connect/settings.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
   userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
-  Disconnect
+  Disconnect,
+  SaveTimekeysToLocal
   } from "../../connect/connect.js";
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
 // import shortid from "shortid";
@@ -160,8 +162,20 @@ window.addEventListener( 'keydown',  ( event ) => {
     selectedLocationTimestamp = timestamp;
   }
 
+  // onclick=\x22AddTimekey()\x22
   // $(function (){ //needs onload for class to pop
-      $('#modalContent').on('click', '#deleteLocalProfileData', function(e) {
+  // onclick=\x22SaveTimekeysToLocal()\x22
+    $('#modalContent').on('click', '#saveTimeKeysLocalButton', function(e) {
+      console.log("tryna save timekey to local!");
+      SaveTimekeysToLocal();
+  
+    });
+    $('#modalContent').on('click', '#addTimekeyButton', function(e) {
+      console.log("tryna add timekey!");
+      AddTimekey();
+  
+    });
+    $('#modalContent').on('click', '#deleteLocalProfileData', function(e) {
       console.log("tryna delete local profile data!");
       DeleteLocalProfileData();
   
@@ -1474,7 +1488,7 @@ function ReturnTimedEventSelectors (selectedType) {
 
 function AddTimekey() {
   let newTimekey = {};
-  newTimekey.keystarttime = currentTime;
+  newTimekey.keystarttime = GetCurrentPrimaryAudioTime();
   newTimekey.keyduration = 5.0;
   newTimekey.keytype = "Beat";
   newTimekey.keydata = "";
@@ -1510,44 +1524,44 @@ function AddTimekey() {
 //   return fancyTimeString;  
 // }
 
-function ShowTimekeysModal() {    //nerp, now in scenemanglermodal
-  console.log("tryna SHowTImekyesMoodla");
-  ShowHideDialogPanel();
-  if (modalTimeStatsEl == null) {
-    modalTimeStatsEl = $('#modalContent').find('#modalTimeStats');
-  }
+// function ShowTimekeysModal() {    //nerp, now in scenemanglermodal
+//   console.log("tryna SHowTImekyesMoodla");
+//   ShowHideDialogPanel();
+//   if (modalTimeStatsEl == null) {
+//     modalTimeStatsEl = $('#modalContent').find('#modalTimeStats');
+//   }
 
-  if (tkStarttimes != null)  {
+//   if (tkStarttimes != null)  {
      
-      let content = "<span id='modalCloser' class='close-modal'>&times;</span><div><h3>Timed Events</h3><hr>" + //populate modal
+//       let content = "<span id='modalCloser' class='close-modal'>&times;</span><div><h3>Timed Events</h3><hr>" + //populate modal
 
-      "<div class=\x22row\x22>"+
+//       "<div class=\x22row\x22>"+
 
-      "<button class=\x22snapButton\x22 style=\x22float:left;\x22 onclick=\x22AddTimekey()\x22>Add Timed Event Key</button>"+
-      "<button class=\x22infoButton\x22 onclick=\x22SceneManglerModal('Tools')\x22>Settings</button>"+
-      "<button class=\x22saveButton\x22 onclick=\x22SaveTimekeysToLocal()\x22>Save to Local Database</button>"+
+//       "<button class=\x22snapButton\x22 style=\x22float:left;\x22 onclick=\x22AddTimekey()\x22>Add Timed Event Key</button>"+
+//       "<button class=\x22infoButton\x22 onclick=\x22SceneManglerModal('Tools')\x22>Settings</button>"+
+//       "<button class=\x22saveButton\x22 onclick=\x22SaveTimekeysToLocal()\x22>Save to Local Database</button>"+
      
-      // "<button class=\x22deleteButton\x22 onclick=\x22PlayPauseMedia()\x22>Play/Pause Media</button>"+
-      "<div class=\x22transport_buttons\x22><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
-      "<div id=\x22transport_play_button\x22 class=\x22play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
-      "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>"+
+//       // "<button class=\x22deleteButton\x22 onclick=\x22PlayPauseMedia()\x22>Play/Pause Media</button>"+
+//       "<div class=\x22transport_buttons\x22><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
+//       "<div id=\x22transport_play_button\x22 class=\x22play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
+//       "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>"+
 
-      "<div style=\x22float: right; width: 166px;\x22>Listen To Timeline:"+
-      "<select id=\x22listenToTimelineSelector\x22 class=\x22listenToTimelineSelector\x22>" +
-          ReturnListenToTimelineSelectors() +
-          "</select>" +
-      "</div>"+
+//       "<div style=\x22float: right; width: 166px;\x22>Listen To Timeline:"+
+//       "<select id=\x22listenToTimelineSelector\x22 class=\x22listenToTimelineSelector\x22>" +
+//           ReturnListenToTimelineSelectors() +
+//           "</select>" +
+//       "</div>"+
       
-      "<div class=\x22\x22 style=\x22margin: 10px;\x22 id=\x22modalTimeStats\x22>"+fancyTimeString+"</div>" +
+//       "<div class=\x22\x22 style=\x22margin: 10px;\x22 id=\x22modalTimeStats\x22>"+fancyTimeString+"</div>" +
    
-      ReturnTimeKeys() +
-      "</div>"+
+//       ReturnTimeKeys() +
+//       "</div>"+
 
-      "</div>";
-      ShowHideDialogPanel(content);
+//       "</div>";
+//       ShowHideDialogPanel(content);
       
-  }
-}
+//   }
+// }
 let isPlaying = false;
 
 // document.addEventListener('keyup', event => {
@@ -1570,6 +1584,10 @@ function PlayPauseMedia () {
         if (primaryAudioController) {
           let isPlaying = primaryAudioController.playPauseToggle(); //returns a bool 
           return isPlaying;
+        }
+      } else {
+        if (primaryAudioHowl) {
+          PrimaryAudioPlayPauseToggle();
         }
       }
       
@@ -1619,9 +1637,10 @@ function PlayPauseMedia () {
 
 function ReturnTimeKeys() { 
   // if (timeKeysData != null) {
-    // console.log("timedEvents:  " +JSON.stringify(timeKeysData));
+    console.log("timedEvents:  " +JSON.stringify(localData));
     if (localData.timedEvents) {
-      timeKeysData = localData.timedEvents;
+      console.log("tryna add local timed events");
+      SetTimeKeysData(localData.timedEvents);
     
       SetTimedEventsListenerMode(timeKeysData.listenTo);
     } else if (settings && settings.sceneTimedEvents) {
@@ -2300,9 +2319,9 @@ export function SceneManglerModal(mode, autoHide) {
 
         "<div class=\x22row\x22>"+
 
-        "<button id=\x22snapLocationButton\x22 class=\x22snapButton\x22 style=\x22float:left;\x22 onclick=\x22AddTimekey()\x22>Add Timed Event Key</button>"+
+        "<button id=\x22addTimekeyButton\x22 class=\x22snapButton\x22 style=\x22float:left;\x22>Add Timed Event Key</button>"+
         // "<button class=\x22infoButton\x22 onclick=\x22SceneManglerModal('Tools')\x22>Tools</button>"+
-        "<button class=\x22saveButton\x22 onclick=\x22SaveTimekeysToLocal()\x22>Save (local)</button>"+
+        "<button id=\x22saveTimeKeysLocalButton\x22 class=\x22saveButton\x22 >Save (local)</button>"+
       
         // "<button class=\x22deleteButton\x22 onclick=\x22PreviousButton()\x22>Start</button>"+
         // "<button class=\x22deleteButton\x22 onclick=\x22RewindButton()\x22><<</button>"+

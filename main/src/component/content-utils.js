@@ -551,7 +551,7 @@ AFRAME.registerComponent('location_data', { //initial loading of "official" loca
       waitAndInitLocalDB: function () {
          setTimeout( function() {
             if (settings && settings.allowMods && !AFRAME.utils.device.isMobile()) {
-               InitIDB();
+              //  InitIDB();
             }
          }, 3000);
       },

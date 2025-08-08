@@ -4,7 +4,7 @@ import { GoWithIt } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 
 import {settings, profile} from "../../connect/settings.js";
 
-// import {userProfile} from "../../connect/connect.js";
+import {localData} from "../../connect/connect.js";
 
 
 
@@ -24,7 +24,7 @@ var player = null;
 export let posRotReader;
 export let lastLocalUpdate = "";
 export let lastCloudUpdate = "";
-export let localData = {locations:[], settings:{}, localFiles: {}}; //all the things
+// export let localData = {locations:[], settings:{}, localFiles: {}}; //all the things
 
 let locationData;
 export let locationTimestamps = [];
@@ -76,14 +76,14 @@ export let mappicURL;
 export let backgroundURL;
 export let backgroundVideoURL;
 
-let localKeys = [];
+// let localKeys = [];
 
-let volumePrimary = 0;
-let volumeAmbient = 0;
-let volumeTrigger = 0;
+// let volumePrimary = 0;
+// let volumeAmbient = 0;
+// let volumeTrigger = 0;
 
-let currentLocationIndex = -1;
-let currentTime = 0;  //depends on listenerMode
+// let currentLocationIndex = -1;
+// let currentTime = 0;  //depends on listenerMode
 
 let modalTimeStatsEl = null; //stats for timekeys modal
 let transportTimeStatsEl = null;
