@@ -1935,7 +1935,7 @@ AFRAME.registerComponent('mod_model', {
      
       if (this.data.tags.toLowerCase().includes("beat")) {
         // let oScale = this.el.getAttribute('data-scale');
-        console.log("tryna beat " + this.el.id + " " + volume + " oScale " + JSON.stringify(this.oScale));
+        // console.log("tryna beat " + this.el.id + " " + volume + " oScale " + JSON.stringify(this.oScale));
 
         // oScale = parseFloat(oScale);
         

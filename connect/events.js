@@ -175,10 +175,7 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
             }
             }
             if (envEl != null) {
-               // console.log("beat volume " + volume);
-               // if (!settings.sceneUseSkybox) {
-                  envEl.components.enviro_mods.beat(.5);
-               // }
+               envEl.components.enviro_mods.beat(.5);
                
             }
          }
@@ -313,6 +310,31 @@ function PlayTimedEvent(timeKey) {
       if (primaryAudioEl != null) {
          // console.log("beat volume " + volume);
          primaryAudioEl.components.primary_audio_control.timekey_beat(.5);
+      }
+   let beatElements = document.getElementsByClassName("beatme");
+   let envEl = document.getElementById('enviroEl');
+   // let skyEl = document.getElementById('skyEl');
+      console.log("beat loop " + duration);
+      if (beatElements != null) {
+         // console.log("beat objex " + beatElements.length)
+         
+      for (let i = 0; i < beatElements.length; i++) {
+         // if (Math.random() > .5) { //hrm, toggle how?
+            if (beatElements[i].components.mod_model != undefined) {
+               beatElements[i].components.mod_model.beat(.75, duration);
+            } else if (beatElements[i].components.mod_object != undefined) {
+               beatElements[i].components.mod_object.beat(.75, duration);
+            } else if (beatElements[i].components.cloud_marker != undefined) {
+               beatElements[i].components.cloud_marker.beat(.15, duration);
+            } else if (beatElements[i].components.mod_physics != undefined) {
+               beatElements[i].components.mod_physics.randomPush();
+            }
+         // }
+      }
+      }
+      if (envEl != null) {
+         envEl.components.enviro_mods.beat(.5);
+         
       }
    }
    if (timeKey.keytype.toLowerCase().includes("stop trigger audio")) {
@@ -547,8 +569,12 @@ export function SetTimeKeysData (tkData) {
    timeKeysData = tkData;
    console.log("SetTimeKeysData !" + timeKeysData.listenTo);
    // 
+   
    localData.timedEvents = timeKeysData;
-   timedEventsListenerMode = timeKeysData.listenTo;
+
+   if (timeKeysData.listenTo) {
+      timedEventsListenerMode = timeKeysData.listenTo;
+   }
    if (timedEventsListenerMode == "Primary Audio") {
       SetPrimaryAudioEventsData();
    }

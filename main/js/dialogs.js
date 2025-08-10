@@ -1637,12 +1637,12 @@ function PlayPauseMedia () {
 
 function ReturnTimeKeys() { 
   // if (timeKeysData != null) {
-    console.log("timedEvents:  " +JSON.stringify(localData));
+    console.log("timedEvents:  " +JSON.stringify(localData.timedEvents.listenTo));
     if (localData.timedEvents) {
       console.log("tryna add local timed events");
       SetTimeKeysData(localData.timedEvents);
     
-      SetTimedEventsListenerMode(timeKeysData.listenTo);
+      SetTimedEventsListenerMode(localData.timedEvents.listenTo);
     } else if (settings && settings.sceneTimedEvents) {
       SetTimeKeysData(settings.sceneTimedEvents);
       // timeKeysData = settings.sceneTimedEvents;
