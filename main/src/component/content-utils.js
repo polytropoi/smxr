@@ -16,7 +16,7 @@ import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation,
       userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations, AvatarClicked, playerPosition, playerRotation } from "../../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
 import { settings } from "../../../connect/settings.js";
-import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat } from '../../../connect/media.js';
+import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat, LoadPrimaryAudioHowl } from '../../../connect/media.js';
 
 var ua = window.navigator.userAgent;
 var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
@@ -289,6 +289,7 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
         }
       }
 
+      LoadPrimaryAudioHowl();
       const skyEl = document.getElementById("a_sky");
       if (skyEl) {
         const skyboxDynamicComponent = skyEl.components.skybox_dynamic;

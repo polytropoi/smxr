@@ -13366,7 +13366,8 @@ function getAllPeople() {
                     "<div class=\x22card shadow mb-4\x22>" +
                     "<div class=\x22card-header py-3 d-flex flex-row align-items-center justify-content-between\x22>" +
                         "<h6 class=\x22m-0 font-weight-bold text-primary\x22>Scene Details - "+ sceneTitle +" | _id: "+ response.data._id + " | short_id: "+ response.data.short_id +
-                        " | <a target=\x22_blank\x22 href=\x22../landing/"+ response.data.short_id +"\x22>Landing Link</a>" +                       
+                        " | <a target=\x22_blank\x22 href=\x22../landing/"+ response.data.short_id +"\x22>Landing Link</a>" +  
+                        " | <a target=\x22_blank\x22 href=\x22../vtt/"+ response.data.short_id +"\x22>VTT Link</a>" +                       
                         " | <a target=\x22_blank\x22 href=\x22../webxr/"+ response.data.short_id +"\x22>WebXR Link</a>" +
                         " | <a target=\x22_blank\x22 href=\x22../unity/"+ response.data.short_id +"\x22>Unity Link</a>" +
                         // " | <a target=\x22_blank\x22 href=\x22http://smxr.net/index.html?scene="+ response.data.short_id +"\x22>Unity Web Link</a>" +

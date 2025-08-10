@@ -449,6 +449,10 @@ export async function PrimaryAudioIsPlaying () {
   // }
 }
 export function LoadPrimaryAudioHowl () {
+  if (!primaryAudioHowl) {
+      primaryAudioHowl = globalThis.primaryAudioHowl;
+  }
+  if (!primaryAudioHowl && settings && settings.primary_mp3url) {
     primaryAudioHowl = new Howl({
         src: [settings.primary_mp3url]
     });
@@ -456,7 +460,10 @@ export function LoadPrimaryAudioHowl () {
     if (timedEventsListenerMode == "Primary Audio") {
       SetPrimaryAudioEventsData();
     }
+    // return primaryAudioHowl;
+  }
 }
+
 
 export function GetCurrentPrimaryAudioTime() {
   if (primaryAudioHowl) {

@@ -211,7 +211,7 @@ webxr_router.get('/:_id', function (req, res) {
     let styleIncludes = "";
     let synthScripts = "";
     let streamPrimaryAudio = false;
-    let audioControl = "<script type=\x22module\x22 src=\x22../main/src/component/audio_control.js\x22></script>";
+    let audioControl = "<script type=\x22module\x22 src=\x22../main/src/component/audio_control.js\x22 defer=\x22defer\x22></script>";
     let primaryAudioScript = "";
     let primaryAudioParams = "";
     let primaryAudioEntity = "";

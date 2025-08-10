@@ -1,7 +1,7 @@
 // import { fancyTimeFormat, primaryAudioMangler, primaryAudioEl } from "../component/content-utils.js";
 // import { fancyTimeFormat, primaryAudioMangler } from "content-utils";
-import { fancyTimeFormat, primaryAudioMangler, FetchAudioGroupsData } from "../../../connect/media.js";
-import { PauseIntervals, timedEventsListenerMode, SetTimedEventsListenerMode } from "../../../connect/events.js";
+import { fancyTimeFormat, primaryAudioMangler, FetchAudioGroupsData} from "../../../connect/media.js";
+import { PauseIntervals, timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData } from "../../../connect/events.js";
 import { settings  } from "../../../connect/settings.js";
 import { attributions, lerp } from "../../../connect/connect.js";
 import { SceneManglerModal } from "../../js/dialogs.js";
@@ -16,6 +16,7 @@ let audiourl = params.split("_")[1];
 if (audiourl != null && audiourl.length)
 var hostname = (new URL(audiourl)).hostname;
 
+// let primaryAudioHowl;
 let triggerParams = document.querySelector(".triggerAudioParams").id;
 // const clampNumber = (num, a, b) => Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
 let triggerPosition = "";
@@ -26,6 +27,8 @@ let listeners = 0;
 let bitrate = 0;
 
 let currentTime = 0;
+
+// LoadPrimaryAudioHowl(); 
 var getJSON = function(url, callback) { //netradio details //nm
     var xhr = new XMLHttpRequest();  
     xhr.open('POST', url, true);
@@ -386,9 +389,9 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
                 });
                 console.log("PRIMARY AUDIO AUTOPLAY is " + this.data.autoplay );
                 if (this.data.autoplay) {
-                    // primaryAudioHowl.play();
-                    // primaryAudioHowl.volume(normalizedVolume);
-                    // el.emit('primaryAudioToggle', {isPlaying : true}, true);
+                    primaryAudioHowl.play();
+                    primaryAudioHowl.volume(normalizedVolume);
+                    el.emit('primaryAudioToggle', {isPlaying : true}, true);
 
                 } 
                 if (!this.data.useDefaultPlayer) {
@@ -603,31 +606,49 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
     } else { //normal mode, not streaming, so can use webaudio api
              
         AFRAME.registerComponent('primary_audio_control', { //register for not-streaming
-        schema: {
-        audioID: {default: ''},
-        color: {default: 'red'},
-        url: {default: ''},
-        title: {default: ''},
-        volume: {default: 0},
-        audioevents: {default: false},
-        targetattach: {default: false},
-        autoplay: {default: false},
-        // jsonData: {
-        //     parse: JSON.parse,
-        //     stringify: JSON.stringify
-        //   },
-        timekeys: {default: ''},
-        timeKeysIndex: {default: 0},
-        nextTimeKey: {default: 0},
-        useDefaultPlayer: {default: false}
-        // analyser: {default: 'selector'}
+            dependencies: ['initializer'],
+            schema: {
+            audioID: {default: ''},
+            color: {default: 'red'},
+            url: {default: ''},
+            title: {default: ''},
+            volume: {default: 0},
+            audioevents: {default: false},
+            targetattach: {default: false},
+            autoplay: {default: false},
+            // jsonData: {
+            //     parse: JSON.parse,
+            //     stringify: JSON.stringify
+            //   },
+            timekeys: {default: ''},
+            timeKeysIndex: {default: 0},
+            nextTimeKey: {default: 0},
+            useDefaultPlayer: {default: false}
+            // analyser: {default: 'selector'}
 
         },
 
         init: function () {
 
+            // LoadPrimaryAudioHowl(); 
+            // if (!primaryAudioHowl) {
+            //       let interval = setInterval(() => { //hrm...
+            //         if (primaryAudioHowl) {
+                        
+            //             clearInterval(interval);
+            //         } else {
+            //             console.log("primaryAudioHowl not found!");
+            //         }
+            //     }, 1000);
+
+            // }
+            // primaryAudioHowl = 
+
+            console.log("primaryAudioHowl : "+primaryAudioHowl);
             this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
             this.primaryAudioHowl = primaryAudioHowl;
+            globalThis.primaryAudioHowl = primaryAudioHowl;
+
             this.mainTransportSlider = document.getElementById("mainTransportSlider");
             // let analyser = null;
             var data = this.data;
@@ -903,9 +924,9 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
         },
         tick: function(time, deltaTime) {
             
-            if (this.primaryAudioHowl != undefined) {
+            if (primaryAudioHowl && this.primaryAudioHowl != undefined) {
                 var data = this.data;
-                var seek = this.primaryAudioHowl.seek() || 0;
+                var seek = this.primaryAudioHowl.playing() ? this.primaryAudioHowl.seek() : 0;
                 seek = Number(seek).toFixed(1);
                 // this.currentTime = seek;
                 this.duration = this.primaryAudioHowl.duration().toFixed(2);
@@ -1191,10 +1212,12 @@ AFRAME.registerComponent('primary_audio_events', {
             if (patk == null) {
             let theData = this.el.getAttribute('data-audio-events');
             this.data.jsonData = JSON.parse(atob(theData)); //convert from base64;
-            let tkObject = {};
-            tkObject.listenTo = "Primary Audio";
+            // let tkObject = {};
+            // tkObject.listenTo = "Primary Audio";
 
-            tkObject.timekeys = this.data.jsonData.timekeys;
+            // tkObject.timekeys = this.data.jsonData.timekeys;
+
+            SetTimeKeysData(this.data.jsonData);
             // let timekeys = this.data.jsonData.timekeys;
             // timekeys.listenTo = "primary audio";
             // console.log("timekeys: " + timekeys);

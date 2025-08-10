@@ -10,6 +10,7 @@ import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAu
 // import { SetTimeKeysData } from "./landing.js";
 
 import { settings, profile } from "../connect/settings.js";
+// import { LoadPrimaryAudioHowl } from "./media.js";
 // import { playerPosition, playerRotation } from "../main/js/navigation.js";
 // import { profileLoaded } from "../connect/vtt.js";
 // import { profileLoaded } from "../vtt/vtt_main.mjs"; //pixi fu here!@
@@ -122,6 +123,7 @@ window.LocationRowClick = LocationRowClick;
 
 $(function() { 
    // InitIDB();
+      // LoadPrimaryAudioHowl();
    if (avatarNameEl) {
       avatarName = avatarNameEl.id;
    }
@@ -139,6 +141,9 @@ $(function() {
       SetTimeKeysData(JSON.parse(atob(theTimedEventsData)));
       // timeKeysData =  JSON.parse(atob(theTimedEventsData));
       SetTimedEventsListenerMode(timeKeysData.listenTo);
+
+      
+
       // timedEventsListenerMode = ;
       // window.timedEventsListenerMode = timedEventsListenerMode;
       console.log("timekeys Data1: " + JSON.stringify(timeKeysData));

@@ -24,13 +24,14 @@ console.log("tryna add buttons!");
 
     container.y = app.screen.height - (app.screen.height * .1);
     container.x = app.screen.width / 2;
-// container.height = app.screen.height;
-// container.width = app.screen.width;
-//  const button = new Button(
-//       new Graphics()
-//           .rect(0, 0, 100, 50, 15)
-//           .fill(0xFFFFFF)
-//  );
+
+    // container.height = app.screen.height;
+    // container.width = app.screen.width;
+    //  const button = new Button(
+    //       new Graphics()
+    //           .rect(0, 0, 100, 50, 15)
+    //           .fill(0xFFFFFF)
+    //  );
     // const bGraphic1 = new Graphics();
     // bGraphic1.x = app.screen.width / 2;
     // bGraphic1.y = app.screen.height / 2;
@@ -52,6 +53,7 @@ console.log("tryna add buttons!");
             }
         }
     });
+
     const fontsize = Math.max(16, window.innerWidth / 50); 
     const text = new Text({
         text: 'Play',
@@ -69,54 +71,53 @@ console.log("tryna add buttons!");
         }
     });
 
-   
-
     const scaleFactor = app.stage.width / 1500;
     const width = 100 * scaleFactor;
     const height = 50 * scaleFactor;
+    const strokeWidth = 3 * scaleFactor;
 
     playButton = new FancyButton({
-    defaultView: new Graphics()
-    .roundRect(0, 0, width, height, 25)
-    .stroke({ color: 'black', width: 6 })
-    .fill({ color: "SkyBlue", alpha: .75 }),
-    hoverView: new Graphics()
-    .roundRect(0, 0, width, height, 25)
-    .stroke({ color: 'black', width: 6 })
-    .fill({ color: "LightBlue", alpha: .75 }),
-    pressedView: new Graphics()
-    .roundRect(0, 0, width, height, 25)
-    .stroke({ color: 'black', width: 6 })
-    .fill({ color: "LightCoral", alpha: .75 }),
-    disabledView: new Graphics()
-    .roundRect(0, 0, width, height, 25)
-        .stroke({ color: 'black', width: 6 })
-    .fill({ color: "DarkGray", alpha: .75 }),
-    width: width,
-    height: height,
-   
-    anchor: 0.5,
-    text: text,
+        defaultView: new Graphics()
+        .roundRect(0, 0, width, height, 25)
+        .stroke({ color: 'black', width: strokeWidth })
+        .fill({ color: "SkyBlue", alpha: .75 }),
+        hoverView: new Graphics()
+        .roundRect(0, 0, width, height, 25)
+        .stroke({ color: 'black', width: strokeWidth })
+        .fill({ color: "LightBlue", alpha: .75 }),
+        pressedView: new Graphics()
+        .roundRect(0, 0, width, height, 25)
+        .stroke({ color: 'black', width: strokeWidth })
+        .fill({ color: "LightCoral", alpha: .75 }),
+        disabledView: new Graphics()
+        .roundRect(0, 0, width, height, 25)
+            .stroke({ color: 'black', width: strokeWidth })
+        .fill({ color: "DarkGray", alpha: .75 }),
+        width: width,
+        height: height,
+    
+        anchor: 0.5,
+        text: text,
 
-    animations: {
-        hover: {
-            props: {
-                scale: {
-                    x: 1.1,
-                    y: 1.1,
-                }
+        animations: {
+            hover: {
+                props: {
+                    scale: {
+                        x: 1.1,
+                        y: 1.1,
+                    }
+                },
+                duration: 100,
             },
-            duration: 100,
-        },
-        pressed: {
-            props: {
-                scale: {
-                    x: 0.9,
-                    y: 0.9,
-                }
-            },
-            duration: 100,
-        }
+            pressed: {
+                props: {
+                    scale: {
+                        x: 0.9,
+                        y: 0.9,
+                    }
+                },
+                duration: 100,
+            }
         }
     });
 

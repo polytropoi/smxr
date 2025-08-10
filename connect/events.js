@@ -11,13 +11,15 @@ export let tkStarttimes = [];
 export let timedEventsListenerMode = "";
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
 
+
+
 export function ResetTimedEvents () {
     timeKeysIndex = 0;
 }
 
 
 function TimedEventListener () { 
-//  console.log("TimedEventsListener" + timedEventsListenerMode + JSON.stringify(timeKeysData) );
+//  console.log("TimedEventsListener " + timedEventsListenerMode + " isplaying " +primaryAudioHowl.playing());
  // let primaryAudioTime = 0;
  timeKeysIndex = 0;
  let timekey = 0;
@@ -38,11 +40,13 @@ function TimedEventListener () {
             // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
             //    timeKeysIndex = 0;
             // }
+
             if (primaryAudioHowl && primaryAudioHowl != undefined && primaryAudioHowl != null && primaryAudioHowl.playing()) {
                
                // primaryAudioEl.components.primary_audio_control.updateStatus(true);
 
                let primaryAudioTime = primaryAudioHowl.seek();
+               // console.log(primaryAudioTime + " vs " + timekey);
                
                if (primaryAudioTime != 0 && primaryAudioTime < .2) { //fudge in case
                   timeKeysIndex = 0; 
@@ -138,8 +142,9 @@ function ClearIntervals () {
 
 function LoopTimedEvent(keyType, duration, keydata, keytags) {
    
+   console.log("tryna LoopTimedEvent pausedLoops " + pauseLoops );
    duration = parseFloat(duration).toFixed(2) * 1000;
-   // console.log("tryna looop " + keyType  + " " +duration);
+   console.log("tryna looop " + keyType  + " " +duration);
    let beatElements = document.getElementsByClassName("beatme");
    let envEl = document.getElementById('enviroEl');
    let skyEl = document.getElementById('skyEl');
@@ -151,7 +156,7 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
             GoToNext();
          } 
          if (keyType.toLowerCase().includes("beat")) {
-            // console.log("beat loop " + duration);
+            console.log("beat loop " + duration);
             if (beatElements != null) {
                // console.log("beat objex " + beatElements.length)
                
@@ -271,7 +276,7 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
 }  //end loop event
 
 function PlayTimedEvent(timeKey) {
-//  console.log("tryna play timed event: " + JSON.stringify(timeKey));
+ console.log("tryna play timed event: " + JSON.stringify(timeKey));
 
  let duration = 1;
  if (timeKey.keyduration) {
@@ -521,13 +526,13 @@ export function SetVideoEventsData (type) {
 
    if (tkStarttimes.length > 0) {
       let teMode = "Primary Video";
-      if (!timedEventsListenerMode) {
-         teMode = timedEventsListenerMode;
+         if (!timedEventsListenerMode) {
+            teMode = timedEventsListenerMode;
+         }
+      console.log("tryna run video events listenr with timedEventsListenerMode : " + teMode);
+      TimedEventListener();
       }
-     console.log("tryna run video events listenr with timedEventsListenerMode : " + teMode);
-     TimedEventListener();
    }
- }
 }
 function SetYoutubeEventsData() {
 
@@ -540,9 +545,14 @@ export function SetTimedEventsListenerMode(mode) {
 
 export function SetTimeKeysData (tkData) {
    timeKeysData = tkData;
-   console.log("SetTimeKeysData!");
-   // SetPrimaryAudioEventsData();
+   console.log("SetTimeKeysData !" + timeKeysData.listenTo);
+   // 
    localData.timedEvents = timeKeysData;
+   timedEventsListenerMode = timeKeysData.listenTo;
+   if (timedEventsListenerMode == "Primary Audio") {
+      SetPrimaryAudioEventsData();
+   }
+   // if (timedEventsListenerMode) 
   
 }
 
