@@ -152,7 +152,9 @@ async function prePreLoader () {
       let theTimedEventsData = timedEventsEl.getAttribute('data-timedevents');
       const tkData =  JSON.parse(atob(theTimedEventsData));
 
-      SetTimedEventsListenerMode(timeKeysData.listenTo);
+      if (tkData.listenTo) {
+        SetTimedEventsListenerMode(tkData.listenTo);
+      }
       // timedEventsListenerMode = ;
       // window.timedEventsListenerMode = timedEventsListenerMode;
       console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
