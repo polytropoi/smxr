@@ -105,3 +105,45 @@ export function HideSplashTexts(uicontainer) {
     uicontainer.removeChildren();
 }
 
+const newFontSize = Math.max(16, window.innerWidth / 20); 
+let eventText;
+
+export function addEventText(app, textData, uicontainer) {
+
+
+    if (!eventText) {
+        eventText = new Text({
+            text: textData,
+            style: {
+            fill: '#ffffff',
+            fontSize: newFontSize,
+            fontFamily: 'Acme',
+            stroke: { color: '#4a1850', width: 5, join: 'round' },
+                dropShadow: {
+                color: '#000000',
+                blur: 4,
+                angle: Math.PI / 6,
+                distance: 6,
+                }
+            },
+            anchor: 0.5
+        });
+        uicontainer.addChild(eventText);
+    } else {
+        eventText.text = textData;
+    }
+
+    const randomSignY = Math.random();
+    const randomSignX = Math.random();
+    
+    const randomY = (randomSignY > .5) ? (Math.random() / 1.5) : (Math.random() / 1.5) * -1;  
+    const randomX = (randomSignX > .5) ? (Math.random() / 6) : (Math.random() /6) * -1;  
+
+        console.log("tryuna set eventtext " + randomY + " " + randomX);
+    eventText.y = app.screen.height * randomY;
+    eventText.x = app.screen.width * randomX;
+
+    // playerText.y += 20;
+
+
+}

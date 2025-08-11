@@ -1,8 +1,8 @@
-import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, VideoSource } from 'pixi';
+import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMatrixFilter } from 'pixi';
 // import { CompositeTilemap } from 'pixi-tilemap';
 import { mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter } from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
-
+import { AdvancedBloomFilter, ReflectionFilter } from '@pixi/filters';
 export let mapsize = {};
 
 export let background;
@@ -274,6 +274,7 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
 
     spritesContainer.addChild(backgroundPictureGroupSprite);
 
+
     // if (app.screen.width > app.screen.height) {
     //     spritesContainer.width = app.screen.width - (app.screen.width * .1);
     //         // background.width = app.screen.width;
@@ -387,6 +388,48 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
   // }
 
 
+    const filter = new ColorMatrixFilter();
+    filter.alpha = .25;
+    const bloomfilter = new AdvancedBloomFilter();
+    bloomfilter.bloomScale = 2;
+    spritesContainer.filters = [filter, bloomfilter];
+
+
+  let count = 0;
+  let enabled = true;
+      let randomFactor = Math.random();
+
+
+  app.ticker.add(() => {
+    // bg.rotation += 0.01;
+    // bgFront.rotation -= 0.01;
+    // light1.rotation += 0.02;
+    // light2.rotation += 0.01;
+
+    // panda.scale.x = 1 + Math.sin(count) * 0.04;
+    // panda.scale.y = 1 + Math.cos(count) * 0.04;
+
+    count += 0.01;
+
+    if (count > 10) {
+      count = 0;
+      // randomFactor = Math.random();
+    }
+
+    bloomfilter.bloomScale = Math.sin(randomFactor);
+      
+    randomFactor = Math.cos(randomFactor);
+    // Animate the filter
+    const { matrix } = filter;
+
+
+    matrix[1] = Math.sin(count) * 3 * randomFactor;
+    matrix[2] = Math.cos(count)  * randomFactor;
+    matrix[3] = Math.cos(count) * 1.5  * randomFactor;
+    matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
+    matrix[5] = Math.sin(count / 2)  * randomFactor;
+    matrix[6] = Math.sin(count / 4)  * randomFactor;
+  });
     // }
   viewport.animate({
       // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position

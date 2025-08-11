@@ -6,6 +6,12 @@ let timeKeysIndex = 0;
 let listenerInterval = null;
 let pauseLoops = false;
 let loopIntervals = [];
+let eventTriggersSet = false;
+
+let timed_event = new Event("timed-event");
+export let eventEl = document.createElement("div");
+eventEl.id = "eventEl";
+
 export let timeKeysData = {};
 export let tkStarttimes = [];
 export let timedEventsListenerMode = "";
@@ -16,7 +22,18 @@ export let timedEventsListenerMode = "";
 export function ResetTimedEvents () {
     timeKeysIndex = 0;
 }
+//    SetEventTriggers();
+// function SetEventTriggers () {
+//    eventTriggersSet = true;
 
+//    beatEvent = new CustomEvent('beat-event', {
+//    bubbles: true,
+//    detail: {
+//       message: 'Data passed with the event',
+//       timestamp: Date.now()
+//    }
+// });
+// }
 
 function TimedEventListener () { 
 //  console.log("TimedEventsListener " + timedEventsListenerMode + " isplaying " +primaryAudioHowl.playing());
@@ -280,11 +297,15 @@ function PlayTimedEvent(timeKey) {
    duration = timeKey.keyduration * 1000;
  }
 
+      // console.log("tryna displatch beatz");
+   timed_event.details = timeKey;
+   eventEl.dispatchEvent(timed_event);
+
  let posObj = {};
  let rotObj = {};
  let tempLabel = "";
    if (timeKey.keydata.toLowerCase().includes('loop')) {
-      LoopTimedEvent(timeKey.keytype, timeKey.keyduration, timeKey.keydata, timeKey.keytags);
+      LoopTimedEvent(timeKey.keytype, timeKey.keyduration, timeKey.keydata, timeKey.keytags); //above
       // return null;
       if (timeKey.keytype.toLowerCase().includes("color lerp")) {
          console.log("tryna beat loop");
@@ -307,13 +328,17 @@ function PlayTimedEvent(timeKey) {
       }
    }
    if (timeKey.keytype.toLowerCase().includes("beat")) {
-      if (primaryAudioEl != null) {
+      if (primaryAudioEl != null) { //i.e. aframe
          // console.log("beat volume " + volume);
          primaryAudioEl.components.primary_audio_control.timekey_beat(.5);
+      } else {
+         // console.log("tryna displatch beatz");
+         // timed_event.details = {"beat"}
+         // eventEl.dispatchEvent(timed_event);
       }
-   let beatElements = document.getElementsByClassName("beatme");
-   let envEl = document.getElementById('enviroEl');
-   // let skyEl = document.getElementById('skyEl');
+      let beatElements = document.getElementsByClassName("beatme");
+      let envEl = document.getElementById('enviroEl');
+      // let skyEl = document.getElementById('skyEl');
       console.log("beat loop " + duration);
       if (beatElements != null) {
          // console.log("beat objex " + beatElements.length)
@@ -579,6 +604,7 @@ export function SetTimeKeysData (tkData) {
       SetPrimaryAudioEventsData();
    }
    // if (timedEventsListenerMode) 
+   // SetEventTriggers();
   
 }
 

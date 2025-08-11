@@ -5,7 +5,7 @@ import { Viewport } from 'pixi-viewport';
 
 // import { LayoutSystem } from '@pixi/layout';
 import { addBackground, addMap, addBackgroundVideo, addBackgroundPictures } from './addBackground.mjs';
-import { addText, addPlayerProfileText } from './addText.mjs';
+import { addText, addPlayerProfileText, addEventText } from './addText.mjs';
 import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './addElements.mjs';
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
@@ -14,11 +14,10 @@ import { LoadPrimaryAudioHowl, ReturnAudioGroupsData } from '../connect/media.js
 import { settings, profile } from '../connect/settings.js';
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData} from "../../connect/events.js";
 import { addButtons, addFancyButtons, isPlaying } from './addButtons.mjs';
-import { SetTimeKeysData } from '../connect/events.js';
-// import {  } from '../connect/events.js';
+import { SetTimeKeysData, eventEl } from '../connect/events.js';
+import { keydown } from '../main/js/dialogs.js';
 
 
-// Create a PixiJS application.
 export const app = new Application();
 let viewport;
 export let viewportVerticalCenter = 2; //i.e. /2 = center
@@ -89,6 +88,16 @@ function onResize () {
   parent.style.width = window.innerWidth;
   parent.style.height = window.innerHeight;
 
+}
+function onTimedEvent (event) {
+  console.log("gotsa timed-event! " + JSON.stringify(event.details));
+  if (event.details.keytype == "Beat") {
+    // addEventText(app, "beat", uicontainer);
+    console.log("beat!");
+  }
+  if (event.details.keytype == "Text Show") {
+    addEventText(app, event.details.keydata, uicontainer);
+  }
 }
 
 async function setup() {
@@ -167,6 +176,7 @@ async function prePreLoader () {
    }
 
 }
+
 
 
 async function preload() {
@@ -362,10 +372,11 @@ export async function GoWithIt() { //called from vtt.js
   // if (viewport) {
   //     viewport.addChild(uicontainer); 
   // } else {
-    app.stage.addChild(uicontainer);
+  app.stage.addChild(uicontainer);
   // }
 
 
 
   // window.addEventListener('resize', onResize);
+  eventEl.addEventListener('timed-event', onTimedEvent);
 }
