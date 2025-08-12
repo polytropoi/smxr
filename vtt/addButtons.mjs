@@ -139,11 +139,14 @@ console.log("tryna add buttons!");
 }
 
 async function PlayPauseToggle() {
-    // console.log("timedEvents Mode " + ReturnTimedEventsListenerMode());
+    console.log("timedEvents Mode " + ReturnTimedEventsListenerMode());
     if (ReturnTimedEventsListenerMode() == "Primary Audio") {
         PrimaryAudioPlayPauseToggle();
         isPlaying = await PrimaryAudioIsPlaying();
     
+    } else { //umm, later...
+        PrimaryAudioPlayPauseToggle();
+        isPlaying = await PrimaryAudioIsPlaying();
     }
 
     if (isPlaying) {

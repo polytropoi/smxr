@@ -715,6 +715,7 @@ export function SaveModsToCloud() { //Save button on location modal, writes loca
       }
       
       mods.locationMods = localData.locations;
+
       console.log("mods.locationMods " + JSON.stringify(mods));
       for (let i = 0; i < mods.locationMods.length; i++) { //pop the properties for non-uniform scaling...
          if (mods.locationMods[i].xscale == null) {
@@ -734,7 +735,7 @@ export function SaveModsToCloud() { //Save button on location modal, writes loca
       if (volumePrimary != "" ||volumeAmbient != "" || volumeTrigger != "") {
          mods.volumeMods = {volumePrimary: volumePrimary, volumeAmbient: volumeAmbient, volumeTrigger: volumeTrigger};
       }
-      mods.timedEventMods = localData.timedEvents;
+      mods.sceneTimedEvents = localData.timedEvents;
       mods.sceneEnvironmentPreset = localData.settings.sceneEnvironmentPreset;
       mods.sceneTags = localData.settings.sceneTags;
       // console.log(JSON.stringify(mods));

@@ -591,17 +591,19 @@ export function SetTimedEventsListenerMode(mode) {
 }
 
 export function SetTimeKeysData (tkData) {
-   timeKeysData = tkData;
-   console.log("SetTimeKeysData !" + timeKeysData.listenTo);
-   // 
-   
-   localData.timedEvents = timeKeysData;
+   if (tkData && tkData.timekeys && tkData.timekeys.length) {
+      timeKeysData = tkData;
+      console.log("SetTimeKeysData !" + timeKeysData.listenTo);
+      // 
+      
+      localData.timedEvents = timeKeysData;
 
-   if (timeKeysData.listenTo) {
-      timedEventsListenerMode = timeKeysData.listenTo;
-   }
-   if (timedEventsListenerMode == "Primary Audio") {
-      SetPrimaryAudioEventsData();
+      if (timeKeysData.listenTo) {
+         timedEventsListenerMode = timeKeysData.listenTo;
+      }
+      if (timedEventsListenerMode == "Primary Audio") {
+         SetPrimaryAudioEventsData();
+      }
    }
    // if (timedEventsListenerMode) 
    // SetEventTriggers();

@@ -5425,7 +5425,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
             
             (async () => {
                 try {
-                    console.log("TRYNA ADD SCENE MODS mods ");
+                    // console.log("TRYNA ADD SCENE MODS mods " + JSON.stringify(req.body));
                     const query = {"short_id": req.params.s_id};
                     const scene = await RunDataQuery("scenes", "findOne", query);
                     if (!scene.sceneTags.includes("no mods")) { 
@@ -5592,6 +5592,10 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                 scenequery.sceneTags = req.body.sceneTags;
                                 console.log("sceneTags mods " + scenequery.sceneTags);
                             }
+                            if (req.body.sceneTimedEvents != null) {
+                                scenequery.sceneTimedEvents = req.body.sceneTimedEvents;
+                                console.log("sceneTimedEvents mods " + JSON.stringify(scenequery.sceneTimedEvents));
+                            }
                             if (req.body.locationMods != null) {
                                 console.log("REQ.BODY.LOCATIONMODS " + JSON.stringify(req.body.locationMods));
                                 for (let l = 0; l < req.body.locationMods.length; l++) {
@@ -5671,6 +5675,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                 }
                                         
                             }
+
                             scenequery.sceneLocations = updatedSceneLocations; //?
                         const finalquery = {'short_id': req.params.s_id};
                         const updoc = { $set: scenequery };
