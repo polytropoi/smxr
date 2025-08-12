@@ -148,7 +148,7 @@ $(function() {
       // window.timedEventsListenerMode = timedEventsListenerMode;
       console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
    }
-   lastCloudUpdate = settings.sceneLastUpdate;
+
 
    if (typeof window.ethereum !== 'undefined') {
       console.log('MetaMask is installed!');
@@ -165,8 +165,7 @@ $(function() {
    // this.statsDiv = document.getElementById("transportStats");
    // document.getElementsByTagName('a-sky')[0].setAttribute('radius', 400); //nope!?!   
 
-   console.log("room: " +room + " vid " + settings.sceneVideoStreams + " type " + settings.sceneType);
-
+   
    setTimeout(function () {
       // localStorage.setItem("last_page", room);
       tcheck(); //token auth
@@ -250,8 +249,9 @@ $(function() {
       }   
       // InitIDB();
    }
+   console.log("room: " +room + " vid " + settings.sceneVideoStreams + " type " + settings.sceneType);
 
-
+   lastCloudUpdate = settings.sceneLastUpdate;
    if (settings.useMatrix) {
       console.log("Loading browser MATRIX sdk!!!");
       GetMatrixData();

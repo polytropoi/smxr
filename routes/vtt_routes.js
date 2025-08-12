@@ -500,9 +500,9 @@ vtt_router.get('/:_id', function (req, res) {
                     if (sceneData.sceneTags[i] == "show transport") {
                         showTransport = true;
                     }
-                    if (sceneData.sceneTags[i] == "show dialog") {
+                    // if (sceneData.sceneTags[i] == "show dialog") {
                         showDialog = true;
-                    }
+                    // }
                     if (sceneData.sceneTags[i] == "show buttons") {
                         showSceneManglerButtons = true;
                     }

@@ -51,39 +51,10 @@ export function animateWaterOverlay(app, time) {
 
 
 export function addGridOverlay(app, tilesize, xcount, ycount, mapwidth, mapheight, spritesContainer, viewport) {
-    //Create a Graphics object and draw a pixel-perfect line
+ 
   // let graphics = new Graphics().moveTo(0, 0).lineTo(window.width, window.height).stroke({ color: 0xff0000, pixelLine: true });
   const gridPixel = buildGrid(app, tilesize, xcount, ycount, mapwidth, mapheight, new Graphics()).stroke({ color: 0x4d4d4d, pixelLine: true, width: .1 });
 
-  // Add it to the stage
-  // app.stage.addChild(graphics);
-    // Create a container to hold both grids
-  // const container = new Container();
-
   spritesContainer.addChild(gridPixel);
-  // if (app.screen.width > app.screen.height) {
-  //   // background.width = app.screen.width - (app.screen.width * .2);
-  //   container.x = app.screen.width - (app.screen.width * .2);
-  // container.y = app.screen.height / 2;
-  //       // background.width = app.screen.width;
-  //   // background.scale.y = background.scale.x;
-  // } else {
-  //   /**
-  //    * If the preview is square or portrait, then fill the height of the screen instead
-  //    * and apply the scaling to the horizontal scale accordingly.
-  //    */
-  //   // background.height = app.screen.height - (app.screen.height * .2);
-  //   // background.scale.x = background.scale.y;
-  //   container.x = app.screen.width / 2;
-  // container.y = app.screen.height - (app.screen.height * .2);
-    
-  // }
 
-  // // Center the container on screen
-  // container.x = app.screen.width / 2;
-  // container.y = app.screen.height / 2;
-  //   container.x = 0;
-  // container.y = 0;
-  // app.stage.addChild(container);
-          // viewport.addChild(container);
 }

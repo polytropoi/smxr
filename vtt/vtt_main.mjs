@@ -15,13 +15,21 @@ import { settings, profile } from '../connect/settings.js';
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData} from "../../connect/events.js";
 import { addButtons, addFancyButtons, isPlaying } from './addButtons.mjs';
 import { SetTimeKeysData, eventEl } from '../connect/events.js';
-import { keydown } from '../main/js/dialogs.js';
+// import { keydown } from '../main/js/dialogs.js';
 
 
 export const app = new Application();
 let viewport;
 export let viewportVerticalCenter = 2; //i.e. /2 = center
 export let viewportHorizontalCenter = 2; //i.e. /2 = center
+export let fontFillColor = 'white';
+export let fontFillColorAlt = 'SkyBlue';
+export let fontStrokeColor = 'black';
+export let font1 = 'Acme';
+export let font2 = 'Acme';
+export let font3 = 'Acme';
+
+
 const spritesContainer = new Container();
 const spriteLayer = new RenderLayer();
 const uicontainer = new Container( {layout: {
@@ -89,14 +97,14 @@ function onResize () {
   parent.style.height = window.innerHeight;
 
 }
-function onTimedEvent (event) {
+function onTimedEvent (event) { //events dispatched from events.js, through id=eventsEl
   console.log("gotsa timed-event! " + JSON.stringify(event.details));
   if (event.details.keytype == "Beat") {
     // addEventText(app, "beat", uicontainer);
     console.log("beat!");
   }
   if (event.details.keytype == "Text Show") {
-    addEventText(app, event.details.keydata, uicontainer);
+    addEventText(app, event.details, uicontainer);
   }
 }
 
@@ -175,6 +183,38 @@ async function prePreLoader () {
       LoadPrimaryAudioHowl();
    }
 
+ 
+
+    // Assets.addBundle('fonts', [{ alias: 'Acme', src: '../../fonts/web/Acme.woff' }]);
+
+    if (settings && settings.sceneFontFillColor) {
+      fontFillColor = settings.sceneFontFillColor;
+    }
+    if (settings && settings.sceneTextBackgroundColor) {
+      // fontFillColorAlt = settings.sceneTextBackgroundColor;
+    }
+    if (settings && settings.sceneFontWeb1) {
+      let fonts = [];
+      fonts.push({ alias: 'Acme', src: '../../fonts/web/Acme.woff' });
+      font1 = settings.sceneFontWeb1;
+      console.log("FONT 1 IS "+ font1);
+      const font1path = "../../fonts/web/" + font1.toString();
+      fonts.push({ alias: stripExtension(font1), src: font1path  });
+      
+      Assets.addBundle('fonts', fonts); 
+   
+    }
+
+
+
+}
+
+export function stripExtension(filename) {
+  const lastDotIndex = filename.lastIndexOf('.');
+  if (lastDotIndex === -1) { // No extension found
+    return filename;
+  }
+  return filename.substring(0, lastDotIndex);
 }
 
 
@@ -224,6 +264,7 @@ async function preload() {
   // Load the assets defined above.
 
   await Assets.load(assets);
+await Assets.loadBundle('fonts');
 
 }
 

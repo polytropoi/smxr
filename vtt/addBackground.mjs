@@ -239,26 +239,11 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
 
   let viewOrientation = "landscape";
   let picOrientation = "landscape";
-          let modFactor = Math.random();
+    let modFactor = Math.random();
     const signFactor = Math.random();
     let modScaleFactor = Math.random();
     const signScaleFactor = Math.random();
 
-    // if (app.screen.width > app.screen.height) {
-    //     spritesContainer.width = app.screen.width - (app.screen.width * .1);
-    //         // background.width = app.screen.width;
-    //     spritesContainer.scale.y = spritesContainer.scale.x;       
-    // } else if (app.screen.width < app.screen.height){
-    //   viewOrientation = "portrait";
-    //   spritesContainer.height = app.screen.height - (app.screen.height * .1);
-    //   spritesContainer.scale.x = spritesContainer.scale.y;
-    // } else {
-    //   viewOrientation = "square";
-    // }
-
-    // spritesContainer.x = app.screen.width * .05;
-    // spritesContainer.y = app.screen.height * .05;
-    // spritesContainer.anchor = .5;
 
   if (!backgroundPictureGroupSprite) {
     const firstTexture = Texture.from(id);
@@ -275,21 +260,6 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
     spritesContainer.addChild(backgroundPictureGroupSprite);
 
 
-    // if (app.screen.width > app.screen.height) {
-    //     spritesContainer.width = app.screen.width - (app.screen.width * .1);
-    //         // background.width = app.screen.width;
-    //     spritesContainer.scale.y = spritesContainer.scale.x;       
-    // } else if (app.screen.width < app.screen.height){
-    //   viewOrientation = "portrait";
-    //   spritesContainer.height = app.screen.height - (app.screen.height * .1);
-    //   spritesContainer.scale.x = spritesContainer.scale.y;
-    // } else {
-    //   viewOrientation = "square";
-    // }
-
-    // spritesContainer.x = app.screen.width * .05;
-    // spritesContainer.y = app.screen.height * .05;
-    // spritesContainer.anchor = .5;
 
     viewport.addChild(spritesContainer);
 
@@ -333,10 +303,7 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
       picOrientation = "portrait";
     }
     backgroundPictureGroupSprite.texture = newTexture;
-    //   if (newTexture.width == newTexture.height) {
-    //       SetViewportVerticalCenter(.75);
-    // }
-  
+
 
   }
   if (app.screen.width > app.screen.height) {
@@ -354,45 +321,31 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
   spritesContainer.x = app.screen.width * .05;
   spritesContainer.y = app.screen.height * .05;
   spritesContainer.anchor = .5;
-// console.log(foundObjectByName);
-  // const picdata  = pictureGroupsData.images[id];
-  
-  // console.log("picData " + JSON.stringify(picdata));
+
     console.log("picData orientation " + picOrientation + " viewOrientation " + viewOrientation);
-  // const sprite = Sprite.from(pictureGroupsData[0].items[randomIndex]);
-  //  spritesContainer.addChild(sprite);
 
+  if (viewOrientation == "landscape" && picOrientation == "square") {  
+    if (signFactor > .5) {
+      modFactor = (modFactor / 4) * -1
+    } else {
+      modFactor = (modFactor / 4);
+    }
+    SetViewportVerticalCenter(1.2 + modFactor);
 
-  // if (picdata.tags.includes("center down")) {
-  //   // SetViewportVerticalCenter(.75);
-  // } else {  
-
-      // if (pictureGroupsData[0].tags.includes("center down")) {
-      if (viewOrientation == "landscape" && picOrientation == "square") {  
-      
-        if (signFactor > .5) {
-          modFactor = (modFactor / 4) * -1
-        } else {
-          modFactor = (modFactor / 4);
-        }
-        SetViewportVerticalCenter(1.2 + modFactor);
-
-        if (signScaleFactor > .5) {
-          modScaleFactor = (modScaleFactor / 6) * -1
-        } else {
-          modScaleFactor = (modScaleFactor / 6);
-        }
-      } else {
-        SetViewportVerticalCenter(2.25);
-      }
-  // }
-
-
-    const filter = new ColorMatrixFilter();
-    filter.alpha = .25;
-    const bloomfilter = new AdvancedBloomFilter();
-    bloomfilter.bloomScale = 2;
-    spritesContainer.filters = [filter, bloomfilter];
+    if (signScaleFactor > .5) {
+      modScaleFactor = (modScaleFactor / 6) * -1
+    } else {
+      modScaleFactor = (modScaleFactor / 6);
+    }
+  } else {
+    SetViewportVerticalCenter(2.25);
+  }
+ 
+  const filter = new ColorMatrixFilter();
+  filter.alpha = .1;
+  const bloomfilter = new AdvancedBloomFilter();
+  bloomfilter.bloomScale = 2;
+  spritesContainer.filters = [filter, bloomfilter];
 
 
   let count = 0;
