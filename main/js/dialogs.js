@@ -201,6 +201,27 @@ window.addEventListener( 'keydown',  ( event ) => {
       SaveModsToCloud();
   
     });
+    $('#modalContent').on('click', '#startButton', function(e) {
+      console.log("tryna start from modal");
+      PreviousButton();
+    });
+    $('#modalContent').on('click', '#playPauseButton', function(e) {
+      console.log("tryna playpause from modal!");
+      PlayPauseMedia();
+    });
+    // onclick=\x22PlayPauseMedia()\x22
+    $('#modalContent').on('click', '#rewindButton', function(e) {
+      console.log("tryna rewind from modal!");
+      RewindButton();
+    });
+    $('#modalContent').on('click', '#ffwdButton', function(e) {
+      console.log("tryna rewind from modal!");
+      FastForwardButton();
+    });
+    $('#modalContent').on('click', '#ffwdButton', function(e) {
+      console.log("tryna rewind from modal!");
+      FastForwardButton();
+    });
   // })
 
   // $('#__deleteLocalSceneData').on('click', function(e) {
@@ -213,7 +234,7 @@ window.addEventListener( 'keydown',  ( event ) => {
   });
 
   $('#transport_play_button').on('click', function(e) {
-    TransportPlayButton();
+    PlayPauseMedia();
   });
 
   $('#transport_next_button').on('click', function(e) {
@@ -229,6 +250,9 @@ window.addEventListener( 'keydown',  ( event ) => {
     FastForwardButton();
   });
   $('#transport_rewind_button').on('click', function(e) {
+    RewindButton();
+  });
+  $('#rewind_button').on('click', function(e) {
     RewindButton();
   });
 
@@ -2338,11 +2362,11 @@ export function SceneManglerModal(mode, autoHide) {
             "</select>" +
         "</div>"+
         "<div>"+
-        "<button class=\x22deleteButton\x22 onclick=\x22PreviousButton()\x22>Start</button>"+
-        "<button class=\x22deleteButton\x22 onclick=\x22RewindButton()\x22><<</button>"+
-            "<button class=\x22deleteButton\x22 onclick=\x22PlayPauseMedia()\x22>Play/Pause</button>"+
-            "<button class=\x22deleteButton\x22 onclick=\x22FastForwardButton()\x22>>></button>"+
-            "<button class=\x22deleteButton\x22 onclick=\x22NextButton()\x22>End</button>"+
+        "<button id=\x22startButton\x22 class=\x22deleteButton\x22 >Start</button>"+
+        "<button id=\x22rewindButton\x22 class=\x22deleteButton\x22 ><<</button>"+
+            "<button id=\x22playPauseButton\x22 class=\x22deleteButton\x22 >Play/Pause</button>"+
+            "<button id=\x22ffwdButton\x22 class=\x22deleteButton\x22 >>></button>"+
+            "<button id=\x22endButton\x22 class=\x22deleteButton\x22 >End</button>"+
             "<div class=\x22\x22 style=\x22margin: 20px; padding: 20px;\x22 id=\x22modalTimeStats\x22>"+fancyTimeString+"</div>" +
             "</div>"+
             ReturnTimeKeys() +

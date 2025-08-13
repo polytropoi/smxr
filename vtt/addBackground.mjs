@@ -1,12 +1,13 @@
 import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMatrixFilter } from 'pixi';
 // import { CompositeTilemap } from 'pixi-tilemap';
-import { mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter } from './vtt_main.mjs';
+import { sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter } from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
-import { AdvancedBloomFilter, ReflectionFilter } from '@pixi/filters';
+import { AdvancedBloomFilter, ReflectionFilter, OldFilmFilter } from '@pixi/filters';
 export let mapsize = {};
 
 export let background;
 export let backgroundPictureGroupSprite;
+// import { settings } from '../connect/settings.js';
 
 export function addBackground(app, viewport, isTileable) {
 
@@ -341,12 +342,28 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
     SetViewportVerticalCenter(2.25);
   }
  
-  const filter = new ColorMatrixFilter();
-  filter.alpha = .1;
+  const colormatrixfilter = new ColorMatrixFilter();
+  colormatrixfilter.alpha = .1;
+  
   const bloomfilter = new AdvancedBloomFilter();
   bloomfilter.bloomScale = 2;
-  spritesContainer.filters = [filter, bloomfilter];
+  
+  const oldFilmFilter = new OldFilmFilter();
+  oldFilmFilter.seed = .9;
+  // oldFilmFilter.noise = .75;
+  let filters = [];
 
+
+  if (sceneTags && sceneTags.includes("color matrix")) {
+    filters.push(colormatrixfilter);
+  }
+  if (sceneTags && sceneTags.includes("bloom")) {
+    filters.push(bloomfilter);
+  }
+  if (sceneTags && sceneTags.includes("old film")) {
+    filters.push(oldFilmFilter);
+  }
+  spritesContainer.filters = filters;
 
   let count = 0;
   let enabled = true;
@@ -354,35 +371,29 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
 
 
   app.ticker.add(() => {
-    // bg.rotation += 0.01;
-    // bgFront.rotation -= 0.01;
-    // light1.rotation += 0.02;
-    // light2.rotation += 0.01;
-
-    // panda.scale.x = 1 + Math.sin(count) * 0.04;
-    // panda.scale.y = 1 + Math.cos(count) * 0.04;
-
+    
     count += 0.01;
-
-    if (count > 10) {
+    if (count > 1000) {
       count = 0;
       // randomFactor = Math.random();
     }
-
     bloomfilter.bloomScale = Math.sin(randomFactor);
       
     randomFactor = Math.cos(randomFactor);
+    oldFilmFilter.noise = Math.random();
+    oldFilmFilter.noiseSize = Math.random();
+    oldFilmFilter.seed = Math.random();
+    oldFilmFilter.scratchWidth = Math.random();
+
     // Animate the filter
-    const { matrix } = filter;
-
-
-    matrix[1] = Math.sin(count) * 3 * randomFactor;
-    matrix[2] = Math.cos(count)  * randomFactor;
-    matrix[3] = Math.cos(count) * 1.5  * randomFactor;
-    matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
-    matrix[5] = Math.sin(count / 2)  * randomFactor;
-    matrix[6] = Math.sin(count / 4)  * randomFactor;
-  });
+    const { matrix } = colormatrixfilter;
+      matrix[1] = Math.sin(count) * 3 * randomFactor;
+      matrix[2] = Math.cos(count)  * randomFactor;
+      matrix[3] = Math.cos(count) * 1.5  * randomFactor;
+      matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
+      matrix[5] = Math.sin(count / 2)  * randomFactor;
+      matrix[6] = Math.sin(count / 4)  * randomFactor;
+    });
     // }
   viewport.animate({
       // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position

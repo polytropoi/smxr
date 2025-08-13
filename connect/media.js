@@ -2,9 +2,9 @@
 // const require = createRequire(import.meta.url);
 // const {Howl, Howler} = require('../node_modules/howler/dist/howler.js');
 
-import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData} from "../../connect/events.js";
+import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData,  ResetTimedEvents, SetPrimaryAudioEventsData } from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
-import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
+// import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
 // import { Howl, Howler } from '../node_modules/howler/dist/howler.js';
 // import {Howl} from '../main/vendor/howler/src/howler.js';
 
@@ -31,6 +31,8 @@ export let primaryAudioEl = document.querySelector('#primaryAudio');
 export let primaryAudioHowl;
 
 export let audioGroupsData = {};
+
+export let isPlaying = false;
 
 let modalTimeStatsEl = null; //stats for timekeys modal
 let transportTimeStatsEl = null;
@@ -251,6 +253,7 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
     return timedEventsListenerMode;
    }
 
+   //playpause
 export function TransportPlayButton () {
   // console.log("TransportPlayButton clcik! " + JSON.stringify(youtubePlayer));
   console.log("TransportPlayButton clcik! " + primaryAudioMangler);
@@ -445,7 +448,8 @@ export function UpdateTriggerAudioVolume(newVolume) {
 export async function PrimaryAudioIsPlaying () {
   await primaryAudioHowl
   // if (primaryAudioHowl && primaryAudioHowl != undefined) {
-    return primaryAudioHowl.playing();
+  isPlaying = primaryAudioHowl.playing();
+    return isPlaying;
   // }
 }
 export function LoadPrimaryAudioHowl () {
@@ -482,6 +486,7 @@ export function PrimaryAudioPlayPauseToggle () {
           // this.el.emit('primaryAudioToggle', {isPlaying : true}, true);
           // this.isPlaying = true;
           PauseIntervals(false);
+          isPlaying = true;
           return true;
       } else {    
           console.log("tryna pause");
@@ -489,6 +494,7 @@ export function PrimaryAudioPlayPauseToggle () {
           // this.el.emit('primaryAudioToggle', {isPlaying : false}, true);
           // this.isPlaying = false;
           PauseIntervals(true);
+          isPlaying = false;
           return false;
       }
     } else {

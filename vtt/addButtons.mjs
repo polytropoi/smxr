@@ -2,9 +2,10 @@ import { Assets, Graphics, Container, Text } from 'pixi';
 
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 
-import { PrimaryAudioPlayPauseToggle, ReturnTimedEventsListenerMode, PrimaryAudioIsPlaying } from '../connect/media.js';
+import { PrimaryAudioPlayPauseToggle, ReturnTimedEventsListenerMode, PrimaryAudioIsPlaying, isPlaying } from '../connect/media.js';
 
-export let isPlaying = false;
+// export let isPlaying = false;
+// import 
 
 let playButton;
 
@@ -137,15 +138,15 @@ export async function addFancyButtons(app, buttonData, uicontainer) {
 
 async function PlayPauseToggle() {
     console.log("timedEvents Mode " + ReturnTimedEventsListenerMode());
-    if (ReturnTimedEventsListenerMode() == "Primary Audio") {
-        PrimaryAudioPlayPauseToggle();
-        isPlaying = await PrimaryAudioIsPlaying();
+    // if (ReturnTimedEventsListenerMode() == "Primary Audio") {
+    //     PrimaryAudioPlayPauseToggle();
+    //     isPlaying = await PrimaryAudioIsPlaying();
     
-    } else { //umm, later...
-        PrimaryAudioPlayPauseToggle();
-        isPlaying = await PrimaryAudioIsPlaying();
-    }
-
+    // } else { //umm, later...
+    //     PrimaryAudioPlayPauseToggle();
+    //     isPlaying = await PrimaryAudioIsPlaying();
+    // }
+    PrimaryAudioPlayPauseToggle();
     if (isPlaying) {
         playButton.defaultView.tint = 0xfc03b6; //({ color: "Yellow", alpha: .75 });
         playButton.options.text.text = "Pause";

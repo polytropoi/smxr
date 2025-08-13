@@ -10,15 +10,16 @@ import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './a
 import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
 import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
-import { LoadPrimaryAudioHowl, ReturnAudioGroupsData } from '../connect/media.js';
+import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../connect/media.js';
 import { settings, profile } from '../connect/settings.js';
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData} from "../../connect/events.js";
-import { addButtons, addFancyButtons, isPlaying } from './addButtons.mjs';
+import { addButtons, addFancyButtons } from './addButtons.mjs';
 import { SetTimeKeysData, eventEl } from '../connect/events.js';
 // import { keydown } from '../main/js/dialogs.js';
 
 
 export const app = new Application();
+export let sceneTags;
 let viewport;
 export let viewportVerticalCenter = 2; //i.e. /2 = center
 export let viewportHorizontalCenter = 2; //i.e. /2 = center
@@ -111,7 +112,7 @@ function onTimedEvent (event) { //events dispatched from events.js, through id=e
 async function setup() {
   // Intialize the application.
   console.log("background color " + settings.sceneColor1);
-  await app.init({ background: '#000000', resizeTo: window, antialias: true});
+  await app.init({ background: 'black', resizeTo: window, antialias: true});
   
 
   app.stage.layout = {
@@ -183,6 +184,9 @@ async function prePreLoader () {
       LoadPrimaryAudioHowl();
    }
 
+   if (settings && settings.sceneTags) {
+    sceneTags = settings.sceneTags;
+   }
  
 
     // Assets.addBundle('fonts', [{ alias: 'Acme', src: '../../fonts/web/Acme.woff' }]);
@@ -278,7 +282,9 @@ export async function GoWithIt() { //called from vtt.js
   await prePreLoader();
   await preload();
   console.log("sceneColor1 " + settings.sceneColor1 );
-  app.renderer.background.color = settings.sceneColor1;
+  if (!hasBackgroundPictureGroup) { //keep bg black for this
+    app.renderer.background.color = settings.sceneColor1; 
+  }
   if (mappicURL || backgroundVideoURL || hasBackgroundPictureGroup) { // just use a tag
 
     viewport = new Viewport({
@@ -357,7 +363,7 @@ export async function GoWithIt() { //called from vtt.js
           const newSprite = new Sprite(texture);
           newSprite.locationData = locationData[i];
           addSprite(app, newSprite, viewport );
-          spriteFilter(newSprite, "HardMixBlend");
+          // spriteFilter(newSprite, "HardMixBlend");
         }
       }
     }
