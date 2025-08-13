@@ -4,21 +4,18 @@ import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 
 import { PrimaryAudioPlayPauseToggle, ReturnTimedEventsListenerMode, PrimaryAudioIsPlaying } from '../connect/media.js';
 
-
 export let isPlaying = false;
 
 let playButton;
+
 export async function addFancyButtons(app, buttonData, uicontainer) {
 
-    if (ReturnTimedEventsListenerMode() == "None") {
-        return;
-    }
-console.log("tryna add buttons!");
+    // if (ReturnTimedEventsListenerMode() == "None") {
+    //     return;
+    // }
+    console.log("tryna add buttons!");
 
-  await Assets.addBundle('fonts', [
-    { alias: 'Acme', src: '../../fonts/web/Acme.woff' }
-
-  ]);
+// await Assets.addBundle('fonts', [{ alias: 'Acme', src: '../../fonts/web/Acme.woff' }]);
  
   const container = new Container();
 

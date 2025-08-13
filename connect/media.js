@@ -473,7 +473,7 @@ export function GetCurrentPrimaryAudioTime() {
 
 export function PrimaryAudioPlayPauseToggle () {
 
-  if (timedEventsListenerMode && timedEventsListenerMode == "Primary Audio") {
+  // if (timedEventsListenerMode && timedEventsListenerMode == "Primary Audio") {
     if (primaryAudioHowl && primaryAudioHowl != undefined) {
       // primaryAudioHowl;
       if (!primaryAudioHowl.playing()) {
@@ -500,7 +500,7 @@ export function PrimaryAudioPlayPauseToggle () {
         PrimaryAudioPlayPauseToggle();
       }
     }
-  }
+  // }
 }
 
 

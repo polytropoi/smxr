@@ -408,7 +408,10 @@ export async function GoWithIt() { //called from vtt.js
 
   const buttonData = {};
   addText(app, textData, uicontainer);
-  addFancyButtons(app, buttonData, uicontainer);
+  if (settings && settings.sceneTags && settings.sceneTags.includes("play button")) {
+    addFancyButtons(app, buttonData, uicontainer);
+  }
+
   
   // if (viewport) {
   //     viewport.addChild(uicontainer); 
