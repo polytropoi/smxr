@@ -222,6 +222,10 @@ window.addEventListener( 'keydown',  ( event ) => {
       console.log("tryna rewind from modal!");
       FastForwardButton();
     });
+    // $('#modalContent').on('click', '#disconnectButton', function(e) {
+    //   console.log("tryna rewind from modal!");
+      
+    // });
   // })
 
   // $('#__deleteLocalSceneData').on('click', function(e) {
@@ -229,6 +233,9 @@ window.addEventListener( 'keydown',  ( event ) => {
   //   DeleteLocalSceneData();
 
   // });
+  $('#disconnectButton').on('click', function(e) {
+    Disconnect();
+  });
   $('#dialog_button').on('click', function(e) {
     SceneManglerModal("Welcome");
   });

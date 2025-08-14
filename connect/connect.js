@@ -2211,6 +2211,8 @@ if (settings && !socket) {
       console.log("tryna join " + avatarName + " socketID " + socket.id);
       mySocketID = socket.id;
       socket.emit('join', room, avatarName, "web");
+      const disconnectButton = document.getElementById("disconnectButton");
+      disconnectButton.removeAttribute("hidden");
    
    });
 
@@ -2759,11 +2761,15 @@ function ReturnPlayerData() { //return my un/color to set marker at current map 
 export function Disconnect() {
    console.log("tryna disconnect..");
    socket.disconnect();
-   let roomAvatars = sceneEl.querySelectorAll('.avatar');
-   for (var a=0; a<roomAvatars.length; a++) { //clean up disconnected avatars
-      roomAvatars[a].remove();
+   if (sceneEl) {
+      let roomAvatars = sceneEl.querySelectorAll('.avatar');
+      for (var a=0; a<roomAvatars.length; a++) { //clean up disconnected avatars
+         roomAvatars[a].remove();
+      }
    }
    $('#users').html("disconnected");
+      const disconnectButton = document.getElementById("disconnectButton");
+      disconnectButton.style.display = "none";
    // document.querySelector("avatar").style.visibility = "hidden";
 }
 

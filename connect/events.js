@@ -147,7 +147,7 @@ export function PauseIntervals (pauseBool) {
    console.log("loops are paused " + pauseLoops);
 
 }
-function ClearIntervals () {
+export function ClearIntervals () {
    for (let i = 0; i < loopIntervals.length; i++) {
       console.log("clearing interval " + i);
       clearInterval(loopIntervals[i]);
@@ -542,7 +542,7 @@ export function SetPrimaryAudioEventsData () {
 
    // timeKeysData = JSON.parse(localStorage.getItem(room+ "_timeKeys"));
    // let timekeysData = settings.sceneTimedEvents;
-   console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
+   // console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
    tkStarttimes = [];
    if (timeKeysData != undefined && timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0 )
       timeKeysData.timekeys.forEach(function (timekey) {

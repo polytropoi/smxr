@@ -2788,13 +2788,23 @@ webxr_router.get('/:_id', function (req, res) {
                 triggerAudioSliderChunk = "<span id=\x22triggerAudioVolume\x22>Trigger Volume</span><div class=\x22slidecontainer\x22><input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+
                 sceneTriggerVolume+"\x22 class=\x22slider\x22 id=\x22triggerAudioVolumeSlider\x22></div>";
             }
+            const landingLink = "../landing/"+short_id;
+            const vttLink = "../vtt/"+short_id;
             let userText = "<div class=\x22smallfont\x22><span id=\x22userName\x22 class=\x22\x22>Welcome " + 
-            avatarName+ "</span>!&nbsp;&nbsp;<button id=\x22disconnect_button\x22 type=\x22button\x22 class=\x22btn\x22>Disconnect</button></div><hr>";
+            avatarName+ "</span>&nbsp;&nbsp;<button id=\x22disconnectButton\x22 hidden type=\x22button\x22 class=\x22btn\x22>Disconnect</button>&nbsp;&nbsp;"+
+            "<a href=\x22"+landingLink+"\x22 id=\x22landingButton\x22 type=\x22button\x22 class=\x22btn\x22>Landing </a>&nbsp;&nbsp;"+
+            "<a href=\x22"+vttLink+"\x22 id=\x22landingButton\x22 type=\x22button\x22 class=\x22btn\x22>VTT </a>&nbsp;&nbsp;"+
+
+            // "<button id=\x22landingButton\x22 type=\x22button\x22 class=\x22btn\x22>Landing </button>&nbsp;&nbsp;"+
+            // "<button id=\x22VTTButton\x22 type=\x22button\x22 class=\x22btn\x22>WebXR </button>"+
+            "</div><hr>";
             if (isGuest) {
                 userText = "<div><span id=\x22userName\x22 class=\x22smallfont\x22>Welcome Guest known as " + avatarName+ "</span>"+
                 //loginLink +
-                "<button id=\x22disconnect_button\x22 type=\x22button\x22 class=\x22btn\x22>Disconnect</button></div>\n"+
-                "<hr>";
+                "<button hidden id=\x22disconnectButton\x22 type=\x22button\x22 class=\x22btn\x22>Disconnect</button>\n"+
+                "<a href=\x22"+landingLink+"\x22 id=\x22landingButton\x22 type=\x22button\x22 class=\x22btn\x22>Landing </a>&nbsp;&nbsp;"+
+                "<a href=\x22"+vttLink+"\x22 id=\x22landingButton\x22 type=\x22button\x22 class=\x22btn\x22>VTT </a>&nbsp;&nbsp;"+
+                "</div><hr>";
             }
             let fromBy = "<div><span class=\x22smallfont\x22>From: <a href=\x22http://"+sceneResponse.sceneDomain+"\x22>" +
             sceneResponse.sceneDomain+ "</a><br><hr>By: " + sceneResponse.userName+ "</span></div><hr>\n"; 

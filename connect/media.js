@@ -2,7 +2,7 @@
 // const require = createRequire(import.meta.url);
 // const {Howl, Howler} = require('../node_modules/howler/dist/howler.js');
 
-import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData,  ResetTimedEvents, SetPrimaryAudioEventsData } from "../../connect/events.js";
+import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData,  ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals } from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
 // import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
 // import { Howl, Howler } from '../node_modules/howler/dist/howler.js';

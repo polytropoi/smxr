@@ -102,6 +102,7 @@ function onTimedEvent (event) { //events dispatched from events.js, through id=e
   console.log("gotsa timed-event! " + JSON.stringify(event.details));
   if (event.details.keytype == "Beat") {
     // addEventText(app, "beat", uicontainer);
+    addBackgroundPictures(app, viewport, spritesContainer);
     console.log("beat!");
   }
   if (event.details.keytype == "Text Show") {

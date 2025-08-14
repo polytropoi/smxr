@@ -119,6 +119,7 @@ export async function addFancyButtons(app, buttonData, uicontainer) {
         }
     });
 
+    playButton.alpha = .5;
     container.addChild(playButton);
 
     app.stage.addChild(container);
@@ -150,9 +151,11 @@ async function PlayPauseToggle() {
     if (isPlaying) {
         playButton.defaultView.tint = 0xfc03b6; //({ color: "Yellow", alpha: .75 });
         playButton.options.text.text = "Pause";
+        playButton.alpha = .1;
     } else {
         playButton.options.defaultView.tint = 0x538a72;
          playButton.options.text.text = "Play";
+                playButton.alpha = .5; 
     }
 }
 
