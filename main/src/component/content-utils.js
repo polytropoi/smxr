@@ -298,6 +298,13 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
         }
       }
 
+      if (settings && settings.sceneTags.includes("hudmap")) {
+        const renderCamera = document.getElementById("renderCamera");
+
+        renderCamera.setAttribute("camrender", {"cid": "topCameraCanvas"});
+        // camrender=\x22cid: topCameraCanvas\x22
+      }
+
       const backgroundVideoEl = document.getElementById("bgVideo");
               // console.log("GOTSA BACKGROUND VIDEO!@" + backgroundVideoEl);
       if (backgroundVideoEl) {
@@ -3522,6 +3529,8 @@ AFRAME.registerComponent('enviro_mods', { //tweak properties of environment comp
     this.enviroDressing = document.querySelector('.environmentDressing');
     this.enviroGround = document.querySelector('.environmentGround');
     this.enviroEl = document.getElementById('enviroEl');
+
+
     // this.skyEl = document.getElementById('a_sky');
     this.isLerping = false;
     this.isTweaking = false;
@@ -3533,6 +3542,18 @@ AFRAME.registerComponent('enviro_mods', { //tweak properties of environment comp
     }
     
 
+  },
+  returnEnvSize: function () {
+    console.log("tryna get size from enviro_mods");
+      if (this.enviroGround) { //for rendercam
+      const boundingBox = new THREE.Box3().setFromObject(this.enviroGround.getObject3D('mesh'));
+      const size = new THREE.Vector3();
+      boundingBox.getSize(size);
+      return size;
+      
+    } else {
+      console.log("caintfind no enviroGround");
+    }
   },
   loadPreset: function(preset) {
     console.log("tryna set enviro to " + preset + " fogDensity " + settings.sceneFogDensity );
@@ -5810,13 +5831,29 @@ AFRAME.registerComponent('camrender',{
        // Height of the renderer element
        height: {
             type: 'number',
-            default: 300
+            default: 1024
        },
        // Width of the renderer element
        width: {
             type: 'number',
-            default: 400
+            default: 1024
        }
+    },
+    'init': function () {
+      this.bbSize = new THREE.Vector3();
+      const enviroEl = document.getElementById('enviroEl');
+      if (enviroEl) {
+        if (enviroEl.components.enviro_mods) {
+        this.bbSize = enviroEl.components.enviro_mods.returnEnvSize(); //as Vector3
+
+        console.log("SIZE OF GROUNDMESH " + JSON.stringify(this.bbSize));
+        this.data.height = this.bbSize.x;
+        this.data.width = this.bbSize.z;
+        }
+      }
+      this.el.object3DMap.camera.aspect = 1;
+      this.el.object3DMap.camera.fov = 45;
+
     },
     'update': function(oldData) {
         var data = this.data
@@ -5829,14 +5866,18 @@ AFRAME.registerComponent('camrender',{
                 canvas: canvasEl
             });
             // Set properties for renderer DOM element
-            this.renderer.setPixelRatio( window.devicePixelRatio );
+            this.renderer.setPixelRatio( 1 );
+                  this.el.object3DMap.camera.aspect = 1;
+      this.el.object3DMap.camera.fov = 45;
             this.renderer.domElement.crossorigin = "anonymous";
         };
         if (oldData.width !== data.width || oldData.height !== data.height) {
             // Set size of canvas renderer
-            this.renderer.setSize(data.width, data.height);
-            this.renderer.domElement.height = data.height;
-            this.renderer.domElement.width = data.width;
+            console.log("ground size " + data.width + " " + data.height);
+
+            this.renderer.setSize(data.width * 4, data.height * 4);
+            this.renderer.domElement.height = data.height * 4;
+            this.renderer.domElement.width = data.width * 4;
         };
         if (oldData.fps !== data.fps) {
             // Set how often to call tick

@@ -6302,7 +6302,15 @@ app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
             const upquery = { "_id": s_id };
             const updateDoc = {$set: {scenePostcards: scenePostcards}};
             const status = await RunDataQuery("scenes", "updateOne", upquery, updateDoc);
-            res.send("updated: " + status);
+        
+
+            const ck = 'postcards/' + req.body.scene_id + '/'+ pic._id + ".standard." + pic.filename;
+            const targetBucket = process.env.PUBLIC_BUCKET_NAME; //postcard needs to be copiied to static route for sharing..
+            const copySource = process.env.ROOT_BUCKET_NAME + '/users/' + pic.userID +"/pictures/"+ pic._id + ".standard." + pic.filename;
+
+            const copystatus = await CopyObject(targetBucket, copySource, ck);
+
+            res.send("updated: " + status + " copied " + copystatus) ;
           } else {
             res.send("postcard not found");
           }

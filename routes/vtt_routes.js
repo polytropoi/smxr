@@ -2585,8 +2585,7 @@ vtt_router.get('/:_id', function (req, res) {
                     console.log("NONLOCALDOMAIN WTF!");
                 }
                 if (picture_item && picture_item.filename) {
-                    postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ 
-                    picture_item._id + ".standard." + picture_item.filename, 6000); //just return a single         
+                    postcard1 = "https://" + process.env.PUBLIC_BUCKET_NAME + '/postcards/' + sceneResponse._id + '/'+ picture_item._id + ".standard." + picture_item.filename;
                     postcardImages.push(postcard1);    
                 }
             }

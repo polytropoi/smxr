@@ -6153,7 +6153,7 @@
             }
             axios.get('/userpics/' + userid, config)
             .then(function (response) {
-                // console.log(JSON.stringify(response));
+                console.log(JSON.stringify(response));
                 // var jsonResponse = response.data;
                 var selectHeader = "";
                 var arr = response.data;
@@ -6217,7 +6217,7 @@
                     "<tr>" +
                         selectButton +
                     "<td>" + detailsPicLink + "</td>" +
-                    "<td>" + detailsLink + "</td>" +
+                    // "<td>" + detailsLink + "</td>" +
                     "<td>" + convertTimestamp(timestamp) + " "+ timestamp +"</td>" +
                     "<td>" + timestamp + "</td>" +
                     "<td>" + arr[i].orientation + "</td>" +

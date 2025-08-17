@@ -91,8 +91,6 @@ function onDragEnd (e) {
 function onResize () {
 
   console.log("tryna resize..." + window.innerWidth + " " + window.innerHeight);
-
-
   let parent = document.getElementById("pixi-container");
   parent.style.width = window.innerWidth;
   parent.style.height = window.innerHeight;
@@ -113,9 +111,8 @@ function onTimedEvent (event) { //events dispatched from events.js, through id=e
 async function setup() {
   // Intialize the application.
   console.log("background color " + settings.sceneColor1);
-  await app.init({ background: 'black', resizeTo: window, antialias: true});
+  await app.init({ background: 'black', resizeTo: window, antialias: true}); //color reset from settings below
   
-
   app.stage.layout = {
         width: 'auto',
         height: 'auto',
@@ -209,9 +206,6 @@ async function prePreLoader () {
       Assets.addBundle('fonts', fonts); 
    
     }
-
-
-
 }
 
 export function stripExtension(filename) {

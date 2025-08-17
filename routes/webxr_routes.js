@@ -1462,7 +1462,7 @@ webxr_router.get('/:_id', function (req, res) {
                     groundcolor2 = "groundColor2: " + sceneResponse.sceneColor4 + ";";
                 }
 
-                aframeEnvironment = "<a-entity id=\x22enviroEl\x22 environment=\x22preset: "+webxrEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
+                aframeEnvironment = "<a-entity id=\x22enviroEl\x22 class=\x22groundMesh\x22 environment=\x22preset: "+webxrEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
                 " "+envLighting+";\x22 hide-on-enter-ar "+tweakColors+"></a-entity>";
 
             } else {
@@ -2854,8 +2854,11 @@ webxr_router.get('/:_id', function (req, res) {
                     console.log("NONLOCALDOMAIN WTF!");
                 }
                 if (picture_item && picture_item.filename) {
-                    postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ 
-                    picture_item._id + ".standard." + picture_item.filename, 6000); //just return a single             
+                    postcard1 = "https://" + process.env.PUBLIC_BUCKET_NAME + '/postcards/' + sceneResponse._id + '/'+ picture_item._id + ".standard." + picture_item.filename;
+                    // postcard1 = await ReturnPresignedUrl(process.env.PUBLIC_BUCKET_NAME, 'postcards/' + sceneResponse.short_id + '/'+ 
+                    // picture_item._id + ".standard." + picture_item.filename, 6000); //just return a single             
+                    // const postCard
+                    // postcardStatic
                 }
             }
             
@@ -3975,7 +3978,7 @@ webxr_router.get('/:_id', function (req, res) {
                         
 
                         ////////// render hudmap - this one works! ///////////////////
-                            // "<a-entity camera=\x22active: false\x22 camrender=\x22cid: topCameraCanvas\x22 position=\x220 150 0\x22 rotation=\x22-90 90 0\x22>"+
+                            // "<a-entity id=\x22renderCamera\x22 camera=\x22active: false; fov: 120; aspect: 1;\x22 position=\x220 120 0\x22 rotation=\x22-90 0 0\x22>"+
                             // "</a-entity>"+
 
 
