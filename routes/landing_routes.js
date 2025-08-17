@@ -2567,9 +2567,12 @@ landing_router.get('/:_id', function (req, res) {
                     console.log("NONLOCALDOMAIN WTF!");
                 }
                 if (picture_item && picture_item.filename) {
-                    // postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ 
-                    // picture_item._id + ".standard." + picture_item.filename, 6000); //just return a single         
-                    postcard1 = "https://" + process.env.PUBLIC_BUCKET_NAME + '/postcards/' + sceneResponse._id + '/'+ picture_item._id + ".standard." + picture_item.filename;
+                    postcard1 = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID +"/pictures/"+ 
+                    picture_item._id + ".standard." + picture_item.filename, 6000); //just return a single  
+
+                    //should be copied to public bucket, for metatag image
+                    postcard1_static = "https://" + process.env.PUBLIC_BUCKET_NAME + '/postcards/' + sceneResponse._id + '/'+ picture_item._id + ".standard." + picture_item.filename;
+                    
                     postcardImages.push(postcard1);    
                 }
             }
@@ -3055,7 +3058,7 @@ landing_router.get('/:_id', function (req, res) {
                         "<meta name=\x22viewport\x22 content=\x22width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no\x22/>" +
                         "<meta property=\x22og:url\x22 content=\x22" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "\x22 /> " +
                         "<meta property=\x22og:type\x22 content=\x22website\x22 /> " +
-                        "<meta property=\x22og:image\x22 content=\x22" + postcard1 + "\x22 /> " +
+                        "<meta property=\x22og:image\x22 content=\x22" + postcard1_static + "\x22 /> " +
                         "<meta property=\x22og:image:height\x22 content=\x221024\x22 /> " +
                         "<meta property=\x22og:image:width\x22 content=\x221024\x22 /> " +
                         "<meta property=\x22og:title\x22 content=\x22" + sceneResponse.sceneTitle + "\x22 /> " +
@@ -3278,7 +3281,7 @@ landing_router.get('/:_id', function (req, res) {
                         "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
                         "<meta property='og:type' content='website' /> " +
                         // "<meta property='og:image' content='" + postcard1 + "' /> " +
-                        "<meta property='og:image' content='" + postcard1 + "' /> " +
+                        "<meta property='og:image' content='" + postcard1_static + "' /> " +
                         "<meta property='og:image:height' content='1024' /> " +
                         "<meta property='og:image:width' content='1024' /> " +
                         "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +

@@ -6279,6 +6279,48 @@ app.post('/add_storeitem_obj/', requiredAuthentication, admin, function (req, re
 });
 
 
+app.post('/update_scene_postcards/', requiredAuthentication, function (req, res) {
+
+    var s_id = ObjectId.createFromHexString(req.body.scene_id);   
+    console.log('tryna add a scene postcard : ' + JSON.stringify(req.body));
+
+    (async () => {
+      try {
+        const scenequery = { "_id": s_id};
+        const scene = await RunDataQuery("scenes", "findOne", scenequery);
+        if (scene) {
+       
+            let scenePostcards = new Array();
+            if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
+                scenePostcards = scene.scenePostcards;
+            }
+            console.log("XXX scenePostcards: " + scenePostcards);
+
+            for (let i = 0; i < scenePostcards.length; i++) {
+                var p_id = ObjectId.createFromHexString(scenePostcards[i]);   
+                const upquery = { "_id": p_id };
+                const pic = await RunDataQuery("image_items", "findOne", upquery);
+            
+
+                const ck = 'postcards/' + req.body.scene_id + '/'+ pic._id + ".standard." + pic.filename;
+                const targetBucket = process.env.PUBLIC_BUCKET_NAME; //postcard needs to be copiied to static route for sharing..
+                const copySource = process.env.ROOT_BUCKET_NAME + '/users/' + pic.userID +"/pictures/"+ pic._id + ".standard." + pic.filename;
+
+                const copystatus = await CopyObject(targetBucket, copySource, ck);
+                console.log("copying postcard ! " +copystatus);
+            }
+            res.send("updated: " + status + " copied " + copystatus) ;
+
+        } else {
+          res.send("scene not found!");
+        }
+      } catch (e) {
+        res.send("error updating scene with postcard " + e);
+      }
+    })();
+  
+});
+
 app.post('/add_scene_postcard/', requiredAuthentication, function (req, res) {
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
