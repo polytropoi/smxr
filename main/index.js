@@ -13309,15 +13309,18 @@ function getAllPeople() {
                     "<a class=\x22btn btn-info\x22 href=\x22index.html?type=scenes&mode=select&parent=scene&iid="+response.data._id+"\x22><i class=\x22fas fa-hand-pointer\x22></i> Select </a>" +
                     "<a class=\x22btn btn-success\x22 href=\x22index.html?type=groups&mode=scenegroup&parent=scene&iid="+response.data._id+"\x22><i class=\x22fas fa-hand-pointer\x22></i> Group </a>" +
                     "<button class=\x22btn btn-danger clearSceneScenes\x22><i class=\x22fas fa-broom\x22></i> Clear </button></div>";
-                    const picButtons = "<label for=\x22scenePicButtons\x22>Scene Pictures </label><div id=\x22scenePicButtons\x22 style=\x22margin: 0px 10px;\x22  class=\x22btn-group float-right\x22 role=\x22group\x22 aria-label=\x22button group\x22>" +
+                    const picButtons = "<div id=\x22scenePicButtons\x22 style=\x22margin: 0px 10px;\x22  class=\x22btn-group float-right\x22 role=\x22group\x22 aria-label=\x22button group\x22>" +
+                    "<div><label for=\x22scenePicButtons\x22>  Scene Pictures  </label></div>"+
                     "<a class=\x22btn btn-primary\x22 href=\x22index.html?type=bulkup\x22><i class=\x22fas fa-file-upload\x22></i> Upload </a>" +
                     "<a class=\x22btn btn-info\x22 href=\x22index.html?type=pictures&mode=select&parent=scene&iid="+response.data._id+"\x22><i class=\x22fas fa-hand-pointer\x22></i> Select </a>" +
                     "<a class=\x22btn btn-success\x22 href=\x22index.html?type=groups&mode=picgroup&parent=scene&iid="+response.data._id+"\x22><i class=\x22fas fa-hand-pointer\x22></i> Group </a>" +
                     "<button class=\x22btn btn-danger clearScenePictures\x22><i class=\x22fas fa-broom\x22></i> Clear </button></div>";
-                    const postcardButtons = "<label for=\x22scenePostcardButtons\x22>Postcards </label><div id=\x22scenePostcardButtons\x22 style=\x22margin: 0px 10px;\x22  class=\x22btn-group float-right\x22 role=\x22group\x22 aria-label=\x22button group\x22>" +
+                    const postcardButtons = "<div id=\x22scenePostcardButtons\x22 style=\x22margin: 0px 10px;\x22  class=\x22btn-group float-right\x22 role=\x22group\x22 aria-label=\x22button group\x22>" +
+                    "<div><label for=\x22scenePostcardButtons\x22>  Scene Postcards  </label></div>"+
                     "<a class=\x22btn btn-primary\x22 href=\x22index.html?type=bulkup\x22><i class=\x22fas fa-file-upload\x22></i> Upload </a>" +
                     "<a class=\x22btn btn-info\x22 href=\x22index.html?type=pictures&mode=postselect&parent=scene&iid="+response.data._id+"\x22><i class=\x22fas fa-hand-pointer\x22></i> Select </a>" +
-                    "<button class=\x22btn btn-danger clearScenePostcards\x22><i class=\x22fas fa-broom\x22></i> Clear </button></div>";
+                    "<button class=\x22btn btn-danger clearScenePostcards\x22><i class=\x22fas fa-broom\x22></i> Clear </button>"+
+                    "<button class=\x22btn btn-warning updateScenePostcards\x22><i class=\x22fas fa-broom\x22></i> Update </button></div>";
                     const vidButtons = "<label for=\x22scenePicButtons\x22>Scene Videos </label><div style=\x22margin: 0px 10px;\x22  class=\x22btn-group float-right\x22 role=\x22group\x22 aria-label=\x22button group\x22>" +
                     "<a class=\x22btn btn-primary\x22 href=\x22index.html?type=bulkup\x22><i class=\x22fas fa-file-upload\x22></i> Upload </a>" +
                     "<a class=\x22btn btn-info\x22 href=\x22index.html?type=video&mode=select&parent=scene&iid="+response.data._id+"\x22><i class=\x22fas fa-hand-pointer\x22></i> Select </a>" +
@@ -15869,7 +15872,32 @@ function getAllPeople() {
                         console.log(error);
                     });
                     */
-  
+                    //add_scene_po
+                    $(document).on('click','.updateScenePostcards',function(e) {
+                        e.preventDefault();  
+                        let headers = { headers: {
+                                appid: appid,
+                            }
+                        };
+                         let data = { 
+                            scene_id : response.data._id
+                        };
+                        axios.post('/update_scene_postcards', data, headers)
+                        .then(function (response) {
+                            console.log(response);
+                            if (response.data.includes("updated postcards")) {
+                                  $("#topSuccess").html("Updated static routes for postcards!");
+                                $("#topSuccess").show();
+                            } else {
+                                $("#topAlert").html(response.data);
+                                $("#topAlert").show();
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                        
+                    });  
                     $(document).on('click','.clearScenePostcards',function(e) {
                         e.preventDefault();  
                         console.log("tryna rem scenePrimaryAudio");

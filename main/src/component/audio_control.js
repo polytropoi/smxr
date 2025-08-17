@@ -1963,11 +1963,11 @@ AFRAME.registerComponent('trigger_audio_control', { //trigger audio on designate
     },
     modLoop: function (modType, modValue) { //TODO send in min/max?
 
-        // if (modValue != this.lastModValue) {
-        if (modType) {
-            return;
-        }
-        // console.log(this.loopID + " " + this.rate);
+        // // if (modValue != this.lastModValue) {
+        // if (modType) {
+        //     return;
+        // }
+        console.log(this.loopID + " " + this.rate);
         if (this.loopHowl) {
             if (modType == "rate") {
                 if (modValue != 0) { //modvalue 0 === this.rate 1
@@ -1990,8 +1990,8 @@ AFRAME.registerComponent('trigger_audio_control', { //trigger audio on designate
     // }
     },
     loopToggle: function (pause) {
-        // console.log("loopToggle " + pause);
-        if (this.loopHowl) {
+        console.log("loopToggle " + pause);
+        if (this.loopHowl && !this.loopHowl.playing()) {
             if (!pause) {
                 this.loopHowl.pause();
             } else {

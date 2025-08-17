@@ -6311,7 +6311,7 @@ app.post('/update_scene_postcards/', requiredAuthentication, function (req, res)
                         console.log("postcard not found!");
                     }
                 }
-                res.send("updated: " + status + " copied " + copystatus) ;
+                res.send("updated postcards!") ;
             } else {
                 res.send("scene has no postcardz!");
             }
