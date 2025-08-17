@@ -132,6 +132,7 @@ landing_router.get('/:_id', function (req, res) {
     let triggerUrl = "";
     var vidUrl = "";
     var postcard1 = "";
+        var postcard1_static = "";
     let postcardImages = [];
     var image1url = "";
     var short_id = "";

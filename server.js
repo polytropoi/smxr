@@ -6282,7 +6282,7 @@ app.post('/add_storeitem_obj/', requiredAuthentication, admin, function (req, re
 app.post('/update_scene_postcards/', requiredAuthentication, function (req, res) {
 
     var s_id = ObjectId.createFromHexString(req.body.scene_id);   
-    console.log('tryna add a scene postcard : ' + JSON.stringify(req.body));
+    console.log('tryna update scene postcards : ' + JSON.stringify(req.body));
 
     (async () => {
       try {
@@ -6293,24 +6293,28 @@ app.post('/update_scene_postcards/', requiredAuthentication, function (req, res)
             let scenePostcards = new Array();
             if (scene.scenePostcards != null && scene.scenePostcards.length > 0) {
                 scenePostcards = scene.scenePostcards;
+
+                console.log("XXX scenePostcards: " + scenePostcards);
+
+                for (let i = 0; i < scenePostcards.length; i++) {
+                    var p_id = ObjectId.createFromHexString(scenePostcards[i]);   
+                    const query = { "_id": p_id };
+                    const pic = await RunDataQuery("image_items", "findOne", query);
+                    if (pic) {
+                        const ck = 'postcards/' + req.body.scene_id + '/'+ pic._id + ".standard." + pic.filename;
+                        const targetBucket = process.env.PUBLIC_BUCKET_NAME; //postcard needs to be copiied to static route for sharing..
+                        const copySource = process.env.ROOT_BUCKET_NAME + '/users/' + pic.userID +"/pictures/"+ pic._id + ".standard." + pic.filename;
+
+                        const copystatus = await CopyObject(targetBucket, copySource, ck);
+                        console.log("copying postcard ! " +copystatus);
+                    } else {
+                        console.log("postcard not found!");
+                    }
+                }
+                res.send("updated: " + status + " copied " + copystatus) ;
+            } else {
+                res.send("scene has no postcardz!");
             }
-            console.log("XXX scenePostcards: " + scenePostcards);
-
-            for (let i = 0; i < scenePostcards.length; i++) {
-                var p_id = ObjectId.createFromHexString(scenePostcards[i]);   
-                const upquery = { "_id": p_id };
-                const pic = await RunDataQuery("image_items", "findOne", upquery);
-            
-
-                const ck = 'postcards/' + req.body.scene_id + '/'+ pic._id + ".standard." + pic.filename;
-                const targetBucket = process.env.PUBLIC_BUCKET_NAME; //postcard needs to be copiied to static route for sharing..
-                const copySource = process.env.ROOT_BUCKET_NAME + '/users/' + pic.userID +"/pictures/"+ pic._id + ".standard." + pic.filename;
-
-                const copystatus = await CopyObject(targetBucket, copySource, ck);
-                console.log("copying postcard ! " +copystatus);
-            }
-            res.send("updated: " + status + " copied " + copystatus) ;
-
         } else {
           res.send("scene not found!");
         }

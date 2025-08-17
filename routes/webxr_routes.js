@@ -141,6 +141,7 @@ webxr_router.get('/:_id', function (req, res) {
     let triggerUrl = "";
     var vidUrl = "";
     var postcard1 = "";
+    var postcard1_static = "";
     var image1url = "";
     var short_id = "";
     var picArray = [];
