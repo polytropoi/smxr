@@ -6,10 +6,11 @@ import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLo
 // import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
 
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
-import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData } from "../connect/events.js";
+import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, eventEl } from "../connect/events.js";
 // import { SetTimeKeysData } from "./landing.js";
 
 import { settings, profile } from "../connect/settings.js";
+import { selectedPosition } from "../vtt/vtt_main.mjs";
 // import { LoadPrimaryAudioHowl } from "./media.js";
 // import { playerPosition, playerRotation } from "../main/js/navigation.js";
 // import { profileLoaded } from "../connect/vtt.js";
@@ -173,7 +174,7 @@ $(function() {
    }, 1000);
    $('#room_id').append($('<button><h4><strong>').text("Welcome to scene " + room).append("</strong></h4></button>"));
 
-   if (settings.sceneType == "Default" || settings.sceneType == "AFrame" || settings.sceneType == "default" || settings.sceneType == "aframe") {
+   if (settings && settings.sceneType == "Default" || settings.sceneType == "AFrame" || settings.sceneType == "default" || settings.sceneType == "aframe") {
       // window.sceneType == "aframe";
       if (settings.hideAvatars) {
          player.setAttribute("player_mover", "init", true);
@@ -1570,9 +1571,128 @@ function LocationRowClick(data) {
    // ShowLocationModal(isCloud, data);
 }
 
+export function CreateLocationAlt (filename, type, position) { 
+
+   console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
+   let timestamp = null;
+   let markertype = "placeholder";
+   
+   let modelID = "none";
+   let mediaID = "none";
+   if (filename && type) {
+      markertype = type;
+      if (type == "model") {
+         modelID = filename;
+      } else if (type == "picture") {
+         mediaID = filename;
+      }
+   }
+   // if (type) {
+   //    markertype = type;
+   // }
+   
+   console.log("tryna create new location type " + markertype);
+   let newPosition = {}; 
+   if (!position) { //if added from dialog instead of with picker
+      // let viewportHolder = document.getElementById('viewportPlaceholder');
+      newPosition.x = selectedPosition.x;
+      newPosition.y = selectedPosition.y;
+      newPosition.z = 0;
+      // viewportHolder.object3D.getWorldPosition( newPosition );
+   } else {
+      newPosition = position;
+   }  
+
+   console.log("new position for placeholder " + JSON.stringify(newPosition));
+
+   let phEl = document.createElement('div');
+
+   // var sceneEl = document.querySelectorAll('a-scene')[0];
+   
+   // phEl.setAttribute('skybox-env-map', '');
+   timestamp = Date.now();
+   timestamp = parseInt(timestamp);
+   let locItem = {};
+   locItem.x = newPosition.x.toString();
+   locItem.eulerx = 0; //maybe get look vector?
+   locItem.y = newPosition.y.toString();
+   locItem.eulery = 0;
+   locItem.z = newPosition.z.toString();
+   locItem.eulerz = 0;
+   locItem.type = "Worldspace";
+   locItem.label = 'local ' + markertype;
+   locItem.name =  'local ' + markertype;
+   locItem.description = '';
+   locItem.markerType = markertype;
+   locItem.eventData = '';
+   locItem.isNew = true;
+   locItem.timestamp = timestamp;
+   locItem.xscale = 1;
+   locItem.yscale = 1;
+   locItem.zscale = 1;
+   locItem.locationTags = '';
+   locItem.phID = timestamp;
+   locItem.modelID = modelID;
+   locItem.mediaID = mediaID;
+   locItem.isLocal = true;
+   if (!localData) {
+      localData = {};
+   }
+   if (!localData.locations) {
+      localData.locations = [];
+      localData.locations.push(locItem);
+   } else {
+      localData.locations.push(locItem);
+   }
+   
+
+   poiLocations.push(locItem);
+
+   phEl.classList.add("local_marker");
+   phEl.id = timestamp;
+   let data = {markerType: locItem.markerType, 
+               timestamp: timestamp, 
+               isNew: true, 
+               xpos: locItem.x, 
+               ypos: locItem.y, 
+               zpos: locItem.z, 
+               xscale: locItem.xscale,
+               yscale: locItem.yscale,
+               zscale: locItem.zscale,
+               mediaID: locItem.mediaID, 
+               modelID: locItem.modelID};
+   
+   phEl.setAttribute('data-elementData', JSON.stringify(data));
 
 
-export function CreateLocation (filename, type, position) { //New Location button, also addToScene button for localfiles
+                                       
+
+   // phEl.setAttribute('position', newPosition);
+   // phEl.setAttribute('local_marker', {markerType: locItem.markerType, 
+   //                                     timestamp: timestamp, 
+   //                                     isNew: true, 
+   //                                     xpos: locItem.x, 
+   //                                     ypos: locItem.y, 
+   //                                     zpos: locItem.z, 
+   //                                     xscale: locItem.xscale,
+   //                                     yscale: locItem.yscale,
+   //                                     zscale: locItem.zscale,
+   //                                     mediaID: locItem.mediaID, 
+   //                                     modelID: locItem.modelID} );
+
+   // sceneEl.appendChild(phEl);
+
+   // let nextbuttonEl = document.getElementById('nextButton');
+   // let prevbuttonEl = document.getElementById('previousButton');
+   // nextbuttonEl.style.visibility = "visible";
+   // prevbuttonEl.style.visibility = "visible";
+
+   SaveLocalData();
+
+}
+
+
+export function CreateLocation (filename, type, position) { //AFRAME New Location button, also addToScene button for localfiles
    console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
    let timestamp = null;
    let markertype = "placeholder";

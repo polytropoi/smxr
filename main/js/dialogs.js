@@ -9,7 +9,8 @@ import { room, lerp, sceneLocations, localData, ReturnLocationTable,
   userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
   Disconnect,
-  SaveTimekeysToLocal
+  SaveTimekeysToLocal,
+  CreateLocationAlt
   } from "../../connect/connect.js";
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
 // import shortid from "shortid";
@@ -390,7 +391,11 @@ window.addEventListener( 'keydown',  ( event ) => {
   });
 
   $('#modalContent').on('click', '#createLocationButton', function(e) {
+    if (settings && settings.sceneType.toLowerCase() == "aframe") {
       CreateLocation();
+    } else {
+      CreateLocationAlt();
+    }
   });
 
   $('#modalContent').on('click', '#dequipButton', function(e) {

@@ -223,8 +223,8 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
                 // let color = "yellow";
                 let color1 = "yellow";
                 let color2 = "white";
-                let intensity = 1.25;
-                let duration = 1500;
+                let intensity = 20.25;
+                let duration = 15000;
                 let decay = 1; //this.data.xscale / 2
                 
                 if (settings && settings.sceneColor3) {
@@ -272,7 +272,7 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
                     }
                   }
                   let lighttype = "point";
-                  let markerLightShadow = true;
+                  let markerLightShadow = false;
                   if (this.data.tags.includes("spot")) {
                     lighttype = "spot";
                     markerLightShadow = false;
@@ -282,7 +282,12 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
                     markerLightShadow = false;
 
                   }
-                  this.el.setAttribute("light", {type: lighttype, intensity: intensity, distance: this.data.xscale * 4, castShadow: markerLightShadow, decay: decay, color: color2});
+                  //                  const lightEl = document.createEntity("a-entity");
+                  // this.sceneEl.appendChild(lightEl);
+                  // lightEl.setAttribute("position", this.el.getAttribute("position"));
+
+                  // lightEl.setAttribute("light", {type: lighttype, intensity: intensity, distance: 25, castShadow: markerLightShadow, decay: decay, color: color2});
+                  this.el.setAttribute("light", {type: lighttype, intensity: intensity, distance: 25, castShadow: markerLightShadow, decay: decay, color: color2});
                   if (this.data.tags && this.data.tags.includes("anim") && this.data.tags.includes("color")) {
                     console.log("LOCAL_MARKER LIGHT " + color1 + color2 + duration);
                     this.el.setAttribute("animation__color", {property: 'light.color', from: color1, to: color2, dur: duration, easing: 'easeInOutSine', loop: true, dir: 'alternate', autoplay: true});
@@ -1341,12 +1346,14 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
             } else if (this.data.markerType == "3D text") {
                 console.log("tryna set 3D text!");
                 this.el.setAttribute("text-geometry", {value: this.data.description, font: '#optimerBoldFont'});
+
+                ////////////////////// lights! ///////////////////////////
             } else if (this.data.markerType == "light") {
               console.log("tryna set a light!");
               // let color = "yellow";
               let color1 = "yellow";
               let color2 = "white";
-              let intensity = 1.25;
+              let intensity = 2.25;
               let duration = 1500;
               let decay = 1; //this.data.xscale / 2
               if (settings && settings.sceneColor3) {
@@ -1419,7 +1426,7 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
                   markerLightShadow = false;
 
                 }
-                this.el.setAttribute("light", {type: lighttype, intensity: intensity, distance: this.data.xscale * 4, castShadow: markerLightShadow, decay: decay, color: color1});
+                this.el.setAttribute("light", {'type': lighttype, 'intensity': intensity, 'distance': 25, 'castShadow': markerLightShadow, 'decay': decay, 'color': color1});
                 // this.el.setAttribute("animation__intensity", {property: 'light.position', from: intensity - intensity/2, to: intensity + intensity/2, dur: duration, easing: 'easeInOutSine', loop: false, autoplay: true});
                 if (this.data.tags && this.data.tags.includes("anim") && this.data.tags.includes("color")) {
                   this.el.setAttribute("animation__color", {property: 'light.color', from: color1, to: color2, dur: duration, easing: 'easeInOutSine', loop: true, dir: 'alternate', autoplay: true});

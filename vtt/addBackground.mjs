@@ -1,6 +1,7 @@
 import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMatrixFilter } from 'pixi';
 // import { CompositeTilemap } from 'pixi-tilemap';
-import { sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter } from './vtt_main.mjs';
+// import { SetSelectedPosition } from '../connect/settings.js';
+import { sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter, SetSelectedPosition } from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 import { AdvancedBloomFilter, ReflectionFilter, OldFilmFilter } from '@pixi/filters';
 export let mapsize = {};
@@ -476,6 +477,7 @@ export async function addMap(app, viewport, spritesContainer) {
             // sprite.tint = 0xffffff;
 
             console.log(sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+            SetSelectedPosition(sprite.label, sprite.position.x, sprite.position.y);
             // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
           });
 

@@ -145,58 +145,68 @@ export function InitIDB() {
                            }
                         } else {//local-only elements, not saved to cloud yet
                            hasLocalData = true;
-                           let localEl = document.createElement("a-entity");
-                                                   
-                           if ( (cursor.value.locations[i].mediaID && cursor.value.locations[i].mediaID.includes("local_") || 
-                              (cursor.value.locations[i].modelID && cursor.value.locations[i].modelID.includes("local_")))) {
-                                    localEl.classList.add("hasLocalFile");
-                           }
-                           if (cursor.value.locations[i].markerType == "poi") {
-                              poiLocations.push(cursor.value.locations[i]);
-                           }
-                           if (cursor.value.locations[i].markerType == "curve point") {
-                              curveLocations.push(cursor.value.locations[i]);
-                           }
-                           if (cursor.value.locations[i].locationTags && cursor.value.locations[i].locationTags.includes("ar_parent")) {
-                              let ar_parentEl = document.getElementById("ar_parent");
-                              if (ar_parentEl) {
-                                 ar_parentEl.appendChild(localEl);
+                           const data = { timestamp: cursor.value.locations[i].timestamp,
+                                          name: cursor.value.locations[i].name, 
+                                          modelID: cursor.value.locations[i].modelID, 
+                                          objectID: cursor.value.locations[i].objectID, 
+                                          mediaID: cursor.value.locations[i].mediaID, 
+                                          tags: cursor.value.locations[i].locationTags, 
+                                          eventData: cursor.value.locations[i].eventData, 
+                                          markerType: cursor.value.locations[i].markerType,
+                                          description: cursor.value.locations[i].description,
+                                          // position: cursor.value.locations[i].x +","+ cursor.value.locations[i].y+","+cursor.value.locations[i].z,
+                                          xpos: cursor.value.locations[i].x,
+                                          ypos: cursor.value.locations[i].y,
+                                          zpos: cursor.value.locations[i].z,
+                                          xrot: cursor.value.locations[i].eulerx,
+                                          yrot: cursor.value.locations[i].eulery,
+                                          zrot: cursor.value.locations[i].eulerz,
+                                          xscale: cursor.value.locations[i].xscale,
+                                          yscale: cursor.value.locations[i].yscale,
+                                          zscale: cursor.value.locations[i].zscale,
+                                          // rotation: cursor.value.locations[i].eulerx+","+cursor.value.locations[i].eulery +","+ cursor.value.locations[i].eulerz,
+                                          // scale: {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale} derp
+                                          scale: cursor.value.locations[i].markerObjScale,
+                                          targetElements: cursor.value.locations[i].targetElements
+                                       };
+                           if (sceneEl) { //i.e. it's an aframe 3D scene
+                              let localEl = document.createElement("a-entity");
+                                    
+                              if ( (cursor.value.locations[i].mediaID && cursor.value.locations[i].mediaID.includes("local_") || 
+                                 (cursor.value.locations[i].modelID && cursor.value.locations[i].modelID.includes("local_")))) {
+                                       localEl.classList.add("hasLocalFile");
+                              }
+                              if (cursor.value.locations[i].markerType == "poi") {
+                                 poiLocations.push(cursor.value.locations[i]);
+                              }
+                              if (cursor.value.locations[i].markerType == "curve point") {
+                                 curveLocations.push(cursor.value.locations[i]);
+                              }
+                              if (cursor.value.locations[i].locationTags && cursor.value.locations[i].locationTags.includes("ar_parent")) {
+                                 let ar_parentEl = document.getElementById("ar_parent");
+                                 if (ar_parentEl) {
+                                    ar_parentEl.appendChild(localEl);
+                                 }
+                              } else {
+                                 sceneEl.appendChild(localEl);
+                              }
+                              
+                              localEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
+                              localEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
+                              // localEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
+                              
+                              localEl.setAttribute("local_marker", data);
+
+                              localEl.id = cursor.value.locations[i].timestamp.toString(); //for lookups
+
+                              if (cursor.value.locations[i].locationTags.includes("curve point")) {
+                                 localEl.classList.add("curvepoint");
                               }
                            } else {
-                              sceneEl.appendChild(localEl);
-                           }
-                           localEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
-                           localEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
-                           // localEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
-                           
-                           localEl.setAttribute("local_marker", { timestamp: cursor.value.locations[i].timestamp,
-                                                               name: cursor.value.locations[i].name, 
-                                                               modelID: cursor.value.locations[i].modelID, 
-                                                               objectID: cursor.value.locations[i].objectID, 
-                                                               mediaID: cursor.value.locations[i].mediaID, 
-                                                               tags: cursor.value.locations[i].locationTags, 
-                                                               eventData: cursor.value.locations[i].eventData, 
-                                                               markerType: cursor.value.locations[i].markerType,
-                                                               description: cursor.value.locations[i].description,
-                                                               // position: cursor.value.locations[i].x +","+ cursor.value.locations[i].y+","+cursor.value.locations[i].z,
-                                                               xpos: cursor.value.locations[i].x,
-                                                               ypos: cursor.value.locations[i].y,
-                                                               zpos: cursor.value.locations[i].z,
-                                                               xrot: cursor.value.locations[i].eulerx,
-                                                               yrot: cursor.value.locations[i].eulery,
-                                                               zrot: cursor.value.locations[i].eulerz,
-                                                               xscale: cursor.value.locations[i].xscale,
-                                                               yscale: cursor.value.locations[i].yscale,
-                                                               zscale: cursor.value.locations[i].zscale,
-                                                               // rotation: cursor.value.locations[i].eulerx+","+cursor.value.locations[i].eulery +","+ cursor.value.locations[i].eulerz,
-                                                               // scale: {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale} derp
-                                                               scale: cursor.value.locations[i].markerObjScale,
-                                                               targetElements: cursor.value.locations[i].targetElements
-                                                            });
-                           localEl.id = cursor.value.locations[i].timestamp.toString(); //for lookups
-
-                           if (cursor.value.locations[i].locationTags.includes("curve point")) {
-                              localEl.classList.add("curvepoint");
+                              let localEl = document.createElement("div");
+                              localEl.classList.add("local_marker");
+                              localEl.id = data.timestamp;
+                              localEl.setAttribute("data-elData", JSON.stringify(data));
                            }
                         }
                      }

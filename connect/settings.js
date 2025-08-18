@@ -2,6 +2,8 @@ export let settings;
 
 export let profile;
 
+// export let selectedPosition = {};
+
 import { SetPlayerToLastPosition, InitSocket } from "../connect/connect.js";
 
 $(function() { 
@@ -23,7 +25,6 @@ export function UpdateUserProfile (userProfile) { //called from indexedDB.js
             
          }
       } 
-
-
    // profileLoaded(profile);
 }
+
