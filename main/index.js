@@ -6157,11 +6157,12 @@
                 // var jsonResponse = response.data;
                 var selectHeader = "";
                 var arr = response.data;
-             
+                let hideIndex  = 3;
                 if (mode == "select") {
                     //selectFor = parent;
                     selectHeader = "<th>Select</th>";
                     $("#pageTitle").html("Select Picture for " + parent + " " + itemid);
+                    hideIndex = 4;
                 }
                 var tableHead = "<table id=\x22dataTable1\x22 class=\x22display table table-striped table-bordered\x22 style=\x22width:100%\x22>" +
                     "<thead>"+
@@ -6173,13 +6174,13 @@
                     "<th>HiddenDate</th>"+
                     "<th>Type</th>"+
                     "<th>Tags</th>"+
-                    "<th>Status</th>"+
+                    // "<th>Status</th>"+
                 "</tr>"+
                 "</thead>"+
                 "<tbody>";
                 var tableBody = "";
                 var selectButton = "";
-                let hideIndex  = 3;
+                
                 
                 for(var i = 0; i < arr.length; i++) {
                     let title = "";
@@ -6217,12 +6218,12 @@
                     "<tr>" +
                         selectButton +
                     "<td>" + detailsPicLink + "</td>" +
-                    // "<td>" + detailsLink + "</td>" +
+                    "<td>" + detailsLink + "</td>" +
                     "<td>" + convertTimestamp(timestamp) + " "+ timestamp +"</td>" +
                     "<td>" + timestamp + "</td>" +
                     "<td>" + arr[i].orientation + "</td>" +
                     "<td>" + arr[i].tags + "</td>" +
-                    "<td>" + isPublic + "</td>" +
+                    // "<td>" + isPublic + "</td>" +
                     "</tr>";
                     }
                     var tableFoot =  "</tbody>" +
@@ -6235,7 +6236,7 @@
                     "<th>HiddenDate</th>"+
                     "<th>Type</th>"+
                     "<th>Tags</th>"+
-                    "<th>Status</th>"+
+                    // "<th>Status</th>"+
                     "</tr>" +
                 "</tfoot>" +
                 "</table>";

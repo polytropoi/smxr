@@ -391,10 +391,10 @@ window.addEventListener( 'keydown',  ( event ) => {
   });
 
   $('#modalContent').on('click', '#createLocationButton', function(e) {
-    if (settings && settings.sceneType.toLowerCase() == "aframe") {
-      CreateLocation();
+    if (settings && settings.sceneType.toLowerCase() == "aframe" || settings && settings.sceneType.toLowerCase() == "default") {
+      CreateLocation(); //aframe
     } else {
-      CreateLocationAlt();
+      CreateLocationAlt(); //not aframe
     }
   });
 

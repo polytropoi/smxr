@@ -12,11 +12,18 @@ let timed_event = new Event("timed-event");
 export let eventEl = document.createElement("div");
 eventEl.id = "eventEl";
 
+export let selectedPosition = {};
 export let timeKeysData = {};
 export let tkStarttimes = [];
 export let timedEventsListenerMode = "";
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
 
+
+export function SetSelectedPosition(tilename, xpos, ypos) { //for vtt/not aframe views
+   selectedPosition.x = xpos;
+   selectedPosition.y = ypos;
+   selectedPosition.tilename = tilename; 
+}
 
 
 export function ResetTimedEvents () {

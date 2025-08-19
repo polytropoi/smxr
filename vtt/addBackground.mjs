@@ -1,7 +1,7 @@
 import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMatrixFilter } from 'pixi';
 // import { CompositeTilemap } from 'pixi-tilemap';
-// import { SetSelectedPosition } from '../connect/settings.js';
-import { sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter, SetSelectedPosition } from './vtt_main.mjs';
+import { SetSelectedPosition } from '../connect/events.js';
+import { sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter} from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 import { AdvancedBloomFilter, ReflectionFilter, OldFilmFilter } from '@pixi/filters';
 export let mapsize = {};
@@ -99,8 +99,25 @@ export function addBackgroundVideo(app, viewport, spritesContainer) {
   } else {
     // app.stage.addChild(backgroundVideo);
   }
+
+
   
   addOverlayMap(app, viewport, width, height, texture, spritesContainer);
+          // });
+          //   backgroundVideo.on('pointerenter', () => {
+          //   backgroundVideo.tint = .3 * 0xffffff;
+          //   // console.log(sprite.label +  " tile entered at " + sprite.position.x + " " + sprite.position.y);
+          // });
+          // backgroundVideo.on('pointerleave', () => {
+          //   backgroundVideo.tint = 0xffffff;
+          //   // console.log("Sprite exit at " + sprite.position.x + " " + sprite.position.y);
+          // });
+          // backgroundVideo.on('pointerdown', () => {
+          //   // sprite.tint = 0xffffff;
+
+          //   console.log(backgroundVideo.label + " pointerdown at " + backgroundVideo.position.x + " " + backgroundVideo.position.y);
+          //   SetSelectedPosition(backgroundVideo.label, backgroundVideo.position.x, backgroundVideo.position.y);
+          //   // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
           // });
 }
 
@@ -183,6 +200,7 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
 
             console.log(sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
             // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
+              SetSelectedPosition(sprite.label, sprite.position.x, sprite.position.y);
           });
 
           spritesContainer.addChild(sprite);

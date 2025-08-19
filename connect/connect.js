@@ -6,11 +6,11 @@ import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLo
 // import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
 
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "../main/js/dialogs.js";
-import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, eventEl } from "../connect/events.js";
+import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition } from "../connect/events.js";
 // import { SetTimeKeysData } from "./landing.js";
 
 import { settings, profile } from "../connect/settings.js";
-import { selectedPosition } from "../vtt/vtt_main.mjs";
+// import { selectedPosition } from "../vtt/vtt_main.mjs";
 // import { LoadPrimaryAudioHowl } from "./media.js";
 // import { playerPosition, playerRotation } from "../main/js/navigation.js";
 // import { profileLoaded } from "../connect/vtt.js";
@@ -1571,7 +1571,7 @@ function LocationRowClick(data) {
    // ShowLocationModal(isCloud, data);
 }
 
-export function CreateLocationAlt (filename, type, position) { 
+export function CreateLocationAlt (filename, type, position) { //for not-aframe views
 
    console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
    let timestamp = null;
@@ -1606,7 +1606,7 @@ export function CreateLocationAlt (filename, type, position) {
    console.log("new position for placeholder " + JSON.stringify(newPosition));
 
    let phEl = document.createElement('div');
-
+   document.body.appendChild(phEl);
    // var sceneEl = document.querySelectorAll('a-scene')[0];
    
    // phEl.setAttribute('skybox-env-map', '');
@@ -1662,7 +1662,7 @@ export function CreateLocationAlt (filename, type, position) {
                mediaID: locItem.mediaID, 
                modelID: locItem.modelID};
    
-   phEl.setAttribute('data-elementData', JSON.stringify(data));
+   phEl.setAttribute('data-elData', JSON.stringify(data));
 
 
                                        

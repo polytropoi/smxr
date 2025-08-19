@@ -20,7 +20,7 @@ import { SetTimeKeysData, eventEl } from '../connect/events.js';
 
 export const app = new Application();
 export let sceneTags;
-export let selectedPosition = {};
+
 let viewport;
 export let viewportVerticalCenter = 2; //i.e. /2 = center
 export let viewportHorizontalCenter = 2; //i.e. /2 = center
@@ -64,12 +64,6 @@ let locationData;
 export let hasBackgroundPictureGroup = false;
 // let profile;
 
-// let sprites
-export function SetSelectedPosition(tilename, xpos, ypos) {
-   selectedPosition.x = xpos;
-   selectedPosition.y = ypos;
-   selectedPosition.tilename; 
-}
 
 export function SetViewportHorizontalCenter (hcenter) {
   viewportHorizontalCenter = hcenter;
