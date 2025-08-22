@@ -1571,7 +1571,7 @@ function LocationRowClick(data) {
    // ShowLocationModal(isCloud, data);
 }
 
-export function CreateLocationAlt (filename, type, position) { //for not-aframe views
+export function CreateLocationAlt (filename, type, position) { //for not-aframe views, args null by default
 
    console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
    let timestamp = null;
@@ -1663,32 +1663,7 @@ export function CreateLocationAlt (filename, type, position) { //for not-aframe 
                modelID: locItem.modelID};
    
    phEl.setAttribute('data-elData', JSON.stringify(data));
-
-
-                                       
-
-   // phEl.setAttribute('position', newPosition);
-   // phEl.setAttribute('local_marker', {markerType: locItem.markerType, 
-   //                                     timestamp: timestamp, 
-   //                                     isNew: true, 
-   //                                     xpos: locItem.x, 
-   //                                     ypos: locItem.y, 
-   //                                     zpos: locItem.z, 
-   //                                     xscale: locItem.xscale,
-   //                                     yscale: locItem.yscale,
-   //                                     zscale: locItem.zscale,
-   //                                     mediaID: locItem.mediaID, 
-   //                                     modelID: locItem.modelID} );
-
-   // sceneEl.appendChild(phEl);
-
-   // let nextbuttonEl = document.getElementById('nextButton');
-   // let prevbuttonEl = document.getElementById('previousButton');
-   // nextbuttonEl.style.visibility = "visible";
-   // prevbuttonEl.style.visibility = "visible";
-
    SaveLocalData();
-
 }
 
 

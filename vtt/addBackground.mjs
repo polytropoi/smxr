@@ -1,9 +1,11 @@
 import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMatrixFilter } from 'pixi';
 // import { CompositeTilemap } from 'pixi-tilemap';
 import { SetSelectedPosition } from '../connect/events.js';
+import { keydown, CreateNewLocation } from '../main/js/dialogs.js';
 import { sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter} from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 import { AdvancedBloomFilter, ReflectionFilter, OldFilmFilter } from '@pixi/filters';
+import { LoadLocations } from './vtt_locations.mjs';
 export let mapsize = {};
 
 export let background;
@@ -23,6 +25,7 @@ export function addBackground(app, viewport, isTileable) {
     } else {
       background = Sprite.from('background');
     
+
       // Center background sprite anchor.
       background.anchor.set(0.5);
       if (app.screen.width > app.screen.height) {
@@ -43,6 +46,7 @@ export function addBackground(app, viewport, isTileable) {
         // app.stage.addChild(background);
     }
     if (viewport) {
+
       viewport.addChild(background);
           viewport.zoomPercent(.75, true);    
     } else {
@@ -103,22 +107,7 @@ export function addBackgroundVideo(app, viewport, spritesContainer) {
 
   
   addOverlayMap(app, viewport, width, height, texture, spritesContainer);
-          // });
-          //   backgroundVideo.on('pointerenter', () => {
-          //   backgroundVideo.tint = .3 * 0xffffff;
-          //   // console.log(sprite.label +  " tile entered at " + sprite.position.x + " " + sprite.position.y);
-          // });
-          // backgroundVideo.on('pointerleave', () => {
-          //   backgroundVideo.tint = 0xffffff;
-          //   // console.log("Sprite exit at " + sprite.position.x + " " + sprite.position.y);
-          // });
-          // backgroundVideo.on('pointerdown', () => {
-          //   // sprite.tint = 0xffffff;
 
-          //   console.log(backgroundVideo.label + " pointerdown at " + backgroundVideo.position.x + " " + backgroundVideo.position.y);
-          //   SetSelectedPosition(backgroundVideo.label, backgroundVideo.position.x, backgroundVideo.position.y);
-          //   // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
-          // });
 }
 
 
@@ -143,6 +132,9 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
     let tilesize = 128;
     const xCount = picwidth / tilesize;
     const yCount = picheight / tilesize;
+
+        viewport.worldWidth = picwidth;                        
+        viewport.worldHeight = picheight;   
 
     console.log("map xCount : " + xCount + " yCount : " + yCount);
   
@@ -186,21 +178,32 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
           sprite.anchor.set(0);
           sprite.interactive = true;
           sprite.buttonMode = true;
-                                          sprite.label = key;
+          sprite.label = key;
+          // sprite.alpha = .1;
           sprite.on('pointerenter', () => {
-            sprite.tint = .3 * 0xffffff;
+             if (keydown =="X") {
+              sprite.tint = .7 * 0xffffff;
+            } else {
+              sprite.tint = .3 * 0xffffff;
+            }
             // console.log(sprite.label +  " tile entered at " + sprite.position.x + " " + sprite.position.y);
           });
           sprite.on('pointerleave', () => {
             sprite.tint = 0xffffff;
             // console.log("Sprite exit at " + sprite.position.x + " " + sprite.position.y);
           });
-          sprite.on('pointerdown', () => {
+          sprite.on('pointerdown', (event) => {
             // sprite.tint = 0xffffff;
-
-            console.log(sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+          const globalPos = event.data.global; // { x: ..., y: ... }
+            // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+          const worldPos = viewport.toLocal(globalPos);
+              console.log("keydown " + keydown + " for " + sprite.label + " pointerdown globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
             // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
               SetSelectedPosition(sprite.label, sprite.position.x, sprite.position.y);
+              if (keydown == "X") {
+                CreateNewLocation();
+              }
+              
           });
 
           spritesContainer.addChild(sprite);
@@ -236,14 +239,14 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
     // app.stage.addChild(map);
     viewport.addChild(spritesContainer);
   
-    viewport.animate({
-      // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-      position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-      scale: 1.1, // Target zoom level
-      time: 1000, // Animation duration of 1 second
-      ease: 'easeInOutQuad' // Using a common easing function
+    // viewport.animate({
+    //   // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+    //   position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+    //   scale: 1.1, // Target zoom level
+    //   time: 1000, // Animation duration of 1 second
+    //   ease: 'easeInOutQuad' // Using a common easing function
   
-    });
+    // });
 
         // viewport.zoomPercent(.01, true);    
     // spritesContainer.zIndex = 10;
@@ -438,6 +441,9 @@ export async function addMap(app, viewport, spritesContainer) {
     mapsize.x = picwidth;
     mapsize.y = picheight;
 
+      viewport.worldWidth = picwidth;
+      viewport.worldHeight = picheight;
+
     let tilesize = 128;
     const xCount = picwidth / tilesize;
     const yCount = picheight / tilesize;
@@ -482,20 +488,31 @@ export async function addMap(app, viewport, spritesContainer) {
           sprite.anchor.set(0);
           sprite.interactive = true;
           sprite.buttonMode = true;
-                                          sprite.label = key;
+          sprite.label = key;
+                    // sprite.alpha = .1;
           sprite.on('pointerenter', () => {
-            sprite.tint = .3 * 0xffffff;
+            
+            if (keydown =="X") {
+              sprite.tint = .7 * 0xffffff;
+            } else {
+              sprite.tint = .3 * 0xffffff;
+            }
             // console.log(sprite.label +  " tile entered at " + sprite.position.x + " " + sprite.position.y);
           });
           sprite.on('pointerleave', () => {
             sprite.tint = 0xffffff;
             // console.log("Sprite exit at " + sprite.position.x + " " + sprite.position.y);
           });
-          sprite.on('pointerdown', () => {
+          sprite.on('pointerdown', (event) => {
             // sprite.tint = 0xffffff;
-
-            console.log(sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
-            SetSelectedPosition(sprite.label, sprite.position.x, sprite.position.y);
+          //             const globalPos = event.data.global; // { x: ..., y: ... }
+          //   // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+          // const worldPos = viewport.toLocal(globalPos);
+          //     console.log("keydown " + keydown + " for " + sprite.label + " pointerdown globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
+          //   SetSelectedPosition(sprite.label, globalPos.x.toFixed(2) , globalPos.y.toFixed(2));
+          //   if (keydown == "X") {
+          //     CreateNewLocation();
+          //   }
             // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
           });
 
@@ -530,15 +547,11 @@ export async function addMap(app, viewport, spritesContainer) {
     addGridOverlay(app, tilesize, xCount, yCount, picwidth, picheight, spritesContainer, viewport);
     // Add the background to the stage.
     // app.stage.addChild(map);
+
     viewport.addChild(spritesContainer);
-        viewport.animate({
-      // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-      position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-      scale: 1.1, // Target zoom level
-      time: 1000, // Animation duration of 1 second
-      ease: 'easeInOutQuad' // Using a common easing function
-  
-    });
+    
+     LoadLocations(app, viewport, spritesContainer);
+
     // spritesContainer.zIndex = 10;
             
 }

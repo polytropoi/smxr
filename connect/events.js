@@ -25,7 +25,6 @@ export function SetSelectedPosition(tilename, xpos, ypos) { //for vtt/not aframe
    selectedPosition.tilename = tilename; 
 }
 
-
 export function ResetTimedEvents () {
     timeKeysIndex = 0;
 }

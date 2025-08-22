@@ -12,8 +12,11 @@ import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverl
 import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
 import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../connect/media.js';
 import { settings, profile } from '../connect/settings.js';
-import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData} from "../../connect/events.js";
+import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData, SetSelectedPosition} from "../../connect/events.js";
+import { keydown, CreateNewLocation } from '../main/js/dialogs.js';
 import { addButtons, addFancyButtons } from './addButtons.mjs';
+
+import { LoadLocations } from './vtt_locations.mjs';
 import { SetTimeKeysData, eventEl } from '../connect/events.js';
 // import { keydown } from '../main/js/dialogs.js';
 
@@ -269,6 +272,7 @@ await Assets.loadBundle('fonts');
 
 export function playerProfileLoaded (playerProfile) {
   addPlayerProfileText(app, playerProfile, uicontainer);
+       LoadLocations(app, viewport, spritesContainer);
 }
 
 export async function GoWithIt() { //called from vtt.js
@@ -282,10 +286,10 @@ export async function GoWithIt() { //called from vtt.js
   if (mappicURL || backgroundVideoURL || hasBackgroundPictureGroup) { // just use a tag
 
     viewport = new Viewport({
-      screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight,
-      worldWidth: 1000,
-      worldHeight: 1000,
+      // screenWidth: window.innerWidth,
+      // screenHeight: window.innerHeight,
+      worldWidth: 10000,
+      worldHeight: 6000,
       disableOnContextMenu: true,
       events: app.renderer.events, 
     });
@@ -300,7 +304,7 @@ export async function GoWithIt() { //called from vtt.js
 
     viewport.x = 0;
     viewport.y = 0;
-    viewport.scale = 1.5
+    viewport.scale = 1
     viewport.position = { x: 0, y: 0 }
     app.stage.addChild(viewport);
     // activate plugins
@@ -311,6 +315,20 @@ export async function GoWithIt() { //called from vtt.js
         .decelerate();
 
     viewport.addEventListener("drag-end", onDragEnd);
+
+    viewport.on('pointerup', (event) => {
+        // ... handle the event
+          const globalPos = event.data.global; // { x: ..., y: ... }
+            // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+          const worldPos = viewport.toLocal(globalPos);
+              console.log("viewport click keydown " + keydown + " pointerdown " + event.x + " " + event.y + "  " + event.screenX + " " + event.screenY + " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
+            SetSelectedPosition('', event.x.toFixed(2) , event.y.toFixed(2));
+            if (keydown == "X") {
+              CreateNewLocation();
+            }
+    });
+
+
     // viewport.bounce();
   } else {
     //no viewport, normal background
@@ -418,6 +436,7 @@ export async function GoWithIt() { //called from vtt.js
   // } else {
   app.stage.addChild(uicontainer);
   // }
+
 
 
 

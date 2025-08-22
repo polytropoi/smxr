@@ -202,11 +202,13 @@ export function InitIDB() {
                               if (cursor.value.locations[i].locationTags.includes("curve point")) {
                                  localEl.classList.add("curvepoint");
                               }
-                           } else {
+                           } else { ///////NOT AFRAME !
+                              console.log("new local_marker for VTT!");
                               let localEl = document.createElement("div");
+                              document.body.appendChild(localEl);
                               localEl.classList.add("local_marker");
                               localEl.id = data.timestamp;
-                              localEl.setAttribute("data-elData", JSON.stringify(data));
+                              localEl.setAttribute("data-eldata", JSON.stringify(data));
                            }
                         }
                      }

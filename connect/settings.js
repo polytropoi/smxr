@@ -25,6 +25,9 @@ export function UpdateUserProfile (userProfile) { //called from indexedDB.js
             
          }
       } 
+   if (settings.sceneType.toLowerCase() != "aframe" && settings.sceneType.toLowerCase() != "default") {
+      
+   }   
    // profileLoaded(profile);
 }
 

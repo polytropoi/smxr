@@ -92,6 +92,7 @@ window.addEventListener( 'keydown',  ( event ) => {
 
     case 88: // X
       keydown = "X";
+      
       break;
 
     case 89: // Y
@@ -914,6 +915,15 @@ function TabMangler(evt, tagName) {
 //     });
 //   }
 // }
+
+export function CreateNewLocation () {
+      if (settings && settings.sceneType.toLowerCase() == "aframe" || settings && settings.sceneType.toLowerCase() == "default") {
+      CreateLocation(); //aframe
+    } else {
+      CreateLocationAlt(); //not aframe
+    }
+}
+
 function ReturnLocationItem () {
   let phID = selectedLocationTimestamp;
   let locationItem = null;
