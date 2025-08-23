@@ -199,10 +199,10 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
           const worldPos = viewport.toLocal(globalPos);
               console.log("keydown " + keydown + " for " + sprite.label + " pointerdown globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
             // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
-              SetSelectedPosition(sprite.label, sprite.position.x, sprite.position.y);
-              if (keydown == "X") {
-                CreateNewLocation();
-              }
+              // SetSelectedPosition(sprite.label, sprite.position.x, sprite.position.y);
+              // if (keydown == "X") {
+              //   CreateNewLocation();
+              // }
               
           });
 
@@ -441,8 +441,8 @@ export async function addMap(app, viewport, spritesContainer) {
     mapsize.x = picwidth;
     mapsize.y = picheight;
 
-      viewport.worldWidth = picwidth;
-      viewport.worldHeight = picheight;
+      // viewport.worldWidth = picwidth;
+      // viewport.worldHeight = picheight;
 
     let tilesize = 128;
     const xCount = picwidth / tilesize;
@@ -503,42 +503,66 @@ export async function addMap(app, viewport, spritesContainer) {
             sprite.tint = 0xffffff;
             // console.log("Sprite exit at " + sprite.position.x + " " + sprite.position.y);
           });
-          sprite.on('pointerdown', (event) => {
-            // sprite.tint = 0xffffff;
+          // sprite.on('pointerup', (event) => {
+          // // ... handle the event
+          //   const globalPos = event.data.global; // { x: ..., y: ... }
+          //     // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+          //   const worldPos = viewport.toLocal(globalPos);
+          //       console.log("viewport click keydown " + keydown + " pointerdown " + event.x + " " + event.y + "  " + event.screenX + " " + event.screenY + " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
+          //     SetSelectedPosition('', globalPos.x.toFixed(2) , globalPos.y.toFixed(2));
+          //     if (keydown == "X") {
+          //       CreateNewLocation();
+          //       LoadLocations(app, viewport, spritesContainer);
+          //     }
+          // });
+          // sprite.on('pointerdown', (event) => {
+          //   sprite.tint = 0xffffff;
           //             const globalPos = event.data.global; // { x: ..., y: ... }
           //   // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
-          // const worldPos = viewport.toLocal(globalPos);
-          //     console.log("keydown " + keydown + " for " + sprite.label + " pointerdown globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
-          //   SetSelectedPosition(sprite.label, globalPos.x.toFixed(2) , globalPos.y.toFixed(2));
-          //   if (keydown == "X") {
-          //     CreateNewLocation();
-          //   }
-            // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
-          });
+          //     const worldPos = viewport.toLocal(globalPos);
+          //     console.log("keydown " + keydown + " for " + sprite.label + " pointerdown " + sprite.position.x + " " + sprite.position.y);
+          //     SetSelectedPosition(sprite.label, globalPos.x.toFixed(2) , globalPos.y.toFixed(2));
+          //     if (keydown == "X") {
+          //       CreateNewLocation();
+          //     }
+          //   // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
+          // });
 
           spritesContainer.addChild(sprite);
           }
         }
-    // Center background sprite anchor.
-    spritesContainer.anchor = 0.5;
-    
+        spritesContainer.interactive = true;
+        // Center background sprite anchor.
+        spritesContainer.anchor = 0.5;
+              spritesContainer.on('pointerup', (event) => {
+          // ... handle the event
+            const globalPos = event.data.global; // { x: ..., y: ... }
+              // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+            const worldPos = spritesContainer.toLocal(globalPos);
+                console.log("spritesContainer click keydown " + keydown + " pointerdown " + event.x + " " + event.y + "  " + event.screenX + " " + event.screenY + " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
+              // SetSelectedPosition('', globalPos.x.toFixed(2) , globalPos.y.toFixed(2));
+              // if (keydown == "X") {
+              //   CreateNewLocation();
+              //   LoadLocations(app, viewport, spritesContainer);
+              // }
+          });
     /**
      * If the preview is landscape, fill the width of the screen
      * and apply horizontal scale to the vertical scale for a uniform fit.
      */
 
-    if (app.screen.width > app.screen.height) {
-      spritesContainer.width = app.screen.width - (app.screen.width * .1);
-          // background.width = app.screen.width;
-      spritesContainer.scale.y = spritesContainer.scale.x;
-    } else {
-      /**
-       * If the preview is square or portrait, then fill the height of the screen instead
-       * and apply the scaling to the horizontal scale accordingly.
-       */
-      spritesContainer.height = app.screen.height - (app.screen.height * .1);
-      spritesContainer.scale.x = spritesContainer.scale.y;
-    }
+        // if (app.screen.width > app.screen.height) {
+        //   spritesContainer.width = app.screen.width - (app.screen.width * .1);
+        //       // background.width = app.screen.width;
+        //   spritesContainer.scale.y = spritesContainer.scale.x;
+        // } else {
+        //   /**
+        //    * If the preview is square or portrait, then fill the height of the screen instead
+        //    * and apply the scaling to the horizontal scale accordingly.
+        //    */
+        //   spritesContainer.height = app.screen.height - (app.screen.height * .1);
+        //   spritesContainer.scale.x = spritesContainer.scale.y;
+        // }
 
     // Position the background sprite in the center of the stage.
     spritesContainer.x = app.screen.width * .05;
@@ -550,7 +574,7 @@ export async function addMap(app, viewport, spritesContainer) {
 
     viewport.addChild(spritesContainer);
     
-     LoadLocations(app, viewport, spritesContainer);
+
 
     // spritesContainer.zIndex = 10;
             

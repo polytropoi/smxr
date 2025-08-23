@@ -16,25 +16,36 @@ let tokenContainer;
     //      console.log("localMarker " + el.id);
     // });
     if (!tokenContainer) {
-        tokenContainer = new Container();
-        tokenContainer.anchor = .5;
-        tokenContainer.width = viewport.worldWidth;
-        tokenContainer.height = viewport.worldHeight;
-        spritesContainer.addChild(tokenContainer);
-        spritesContainer.setChildIndex(tokenContainer, 0);
+            // tokenContainer.destroy({ children: true });
+                tokenContainer = new Container();
+        tokenContainer.anchor = 0;
+        // tokenContainer.width = viewport.width;
+        // tokenContainer.height = viewport.height;
+        viewport.addChild(tokenContainer);
+        viewport.setChildIndex(tokenContainer, viewport.children.length - 1);
+    } else {
+        tokenContainer.removeChildren();
     }
+    
+    // tokenContainer = new Container();
+    // // tokenContainer.anchor = .5;
+    // // tokenContainer.width = viewport.width;
+    // // tokenContainer.height = viewport.height;
+    // viewport.addChild(tokenContainer);
+    // viewport.setChildIndex(tokenContainer, viewport.children.length - 1);
+    
     console.log("localMarkers found " + localMarkers.length + " viewport is " + viewport.worldWidth + " " + viewport.worldHeight);
     for (let i = 0; i < localMarkers.length; i++) {
         console.log("localMarker " + localMarkers[i].id + " data " + localMarkers[i].dataset.eldata);
         const elData = JSON.parse(localMarkers[i].dataset.eldata);
-         const scaleFactor = .25;
+         const scaleFactor = .6;
             const width = 100 * scaleFactor;
             const height = 50 * scaleFactor;
             const strokeWidth = 3 * scaleFactor;
             const xpos = parseFloat(elData.xpos);
             const ypos = parseFloat(elData.ypos);
 
-  const fontsize = Math.max(18, window.innerWidth / 50); 
+    const fontsize = Math.max(18, window.innerWidth / 50);  
     const text = new Text({
         text: 'placeholder',
         style: {
@@ -98,29 +109,20 @@ let tokenContainer;
     // token.data = elData;
     
 
-    const globalPos = {x: xpos, y: ypos};
-    const worldPos = viewport.toLocal(globalPos);
-        console.log("tryna set token position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
+    const globalPos = {x: xpos, y: ypos} ;
+    const worldPos = viewport.toWorld(globalPos);
+        // console.log(viewport.x + " " + viewport.scale.x + " " + viewport.scale.y  + " scale tryna set token position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
+        console.log("setting token position w/ viewport position " + viewport.x + " " + viewport.x  + " scale " + viewport.scale.x + " " + viewport.scale.y  + " position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
     // token.position.set(worldPos.x,worldPos.y);
     token.x = worldPos.x;
     token.y = worldPos.y;
-viewport.addChild(token);
+    tokenContainer.addChild(token);
+    // tokenContainer.setChildIndex(token, tokenContainer.children.length -1);
     token.onPress.connect((event) => {
         // console.log("pressed token " + JSON.stringify(token.data));
         }
     );
     }
-    console.log(tokenContainer.children);
-    //     viewport.animate({
-    //   // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-    //   position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-    //   scale: 1, // Target zoom level
-    //   time: 1000, // Animation duration of 1 second
-    //   ease: 'easeInOutQuad', // Using a common easing function
-    //   callbackOnComplete: () => {
-    //     console.log("Animation completed!");
-       
-    //     // Perform actions after animation finishes
-    //   }
-    // });
+    // console.log(tokenContainer.children);
+
  }

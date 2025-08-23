@@ -272,7 +272,7 @@ await Assets.loadBundle('fonts');
 
 export function playerProfileLoaded (playerProfile) {
   addPlayerProfileText(app, playerProfile, uicontainer);
-       LoadLocations(app, viewport, spritesContainer);
+  LoadLocations(app, viewport, spritesContainer);
 }
 
 export async function GoWithIt() { //called from vtt.js
@@ -288,24 +288,25 @@ export async function GoWithIt() { //called from vtt.js
     viewport = new Viewport({
       // screenWidth: window.innerWidth,
       // screenHeight: window.innerHeight,
-      worldWidth: 10000,
-      worldHeight: 6000,
+      // worldWidth: 10000,
+      // worldHeight: 10000,
       disableOnContextMenu: true,
       events: app.renderer.events, 
     });
-    if (app.screen.width > app.screen.height) {
-      viewport.width = app.screen.width - (app.screen.width * .1);
-      viewport.scale.y = viewport.scale.x;
-      } else {
-      viewport.height = app.screen.height - (app.screen.height * .1);
-      viewport.scale.x = viewport.scale.y;
-    }
+    // if (app.screen.width > app.screen.height) {
+    //   // viewport.width = app.screen.width - (app.screen.width * .1);
+    //   viewport.scale.y = viewport.scale.x;
+    //   } else {
+    //   // viewport.height = app.screen.height - (app.screen.height * .1);
+    //   viewport.scale.x = viewport.scale.y;
+    // }
 
 
-    viewport.x = 0;
-    viewport.y = 0;
-    viewport.scale = 1
-    viewport.position = { x: 0, y: 0 }
+    // viewport.x = 0;
+    // viewport.y = 0;
+    viewport.anchor = .5;
+    viewport.scale = 1;
+    // viewport.position = { x: 0, y: 0 }
     app.stage.addChild(viewport);
     // activate plugins
     viewport
@@ -316,17 +317,32 @@ export async function GoWithIt() { //called from vtt.js
 
     viewport.addEventListener("drag-end", onDragEnd);
 
-    viewport.on('pointerup', (event) => {
+        viewport.on('pointerup', (event) => {
         // ... handle the event
           const globalPos = event.data.global; // { x: ..., y: ... }
             // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
-          const worldPos = viewport.toLocal(globalPos);
-              console.log("viewport click keydown " + keydown + " pointerdown " + event.x + " " + event.y + "  " + event.screenX + " " + event.screenY + " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
-            SetSelectedPosition('', event.x.toFixed(2) , event.y.toFixed(2));
+          const worldPos = viewport.toWorld(globalPos);
+              console.log("viewport click on " + viewport.scale.x + " " + viewport.x + " " + viewport.y + " keydown " + keydown + " pointerdown " + event.x + " " + event.y + "  " + event.screenX + " " + event.screenY + " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
+            SetSelectedPosition('', globalPos.x.toFixed(2) , globalPos.y.toFixed(2));
             if (keydown == "X") {
               CreateNewLocation();
+              LoadLocations(app, viewport, spritesContainer);
             }
-    });
+        });
+
+
+    // viewport.animate({
+    //   // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+    //   position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+    //   scale: 1, // Target zoom level
+    //   time: 1000, // Animation duration of 1 second
+    //   ease: 'easeInOutQuad', // Using a common easing function
+    //   callbackOnComplete: () => {
+    //     console.log("Animation completed!");
+       
+    //     // Perform actions after animation finishes
+    //   }
+    // });
 
 
     // viewport.bounce();
