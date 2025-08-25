@@ -876,6 +876,7 @@ export function InitIDB() {
 
    export function DeleteLocalSceneData() {  //kill everything for this scene
 
+         
         console.log("tryna delete local scene data");
         if (!('indexedDB' in window)) {
            console.log("This browser doesn't support IndexedDB");
@@ -904,11 +905,13 @@ export function InitIDB() {
            // report that the data item has been deleted
            transaction.oncomplete = () => {
            console.log("sceneData deleted - reload to confirm!");
+           localStorage.clear();
            setTimeout(function () {
               window.location.reload();
            }, 2000);
   
            };
+           
         };
      }
 

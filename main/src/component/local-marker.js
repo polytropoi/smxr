@@ -88,7 +88,10 @@ AFRAME.registerComponent('local_marker', { //special items with local mods, not 
       this.calloutText = document.createElement("a-entity");
       this.viewportHolder = document.getElementById('viewportPlaceholder3');
       var cameraPosition = new THREE.Vector3(); 
-      this.viewportHolder.object3D.getWorldPosition( cameraPosition );
+      if (this.viewportHolder) {
+        this.viewportHolder.object3D.getWorldPosition( cameraPosition ); 
+      }
+
       this.calloutIndex = 0;
       this.calloutEntity.setAttribute('visible', false);
       this.selectedAxis = null;

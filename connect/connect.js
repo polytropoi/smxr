@@ -1596,8 +1596,8 @@ export function CreateLocationAlt (filename, type, position) { //for not-aframe 
    if (!position) { //if added from dialog instead of with picker
       // let viewportHolder = document.getElementById('viewportPlaceholder');
       newPosition.x = selectedPosition.x;
-      newPosition.y = selectedPosition.y;
-      newPosition.z = 0;
+      newPosition.y = 0;
+      newPosition.z = selectedPosition.y; 
       // viewportHolder.object3D.getWorldPosition( newPosition );
    } else {
       newPosition = position;

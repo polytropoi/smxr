@@ -359,6 +359,8 @@ vtt_router.get('/:_id', function (req, res) {
     let useArParent = false;
     let sceneUnityWebDomain = "http://smxr.net";
     let activityPubScripts = "";
+    let pixelsPerMeterActual = 10; //these need some input.... use for conversion of 2d coord system to 3d units
+    let pixelsPerMeterVirtual = .01; //use for speed?
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
@@ -2919,7 +2921,9 @@ vtt_router.get('/:_id', function (req, res) {
                     settings.sceneEnvironmentPreset = sceneResponse.sceneEnvironmentPreset;
                     settings.showCameraIcon = sceneResponse.showCameraIcon; //for picture group mgr
                     settings.useArParent = useArParent;
-                
+                    settings.pixelsPerMeterActual = pixelsPerMeterActual; //for 2d to 3d position conversion
+                    settings.pixelsPerMeterActual = pixelsPerMeterVirtual; //hrm
+
                     if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
                         settings.useXrRoomPhysics = true;
                     } else {

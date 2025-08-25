@@ -493,9 +493,9 @@ export async function addMap(app, viewport, spritesContainer) {
           sprite.on('pointerenter', () => {
             
             if (keydown =="X") {
-              sprite.tint = .7 * 0xffffff;
+              sprite.tint = .35 * 0xffffff;
             } else {
-              sprite.tint = .3 * 0xffffff;
+              sprite.tint = .625 * 0xffffff;
             }
             // console.log(sprite.label +  " tile entered at " + sprite.position.x + " " + sprite.position.y);
           });

@@ -20,8 +20,8 @@ export let timedEventsListenerMode = "";
 
 
 export function SetSelectedPosition(tilename, xpos, ypos) { //for vtt/not aframe views
-   selectedPosition.x = xpos;
-   selectedPosition.y = ypos;
+   selectedPosition.x = xpos.toFixed(2);
+   selectedPosition.y = ypos.toFixed(2);
    selectedPosition.tilename = tilename; 
 }
 

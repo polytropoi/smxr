@@ -16,13 +16,14 @@ import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, ti
 import { keydown, CreateNewLocation } from '../main/js/dialogs.js';
 import { addButtons, addFancyButtons } from './addButtons.mjs';
 
-import { LoadLocations } from './vtt_locations.mjs';
+import { LoadLocations, AddLocation } from './vtt_locations.mjs';
 import { SetTimeKeysData, eventEl } from '../connect/events.js';
 // import { keydown } from '../main/js/dialogs.js';
 
 
 export const app = new Application();
 export let sceneTags;
+export let pixelsPerMeterActual = 10;
 
 let viewport;
 export let viewportVerticalCenter = 2; //i.e. /2 = center
@@ -78,6 +79,7 @@ function onDragEnd (e) {
   console.log("dragend! screen " + JSON.stringify(e.screen) + " world " + JSON.stringify(e.world) + " center " + viewportVerticalCenter);
   // console.log(viewport.fitWorld(e.world.x, e.world.y));
   // viewport.fitWorld();
+
   if (hasBackgroundPictureGroup) {
     viewport.animate({
       // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
@@ -88,8 +90,15 @@ function onDragEnd (e) {
 
     });
   }
-    
+  localStorage.setItem("viewportPosition", viewport.x + "," + viewport.y + "," + viewport.scale.x);
 }
+
+function onZoomedEnd (e) {
+  console.log("zoomend! " + viewport.scale.x);
+
+  localStorage.setItem("viewportPosition", viewport.x + "," + viewport.y + "," + viewport.scale.x);
+}
+
 function onResize () {
 
   console.log("tryna resize..." + window.innerWidth + " " + window.innerHeight);
@@ -272,6 +281,7 @@ await Assets.loadBundle('fonts');
 
 export function playerProfileLoaded (playerProfile) {
   addPlayerProfileText(app, playerProfile, uicontainer);
+  // LoadLocations(app, viewport, spritesContainer);
   LoadLocations(app, viewport, spritesContainer);
 }
 
@@ -302,10 +312,17 @@ export async function GoWithIt() { //called from vtt.js
     // }
 
 
+    const lastP = localStorage.getItem("viewportPosition");
+    if (lastP) {
+      const pSplit = lastP.split(","); 
+      viewport.x = parseFloat(pSplit[0]);
+      viewport.y = parseFloat(pSplit[1]);
+      viewport.setZoom(parseFloat(pSplit[2]));
+    }
     // viewport.x = 0;
     // viewport.y = 0;
-    viewport.anchor = .5;
-    viewport.scale = 1;
+    // viewport.anchor = .5;
+    // viewport.scale = 1;
     // viewport.position = { x: 0, y: 0 }
     app.stage.addChild(viewport);
     // activate plugins
@@ -313,22 +330,33 @@ export async function GoWithIt() { //called from vtt.js
         .drag()
         .pinch()
         .wheel()
+        // .bounce({
+        // friction: 1,
+        // time: 2000,
+        // ease: 'easeOutQuad'
+        // })
         .decelerate();
 
     viewport.addEventListener("drag-end", onDragEnd);
 
-        viewport.on('pointerup', (event) => {
-        // ... handle the event
-          const globalPos = event.data.global; // { x: ..., y: ... }
-            // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
-          const worldPos = viewport.toWorld(globalPos);
-              console.log("viewport click on " + viewport.scale.x + " " + viewport.x + " " + viewport.y + " keydown " + keydown + " pointerdown " + event.x + " " + event.y + "  " + event.screenX + " " + event.screenY + " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
-            SetSelectedPosition('', globalPos.x.toFixed(2) , globalPos.y.toFixed(2));
-            if (keydown == "X") {
-              CreateNewLocation();
-              LoadLocations(app, viewport, spritesContainer);
-            }
-        });
+    viewport.addEventListener("zoomed-end", onZoomedEnd);
+
+    viewport.on('pointerup', (event) => { //main picker for maps
+    // ... handle the event
+      const globalPos = event.data.global; // { x: ..., y: ... }
+        // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+      const worldPos = viewport.toLocal(globalPos);
+        console.log("viewport click on " + viewport.scale.x + " " + viewport.x + " " + viewport.y + " keydown " + keydown + " pointer " + event.x + " " + event.y + " screen " + event.screenX + " " + event.screenY + 
+          " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
+
+        SetSelectedPosition('', worldPos.x.toFixed(2) / pixelsPerMeterActual , worldPos.y.toFixed(2) / pixelsPerMeterActual);
+        if (keydown == "X") {
+          CreateNewLocation();
+          AddLocation(app, viewport, spritesContainer);
+        }
+    });
+
+    
 
 
     // viewport.animate({
@@ -454,7 +482,7 @@ export async function GoWithIt() { //called from vtt.js
   // }
 
 
-
+    
 
   // window.addEventListener('resize', onResize);
   eventEl.addEventListener('timed-event', onTimedEvent);

@@ -1566,56 +1566,9 @@ function AddTimekey() {
   // ShowTimekeysModal();
 }
 
-// function ReturnFancyTimeString () {
-//   return fancyTimeString;  
-// }
-
-// function ShowTimekeysModal() {    //nerp, now in scenemanglermodal
-//   console.log("tryna SHowTImekyesMoodla");
-//   ShowHideDialogPanel();
-//   if (modalTimeStatsEl == null) {
-//     modalTimeStatsEl = $('#modalContent').find('#modalTimeStats');
-//   }
-
-//   if (tkStarttimes != null)  {
-     
-//       let content = "<span id='modalCloser' class='close-modal'>&times;</span><div><h3>Timed Events</h3><hr>" + //populate modal
-
-//       "<div class=\x22row\x22>"+
-
-//       "<button class=\x22snapButton\x22 style=\x22float:left;\x22 onclick=\x22AddTimekey()\x22>Add Timed Event Key</button>"+
-//       "<button class=\x22infoButton\x22 onclick=\x22SceneManglerModal('Tools')\x22>Settings</button>"+
-//       "<button class=\x22saveButton\x22 onclick=\x22SaveTimekeysToLocal()\x22>Save to Local Database</button>"+
-     
-//       // "<button class=\x22deleteButton\x22 onclick=\x22PlayPauseMedia()\x22>Play/Pause Media</button>"+
-//       "<div class=\x22transport_buttons\x22><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
-//       "<div id=\x22transport_play_button\x22 class=\x22play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
-//       "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>"+
-
-//       "<div style=\x22float: right; width: 166px;\x22>Listen To Timeline:"+
-//       "<select id=\x22listenToTimelineSelector\x22 class=\x22listenToTimelineSelector\x22>" +
-//           ReturnListenToTimelineSelectors() +
-//           "</select>" +
-//       "</div>"+
-      
-//       "<div class=\x22\x22 style=\x22margin: 10px;\x22 id=\x22modalTimeStats\x22>"+fancyTimeString+"</div>" +
-   
-//       ReturnTimeKeys() +
-//       "</div>"+
-
-//       "</div>";
-//       ShowHideDialogPanel(content);
-      
-//   }
-// }
 let isPlaying = false;
 
-// document.addEventListener('keyup', event => {
-//   if (event.code === 'Space') {
-//     console.log('Space pressed');
-//     PlayPauseMedia();
-//   }
-// });
+
 
 function PlayPauseMedia () {
 

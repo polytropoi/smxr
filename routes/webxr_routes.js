@@ -1221,6 +1221,12 @@ webxr_router.get('/:_id', function (req, res) {
                     wasd = "";
                     cameraRigEntity = "<a-entity initializer camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; enablePan: true; screenSpacePanning: true; minDistance: 0.5; maxDistance: 90; initialPosition: "+playerPosition+"\x22>"+
                     "<a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
+                    "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22equipPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 -.5 -.65\x22"+ //these seemed to need actual geometry to get a worldspace loc
+                    "material=\x22opacity: 0\x22></a-entity>"+
+                    "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -1\x22"+
+                    "material=\x22opacity: 0\x22></a-entity>"+
+                    "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -3\x22"+
+                    "material=\x22opacity: 0\x22></a-entity>"+
                     "</a-entity>";
                     joystickScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/diarmidmackenzie/superframe@fix-orbit-controls/components/orbit-controls/dist/aframe-orbit-controls.min.js\x22></script>";
                 

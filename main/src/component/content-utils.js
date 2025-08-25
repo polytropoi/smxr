@@ -300,8 +300,9 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
 
       if (settings && settings.sceneTags.includes("hudmap")) {
         const renderCamera = document.getElementById("renderCamera");
-
-        renderCamera.setAttribute("camrender", {"cid": "topCameraCanvas"});
+        if (renderCamera) {
+          renderCamera.setAttribute("camrender", {"cid": "topCameraCanvas"});
+        }
         // camrender=\x22cid: topCameraCanvas\x22
       }
 
@@ -2752,23 +2753,25 @@ AFRAME.registerComponent('player_hud', {
 
 
       const that = this;
-      this.hudText.setAttribute('troika-text', {
-        maxWidth: .9,
-        baseline: "bottom",
-        align: "center",
-        fontSize: .03,
-        font: "/fonts/web/"+ this.font2,
-        anchor: "center",
-        color: "white",
-        outlineColor: "black",
-        outlineWidth: "2%",
-        value: userstring,
-        colorRanges: colorRanges//{0: "white", 17: connectedUsers[0].color}
-        });
-      this.hudText.setAttribute("visible", true);
-      setTimeout(() => {
-        this.hudText.setAttribute("visible", false);
-      }, 8000);
+      if (this.hudText) {
+        this.hudText.setAttribute('troika-text', {
+          maxWidth: .9,
+          baseline: "bottom",
+          align: "center",
+          fontSize: .03,
+          font: "/fonts/web/"+ this.font2,
+          anchor: "center",
+          color: "white",
+          outlineColor: "black",
+          outlineWidth: "2%",
+          value: userstring,
+          colorRanges: colorRanges//{0: "white", 17: connectedUsers[0].color}
+          });
+        this.hudText.setAttribute("visible", true);
+        setTimeout(() => {
+          this.hudText.setAttribute("visible", false);
+        }, 8000);
+      }
     }
   // }
 });
