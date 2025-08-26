@@ -4,7 +4,7 @@ import { GoWithIt } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 
 import {settings, profile} from "../../connect/settings.js";
 
-import {localData} from "../../connect/connect.js";
+import {localData, SetSceneLocations} from "../../connect/connect.js";
 
 
 
@@ -174,6 +174,7 @@ $(function() {
       let theLocationData = locationDataEl.getAttribute('data-locations');
 
       locationData = JSON.parse(atob(theLocationData));
+      SetSceneLocations(locationData);
       // console.log("locationData " + JSON.stringify(locationData));
 
    }

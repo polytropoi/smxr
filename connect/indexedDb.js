@@ -80,68 +80,71 @@ export function InitIDB() {
                      // console.log(cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " scale " + cursor.value.locations[i].xscale + cursor.value.locations[i].yscale + cursor.value.locations[i].zscale );
                      console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal " + " modelID " + cursor.value.locations[i].modelID);
                      let cloudEl = document.getElementById(cursor.value.locations[i].timestamp);
-
-                        if (cloudEl) { //prexisting elements (cloud_marker, mod_model, mod_object) already rendered onload
                         
-                           cloudEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
-                           cloudEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
-                           // cloudEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
-                           cloudEl.setAttribute("scale", {x: cursor.value.locations[i].xscale, y: cursor.value.locations[i].yscale, z: cursor.value.locations[i].zscale});
-                           let cloudMarkerComponent = cloudEl.components.cloud_marker;
-                           if (cloudMarkerComponent) {  
-                              if (
-                                 (cursor.value.locations[i].mediaID && cursor.value.locations[i].mediaID.includes("local_") || 
-                                 (cursor.value.locations[i].modelID && cursor.value.locations[i].modelID.includes("local_")))) {
-                                    cloudEl.classList.add("hasLocalFile");
-                                    console.log("cursor hasLocalFile: "+ JSON.stringify(cursor.value.locations[i]));
-                              }
-                              if (cursor.value.locations[i].locationTags && cursor.value.locations[i].locationTags.includes("curve point")) {
-                                 cloudEl.classList.add("curvepoint");
-                              }
-                              cloudMarkerComponent.updateAndLoad(cursor.value.locations[i].name, 
-                                                               cursor.value.locations[i].description, 
-                                                               cursor.value.locations[i].locationTags, 
-                                                               cursor.value.locations[i].eventData, 
-                                                               cursor.value.locations[i].markerType, 
-                                                               cursor.value.locations[i].markerObjScale, 
-                                                               cursor.value.locations[i].x, 
-                                                               cursor.value.locations[i].y, 
-                                                               cursor.value.locations[i].z, 
-                                                               cursor.value.locations[i].eulerx, 
-                                                               cursor.value.locations[i].eulery, 
-                                                               cursor.value.locations[i].eulerz, 
-                                                               cursor.value.locations[i].xscale,
-                                                               cursor.value.locations[i].yscale,
-                                                               cursor.value.locations[i].zscale,
-                                                               cursor.value.locations[i].modelID,
-                                                               cursor.value.locations[i].objectID,
-                                                               cursor.value.locations[i].mediaID,
-                                                               cursor.value.locations[i].targetElements );   
-
-                           } else {
-                              let modModelComponent = cloudEl.components.mod_model;
-                              if (modModelComponent) {
+                        if (cloudEl) { //prexisting elements (cloud_marker, mod_model, mod_object) already rendered onload
+                           if (sceneEl) {
+                              cloudEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
+                              cloudEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
+                              // cloudEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
+                              cloudEl.setAttribute("scale", {x: cursor.value.locations[i].xscale, y: cursor.value.locations[i].yscale, z: cursor.value.locations[i].zscale});
+                              let cloudMarkerComponent = cloudEl.components.cloud_marker;
+                              if (cloudMarkerComponent) {  
                                  if (
-                                    cursor.value.locations[i].modelID.includes("local_")) {
-                                    cloudEl.classList.add("hasLocalFile");
+                                    (cursor.value.locations[i].mediaID && cursor.value.locations[i].mediaID.includes("local_") || 
+                                    (cursor.value.locations[i].modelID && cursor.value.locations[i].modelID.includes("local_")))) {
+                                       cloudEl.classList.add("hasLocalFile");
+                                       console.log("cursor hasLocalFile: "+ JSON.stringify(cursor.value.locations[i]));
                                  }
-                                 modModelComponent.updateAndLoad(cursor.value.locations[i].name, //passing in params to function, order matters!
-                                                               cursor.value.locations[i].description, 
-                                                               cursor.value.locations[i].locationTags, 
-                                                               cursor.value.locations[i].eventData, 
-                                                               cursor.value.locations[i].markerType, 
-                                                               // cursor.value.locations[i].markerObjScale, 
-                                                               cursor.value.locations[i].x, 
-                                                               cursor.value.locations[i].y, 
-                                                               cursor.value.locations[i].z, 
-                                                               cursor.value.locations[i].eulerx, 
-                                                               cursor.value.locations[i].eulery, 
-                                                               cursor.value.locations[i].eulerz, 
-                                                               cursor.value.locations[i].xscale,
-                                                               cursor.value.locations[i].yscale,
-                                                               cursor.value.locations[i].zscale,
-                                                               cursor.value.locations[i].modelID   );
+                                 if (cursor.value.locations[i].locationTags && cursor.value.locations[i].locationTags.includes("curve point")) {
+                                    cloudEl.classList.add("curvepoint");
+                                 }
+                                 cloudMarkerComponent.updateAndLoad(cursor.value.locations[i].name, 
+                                                                  cursor.value.locations[i].description, 
+                                                                  cursor.value.locations[i].locationTags, 
+                                                                  cursor.value.locations[i].eventData, 
+                                                                  cursor.value.locations[i].markerType, 
+                                                                  cursor.value.locations[i].markerObjScale, 
+                                                                  cursor.value.locations[i].x, 
+                                                                  cursor.value.locations[i].y, 
+                                                                  cursor.value.locations[i].z, 
+                                                                  cursor.value.locations[i].eulerx, 
+                                                                  cursor.value.locations[i].eulery, 
+                                                                  cursor.value.locations[i].eulerz, 
+                                                                  cursor.value.locations[i].xscale,
+                                                                  cursor.value.locations[i].yscale,
+                                                                  cursor.value.locations[i].zscale,
+                                                                  cursor.value.locations[i].modelID,
+                                                                  cursor.value.locations[i].objectID,
+                                                                  cursor.value.locations[i].mediaID,
+                                                                  cursor.value.locations[i].targetElements );   
+
+                              } else {
+                                 let modModelComponent = cloudEl.components.mod_model;
+                                 if (modModelComponent) {
+                                    if (
+                                       cursor.value.locations[i].modelID.includes("local_")) {
+                                       cloudEl.classList.add("hasLocalFile");
+                                    }
+                                    modModelComponent.updateAndLoad(cursor.value.locations[i].name, //passing in params to function, order matters!
+                                                                  cursor.value.locations[i].description, 
+                                                                  cursor.value.locations[i].locationTags, 
+                                                                  cursor.value.locations[i].eventData, 
+                                                                  cursor.value.locations[i].markerType, 
+                                                                  // cursor.value.locations[i].markerObjScale, 
+                                                                  cursor.value.locations[i].x, 
+                                                                  cursor.value.locations[i].y, 
+                                                                  cursor.value.locations[i].z, 
+                                                                  cursor.value.locations[i].eulerx, 
+                                                                  cursor.value.locations[i].eulery, 
+                                                                  cursor.value.locations[i].eulerz, 
+                                                                  cursor.value.locations[i].xscale,
+                                                                  cursor.value.locations[i].yscale,
+                                                                  cursor.value.locations[i].zscale,
+                                                                  cursor.value.locations[i].modelID   );
+                                 }
                               }
+                           } else {
+                              
                            }
                         } else {//local-only elements, not saved to cloud yet
                            hasLocalData = true;

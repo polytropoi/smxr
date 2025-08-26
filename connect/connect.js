@@ -30,7 +30,7 @@ export let sceneLocations = {locations: [], locationMods: []};
 export let attributions = [];
 export var videoEl = null;
 // export const mouse = new THREE.Vector2();
-export const sceneEl = document.querySelector('a-scene');
+export const sceneEl = document.querySelector('a-scene'); //related to problem...
 // export let hasLocalData = false;
 export const lerp = (x, y, a) => x * (1 - a) + y * a;
 
@@ -555,6 +555,10 @@ function UpdateSceneLocations () { //unused?
    }
 }
 
+export function SetSceneLocations (sceneLocs) { //e.g. from vtt/non aframe, not set in content-utils
+   sceneLocations.locations = sceneLocs;
+}
+
 export function getExtension(filename) {
    // console.log("tryna get extension of " + filename);
    var i = filename.lastIndexOf('.');
@@ -1046,115 +1050,118 @@ export function SaveModToLocal(locationKey) { //locationKey is now just timestam
          localData.locations[i].mediaID = locItem.mediaID;
          hasLocal = true;
          let theEl = document.getElementById(locationKey.toString());
-         if (theEl != null) {
-            
-            //get loc props from object...
+         if (theEl) {
+            if (sceneEl) {
+               //get loc props from object...
 
-            // let o3D = theEl.object3D;
-            // let o3DScale = theEl.object3D.scale;
-            // let o3DScale = theEl.getAttribute("scale");
-            // let o3DScale = new THREE.Vector3();
-            // o3D.getWorldScale(o3DScale);
-            
-            console.log("found the EL: " + locationKey + " locItem name " + locItem.name + " scale " + locItem.xscale + " " + locItem.yscale + " " +  locItem.zscale + " modelID " + locItem.modelID );
-            // localData.locations[i].xscale = o3DScale.x;
-            // localData.locations[i].yscale = o3DScale.y;
-            // localData.locations[i].zscale = o3DScale.z;
-            // locItem.xscale = o3DScale.x;
-            // locItem.yscale = o3DScale.y;
-            // locItem.zscale = o3DScale.z;
-            // let scale = (locItem.markerObjScale != undefined && locItem.markerObjScale != null && locItem.markerObjScale != "") ? locItem.markerObjScale : 1;
-            // theEl.setAttribute('position', {x: locItem.x, y: locItem.y, z: locItem.z});
-            // theEl.setAttribute('rotation', {x: locItem.eulerx, y: locItem.eulery, z: locItem.eulerz});
-            // theEl.setAttribute('scale', {x: scale, y: scale, z: scale});
-            let modModelComponent = theEl.components.mod_model;
-            let localMarkerComponent = theEl.components.local_marker;
-            let cloudMarkerComponent = theEl.components.cloud_marker;
-            let type = "";
-            if (modModelComponent) {
-               type = "modModelComponent";
-               modModelComponent.data.modelID = locItem.modelID;
-               modModelComponent.data.eventData = locItem.eventData;
-               modModelComponent.data.tags = locItem.locationTags;
-               // modModelComponent.loadModel(locItem.modelID); 
-               modModelComponent.data.name = locItem.name;
-               modModelComponent.data.markerType = locItem.markerType;
-               modModelComponent.data.xpos = locItem.x;
-               modModelComponent.data.ypos = locItem.y;
-               modModelComponent.data.zpos = locItem.z;
-               modModelComponent.data.xrot = locItem.eulerx;
-               modModelComponent.data.yrot = locItem.eulery;
-               modModelComponent.data.zrot = locItem.eulerz;
-               modModelComponent.data.xscale = locItem.xscale;
-               modModelComponent.data.yscale = locItem.yscale;
-               modModelComponent.data.zscale = locItem.zscale;
-               modModelComponent.data.scale = locItem.markerObjScale;
-               modModelComponent.data.tags = locItem.locationTags;
-               modModelComponent.loadModel(locItem.modelID); 
+               // let o3D = theEl.object3D;
+               // let o3DScale = theEl.object3D.scale;
+               // let o3DScale = theEl.getAttribute("scale");
+               // let o3DScale = new THREE.Vector3();
+               // o3D.getWorldScale(o3DScale);
                
-               // modModelComponent.updateMaterials();
-            } else if (cloudMarkerComponent) {
-               console.log("found the cloudmarker component!");
-               type = "cloudMarkerComponent";
-               cloudMarkerComponent.data.modelID = locItem.modelID;
-               cloudMarkerComponent.data.modelID = locItem.mediaID;
-               cloudMarkerComponent.data.name = locItem.name;
-               cloudMarkerComponent.data.markerType = locItem.markerType;
-               cloudMarkerComponent.data.description = locItem.description;
-               cloudMarkerComponent.data.xpos = locItem.x;
-               cloudMarkerComponent.data.ypos = locItem.y;
-               cloudMarkerComponent.data.zpos = locItem.z;
-               cloudMarkerComponent.data.xrot = locItem.eulerx;
-               cloudMarkerComponent.data.yrot = locItem.eulery;
-               cloudMarkerComponent.data.zrot = locItem.eulerz;
-               cloudMarkerComponent.data.xscale = locItem.xscale;
-               cloudMarkerComponent.data.yscale = locItem.yscale;
-               cloudMarkerComponent.data.zscale = locItem.zscale;
-               cloudMarkerComponent.data.scale = locItem.markerObjScale;
-               cloudMarkerComponent.data.tags = locItem.locationTags;
-               cloudMarkerComponent.data.targetElements = locItem.targetElements;
+               console.log("found the EL: " + locationKey + " locItem name " + locItem.name + " scale " + locItem.xscale + " " + locItem.yscale + " " +  locItem.zscale + " modelID " + locItem.modelID );
+               // localData.locations[i].xscale = o3DScale.x;
+               // localData.locations[i].yscale = o3DScale.y;
+               // localData.locations[i].zscale = o3DScale.z;
+               // locItem.xscale = o3DScale.x;
+               // locItem.yscale = o3DScale.y;
+               // locItem.zscale = o3DScale.z;
+               // let scale = (locItem.markerObjScale != undefined && locItem.markerObjScale != null && locItem.markerObjScale != "") ? locItem.markerObjScale : 1;
+               // theEl.setAttribute('position', {x: locItem.x, y: locItem.y, z: locItem.z});
+               // theEl.setAttribute('rotation', {x: locItem.eulerx, y: locItem.eulery, z: locItem.eulerz});
+               // theEl.setAttribute('scale', {x: scale, y: scale, z: scale});
+               let modModelComponent = theEl.components.mod_model;
+               let localMarkerComponent = theEl.components.local_marker;
+               let cloudMarkerComponent = theEl.components.cloud_marker;
+               let type = "";
+               if (modModelComponent) {
+                  type = "modModelComponent";
+                  modModelComponent.data.modelID = locItem.modelID;
+                  modModelComponent.data.eventData = locItem.eventData;
+                  modModelComponent.data.tags = locItem.locationTags;
+                  // modModelComponent.loadModel(locItem.modelID); 
+                  modModelComponent.data.name = locItem.name;
+                  modModelComponent.data.markerType = locItem.markerType;
+                  modModelComponent.data.xpos = locItem.x;
+                  modModelComponent.data.ypos = locItem.y;
+                  modModelComponent.data.zpos = locItem.z;
+                  modModelComponent.data.xrot = locItem.eulerx;
+                  modModelComponent.data.yrot = locItem.eulery;
+                  modModelComponent.data.zrot = locItem.eulerz;
+                  modModelComponent.data.xscale = locItem.xscale;
+                  modModelComponent.data.yscale = locItem.yscale;
+                  modModelComponent.data.zscale = locItem.zscale;
+                  modModelComponent.data.scale = locItem.markerObjScale;
+                  modModelComponent.data.tags = locItem.locationTags;
+                  modModelComponent.loadModel(locItem.modelID); 
+                  
+                  // modModelComponent.updateMaterials();
+               } else if (cloudMarkerComponent) {
+                  console.log("found the cloudmarker component!");
+                  type = "cloudMarkerComponent";
+                  cloudMarkerComponent.data.modelID = locItem.modelID;
+                  cloudMarkerComponent.data.modelID = locItem.mediaID;
+                  cloudMarkerComponent.data.name = locItem.name;
+                  cloudMarkerComponent.data.markerType = locItem.markerType;
+                  cloudMarkerComponent.data.description = locItem.description;
+                  cloudMarkerComponent.data.xpos = locItem.x;
+                  cloudMarkerComponent.data.ypos = locItem.y;
+                  cloudMarkerComponent.data.zpos = locItem.z;
+                  cloudMarkerComponent.data.xrot = locItem.eulerx;
+                  cloudMarkerComponent.data.yrot = locItem.eulery;
+                  cloudMarkerComponent.data.zrot = locItem.eulerz;
+                  cloudMarkerComponent.data.xscale = locItem.xscale;
+                  cloudMarkerComponent.data.yscale = locItem.yscale;
+                  cloudMarkerComponent.data.zscale = locItem.zscale;
+                  cloudMarkerComponent.data.scale = locItem.markerObjScale;
+                  cloudMarkerComponent.data.tags = locItem.locationTags;
+                  cloudMarkerComponent.data.targetElements = locItem.targetElements;
+                  
+                  cloudMarkerComponent.loadModel(locItem.modelID); 
+                  cloudMarkerComponent.updateMaterials();
+                  cloudMarkerComponent.loadMedia(locItem.mediaID);
+                  
+               } else if (localMarkerComponent) {
+                  type = "localMarkerComponent";
+                  localMarkerComponent.data.modelID = locItem.modelID;
+                  localMarkerComponent.data.mediaID = locItem.mediaID;
+                  localMarkerComponent.data.name = locItem.name;
+                  localMarkerComponent.data.markerType = locItem.markerType;
+                  localMarkerComponent.data.description = locItem.description;
+                  localMarkerComponent.data.xpos = locItem.x;
+                  localMarkerComponent.data.ypos = locItem.y;
+                  localMarkerComponent.data.zpos = locItem.z;
+                  localMarkerComponent.data.xrot = locItem.eulerx;
+                  localMarkerComponent.data.yrot = locItem.eulery;
+                  localMarkerComponent.data.zrot = locItem.eulerz;
+                  localMarkerComponent.data.xscale = locItem.xscale;
+                  localMarkerComponent.data.yscale = locItem.yscale;
+                  localMarkerComponent.data.zscale = locItem.zscale;
+                  localMarkerComponent.data.scale = locItem.markerObjScale;
+                  localMarkerComponent.data.tags = locItem.locationTags;
+                  localMarkerComponent.data.targetElements = locItem.targetElements;
                
-               cloudMarkerComponent.loadModel(locItem.modelID); 
-               cloudMarkerComponent.updateMaterials();
-               cloudMarkerComponent.loadMedia(locItem.mediaID);
-                
-            } else if (localMarkerComponent) {
-               type = "localMarkerComponent";
-               localMarkerComponent.data.modelID = locItem.modelID;
-               localMarkerComponent.data.mediaID = locItem.mediaID;
-               localMarkerComponent.data.name = locItem.name;
-               localMarkerComponent.data.markerType = locItem.markerType;
-               localMarkerComponent.data.description = locItem.description;
-               localMarkerComponent.data.xpos = locItem.x;
-               localMarkerComponent.data.ypos = locItem.y;
-               localMarkerComponent.data.zpos = locItem.z;
-               localMarkerComponent.data.xrot = locItem.eulerx;
-               localMarkerComponent.data.yrot = locItem.eulery;
-               localMarkerComponent.data.zrot = locItem.eulerz;
-               localMarkerComponent.data.xscale = locItem.xscale;
-               localMarkerComponent.data.yscale = locItem.yscale;
-               localMarkerComponent.data.zscale = locItem.zscale;
-               localMarkerComponent.data.scale = locItem.markerObjScale;
-               localMarkerComponent.data.tags = locItem.locationTags;
-               localMarkerComponent.data.targetElements = locItem.targetElements;
-              
-               localMarkerComponent.loadModel(locItem.modelID); 
-               localMarkerComponent.updateMaterials();
-               localMarkerComponent.loadMedia(locItem.mediaID); 
+                  localMarkerComponent.loadModel(locItem.modelID); 
+                  localMarkerComponent.updateMaterials();
+                  localMarkerComponent.loadMedia(locItem.mediaID); 
 
+               }
+               console.log("updating existing element " + type + " " + locationKey+ " : " + JSON.stringify(locItem));
+               SaveLocalData();
+               
+               break;
+            } else {
+               // var buff = Buffer.from(JSON.stringify(locItem)).toString("base64");
+               theEl.setAttribute("data-eldata", JSON.stringify(locItem));
+               console.log("setting theEl cloudMarker data " + theEl.id);
             }
-            console.log("updating existing element " + type + " " + locationKey+ " : " + JSON.stringify(locItem));
-            SaveLocalData();
-            
-            break;
-            
          } else {
             // SaveLocalData();
-            console.log("DINT FIND THE EL " + locationKey);
+            console.log("DINT FIND THEEL " + locationKey);
             break;
             
          }
-
       }
    }
    

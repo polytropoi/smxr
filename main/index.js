@@ -17663,7 +17663,8 @@ function getAllPeople() {
             "<td><a href=\x22index.html?type=scene&iid=" + arr[i]._id + "\x22>" + arr[i].sceneTitle + "</a>"+
             "<button class=\x22btn btn-sm\x22 onclick=\x22CloneScene('" + arr[i]._id + "', '" + arr[i].short_id + "')\x22><i class=\x22far fa-clone\x22></i></button></td>" +
             "<td><a href=\x22index.html?type=scene&iid=" + arr[i]._id + "\x22 target=\x22_blank\x22>Edit" + 
-            "</a> | <a href=\x22/landing/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Landing" + 
+            "</a> | <a href=\x22/landing/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Landing" +
+            "</a> | <a href=\x22/vtt/" + arr[i].short_id + "\x22 target=\x22_blank\x22>VTT" +  
             "</a> | <a href=\x22/webxr/" + arr[i].short_id + "\x22 target=\x22_blank\x22>WebXR" + 
             "</a> | <a href=\x22/unity/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Unity</a></td>" +
             "<td>" + arr[i].sceneStickyness + "</td>" +

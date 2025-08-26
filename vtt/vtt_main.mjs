@@ -330,6 +330,7 @@ export async function GoWithIt() { //called from vtt.js
         .drag()
         .pinch()
         .wheel()
+        .clampZoom({'minScale': .1})
         // .bounce({
         // friction: 1,
         // time: 2000,
@@ -412,7 +413,7 @@ export async function GoWithIt() { //called from vtt.js
 
   if (locationData) {
     for (let i = 0; i < locationData.length; i++) {
-      console.log("location " + JSON.stringify(locationData[i]));
+      console.log("location from locationData " + JSON.stringify(locationData[i]));
       if (locationData[i].markerType == "picture") {
         if (locationData[i].mediaID && locationData[i].mediaID != "" & locationData[i].mediaID != "none") {
           const texture = Texture.from(locationData[i].mediaID);
