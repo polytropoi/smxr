@@ -67,6 +67,7 @@ let posRotRunning = false;
 // export let timeKeysData = {};
 // export let tkStarttimes = [];
 
+//hrm, move these to navigation, w/ next/previous?
 export let poiLocations = [];
 export let curveLocations = [];
 export let cloudMarkers = []; //???? unused>?//nope
@@ -511,6 +512,9 @@ export function UpdateAvatarName(name) {
    const usernameEl = document.getElementById("userName");
    usernameEl.innerText = avatarName;
 }
+// export function UpdatePoiLocations(loc) { //placeholder and poi locations
+//    poiLocations.push(loc);
+// }
 
 $('#nextButton').on('click', function(e) {
    GoToNext();
@@ -1271,9 +1275,9 @@ export function GoToLocation(locationKey) {
    console.log("tryna goat locatioKey " + locationKey);
    // let location = JSON.parse(localStorage.getItem(locationKey));
    let targetEl = document.getElementById(locationKey);
-   if (targetEl != null) { 
+   if (targetEl) { 
       let targetLocation = targetEl.getAttribute('position');
-      if (targetLocation != null) {
+      if (targetLocation) {
       
          if (player == null) {
             player = document.getElementById('player');
@@ -1451,6 +1455,7 @@ export function GoToPrevious() {
             }
          }
       }
+      console.log("poiLocations length " + poiLocations.length);
       if (sceneLocations != null && poiLocations.length > 0) {
          if (currentLocationIndex > 0) {
             currentLocationIndex--;

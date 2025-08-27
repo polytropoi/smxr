@@ -190,7 +190,9 @@ window.mobileAndTabletCheck = function() {
   return check;
 };
 
-AFRAME.registerComponent('initializer', { //adjust for device settings, and callbackn to connect.js
+
+
+AFRAME.registerComponent('initializer', { //when aframe isLoaded, adjust for device settings, and callbackn to connect.js
   schema: {
     initialized: {default: ''},
     // href: {default: ''},
@@ -347,46 +349,55 @@ AFRAME.registerComponent('initializer', { //adjust for device settings, and call
         backgroundVideoEl.play();
 
       }
-      // this.el.addEventListener('obbcollisionstarted	', (evt) => {
-      //   console.log("obb player hit : " + evt.target.withEl.id);
-      // });
 
-      // let curvePointEls = document.querySelectorAll(".curvepoint");
-      // if (curvePointEls.length) {
-      //    let curvePoints = [];
-      //    for (let i = 0; i < curvePointEls.length; i++) {
-      //       curvePoints.push(curvePointEls.getAttribute(position));
-      //    }
-      //    console.log("gots curvepoints " + JSON.stringify(curvePoints));
-      // } else {
-      //    console.log("din't find no curvepoints");
-      // }
-      // InitCurves();
-   }); //end loaded
+      const backgroundMapImg = document.getElementById("bgMap");
+        console.log("GOTSA BACKGROUND MAP!@");
+      if (backgroundMapImg) {
+        const textureLoader = new THREE.TextureLoader();
+        const texture = textureLoader.load(
+          backgroundMapImg.src,
+          function (texture) {
+              const modWidth = texture.image.width / 10; //hrm, this should be pixelsPerMeterActual
+              const modHeight= texture.image.height / 10;
+              // texture.minFilter = THREE.LinearFilter;
+              // texture.magFilter = THREE.LinearFilter;
+                      
+                  // texture.flipY = this.data.flipY; 
+              texture.colorSpace = THREE.SRGBColorSpace;
+              const geometry = new THREE.PlaneGeometry( modWidth, modHeight );
+              const material = new THREE.MeshStandardMaterial( {side: THREE.FrontSide, map: texture} );
+              const plane = new THREE.Mesh( geometry, material );
 
+              const size = modWidth;
+              const divisions = modHeight;
 
-  // this.el.addEventListener('mouseenter', (evt) => {
-  //   evt.preventDefault();
+              // const gridHelper = new THREE.GridHelper(size, divisions);
+              const vttPlaneEl = document.createElement("a-entity");
+              // const vttGrid = document.createElement("a-entity");
+              // vttGrid.setObject3D('mesh', gridHelper);
+              // vttPlaneEl.object3D = plane;
+              vttPlaneEl.setObject3D('mesh', plane);
 
-  //   if (keydown == "X") {
-      
-  //   if (evt.detail.intersection) {
-     
-     
-  //     let pos = evt.detail.intersection.point; //hitpoint on model
-  //     this.hitPosition = pos;
+              sceneEl.appendChild(vttPlaneEl); 
 
-  //     this.distance = evt.detail.intersection.distance;
-  //     this.rayhit(evt.detail.intersection.object.name, this.distance, evt.detail.intersection.point);
-   
-  //     // this.selectedAxis = name;
-      
-  //     // let elPos = this.el.getAttribute('position');
-  //     // console.log(pos);
+              vttPlaneEl.setAttribute("position", "0 0 0");
+              vttPlaneEl.setAttribute("rotation", "-90 0 0");
+                      // vttGrid.setAttribute("rotation", "-90 0 0");
+                    // vttGrid.setAttribute("position", "0 .1 0");
+                    //         sceneEl.appendChild(vttGrid);
+              vttPlaneEl.id = "vttMapPlane";
+          
+          },
+          undefined, // onProgress callback (optional)
+          function (err) {
+              // This function runs if there's an error loading the texture
+              console.error('An error occurred loading the texture:', err);
+          }
+        );
+      }
 
-  //     }
-  //   }
-  // });
+   }); //end initializer / loaded
+
 
 
    if (this.data.usdz != '') {
@@ -510,7 +521,7 @@ AFRAME.registerComponent('location_data', { //initial loading of "official" loca
                      this.data.youtubePosition.z = locItem.z;
                      // console.log("YOTUBE POSOTION: " +JSON.stringify(this.data.youtubePosition));
                   }
-                  if (locItem.markerType == "poi") {
+                  if (locItem.markerType == "poi" || locItem.markerType == "placeholder") {
                      let nextbuttonEl = document.getElementById('nextButton');
                      let prevbuttonEl = document.getElementById('previousButton');
                      nextbuttonEl.style.visibility = "visible";

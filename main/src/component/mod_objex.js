@@ -1829,7 +1829,11 @@ AFRAME.registerComponent('mod_object', {
             // console.log(this.data.objectData.name +" collided with mod_object " +targetModObjComponent.data.objectData.name + " with objtype " + targetModObjComponent.data.objectData.objtype );
             // this.hitpoint = e.detail.withEl.object3D.position;
             let targetPosition = e.detail.withEl.object3D.position;
-            let targetDistance = window.playerPosition.distanceTo(targetPosition);
+            let targetDistance = 1;
+            if (window.playerPosition) {
+              targetDistance = window.playerPosition.distanceTo(targetPosition);
+            }
+
             console.log(this.data.objectData.name + " gotsa collision with " + targetModObjComponent.data.objectData.name + 
             " type " + targetModObjComponent.data.objectData.objtype + " hitpoints " + targetModObjComponent.data.objectData.hitpoints);
 

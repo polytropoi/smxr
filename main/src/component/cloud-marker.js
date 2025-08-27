@@ -155,7 +155,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
       if (this.data.markerType == "player" ) {
         this.el.classList.remove("activeObjexRay");
       }
-  
+
       console.log("CLOUDMARKER " + this.data.name + " " +this.data.markerType + " " + this.data.modelID + " " + this.data.tags);
       // this.el.removeAttribute("geometry"); //just in case?
           
@@ -172,7 +172,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             //   if (this.data.markerType != "mailbox" && this.data.markerType != "light"  && this.data.markerType != "gate") {
                 if (this.data.markerType.toLowerCase() == "player") {
                   // this.el.removeAttribute("geometry");
-                  this.el.setAttribute('gltf-model', '#poi1');
+                  // this.el.setAttribute('gltf-model', '#poi1');
                   this.el.setAttribute("material", {color: "lime", transparent: true, opacity: .5});
                 }
                 if (this.data.markerType.toLowerCase() == "spawn") {
@@ -1542,7 +1542,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                 // if (this.data.markerType != "mailbox" && this.data.markerType != "light"  && this.data.markerType != "gate") {
                   if (this.data.markerType.toLowerCase() == "player") {
                     this.el.removeAttribute("geometry");
-                    this.el.setAttribute('gltf-model', '#poi1');
+                    // this.el.setAttribute('gltf-model', '#poi1');
                     this.el.setAttribute("material", {color: "lime", transparent: true, opacity: .5});
                   }
                   if (this.data.markerType.toLowerCase() == "placeholder") {

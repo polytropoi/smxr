@@ -282,7 +282,10 @@ await Assets.loadBundle('fonts');
 export function playerProfileLoaded (playerProfile) {
   addPlayerProfileText(app, playerProfile, uicontainer);
   // LoadLocations(app, viewport, spritesContainer);
-  LoadLocations(app, viewport, spritesContainer);
+        setTimeout(() => {
+            LoadLocations(app, viewport, spritesContainer); //give it a shake...
+        }, 1000);
+  
 }
 
 export async function GoWithIt() { //called from vtt.js
@@ -330,7 +333,7 @@ export async function GoWithIt() { //called from vtt.js
         .drag()
         .pinch()
         .wheel()
-        .clampZoom({'minScale': .1})
+        .clampZoom({'minScale': .1, 'maxScale': 10})
         // .bounce({
         // friction: 1,
         // time: 2000,

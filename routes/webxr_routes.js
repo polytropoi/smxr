@@ -1335,7 +1335,7 @@ webxr_router.get('/:_id', function (req, res) {
                         sceneResponse.scenePlayer.playerSpeed = 2;
                     }
 
-                    wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22";
+                    wasd = "extended_wasd_controls=\x22flyEnabled: true; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22";
                     if (useSimpleNavmesh || useNavmesh) {
                         wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height: "+sceneResponse.scenePlayer.playerHeight+"\x22";
                     } 
@@ -1630,29 +1630,36 @@ webxr_router.get('/:_id', function (req, res) {
                     const xscale = locationPlaceholders[i].xscale != null ? locationPlaceholders[i].xscale : scale;
                     const yscale = locationPlaceholders[i].yscale != null ? locationPlaceholders[i].yscale : scale;
                     const zscale = locationPlaceholders[i].zscale != null ? locationPlaceholders[i].zscale : scale;   
+
                     const xrot = locationPlaceholders[i].eulerx != null ? locationPlaceholders[i].eulerx : rot;
                     const yrot = locationPlaceholders[i].eulery != null ? locationPlaceholders[i].eulery : rot;
                     const zrot = locationPlaceholders[i].eulerz != null ? locationPlaceholders[i].eulerz : rot;
 
+                    let xpos = locationPlaceholders[i].x != null ? locationPlaceholders[i].x : rot;
+                    let ypos = locationPlaceholders[i].y != null ? locationPlaceholders[i].y : rot;
+                    let zpos = locationPlaceholders[i].z != null ? locationPlaceholders[i].z : rot;
+
+                    // if ()
+
                     if (useArParent || (locationPlaceholders[i].tags && (locationPlaceholders[i].tags.includes("ar child") ||  locationPlaceholders[i].tags.includes("archild")))) { //used for hit test
                             
                         arChildElements = arChildElements + "<a-entity data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
-                        "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+locationPlaceholders[i].x+"; ypos: "+locationPlaceholders[i].y+"; zpos: "+locationPlaceholders[i].z+";" +
+                        "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+xpos+"; ypos: "+ypos+"; zpos: "+zpos+";" +
                         "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
                         "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
                         "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
                         locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
                         locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
-                        skyboxEnvMap+ " position=\x22"+locationPlaceholders[i].x+" "+locationPlaceholders[i].y+ " " +locationPlaceholders[i].z+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></a-entity>";
+                        skyboxEnvMap+ " position=\x22"+xpos+" "+ypos+ " " +zpos+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></a-entity>";
                     } else {
                         placeholderEntities = placeholderEntities + "<a-entity data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
-                        "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+locationPlaceholders[i].x+"; ypos: "+locationPlaceholders[i].y+"; zpos: "+locationPlaceholders[i].z+";" +
+                        "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+xpos+"; ypos: "+ypos+"; zpos: "+zpos+";" +
                         "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
                         "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
                         "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
                         locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
                         locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
-                        skyboxEnvMap+ " position=\x22"+locationPlaceholders[i].x+" "+locationPlaceholders[i].y+ " " +locationPlaceholders[i].z+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></a-entity>";
+                        skyboxEnvMap+ " position=\x22"+xpos+" "+ypos+ " " +zpos+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></a-entity>";
                     }
                 }
             }
@@ -2995,15 +3002,24 @@ webxr_router.get('/:_id', function (req, res) {
                         } else {
                             image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, 6000);
                         }
-                        if (picture_item.orientation == "Tileable") {
 
+                        if (picture_item.orientation == "Tileable") {
                             tilepicUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
                             console.log("GOTSA TILEABLE PIC! " + tilepicUrl);
                         }
+                        // if (picture_item.tags.includes("map")) { //background map used in vtt, cooks the geo based in img rez
+                        //     imageAssets = imageAssets + "<img id=\x22bgMap\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
+                        // }
 
                         picture_item.url = image1url;
                         scenePictureItems.push(picture_item);
-                        imageAssets = imageAssets + "<img id=\x22smimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
+                        if (picture_item.tags.includes("map")) { //background map used in vtt, cooks the geo based in img rez
+                            image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
+                            imageAssets = imageAssets + "<img id=\x22bgMap\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
+                        } else {
+                            imageAssets = imageAssets + "<img id=\x22smimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
+                        }
+                       
                         let caption = "";
                         if (picture_item.captionUpper != null && picture_item.captionUpper != undefined) {
                             caption = "<a-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x220 1.3 -.1\x22 wrapCount=\x2240\x22 value=\x22"+picture_item.captionUpper+"\x22></a-text>";

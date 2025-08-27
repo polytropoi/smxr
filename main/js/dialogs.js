@@ -2179,11 +2179,16 @@ export function SceneManglerModal(mode, autoHide) {
     if (mode == "click") {
       ShowHideDialogPanel("<div>playing stream</div>");
     } else {
-      let userString = profile.isGuest ? "Unregistered guest" : "Registered user";
+      let userString = "";
       let lastVisit = "first visit to this scene!";
-      if (profile.history.init_scene[room]) {
-        lastVisit = profile.history.init_scene[room].count + " total visits to this scene, most recently : " + new Date(profile.history.init_scene[room].lts);
+      if (profile) {
+        userString = profile.isGuest ? "Unregistered guest" : "Registered user";
+        if (profile.history.init_scene[room]) {
+          lastVisit = profile.history.init_scene[room].count + " total visits to this scene, most recently : " + new Date(profile.history.init_scene[room].lts);
+        }
       }
+      
+
       let content = "<span id='modalCloser' class='close-modal'>&times;</span>" +
                   "<div><span id=\x22modalTitle\x22><h3>Scene Mangler</h3></span>" + //populate modal
       tabs+

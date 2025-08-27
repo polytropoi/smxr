@@ -76,6 +76,10 @@ export function InitIDB() {
                         console.log("PLayerPosMods :" + JSON.stringify(playerPosMods));
                      
                      }
+
+                     // if (cursor.value.locations[i].markerType == "poi" || cursor.value.locations[i].markerType == "placeholder") {
+                     //    poiLocations.push(cursor.value.locations[i]);
+                     // }
                      if (cursor.value.locations[i].isLocal != undefined && cursor.value.locations[i].isLocal) { //only update ones with local changes
                      // console.log(cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " scale " + cursor.value.locations[i].xscale + cursor.value.locations[i].yscale + cursor.value.locations[i].zscale );
                      console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal " + " modelID " + cursor.value.locations[i].modelID);
@@ -118,6 +122,7 @@ export function InitIDB() {
                                                                   cursor.value.locations[i].mediaID,
                                                                   cursor.value.locations[i].targetElements );   
 
+
                               } else {
                                  let modModelComponent = cloudEl.components.mod_model;
                                  if (modModelComponent) {
@@ -144,7 +149,7 @@ export function InitIDB() {
                                  }
                               }
                            } else {
-                              
+
                            }
                         } else {//local-only elements, not saved to cloud yet
                            hasLocalData = true;
@@ -179,9 +184,9 @@ export function InitIDB() {
                                  (cursor.value.locations[i].modelID && cursor.value.locations[i].modelID.includes("local_")))) {
                                        localEl.classList.add("hasLocalFile");
                               }
-                              if (cursor.value.locations[i].markerType == "poi") {
+                              // if (cursor.value.locations[i].markerType == "poi" || ) {
                                  poiLocations.push(cursor.value.locations[i]);
-                              }
+                              // }
                               if (cursor.value.locations[i].markerType == "curve point") {
                                  curveLocations.push(cursor.value.locations[i]);
                               }
@@ -191,7 +196,10 @@ export function InitIDB() {
                                     ar_parentEl.appendChild(localEl);
                                  }
                               } else {
-                                 sceneEl.appendChild(localEl);
+                                 // if (sceneEl) {
+                                    sceneEl.appendChild(localEl);
+                                 // }
+                                 
                               }
                               
                               localEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
