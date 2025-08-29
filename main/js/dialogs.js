@@ -2186,7 +2186,7 @@ export function SceneManglerModal(mode, autoHide) {
     } else {
       let userString = "";
       let lastVisit = "first visit to this scene!";
-      if (profile) {
+      if (profile && profile.history) {
         userString = profile.isGuest ? "Unregistered guest" : "Registered user";
         if (profile.history.init_scene[room]) {
           lastVisit = profile.history.init_scene[room].count + " total visits to this scene, most recently : " + new Date(profile.history.init_scene[room].lts);

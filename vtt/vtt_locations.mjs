@@ -34,8 +34,8 @@ export function LoadLocations(app, viewport, spritesContainer) {
             const height = 50 * scaleFactor;
             const strokeWidth = 3 * scaleFactor;
             const zIndex = parseFloat(elData.ypos); //use Y axis from 3D as elevation/sorting/zindex for 2D 
-            const xpos = parseFloat(elData.xpos) * pixelsPerMeterActual; //these values are multiplied by pixelsPerMeterActual
-            const ypos = parseFloat(elData.zpos) * pixelsPerMeterActual; // use the Z axis for Y position in 2D, you must
+            let xpos = parseFloat(elData.xpos); //these values are multiplied by pixelsPerMeterActual
+            let ypos = parseFloat(elData.zpos); // use the Z axis for Y position in 2D, you must
 
         const fontsize = Math.max(18, window.innerWidth / 50);  
         const text = new Text({
@@ -106,6 +106,16 @@ export function LoadLocations(app, viewport, spritesContainer) {
         // token.position.set(worldPos.x,worldPos.y);
         // token.x = worldPos.x;
         // token.y = worldPos.y;
+         if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+            xpos = xpos * 2;
+        } else {
+            xpos = xpos * -1;
+        }
+        if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+            ypos = ypos * 2;
+        } else {
+            ypos = ypos * -1;
+        } 
         token.x = xpos;
         token.y = ypos;
         tokenContainer.addChild(token);
@@ -139,8 +149,8 @@ export function LoadLocations(app, viewport, spritesContainer) {
             const height = 50 * scaleFactor;
             const strokeWidth = 3 * scaleFactor;
             const zIndex = parseFloat(elData.ypos); //use Y axis from 3D as elevation/sorting/zindex for 2D 
-            const xpos = parseFloat(elData.x) * pixelsPerMeterActual; //these values are multiplied by pixelsPerMeterActual
-            const ypos = parseFloat(elData.z) * pixelsPerMeterActual; // use the Z axis for Y position in 2D, you must
+            let xpos = parseFloat(elData.x); //these values are multiplied by pixelsPerMeterActual
+            let ypos = parseFloat(elData.z); // use the Z axis for Y position in 2D, you must
 
         const fontsize = Math.max(18, window.innerWidth / 50);  
         const text = new Text({
@@ -204,6 +214,17 @@ export function LoadLocations(app, viewport, spritesContainer) {
             }
         });
         token.data = elData;
+
+        if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+            xpos = xpos * 2;
+        } else {
+            xpos = xpos * -1;
+        }
+        if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+            ypos = ypos * 2;
+        } else {
+            ypos = ypos * -1;
+        } 
         token.x = xpos;
         token.y = ypos;
         tokenContainer.addChild(token);
@@ -266,8 +287,10 @@ export function LoadLocations(app, viewport, spritesContainer) {
             const width = 100 * scaleFactor;
             const height = 50 * scaleFactor;
             const strokeWidth = 3 * scaleFactor;
-            const xpos = parseFloat(selectedPosition.x) * pixelsPerMeterActual;
-            const ypos = parseFloat(selectedPosition.y) * pixelsPerMeterActual;
+            // let xpos = parseFloat(selectedPosition.x) * pixelsPerMeterActual;
+            // let ypos = parseFloat(selectedPosition.y) * pixelsPerMeterActual;
+            let xpos = parseFloat(selectedPosition.x);
+            let ypos = parseFloat(selectedPosition.y);
 
     const fontsize = Math.max(18, window.innerWidth / 50);  
     const text = new Text({
@@ -338,6 +361,18 @@ export function LoadLocations(app, viewport, spritesContainer) {
         // console.log(viewport.x + " " + viewport.scale.x + " " + viewport.scale.y  + " scale tryna set token position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
         console.log("setting token position w/ viewport position " + viewport.x + " " + viewport.x  + " scale " + viewport.scale.x + " " + viewport.scale.y  + " position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
     // token.position.set(worldPos.x,worldPos.y);
+
+    if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+        xpos = xpos * 2;
+    } else {
+        xpos = xpos * -1;
+    }
+    if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+        ypos = ypos * 2;
+    } else {
+        ypos = ypos * -1;
+    } 
+
     token.x = xpos;
     token.y = ypos;
     tokenContainer.addChild(token);

@@ -2,7 +2,7 @@ import { InitLocalColors, DisplayLocalFiles } from "../main/js/dialogs.js";
 
 import { room, sceneLocations, locationTimestamps, localData, userData, lastCloudUpdate, InitCurves, 
    sceneEl, PlayerToLocation, getExtension, poiLocations, curveLocations, avatarName, UpdateAvatarName, GoToPosRot, 
-   playerPosition, playerRotation} from "../connect/connect.js";
+   playerPosition, playerRotation } from "../connect/connect.js";
 
 import { settings, UpdateUserProfile } from "../../connect/settings.js";
 import { SetTimeKeysData } from "../connect/events.js";
@@ -65,11 +65,20 @@ export function InitIDB() {
                 localData.lastUpdate = cursor.value.lastUpdate;
 
                 // start location loop
-                if (cursor.value.locations) {
+               let mapScale = 1;
+               console.log(settings.sceneType + " hasBgMap settings in indexedDB " + settings.hasBgMap);
+               if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) {
+                  // if (cursor.value.sceneTags.includes("map")) {
+                  mapScale = .1; //divide by pixelsPerMeterActual, e.g 10 = .1
+               }
+               if (cursor.value.locations) {
                   for (let i = 0; i < cursor.value.locations.length; i++) { //mod or create the scene elements
                      // let loc = JSON.stringify(cursor.value.locations[i]);
                      console.log("cursor " + i + " of " + cursor.value.locations.length);
                      locationTimestamps.push(cursor.value.locations[i].timestamp.toString()); //hrm, for ref
+                     cursor.value.locations[i].x = cursor.value.locations[i].x * mapScale;
+                     cursor.value.locations[i].y = cursor.value.locations[i].y * mapScale;
+                     cursor.value.locations[i].z = cursor.value.locations[i].z * mapScale;
                      localData.locations.push(cursor.value.locations[i]);
                      if (cursor.value.locations[i].markerType == "player") {
                         playerPosMods.push(cursor.value.locations[i].x + " " + cursor.value.locations[i].y + " " + cursor.value.locations[i].z);
@@ -153,6 +162,7 @@ export function InitIDB() {
                            }
                         } else {//local-only elements, not saved to cloud yet
                            hasLocalData = true;
+                           
                            const data = { timestamp: cursor.value.locations[i].timestamp,
                                           name: cursor.value.locations[i].name, 
                                           modelID: cursor.value.locations[i].modelID, 
@@ -202,7 +212,7 @@ export function InitIDB() {
                                  
                               }
                               
-                              localEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
+                              localEl.setAttribute("position", {x: cursor.value.locations[i].x * mapScale, y: cursor.value.locations[i].y * mapScale, z: cursor.value.locations[i].z * mapScale });
                               localEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
                               // localEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
                               
@@ -527,6 +537,7 @@ export function InitIDB() {
                transaction.oncomplete = function () {
                   db.close();
                   console.log("new localprofile saved! " + JSON.stringify(profile));
+                  UpdateUserProfile(profile);
                }
                 const playerHudEl = document.getElementById("player_hud");
                   if (playerHudEl) {

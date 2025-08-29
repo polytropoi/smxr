@@ -313,7 +313,7 @@ webxr_router.get('/:_id', function (req, res) {
     let triggerOggUrl = "";
     let triggerMp3Url = "";
     let hasTriggerAudio = true;
-    let hasBgMap = false;
+    let hasBgMap = true;
     let mapWidth = 0;
     let mapHeight = 0;
     let wasd = "";
@@ -1629,9 +1629,34 @@ webxr_router.get('/:_id', function (req, res) {
             ///////////////////// location "placeholders" used for "cloud markers" /////////////////////////////////
             if (locationPlaceholders.length > 0) {
                 for (let i = 0; i < locationPlaceholders.length; i++) {
+                    if (hasBgMap) {
+                        locationPlaceholders[i].x = locationPlaceholders[i].x/10
+
+                        locationPlaceholders[i].y = locationPlaceholders[i].y/10
+
+                        locationPlaceholders[i].z = locationPlaceholders[i].z/10
+                        // const centerX = 1682 / 2;
+                        // const centerY = 1237 / 2;
+                        // if (xpos < centerX) {
+                        //     xpos = (xpos / 2) * -1;
+                        // } else {
+                        //     xpos = (xpos / 2);
+                        // }
+                        // if (ypos < centerY) {
+                        //     ypos = (ypos / 2) * -1;
+                        // } else {
+                        //     ypos = (ypos / 2)
+                        // }
+
+                        // xpos = xpos/10; //or pixelsPerMeterActual
+                        // ypos = ypos/10;
+                        // zpos = zpos/10;
+                        
+                    }
                     //use the "cloud_marker" component for certain markertypes () TODO rename it to mod_location // nope
                     let scale = 1;
                     let rot = 0;
+                    
                     if (locationPlaceholders[i].markerObjScale && locationPlaceholders[i].markerObjScale != 0 && locationPlaceholders[i].markerObjScale != "") { //deprecated, using non-u scaling now..
                         scale = locationPlaceholders[i].markerObjScale; 
                     }
@@ -1648,24 +1673,7 @@ webxr_router.get('/:_id', function (req, res) {
                     let ypos = locationPlaceholders[i].y != null ? locationPlaceholders[i].y : rot;
                     let zpos = locationPlaceholders[i].z != null ? locationPlaceholders[i].z : rot;
 
-                    if (hasBgMap) {
-                        const centerX = 1682 / 2;
-                        const centerY = 1237 / 2;
-                        if (xpos < centerX) {
-                            xpos = (xpos / 2) * -1;
-                        } else {
-                            xpos = (xpos / 2);
-                        }
-                        if (ypos < centerY) {
-                            ypos = (ypos / 2) * -1;
-                        } else {
-                            ypos = (ypos / 2)
-                        }
 
-                        // xpos = xpos/10; //or pixelsPerMeterActual
-                        // ypos = ypos/10;
-                        
-                    }
 
                     // if ()
 

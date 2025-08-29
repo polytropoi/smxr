@@ -362,10 +362,26 @@ export async function GoWithIt() { //called from vtt.js
       const globalPos = event.data.global; // { x: ..., y: ... }
         // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
       const worldPos = viewport.toLocal(globalPos);
-        console.log("viewport click on " + viewport.scale.x + " " + viewport.x + " " + viewport.y + " keydown " + keydown + " pointer " + event.x + " " + event.y + " screen " + event.screenX + " " + event.screenY + 
+
+
+        console.log(viewport.width + " x " + viewport.height + " viewport click on " + viewport.scale.x + " " + viewport.x + " " + viewport.y + " keydown " + keydown + " pointer " + event.x + " " + event.y + " screen " + event.screenX + " " + event.screenY + 
           " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
 
-        SetSelectedPosition('', worldPos.x.toFixed(2) / pixelsPerMeterActual , worldPos.y.toFixed(2) / pixelsPerMeterActual);
+        if (worldPos.x > viewport.width / 2) { //modify coords to match 3D, with zero in the center instead of top left corner
+          worldPos.x = worldPos.x / 2;
+        } else {
+          worldPos.x = worldPos.x * -1;
+        }
+        
+        if (worldPos.y > viewport.height / 2) { //modify coords to match 3D, with zero in the center instead of top left corner
+          worldPos.y = worldPos.y / 2;
+        } else {
+          worldPos.y = worldPos.y * -1;
+        }
+        
+
+        // SetSelectedPosition('', worldPos.x.toFixed(2) / pixelsPerMeterActual , worldPos.y.toFixed(2) / pixelsPerMeterActual);
+        SetSelectedPosition('', worldPos.x.toFixed(2) , worldPos.y.toFixed(2));
         if (keydown == "X") {
           CreateNewLocation();
           AddLocation(app, viewport, spritesContainer);
