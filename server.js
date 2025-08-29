@@ -7893,7 +7893,7 @@ app.post('/delete_obj/', requiredAuthentication, function (req, res) {
 
 
 app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
-    console.log("update_pic imageData "+ JSON.stringify(req.body.imageData));
+    console.log("update_pic rez " + req.body.width + " " + req.body.height);
 
     var o_id = ObjectId.createFromHexString(req.params._id);   
     console.log('pic requested : ' + req.body._id);
@@ -7906,7 +7906,7 @@ app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
               console.log("must be owner to update!");
               res.send ("You don't have permission to update this");
           } else {
-              console.log("tryna update " + req.body._id + " to status " + req.body.item_status);
+              console.log("tryna update pic " + req.body._id + " rez " + req.body.width + " " + req.body.height);
               let timestamp = Math.round(Date.now() / 1000);
               let isPublic = false;
               if (req.body.isPublic != null) {
@@ -7936,6 +7936,8 @@ app.post('/update_pic/:_id', requiredAuthentication, function (req, res) {
                 authorName: req.body.authorName,
                 authorLink: req.body.authorLink,
                 nft: req.body.nft,
+                width: req.body.width,
+                height: req.body.height,
                 lastUpdateTimestamp: timestamp,
                 lastUpdateUserID: req.session.user._id,
                 lastUpdateUserName: req.session.user.userName

@@ -359,6 +359,9 @@ AFRAME.registerComponent('initializer', { //when aframe isLoaded, adjust for dev
           function (texture) {
               const modWidth = texture.image.width / 10; //hrm, this should be pixelsPerMeterActual
               const modHeight= texture.image.height / 10;
+              settings.mapWidth = modWidth;
+              settings.mapHeight = modHeight;
+              settings.pixelsPerMeterActual = 10; 
               // texture.minFilter = THREE.LinearFilter;
               // texture.magFilter = THREE.LinearFilter;
                       

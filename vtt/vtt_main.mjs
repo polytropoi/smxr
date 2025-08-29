@@ -157,12 +157,19 @@ async function prePreLoader () {
   locationData = await ReturnLocations();
   
   console.log("sceneColor1 " + settings.sceneColor1);
+  let count = 0;
   let interval = setInterval(() => { //wait a shake for iDB to get localprofile..
     if (profile) {
       playerProfileLoaded(profile)
       clearInterval(interval);
     } else {
+      count++;
+
       console.log("no profile yet...");
+      if (count > 3){
+        LoadLocations(app, viewport, spritesContainer);
+        clearInterval(interval);
+      }
     }
   }, 1000); 
 
@@ -299,10 +306,10 @@ export async function GoWithIt() { //called from vtt.js
   if (mappicURL || backgroundVideoURL || hasBackgroundPictureGroup) { // just use a tag
 
     viewport = new Viewport({
-      // screenWidth: window.innerWidth,
-      // screenHeight: window.innerHeight,
-      // worldWidth: 10000,
-      // worldHeight: 10000,
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
+      worldWidth: 10000,
+      worldHeight: 10000,
       disableOnContextMenu: true,
       events: app.renderer.events, 
     });
@@ -321,6 +328,11 @@ export async function GoWithIt() { //called from vtt.js
       viewport.x = parseFloat(pSplit[0]);
       viewport.y = parseFloat(pSplit[1]);
       viewport.setZoom(parseFloat(pSplit[2]));
+    } else {
+      viewport.x = 0;
+      viewport.y = 0;
+      viewport.setZoom(1.1);
+      // viewport.moveToCenter
     }
     // viewport.x = 0;
     // viewport.y = 0;
@@ -393,8 +405,21 @@ export async function GoWithIt() { //called from vtt.js
   }
 
   if (hasBackgroundPictureGroup) {
+
     addBackgroundPictures(app, viewport, spritesContainer);
     let elapsed = 0.0;
+    viewport.animate({
+      // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+      position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+      scale: 1, // Target zoom level
+      time: 1000, // Animation duration of 1 second
+      ease: 'easeInOutQuad', // Using a common easing function
+      callbackOnComplete: () => {
+        console.log("Animation completed!");
+       
+        // Perform actions after animation finishes
+      }
+    });
 
     // app.ticker.add((ticker) => {
     //     // Run every frame, delta is the time since last update

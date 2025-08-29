@@ -313,6 +313,9 @@ webxr_router.get('/:_id', function (req, res) {
     let triggerOggUrl = "";
     let triggerMp3Url = "";
     let hasTriggerAudio = true;
+    let hasBgMap = false;
+    let mapWidth = 0;
+    let mapHeight = 0;
     let wasd = "";
     let sceneData = "";
     let nftIDs = "";
@@ -1419,6 +1422,10 @@ webxr_router.get('/:_id', function (req, res) {
                 if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
                     dressing = "dressing: none;"
                 }
+
+                if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('map')) {
+                    hasBgMap = true;
+                }
                 
                 if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "none") {
                     ground = "ground: none;"
@@ -1618,6 +1625,7 @@ webxr_router.get('/:_id', function (req, res) {
                 }
             }
 
+
             ///////////////////// location "placeholders" used for "cloud markers" /////////////////////////////////
             if (locationPlaceholders.length > 0) {
                 for (let i = 0; i < locationPlaceholders.length; i++) {
@@ -1635,9 +1643,29 @@ webxr_router.get('/:_id', function (req, res) {
                     const yrot = locationPlaceholders[i].eulery != null ? locationPlaceholders[i].eulery : rot;
                     const zrot = locationPlaceholders[i].eulerz != null ? locationPlaceholders[i].eulerz : rot;
 
+
                     let xpos = locationPlaceholders[i].x != null ? locationPlaceholders[i].x : rot;
                     let ypos = locationPlaceholders[i].y != null ? locationPlaceholders[i].y : rot;
                     let zpos = locationPlaceholders[i].z != null ? locationPlaceholders[i].z : rot;
+
+                    if (hasBgMap) {
+                        const centerX = 1682 / 2;
+                        const centerY = 1237 / 2;
+                        if (xpos < centerX) {
+                            xpos = (xpos / 2) * -1;
+                        } else {
+                            xpos = (xpos / 2);
+                        }
+                        if (ypos < centerY) {
+                            ypos = (ypos / 2) * -1;
+                        } else {
+                            ypos = (ypos / 2)
+                        }
+
+                        // xpos = xpos/10; //or pixelsPerMeterActual
+                        // ypos = ypos/10;
+                        
+                    }
 
                     // if ()
 
@@ -3016,6 +3044,8 @@ webxr_router.get('/:_id', function (req, res) {
                         if (picture_item.tags.includes("map")) { //background map used in vtt, cooks the geo based in img rez
                             image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
                             imageAssets = imageAssets + "<img id=\x22bgMap\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
+                            hasBgMap = true;
+
                         } else {
                             imageAssets = imageAssets + "<img id=\x22smimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
                         }
@@ -3210,6 +3240,7 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                     settings.sceneGreeting = sceneGreeting;
                     settings.sceneQuest = sceneQuest;
+                    settings.hasBgMap = hasBgMap;
                 
                     // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
                     //     settings.useXrRoomPhysics = true;

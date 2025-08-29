@@ -188,6 +188,11 @@ window.addEventListener( 'keydown',  ( event ) => {
       DeleteLocalSceneData();
   
     });
+    $('#modalContent').on('click', '#resetPlayerPosition', function(e) {
+      console.log("tryna reset player position!");
+      localStorage.clear();
+  
+    });
     $('#modalContent').on('click', '#exportButton', function(e) {
       console.log("tryna exportMods!");
       ExportMods();
@@ -2312,7 +2317,7 @@ export function SceneManglerModal(mode, autoHide) {
         "<br><br><br><div>"+locationTable+"</div><br>"+
 
         "<button class=\x22deleteLocalSceneDataButton\x22 id=\x22deleteLocalSceneData\x22 >Delete Local Scene Data</button>"+
-
+        "<button class=\x22deleteLocalProfileDataButton\x22 id=\x22resetPlayerPosition\x22 >Reset Player Position</button>"+
 
         // "<button style=\x22float:left\x22 class=\x22snapButton\x22 id=\x22CreateLocationButton\x22 onclick=\x22ToggleAllTransformControls()\x22>Toggle All Transform Controls</button>"+
       "</div>"+     

@@ -5430,6 +5430,8 @@
         let captionLower = (response.data.captionLower != undefined && response.data.captionLower != 'undefined') ? response.data.captionLower  : ""; 
         let description = (response.data.description != undefined && response.data.description != 'undefined') ? response.data.description  : ""; 
         let nft = (response.data.nft != undefined && response.data.nft != 'undefined') ? response.data.nft  : ""; 
+        let width = (response.data.width != undefined && response.data.width != 'undefined') ? response.data.width  : "0"; 
+        let height = (response.data.height != undefined && response.data.height != 'undefined') ? response.data.height  : "0"; 
         // let authorLink = response.data.authorLink != undefined ? response.data.authorLink : ""; 
 
         $("#cards").show();
@@ -5452,10 +5454,10 @@
                         "<label for=\x22vidTitle\x22>Title</label>" + 
                         "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22picTitle\x22 value=\x22" + response.data.title + "\x22 >" +
                     "</div>" +
-                    "<div class=\x22col form-group col-md-2\x22>" + 
-                        "<label for=\x22sceneTitle\x22>Owner</label>" + 
-                        "<p>" + ouser + "</p>" +
-                    "</div>" +
+                    // "<div class=\x22col form-group col-md-2\x22>" + 
+                    //     "<label for=\x22sceneTitle\x22>Owner</label>" + 
+                    //     "<p>" + ouser + "</p>" +
+                    // "</div>" +
                     "<div class=\x22col form-group col-md-2\x22>" + 
                         "<label for=\x22sceneTitle\x22>Last Update</label>" + 
                         "<p>" + convertTimestamp(date) + "</p>" +
@@ -5467,6 +5469,10 @@
                     "<div class=\x22col form-group col-md-3\x22>" + 
                         "<label for=\x22sceneTitle\x22>Filename</label>" + 
                         "<p>" + response.data.filename + "</p>" +
+                    "</div>" +
+                    "<div class=\x22col form-group col-md-2\x22>" + 
+                        "<label for=\x22sceneTitle\x22>Image Dimensions</label>" + 
+                        "<p id=\x22image_dimensions\x22>" + width + " x " + height + "</p>" +
                     "</div>" +
                 "</div>" +     
                 "<div class=\x22form-row\x22>" +
@@ -5580,8 +5586,8 @@
                         "<label for=\x22source\x22>NFT</label>" +
                         "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22nft\x22 placeholder=\x22NFT string\x22 value=\x22" + nft + "\x22 >" +
                     "</div>" +
-                    // "<div class=\x22col form-group col-md-3\x22>" +
-                    //     "<label for=\x22source\x22>Source </label>" +
+                    // "<div class=\x22col form-group col-md-2\x22>" +
+                    //     "<label for=\x22source\x22>Width </label>" +
                     //     "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22Source\x22 placeholder=\x22Source Text\x22 value=\x22" + response.data.sourceText + "\x22 >" +
                     // "</div>" +
                     "<div class=\x22col form-group col-md-2\x22>" +
@@ -5662,6 +5668,23 @@
         if (response.data.useTarget == true) {
             $('#useTarget').bootstrapToggle('on');
         } 
+
+        if (width == "0") {
+            let oImage = document.createElement("img");
+            oImage.src = response.data.URLoriginal;
+            oImage.id = "original_image";
+            oImage.style.display = 'none';
+            document.body.appendChild(oImage);
+            oImage.addEventListener("load", (event) => {
+                const { naturalWidth, naturalHeight } = oImage;
+
+                width = naturalWidth;
+                height = naturalHeight;
+                console.log("image dimensions " + width + " " + height);
+                document.getElementById("image_dimensions").innerText = width + " x " + height;
+            });
+
+        }
         if (response.data.tags != null && response.data.tags.length > 0) {
             tags = response.data.tags;
             for (let i = 0; i < tags.length; i++) {
@@ -5869,7 +5892,9 @@
                     description: description,
                     mods: mods,
                     license: license,
-                    nft: nft
+                    nft: nft,
+                    width: width,
+                    height: height
                     // sourceAut
                 }
                 axios.post('/update_pic/' + item_id, data)
@@ -5894,6 +5919,7 @@
         console.log(error);
         });
     } 
+
     ///////////// mindar image target cooking
     const getBlobFromUrl = (myImageUrl) => {
         return new Promise((resolve, reject) => {

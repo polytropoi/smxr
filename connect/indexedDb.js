@@ -349,6 +349,9 @@ export function InitIDB() {
 
             InitLocalProfile(userData);
 
+         } else {
+            userData.avatarName = avatarName;
+            InitLocalProfile(userData);
          }
 
        }
