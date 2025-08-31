@@ -3309,7 +3309,7 @@ webxr_router.get('/:_id', function (req, res) {
                             "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>" +
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
                             extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>" +
+                            "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>" +
                             "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
                             geoScripts +
                             locationScripts +
@@ -3464,7 +3464,7 @@ webxr_router.get('/:_id', function (req, res) {
                             "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
                             extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
+                            "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>"+
                             "<script src=\x22/connect/indexedDb.js\x22></script>" +
                             "<script src=\x22/connect/traffic.js\x22></script>" +
                             
@@ -3755,7 +3755,7 @@ webxr_router.get('/:_id', function (req, res) {
                                                
                                                "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
                        
-                                               // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>" +
+                                               // "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>" +
                                                
                                                "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
                                                

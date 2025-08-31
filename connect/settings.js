@@ -2,6 +2,7 @@ export let settings;
 
 export let profile;
 
+export let pixelsPerMeterActual = 10;
 // export let selectedPosition = {};
 
 import { SetPlayerToLastPosition, InitSocket } from "../connect/connect.js";

@@ -1,11 +1,12 @@
-import { InitLocalColors, DisplayLocalFiles } from "../main/js/dialogs.js";
+import { InitLocalColors, DisplayLocalFiles } from "/connect/dialogs.js";
 
 import { room, sceneLocations, locationTimestamps, localData, userData, lastCloudUpdate, InitCurves, 
    sceneEl, PlayerToLocation, getExtension, poiLocations, curveLocations, avatarName, UpdateAvatarName, GoToPosRot, 
-   playerPosition, playerRotation } from "../connect/connect.js";
+   playerPosition, playerRotation } from "/connect/connect.js";
 
-import { settings, UpdateUserProfile } from "../../connect/settings.js";
-import { SetTimeKeysData } from "../connect/events.js";
+import { settings, UpdateUserProfile, pixelsPerMeterActual } from "/connect/settings.js";
+import { SetTimeKeysData } from "/connect/events.js";
+// import { pixelsPerMeterActual } from "../vtt/vtt_main.mjs";
 export let hasLocalData = false;
 //////////////////////indexedDB functions...
 export function InitIDB() {
@@ -56,7 +57,7 @@ export function InitIDB() {
        //first check if there are localmods, version saved with tilde
        // const modQuery = store.get(room + "~"); //nope, needs cursor
        const modQuery = store.openCursor(room + "~"); //use cursor mode so it's iterable below
-      //  const fileQuery = filestore.openCursor();
+         //  const fileQuery = filestore.openCursor();
        modQuery.onsuccess = function (e) {
           var cursor = e.target.result;
           console.log("query for localData : " + e.target.result);
@@ -66,10 +67,10 @@ export function InitIDB() {
 
                 // start location loop
                let mapScale = 1;
-               console.log(settings.sceneType + " hasBgMap settings in indexedDB " + settings.hasBgMap);
+               console.log(settings.sceneType + " hasBgMap settings in indexedDB " + settings.hasBgMap + " ppm " + pixelsPerMeterActual);
                if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) {
                   // if (cursor.value.sceneTags.includes("map")) {
-                  mapScale = .1; //divide by pixelsPerMeterActual, e.g 10 = .1
+                  mapScale = mapScale / pixelsPerMeterActual; //divide by pixelsPerMeterActual, e.g 10 = .1
                }
                if (cursor.value.locations) {
                   for (let i = 0; i < cursor.value.locations.length; i++) { //mod or create the scene elements
@@ -212,7 +213,7 @@ export function InitIDB() {
                                  
                               }
                               
-                              localEl.setAttribute("position", {x: cursor.value.locations[i].x * mapScale, y: cursor.value.locations[i].y * mapScale, z: cursor.value.locations[i].z * mapScale });
+                              localEl.setAttribute("position", {x: cursor.value.locations[i].x, y: cursor.value.locations[i].y, z: cursor.value.locations[i].z });
                               localEl.setAttribute("rotation", {x: cursor.value.locations[i].eulerx, y: cursor.value.locations[i].eulery, z: cursor.value.locations[i].eulerz });
                               // localEl.setAttribute("scale", {x: cursor.value.locations[i].markerObjScale, y: cursor.value.locations[i].markerObjScale, z: cursor.value.locations[i].markerObjScale});
                               
@@ -767,6 +768,25 @@ export function InitIDB() {
 
        scene.settings = localData.settings;
        scene.locations = localData.locations;
+
+        if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) {
+                  // if (cursor.value.sceneTags.includes("map")) {
+                  const mapScale = pixelsPerMeterActual; //divide by pixelsPerMeterActual, e.g 10 = .1
+                  for (let i = 0; i < scene.locations.length; i++) { //mod or create the scene elements
+                     // let loc = JSON.stringify(cursor.value.locations[i]);
+                     console.log("updating loication " + i + " of " + scene.locations.length);
+                    
+                     scene.locations[i].x = scene.locations[i].x * mapScale;
+                     scene.locations[i].y = scene.locations[i].y * mapScale;
+                     scene.locations[i].z = scene.locations[i].z * mapScale;
+                     localData.locations.push(scene.locations[i]);
+                     if (scene.locations[i].markerType == "player") {
+                        playerPosMods.push(scene.locations[i].x + " " + scene.locations[i].y + " " + scene.locations[i].z);
+                        console.log("PLayerPosMods :" + JSON.stringify(playerPosMods));
+                     
+                     }
+         }
+      }
        
        scene.localFiles = localData.localFiles;
        

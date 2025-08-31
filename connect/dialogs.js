@@ -2,17 +2,17 @@
 // import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "content-utils";
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
           InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, 
-          RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime } from "../../connect/media.js";
-import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData } from "../../connect/events.js";
-import { settings, profile } from "../../connect/settings.js";
+          RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime } from "./media.js";
+import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData } from "./events.js";
+import { settings, profile } from "./settings.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
   userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
   Disconnect,
   SaveTimekeysToLocal,
   CreateLocationAlt
-  } from "../../connect/connect.js";
-import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "../../connect/indexedDb.js";
+  } from "./connect.js";
+import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "./indexedDb.js";
 // import shortid from "shortid";
 
 export let showDialogPanel = false;
@@ -191,6 +191,7 @@ window.addEventListener( 'keydown',  ( event ) => {
     $('#modalContent').on('click', '#resetPlayerPosition', function(e) {
       console.log("tryna reset player position!");
       localStorage.clear();
+      window.location.reload();
   
     });
     $('#modalContent').on('click', '#exportButton', function(e) {
@@ -2193,7 +2194,16 @@ export function SceneManglerModal(mode, autoHide) {
         }
       }
       
-
+      let profilestring = "";
+      if (profile && profile.playerState) {
+        profilestring =  "<div>Player name : " + profile.avatarName + "</div><br>"+
+        "<div>Player status : "+ userString + "</div><br>"+
+        "<div>History : " + lastVisit + "</div><br>"+
+        "<div>Health : " + profile.playerState.health + "%</div><br>"+
+        "<div>Mana : " + profile.playerState.mana + "%<br></div><br>"+
+        "<div>XP : " + profile.playerState.xp + "<br></div><br>"+
+        "<div>Armor : " + profile.playerState.armor + "</div><br>";
+      }
       let content = "<span id='modalCloser' class='close-modal'>&times;</span>" +
                   "<div><span id=\x22modalTitle\x22><h3>Scene Mangler</h3></span>" + //populate modal
       tabs+
@@ -2202,14 +2212,14 @@ export function SceneManglerModal(mode, autoHide) {
         "<div><p>Quest : " + quest + "</p></div>"+
         "<div><p>Connection : " + stringRoomUsers + "</p></div>"+
         // 
-        
-        "<div>Player name : " + profile.avatarName + "</div><br>"+
-        "<div>Player status : "+ userString + "</div><br>"+
-        "<div>History : " + lastVisit + "</div><br>"+
-        "<div>Health : " + profile.playerState.health + "%</div><br>"+
-        "<div>Mana : " + profile.playerState.mana + "%<br></div><br>"+
-        "<div>XP : " + profile.playerState.xp + "<br></div><br>"+
-        "<div>Armor : " + profile.playerState.armor + "</div><br>"+
+        profilestring +
+        // "<div>Player name : " + profile.avatarName + "</div><br>"+
+        // "<div>Player status : "+ userString + "</div><br>"+
+        // "<div>History : " + lastVisit + "</div><br>"+
+        // "<div>Health : " + profile.playerState.health + "%</div><br>"+
+        // "<div>Mana : " + profile.playerState.mana + "%<br></div><br>"+
+        // "<div>XP : " + profile.playerState.xp + "<br></div><br>"+
+        // "<div>Armor : " + profile.playerState.armor + "</div><br>"+
   "</div>"+    
       "</div>"+    
       // "<div "+questsDisplay+" id=\x22Quests\x22 class=\x22modalMain tabcontent\x22>"+

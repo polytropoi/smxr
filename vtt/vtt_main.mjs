@@ -11,19 +11,21 @@ import { addDisplacementEffect } from './addDisplacement.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
 import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
 import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../connect/media.js';
-import { settings, profile } from '../connect/settings.js';
+import { settings, profile, pixelsPerMeterActual } from '../connect/settings.js';
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData, SetSelectedPosition} from "../../connect/events.js";
-import { keydown, CreateNewLocation } from '../main/js/dialogs.js';
+import { keydown, CreateNewLocation } from '../connect/dialogs.js';
 import { addButtons, addFancyButtons } from './addButtons.mjs';
 
 import { LoadLocations, AddLocation } from './vtt_locations.mjs';
 import { SetTimeKeysData, eventEl } from '../connect/events.js';
-// import { keydown } from '../main/js/dialogs.js';
+// import { keydown } from '../connect/dialogs.js';
 
 
 export const app = new Application();
 export let sceneTags;
-export let pixelsPerMeterActual = 10;
+
+
+export let pixelsPerMeter = 1;
 
 let viewport;
 export let viewportVerticalCenter = 2; //i.e. /2 = center
@@ -167,7 +169,7 @@ async function prePreLoader () {
 
       console.log("no profile yet...");
       if (count > 3){
-        LoadLocations(app, viewport, spritesContainer);
+        LoadLocations(app, viewport);
         clearInterval(interval);
       }
     }
@@ -204,7 +206,8 @@ async function prePreLoader () {
     sceneTags = settings.sceneTags;
    }
  
-
+   pixelsPerMeter = pixelsPerMeterActual; //don't wanna reload settings again..?
+   
     // Assets.addBundle('fonts', [{ alias: 'Acme', src: '../../fonts/web/Acme.woff' }]);
 
     if (settings && settings.sceneFontFillColor) {
@@ -290,7 +293,7 @@ export function playerProfileLoaded (playerProfile) {
   addPlayerProfileText(app, playerProfile, uicontainer);
   // LoadLocations(app, viewport, spritesContainer);
         setTimeout(() => {
-            LoadLocations(app, viewport, spritesContainer); //give it a shake...
+            LoadLocations(app, viewport); //give it a shake...
         }, 1000);
   
 }
@@ -331,6 +334,8 @@ export async function GoWithIt() { //called from vtt.js
     } else {
       viewport.x = 0;
       viewport.y = 0;
+      // viewport.y = -app.screen.height/2;
+      // viewport.anchor = .5;
       viewport.setZoom(1.1);
       // viewport.moveToCenter
     }

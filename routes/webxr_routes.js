@@ -3415,7 +3415,7 @@ webxr_router.get('/:_id', function (req, res) {
                             "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>" +
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
                             extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>" +
+                            "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>" +
                             "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
                             geoScripts +
                             locationScripts +
@@ -3570,7 +3570,7 @@ webxr_router.get('/:_id', function (req, res) {
                             "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
                             extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
+                            "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>"+
                             "<script src=\x22/connect/indexedDb.js\x22></script>" +
                             "<script src=\x22/connect/traffic.js\x22></script>" +
                             
@@ -3847,7 +3847,7 @@ webxr_router.get('/:_id', function (req, res) {
                         "<script src=\x22../main/vendor/howler/src/howler.spatial.js\x22></script>"+
                         hlsScript +
                         
-                        "<script type=\x22module\x22 src=\x22../main/js/navigation.js\x22></script>" + //includes navmesh components (simple and not), and extended_wasd_controls
+                        "<script type=\x22module\x22 src=\x22/connect/navigation.js\x22></script>" + //includes navmesh components (simple and not), and extended_wasd_controls
                         blinkScript +   //TODO - check if req comes from vr headset
                         enviromentScript +
                         joystickScript +
@@ -3905,7 +3905,7 @@ webxr_router.get('/:_id', function (req, res) {
                         locationScripts +
                         locationData +
                         geoScripts +
-                        "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>"+
 
                         "<div id=\x22dom-overlay\x22 style=\x22visibility: hidden\x22><div id=\x22ar_overlay_message\x22></div>" +
                         "<div><button id=\x22arLockButton\x22 style=\x22visibility: hidden; float:right; margin: auto\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>toggle lock</button></div><br><br><br>"+

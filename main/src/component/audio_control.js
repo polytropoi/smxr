@@ -4,7 +4,7 @@ import { fancyTimeFormat, primaryAudioMangler, FetchAudioGroupsData} from "../..
 import { PauseIntervals, timedEventsListenerMode, SetTimedEventsListenerMode, SetTimeKeysData } from "../../../connect/events.js";
 import { settings  } from "../../../connect/settings.js";
 import { attributions, lerp } from "../../../connect/connect.js";
-import { SceneManglerModal } from "../../js/dialogs.js";
+import { SceneManglerModal } from "../../../connect/dialogs.js";
 
 
 // import {Howl, Howler} from '../main/vendor/howler/src/howler.mjs';

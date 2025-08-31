@@ -1,7 +1,7 @@
 import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMatrixFilter } from 'pixi';
 // import { CompositeTilemap } from 'pixi-tilemap';
 import { SetSelectedPosition } from '../connect/events.js';
-import { keydown, CreateNewLocation } from '../main/js/dialogs.js';
+import { keydown, CreateNewLocation } from '../connect/dialogs.js';
 import { sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter} from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 import { AdvancedBloomFilter, ReflectionFilter, OldFilmFilter } from '@pixi/filters';
@@ -440,7 +440,7 @@ export async function addMap(app, viewport, spritesContainer) {
     const picheight = map.texture.height;
     mapsize.x = picwidth;
     mapsize.y = picheight;
-
+    
       // viewport.worldWidth = picwidth;
       // viewport.worldHeight = picheight;
 
@@ -450,6 +450,10 @@ export async function addMap(app, viewport, spritesContainer) {
 
     console.log("map xCount : " + xCount + " yCount : " + yCount);
   
+    // viewport.width = picwidth;
+    // viewport.height = picheight;
+    // viewport.worldHeight = picheight;
+    // viewport.worldWidth = picwidth;
     //cook the spritesheet json based on image rez and tilesize
     for (let i = 0; i < xCount; i++) {
       const xpos = (i * tilesize);
@@ -534,7 +538,7 @@ export async function addMap(app, viewport, spritesContainer) {
         spritesContainer.interactive = true;
         // Center background sprite anchor.
         spritesContainer.anchor = 0.5;
-              spritesContainer.on('pointerup', (event) => {
+        spritesContainer.on('pointerup', (event) => {
           // ... handle the event
             const globalPos = event.data.global; // { x: ..., y: ... }
               // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);

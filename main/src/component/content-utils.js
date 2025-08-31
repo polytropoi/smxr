@@ -10,12 +10,12 @@ import 'troika-text';
 
 
 import {  PauseIntervals, SetVideoEventsData, SetTimeKeysData, SetTimedEventsListenerMode } from "../../../connect/events.js";
-import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../js/dialogs.js";
+import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../../connect/dialogs.js";
 // import {  } from "../../js/navigation.js";
 import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation, 
       userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations, AvatarClicked, playerPosition, playerRotation } from "../../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
-import { settings } from "../../../connect/settings.js";
+import { pixelsPerMeterActual, settings } from "../../../connect/settings.js";
 import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat, LoadPrimaryAudioHowl } from '../../../connect/media.js';
 
 var ua = window.navigator.userAgent;
@@ -351,28 +351,41 @@ AFRAME.registerComponent('initializer', { //when aframe isLoaded, adjust for dev
       }
 
       const backgroundMapImg = document.getElementById("bgMap");
-        console.log("GOTSA BACKGROUND MAP!@");
+        
       if (backgroundMapImg) {
         const textureLoader = new THREE.TextureLoader();
         const texture = textureLoader.load(
           backgroundMapImg.src,
           function (texture) {
-              const modWidth = texture.image.width / 10; //hrm, this should be pixelsPerMeterActual
-              const modHeight= texture.image.height / 10;
+
+              const modWidth = texture.image.width / pixelsPerMeterActual; //hrm, this should be pixelsPerMeterActual
+              const modHeight = texture.image.height / pixelsPerMeterActual;
               settings.mapWidth = modWidth;
               settings.mapHeight = modHeight;
-              settings.pixelsPerMeterActual = 10; 
+              // settings.pixelsPerMeterActual = ; 
               // texture.minFilter = THREE.LinearFilter;
               // texture.magFilter = THREE.LinearFilter;
-                      
+              console.log("GOTSA BACKGROUND MAP!@ " + texture.image.width + " " + texture.image.height + " modded " + modWidth + " " + modHeight );
                   // texture.flipY = this.data.flipY; 
               texture.colorSpace = THREE.SRGBColorSpace;
-              const geometry = new THREE.PlaneGeometry( modWidth, modHeight );
+              const geometry = new THREE.PlaneGeometry( texture.image.width, texture.image.height );
               const material = new THREE.MeshStandardMaterial( {side: THREE.FrontSide, map: texture} );
               const plane = new THREE.Mesh( geometry, material );
 
-              const size = modWidth;
-              const divisions = modHeight;
+   
+
+
+
+              const scale = 1 / pixelsPerMeterActual;
+              plane.scale.set(scale, scale, scale); //almost but not quite!
+
+              const boundingBox = new THREE.Box3();
+              boundingBox.setFromObject(plane);
+              const size = new THREE.Vector3();
+              boundingBox.getSize(size);
+                           console.log("bgmap size is " + JSON.stringify(size));
+              // const size = modWidth;
+              // const divisions = modHeight;
 
               // const gridHelper = new THREE.GridHelper(size, divisions);
               const vttPlaneEl = document.createElement("a-entity");

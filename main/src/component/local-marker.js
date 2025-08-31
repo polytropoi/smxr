@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 import { settings  } from "../../../connect/settings.js";
 import { ToggleTransformControls, GoToLocation, localData } from "../../../connect/connect.js";
-import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
+import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../../connect/dialogs.js";
 import { sceneTextItems } from "./content-utils.js";
 
 AFRAME.registerComponent('local_marker', { //special items with local mods, not saved to cloud yet

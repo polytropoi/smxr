@@ -3304,7 +3304,7 @@ landing_router.get('/:_id', function (req, res) {
                         
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
 
-                        // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>" +
                         
                         // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
 

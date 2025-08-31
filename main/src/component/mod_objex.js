@@ -4,7 +4,7 @@
 import { settings  } from "../../../connect/settings.js";
 import { UpdateLocalPlayerState, UpdateLocalEquipment } from "../../../connect/indexedDb.js";
 import { room, localData, userData, mouseDowntime } from "../../../connect/connect.js";
-import { keydown, SetSelectedLocationTimestamp, showDialogPanel, DropInventoryItem, DequipAndDropItem } from "../../js/dialogs.js";
+import { keydown, SetSelectedLocationTimestamp, showDialogPanel, DropInventoryItem, DequipAndDropItem } from "../../../connect/dialogs.js";
 import { Pickup, Drop } from "../../src/component/content-utils.js";
 
 AFRAME.registerComponent('mod_scene_inventory', {

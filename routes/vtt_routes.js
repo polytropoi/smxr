@@ -3348,7 +3348,7 @@ vtt_router.get('/:_id', function (req, res) {
                             // "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
                             // "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
 
-                            "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
+                            "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>"+
                             "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
 
                             "<script type=\x22module\x22 src=\x22/connect/media.js\x22></script>" +
@@ -3381,7 +3381,7 @@ vtt_router.get('/:_id', function (req, res) {
                         
                         cloudMarkerElements+
 
-                        // "<script type=\x22module\x22 src=\x22../main/js/dialogs.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>"+
                         // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
 
                         // primaryAudioScript +

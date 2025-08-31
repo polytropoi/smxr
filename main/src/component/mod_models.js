@@ -6,7 +6,7 @@ import 'aframe-extras';
 import { settings  } from "../../../connect/settings.js";
 import { localData, ToggleTransformControls } from "../../../connect/connect.js";
 import { clamp } from "../component/content-utils.js";
-import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../js/dialogs.js";
+import { keydown, SetSelectedLocationTimestamp, SceneManglerModal } from "../../../connect/dialogs.js";
 ////////////////////////// - MOD_MODEL - for "plain" models, these are written (aframe elements + components + assets) by the server into response, as opposed to "Objects", see mod_objex.js
 AFRAME.registerComponent('mod_model', {
     schema: {

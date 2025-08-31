@@ -1,9 +1,9 @@
 import AFRAME from 'aframe'; 
 import * as THREE from 'three';
 
-import { showDialogPanel } from "../js/dialogs.js";
-import { settings } from "../../../connect/settings.js";
-import { UpdatePlayerPosRot } from "../../../connect/connect.js";
+import { showDialogPanel } from "/connect/dialogs.js";
+import { settings } from "/connect/settings.js";
+import { UpdatePlayerPosRot } from "/connect/connect.js";
 import {} from "content-utils";
 
 
@@ -612,7 +612,7 @@ AFRAME.registerComponent('extended_wasd_controls', {
 			if (this.isKeyPressed(this.data.moveLeftKey) || this.isKeyPressed(this.data.moveLeftKeyAlt))
 				this.movePercent.x -= 1;
 
-			if ( this.data.flyEnabled )
+			if ( this.data.flyEnabled || this.isFlyable )
 			{
 				if (this.isKeyPressed(this.data.moveUpKey))
 					this.movePercent.y += 1;
@@ -814,9 +814,10 @@ AFRAME.registerComponent('extended_wasd_thirdperson', {
 		// allows easy extraction of turn angle
 		this.el.object3D.rotation.order = 'YXZ';
 
-		this.isFlyable = false;
+		this.isFlyable = true;
 		if (settings != undefined && settings != null && settings.sceneCameraFlyable) {
 			this.isFlyable = true;
+			this.data.flyEnabled = true;
 		}
 	},
 	setJoystickInput: function () {
@@ -933,7 +934,7 @@ AFRAME.registerComponent('extended_wasd_thirdperson', {
 			if (this.isKeyPressed(this.data.moveLeftKey))
 				this.movePercent.x -= .5;
 
-			if ( this.data.flyEnabled )
+			if ( this.data.flyEnabled || this.isFlyable)
 			{
 				if (this.isKeyPressed(this.data.moveUpKey))
 					this.movePercent.y += 1;

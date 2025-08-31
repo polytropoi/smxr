@@ -2,23 +2,25 @@ import { Assets, Graphics, Container, Text } from 'pixi';
 
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 import { selectedPosition } from '../connect/events.js';
-import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../main/js/dialogs.js';
-import { pixelsPerMeterActual } from './vtt_main.mjs';
+import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../connect/dialogs.js';
+import { pixelsPerMeter } from './vtt_main.mjs';
 
 
-let tokenContainer;
+let tokenContainer = new Container();
 
-export function LoadLocations(app, viewport, spritesContainer) {
+export function LoadLocations(app, viewport) {
     console.log("tryna load localMarkers..");
     const localMarkers = document.querySelectorAll('.local_marker');
     const cloudMarkers = document.querySelectorAll('.cloud_marker');
     
-    if (!tokenContainer) {
+    if (!tokenContainer.children.length) {
             // tokenContainer.destroy({ children: true });
-                tokenContainer = new Container();
+                // tokenContainer = new Container();
         tokenContainer.anchor = 0;
         // tokenContainer.width = viewport.width;
         // tokenContainer.height = viewport.height;
+        //  tokenContainer.width = viewport.worldWidth;
+        // tokenContainer.height = viewport.worldHeight;
         viewport.addChild(tokenContainer);
         viewport.setChildIndex(tokenContainer, viewport.children.length - 1);
     } else {
@@ -256,7 +258,7 @@ export function LoadLocations(app, viewport, spritesContainer) {
  }
 
 
- export function AddLocation(app, viewport, spritesContainer) {
+ export function AddLocation(app, viewport) {
     console.log("tryna load localMarkers..");
     // const localMarkers = document.querySelectorAll('.local_marker');
     
@@ -356,10 +358,12 @@ export function LoadLocations(app, viewport, spritesContainer) {
     // token.data = elData;
     
 
-    const globalPos = {x: xpos, y: ypos} ;
-    const worldPos = viewport.toWorld(globalPos);
+    // const globalPos = {x: xpos, y: ypos} ;
+    // const worldPos = viewport.toWorld(globalPos);
+    // xpos = worldPos.x;
+    // ypos = world
         // console.log(viewport.x + " " + viewport.scale.x + " " + viewport.scale.y  + " scale tryna set token position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
-        console.log("setting token position w/ viewport position " + viewport.x + " " + viewport.x  + " scale " + viewport.scale.x + " " + viewport.scale.y  + " position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
+        console.log("setting token position w/ viewport position " + viewport.x + " " + viewport.x  + " scale " + viewport.scale.x + " " + viewport.scale.y  + " position " + xpos + "  " + ypos)/// + " " + worldPos.x + " " + worldPos.y);
     // token.position.set(worldPos.x,worldPos.y);
 
     if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
