@@ -300,7 +300,7 @@ AFRAME.registerComponent('initializer', { //when aframe isLoaded, adjust for dev
         }
       }
 
-      if (settings && settings.sceneTags.includes("hudmap")) {
+      if (settings && settings.sceneTags && settings.sceneTags.includes("hudmap")) {
         const renderCamera = document.getElementById("renderCamera");
         if (renderCamera) {
           renderCamera.setAttribute("camrender", {"cid": "topCameraCanvas"});

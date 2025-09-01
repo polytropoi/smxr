@@ -188,7 +188,7 @@ webxr_router.get('/:_id', function (req, res) {
     var prevSceneLink = "";
     var loopable = "";
   
-    var sceneGLTFLocations = [];
+
     var sceneModelLocations = [];
     var sceneObjectLocations = [];
     var sceneTextLocations = [];
@@ -313,9 +313,7 @@ webxr_router.get('/:_id', function (req, res) {
     let triggerOggUrl = "";
     let triggerMp3Url = "";
     let hasTriggerAudio = true;
-    let hasBgMap = false;
-    let mapWidth = 0;
-    let mapHeight = 0;
+
     let wasd = "";
     let sceneData = "";
     let nftIDs = "";
@@ -368,6 +366,12 @@ webxr_router.get('/:_id', function (req, res) {
     let useArParent = false;
     let sceneUnityWebDomain = "http://smxr.net";
     let activityPubScripts = "";
+    
+    let pixelsPerMeterActual;
+    let hasBgMap = false;
+    let mapScale;
+    let mapWidth;
+    let mapHeight;
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
@@ -599,11 +603,19 @@ webxr_router.get('/:_id', function (req, res) {
                         troikaScript = "";
                         particleScript = "";
                         // aframeScript = "";
-                        // contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
+                        // contentUtils = "<script type=\x22module\x22 ssrc=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
                         
                     }
                     
                 }
+            }
+            console.log("sceneData.sceneHasBgMap && sceneData.sceneMapWidth && sceneData.sceneMapHeight " +sceneData.sceneHasBgMap + " " + sceneData.sceneMapWidth + " " + sceneData.sceneMapHeight);
+            if (sceneData.sceneHasBgMap && sceneData.sceneMapWidth && sceneData.sceneMapHeight) {
+                hasBgMap = true;
+                mapWidth = sceneData.sceneMapWidth;
+                mapHeight = sceneData.sceneMapHeight;
+                pixelsPerMeterActual = sceneData.scenePixelsPerMeterActual;
+                mapScale = 1 / pixelsPerMeterActual;
             }
             if (socketHost != null && socketHost != "NONE") {
                 if (sceneData.sceneNetworking == "SocketIO") {
@@ -1629,8 +1641,20 @@ webxr_router.get('/:_id', function (req, res) {
             ///////////////////// location "placeholders" used for "cloud markers" /////////////////////////////////
             if (locationPlaceholders.length > 0) {
                 for (let i = 0; i < locationPlaceholders.length; i++) {
+                    // if (hasBgMap && mapWidth && mapHeight && pixelsPerMeterActual && mapScale) {  ///////// if using 2d coord system, e.g. pixijs
                     if (hasBgMap) {
-                        console.log("gotsa background map!");
+                        console.log("!!!!!!!! gotsa background map!!!!!!!!!! modding locationData... " + mapWidth);
+                         if (locationPlaceholders[i].x < mapWidth / 2) {
+                            locationPlaceholders[i].x = (((mapWidth / 2) - locationPlaceholders[i].x) * mapScale) * -1; //?!?!?!
+                        } else {
+                            locationPlaceholders[i].x = (mapWidth - locationPlaceholders[i].x) * mapScale;
+                        }
+                        // leave the y value as is, use for sorting in 2d mode
+                        if (locationPlaceholders[i].z < mapHeight / 2) {
+                            locationPlaceholders[i].z = (((mapHeight / 2) - locationPlaceholders[i].z) * mapScale) * -1;
+                        } else {
+                            locationPlaceholders[i].x = (mapWidth - locationPlaceholders[i].x) * mapScale;
+                        }
                         // locationPlaceholders[i].x = locationPlaceholders[i].x/10
 
                         // locationPlaceholders[i].y = locationPlaceholders[i].y/10
@@ -3054,6 +3078,10 @@ webxr_router.get('/:_id', function (req, res) {
                             image1url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + picture_item.userID + "/pictures/originals/" + picture_item._id + ".original." + picture_item.filename, 6000);
                             imageAssets = imageAssets + "<img id=\x22bgMap\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";
                             hasBgMap = true;
+                            mapWidth = picture_item.width;
+                            mapHeight = picture_item.height;
+                            pixelsPerMeterActual = picture_item.pixelsPerMeterActual;
+                            mapScale = 1 / pixelsPerMeterActual;
 
                         } else {
                             imageAssets = imageAssets + "<img id=\x22smimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + image1url + "'>";

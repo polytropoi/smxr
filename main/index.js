@@ -5432,6 +5432,7 @@
         let nft = (response.data.nft != undefined && response.data.nft != 'undefined') ? response.data.nft  : ""; 
         let width = (response.data.width != undefined && response.data.width != 'undefined') ? response.data.width  : "0"; 
         let height = (response.data.height != undefined && response.data.height != 'undefined') ? response.data.height  : "0"; 
+        let pixelsPerMeterActual = (response.data.pixelsPerMeterActual != undefined && response.data.pixelsPerMeterActual != 'undefined') ? response.data.pixelsPerMeterActual  : "10";
         // let authorLink = response.data.authorLink != undefined ? response.data.authorLink : ""; 
 
         $("#cards").show();
@@ -5473,6 +5474,7 @@
                     "<div class=\x22col form-group col-md-2\x22>" + 
                         "<label for=\x22sceneTitle\x22>Image Dimensions</label>" + 
                         "<p id=\x22image_dimensions\x22>" + width + " x " + height + "</p>" +
+                        "<p id=\x22pixels per meter\x22>" + pixelsPerMeterActual + "</p>" +
                     "</div>" +
                 "</div>" +     
                 "<div class=\x22form-row\x22>" +
@@ -5894,7 +5896,8 @@
                     license: license,
                     nft: nft,
                     width: width,
-                    height: height
+                    height: height,
+                    pixelsPerMeterActual: 10, //needs input..
                     // sourceAut
                 }
                 axios.post('/update_pic/' + item_id, data)
@@ -12647,6 +12650,10 @@ function getAllPeople() {
             let gltfSelect = "";
             let allPix = [];
             let zone = new Date().toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2];
+            let hasBgMap = false;
+            let mapWidth;
+            let mapHeight;
+            let pixelsPerMeterActual = 10;
 
             // console.log(sceneModelz);
             // axios.get('/gltf/' + userid)
@@ -12740,12 +12747,19 @@ function getAllPeople() {
                     }
                 }    
             let scenePics = "";    
-                if (pictures != null && pictures != undefined && pictures.length > 0 ) {
+            if (pictures != null && pictures != undefined && pictures.length > 0 ) {
                 // console.log("tryna fetch pics " + JSON.stringify(response.data.pictures));
                 for (let i = 0; i < pictures.length; i++) {
                     let orientation = "scene pic";
                     if (pictures[i].orientation != undefined) {
                         orientation = pictures[i].orientation;
+                    }
+                    if (pictures[i].tags && pictures[i].tags.includes("map")) {
+                        console.log("map pic " + JSON.stringify(pictures[i]));
+                        hasBgMap = true;
+                        mapWidth = pictures[i].width;
+                        mapHeight = pictures[i].height;
+                        pixelsPerMeterActual = 10;
                     }
                     scenePics = scenePics +
                     "<div class=\x22card\x22 style=\x22width:128px;\x22>" +
@@ -12757,7 +12771,10 @@ function getAllPeople() {
                         "</div>" +
                     "</div>";
                     }
-                }
+                    if (hasBgMap) {
+                        scenePics = scenePics + "<div class=\x22float-left\x22><p>map dimensions " + mapWidth + " " + mapHeight + " ppm " + pixelsPerMeterActual + "</p></div>";
+                    }
+            }
 
             // let sceneTextItems = "";
             let text_items = "";
@@ -17510,7 +17527,11 @@ function getAllPeople() {
                             sceneTriggerPatch2: sceneTriggerPatch2,
                             sceneEnvironmentPreset: sceneEnvironmentPreset,
                             sceneLocations: sceneLocations,
-                            sceneTimedEvents: sceneTimedEvents
+                            sceneTimedEvents: sceneTimedEvents,
+                            sceneHasBgMap: hasBgMap,
+                            sceneMapWidth: mapWidth,
+                            sceneMapHeight: mapHeight,
+                            scenePixelsPerMeterActual: pixelsPerMeterActual
                         };
                         // let headers = { headers: {
                         //     appid: appid,

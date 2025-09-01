@@ -7823,7 +7823,11 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
           sceneModels: req.body.sceneModels,
           sceneObjectGroups: req.body.sceneObjectGroups,
           sceneTimedEvents: req.body.sceneTimedEvents,
-          sceneLastUpdate : lastUpdateTimestamp
+          sceneLastUpdate : lastUpdateTimestamp,
+          sceneHasBgMap: req.body.sceneHasBgMap,
+          sceneMapWidth: req.body.sceneMapWidth,
+          sceneMapHeight: req.body.sceneMapHeight,
+          scenePixelsPerMeterActual: req.body.scenePixelsPerMeterActual
         }};
         const updated = await RunDataQuery("scenes", "updateOne", query, updoc);
         res.send("updated " + updated);

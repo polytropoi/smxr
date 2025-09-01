@@ -87,9 +87,9 @@ export function InitIDB() {
                         if (cursor.value.locations[i].z < settings.mapHeight / 2) {
                            cursor.value.locations[i].z = (((settings.mapHeight / 2) - cursor.value.locations[i].z) * mapScale) * -1;
                         } else {
-                           cursor.value.locations[i].x = (settings.mapWidth - cursor.value.locations[i].x) * mapScale;
+                           cursor.value.locations[i].z = (settings.mapWidth - cursor.value.locations[i].z) * mapScale;
                         }
-                        console.log("modded cursor " + i + " of " + cursor.value.locations.length + " x " + cursor.value.locations[i].x + " y " + cursor.value.locations[i].y);
+                        console.log("modded cursor " + i + " of " + cursor.value.locations.length + " x " + cursor.value.locations[i].x + " z " + cursor.value.locations[i].z);
                      }
 
                      localData.locations.push(cursor.value.locations[i]);
