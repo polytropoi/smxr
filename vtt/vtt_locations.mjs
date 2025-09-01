@@ -6,26 +6,27 @@ import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../con
 import { pixelsPerMeter } from './vtt_main.mjs';
 
 
-let tokenContainer = new Container();
 
-export function LoadLocations(app, viewport) {
+    let locationTokenContainer = new Container();
+
+export function LoadLocations(app, viewport, spritesContainer) {
     console.log("tryna load localMarkers..");
     const localMarkers = document.querySelectorAll('.local_marker');
     const cloudMarkers = document.querySelectorAll('.cloud_marker');
-    
-    if (!tokenContainer.children.length) {
-            // tokenContainer.destroy({ children: true });
-                // tokenContainer = new Container();
-        tokenContainer.anchor = 0;
-        // tokenContainer.width = viewport.width;
-        // tokenContainer.height = viewport.height;
-        //  tokenContainer.width = viewport.worldWidth;
-        // tokenContainer.height = viewport.worldHeight;
-        viewport.addChild(tokenContainer);
-        viewport.setChildIndex(tokenContainer, viewport.children.length - 1);
-    } else {
-        tokenContainer.removeChildren();
-    }
+
+    // if (!locationTokenContainer.children.length) {
+            // locationTokenContainer.destroy({ children: true });
+                // locationTokenContainer = new Container();
+        // locationTokenContainer.anchor = 0;
+        // locationTokenContainer.width = spritesContainer.width;
+        // locationTokenContainer.height = spritesContainer.height;
+        //  locationTokenContainer.width = viewport.worldWidth;
+        // locationTokenContainer.height = viewport.worldHeight;
+        viewport.addChild(locationTokenContainer);
+        viewport.setChildIndex(locationTokenContainer, viewport.children.length - 1);
+    // } else {
+    //     locationTokenContainer.removeChildren();
+    // }
     
     console.log("localMarkers found " + localMarkers.length + " viewport is " + viewport.worldWidth + " " + viewport.worldHeight);
     for (let i = 0; i < localMarkers.length; i++) {
@@ -120,8 +121,8 @@ export function LoadLocations(app, viewport) {
         } 
         token.x = xpos;
         token.y = ypos;
-        tokenContainer.addChild(token);
-        // tokenContainer.setChildIndex(token, tokenContainer.children.length -1);
+        locationTokenContainer.addChild(token);
+        // locationTokenContainer.setChildIndex(token, locationTokenContainer.children.length -1);
         token.onPress.connect((event) => {
             console.log(token.x + " " + token.y + " pressed loaded token " + JSON.stringify(token.data));
             
@@ -229,8 +230,8 @@ export function LoadLocations(app, viewport) {
         } 
         token.x = xpos;
         token.y = ypos;
-        tokenContainer.addChild(token);
-        // tokenContainer.setChildIndex(token, tokenContainer.children.length -1);
+        locationTokenContainer.addChild(token);
+        // locationTokenContainer.setChildIndex(token, locationTokenContainer.children.length -1);
         token.onPress.connect((event) => {
             console.log(token.x + " " + token.y + " pressed loaded cloud token " + JSON.stringify(token.data));
             
@@ -253,33 +254,33 @@ export function LoadLocations(app, viewport) {
 
 
     viewport.bounce(); //better to add this after locations loaded..?
-    // console.log(tokenContainer.children);
+    // console.log(locationTokenContainer.children);
 
  }
 
 
- export function AddLocation(app, viewport) {
+ export function AddLocation(app, viewport, spritesContainer) {
     console.log("tryna load localMarkers..");
     // const localMarkers = document.querySelectorAll('.local_marker');
     
-    // if (!tokenContainer) {
-    //         // tokenContainer.destroy({ children: true });
-    //             tokenContainer = new Container();
-    //     tokenContainer.anchor = 0;
-    //     // tokenContainer.width = viewport.width;
-    //     // tokenContainer.height = viewport.height;
-    //     viewport.addChild(tokenContainer);
-    //     viewport.setChildIndex(tokenContainer, viewport.children.length - 1);
+    // if (!locationTokenContainer) {
+    //         // locationTokenContainer.destroy({ children: true });
+    //             locationTokenContainer = new Container();
+    //     locationTokenContainer.anchor = 0;
+    //     // locationTokenContainer.width = viewport.width;
+    //     // locationTokenContainer.height = viewport.height;
+    //     viewport.addChild(locationTokenContainer);
+    //     viewport.setChildIndex(locationTokenContainer, viewport.children.length - 1);
     // } else {
-    //     tokenContainer.removeChildren();
+    //     locationTokenContainer.removeChildren();
     // }
     
-    // tokenContainer = new Container();
-    // // tokenContainer.anchor = .5;
-    // // tokenContainer.width = viewport.width;
-    // // tokenContainer.height = viewport.height;
-    // viewport.addChild(tokenContainer);
-    // viewport.setChildIndex(tokenContainer, viewport.children.length - 1);
+    // locationTokenContainer = new Container();
+    // // locationTokenContainer.anchor = .5;
+    // // locationTokenContainer.width = viewport.width;
+    // // locationTokenContainer.height = viewport.height;
+    // viewport.addChild(locationTokenContainer);
+    // viewport.setChildIndex(locationTokenContainer, viewport.children.length - 1);
     
     // console.log("localMarkers found " + localMarkers.length + " viewport is " + viewport.worldWidth + " " + viewport.worldHeight);
     // // for (let i = 0; i < localMarkers.length; i++) {
@@ -379,13 +380,13 @@ export function LoadLocations(app, viewport) {
 
     token.x = xpos;
     token.y = ypos;
-    tokenContainer.addChild(token);
-    // tokenContainer.setChildIndex(token, tokenContainer.children.length -1);
+    locationTokenContainer.addChild(token);
+    // locationTokenContainer.setChildIndex(token, locationTokenContainer.children.length -1);
     token.onPress.connect((event) => {
         console.log("pressed new token " + JSON.stringify(token.data));
         }
     );
     // }
-    // console.log(tokenContainer.children);
+    // console.log(locationTokenContainer.children);
 
  }
