@@ -38,7 +38,7 @@ export let font2 = 'Acme';
 export let font3 = 'Acme';
 
 
-const spritesContainer = new Container();
+let spritesContainer = new Container();
 const spriteLayer = new RenderLayer();
 const uicontainer = new Container( {layout: {
             width: '80%',
@@ -169,7 +169,7 @@ async function prePreLoader () {
 
       console.log("no profile yet...");
       if (count > 3){
-        LoadLocations(app, viewport);
+        LoadLocations(app, viewport, spritesContainer);
         clearInterval(interval);
       }
     }
@@ -293,7 +293,7 @@ export function playerProfileLoaded (playerProfile) {
   addPlayerProfileText(app, playerProfile, uicontainer);
   // LoadLocations(app, viewport, spritesContainer);
         setTimeout(() => {
-            LoadLocations(app, viewport); //give it a shake...
+            LoadLocations(app, viewport, spritesContainer); //give it a shake...
         }, 1000);
   
 }
@@ -386,7 +386,7 @@ export async function GoWithIt() { //called from vtt.js
         
 
         // SetSelectedPosition('', worldPos.x.toFixed(2) / pixelsPerMeterActual , worldPos.y.toFixed(2) / pixelsPerMeterActual);
-        SetSelectedPosition('', worldPos.x.toFixed(2) , worldPos.y.toFixed(2));
+        // SetSelectedPosition('', worldPos.x.toFixed(2) , worldPos.y.toFixed(2));
         if (keydown == "X") {
           CreateNewLocation();
           AddLocation(app, viewport, spritesContainer);

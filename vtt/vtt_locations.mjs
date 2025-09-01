@@ -22,8 +22,8 @@ export function LoadLocations(app, viewport, spritesContainer) {
         // locationTokenContainer.height = spritesContainer.height;
         //  locationTokenContainer.width = viewport.worldWidth;
         // locationTokenContainer.height = viewport.worldHeight;
-        viewport.addChild(locationTokenContainer);
-        viewport.setChildIndex(locationTokenContainer, viewport.children.length - 1);
+        spritesContainer.addChild(locationTokenContainer);
+        // spritesContainer.setChildIndex(locationTokenContainer, viewport.children.length - 1);
     // } else {
     //     locationTokenContainer.removeChildren();
     // }
@@ -109,16 +109,16 @@ export function LoadLocations(app, viewport, spritesContainer) {
         // token.position.set(worldPos.x,worldPos.y);
         // token.x = worldPos.x;
         // token.y = worldPos.y;
-         if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-            xpos = xpos * 2;
-        } else {
-            xpos = xpos * -1;
-        }
-        if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-            ypos = ypos * 2;
-        } else {
-            ypos = ypos * -1;
-        } 
+            // if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+            //     xpos = xpos * 2;
+            // } else {
+            //     xpos = xpos * -1;
+            // }
+            // if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+            //     ypos = ypos * 2;
+            // } else {
+            //     ypos = ypos * -1;
+            // } 
         token.x = xpos;
         token.y = ypos;
         locationTokenContainer.addChild(token);
@@ -218,16 +218,16 @@ export function LoadLocations(app, viewport, spritesContainer) {
         });
         token.data = elData;
 
-        if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-            xpos = xpos * 2;
-        } else {
-            xpos = xpos * -1;
-        }
-        if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-            ypos = ypos * 2;
-        } else {
-            ypos = ypos * -1;
-        } 
+        // if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+        //     xpos = xpos * 2;
+        // } else {
+        //     xpos = xpos * -1;
+        // }
+        // if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+        //     ypos = ypos * 2;
+        // } else {
+        //     ypos = ypos * -1;
+        // } 
         token.x = xpos;
         token.y = ypos;
         locationTokenContainer.addChild(token);
@@ -367,16 +367,16 @@ export function LoadLocations(app, viewport, spritesContainer) {
         console.log("setting token position w/ viewport position " + viewport.x + " " + viewport.x  + " scale " + viewport.scale.x + " " + viewport.scale.y  + " position " + xpos + "  " + ypos)/// + " " + worldPos.x + " " + worldPos.y);
     // token.position.set(worldPos.x,worldPos.y);
 
-    if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-        xpos = xpos * 2;
-    } else {
-        xpos = xpos * -1;
-    }
-    if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-        ypos = ypos * 2;
-    } else {
-        ypos = ypos * -1;
-    } 
+        // if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+        //     xpos = xpos * 2;
+        // } else {
+        //     xpos = xpos * -1;
+        // }
+        // if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
+        //     ypos = ypos * 2;
+        // } else {
+        //     ypos = ypos * -1;
+        // } 
 
     token.x = xpos;
     token.y = ypos;
