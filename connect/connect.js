@@ -1681,6 +1681,11 @@ export function CreateLocationAlt (filename, type, position) { //for not-aframe 
 
 export function CreateLocation (filename, type, position) { //AFRAME New Location button, also addToScene button for localfiles
    console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
+
+   if (settings.hasBgMap) {
+      console.log("NOPE, when there's a bg map do this in VTT mode for now!");
+      return;
+   }
    let timestamp = null;
    let markertype = "placeholder";
    
