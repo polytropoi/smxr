@@ -360,8 +360,8 @@ AFRAME.registerComponent('initializer', { //when aframe isLoaded, adjust for dev
 
               const modWidth = texture.image.width / pixelsPerMeterActual; //hrm, this should be pixelsPerMeterActual
               const modHeight = texture.image.height / pixelsPerMeterActual;
-              settings.mapWidth = modWidth;
-              settings.mapHeight = modHeight;
+              settings.mapWidth = texture.image.width;
+              settings.mapHeight = texture.image.height;
               // settings.pixelsPerMeterActual = ; 
               // texture.minFilter = THREE.LinearFilter;
               // texture.magFilter = THREE.LinearFilter;

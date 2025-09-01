@@ -67,7 +67,7 @@ export function InitIDB() {
 
                 // start location loop
                let mapScale = 1;
-               console.log(settings.sceneType + " hasBgMap settings in indexedDB " + settings.hasBgMap + " ppm " + pixelsPerMeterActual);
+               console.log(settings.sceneType + " hasBgMap settings in indexedDB " + settings.hasBgMap + " ppm " + pixelsPerMeterActual + " width " + settings.mapWidth + " height " + settings.mapHeight);
                if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) {
                   // if (cursor.value.sceneTags.includes("map")) {
                   mapScale = mapScale / pixelsPerMeterActual; //divide by pixelsPerMeterActual, e.g 10 = .1
@@ -75,12 +75,25 @@ export function InitIDB() {
                if (cursor.value.locations) {
                   for (let i = 0; i < cursor.value.locations.length; i++) { //mod or create the scene elements
                      // let loc = JSON.stringify(cursor.value.locations[i]);
-                     console.log("cursor " + i + " of " + cursor.value.locations.length);
+                     console.log("cursor " + i + " of " + cursor.value.locations.length + " x " + cursor.value.locations[i].x + " y " + cursor.value.locations[i].y);
                      locationTimestamps.push(cursor.value.locations[i].timestamp.toString()); //hrm, for ref
-                     cursor.value.locations[i].x = cursor.value.locations[i].x * mapScale;
-                     cursor.value.locations[i].y = cursor.value.locations[i].y * mapScale;
-                     cursor.value.locations[i].z = cursor.value.locations[i].z * mapScale;
+                     if (settings.hasBgMap && settings.mapWidth && settings.mapHeight) {
+                        if (cursor.value.locations[i].x < settings.mapWidth / 2) {
+                           cursor.value.locations[i].x = (((settings.mapWidth / 2) - cursor.value.locations[i].x) * mapScale) * -1; //?!?!?!
+                        } else {
+                           cursor.value.locations[i].x = (settings.mapWidth - cursor.value.locations[i].x) * mapScale;
+                        }
+                        // leave the y value as is, use for sorting in 2d mode
+                        if (cursor.value.locations[i].z < settings.mapHeight / 2) {
+                           cursor.value.locations[i].z = (((settings.mapHeight / 2) - cursor.value.locations[i].z) * mapScale) * -1;
+                        } else {
+                           cursor.value.locations[i].x = (settings.mapWidth - cursor.value.locations[i].x) * mapScale;
+                        }
+                        console.log("modded cursor " + i + " of " + cursor.value.locations.length + " x " + cursor.value.locations[i].x + " y " + cursor.value.locations[i].y);
+                     }
+
                      localData.locations.push(cursor.value.locations[i]);
+                     
                      if (cursor.value.locations[i].markerType == "player") {
                         playerPosMods.push(cursor.value.locations[i].x + " " + cursor.value.locations[i].y + " " + cursor.value.locations[i].z);
                         console.log("PLayerPosMods :" + JSON.stringify(playerPosMods));

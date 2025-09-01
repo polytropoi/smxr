@@ -336,7 +336,7 @@ export async function GoWithIt() { //called from vtt.js
       viewport.y = 0;
       // viewport.y = -app.screen.height/2;
       // viewport.anchor = .5;
-      viewport.setZoom(1.1);
+      viewport.setZoom(1.2);
       // viewport.moveToCenter
     }
     // viewport.x = 0;

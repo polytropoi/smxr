@@ -313,7 +313,7 @@ webxr_router.get('/:_id', function (req, res) {
     let triggerOggUrl = "";
     let triggerMp3Url = "";
     let hasTriggerAudio = true;
-    let hasBgMap = true;
+    let hasBgMap = false;
     let mapWidth = 0;
     let mapHeight = 0;
     let wasd = "";
@@ -1630,11 +1630,12 @@ webxr_router.get('/:_id', function (req, res) {
             if (locationPlaceholders.length > 0) {
                 for (let i = 0; i < locationPlaceholders.length; i++) {
                     if (hasBgMap) {
-                        locationPlaceholders[i].x = locationPlaceholders[i].x/10
+                        console.log("gotsa background map!");
+                        // locationPlaceholders[i].x = locationPlaceholders[i].x/10
 
-                        locationPlaceholders[i].y = locationPlaceholders[i].y/10
+                        // locationPlaceholders[i].y = locationPlaceholders[i].y/10
 
-                        locationPlaceholders[i].z = locationPlaceholders[i].z/10
+                        // locationPlaceholders[i].z = locationPlaceholders[i].z/10
                         // const centerX = 1682 / 2;
                         // const centerY = 1237 / 2;
                         // if (xpos < centerX) {
@@ -3242,7 +3243,7 @@ webxr_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
                         sceneGreeting = sceneResponse.sceneGreeting;
                     }      
-                    let sceneQuest = "No quests for this scene... yet!";
+                    let sceneQuest = "";
                     if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
                         sceneQuest = sceneResponse.sceneQuest;
                     }
@@ -3405,7 +3406,7 @@ webxr_router.get('/:_id', function (req, res) {
                         if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
                             sceneGreeting = sceneResponse.sceneGreeting;
                         }      
-                        let sceneQuest = "No quests for this scene... yet!";
+                        let sceneQuest = "";
                         if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
                             sceneQuest = sceneResponse.sceneQuest;
                         }
@@ -3560,7 +3561,7 @@ webxr_router.get('/:_id', function (req, res) {
                         if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
                             sceneGreeting = sceneResponse.sceneGreeting;
                         }      
-                        let sceneQuest = "No quests for this scene... yet!";
+                        let sceneQuest = "";
                          if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
                              sceneQuest = sceneResponse.sceneQuest;
                          }

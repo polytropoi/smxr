@@ -3215,7 +3215,7 @@ vtt_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
                         sceneGreeting = sceneResponse.sceneGreeting;
                     }      
-                    let sceneQuest = "No quests for this scene... yet!";
+                    let sceneQuest = "";
                     if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
                         sceneQuest = sceneResponse.sceneQuest;
                     }
