@@ -1683,7 +1683,7 @@ export function CreateLocation (filename, type, position) { //AFRAME New Locatio
    console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
 
    if (settings.hasBgMap) {
-      console.log("NOPE, when there's a bg map do this in VTT mode for now!");
+      console.log("NOPE, when there's a bg map do this only in VTT mode for now!");
       return;
    }
    let timestamp = null;

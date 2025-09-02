@@ -1645,7 +1645,7 @@ webxr_router.get('/:_id', function (req, res) {
                     if (hasBgMap) {
                         console.log("!!!!!!!! gotsa background map!!!!!!!!!! modding locationData... " + mapWidth);
                          if (locationPlaceholders[i].x < mapWidth / 2) {
-                            locationPlaceholders[i].x = (((mapWidth / 2) - locationPlaceholders[i].x) * mapScale) * -1; //?!?!?!
+                            locationPlaceholders[i].x = (((mapWidth / 2) - locationPlaceholders[i].x) * mapScale) * -1; 
                         } else {
                             locationPlaceholders[i].x = (mapWidth - locationPlaceholders[i].x) * mapScale;
                         }
@@ -1655,28 +1655,6 @@ webxr_router.get('/:_id', function (req, res) {
                         } else {
                             locationPlaceholders[i].x = (mapWidth - locationPlaceholders[i].x) * mapScale;
                         }
-                        // locationPlaceholders[i].x = locationPlaceholders[i].x/10
-
-                        // locationPlaceholders[i].y = locationPlaceholders[i].y/10
-
-                        // locationPlaceholders[i].z = locationPlaceholders[i].z/10
-                        // const centerX = 1682 / 2;
-                        // const centerY = 1237 / 2;
-                        // if (xpos < centerX) {
-                        //     xpos = (xpos / 2) * -1;
-                        // } else {
-                        //     xpos = (xpos / 2);
-                        // }
-                        // if (ypos < centerY) {
-                        //     ypos = (ypos / 2) * -1;
-                        // } else {
-                        //     ypos = (ypos / 2)
-                        // }
-
-                        // xpos = xpos/10; //or pixelsPerMeterActual
-                        // ypos = ypos/10;
-                        // zpos = zpos/10;
-                        
                     }
                     //use the "cloud_marker" component for certain markertypes () TODO rename it to mod_location // nope
                     let scale = 1;
