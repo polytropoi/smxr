@@ -1647,13 +1647,14 @@ webxr_router.get('/:_id', function (req, res) {
                          if (locationPlaceholders[i].x < mapWidth / 2) {
                             locationPlaceholders[i].x = (((mapWidth / 2) - locationPlaceholders[i].x) * mapScale) * -1; 
                         } else {
-                            locationPlaceholders[i].x = (mapWidth - locationPlaceholders[i].x) * mapScale;
+                            // locationPlaceholders[i].x = (mapWidth - locationPlaceholders[i].x) * mapScale;
+                            locationPlaceholders[i].x = (locationPlaceholders[i].x - (mapWidth / 2)) * mapScale;
                         }
                         // leave the y value as is, use for sorting in 2d mode
                         if (locationPlaceholders[i].z < mapHeight / 2) {
                             locationPlaceholders[i].z = (((mapHeight / 2) - locationPlaceholders[i].z) * mapScale) * -1;
                         } else {
-                            locationPlaceholders[i].z = (mapWidth - locationPlaceholders[i].z) * mapScale;
+                            locationPlaceholders[i].z = (locationPlaceholders[i].z - (mapHeight / 2)) * mapScale;
                         }
                     }
                     //use the "cloud_marker" component for certain markertypes () TODO rename it to mod_location // nope
