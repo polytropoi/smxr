@@ -830,7 +830,7 @@ background-color: #000000;
         
         margin-top: 60px;
         margin-right: auto;
-        margin-bottom: 330px;
+        margin-bottom: 100px;
         margin-left: auto;
          /* auto 300px auto; */
         padding-right: 30px;
@@ -842,7 +842,7 @@ background-color: #000000;
         border-width: 4px;
         width: 70%; /* Could be more or less, depending on screen size */
         /* height: 75%; */
-        height: 65vh;
+        height: 85vh;
         overflow-y: auto;
         /* font-family: Trebuchet MS, Helvetica, sans-serif; */
         font-family: Source Sans Pro, Helvetica Neue, Helvetica, Arial, sans-serif;

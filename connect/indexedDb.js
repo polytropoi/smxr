@@ -81,13 +81,14 @@ export function InitIDB() {
                         if (cursor.value.locations[i].x < settings.mapWidth / 2) {
                            cursor.value.locations[i].x = (((settings.mapWidth / 2) - cursor.value.locations[i].x) * mapScale) * -1; //?!?!?!
                         } else {
-                           cursor.value.locations[i].x = (settings.mapWidth - cursor.value.locations[i].x) * mapScale;
+                           cursor.value.locations[i].x = (cursor.value.locations[i].x - (mapWidth / 2)) * mapScale;
+                           // locationPlaceholders[i].x = (locationPlaceholders[i].x - (mapWidth / 2)) * mapScale;
                         }
                         // leave the y value as is, use for sorting in 2d mode
                         if (cursor.value.locations[i].z < settings.mapHeight / 2) {
                            cursor.value.locations[i].z = (((settings.mapHeight / 2) - cursor.value.locations[i].z) * mapScale) * -1;
                         } else {
-                           cursor.value.locations[i].z = (settings.mapWidth - cursor.value.locations[i].z) * mapScale;
+                           cursor.value.locations[i].z = (cursor.value.locations[i].z - (maxHeight / 2)) * mapScale;
                         }
                         console.log("modded cursor " + i + " of " + cursor.value.locations.length + " x " + cursor.value.locations[i].x + " z " + cursor.value.locations[i].z);
                      }
