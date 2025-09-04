@@ -10,65 +10,46 @@ import { app, viewport } from './vtt_main.mjs';
   let dragTarget = null;
 //   let viewport;
    function onDragMove(event) {
- 
+    console.log("tryna dragmove.." + dragTarget.data.name + " child of " + dragTarget.parent);
     if (dragTarget) {
-      console.log("tryna dragmove..");
-      dragTarget.parent.toLocal(event.global, null, dragTarget.position);
+      
+      locationTokenContainer.toLocal(event.global, null, dragTarget.position);
     }
   }
 
-   function onDragStart(target) {
-    console.log("dragstart!");
-    // Store a reference to the data
-    // * The reason for this is because of multitouch *
-    // * We want to track the movement of this particular touch *
-    // this.alpha = 0.5;
-// viewport.pausePlugin('drag')
-    // if (viewport) {
-        // viewport.plugins.pause("drag");
-    // }
-
-    dragTarget = target;
-    app.stage.on('pointermove', onDragMove);
+   function onDragStart(event) {
+    console.log("token dragstart! " + dragTarget.data.name);   
+    dragTarget.alpha = 0.5;
+    locationTokenContainer.on('pointermove', onDragMove);
   }
 
    function onDragEnd() {
+   
     if (dragTarget) {
-      app.stage.off('pointermove', onDragMove);
+         console.log("dragend " + dragTarget.data + " x " + dragTarget.x + " y " + dragTarget.y );
+      locationTokenContainer.off('pointermove', onDragMove);
       dragTarget.alpha = 1;
       dragTarget = null;
-      if (viewport) {
-        // viewport.plugins.resume("drag");
-      }
-     
+    //   console.log(dragTarget.data.name )
     }
   }
 
     let locationTokenContainer = new Container();
+    locationTokenContainer.interactive = true;
+    locationTokenContainer.on('pointerup', onDragEnd);
+    locationTokenContainer.on('pointerupoutside', onDragEnd);
+
 
 export function LoadLocations(app, viewport, spritesContainer) {
     console.log("tryna load localMarkers..");
     const localMarkers = document.querySelectorAll('.local_marker');
     const cloudMarkers = document.querySelectorAll('.cloud_marker');
-
-    // if (!locationTokenContainer.children.length) {
-            // locationTokenContainer.destroy({ children: true });
-                // locationTokenContainer = new Container();
-        // locationTokenContainer.anchor = 0;
-        // locationTokenContainer.width = spritesContainer.width;
-        // locationTokenContainer.height = spritesContainer.height;
-        //  locationTokenContainer.width = viewport.worldWidth;
-        // locationTokenContainer.height = viewport.worldHeight;
-        spritesContainer.addChild(locationTokenContainer);
-        // spritesContainer.setChildIndex(locationTokenContainer, viewport.children.length - 1);
-    // } else {
-    //     locationTokenContainer.removeChildren();
-    // }
+    spritesContainer.addChild(locationTokenContainer);
     
     // console.log("localMarkers found " + localMarkers.length + " viewport is " + viewport.worldWidth + " " + viewport.worldHeight);
     for (let i = 0; i < localMarkers.length; i++) {
         console.log("localMarker " + localMarkers[i].id + " data " + localMarkers[i].dataset.eldata);
-        const elData = JSON.parse(localMarkers[i].dataset.eldata);
+        const elData = JSON.parse(localMarkers[i].dataset.eldata); //this one is not b64 encoded
          const scaleFactor = .6;
             const width = 100 * scaleFactor;
             const height = 50 * scaleFactor;
@@ -139,58 +120,47 @@ export function LoadLocations(app, viewport, spritesContainer) {
             }
         });
         token.data = elData;
-        // const globalPos = {x: xpos, y: ypos} ;
-        // const worldPos = viewport.toWorld(globalPos);
-        // // console.log(viewport.x + " " + viewport.scale.x + " " + viewport.scale.y  + " scale tryna set token position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
-        // console.log("setting token position w/ viewport position " + viewport.x + " " + viewport.x  + " scale " + viewport.scale.x + " " + viewport.scale.y  + " position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
-        // token.position.set(worldPos.x,worldPos.y);
-        // token.x = worldPos.x;
-        // token.y = worldPos.y;
-            // if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-            //     xpos = xpos * 2;
-            // } else {
-            //     xpos = xpos * -1;
-            // }
-            // if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-            //     ypos = ypos * 2;
-            // } else {
-            //     ypos = ypos * -1;
-            // } 
+         console.log("localMarker " + localMarkers[i].id + " data " + JSON.stringify(token.data));
         token.x = xpos;
         token.y = ypos;
         locationTokenContainer.addChild(token);
         // locationTokenContainer.setChildIndex(token, locationTokenContainer.children.length -1);
-        token.onPress.connect((event) => {
-            console.log(token.x + " " + token.y + " pressed loaded token " + JSON.stringify(token.data));
+        token.on('pointerdown', (event) => {
             
-            viewport.animate({
-                position: { x: token.x, y: token.y }, // Target center position
-                scale: 1.5, // Target zoom level
-                time: 1000, // Animation duration of 1 second
-                ease: 'easeInOutQuad', // Using a common easing function
-                callbackOnComplete: () => {
-                    // console.log("Animation completed!");
-                }
-            });
 
             if (keydown == "Shift") {
+                console.log("localmarker shift + onPress");
                 SetSelectedLocationTimestamp(elData.timestamp);
                 SceneManglerModal('Location');
             } else if (keydown == "T") {
                 // viewport.plugins.pause("drag");
+                console.log("localmarker shift + onPress");
                 SetSelectedLocationTimestamp(elData.timestamp);
                 // SceneManglerModal('Location');
-                onDragStart(token);
+                dragTarget = token;
+                onDragStart();
+            } else {
+                console.log("localmarker onPress" + token.x + " " + token.y + " pressed loaded token " + JSON.stringify(token.data));
+                    
+                viewport.animate({
+                    position: { x: token.x, y: token.y }, // Target center position
+                    scale: 1.5, // Target zoom level
+                    time: 1000, // Animation duration of 1 second
+                    ease: 'easeInOutQuad', // Using a common easing function
+                    callbackOnComplete: () => {
+                        // console.log("Animation completed!");
+                    }
+                });
             }
         });
           token.on('pointerup', onDragEnd);
             token.on('pointerupoutside', onDragEnd);
     }
-
+        ///////////////same but different for cloudmarkers
     for (let i = 0; i < cloudMarkers.length; i++) {
 
         const elData = JSON.parse(atob(cloudMarkers[i].dataset.eldata));
-                console.log("cloudMarker " + cloudMarkers[i].id + " data " + JSON.stringify(elData));
+                // console.log("cloudMarker " + cloudMarkers[i].id + " data " + JSON.stringify(elData));
          const scaleFactor = .6;
             const width = 100 * scaleFactor;
             const height = 50 * scaleFactor;
@@ -276,29 +246,35 @@ export function LoadLocations(app, viewport, spritesContainer) {
         token.y = ypos;
         locationTokenContainer.addChild(token);
         // locationTokenContainer.setChildIndex(token, locationTokenContainer.children.length -1);
-        token.onPress.connect((event) => {
-            console.log(token.x + " " + token.y + " pressed loaded cloud token " + JSON.stringify(token.data));
-            
-            viewport.animate({
-                position: { x: token.x, y: token.y }, // Target center position
-                scale: 1.5, // Target zoom level
-                time: 1000, // Animation duration of 1 second
-                ease: 'easeInOutQuad', // Using a common easing function
-                callbackOnComplete: () => {
-                    // console.log("Animation completed!");
-                }
-            });
+        // token.onPress.connect((event) => {      
+        token.on('pointerdown', (event) => {
+            console.log("keydown is " + keydown);
 
             if (keydown == "Shift") {
+                console.log("SHift key + token pointerdown");
                 SetSelectedLocationTimestamp(elData.timestamp);
                 SceneManglerModal('Location');
             } else if (keydown == "T") {
                 SetSelectedLocationTimestamp(elData.timestamp);
                 // SceneManglerModal('Location');
-                // console.log(" pointerdown at " + animatedSprite.position.x + " " + animatedSprite.position.y);
-                onDragStart(token);
+                console.log("T key + pointerdown at " + token.x + " " + token.y);
+                dragTarget = token;
+                onDragStart();
 
-            }
+            } else {
+                    console.log(token.x + " " + token.y + " pressed loaded cloud token " + JSON.stringify(token.data));
+                
+                    viewport.animate({
+                        position: { x: token.x, y: token.y }, // Target center position
+                        scale: 1.5, // Target zoom level
+                        time: 1000, // Animation duration of 1 second
+                        ease: 'easeInOutQuad', // Using a common easing function
+                        callbackOnComplete: () => {
+                            // console.log("Animation completed!");
+                        }
+                    });
+                }
+            
         });
 
     }
