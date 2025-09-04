@@ -3,9 +3,46 @@ import { Assets, Graphics, Container, Text } from 'pixi';
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 import { selectedPosition } from '../connect/events.js';
 import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../connect/dialogs.js';
-import { pixelsPerMeter } from './vtt_main.mjs';
 
+// import { dragTarget, onDragStart, onDragMove, onDragEnd } from './addElements.mjs';
+import { app, viewport } from './vtt_main.mjs';
 
+  let dragTarget = null;
+//   let viewport;
+   function onDragMove(event) {
+ 
+    if (dragTarget) {
+      console.log("tryna dragmove..");
+      dragTarget.parent.toLocal(event.global, null, dragTarget.position);
+    }
+  }
+
+   function onDragStart(target) {
+    console.log("dragstart!");
+    // Store a reference to the data
+    // * The reason for this is because of multitouch *
+    // * We want to track the movement of this particular touch *
+    // this.alpha = 0.5;
+// viewport.pausePlugin('drag')
+    // if (viewport) {
+        // viewport.plugins.pause("drag");
+    // }
+
+    dragTarget = target;
+    app.stage.on('pointermove', onDragMove);
+  }
+
+   function onDragEnd() {
+    if (dragTarget) {
+      app.stage.off('pointermove', onDragMove);
+      dragTarget.alpha = 1;
+      dragTarget = null;
+      if (viewport) {
+        // viewport.plugins.resume("drag");
+      }
+     
+    }
+  }
 
     let locationTokenContainer = new Container();
 
@@ -28,7 +65,7 @@ export function LoadLocations(app, viewport, spritesContainer) {
     //     locationTokenContainer.removeChildren();
     // }
     
-    console.log("localMarkers found " + localMarkers.length + " viewport is " + viewport.worldWidth + " " + viewport.worldHeight);
+    // console.log("localMarkers found " + localMarkers.length + " viewport is " + viewport.worldWidth + " " + viewport.worldHeight);
     for (let i = 0; i < localMarkers.length; i++) {
         console.log("localMarker " + localMarkers[i].id + " data " + localMarkers[i].dataset.eldata);
         const elData = JSON.parse(localMarkers[i].dataset.eldata);
@@ -139,8 +176,15 @@ export function LoadLocations(app, viewport, spritesContainer) {
             if (keydown == "Shift") {
                 SetSelectedLocationTimestamp(elData.timestamp);
                 SceneManglerModal('Location');
+            } else if (keydown == "T") {
+                // viewport.plugins.pause("drag");
+                SetSelectedLocationTimestamp(elData.timestamp);
+                // SceneManglerModal('Location');
+                onDragStart(token);
             }
         });
+          token.on('pointerup', onDragEnd);
+            token.on('pointerupoutside', onDragEnd);
     }
 
     for (let i = 0; i < cloudMarkers.length; i++) {
@@ -248,8 +292,15 @@ export function LoadLocations(app, viewport, spritesContainer) {
             if (keydown == "Shift") {
                 SetSelectedLocationTimestamp(elData.timestamp);
                 SceneManglerModal('Location');
+            } else if (keydown == "T") {
+                SetSelectedLocationTimestamp(elData.timestamp);
+                // SceneManglerModal('Location');
+                // console.log(" pointerdown at " + animatedSprite.position.x + " " + animatedSprite.position.y);
+                onDragStart(token);
+
             }
         });
+
     }
 
 

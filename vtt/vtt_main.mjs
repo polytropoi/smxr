@@ -27,7 +27,7 @@ export let sceneTags;
 
 export let pixelsPerMeter = 1;
 
-let viewport;
+export let viewport;
 export let viewportVerticalCenter = 2; //i.e. /2 = center
 export let viewportHorizontalCenter = 2; //i.e. /2 = center
 export let fontFillColor = 'white';
@@ -38,7 +38,7 @@ export let font2 = 'Acme';
 export let font3 = 'Acme';
 
 
-let spritesContainer = new Container();
+export let spritesContainer = new Container();
 const spriteLayer = new RenderLayer();
 const uicontainer = new Container( {layout: {
             width: '80%',
@@ -347,7 +347,7 @@ export async function GoWithIt() { //called from vtt.js
     app.stage.addChild(viewport);
     // activate plugins
     viewport
-        .drag()
+        .drag({'mouseButtons': 'middle-right'})
         .pinch()
         .wheel()
         .clampZoom({'minScale': .1, 'maxScale': 10})
@@ -361,37 +361,51 @@ export async function GoWithIt() { //called from vtt.js
     viewport.addEventListener("drag-end", onDragEnd);
 
     viewport.addEventListener("zoomed-end", onZoomedEnd);
+    // viewport.on('pointerdown', (event) => {
+    //     // if (keydown == "T") {
+    //     //   // viewport.plugins.resume.
+    //     //   console.log("pausing vp drag...");
+    //     //   viewport.plugins.pause('drag');
+    //     // } else {
+    //     //   console.log("resuming vp drag");
+    //     //   viewport.plugins.resume('drag');
+    //     // }
+    // });
 
-    viewport.on('pointerup', (event) => { //main picker for maps
-    // ... handle the event
-      const globalPos = event.data.global; // { x: ..., y: ... }
-        // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
-      const worldPos = viewport.toLocal(globalPos);
+    // viewport.on('pointerup', (event) => { //main picker for maps
+    // // ... handle the event
+    //   // const globalPos = event.data.global; // { x: ..., y: ... }
+    //   //   // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+    //   // const worldPos = viewport.toLocal(globalPos);
 
 
-        console.log(viewport.width + " x " + viewport.height + " viewport click on " + viewport.scale.x + " " + viewport.x + " " + viewport.y + " keydown " + keydown + " pointer " + event.x + " " + event.y + " screen " + event.screenX + " " + event.screenY + 
-          " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
+    //   // // console.log(viewport.width + " x " + viewport.height + " viewport click on " + viewport.scale.x + " " + viewport.x + " " + viewport.y + " keydown " + keydown + " pointer " + event.x + " " + event.y + " screen " + event.screenX + " " + event.screenY + 
+    //   // //   " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
 
-        if (worldPos.x > viewport.width / 2) { //modify coords to match 3D, with zero in the center instead of top left corner
-          worldPos.x = worldPos.x / 2;
-        } else {
-          worldPos.x = worldPos.x * -1;
-        }
-        
-        if (worldPos.y > viewport.height / 2) { //modify coords to match 3D, with zero in the center instead of top left corner
-          worldPos.y = worldPos.y / 2;
-        } else {
-          worldPos.y = worldPos.y * -1;
-        }
-        
+    //   // if (worldPos.x > viewport.width / 2) { //modify coords to match 3D, with zero in the center instead of top left corner
+    //   //   worldPos.x = worldPos.x / 2;
+    //   // } else {
+    //   //   worldPos.x = worldPos.x * -1;
+    //   // }
+      
+    //   // if (worldPos.y > viewport.height / 2) { //modify coords to match 3D, with zero in the center instead of top left corner
+    //   //   worldPos.y = worldPos.y / 2;
+    //   // } else {
+    //   //   worldPos.y = worldPos.y * -1;
+    //   // }
+    //   // if (keydown != "T") {
+    //   //   // viewport.plugins.resume.
+    //   //   viewport.plugins.resume("drag");
+    //   // }
 
-        // SetSelectedPosition('', worldPos.x.toFixed(2) / pixelsPerMeterActual , worldPos.y.toFixed(2) / pixelsPerMeterActual);
-        // SetSelectedPosition('', worldPos.x.toFixed(2) , worldPos.y.toFixed(2));
-        if (keydown == "X") {
-          CreateNewLocation();
-          AddLocation(app, viewport, spritesContainer);
-        }
-    });
+    //   // SetSelectedPosition('', worldPos.x.toFixed(2) / pixelsPerMeterActual , worldPos.y.toFixed(2) / pixelsPerMeterActual);
+    //   // SetSelectedPosition('', worldPos.x.toFixed(2) , worldPos.y.toFixed(2));
+    //   // if (keydown == "X") {
+    //   //   CreateNewLocation();
+    //   //   AddLocation(app, viewport, spritesContainer);
+    //   // }
+
+    // });
 
     
 

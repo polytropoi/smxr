@@ -4,6 +4,7 @@ import { Application, Assets, Point, AnimatedSprite, Container, Sprite, Spritesh
 import { AdvancedBloomFilter, ReflectionFilter } from '@pixi/filters';
 import { PlayTriggerWithTag } from '../connect/media.js';
 import { mapsize } from './addBackground.mjs';
+import { app, viewport } from './vtt_main.mjs';
 
   const allBlendModes = [
     'normal',
@@ -112,10 +113,12 @@ import { mapsize } from './addBackground.mjs';
 //   });
 // }
 
+
 export async function addAnimatedSprite (app, texture, spriteData, count, elements, viewport, spritesContainer) {
 
 // const sprite = 'sprites1';
     // let asset = sprites.
+    viewport = viewport;
   console.log("spritesData " + JSON.stringify(spriteData));
   if (app.screen.width > app.screen.height) {
       spritesContainer.width = app.screen.width - (app.screen.width * .1);
@@ -135,42 +138,7 @@ export async function addAnimatedSprite (app, texture, spriteData, count, elemen
   app.stage.hitArea = app.screen;
   app.stage.on('pointerup', onDragEnd);
   app.stage.on('pointerupoutside', onDragEnd);
-  let dragTarget = null;
-
-  function onDragMove(event) {
- 
-    if (dragTarget) {
-      console.log("tryna dragmove..");
-      dragTarget.parent.toLocal(event.global, null, dragTarget.position);
-    }
-  }
-
-  function onDragStart(target) {
-    console.log("dragstart!");
-    // Store a reference to the data
-    // * The reason for this is because of multitouch *
-    // * We want to track the movement of this particular touch *
-    // this.alpha = 0.5;
-// viewport.pausePlugin('drag')
-    if (viewport) {
-        viewport.plugins.pause("drag");
-    }
-
-    dragTarget = target;
-    app.stage.on('pointermove', onDragMove);
-  }
-
-  function onDragEnd() {
-    if (dragTarget) {
-      app.stage.off('pointermove', onDragMove);
-      dragTarget.alpha = 1;
-      dragTarget = null;
-      if (viewport) {
-        viewport.plugins.resume("drag");
-      }
-     
-    }
-  }
+  
 
     const elementCount = count;
     const elementContainer = new Container();

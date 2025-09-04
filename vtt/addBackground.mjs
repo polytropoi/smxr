@@ -5,7 +5,7 @@ import { keydown, CreateNewLocation } from '../connect/dialogs.js';
 import { sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter} from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 import { AdvancedBloomFilter, ReflectionFilter, OldFilmFilter } from '@pixi/filters';
-import { LoadLocations } from './vtt_locations.mjs';
+import { AddLocation } from './vtt_locations.mjs';
 export let mapsize = {};
 
 export let background;
@@ -507,30 +507,7 @@ export async function addMap(app, viewport, spritesContainer) {
             sprite.tint = 0xffffff;
             // console.log("Sprite exit at " + sprite.position.x + " " + sprite.position.y);
           });
-          // sprite.on('pointerup', (event) => {
-          // // ... handle the event
-          //   const globalPos = event.data.global; // { x: ..., y: ... }
-          //     // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
-          //   const worldPos = viewport.toLocal(globalPos);
-          //       console.log("viewport click keydown " + keydown + " pointerdown " + event.x + " " + event.y + "  " + event.screenX + " " + event.screenY + " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
-          //     SetSelectedPosition('', globalPos.x.toFixed(2) , globalPos.y.toFixed(2));
-          //     if (keydown == "X") {
-          //       CreateNewLocation();
-          //       LoadLocations(app, viewport, spritesContainer);
-          //     }
-          // });
-          // sprite.on('pointerdown', (event) => {
-          //   sprite.tint = 0xffffff;
-          //             const globalPos = event.data.global; // { x: ..., y: ... }
-          //   // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
-          //     const worldPos = viewport.toLocal(globalPos);
-          //     console.log("keydown " + keydown + " for " + sprite.label + " pointerdown " + sprite.position.x + " " + sprite.position.y);
-          //     SetSelectedPosition(sprite.label, globalPos.x.toFixed(2) , globalPos.y.toFixed(2));
-          //     if (keydown == "X") {
-          //       CreateNewLocation();
-          //     }
-          //   // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
-          // });
+         
 
           spritesContainer.addChild(sprite);
           }
@@ -539,17 +516,19 @@ export async function addMap(app, viewport, spritesContainer) {
         // Center background sprite anchor.
         spritesContainer.anchor = 0.5;
         spritesContainer.on('pointerup', (event) => {
-          // ... handle the event
-            const globalPos = event.data.global; // { x: ..., y: ... }
-              // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
-            const worldPos = spritesContainer.toLocal(globalPos);
-                console.log("spritesContainer click keydown " + keydown + " pointerdown " + event.x + " " + event.y + "  " + event.screenX + " " + event.screenY + " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
-              SetSelectedPosition('', worldPos.x.toFixed(2) , worldPos.y.toFixed(2));
-              // if (keydown == "X") {
-              //   CreateNewLocation();
-              //   LoadLocations(app, viewport, spritesContainer);
-              // }
-          });
+          // ... handle the event 
+          if (keydown != "T") {
+              const globalPos = event.data.global; // { x: ..., y: ... }
+                // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+              const worldPos = spritesContainer.toLocal(globalPos);
+                // console.log("spritesContainer click keydown " + keydown + " pointerdown " + event.x + " " + event.y + "  " + event.screenX + " " + event.screenY + " globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
+                SetSelectedPosition('', worldPos.x.toFixed(2) , worldPos.y.toFixed(2));
+          }
+          if (keydown == "X") {
+            CreateNewLocation();
+            AddLocation(app, viewport, spritesContainer);
+          }
+        });
     /**
      * If the preview is landscape, fill the width of the screen
      * and apply horizontal scale to the vertical scale for a uniform fit.
