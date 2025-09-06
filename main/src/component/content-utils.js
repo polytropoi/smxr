@@ -528,6 +528,7 @@ AFRAME.registerComponent('location_data', { //initial loading of "official" loca
             if (this.data.jsonData.length) {
             for (let i = 0; i < this.data.jsonData.length; i++) {
                let locItem = this.data.jsonData[i];
+               console.log("sceneLocation " + i + " of " + this.data.jsonData.length + " " + locItem.x + " " + locItem.y + " " + locItem.z );
                sceneLocations.locations.push(locItem);
                // localData.locations.push(locItem);
                if (locItem.markerType != undefined) {

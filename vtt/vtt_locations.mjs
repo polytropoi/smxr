@@ -1,7 +1,7 @@
 import { Assets, Graphics, Container, Text } from 'pixi';
 
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
-import { selectedPosition } from '../connect/events.js';
+import { selectedPosition, eventEl } from '../connect/events.js';
 import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../connect/dialogs.js';
 
 // import { dragTarget, onDragStart, onDragMove, onDragEnd } from './addElements.mjs';
@@ -9,6 +9,26 @@ import { app, viewport } from './vtt_main.mjs';
 
   let dragTarget = null;
 //   let viewport;
+  eventEl.addEventListener('map-update', onMapLocationUpdate);
+
+
+    function onMapLocationUpdate(event) {
+        
+        const theEl = document.getElementById(event.details);
+        console.log("theEl data " + theEl.dataset.eldata);
+        const elData = JSON.parse(atob(theEl.dataset.eldata));
+        console.log("gotsa mapLocationUpdate.." + event.details + " " + JSON.stringify(elData));
+        for (let i = 0; i < locationTokenContainer.children.length; i++) {
+                
+            if (event.details == locationTokenContainer.children[i].data.timestamp) {
+                console.log("whoot gotsa amtch");
+                locationTokenContainer.children[i].data = elData;
+                locationTokenContainer.children[i].text = elData.name;
+            }
+        }
+
+    }
+
    function onDragMove(event) {
     console.log("tryna dragmove.." + dragTarget.data.name + " child of " + dragTarget.parent);
     if (dragTarget) {
@@ -262,19 +282,18 @@ export function LoadLocations(app, viewport, spritesContainer) {
                 onDragStart();
 
             } else {
-                    console.log(token.x + " " + token.y + " pressed loaded cloud token " + JSON.stringify(token.data));
-                
-                    viewport.animate({
-                        position: { x: token.x, y: token.y }, // Target center position
-                        scale: 1.5, // Target zoom level
-                        time: 1000, // Animation duration of 1 second
-                        ease: 'easeInOutQuad', // Using a common easing function
-                        callbackOnComplete: () => {
-                            // console.log("Animation completed!");
-                        }
-                    });
-                }
+                console.log(token.x + " " + token.y + " pressed loaded cloud token " + JSON.stringify(token.data));
             
+                viewport.animate({
+                    position: { x: token.x, y: token.y }, // Target center position
+                    scale: 1.5, // Target zoom level
+                    time: 1000, // Animation duration of 1 second
+                    ease: 'easeInOutQuad', // Using a common easing function
+                    callbackOnComplete: () => {
+                        // console.log("Animation completed!");
+                    }
+                });
+            }
         });
 
     }

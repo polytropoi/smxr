@@ -1654,31 +1654,6 @@ function play() {
    source.start(0);
 }
 
-function UpdateContentBox() { //nm for now
-   // console.log("tryna update content box");
-   // var coll = document.getElementsByClassName("collapsible");
-   // var i;
-
-   // for (i = 0; i < coll.length; i++) {
-   //    var content = coll[i].nextElementSibling;
-   //       content.style.maxHeight = content.scrollHeight + "px";
-
-   // }
-}
-
-
-
-// function HideAll() {
-//    let overlay = document.getElementById('canvasOverlay');
-//    overlay.style.display = 'none';
-// }
-// function ShowAll() {
-//    let overlay = document.getElementById('canvasOverlay');
-//    overlay.style.display = 'block';
-// }
-// function PlayerToLocation (timestamp) { //locationIDs = timestamp, unique in scene
-//    sceneLocations.locations;
-// }
 
 
 

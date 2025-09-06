@@ -6,10 +6,10 @@ import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLo
 // import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
 
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "./dialogs.js";
-import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition } from "../connect/events.js";
+import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition, MapUpdate } from "../connect/events.js";
 // import { SetTimeKeysData } from "./landing.js";
 
-import { settings, profile } from "../connect/settings.js";
+import { settings, profile, pixelsPerMeterActual } from "../connect/settings.js";
 // import { selectedPosition } from "../vtt/vtt_main.mjs";
 // import { LoadPrimaryAudioHowl } from "./media.js";
 // import { playerPosition, playerRotation } from "../main/js/navigation.js";
@@ -963,14 +963,42 @@ export function SaveModToLocal(locationKey) { //locationKey is now just timestam
    
    SetHasLocalData(true);
    let locItem = {};
-   
+
    
    // let keySplit = locationKey.split("~");
-   locItem.x = document.getElementById('xpos').value;
+   // if (!settings.hasBgMap) { 
+      locItem.x = document.getElementById('xpos').value;
+      locItem.z = document.getElementById('zpos').value;
+         let modX = locItem.x;
+         let modZ = locItem.z;
+
+   // if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) {
+   //    console.log("modded position values x and z " + locItem.x + " " + locItem.z + " from 3d mode because there's a map!");
+   //          //   if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) { //reverse the position conversion if in map mode
+   //       // if (cursor.value.sceneTags.includes("map")) {
+   //    const mapScale = pixelsPerMeterActual; //multiply by (originally divided 1 by) pixelsPerMeterActual, e.g 10 = .1
+
+      
+   //    if (locItem.x < 0) {
+   //       modX = ((settings.mapWidth / 2) - Math.abs(locItem.x)) * mapScale;
+   //    } else {
+   //       modX = ((settings.mapWidth / 2) + Math.abs(locItem.x)) * mapScale;
+   //    }
+   //    //leave the y alone...
+   //    if (locItem.z < 0) {
+   //       modZ = ((settings.mapHeight / 2) - Math.abs(locItem.z)) * mapScale;
+   //    } else {
+   //       modZ = ((settings.mapHeight / 2) + Math.abs(locItem.z)) * mapScale;
+   //    }
+   //    console.log("modded location " + modX + " " + modZ);
+   // }
+   
+   
+
    locItem.eulerx = document.getElementById('xrot').value.length > 0 ? document.getElementById('xrot').value : '0';
    locItem.y = document.getElementById('ypos').value;
    locItem.eulery = document.getElementById('yrot').value.length > 0 ? document.getElementById('yrot').value : '0';
-   locItem.z = document.getElementById('zpos').value;
+
    locItem.eulerz = document.getElementById('zrot').value.length > 0 ? document.getElementById('zrot').value : '0';
    // locItem.lat 
    // locItem.label = document.getElementById('locationName').value;
@@ -1014,23 +1042,27 @@ export function SaveModToLocal(locationKey) { //locationKey is now just timestam
    // if (locationKey.toString().includes("local")) {
    //    locItem.isLocal = true;
    // }
-   // console.log("tryna savelocation "+locationKey+"  : " + JSON.stringify(locItem));
-   console.log("tryna savelocation "+locationKey+"  : " + locItem.targetElements);
+   console.log("tryna savelocation "+locationKey+"  : " + JSON.stringify(locItem));
+   // console.log("tryna savelocation "+locationKey+"  : " + locItem.targetElements);
    // localStorage.setItem(locationKey, JSON.stringify(locItem));
    let hasLocal = false;
    for (let i = 0; i < localData.locations.length; i++) {
       // console.log("chck : " + localData.locations[i].timestamp.toString() + " vs " +locationKey.toString());
       if (localData.locations[i].timestamp.toString() == locationKey.toString() ) {
-         console.log("gotsa match for localData.locations " + locationKey.toString() + " modelID " +locItem.modelID);
+       
          // localData.locations[i] = Object.assign(locItem); //merge?
          // locItem.x = document.getElementById('xpos').value;
-         localData.locations[i].x = locItem.x;
+         if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) { //don't change pos values if from bgmap
+            modX = localData.locations[i].x;
+            modZ = localData.locations[i].z;
+         }
+         localData.locations[i].x = modX;
          localData.locations[i].eulerx = locItem.eulerx;
          localData.locations[i].xscale = locItem.xscale;
          localData.locations[i].y = locItem.y;
          localData.locations[i].eulery = locItem.eulery;
          localData.locations[i].yscale = locItem.yscale;
-         localData.locations[i].z = locItem.z;
+         localData.locations[i].z = modZ;
          localData.locations[i].eulerz = locItem.eulerz;
          localData.locations[i].zscale = locItem.zscale;
 
@@ -1053,18 +1085,15 @@ export function SaveModToLocal(locationKey) { //locationKey is now just timestam
          localData.locations[i].targetElements = locItem.targetElements;
          localData.locations[i].mediaID = locItem.mediaID;
          hasLocal = true;
+         // isLocal = true;
+         localData.locations[i].hasLocalData = true;
+  
+         console.log(locItem.name + " gotsa match for localData.locations " + locationKey.toString() + " data " +JSON.stringify(localData.locations[i]));
          let theEl = document.getElementById(locationKey.toString());
          if (theEl) {
             if (sceneEl) {
-               //get loc props from object...
-
-               // let o3D = theEl.object3D;
-               // let o3DScale = theEl.object3D.scale;
-               // let o3DScale = theEl.getAttribute("scale");
-               // let o3DScale = new THREE.Vector3();
-               // o3D.getWorldScale(o3DScale);
-               
-               console.log("found the EL: " + locationKey + " locItem name " + locItem.name + " scale " + locItem.xscale + " " + locItem.yscale + " " +  locItem.zscale + " modelID " + locItem.modelID );
+                             
+               console.log("found the EL: " + locationKey + " locItem dat " + JSON.stringify(locItem) );
                // localData.locations[i].xscale = o3DScale.x;
                // localData.locations[i].yscale = o3DScale.y;
                // localData.locations[i].zscale = o3DScale.z;
@@ -1156,9 +1185,13 @@ export function SaveModToLocal(locationKey) { //locationKey is now just timestam
                
                break;
             } else {
-               // var buff = Buffer.from(JSON.stringify(locItem)).toString("base64");
-               theEl.setAttribute("data-eldata", JSON.stringify(locItem));
-               console.log("setting theEl cloudMarker data " + theEl.id);
+               
+               // var buff = Buffer.from(JSON.stringify(locItem)).toString("base64"); //nope, node only...
+               const buff = btoa(JSON.stringify(locItem));
+               theEl.setAttribute("data-eldata", buff);
+               MapUpdate(locationKey);
+               console.log("setting theEl cloudMarker data " + locationKey);
+               SaveLocalData();
             }
          } else {
             // SaveLocalData();
@@ -1485,7 +1518,7 @@ export function GoToPrevious() {
 export function ReturnLocationTable () { //just show em all now!
 
    let tablerows = "";
-   // console.log("localData.locations " + JSON.stringify(localData.locations) );
+   console.log("localData.locations " + JSON.stringify(localData.locations) );
    if (!localData.locations.length) {
      
       for (let i = 0; i < sceneLocations.locations.length; i++) {

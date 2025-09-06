@@ -9,6 +9,7 @@ let loopIntervals = [];
 let eventTriggersSet = false;
 
 let timed_event = new Event("timed-event");
+let map_update = new Event("map-update");
 export let eventEl = document.createElement("div");
 eventEl.id = "eventEl";
 
@@ -27,6 +28,12 @@ export function SetSelectedPosition(tilename, xpos, ypos) { //for vtt/not aframe
 
 export function ResetTimedEvents () {
     timeKeysIndex = 0;
+}
+
+export function MapUpdate(phID) {
+   map_update.details = phID;
+   eventEl.dispatchEvent(map_update);
+   console.log("tryhna fire map-update")
 }
 //    SetEventTriggers();
 // function SetEventTriggers () {

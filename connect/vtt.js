@@ -219,11 +219,11 @@ $(function() {
    //    pictureGroupsData = JSON.parse(atob(theData)); //convert from base64
    //    // console.log("pictureGroups data :" +JSON.stringify(pictureGroupsData));  
    // }
-    console.log("settings " + JSON.stringify(settings));
-    console.log("sprites " + JSON.stringify(sprites));
-    console.log("scenepictures " + JSON.stringify(scenePicturesData));
-      //   console.log("picturegroups " + JSON.stringify(pictureGroupsData));
-        console.log("background video " + settings.backgroundVideoURL);
+   //  console.log("settings " + JSON.stringify(settings));
+   //  console.log("sprites " + JSON.stringify(sprites));
+   //  console.log("scenepictures " + JSON.stringify(scenePicturesData));
+   //    //   console.log("picturegroups " + JSON.stringify(pictureGroupsData));
+   // console.log("background video " + settings.backgroundVideoURL);
 
     mappicURL = settings.mappicURL;
     backgroundURL = settings.backgroundURL;
@@ -342,25 +342,25 @@ export async function ReturnBackgroundVideo () {
 
 export async function ReturnText () {
     await settings;
-    console.log("tryna return scenetext " + settings.sceneGreeting);
+   //  console.log("tryna return scenetext " + settings.sceneGreeting);
     return settings.sceneGreeting + "~" + settings.sceneQuest;
 }
 
 export async function ReturnScenePictures () {
    await scenePicturesData != null;
-         console.log("scenePicturesData " + JSON.stringify(scenePicturesData));
+         // console.log("scenePicturesData " + JSON.stringify(scenePicturesData));
    return scenePicturesData;
 }
 
 export async function ReturnPictureGroups () {
    await pictureGroupsData;
-            console.log("scenePicturesData " + JSON.stringify(pictureGroupsData));
+            // console.log("scenePicturesData " + JSON.stringify(pictureGroupsData));
    return pictureGroupsData;
 }
 
 export async function ReturnLocations () {
       await locationData;
-      console.log("locationData " + JSON.stringify(locationData));
+      // console.log("locationData " + JSON.stringify(locationData));
       return locationData;
 }
 

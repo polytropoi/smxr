@@ -5,7 +5,7 @@ import { room, sceneLocations, locationTimestamps, localData, userData, lastClou
    playerPosition, playerRotation } from "/connect/connect.js";
 
 import { settings, UpdateUserProfile, pixelsPerMeterActual } from "/connect/settings.js";
-import { SetTimeKeysData } from "/connect/events.js";
+import { SetTimeKeysData, MapUpdate } from "/connect/events.js";
 // import { pixelsPerMeterActual } from "../vtt/vtt_main.mjs";
 export let hasLocalData = false;
 //////////////////////indexedDB functions...
@@ -104,9 +104,11 @@ export function InitIDB() {
                      // if (cursor.value.locations[i].markerType == "poi" || cursor.value.locations[i].markerType == "placeholder") {
                      //    poiLocations.push(cursor.value.locations[i]);
                      // }
-                     if (cursor.value.locations[i].isLocal != undefined && cursor.value.locations[i].isLocal) { //only update ones with local changes
-                     // console.log(cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " scale " + cursor.value.locations[i].xscale + cursor.value.locations[i].yscale + cursor.value.locations[i].zscale );
-                     console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal " + " modelID " + cursor.value.locations[i].modelID);
+                     console.log( "cursor " + cursor.value.locations[i].isLocal + " " + cursor.value.locations[i].hasLocalData + " " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
+
+                     if ((cursor.value.locations[i].isLocal != undefined && cursor.value.locations[i].isLocal) || cursor.value.locations[i].hasLocalData) { //only update ones with local changes
+                     console.log(cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
+                     // console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal " + " modelID " + cursor.value.locations[i].modelID);
                      let cloudEl = document.getElementById(cursor.value.locations[i].timestamp);
                         
                         if (cloudEl) { //prexisting elements (cloud_marker, mod_model, mod_object) already rendered onload
@@ -173,7 +175,13 @@ export function InitIDB() {
                                  }
                               }
                            } else {
-
+                              //populate the modded cloud els...
+                              console.log("gotsa MODDED CLOUDEL " + cursor.value.locations[i].timestamp);
+                              
+                              const buff = btoa(JSON.stringify(cursor.value.locations[i]));
+                                             cloudEl.setAttribute("data-eldata", buff);
+                                             MapUpdate(cursor.value.locations[i].timestamp);
+                                             // console.log("setting theEl cloudMarker data " + locationKey);
                            }
                         } else {//local-only elements, not saved to cloud yet
                            hasLocalData = true;
@@ -749,10 +757,14 @@ export function InitIDB() {
 
  export function SaveLocalData() {  //local mods to iDB
     console.log("tryna connect to SMXR indexeddb");
-    if (!('indexedDB' in window)) {
+    if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) {
+      console.log("aframe modding not available for mapped scenes - use vtt mode for modding if hasBgMap");
+      return;
+   }
+   if (!('indexedDB' in window)) {
        console.log("This browser doesn't support IndexedDB");
        return;
-    }
+   }
     const request = indexedDB.open("SMXR", 2);
     request.onerror = (event) => {
        console.error("could not connect to iDB " + event);
@@ -783,24 +795,27 @@ export function InitIDB() {
        scene.settings = localData.settings;
        scene.locations = localData.locations;
 
-        if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) {
-                  // if (cursor.value.sceneTags.includes("map")) {
-                  const mapScale = pixelsPerMeterActual; //divide by pixelsPerMeterActual, e.g 10 = .1
-                  for (let i = 0; i < scene.locations.length; i++) { //mod or create the scene elements
-                     // let loc = JSON.stringify(cursor.value.locations[i]);
-                     console.log("updating loication " + i + " of " + scene.locations.length);
-                    
-                     scene.locations[i].x = scene.locations[i].x * mapScale;
-                     scene.locations[i].y = scene.locations[i].y * mapScale;
-                     scene.locations[i].z = scene.locations[i].z * mapScale;
-                     localData.locations.push(scene.locations[i]);
-                     if (scene.locations[i].markerType == "player") {
-                        playerPosMods.push(scene.locations[i].x + " " + scene.locations[i].y + " " + scene.locations[i].z);
-                        console.log("PLayerPosMods :" + JSON.stringify(playerPosMods));
-                     
-                     }
-         }
-      }
+      //   if ((settings.sceneType == "aframe" || settings.sceneType == "Default") && settings.hasBgMap) { //reverse the position conversion if in map mode
+      //          // if (cursor.value.sceneTags.includes("map")) {
+      //    const mapScale = pixelsPerMeterActual; //multiply by (originally divided 1 by) pixelsPerMeterActual, e.g 10 = .1
+      //    for (let i = 0; i < scene.locations.length; i++) { 
+      //       // let loc = JSON.stringify(cursor.value.locations[i]);
+      //       console.log("updating loication " + i + " of " + scene.locations.length +" mapscale "+ mapScale + " " + scene.locations[i].x + " " + scene.locations[i].y + " " + scene.locations[i].z );
+            
+      //       if (scene.locations[i].x < 0) {
+      //          scene.locations[i].x = ((scene.settings.mapWidth / 2) - Math.abs(scene.locations[i].x)) * mapScale;
+      //       } else {
+      //          scene.locations[i].x = ((scene.settings.mapWidth / 2) + Math.abs(scene.locations[i].x)) * mapScale;
+      //       }
+      //       //leave the y alone...
+      //       if (scene.locations[i].z < 0) {
+      //          scene.locations[i].z = ((scene.settings.mapWidth / 2) - Math.abs(scene.locations[i].z)) * mapScale;
+      //       } else {
+      //          scene.locations[i].z = ((scene.settings.mapWidth / 2) + Math.abs(scene.locations[i].z)) * mapScale;
+      //       }
+      //      console.log("modded location " + JSON.stringify(scene.locations[i]));
+      //    }
+      // }
        
        scene.localFiles = localData.localFiles;
        

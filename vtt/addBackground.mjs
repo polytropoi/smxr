@@ -470,7 +470,7 @@ export async function addMap(app, viewport, spritesContainer) {
     }
 
     mapSpritesData.meta.images = mappicURL;
-    console.log("mapSpritesData " + JSON.stringify(mapSpritesData));
+    // console.log("mapSpritesData " + JSON.stringify(mapSpritesData));
     
     const sheetTexture = await Assets.load(mappicURL);
     const spritesheet = new Spritesheet(sheetTexture, mapSpritesData);

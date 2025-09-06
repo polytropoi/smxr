@@ -675,6 +675,21 @@ webxr_router.get('/:_id', function (req, res) {
             ////LOCATION FU
             if (sceneResponse.sceneLocations != null) {
                 for (var i = 0; i < sceneResponse.sceneLocations.length; i++) {       
+                    if (hasBgMap) {
+                        console.log("!!!!!!!! gotsa background map!!!!!!!!!! modding locationData... " + sceneResponse.sceneLocations[i].x + " " +sceneResponse.sceneLocations[i].z);
+                         if (sceneResponse.sceneLocations[i].x < (mapWidth / 2)) {
+                            sceneResponse.sceneLocations[i].x = (((mapWidth / 2) - sceneResponse.sceneLocations[i].x) * mapScale) * -1; 
+                        } else {
+                            // sceneResponse.sceneLocations[i].x = (mapWidth - sceneResponse.sceneLocations[i].x) * mapScale;
+                            sceneResponse.sceneLocations[i].x = (sceneResponse.sceneLocations[i].x - (mapWidth / 2)) * mapScale;
+                        }
+                        // leave the y value as is, use for sorting in 2d mode
+                        if (sceneResponse.sceneLocations[i].z < (mapHeight / 2)) {
+                            sceneResponse.sceneLocations[i].z = (((mapHeight / 2) - sceneResponse.sceneLocations[i].z) * mapScale) * -1;
+                        } else {
+                            sceneResponse.sceneLocations[i].z = (sceneResponse.sceneLocations[i].z - (mapHeight / 2)) * mapScale;
+                        }
+                    }
                     
                     if (sceneResponse.sceneLocations[i].eventData == null || sceneResponse.sceneLocations[i].eventData == undefined || sceneResponse.sceneLocations[i].eventData == "undefined") { //old scenes...
                         sceneResponse.sceneLocations[i].eventData = "";
@@ -1642,21 +1657,21 @@ webxr_router.get('/:_id', function (req, res) {
             if (locationPlaceholders.length > 0) {
                 for (let i = 0; i < locationPlaceholders.length; i++) {
                     // if (hasBgMap && mapWidth && mapHeight && pixelsPerMeterActual && mapScale) {  ///////// if using 2d coord system, e.g. pixijs
-                    if (hasBgMap) {
-                        console.log("!!!!!!!! gotsa background map!!!!!!!!!! modding locationData... " + mapWidth);
-                         if (locationPlaceholders[i].x < mapWidth / 2) {
-                            locationPlaceholders[i].x = (((mapWidth / 2) - locationPlaceholders[i].x) * mapScale) * -1; 
-                        } else {
-                            // locationPlaceholders[i].x = (mapWidth - locationPlaceholders[i].x) * mapScale;
-                            locationPlaceholders[i].x = (locationPlaceholders[i].x - (mapWidth / 2)) * mapScale;
-                        }
-                        // leave the y value as is, use for sorting in 2d mode
-                        if (locationPlaceholders[i].z < mapHeight / 2) {
-                            locationPlaceholders[i].z = (((mapHeight / 2) - locationPlaceholders[i].z) * mapScale) * -1;
-                        } else {
-                            locationPlaceholders[i].z = (locationPlaceholders[i].z - (mapHeight / 2)) * mapScale;
-                        }
-                    }
+                    // if (hasBgMap) {
+                    //     console.log("!!!!!!!! gotsa background map!!!!!!!!!! modding locationData... " + mapWidth);
+                    //      if (locationPlaceholders[i].x < mapWidth / 2) {
+                    //         locationPlaceholders[i].x = (((mapWidth / 2) - locationPlaceholders[i].x) * mapScale) * -1; 
+                    //     } else {
+                    //         // locationPlaceholders[i].x = (mapWidth - locationPlaceholders[i].x) * mapScale;
+                    //         locationPlaceholders[i].x = (locationPlaceholders[i].x - (mapWidth / 2)) * mapScale;
+                    //     }
+                    //     // leave the y value as is, use for sorting in 2d mode
+                    //     if (locationPlaceholders[i].z < mapHeight / 2) {
+                    //         locationPlaceholders[i].z = (((mapHeight / 2) - locationPlaceholders[i].z) * mapScale) * -1;
+                    //     } else {
+                    //         locationPlaceholders[i].z = (locationPlaceholders[i].z - (mapHeight / 2)) * mapScale;
+                    //     }
+                    // }
                     //use the "cloud_marker" component for certain markertypes () TODO rename it to mod_location // nope
                     let scale = 1;
                     let rot = 0;

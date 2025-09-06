@@ -380,7 +380,7 @@ window.addEventListener( 'keydown',  ( event ) => {
       let phID = $(this).attr("data-phID");
       console.log("saving local mod for " + phID);
       SaveModToLocal(phID);
-      SaveLocalAndClose();
+      // SaveLocalAndClose();
   });
   $('#modalContent').on('click', '#snapLocationButton', function(e) {
       let phID = $(this).attr("data-phID");

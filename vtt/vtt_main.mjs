@@ -13,7 +13,7 @@ import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, Retu
 import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../connect/media.js';
 import { settings, profile, pixelsPerMeterActual } from '../connect/settings.js';
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData, SetSelectedPosition} from "../../connect/events.js";
-import { keydown, CreateNewLocation } from '../connect/dialogs.js';
+// import { keydown, CreateNewLocation } from '../connect/dialogs.js';
 import { addButtons, addFancyButtons } from './addButtons.mjs';
 
 import { LoadLocations, AddLocation } from './vtt_locations.mjs';

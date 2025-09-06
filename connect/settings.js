@@ -2,7 +2,9 @@ export let settings;
 
 export let profile;
 
-export let pixelsPerMeterActual = 10;
+export let pixelsPerMeterActual = 10; //pull from scene.settings instead...
+// export let mapWidth = 0;
+// export let mapHeight = 0;
 // export let selectedPosition = {};
 
 import { SetPlayerToLastPosition, InitSocket } from "../connect/connect.js";
@@ -20,12 +22,15 @@ export function UpdateUserProfile (userProfile) { //called from indexedDB.js
    profile = userProfile;
    console.log("userProfile is ready for " + profile.avatarName);
    SetPlayerToLastPosition();
-      if (settings.networking == 'SocketIO' && settings.socketHost) {
-         if (settings.socketHost.length > 6) { //i.e. not "none" or empty
-            InitSocket(); //hrm
-            
-         }
-      } 
-
+   if (settings.networking == 'SocketIO' && settings.socketHost) {
+      if (settings.socketHost.length > 6) { //i.e. not "none" or empty
+         InitSocket(); //hrm
+         
+      }
+   } 
 }
 
+// export function UpdateMapDimensions(x, y) {
+//    mapWidth = x;
+//    mapHeight = y;
+// }  
