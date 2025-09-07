@@ -3,16 +3,18 @@ import { Assets, Graphics, Container, Text } from 'pixi';
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 import { selectedPosition, eventEl } from '../connect/events.js';
 import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../connect/dialogs.js';
+import { localData, SaveModToLocal} from '../connect/connect.js';
 
 // import { dragTarget, onDragStart, onDragMove, onDragEnd } from './addElements.mjs';
 import { app, viewport } from './vtt_main.mjs';
+import { SaveLocalData } from '../connect/indexedDb.js';
 
   let dragTarget = null;
 //   let viewport;
   eventEl.addEventListener('map-update', onMapLocationUpdate);
 
-
-    function onMapLocationUpdate(event) {
+ 
+    function onMapLocationUpdate(event) { //dialog or other event that updates a map token
         
         const theEl = document.getElementById(event.details);
         console.log("theEl data " + theEl.dataset.eldata);
@@ -21,9 +23,11 @@ import { app, viewport } from './vtt_main.mjs';
         for (let i = 0; i < locationTokenContainer.children.length; i++) {
                 
             if (event.details == locationTokenContainer.children[i].data.timestamp) {
-                console.log("whoot gotsa amtch");
+                console.log("whoot gotsa amtch at xz " + locationTokenContainer.children[i].x + " " +locationTokenContainer.children[i].y );
                 locationTokenContainer.children[i].data = elData;
                 locationTokenContainer.children[i].text = elData.name;
+                // document.getElementById('xpos').value = locationTokenContainer.children[i].x;
+                // document.getElementById('zpos').value = locationTokenContainer.children[i].z;
             }
         }
 
@@ -46,11 +50,22 @@ import { app, viewport } from './vtt_main.mjs';
    function onDragEnd() {
    
     if (dragTarget) {
-         console.log("dragend " + dragTarget.data + " x " + dragTarget.x + " y " + dragTarget.y );
+         console.log("dragend " + dragTarget.data.timestamp + " x " + dragTarget.x + " y " + dragTarget.y );
       locationTokenContainer.off('pointermove', onDragMove);
       dragTarget.alpha = 1;
-      dragTarget = null;
-    //   console.log(dragTarget.data.name )
+        console.log("localData is " + JSON.stringify(localData));
+        for (let i = 0; i < localData.locations.length; i++) {
+            if (localData.locations[i].timestamp == dragTarget.data.timestamp) {
+                localData.locations[i].x = dragTarget.x;
+                localData.locations[i].z = dragTarget.y;
+            }
+        } 
+    //   document.getElementById('xpos').value = dragTarget.x;
+    //             document.getElementById('zpos').value = dragTarget.z;
+    // //   console.log(dragTarget.data.name )
+        // SaveModToLocal(dragTarget.data.timestamp);
+        SaveLocalData();
+         dragTarget = null;
     }
   }
 
