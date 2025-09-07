@@ -14,7 +14,7 @@ import { SaveLocalData } from '../connect/indexedDb.js';
   eventEl.addEventListener('map-update', onMapLocationUpdate);
 
  
-    function onMapLocationUpdate(event) { //dialog or other event that updates a map token
+    function onMapLocationUpdate(event) { //dialog savemod button or other event that updates a map token
         
         const theEl = document.getElementById(event.details);
         console.log("theEl data " + theEl.dataset.eldata);
@@ -313,52 +313,29 @@ export function LoadLocations(app, viewport, spritesContainer) {
 
     }
 
-
+    if (viewport) {
     viewport.bounce(); //better to add this after locations loaded..?
     // console.log(locationTokenContainer.children);
-
+    }
  }
 
 
  export function AddLocation(app, viewport, spritesContainer) {
-    console.log("tryna load localMarkers..");
-    // const localMarkers = document.querySelectorAll('.local_marker');
-    
-    // if (!locationTokenContainer) {
-    //         // locationTokenContainer.destroy({ children: true });
-    //             locationTokenContainer = new Container();
-    //     locationTokenContainer.anchor = 0;
-    //     // locationTokenContainer.width = viewport.width;
-    //     // locationTokenContainer.height = viewport.height;
-    //     viewport.addChild(locationTokenContainer);
-    //     viewport.setChildIndex(locationTokenContainer, viewport.children.length - 1);
-    // } else {
-    //     locationTokenContainer.removeChildren();
-    // }
-    
-    // locationTokenContainer = new Container();
-    // // locationTokenContainer.anchor = .5;
-    // // locationTokenContainer.width = viewport.width;
-    // // locationTokenContainer.height = viewport.height;
-    // viewport.addChild(locationTokenContainer);
-    // viewport.setChildIndex(locationTokenContainer, viewport.children.length - 1);
-    
-    // console.log("localMarkers found " + localMarkers.length + " viewport is " + viewport.worldWidth + " " + viewport.worldHeight);
-    // // for (let i = 0; i < localMarkers.length; i++) {
-    //     console.log("localMarker " + localMarkers[i].id + " data " + localMarkers[i].dataset.eldata);
+    console.log("tryna add local map token..");
+   
     //     const elData = JSON.parse(localMarkers[i].dataset.eldata);
-         const scaleFactor = .6;
-            const width = 100 * scaleFactor;
-            const height = 50 * scaleFactor;
-            const strokeWidth = 3 * scaleFactor;
-            // let xpos = parseFloat(selectedPosition.x) * pixelsPerMeterActual;
-            // let ypos = parseFloat(selectedPosition.y) * pixelsPerMeterActual;
-            let xpos = parseFloat(selectedPosition.x);
-            let ypos = parseFloat(selectedPosition.y);
+    const scaleFactor = .6;
+    const width = 100 * scaleFactor;
+    const height = 50 * scaleFactor;
+    const strokeWidth = 3 * scaleFactor;
+    // let xpos = parseFloat(selectedPosition.x) * pixelsPerMeterActual;
+    // let ypos = parseFloat(selectedPosition.y) * pixelsPerMeterActual;
+    let xpos = parseFloat(selectedPosition.x);
+    let ypos = parseFloat(selectedPosition.y);
 
     const fontsize = Math.max(18, window.innerWidth / 50);  
     const text = new Text({
-        text: 'new placeholder',
+        text: 'local placeholder',
         style: {
         fontSize: fontsize,
         fill: 'white', // Red color
@@ -418,36 +395,46 @@ export function LoadLocations(app, viewport, spritesContainer) {
         }
     });
     // token.data = elData;
-    
+    token.data = {'timestamp' : Date.now(),
+                    'name': 'local placeholder',
+                    'x' : xpos,
+                    'y' : 0,
+                    'z' : ypos
+                    }
 
-    // const globalPos = {x: xpos, y: ypos} ;
-    // const worldPos = viewport.toWorld(globalPos);
-    // xpos = worldPos.x;
-    // ypos = world
-        // console.log(viewport.x + " " + viewport.scale.x + " " + viewport.scale.y  + " scale tryna set token position " + xpos + "  " + ypos + " " + worldPos.x + " " + worldPos.y);
-        console.log("setting token position w/ viewport position " + viewport.x + " " + viewport.x  + " scale " + viewport.scale.x + " " + viewport.scale.y  + " position " + xpos + "  " + ypos)/// + " " + worldPos.x + " " + worldPos.y);
-    // token.position.set(worldPos.x,worldPos.y);
-
-        // if (xpos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-        //     xpos = xpos * 2;
-        // } else {
-        //     xpos = xpos * -1;
-        // }
-        // if (ypos > 0) { //modify coords to match 3D, with zero in the center instead of top left corner
-        //     ypos = ypos * 2;
-        // } else {
-        //     ypos = ypos * -1;
-        // } 
+    console.log("new local maptoken w/ viewport position " + viewport.x + " " + viewport.x  + " scale " + viewport.scale.x + " " + viewport.scale.y  + " position " + xpos + "  " + ypos);/// + " " + worldPos.x + " " + worldPos.y);
+     
 
     token.x = xpos;
     token.y = ypos;
     locationTokenContainer.addChild(token);
-    // locationTokenContainer.setChildIndex(token, locationTokenContainer.children.length -1);
-    token.onPress.connect((event) => {
-        console.log("pressed new token " + JSON.stringify(token.data));
-        }
-    );
-    // }
-    // console.log(locationTokenContainer.children);
+   token.on('pointerdown', (event) => {
+            console.log("keydown is " + keydown);
+
+            if (keydown == "Shift") {
+                console.log("SHift key + token pointerdown");
+                SetSelectedLocationTimestamp(token.data.timestamp);
+                SceneManglerModal('Location');
+            } else if (keydown == "T") {
+                SetSelectedLocationTimestamp(token.data.timestamp);
+                // SceneManglerModal('Location');
+                console.log("T key + pointerdown at " + token.x + " " + token.y);
+                dragTarget = token;
+                onDragStart();
+
+            } else {
+                console.log(token.x + " " + token.y + " pressed new local maptoken " + JSON.stringify(token.data));
+            
+                viewport.animate({
+                    position: { x: token.x, y: token.y }, // Target center position
+                    scale: 1.5, // Target zoom level
+                    time: 1000, // Animation duration of 1 second
+                    ease: 'easeInOutQuad', // Using a common easing function
+                    callbackOnComplete: () => {
+                        // console.log("Animation completed!");
+                    }
+                });
+            }
+        });
 
  }

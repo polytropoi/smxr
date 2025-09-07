@@ -134,6 +134,15 @@ async function setup() {
     };
   // Then adding the application's canvas to the DOM body.
   document.getElementById("pixi-container").appendChild(app.canvas);
+  
+  viewport = new Viewport({
+    screenWidth: window.innerWidth,
+    screenHeight: window.innerHeight,
+    worldWidth: 10000,
+    worldHeight: 10000,
+    disableOnContextMenu: true,
+    events: app.renderer.events, 
+  });
 }
 
 async function prePreLoader () {
@@ -308,14 +317,7 @@ export async function GoWithIt() { //called from vtt.js
   }
   if (mappicURL || backgroundVideoURL || hasBackgroundPictureGroup) { // just use a tag
 
-    viewport = new Viewport({
-      screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight,
-      worldWidth: 10000,
-      worldHeight: 10000,
-      disableOnContextMenu: true,
-      events: app.renderer.events, 
-    });
+
     // if (app.screen.width > app.screen.height) {
     //   // viewport.width = app.screen.width - (app.screen.width * .1);
     //   viewport.scale.y = viewport.scale.x;

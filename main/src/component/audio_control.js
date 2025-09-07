@@ -1968,34 +1968,37 @@ AFRAME.registerComponent('trigger_audio_control', { //trigger audio on designate
         //     return;
         // }
         console.log(this.loopID + " " + this.rate);
-        if (this.loopHowl) {
-            if (modType == "rate") {
-                if (modValue != 0) { //modvalue 0 === this.rate 1
+            if (this.loopHowl) {
+                if (modType == "rate") {
+                    if (modValue != 0) { //modvalue 0 === this.rate 1
 
-                    if (this.rate > 2.475) {
-                        this.rate = 2.5;
+                        if (this.rate > 2.475) {
+                            this.rate = 2.5;
+                        } else {
+                            this.rate = lerp(this.rate, 2.5, .01); //eg, engine noise, footsteps get faster
+                        }
+                        if (this.rate) {
+                            this.loopHowl.rate(this.rate, this.loopID); //what if multiplez?
+                        }
                     } else {
-                        this.rate = lerp(this.rate, 2.5, .01); //eg, engine noise, footsteps get faster
+                        this.loopHowl.rate(1, this.loopID);
+                        this.rate = 1;
+                        // console.log("reset this.rzate" +this.rate);
                     }
-                    if (this.rate) {
-                        this.loopHowl.rate(this.rate, this.loopID); //what if multiplez?
-                    }
-                } else {
-                    this.loopHowl.rate(1, this.loopID);
-                    this.rate = 1;
-                    // console.log("reset this.rzate" +this.rate);
                 }
             }
-        }
     // }
     },
     loopToggle: function (pause) {
         console.log("loopToggle " + pause);
-        if (this.loopHowl && !this.loopHowl.playing()) {
+        if (this.hasLoopHowl()) {
             if (!pause) {
                 this.loopHowl.pause();
             } else {
-                this.loopHowl.play();
+                if (!this.loopHowl.playing()) {
+                    this.loopHowl.play();
+                }
+               
             }
         }
         // } else {
@@ -2041,7 +2044,9 @@ AFRAME.registerComponent('trigger_audio_control', { //trigger audio on designate
                         // console.log("tag "+ tags[i] + " tryna get audioID " + audioID);
                         if (!audioID) continue; //if no match skip this one and keep looping
                         this.audioItem = this.audioGroupsController.returnAudioItem(audioID);
-
+                        if (this.loopHowl) {
+                            this.loopHowl = null;
+                        }
                         if (this.audioItem != null) {
                             
                             console.log("gotsa loop and follow audioItem, tryna set trigger to src " + this.audioItem.URLogg);

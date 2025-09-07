@@ -960,9 +960,12 @@ AFRAME.registerComponent('extended_wasd_thirdperson', {
 
 		if (this.triggerAudioController) {
 			if (this.isKeyPressed(this.data.moveForwardKey)) {
+				// if (this.triggerAudioController.loo)
 				this.triggerAudioController.loopToggle(true);
-				// console.log("tryna mod audio Loop " + this.movePercent.z);
-				this.triggerAudioController.modLoop("rate", this.movePercent.z );
+				console.log("tryna mod audio Loop " + this.movePercent.z);
+				this.triggerAudioController.modLoop("rate", this.movePercent.z);
+			} else {
+				// this.triggerAudioController.loopToggle(false);
 			}
 			// } else {
 			// 	if (this.registerKeyUp(this.data.moveForwardKey)) {
