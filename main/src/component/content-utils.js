@@ -13,7 +13,8 @@ import {  PauseIntervals, SetVideoEventsData, SetTimeKeysData, SetTimedEventsLis
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../../connect/dialogs.js";
 // import {  } from "../../js/navigation.js";
 import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation, 
-      userData, avatarName, sceneLocations, poiLocations, cloudMarkers, curveLocations, AvatarClicked, playerPosition, playerRotation } from "../../../connect/connect.js";
+      userData, avatarName, sceneLocations, poiLocations, cloudMarkers, 
+      curveLocations, AvatarClicked, playerPosition, playerRotation } from "../../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
 import { pixelsPerMeterActual, settings } from "../../../connect/settings.js";
 import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat, LoadPrimaryAudioHowl } from '../../../connect/media.js';
@@ -23,7 +24,7 @@ var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
 var webkit = !!ua.match(/WebKit/i);
 var iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
 
-let analyser = null;
+// let analyser = null;
 // let dataArray = [];
 let fLevels = null;
 let volume = 0;
@@ -95,93 +96,93 @@ export const mouse = new THREE.Vector2();
 // }
 
 
-function AudioAnalyzer() {
+// function AudioAnalyzer() {
 
-  if (analyser == null) {
-      console.log("tryna create analyser from media");
+//   if (analyser == null) {
+//       console.log("tryna create analyser from media");
   
-  let beatDetectionDecay, beatDetectionMinVolume, beatDetectionThrottle;
-  if (vidz != null && vidz.length > 0) { //wire up the analyzer to the video if present
-    var context = new AudioContext();
-    var source = context.createMediaElementSource(vidz[0]);
-    analyser = context.createAnalyser();
+//   let beatDetectionDecay, beatDetectionMinVolume, beatDetectionThrottle;
+//   if (vidz != null && vidz.length > 0) { //wire up the analyzer to the video if present
+//     var context = new AudioContext();
+//     var source = context.createMediaElementSource(vidz[0]);
+//     analyser = context.createAnalyser();
     
-    source.connect(analyser);
-    console.log("gotsome vidz" );
-    analyser.connect(context.destination);
-    analyser.fftSize = 1024;
-    analyser.smoothingTimeConstant = 0.8;
-    let bufferLength = analyser.frequencyBinCount;
-    fLevels = new Uint8Array(analyser.fftSize);
-    beatDetectionDecay = .99;
-    beatDetectionMinVolume = 12;
-    beatDetectionThrottle = 50;
+//     source.connect(analyser);
+//     console.log("gotsome vidz" );
+//     analyser.connect(context.destination);
+//     analyser.fftSize = 1024;
+//     analyser.smoothingTimeConstant = 0.8;
+//     let bufferLength = analyser.frequencyBinCount;
+//     fLevels = new Uint8Array(analyser.fftSize);
+//     beatDetectionDecay = .99;
+//     beatDetectionMinVolume = 12;
+//     beatDetectionThrottle = 50;
 
-  } else if (primaryAudioEl != null) { 
-    analyser = Howler.ctx.createAnalyser();
-    Howler.masterGain.connect(analyser);
-    analyser.connect(Howler.ctx.destination);
+//   } else if (primaryAudioEl != null) { 
+//     analyser = Howler.ctx.createAnalyser();
+//     Howler.masterGain.connect(analyser);
+//     analyser.connect(Howler.ctx.destination);
 
-    analyser.fftSize = 1024;
-    analyser.smoothingTimeConstant = 0.8;
-    let bufferLength = analyser.frequencyBinCount;
-    fLevels = new Uint8Array(analyser.fftSize);
-    beatDetectionDecay = .99;
-    beatDetectionMinVolume = 10;
-    beatDetectionThrottle = 50;
-    } 
-  } 
-  if (analyser != null) {
-    let beatElements = document.getElementsByClassName("beatme");
+//     analyser.fftSize = 1024;
+//     analyser.smoothingTimeConstant = 0.8;
+//     let bufferLength = analyser.frequencyBinCount;
+//     fLevels = new Uint8Array(analyser.fftSize);
+//     beatDetectionDecay = .99;
+//     beatDetectionMinVolume = 10;
+//     beatDetectionThrottle = 50;
+//     } 
+//   } 
+//   if (analyser != null) {
+//     let beatElements = document.getElementsByClassName("beatme");
 
-    if ((primaryAudioEl != null && primaryAudioHowl.playing()) || (videoEl != null && !videoEl.paused)) {
-        // console.log("beat elements: " + beatElements.length);
-      var sum = 0;
-      analyser.getByteFrequencyData(fLevels);
-      for (var i = 0; i < fLevels.length; i++) {
-        sum += fLevels[i];;
-        }
-      volume = sum / fLevels.length;
-      // console.log(volume);
-      if (!this.beatCutOff) {
-          this.beatCutOff = volume;
-      }
-      if (volume > this.beatCutOff && volume > beatDetectionMinVolume) {
-        this.beatCutOff = volume * 1.5;
-        this.beatTime = 0;
+//     if ((primaryAudioEl != null && primaryAudioHowl.playing()) || (videoEl != null && !videoEl.paused)) {
+//         // console.log("beat elements: " + beatElements.length);
+//       var sum = 0;
+//       analyser.getByteFrequencyData(fLevels);
+//       for (var i = 0; i < fLevels.length; i++) {
+//         sum += fLevels[i];;
+//         }
+//       volume = sum / fLevels.length;
+//       // console.log(volume);
+//       if (!this.beatCutOff) {
+//           this.beatCutOff = volume;
+//       }
+//       if (volume > this.beatCutOff && volume > beatDetectionMinVolume) {
+//         this.beatCutOff = volume * 1.5;
+//         this.beatTime = 0;
         
-        if (primaryAudioEl != null) {
-          // console.log("beat volume " + volume);
-            primaryAudioEl.components.primary_audio_control.analyzer_beat(volume);
-        }
-        if (videoEl != null) {
-          // console.log("beat volume " + volume);
-          if (beatElements != null) {
-            for (let i = 0; i < beatElements.length; i++) {
-              beatElements[i].components.mod_model.beat(volume, 500);
-              }
-            }
-            // beatElements.every(beat());
-            // this.event = new Event("beatme"); 
-            // document.dispatchEvent(this.event);
-            // document.dispatchEvent(new CustomEvent('beatme', { bubbles: true, detail: {'volume' : volume}}));
-          }
-        } else {
-          if (this.beatTime <= beatDetectionThrottle) {
-            this.beatTime += window.performance.now();
-          } else {
-            this.beatCutOff *= beatDetectionDecay;
-            this.beatCutOff = Math.max(this.beatCutOff, beatDetectionMinVolume);
-          }
-        }        
-      } else {
-          // beatDetectionDecay = 0.99;
-          // beatDetectionMinVolume = 15;
-          // beatDetectionThrottle = 250;
-      }
-  }
-  window.requestAnimationFrame(AudioAnalyzer);   
-};
+//         if (primaryAudioEl != null) {
+//           // console.log("beat volume " + volume);
+//             primaryAudioEl.components.primary_audio_control.analyzer_beat(volume);
+//         }
+//         if (videoEl != null) {
+//           // console.log("beat volume " + volume);
+//           if (beatElements != null) {
+//             for (let i = 0; i < beatElements.length; i++) {
+//               beatElements[i].components.mod_model.beat(volume, 500);
+//               }
+//             }
+//             // beatElements.every(beat());
+//             // this.event = new Event("beatme"); 
+//             // document.dispatchEvent(this.event);
+//             // document.dispatchEvent(new CustomEvent('beatme', { bubbles: true, detail: {'volume' : volume}}));
+//           }
+//         } else {
+//           if (this.beatTime <= beatDetectionThrottle) {
+//             this.beatTime += window.performance.now();
+//           } else {
+//             this.beatCutOff *= beatDetectionDecay;
+//             this.beatCutOff = Math.max(this.beatCutOff, beatDetectionMinVolume);
+//           }
+//         }        
+//       } else {
+//           // beatDetectionDecay = 0.99;
+//           // beatDetectionMinVolume = 15;
+//           // beatDetectionThrottle = 250;
+//       }
+//   }
+//   window.requestAnimationFrame(AudioAnalyzer);   
+// };
 
 
 window.mobileAndTabletCheck = function() {
