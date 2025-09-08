@@ -16,8 +16,9 @@ import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, ti
 // import { keydown, CreateNewLocation } from '../connect/dialogs.js';
 import { addButtons, addFancyButtons } from './addButtons.mjs';
 
-import { LoadLocations, AddLocation } from './vtt_locations.mjs';
+import { LoadLocations, AddLocation, locationTokenContainer } from './vtt_locations.mjs';
 import { SetTimeKeysData, eventEl } from '../connect/events.js';
+import { poiLocations } from '../connect/connect.js';
 // import { keydown } from '../connect/dialogs.js';
 
 
@@ -37,6 +38,27 @@ export let font1 = 'Acme';
 export let font2 = 'Acme';
 export let font3 = 'Acme';
 
+export function GoToMapLocation (timestamp) {
+     console.log("tryna goat mmap locaiton " + timestamp);
+      if (locationTokenContainer && locationTokenContainer.children.length) {
+        for (let i = 0; i < locationTokenContainer.children.length; i++) {
+          if (timestamp == locationTokenContainer.children[i].data.timestamp) {
+            console.log(locationTokenContainer.children[i].data.x + " " + locationTokenContainer.children[i].data.z);
+          viewport.animate({
+                    position: { x: locationTokenContainer.children[i].data.x, y: locationTokenContainer.children[i].data.z }, // Target center position
+                    scale: 1.5, // Target zoom level
+                    time: 1000, // Animation duration of 1 second
+                    ease: 'easeInOutQuad', // Using a common easing function
+                    callbackOnComplete: () => {
+                        // console.log("Animation completed!");
+                    }
+                });
+                break;
+          }
+        }
+      }
+     
+}
 
 export let spritesContainer = new Container();
 const spriteLayer = new RenderLayer();
@@ -487,6 +509,10 @@ export async function GoWithIt() { //called from vtt.js
           addSprite(app, newSprite, viewport );
           // spriteFilter(newSprite, "HardMixBlend");
         }
+      }
+      if (locationData[i].markerType == "placeholder" || locationData[i].markerType == "poi") {
+        poiLocations.push(locationData[i]);
+      
       }
     }
   }

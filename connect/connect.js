@@ -67,7 +67,7 @@ let posRotRunning = false;
 // export let timeKeysData = {};
 // export let tkStarttimes = [];
 
-//hrm, move these to navigation, w/ next/previous?
+
 export let poiLocations = [];
 export let curveLocations = [];
 export let cloudMarkers = []; //???? unused>?//nope
@@ -517,6 +517,7 @@ export function UpdateAvatarName(name) {
 // }
 
 $('#nextButton').on('click', function(e) {
+   console.log("tryna goto next");
    GoToNext();
 });
 $('#previousButton').on('click', function(e) {
@@ -1307,6 +1308,10 @@ export function GoToPosRot (pos, rot) {
 export function GoToLocation(locationKey) {
    console.log("tryna goat locatioKey " + locationKey);
    // let location = JSON.parse(localStorage.getItem(locationKey));
+   // if ((settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default") && settings.hasBgMap) {
+   //    //if there's a map, move viewport instead of player
+
+   // } else {
    let targetEl = document.getElementById(locationKey);
    if (targetEl) { 
       let targetLocation = targetEl.getAttribute('position');
@@ -1319,30 +1324,12 @@ export function GoToLocation(locationKey) {
          let worldPos = new THREE.Vector3();
                // location.getWorldPosition(worldPos);
          worldPos = {'x': targetLocation.x, 'y': targetLocation.y + 1, 'z': targetLocation.z + 3};
-               // cameraEl.object3D.getWorldPosition( cameraPosition );
-         //       const zmod = worldPos.z + 5;
-         //       const ymod = worldPos.y - 1;
-         //       const xmod = worldPos.x;
-         // let pos = {x: xmod, y: ymod, z: zmod};
-
+        
          player.setAttribute('position', worldPos);
          console.log("target "+JSON.stringify(targetLocation)+ " vs. player " + JSON.stringify(player.getAttribute('position')));
 
-            //  var cameraEl = document.getElementById('player'); //hrm
-            // player.setAttribute('look-controls', {enabled: false});
-            // player.setAttribute("look-at", targetEl);
-            //    setTimeout(function (){
-            //       // player.object3D.updateMatrix();    
-            //       player.removeAttribute("look-at");
-            //       player.setAttribute('look-controls', {enabled: true});
-            //    }, 1000);
-
-         // cameraEl.removeAttribute("look-at");
-         // cameraEl.setAttribute('look-controls', {enabled: true});
-         // window.playerPosition = worldPos;
-
-         // ShowHideDialogPanel(); 
-      } 
+         // } 
+      }
    }
 }
 
@@ -1351,13 +1338,13 @@ export function PlayerToLocation(worldPos) {
    console.log("tryna set PlayerToLocation " + JSON.stringify(worldPos));
    if (player) {
       player.setAttribute('position', worldPos);
-   }
-   
-  
+   } 
 }
 
 export function GoToNext() {
+
    console.log("tryna gotonext " + settings.sceneType);
+   // if ((settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default") && settings.hasBgMap) { 
 // if (currentLocationIndex > 0) {
    if (settings.sceneType == "mapbox") {
       
@@ -1373,6 +1360,8 @@ export function GoToNext() {
       let lbData = locbuttons[currentLocationIndex].id;
       FlyToMapPosition(lbData.split("_")[0],lbData.split("_")[1], false);
     
+   // } else if ((settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default") && settings.hasBgMap) { 
+      
    } else {
      
          let curveDriver = document.getElementById("cameraCurve");
@@ -1524,7 +1513,7 @@ export function ReturnLocationTable () { //just show em all now!
       for (let i = 0; i < sceneLocations.locations.length; i++) {
          let markerString = "";
          if (sceneLocations.locations[i].isLocal != null && sceneLocations.locations[i].isLocal === true) {
-            markerString = "<span style=\x22color: pink; font-weight: bold;\x22>"+sceneLocations.locations[i].markerType+"</span>";
+            markerString = "<span style=\x22color: skyblue; font-weight: bold;\x22>"+sceneLocations.locations[i].markerType+"</span>";
          } else {
             markerString = "<span style=\x22color: lime; font-weight: bold;\x22>"+sceneLocations.locations[i].markerType+"</span>";
          }        
@@ -1534,10 +1523,15 @@ export function ReturnLocationTable () { //just show em all now!
       }
    } else {
       for (let i = 0; i < localData.locations.length; i++) {
+         localData.locations[i].x = parseFloat(localData.locations[i].x).toFixed(2).toString();
+         localData.locations[i].y = parseFloat(localData.locations[i].y).toFixed(2).toString();
+         localData.locations[i].z = parseFloat(localData.locations[i].z).toFixed(2).toString();
+         // localData.locations[i].y = localData.locations[i].y.toFixed(2);
+         // localData.locations[i].z = localData.locations[i].z.toFixed(2);
          let namelabel = (localData.locations[i].name != 'undefined' && localData.locations[i].name != undefined && localData.locations[i].name != null) ? localData.locations[i].name : localData.locations[i].label; 
          let namestring = "<span style=\x22color: white; \x22>"+namelabel+"</span>";
          if (localData.locations[i].isLocal != null && localData.locations[i].isLocal === true) {
-            namestring = "<span style=\x22color: pink; \x22>"+namelabel+"</span>";
+            namestring = "<span style=\x22color: skyblue; \x22>"+namelabel+"</span>";
             // hasLocalData = true;
          }  
 
@@ -1599,7 +1593,7 @@ export function ReturnLocationTable () { //just show em all now!
             asset = fAsset;
          }
          tablerows = tablerows + "<tr class=\x22clickableRow\x22 onclick=\x22LocationRowClick('"+localData.locations[i].timestamp+"')\x22><td>"+namestring+"</td><td>"+localData.locations[i].timestamp+"</td>"+
-         "<td>"+localData.locations[i].x+","+localData.locations[i].y+","+localData.locations[i].z+"</td><td>"+asset+"</td><td>"+ markerString+"</td></tr>";
+         "<td>"+localData.locations[i].x+", "+localData.locations[i].y+", "+localData.locations[i].z+"</td><td>"+asset+"</td><td>"+ markerString+"</td></tr>";
       }
    }
    return "<table id=\x22locations\x22><th style=\x22color: black;\x22>Name</th><th style=\x22color: black;\x22>ID</th><th style=\x22color: black;\x22>Position</th><th style=\x22color: black;\x22>Asset</th><th style=\x22color: black;\x22>Type</th>"+tablerows+"</table>";
@@ -1616,10 +1610,10 @@ function LocationRowClick(data) {
    // ShowLocationModal(isCloud, data);
 }
 
-export function CreateLocationAlt (filename, type, position) { //for not-aframe views, args null by default
+export function CreateLocationAlt (filename, type, position, timestamp) { //for not-aframe views, args null by default
 
    console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
-   let timestamp = null;
+   // let timestamp = null;
    let markertype = "placeholder";
    
    let modelID = "none";
@@ -1655,8 +1649,8 @@ export function CreateLocationAlt (filename, type, position) { //for not-aframe 
    // var sceneEl = document.querySelectorAll('a-scene')[0];
    
    // phEl.setAttribute('skybox-env-map', '');
-   timestamp = Date.now();
-   timestamp = parseInt(timestamp);
+   // timestamp = timestamp;
+   // timestamp = parseInt(timestamp);
    let locItem = {};
    locItem.x = newPosition.x.toString();
    locItem.eulerx = 0; //maybe get look vector?

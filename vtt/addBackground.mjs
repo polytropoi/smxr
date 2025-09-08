@@ -525,7 +525,7 @@ export async function addMap(app, viewport, spritesContainer) {
                 SetSelectedPosition('', worldPos.x.toFixed(2) , worldPos.y.toFixed(2));
           }
           if (keydown == "X") {
-            CreateNewLocation();
+            // CreateNewLocation();
             AddLocation(app, viewport, spritesContainer);
           }
         });

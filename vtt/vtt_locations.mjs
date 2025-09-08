@@ -3,18 +3,19 @@ import { Assets, Graphics, Container, Text } from 'pixi';
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 import { selectedPosition, eventEl } from '../connect/events.js';
 import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../connect/dialogs.js';
-import { localData, SaveModToLocal} from '../connect/connect.js';
+import { localData, CreateLocationAlt } from '../connect/connect.js';
 
 // import { dragTarget, onDragStart, onDragMove, onDragEnd } from './addElements.mjs';
 import { app, viewport } from './vtt_main.mjs';
 import { SaveLocalData } from '../connect/indexedDb.js';
+
 
   let dragTarget = null;
 //   let viewport;
   eventEl.addEventListener('map-update', onMapLocationUpdate);
 
  
-    function onMapLocationUpdate(event) { //dialog savemod button or other event that updates a map token
+function onMapLocationUpdate(event) { //dialog savemod button or other event that updates a map token
         
         const theEl = document.getElementById(event.details);
         console.log("theEl data " + theEl.dataset.eldata);
@@ -69,7 +70,7 @@ import { SaveLocalData } from '../connect/indexedDb.js';
     }
   }
 
-    let locationTokenContainer = new Container();
+    export let locationTokenContainer = new Container();
     locationTokenContainer.interactive = true;
     locationTokenContainer.on('pointerup', onDragEnd);
     locationTokenContainer.on('pointerupoutside', onDragEnd);
@@ -317,7 +318,13 @@ export function LoadLocations(app, viewport, spritesContainer) {
     viewport.bounce(); //better to add this after locations loaded..?
     // console.log(locationTokenContainer.children);
     }
- }
+    if (localMarkers.length || cloudMarkers.length) {
+        let nextbuttonEl = document.getElementById('next_Button');
+        let prevbuttonEl = document.getElementById('previous_Button');
+        nextbuttonEl.style.visibility = "visible";
+        prevbuttonEl.style.visibility = "visible";
+    }
+}
 
 
  export function AddLocation(app, viewport, spritesContainer) {
@@ -402,12 +409,13 @@ export function LoadLocations(app, viewport, spritesContainer) {
                     'z' : ypos
                     }
 
-    console.log("new local maptoken w/ viewport position " + viewport.x + " " + viewport.x  + " scale " + viewport.scale.x + " " + viewport.scale.y  + " position " + xpos + "  " + ypos);/// + " " + worldPos.x + " " + worldPos.y);
+    console.log("new local maptoken id " + token.data.timestamp + " position " + xpos + "  " + ypos);/// + " " + worldPos.x + " " + worldPos.y);
      
 
     token.x = xpos;
     token.y = ypos;
     locationTokenContainer.addChild(token);
+    CreateLocationAlt(null, null, null, token.data.timestamp);
    token.on('pointerdown', (event) => {
             console.log("keydown is " + keydown);
 
@@ -437,4 +445,4 @@ export function LoadLocations(app, viewport, spritesContainer) {
             }
         });
 
- }
+}

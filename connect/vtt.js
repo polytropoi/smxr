@@ -1,10 +1,10 @@
 //loaded with landing pages, instead of connect.js, or landing.js (w/out aframe/three, with pixi refs)
 
-import { GoWithIt } from "../vtt/vtt_main.mjs"; //pixi fu here!@
+import { GoWithIt, GoToMapLocation } from "../vtt/vtt_main.mjs"; //pixi fu here!@
 
 import {settings, profile} from "../../connect/settings.js";
 
-import {localData, SetSceneLocations} from "../../connect/connect.js";
+import {localData, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "../../connect/connect.js";
 
 
 
@@ -67,7 +67,7 @@ let posRotRunning = false;
 export let timeKeysData = {};
 export let tkStarttimes = [];
 
-export let poiLocations = [];
+// export let poiLocations = [];
 export let curveLocations = [];
 export let cloudMarkers = []; //???? unused>?//nope
 export let sceneModels = [];
@@ -93,6 +93,8 @@ let uiVisible = true;
 let pauseLoops = false;
 let matrixClient = null;
 let matrixRoomsData = null;
+
+let currentLocationIndex = -1;
 // let vidz = null;
 // let videoEl = null;
 
@@ -124,6 +126,37 @@ export let avatarName = "";
 // export let audioGroupsData = {};
 
 // window.LocationRowClick = LocationRowClick;
+
+$('#next_Button').on('click', function(e) {
+               console.log("currentLocationIndex " +  currentLocationIndex  +" poiLocations"  + JSON.stringify(poiLocations));
+                  if (sceneLocations != null && poiLocations.length > 0) { 
+                     if (currentLocationIndex < poiLocations.length - 1) {
+                        currentLocationIndex++;
+                     } else {
+                        currentLocationIndex = 0;
+                        
+                     }
+                  console.log("currentLocationIndex " +  currentLocationIndex  + " " + JSON.stringify(poiLocations));
+                  GoToMapLocation(poiLocations[currentLocationIndex].timestamp);
+                  document.getElementById("footerText").innerHTML = poiLocations[currentLocationIndex].name;
+               }
+   
+});
+$('#previous_Button').on('click', function(e) {
+        if (sceneLocations != null && poiLocations.length > 0) {
+           if (currentLocationIndex > 0) {
+              currentLocationIndex--;
+           } else {
+              currentLocationIndex = poiLocations.length - 1;
+           }
+           
+           GoToMapLocation(poiLocations[currentLocationIndex].timestamp);
+           let curveDriver = document.getElementById("cameraCurve");
+           if (!curveDriver) {
+              document.getElementById("footerText").innerHTML = poiLocations[currentLocationIndex].name;
+           }// }
+        }
+});
 
 $(function() { 
 
@@ -390,12 +423,12 @@ export function SetTimedEventsListenerMode(mode) {
    timedEventsListenerMode = mode;
 }
 
-$('#nextButton').on('click', function(e) {
-   GoToNext();
-});
-$('#previousButton').on('click', function(e) {
-   GoToPrevious();
-});
+// $('#nextButton').on('click', function(e) {
+//    GoToNext();
+// });
+// $('#previousButton').on('click', function(e) {
+//    GoToPrevious();
+// });
 
 $('a-entity').each(function() {  //external way of getting click duration for physics
 

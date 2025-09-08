@@ -1278,10 +1278,15 @@ function ShowLocationModal(timestamp) {
     clearSelection();
     let thisLocation = null;
     selectedLocationTimestamp = timestamp;
+
+
     // console.log("loaded and looking for " + phID);
     console.log("ShowLocationModal looking for " + timestamp);
     const phID = timestamp;
-
+    let saveToLocalButton = "<button id=\x22saveModToLocalButton\x22 class=\x22addButton\x22 style=\x22float:right;\x22 data-phID=\x22"+phID+"\x22 >Save to Local DB</button>";
+    if (settings.hasBgMap && (settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default")) {
+      saveToLocalButton = "<span id=\x22modMessage\x22 style=\x22color:pink; float:right;\x22>Modding in 2D mode only using map!</span>";
+    }
     console.log("local length " + localData.locations.length + " vs cloud length " + sceneLocations.locations.length);
     if (localData.locations.length) {
       // console.log("looking for localdata.locations");
@@ -1430,8 +1435,8 @@ function ShowLocationModal(timestamp) {
 
 
 
-        "<button id=\x22saveModToLocalButton\x22 class=\x22addButton\x22 style=\x22float:right;\x22 data-phID=\x22"+phID+"\x22 >Save to Local DB</button>"+
-        cloudSaveButton +
+        saveToLocalButton + 
+        // cloudSaveButton +
 
         // "<button class=\x22snapButton\x22 onclick=\x22SnapLocation('"+phID+"')\x22>Snap</button>"+
         // "<button class=\x22grabButton\x22 onclick=\x22GrabLocation('"+phID+"')\x22>Grab</button>"+
@@ -2070,6 +2075,7 @@ function GreetingModal() {
 export function SceneManglerModal(mode, autoHide) {
 
     // ClearInputs();
+
     console.log("opening SceneManglerModal with location " + selectedLocationTimestamp);
         
     if (localData.settings.sceneColor1) {
@@ -2116,14 +2122,26 @@ export function SceneManglerModal(mode, autoHide) {
     }
     let hasModsMessage = "<span id=\x22modMessage\x22 style=\x22float:right;\x22>No local mods found</span>";
     if (hasLocalData) {
-      hasModsMessage = "<span id=\x22modMessage\x22 style=\x22color:pink; float:right;\x22>Local mods found!</span>";
+      hasModsMessage = "<span id=\x22modMessage\x22 style=\x22color:skyblue; float:right;\x22>Local mods found!</span>";
     }
+    // if (settings.hasBgMap) {
+      
+    // }
+    let SaveLocalAndCloseButton = "<button id=\x22saveLocalAndCloseButton\x22 style=\x22float: right;\x22 class=\x22addButton\x22>Save Local and Close</button>";
     let ownerButton = "";
     let sendAdminMessageButton = "";
-    if (userData.sceneOwner == "indaehoose") {
-        ownerButton = "<button id=\x22EditScene\x22 class=\x22addButton\x22 id=\x22editButton\x22 onclick=\x22window.location='../main/?type=scene&iid="+userData.sceneID+"';\x22>Edit Scene</button>"+
-        "<button id=\x22SaveModsToCloud\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 >Save to Cloud DB</button>";
-        sendAdminMessageButton = "<button id=\x22sendAdminMessageButton\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 >Send Admin Message</button>";
+    if (settings && (settings.sceneType && settings.sceneType.toLowerCase() == 'aframe' || settings.sceneType.toLowerCase() == 'default') && settings.hasBgMap ) {
+      // //hide the save buttons if in 3d mode using map positions
+      // const modal = document.getElementById("modalContent");  
+      // modal.getElementById('saveModsToCloudButton').style.display = 'none';
+       hasModsMessage = "<span id=\x22modMessage\x22 style=\x22color:pink; float:right;\x22>Modding in 2D mode only using map!</span>";
+       SaveLocalAndCloseButton = "";
+    } else {
+      if (userData.sceneOwner == "indaehoose") {
+          ownerButton = "<button id=\x22EditScene\x22 class=\x22addButton\x22 id=\x22editButton\x22 onclick=\x22window.location='../main/?type=scene&iid="+userData.sceneID+"';\x22>Edit Scene</button>"+
+          "<button id=\x22SaveModsToCloud\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 >Save to Cloud DB</button>";
+          sendAdminMessageButton = "<button id=\x22sendAdminMessageButton\x22 style=\x22float: left;\x22 class=\x22reallySaveButton\x22 >Send Admin Message</button>";
+      }
     }
 
     let oculusButton = "<button style=\x22float: right;\x22 class=\x22addButton\x22 id=\x22oculusButton\x22><a href=\x22https://www.oculus.com/open_url/?url=https%3A%2F%2Fservicemedia.net/webxr/"+room+"\x22>Open on Oculus Quest</a></button>";
@@ -2309,7 +2327,8 @@ export function SceneManglerModal(mode, autoHide) {
 
       "<button class=\x22deleteLocalSceneDataButton\x22 style=\x22float: left;\x22 id=\x22deleteLocalSceneData\x22 >Delete Local Scene Data</button>"+
       "<button class=\x22deleteLocalProfileDataButton\x22 style=\x22float: left;\x22 id=\x22deleteLocalProfileData\x22 >Delete Local Profile Data</button>"+
-      "<button id=\x22saveLocalAndCloseButton\x22 style=\x22float: right;\x22 class=\x22addButton\x22>Save Local and Close</button>"+
+      SaveLocalAndCloseButton +
+
 
       "</div>"+
 
@@ -2469,7 +2488,7 @@ export function SceneManglerModal(mode, autoHide) {
 // }
 function SaveLocalAndClose() {
   SaveLocalData();
-  // ShowHideDialogPanel();
+  ShowHideDialogPanel();
 }
 
 export function ToggleStats () {

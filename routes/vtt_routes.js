@@ -3368,7 +3368,10 @@ vtt_router.get('/:_id', function (req, res) {
                         "<body "+bgstyle+">" +
                         canvasOverlay +
                         transportButtons+ 
-                    
+
+
+                       
+
                         "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
                         "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
                         settingsData +
@@ -3457,11 +3460,15 @@ vtt_router.get('/:_id', function (req, res) {
                         "<script type=\x22module\x22 src=\x22/vtt/vtt_main.mjs\x22 ></script>" +
 
                         // audioHtml +
-
+                        "<div class=\x22footer\x22><div class=\x22previous-button-2\x22 id=\x22previous_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
+                         "<div class=\x22next-button-2\x22 id=\x22next_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div></div>"+
+                        "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
+                        
                         "<div id=\x22pixi-container\x22>"+
                         // "<canvas id=\x22pixi-canvas\x22></canvas>"+
                         "</div>"+
                         videoEl+
+                      
                         "</body>\n" +
                     
                         "</html>";
