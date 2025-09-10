@@ -3,39 +3,13 @@ import { Assets, Graphics, Container, Text } from 'pixi';
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 
 import { PrimaryAudioPlayPauseToggle, ReturnTimedEventsListenerMode, PrimaryAudioIsPlaying, isPlaying } from '../connect/media.js';
-
+import { addBackgroundPictures } from './addBackground.mjs';
+import { app, viewport, hasBgMap } from './vtt_main.mjs';
 // export let isPlaying = false;
 // import 
 
-let playButton;
-
-export async function addFancyButtons(app, buttonData, uicontainer) {
-
-    // if (ReturnTimedEventsListenerMode() == "None") {
-    //     return;
-    // }
-    console.log("tryna add buttons!");
-
-// await Assets.addBundle('fonts', [{ alias: 'Acme', src: '../../fonts/web/Acme.woff' }]);
- 
-  const container = new Container();
-
-    container.y = app.screen.height - (app.screen.height * .1);
-    container.x = app.screen.width / 2;
-
-    // container.height = app.screen.height;
-    // container.width = app.screen.width;
-    //  const button = new Button(
-    //       new Graphics()
-    //           .rect(0, 0, 100, 50, 15)
-    //           .fill(0xFFFFFF)
-    //  );
-    // const bGraphic1 = new Graphics();
-    // bGraphic1.x = app.screen.width / 2;
-    // bGraphic1.y = app.screen.height / 2;
-    // bGraphic1.fill(0xFFFFFF);
-    // bGraphic1.roundRect(500, 500, 100, 50, 15);
-   
+  let buttonContainer = new Container();
+export function addSimplePlayButton(app, buttonData, uicontainer) {
     const buttonText = new Text({
         text: 'Click me',
         style: {
@@ -51,6 +25,39 @@ export async function addFancyButtons(app, buttonData, uicontainer) {
             }
         }
     });
+}
+
+export function addPlayButton(app, buttonData, uicontainer) {
+
+    // if (ReturnTimedEventsListenerMode() == "None") {
+    //     return;
+    // }
+    console.log("tryna add buttons!");
+
+// await Assets.addBundle('fonts', [{ alias: 'Acme', src: '../../fonts/web/Acme.woff' }]);
+ 
+
+    app.stage.addChild(buttonContainer);
+
+    // buttonContainer.y = uicontainer.height - (uicontainer.height * .1);
+    // buttonContainer.x = uicontainer.width / 2;
+        // buttonContainer.interactive = true;
+
+
+    // container.height = app.screen.height;
+    // container.width = app.screen.width;
+    //  const button = new Button(
+    //       new Graphics()
+    //           .rect(0, 0, 100, 50, 15)
+    //           .fill(0xFFFFFF)
+    //  );
+    // const bGraphic1 = new Graphics();
+    // bGraphic1.x = app.screen.width / 2;
+    // bGraphic1.y = app.screen.height / 2;
+    // bGraphic1.fill(0xFFFFFF);
+    // bGraphic1.roundRect(500, 500, 100, 50, 15);
+   
+
 
     const fontsize = Math.max(16, window.innerWidth / 50); 
     const text = new Text({
@@ -69,12 +76,12 @@ export async function addFancyButtons(app, buttonData, uicontainer) {
         }
     });
 
-    const scaleFactor = app.stage.width / 1500;
+    const scaleFactor = app.stage.width / 1200;
     const width = 100 * scaleFactor;
     const height = 50 * scaleFactor;
     const strokeWidth = 3 * scaleFactor;
 
-    playButton = new FancyButton({
+    const playButton = new FancyButton({
         defaultView: new Graphics()
         .roundRect(0, 0, width, height, 25)
         .stroke({ color: 'black', width: strokeWidth })
@@ -118,27 +125,34 @@ export async function addFancyButtons(app, buttonData, uicontainer) {
             }
         }
     });
+   
 
+        text.interactive = false;
+    text.eventMode = 'none';
+    buttonContainer.addChild(playButton);
+    
+    playButton.interactive = true;
+    playButton.eventMode = 'static';
     playButton.alpha = .5;
-    container.addChild(playButton);
-
-    app.stage.addChild(container);
     // playButton.y = container.height + 300;
 
-    // playButton.y = window.innerHeight - (window.innerHeight  * .1);;
+    playButton.y = window.innerHeight - (window.innerHeight  * .1);;
+    playButton.x = window.innerWidth / 2;
 
-    playButton.onPress.connect(() => 
+    // playButton.onPress.connect(() => 
+         playButton.onPress.connect(() => console.log('Button pressed!'));
+    playButton.on('pointerdown', (event) => {
         // console.log('onPress');
-    PlayPauseToggle()
+    PlayPauseToggle(playButton);
     // if (isPlaying) {
        
     // }
 
-    );
+    });
 }
 
-async function PlayPauseToggle() {
-    console.log("timedEvents Mode " + ReturnTimedEventsListenerMode());
+async function PlayPauseToggle(playButton) {
+    console.log("playPauseToggle w timedEvents Mode " + ReturnTimedEventsListenerMode());
     // if (ReturnTimedEventsListenerMode() == "Primary Audio") {
     //     PrimaryAudioPlayPauseToggle();
     //     isPlaying = await PrimaryAudioIsPlaying();
@@ -147,6 +161,7 @@ async function PlayPauseToggle() {
     //     PrimaryAudioPlayPauseToggle();
     //     isPlaying = await PrimaryAudioIsPlaying();
     // }
+    addBackgroundPictures(app);
     PrimaryAudioPlayPauseToggle();
     if (isPlaying) {
         playButton.defaultView.tint = 0xfc03b6; //({ color: "Yellow", alpha: .75 });

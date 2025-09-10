@@ -6,7 +6,7 @@ import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../con
 import { localData, CreateLocationAlt } from '../connect/connect.js';
 
 // import { dragTarget, onDragStart, onDragMove, onDragEnd } from './addElements.mjs';
-import { app, viewport } from './vtt_main.mjs';
+import { app, viewport, hasBgMap } from './vtt_main.mjs';
 import { SaveLocalData } from '../connect/indexedDb.js';
 
 
@@ -78,6 +78,9 @@ function onMapLocationUpdate(event) { //dialog savemod button or other event tha
 
 export function LoadLocations(app, viewport, spritesContainer) {
     console.log("tryna load localMarkers..");
+    if (!hasBgMap) {
+        return;
+    }
     const localMarkers = document.querySelectorAll('.local_marker');
     const cloudMarkers = document.querySelectorAll('.cloud_marker');
     spritesContainer.addChild(locationTokenContainer);

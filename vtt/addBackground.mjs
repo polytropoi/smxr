@@ -2,14 +2,16 @@ import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMat
 // import { CompositeTilemap } from 'pixi-tilemap';
 import { SetSelectedPosition } from '../connect/events.js';
 import { keydown, CreateNewLocation } from '../connect/dialogs.js';
-import { sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter} from './vtt_main.mjs';
+import { viewport, sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, 
+  viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter, spritesContainer} from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 import { AdvancedBloomFilter, ReflectionFilter, OldFilmFilter } from '@pixi/filters';
 import { AddLocation } from './vtt_locations.mjs';
 export let mapsize = {};
 
 export let background;
-export let backgroundPictureGroupSprite;
+export let backgroundPictureGroupSprite = new Sprite();
+
 // import { settings } from '../connect/settings.js';
 
 export function addBackground(app, viewport, isTileable) {
@@ -72,7 +74,7 @@ export function addBackground(app, viewport, isTileable) {
 }
 
 
-export function addBackgroundVideo(app, viewport, spritesContainer) {
+export function addBackgroundVideo(app, viewport) {
 
 
   const video = document.getElementById("bgVideo");
@@ -210,50 +212,50 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
           }
         }
     // Center background sprite anchor.
-    spritesContainer.anchor = 0.5;
+    spritesContainer.anchor = .5;
     
     /**
      * If the preview is landscape, fill the width of the screen
      * and apply horizontal scale to the vertical scale for a uniform fit.
      */
 
-    if (app.screen.width > app.screen.height) {
-      spritesContainer.width = app.screen.width - (app.screen.width * .1);
-          // background.width = app.screen.width;
-      spritesContainer.scale.y = spritesContainer.scale.x;
-    } else {
-      /**
-       * If the preview is square or portrait, then fill the height of the screen instead
-       * and apply the scaling to the horizontal scale accordingly.
-       */
-      spritesContainer.height = app.screen.height - (app.screen.height * .1);
-      spritesContainer.scale.x = spritesContainer.scale.y;
-    }
+          // if (app.screen.width > app.screen.height) {
+          //   spritesContainer.width = app.screen.width - (app.screen.width * .1);
+          //       // background.width = app.screen.width;
+          //   spritesContainer.scale.y = spritesContainer.scale.x;
+          // } else {
+          //   /**
+          //    * If the preview is square or portrait, then fill the height of the screen instead
+          //    * and apply the scaling to the horizontal scale accordingly.
+          //    */
+          //   spritesContainer.height = app.screen.height - (app.screen.height * .1);
+          //   spritesContainer.scale.x = spritesContainer.scale.y;
+          // }
 
     // Position the background sprite in the center of the stage.
-    spritesContainer.x = app.screen.width * .05;
-    spritesContainer.y = app.screen.height * .05;
+    spritesContainer.x = viewport.width * .05;
+    spritesContainer.y = viewport.height * .05;
 
     addGridOverlay(app, tilesize, xCount, yCount, picwidth, picheight, spritesContainer, viewport);
     // Add the background to the stage.
     // app.stage.addChild(map);
     viewport.addChild(spritesContainer);
   
-    // viewport.animate({
-    //   // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-    //   position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-    //   scale: 1.1, // Target zoom level
-    //   time: 1000, // Animation duration of 1 second
-    //   ease: 'easeInOutQuad' // Using a common easing function
+    viewport.animate({
+      // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+      position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+      scale: 1.1, // Target zoom level
+      time: 1000, // Animation duration of 1 second
+      ease: 'easeInOutQuad' // Using a common easing function
   
-    // });
+    });
 
         // viewport.zoomPercent(.01, true);    
     // spritesContainer.zIndex = 10;
             
 }
 
-export function addBackgroundPictures(app, viewport, spritesContainer) {
+export function addBackgroundPictures(app) {
 
   let randomIndex = Math.floor(Math.random()*pictureGroupsData[0].items.length);
   let id = pictureGroupsData[0].items[randomIndex];
@@ -261,6 +263,9 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
   const picdata = pictureGroupsData[0].images.find(obj => obj._id === id);
 
   let viewOrientation = "landscape";
+  if (window.innerWidth < window.innerHeight) {
+    viewOrientation = "portrait";
+  }
   let picOrientation = "landscape";
     let modFactor = Math.random();
     const signFactor = Math.random();
@@ -268,56 +273,75 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
     const signScaleFactor = Math.random();
 
 
-  if (!backgroundPictureGroupSprite) {
-    const firstTexture = Texture.from(id);
-    if (firstTexture.width == firstTexture.height) {
-      picOrientation = "square";
-    } else if (firstTexture.width < firstTexture.height) {
-      picOrientation = "portrait";
-    }
-    // backgroundPictureGroupSprite.texture = newTexture;
+//     spritesContainer.x = app.screen.width / 2;
+// spritesContainer.y = app.screen.height / 2;
 
-    backgroundPictureGroupSprite = Sprite.from(id);
+// // Center bunny sprite in local container coordinates
+// spritesContainer.pivot.x = spritesContainer.width / 2;
+// spritesContainer.pivot.y = spritesContainer.height / 2;
 
+  // // if (!backgroundPictureGroupSprite) {
+  //   const firstTexture = Texture.from(id);
+  //   if (firstTexture.width == firstTexture.height) {
+  //     picOrientation = "square";
+  //   } else if (firstTexture.width < firstTexture.height) {
+  //     picOrientation = "portrait";
+  //   }
+  //   // backgroundPictureGroupSprite.texture = newTexture;
 
+  //   backgroundPictureGroupSprite = Sprite.from(id);
+
+    backgroundPictureGroupSprite.anchor = .5;
     spritesContainer.addChild(backgroundPictureGroupSprite);
 
+    spritesContainer.interactive = true;
 
 
-    viewport.addChild(spritesContainer);
+    // spritesContainer.anchor = .5;
+    // spritesContainer.width = 
+    // spritesContainer.x = 0;
+    //         spritesContainer.y = viewport.height * .01;
+    spritesContainer.height = app.stage.height;
+    // let xMod = .5;
+    // viewport.anchor = .5;
 
-    if (viewOrientation == "landscape" && picOrientation == "square") {  
-    
-      if (signFactor > .5) {
-        modFactor = (modFactor / 8) * -1
-      } else {
-        modFactor = (modFactor / 8);
-      }
-      SetViewportVerticalCenter(1 + modFactor);
 
-      if (signScaleFactor > .5) {
-        modScaleFactor = (modScaleFactor / 6) * -1
-      } else {
-        modScaleFactor = (modScaleFactor / 6);
-      }
-    } else if (viewOrientation == "landscape" && picOrientation == "square") {  
-    
-      if (signFactor > .5) {
-        modFactor = (modFactor / 8) * -1
-      } else {
-        modFactor = (modFactor / 8);
-      }
-      SetViewportVerticalCenter(1 + modFactor);
 
-      if (signScaleFactor > .5) {
-        modScaleFactor = (modScaleFactor / 6) * -1
-      } else {
-        modScaleFactor = (modScaleFactor / 6);
-      }
-    } else {
-      SetViewportVerticalCenter(2.25);
-    }
-  } else {
+    // if (viewOrientation == "landscape" && picOrientation == "square") {  
+    //   // xMod = .85;
+    //     // spritesContainer.x = app.stage.width *.01;
+    //   if (signFactor > .5) {
+    //     modFactor = (modFactor / 8) * -1
+    //   } else {
+    //     modFactor = (modFactor / 8);
+    //   }
+    //         console.log("modFactor iss " + modFactor);
+    //   SetViewportVerticalCenter(modFactor);
+
+    //   if (signScaleFactor > .5) {
+    //     modScaleFactor = (modScaleFactor / 6) * -1
+    //   } else {
+    //     modScaleFactor = (modScaleFactor / 6);
+    //   }
+    // } else if (viewOrientation == "portrait" && picOrientation == "square") {  
+    //   xMod = 1;
+    //   if (signFactor > .5) {
+    //     modFactor = (modFactor / 8) * -1
+    //   } else {
+    //     modFactor = (modFactor / 8);
+    //   }
+    //   console.log("modFactor is " + modFactor);
+    //   SetViewportVerticalCenter(modFactor);
+
+    //   if (signScaleFactor > .5) {
+    //     modScaleFactor = (modScaleFactor / 6) * -1
+    //   } else {
+    //     modScaleFactor = (modScaleFactor / 6);
+    //   }
+    // } else {
+    //   SetViewportVerticalCenter(2.25);
+    // }
+  // } else { ///////////// IF SPRITE IS ALREADY SET, JUST SWAP
     //∂∂
     const newTexture = Texture.from(id);
     if (newTexture.width == newTexture.height) {
@@ -328,11 +352,14 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
     backgroundPictureGroupSprite.texture = newTexture;
 
 
-  }
+  // }
+  ///////////////////// now gotsa sprite and texture 
+
   if (app.screen.width > app.screen.height) {
       spritesContainer.width = app.screen.width - (app.screen.width * .1);
           // background.width = app.screen.width;
       spritesContainer.scale.y = spritesContainer.scale.x;       
+      
   } else if (app.screen.width < app.screen.height){
     viewOrientation = "portrait";
     spritesContainer.height = app.screen.height - (app.screen.height * .1);
@@ -341,19 +368,22 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
     viewOrientation = "square";
   }
 
-  spritesContainer.x = app.screen.width * .05;
-  spritesContainer.y = app.screen.height * .05;
-  spritesContainer.anchor = .5;
+  // spritesContainer.x = app.screen.width * .25;
+  // // spritesContainer.y = app.screen.height * .05;
+  // // spritesContainer.anchor = ;
+  //   // spritesContainer.width = app.screen.width;
+  //       spritesContainer.height = app.screen.height;
 
-    console.log("picData orientation " + picOrientation + " viewOrientation " + viewOrientation);
-
+      let xMod = .75;    
+      // spritesContainer.height = app.stage.height;
   if (viewOrientation == "landscape" && picOrientation == "square") {  
     if (signFactor > .5) {
       modFactor = (modFactor / 4) * -1
     } else {
       modFactor = (modFactor / 4);
     }
-    SetViewportVerticalCenter(1.2 + modFactor);
+        console.log("modFactor is " + modFactor);
+    SetViewportVerticalCenter(modFactor);
 
     if (signScaleFactor > .5) {
       modScaleFactor = (modScaleFactor / 6) * -1
@@ -361,6 +391,8 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
       modScaleFactor = (modScaleFactor / 6);
     }
   } else {
+        xMod = 1.1;
+    console.log("modFactor is 2.25");
     SetViewportVerticalCenter(2.25);
   }
  
@@ -417,10 +449,12 @@ export function addBackgroundPictures(app, viewport, spritesContainer) {
       matrix[6] = Math.sin(count / 4)  * randomFactor;
     });
     // }
-  viewport.animate({
-      // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-      position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
-      scale: 1.2 + modScaleFactor, // Target zoom level
+        console.log("modFactor " + modFactor + " modScaleFactor " + modScaleFactor + " viewOrientation " + viewOrientation + " picOrientation " + 
+          picOrientation + " viewportVerticalCenter" + viewportVerticalCenter+ " viewportHorizontalCenter" + viewportHorizontalCenter);
+      viewport.animate({
+      position: { x: 0, y:0}, // Target center position
+      // position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
+      scale: 1.1 + modScaleFactor, // Target zoom level
       time: 3000, // Animation duration of 1 second
       ease: 'easeInOutQuad' // Using a common easing function
   

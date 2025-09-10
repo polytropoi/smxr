@@ -253,11 +253,11 @@ export function addSprite (app, sprite, viewport) {
     // sprite.blendMode = 'add';
     sprite.filters = [filter];
     sprite.alpha = .85;
-    if (viewport) {
-      viewport.addChild(sprite);
-    } else {
+    // if (viewport) {
+    //   viewport.addChild(sprite);
+    // } else {
       app.stage.addChild(sprite);
-    }
+    // }
 
     let count = 0;
     app.ticker.add(() => {

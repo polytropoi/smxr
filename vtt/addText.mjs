@@ -1,5 +1,6 @@
 import { Text, TextStyle, Assets, Container } from 'pixi';
-import { fontFillColor, fontFillColorAlt, font1, stripExtension } from './vtt_main.mjs';
+import { fontFillColor, fontFillColorAlt, font1, stripExtension, app, viewport } from './vtt_main.mjs';
+
 // import { ReturnUserProfile } from '../connect/vtt.js';
 // Load font before use
 // await Assets.load({
@@ -12,56 +13,96 @@ import { fontFillColor, fontFillColorAlt, font1, stripExtension } from './vtt_ma
 
 
 // let userProfile;
+    
+    let textContainer = new Container();
 
     // const text3 = new Text({ text: 'Dotrice Regular.woff', style: { fontFamily: 'Dotrice Regular', fontSize: 50 } });
-export function addText(app, textData, uicontainer) {
-
-    console.log("font 1 iis " + font1); 
-    const newFontSize = Math.max(16, window.innerWidth / 20); 
-    const newSmallFontSize = Math.max(16, window.innerWidth / 30); 
-    const greetingText = new Text({
-        text: textData.split("~")[0],
-        style: {
-        fill: fontFillColor,
-        fontSize: newFontSize,
-        fontFamily: stripExtension(font1),
-        stroke: { color: '#4a1850', width: 5, join: 'round' },
-            dropShadow: {
-            color: '#000000',
-            blur: 4,
-            angle: Math.PI / 6,
-            distance: 6,
-            }
-        },
-        anchor: 0.5
-    });
-
-    const questText = new Text({
-        text: textData.split("~")[1],
-        style: {
-        fill: fontFillColor,
-        fontSize: newSmallFontSize,
-        fontFamily: stripExtension(font1),
-        stroke: { color: '#4a1850', width: 5, join: 'round' },
-            dropShadow: {
-            color: '#000000',
-            blur: 4,
-            angle: Math.PI / 6,
-            distance: 6,
-            }
-        },
-        anchor: 0.5
-    });
-
-   
-
-    greetingText.y = app.screen.height * .075;
-    questText.y = app.screen.height * .2;
+export function addText(app, textData) {
 
 
+
+      app.stage.addChild(textContainer);
+//   textContainer.anchor.x = .5;
+//   textContainer.width = window.innerWidth;
+//   textContainer.height = window.innerHeight;
+// //     // textContainer.height = app.stage.height;
+//     // textContainer.x = app.stage.width / 2;
+//         textContainer.x = 0;
+//     textContainer.y = app.screen.height * .1;
+
+    let t1 = "";
+    let t2 = "";
+    if (textData.split("~")[0]) {
+        t1 = textData.split("~")[0];
+    }
+    if (textData.split("~")[1]) {
+        t2 = textData.split("~")[1];
+    }
+    // t1 = 
+    console.log("textData " + textData + " font 1 iis " + font1); 
+    if (t1 && t1 != "") {
+        const newFontSize = Math.max(16, window.innerWidth / 20); 
+        const newSmallFontSize = Math.max(16, window.innerWidth / 30); 
+        const greetingText = new Text({
+            text: t1,
+            style: {
+            fill: fontFillColor,
+            fontSize: newFontSize,
+            fontFamily: stripExtension(font1),
+            stroke: { color: '#4a1850', width: 5, join: 'round' },
+                dropShadow: {
+                color: '#000000',
+                blur: 4,
+                angle: Math.PI / 6,
+                distance: 6,
+                }
+            },
+            anchor: 0.5
+        });
+
+    greetingText.y = app.screen.height * .2;
+     greetingText.x = app.screen.width / 2;
+    textContainer.addChild(greetingText);
+
+    }
+    if (t2 && t2 != "") {
+        const questText = new Text({
+            text: t2,
+            style: {
+            fill: fontFillColor,
+            fontSize: newSmallFontSize,
+            fontFamily: stripExtension(font1),
+            stroke: { color: '#4a1850', width: 5, join: 'round' },
+                dropShadow: {
+                color: '#000000',
+                blur: 4,
+                angle: Math.PI / 6,
+                distance: 6,
+                }
+            },
+            anchor: 0.5
+        });
+        questText.y = app.screen.height * .2;
+        questText.x = app.screen.width / 2;
+        textContainer.addChild(questText);
+    }
+
+
+
+    //
+
+    // 
+        // questText.x = window.innerWidth/2;
+    // questText.y = window.innerHeight * .2;
+
+
+
+
+
+// questText.y = app.stage.height * .3;
     // playerText.y += 20;
 
-    uicontainer.addChild(greetingText, questText);
+
 }
 
 export function addPlayerProfileText (app, userProfile, uicontainer) {
@@ -88,20 +129,21 @@ export function addPlayerProfileText (app, userProfile, uicontainer) {
             angle: Math.PI / 6,
             distance: 6,
             }
-        }
+        },
+        anchor: .5
     });
-    playerText.anchor.x = .5;
+    playerText.x = app.screen.width/ 2;
     // playerText.y = app.screen.height - (app.screen.height * .2);
-    playerText.y = app.screen.height * .75;
-    uicontainer.addChild(playerText);
+    playerText.y = app.screen.height * .65;
+    textContainer.addChild(playerText);
 
             setTimeout(() =>  {
-              HideSplashTexts(uicontainer);
+              HideSplashTexts(textContainer);
             }, 4000);
 }
 
-export function HideSplashTexts(uicontainer) {
-    uicontainer.removeChildren();
+export function HideSplashTexts(textContainer) {
+    textContainer.removeChildren();
 }
 
 function clamp(num, lower, upper) {
@@ -110,7 +152,7 @@ function clamp(num, lower, upper) {
 
 let newFontSize = Math.max(16, window.innerWidth / 20); 
 let eventText;
-let textContainer;
+let eventTextContainer;
 let timeout;
 
 export function addEventText(app, textData, uicontainer) {
@@ -139,13 +181,13 @@ export function addEventText(app, textData, uicontainer) {
             },
             anchor: 0.5
         });
-        textContainer = new Container();
-        textContainer.addChild(eventText);
-        app.stage.addChild(textContainer);
+        eventTextContainer = new Container();
+        eventTextContainer.addChild(eventText);
+        app.stage.addChild(eventTextContainer);
     } else {
         eventText.text = textData.keydata;
     }
-    textContainer.anchor = .5;
+    eventTextContainer.anchor = .5;
 
     const randomSignY = Math.random();
     const randomSignX = Math.random();

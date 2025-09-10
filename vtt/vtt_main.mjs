@@ -14,7 +14,7 @@ import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../conne
 import { settings, profile, pixelsPerMeterActual } from '../connect/settings.js';
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData, SetSelectedPosition} from "../../connect/events.js";
 // import { keydown, CreateNewLocation } from '../connect/dialogs.js';
-import { addButtons, addFancyButtons } from './addButtons.mjs';
+import { addButtons, addPlayButton } from './addButtons.mjs';
 
 import { LoadLocations, AddLocation, locationTokenContainer } from './vtt_locations.mjs';
 import { SetTimeKeysData, eventEl } from '../connect/events.js';
@@ -37,6 +37,11 @@ export let fontStrokeColor = 'black';
 export let font1 = 'Acme';
 export let font2 = 'Acme';
 export let font3 = 'Acme';
+
+export let hasBgMap = false;
+
+
+
 
 export function GoToMapLocation (timestamp) {
      console.log("tryna goat mmap locaiton " + timestamp);
@@ -61,16 +66,17 @@ export function GoToMapLocation (timestamp) {
 }
 
 export let spritesContainer = new Container();
-const spriteLayer = new RenderLayer();
-const uicontainer = new Container( {layout: {
-            width: '80%',
-            height: '80%',
-            justifyContent: 'top',
-            flexDirection: 'row',
-            alignContent: 'center',
-            flexWrap: 'wrap',
-            gap: 4,
-        }});
+let uicontainer = new Container();
+// const spriteLayer = new RenderLayer();
+// const uicontainer = new Container( {layout: {
+//             width: '80%',
+//             height: '80%',
+//             justifyContent: 'top',
+//             flexDirection: 'row',
+//             alignContent: 'center',
+//             flexWrap: 'wrap',
+//             gap: 4,
+//         }});
 
 
 // Store an array of fish sprites for animation.
@@ -105,14 +111,13 @@ function onDragEnd (e) {
   // viewport.fitWorld();
 
   if (hasBackgroundPictureGroup) {
-    viewport.animate({
-      // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-      position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
-      scale: 1.1, // Target zoom level
-      time: 1000, // Animation duration of 1 second
-      ease: 'easeInOutQuad' // Using a common easing function
-
-    });
+    // viewport.animate({
+    //   position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+    //   // position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
+    //   scale: 1.2, // Target zoom level
+    //   time: 1000, // Animation duration of 1 second
+    //   ease: 'easeInOutQuad' // Using a common easing function
+    // });
   }
   localStorage.setItem("viewportPosition", viewport.x + "," + viewport.y + "," + viewport.scale.x);
 }
@@ -165,6 +170,9 @@ async function setup() {
     disableOnContextMenu: true,
     events: app.renderer.events, 
   });
+  // textContainer.x = app.stage.width/2;
+
+
 }
 
 async function prePreLoader () {
@@ -321,11 +329,12 @@ await Assets.loadBundle('fonts');
 
 
 export function playerProfileLoaded (playerProfile) {
+  // if (settings.)
   addPlayerProfileText(app, playerProfile, uicontainer);
   // LoadLocations(app, viewport, spritesContainer);
-        setTimeout(() => {
+        // setTimeout(() => {
             LoadLocations(app, viewport, spritesContainer); //give it a shake...
-        }, 1000);
+        // }, 1000);
   
 }
 
@@ -356,10 +365,10 @@ export async function GoWithIt() { //called from vtt.js
       viewport.y = parseFloat(pSplit[1]);
       viewport.setZoom(parseFloat(pSplit[2]));
     } else {
-      viewport.x = 0;
+      viewport.x = app.stage.width/2;
       viewport.y = 0;
-      // viewport.y = -app.screen.height/2;
-      // viewport.anchor = .5;
+      // viewport.y = app.stage.height/2;
+      viewport.anchor = .5;
       viewport.setZoom(1.2);
       // viewport.moveToCenter
     }
@@ -456,6 +465,7 @@ export async function GoWithIt() { //called from vtt.js
     addBackground(app, null, false);
   }
   if (mappicURL) {
+    hasBgMap = true;
     addMap(app, viewport, spritesContainer);
   }
   if (backgroundVideoURL) {
@@ -464,21 +474,21 @@ export async function GoWithIt() { //called from vtt.js
   }
 
   if (hasBackgroundPictureGroup) {
-
+    viewport.addChild(spritesContainer);  
     addBackgroundPictures(app, viewport, spritesContainer);
     let elapsed = 0.0;
-    viewport.animate({
-      // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-      position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-      scale: 1, // Target zoom level
-      time: 1000, // Animation duration of 1 second
-      ease: 'easeInOutQuad', // Using a common easing function
-      callbackOnComplete: () => {
-        console.log("Animation completed!");
+    // viewport.animate({
+    //   // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+    //   position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+    //   scale: 1, // Target zoom level
+    //   time: 1000, // Animation duration of 1 second
+    //   ease: 'easeInOutQuad', // Using a common easing function
+    //   callbackOnComplete: () => {
+    //     console.log("Animation completed!");
        
-        // Perform actions after animation finishes
-      }
-    });
+    //     // Perform actions after animation finishes
+    //   }
+    // });
 
     // app.ticker.add((ticker) => {
     //     // Run every frame, delta is the time since last update
@@ -496,14 +506,19 @@ export async function GoWithIt() { //called from vtt.js
         }
       }
     });
+    if (settings && settings.sceneTags && settings.sceneTags.includes("play button")) {
+      console.log("tryna add play button");
+      addPlayButton(app);
+    }
   }
 
   if (locationData) {
     for (let i = 0; i < locationData.length; i++) {
       console.log("location from locationData " + JSON.stringify(locationData[i]));
       if (locationData[i].markerType == "picture") {
+        console.log("gotsa sprite picture " + locationData[i].mediaID);
         if (locationData[i].mediaID && locationData[i].mediaID != "" & locationData[i].mediaID != "none") {
-          const texture = Texture.from(locationData[i].mediaID);
+          const texture = Texture.from(locationData[i].mediaID.toString());
           const newSprite = new Sprite(texture);
           newSprite.locationData = locationData[i];
           addSprite(app, newSprite, viewport );
@@ -546,14 +561,15 @@ export async function GoWithIt() { //called from vtt.js
     // });
   
   }
-
-
+  app.stage.addChild(uicontainer);
+    uicontainer.pivot.x = window.innerWidth / 2;
+    uicontainer.pivot.y = window.innerHeight / 2;
   // uicontainer.x = app.screen.width / 2;
   // uicontainer.y = app.screen.height / 2;
   // uicontainer.width = app.screen.width;
   // uicontainer.height = app.screen.height;
   // // const button = new Button();
-    uicontainer.x = app.screen.width / 2;
+    // uicontainer.x = app.stage.width / 2;
     // uicontainer.y = app.screen.height * .005;
   //     uicontainer.x = app.screen.width / 2;
   //   uicontainer.y = app.screen.height / 2;
@@ -561,16 +577,15 @@ export async function GoWithIt() { //called from vtt.js
   // app.stage.addChild(uicontainer);
 
   const buttonData = {};
-  addText(app, textData, uicontainer);
-  if (settings && settings.sceneTags && settings.sceneTags.includes("play button")) {
-    addFancyButtons(app, buttonData, uicontainer);
-  }
+
+  addText(app, textData);
+
 
   
   // if (viewport) {
   //     viewport.addChild(uicontainer); 
   // } else {
-  app.stage.addChild(uicontainer);
+
   // }
 
 
