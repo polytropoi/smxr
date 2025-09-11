@@ -23,7 +23,7 @@ unity_router.get("/test", function (req, res) {
 });
 
 ///////////UNITY ROUTE
-unity_router.get('/:_id/:platform/:version', function (req, res) { ////called from unity app context - TODO lock down w/ checkAppID, requiredAuthentication (i.e. )
+unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////called from unity app context - TODO lock down w/ checkAppID, requiredAuthentication (i.e. )
 
     console.log("tryna get scene id: ", req.params._id + " excaped " + entities.decodeHTML(req.params._id));
 

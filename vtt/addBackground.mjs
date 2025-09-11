@@ -257,6 +257,9 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
 
 export function addBackgroundPictures(app) {
 
+  if (!pictureGroupsData || !pictureGroupsData.length) {
+    return;
+  }
   let randomIndex = Math.floor(Math.random()*pictureGroupsData[0].items.length);
   let id = pictureGroupsData[0].items[randomIndex];
 

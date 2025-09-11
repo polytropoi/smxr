@@ -463,14 +463,26 @@ export async function GoWithIt() { //called from vtt.js
   }
   if (backgroundURL) {
     addBackground(app, null, false);
+        if (settings && settings.sceneTags && settings.sceneTags.includes("play button")) {
+      console.log("tryna add play button");
+      addSimplePlayButton(app);
+    }
   }
   if (mappicURL) {
     hasBgMap = true;
     addMap(app, viewport, spritesContainer);
+        if (settings && settings.sceneTags && settings.sceneTags.includes("play button")) {
+      console.log("tryna add play button");
+      addSimplePlayButton(app);
+    }
   }
   if (backgroundVideoURL) {
     console.log("gotsa backgroundVideoURL "+ backgroundVideoURL);
     addBackgroundVideo(app, viewport, spritesContainer);
+        if (settings && settings.sceneTags && settings.sceneTags.includes("play button")) {
+      console.log("tryna add play button");
+      addSimplePlayButton(app);
+    }
   }
 
   if (hasBackgroundPictureGroup) {
