@@ -530,10 +530,13 @@ AFRAME.registerComponent("mod_synth", {
   //       }
 
   amHitDistance: function (distance) {
+    if (distance && distance > 0) { 
     this.distance = distance;
+
     this.vol.volume.value = 15 - distance;
 
     this.amSynth.triggerAttackRelease(getRandomInt(48, 72), 1);
+    }
     //    psynth.triggerAttackRelease([getRandomInt(36,64),getRandomInt(64,88),getRandomInt(88,256)], 1)
     //    amSynth.triggerAttackRelease("C2", 1)
   },

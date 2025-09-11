@@ -3,7 +3,7 @@ import { settings  } from "../../../connect/settings.js";
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import { mouse } from "../../src/component/content-utils.js";
-import { localData, GoToNext, GoToPrevious, GetMatrixData } from "../../../connect/connect.js";
+import { localData, GoToNext, GoToPrevious, GetMatrixData, sceneLocations } from "../../../connect/connect.js";
 import { timedEventsListenerMode } from "../../../connect/events.js";
 import { SaveLocalData } from "../../../connect/indexedDb.js";
 

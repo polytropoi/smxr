@@ -40,9 +40,11 @@ export function addText(app, textData) {
     }
     // t1 = 
     console.log("textData " + textData + " font 1 iis " + font1); 
-    if (t1 && t1 != "") {
-        const newFontSize = Math.max(16, window.innerWidth / 20); 
+
+            const newFontSize = Math.max(16, window.innerWidth / 20); 
         const newSmallFontSize = Math.max(16, window.innerWidth / 30); 
+    if (t1 && t1 != "") {
+
         const greetingText = new Text({
             text: t1,
             style: {
@@ -82,7 +84,7 @@ export function addText(app, textData) {
             },
             anchor: 0.5
         });
-        questText.y = app.screen.height * .2;
+        questText.y = app.screen.height * .3;
         questText.x = app.screen.width / 2;
         textContainer.addChild(questText);
     }

@@ -14,7 +14,7 @@ import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../conne
 import { settings, profile, pixelsPerMeterActual } from '../connect/settings.js';
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData, SetSelectedPosition} from "../../connect/events.js";
 // import { keydown, CreateNewLocation } from '../connect/dialogs.js';
-import { addButtons, addPlayButton } from './addButtons.mjs';
+import { addButtons, addPlayButton, addSimplePlayButton } from './addButtons.mjs';
 
 import { LoadLocations, AddLocation, locationTokenContainer } from './vtt_locations.mjs';
 import { SetTimeKeysData, eventEl } from '../connect/events.js';
@@ -508,7 +508,7 @@ export async function GoWithIt() { //called from vtt.js
     });
     if (settings && settings.sceneTags && settings.sceneTags.includes("play button")) {
       console.log("tryna add play button");
-      addPlayButton(app);
+      addSimplePlayButton(app);
     }
   }
 
