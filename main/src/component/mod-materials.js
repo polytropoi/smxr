@@ -729,7 +729,7 @@ AFRAME.registerComponent('mod-materials', {
                 console.log("tryna play!");
                 playVideo(this.video);
               } else {
-                pauseVideo(this.video);
+                // pauseVideo(this.video);
               }
               // this.el.getObject3D('mesh').scale.set(200, 200, 200);
               // this.el.components.a-sphere.setAttribute("radius", 100);

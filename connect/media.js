@@ -5,6 +5,7 @@
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData,  
   ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals } from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
+import { InitAnalyzer } from "../vtt/vtt_audioViz.mjs";
 // import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
 // import { Howl, Howler } from '../node_modules/howler/dist/howler.js';
 // import {Howl} from '../main/vendor/howler/src/howler.js';
@@ -34,6 +35,7 @@ export var primaryAudioMangler = null;
 export let primaryAudioEl = document.querySelector('#primaryAudio');
 
 export let primaryAudioHowl;
+export let primaryAudioElement;
 
 export let audioGroupsData = {};
 
@@ -469,6 +471,7 @@ export function LoadPrimaryAudioHowl () {
     if (timedEventsListenerMode == "Primary Audio") {
       SetPrimaryAudioEventsData();
     }
+      
     // return primaryAudioHowl;
   }
 }
@@ -487,7 +490,13 @@ export function PrimaryAudioPlayPauseToggle () {
       // primaryAudioHowl;
       if (!primaryAudioHowl.playing()) {
               console.log("tryna play " + settings.primary_mp3url);
-          primaryAudioHowl.play();
+              primaryAudioHowl.play();
+          // const soundId = primaryAudioHowl.play();
+          // const soundId = primaryAudioHowl.play('mysound'); // Play the sound and get its ID
+          // primaryAudioElement = primaryAudioHowl._soundById(soundId); //for analyzer
+          primaryAudioElement = primaryAudioHowl._sounds[0]._node;
+          // console.log("primaryAudioID " + soundId);
+          InitAnalyzer();
           // this.el.emit('primaryAudioToggle', {isPlaying : true}, true);
           // this.isPlaying = true;
           PauseIntervals(false);
