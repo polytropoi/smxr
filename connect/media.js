@@ -483,7 +483,7 @@ export function GetCurrentPrimaryAudioTime() {
   }
 }
 
-export function PrimaryAudioPlayPauseToggle () {
+export function PrimaryAudioPlayPauseToggle () { //this is for pixi / non-aframe modes
 
   // if (timedEventsListenerMode && timedEventsListenerMode == "Primary Audio") {
     if (primaryAudioHowl && primaryAudioHowl != undefined) {
@@ -494,9 +494,11 @@ export function PrimaryAudioPlayPauseToggle () {
           // const soundId = primaryAudioHowl.play();
           // const soundId = primaryAudioHowl.play('mysound'); // Play the sound and get its ID
           // primaryAudioElement = primaryAudioHowl._soundById(soundId); //for analyzer
-          primaryAudioElement = primaryAudioHowl._sounds[0]._node;
-          // console.log("primaryAudioID " + soundId);
-          InitAnalyzer();
+          if (settings && settings.sceneTags.includes("audioviz")) {
+            primaryAudioElement = primaryAudioHowl._sounds[0]._node;
+            // console.log("primaryAudioID " + soundId);
+            InitAnalyzer();
+          }
           // this.el.emit('primaryAudioToggle', {isPlaying : true}, true);
           // this.isPlaying = true;
           PauseIntervals(false);

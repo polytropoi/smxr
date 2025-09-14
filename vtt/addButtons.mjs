@@ -35,7 +35,7 @@ export function addSimplePlayButton(app, buttonData, uicontainer) {
     buttonText.alpha = .75;
     // playButton.y = container.height + 300;
     buttonText.anchor = .5;
-    buttonText.y = window.innerHeight - (window.innerHeight  * .125);
+    buttonText.y = window.innerHeight - (window.innerHeight  * .15);
     buttonText.x = window.innerWidth / 2;
 
         // buttonText.onPress.connect(() => 

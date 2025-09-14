@@ -9,7 +9,8 @@ import { primaryAudioElement } from '../connect/media.js';
 // instantiate analyzer
 let audioMotion;
 export function InitAnalyzer () {
-  if (primaryAudioElement) {
+
+  if (primaryAudioElement && !audioMotion) {
     audioMotion = new AudioMotionAnalyzer(
       document.getElementById('audioVizContainer'),
       {
@@ -51,7 +52,7 @@ export function InitAnalyzer () {
       }
     );
   } else {
-    console.log("primaryAudioElement not found..");
+    console.log("primaryAudioElement not found, or audioMotion initialized..");
   }
 }
 
