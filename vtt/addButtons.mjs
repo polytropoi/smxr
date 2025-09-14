@@ -8,7 +8,8 @@ import { app, viewport, hasBgMap, font1, stripExtension } from './vtt_main.mjs';
 // export let isPlaying = false;
 // import 
 
-  let buttonContainer = new Container();
+let buttonContainer = new Container();
+
 export function addSimplePlayButton(app, buttonData, uicontainer) {
     let buttonText = new Text({
         text: 'Play',
@@ -31,7 +32,7 @@ export function addSimplePlayButton(app, buttonData, uicontainer) {
     buttonContainer.addChild(buttonText);
 
     buttonText.interactive = true;
-        buttonText.eventMode = 'dynamic';
+    buttonText.eventMode = 'dynamic';
     buttonText.alpha = .75;
     // playButton.y = container.height + 300;
     buttonText.anchor = .5;

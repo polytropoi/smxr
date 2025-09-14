@@ -20,6 +20,7 @@ import { LoadLocations, AddLocation, locationTokenContainer } from './vtt_locati
 import { SetTimeKeysData, eventEl } from '../connect/events.js';
 import { poiLocations } from '../connect/connect.js';
 // import { keydown } from '../connect/dialogs.js';
+import { addAudioVizSelect } from './vtt_audioViz.mjs';
 
 
 export const app = new Application();
@@ -592,7 +593,7 @@ export async function GoWithIt() { //called from vtt.js
 
   addText(app, textData);
 
-
+// addAudioVizSelect();
   
   // if (viewport) {
   //     viewport.addChild(uicontainer); 

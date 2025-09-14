@@ -5,7 +5,7 @@
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData,  
   ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals } from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
-import { InitAnalyzer } from "../vtt/vtt_audioViz.mjs";
+import { InitAnalyzer, addAudioVizSelect } from "../vtt/vtt_audioViz.mjs";
 // import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
 // import { Howl, Howler } from '../node_modules/howler/dist/howler.js';
 // import {Howl} from '../main/vendor/howler/src/howler.js';
@@ -498,6 +498,7 @@ export function PrimaryAudioPlayPauseToggle () { //this is for pixi / non-aframe
             primaryAudioElement = primaryAudioHowl._sounds[0]._node;
             // console.log("primaryAudioID " + soundId);
             InitAnalyzer();
+                
           }
           // this.el.emit('primaryAudioToggle', {isPlaying : true}, true);
           // this.isPlaying = true;
@@ -521,6 +522,7 @@ export function PrimaryAudioPlayPauseToggle () { //this is for pixi / non-aframe
       if (primaryAudioHowl && primaryAudioHowl != undefined) {
         PrimaryAudioPlayPauseToggle();
       }
+      // addAudioVizSelect();
     }
   // }
 }
