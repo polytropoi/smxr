@@ -95,10 +95,26 @@ function getOpenBG(backgroundColor, width, height, radius) {
   // });
   return openBG;
 }
+let presetIndex = -1;
 
+export function AudioVizMode (mode) {
+  
+  if (mode == 'Classic LEDs') {
+    presetIndex = 0;
+  }
+  if (mode == 'Mirror Wave') {
+    presetIndex = 1;
+  }
+  if (mode == 'Radial Inverse') {
+    presetIndex = 2;
+  }
+  if (mode == 'Reflex Bars') {
+    presetIndex = 3;
+  }
+}
 export function InitAnalyzer () {
 
-  
+
   const presets = [
     // {
     //   name: 'Defaults',
@@ -111,7 +127,7 @@ export function InitAnalyzer () {
         barSpace: .5,
         bgAlpha: .7,
         colorMode: 'gradient',
-        gradient: 'classic',
+        gradient: 'prism',
         ledBars: true,
         lumiBars: false,
         maxFreq: 16000,
@@ -128,7 +144,8 @@ export function InitAnalyzer () {
       options: {
         mode: 10,
         bgAlpha: .7,
-        fillAlpha: .6,
+        fillAlpha: .3,
+        alphaBars: true,
         gradient: 'rainbow',
         lineWidth: 2,
         lumiBars: false,
@@ -148,10 +165,11 @@ export function InitAnalyzer () {
       options: {
         mode: 3,
         barSpace: .25,
-        bgAlpha: .5,
+        bgAlpha: 0,
         fillAlpha: .5,
         gradient: 'prism',
         ledBars: false,
+        alphaBars: true,
         linearAmplitude: true,
         linearBoost: 1.8,
         lineWidth: 1.5,
@@ -187,19 +205,24 @@ export function InitAnalyzer () {
         showPeaks: true,
         overlay: true,
         outlineBars: false,
+        alphaBars: true,
         source: primaryAudioElement
       }
     }
   ];
 
+
+    if (presetIndex == -1) {
+         presetIndex = Math.floor(Math.random() * presets.length);
+    }
+
   if (primaryAudioElement && !audioMotion) {
     // addAudioVizSelect();
 
-    const randomIndex = Math.floor(Math.random() * presets.length);
 
     audioMotion = new AudioMotionAnalyzer(
       document.getElementById('audioVizContainer'),
-      presets[randomIndex].options
+      presets[presetIndex].options
       // {
       //   mode: 10,
       // bgAlpha: .7,

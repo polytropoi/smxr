@@ -2,7 +2,7 @@
 // import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "content-utils";
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
           InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, 
-          RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime } from "./media.js";
+          RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime, SetAudioVizMode } from "./media.js";
 import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData } from "./events.js";
 import { settings, profile } from "./settings.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
@@ -835,6 +835,15 @@ window.addEventListener( 'keydown',  ( event ) => {
   });
 
 
+  
+  $('#modalContent').on('change', '#audioVizModeSelector', function(e) {
+    SetAudioVizMode(e.target.value);
+    // timedEventsListenerMode = e.target.value;
+    // timeKeysData.listenTo = timedEventsListenerMode;
+    // console.log('timedEventsListenerMode ' + timedEventsListenerMode);
+  });
+
+
 
   $('#modalContent').on('click', '.tk_rm', function(e) {  
     console.log('tryna remove ' + e.target.id);
@@ -1489,6 +1498,41 @@ function ReturnTimedEventSelectors (selectedType) {
     return types;
  }
 
+function ReturnAudioVizModeSelectors (selectedType) {
+    
+  if (settings && settings.sceneTags.includes("audioviz")) {
+      let types = "";
+      const typesArray = [
+          "None",
+          "Classic LEDs",
+          "Mirror Wave",
+          "Radial Inverse",
+          "Reflex Bars",
+          "Custom"
+          ];
+      for (let i = 0; i < typesArray.length; i++) { 
+        if (selectedType != null && selectedType != undefined) {  //if user selected
+          if (typesArray[i].toLowerCase() == selectedType.toLowerCase()) {
+              types = types +
+              "<option selected>" + typesArray[i] + "</option>";
+          } else {
+              types = types +
+              "<option>" + typesArray[i] + "</option>";
+          }
+          // SetAudioVizMode
+        } else {
+         
+              types = types +
+              "<option>" + typesArray[i] + "</option>";
+
+        }
+      }
+      return types;
+    } else {
+      return null;
+    }
+  }
+
  function ReturnListenToTimelineSelectors (selectedType) {
    
    if (timeKeysData != null && timeKeysData.listenTo != undefined) {
@@ -1500,6 +1544,8 @@ function ReturnTimedEventSelectors (selectedType) {
    }
 
   console.log("tryna return timeline listener mode " + selectedType +  " " + timedEventsListenerMode);
+
+
   let types = "";
   const typesArray = [
       "None",
@@ -2370,6 +2416,11 @@ export function SceneManglerModal(mode, autoHide) {
         // "<div><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
         // "<div class=\x22play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22Play/Pause Media\x22><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
         // "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>"+
+        "<div style=\x22float: right; width: 166px;\x22>Audio Viz Mode:"+
+        "<select id=\x22audioVizModeSelector\x22 class=\x22audioVizModeSelector\x22>" +
+            ReturnAudioVizModeSelectors() +
+            "</select>" +
+        "</div>"+
 
         "<div style=\x22float: right; width: 166px;\x22>Listen To Timeline:"+
         "<select id=\x22listenToTimelineSelector\x22 class=\x22listenToTimelineSelector\x22>" +

@@ -10,6 +10,8 @@ let eventTriggersSet = false;
 
 let timed_event = new Event("timed-event");
 let map_update = new Event("map-update");
+let audio_viz = new Event("audio-viz");
+
 export let eventEl = document.createElement("div");
 eventEl.id = "eventEl";
 
@@ -26,6 +28,9 @@ export function SetSelectedPosition(tilename, xpos, ypos) { //for vtt/not aframe
    selectedPosition.tilename = tilename; 
 }
 
+export function SetAudioViz (mode) {
+
+}
 export function ResetTimedEvents () {
     timeKeysIndex = 0;
 }

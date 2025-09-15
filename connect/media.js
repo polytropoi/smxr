@@ -3,9 +3,9 @@
 // const {Howl, Howler} = require('../node_modules/howler/dist/howler.js');
 
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData,  
-  ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals } from "../../connect/events.js";
+  ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals, SetAudioViz } from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
-import { InitAnalyzer, addAudioVizSelect } from "../vtt/vtt_audioViz.mjs";
+// import { InitAnalyzer, addAudioVizSelect, AudioVizMode } from "../vtt/vtt_audioViz.mjs";
 // import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
 // import { Howl, Howler } from '../node_modules/howler/dist/howler.js';
 // import {Howl} from '../main/vendor/howler/src/howler.js';
@@ -476,12 +476,16 @@ export function LoadPrimaryAudioHowl () {
   }
 }
 
-
 export function GetCurrentPrimaryAudioTime() {
   if (primaryAudioHowl) {
     return primaryAudioHowl.seek();
   }
 }
+
+export function SetAudioVizMode (mode) {
+    AudioVizMode(mode);
+}
+
 
 export function PrimaryAudioPlayPauseToggle () { //this is for pixi / non-aframe modes
 
@@ -528,7 +532,8 @@ export function PrimaryAudioPlayPauseToggle () { //this is for pixi / non-aframe
 }
 
 
-export function PrimaryAudioInit() {
+
+export function PrimaryAudioInit() { //this one is for aframe
   console.log("PRIMARY AUDIO INIT()");
   // primaryAudioEl = 
   if (primaryAudioEl != null) {
@@ -543,21 +548,21 @@ export function PrimaryAudioInit() {
       }
     }
   }
-  let avz = document.getElementById("audiovizzler");
-  if (avz != null) {
-    vidz = document.getElementsByTagName("video"); //vidz declared in content-utils?
-    if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
-      videoEl = vidz[0];
-      console.log("videoEl " + videoEl.src);
-        // AudioAnalyzer();
-    } else {
-        if (primaryAudioMangler != null) {
-        // AudioAnalyzer();
-      } 
-    }
-  } else {
-    console.log("didn't find no audiovizzler");
-  }
+  // let avz = document.getElementById("audiovizzler"); //NOPE, this is the old deprecated one...
+  // if (avz != null) {
+  //   vidz = document.getElementsByTagName("video"); //vidz declared in content-utils?
+  //   if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
+  //     videoEl = vidz[0];
+  //     console.log("videoEl " + videoEl.src);
+  //       // AudioAnalyzer();
+  //   } else {
+  //       if (primaryAudioMangler != null) {
+  //       // AudioAnalyzer();
+  //     } 
+  //   }
+  // } else {
+  //   console.log("didn't find no audiovizzler");
+  // }
 }
 
 export function FetchAudioGroupsData(groupArray) { //sets data in aframe component
