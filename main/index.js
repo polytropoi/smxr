@@ -14315,7 +14315,7 @@ function getAllPeople() {
                                     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneAutoplayPrimaryAudio\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
                                 "</div>" +
                                 "<div class=\x22col form-group col-md-2\x22>" +
-                                    "<div class=\x22\x22><label for=\x22scenePrimaryAudioVisualizer\x22>Use FFT</label><br>" + 
+                                    "<div class=\x22\x22><label for=\x22scenePrimaryAudioVisualizer\x22>Use Audio Viz</label><br>" + 
                                     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22scenePrimaryAudioVisualizer\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
                                 "</div>" +
                                 "<div class=\x22col form-group col-md-2\x22>" +
@@ -14330,6 +14330,20 @@ function getAllPeople() {
                                     "<div class=\x22\x22><label for=\x22scenePrimaryAudioTriggerEvents\x22>Trigger Events</label><br>" + 
                                     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22scenePrimaryAudioTriggerEvents\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
                                 "</div>" + 
+
+                                // "<div class=\x22col form-group col-md-3\x22>" +
+                                // "<label for=\x22scenePrimaryAudioVisualizer\x22>AudioVizMode</label>" +
+                                //     "<select class=\x22form-control\x22 id=\x22audioVizMode\x22 >" +
+                                //     "<option value=\x22\x22 disabled selected>Select:</option>" +
+                                //     "<option>Classic LEDs</option>" +
+                                //     "<option>Mirror Wave</option>" +
+                                //     "<option>Radial Inverse</option>" +
+                                //     "<option>Reflex Bars</option>" +
+                                //     "<option>Custom</option>" +
+
+                               
+                                //     "</select>" +
+                                // "</div>" +
                             "</div>" +  
                             "<hr/>" +
                 "</div>" +

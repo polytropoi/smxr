@@ -40,7 +40,7 @@ export let font2 = 'Acme';
 export let font3 = 'Acme';
 
 export let hasBgMap = false;
-
+export let hasAudioViz = false;
 
 
 
@@ -172,7 +172,9 @@ async function setup() {
     events: app.renderer.events, 
   });
   // textContainer.x = app.stage.width/2;
-
+  if (settings && settings.sceneTags.includes("audioviz")) {
+    hasAudioViz = true;
+  }
 
 }
 

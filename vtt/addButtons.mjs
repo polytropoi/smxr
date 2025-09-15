@@ -4,7 +4,8 @@ import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 
 import { PrimaryAudioPlayPauseToggle, ReturnTimedEventsListenerMode, PrimaryAudioIsPlaying, isPlaying } from '../connect/media.js';
 import { addBackgroundPictures } from './addBackground.mjs';
-import { app, viewport, hasBgMap, font1, stripExtension } from './vtt_main.mjs';
+import { app, viewport, hasBgMap, font1, stripExtension, hasAudioViz } from './vtt_main.mjs';
+import { InitAnalyzer } from './vtt_audioViz.mjs';
 // export let isPlaying = false;
 // import 
 
@@ -197,6 +198,9 @@ async function PlayPauseToggle(playButton) {
         // playButton.alpha = .1;
         playButton.tint = '0xfc03b6';
         playButton.text = "Pause";
+        if (hasAudioViz) {
+            InitAnalyzer();
+        }
     } else {
          playButton.tint = 'white';
         playButton.text = "Play";

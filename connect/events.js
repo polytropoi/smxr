@@ -28,8 +28,14 @@ export function SetSelectedPosition(tilename, xpos, ypos) { //for vtt/not aframe
    selectedPosition.tilename = tilename; 
 }
 
-export function SetAudioViz (mode) {
+export function InitAudioViz (mode) {
 
+   if (!mode) {
+      mode == "Classic LEDs";
+   }
+      audio_viz.details = mode;
+      eventEl.dispatchEvent(audio_viz);
+   
 }
 export function ResetTimedEvents () {
     timeKeysIndex = 0;

@@ -1,5 +1,5 @@
 import { Assets, Graphics, Container, Text } from 'pixi';
-
+import { eventEl } from '../connect/events.js';
 import AudioMotionAnalyzer from 'https://cdn.skypack.dev/audiomotion-analyzer?min';
 import { primaryAudioElement } from '../connect/media.js';
 
@@ -7,6 +7,11 @@ import { Select } from '@pixi/ui';
 import { app} from './vtt_main.mjs';
 
 
+  eventEl.addEventListener('audio-viz', onAudioVizInit);
+
+  function onAudioVizInit(event) {
+    AudioVizMode(event.details);
+  }
 // audio source
 // const audioEl = document.getElementById('audio');
 
@@ -98,7 +103,7 @@ function getOpenBG(backgroundColor, width, height, radius) {
 let presetIndex = -1;
 
 export function AudioVizMode (mode) {
-  
+
   if (mode == 'Classic LEDs') {
     presetIndex = 0;
   }
@@ -125,11 +130,12 @@ export function InitAnalyzer () {
       options: {
         mode: 3,
         barSpace: .5,
-        bgAlpha: .7,
+        bgAlpha: 0,
         colorMode: 'gradient',
         gradient: 'prism',
         ledBars: true,
         lumiBars: false,
+        alphaBars: true,
         maxFreq: 16000,
         radial: false,
         reflexRatio: 0,

@@ -2,8 +2,8 @@
 // import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "content-utils";
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
           InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, 
-          RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime, SetAudioVizMode } from "./media.js";
-import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData } from "./events.js";
+          RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime } from "./media.js";
+import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz } from "./events.js";
 import { settings, profile } from "./settings.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
   userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
@@ -837,7 +837,8 @@ window.addEventListener( 'keydown',  ( event ) => {
 
   
   $('#modalContent').on('change', '#audioVizModeSelector', function(e) {
-    SetAudioVizMode(e.target.value);
+    console.log("tryna set audi0viz " + e.target.value);
+    InitAudioViz(e.target.value);
     // timedEventsListenerMode = e.target.value;
     // timeKeysData.listenTo = timedEventsListenerMode;
     // console.log('timedEventsListenerMode ' + timedEventsListenerMode);
