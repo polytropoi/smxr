@@ -844,6 +844,22 @@ window.addEventListener( 'keydown',  ( event ) => {
     // console.log('timedEventsListenerMode ' + timedEventsListenerMode);
   });
 
+  $('#modalContent').on('change', '#mediaDeviceSelector', function(e) {
+    console.log("tryna set mediaDevice " + e.target.value);
+    InitAudioViz(e.target.value);
+    // timedEventsListenerMode = e.target.value;
+    // timeKeysData.listenTo = timedEventsListenerMode;
+    // console.log('timedEventsListenerMode ' + timedEventsListenerMode);
+  });
+
+
+  $('#modalContent').on('change', '#audioVizModeSelector', function(e) {
+    console.log("tryna set audi0viz " + e.target.value);
+    InitAudioViz(e.target.value);
+    // timedEventsListenerMode = e.target.value;
+    // timeKeysData.listenTo = timedEventsListenerMode;
+    // console.log('timedEventsListenerMode ' + timedEventsListenerMode);
+  });
 
 
   $('#modalContent').on('click', '.tk_rm', function(e) {  
@@ -1533,6 +1549,77 @@ function ReturnAudioVizModeSelectors (selectedType) {
       return null;
     }
   }
+
+  function ReturnMediaDeviceSelectors (selectedType) {
+        let mediaDevices = "";
+ if (!navigator.mediaDevices?.enumerateDevices) {
+    console.log("enumerateDevices() not supported.");
+    return mediaDevices;
+  } else {
+    // List cameras and microphones.
+
+  //   const typesArray = [
+  // //     //     "None",
+  // //     //     "Classic LEDs",
+  // //     //     "Mirror Wave",
+  // //     //     "Radial Inverse",
+  // //     //     "Reflex Bars",
+  // //     //     "Custom"
+  // //     //     ];
+    navigator.mediaDevices
+      .enumerateDevices()
+      .then((devices) => {
+        devices.forEach((device) => {
+          console.log("device " + device.label + `${device.kind}: ${device.label} id = ${device.deviceId}`);
+          mediaDevices = mediaDevices + "<option>" + device.label + "</option>";
+        });
+
+      })
+      .finally(() => {
+        console.log("returning mediaDevices " + mediaDevices);
+        const mediaDeviceSeletor = document.getElementById("mediaDeviceSelector").innerHTML = mediaDevices;
+      })
+      .catch((err) => {
+        console.error(`${err.name}: ${err.message}`);
+        return err;
+      });
+                
+  }
+
+}
+
+  // if ( navigator.mediaDevices ) {
+  //     // let types = "";
+  //     // const typesArray = [
+  //     //     "None",
+  //     //     "Classic LEDs",
+  //     //     "Mirror Wave",
+  //     //     "Radial Inverse",
+  //     //     "Reflex Bars",
+  //     //     "Custom"
+  //     //     ];
+  //     for (let i = 0; i < navigator.mediaDevices.length; i++) { 
+  //       if (selectedType != null && selectedType != undefined) {  //if user selected
+  //         if (navigator.mediaDevices[i].toLowerCase() == selectedType.toLowerCase()) {
+  //             types = types +
+  //             "<option selected>" + typesArray[i] + "</option>";
+  //         } else {
+  //             types = types +
+  //             "<option>" + typesArray[i] + "</option>";
+  //         }
+  //         // SetAudioVizMode
+  //       } else {
+         
+  //             types = types +
+  //             "<option>" + typesArray[i] + "</option>";
+
+  //       }
+  //     }
+  //     return types;
+  //   } else {
+  //     return null;
+  //   }
+  // }
 
  function ReturnListenToTimelineSelectors (selectedType) {
    
@@ -2341,6 +2428,18 @@ export function SceneManglerModal(mode, autoHide) {
         "<button id=\x22toggleStatsButton\x22 style=\x22float: right;\x22 class=\x22goToButton\x22 id=\x22statsButton\x22>Show Stats</button>"+
       
       "</div><hr>"+
+
+        "<div style=\x22float: right; width: 166px;\x22>Audio Viz Mode:"+
+        "<select id=\x22audioVizModeSelector\x22 class=\x22audioVizModeSelector\x22>" +
+            ReturnAudioVizModeSelectors() +
+            "</select>" +
+        "</div>"+
+
+        "<div style=\x22float: right; width: 166px;\x22>Use Media Device:"+
+        "<select id=\x22mediaDeviceSelector\x22 class=\x22mediaDeviceSelector\x22>" +
+            ReturnMediaDeviceSelectors() +
+            "</select>" +
+        "</div>"+
       // "<button class=\x22addButton\x22 id=\x22TimekeysButton\x22 onclick=\x22ShowTimekeysModal()\x22>Edit Timekeys</button>"+
       audioSliders +
       // ReturnColorButtons() +
@@ -2417,11 +2516,7 @@ export function SceneManglerModal(mode, autoHide) {
         // "<div><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
         // "<div class=\x22play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22Play/Pause Media\x22><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
         // "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>"+
-        "<div style=\x22float: right; width: 166px;\x22>Audio Viz Mode:"+
-        "<select id=\x22audioVizModeSelector\x22 class=\x22audioVizModeSelector\x22>" +
-            ReturnAudioVizModeSelectors() +
-            "</select>" +
-        "</div>"+
+
 
         "<div style=\x22float: right; width: 166px;\x22>Listen To Timeline:"+
         "<select id=\x22listenToTimelineSelector\x22 class=\x22listenToTimelineSelector\x22>" +

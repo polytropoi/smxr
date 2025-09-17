@@ -1003,7 +1003,7 @@ vtt_router.get('/:_id', function (req, res) {
             } else { //"sceneWebType == "Default or AFrame"
                                 
 
-                
+                if (sceneData.sceneTags.includes("transport")) {
 
                 transportButtons = "<div class=\x22transport_buttons\x22>"+
 
@@ -1013,7 +1013,7 @@ vtt_router.get('/:_id', function (req, res) {
                 "<div id=\x22transport_rewind_button\x22 class=\x22rewind_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 ><i class=\x22fas fa-backward fa-2x\x22></i></div>"+
                 "<div id=\x22transport_previous_button\x22 class=\x22previous_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
                 "<div id=\x22transportStats\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px; text-align: left\x22></div></div>";                                
-
+                }
                 dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
                
                 sceneManglerButtons = "<div class=\x22show-ui-button\x22 onclick=\x22ShowHideUI()\x22><i class=\x22far fa-eye fa-2x\x22></i></div>";
@@ -3368,6 +3368,7 @@ vtt_router.get('/:_id', function (req, res) {
                         "<body "+bgstyle+">" +
                         canvasOverlay +
                         transportButtons+ 
+                        dialogButton +
 
 
                        
@@ -3460,8 +3461,10 @@ vtt_router.get('/:_id', function (req, res) {
                         "<script type=\x22module\x22 src=\x22/vtt/vtt_main.mjs\x22 ></script>" +
 
                         "<script type=\x22module\x22 src=\x22/vtt/vtt_audioViz.mjs\x22 ></script>" +
-
+                        "<div id=\x22audioVizContainer\x22></div>"+
                         // audioHtml +
+                        // <i class=\x22fas fa-stopwatch \x22></i>
+                        "<div id=\x22microphone_button\x22><i class=\x22fa-solid fa-microphone fa-2xl\x22></i></div>" +
                         "<div class=\x22footer\x22><div class=\x22previous-button-2\x22 id=\x22previous_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
                          "<div class=\x22next-button-2\x22 id=\x22next_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div></div>"+
                         "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
@@ -3470,7 +3473,7 @@ vtt_router.get('/:_id', function (req, res) {
                         // "<canvas id=\x22pixi-canvas\x22></canvas>"+
                         "</div>"+
                         videoEl+
-                        "<div id=\x22audioVizContainer\x22></div>"+
+
                         "</body>\n" +
                     
                         "</html>";

@@ -229,61 +229,12 @@ export function InitAnalyzer () {
     audioMotion = new AudioMotionAnalyzer(
       document.getElementById('audioVizContainer'),
       presets[presetIndex].options
-      // {
-      //   mode: 10,
-      // bgAlpha: .7,
-      // fillAlpha: .6,
-      // gradient: 'rainbow',
-      // lineWidth: 2,
-      // lumiBars: false,
-      // maxFreq: 16000,
-      // radial: false,
-      // reflexAlpha: 1,
-      // reflexBright: 1,
-      // reflexRatio: .5,
-      // showBgColor: false,
-      // showPeaks: false,
-      // overlay: true,
-            //   mode: 5,
-            // barSpace: .25,
-            // bgAlpha: .5,
-            // colorMode: 'gradient',
-            // gradient: 'prism',
-            // ledBars: false,
-            // lumiBars: false,
-            // maxFreq: 16000,
-            // radial: false,
-            // reflexAlpha: .5,
-            // reflexFit: true,
-            // reflexRatio: .1,
-            // showBgColor: false,
-            // showPeaks: true,
-            // overlay: true,
-            // outlineBars: true,
-            // alphaBars: true,
-            // source: primaryAudioElement
-        // source: primaryAudioElement,
-        // height: window.innerHeight - 50,
-        // preset: 'Reflex Bars',
-        // // you can set other options below - check the docs!
-        // mode: 3,
-        // barSpace: .6,
-        // ledBars: true,
-        // alphaBars: true,
-        // roundBars: true,
-        // overlay: true,
-        // showBgColor: false,
-        // // onCanvasDraw: energyMeters,
-        // colorMode: 'gradient',
-        // channelLayout: 'dual-horizontal',
-        // linearAmplitude: true,
-        // showPeaks: true
-
-      // }
+     
     );
 
   } else {
     console.log("primaryAudioElement not found, or audioMotion initialized..");
+
   }
 }
 
@@ -369,3 +320,72 @@ function energyMeters() {
 // 		audioEl.play();
 // 	}
 // });
+
+// toggle microphone on/off
+
+//     if (!navigator.mediaDevices?.enumerateDevices) {
+//   console.log("enumerateDevices() not supported.");
+// } else {
+//   // List cameras and microphones.
+//   navigator.mediaDevices
+//     .enumerateDevices()
+//     .then((devices) => {
+//       devices.forEach((device) => {
+//         console.log("device" + `${device.kind}: ${device.label} id = ${device.deviceId}`);
+//       });
+//     })
+//     .catch((err) => {
+//       console.error(`${err.name}: ${err.message}`);
+//     });
+// }
+
+let micStream;
+const micButton = document.getElementById('microphone_button');
+let micEnabled = false;
+micButton.addEventListener( 'click', () => {
+        micEnabled = !micEnabled;
+  console.log("micButton click enabled " + micEnabled + " audioMotion is null " + (audioMotion == null));
+
+  if (!audioMotion) {
+      audioMotion = new AudioMotionAnalyzer(
+    document.getElementById('audioVizContainer'),
+    {
+      gradient: 'rainbow',
+      height: window.innerHeight - 40,
+      showScaleY: true,
+      bgAlpha: 0,
+      overlay: true
+    }
+  );
+  }
+    
+
+    if ( micEnabled ) {
+
+      if ( navigator.mediaDevices ) {
+        navigator.mediaDevices.getUserMedia( { audio: true, video: false } )
+        .then( stream => {
+          // create stream using audioMotion audio context
+          micStream = audioMotion.audioCtx.createMediaStreamSource( stream );
+          // connect microphone stream to analyzer
+          audioMotion.connectInput( micStream );
+          // mute output to prevent feedback loops from the speakers
+          audioMotion.volume = 0;
+          console.log("tryna send microphon e stream.,.");
+        })
+        .catch( err => {
+          alert('Microphone access denied by user');
+        });
+      }
+      else {
+        alert('User mediaDevices not available');
+      }
+    } else {
+      // disconnect and release microphone stream
+      if (audioMotion && micStream) {
+        audioMotion.disconnectInput( micStream, true ); 
+      }
+      
+    }
+  
+});
