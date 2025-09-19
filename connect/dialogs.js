@@ -836,20 +836,15 @@ window.addEventListener( 'keydown',  ( event ) => {
 
 
   
-  $('#modalContent').on('change', '#audioVizModeSelector', function(e) {
-    console.log("tryna set audi0viz " + e.target.value);
-    InitAudioViz(e.target.value);
-    // timedEventsListenerMode = e.target.value;
-    // timeKeysData.listenTo = timedEventsListenerMode;
-    // console.log('timedEventsListenerMode ' + timedEventsListenerMode);
+  $('#modalContent').on('change', '#cameraInputDeviceSelector', function(e) {
+     console.log("tryna set mediaDevice " + e.target.value);
+     localStorage.setItem("cameraInputDevice", e.target.value);
   });
 
-  $('#modalContent').on('change', '#mediaDeviceSelector', function(e) {
-    console.log("tryna set mediaDevice " + e.target.value);
-    InitAudioViz(e.target.value);
-    // timedEventsListenerMode = e.target.value;
-    // timeKeysData.listenTo = timedEventsListenerMode;
-    // console.log('timedEventsListenerMode ' + timedEventsListenerMode);
+  $('#modalContent').on('change', '#audioInputDeviceSelector', function(e) {
+      console.log("tryna set videoDevice " + e.target.value);
+     localStorage.setItem("audioInputDevice", e.target.value);
+    
   });
 
 
@@ -1550,12 +1545,13 @@ function ReturnAudioVizModeSelectors (selectedType) {
     }
   }
 
-  function ReturnMediaDeviceSelectors (selectedType) {
-        let mediaDevices = "";
- if (!navigator.mediaDevices?.enumerateDevices) {
-    console.log("enumerateDevices() not supported.");
-    return mediaDevices;
-  } else {
+  function PopulateMediaDeviceSelectors (deviceType, deviceName, deviceId) {
+        let audioInputDevices = "";
+        let cameraInputDevices = "";
+  if (!navigator.mediaDevices?.enumerateDevices) {
+      console.log("enumerateDevices() not supported.");
+      // return mediaDevices;
+    } else {
     // List cameras and microphones.
 
   //   const typesArray = [
@@ -1571,17 +1567,24 @@ function ReturnAudioVizModeSelectors (selectedType) {
       .then((devices) => {
         devices.forEach((device) => {
           console.log("device " + device.label + `${device.kind}: ${device.label} id = ${device.deviceId}`);
-          mediaDevices = mediaDevices + "<option>" + device.label + "</option>";
+          if (device.kind == "audioinput") {
+            audioInputDevices = audioInputDevices + "<option>" + device.label + "</option>";
+          }
+          if (device.kind == "videoinput") {
+            cameraInputDevices = cameraInputDevices + "<option value=\x22"+device.deviceId+"\x22>" + device.label + "</option>";
+          }
         });
 
       })
       .finally(() => {
-        console.log("returning mediaDevices " + mediaDevices);
-        const mediaDeviceSeletor = document.getElementById("mediaDeviceSelector").innerHTML = mediaDevices;
+        console.log("returning mediaDevices " + audioInputDevices);
+        // const mediaDeviceSeletor = 
+        document.getElementById("audioInputDeviceSelector").innerHTML = audioInputDevices;
+        document.getElementById("cameraInputDeviceSelector").innerHTML = cameraInputDevices;
       })
       .catch((err) => {
         console.error(`${err.name}: ${err.message}`);
-        return err;
+        // return err;
       });
                 
   }
@@ -2428,38 +2431,46 @@ export function SceneManglerModal(mode, autoHide) {
         "<button id=\x22toggleStatsButton\x22 style=\x22float: right;\x22 class=\x22goToButton\x22 id=\x22statsButton\x22>Show Stats</button>"+
       
       "</div><hr>"+
-
-        "<div style=\x22float: right; width: 166px;\x22>Audio Viz Mode:"+
+      audioSliders +
+      "<hr>"+
+        "<div class=\x22row\x22><div style=\x22float: left; width: 266px; margin: 20px;\x22>Audio Viz Mode:"+
         "<select id=\x22audioVizModeSelector\x22 class=\x22audioVizModeSelector\x22>" +
             ReturnAudioVizModeSelectors() +
             "</select>" +
         "</div>"+
 
-        "<div style=\x22float: right; width: 166px;\x22>Use Media Device:"+
-        "<select id=\x22mediaDeviceSelector\x22 class=\x22mediaDeviceSelector\x22>" +
-            ReturnMediaDeviceSelectors() +
+
+        "<div style=\x22float: left; width: 266px; margin: 20px;\x22>Use Camera Input:"+
+        "<select id=\x22cameraInputDeviceSelector\x22 class=\x22cameraInputDeviceSelector\x22>" +
+            PopulateMediaDeviceSelectors() +
             "</select>" +
         "</div>"+
+
+        "<div style=\x22float: left; width: 266px; margin: 20px;\x22>Use Audio Input:"+
+        "<select id=\x22audioInputDeviceSelector\x22 class=\x22audioInputDeviceSelector\x22>" +
+            PopulateMediaDeviceSelectors() +
+            "</select>" +
+        "</div></div>"+
       // "<button class=\x22addButton\x22 id=\x22TimekeysButton\x22 onclick=\x22ShowTimekeysModal()\x22>Edit Timekeys</button>"+
-      audioSliders +
+
       // ReturnColorButtons() +
-      "<hr><div class=\x22row\x22><div class=\x22threecolumn\x22>"+
-      "<label style=\x22margin: 10px;\x22 for=\x22sceneColor1\x22>Color 1</label>"+
+      "<hr><div class=\x22row\x22><div class=\x22\x22>"+
+      "<label style=\x22margin: 20px;\x22 for=\x22sceneColor1\x22>Color 1</label>"+
       "<input type=\x22color\x22 class=\x22inputColor\x22 id=\x22sceneColor1\x22 name=\x22sceneColor1\x22 value=\x22"+sceneColor1+"\x22>"+
 
-      "<label style=\x22margin: 10px;\x22 for=\x22sceneColor2\x22>Color 2</label>"+
+      "<label style=\x22margin: 20px;\x22 for=\x22sceneColor2\x22>Color 2</label>"+
       "<input type=\x22color\x22 class=\x22inputColor\x22 id=\x22sceneColor2\x22 name=\x22sceneColor2\x22 value=\x22"+sceneColor2+"\x22>"+
       
-      "<label style=\x22margin: 10px;\x22 for=\x22sceneColor3\x22>Color 3</label>"+
+      "<label style=\x22margin: 20px;\x22 for=\x22sceneColor3\x22>Color 3</label>"+
       "<input type=\x22color\x22 class=\x22inputColor\x22 id=\x22sceneColor3\x22 name=\x22sceneColor3\x22 value=\x22"+sceneColor3+"\x22>"+
       
-      "<label style=\x22margin: 10px;\x22 for=\x22sceneColor4\x22>Color 4</label>"+
+      "<label style=\x22margin: 20px;\x22 for=\x22sceneColor4\x22>Color 4</label>"+
       "<input type=\x22color\x22 class=\x22inputColor\x22 id=\x22sceneColor4\x22 name=\x22sceneColor4\x22 value=\x22"+sceneColor4+"\x22>"+
 
 
-      "</div>"+
+      "</div><br><br>"+
       // "<div class=\x22row\x22>
-      "<div class=\x22threecolumn\x22 width=\x22100px\x22><label for=\x22sceneEnvironmentPreset\x22>Environment Preset</label>"+
+      "<hr><div class=\x22threecolumn\x22 width=\x22100px\x22><label for=\x22sceneEnvironmentPreset\x22>Environment Preset</label>"+
       "<select id=\x22sceneEnvironmentPreset\x22 name=\x22sceneEnvironmentPreset\x22>"+
       ReturnSceneEnviromentPreset(sceneEnvironmentPreset) + 
       "</select></div>"+

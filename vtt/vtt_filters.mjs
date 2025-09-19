@@ -20,7 +20,6 @@ export function addDisplacementEffect(app) {
   // Add the filter to the stage.
  background.filters = [filter];
 
-
   animateEffect(app, sprite);
 }
 

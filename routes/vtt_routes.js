@@ -2518,9 +2518,9 @@ vtt_router.get('/:_id', function (req, res) {
                 }
             }
             if (hasPrimaryAudio || hasPrimaryAudioStream) {
-                primaryAudioSliderChunk = "<a href=\x22#\x22 style=\x22float: right;\x22 onclick=PlayPausePrimaryAudio() id=\x22primaryAudioPlayPause\x22 class=\x22btn tooltip\x22 type=\x22button\x22>"+
-                "Play/Pause Primary Audio<span class=\x22tooltiptext\x22>"+primaryAudioTitle+"</span></a></span><br>"+
-                "<span id=\x22primaryAudioVolume\x22>Primary Volume</span><div class=\x22slidecontainer\x22>"+
+                // primaryAudioSliderChunk = "<a href=\x22#\x22 style=\x22float: right;\x22 onclick=PlayPausePrimaryAudio() id=\x22primaryAudioPlayPause\x22 class=\x22btn tooltip\x22 type=\x22button\x22>"+
+                // "Play/Pause Primary Audio<span class=\x22tooltiptext\x22>"+primaryAudioTitle+"</span></a></span><br>"+
+                primaryAudioSliderChunk = "<span id=\x22primaryAudioVolume\x22>Primary Volume</span><div class=\x22slidecontainer\x22>"+
                 // "<a href=\x22#\x22 class=\x22btn\x22 type=\x22button\x22>Play</a>"+
                 "<input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+scenePrimaryVolume+"\x22 class=\x22slider\x22 id=\x22primaryAudioVolumeSlider\x22>" +
                 "</div>";
@@ -3457,7 +3457,7 @@ vtt_router.get('/:_id', function (req, res) {
                         "<script type=\x22module\x22 src=\x22/vtt/addBackground.mjs\x22></script>" +
                         "<script type=\x22module\x22 src=\x22/vtt/addElements.mjs\x22></script>" +
                         "<script type=\x22module\x22 src=\x22/vtt/addOverlay.mjs\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/vtt/addDisplacement.mjs\x22></script>" +  
+                        "<script type=\x22module\x22 src=\x22/vtt/vtt_filters.mjs\x22></script>" +  
                         "<script type=\x22module\x22 src=\x22/vtt/vtt_main.mjs\x22 ></script>" +
 
                         "<script type=\x22module\x22 src=\x22/vtt/vtt_audioViz.mjs\x22 ></script>" +

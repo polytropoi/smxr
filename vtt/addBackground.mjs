@@ -74,51 +74,385 @@ export function addBackground(app, viewport, isTileable) {
 }
 
 
-export function addBackgroundVideo(app, viewport) {
+export async function addBackgroundVideo(app, viewport, source) {
 
 
-  const video = document.getElementById("bgVideo");
-  let width = video.videoWidth;
-  let height = video.videoHeight;
-  // console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
-  const texture = Texture.from(video);
-  const backgroundVideo = new Sprite(texture);    
-  backgroundVideo.anchor.set(0.5);
-  // spritesContainer.anchor.set(0.5);
-  if (app.screen.width > app.screen.height) {
-    backgroundVideo.width = app.screen.width * 1.05;
-    backgroundVideo.scale.y = backgroundVideo.scale.x;
+  let video = document.createElement("video");
+
+  if (source == "webcam") {
+  let constraints = { video: true, audio: false };
+    const selectedVideoInput = localStorage.getItem("cameraInputDevice"); 
+    console.log("tryna use selectedVideoInput " + selectedVideoInput);
+    if (selectedVideoInput) {
+      constraints = { 
+        video: { deviceId: selectedVideoInput, width: 4096, height: 2160 } // Replace with actual deviceId
+        // audio: { deviceId: '' } // Replace with actual deviceId
+      };
+    } 
+
+    // Get a MediaStream from the webcam
+    // const stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    // Create an HTML video element to use the stream
+    // Get the settings of the video track
+    const videoTrack = stream.getVideoTracks()[0];
+    const settings = videoTrack.getSettings();
+
+    const actualWidth = settings.width;
+    const actualHeight = settings.height;
+
+    console.log('Actual camera width:', actualWidth);
+    console.log('Actual camera height:', actualHeight);
+
+    video.autoplay = true;
+    video.srcObject = stream;
+    // Setting srcObject is required for a live stream
+
+    console.log("VIDEO WIDTH " + actualWidth + " HEIGHT " +actualHeight);
+    // Create a texture from the video element
+    const videoTexture = await Texture.from(video);
+
+    // Create a sprite from the texture and add it to the stage
+    // const videoSprite = new Sprite(videoTexture);
+    // app.stage.addChild(videoSprite);
+
+        // await navigator.mediaDevices.getUserMedia({ video: true })
+    // .then(function (stream) {
+      
+    //   video.srcObject = stream;
+    //   video.autoplay = true;
+    //   console.log("adding video with source " + source);
+    //   const width = video.videoWidth;
+    //   const height = video.videoHeight;
+    //   console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
+    //   const texture = Texture.from(video);
+
+      // const videoSprite = await new Sprite(videoTexture);    
+
+      addBackgroundCamera(app, viewport, actualWidth, actualHeight, videoTexture, spritesContainer);
+      // videoSprite.anchor.set(0.5);
+      //               spritesContainer.addChild(videoSprite);
+      //     // spritesContainer.anchor.set(0.5);
+      //         // if (app.screen.width > app.screen.height) {
+      //         //   videoSprite.width = app.screen.width * 1.05;
+      //         //   videoSprite.scale.y = videoSprite.scale.x;
+      //         // } else {
+      //         //   /**
+      //         //    * If the preview is square or portrait, then fill the height of the screen instead
+      //         //    * and apply the scaling to the horizontal scale accordingly.
+      //         //    */
+      //         //   videoSprite.height = app.screen.height * 1.05;
+      //         //   videoSprite.scale.x = videoSprite.scale.y;
+      //         // }
+      //     // Position the videoSprite sprite in the center of the stage.
+      // videoSprite.x = app.screen.width / 2;
+      // videoSprite.y = app.screen.height / 2;
+      // videoSprite.position.set(100, 100);
+      // videoSprite.width = actualWidth;
+      // videoSprite.height = actualHeight;
+
+      // viewport.addChild(backgroundVideo);
+    // })
+    // .catch(function (err0r) {
+    //   console.log("Something went wrong!");
+    // });
+
+
+    // stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    // video = document.createElement("video");
+    // video.autoplay = true;
+    // video.src = stream;
+    // addMap = false;
+
+    // navigator.mediaDevices
+    // .getUserMedia(constraints)
+    // .then((theStream) => {
+    //   stream = theStream;
+    //   video = document.createElement("video");
+    //   video.autoplay = true;
+    //   video.srcObject = stream;
+    //   addMap = false;
+    //   /* use the stream */
+    // })
+    // .catch((err) => {
+    //   /* handle the error */
+    // });
+    // addOverlayMap(app, viewport, actualWidth, actualHeight, videoTexture, spritesContainer);
+    
+        //     spritesContainer.anchor = .5;
+    
+        // /**
+        //  * If the preview is landscape, fill the width of the screen
+        //  * and apply horizontal scale to the vertical scale for a uniform fit.
+        //  */
+
+        //   if (app.screen.width > app.screen.height) {
+        //     spritesContainer.width = app.screen.width - (app.screen.width * .1);
+        //         // background.width = app.screen.width;
+        //     spritesContainer.scale.y = spritesContainer.scale.x;
+        //   } else {
+        //     /**
+        //      * If the preview is square or portrait, then fill the height of the screen instead
+        //      * and apply the scaling to the horizontal scale accordingly.
+        //      */
+        //     spritesContainer.height = app.screen.height - (app.screen.height * .1);
+        //     spritesContainer.scale.x = spritesContainer.scale.y;
+        //   }
+
+        //       viewport.addChild(spritesContainer);
   } else {
-    /**
-     * If the preview is square or portrait, then fill the height of the screen instead
-     * and apply the scaling to the horizontal scale accordingly.
-     */
-    backgroundVideo.height = app.screen.height * 1.05;
-    backgroundVideo.scale.x = backgroundVideo.scale.y;
-  }
+      video = document.getElementById("bgVideo");
+      addMap = true;
+          console.log("adding video with source " + source);
+    const width = video.videoWidth;
+    const height = video.videoHeight;
+    console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
+    const texture = Texture.from(video);
+    const backgroundVideo = new Sprite(texture);    
+    backgroundVideo.anchor.set(0.5);
+    // spritesContainer.anchor.set(0.5);
+    if (app.screen.width > app.screen.height) {
+      backgroundVideo.width = app.screen.width * 1.05;
+      backgroundVideo.scale.y = backgroundVideo.scale.x;
+    } else {
+      /**
+       * If the preview is square or portrait, then fill the height of the screen instead
+       * and apply the scaling to the horizontal scale accordingly.
+       */
+      backgroundVideo.height = app.screen.height * 1.05;
+      backgroundVideo.scale.x = backgroundVideo.scale.y;
+    }
     // Position the backgroundVideo sprite in the center of the stage.
     backgroundVideo.x = app.screen.width / 2;
     backgroundVideo.y = app.screen.height / 2;
-
-  if (viewport) {
-    // viewport.addChild(backgroundVideo);
-  } else {
-    // app.stage.addChild(backgroundVideo);
+    addOverlayMap(app, viewport, width, height, texture, spritesContainer);
   }
 
+  // if (video) {
+  //   console.log("adding video with source " + source);
+  //   const width = video.videoWidth;
+  //   const height = video.videoHeight;
+  //   console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
+  //   const texture = Texture.from(video);
+  //   const backgroundVideo = new Sprite(texture);    
+  //   backgroundVideo.anchor.set(0.5);
+  //   // spritesContainer.anchor.set(0.5);
+  //   if (app.screen.width > app.screen.height) {
+  //     backgroundVideo.width = app.screen.width * 1.05;
+  //     backgroundVideo.scale.y = backgroundVideo.scale.x;
+  //   } else {
+  //     /**
+  //      * If the preview is square or portrait, then fill the height of the screen instead
+  //      * and apply the scaling to the horizontal scale accordingly.
+  //      */
+  //     backgroundVideo.height = app.screen.height * 1.05;
+  //     backgroundVideo.scale.x = backgroundVideo.scale.y;
+  //   }
+  //     // Position the backgroundVideo sprite in the center of the stage.
+  //     backgroundVideo.x = app.screen.width / 2;
+  //     backgroundVideo.y = app.screen.height / 2;
+
+  //   // if (viewport) {
+  //   //   // viewport.addChild(backgroundVideo);
+  //   // } else {
+  //   //   // app.stage.addChild(backgroundVideo);
+  //   // }  
+  //   if (source != "webcam") {
+  //     addOverlayMap(app, viewport, width, height, texture, spritesContainer);
+  //   } else {
+  //     app.stage.addChild(backgroundVideo);
+  //   }
+  // } 
 
   
-  addOverlayMap(app, viewport, width, height, texture, spritesContainer);
 
 }
 
+async function addBackgroundCamera(app, viewport, width, height, videoTexture, spritesContainer) {
+
+    const map = videoTexture;
+   
+    let mapSpritesData = {};
+    mapSpritesData.meta = {};
+    mapSpritesData.frames = {};
+
+    const picwidth = width;
+    const picheight = height;
+    mapsize.x = picwidth;
+    mapsize.y = picheight;
+
+    let tilesize = 32;
+    const xCount = picwidth / tilesize;
+    const yCount = picheight / tilesize;
+
+        viewport.worldWidth = picwidth;                        
+        viewport.worldHeight = picheight;   
+
+    console.log("map xCount : " + xCount + " yCount : " + yCount);
+  
+    //cook the spritesheet json based on image rez and tilesize
+    for (let i = 0; i < xCount; i++) {
+      const xpos = (i * tilesize);
+      for (let k = 0; k < yCount; k++) {
+        const tileID = "tile_" + i + "_" + k;
+        const ypos = (k * tilesize);
+        //add object the spritesheet json!
+        mapSpritesData.frames[tileID] = {frame: { x: xpos, y: ypos, w: tilesize, h: tilesize },
+                                        sourceSize: { w: tilesize, h: tilesize },
+                                        trimmed: false,
+                                        spriteSourceSize: { x: 0, y: 0, w: tilesize, h: tilesize },
+                                        anchor: { x: 0, y: 0 }};
+      }
+    }
+
+    mapSpritesData.meta.images = mappicURL;
+    console.log("mapSpritesData " + JSON.stringify(mapSpritesData));
+    
+    // const sheetTexture = await Assets.load(mappicURL);
+    
+    const spritesheet = new Spritesheet(map, mapSpritesData);
+    await spritesheet.parse();
+   
+    for(var key in mapSpritesData.frames) {
+
+        if(mapSpritesData.frames.hasOwnProperty(key)) {
+          // spritesContainer.
+          // console.log("mapsprite " + key);
+          const sprite = new Sprite(spritesheet.textures[key]);
+          // const sprite = new Sprite();
+          const keySplit = key.split("_");
+
+          sprite.x = parseInt((keySplit[1]) * tilesize);
+          sprite.y = parseInt((keySplit[2]) * tilesize);
+          sprite.position.set(parseInt(keySplit[1]) * tilesize, parseInt((keySplit[2]) * tilesize))
+          sprite.width = tilesize;
+          sprite.height = tilesize;
+          sprite.anchor.set(0);
+          sprite.interactive = true;
+          sprite.buttonMode = true;
+          sprite.label = key;
+          // sprite.alpha = .1;
+          // sprite.on('pointerenter', () => {
+          //    if (keydown =="X") {
+          //     sprite.tint = .7 * 0xffffff;
+          //   } else {
+          //     sprite.tint = .3 * 0xffffff;
+          //   }
+          //   // console.log(sprite.label +  " tile entered at " + sprite.position.x + " " + sprite.position.y);
+          // });
+          // sprite.on('pointerleave', () => {
+          //   sprite.tint = 0xffffff;
+          //   // console.log("Sprite exit at " + sprite.position.x + " " + sprite.position.y);
+          // });
+          sprite.on('pointerdown', (event) => {
+            // sprite.tint = 0xffffff;
+          const globalPos = event.data.global; // { x: ..., y: ... }
+            // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
+          const worldPos = viewport.toLocal(globalPos);
+              console.log("keydown " + keydown + " for " + sprite.label + " pointerdown globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
+
+          });
+
+          spritesContainer.addChild(sprite);
+          }
+        }
+        // Center background sprite anchor.
+        // viewport.anchor = .5;
+        // viewport.width = width;
+        // viewport.height = height;
+
+      /**
+       * If the preview is landscape, fill the width of the screen
+       * and apply horizontal scale to the vertical scale for a uniform fit.
+       */
+
+      if (app.screen.width > app.screen.height) {
+        spritesContainer.width = app.screen.width - (app.screen.width * .01);
+            // background.width = app.screen.width;
+        spritesContainer.scale.y = spritesContainer.scale.x;
+      } else {
+        /**
+         * If the preview is square or portrait, then fill the height of the screen instead
+         * and apply the scaling to the horizontal scale accordingly.
+         */
+        spritesContainer.height = app.screen.height - (app.screen.height * .01);
+        spritesContainer.scale.x = spritesContainer.scale.y;
+      }
+
+      viewport.addChild(spritesContainer);
+    
+      viewport.animate({
+          // position: { x: 0, y: 0 }, // Target center position
+        position: { x: app.screen.width/2, y: app.screen.height/2 }, // Target center position
+        // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+        scale: 1.1, // Target zoom level
+        time: 1000, // Animation duration of 1 second
+        ease: 'easeInOutQuad' // Using a common easing function
+    
+      });
+      applyFilters(app, spritesContainer);
+
+}
+async function applyFilters (app, spritesContainer) {
+   const colormatrixfilter = new ColorMatrixFilter();
+  colormatrixfilter.alpha = .1;
+  
+  const bloomfilter = new AdvancedBloomFilter();
+  bloomfilter.bloomScale = 2;
+  
+  const oldFilmFilter = new OldFilmFilter();
+  oldFilmFilter.seed = .9;
+  // oldFilmFilter.noise = .75;
+  let filters = [];
+
+
+  if (sceneTags && sceneTags.includes("color matrix")) {
+    filters.push(colormatrixfilter);
+  }
+  if (sceneTags && sceneTags.includes("bloom")) {
+    filters.push(bloomfilter);
+  }
+  if (sceneTags && sceneTags.includes("old film")) {
+    filters.push(oldFilmFilter);
+  }
+  spritesContainer.filters = filters;
+
+  let count = 0;
+  let enabled = true;
+      let randomFactor = Math.random();
+
+
+  app.ticker.add(() => {
+    
+    count += 0.01;
+    if (count > 1000) {
+      count = 0;
+      // randomFactor = Math.random();
+    }
+    bloomfilter.bloomScale = Math.sin(randomFactor);
+      
+    randomFactor = Math.cos(randomFactor);
+    oldFilmFilter.noise = Math.random();
+    oldFilmFilter.noiseSize = Math.random();
+    oldFilmFilter.seed = Math.random();
+    oldFilmFilter.scratchWidth = Math.random();
+
+    // Animate the filter
+    const { matrix } = colormatrixfilter;
+      matrix[1] = Math.sin(count) * 3 * randomFactor;
+      matrix[2] = Math.cos(count)  * randomFactor;
+      matrix[3] = Math.cos(count) * 1.5  * randomFactor;
+      matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
+      matrix[5] = Math.sin(count / 2)  * randomFactor;
+      matrix[6] = Math.sin(count / 4)  * randomFactor;
+    });
+    
+
+}
 
 async function addOverlayMap(app, viewport, width, height, videoTexture, spritesContainer) {
-  // Create a background sprite.
-
-    // const map = Sprite.from('map'); //need to ref it for w/h below\
-    // const spritesContainer = new Container();
-    // const map = Texture.from('backgroundVideo');
+ 
     const map = videoTexture;
     // map.texture.width = width;
     // map.texture.height = height;
@@ -200,12 +534,7 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
             // console.log("keydown " + keydown + " for " + sprite.label + " pointerdown at " + sprite.position.x + " " + sprite.position.y);
           const worldPos = viewport.toLocal(globalPos);
               console.log("keydown " + keydown + " for " + sprite.label + " pointerdown globalPos " + globalPos.x + " " + globalPos.y + " vs worldPos " + worldPos.x + " " +worldPos.y);
-            // viewport.snap(sprite.getGlobalPosition().x, sprite.getGlobalPosition().y);
-              // SetSelectedPosition(sprite.label, sprite.position.x, sprite.position.y);
-              // if (keydown == "X") {
-              //   CreateNewLocation();
-              // }
-              
+            
           });
 
           spritesContainer.addChild(sprite);
@@ -219,22 +548,23 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
      * and apply horizontal scale to the vertical scale for a uniform fit.
      */
 
-          // if (app.screen.width > app.screen.height) {
-          //   spritesContainer.width = app.screen.width - (app.screen.width * .1);
-          //       // background.width = app.screen.width;
-          //   spritesContainer.scale.y = spritesContainer.scale.x;
-          // } else {
-          //   /**
-          //    * If the preview is square or portrait, then fill the height of the screen instead
-          //    * and apply the scaling to the horizontal scale accordingly.
-          //    */
-          //   spritesContainer.height = app.screen.height - (app.screen.height * .1);
-          //   spritesContainer.scale.x = spritesContainer.scale.y;
-          // }
+    if (app.screen.width > app.screen.height) {
+      spritesContainer.width = app.screen.width - (app.screen.width * .05);
+          // background.width = app.screen.width;
+      spritesContainer.scale.y = spritesContainer.scale.x;
+    } else {
+      /**
+       * If the preview is square or portrait, then fill the height of the screen instead
+       * and apply the scaling to the horizontal scale accordingly.
+       */
+      spritesContainer.height = app.screen.height - (app.screen.height * .05);
+      spritesContainer.scale.x = spritesContainer.scale.y;
+    }
 
     // Position the background sprite in the center of the stage.
-    spritesContainer.x = viewport.width * .05;
-    spritesContainer.y = viewport.height * .05;
+    // spritesContainer.x = viewport.width * .05;
+    // spritesContainer.y = viewport.height * .05;
+    // spritesContainer.a
 
     addGridOverlay(app, tilesize, xCount, yCount, picwidth, picheight, spritesContainer, viewport);
     // Add the background to the stage.
@@ -242,8 +572,8 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
     viewport.addChild(spritesContainer);
   
     viewport.animate({
+      position: { x: app.screen.width/2, y: app.screen.height/2 }, // Target center position
       // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
-      position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
       scale: 1.1, // Target zoom level
       time: 1000, // Animation duration of 1 second
       ease: 'easeInOutQuad' // Using a common easing function
@@ -385,7 +715,7 @@ export function addBackgroundPictures(app) {
     } else {
       modFactor = (modFactor / 4);
     }
-        console.log("modFactor is " + modFactor);
+    console.log("modFactor is " + modFactor);
     SetViewportVerticalCenter(modFactor);
 
     if (signScaleFactor > .5) {
@@ -394,7 +724,7 @@ export function addBackgroundPictures(app) {
       modScaleFactor = (modScaleFactor / 6);
     }
   } else {
-        xMod = 1.1;
+    xMod = 1.1;
     console.log("modFactor is 2.25");
     SetViewportVerticalCenter(2.25);
   }
@@ -452,16 +782,16 @@ export function addBackgroundPictures(app) {
       matrix[6] = Math.sin(count / 4)  * randomFactor;
     });
     // }
-        console.log("modFactor " + modFactor + " modScaleFactor " + modScaleFactor + " viewOrientation " + viewOrientation + " picOrientation " + 
+      console.log("modFactor " + modFactor + " modScaleFactor " + modScaleFactor + " viewOrientation " + viewOrientation + " picOrientation " + 
           picOrientation + " viewportVerticalCenter" + viewportVerticalCenter+ " viewportHorizontalCenter" + viewportHorizontalCenter);
+
       viewport.animate({
       position: { x: 0, y:0}, // Target center position
       // position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
       scale: 1.1 + modScaleFactor, // Target zoom level
       time: 3000, // Animation duration of 1 second
       ease: 'easeInOutQuad' // Using a common easing function
-  
-  });
+    });
 
 }
 

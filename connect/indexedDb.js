@@ -498,7 +498,8 @@ export function InitIDB() {
                   pstore.put(updoc);
                   transaction.oncomplete = function () {
                      db.close();
-                     console.log("localprofile found and updated! " + JSON.stringify(updoc));
+                     // console.log("localprofile found and updated! " + JSON.stringify(updoc));
+                     console.log("localprofile found and updated! " );
                   }
 
                   UpdateUserProfile(updoc);

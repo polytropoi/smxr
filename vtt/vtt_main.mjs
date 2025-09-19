@@ -7,7 +7,7 @@ import { Viewport } from 'pixi-viewport';
 import { addBackground, addMap, addBackgroundVideo, addBackgroundPictures } from './addBackground.mjs';
 import { addText, addPlayerProfileText, addEventText } from './addText.mjs';
 import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './addElements.mjs';
-import { addDisplacementEffect } from './addDisplacement.mjs';
+import { addDisplacementEffect } from './vtt_filters.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
 import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
 import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../connect/media.js';
@@ -479,10 +479,13 @@ export async function GoWithIt() { //called from vtt.js
       addSimplePlayButton(app);
     }
   }
-  if (backgroundVideoURL) {
-    console.log("gotsa backgroundVideoURL "+ backgroundVideoURL);
-    addBackgroundVideo(app, viewport, spritesContainer);
-        if (settings && settings.sceneTags && settings.sceneTags.includes("play button")) {
+
+  if (settings && settings.sceneTags.includes("background webcam")) {
+        addBackgroundVideo(app, viewport, "webcam");
+  } else if (backgroundVideoURL) {
+      console.log("gotsa backgroundVideoURL "+ backgroundVideoURL);
+      addBackgroundVideo(app, viewport, "video");
+    if (settings && settings.sceneTags && settings.sceneTags.includes("play button")) {
       console.log("tryna add play button");
       addSimplePlayButton(app);
     }

@@ -860,7 +860,7 @@ background-color: #000000;
         border-width: 4px;
         width: 70%; /* Could be more or less, depending on screen size */
         /* height: 75%; */
-        height: 85vh;
+        height: 75vh;
         overflow-y: auto;
         /* font-family: Trebuchet MS, Helvetica, sans-serif; */
         font-family: Source Sans Pro, Helvetica Neue, Helvetica, Arial, sans-serif;

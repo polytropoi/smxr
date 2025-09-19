@@ -117,7 +117,8 @@ export function AudioVizMode (mode) {
     presetIndex = 3;
   }
 }
-export function InitAnalyzer () {
+export function InitAnalyzer (source) {
+
 
 
   const presets = [
@@ -141,8 +142,8 @@ export function InitAnalyzer () {
         reflexRatio: 0,
         showBgColor: true,
         showPeaks: true,
-        overlay: true,
-        source: primaryAudioElement
+        overlay: true
+        // source: primaryAudioElement
       }
     },
     {
@@ -162,8 +163,8 @@ export function InitAnalyzer () {
         reflexRatio: .5,
         showBgColor: false,
         showPeaks: false,
-        overlay: true,
-        source: primaryAudioElement
+        overlay: true
+        // source: primaryAudioElement
       }
     },
     {
@@ -188,8 +189,8 @@ export function InitAnalyzer () {
         spinSpeed: 2,
         outlineBars: true,
         overlay: true,
-        weightingFilter: 'D',
-        source: primaryAudioElement
+        weightingFilter: 'D'
+        // source: primaryAudioElement
       }
     },
     {
@@ -211,21 +212,21 @@ export function InitAnalyzer () {
         showPeaks: true,
         overlay: true,
         outlineBars: false,
-        alphaBars: true,
-        source: primaryAudioElement
+        alphaBars: true
+        // source: primaryAudioElement
       }
     }
   ];
 
+  if (presetIndex == -1) {
+        presetIndex = Math.floor(Math.random() * presets.length);
+  }
 
-    if (presetIndex == -1) {
-         presetIndex = Math.floor(Math.random() * presets.length);
+  if (!audioMotion) {
+    
+    if (source != "audioDevice" && primaryAudioElement) {
+      presets[presetIndex].options.source = primaryAudioElement;
     }
-
-  if (primaryAudioElement && !audioMotion) {
-    // addAudioVizSelect();
-
-
     audioMotion = new AudioMotionAnalyzer(
       document.getElementById('audioVizContainer'),
       presets[presetIndex].options
@@ -346,23 +347,33 @@ micButton.addEventListener( 'click', () => {
         micEnabled = !micEnabled;
   console.log("micButton click enabled " + micEnabled + " audioMotion is null " + (audioMotion == null));
 
-  if (!audioMotion) {
-      audioMotion = new AudioMotionAnalyzer(
-    document.getElementById('audioVizContainer'),
-    {
-      gradient: 'rainbow',
-      height: window.innerHeight - 40,
-      showScaleY: true,
-      bgAlpha: 0,
-      overlay: true
-    }
-  );
-  }
-    
+  // if (!audioMotion) {
+  //     audioMotion = new AudioMotionAnalyzer(
+  //   document.getElementById('audioVizContainer'),
+  //   {
+  //     gradient: 'rainbow',
+  //     height: window.innerHeight - 40,
+  //     showScaleY: true,
+  //     bgAlpha: 0,
+  //     overlay: true
+  //   }
+  // );
+  // }
+    InitAnalyzer("audioDevice");
 
-    if ( micEnabled ) {
+    if ( micEnabled && audioMotion) {
 
       if ( navigator.mediaDevices ) {
+
+        let constraints = { audio: true, video: false };
+        
+        const selectedAudioInput = localStorage.getItem("audioInputDevice"); 
+        if (selectedAudioInput) {
+          constraints = { 
+            video: { deviceId: 'your-selected-camera-device-id' }, // Replace with actual deviceId
+            audio: { deviceId: selectedAudioInput } // Replace with actual deviceId
+          };
+        }
         navigator.mediaDevices.getUserMedia( { audio: true, video: false } )
         .then( stream => {
           // create stream using audioMotion audio context
@@ -372,6 +383,7 @@ micButton.addEventListener( 'click', () => {
           // mute output to prevent feedback loops from the speakers
           audioMotion.volume = 0;
           console.log("tryna send microphon e stream.,.");
+          micButton.style.color = "pink";
         })
         .catch( err => {
           alert('Microphone access denied by user');
@@ -384,6 +396,7 @@ micButton.addEventListener( 'click', () => {
       // disconnect and release microphone stream
       if (audioMotion && micStream) {
         audioMotion.disconnectInput( micStream, true ); 
+         micButton.style.color = "white";
       }
       
     }
