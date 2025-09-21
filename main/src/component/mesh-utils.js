@@ -1004,8 +1004,10 @@ AFRAME.registerComponent('instanced_meshes_sphere', { //scattered randomly in sp
             }
             this.el.sceneEl.object3D.add( this.arrow );
           } else {
-            this.raycaster.setFromCamera( mouse, this.camera );
-            this.intersection = this.raycaster.intersectObject( this.iMesh );
+            if (this.camera) {
+              this.raycaster.setFromCamera( mouse, this.camera );
+              this.intersection = this.raycaster.intersectObject( this.iMesh );
+            }
           }
         }
         if ( this.intersection != null && this.intersection.length > 0 ) {
