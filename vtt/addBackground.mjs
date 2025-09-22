@@ -1,12 +1,15 @@
 import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMatrixFilter } from 'pixi';
+// import 'pixi.js/advanced-blend-modes';
+// import '../main/js/pixi/pixi.min.mjs/advanced-blend-modes'
 // import { CompositeTilemap } from 'pixi-tilemap';
 import { SetSelectedPosition } from '../connect/events.js';
 import { keydown, CreateNewLocation } from '../connect/dialogs.js';
 import { viewport, sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, 
   viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter, spritesContainer} from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
-import { AdvancedBloomFilter, ReflectionFilter, OldFilmFilter } from '@pixi/filters';
+
 import { AddLocation } from './vtt_locations.mjs';
+import {applyFilters} from './vtt_filters.mjs';
 export let mapsize = {};
 
 export let background;
@@ -79,7 +82,9 @@ export async function addBackgroundVideo(app, viewport, source) {
 
   let video = document.createElement("video");
 
-  if (source == "webcam") {
+  if (source == "webcamm") {
+    addWebcam(app);
+  } else if (source == "webcam") {
   let constraints = { video: true, audio: false };
     const selectedVideoInput = localStorage.getItem("cameraInputDevice"); 
     console.log("tryna use selectedVideoInput " + selectedVideoInput);
@@ -92,7 +97,7 @@ export async function addBackgroundVideo(app, viewport, source) {
 
     // Get a MediaStream from the webcam
     // const stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
     // Create an HTML video element to use the stream
     // Get the settings of the video track
@@ -109,98 +114,12 @@ export async function addBackgroundVideo(app, viewport, source) {
     video.srcObject = stream;
     // Setting srcObject is required for a live stream
 
-    console.log("VIDEO WIDTH " + actualWidth + " HEIGHT " +actualHeight);
+    console.log("webcam VIDEO WIDTH " + actualWidth + " HEIGHT " +actualHeight);
     // Create a texture from the video element
     const videoTexture = await Texture.from(video);
 
-    // Create a sprite from the texture and add it to the stage
-    // const videoSprite = new Sprite(videoTexture);
-    // app.stage.addChild(videoSprite);
-
-        // await navigator.mediaDevices.getUserMedia({ video: true })
-    // .then(function (stream) {
+    addBackgroundCamera(app, viewport, actualWidth, actualHeight, videoTexture, spritesContainer);
       
-    //   video.srcObject = stream;
-    //   video.autoplay = true;
-    //   console.log("adding video with source " + source);
-    //   const width = video.videoWidth;
-    //   const height = video.videoHeight;
-    //   console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
-    //   const texture = Texture.from(video);
-
-      // const videoSprite = await new Sprite(videoTexture);    
-
-      addBackgroundCamera(app, viewport, actualWidth, actualHeight, videoTexture, spritesContainer);
-      // videoSprite.anchor.set(0.5);
-      //               spritesContainer.addChild(videoSprite);
-      //     // spritesContainer.anchor.set(0.5);
-      //         // if (app.screen.width > app.screen.height) {
-      //         //   videoSprite.width = app.screen.width * 1.05;
-      //         //   videoSprite.scale.y = videoSprite.scale.x;
-      //         // } else {
-      //         //   /**
-      //         //    * If the preview is square or portrait, then fill the height of the screen instead
-      //         //    * and apply the scaling to the horizontal scale accordingly.
-      //         //    */
-      //         //   videoSprite.height = app.screen.height * 1.05;
-      //         //   videoSprite.scale.x = videoSprite.scale.y;
-      //         // }
-      //     // Position the videoSprite sprite in the center of the stage.
-      // videoSprite.x = app.screen.width / 2;
-      // videoSprite.y = app.screen.height / 2;
-      // videoSprite.position.set(100, 100);
-      // videoSprite.width = actualWidth;
-      // videoSprite.height = actualHeight;
-
-      // viewport.addChild(backgroundVideo);
-    // })
-    // .catch(function (err0r) {
-    //   console.log("Something went wrong!");
-    // });
-
-
-    // stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    // video = document.createElement("video");
-    // video.autoplay = true;
-    // video.src = stream;
-    // addMap = false;
-
-    // navigator.mediaDevices
-    // .getUserMedia(constraints)
-    // .then((theStream) => {
-    //   stream = theStream;
-    //   video = document.createElement("video");
-    //   video.autoplay = true;
-    //   video.srcObject = stream;
-    //   addMap = false;
-    //   /* use the stream */
-    // })
-    // .catch((err) => {
-    //   /* handle the error */
-    // });
-    // addOverlayMap(app, viewport, actualWidth, actualHeight, videoTexture, spritesContainer);
-    
-        //     spritesContainer.anchor = .5;
-    
-        // /**
-        //  * If the preview is landscape, fill the width of the screen
-        //  * and apply horizontal scale to the vertical scale for a uniform fit.
-        //  */
-
-        //   if (app.screen.width > app.screen.height) {
-        //     spritesContainer.width = app.screen.width - (app.screen.width * .1);
-        //         // background.width = app.screen.width;
-        //     spritesContainer.scale.y = spritesContainer.scale.x;
-        //   } else {
-        //     /**
-        //      * If the preview is square or portrait, then fill the height of the screen instead
-        //      * and apply the scaling to the horizontal scale accordingly.
-        //      */
-        //     spritesContainer.height = app.screen.height - (app.screen.height * .1);
-        //     spritesContainer.scale.x = spritesContainer.scale.y;
-        //   }
-
-        //       viewport.addChild(spritesContainer);
   } else {
       video = document.getElementById("bgVideo");
       addMap = true;
@@ -269,6 +188,108 @@ export async function addBackgroundVideo(app, viewport, source) {
 
 }
 
+async function addWebcam (app) {
+   
+  let constraints = { video: true };
+    const selectedVideoInput = localStorage.getItem("cameraInputDevice"); 
+    console.log("tryna use selectedVideoInput " + selectedVideoInput);
+    if (selectedVideoInput) {
+      constraints = { 
+        video: { deviceId: selectedVideoInput, width: 4096, height: 2160 } // Replace with actual deviceId
+        // audio: { deviceId: '' } // Replace with actual deviceId
+      };
+    } 
+
+  // const stream = await navigator.mediaDevices.getUserMedia({
+  //       video:true,
+  //   });
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+
+  //   stream.getVideoTracks()[0].applyConstraints({
+  //       width: 960,
+  //       height: 540,
+  //       // bitrate: 512_000,
+  //       // aspectRatio: 1.777777778,
+  //       // frameRate: { max: 1 },
+  //  })
+
+    // const stream2 = await navigator.mediaDevices.getUserMedia({
+    //     video:true,
+    // });
+    // stream2.getVideoTracks()[0].applyConstraints({
+    //     width: 1920,
+    //     height: 1080,
+    //     bitrate: 2_097_152,
+    //     aspectRatio: 1.777777778,
+    //     frameRate: { max: 30 },
+    // })
+        const videoTrack = stream.getVideoTracks()[0];
+        // videoTrack.applyConstraints(constraints);
+    const settings = videoTrack.getSettings();
+
+    const actualWidth = settings.width;
+    const actualHeight = settings.height;
+        console.log("tryna webcam " + actualWidth + " x " + actualHeight);
+    const videoElement = document.createElement('video');
+    // videoElement.height = actualWidth;
+    // videoElement.width = actualWidth;
+    videoElement.srcObject = stream;
+    videoElement.autoplay = true; 
+    videoElement.muted = true;
+    await videoElement.play();
+
+    // videoElement.addEventListener('pause', async () => {
+    //     console.info('pause event')
+    //     try {
+    //         await videoElement.play();
+    //     } catch (e) {
+    //         console.error('Play failed after video pause', e);
+    //     }
+    // });
+
+    const videoTexture = Texture.from(videoElement);
+
+    const videoSprite = new Sprite({
+        texture: videoTexture,
+        label: "video"
+    });
+
+    videoSprite.anchor.set(0.5);
+    videoSprite.x = app.renderer.width / 2;
+    videoSprite.y = app.renderer.height / 2;
+    videoSprite.height = actualHeight;
+    videoSprite.width = actualWidth;
+      if (app.screen.width > app.screen.height) {
+        spritesContainer.width = app.screen.width - (app.screen.width * .01);
+            // background.width = app.screen.width;
+        spritesContainer.scale.y = spritesContainer.scale.x;
+      } else {
+        /**
+         * If the preview is square or portrait, then fill the height of the screen instead
+         * and apply the scaling to the horizontal scale accordingly.
+         */
+        spritesContainer.height = app.screen.height - (app.screen.height * .01);
+        spritesContainer.scale.x = spritesContainer.scale.y;
+      }
+    spritesContainer.addChild(videoSprite);
+    // viewport.addChild(spritesContainer);
+    
+    viewport.animate({
+        // position: { x: 0, y: 0 }, // Target center position
+      position: { x: app.screen.width/2, y: app.screen.height/2 }, // Target center position
+      // position: { x: window.innerWidth/2, y: window.innerHeight/2 }, // Target center position
+      scale: 1.1, // Target zoom level
+      time: 1000, // Animation duration of 1 second
+      ease: 'easeInOutQuad' // Using a common easing function
+  
+    });
+    applyFilters(app, spritesContainer);
+    // app.stage.addChild(videoSprite );
+}
+
+
 async function addBackgroundCamera(app, viewport, width, height, videoTexture, spritesContainer) {
 
     const map = videoTexture;
@@ -289,7 +310,7 @@ async function addBackgroundCamera(app, viewport, width, height, videoTexture, s
         viewport.worldWidth = picwidth;                        
         viewport.worldHeight = picheight;   
 
-    console.log("map xCount : " + xCount + " yCount : " + yCount);
+    console.log("tryna addBackground camera w map xCount : " + xCount + " yCount : " + yCount);
   
     //cook the spritesheet json based on image rez and tilesize
     for (let i = 0; i < xCount; i++) {
@@ -394,62 +415,63 @@ async function addBackgroundCamera(app, viewport, width, height, videoTexture, s
       applyFilters(app, spritesContainer);
 
 }
-async function applyFilters (app, spritesContainer) {
-   const colormatrixfilter = new ColorMatrixFilter();
-  colormatrixfilter.alpha = .1;
+
+// async function applyFilters (app, spritesContainer) {
+//    const colormatrixfilter = new ColorMatrixFilter();
+//   colormatrixfilter.alpha = .1;
   
-  const bloomfilter = new AdvancedBloomFilter();
-  bloomfilter.bloomScale = 2;
+//   const bloomfilter = new AdvancedBloomFilter();
+//   bloomfilter.bloomScale = 2;
   
-  const oldFilmFilter = new OldFilmFilter();
-  oldFilmFilter.seed = .9;
-  // oldFilmFilter.noise = .75;
-  let filters = [];
+//   const oldFilmFilter = new OldFilmFilter();
+//   oldFilmFilter.seed = .9;
+//   // oldFilmFilter.noise = .75;
+//   let filters = [];
 
 
-  if (sceneTags && sceneTags.includes("color matrix")) {
-    filters.push(colormatrixfilter);
-  }
-  if (sceneTags && sceneTags.includes("bloom")) {
-    filters.push(bloomfilter);
-  }
-  if (sceneTags && sceneTags.includes("old film")) {
-    filters.push(oldFilmFilter);
-  }
-  spritesContainer.filters = filters;
+//   if (sceneTags && sceneTags.includes("color matrix")) {
+//     filters.push(colormatrixfilter);
+//   }
+//   if (sceneTags && sceneTags.includes("bloom")) {
+//     filters.push(bloomfilter);
+//   }
+//   if (sceneTags && sceneTags.includes("old film")) {
+//     filters.push(oldFilmFilter);
+//   }
+//   spritesContainer.filters = filters;
 
-  let count = 0;
-  let enabled = true;
-      let randomFactor = Math.random();
+//   let count = 0;
+//   let enabled = true;
+//       let randomFactor = Math.random();
 
 
-  app.ticker.add(() => {
+//   app.ticker.add(() => {
     
-    count += 0.01;
-    if (count > 1000) {
-      count = 0;
-      // randomFactor = Math.random();
-    }
-    bloomfilter.bloomScale = Math.sin(randomFactor);
+//     count += 0.01;
+//     if (count > 1000) {
+//       count = 0;
+//       // randomFactor = Math.random();
+//     }
+//     bloomfilter.bloomScale = Math.sin(randomFactor);
       
-    randomFactor = Math.cos(randomFactor);
-    oldFilmFilter.noise = Math.random();
-    oldFilmFilter.noiseSize = Math.random();
-    oldFilmFilter.seed = Math.random();
-    oldFilmFilter.scratchWidth = Math.random();
+//     randomFactor = Math.cos(randomFactor);
+//     oldFilmFilter.noise = Math.random();
+//     oldFilmFilter.noiseSize = Math.random();
+//     oldFilmFilter.seed = Math.random();
+//     oldFilmFilter.scratchWidth = Math.random();
 
-    // Animate the filter
-    const { matrix } = colormatrixfilter;
-      matrix[1] = Math.sin(count) * 3 * randomFactor;
-      matrix[2] = Math.cos(count)  * randomFactor;
-      matrix[3] = Math.cos(count) * 1.5  * randomFactor;
-      matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
-      matrix[5] = Math.sin(count / 2)  * randomFactor;
-      matrix[6] = Math.sin(count / 4)  * randomFactor;
-    });
+//     // Animate the filter
+//     const { matrix } = colormatrixfilter;
+//       matrix[1] = Math.sin(count) * 3 * randomFactor;
+//       matrix[2] = Math.cos(count)  * randomFactor;
+//       matrix[3] = Math.cos(count) * 1.5  * randomFactor;
+//       matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
+//       matrix[5] = Math.sin(count / 2)  * randomFactor;
+//       matrix[6] = Math.sin(count / 4)  * randomFactor;
+//     });
     
 
-}
+// }
 
 async function addOverlayMap(app, viewport, width, height, videoTexture, spritesContainer) {
  
