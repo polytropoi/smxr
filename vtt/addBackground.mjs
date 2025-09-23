@@ -82,9 +82,9 @@ export async function addBackgroundVideo(app, viewport, source) {
 
   let video = document.createElement("video");
 
-  if (source == "webcamm") {
+  if (source == "webcam") {
     addWebcam(app);
-  } else if (source == "webcam") {
+  } else if (source == "mapcam") {
   let constraints = { video: true, audio: false };
     const selectedVideoInput = localStorage.getItem("cameraInputDevice"); 
     console.log("tryna use selectedVideoInput " + selectedVideoInput);
@@ -274,7 +274,7 @@ async function addWebcam (app) {
         spritesContainer.scale.x = spritesContainer.scale.y;
       }
     spritesContainer.addChild(videoSprite);
-    // viewport.addChild(spritesContainer);
+    viewport.addChild(spritesContainer);
     
     viewport.animate({
         // position: { x: 0, y: 0 }, // Target center position
@@ -750,62 +750,63 @@ export function addBackgroundPictures(app) {
     console.log("modFactor is 2.25");
     SetViewportVerticalCenter(2.25);
   }
+  applyFilters(app, spritesContainer);
  
-  const colormatrixfilter = new ColorMatrixFilter();
-  colormatrixfilter.alpha = .1;
+  // const colormatrixfilter = new ColorMatrixFilter();
+  // colormatrixfilter.alpha = .1;
   
-  const bloomfilter = new AdvancedBloomFilter();
-  bloomfilter.bloomScale = 2;
+  // const bloomfilter = new AdvancedBloomFilter();
+  // bloomfilter.bloomScale = 2;
   
-  const oldFilmFilter = new OldFilmFilter();
-  oldFilmFilter.seed = .9;
-  // oldFilmFilter.noise = .75;
-  let filters = [];
+  // const oldFilmFilter = new OldFilmFilter();
+  // oldFilmFilter.seed = .9;
+  // // oldFilmFilter.noise = .75;
+  // let filters = [];
 
 
-  if (sceneTags && sceneTags.includes("color matrix")) {
-    filters.push(colormatrixfilter);
-  }
-  if (sceneTags && sceneTags.includes("bloom")) {
-    filters.push(bloomfilter);
-  }
-  if (sceneTags && sceneTags.includes("old film")) {
-    filters.push(oldFilmFilter);
-  }
-  spritesContainer.filters = filters;
+  // if (sceneTags && sceneTags.includes("color matrix")) {
+  //   filters.push(colormatrixfilter);
+  // }
+  // if (sceneTags && sceneTags.includes("bloom")) {
+  //   filters.push(bloomfilter);
+  // }
+  // if (sceneTags && sceneTags.includes("old film")) {
+  //   filters.push(oldFilmFilter);
+  // }
+  // spritesContainer.filters = filters;
 
-  let count = 0;
-  let enabled = true;
-      let randomFactor = Math.random();
+  // let count = 0;
+  // let enabled = true;
+  //     let randomFactor = Math.random();
 
 
-  app.ticker.add(() => {
+  // app.ticker.add(() => {
     
-    count += 0.01;
-    if (count > 1000) {
-      count = 0;
-      // randomFactor = Math.random();
-    }
-    bloomfilter.bloomScale = Math.sin(randomFactor);
+  //   count += 0.01;
+  //   if (count > 1000) {
+  //     count = 0;
+  //     // randomFactor = Math.random();
+  //   }
+  //   bloomfilter.bloomScale = Math.sin(randomFactor);
       
-    randomFactor = Math.cos(randomFactor);
-    oldFilmFilter.noise = Math.random();
-    oldFilmFilter.noiseSize = Math.random();
-    oldFilmFilter.seed = Math.random();
-    oldFilmFilter.scratchWidth = Math.random();
+  //   randomFactor = Math.cos(randomFactor);
+  //   oldFilmFilter.noise = Math.random();
+  //   oldFilmFilter.noiseSize = Math.random();
+  //   oldFilmFilter.seed = Math.random();
+  //   oldFilmFilter.scratchWidth = Math.random();
 
-    // Animate the filter
-    const { matrix } = colormatrixfilter;
-      matrix[1] = Math.sin(count) * 3 * randomFactor;
-      matrix[2] = Math.cos(count)  * randomFactor;
-      matrix[3] = Math.cos(count) * 1.5  * randomFactor;
-      matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
-      matrix[5] = Math.sin(count / 2)  * randomFactor;
-      matrix[6] = Math.sin(count / 4)  * randomFactor;
-    });
-    // }
-      console.log("modFactor " + modFactor + " modScaleFactor " + modScaleFactor + " viewOrientation " + viewOrientation + " picOrientation " + 
-          picOrientation + " viewportVerticalCenter" + viewportVerticalCenter+ " viewportHorizontalCenter" + viewportHorizontalCenter);
+  //   // Animate the filter
+  //   const { matrix } = colormatrixfilter;
+  //     matrix[1] = Math.sin(count) * 3 * randomFactor;
+  //     matrix[2] = Math.cos(count)  * randomFactor;
+  //     matrix[3] = Math.cos(count) * 1.5  * randomFactor;
+  //     matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
+  //     matrix[5] = Math.sin(count / 2)  * randomFactor;
+  //     matrix[6] = Math.sin(count / 4)  * randomFactor;
+  //   });
+  //   // }
+  //     console.log("modFactor " + modFactor + " modScaleFactor " + modScaleFactor + " viewOrientation " + viewOrientation + " picOrientation " + 
+  //         picOrientation + " viewportVerticalCenter" + viewportVerticalCenter+ " viewportHorizontalCenter" + viewportHorizontalCenter);
 
       viewport.animate({
       position: { x: 0, y:0}, // Target center position

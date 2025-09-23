@@ -227,9 +227,11 @@ export function InitAnalyzer (source) {
     if (source != "audioDevice" && primaryAudioElement) {
       presets[presetIndex].options.source = primaryAudioElement;
     }
+    presets[presetIndex].options.onCanvasDraw = energyMeters;
     audioMotion = new AudioMotionAnalyzer(
       document.getElementById('audioVizContainer'),
-      presets[presetIndex].options
+      presets[presetIndex].options,
+      
      
     );
 
@@ -283,21 +285,21 @@ function energyMeters() {
 
   const bassEnergy = audioMotion.getEnergy('bass');
   ctx.font = `bold ${ baseSize + growSize * bassEnergy }px sans-serif`;
-  ctx.fillText( 'BASS', canvas.width * .15, centerY );
+  // ctx.fillText( bassEnergy.toString(), canvas.width * .15, centerY );
   drawLight( canvas.width * .15, '#f00', bassEnergy );
 
   drawLight( canvas.width * .325, '#f80', audioMotion.getEnergy('lowMid') );
 
   const midEnergy = audioMotion.getEnergy('mid');
   ctx.font = `bold ${ baseSize + growSize * midEnergy }px sans-serif`;
-  ctx.fillText( 'MIDRANGE', centerX, centerY );
+  // ctx.fillText( midEnergy.toString(), centerX, centerY );
   drawLight( centerX, '#ff0', midEnergy );
 
   drawLight( canvas.width * .675, '#0f0', audioMotion.getEnergy('highMid') );
 
   const trebleEnergy = audioMotion.getEnergy('treble');
   ctx.font = `bold ${ baseSize + growSize * trebleEnergy }px sans-serif`;
-  ctx.fillText( 'TREBLE', canvas.width * .85, centerY );
+  // ctx.fillText( trebleEnergy.toString(), canvas.width * .85, centerY );
   drawLight( canvas.width * .85, '#0ff', trebleEnergy );
 }
 
