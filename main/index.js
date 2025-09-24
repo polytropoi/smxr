@@ -6187,7 +6187,7 @@
                 var selectHeader = "";
                 var arr = response.data;
                 let hideIndex  = 3;
-                if (mode == "select") {
+                if (mode == "select" || mode == "postselect") {
                     //selectFor = parent;
                     selectHeader = "<th>Select</th>";
                     $("#pageTitle").html("Select Picture for " + parent + " " + itemid);

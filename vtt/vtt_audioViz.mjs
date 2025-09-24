@@ -1,17 +1,22 @@
 import { Assets, Graphics, Container, Text } from 'pixi';
 import { eventEl } from '../connect/events.js';
-import AudioMotionAnalyzer from 'https://cdn.skypack.dev/audiomotion-analyzer?min';
+// import AudioMotionAnalyzer from 'https://cdn.skypack.dev/audiomotion-analyzer?min';
+import AudioMotionAnalyzer from '../main/js/audioMotion-analyzer.js';
 import { primaryAudioElement } from '../connect/media.js';
 
 import { Select } from '@pixi/ui';
 import { app} from './vtt_main.mjs';
 
+let presetIndex = -1;
+if (localStorage.getItem("audioVizMode")) {
+AudioVizMode(localStorage.getItem("audioVizMode"));
+}
 
-  eventEl.addEventListener('audio-viz', onAudioVizInit);
+eventEl.addEventListener('audio-viz', onAudioVizInit);
 
-  function onAudioVizInit(event) {
-    AudioVizMode(event.details);
-  }
+function onAudioVizInit(event) {
+  AudioVizMode(event.details);
+}
 // audio source
 // const audioEl = document.getElementById('audio');
 
@@ -100,10 +105,10 @@ function getOpenBG(backgroundColor, width, height, radius) {
   // });
   return openBG;
 }
-let presetIndex = -1;
+
 
 export function AudioVizMode (mode) {
-
+  console.log("tryna set audiovizmode " + mode);
   if (mode == 'Classic LEDs') {
     presetIndex = 0;
   }
@@ -286,21 +291,23 @@ function energyMeters() {
   const bassEnergy = audioMotion.getEnergy('bass');
   ctx.font = `bold ${ baseSize + growSize * bassEnergy }px sans-serif`;
   // ctx.fillText( bassEnergy.toString(), canvas.width * .15, centerY );
-  drawLight( canvas.width * .15, '#f00', bassEnergy );
+  ctx.fillText( bassEnergy.toFixed(2), canvas.width * .25, canvas.height - 50 );
+  
+  // drawLight( canvas.width * .15, '#f00', bassEnergy );
 
-  drawLight( canvas.width * .325, '#f80', audioMotion.getEnergy('lowMid') );
+  // drawLight( canvas.width * .325, '#f80', audioMotion.getEnergy('lowMid') );
 
   const midEnergy = audioMotion.getEnergy('mid');
   ctx.font = `bold ${ baseSize + growSize * midEnergy }px sans-serif`;
-  // ctx.fillText( midEnergy.toString(), centerX, centerY );
-  drawLight( centerX, '#ff0', midEnergy );
+  ctx.fillText( midEnergy.toFixed(2), canvas.width * .5, canvas.height - 50);
+  // drawLight( centerX, '#ff0', midEnergy );
 
-  drawLight( canvas.width * .675, '#0f0', audioMotion.getEnergy('highMid') );
+  // drawLight( canvas.width * .675, '#0f0', audioMotion.getEnergy('highMid') );
 
   const trebleEnergy = audioMotion.getEnergy('treble');
   ctx.font = `bold ${ baseSize + growSize * trebleEnergy }px sans-serif`;
-  // ctx.fillText( trebleEnergy.toString(), canvas.width * .85, centerY );
-  drawLight( canvas.width * .85, '#0ff', trebleEnergy );
+  ctx.fillText( trebleEnergy.toFixed(2), canvas.width * .75, canvas.height - 50 );
+  // drawLight( canvas.width * .85, '#0ff', trebleEnergy );
 }
 
 

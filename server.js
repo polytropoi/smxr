@@ -3322,6 +3322,8 @@ app.get('/userpics/:u_id', requiredAuthentication, function (req, res) {
        try {
         const picture_items = await RunDataQuery("image_items", "find", query);
         console.log("gotsome userpics " + picture_items.length);
+        picture_items.sort((a, b) => b.otimestamp - a.otimestamp); //or use lastupdatetimestamp?
+        const maxImages = 100;
         for (var i = 0; i < picture_items.length; i++) {
             // console.log("pic userID: "+ picture_items[i].userID);
             var item_string_filename = JSON.stringify(picture_items[i].filename);
@@ -3331,7 +3333,10 @@ app.get('/userpics/:u_id', requiredAuthentication, function (req, res) {
             expiration.setMinutes(expiration.getMinutes() + 30);
             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
             var thumbName = 'thumb.' + baseName + item_string_filename_ext;
-            var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + thumbName, 6000); 
+            let urlThumb = "#";
+            if (i < maxImages) {
+                urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + thumbName, 6000); 
+            } 
             picture_items[i].URLthumb = urlThumb;
             // console.log(picture_items[i].URLthumb);
         }

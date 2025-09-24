@@ -850,6 +850,7 @@ window.addEventListener( 'keydown',  ( event ) => {
 
   $('#modalContent').on('change', '#audioVizModeSelector', function(e) {
     console.log("tryna set audi0viz " + e.target.value);
+    localStorage.setItem("audioVizMode", e.target.value);
     InitAudioViz(e.target.value);
     // timedEventsListenerMode = e.target.value;
     // timeKeysData.listenTo = timedEventsListenerMode;
