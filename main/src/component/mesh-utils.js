@@ -11,6 +11,17 @@ if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
 
+
+AFRAME.registerComponent('invisible-material', {
+  init: function () {
+    this.el.setAttribute('material', {
+      opacity: 0,
+      transparent: true,
+    });
+    console.log("tryna set invisible-mat");
+  }
+});
+
 AFRAME.registerComponent('mod_physics', { //used by models, placeholders, instanced meshes, but NOT objects which manage physics settings in mod_object
   schema: {
     model: {default: ''},

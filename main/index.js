@@ -17592,6 +17592,8 @@ function getAllPeople() {
     }
 
     function getScene(sceneid) {
+        console.log("tryna get sceneid " + sceneid);
+        sceneid = sceneid.toString().trim();
         axios.get('/uscene/' + userid + '/' + sceneid)
         .then(function (response) {
             // console.log(response);

@@ -168,7 +168,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
           // {
             // console.log("CLOUDMARKER PLACEHOLDER GEO " + this.data.modelID);
             // // console.log("CLOUDMARKER " + this.data.markerType + " " + this.data.modelID );
-            if ((this.data.tags && !this.data.tags.includes("hide gizmo")) || (settings && !settings.hideGizmos)) {
+          // if ((this.data.tags && !this.data.tags.includes("hide gizmo")) || (settings && !settings.hideGizmos)) {
             //   if (this.data.markerType != "mailbox" && this.data.markerType != "light"  && this.data.markerType != "gate") {
                 if (this.data.markerType.toLowerCase() == "player") {
                   // this.el.removeAttribute("geometry");
@@ -200,11 +200,18 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                 } else if (this.data.markerType == "trigger" || this.data.markerType == "spawntrigger") { //spawntrigger deprecated
                   this.el.setAttribute('gltf-model', '#poi1');
                   // this.el.setAttribute("geometry", {"primitive": "box", "width": this.data.xscale, "height": this.data.yscale, "depth": this.data.zscale});
-                 
-                  this.el.setAttribute("material", {color: "LightSalmon", transparent: true, opacity: .5});
+                  
+                
                   this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"box", scaleFactor: this.data.scale});
 
                   this.el.setAttribute("obb-collider", {size: this.data.xscale * 1.5 + " " + this.data.yscale * 1.5 + " " + this.data.zscale * 1.5});
+                  if (this.data.tags && this.data.tags.includes("hide gizmo")) {
+                    console.log("tryna hide gizmo...");
+                    this.el.setAttribute("material", {transparent: true, opacity: 0});
+                    // return;
+                  } else {
+                    this.el.setAttribute("material", {color: "green", transparent: true, opacity: .1});
+                  }
 
                 } else if (this.data.markerType.toLowerCase().includes("object")) {
                   // this.el.setAttribute('gltf-model', '#poi1');  
@@ -235,7 +242,9 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                   console.log("tryna set 3D text!");
                   this.el.setAttribute("text_geometry", {value: this.data.description, font: '#optimerBoldFont'});
                 } 
-              }
+
+                // this.el.setAttribute("invisible-material");
+              // }
             if (this.data.markerType == "light") {
               console.log("tryna set a light!");
 
@@ -346,10 +355,11 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             if (this.data.tags.includes("hide") || this.data.tags.includes("highlight") || (settings && settings.hideGizmos)) {
               if (this.data.markerType != "mailbox" && this.data.markerType != "light") {
               // if (this.data.markerType != "mailbox" && this.data.markerType != "light" && this.data.markerType != "gate") {
-                this.el.object3D.visible = false;
+                // this.el.object3D.visible = false;
+                this.el.setAttribute("invisible-material");
               }
             } else {
-              this.el.object3D.visible = true;
+              // this.el.object3D.visible = true;
             }
             //   }
             // }
@@ -380,7 +390,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                 } else if (this.data.markerType.toLowerCase().includes("link")) {
                   this.el.setAttribute("material", {color: "gold", transparent: true, opacity: .5});
                 } else if (this.data.markerType.toLowerCase() ==  "trigger" || this.data.markerType == "spawntrigger") {
-                    this.el.setAttribute("material", {color: "LightSalmon", transparent: true, opacity: .5});
+                    this.el.setAttribute("material", {color: "green", transparent: true, opacity: .5});
                     // this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder"});
                     this.el.setAttribute("obb-collider", {size: this.data.xscale * 1.5 + " " + this.data.yscale * 1.5 + " " + this.data.zscale * 1.5});
                     
@@ -439,8 +449,9 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             }
             if (this.data.tags.includes("hide gizmo") || this.data.tags.includes("highlight") || (settings && settings.hideGizmos)) {
               if (this.data.markerType != "mailbox" && this.data.markerType != "light") {
-                console.log(this.data.name + " hiding gizmos because");
-                this.el.object3D.visible = false;
+                console.log("hide because " + this.data.name + " ....");
+                // this.el.object3D.visible = false;
+                this.el.setAttribute("invisible-material");
               }
             }
             if (this.data.markerType == "navmesh"  || this.data.markerType == "surface") {
@@ -559,7 +570,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             // this.el.setAttribute("gltf-model", "#poi1");
             this.el.setAttribute("material", {color: "blue", transparent: true, opacity: .5});
           } else if (this.data.markerType == "trigger") {
-            this.el.setAttribute("material", {color: "LightSalmon", transparent: true, opacity: .5});
+            this.el.setAttribute("material", {color: "green", transparent: true, opacity: .5});
             this.el.setAttribute("obb-collider");
         
           } else if (this.data.markerType.toLowerCase().includes("collider")) {
@@ -843,7 +854,8 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
               primaryAudioMangler.playPauseToggle();
             }
           }
-          if (this.data.markerType == "trigger" && this.data.tags.includes("click only")) { //like a "button"
+          // if (this.data.markerType == "trigger" && this.data.tags.includes("click only")) { //like a "button"
+          if (this.data.markerType == "trigger") { //like a "button"
             this.targetMods();
           }
         }
@@ -1048,9 +1060,18 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         if (this.data.tags && this.data.tags.includes("curve point") || this.data.markerType == "curve point") {
           this.el.classList.add("curvepoint");
         }
+        if (this.data.tags && this.data.tags.includes("hide gizmo")) {
+          this.el.setAttribute("material", {transparent: true, opacity: 0});
+        }
        
     },
     updateMaterials: function () {
+      if (this.data.tags && this.data.tags.includes("hide gizmo")) {
+        console.log("tryna hide gizmo...");
+        this.el.setAttribute("material", {transparent: true, opacity: 0});
+        return;
+      }
+
       if (this.data.tags && this.data.tags.includes("color")) {
         this.el.setAttribute("material", {color: this.data.eventData.toLowerCase(), transparent: true, opacity: .5});
       } else if (this.data.modelID && this.data.modelID.toLowerCase().includes("primitive")) {
@@ -1073,7 +1094,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         
         }else if (this.data.markerType.toLowerCase() == "trigger") {
           // this.el.setAttribute("material", {color: "lime", transparent: true, opacity: .5});
-          this.el.setAttribute("material", {color: "LightSalmon", transparent: true, opacity: .5});
+          this.el.setAttribute("material", {color: "green", transparent: true, opacity: .5});
         } else if (this.data.markerType.toLowerCase() == "object") {
           this.el.setAttribute("material", {color: "tomato", transparent: true, opacity: .5});
         } else if (this.data.markerType.toLowerCase() == "collider") {
@@ -1453,8 +1474,16 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
               // this.el.setAttribute("gltf-model", "#poi1");
               this.el.setAttribute("material", {color: "blue", transparent: true, opacity: .5});
             } else if (this.data.markerType == "trigger") {
-              this.el.setAttribute("material", {color: "LightSalmon", transparent: true, opacity: .5});
+                if (this.data.tags && this.data.tags.includes("hide gizmo")) {
+                  console.log("tryna hide gizmo...");
+                  this.el.setAttribute("material", {transparent: true, opacity: 0});
+                  // return;
+                } else {
+                  this.el.setAttribute("material", {color: "green", transparent: true, opacity: .5});
+                }
+
               this.el.setAttribute("obb-collider");
+              
           
             } else if (this.data.markerType.toLowerCase().includes("collider")) {
               this.el.setAttribute("material", {color: "firebrick", transparent: true, opacity: .5});
@@ -1483,9 +1512,10 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
             
             if (this.data.tags && this.data.tags.includes("hide gizmo") || (settings && settings.hideGizmos)) {
               if (this.data.markerType != "mailbox" && this.data.markerType != "light") {
-                this.el.object3D.visible = false;
-                this.el.setAttribute("visible", false);
-                console.log("hiding " + this.data.name + " because....");
+                // this.el.object3D.visible = false;
+                // this.el.setAttribute("visible", false);
+
+                console.log("hide because " + this.data.name + " ....");
               }
             }
             if (this.data.markerType == "navmesh" || this.data.markerType == "surface") {
@@ -1534,11 +1564,14 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
               }
             }
           } 
+          if (this.data.tags && this.data.tags.includes("hide gizmo")) {
+            this.el.setAttribute("material", {transparent: true, opacity: 0});
+          }
          
           
         } else { //if "none"
             console.log("NO MODEL CLOUDMARKER type " + this.data.markerType);
-            if ((this.data.tags && !this.data.tags.includes("hide gizmo")) || (settings && !settings.hideGizmos)) {
+            // if ((this.data.tags && !this.data.tags.includes("hide gizmo")) || (settings && !settings.hideGizmos)) {
                 // if (this.data.markerType != "mailbox" && this.data.markerType != "light"  && this.data.markerType != "gate") {
                   if (this.data.markerType.toLowerCase() == "player") {
                     this.el.removeAttribute("geometry");
@@ -1566,7 +1599,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                   } else if (this.data.markerType.toLowerCase ==  "trigger") {
                     // this.el.setAttribute("gltf-model", "#poi1");
                     this.el.setAttribute("obb-collider", {size: '1 1 1'});
-                    this.el.setAttribute("material", {color: "LightSalmon", transparent: true, opacity: .5});
+                    this.el.setAttribute("material", {color: "green", transparent: true, opacity: .5});
                     // this.el.setAttribute("mod_physics", {body: "kinematic", isTrigger: true, model:"placeholder", scaleFactor: this.data.scale});
                     
                   } else if (this.data.markerType.toLowerCase().includes("object")) {
@@ -1591,7 +1624,11 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                       this.el.setAttribute("gltf-model", "#poi1");
                       this.el.setAttribute("material", {color: "aqua", transparent: true, opacity: .5});
                   }
-                } 
+                // } 
+                if (this.data.tags && this.data.tags.includes("hide gizmo")) {
+                  console.log("tryna hide gizmo...");
+                  this.el.setAttribute("material", {transparent: true, opacity: 0});
+                }
               }
               
               if (this.data.markerType.toLowerCase() == "mailbox") {
@@ -1601,7 +1638,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
                   this.el.setAttribute("text-geometry", {value: this.data.description, font: '#optimerBoldFont'});
               } 
             // }
-          if (this.data.markerType == "light") {
+            if (this.data.markerType == "light") {
               console.log("tryna set a light!");
 
               // let color = "yellow";
@@ -1689,13 +1726,19 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
               } else {
                 this.el.object3D.visible = true;
               }    
-          }
+            }
          
+          if (this.data.tags && this.data.tags.includes("hide gizmo")) {
+            console.log("tryna hide gizmo...");
+            this.el.setAttribute("material", {transparent: true, opacity: 0});
+          }
 
           if (this.data.tags && this.data.tags.includes("hide gizmo") ||  this.data.tags.includes("highlight") || (settings && settings.hideGizmos)) {
             if (this.data.markerType != "mailbox" && this.data.markerType != "light") {
               console.log("tryna hide gizmo 2");
-              this.el.object3D.visible = false;
+              // this.el.object3D.visible = false;
+              // this.el.setAttribute("invisible-material");
+
             }
             // this.el.classList.remove("activeObjexRay");
           }
@@ -1904,7 +1947,7 @@ AFRAME.registerComponent('cloud_marker', { //special items saved upstairs
         }
       }
       if (this.data.tags && this.data.tags.length && this.data.tags.toLowerCase().includes("toggle target")) {
-        // console.log( "tryna toggle somethin..." + this.data.targetElements.toString() + " length " + this.data.targetElements.length); 
+        console.log( "tryna toggle somethin..." + this.data.targetElements.toString() + " length " + this.data.targetElements.length); 
         
         let targetEls = [];
         if (Array.isArray(this.data.targetElements)) {

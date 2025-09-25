@@ -617,10 +617,12 @@ export function getExtension(filename) {
 }
 
 export function convertStringToObjectID (stringID) {
+    // console.log("tryna convert to objectid " + stringID);   
     stringID = stringID.toString();
     if (ObjectId.isValid(stringID)) {
         return ObjectId.createFromHexString(stringID);
     } else {
+        console.log("error returning objectId " + stringID);
         return null;
     }
     
@@ -6500,7 +6502,7 @@ app.post('/appscenes/',  requiredAuthentication, function (req, res) { //get sce
 
 app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function (req, res) { //scene view for editing/updating scene in admin mode for this user
 
-    console.log("tryna get scene id: ", req.params.scene_id + " excaped " + entities.decodeHTML(req.params.scene_id));
+    console.log("tryna get scene id: ", req.params.scene_id + " excaped " + entities.decodeHTML(req.params.scene_id) + " length " + req.params.scene_id.length);
     var reqstring = entities.decodeHTML(req.params.scene_id).toString().replace(":", "");//um,no
 //    var sceneID = req.params.scene_id.toString().replace(":", "");
     var audioResponse = {};
@@ -6523,7 +6525,9 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
         try {
             // const scenequery = {$or: [{ sceneTitle: reqstring },{ short_id : reqstring },{ _id : o_id}]}; //why the options?
             //get scene data
-            const o_id = ObjectId.createFromHexString(req.params.scene_id);
+            console.log("id is valid object id : "+ ObjectId.isValid(req.params.scene_id.toString()));
+
+            const o_id = ObjectId.createFromHexString(req.params.scene_id.toString());
             const scenequery = { "_id" : o_id};
             const sceneData = await RunDataQuery("scenes", "findOne", scenequery);
             
@@ -6534,8 +6538,13 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             if (sceneData.scenePictures != undefined) { 
                 if (sceneData.scenePictures.length > 0) {                              
                     sceneData.scenePictures.forEach(function (picture) {
-                    var p_id = ObjectId.createFromHexString(picture); //convert to binary to search by _id beloiw
-                    requestedPictureItems.push(p_id); //populate array
+                    console.log(picture.length + " picture id is valid object id : "+ ObjectId.isValid(picture));    
+
+                    if (ObjectId.isValid(picture)) {
+                        var p_id = ObjectId.createFromHexString(picture.toString()); //convert to binary to search by _id beloiw
+                         console.log(picture + " picture id converted to object id : "+ p_id);    
+                        requestedPictureItems.push(p_id); //populate array
+                    }
                     });
                 }
             }
@@ -6543,7 +6552,16 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             var triggerOID = ObjectId.isValid(sceneData.sceneTriggerAudioID) ? ObjectId.createFromHexString(sceneData.sceneTriggerAudioID) : "";
             var ambientOID = ObjectId.isValid(sceneData.sceneAmbientAudioID) ? ObjectId.createFromHexString(sceneData.sceneAmbientAudioID) : "";
             var primaryOID = ObjectId.isValid(sceneData.scenePrimaryAudioID) ? ObjectId.createFromHexString(sceneData.scenePrimaryAudioID) : "";
-            requestedAudioItems = [triggerOID, ambientOID, primaryOID];
+            if (triggerOID != "") {
+                requestedAudioItems.push(triggerOID);
+            }
+            if (ambientOID != "") {
+                requestedAudioItems.push(ambientOID);
+            }
+            if (primaryOID != "") {
+                requestedAudioItems.push(primaryOID);
+            }
+            // requestedAudioItems = [triggerOID, ambientOID, primaryOID];
             
 
             if (sceneResponse.sceneWebLinks != null && sceneResponse.sceneWebLinks.length > 0) {
@@ -6551,7 +6569,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 for (var i = 0; i < sceneResponse.sceneWebLinks.length; i++) {
                 
                     if (ObjectId.isValid(sceneResponse.sceneWebLinks[i])) {
-                        const query = {"_id": ObjectId.createFromHexString(sceneResponse.sceneWebLinks[i])};
+                        const query = {"_id": ObjectId.createFromHexString(sceneResponse.sceneWebLinks[i].toString())};
                         const weblink = await RunDataQuery("weblinks", "findOne", query);
                         if (weblink) {
                             console.log(JSON.stringify(weblink));
@@ -6572,6 +6590,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 console.log("uscene weblinx " + sceneResponse.weblinx);
             }
             if (sceneResponse.sceneVideos != null && sceneResponse.sceneVideos != undefined && sceneResponse.sceneVideos.length > 0) {
+                console.log("checking scene videos " + sceneResponse.sceneVideos);
                 const moids = sceneResponse.sceneVideos.map(convertStringToObjectID);
                 const vidquery = {_id: {$in: moids }};
                 let video_items = await RunDataQuery("video_items", "find", vidquery);
@@ -6587,6 +6606,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 sceneResponse.sceneVideoItems = video_items;
             }
             if (sceneResponse.sceneTextItems != null && sceneResponse.sceneTextItems != undefined && sceneResponse.sceneTextItems.length > 0) {
+                console.log("checking scene text " + sceneResponse.sceneTextItems);
                 const moids = sceneResponse.sceneTextItems.map(convertStringToObjectID);
                 const textquery = {_id: {$in: moids }};
                 const text_items = await RunDataQuery("text_items", "find", textquery);
@@ -6607,6 +6627,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
                 allgroups.push(...sceneResponse.sceneLocationGroups);
             };
             if (allgroups.length > 0) {
+                console.log("checking groups " + allgroups);
                 const moids = allgroups.map(convertStringToObjectID);
                 const query = {"_id": {$in: moids }};
                 const items = await RunDataQuery("groups", "find", query);
@@ -6617,6 +6638,7 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
 
             //get audio files
             const query = {"_id": {$in: requestedAudioItems }};
+            console.log("audio items query " + requestedAudioItems);
             let audio_items = await RunDataQuery("audio_items", "find", query);
             for (var i = 0; i < audio_items.length; i++) {
                 var item_string_filename = JSON.stringify(audio_items[i].filename);
