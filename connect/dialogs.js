@@ -1513,6 +1513,9 @@ function ReturnTimedEventSelectors (selectedType) {
 
 function ReturnAudioVizModeSelectors (selectedType) {
     
+  if (localStorage.getItem("audioVizMode")) {
+    selectedType = localStorage.getItem("audioVizMode");
+  }
   if (settings && settings.sceneTags.includes("audioviz")) {
       let types = "";
       const typesArray = [
@@ -1563,16 +1566,35 @@ function ReturnAudioVizModeSelectors (selectedType) {
   // //     //     "Reflex Bars",
   // //     //     "Custom"
   // //     //     ];
+    let audioDeviceId = "";
+    let cameraDeviceId = "";
+    if (localStorage.getItem("audioInputDevice")) {
+      audioDeviceId = localStorage.getItem("audioInputDevice");
+    }
+    if (localStorage.getItem("audioInputDevice")) {
+      cameraDeviceId = localStorage.getItem("cameraInputDevice");
+    }
     navigator.mediaDevices
       .enumerateDevices()
       .then((devices) => {
         devices.forEach((device) => {
           console.log("device " + device.label + `${device.kind}: ${device.label} id = ${device.deviceId}`);
           if (device.kind == "audioinput") {
-            audioInputDevices = audioInputDevices + "<option>" + device.label + "</option>";
+            if (audioDeviceId == device.deviceId) {
+              audioInputDevices = audioInputDevices + "<option value=\x22"+device.deviceId+"\x22 selected>" + device.label + "</option>";
+            } else {
+              audioInputDevices = audioInputDevices + "<option value=\x22"+device.deviceId+"\x22>" + device.label + "</option>";
+            }
+
           }
           if (device.kind == "videoinput") {
-            cameraInputDevices = cameraInputDevices + "<option value=\x22"+device.deviceId+"\x22>" + device.label + "</option>";
+            // cameraInputDevices = cameraInputDevices + "<option value=\x22"+device.deviceId+"\x22>" + device.label + "</option>";
+            if (cameraDeviceId == device.deviceId) {
+              cameraInputDevices = cameraInputDevices + "<option value=\x22"+device.deviceId+"\x22 selected>" + device.label + "</option>";
+            } else {
+              cameraInputDevices = cameraInputDevices + "<option value=\x22"+device.deviceId+"\x22>" + device.label + "</option>";
+            }
+
           }
         });
 

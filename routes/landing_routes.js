@@ -3187,7 +3187,7 @@ landing_router.get('/:_id', function (req, res) {
 
                     
                     
-                    if (sceneResponse.sceneWebType != "Video Landinggggg") {
+                    if (sceneResponse.sceneWebType != "Video Landinggggg") { //um, nm
                         // if (!sceneGreeting || !sceneGreeting.length) {
                         //     sceneGreeting = "Welcome!";
                         // } 
@@ -3212,7 +3212,7 @@ landing_router.get('/:_id', function (req, res) {
                         }
 
                         // if (mappicURL != "" || backgroundURL != "") {
-                            vttButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22>Table Top</a> ";
+                            vttButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22>VTT</a> ";
                         // }
                         // }
                         if (sceneResponse.sceneShareWithSubscribers) {
@@ -3245,8 +3245,9 @@ landing_router.get('/:_id', function (req, res) {
                         // platformButtons = "";
                         let buttonLabel = sceneResponse.sceneWebType == "Video Landing" ? "Watch Video" : "WebXR"
 
-                        let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22>"+buttonLabel+"</a>"+
-                        "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22>Quest</a>"
+                        let platformButtons = "<a href=\x22https://smxr.net/qrcode/" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22mx-auto btn btn-xl btn-primary \x22>QR</a>"+
+                        "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22>"+buttonLabel+"</a>"+
+                        "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22>Quest</a>";
                         if (sceneResponse.sceneShareWithSubscribers) {
                             if (isGuest) {
                                 platformButtons = "";
@@ -3304,20 +3305,6 @@ landing_router.get('/:_id', function (req, res) {
                         
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
 
-                        // "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>" +
-                        
-                        // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
-
-                        // settingsData +
-    
-
-                        // "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
-
-                        // "\x22content-utils\x22: \x22/main/src/component/content-utils.js\x22"+  
-                        
-                        // "}"+
-
-                        // "}</script>"+
                         socketScripts +
                         
                         "<script type=\x22module\x22 src=\x22/connect/landing.js\x22 defer=\x22defer\x22></script>" +
