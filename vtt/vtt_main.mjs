@@ -94,9 +94,11 @@ let audioGroupsData;
 let textData;
 let scenePicturesData;
 export let pictureGroupsData;
+export let videoGroupsData;
 let locationData;
 // export let timeKeysData;
 export let hasBackgroundPictureGroup = false;
+export let hasBackgroundVideoGroup = false;
 // let profile;
 
 
@@ -219,10 +221,16 @@ async function prePreLoader () {
 
   let picGroupMgr = document.getElementById("pictureGroupsData"); //hrm, should do this here for all the ones in vtt.js
   if (picGroupMgr) {
-    let theData = picGroupMgr.getAttribute('data-picture-groups');
+    const theData = picGroupMgr.getAttribute('data-picture-groups');
     pictureGroupsData = JSON.parse(atob(theData)); //convert from base64
     // console.log("pictureGroups data :" +JSON.stringify(pictureGroupsData));  
     console.log("pictureGroups " + JSON.stringify(pictureGroupsData));
+  }
+  let vidGroupMgr = document.getElementById("videoGroupsData");
+  if (vidGroupMgr) {
+    const theData = vidGroupMgr.getAttribute("data-video-groups");
+    videoGroupsData = JSON.parse(atob(theData));
+    console.log("videoGroups " + JSON.stringify(videoGroupsData));
   }
      // console.log("Settings : " + JSON.stringify(settings));
    let timedEventsEl = document.getElementById('timedEventsDataElement'); //volume, color, etc...

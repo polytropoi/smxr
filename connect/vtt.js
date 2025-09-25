@@ -188,11 +188,11 @@ $(function() {
 
    }
 
-   let videoGroupsDataEl = document.getElementById('videoGroupsData');
-   if (videoGroupsDataEl) {
-      let theVideoGroupsData = videoGroupsDataEl.getAttribute('data-video-groups');
-      videoGroupsData = JSON.parse(atob(theVideoGroupsData));
-   }
+   // let videoGroupsDataEl = document.getElementById('videoGroupsData');
+   // if (videoGroupsDataEl) {
+   //    let theVideoGroupsData = videoGroupsDataEl.getAttribute('data-video-groups');
+   //    videoGroupsData = JSON.parse(atob(theVideoGroupsData));
+   // }
 
    let sceneVideoDataEl = document.getElementById('sceneVideoData');
    if (sceneVideoDataEl) {

@@ -112,7 +112,31 @@ import { app, viewport } from './vtt_main.mjs';
 //     }
 //   });
 // }
+  let dragTarget = null;
+  function onDragMove(event) {
+    if (dragTarget) {
+      dragTarget.parent.toLocal(event.global, null, dragTarget.position);
+    }
+  }
 
+  function onDragStart(target) {
+    dragTarget = target;
+    // Store a reference to the data
+    // * The reason for this is because of multitouch *
+    // * We want to track the movement of this particular touch *
+    if (dragTarget) {
+      dragTarget.alpha = .5;
+      app.stage.on('pointermove', onDragMove);
+    }
+  }
+
+  function onDragEnd() {
+    if (dragTarget) {
+      app.stage.off('pointermove', onDragMove);
+      dragTarget.alpha = 1;
+      dragTarget = null;
+    }
+  }
 
 export async function addAnimatedSprite (app, texture, spriteData, count, elements, viewport, spritesContainer) {
 

@@ -2451,7 +2451,7 @@ vtt_router.get('/:_id', function (req, res) {
                     for (let v = 0; v < requestedVideoGroups.length; v++) {
                         for (let i = 0; i < requestedVideoGroups[v].videos.length; i++ ) {  //TODO spin first and second level array
                             videoElements = videoElements + "<video style=\x22display: none;\x22 loop=\x22true\x22 crossorigin=\x22use-credentials\x22 webkit-playsinline playsinline id=\x22"+requestedVideoGroups[v].videos[i]._id+"\x22></video>";
-                            console.log("Video elements " + JSON.stringify(videoElements));
+                            // console.log("Video elements " + JSON.stringify(videoElements));
                         }
                     }
                 }
@@ -3380,6 +3380,7 @@ vtt_router.get('/:_id', function (req, res) {
                         spriteData + 
                         scenePicturesData +
                         pictureGroupsData +
+                        videoGroupsEntity +
                         loadLocations +
                         sceneTimedEventsData +
                         "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +

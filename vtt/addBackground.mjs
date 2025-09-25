@@ -5,7 +5,8 @@ import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMat
 import { SetSelectedPosition } from '../connect/events.js';
 import { keydown, CreateNewLocation } from '../connect/dialogs.js';
 import { viewport, sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, 
-  viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter, spritesContainer} from './vtt_main.mjs';
+  viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter, spritesContainer,
+  videoGroupsData} from './vtt_main.mjs';
 import { addGridOverlay } from './addOverlay.mjs';
 
 import { AddLocation } from './vtt_locations.mjs';
@@ -148,41 +149,6 @@ export async function addBackgroundVideo(app, viewport, source) {
     addOverlayMap(app, viewport, width, height, texture, spritesContainer);
   }
 
-  // if (video) {
-  //   console.log("adding video with source " + source);
-  //   const width = video.videoWidth;
-  //   const height = video.videoHeight;
-  //   console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
-  //   const texture = Texture.from(video);
-  //   const backgroundVideo = new Sprite(texture);    
-  //   backgroundVideo.anchor.set(0.5);
-  //   // spritesContainer.anchor.set(0.5);
-  //   if (app.screen.width > app.screen.height) {
-  //     backgroundVideo.width = app.screen.width * 1.05;
-  //     backgroundVideo.scale.y = backgroundVideo.scale.x;
-  //   } else {
-  //     /**
-  //      * If the preview is square or portrait, then fill the height of the screen instead
-  //      * and apply the scaling to the horizontal scale accordingly.
-  //      */
-  //     backgroundVideo.height = app.screen.height * 1.05;
-  //     backgroundVideo.scale.x = backgroundVideo.scale.y;
-  //   }
-  //     // Position the backgroundVideo sprite in the center of the stage.
-  //     backgroundVideo.x = app.screen.width / 2;
-  //     backgroundVideo.y = app.screen.height / 2;
-
-  //   // if (viewport) {
-  //   //   // viewport.addChild(backgroundVideo);
-  //   // } else {
-  //   //   // app.stage.addChild(backgroundVideo);
-  //   // }  
-  //   if (source != "webcam") {
-  //     addOverlayMap(app, viewport, width, height, texture, spritesContainer);
-  //   } else {
-  //     app.stage.addChild(backgroundVideo);
-  //   }
-  // } 
 
   
 
@@ -200,32 +166,10 @@ async function addWebcam (app) {
       };
     } 
 
-  // const stream = await navigator.mediaDevices.getUserMedia({
-  //       video:true,
-  //   });
-
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
 
-  //   stream.getVideoTracks()[0].applyConstraints({
-  //       width: 960,
-  //       height: 540,
-  //       // bitrate: 512_000,
-  //       // aspectRatio: 1.777777778,
-  //       // frameRate: { max: 1 },
-  //  })
-
-    // const stream2 = await navigator.mediaDevices.getUserMedia({
-    //     video:true,
-    // });
-    // stream2.getVideoTracks()[0].applyConstraints({
-    //     width: 1920,
-    //     height: 1080,
-    //     bitrate: 2_097_152,
-    //     aspectRatio: 1.777777778,
-    //     frameRate: { max: 30 },
-    // })
-        const videoTrack = stream.getVideoTracks()[0];
+    const videoTrack = stream.getVideoTracks()[0];
         // videoTrack.applyConstraints(constraints);
     const settings = videoTrack.getSettings();
 
@@ -259,8 +203,8 @@ async function addWebcam (app) {
     videoSprite.anchor.set(0.5);
     videoSprite.x = app.renderer.width / 2;
     videoSprite.y = app.renderer.height / 2;
-    videoSprite.height = actualHeight;
-    videoSprite.width = actualWidth;
+    videoSprite.height = app.renderer.height;
+    videoSprite.width = app.renderer.width;
       if (app.screen.width > app.screen.height) {
         spritesContainer.width = app.screen.width - (app.screen.width * .01);
             // background.width = app.screen.width;
@@ -612,8 +556,30 @@ export function addBackgroundPictures(app) {
   if (!pictureGroupsData || !pictureGroupsData.length) {
     return;
   }
-  let randomIndex = Math.floor(Math.random()*pictureGroupsData[0].items.length);
-  let id = pictureGroupsData[0].items[randomIndex];
+
+  // if (videoGroupsData && videoGroupsData.length) { //not yet..
+  //   const rnd = Math.random();
+  //   if (rnd > .3) {
+  //     const vrandIndex = Math.floor(Math.random()*videoGroupsData[0].videos.length);
+  //       const v_data = videoGroupsData[0].videos[vrandIndex];
+  //       // console.log("video random index is " + vrandIndex + " id is " + v_id);
+  //       // const viddata = videoGroupsData[0].videos.find(obj => obj._id === v_id);
+  //       console.log("tryna play viddata " + JSON.stringify(v_data));
+  //       const video = document.getElementById(v_data._id.toString());
+  //     addMap = true;
+
+  //   // const width = video.videoWidth;
+  //   // const height = video.videoHeight;
+  //   // console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
+  //   const texture = Texture.from(video);
+  //   video.play();
+  //   backgroundPictureGroupSprite.texture = texture;    
+
+  //   }
+  // }
+
+  const randomIndex = Math.floor(Math.random()*pictureGroupsData[0].items.length);
+  const id = pictureGroupsData[0].items[randomIndex];
 
   const picdata = pictureGroupsData[0].images.find(obj => obj._id === id);
 
