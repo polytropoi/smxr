@@ -15,6 +15,14 @@ export let mapsize = {};
 
 export let background;
 export let backgroundPictureGroupSprite = new Sprite();
+    // spritesContainer.addChild(backgroundPictureGroupSprite);
+export let backgroundVideoGroupSprite = new Sprite();
+let videoContainer = new Container();
+let bgPicsInit = false;
+let bgVidsInit = false;
+        // if (!videoEl) {
+let videoEl = document.createElement("video");
+        // }
 
 // import { settings } from '../connect/settings.js';
 
@@ -86,7 +94,7 @@ export async function addBackgroundVideo(app, viewport, source) {
   if (source == "webcam") {
     addWebcam(app);
   } else if (source == "mapcam") {
-  let constraints = { video: true, audio: false };
+    let constraints = { video: true, audio: false };
     const selectedVideoInput = localStorage.getItem("cameraInputDevice"); 
     console.log("tryna use selectedVideoInput " + selectedVideoInput);
     if (selectedVideoInput) {
@@ -95,7 +103,6 @@ export async function addBackgroundVideo(app, viewport, source) {
         // audio: { deviceId: '' } // Replace with actual deviceId
       };
     } 
-
     // Get a MediaStream from the webcam
     // const stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -119,12 +126,13 @@ export async function addBackgroundVideo(app, viewport, source) {
     // Create a texture from the video element
     const videoTexture = await Texture.from(video);
 
-    addBackgroundCamera(app, viewport, actualWidth, actualHeight, videoTexture, spritesContainer);
+    addBackgroundCamera(app, viewport, actualWidth, actualHeight, videoTexture, spritesContainer); //cooks with a spritesheet/map
       
   } else {
-      video = document.getElementById("bgVideo");
-      addMap = true;
-          console.log("adding video with source " + source);
+
+    video = document.getElementById("bgVideo");
+    addMap = true;
+    console.log("adding video with source " + source);
     const width = video.videoWidth;
     const height = video.videoHeight;
     console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
@@ -147,11 +155,10 @@ export async function addBackgroundVideo(app, viewport, source) {
     backgroundVideo.x = app.screen.width / 2;
     backgroundVideo.y = app.screen.height / 2;
     addOverlayMap(app, viewport, width, height, texture, spritesContainer);
-  }
-
-
+    // spritesContainer.anchor = 0.5;
+    //     viewport.addChild(spritesContainer);
   
-
+  }
 }
 
 async function addWebcam (app) {
@@ -360,62 +367,6 @@ async function addBackgroundCamera(app, viewport, width, height, videoTexture, s
 
 }
 
-// async function applyFilters (app, spritesContainer) {
-//    const colormatrixfilter = new ColorMatrixFilter();
-//   colormatrixfilter.alpha = .1;
-  
-//   const bloomfilter = new AdvancedBloomFilter();
-//   bloomfilter.bloomScale = 2;
-  
-//   const oldFilmFilter = new OldFilmFilter();
-//   oldFilmFilter.seed = .9;
-//   // oldFilmFilter.noise = .75;
-//   let filters = [];
-
-
-//   if (sceneTags && sceneTags.includes("color matrix")) {
-//     filters.push(colormatrixfilter);
-//   }
-//   if (sceneTags && sceneTags.includes("bloom")) {
-//     filters.push(bloomfilter);
-//   }
-//   if (sceneTags && sceneTags.includes("old film")) {
-//     filters.push(oldFilmFilter);
-//   }
-//   spritesContainer.filters = filters;
-
-//   let count = 0;
-//   let enabled = true;
-//       let randomFactor = Math.random();
-
-
-//   app.ticker.add(() => {
-    
-//     count += 0.01;
-//     if (count > 1000) {
-//       count = 0;
-//       // randomFactor = Math.random();
-//     }
-//     bloomfilter.bloomScale = Math.sin(randomFactor);
-      
-//     randomFactor = Math.cos(randomFactor);
-//     oldFilmFilter.noise = Math.random();
-//     oldFilmFilter.noiseSize = Math.random();
-//     oldFilmFilter.seed = Math.random();
-//     oldFilmFilter.scratchWidth = Math.random();
-
-//     // Animate the filter
-//     const { matrix } = colormatrixfilter;
-//       matrix[1] = Math.sin(count) * 3 * randomFactor;
-//       matrix[2] = Math.cos(count)  * randomFactor;
-//       matrix[3] = Math.cos(count) * 1.5  * randomFactor;
-//       matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
-//       matrix[5] = Math.sin(count / 2)  * randomFactor;
-//       matrix[6] = Math.sin(count / 4)  * randomFactor;
-//     });
-    
-
-// }
 
 async function addOverlayMap(app, viewport, width, height, videoTexture, spritesContainer) {
  
@@ -551,119 +502,163 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
             
 }
 
-export function addBackgroundPictures(app) {
+// let videoEl;
+export async function addBackgroundVideos (app) {
+    // if (rnd > .3) {
+    if (!bgVidsInit) {
+          
+            videoContainer.addChild(backgroundVideoGroupSprite);
+      bgVidsInit = true;
+      viewport.addChild(videoContainer);  
 
+          // videoContainer.height = app.stage.height;
+          videoContainer.visible = true;
+          videoContainer.anchor = 0.5;
+      // videoEl.crossOrigin = "anonymous";
+    }
+
+    const vrandIndex = Math.floor(Math.random()*videoGroupsData[0].videos.length);
+    const v_data = videoGroupsData[0].videos[vrandIndex];
+    // console.log("video random index is " + vrandIndex + " id is " + v_id);
+    // const viddata = videoGroupsData[0].videos.find(obj => obj._id === v_id);
+    console.log("tryna play viddata " + JSON.stringify(v_data));
+    const id = "video_" + v_data._id.toString();
+    console.log("tryna play viddata " + id);
+    const videoElement = document.getElementById(id);
+    if (videoElement) {
+        videoElement.autoplay = true; 
+      videoElement.muted = true;
+
+      const width = videoElement.videoWidth;
+      const height = videoElement.videoHeight;
+      // videoElement.height = app.screen.height;
+      // videoElement.width = app.screen.width;
+      await videoElement.play();
+      const videoTexture = Texture.from(videoElement);
+      const videoSprite = new Sprite({
+        texture: videoTexture,
+        label: "video"
+      });
+
+      // videoElement.play();
+      console.log("found video element, tryna play " + width + " " + height);
+      // const texture = Texture.from(videoElement);
+      videoSprite.width = width;
+      videoSprite.height = height;
+      // videoContainer.width = width;
+      // videoContainer.height = height;
+        videoContainer.addChild(videoSprite);
+        
+      videoSprite.anchor = .5;
+      
+      // // videoSprite.visible = false;
+            if (app.screen.width > app.screen.height) {
+          videoSprite.width = app.screen.width * 1.05;
+          videoSprite.scale.y = videoSprite.scale.x;
+        } else {
+          /**
+           * If the preview is square or portrait, then fill the height of the screen instead
+           * and apply the scaling to the horizontal scale accordingly.
+           */
+          videoSprite.height = app.screen.height * 1.05;
+          videoSprite.scale.x = videoSprite.scale.y;
+        }
+        // Position the backgroundVideo sprite in the center of the stage.
+        // videoSprite.x = app.screen.width / 2;
+        // videoSprite.y = app.screen.height / 2;
+        applyFilters(app, videoContainer);
+        spritesContainer.visible = false;
+
+      viewport.animate({
+        position: { x: 0, y:0}, // Target center position
+        // position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
+        scale: 1.1, // Target zoom level
+        time: 3000, // Animation duration of 1 second
+        ease: 'easeInOutQuad' // Using a common easing function
+      });
+      // backgroundVideoGroupSprite.width = app.renderer.width;
+      //       backgroundVideoGroupSprite.height = app.renderer.height;
+    } else {
+      console.log("videoElement not found")
+    }
+    // const video = document.getElementById("bgVideo");
+    // videoEl.src = v_data.url;
+    // videoEl.addEventListener("loadeddata", () => {
+    // if (videoEl.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) { 
+    //     // videoEl.play();
+    //     const texture = Texture.from(videoEl);
+    //     videoEl.play();
+    //     backgroundVideoGroupSprite.texture = texture;    
+            // backgroundVideoGroupSprite.anchor = .5;
+
+    //   }
+    // });
+    // addMap = true;
+
+    // const width = video.videoWidth;
+    // const height = video.videoHeight;
+    // console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
+
+    // spritesContainer.addChild(backgroundVideoGroupSprite);
+    //   applyFilters(app, videoContainer);
+    //   viewport.animate({
+    //   position: { x: 0, y:0}, // Target center position
+    //   // position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
+    //   scale: 1.1, // Target zoom level
+    //   time: 3000, // Animation duration of 1 second
+    //   ease: 'easeInOutQuad' // Using a common easing function
+    // });
+
+    
+}
+
+
+export function addBackgroundPictures(app) { 
+
+  if (!bgPicsInit) {
+
+    spritesContainer.addChild(backgroundPictureGroupSprite);
+    bgPicsInit = true;
+  }
   if (!pictureGroupsData || !pictureGroupsData.length) {
     return;
   }
 
-  // if (videoGroupsData && videoGroupsData.length) { //not yet..
-  //   const rnd = Math.random();
-  //   if (rnd > .3) {
-  //     const vrandIndex = Math.floor(Math.random()*videoGroupsData[0].videos.length);
-  //       const v_data = videoGroupsData[0].videos[vrandIndex];
-  //       // console.log("video random index is " + vrandIndex + " id is " + v_id);
-  //       // const viddata = videoGroupsData[0].videos.find(obj => obj._id === v_id);
-  //       console.log("tryna play viddata " + JSON.stringify(v_data));
-  //       const video = document.getElementById(v_data._id.toString());
-  //     addMap = true;
-
-  //   // const width = video.videoWidth;
-  //   // const height = video.videoHeight;
-  //   // console.log("VIDEO WIDTH " + video.videoWidth + " HEIGHT " + video.videoHeight);
-  //   const texture = Texture.from(video);
-  //   video.play();
-  //   backgroundPictureGroupSprite.texture = texture;    
-
-  //   }
-  // }
-
-  const randomIndex = Math.floor(Math.random()*pictureGroupsData[0].items.length);
-  const id = pictureGroupsData[0].items[randomIndex];
-
-  const picdata = pictureGroupsData[0].images.find(obj => obj._id === id);
-
+  spritesContainer.visible = true;
+  videoContainer.visible = false;
+  backgroundPictureGroupSprite.visible = true;
+  
   let viewOrientation = "landscape";
   if (window.innerWidth < window.innerHeight) {
     viewOrientation = "portrait";
   }
-  let picOrientation = "landscape";
+  // const rnd = Math.random();
+  // if (videoGroupsData && videoGroupsData.length && (rnd > .3)) { //not yet..
+
+  //   // insertBackgroundVideo();
+    
+  //       // return;
+  //   // }
+  // } 
+
+    const randomIndex = Math.floor(Math.random()*pictureGroupsData[0].items.length);
+    const id = pictureGroupsData[0].items[randomIndex];
+
+    const picdata = pictureGroupsData[0].images.find(obj => obj._id === id);
+
+
+    let picOrientation = "landscape";
     let modFactor = Math.random();
     const signFactor = Math.random();
     let modScaleFactor = Math.random();
     const signScaleFactor = Math.random();
 
-
-//     spritesContainer.x = app.screen.width / 2;
-// spritesContainer.y = app.screen.height / 2;
-
-// // Center bunny sprite in local container coordinates
-// spritesContainer.pivot.x = spritesContainer.width / 2;
-// spritesContainer.pivot.y = spritesContainer.height / 2;
-
-  // // if (!backgroundPictureGroupSprite) {
-  //   const firstTexture = Texture.from(id);
-  //   if (firstTexture.width == firstTexture.height) {
-  //     picOrientation = "square";
-  //   } else if (firstTexture.width < firstTexture.height) {
-  //     picOrientation = "portrait";
-  //   }
-  //   // backgroundPictureGroupSprite.texture = newTexture;
-
-  //   backgroundPictureGroupSprite = Sprite.from(id);
-
     backgroundPictureGroupSprite.anchor = .5;
-    spritesContainer.addChild(backgroundPictureGroupSprite);
 
     spritesContainer.interactive = true;
 
-
-    // spritesContainer.anchor = .5;
-    // spritesContainer.width = 
-    // spritesContainer.x = 0;
-    //         spritesContainer.y = viewport.height * .01;
     spritesContainer.height = app.stage.height;
-    // let xMod = .5;
-    // viewport.anchor = .5;
-
-
-
-    // if (viewOrientation == "landscape" && picOrientation == "square") {  
-    //   // xMod = .85;
-    //     // spritesContainer.x = app.stage.width *.01;
-    //   if (signFactor > .5) {
-    //     modFactor = (modFactor / 8) * -1
-    //   } else {
-    //     modFactor = (modFactor / 8);
-    //   }
-    //         console.log("modFactor iss " + modFactor);
-    //   SetViewportVerticalCenter(modFactor);
-
-    //   if (signScaleFactor > .5) {
-    //     modScaleFactor = (modScaleFactor / 6) * -1
-    //   } else {
-    //     modScaleFactor = (modScaleFactor / 6);
-    //   }
-    // } else if (viewOrientation == "portrait" && picOrientation == "square") {  
-    //   xMod = 1;
-    //   if (signFactor > .5) {
-    //     modFactor = (modFactor / 8) * -1
-    //   } else {
-    //     modFactor = (modFactor / 8);
-    //   }
-    //   console.log("modFactor is " + modFactor);
-    //   SetViewportVerticalCenter(modFactor);
-
-    //   if (signScaleFactor > .5) {
-    //     modScaleFactor = (modScaleFactor / 6) * -1
-    //   } else {
-    //     modScaleFactor = (modScaleFactor / 6);
-    //   }
-    // } else {
-    //   SetViewportVerticalCenter(2.25);
-    // }
-  // } else { ///////////// IF SPRITE IS ALREADY SET, JUST SWAP
-    //∂∂
+  
     const newTexture = Texture.from(id);
     if (newTexture.width == newTexture.height) {
       picOrientation = "square";
@@ -672,8 +667,6 @@ export function addBackgroundPictures(app) {
     }
     backgroundPictureGroupSprite.texture = newTexture;
 
-
-  // }
   ///////////////////// now gotsa sprite and texture 
 
   if (app.screen.width > app.screen.height) {
@@ -689,13 +682,7 @@ export function addBackgroundPictures(app) {
     viewOrientation = "square";
   }
 
-  // spritesContainer.x = app.screen.width * .25;
-  // // spritesContainer.y = app.screen.height * .05;
-  // // spritesContainer.anchor = ;
-  //   // spritesContainer.width = app.screen.width;
-  //       spritesContainer.height = app.screen.height;
-
-      let xMod = .75;    
+  let xMod = .75;    
       // spritesContainer.height = app.stage.height;
   if (viewOrientation == "landscape" && picOrientation == "square") {  
     if (signFactor > .5) {
@@ -717,63 +704,6 @@ export function addBackgroundPictures(app) {
     SetViewportVerticalCenter(2.25);
   }
   applyFilters(app, spritesContainer);
- 
-  // const colormatrixfilter = new ColorMatrixFilter();
-  // colormatrixfilter.alpha = .1;
-  
-  // const bloomfilter = new AdvancedBloomFilter();
-  // bloomfilter.bloomScale = 2;
-  
-  // const oldFilmFilter = new OldFilmFilter();
-  // oldFilmFilter.seed = .9;
-  // // oldFilmFilter.noise = .75;
-  // let filters = [];
-
-
-  // if (sceneTags && sceneTags.includes("color matrix")) {
-  //   filters.push(colormatrixfilter);
-  // }
-  // if (sceneTags && sceneTags.includes("bloom")) {
-  //   filters.push(bloomfilter);
-  // }
-  // if (sceneTags && sceneTags.includes("old film")) {
-  //   filters.push(oldFilmFilter);
-  // }
-  // spritesContainer.filters = filters;
-
-  // let count = 0;
-  // let enabled = true;
-  //     let randomFactor = Math.random();
-
-
-  // app.ticker.add(() => {
-    
-  //   count += 0.01;
-  //   if (count > 1000) {
-  //     count = 0;
-  //     // randomFactor = Math.random();
-  //   }
-  //   bloomfilter.bloomScale = Math.sin(randomFactor);
-      
-  //   randomFactor = Math.cos(randomFactor);
-  //   oldFilmFilter.noise = Math.random();
-  //   oldFilmFilter.noiseSize = Math.random();
-  //   oldFilmFilter.seed = Math.random();
-  //   oldFilmFilter.scratchWidth = Math.random();
-
-  //   // Animate the filter
-  //   const { matrix } = colormatrixfilter;
-  //     matrix[1] = Math.sin(count) * 3 * randomFactor;
-  //     matrix[2] = Math.cos(count)  * randomFactor;
-  //     matrix[3] = Math.cos(count) * 1.5  * randomFactor;
-  //     matrix[4] = Math.sin(count / 3) * 2  * randomFactor;
-  //     matrix[5] = Math.sin(count / 2)  * randomFactor;
-  //     matrix[6] = Math.sin(count / 4)  * randomFactor;
-  //   });
-  //   // }
-  //     console.log("modFactor " + modFactor + " modScaleFactor " + modScaleFactor + " viewOrientation " + viewOrientation + " picOrientation " + 
-  //         picOrientation + " viewportVerticalCenter" + viewportVerticalCenter+ " viewportHorizontalCenter" + viewportHorizontalCenter);
-
       viewport.animate({
       position: { x: 0, y:0}, // Target center position
       // position: { x: window.innerWidth/viewportHorizontalCenter, y: window.innerHeight/viewportVerticalCenter }, // Target center position
@@ -781,7 +711,6 @@ export function addBackgroundPictures(app) {
       time: 3000, // Animation duration of 1 second
       ease: 'easeInOutQuad' // Using a common easing function
     });
-
 }
 
 export async function addMap(app, viewport, spritesContainer) {

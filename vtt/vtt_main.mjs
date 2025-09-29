@@ -4,7 +4,7 @@ import { Viewport } from 'pixi-viewport';
 
 
 // import { LayoutSystem } from '@pixi/layout';
-import { addBackground, addMap, addBackgroundVideo, addBackgroundPictures, background } from './addBackground.mjs';
+import { addBackground, addMap, addBackgroundVideo, addBackgroundPictures, addBackgroundVideos, background } from './addBackground.mjs';
 import { addText, addPlayerProfileText, addEventText } from './addText.mjs';
 import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './addElements.mjs';
 import { addDisplacementEffect } from './vtt_filters.mjs';
@@ -527,8 +527,13 @@ export async function GoWithIt() { //called from vtt.js
         // console.log(elapsed);
         if (elapsed > 300) {
           elapsed = 0;
-          addBackgroundPictures(app, viewport, spritesContainer);
-
+          const random = Math.random();
+          if (random > .3) {
+            addBackgroundPictures(app, viewport, spritesContainer);
+            //  addBackgroundVideos(app, viewport, spritesContainer);
+          } else {
+            addBackgroundVideos(app, viewport, spritesContainer);
+          }
         }
       }
     });

@@ -3,7 +3,7 @@ import { Assets, Graphics, Container, Text } from 'pixi';
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 
 import { PrimaryAudioPlayPauseToggle, ReturnTimedEventsListenerMode, PrimaryAudioIsPlaying, isPlaying } from '../connect/media.js';
-import { addBackgroundPictures } from './addBackground.mjs';
+import { addBackgroundPictures, addBackgroundVideos } from './addBackground.mjs';
 import { app, viewport, hasBgMap, font1, stripExtension, hasAudioViz } from './vtt_main.mjs';
 import { InitAnalyzer } from './vtt_audioViz.mjs';
 // export let isPlaying = false;
@@ -40,16 +40,13 @@ export function addSimplePlayButton(app, buttonData, uicontainer) {
     buttonText.y = window.innerHeight - (window.innerHeight  * .15);
     buttonText.x = window.innerWidth / 2;
 
-        // buttonText.onPress.connect(() => 
-        //     // console.log('Button pressed!');``
-        //     PlayPauseToggle(buttonText)
-        // );
+
     buttonText.on('pointerdown', (event) => {
         console.log('Button down!');
         PlayPauseToggle(buttonText);
     });
     buttonText.on('pointerover', (event) => {
-                console.log('Button over');
+        console.log('Button over');
         buttonText.tint = 'skyblue';
         // PlayPauseToggle(buttonText);
     });
@@ -58,34 +55,7 @@ export function addSimplePlayButton(app, buttonData, uicontainer) {
 
 export function addPlayButton(app, buttonData, uicontainer) {
 
-    // if (ReturnTimedEventsListenerMode() == "None") {
-    //     return;
-    // }
-    console.log("tryna add buttons!");
-
-// await Assets.addBundle('fonts', [{ alias: 'Acme', src: '../../fonts/web/Acme.woff' }]);
- 
-
-
-    // buttonContainer.y = uicontainer.height - (uicontainer.height * .1);
-    // buttonContainer.x = uicontainer.width / 2;
-        // buttonContainer.interactive = true;
-
-
-    // container.height = app.screen.height;
-    // container.width = app.screen.width;
-    //  const button = new Button(
-    //       new Graphics()
-    //           .rect(0, 0, 100, 50, 15)
-    //           .fill(0xFFFFFF)
-    //  );
-    // const bGraphic1 = new Graphics();
-    // bGraphic1.x = app.screen.width / 2;
-    // bGraphic1.y = app.screen.height / 2;
-    // bGraphic1.fill(0xFFFFFF);
-    // bGraphic1.roundRect(500, 500, 100, 50, 15);
-   
-
+    // console.log("tryna add buttons!");
 
     const fontsize = Math.max(16, window.innerWidth / 50); 
     const text = new Text({
@@ -155,7 +125,7 @@ export function addPlayButton(app, buttonData, uicontainer) {
     });
    
 
-        text.interactive = false;
+    text.interactive = false;
     text.eventMode = 'none';
     buttonContainer.addChild(playButton);
     
@@ -164,7 +134,7 @@ export function addPlayButton(app, buttonData, uicontainer) {
     playButton.alpha = .5;
     // playButton.y = container.height + 300;
 
-    playButton.y = window.innerHeight - (window.innerHeight  * .125);;
+    playButton.y = window.innerHeight - (window.innerHeight  * .2);;
     playButton.x = window.innerWidth / 2;
 
     // playButton.onPress.connect(() => 
@@ -189,7 +159,12 @@ async function PlayPauseToggle(playButton) {
     //     PrimaryAudioPlayPauseToggle();
     //     isPlaying = await PrimaryAudioIsPlaying();
     // }
-    addBackgroundPictures(app);
+    const random = Math.random();
+    if (random > .3) {
+        addBackgroundPictures(app);
+    } else {
+        addBackgroundVideos(app);
+    }
     PrimaryAudioPlayPauseToggle();
     
     if (isPlaying) {

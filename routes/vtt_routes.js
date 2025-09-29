@@ -2388,8 +2388,9 @@ vtt_router.get('/:_id', function (req, res) {
                     
                     backgroundVideoURL = vidUrl;
                     console.log(vid.tags + " backgroundVideo is " + vidUrl);
-                     videoEl = "<video hidden autoplay muted loop=\x22true\x22 webkit-playsinline playsinline id=\x22bgVideo\x22 crossOrigin=\x22anonymous\x22><source src=" + vidUrl + " type=\x22video/mp4\x22/></video>"; 
+                    videoEl = "<video hidden autoplay muted loop=\x22true\x22 webkit-playsinline playsinline id=\x22bgVideo\x22 crossOrigin=\x22anonymous\x22><source src=" + vidUrl + " type=\x22video/mp4\x22/></video>"; 
                 }
+
                 // }
                 // if (ori.toLowerCase() == "equirectangular") {
                 //     if (video_items[0].tags.includes("hls")) {
@@ -2440,18 +2441,26 @@ vtt_router.get('/:_id', function (req, res) {
                     console.log("vid group items: "+o_ids);
                     const vidquery = {_id : {$in : o_ids}};
                     let videos = await RunDataQuery("video_items", "find", vidquery);
+                    // let lastVidUrl = "";
                     for (let video of videos) {
                         // let video = videos[i];
                         video.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + video.userID + "/video/" + video._id + "/" + video._id + "." + video.filename, 6000);
                         // console.log("video url " + video.url)
+                        // lastVidUrl = video.url;
                     }
+                    //not the same as bgVideo, not in group
                     vidGroup.videos = videos;
                     requestedVideoGroups.push(vidGroup);
                     videoElements = ""; //jack in video elements, ios don't like them cooked up in script
                     for (let v = 0; v < requestedVideoGroups.length; v++) {
                         for (let i = 0; i < requestedVideoGroups[v].videos.length; i++ ) {  //TODO spin first and second level array
-                            videoElements = videoElements + "<video style=\x22display: none;\x22 loop=\x22true\x22 crossorigin=\x22use-credentials\x22 webkit-playsinline playsinline id=\x22"+requestedVideoGroups[v].videos[i]._id+"\x22></video>";
+                            //crossorigin=\x22use-credentials\x22
+                            
+                            videoElements = videoElements + "<video hidden autoplay muted loop=\x22true\x22 webkit-playsinline playsinline crossOrigin=\x22anonymous\x22 webkit-playsinline playsinline id=\x22video_"+requestedVideoGroups[v].videos[i]._id+"\x22>"+
+                            "<source src=" +requestedVideoGroups[v].videos[i].url+ " type=\x22video/mp4\x22/></video>";
                             // console.log("Video elements " + JSON.stringify(videoElements));
+                            
+                            // videoEl = "<video hidden autoplay muted loop=\x22true\x22 webkit-playsinline playsinline id=\x22bgVideo\x22 crossOrigin=\x22anonymous\x22><source src=" +lastVidUrl+ " type=\x22video/mp4\x22/></video>"; 
                         }
                     }
                 }
@@ -2462,6 +2471,7 @@ vtt_router.get('/:_id', function (req, res) {
                     videoGroupsEntity = "<a-entity video_groups_data id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></a-entity>"; 
                 }
                 hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>"; //v 1.0.6 client hls player ref
+               
             }
             
             ////////////// cook some output, ui elements, etc. -- TODO move up or down?
@@ -3475,6 +3485,7 @@ vtt_router.get('/:_id', function (req, res) {
                         // "<canvas id=\x22pixi-canvas\x22></canvas>"+
                         "</div>"+
                         videoEl+
+                        videoElements+
 
                         "</body>\n" +
                     

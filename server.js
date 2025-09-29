@@ -625,7 +625,6 @@ export function convertStringToObjectID (stringID) {
         console.log("error returning objectId " + stringID);
         return null;
     }
-    
 }
 
 export function removeDuplicates(arr){
@@ -647,8 +646,6 @@ export function saveActivity (data) {
             console.log("error inserting activity " + e);
         }
     })();
-   
-   
 }
 ////////////////////////// create API KEYS ... maybe later...
 
