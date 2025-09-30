@@ -172,6 +172,8 @@ async function setup() {
     worldHeight: 10000,
     disableOnContextMenu: true,
     events: app.renderer.events, 
+    sortableChildren: true
+
   });
   // textContainer.x = app.stage.width/2;
   if (settings && settings.sceneTags.includes("audioviz")) {
@@ -405,16 +407,24 @@ export async function GoWithIt() { //called from vtt.js
     viewport.addEventListener("drag-end", onDragEnd);
 
     viewport.addEventListener("zoomed-end", onZoomedEnd);
-    // viewport.on('pointerdown', (event) => {
-    //     // if (keydown == "T") {
-    //     //   // viewport.plugins.resume.
-    //     //   console.log("pausing vp drag...");
-    //     //   viewport.plugins.pause('drag');
-    //     // } else {
-    //     //   console.log("resuming vp drag");
-    //     //   viewport.plugins.resume('drag');
-    //     // }
-    // });
+    viewport.on('pointerdown', (event) => {
+      if (pictureGroupsData && videoGroupsData) {
+        const random = Math.random();
+        if (random > .5) {
+            addBackgroundPictures(app);
+        } else {
+            addBackgroundVideos(app);
+        }
+      }
+        // if (keydown == "T") {
+        //   // viewport.plugins.resume.
+        //   console.log("pausing vp drag...");
+        //   viewport.plugins.pause('drag');
+        // } else {
+        //   console.log("resuming vp drag");
+        //   viewport.plugins.resume('drag');
+        // }
+    });
 
     // viewport.on('pointerup', (event) => { //main picker for maps
     // // ... handle the event
@@ -525,10 +535,10 @@ export async function GoWithIt() { //called from vtt.js
         // Add the time to our total elapsed time
         elapsed += ticker.deltaTime;
         // console.log(elapsed);
-        if (elapsed > 300) {
+        if (elapsed > 200) {
           elapsed = 0;
           const random = Math.random();
-          if (random > .3) {
+          if (random > .5) {
             addBackgroundPictures(app, viewport, spritesContainer);
             //  addBackgroundVideos(app, viewport, spritesContainer);
           } else {

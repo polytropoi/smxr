@@ -505,69 +505,81 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
 // let videoEl;
 export async function addBackgroundVideos (app) {
     // if (rnd > .3) {
-    if (!bgVidsInit) {
+    if (!bgVidsInit) {  
           
-            videoContainer.addChild(backgroundVideoGroupSprite);
+
+            // videoContainer.addChild(backgroundVideoGroupSprite);
       bgVidsInit = true;
       viewport.addChild(videoContainer);  
 
           // videoContainer.height = app.stage.height;
           videoContainer.visible = true;
           videoContainer.anchor = 0.5;
+          videoContainer.addChild(backgroundVideoGroupSprite);
       // videoEl.crossOrigin = "anonymous";
     }
-
+    // spritesContainer.visible = false;
+  videoContainer.zIndex = 1;
+  spritesContainer.zIndex = 0;
+  
     const vrandIndex = Math.floor(Math.random()*videoGroupsData[0].videos.length);
     const v_data = videoGroupsData[0].videos[vrandIndex];
     // console.log("video random index is " + vrandIndex + " id is " + v_id);
     // const viddata = videoGroupsData[0].videos.find(obj => obj._id === v_id);
     console.log("tryna play viddata " + JSON.stringify(v_data));
     const id = "video_" + v_data._id.toString();
-    console.log("tryna play viddata " + id);
+
     const videoElement = document.getElementById(id);
     if (videoElement) {
+
+    console.log("gotsa element, tryna play viddata " + id);
         videoElement.autoplay = true; 
       videoElement.muted = true;
+      videoElement.loop = true;
 
       const width = videoElement.videoWidth;
       const height = videoElement.videoHeight;
       // videoElement.height = app.screen.height;
       // videoElement.width = app.screen.width;
       await videoElement.play();
-      const videoTexture = Texture.from(videoElement);
-      const videoSprite = new Sprite({
-        texture: videoTexture,
-        label: "video"
-      });
+      const videoTexture = await Texture.from(videoElement);
+      // const videoSprite = new Sprite({
+      //   texture: videoTexture,
+      //   label: "video"
+      // });
+      backgroundVideoGroupSprite.texture = videoTexture;
+      backgroundVideoGroupSprite.label = "video";
+
+      // videoContainer.addChild(backgroundVideoGroupSprite);
 
       // videoElement.play();
       console.log("found video element, tryna play " + width + " " + height);
       // const texture = Texture.from(videoElement);
-      videoSprite.width = width;
-      videoSprite.height = height;
+      backgroundVideoGroupSprite.width = width;
+      backgroundVideoGroupSprite.height = height;
       // videoContainer.width = width;
       // videoContainer.height = height;
-        videoContainer.addChild(videoSprite);
+
         
-      videoSprite.anchor = .5;
+      backgroundVideoGroupSprite.anchor = .5;
       
       // // videoSprite.visible = false;
-            if (app.screen.width > app.screen.height) {
-          videoSprite.width = app.screen.width * 1.05;
-          videoSprite.scale.y = videoSprite.scale.x;
+        if (app.screen.width > app.screen.height) {
+          backgroundVideoGroupSprite.width = app.screen.width * 1.05;
+          backgroundVideoGroupSprite.scale.y = backgroundVideoGroupSprite.scale.x;
         } else {
           /**
            * If the preview is square or portrait, then fill the height of the screen instead
            * and apply the scaling to the horizontal scale accordingly.
            */
-          videoSprite.height = app.screen.height * 1.05;
-          videoSprite.scale.x = videoSprite.scale.y;
+          backgroundVideoGroupSprite.height = app.screen.height * 1.05;
+          backgroundVideoGroupSprite.scale.x = backgroundVideoGroupSprite.scale.y;
         }
         // Position the backgroundVideo sprite in the center of the stage.
         // videoSprite.x = app.screen.width / 2;
         // videoSprite.y = app.screen.height / 2;
         applyFilters(app, videoContainer);
-        spritesContainer.visible = false;
+        // spritesContainer.visible = false;
 
       viewport.animate({
         position: { x: 0, y:0}, // Target center position
@@ -615,6 +627,7 @@ export async function addBackgroundVideos (app) {
 
 export function addBackgroundPictures(app) { 
 
+  console.log("tryna show background pics...");
   if (!bgPicsInit) {
 
     spritesContainer.addChild(backgroundPictureGroupSprite);
@@ -624,9 +637,9 @@ export function addBackgroundPictures(app) {
     return;
   }
 
-  spritesContainer.visible = true;
-  videoContainer.visible = false;
-  backgroundPictureGroupSprite.visible = true;
+  videoContainer.zIndex = 0; //these are children of viewport
+  spritesContainer.zIndex = 1;
+
   
   let viewOrientation = "landscape";
   if (window.innerWidth < window.innerHeight) {
@@ -669,19 +682,20 @@ export function addBackgroundPictures(app) {
 
   ///////////////////// now gotsa sprite and texture 
 
-  if (app.screen.width > app.screen.height) {
-      spritesContainer.width = app.screen.width - (app.screen.width * .1);
-          // background.width = app.screen.width;
-      spritesContainer.scale.y = spritesContainer.scale.x;       
-      
-  } else if (app.screen.width < app.screen.height){
-    viewOrientation = "portrait";
-    spritesContainer.height = app.screen.height - (app.screen.height * .1);
-    spritesContainer.scale.x = spritesContainer.scale.y;
-  } else {
-    viewOrientation = "square";
-  }
+      if (app.screen.width > app.screen.height) {
+          spritesContainer.width = app.screen.width - (app.screen.width * .01);
+              // background.width = app.screen.width;
+          spritesContainer.scale.y = spritesContainer.scale.x;       
+          
+      } else if (app.screen.width < app.screen.height){
+        viewOrientation = "portrait";
+        spritesContainer.height = app.screen.height - (app.screen.height * .01);
+        spritesContainer.scale.x = spritesContainer.scale.y;
+      } else {
+        viewOrientation = "square";
+      }
 
+      
   let xMod = .75;    
       // spritesContainer.height = app.stage.height;
   if (viewOrientation == "landscape" && picOrientation == "square") {  

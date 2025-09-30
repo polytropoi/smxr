@@ -37,7 +37,7 @@ export function addSimplePlayButton(app, buttonData, uicontainer) {
     buttonText.alpha = .75;
     // playButton.y = container.height + 300;
     buttonText.anchor = .5;
-    buttonText.y = window.innerHeight - (window.innerHeight  * .15);
+    buttonText.y = window.innerHeight - (window.innerHeight  * .2);
     buttonText.x = window.innerWidth / 2;
 
 
@@ -160,7 +160,7 @@ async function PlayPauseToggle(playButton) {
     //     isPlaying = await PrimaryAudioIsPlaying();
     // }
     const random = Math.random();
-    if (random > .3) {
+    if (random > .5) {
         addBackgroundPictures(app);
     } else {
         addBackgroundVideos(app);
