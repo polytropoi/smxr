@@ -12552,7 +12552,7 @@ function getAllPeople() {
             let sceneAccessLinkExpire = response.data.sceneAccessLinkExpire != undefined ? response.data.sceneAccessLinkExpire : ""; 
             let sceneNextScene = response.data.sceneNextScene != undefined ? response.data.sceneNextScene : "";
             let scenePreviousScene = response.data.scenePreviousScene != undefined ? response.data.scenePreviousScene : ""; 
-            let sceneSource = response.data.sceneSource != undefined ? response.data.sceneSource : ""; 
+            let sceneAlias = response.data.sceneAlias != undefined ? response.data.sceneAlias : ""; 
             let sceneStickyness = response.data.sceneStickyness != undefined ? response.data.sceneStickyness : ""; 
             let sceneLocationRange = response.data.sceneLocationRange != undefined ? response.data.sceneLocationRange : ""; 
             let scenePlayer = response.data.scenePlayer != undefined ? response.data.scenePlayer : {};
@@ -13516,8 +13516,8 @@ function getAllPeople() {
                                 "</select>" +
                             "</div>" +
                             "<div class=\x22col form-group col-md-2\x22>" +
-                                "<label for=\x22sceneSource\x22>Source/Creator</label>" + //sceneNext
-                                "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22sceneSource\x22 value=\x22" + sceneSource + "\x22 >" +
+                                "<label for=\x22sceneAlias\x22>Scene Alias URL</label>" + //sceneNext
+                                "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22sceneAlias\x22 value=\x22" + sceneAlias + "\x22 >" +
                             "</div>" +
 
   
@@ -17160,7 +17160,7 @@ function getAllPeople() {
                         let sceneNextScene = document.getElementById("sceneNextScene").value;
                         let scenePreviousScene = document.getElementById("scenePreviousScene").value;
                         let sceneStickyness = document.getElementById("sceneStickyness").value;
-                        let sceneSource = document.getElementById("sceneSource").value;
+                        let sceneAlias = document.getElementById("sceneAlias").value;
                         let sceneText = document.getElementById("sceneText").value;
 
                         let sceneStyleTheme = document.getElementById("sceneStyleTheme").value;
@@ -17393,7 +17393,7 @@ function getAllPeople() {
                             sceneEventEnd: sceneEventEnd,
                             sceneAccessLinkExpire: sceneAccessLinkExpire,
                             sceneStickyness: sceneStickyness,
-                            sceneSource: sceneSource,
+                            sceneAlias: sceneAlias,
                             sceneText: sceneText,
                             sceneFontFillColor: sceneFontFillColor,
                             sceneFontOutlineColor: sceneFontOutlineColor,

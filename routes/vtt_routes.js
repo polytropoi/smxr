@@ -391,7 +391,7 @@ vtt_router.get('/:_id', function (req, res) {
     (async () => {
         try {
 
-            const scenequery = {"short_id": reqstring};
+            const scenequery = {$or: [{"short_id": reqstring}, {"sceneAlias": reqstring}]};
             let sceneData = await RunDataQuery("scenes", "findOne", scenequery);
 
             // console.log("sceneData is " + sceneData._id);
@@ -3515,8 +3515,8 @@ vtt_router.get('/:_id', function (req, res) {
                     res.send(htmltext).end();   
                 }
         } catch (e) {
-            console.log("error in webxr route : " + e);
-            res.send("error in webxr route " + e);
+            console.log("error in vtt route : " + e);
+            res.send("error in vtt route " + e);
         }
     })();
         
