@@ -343,8 +343,8 @@ webxr_router.get('/:_id', function (req, res) {
     let instancingEntity = "";
     let meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22 defer=\x22defer\x22></script>";
     let physicsScripts = "";
-    // let blinkScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-blink-controls.min.js\x22></script>"
-    let blinkScript = "";
+    let blinkScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-blink-controls.min.js\x22></script>"
+    // let blinkScript = "";
     let brownianScript = "";
     let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
@@ -3389,7 +3389,7 @@ webxr_router.get('/:_id', function (req, res) {
                             webxrFeatures = "webxr=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
                         }
                         if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hand controls") || sceneResponse.sceneTags.toString().toLowerCase().includes("hand controllers")) {
-                            meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/component/hand_equip.js\x22></script>";
+                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/hand_equip.js\x22></script>";
                         }
                         // arElements = "<a-entity material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
                         // "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></a-entity>"+

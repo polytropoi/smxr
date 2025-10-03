@@ -1,6 +1,7 @@
 // https://github.com/diarmidmackenzie/aframe-components/blob/main/components/ball-blaster/index.js
-/* global AFRAME, THREE, Ammo */
-(function () {
+// global AFRAME, THREE, Ammo
+
+// (function () {
 
   let impulseVector = new THREE.Vector3();
   let zeroVector = new THREE.Vector3(0, 0, 0);
@@ -245,7 +246,7 @@
       })
     }
   })
-})()
+// })()
 
 
 AFRAME.registerComponent('equip_controller', {

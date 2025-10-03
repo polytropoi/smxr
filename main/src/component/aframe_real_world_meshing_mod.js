@@ -7,7 +7,7 @@
  *
  */
 
-import { settings } from "../../../connect/connect.js"; 
+import { settings } from "../../../connect/settings.js"; 
 
 AFRAME.registerComponent('real_world_meshing_mod', {
   schema: {

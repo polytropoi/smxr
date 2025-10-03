@@ -3222,16 +3222,16 @@ AFRAME.registerComponent('mod_random_path', {
     geometry.setAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
   
     // drawcalls
-    drawCount = 2; // draw the first 2 points, only
+    let drawCount = 2; // draw the first 2 points, only
     geometry.setDrawRange( 0, drawCount );
 
     const material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 2 } );
 
     // line
-    line = new THREE.Line( geometry,  material );
+    this.line = new THREE.Line( geometry,  material );
   },
   updatePositions: function () {
-    const positions = line.geometry.attributes.position.array;
+    const positions = this.line.geometry.attributes.position.array;
 
     let x = 0;
     let y = 0;
@@ -3244,12 +3244,16 @@ AFRAME.registerComponent('mod_random_path', {
       positions[ index ++ ] = y;
       positions[ index ++ ] = z;
 
-      x += ( Math.random() - 0.5 ) * 30;
-      y += ( Math.random() - 0.5 ) * 30;
-      z += ( Math.random() - 0.5 ) * 30;
+      x += ( Math.random() - 0.5 ) * .5;
+      y += ( Math.random() - 0.5 ) * .5;
+      z += ( Math.random() - 0.5 ) * .5;
 
 	  }
+    this.el.setAttribute("position", {'x': x, 'y': y, 'z': z});
 
+  },
+  tick: function () {
+    this.updatePositions();
   }
 
 });

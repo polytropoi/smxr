@@ -42,7 +42,15 @@ export let font3 = 'Acme';
 export let hasBgMap = false;
 export let hasAudioViz = false;
 
+const pathname = window.location.pathname;
+let scene_id = '';
 
+if (pathname.includes('/')) {
+    scene_id = pathname.substring(pathname.lastIndexOf('/') + 1);
+} else {
+    scene_id = pathname; // If no slashes, the whole pathname is the last element
+}
+console.log("scene id from path " + scene_id);
 
 export function GoToMapLocation (timestamp) {
      console.log("tryna goat mmap locaiton " + timestamp);
