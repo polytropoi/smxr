@@ -7,6 +7,10 @@ import { primaryAudioElement } from '../connect/media.js';
 import { Select } from '@pixi/ui';
 import { app} from './vtt_main.mjs';
 
+let silenceLength = 0;
+let speechDetection = true;
+let mediaRecorder;
+let isRecordingAudio = false;
 let presetIndex = -1;
 if (localStorage.getItem("audioVizMode")) {
 AudioVizMode(localStorage.getItem("audioVizMode"));
@@ -235,9 +239,7 @@ export function InitAnalyzer (source) {
     presets[presetIndex].options.onCanvasDraw = energyMeters;
     audioMotion = new AudioMotionAnalyzer(
       document.getElementById('audioVizContainer'),
-      presets[presetIndex].options,
-      
-     
+      presets[presetIndex].options
     );
 
   } else {
@@ -247,6 +249,7 @@ export function InitAnalyzer (source) {
 }
 
 // callback function
+let midEnergy = 0;
 function energyMeters() {
   const canvas     = audioMotion.canvas,
         ctx        = audioMotion.canvasCtx,
@@ -289,6 +292,7 @@ function energyMeters() {
   const growSize = baseSize * 4;
 
   const bassEnergy = audioMotion.getEnergy('bass');
+
   ctx.font = `bold ${ baseSize + growSize * bassEnergy }px sans-serif`;
   // ctx.fillText( bassEnergy.toString(), canvas.width * .15, centerY );
   ctx.fillText( bassEnergy.toFixed(2), canvas.width * .25, canvas.height - 50 );
@@ -297,7 +301,19 @@ function energyMeters() {
 
   // drawLight( canvas.width * .325, '#f80', audioMotion.getEnergy('lowMid') );
 
-  const midEnergy = audioMotion.getEnergy('mid');
+
+  midEnergy = audioMotion.getEnergy('mid');
+  if (speechDetection) {
+    if (midEnergy > .1) {
+      if (!isRecordingAudio) {
+        StartAudioRecord();
+      }
+    } else {
+      if (isRecordingAudio) {
+        StopAudioRecord();
+      }
+    }
+  }
   ctx.font = `bold ${ baseSize + growSize * midEnergy }px sans-serif`;
   ctx.fillText( midEnergy.toFixed(2), canvas.width * .5, canvas.height - 50);
   // drawLight( centerX, '#ff0', midEnergy );
@@ -312,42 +328,6 @@ function energyMeters() {
 
 
 
-// // display module version
-// document.getElementById('version').innerText = `v${AudioMotionAnalyzer.version}`;
-
-// // play stream
-// document.getElementById('live').addEventListener( 'click', () => {
-//   audioEl.src = 'https://icecast2.ufpel.edu.br/live';
-//   audioEl.play();
-// });
-
-// // file upload
-// document.getElementById('upload').addEventListener( 'change', e => {
-// 	const fileBlob = e.target.files[0];
-
-// 	if ( fileBlob ) {
-// 		audioEl.src = URL.createObjectURL( fileBlob );
-// 		audioEl.play();
-// 	}
-// });
-
-// toggle microphone on/off
-
-//     if (!navigator.mediaDevices?.enumerateDevices) {
-//   console.log("enumerateDevices() not supported.");
-// } else {
-//   // List cameras and microphones.
-//   navigator.mediaDevices
-//     .enumerateDevices()
-//     .then((devices) => {
-//       devices.forEach((device) => {
-//         console.log("device" + `${device.kind}: ${device.label} id = ${device.deviceId}`);
-//       });
-//     })
-//     .catch((err) => {
-//       console.error(`${err.name}: ${err.message}`);
-//     });
-// }
 
 let micStream;
 const micButton = document.getElementById('microphone_button');
@@ -393,6 +373,10 @@ micButton.addEventListener( 'click', () => {
           audioMotion.volume = 0;
           console.log("tryna send microphon e stream.,.");
           micButton.style.color = "pink";
+
+          if (speechDetection) {
+             InitMediaRecorder(stream);
+          }
         })
         .catch( err => {
           alert('Microphone access denied by user');
@@ -409,5 +393,75 @@ micButton.addEventListener( 'click', () => {
       }
       
     }
+
+   
+    // function ReturnMediaRecorder
   
 });
+
+
+ function StartAudioRecord() {
+    // To start recording
+
+    if (mediaRecorder) {
+      if (!isRecordingAudio) {
+        isRecordingAudio = true;
+        console.log("tryna start recording");
+        mediaRecorder.start();
+      }
+
+    }
+    }
+    function StopAudioRecord() {
+    // To stop recording
+    if (mediaRecorder && isRecordingAudio) {
+      // console.log("tryna stop recording");
+      // mediaRecorder.stop();
+      // isRecordingAudio = false;
+      }   
+    }   
+
+  function InitMediaRecorder (stream) {
+      console.log("tryna create mediarecorder ");
+      mediaRecorder = new MediaRecorder(stream);
+      let audioChunks = [];
+
+      mediaRecorder.ondataavailable = event => {
+        audioChunks.push(event.data);
+        console.log(audioChunks.length);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' }); // Type might need adjustment based on library
+        
+        const audioUrl = URL.createObjectURL(audioBlob);
+        console.log("audioBlob length is " + audioChunks.length + " url " + audioUrl);
+        const a = document.createElement('a');
+        a.href = audioUrl;
+        a.download = 'myRecording.wav';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      let elapsed = 0;
+      let recordedTime = 0;
+      app.ticker.add((ticker) => {
+        if (mediaRecorder && isRecordingAudio && midEnergy < .01) {
+
+            elapsed += ticker.deltaTime;
+            console.log(elapsed);
+            if (elapsed > 100) {
+              if (midEnergy < .01) {
+                elapsed = 0;
+                mediaRecorder.stop();
+                      isRecordingAudio = false;
+                      audioChunks = [];
+                // recordedTime =
+              }
+            }
+          }
+              
+      });
+  }
