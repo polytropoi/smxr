@@ -7,8 +7,8 @@ import { primaryAudioElement } from '../connect/media.js';
 import { Select } from '@pixi/ui';
 import { app} from './vtt_main.mjs';
 
-let silenceLength = 0;
-let speechDetection = true;
+let maxAudioRecordTime = 10000; //10 seconds
+let speechDetection = false;
 let mediaRecorder;
 let isRecordingAudio = false;
 let presetIndex = -1;
@@ -451,15 +451,24 @@ micButton.addEventListener( 'click', () => {
         if (mediaRecorder && isRecordingAudio && midEnergy < .01) {
 
             elapsed += ticker.deltaTime;
+            recordedTime += ticker.deltaTime;
             console.log(elapsed);
             if (elapsed > 100) {
               if (midEnergy < .01) {
                 elapsed = 0;
+                recordedTime = 0;
                 mediaRecorder.stop();
                       isRecordingAudio = false;
                       audioChunks = [];
                 // recordedTime =
               }
+            }
+            if (recordedTime > maxAudioRecordTime) {
+               mediaRecorder.stop();
+               elapsed = 0;
+               recordedTime = 0;
+              isRecordingAudio = false;
+              audioChunks = [];
             }
           }
               
