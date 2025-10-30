@@ -57,6 +57,8 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////cal
             } 
             // const query = {$or: [{ "short_id" : req.params._id},{"_id": s_id}]};
             const sceneData = await RunDataQuery("scenes", "findOne", query);
+
+            sceneResponse = sceneData;
             if (sceneData.scenePictures != null && sceneData.scenePictures.length > 0) {
                 sceneData.scenePictures.forEach(function (picture) {
                     var p_id = ObjectId.createFromHexString(picture); //convert to binary to search by _id beloiw
@@ -67,10 +69,17 @@ unity_router.get('/scene/:_id/:platform/:version', function (req, res) { ////cal
                 var ambientOID = ObjectId.isValid(sceneData.sceneAmbientAudioID) ? ObjectId.createFromHexString(sceneData.sceneAmbientAudioID) : "";
                 var primaryOID = ObjectId.isValid(sceneData.scenePrimaryAudioID) ? ObjectId.createFromHexString(sceneData.scenePrimaryAudioID) : "";
                 requestedAudioItems = [ triggerOID, ambientOID, primaryOID];
-                
-                sceneResponse = sceneData;
+               
+               
                 if (sceneResponse.sceneLocations != null && sceneResponse.sceneLocations.length > 0) {
                     for (var i = 0; i < sceneResponse.sceneLocations.length; i++) {
+                        console.log("scene " + req.params._id + " locationTags " + sceneResponse.sceneLocations[i].locationTags);
+
+                        if (!sceneResponse.sceneLocations[i].locationTags || sceneResponse.sceneLocations[i].locationTags == undefined) {
+                            sceneResponse.sceneLocations[i].locationTags = "";
+                        } else {
+                            sceneResponse.sceneLocations[i].locationTags = sceneResponse.sceneLocations[i].locationTags.toString();
+                        }
                         if (sceneResponse.sceneLocations[i].x == "") {
                             sceneResponse.sceneLocations[i].x = 0;
                         }
