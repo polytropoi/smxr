@@ -505,6 +505,8 @@ async function addOverlayMap(app, viewport, width, height, videoTexture, sprites
 // let videoEl;
 export async function addBackgroundVideos (app) {
     // if (rnd > .3) {
+    // videoGroupsData && videoGroupsData.length
+    if (videoGroupsData && videoGroupsData.length && videoGroupsData[0].videos.length) {
     if (!bgVidsInit) {  
           
 
@@ -522,7 +524,7 @@ export async function addBackgroundVideos (app) {
   videoContainer.zIndex = 1;
   spritesContainer.zIndex = 0;
   
-    const vrandIndex = Math.floor(Math.random()*videoGroupsData[0].videos.length);
+    const vrandIndex = Math.floor(Math.random()* videoGroupsData[0].videos.length);
     const v_data = videoGroupsData[0].videos[vrandIndex];
     // console.log("video random index is " + vrandIndex + " id is " + v_id);
     // const viddata = videoGroupsData[0].videos.find(obj => obj._id === v_id);
@@ -621,7 +623,7 @@ export async function addBackgroundVideos (app) {
     //   ease: 'easeInOutQuad' // Using a common easing function
     // });
 
-    
+  }
 }
 
 

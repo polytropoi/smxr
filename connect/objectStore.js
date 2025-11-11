@@ -23,10 +23,10 @@ const s3 = new S3Client({
         secretAccessKey: process.env.AWSSECRET
     }
 });
-
+import * as minio from 'minio'
 var minioClient = null;
 if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
-    const minio = require('minio');
+   
         minioClient = new minio.Client({
         endPoint: process.env.MINIOENDPOINT,
         port: 9000,
