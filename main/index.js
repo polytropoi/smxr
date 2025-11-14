@@ -12697,6 +12697,7 @@ function getAllPeople() {
             if (response.data.sceneHeightmap != null && response.data.sceneHeightmap.name != undefined) {
                 heightmapName = response.data.sceneHeightmap.name;
             }
+            console.log("enabled client types: " + JSON.stringify(response.data.sceneEnabledClientTypes));
             if (response.data.scenePictureGroups != null) {
                 // response.data.scenePictureGroups = [];
                 for (let i =0; i < response.data.scenePictureGroups.length; i++) {
@@ -13519,26 +13520,8 @@ function getAllPeople() {
                                 "<label for=\x22sceneAlias\x22>Scene Alias URL</label>" + //sceneNext
                                 "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22sceneAlias\x22 value=\x22" + sceneAlias + "\x22 >" +
                             "</div>" +
-
-  
-                            "<div class=\x22col form-group col-md-1\x22>" +
-                                "<div class=\x22\x22><label for=\x22sceneIosOK\x22>iOS Enabled</label><br>" + 
-                                "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneIosOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
                             
-                                "</div>" +
-                            "<div class=\x22col form-group col-md-1\x22>" +
-                                "<div class=\x22\x22><label for=\x22sceneAndroidOK\x22>Android Enabled</label><br>" + 
-                                "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneAndroidOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                            "</div>" +
-                            "<div class=\x22col form-group col-md-1\x22>" +
-                                "<div class=\x22\x22><label for=\x22sceneWindowsOK\x22>Windows Enabled</label><br>" + 
-                                "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneWindowsOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                            "</div>" +
-                            // "</div>" +
-                            "<div class=\x22col form-group col-md-1\x22>" +
-                                "<div class=\x22\x22><label for=\x22sceneWebGLOK\x22>WebGL Enabled</label><br>" + 
-                                "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneWebGLOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                            "</div>" +
+                           
                             "<div class=\x22col form-group col-md-1\x22>" +
                                 "<label for=\x22scenePreviousScene\x22>Prev Scene</label>" + //scenePrevious
                                 "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22scenePreviousScene\x22 placeholder=\x22Previous Scene\x22 value=\x22" + scenePreviousScene + "\x22 >" +
@@ -13573,7 +13556,123 @@ function getAllPeople() {
                                 "</div>" +
                             "</div>" +
                             "</div>" +
-                            
+                            "<div class=\x22form-row\x22>" + 
+
+                            "<div class=\x22col form-group col-md-11\x22> " +
+                                "<label for=\x22sceneEnabledClientTypesBtns\x22>Enabled Client Types</label>" + //alignement
+                                "<div id=\x22sceneEnabledClientTypesBtns\x22 class=\x22btn-group btn-group-toggle flex-wrap\x22 data-toggle=\x22buttons\x22>" +
+                                    "<label class=\x22btn btn-light \x22>" +
+                                    "<input type=\x22checkbox\x22 class=\x22active\x22 name=\x22sceneEnabledClients\x22 value=\x22aframeWeb\x22 id=\x22sceneEnabledClientTypes.aframeWeb\x22 autocomplete=\x22off\x22> Aframe WebXR " +
+                                    "</label>" +
+                                    "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22pixiWeb\x22 id=\x22sceneEnabledClientTypes.pixiWeb\x22 autocomplete=\x22off\x22> Pixi Web " +
+                                    "</label>" +
+                                    "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22unityWeb\x22 id=\x22sceneEnabledClientTypes.unityWeb\x22 autocomplete=\x22off\x22> Unity Web " +
+                                    "</label>" +
+                                    "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22babylonWeb\x22 id=\x22sceneEnabledClientTypes.babylonWeb\x22 autocomplete=\x22off\x22> Babylon Web " +
+                                    "</label>" +
+                                    "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22threeWeb\x22 id=\x22sceneEnabledClientTypes.threeWeb\x22 autocomplete=\x22off\x22> Three Web " +
+                                    "</label>" +
+                                    "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22unityIOS\x22 id=\x22sceneEnabledClientTypes.unityIOS\x22 autocomplete=\x22off\x22> Unity IOS " +
+                                    "</label>" +
+                                      "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22unityAndroid\x22 id=\x22sceneEnabledClientTypes.unityAndroid\x22 autocomplete=\x22off\x22> Unity Android " +
+                                    "</label>" +
+                                      "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22unityWindows\x22 id=\x22sceneEnabledClientTypes.unityWindows\x22 autocomplete=\x22off\x22> Unity Windows " +
+                                    "</label>" +
+                                      "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22unityMac\x22 id=\x22sceneEnabledClientTypes.unityMac\x22 autocomplete=\x22off\x22> Unity MacOS " +
+                                    "</label>" +
+                                      "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22unityLinux\x22 id=\x22sceneEnabledClientTypes.unityLinux\x22 autocomplete=\x22off\x22> Unity Linux " +
+                                    "</label>" +
+                                    
+                                "</div>" +
+                                // "</div>" +
+                            "</div>" +
+
+
+
+
+                            //////////////////////////////////////////
+                            //  "<div class=\x22btn-group\x22 role=\x22group\x22 aria-label=\x22Basic checkbox toggle button group\x22 data-toggle=\x22buttons\x22></div>"+
+                                
+                            //         "<input class=\x22btn-check\x22 type=\x22checkbox\x22  id=\x22sceneAframeOK\x22 autocomplete=\x22off\x22>"+
+                            //         "<label class=\x22btn btn-outline-primary\x22 for=\x22sceneAframeOK\x22>AFrame WebXR</label>" + 
+                                    
+                                     
+                            //         "<input class=\x22btn-check\x22 type=\x22checkbox\x22  id=\x22sceneVTTOK\x22 autocomplete=\x22off\x22>"+
+                            //         "<label class=\x22btn btn-outline-primary\x22 for=\x22sceneVTTOK\x22>Pixi VTT Web</label>" +
+                                     
+                            //         "<input class=\x22btn-check\x22 type=\x22checkbox\x22  id=\x22sceneBabylonOK\x22 autocomplete=\x22off\x22>"+
+                            //         "<label class=\x22btn btn-outline-primary\x22 for=\x22sceneBabylonOK\x22>Babylon Web</label>" +
+                                    
+                            //         "<input class=\x22btn-check\x22 type=\x22checkbox\x22  id=\x22sceneThreeOK\x22 autocomplete=\x22off\x22>"+
+                            //         "<label class=\x22btn btn-outline-primary\x22 for=\x22sceneThreeOK\x22>THREE Web</label>" + 
+                            //  "</div>"+
+
+                            //////////////////////////////////////////////////////
+
+                            // "<div class=\x22col form-group col-md-1\x22>" +
+                            // "<label>Enabled client types:</label><br><br>" + //message to include in sending
+                            //  "</div>" +
+
+
+
+
+                            // "</div>" +
+                                // "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneAframeOK\x22>AFrame WebXR</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneAframeOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                // "</div>" +
+                                // "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneVTTOK\x22>Pixi VTT Web</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneVTTOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                // "</div>" +
+
+                                //  "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneUnityWebOK\x22>Unity Web</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityWebOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                // "</div>" +
+
+                                // "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneBabylonOK\x22>Babylon Web</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneBabylonOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                // "</div>" +
+                                // "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneThreeOK\x22>THREE Web</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneThreeOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                // "</div>" +
+                               
+                                
+                                // "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneUnityIosOK\x22>Unity iOS</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityIosOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                
+                                // "</div>" +
+                                // "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneUnityAndroidOK\x22>Unity Android</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityAndroidOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                // "</div>" +
+                                // "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneUnityWindowsOK\x22>Unity Windows</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityWindowsOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                // "</div>" +
+                                // "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneUnityMacOK\x22>Unity MacOS</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityMacOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                // "</div>" +
+                                // "<div class=\x22col form-group col-md-1\x22>" +
+                                //     "<div class=\x22\x22><label for=\x22sceneUnityLinuxOK\x22>Unity Linux</label><br>" + 
+                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityLinuxOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                // "</div>" +
+                            "</div>" +
+
                             "<hr/>" +
                         "</div>" +
                             "<button id=\x22sharingSectionButton\x22 class=\x22btn btn-sm btn-primary btn-circle btn-light float-left\x22><i class=\x22fas fa-plus-circle\x22></i> </button>" +
@@ -15026,49 +15125,49 @@ function getAllPeople() {
                             
                             "<div class=\x22form-row\x22>" +
                                 "<div class=\x22col form-group col-md-11\x22> " +
-                                "<label for=\x22scatterMeshLayerBtns\x22>Scatter Object Layers </label>" + //alignement
-                                "<br><div id=\x22scatterMeshLayerBtns\x22 class=\x22btn-group btn-group-toggle flex-wrap\x22 data-toggle=\x22buttons\x22>" +
+                                "<label for=\x22scatterObjectLayerBtns\x22>Scatter Object Layers </label>" + //alignement
+                                "<br><div id=\x22scatterObjectLayerBtns\x22 class=\x22btn-group btn-group-toggle flex-wrap\x22 data-toggle=\x22buttons\x22>" +
                                     "<label class=\x22btn btn-light \x22>" +
-                                    "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22picobj\x22 id=\x22sceneScatterObjectLayers.picobj\x22 autocomplete=\x22off\x22> Pictures " +
+                                    "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22picobj\x22 id=\x22sceneScatterObjectLayers.picobj\x22 autocomplete=\x22off\x22> Pictures " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22linkobj\x22 id=\x22sceneScatterObjectLayers.linkobj\x22 autocomplete=\x22off\x22> Links " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22linkobj\x22 id=\x22sceneScatterObjectLayers.linkobj\x22 autocomplete=\x22off\x22> Links " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22textobj\x22 id=\x22sceneScatterObjectLayers.textobj\x22 autocomplete=\x22off\x22> Text " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22textobj\x22 id=\x22sceneScatterObjectLayers.textobj\x22 autocomplete=\x22off\x22> Text " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22audioobj\x22 id=\x22sceneScatterObjectLayers.audioobj\x22 autocomplete=\x22off\x22> Audio " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22audioobj\x22 id=\x22sceneScatterObjectLayers.audioobj\x22 autocomplete=\x22off\x22> Audio " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22mediaobj\x22 id=\x22sceneScatterObjectLayers.mediaobj\x22 autocomplete=\x22off\x22> Video " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22mediaobj\x22 id=\x22sceneScatterObjectLayers.mediaobj\x22 autocomplete=\x22off\x22> Video " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22keys\x22 id=\x22sceneScatterObjectLayers.keys\x22 autocomplete=\x22off\x22> Keys " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22keys\x22 id=\x22sceneScatterObjectLayers.keys\x22 autocomplete=\x22off\x22> Keys " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22doors\x22 id=\x22sceneScatterObjectLayers.doors\x22 autocomplete=\x22off\x22> Doors " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22doors\x22 id=\x22sceneScatterObjectLayers.doors\x22 autocomplete=\x22off\x22> Doors " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22mailboxes\x22 id=\x22sceneScatterObjectLayers.mailboxes\x22 autocomplete=\x22off\x22> Mailboxes " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22mailboxes\x22 id=\x22sceneScatterObjectLayers.mailboxes\x22 autocomplete=\x22off\x22> Mailboxes " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22pickups\x22 id=\x22sceneScatterObjectLayers.pickups\x22 autocomplete=\x22off\x22> Pickups " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22pickups\x22 id=\x22sceneScatterObjectLayers.pickups\x22 autocomplete=\x22off\x22> Pickups " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22drops\x22 id=\x22sceneScatterObjectLayers.drops\x22 autocomplete=\x22off\x22> Drops " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22drops\x22 id=\x22sceneScatterObjectLayers.drops\x22 autocomplete=\x22off\x22> Drops " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22players\x22 id=\x22sceneScatterObjectLayers.players\x22 autocomplete=\x22off\x22> Players " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22players\x22 id=\x22sceneScatterObjectLayers.players\x22 autocomplete=\x22off\x22> Players " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22characters\x22 id=\x22sceneScatterObjectLayers.characters\x22 autocomplete=\x22off\x22> Characters " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22characters\x22 id=\x22sceneScatterObjectLayers.characters\x22 autocomplete=\x22off\x22> Characters " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22waypoints\x22 id=\x22sceneScatterObjectLayers.waypoints\x22 autocomplete=\x22off\x22> Waypoints " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22waypoints\x22 id=\x22sceneScatterObjectLayers.waypoints\x22 autocomplete=\x22off\x22> Waypoints " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneMeshLayers\x22 value=\x22equipment\x22 id=\x22sceneScatterObjectLayers.equipment\x22 autocomplete=\x22off\x22> Equipment " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneObjectLayers\x22 value=\x22equipment\x22 id=\x22sceneScatterObjectLayers.equipment\x22 autocomplete=\x22off\x22> Equipment " +
                                     "</label>" +
                                 "</div>" +
                                 // "</div>" +
@@ -15383,21 +15482,50 @@ function getAllPeople() {
                 // scenePrimaryTextRotate : req.body.scenePrimaryTextRotate != null ? req.body.scenePrimaryTextRotate : false,
                 // scenePrimaryTextScaleByDistance : req.body.scenePrimaryTextScaleByDistance != null ? req.body.scenePrimaryTextScaleByDistance : false,
                 // sceneTextAudioSync : req.body.sceneTextAudioSync != null ? req.body.sceneTextAudioSync : false,
-                $('#sceneIosOK').bootstrapToggle();
-                if (response.data.sceneIosOK) {
-                $('#sceneIosOK').bootstrapToggle('on');
-                }
-                $('#sceneAndroidOK').bootstrapToggle();
-                if (response.data.sceneAndroidOK) {
-                $('#sceneAndroidOK').bootstrapToggle('on');
-                }
-                $('#sceneWindowsOK').bootstrapToggle();
-                if (response.data.sceneWindowsOK) {
-                $('#sceneWindowsOK').bootstrapToggle('on');
-                }
-                $('#sceneWebGLOK').bootstrapToggle();
-                if (response.data.sceneWebGLOK) {
-                $('#sceneWebGLOK').bootstrapToggle('on');
+                
+                // $('#sceneUnityIosOK').bootstrapToggle();
+                // if (response.data.sceneUnityIosOK) {
+                // $('#sceneUnityIosOK').bootstrapToggle('on');
+                // }
+                // $('#sceneUnityAndroidOK').bootstrapToggle();
+                // if (response.data.sceneUnityAndroidOK) {
+                // $('#sceneUnityAndroidOK').bootstrapToggle('on');
+                // }
+                // $('#sceneUnityWindowsOK').bootstrapToggle();
+                // if (response.data.sceneUnityWindowsOK) {
+                // $('#sceneUnityWindowsOK').bootstrapToggle('on');
+                // }
+                // $('#sceneWindowsOK').bootstrapToggle();
+                // if (response.data.sceneWindowsOK) {
+                // $('#sceneWindowsOK').bootstrapToggle('on');
+                // }
+                // $('#sceneUnityLinuxOK').bootstrapToggle();
+                // if (response.data.sceneUnityLinuxOK) {
+                // $('#sceneUnityLinuxOK').bootstrapToggle('on');
+                // }
+                // $('#sceneUnityMacOK').bootstrapToggle();
+                // if (response.data.sceneUnityMacOK) {
+                // $('#sceneUnityMacOK').bootstrapToggle('on');
+                // }
+                // $('#sceneUnityWebOK').bootstrapToggle();
+                // if (response.data.sceneUnityWebOK) {
+                // $('#sceneUnityWebOK').bootstrapToggle('on');
+                // }
+                // $('#sceneAframeOK').bootstrapToggle();
+                // if (response.data.sceneAframeOK) {
+                // $('#sceneAframeOK').bootstrapToggle('on');
+                // }
+                // $('#sceneVTTOK').bootstrapToggle();
+                // if (response.data.sceneVTTOK) {
+                // $('#sceneVTTOK').bootstrapToggle('on');
+                // }
+                // $('#sceneBabylonOK').bootstrapToggle();
+                // if (response.data.sceneBabylonOK) {
+                // $('#sceneBabylonOK').bootstrapToggle('on');
+                // }
+                $('#sceneThreeOK').bootstrapToggle();
+                if (response.data.sceneThreeOK) {
+                $('#sceneThreeOK').bootstrapToggle('on');
                 }
                 $('#scenePublicToggle').bootstrapToggle();
                 if (response.data.sceneShareWithPublic) {
@@ -15584,6 +15712,57 @@ function getAllPeople() {
                     let selection = document.getElementById(scenePrimaryTextMode); //radio
                     $(selection).closest('.btn').button('toggle');
                 }
+
+                if (response.data.sceneEnabledClientTypes != undefined) {
+
+
+                    if (response.data.sceneEnabledClientTypes.aframeWeb) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.aframeWeb');
+                        $(selection).closest('.btn').button('toggle');
+                    } 
+                    if (response.data.sceneEnabledClientTypes.pixiWeb) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.pixiWeb');
+                        $(selection).closest('.btn').button('toggle');
+                    }
+                    if (response.data.sceneEnabledClientTypes.unityWeb) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.unityWeb');
+                        $(selection).closest('.btn').button('toggle');
+                    }
+                    if (response.data.sceneEnabledClientTypes.babylonWeb) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.babylonWeb');
+                        $(selection).closest('.btn').button('toggle');
+                    }                
+                    if (response.data.sceneEnabledClientTypes.threeWeb) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.threeWeb');
+                        $(selection).closest('.btn').button('toggle');
+                    }                
+                    if (response.data.sceneEnabledClientTypes.unityIOS) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.unityIOS');
+                        $(selection).closest('.btn').button('toggle');
+                    }
+                    if (response.data.sceneEnabledClientTypes.unityAndroid) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.unityAndroid');
+                        $(selection).closest('.btn').button('toggle');
+                    }
+                    if (response.data.sceneEnabledClientTypes.unityWindows) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.unityWindows');
+                        $(selection).closest('.btn').button('toggle');
+                    }
+                    if (response.data.sceneEnabledClientTypes.unityMac) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.unityMac');
+                        $(selection).closest('.btn').button('toggle');
+                    }
+                    if (response.data.sceneEnabledClientTypes.unityLinux) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.unityLinux');
+                        $(selection).closest('.btn').button('toggle');
+                    }
+
+                } else {
+                        let selection = document.getElementById('sceneEnabledClientTypes.aframeWeb');
+                        $(selection).closest('.btn').button('toggle');
+                    
+                }
+
                 if (response.data.sceneScatterMeshLayers != undefined) {
 
                     if (response.data.sceneScatterMeshLayers.grass1) {
@@ -16665,6 +16844,7 @@ function getAllPeople() {
                             } 
                         }
                     });
+
                     $(document).on('change', '#sceneTextBackgroundSelect', function() {
                         console.log("sceneFontWeb1 change : "+ this.value);
                         sceneTextBackground = this.value;
@@ -17204,10 +17384,18 @@ function getAllPeople() {
                         let sceneSkyRadius = document.getElementById("sceneSkyRadius").value;
                         let sceneWindFactor = document.getElementById("sceneWindFactor").value;
                         let sceneLightningFactor = document.getElementById("sceneLightningFactor").value;
-                        let sceneIosOK = document.getElementById("sceneIosOK").checked;
-                        let sceneAndroidOK = document.getElementById("sceneAndroidOK").checked;
-                        let sceneWindowsOK = document.getElementById("sceneWindowsOK").checked;
-                        let sceneWebGLOK = document.getElementById("sceneWebGLOK").checked;
+                        
+                        // let sceneAframeOK = document.getElementById("sceneAframeOK").checked;
+                        // let sceneVTTOK = document.getElementById("sceneVTTOK").checked;
+                        // let sceneBabylonOK = document.getElementById("sceneBabylonOK").checked;
+                        // let sceneThreeOK = document.getElementById("sceneThreeOK").checked;
+                        // let sceneUnityWebOK = document.getElementById("sceneUnityWebOK").checked;
+                        // let sceneUnityIosOK = document.getElementById("sceneUnityIosOK").checked;
+                        // let sceneUnityAndroidOK = document.getElementById("sceneUnityAndroidOK").checked;
+                        // let sceneUnityWindowsOK = document.getElementById("sceneUnityWindowsOK").checked;
+                        // let sceneUnityMacOK = document.getElementById("sceneUnityMacOK").checked;
+                        // let sceneUnityLinuxOK = document.getElementById("sceneUnityLinuxOK").checked;
+
                         let sceneLocationTracking = document.getElementById("sceneLocationTracking").checked;
                         let sceneShowAds = document.getElementById("sceneShowAds").checked;
                         let sceneFlyable = document.getElementById("sceneFlyable").checked;
@@ -17305,6 +17493,7 @@ function getAllPeople() {
                         }
                         let sceneScatterMeshLayers = {};
                         let sceneScatterObjectLayers = {};
+                        let sceneEnabledClientTypes = {};
                         let sceneEnvironment = {};
                         sceneEnvironment.name = sceneAssetBundleName; //to do - flex for gltf
                         let sceneWeather = {};
@@ -17360,6 +17549,18 @@ function getAllPeople() {
                         sceneScatterObjectLayers.waypoints = document.getElementById('sceneScatterObjectLayers.waypoints').checked;
                         sceneScatterObjectLayers.equipment = document.getElementById('sceneScatterObjectLayers.equipment').checked;
 
+                        sceneEnabledClientTypes.aframeWeb = document.getElementById('sceneEnabledClientTypes.aframeWeb').checked;
+                        sceneEnabledClientTypes.pixiWeb = document.getElementById('sceneEnabledClientTypes.pixiWeb').checked;
+                        sceneEnabledClientTypes.unityWeb = document.getElementById('sceneEnabledClientTypes.unityWeb').checked;
+                        sceneEnabledClientTypes.babylonWeb = document.getElementById('sceneEnabledClientTypes.babylonWeb').checked;
+                        sceneEnabledClientTypes.threeWeb = document.getElementById('sceneEnabledClientTypes.threeWeb').checked;
+                        sceneEnabledClientTypes.unityIOS = document.getElementById('sceneEnabledClientTypes.unityIOS').checked;
+                        sceneEnabledClientTypes.unityAndroid = document.getElementById('sceneEnabledClientTypes.unityAndroid').checked;
+                        sceneEnabledClientTypes.unityWindows = document.getElementById('sceneEnabledClientTypes.unityWindows').checked;
+                        sceneEnabledClientTypes.unityMac = document.getElementById('sceneEnabledClientTypes.unityMac').checked;
+                        sceneEnabledClientTypes.unityLinux = document.getElementById('sceneEnabledClientTypes.unityLinux').checked;
+
+                        console.log("sceneEnabledClientTypes " + JSON.stringify(sceneEnabledClientTypes));
                         ///////////////////////////
                         //////////////////////////
                         // alert("sceneScatterOFfset " + sceneScatterOffset);
@@ -17444,10 +17645,18 @@ function getAllPeople() {
                             sceneSkyRadius: sceneSkyRadius,
                             sceneWindFactor: sceneWindFactor,
                             sceneLightningFactor: sceneLightningFactor,
-                            sceneIosOK: sceneIosOK,
-                            sceneAndroidOK: sceneAndroidOK,
-                            sceneWindowsOK: sceneWindowsOK,
-                            sceneWebGLOK: sceneWebGLOK,
+
+                            // sceneAframeOK: sceneAframeOK,
+                            // sceneVTTOK: sceneVTTOK,
+                            // sceneBabylonOK: sceneBabylonOK,
+                            // sceneUnityWebOK: sceneUnityWebOK,
+                            // sceneThreeOK: sceneThreeOK,
+                            // sceneUnityIosOK: sceneUnityIosOK,
+                            // sceneUnityAndroidOK: sceneUnityAndroidOK,
+                            // sceneUnityWindowsOK: sceneUnityWindowsOK,
+                            // sceneUnityMacOK: sceneUnityMacOK,
+                            // sceneUnityLinuxOK: sceneUnityLinuxOK,
+                            
                             sceneLocationTracking: sceneLocationTracking,
                             sceneShowAds: sceneShowAds,
                             sceneWebLinks: sceneWebLinks,
@@ -17496,6 +17705,7 @@ function getAllPeople() {
                             sceneUseFloorPlane: sceneUseFloorPlane,
                             sceneFloorplaneTexture: sceneFloorplaneTexture,
                             // sceneRenderFloorPlane: sceneRenderFloorPlane,
+
                             sceneScatterMeshes: sceneScatterMeshes,
                             sceneScatterObjects: sceneScatterObjects,
                             sceneFontWeb1: sceneFontWeb1,
@@ -17524,6 +17734,7 @@ function getAllPeople() {
                             scenePrimaryTextMode: scenePrimaryTextMode,
                             sceneScatterMeshLayers: sceneScatterMeshLayers,
                             sceneScatterObjectLayers: sceneScatterObjectLayers,
+                            sceneEnabledClientTypes: sceneEnabledClientTypes,
                             sceneScatterOffset: sceneScatterOffset,
                             sceneWater: sceneWater,
                             sceneGroundLevel: sceneGroundLevel,
@@ -17716,7 +17927,7 @@ function getAllPeople() {
             var windows = arr[i].sceneWindowsOK ? 
             "<a href=\x22#\x22 class=\x22btn btn-success btn-circle \x22><i class=\x22fab fa-windows\x22></i></a>" :
             "<a href=\x22#\x22 class=\x22btn btn-danger btn-circle \x22><i class=\x22fab fa-windows\x22></i></a>";
-            var webgl = arr[i].sceneWebGLOK ? 
+            var webgl = arr[i].sceneUnityWebOK ? 
             "<a href=\x22#\x22 class=\x22btn btn-success btn-circle \x22><i class=\x22fab fa-browser\x22></i></a>" :
             "<a href=\x22#\x22 class=\x22btn btn-danger btn-circle \x22><i class=\x22fab fa-browser\x22></i></a>";
             tableBody = tableBody +
@@ -17846,7 +18057,7 @@ function getAllPeople() {
             var windows = arr[i].sceneWindowsOK ? 
             "<a href=\x22#\x22 class=\x22btn btn-success btn-circle \x22><i class=\x22fab fa-windows\x22></i></a>" :
             "<a href=\x22#\x22 class=\x22btn btn-danger btn-circle \x22><i class=\x22fab fa-windows\x22></i></a>";
-            var webgl = arr[i].sceneWebGLOK ? 
+            var webgl = arr[i].sceneUnityWebOK ? 
             "<a href=\x22#\x22 class=\x22btn btn-success btn-circle \x22><i class=\x22fab fa-windows\x22></i></a>" :
             "<a href=\x22#\x22 class=\x22btn btn-danger btn-circle \x22><i class=\x22fab fa-windows\x22></i></a>";
             tableBody = tableBody +

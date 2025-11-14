@@ -3245,9 +3245,34 @@ landing_router.get('/:_id', function (req, res) {
                         // platformButtons = "";
                         let buttonLabel = sceneResponse.sceneWebType == "Video Landing" ? "Watch Video" : "WebXR"
 
-                        let platformButtons = "<a href=\x22https://smxr.net/qrcode/" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22mx-auto btn btn-xl btn-primary \x22>QR</a>"+
-                        "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22>"+buttonLabel+"</a>"+
-                        "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22>Quest</a>";
+
+                        // buttons = "<a href=\x22/landing/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>"+
+                        //         "<a href=\x22/webxr/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebXR</a>"+
+                        //         "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/" +  shuffledArray[i].sceneKey + 
+                        //         "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Quest</a>";
+                        let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22> WebXR </a>"+
+                        "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22> Send to Quest </a>";
+                        let picLink = "<a href=\x22../webxr/"+ sceneResponse.short_id + "\x22>";
+                        if (sceneResponse.sceneEnabledClientTypes != undefined) {
+                            if (sceneResponse.sceneEnabledClientTypes.aframeWeb == false) {
+                                platformButtons = "";
+                                picLink = "";
+                            }
+                            if (sceneResponse.sceneEnabledClientTypes.pixiWeb == true) {
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22> Virtual Table Top </a>" + platformButtons;
+                                picLink = "<a href=\x22../webxr/"+ sceneResponse.short_id + "\x22>";
+                            }
+                            if (sceneResponse.sceneEnabledClientTypes.unityWeb == true) {
+                                platformButtons = platformButtons + "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22mx-auto btn btn-xl btn-primary float-right\x22>Unity Web</a>";
+                                picLink = "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22>";
+                            }
+                        }
+                        // if (sceneResponse.sceneEnabledClientTypes != undefined) {
+                            
+                        // }
+
+
+                        
                         if (sceneResponse.sceneShareWithSubscribers) {
                             if (isGuest) {
                                 platformButtons = "";
@@ -3255,9 +3280,9 @@ landing_router.get('/:_id', function (req, res) {
                             
                             //  "Subscribe or Login to access this scene - "
                         }
-                        if (!sceneResponse.sceneShareWithSubscribers && sceneResponse.sceneWebGLOK) {
-                            platformButtons += "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../unity/"+ sceneResponse.short_id + "\x22>Enter Unity Scene</a> ";
-                        }
+                        // if (!sceneResponse.sceneShareWithSubscribers && sceneResponse.sceneUnityWebOK) {
+                        //     platformButtons += "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../unity/"+ sceneResponse.short_id + "\x22>Enter Unity Scene</a> ";
+                        // }
                         var audioHtml = "";
                         let uid = "0000000000000";
                         if (req.session.user) {
@@ -3325,7 +3350,8 @@ landing_router.get('/:_id', function (req, res) {
                         "<div class=\x22container px-4 px-lg-5 my-5\x22>"+
                             "<div class=\x22row gx-4 gx-lg-5 align-items-center\x22>"+
                                 "<div class=\x22col-md-6\x22>"+
-                                "<a href=\x22../webxr/"+ sceneResponse.short_id + "\x22>" +
+                                picLink +
+                                
                                 "<img class=\x22img-fluid\x22 src=\x22"+postcardImages[0]+"\x22 alt=\x22...\x22 /></a>"+
                                 audioHtml +
                                 // "<img class=\x22card-img-top mb-5 mb-md-0\x22 src=\x22"+postcard1+"\x22 alt=\x22...\x22 />"+
@@ -3349,7 +3375,8 @@ landing_router.get('/:_id', function (req, res) {
 
                                     platformButtons +
                                     sceneEditButton + 
-                                    vttButton +
+                                    "<a href=\x22https://smxr.net/qrcode/" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22mx-auto btn btn-xl btn-primary \x22> QR Code</a>"+
+                                    // vttButton +
                                     "</div>"+
                                     
                                     "<div class=\x22d-flex\x22>"+

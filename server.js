@@ -6450,7 +6450,7 @@ app.get('/uscenes/:_id',  requiredAuthentication, usercheck, function (req, res)
     }
     (async () => {
         try {
-            const sort = { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 };
+            const sort = { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneUnityWebOK: 1, sceneShareWithPublic: 1 };
             const scenes = await RunDataQuery("scenes","find",query,null,sort);
             res.send(scenes);
         } catch (e) {
@@ -6466,7 +6466,7 @@ app.post('/uscenes/',  requiredAuthentication, usercheck, function (req, res) { 
     (async () => {
         try {
             const query = { "sceneAppName" : req.body.appName};
-            const sort = { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 };
+            const sort = { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneUnityWebOK: 1, sceneShareWithPublic: 1 };
             const scenes = await RunDataQuery("scenes","find",query,null,sort);
             res.send(scenes);
         } catch (e) {
@@ -6485,7 +6485,7 @@ app.post('/appscenes/',  requiredAuthentication, function (req, res) { //get sce
     (async () => {
         try {
             const query = { "sceneDomain" : req.body.sceneDomain};
-            const sort = { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneWebGLOK: 1, sceneShareWithPublic: 1 };
+            const sort = { sceneTitle: 1, short_id: 1, sceneLastUpdate: 1, sceneDomain: 1, userName: 1, user_id: 1, sceneAndroidOK: 1, sceneIosOK: 1, sceneWindowsOK: 1, sceneUnityWebOK: 1, sceneShareWithPublic: 1 };
             const scenes = await RunDataQuery("scenes","find",query,null,sort);
             res.send(scenes);
         } catch (e) {
@@ -6836,7 +6836,7 @@ app.get('/available_domain_scenes/:domain',  function (req, res) { //public scen
                                 sceneCategory: scene.sceneCategory,
                                 sceneAlias: scene.sceneAlias,
                                 sceneTags: scene.sceneTags,
-                                sceneWebGLOK: scene.sceneWebGLOK,
+                                sceneUnityWebOK: scene.sceneUnityWebOK,
                                 sceneAndroidOK: scene.sceneAndroidOK,
                                 sceneIosOK: scene.sceneIosOK,
                                 sceneWindowsOK: scene.sceneWindowsOK,
@@ -6911,7 +6911,7 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
             } else if (req.params.platform_id == "3") {
                 platformString = "sceneIosOK";
             } else if (req.params.platform_id == "4") {
-                platformString = "sceneWebGLOK";
+                platformString = "sceneUnityWebOK";
             }
             if (req.params.domain == "servicemedia.net") { //guest query?  show all public scenes for servicemedia
                 query = {$and: [{ [platformString]: true}, {sceneShareWithPublic: true }, {sceneStickyness: { $lt: 4 }}]};
@@ -6961,7 +6961,7 @@ app.get('/available_domain_scenes/:domain/:user_id/:platform_id',  requiredAuthe
                         sceneAndroidOK: scene.sceneAndroidOK,
                         sceneIosOK: scene.sceneIosOK,
                         sceneWindowsOK: scene.sceneWindowsOK,
-                        sceneWebGLOK: scene.sceneWebGLOK,
+                        sceneUnityWebOK: scene.sceneUnityWebOK,
                         sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
                         sceneOwner: scene.userName ? "" : scene.userName,
                         scenePostcardQuarter: urlQuarter,
@@ -7024,7 +7024,7 @@ app.get('/publicscenes', async (req, res) => { //works to put async in the route
     
     const scenes = sampleScenes(data,30);
     console.log("gots public scenes" + scenes.length );
-    for (const scene of scenes) { 
+    for (let scene of scenes) { 
       if (scene.scenePostcards != null && scene.scenePostcards.length > 0 && scene.scenePostcards[0] != undefined) {
         
         try {
@@ -7045,10 +7045,17 @@ app.get('/publicscenes', async (req, res) => { //works to put async in the route
         //   var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000);
           // console.log("tyryna get mibno urls... " + urlHalf);
           var tempOwnerName = "test"
+          if (scene.sceneEnabledClientTypes == null || scene.sceneEnabledClientTypes == undefined) {
+            scene.sceneEnabledClientTypes = {};
+            scene.sceneEnabledClientTypes.aframeWeb = true;
+            scene.sceneEnabledClientTypes.pixiWeb = false;
+            scene.sceneEnabledClientTypes.unityWeb = false;
+          }
           var availableScene = {
-              sceneWindowsOK: scene.sceneWindowsOK,
-              sceneAndroidOK: scene.sceneAndroidOK,
-              sceneIosOK: scene.sceneIosOK,
+            //   sceneWindowsOK: scene.sceneWindowsOK,
+            //   sceneAndroidOK: scene.sceneAndroidOK,
+            //   sceneIosOK: scene.sceneIosOK,
+                sceneEnabledClientTypes: scene.sceneEnabledClientTypes,
               sceneDomain: scene.sceneDomain,
               sceneTitle: scene.sceneTitle,
               sceneKey: scene.short_id,
@@ -7451,6 +7458,7 @@ app.post('/clone_scene', requiredAuthentication, function (req,res) {
                 sceneScatterMeshes : scene.sceneScatterMeshes != null ? scene.sceneScatterMeshes : false,
                 sceneScatterMeshLayers : scene.sceneScatterMeshLayers != null ? scene.sceneScatterMeshLayers : {},
                 sceneScatterObjectLayers : scene.sceneScatterObjectLayers != null ? scene.sceneScatterObjectLayers : {},
+                sceneEnabledClientTypes : scene.sceneEnabledClientTypes != null ? scene.sceneEnabledClientTypes : {},
                 sceneScatterObjects : scene.sceneScatterObjects != null ? scene.sceneScatterObjects : false,
                 sceneScatterOffset : scene.sceneScatterOffset != null ? scene.sceneScatterOffset : "",
                 sceneShowViewportMeshes : scene.sceneShowViewportMeshes != null ? scene.sceneShowViewportMeshes : false,
@@ -7628,7 +7636,7 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
     console.log(req.params._id);
     var lastUpdateTimestamp = Date.now();
     var o_id = ObjectId.createFromHexString(req.body._id);   
-    console.log('path requested : ' + req.body._id);
+    console.log('path requested : ' + req.body._id + " enabledClientTypes " + JSON.stringify(req.body.sceneEnabledClientTypes));
     
     (async () => {
       try {
@@ -7659,10 +7667,19 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
           sceneCameraMode : req.body.sceneCameraMode != null ? req.body.sceneCameraMode : "First Person",
           sceneDebugMode : req.body.sceneDebugMode != null ? req.body.sceneDebugMode : "",
           sceneUseThreeDeeText : req.body.sceneUseThreeDeeText != null ? req.body.sceneUseThreeDeeText : false,
-          sceneAndroidOK : req.body.sceneAndroidOK != null ? req.body.sceneAndroidOK : false,
-          sceneIosOK : req.body.sceneIosOK != null ? req.body.sceneIosOK : false,
-          sceneWindowsOK : req.body.sceneWindowsOK != null ? req.body.sceneWindowsOK : false,
-          sceneWebGLOK : req.body.sceneWebGLOK != null ? req.body.sceneWebGLOK : false,
+
+        sceneEnabledClientTypes : req.body.sceneEnabledClientTypes != null ? req.body.sceneEnabledClientTypes : {},
+            // sceneAframeOK : req.body.sceneAframeOK != null ? req.body.sceneAframeOK : true, //default this one on
+            // sceneVTTOK : req.body.sceneVTTOK != null ? req.body.sceneVTTOK : false,
+            // sceneBabylonOK : req.body.sceneBabylonOK != null ? req.body.sceneBabylonOK : false,
+            // sceneThreeOK : req.body.sceneThreeOK != null ? req.body.sceneThreeOK : false,
+            // sceneUnityWebOK : req.body.sceneUnityWebOK != null ? req.body.sceneUnityWebOK : false,
+            // sceneUnityAndroidOK : req.body.sceneUnityAndroidOK != null ? req.body.sceneUnityAndroidOK : false,
+            // sceneUnityIosOK : req.body.sceneUnityIosOK != null ? req.body.sceneUnityIosOK : false,
+            // sceneUnityWindowsOK : req.body.sceneUnityWindowsOK != null ? req.body.sceneUnityWindowsOK : false,
+            // sceneUnityMacOK : req.body.sceneUnityMacOK != null ? req.body.sceneUnityMacOK : false,
+            // sceneUnityLinuxOK : req.body.sceneUnityLinuxOK != null ? req.body.sceneUnityLinuxOK : false,
+        // sceneUnityMacOK : req.body.sceneUnityMacOK != null ? req.body.sceneUnityMacOK : false,
           sceneLocationTracking : req.body.sceneLocationTracking != null ? req.body.sceneLocationTracking : false,
           sceneShowAds : req.body.sceneShowAds != null ? req.body.sceneShowAds : false,
           sceneShareWithPublic : req.body.sceneShareWithPublic != null ? req.body.sceneShareWithPublic : false,

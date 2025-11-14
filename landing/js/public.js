@@ -68,6 +68,22 @@ function generateSuccessHTMLOutput(response) {
             descHtml = '<div >Description: ' + shuffledArray[i].sceneDescription + '</div><br>'
         }
 
+        buttons = "<a href=\x22/landing/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>"+
+                  "<a href=\x22/webxr/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebXR</a>"+
+                  "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/" +  shuffledArray[i].sceneKey + 
+                  "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Quest</a>";
+        
+        if (shuffledArray[i].sceneEnabledClientTypes != undefined) {
+          if (shuffledArray[i].sceneEnabledClientTypes.aframeWeb == false) {
+            buttons = "<a href=\x22/landing/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>";
+          }
+          if (shuffledArray[i].sceneEnabledClientTypes.pixiWeb == true) {
+            buttons = buttons + "<a href=\x22/vtt/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Pixi VTT</a>";
+          }
+          if (shuffledArray[i].sceneEnabledClientTypes.unityWeb == true) {
+            buttons = buttons + "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Unity Web</a>";
+          }
+        }
            
         html = html + "<div class=\x22col\x22>"+
           "<div class=\x22card shadow-sm\x22>"+
@@ -81,10 +97,14 @@ function generateSuccessHTMLOutput(response) {
               "<p class=\x22card-text\x22><a href=\x22http://"+shuffledArray[i].sceneDomain+"\x22>"+shuffledArray[i].sceneDomain+"</a></p>"+
               "<div class=\x22d-flex justify-content-between align-items-center\x22>"+
                 "<div class=\x22btn-group\x22>"+
-                  "<a href=\x22/landing/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>"+
-                  "<a href=\x22/webxr/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebXR</a>"+
-                  "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Quest</a>"+
-                  "<a href=\x22/vtt/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>VTT</a>"+
+
+                  buttons +
+
+                  // "<a href=\x22/landing/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>"+
+                  // "<a href=\x22/webxr/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebXR</a>"+
+                  // "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Quest</a>"+
+                  
+                  // "<a href=\x22/vtt/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>VTT</a>"+
                   // "<a href=\x22https://smxr.net/qrcode/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>QR Code</a>"+
                 "</div>"+
                 // "<small class=\x22text-body-secondary\x22>9 mins</small>"+

@@ -1033,7 +1033,7 @@ unity_router.get("/unity/:id", function (req, res) { //redirect to unity
             const query = {"short_id" : req.params.id};
             const scene = await RunDataQuery("scenes", "findOne", query);
             saveTraffic(req, scene.sceneDomain, scene.short_id);
-            if (scene.sceneWebGLOK) { //if webgl is enabled for scene
+            if (scene.sceneUnityWebOK) { //if webgl is enabled for scene
                 let sceneUnityWebDomain = "https://mvmv.us"; 
                 const appquery = {"appdomain": scene.sceneDomain};
                 const app = await RunDataQuery("apps", "findOne", appquery);

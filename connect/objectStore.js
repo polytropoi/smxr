@@ -261,16 +261,16 @@ export async function PutObject(bucket, key, body) {
           caught instanceof S3ServiceException &&
           caught.name === "EntityTooLarge"
         ) {
-          console.error(
-            `Error from S3 while uploading object to ${bucketName}. \
+          console.error(chalk.red(
+            `Error from S3 while uploading object to ${key}. \
     The object was too large. To upload objects larger than 5GB, use the S3 console (160GB max) \
     or the multipart upload API (5TB max).`,
-          );
+          ));
           
         } else if (caught instanceof S3ServiceException) {
-          console.error(
-            `Error from S3 while uploading object to ${bucketName}.  ${caught.name}: ${caught.message}`,
-          );
+          console.error(chalk.red(
+            `Error from S3 while uploading object to ${key}.  ${caught.name}: ${caught.message}`,
+          ));
         } else {
           throw caught;
         }
@@ -294,11 +294,11 @@ export async function CopyObject(targetBucket, copySource, key) {
             return data;
         } catch (error) {
             if (error.name === 'NotFound') {
-                console.log(`File does not exist: ${filePath}`);
+                console.log(chalk.magenta(`File does not exist: ${key}`));
                 // return { exists: false, error: null };
                 return error;
             }
-            console.error(`Error copying: ${error}`);
+            console.error(chalk.red(`Error copying: ${error}`));
             // return { exists: false, error };
             return error;
         }
