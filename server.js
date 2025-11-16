@@ -7016,65 +7016,97 @@ app.get('/publicscenes', async (req, res) => { //works to put async in the route
       }
       return arr;
     };
-    const sampleScenes = ([...arr], n = 1) => shuffleArray(arr).slice(0, n);
 
-    const query = {$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}]};
-    // const data = await db.collection("scenes").find({$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}]}).toArray();
-    const data = await RunDataQuery ("scenes","find",query);
-    
-    const scenes = sampleScenes(data,30);
-    console.log("gots public scenes" + scenes.length );
-    for (let scene of scenes) { 
-      if (scene.scenePostcards != null && scene.scenePostcards.length > 0 && scene.scenePostcards[0] != undefined) {
+    try {
+
+        const sampleScenes = ([...arr], n = 1) => shuffleArray(arr).slice(0, n);
+
+        const query = {$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}]};
+        // const data = await db.collection("scenes").find({$and: [{sceneShareWithPublic: true}, {sceneStickyness: {$lt: 4}}]}).toArray();
+        const data = await RunDataQuery ("scenes","find",query);
         
-        try {
-          let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
-          var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //? still confused w/ mongojs driver?
-          const query = {"_id": oo_id};
-          const picture_item = await RunDataQuery("image_items", "findOne" , query); //TODO make this one call!!!!!
+        const scenes = sampleScenes(data,30);
+        // console.log("gots public scenes" + scenes.length );
+        let postcards = [];
 
-          var item_string_filename = JSON.stringify(picture_item.filename);
-          item_string_filename = item_string_filename.replace(/\"/g, "");
-          var item_string_filename_ext = getExtension(item_string_filename);
-          var expiration = new Date();
-          expiration.setMinutes(expiration.getMinutes() + 30);
-          var baseName = path.basename(item_string_filename, (item_string_filename_ext));
-          var halfName = 'half.' + baseName + item_string_filename_ext;
-        //   var quarterName = 'quarter.' + baseName + item_string_filename_ext;
-          var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
-        //   var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000);
-          // console.log("tyryna get mibno urls... " + urlHalf);
-          var tempOwnerName = "test"
-          if (scene.sceneEnabledClientTypes == null || scene.sceneEnabledClientTypes == undefined) {
-            scene.sceneEnabledClientTypes = {};
-            scene.sceneEnabledClientTypes.aframeWeb = true;
-            scene.sceneEnabledClientTypes.pixiWeb = false;
-            scene.sceneEnabledClientTypes.unityWeb = false;
-          }
-          var availableScene = {
-            //   sceneWindowsOK: scene.sceneWindowsOK,
-            //   sceneAndroidOK: scene.sceneAndroidOK,
-            //   sceneIosOK: scene.sceneIosOK,
-                sceneEnabledClientTypes: scene.sceneEnabledClientTypes,
-              sceneDomain: scene.sceneDomain,
-              sceneTitle: scene.sceneTitle,
-              sceneKey: scene.short_id,
-              sceneDescription: scene.sceneDescription,
-              sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-              sceneOwner: tempOwnerName,
-              scenePostcardHalf: urlHalf
-            //   scenePostcardQuarter: urlQuarter
-          };
-          availableScenesResponse.availableScenes.push(availableScene);
+        for (let scene of scenes) { 
+            if (scene.scenePostcards != null && scene.scenePostcards.length > 0 && scene.scenePostcards[0] != undefined) {
+                        
+                let postcardIndex = getRandomInt(0, scene.scenePostcards.length - 1);
+                var oo_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //? still confused w/ mongojs driver?
+                postcards.push(oo_id);
+                // const query = {"_id": oo_id};
+                // const picture_item = await RunDataQuery("image_items", "findOne" , query); //TODO make this one call!!!!!
+
+                // var item_string_filename = JSON.stringify(picture_item.filename);
+                // item_string_filename = item_string_filename.replace(/\"/g, "");
+                // var item_string_filename_ext = getExtension(item_string_filename);
+                // var expiration = new Date();
+                // expiration.setMinutes(expiration.getMinutes() + 30);
+                // var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                // var halfName = 'half.' + baseName + item_string_filename_ext;
+                // //   var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+                // var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000);
+                // //   var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000);
+                // // console.log("tyryna get mibno urls... " + urlHalf);
+                var tempOwnerName = "test"
+                if (scene.sceneEnabledClientTypes == null || scene.sceneEnabledClientTypes == undefined) {
+                    scene.sceneEnabledClientTypes = {};
+                    scene.sceneEnabledClientTypes.aframeWeb = true;
+                    scene.sceneEnabledClientTypes.pixiWeb = false;
+                    scene.sceneEnabledClientTypes.unityWeb = false;
+                }
+                var availableScene = {
+                    //   sceneWindowsOK: scene.sceneWindowsOK,
+                    //   sceneAndroidOK: scene.sceneAndroidOK,
+                    //   sceneIosOK: scene.sceneIosOK,
+                    sceneEnabledClientTypes: scene.sceneEnabledClientTypes,
+                    sceneDomain: scene.sceneDomain,
+                    sceneTitle: scene.sceneTitle,
+                    sceneKey: scene.short_id,
+                    sceneDescription: scene.sceneDescription,
+                    sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+                    sceneOwner: tempOwnerName,
+                    scenePostcardID: scene.scenePostcards[postcardIndex].toString(),
+                    scenePostcardHalf: urlHalf
+                    //   scenePostcardQuarter: urlQuarter
+                };
+                // console.log("postcard id is " + scene.scenePostcards[postcardIndex]);
+                availableScenesResponse.availableScenes.push(availableScene);
+                
+            }
+        }
+            const postcardquery = {"_id": {$in: postcards}};
+            const picture_items = await RunDataQuery("image_items", "find" , postcardquery); //TODO make this one call!!!!!
+            for (let i = 0; i < picture_items.length; i++) {
+                var item_string_filename = JSON.stringify(picture_items[i].filename);
+                item_string_filename = item_string_filename.replace(/\"/g, "");
+                var item_string_filename_ext = getExtension(item_string_filename);
+                var expiration = new Date();
+                expiration.setMinutes(expiration.getMinutes() + 30);
+                var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                var halfName = 'half.' + baseName + item_string_filename_ext;
+                //   var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+                var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_items[i].userID + "/pictures/" + picture_items[i]._id + "." + halfName, 6000);
+                // console.log("looking for postcardID " + picture_items[i]._id );
+                const sceneIndex = availableScenesResponse.availableScenes.findIndex(ascene => ascene.scenePostcardID === picture_items[i]._id.toString());
+                if (sceneIndex != -1) {
+                    availableScenesResponse.availableScenes[sceneIndex].scenePostcardHalf = urlHalf;
+                } else {
+                    // console.log("postgcard not found!");
+                }
+            }
+              res.send(availableScenesResponse); 
+                //   var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000);
+                // console.log("tyryna get mibno urls... " + urlHalf);
+
           // console.log("pushing available scene " + availableScene.sceneTitle);
+        
         } catch (e) {
           // res.send(e);
           console.log("public scenes error: "+ e);
         }
-    }
-  }
-//   console.log("availableScenesRsponse " + JSON.stringify(availableScenesResponse));
-  res.send(availableScenesResponse); 
+
 
 });
 

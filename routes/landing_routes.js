@@ -3260,7 +3260,7 @@ landing_router.get('/:_id', function (req, res) {
                             }
                             if (sceneResponse.sceneEnabledClientTypes.pixiWeb == true) {
                                 platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22> Virtual Table Top </a>" + platformButtons;
-                                picLink = "<a href=\x22../webxr/"+ sceneResponse.short_id + "\x22>";
+                                picLink = "<a href=\x22../vtt/"+ sceneResponse.short_id + "\x22>";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.unityWeb == true) {
                                 platformButtons = platformButtons + "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22mx-auto btn btn-xl btn-primary float-right\x22>Unity Web</a>";

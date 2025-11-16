@@ -13571,6 +13571,12 @@ function getAllPeople() {
                                         "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22unityWeb\x22 id=\x22sceneEnabledClientTypes.unityWeb\x22 autocomplete=\x22off\x22> Unity Web " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22mapboxWeb\x22 id=\x22sceneEnabledClientTypes.mapboxWeb\x22 autocomplete=\x22off\x22> Mapbox " +
+                                    "</label>" +
+                                    "<label class=\x22btn btn-light\x22>" +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22cesiumWeb\x22 id=\x22sceneEnabledClientTypes.cesiumWeb\x22 autocomplete=\x22off\x22> Cesium " +
+                                    "</label>" +
+                                    "<label class=\x22btn btn-light\x22>" +
                                         "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22babylonWeb\x22 id=\x22sceneEnabledClientTypes.babylonWeb\x22 autocomplete=\x22off\x22> Babylon Web " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
@@ -17552,6 +17558,8 @@ function getAllPeople() {
                         sceneEnabledClientTypes.aframeWeb = document.getElementById('sceneEnabledClientTypes.aframeWeb').checked;
                         sceneEnabledClientTypes.pixiWeb = document.getElementById('sceneEnabledClientTypes.pixiWeb').checked;
                         sceneEnabledClientTypes.unityWeb = document.getElementById('sceneEnabledClientTypes.unityWeb').checked;
+                        sceneEnabledClientTypes.mapboxWeb = document.getElementById('sceneEnabledClientTypes.mapboxWeb').checked;
+                        sceneEnabledClientTypes.cesiumWeb = document.getElementById('sceneEnabledClientTypes.cesiumWeb').checked;
                         sceneEnabledClientTypes.babylonWeb = document.getElementById('sceneEnabledClientTypes.babylonWeb').checked;
                         sceneEnabledClientTypes.threeWeb = document.getElementById('sceneEnabledClientTypes.threeWeb').checked;
                         sceneEnabledClientTypes.unityIOS = document.getElementById('sceneEnabledClientTypes.unityIOS').checked;
