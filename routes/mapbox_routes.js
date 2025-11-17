@@ -2,7 +2,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const express = require("express");
-const webxr_router = express.Router();
+const mapbox_router = express.Router();
 const entities = require("entities");
 // const async = require('async'); ///goodbye to you my confusing friend...
 
@@ -59,7 +59,7 @@ function UppercaseFirst(s) {
         }
     };
     
-webxr_router.get("/test", function (req, res) {
+mapbox_router.get("/test", function (req, res) {
     res.send("OK!");
 });    
 
@@ -83,7 +83,7 @@ function HexToRgbValues (c) {
 
  
 ////////// test / example of aframe response
-webxr_router.get('/simple_aframe', function (req, res) { 
+mapbox_router.get('/simple_aframe', function (req, res) { 
 
     let response =
         "<!DOCTYPE html> <html lang=\x22en\x22>" +
@@ -105,11 +105,11 @@ webxr_router.get('/simple_aframe', function (req, res) {
     }
 );
 
-////////////////////PRIMARY /WEBXR ROUTE  e.g. /webxr/<short_id> ///////////////////
-webxr_router.get('/:_id', function (req, res) { 
+////////////////////PRIMARY /mapbox ROUTE  e.g. /mapbox/<short_id> ///////////////////
+mapbox_router.get('/:_id', function (req, res) { 
     
     var reqstring = entities.decodeHTML(req.params._id);
-    console.log("NEW WEBXR SCENE REQUEST : " + reqstring);
+    console.log("NEW mapbox SCENE REQUEST : " + reqstring);
     if (!reqstring || reqstring == undefined || reqstring == '') {
         return null;
     }
@@ -212,7 +212,7 @@ webxr_router.get('/:_id', function (req, res) {
     let styleIncludes = "";
     let synthScripts = "";
     let streamPrimaryAudio = false;
-    let audioControl = "<script type=\x22module\x22 src=\x22../main/src/component/audio_control.js\x22 defer=\x22defer\x22></script>";
+    // let audioControl = "<script type=\x22module\x22 src=\x22../main/src/component/audio_control.js\x22 defer=\x22defer\x22></script>";
     let primaryAudioScript = "";
     let primaryAudioParams = "";
     let primaryAudioEntity = "";
@@ -250,8 +250,8 @@ webxr_router.get('/:_id', function (req, res) {
     let ts = Date.now();
     let contentUtils = ""; 
     // let contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content-utils.js?v=1\x22 defer=\x22defer\x22></script>"; 
-    let modObjex = "<script type=\x22module\x22 src=\x22../main/src/component/mod_objex.js\x22 defer=\x22defer\x22></script>"; 
-    let modModels = "<script type=\x22module\x22 src=\x22../main/src/component/mod_models.js\x22 defer=\x22defer\x22></script>"; 
+    // let modObjex = "<script type=\x22module\x22 src=\x22../main/src/component/mod_objex.js\x22 defer=\x22defer\x22></script>"; 
+    // let modModels = "<script type=\x22module\x22 src=\x22../main/src/component/mod_models.js\x22 defer=\x22defer\x22></script>"; 
     let modSplats = ""; 
     let videosphereAsset = "";
     let webcamAsset = "";
@@ -375,28 +375,28 @@ webxr_router.get('/:_id', function (req, res) {
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
-    let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+    // let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
-                        "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+    //                     "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
                        
-                        "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-                        // "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
+    //                     "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
+    //                     "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
+    //                     // "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
                                                
-                        "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
-                        "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                        "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
-                        // "\x22aframe-physics-system\x22: \x22../main/vendor/aframe/aframe-physics-system.min.js\x22,"+ 
-                        // "\x22Ammo\x22: \x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22,"+ 
-                        "\x22aframe-extras\x22: \x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22,"+ 
+    //                     "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+    //                     "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+    //                     "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
+    //                     // "\x22aframe-physics-system\x22: \x22../main/vendor/aframe/aframe-physics-system.min.js\x22,"+ 
+    //                     // "\x22Ammo\x22: \x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22,"+ 
+    //                     "\x22aframe-extras\x22: \x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22,"+ 
                         
                         
                         
-                        "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+    //                     "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
                         
-                        "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
-                        "}"+
-                    "}</script>";
+    //                     "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
+    //                     "}"+
+    //                 "}</script>";
 
     
     (async () => {
@@ -465,30 +465,30 @@ webxr_router.get('/:_id', function (req, res) {
                 for (let i = 0; i < sceneData.sceneTags.length; i++) { //not ideal, but it's temporary... //no it isn't
                     if (sceneData.sceneTags[i].toLowerCase().includes("spark") || sceneData.sceneTags[i].toLowerCase().includes("splat")) {    
                         
-                        importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+                    //     importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
-                        "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+                    //     "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
                        
-                        "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-                        "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
+                    //     "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
+                    //     "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
+                    //     "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
                         
-                        "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
-                        "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                        "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
-                        // "\x22aframe-physics-system\x22: \x22../main/vendor/aframe/aframe-physics-system.min.js\x22,"+ 
-                        // "\x22Ammo\x22: \x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22,"+ 
+                    //     "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                    //     "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                    //     "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
+                    //     // "\x22aframe-physics-system\x22: \x22../main/vendor/aframe/aframe-physics-system.min.js\x22,"+ 
+                    //     // "\x22Ammo\x22: \x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22,"+ 
                         
-                        "\x22aframe-extras\x22: \x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22,"+ 
+                    //     "\x22aframe-extras\x22: \x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22,"+ 
 
                         
-                        // "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
-                        // "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                        "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                    //     // "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                    //     // "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                    //     "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
                         
-                        "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
-                        "}"+
-                    "}</script>";
+                    //     "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
+                    //     "}"+
+                    // "}</script>";
                     }
 
                     // aframe-physics-system.min
@@ -573,39 +573,39 @@ webxr_router.get('/:_id', function (req, res) {
                         aframeScript = "<script src=\x22https://cdn.jsdelivr.net/gh/aframevr/aframe@edca48b2e71a0838690c7541fab5ede279def7a1/dist/aframe-master.min.js\x22></script>"; //ref 20231103 (integrated hands!)
                         threejsVersion = "175";
                     }
-                    if (sceneData.sceneTags[i].toLowerCase().includes("webgpu")) { 
-                                                // aframeScript = "";
-                       importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+                    // if (sceneData.sceneTags[i].toLowerCase().includes("webgpu")) { 
+                    //                             // aframeScript = "";
+                    //    importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
 
 
                        
-                            "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+                    //         "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
                        
-                        // "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-                        // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
+                    //     // "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
+                    //     // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
                             
-                            // "\x22aframe\x22: \x22https://cdn.jsdelivr.net/npm/aframe@1.7.1/dist/aframe-master.module.min.js\x22,"+
-                            "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
-                            "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
-                            "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.tsl.js\x22,"+
-                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/examples/jsm/\x22,"+
-                            "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
-                            "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                            "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                    //         // "\x22aframe\x22: \x22https://cdn.jsdelivr.net/npm/aframe@1.7.1/dist/aframe-master.module.min.js\x22,"+
+                    //         "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
+                    //         "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
+                    //         "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.tsl.js\x22,"+
+                    //         "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/examples/jsm/\x22,"+
+                    //         "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                    //         "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                    //         "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
                             
-                            "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+                  
+                    //         "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+                  
                         
-                            "}"+
-                        "}</script>"+
-                        "<script type=\x22module\x22>import AFRAME from 'aframe';"+
-                                                    "import { color, cos, float, mix, range, sin, time, uniform, uv, vec3, vec4, PI2 } from 'three/tsl';"+
-                        "</script>";
-                        troikaScript = "";
-                        particleScript = "";
-                        // aframeScript = "";
-                        // contentUtils = "<script type=\x22module\x22 ssrc=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
+                    //         "}"+
+                    //     "}</script>"+
+                    //     "<script type=\x22module\x22>import AFRAME from 'aframe';"+
+                    //                                 "import { color, cos, float, mix, range, sin, time, uniform, uv, vec3, vec4, PI2 } from 'three/tsl';"+
+                    //     "</script>";
+                    //     troikaScript = "";
+                    //     particleScript = "";
+                    //     // aframeScript = "";
+                    //     // contentUtils = "<script type=\x22module\x22 ssrc=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
                         
-                    }
+                    // }
                     
                 }
             }
@@ -704,54 +704,29 @@ webxr_router.get('/:_id', function (req, res) {
                     // console.log("sceneResponse.sceneLocations[i].eventData "+ sceneResponse.sceneLocations[i].eventData);
                     if ((sceneResponse.sceneLocationTracking != null && sceneResponse.sceneLocationTracking == true) || sceneResponse.sceneWebType == "AR Location Tracking") {  
                         if (sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //just to set scripts and restrict to location
-                            if (sceneResponse.sceneWebType == "AR Location Tracking") {
+                            // if (sceneResponse.sceneWebType == "Mapbox") {
+                            if (sceneResponse.sceneEnabledClientTypes.mapboxWeb) { //just location tracking, for any sceneWebType
                                 if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                                    locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict_ar position=\x220 2 -5\x22>"+
-                                        "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                                        "</a-entity>"+
-                                    "</a-entity>";
-                                    locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 ><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                                    // locationEntity = "<div id=\x22youAreHere\x22 location_restrict position=\x220 2 -5\x22>"+
+                                    //     "<div class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
+                                    //     "</div>"+
+                                    // "</div>";
+                                    // locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
                                 } else {
-                                    locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_ar position=\x220 2 -5\x22>"+
-                                        "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                                        "</a-entity>"+
-                                    "</a-entity>"; 
-                                    locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                                }
-                                geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                                locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
-                                var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                                locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                            } else if (sceneResponse.sceneWebType == "Model Viewer") { 
-                                console.log("sceneResponse.sceneLocations[i].eventData : " + sceneResponse.sceneLocations[i].eventData);
-                                if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                                geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                                locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
-                                var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                                locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                                }
-                            } else if (sceneResponse.sceneWebType == "Mapbox") { //just location tracking, for any sceneWebType
-                                if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                                    locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict position=\x220 2 -5\x22>"+
-                                        "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                                        "</a-entity>"+
-                                    "</a-entity>";
-                                    locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                                } else {
-                                    locationEntity = "<a-entity id=\x22youAreHere\x22 location_init position=\x220 2 -5\x22>"+
-                                        "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                                        "</a-entity>"+
-                                    "</a-entity>"; 
-                                    locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                                    // locationEntity = "<div id=\x22youAreHere\x22 location_init position=\x220 2 -5\x22>"+
+                                    //     "<div class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
+                                    //     "</div>"+
+                                    // "</div>"; 
+                                    // locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
                                 }
                             } else {
-                                console.log("tryna set geo loc " + sceneResponse.sceneLocations[i].eventData);
-                                if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                                    geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                                    locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
-                                    var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                                    locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                                }
+                                // console.log("tryna set geo loc " + sceneResponse.sceneLocations[i].eventData);
+                                // if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
+                                //     geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
+                                //     locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
+                                //     var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
+                                //     locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
+                                // }
                             }
                         }
                     }
@@ -759,26 +734,26 @@ webxr_router.get('/:_id', function (req, res) {
                         // let id = sceneResponse.sceneLocations[i]._id != undefined ? 
                         if (sceneResponse.sceneLocations[i].markerType == "poi") {
                             poiIndex++;
-                            if (sceneResponse.sceneWebType == "AR Location Tracking") {
-                                //TODO jack in models / objs here?
-                                geoEntities = geoEntities + "<a-entity look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
-                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><a-entity scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></a-entity></a-entity>";
+                            // if (sceneResponse.sceneWebType == "AR Location Tracking") {
+                            //     //TODO jack in models / objs here?
+                            //     geoEntities = geoEntities + "<div look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
+                            //     "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><div scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></div></div>";
                             
-                            } else if (sceneResponse.sceneWebType != "Mapbox") {
-                                geoEntities = geoEntities + "<a-entity look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
-                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><a-entity scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></a-entity></a-entity>";
-                                // console.log(geoEntities);
-                            } else {
+                            // } else if (sceneResponse.sceneWebType != "Mapbox") {
+                            //     geoEntities = geoEntities + "<div look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
+                            //     "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><div scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></div></div>";
+                            //     // console.log(geoEntities);
+                            // } else {
                                 //for mapbox just using aframe to pass data
-                                geoEntities = geoEntities + "<a-entity class=\x22geo poi\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
-                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></a-entity>";
+                                geoEntities = geoEntities + "<div class=\x22geo poi\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
+                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></div>";
                                 // console.log("mapbox geoEntities: " + geoEntities);
-                            }
+                            // }
                         } else {
                             if (sceneResponse.sceneLocations[i].modelID != null) {
                                 console.log("gotsa modelID at a geographic location " + sceneResponse.sceneLocations[i].modelID );
-                                geoEntities = geoEntities + "<a-entity class=\x22geo\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
-                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></a-entity>";
+                                geoEntities = geoEntities + "<div class=\x22geo\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
+                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></div>";
                             } else {
                                 console.log("modelID is null at this location"); 
                             }
@@ -849,7 +824,7 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                     if (sceneResponse.sceneLocations[i].markerType == "3D text") { //unused
                         threeDeeTextComponent = "<script src=\x22../main/src/component/aframe-text-geometry-component.min.js\x22></script>"; //TODO - these must all be arrays, like sceneModelLocations above!
-                        externalAssets = externalAssets + "<a-asset-item id=\x22optimerBoldFont\x22 src=\x22https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json\x22></a-asset-item>";
+                        externalAssets = externalAssets + "<div id=\x22optimerBoldFont\x22 src=\x22https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json\x22></div>";
                     }
                     if (sceneResponse.sceneLocations[i].markerType == "player") {
                         playerPosition = sceneResponse.sceneLocations[i].x + " " +  sceneResponse.sceneLocations[i].y + " " +  sceneResponse.sceneLocations[i].z;
@@ -973,97 +948,98 @@ webxr_router.get('/:_id', function (req, res) {
                         curvePoint.data = sceneResponse.sceneLocations[i].eventData;
                         curvePoints.push(curvePoint);
                     }
-                    if (sceneResponse.sceneLocations[i].markerType == "tunnel") {
-                        let scrollDirection = 'x';
-                        let scrollSpeed = .001;
-                        // let tunnelOrigin = sceneResponse.sceneLocations[i].x + " " + sceneResponse.sceneLocations[i].y + " " + sceneResponse.sceneLocations[i].z;
-                        let tunnelOrientation = "horizontal";
-                        if (sceneResponse.sceneLocations[i].eulery && sceneResponse.sceneLocations[i].eulery.toString() == "90") {
-                            tunnelOrientation = "vertical";
-                        } 
-                        if (sceneResponse.sceneLocations[i].eulerz && sceneResponse.sceneLocations[i].eulerz.toString() == "90") {
-                            tunnelOrientation = "sideways";
-                        } 
-                        if (sceneResponse.sceneLocations[i].eventData && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes('scroll y')) {
-                            scrollDirection = 'y';
-                        }
-                        if (sceneResponse.sceneLocations[i].eventData && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes('scroll -y')) {
-                            scrollDirection = '-y';
-                        }
-                        if (sceneResponse.sceneLocations[i].eventData && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes('scroll -x')) {
-                            scrollDirection = '-x';
-                        }
-                        if (sceneResponse.sceneLocations[i].eventData && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes('speed')) {
-                            const speedSplit = sceneResponse.sceneLocations[i].eventData.toLowerCase().split('~');
-                            if (speedSplit.length > 1) {
-                                scrollSpeed = speedSplit[1];
-                            } else {
-                                scrollSpeed = .001;
-                            }   
-                        }
-                        proceduralEntities = proceduralEntities + "<a-entity mod_tunnel=\x22init: true; tunnelOrientation: "+tunnelOrientation+"; tunnelOriginZ: "+sceneResponse.sceneLocations[i].z+"; tunnelOriginY: "+sceneResponse.sceneLocations[i].y+"; tunnelOriginX: "+sceneResponse.sceneLocations[i].x+"; scrollDirection: "+scrollDirection+"; scrollSpeed: "+scrollSpeed+"\x22></a-entity>";
-                    }
+                    // if (sceneResponse.sceneLocations[i].markerType == "tunnel") {
+                    //     let scrollDirection = 'x';
+                    //     let scrollSpeed = .001;
+                    //     // let tunnelOrigin = sceneResponse.sceneLocations[i].x + " " + sceneResponse.sceneLocations[i].y + " " + sceneResponse.sceneLocations[i].z;
+                    //     let tunnelOrientation = "horizontal";
+                    //     if (sceneResponse.sceneLocations[i].eulery && sceneResponse.sceneLocations[i].eulery.toString() == "90") {
+                    //         tunnelOrientation = "vertical";
+                    //     } 
+                    //     if (sceneResponse.sceneLocations[i].eulerz && sceneResponse.sceneLocations[i].eulerz.toString() == "90") {
+                    //         tunnelOrientation = "sideways";
+                    //     } 
+                    //     if (sceneResponse.sceneLocations[i].eventData && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes('scroll y')) {
+                    //         scrollDirection = 'y';
+                    //     }
+                    //     if (sceneResponse.sceneLocations[i].eventData && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes('scroll -y')) {
+                    //         scrollDirection = '-y';
+                    //     }
+                    //     if (sceneResponse.sceneLocations[i].eventData && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes('scroll -x')) {
+                    //         scrollDirection = '-x';
+                    //     }
+                    //     if (sceneResponse.sceneLocations[i].eventData && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes('speed')) {
+                    //         const speedSplit = sceneResponse.sceneLocations[i].eventData.toLowerCase().split('~');
+                    //         if (speedSplit.length > 1) {
+                    //             scrollSpeed = speedSplit[1];
+                    //         } else {
+                    //             scrollSpeed = .001;
+                    //         }   
+                    //     }
+                    //     proceduralEntities = proceduralEntities + "<div mod_tunnel=\x22init: true; tunnelOrientation: "+tunnelOrientation+"; tunnelOriginZ: "+sceneResponse.sceneLocations[i].z+"; tunnelOriginY: "+sceneResponse.sceneLocations[i].y+"; tunnelOriginX: "+sceneResponse.sceneLocations[i].x+"; scrollDirection: "+scrollDirection+"; scrollSpeed: "+scrollSpeed+"\x22></div>";
+                    // }
                     let scale = 1;
-                    if (sceneResponse.sceneLocations[i].markerObjScale && sceneResponse.sceneLocations[i].markerObjScale != undefined && sceneResponse.sceneLocations[i].markerObjScale != "" && sceneResponse.sceneLocations[i].markerObjScale != 0) {
-                        scale = sceneResponse.sceneLocations[i].markerObjScale;
-                    }
-                    if (sceneResponse.sceneLocations[i].markerType == "svg canvas fixed") {
-                        sceneTextLocations.push(sceneResponse.sceneLocations[i]);
-                        proceduralEntities = proceduralEntities + " <a-plane loadsvg=\x22description: "+sceneResponse.sceneLocations[i].description+"; eventdata: "+sceneResponse.sceneLocations[i].eventData+"; tags:  "+sceneResponse.sceneLocations[i].locationTags+"\x22 id=\x22svg_"+sceneResponse.sceneLocations[i].timestamp+
-                        "\x22 width=\x22"+scale+"\x22 height=\x22"+scale+"\x22 position=\x22"+sceneResponse.sceneLocations[i].x + " " + sceneResponse.sceneLocations[i].y + " " + zFix+"\x22></a-plane>";
-                    }
-                    if (sceneResponse.sceneLocations[i].markerType == "svg canvas billboard") {
-                        sceneTextLocations.push(sceneResponse.sceneLocations[i]);
-                    }
-                    if (sceneResponse.sceneLocations[i].markerType == "text") {
-                        sceneTextLocations.push(sceneResponse.sceneLocations[i]);
-                    }
-                    if (sceneResponse.sceneLocations[i].markerType == "svg fixed") {
-                        sceneTextLocations.push(sceneResponse.sceneLocations[i]);
+                    // if (sceneResponse.sceneLocations[i].markerObjScale && sceneResponse.sceneLocations[i].markerObjScale != undefined && sceneResponse.sceneLocations[i].markerObjScale != "" && sceneResponse.sceneLocations[i].markerObjScale != 0) {
+                    //     scale = sceneResponse.sceneLocations[i].markerObjScale;
+                    // }
+                    // if (sceneResponse.sceneLocations[i].markerType == "svg canvas fixed") {
+                    //     sceneTextLocations.push(sceneResponse.sceneLocations[i]);
+                    //     proceduralEntities = proceduralEntities + " <a-plane loadsvg=\x22description: "+sceneResponse.sceneLocations[i].description+"; eventdata: "+sceneResponse.sceneLocations[i].eventData+"; tags:  "+sceneResponse.sceneLocations[i].locationTags+"\x22 id=\x22svg_"+sceneResponse.sceneLocations[i].timestamp+
+                    //     "\x22 width=\x22"+scale+"\x22 height=\x22"+scale+"\x22 position=\x22"+sceneResponse.sceneLocations[i].x + " " + sceneResponse.sceneLocations[i].y + " " + zFix+"\x22></a-plane>";
+                    // }
+                    // if (sceneResponse.sceneLocations[i].markerType == "svg canvas billboard") {
+                    //     sceneTextLocations.push(sceneResponse.sceneLocations[i]);
+                    // }
+                    // if (sceneResponse.sceneLocations[i].markerType == "text") {
+                    //     sceneTextLocations.push(sceneResponse.sceneLocations[i]);
+                    // }
+                    // if (sceneResponse.sceneLocations[i].markerType == "svg fixed") {
+                    //     sceneTextLocations.push(sceneResponse.sceneLocations[i]);
 
-                    }
-                    if (sceneResponse.sceneLocations[i].markerType == "svg billboard") {
-                        sceneTextLocations.push(sceneResponse.sceneLocations[i]);
-                    }
+                    // }
+                    // if (sceneResponse.sceneLocations[i].markerType == "svg billboard") {
+                    //     sceneTextLocations.push(sceneResponse.sceneLocations[i]);
+                    // }
                     // console.log(JSON.stringify(sceneResponse.sceneLocations[i]));
                 } //end location loop
                 // console.log("sceneResponse " + JSON.stringify(sceneResponse));
                 var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations)).toString("base64");
-                loadLocations = "<a-entity location_data id=\x22locationData\x22 data-locations='"+buff+"'></a-entity>";
+                loadLocations = "<div id=\x22locationData\x22 data-locations='"+buff+"'></div>";
             } else {
                 var buff = Buffer.from(JSON.stringify([])).toString("base64");
-                loadLocations = "<a-entity location_data id=\x22locationData\x22 data-locations='"+buff+"'></a-entity>";
+                loadLocations = "<div id=\x22locationData\x22 data-locations='"+buff+"'></div>";
             } //end locations
 
             ///scene types/////////
             if (sceneData.sceneWebType == 'AR Location Tracking') {
 
-                geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                ARScript = "<script src=\x22https://raw.githack.com/MediaComem/LBAR.js/main/dist/lbar-v0.2.min.js\x22></script>";
-                locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
-                // locationScripts = "<script>window.onload = () => { navigator.geolocation.getCurrentPosition((position) => {"+ //put this where?
-                // "document.querySelector('a-text').setAttribute('"+geoEntity+"', `latitude: ${position.coords.latitude}; longitude: ${position.coords.longitude};`)});}</script>";
-                ARSceneArg = "gps-position webxr=\x22referenceSpaceType: unbounded; requiredFeatures: unbounded;\x22 xr-mode-ui=\x22enabled: false\x22 arjs=\x22sourceType: webcam; debugUIEnabled: false;\x22";
-                cameraRigEntity = "<a-entity id=\x22player\x22 position=\x220 0 0\x22 camera pitch-roll-look-controls>"+ 
-                    "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22equipPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 -.5 -.65\x22"+ //these seemed to need actual geometry to get a worldspace loc
-                    "material=\x22opacity: 0\x22></a-entity>"+
-                    "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -1\x22"+
-                    "material=\x22opacity: 0\x22></a-entity>"+
-                    "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -3\x22"+
-                    "material=\x22opacity: 0\x22></a-entity>"+
-                "</a-entity>";
-                locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_ar position=\x220 2 -5\x22>"+
-                    "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                    "</a-entity>"+
-                "</a-entity>";
-                locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                // geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
+                // ARScript = "<script src=\x22https://raw.githack.com/MediaComem/LBAR.js/main/dist/lbar-v0.2.min.js\x22></script>";
+                // // locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
+                // locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
+                // // locationScripts = "<script>window.onload = () => { navigator.geolocation.getCurrentPosition((position) => {"+ //put this where?
+                // // "document.querySelector('a-text').setAttribute('"+geoEntity+"', `latitude: ${position.coords.latitude}; longitude: ${position.coords.longitude};`)});}</script>";
+                // ARSceneArg = "gps-position geomap=\x22referenceSpaceType: unbounded; requiredFeatures: unbounded;\x22 xr-mode-ui=\x22enabled: false\x22 arjs=\x22sourceType: webcam; debugUIEnabled: false;\x22";
+                // cameraRigEntity = "<div id=\x22player\x22 position=\x220 0 0\x22 camera pitch-roll-look-controls>"+ 
+                //     "<div class=\x22hiddenPlaceholders\x22 id=\x22equipPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 -.5 -.65\x22"+ //these seemed to need actual geometry to get a worldspace loc
+                //     "material=\x22opacity: 0\x22></div>"+
+                //     "<div class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -1\x22"+
+                //     "material=\x22opacity: 0\x22></div>"+
+                //     "<div class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -3\x22"+
+                //     "material=\x22opacity: 0\x22></div>"+
+                // "</div>";
+                // locationEntity = "<div id=\x22youAreHere\x22 location_init_ar position=\x220 2 -5\x22>"+
+                //     "<div class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
+                //     "</div>"+
+                // "</div>";
+                // locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
                             
             } else if (sceneData.sceneWebType == 'Mapbox') { 
                 
                 dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
                 locationButton = "<div id=\x22loc_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
                 if (!sceneData.sceneTextUseModals) {
-                    //renderPanel = "<a-entity visible=\x22false\x22 render_canvas id=\x22renderCanvas\x22 look-at=\x22#player\x22 geometry=\x22primitive: plane; width:1; height:1;\x22 scale=\x221 1 1\x22 position=\x220 3.5 -.25\x22 material=\x22shader: html; transparent: true; width:1024; height:1024; fps: 10; target: #renderPanel;\x22></a-entity>\n";
+                    //renderPanel = "<div visible=\x22false\x22 render_canvas id=\x22renderCanvas\x22 look-at=\x22#player\x22 geometry=\x22primitive: plane; width:1; height:1;\x22 scale=\x221 1 1\x22 position=\x220 3.5 -.25\x22 material=\x22shader: html; transparent: true; width:1024; height:1024; fps: 10; target: #renderPanel;\x22></div>\n";
                 }
                 transportButtons = "<div class=\x22transport_buttons\x22><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
                 "<div class=\x22transport_play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
@@ -1071,17 +1047,19 @@ webxr_router.get('/:_id', function (req, res) {
 
                 "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>";
                 geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>" +
+                "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js\x22></script>"+
+                "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>"+
+                "<script src=\x22../main/js/mapbox/mapbox_main.js\x22></script>";
                 
                 // "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js\x22></script>"+
                 // "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>";
-                "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js\x22></script>"+
-                "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>";
-
-                locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
+                    // <script src='https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js'></script>
+                // locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
+                // locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
                 
-                cameraRigEntity = "<a-camera id=\x22player\x22 look-controls-enabled=\x22false\x22 listen-from-camera gps-camera rotation-reader><a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
-                // "<a-entity id=\x22player\x22 networked=\x22template:#avatar-template;attachTemplateToLocal:false;\x22 spawn-in-circle=\x22radius:3;\x22>" + //ENABLE LATER
-                        "</a-camera>";
+                // cameraRigEntity = "<a-camera id=\x22player\x22 look-controls-enabled=\x22false\x22 listen-from-camera gps-camera rotation-reader><div id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></div>"+
+                // "<div id=\x22player\x22 networked=\x22template:#avatar-template;attachTemplateToLocal:false;\x22 spawn-in-circle=\x22radius:3;\x22>" + //ENABLE LATER
+                        // "</a-camera>";
                 let doBuildings = false;
                 let doTerrain = false;        
                 if (sceneData.sceneTags != null && sceneData.sceneTags.includes("buildings")) {
@@ -1090,8 +1068,8 @@ webxr_router.get('/:_id', function (req, res) {
                 if (sceneData.sceneTags != null && sceneData.sceneTags.includes("terrain")) {
                     doTerrain = true;
                 }
-                locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_mapbox=\x22zoomLevel: "+sceneData.sceneMapZoom+"; doBuildings: "+doBuildings+"; doTerrain: "+doTerrain+"; mbid: "+process.env.MAPBOX_KEY+";\x22 position=\x220 2 -5\x22>"+
-                "</a-entity>";
+                locationEntity = "<div id=\x22youAreHere\x22 data-mapbox_init=\x22zoomLevel: "+sceneData.sceneMapZoom+"; doBuildings: "+doBuildings+"; doTerrain: "+doTerrain+"; mbid: "+process.env.MAPBOX_KEY+";\x22 position=\x220 2 -5\x22>"+
+                "</div>";
             
                 mapButtons = "<div id=\x22button_left_1\x22 style=\x22float: left; margin: 10px 10px;\x22 class=\x22\x22 onclick=\x22ToggleDragPan()\x22><i class=\x22fas fa-level-down-alt fa-2x\x22></i></div>"+
                 "<div id=\x22button_left_2\x22 class=\x22\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22ZoomOut()\x22 class=\x22tooltip\x22><i class=\x22fas fa-search-minus  fa-2x\x22></i><span class=\x22tooltiptext\x22></span></div>"+
@@ -1107,312 +1085,10 @@ webxr_router.get('/:_id', function (req, res) {
                             "<option>Light</option>" +
                     "</select>" +
                 "</div>";
-            } else { //"sceneWebType == "Default or AFrame"
-                                
-                joystickContainer = "<div id=\x22joystickContainer\x22 class=\x22JoystickRegionUI\x22 style=\x22z-index: 1000; visibility: hidden\x22>" + //initialized in navigation / content-utils
-                "<div class=\x22JoystickButtonUI\x22 style=\x22width: 128px; opacity:0.50;\x22>" +
-                    "<img src=\x22/css/joystick-base.png\x22/>" +
-                    "<div id=\x22joystickEl\x22 style=\x22position: absolute; left:32px; top:32px;\x22>" +
-                    "<img src=\x22/css/joystick-red.png\x22/>" +
-                    "</div>" +
-                    "</div>" +
-                "</div>";
-               
-                wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: 5; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:.1;\x22";
-                let physicsMod = "";
-                
-                if (useSimpleNavmesh) {
-                    wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: 5; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:.1;\x22";                 
-                } 
-                
-                if (physicsScripts.length > 0 && !useSuperHands && !useStarterKit) { //inject into player for collider
-                    physicsMod = "geometry=\x22primitive: cylinder; height: 2; radius: 0.5;\x22 ammo-body=\x22type: kinematic;\x22 ammo-shape=\x22type: capsule\x22"                 
-                }
-                 if (physicsScripts.length > 0 && useNavmesh && !useSuperHands && !useStarterKit) {
-                    physicsMod = "geometry=\x22primitive: cylinder; height: 2; radius: 0.5;\x22 ammo-body=\x22type: kinematic;\x22 ammo-shape=\x22type: capsule\x22";
-                }
 
-                transportButtons = "<div class=\x22transport_buttons\x22>"+
 
-                "<div class=\x22next_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div>"+
-                "<div class=\x22ffwd_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22FastForwardButton()\x22><i class=\x22fas fa-forward fa-2x\x22></i></div>"+
-                "<div class=\x22play_button\x22 id=\x22transport_play_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
-                "<div class=\x22rewind_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22RewindButton()\x22><i class=\x22fas fa-backward fa-2x\x22></i></div>"+
-                "<div class=\x22previous_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
-                "<div id=\x22transportStats\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px; text-align: left\x22></div></div>";                                
-
-                dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
-               
-                sceneManglerButtons = "<div class=\x22show-ui-button\x22 onclick=\x22ShowHideUI()\x22><i class=\x22far fa-eye fa-2x\x22></i></div>";
-                if (!sceneResponse.sceneTextUseModals) {
-                   // renderPanel = "<a-entity visible=\x22false\x22 render_canvas id=\x22renderCanvas\x22 look-at=\x22#player\x22 geometry=\x22primitive: plane; width:1; height:1;\x22 scale=\x221 1 1\x22 position=\x220 3.5 -.25\x22 material=\x22shader: html; transparent: true; width:1024; height:1024; fps: 10; target: #renderPanel;\x22></a-entity>\n";
-                }
-                if (sceneResponse.sceneFlyable) {
-                    wasd = "extended_wasd_controls=\x22flyEnabled: true; moveSpeed: 4; inputType: keyboard\x22";
-                }
-               
-                if (sceneResponse.sceneCameraMode == "Orbit") {
-                    // joystickScript = "<script src=\x22../main/vendor/aframe/aframe-orbit-controls.min.js\x22></script>";
-                    // joystickScript = "<script src=\x22../main/src/component/aframe-orbit-controls.min.js\x22></script>";
-                    joystickScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-orbit-controls.min.js\x22></script>";
-                    
-                    // wasd = "orbit-controls=\x22target: 0 0 0; minDistance: .5; maxDistance: 100; initialPosition: 0 1 -5; enableDamping: true;\x22";
-                }
-                if (sceneResponse.sceneCameraMode == "Fixed") {
-                    joystickScript = "";
-                    joystickContainer = "";
-                    wasd = "";
-                }
-                if (sceneResponse.sceneCameraMode == "Fixed Rotate") {
-                    joystickScript = "";
-                    joystickContainer = "";
-                    wasd = " rotate_player_camera ";
-                }
-              
-                
-                let spawnInCircle = "";
-                if (sceneResponse.sceneNetworking != "None") {
-                    spawnInCircle = "spawn-in-circle=\x22radius:3;\x22";
-                }
-
-                //AFRAME CAMERA
-                let blinkMod = "blink-controls=\x22cameraRig: #cameraRig\x22";
-                // sceneResponse.scenePlayer.playerHeight = 10;
-                if (useSimpleNavmesh || useNavmesh) {
-                    blinkMod = "blink-controls=\x22cameraRig: #cameraRig; collisionEntities: #nav-mesh;\x22"; //only one navmesh for now
-                    wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:"+
-                    sceneResponse.scenePlayer.playerHeight+"\x22";
-                }
-                console.log("sceneResponse.sceneTags " + sceneResponse.sceneTags);
-                if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("webgpu")) {
-                    blinkMod = "";
-                    blinkScript = "";
-                } 
-                // if (useSimpleNavmesh) { //this lives in navigation.js
-                //     //simple navmesh can use 
-                //     wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:"+sceneResponse.scenePlayer.playerHeight+"\x22";
-                //     // wasd = "wasd-controls=\x22fly: true; acceleration: 35\x22 ";
-                    
-                // } 
-                // let follower = "";
-                if (playerPositions.length) {
-                    playerPosition = playerPositions[Math.floor(Math.random() * playerPositions.length)];
-                }
-                ////////////////////////// - THIRD PERSON CAMERA SETUP - //////////////////////////////
-                console.log("sceneCameraMode " + sceneResponse.sceneCameraMode);
-                if (sceneResponse.sceneCameraMode != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase().includes("third person")) {
-                    let lookcontrols = "look-controls=\x22magicWindowTrackingEnabled: false; reverseTouchDrag: true\x22";
-                    if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags.includes('magic window'))) {
-                        lookcontrols = "look-controls=\x22reverseTouchDrag: true\x22"; // because magicwinders enabled by default
-                    }
-                    // let audioType = '';
-                    // if ()
-                    // wasd = "wasd-controls=\x22fly: true; acceleration: "+sceneResponse.scenePlayer.playerSpeed+"\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:0;\x22";
-                    // wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: 4; inputType: keyboard\x22";
-                    // let navConstraint = "";
-                    wasd = "extended_wasd_thirdperson=\x22fly: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22";
-                    if (useSimpleNavmesh) {
-                        wasd = "extended_wasd_thirdperson=\x22fly: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height: 0\x22";
-                    } else if (useNavmesh) { //well just use them both!
-                        // let navConstraint = "constrainToNavMesh: true; enabled: true; speed:0.2;\x22";
-                        // wasd = "extended_wasd_thirdperson=\x22fly: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard constrainToNavMesh: true; enabled: true; speed:0.2;\x22";
-                        wasd = "extended_wasd_thirdperson=\x22fly: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height: 0\x22";
-                    }
-                   
-                    // wasd = "extended_wasd_thirdperson=\x22fly: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 " + navConstraint;
-                    cameraRigEntity = "<a-entity id=\x22lookControls\x22 "+lookcontrols+" follow-camera=\x22target: #player\x22>" +
-                        "<a-entity id=\x22thirdPersonCamera\x22 camera position=\x220 5 7\x22 >" +
-                        // "<a-entity id=\x22viewportPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -1.5\x22 material=\x22opacity: 0\x22></a-entity>"+
-                        "</a-entity>" +
-                       
-                    "</a-entity>"+
-                    "<a-entity id=\x22cameraRig\x22 initializer "+
-                
-                        " id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22>"+
-                        
-                       
-                        "<a-entity get_pos_rot id=\x22player\x22 "+wasd+" "+ physicsMod +" rotation=\x22"+playerRotation+"\x22 position=\x22"+playerPosition+"\x22>"+
-                            "<a-entity id=\x22equipPlaceholder\x22 geometry=\x22primitive: box; height: .1; width: .1; depth: .1\x22 position=\x220 -.65 -.75\x22"+
-                            "material=\x22opacity: 0\x22></a-entity>"+
-                            "<a-entity id=\x22viewportPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 5 5\x22"+
-                            "material=\x22opacity: 0\x22></a-entity>"+
-                            "<a-entity id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -3\x22"+
-                            "material=\x22opacity: 0\x22></a-entity>"+
-                            "<a-entity id=\x22thirdPersonPlaceholder\x22 position=\x220 0 0\x22></a-entity>"+
-                            "<a-entity id=\x22playCaster\x22 position=\x220 .5 .5\x22></a-entity>"+
-                            // "<a-sphere visible=\x22true\x22 scale=\x220.45 0.5 0.4\x22 random-color></a-sphere>"+
-                        "</a-entity>"+
-                        //TODO - hands?
-                       
-                        "</a-entity></a-entity>";
-
-                ///////////////// - Orbit camera - /////////////////
-                } else if (sceneResponse.sceneCameraMode != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase().includes("orbit")) { //hrm..
-                    wasd = "";
-                    cameraRigEntity = "<a-entity initializer camera look-controls id=\x22player\x22 orbit-controls=\x22target: 0 0 0; enablePan: true; screenSpacePanning: true; minDistance: 0.5; maxDistance: 90; initialPosition: "+playerPosition+"\x22>"+
-                    "<a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
-                    "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22equipPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 -.5 -.65\x22"+ //these seemed to need actual geometry to get a worldspace loc
-                    "material=\x22opacity: 0\x22></a-entity>"+
-                    "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -1\x22"+
-                    "material=\x22opacity: 0\x22></a-entity>"+
-                    "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -3\x22"+
-                    "material=\x22opacity: 0\x22></a-entity>"+
-                    "</a-entity>";
-                    joystickScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/diarmidmackenzie/superframe@fix-orbit-controls/components/orbit-controls/dist/aframe-orbit-controls.min.js\x22></script>";
-                
-                ///////////////// - Fixed camera - /////////////////
-                } else if (sceneResponse.sceneCameraMode != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase() == "fixed rotate") { //hrm..
-                    let lookcontrols = "look-controls=\x22magicWindowTrackingEnabled: false; reverseTouchDrag: true\x22";
-                    if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags.includes('magic window'))) {
-                        lookcontrols = "look-controls=\x22reverseTouchDrag: true\x22"; // because magicwinders enabled by default
-                    }
-                    wasd = "";
-                    cameraRigEntity = "<a-entity "+lookcontrols+" follow-camera=\x22target: #player\x22>" +
-                        "<a-entity camera rotation=\x22"+playerRotation+"\x22 position=\x22"+playerPosition+"\x22 ></a-entity>" +
-                    "</a-entity>"+
-                    "<a-entity id=\x22cameraRig\x22 initializer "+
-                    " id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22>"+
-                    // "<a-entity id=\x22player\x22 "+wasd+" "+ physicsMod +" position=\x22"+playerPosition+"\x22>"+
-                    "<a-entity id=\x22player\x22 >"+
-                        "<a-entity id=\x22equipPlaceholder\x22 geometry=\x22primitive: box; height: .1; width: .1; depth: .1\x22 position=\x220 -.65 -.75\x22"+
-                        "material=\x22opacity: 0\x22></a-entity>"+
-                        "<a-entity id=\x22viewportPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -1.5\x22"+
-                        "material=\x22opacity: 0\x22></a-entity>"+
-                        "<a-entity id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -3\x22"+
-                        "material=\x22opacity: 0\x22></a-entity>"+
-                        "<a-entity id=\x22thirdPersonPlaceholder\x22 position=\x220 0 0\x22></a-entity>"+
-                        "<a-entity id=\x22playCaster\x22 position=\x220 .5 .5\x22></a-entity>"+
-                        // "<a-sphere visible=\x22true\x22 scale=\x220.45 0.5 0.4\x22 random-color></a-sphere>"+
-                    "</a-entity>"+
-                    
-                    "</a-entity></a-entity>";
-                } else if (sceneResponse.sceneCameraMode  != null && sceneResponse.sceneCameraMode != undefined && sceneResponse.sceneCameraMode.toLowerCase() == "fixed") { //hrm..
-                    let lookcontrols = "look-controls=\x22magicWindowTrackingEnabled: false; reverseTouchDrag: true\x22";
-                    if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags.includes('magic window'))) {
-                        lookcontrols = "look-controls=\x22reverseTouchDrag: true\x22"; // because magicwinders enabled by default
-                    }
-                    wasd = "";
-                    
-                    cameraRigEntity = "<a-entity camera position=\x22"+playerPosition+"\x22></a-entity>"+
-                    "<a-entity id=\x22cameraRig\x22 initializer "+
-                    " id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22>"+
-                    "<a-entity id=\x22player\x22 >"+
-                        "<a-entity id=\x22equipPlaceholder\x22 geometry=\x22primitive: box; height: .1; width: .1; depth: .1\x22 position=\x220 -.65 -.75\x22"+
-                        "material=\x22opacity: 0\x22></a-entity>"+
-                        "<a-entity id=\x22viewportPlaceholder\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -1.5\x22"+
-                        "material=\x22opacity: 0\x22></a-entity>"+
-                        "<a-entity id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -3\x22"+
-                        "material=\x22opacity: 0\x22></a-entity>"+
-                        "<a-entity id=\x22thirdPersonPlaceholder\x22 position=\x220 0 0\x22></a-entity>"+
-                        "<a-entity id=\x22playCaster\x22 position=\x220 .5 .5\x22></a-entity>"+
-                        // "<a-sphere visible=\x22true\x22 scale=\x220.45 0.5 0.4\x22 random-color></a-sphere>"+
-                    "</a-entity>"+
-                    
-                    
-                    "</a-entity></a-entity>";
-
-                ///////////////// - First Person camera - /////////////////        
-                } else { 
-                    
-                    let lookcontrols = "look-controls=\x22magicWindowTrackingEnabled: false;\x22";
-                    let console = "";
-                    if (logScripts != "") {
-                        console = "<a-console id=\x22consoleEntity\x22 position=\x220\ .13 -.36\x22 scale=\x22.33 .33 .33\x22 rotation=\x22-70.7 -1.77\x22></a-console>";   
-                    }
-                    if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('magicwindow') || sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('magic window'))) {
-                        lookcontrols = "look-controls"; // because magicwinders enabled by default
-                    }
-                    let ammoHands = "";
-                    let hapticsHands = ""; //grab?
-                    if (usePhysicsType == "ammo") {
-                        ammoHands = " ammo-body=\x22type: kinematic; emitCollisionEvents: true;\x22 ammo-shape=\x22type: sphere\x22 ";
-                        hapticsHands = "haptics"
-                    }
-                    
-                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("hand controls")  || sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("hand controllers")) {
-                        handEntities = "<a-entity id=\x22left-hand\x22 hand-controls=\x22hand: left\x22 left_controller_buttons></a-entity>" +
-                        "<a-sphere color=\x22blue\x22 opacity=\x220.1\x22 radius=\x220.06\x22 "+ammoHands+"></a-sphere></a-entity>" +
-                        "<a-entity id=\x22right-hand\x22 hand-controls=\x22hand: right\x22>" +
-                        "<a-sphere color=\x22orange\x22 opacity=\x220.1\x22 radius=\x220.06\x22 "+ammoHands+"></a-sphere>"+
-                        "<a-entity id=\x22rightHandEquip\x22 equip_controller rotation=\x22-80 0 0\x22 position=\x22-0.02 0 -0.01\x22></a-entity>" +
-                        "</a-entity>";
-                    } else if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("hand tracking")) { 
-                        handEntities = "<a-entity id=\x22left-hand\x22 hand-tracking-controls=\x22hand: left; hoverEnabled: true;\x22 pinch_fu>" +
-                        "<a-sphere color=\x22blue\x22 opacity=\x221\x22 radius=\x220.05\x22 "+ammoHands+"></a-sphere>"+
-                        "</a-entity>" +
-                        "<a-entity id=\x22right-hand\x22 hand-tracking-grab-controls=\x22hand: right; hoverEnabled: true;\x22 anchor-grabbed-entity>" +
-                        "<a-sphere color=\x22orange\x22 opacity=\x221\x22 radius=\x220.05\x22 "+ammoHands+"></a-sphere>"+
-                        "</a-entity>";
-                    } else {
-                        let rightHandEquip = "";
-                        let leftHandEquip = "";
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("blaster")) {
-                            rightHandEquip = " equip_controller rotation=\x22-80 0 0\x22 position=\x22-0.02 0 -0.01\x22"
-                        }
-                        handEntities = "<a-entity id=\x22left-hand\x22 "+blinkMod+" meta-touch-controls=\x22hand: left;\x22 left_controller_thumb left_controller_buttons>"+
-                        
-                        "<a-sphere color=\x22blue\x22 opacity=\x220.1\x22 radius=\x220.06\x22 "+ammoHands+"></a-sphere></a-entity>" +
-                        // "<a-entity id=\x22right-hand\x22 hand-tracking-grab-controls=\x22hand: right\x22 oculus-touch-controls=\x22hand: right\x22 laser-controls=\x22hand: right;\x22 handModelStyle: lowPoly; color: #ffcccc\x22 raycaster=\x22objects: .activeObjexRay;\x22 grab "+hapticsHands+">"+
-                        "<a-entity id=\x22right-hand\x22 laser-controls=\x22hand: right;\x22 raycaster=\x22objects: .activeObjexRay;\x22 meta-touch-controls=\x22hand: right\x22 >"+
-                        "<a-entity id=\x22right_hand_attach\x22 "+rightHandEquip+"></a-entity>" +
-                        "<a-sphere color=\x22orange\x22 opacity=\x220.1\x22 radius=\x220.06\x22 "+ammoHands+"></a-sphere>"+
-                        "</a-entity>";       
-                    }
-                    //////////////////////////////////// FP cameraRig
-                    // cameraRigEntity = "<a-entity id=\x22cameraRig\x22 "+movementControls+" initializer "+
-                    if (!sceneResponse.scenePlayer) {
-                        sceneResponse.scenePlayer = {};
-                        sceneResponse.scenePlayer.playerSpeed = 2;
-                    }
-
-                    wasd = "extended_wasd_controls=\x22flyEnabled: true; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22";
-                    if (useSimpleNavmesh || useNavmesh) {
-                        wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height: "+sceneResponse.scenePlayer.playerHeight+"\x22";
-                    } 
-                    cameraRigEntity = "<a-entity id=\x22cameraRig\x22 initializer "+
-                        " id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22>"+
-                        // " id=\x22mouseCursor\x22 cursor raycaster=\x22objects: .activeObjexRay\x22>"+
-                        "<a-entity id=\x22player\x22 "+lookcontrols+" get_pos_rot obb-collider=\x22size: 1 1 1\x22 camera=\x22near: .1\x22 "+wasd+" "+ physicsMod +" rotation=\x22"+playerRotation+"\x22 position=\x22"+playerPosition+"\x22>"+
-                            "<a-entity id=\x22equipPlaceholder\x22 geometry=\x22primitive: box; height: 0; width: 0; depth: 0;\x22 position=\x220 -.65 -.75\x22"+
-                            "material=\x22opacity: 0\x22></a-entity>"+
-                            "<a-entity id=\x22viewportPlaceholder\x22 geometry=\x22primitive: plane; height: 0; width: 0\x22 position=\x220 0 -1.5\x22"+
-                            "material=\x22opacity: 0\x22>"+
-                            
-                            "</a-entity>"+
-                            "<a-entity id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0; width: 0\x22 position=\x220 0 -3\x22"+
-                            "material=\x22opacity: 0\x22></a-entity>"+
-                        "</a-entity>"+
-                        handEntities +
-                        "</a-entity></a-entity>";
-
-                    if (useStarterKit) { //can't do starterkit + superhands! // maybe later...
-                        usePhysicsType = "physx";
-                        physicsScripts = "<script src=\x22https://cdn.jsdelivr.net/gh/c-frame/physx@v0.1.0/dist/physx.min.js\x22></script>"+
-                        "<script src=\x22https://cdn.jsdelivr.net/npm/handy-work@3.1.10/build/handy-controls.min.js\x22></script>"+
-                        "<script src=\x22https://cdn.jsdelivr.net/npm/handy-work@3.1.10/build/magnet-helpers.min.js\x22></script>";
-                        if (useSimpleNavmesh || useNavmesh) {
-                            cameraRigEntity = "<a-entity id=\x22cameraRig\x22 rotation=\x22"+playerRotation+"\x22 position=\x22"+playerPosition+"\x22 initializer cursor=\x22rayOrigin: mouse\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:"+
-                            sceneResponse.scenePlayer.playerHeight+"\x22 raycaster=\x22objects: .activeObjexRay\x22  movement-controls=\x22speed:0.15;camera:#head;\x22"+
-                            "position=\x22-1 0 1\x22 rotation=\x220 45 0\x22 origin-on-ar-start> <a-entity id=\x22head\x22 camera=\x22near:0.01;\x22 look-controls=\x22pointerLockEnabled: false\x22 position=\x220 1.65 0\x22>"+
-                            "<a-entity id=player get_pos_rot></a-entity>"+
-                            "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -3\x22"+
-                            "material=\x22opacity: 0\x22></a-entity>"+
-                            "</a-entity>"+ handEntities +"</a-entity>";
-                        } else { //no navmesh
-                            cameraRigEntity = "<a-entity id=\x22cameraRig\x22 initializer cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22 id=\x22cameraRig\x22 rotation=\x22"+playerRotation+"\x22 position=\x22"+
-                            playerPosition+"\x22 movement-controls=\x22speed:0.15;camera:#head;\x22"+
-                            "position=\x22-1 0 1\x22 rotation=\x220 45 0\x22 origin-on-ar-start> <a-entity id=\x22head\x22 camera=\x22near:0.01;\x22 look-controls=\x22pointerLockEnabled: false\x22 position=\x220 1.65 0\x22>"+
-                            "<a-entity id=player get_pos_rot></a-entity>"+ //el w/ id=player is always tracked for ranging
-                            "<a-entity class=\x22hiddenPlaceholders\x22 id=\x22viewportPlaceholder3\x22 geometry=\x22primitive: plane; height: 0.01; width: .01\x22 position=\x220 0 -3\x22"+
-                            "material=\x22opacity: 0\x22></a-entity>"+
-                            "</a-entity>"+ handEntities +"</a-entity>";
-                        }
-                        
-                    }
-
-                }
             } //end AFrame scene variations
-            let webxrEnv = "default";
+            let geomapEnv = "default";
             let shadow = "";
             let sunVector = "0 -.5 -.5";
             let intensity = "2";
@@ -1420,110 +1096,110 @@ webxr_router.get('/:_id', function (req, res) {
             //default lights, 
 
             /////////////////////// environmental conf /////////////////////////////////////
-            if (!sceneResponse.sceneEnvironmentPreset && sceneResponse.sceneWebXREnvironment) {
-                sceneResponse.sceneEnvironmentPreset = sceneResponse.sceneWebXREnvironment; //the old setting is still out there!
+            if (!sceneResponse.sceneEnvironmentPreset && sceneResponse.scenegeomapEnvironment) {
+                sceneResponse.sceneEnvironmentPreset = sceneResponse.scenegeomapEnvironment; //the old setting is still out there!
             }
             if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) {
 
-                webxrEnv = sceneResponse.sceneEnvironmentPreset;
-                enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
-                let ground = "ground: hills;";
-                let dressing = "";
-                let skycolor = "";
-                let groundcolor = "";
-                let groundcolor2 = "";
-                let dressingcolor = "";
-                let horizoncolor = "";
+                // geomapEnv = sceneResponse.sceneEnvironmentPreset;
+                // enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
+                // let ground = "ground: hills;";
+                // let dressing = "";
+                // let skycolor = "";
+                // let groundcolor = "";
+                // let groundcolor2 = "";
+                // let dressingcolor = "";
+                // let horizoncolor = "";
                 
-                let fog = "";
-                let tweakColors = "";
-                let hasColorMods = false;
-                //if any of the default colors have changed, use them
-                if (sceneResponse.sceneColor1 != "#808080" || sceneResponse.sceneColor2 != "#808080" || sceneResponse.sceneColor3 != "#808080" || sceneResponse.sceneColor1 != "#808080") {
-                    hasColorMods = true;
-                }
-                if (webxrEnv == "none") {
-                    ground = "ground: none;"
-                }
+                // let fog = "";
+                // let tweakColors = "";
+                // let hasColorMods = false;
+                // //if any of the default colors have changed, use them
+                // if (sceneResponse.sceneColor1 != "#808080" || sceneResponse.sceneColor2 != "#808080" || sceneResponse.sceneColor3 != "#808080" || sceneResponse.sceneColor1 != "#808080") {
+                //     hasColorMods = true;
+                // }
+                // if (geomapEnv == "none") {
+                //     ground = "ground: none;"
+                // }
 
-                if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
-                    dressing = "dressing: none;"
-                }
+                // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
+                //     dressing = "dressing: none;"
+                // }
 
-                if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('map')) {
-                    hasBgMap = true;
-                }
+                // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('map')) {
+                //     hasBgMap = true;
+                // }
                 
-                if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "none") {
-                    ground = "ground: none;"
-                    dressing = "dressing: none;"
-                } else if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "flat") {
-                    ground = "ground: flat; dressing: none;"
-                    dressing = "dressing: none;"
-                } else if  (sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.length > 3) {
-                    ground = "ground: " + sceneResponse.sceneFloorplaneTexture.toLowerCase() +"; "; //needs refactor to...?
-                }
+                // if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "none") {
+                //     ground = "ground: none;"
+                //     dressing = "dressing: none;"
+                // } else if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "flat") {
+                //     ground = "ground: flat; dressing: none;"
+                //     dressing = "dressing: none;"
+                // } else if  (sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.length > 3) {
+                //     ground = "ground: " + sceneResponse.sceneFloorplaneTexture.toLowerCase() +"; "; //needs refactor to...?
+                // }
 
-                if (sceneResponse.sceneUseDynamicShadows) {
-                    shadow = "shadow: true; shadowSize: 50;"
-                } else {
-                    shadow = " shadow: false ";
-                }
+                // if (sceneResponse.sceneUseDynamicShadows) {
+                //     shadow = "shadow: true; shadowSize: 50;"
+                // } else {
+                //     shadow = " shadow: false ";
+                // }
                 
-                if (sceneResponse.sceneTweakColors) {
-                    // tweakColors = "mod-colors"; //need to animate
-                    // envLighting = "lighting: none";
-                }
+                // if (sceneResponse.sceneTweakColors) {
+                //     // tweakColors = "mod-colors"; //need to animate
+                //     // envLighting = "lighting: none";
+                // }
                 
-                if (!sceneResponse.sceneUseDynamicSky) {
-                    envLighting = "lighting: none";
-                }
+                // if (!sceneResponse.sceneUseDynamicSky) {
+                //     envLighting = "lighting: none";
+                // }
                 
-                if (sceneResponse.sceneUseSceneFog) {
-                    let fogDistance = sceneResponse.sceneSkyRadius / 2 
-                    fogSettings = "fog=\x22type: exponential; density:" +sceneResponse.sceneGlobalFogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
-                    fog = "fog: " +sceneResponse.sceneGlobalFogDensity+ ";";
-                } else {
-                    fogSettings = "";
-                    fog = "";
-                }
+                // if (sceneResponse.sceneUseSceneFog) {
+                //     let fogDistance = sceneResponse.sceneSkyRadius / 2 
+                //     fogSettings = "fog=\x22type: exponential; density:" +sceneResponse.sceneGlobalFogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
+                //     fog = "fog: " +sceneResponse.sceneGlobalFogDensity+ ";";
+                // } else {
+                //     fogSettings = "";
+                //     fog = "";
+                // }
                 
-                if (hasColorMods && sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3 && sceneResponse.sceneColorizeSky) {
-                    skycolor = "skyColor: " + sceneResponse.sceneColor1 + ";";
-                }
+                // if (hasColorMods && sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3 && sceneResponse.sceneColorizeSky) {
+                //     skycolor = "skyColor: " + sceneResponse.sceneColor1 + ";";
+                // }
                 
-                if (hasColorMods && sceneResponse.sceneColor2 != null && sceneResponse.sceneColor2.length > 3 && sceneResponse.sceneColorizeSky) {  
-                    horizoncolor = "horizonColor: " + sceneResponse.sceneColor2 + ";";
-                } 
-                if (hasColorMods && sceneResponse.sceneColor3 != null && sceneResponse.sceneColor3.length > 3) { 
-                    groundcolor = "groundColor: " + sceneResponse.sceneColor3 + ";";
-                }
-                if (hasColorMods && sceneResponse.sceneColor4 != null && sceneResponse.sceneColor4.length > 3) {
-                    dressingcolor = "dressingColor: " + sceneResponse.sceneColor4 + ";";
-                    groundcolor2 = "groundColor2: " + sceneResponse.sceneColor4 + ";";
-                }
+                // if (hasColorMods && sceneResponse.sceneColor2 != null && sceneResponse.sceneColor2.length > 3 && sceneResponse.sceneColorizeSky) {  
+                //     horizoncolor = "horizonColor: " + sceneResponse.sceneColor2 + ";";
+                // } 
+                // if (hasColorMods && sceneResponse.sceneColor3 != null && sceneResponse.sceneColor3.length > 3) { 
+                //     groundcolor = "groundColor: " + sceneResponse.sceneColor3 + ";";
+                // }
+                // if (hasColorMods && sceneResponse.sceneColor4 != null && sceneResponse.sceneColor4.length > 3) {
+                //     dressingcolor = "dressingColor: " + sceneResponse.sceneColor4 + ";";
+                //     groundcolor2 = "groundColor2: " + sceneResponse.sceneColor4 + ";";
+                // }
 
-                aframeEnvironment = "<a-entity id=\x22enviroEl\x22 class=\x22groundMesh\x22 environment=\x22preset: "+webxrEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
-                " "+envLighting+";\x22 hide-on-enter-ar "+tweakColors+"></a-entity>";
+                // aframeEnvironment = "<div id=\x22enviroEl\x22 class=\x22groundMesh\x22 environment=\x22preset: "+geomapEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
+                // " "+envLighting+";\x22 hide-on-enter-ar "+tweakColors+"></div>";
 
             } else {
                 if (sceneResponse.sceneUseDynamicSky) {
-                    if (sceneResponse.sceneUseDynamicShadows) {
-                        shadow = " light=\x22castShadow: true\x22 ";
-                    }
+                    // if (sceneResponse.sceneUseDynamicShadows) {
+                    //     shadow = " light=\x22castShadow: true\x22 ";
+                    // }
 
-                    if (sceneResponse.sceneSunVector) {
-                        sunVector = sceneResponse.sceneSunVector;
-                    }
-                    if (sceneResponse.sceneSunIntensity) {
-                        intensity = sceneResponse.sceneSunIntensity;
-                    }
+                    // if (sceneResponse.sceneSunVector) {
+                    //     sunVector = sceneResponse.sceneSunVector;
+                    // }
+                    // if (sceneResponse.sceneSunIntensity) {
+                    //     intensity = sceneResponse.sceneSunIntensity;
+                    // }
 
-                    let skyRad = parseInt(sceneResponse.sceneSkyRadius) - (parseInt(sceneResponse.sceneSkyRadius) * .2);
-                    skySettings =  "<a-sky hide-on-enter-ar id=\x22skyEl\x22 color=\x22" + sceneResponse.sceneColor1 + "\x22 radius=\x22" + skyRad + "\x22 mod_sky=\x22enabled: true; color: "+sceneResponse.sceneColor1+";\x22></a-sky>";
-                    lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22"+sceneResponse.sceneColor1+"\x22 "+
-                    "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><a-entity id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></a-entity></a-light>" +
-                    "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
+                    // let skyRad = parseInt(sceneResponse.sceneSkyRadius) - (parseInt(sceneResponse.sceneSkyRadius) * .2);
+                    // skySettings =  "<a-sky hide-on-enter-ar id=\x22skyEl\x22 color=\x22" + sceneResponse.sceneColor1 + "\x22 radius=\x22" + skyRad + "\x22 mod_sky=\x22enabled: true; color: "+sceneResponse.sceneColor1+";\x22></a-sky>";
+                    // lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22"+sceneResponse.sceneColor1+"\x22 "+
+                    // "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><div id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></div></a-light>" +
+                    // "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
                 }
             }
             sceneResponse.scenePostcards = sceneData.scenePostcards;
@@ -1544,75 +1220,75 @@ webxr_router.get('/:_id', function (req, res) {
             }
             
             if (sceneResponse.sceneSkyParticles != undefined && sceneResponse.sceneSkyParticles != null && sceneResponse.sceneSkyParticles != "None") { 
-                if (sceneResponse.sceneSkyParticles.toLowerCase() == "dust") {
-                    skyParticles = "<a-entity position=\x220 0 0\x22 sky_particle_points=\x22type: dust\x22></a-entity>";
-                    imageAssets = imageAssets + "<img id=\x22sparkle1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/sparkle.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "rain") {
-                    skyParticles = "<a-entity position=\x220 0 0\x22 rotation=\x220 0 90\x22 scale=\x221 1 1\x22 sky_particles=\x22type: rain; size: .1; src: http://servicemedia.s3.amazonaws.com/assets/pics/raindrop2.png\x22></a-entity>";
-                    imageAssets = imageAssets + "<img id=\x22raindrop2\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/raindrop2.png\x22 crossorigin=\x22anonymous\x22>";
+                // if (sceneResponse.sceneSkyParticles.toLowerCase() == "dust") {
+                //     skyParticles = "<div position=\x220 0 0\x22 sky_particle_points=\x22type: dust\x22></div>";
+                //     imageAssets = imageAssets + "<img id=\x22sparkle1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/sparkle.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "rain") {
+                //     skyParticles = "<div position=\x220 0 0\x22 rotation=\x220 0 90\x22 scale=\x221 1 1\x22 sky_particles=\x22type: rain; size: .1; src: http://servicemedia.s3.amazonaws.com/assets/pics/raindrop2.png\x22></div>";
+                //     imageAssets = imageAssets + "<img id=\x22raindrop2\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/raindrop2.png\x22 crossorigin=\x22anonymous\x22>";
                 
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "rain/fog") {
-                    skyParticles = "<a-entity scale=\x2220 10 20\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #raindrop; color: " +sceneResponse.sceneColor2 + "; position: -1 1 -1..1 1 1; spawnRate: 1000; velocity: 0 -.75 0; lifeTime: 10; scale: .15,.25; opacity: 1\x22></a-entity>"+
-                    "<a-entity scale=\x2250 10 50\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #cloud1; color: " +sceneResponse.sceneColor2 + "; blending: additive; position: -1 -1 -1..1 1 1; velocity: -.05 -.025 -.05 .. .05 .025 .05; spawnRate: 5; lifeTime: 20; scale: 200,400; opacity: 0,.3,0; rotation: 0..360\x22></a-entity>";
-                    imageAssets = imageAssets + "<img id=\x22raindrop2\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/raindrop.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "rain/fog/add") {
-                    skyParticles = "<a-entity scale=\x2220 10 20\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #raindrop; color: " +sceneResponse.sceneColor2 + "; blending: additive; position: -1 1 -1..1 1 1; spawnRate: 1000; velocity: 0 -.75 0; lifeTime: 10; scale: .15,.25; opacity: 1\x22></a-entity>"+
-                    "<a-entity scale=\x2250 10 50\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #cloud1; color: " +sceneResponse.sceneColor2 + "; blending: additive; position: -1 -1 -1..1 1 1; velocity: -.05 -.025 -.05 .. .05 .025 .05; spawnRate: 5; lifeTime: 20; scale: 100,200; opacity: 0,.3,0; rotation: 0..360\x22></a-entity>";
-                    imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "snow") {
-                    skyParticles = "<a-entity position=\x220 0 0\x22 rotation=\x220 0 90\x22 scale=\x221 1 1\x22 sky_particles=\x22type: rain; size: .2; src: https://servicemedia.s3.amazonaws.com/assets/pics/snowflake.png\x22></a-entity>";
-                    imageAssets = imageAssets + "<img id=\x22snowflake\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/snowflake.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "smoke") {
-                    skyParticles = "<a-entity position=\x220 0 0\x22 sky_particle_points=\x22type: smoke\x22></a-entity>";
-                    imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "explosions") {
-                    skyParticles = "<a-entity scale=\x2220 20 20\x22 position=\x220 20 0\x22 sprite-particles=\x22texture: #explosion1; textureFrame: 8 8; blending: additive; color: black..white;"+
-                    " position: -1 -1 -1..1 1 1; velocity: -.1 -.05 -.1 .. .1 .05 .1; spawnRate: 20; lifeTime: 1; scale: 50,200; opacity: 0,1,0; rotation: 0..360\x22></a-entity>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "rain/fog") {
+                //     skyParticles = "<div scale=\x2220 10 20\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #raindrop; color: " +sceneResponse.sceneColor2 + "; position: -1 1 -1..1 1 1; spawnRate: 1000; velocity: 0 -.75 0; lifeTime: 10; scale: .15,.25; opacity: 1\x22></div>"+
+                //     "<div scale=\x2250 10 50\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #cloud1; color: " +sceneResponse.sceneColor2 + "; blending: additive; position: -1 -1 -1..1 1 1; velocity: -.05 -.025 -.05 .. .05 .025 .05; spawnRate: 5; lifeTime: 20; scale: 200,400; opacity: 0,.3,0; rotation: 0..360\x22></div>";
+                //     imageAssets = imageAssets + "<img id=\x22raindrop2\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/raindrop.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "rain/fog/add") {
+                //     skyParticles = "<div scale=\x2220 10 20\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #raindrop; color: " +sceneResponse.sceneColor2 + "; blending: additive; position: -1 1 -1..1 1 1; spawnRate: 1000; velocity: 0 -.75 0; lifeTime: 10; scale: .15,.25; opacity: 1\x22></div>"+
+                //     "<div scale=\x2250 10 50\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #cloud1; color: " +sceneResponse.sceneColor2 + "; blending: additive; position: -1 -1 -1..1 1 1; velocity: -.05 -.025 -.05 .. .05 .025 .05; spawnRate: 5; lifeTime: 20; scale: 100,200; opacity: 0,.3,0; rotation: 0..360\x22></div>";
+                //     imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "snow") {
+                //     skyParticles = "<div position=\x220 0 0\x22 rotation=\x220 0 90\x22 scale=\x221 1 1\x22 sky_particles=\x22type: rain; size: .2; src: https://servicemedia.s3.amazonaws.com/assets/pics/snowflake.png\x22></div>";
+                //     imageAssets = imageAssets + "<img id=\x22snowflake\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/snowflake.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "smoke") {
+                //     skyParticles = "<div position=\x220 0 0\x22 sky_particle_points=\x22type: smoke\x22></div>";
+                //     imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "explosions") {
+                //     skyParticles = "<div scale=\x2220 20 20\x22 position=\x220 20 0\x22 sprite-particles=\x22texture: #explosion1; textureFrame: 8 8; blending: additive; color: black..white;"+
+                //     " position: -1 -1 -1..1 1 1; velocity: -.1 -.05 -.1 .. .1 .05 .1; spawnRate: 20; lifeTime: 1; scale: 50,200; opacity: 0,1,0; rotation: 0..360\x22></div>";
                     
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "fireworks") {
-                    skyParticles = "<a-entity scale=\x2240 10 40\x22 position=\x220 40 0\x22 sprite-particles=\x22texture: #fireworksanim1; textureFrame: 5 5; blending: additive; color: black..white;"+
-                    " position: -1 -1 -1..1 1 1; velocity: -.1 -.05 -.1 .. .1 .05 .1; spawnRate: 10; lifeTime: 1; scale: 50,200; opacity: 0,1,0; rotation: 0..360\x22></a-entity>";
-                    imageAssets = imageAssets + "<img id=\x22fireworksanim1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/fireworks_sheet.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "fog") {
-                    skyParticles = "<a-entity position=\x220 0 0\x22 sky_particle_points=\x22type: fog\x22></a-entity>";
-                    imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "fog/add") {
-                    skyParticles = "<a-entity scale=\x2250 10 50\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #cloud1; blending: additive; color: " +sceneResponse.sceneColor2 + "; position: -1 -1 -1..1 1 1; velocity: -.05 -.025 -.05 .. .05 .025 .05; spawnRate: 5; lifeTime: 20; scale: 100,200; opacity: 0,.3,0; rotation: 0..360\x22></a-entity>";
-                    imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "clouds") {
-                    // skyParticles = "<a-entity scale='15 5 15' position='0 10 0' particle_mangler particle-system=\x22preset: dust; maxAge: 25; velocityValue: 0 -.01 0; direction: -.01; positionSpread: 30 15 30; opacity: .2; particleCount: 50; size: 1000; blending: 2; texture: https://realitymangler.com/assets/textures/cloud_lg.png; color: " + sceneResponse.sceneColor1 + "," + sceneResponse.sceneColor2 +"\x22></a-entity>";
-                } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "stars") {    
-                    // skyParticles = "<a-entity scale='2 2 2' position='0 15 0' particle_mangler particle-system=\x22preset: stars; particleCount: 3000; texture: https://realitymangler.com/assets/textures/star2b.png; color: " + sceneResponse.sceneColor1 + "," + sceneResponse.sceneColor2 +"\x22></a-entity>";
-                }
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "fireworks") {
+                //     skyParticles = "<div scale=\x2240 10 40\x22 position=\x220 40 0\x22 sprite-particles=\x22texture: #fireworksanim1; textureFrame: 5 5; blending: additive; color: black..white;"+
+                //     " position: -1 -1 -1..1 1 1; velocity: -.1 -.05 -.1 .. .1 .05 .1; spawnRate: 10; lifeTime: 1; scale: 50,200; opacity: 0,1,0; rotation: 0..360\x22></div>";
+                //     imageAssets = imageAssets + "<img id=\x22fireworksanim1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/fireworks_sheet.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "fog") {
+                //     skyParticles = "<div position=\x220 0 0\x22 sky_particle_points=\x22type: fog\x22></div>";
+                //     imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "fog/add") {
+                //     skyParticles = "<div scale=\x2250 10 50\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #cloud1; blending: additive; color: " +sceneResponse.sceneColor2 + "; position: -1 -1 -1..1 1 1; velocity: -.05 -.025 -.05 .. .05 .025 .05; spawnRate: 5; lifeTime: 20; scale: 100,200; opacity: 0,.3,0; rotation: 0..360\x22></div>";
+                //     imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "clouds") {
+                //     // skyParticles = "<div scale='15 5 15' position='0 10 0' particle_mangler particle-system=\x22preset: dust; maxAge: 25; velocityValue: 0 -.01 0; direction: -.01; positionSpread: 30 15 30; opacity: .2; particleCount: 50; size: 1000; blending: 2; texture: https://realitymangler.com/assets/textures/cloud_lg.png; color: " + sceneResponse.sceneColor1 + "," + sceneResponse.sceneColor2 +"\x22></div>";
+                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "stars") {    
+                //     // skyParticles = "<div scale='2 2 2' position='0 15 0' particle_mangler particle-system=\x22preset: stars; particleCount: 3000; texture: https://realitymangler.com/assets/textures/star2b.png; color: " + sceneResponse.sceneColor1 + "," + sceneResponse.sceneColor2 +"\x22></div>";
+                // }
                 
             }
             if (sceneResponse.sceneUseFloorPlane) {
-                groundPlane = "<a-plane rotation='-90 0 0' visible=\x22false\x22 position='0 0 0' width='100' height='100' mod_physics=\x22type: static; model: collider;\x22 color=\x22" + sceneResponse.sceneColor2+ "\x22></a-plane>"; //deprecated for environment component
+                // groundPlane = "<a-plane rotation='-90 0 0' visible=\x22false\x22 position='0 0 0' width='100' height='100' mod_physics=\x22type: static; model: collider;\x22 color=\x22" + sceneResponse.sceneColor2+ "\x22></a-plane>"; //deprecated for environment component
             }
             if (sceneResponse.sceneWater != null) {
-                if (sceneResponse.sceneWater.name == "water2") {
-                    ocean = "<a-plane position=\x220  "+sceneResponse.sceneWater.level+" 0\x22 width=\x22300\x22 height=\x22300\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22100\x22 segments-width=\x22100\x22 "+skyboxEnvMap+" material=\x22color: "+sceneResponse.sceneColor3+"; shader:makewaves; uMap: #water; repeat: 500 500;\x22></a-plane>";
-                    imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2c.jpeg\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneWater.name == "water1") {
-                    ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2264\x22 segments-width=\x2264\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water2; repeat: 500 500; transparent: true\x22></a-plane>";
-                    imageAssets = imageAssets + "<img id=\x22water2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneWater.name == "water3") {
-                    ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2216\x22 segments-width=\x2216\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water; repeat: 50 50; transparent: false\x22></a-plane>";
-                    imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/watertile3.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneWater.name == "water4") {
-                    ocean = "<a-ocean></a-ocean>";
-                }
+                // if (sceneResponse.sceneWater.name == "water2") {
+                //     ocean = "<a-plane position=\x220  "+sceneResponse.sceneWater.level+" 0\x22 width=\x22300\x22 height=\x22300\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22100\x22 segments-width=\x22100\x22 "+skyboxEnvMap+" material=\x22color: "+sceneResponse.sceneColor3+"; shader:makewaves; uMap: #water; repeat: 500 500;\x22></a-plane>";
+                //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2c.jpeg\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneWater.name == "water1") {
+                //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2264\x22 segments-width=\x2264\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water2; repeat: 500 500; transparent: true\x22></a-plane>";
+                //     imageAssets = imageAssets + "<img id=\x22water2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneWater.name == "water3") {
+                //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2216\x22 segments-width=\x2216\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water; repeat: 50 50; transparent: false\x22></a-plane>";
+                //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/watertile3.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneWater.name == "water4") {
+                //     ocean = "<a-ocean></a-ocean>";
+                // }
             }
             if (sceneResponse.sceneUseHeightmap != null && sceneResponse.sceneUseHeightmap) {
-                terrain = "<a-plane class=\x22surface activeObjexRay\x22 position=\x220 -20 0\x22 width=\x22512\x22 height=\x22512\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22512\x22 segments-width=\x22512\x22 terrain-mangler></a-plane>";
+                // terrain = "<a-plane class=\x22surface activeObjexRay\x22 position=\x220 -20 0\x22 width=\x22512\x22 height=\x22512\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22512\x22 segments-width=\x22512\x22 terrain-mangler></a-plane>";
             }
             
-            if (sceneResponse.sceneNextScene != null && sceneResponse.sceneNextScene != "") {
-                nextSceneLink = "href=\x22../webxr/" + sceneResponse.sceneNextScene + "\x22";
-            }
-            if (sceneResponse.scenePreviousScene != null && sceneResponse.scenePreviousScene != "") {
-                prevSceneLink = "href=\x22../" + sceneResponse.scenePreviousScene + "\x22";
-            }
+            // if (sceneResponse.sceneNextScene != null && sceneResponse.sceneNextScene != "") {
+            //     nextSceneLink = "href=\x22../geomap/" + sceneResponse.sceneNextScene + "\x22";
+            // }
+            // if (sceneResponse.scenePreviousScene != null && sceneResponse.scenePreviousScene != "") {
+            //     prevSceneLink = "href=\x22../" + sceneResponse.scenePreviousScene + "\x22";
+            // }
             if (sceneResponse.sceneLoopPrimaryAudio) {
                 loopable = "loop: true";
             }
@@ -1621,7 +1297,7 @@ webxr_router.get('/:_id', function (req, res) {
                 var pid = ObjectId.createFromHexString(sceneData.scenePrimaryAudioID);
                 requestedAudioItems.push(ObjectId.createFromHexString(sceneData.scenePrimaryAudioID));
                 if (sceneData.scenePrimaryAudioVisualizer) {    
-                    audioVizEntity = "<a-entity id=\x22audiovizzler\x22 position=\x22"+audioLocation+"\x22 data-audio-analyzer=\x22true\x22 data-beat=\x22true\x22></a-entity>";
+                    // audioVizEntity = "<div id=\x22audiovizzler\x22 position=\x22"+audioLocation+"\x22 data-audio-analyzer=\x22true\x22 data-beat=\x22true\x22></div>";
                 }
             }
             if (sceneData.sceneAmbientAudioID != null && sceneData.sceneAmbientAudioID.length > 4) {
@@ -1698,23 +1374,23 @@ webxr_router.get('/:_id', function (req, res) {
 
                     if (useArParent || (locationPlaceholders[i].tags && (locationPlaceholders[i].tags.includes("ar child") ||  locationPlaceholders[i].tags.includes("archild")))) { //used for hit test
                             
-                        arChildElements = arChildElements + "<a-entity data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
-                        "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+xpos+"; ypos: "+ypos+"; zpos: "+zpos+";" +
-                        "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
-                        "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
-                        "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
-                        locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
-                        locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
-                        skyboxEnvMap+ " position=\x22"+xpos+" "+ypos+ " " +zpos+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></a-entity>";
+                        // arChildElements = arChildElements + "<div data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
+                        // "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+xpos+"; ypos: "+ypos+"; zpos: "+zpos+";" +
+                        // "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
+                        // "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
+                        // "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
+                        // locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
+                        // locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
+                        // skyboxEnvMap+ " position=\x22"+xpos+" "+ypos+ " " +zpos+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></div>";
                     } else {
-                        placeholderEntities = placeholderEntities + "<a-entity data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
-                        "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+xpos+"; ypos: "+ypos+"; zpos: "+zpos+";" +
-                        "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
-                        "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
-                        "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
-                        locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
-                        locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
-                        skyboxEnvMap+ " position=\x22"+xpos+" "+ypos+ " " +zpos+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></a-entity>";
+                        // placeholderEntities = placeholderEntities + "<div data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
+                        // "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+xpos+"; ypos: "+ypos+"; zpos: "+zpos+";" +
+                        // "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
+                        // "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
+                        // "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
+                        // locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
+                        // locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
+                        // skyboxEnvMap+ " position=\x22"+xpos+" "+ypos+ " " +zpos+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></div>";
                     }
                 }
             }
@@ -1723,7 +1399,7 @@ webxr_router.get('/:_id', function (req, res) {
             const inventoryitems = await RunDataQuery("inventory_items", "find", invquery);
             // console.log("gots inventory items: " + JSON.stringify(inventoryitems));
             var buff = Buffer.from(JSON.stringify(inventoryitems)).toString("base64");
-            inventoryData = "<a-entity mod_scene_inventory id=\x22sceneInventory\x22 data-inventory='"+buff+"'></a-entity>";
+            // inventoryData = "<div mod_scene_inventory id=\x22sceneInventory\x22 data-inventory='"+buff+"'></div>";
             
             ///////////////// scene models //////////////////
             var modelz = [];
@@ -1752,7 +1428,6 @@ webxr_router.get('/:_id', function (req, res) {
             }
             ///////////////// available scenes /////////////////////
 
-            ///// TODO do this after page load, and group the img reqs.
 
             const query = {$and: [{"sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
             const available_scenes = await RunDataQuery("scenes", "find", query);
@@ -1813,21 +1488,21 @@ webxr_router.get('/:_id', function (req, res) {
             }
             // console.log("availableScenes : " +JSON.stringify(availableScenes));
             if (availableScenes != null && availableScenes != undefined && availableScenes.length > 0) { //need it for random gates, etc...
-                const buff = Buffer.from(JSON.stringify(availableScenesResponse)).toString("base64");
-                availableScenesEntity = "<a-entity scale=\x22.75 .75 .75\x22 look-at=\x22#player\x22 position=\x22"+scenesKeyLocation+"\x22>"+ 
-                "<a-entity available_scenes_control position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22availableScenesControl\x22 data-availablescenes='"+buff+"' class=\x22envMap activeObjexRay\x22 toggle-available-scenes "+skyboxEnvMap+" gltf-model=\x22#key\x22></a-entity>"+
-                "<a-entity id=\x22availableScenesPanel\x22 visible='false' position=\x220 -1 0\x22>"+
-                "<a-entity id=\x22availableScenesHeaderText\x22 geometry=\x22primitive: plane; width: 3.25; height: 1\x22 position=\x220 1.75 0\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22" +
-                "text=\x22value:; wrap-count: 35;\x22></a-entity>" +
+                // const buff = Buffer.from(JSON.stringify(availableScenesResponse)).toString("base64");
+                // availableScenesEntity = "<div scale=\x22.75 .75 .75\x22 look-at=\x22#player\x22 position=\x22"+scenesKeyLocation+"\x22>"+ 
+                // "<div available_scenes_control position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22availableScenesControl\x22 data-availablescenes='"+buff+"' class=\x22envMap activeObjexRay\x22 toggle-available-scenes "+skyboxEnvMap+" gltf-model=\x22#key\x22></div>"+
+                // "<div id=\x22availableScenesPanel\x22 visible='false' position=\x220 -1 0\x22>"+
+                // "<div id=\x22availableScenesHeaderText\x22 geometry=\x22primitive: plane; width: 3.25; height: 1\x22 position=\x220 1.75 0\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22" +
+                // "text=\x22value:; wrap-count: 35;\x22></div>" +
 
-                "<a-entity id=\x22availableScenePic\x22 class=\x22envMap activeObjexRay\x22 visible=\x22true\x22 position=\x220 3 -.1\x22 gltf-model=\x22#widelandscape_panel\x22 scale=\x22.5 .5 .5\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                "rotation='0 0 0'></a-entity>"+
-                "<a-entity gltf-model=\x22#square_panel\x22 scale=\x222.25 2.25 2.25\x22 position=\x220 2.1 -.25\x22></a-entity>" +
-                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x221.5 -.75 0\x22></a-entity>" +
-                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesPreviousButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-1.5 -.75 0\x22></a-entity>" +
-                "</a-entity></a-entity>";
-                console.log('processed availablescenes ' + availableScenes.length);
-                modelAssets = modelAssets + "<a-asset-item id=\x22widelandscape_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5b.glb\x22></a-asset-item>\n";  
+                // "<div id=\x22availableScenePic\x22 class=\x22envMap activeObjexRay\x22 visible=\x22true\x22 position=\x220 3 -.1\x22 gltf-model=\x22#widelandscape_panel\x22 scale=\x22.5 .5 .5\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                // "rotation='0 0 0'></div>"+
+                // "<div gltf-model=\x22#square_panel\x22 scale=\x222.25 2.25 2.25\x22 position=\x220 2.1 -.25\x22></div>" +
+                // "<div visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x221.5 -.75 0\x22></div>" +
+                // "<div visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesPreviousButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-1.5 -.75 0\x22></div>" +
+                // "</div></div>";
+                // console.log('processed availablescenes ' + availableScenes.length);
+                // modelAssets = modelAssets + "<div id=\x22widelandscape_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5b.glb\x22></div>\n";  
             }
             //////////////////////// weblinks /////////////////////////
             if (sceneResponse.sceneWebLinks != null && sceneResponse.sceneWebLinks.length > 0) {
@@ -1866,12 +1541,12 @@ webxr_router.get('/:_id', function (req, res) {
                         position = x + " " + 1.5 + " " + z;
                     }
                     index++;
-                    var urlStandard = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME, weblink._id +"/"+ weblink._id + ".standard.jpg", 6000);
-                    weblinkAssets = weblinkAssets + "<img id=\x22wlimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + urlStandard + "'>";
-                    let link = "basic-link=\x22href: "+weblink.link_url+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
-                    let caption = "<a-troika-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 font=\x22../fonts/web/Acme.woff\x22 outlineWidth=\x222%\x22 outlineColor=\x22black\x22  fontSize=\x221\x22 anchor=\x22top\x22 maxWidth=\x2210\x22 position=\x220 1.1 .1\x22 value=\x22"+weblink.link_title+"\x22></a-troika-text>";
-                    weblinkEntities = weblinkEntities + "<a-entity "+link+" position=\x22"+position+"\x22 weblink-materials=\x22index:"+index+"\x22 look-at=\x22#player\x22 gltf-model=\x22#flatsquare\x22 scale=\x22"+scale+"\x22 material=\x22shader: flat; src: #wlimage" + index + "; alphaTest: 0.5;\x22"+
-                    " visible='true'>"+caption+"</a-entity>";   
+                    // var urlStandard = await ReturnPresignedUrl(process.env.WEBSCRAPE_BUCKET_NAME, weblink._id +"/"+ weblink._id + ".standard.jpg", 6000);
+                    // weblinkAssets = weblinkAssets + "<img id=\x22wlimage" + index + "\x22 crossorigin=\x22anonymous\x22 src='" + urlStandard + "'>";
+                    // let link = "basic-link=\x22href: "+weblink.link_url+";\x22 class=\x22activeObjexGrab activeObjexRay\x22";
+                    // let caption = "<a-troika-text class=\x22pCap\x22 align=\x22center\x22 rotation=\x220 0 0\x22 font=\x22../fonts/web/Acme.woff\x22 outlineWidth=\x222%\x22 outlineColor=\x22black\x22  fontSize=\x221\x22 anchor=\x22top\x22 maxWidth=\x2210\x22 position=\x220 1.1 .1\x22 value=\x22"+weblink.link_title+"\x22></a-troika-text>";
+                    // weblinkEntities = weblinkEntities + "<div "+link+" position=\x22"+position+"\x22 weblink-materials=\x22index:"+index+"\x22 look-at=\x22#player\x22 gltf-model=\x22#flatsquare\x22 scale=\x22"+scale+"\x22 material=\x22shader: flat; src: #wlimage" + index + "; alphaTest: 0.5;\x22"+
+                    // " visible='true'>"+caption+"</div>";   
                     }
                 }
             }
@@ -1935,7 +1610,7 @@ webxr_router.get('/:_id', function (req, res) {
                     if (model && model.item_type == "glb" && model.filename) {
                         let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
                         objekt.modelURL = modelURL;
-                        gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + objekt.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
+                        gltfsAssets = gltfsAssets + "<div id=\x22" + objekt.modelID + "\x22 src=\x22"+ modelURL +"\x22></div>";
                         
                     }
                 }
@@ -1948,7 +1623,7 @@ webxr_router.get('/:_id', function (req, res) {
             }
             var buff = Buffer.from(JSON.stringify(objex)).toString("base64");
             var buff2 = Buffer.from(JSON.stringify(sceneObjectLocations)).toString("base64");
-            objectData = "<a-entity mod_objex id=\x22sceneObjects\x22 data-objex-locations='"+buff2+"' data-objex='"+buff+"'></a-entity>"; //doublebuff
+            objectData = "<div id=\x22sceneObjex\x22 data-objex-locations='"+buff2+"' data-objex='"+buff+"'></div>"; //doublebuff
 
             //////// get models associated with the actions on the objects //////////
             if (actionModels.length > 0) {
@@ -1959,8 +1634,8 @@ webxr_router.get('/:_id', function (req, res) {
                     const model = await RunDataQuery("models", "findOne", mquery);
                     if (model && model.userID && model.item_type && model.item_type == "glb" && model.filename) {
                         let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                        gltfsAssets = gltfsAssets + "<a-asset-item class=\x22gltfAssets\x22 crossorigin=\x22anonymous\x22 response-type=\x22arraybuffer\x22 id=\x22" + 
-                        actionModel.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";  
+                        gltfsAssets = gltfsAssets + "<div class=\x22gltfAssets\x22 crossorigin=\x22anonymous\x22 response-type=\x22arraybuffer\x22 id=\x22" + 
+                        actionModel.modelID + "\x22 src=\x22"+ modelURL +"\x22></div>";  
                         console.log("adding actionModel :" + actionModel.modelName);
                     }
                 }
@@ -2077,8 +1752,8 @@ webxr_router.get('/:_id', function (req, res) {
                             if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
                                 visible = true;
                             }
-                            navmeshAsset = "<a-asset-item id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";        
-                            navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller visible=\x22"+visible+"\x22 gltf-model=\x22#" + m_assetID + "\x22></a-entity>"; //simple navmesh uses it too!
+                            navmeshAsset = "<div id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></div>";        
+                            navmeshEntity = "<div id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller visible=\x22"+visible+"\x22 gltf-model=\x22#" + m_assetID + "\x22></div>"; //simple navmesh uses it too!
                         }   
                         if (locMdl.eventData != null && locMdl.eventData != undefined && locMdl.eventData.length > 1) { //eventData has info
                             
@@ -2093,8 +1768,8 @@ webxr_router.get('/:_id', function (req, res) {
                                     if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
                                         visible = true;
                                     }
-                                    navmeshAsset = "<a-asset-item id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";        
-                                    navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller visible=\x22"+visible+"\x22 gltf-model=\x22#" + m_assetID + "\x22></a-entity>"; //maybe id=nav-mesh so simple navmesh can use it too?
+                                    navmeshAsset = "<div id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></div>";        
+                                    navmeshEntity = "<div id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller visible=\x22"+visible+"\x22 gltf-model=\x22#" + m_assetID + "\x22></div>"; //maybe id=nav-mesh so simple navmesh can use it too?
                             }
                             
                             rightRot = !rightRot;
@@ -2103,7 +1778,7 @@ webxr_router.get('/:_id', function (req, res) {
                             }
                             var eSplit = locMdl.eventData.split("~");
                             if (eSplit[0] == "orbit") { 
-                                offsetPos =  "<a-entity position=\x22"+ eSplit[1] + " 0 0\x22></a-entity>";
+                                offsetPos =  "<div position=\x22"+ eSplit[1] + " 0 0\x22></div>";
                                 cannedAnim = "animation=\x22property: rotation; to: 0 " + (ry - 360) + " 0; loop: true; dur: 10000\x22";
 
                             } else if (locMdl.eventData.includes("rotate")) {
@@ -2154,168 +1829,168 @@ webxr_router.get('/:_id', function (req, res) {
                         /////////////////////////////// Geographic location types w/ lat/lng
                         if (locMdl.type.toLowerCase() == "geographic" && locMdl.latitude != null && locMdl.longitude != null && locMdl.latitude != 0 && locMdl.longitude != 0) { 
                             console.log(" lat/lng model " + JSON.stringify(locMdl));
-                            gltfsAssets = gltfsAssets + "<a-asset-item id=\x22" + locMdl.modelID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
-                            gltfsEntities = gltfsEntities + "<a-entity class=\x22geo\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 mod_model=\x22markerType: "+
+                            gltfsAssets = gltfsAssets + "<div id=\x22" + locMdl.modelID + "\x22 src=\x22"+ modelURL +"\x22></div>";
+                            gltfsEntities = gltfsEntities + "<div class=\x22geo\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 mod_model=\x22markerType: "+
                             locMdl.markerType+"; timestamp: "+locMdl.timestamp+"; tags: "+locationTags+"; scale:"+scale;+"; name:"+locMdl.name+"; eventData:"+locMdl.eventData+";\x22 class=\x22gltf "+entityType+" "+ambientChild+" activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+locMdl.latitude+
-                            "; longitude: "+locMdl.longitude+";\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+" rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";
+                            "; longitude: "+locMdl.longitude+";\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+" rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</div>";
 
                         } else { ///NOT positioned by lat/lng
 
-                            let zFix = parseFloat(locMdl.z); //nope
-                            if (!locMdl.markerObjScale || locMdl.markerObjScale == undefined || locMdl.markerObjScale == "") {
-                                locMdl.markerObjScale = 1;
-                            }
-                            if (!locMdl.xscale || locMdl.xscale == undefined || locMdl.xscale == "") {
-                                locMdl.xscale = locMdl.markerObjScale;
-                            }
-                            if (!locMdl.yscale || locMdl.yscale == undefined || locMdl.yscale == "") {
-                                locMdl.yscale = locMdl.markerObjScale;
-                            }
-                            if (!locMdl.zscale || locMdl.zscale == undefined || locMdl.zscale == "") {
-                                locMdl.zscale = locMdl.markerObjScale;
-                            }
+                            // let zFix = parseFloat(locMdl.z); //nope
+                            // if (!locMdl.markerObjScale || locMdl.markerObjScale == undefined || locMdl.markerObjScale == "") {
+                            //     locMdl.markerObjScale = 1;
+                            // }
+                            // if (!locMdl.xscale || locMdl.xscale == undefined || locMdl.xscale == "") {
+                            //     locMdl.xscale = locMdl.markerObjScale;
+                            // }
+                            // if (!locMdl.yscale || locMdl.yscale == undefined || locMdl.yscale == "") {
+                            //     locMdl.yscale = locMdl.markerObjScale;
+                            // }
+                            // if (!locMdl.zscale || locMdl.zscale == undefined || locMdl.zscale == "") {
+                            //     locMdl.zscale = locMdl.markerObjScale;
+                            // }
 
-                            gltfsAssets = gltfsAssets + "<a-asset-item class=\x22gltfAssets\x22 id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></a-asset-item>";
+                            // gltfsAssets = gltfsAssets + "<div class=\x22gltfAssets\x22 id=\x22" + m_assetID + "\x22 src=\x22"+ modelURL +"\x22></div>";
                             
-                            // let yRot 
-                            let scatterSurface = "";
-                            let brownian = "";
-                            // let id = "gltf_" + m_assetID;  /////THIS CHANGE COULD BREAK THINGS??? don't think so, but....
-                            let id = locMdl.timestamp;
-                            if (locMdl.markerType == "surface" || locMdl.eventData.toLowerCase().includes("surface")) {
-                                scatterSurface = "scatter-surface";
-                                id = 'scatterSurface';
-                                entityType = "surface";
-                            }
+                            // // let yRot 
+                            // let scatterSurface = "";
+                            // let brownian = "";
+                            // // let id = "gltf_" + m_assetID;  /////THIS CHANGE COULD BREAK THINGS??? don't think so, but....
+                            // let id = locMdl.timestamp;
+                            // if (locMdl.markerType == "surface" || locMdl.eventData.toLowerCase().includes("surface")) {
+                            //     scatterSurface = "scatter-surface";
+                            //     id = 'scatterSurface';
+                            //     entityType = "surface";
+                            // }
 
-                            let modModel = "mod_model=\x22markerType: "+locMdl.markerType+"; modelName: "+locMdl.model+"; xscale:"+locMdl.xscale+"; yscale:"+locMdl.yscale+"; zscale:"+locMdl.zscale+"; xpos:"+
-                            locMdl.x+"; ypos:"+locMdl.y+"; zpos:"+locMdl.z+"; timestamp: "+locMdl.timestamp+"; tags: "+locMdl.locationTags+"; scale:"+locMdl.markerObjScale+"; name:"+
-                            locMdl.name+"; description:"+locMdl.description+"; eventData:"+locMdl.eventData+"; modelID:"+m_assetID+";\x22";
+                            // let modModel = "mod_model=\x22markerType: "+locMdl.markerType+"; modelName: "+locMdl.model+"; xscale:"+locMdl.xscale+"; yscale:"+locMdl.yscale+"; zscale:"+locMdl.zscale+"; xpos:"+
+                            // locMdl.x+"; ypos:"+locMdl.y+"; zpos:"+locMdl.z+"; timestamp: "+locMdl.timestamp+"; tags: "+locMdl.locationTags+"; scale:"+locMdl.markerObjScale+"; name:"+
+                            // locMdl.name+"; description:"+locMdl.description+"; eventData:"+locMdl.eventData+"; modelID:"+m_assetID+";\x22";
                             
-                            //////////   DEFAULT not instanced, normal placement
-                            if (!locMdl.eventData.toLowerCase().includes("instanc")) {  //NOT "scatter" anymore, see mod_models
-                                let physicsMod = "";
-                                let shape = 'hull';
-                                let groundMod = "";
-                                // console.log("locMdl deets " + JSON.stringify(locMdl));
-                                if (locMdl.eventData.toLowerCase().includes('physics')){ //ammo for now // no add in mod_model (where model isloaded)
-                                    //hrm, maybe 
-                                }
-                                if (locMdl.eventData.toLowerCase().includes("shader")) {
-                                    if (locMdl.eventData.toLowerCase().includes("noise")) {
-                                        console.log("TRYNA PUT A SHADER@@");
-                                        // modMaterial = "material=\x22shader: noise;\x22";
-                                        modModel = "mod_model=\x22markerType: "+locMdl.markerType+"; timestamp: "+locMdl.timestamp+"; tags: "+locMdl.locationTags+"; name: "+locMdl.name+"; eventData:"+locMdl.eventData+"; shader: noise\x22";
-                                        let vertexShader  = requireText('../main/src/shaders/noise1_vertex.glsl', require);
-                                        let fragmentShader = requireText('../main/src/shaders/noise1_fragment.glsl', require);
-                                        shaderScripts = "<script type=\x22x-shader/x-vertex\x22 id=\x22noise1_vertex\x22>"+vertexShader+"</script>"+
-                                        "<script type=\x22x-shader/x-fragment\x22 id=\x22noise1_fragment\x22>"+fragmentShader+"</script>";
-                                    }
-                                }
-                                if (locMdl.markerType == "brownian path" || locMdl.markerType == "brownian motion") {
-                                    scale = locMdl.yscale != null ? locMdl.yscale : 1;
-                                    if (locMdl.markerType == "brownian path") {
+                            // //////////   DEFAULT not instanced, normal placement
+                            // if (!locMdl.eventData.toLowerCase().includes("instanc")) {  //NOT "scatter" anymore, see mod_models
+                            //     let physicsMod = "";
+                            //     let shape = 'hull';
+                            //     let groundMod = "";
+                            //     // console.log("locMdl deets " + JSON.stringify(locMdl));
+                            //     if (locMdl.eventData.toLowerCase().includes('physics')){ //ammo for now // no add in mod_model (where model isloaded)
+                            //         //hrm, maybe 
+                            //     }
+                            //     if (locMdl.eventData.toLowerCase().includes("shader")) {
+                            //         if (locMdl.eventData.toLowerCase().includes("noise")) {
+                            //             console.log("TRYNA PUT A SHADER@@");
+                            //             // modMaterial = "material=\x22shader: noise;\x22";
+                            //             modModel = "mod_model=\x22markerType: "+locMdl.markerType+"; timestamp: "+locMdl.timestamp+"; tags: "+locMdl.locationTags+"; name: "+locMdl.name+"; eventData:"+locMdl.eventData+"; shader: noise\x22";
+                            //             let vertexShader  = requireText('../main/src/shaders/noise1_vertex.glsl', require);
+                            //             let fragmentShader = requireText('../main/src/shaders/noise1_fragment.glsl', require);
+                            //             shaderScripts = "<script type=\x22x-shader/x-vertex\x22 id=\x22noise1_vertex\x22>"+vertexShader+"</script>"+
+                            //             "<script type=\x22x-shader/x-fragment\x22 id=\x22noise1_fragment\x22>"+fragmentShader+"</script>";
+                            //         }
+                            //     }
+                            //     if (locMdl.markerType == "brownian path" || locMdl.markerType == "brownian motion") {
+                            //         scale = locMdl.yscale != null ? locMdl.yscale : 1;
+                            //         if (locMdl.markerType == "brownian path") {
 
-                                        brownian = "brownian_path=\x22lineEnd:100000;lineStep:100;count:33;object:#thing-to-clone;positionVariance:88 33 86;spaceVectorOffset:101.1,100,100.2,101.2,100,100.3;rotationFollowsAxis:x;speed:0.01;\x22";
+                            //             brownian = "brownian_path=\x22lineEnd:100000;lineStep:100;count:33;object:#thing-to-clone;positionVariance:88 33 86;spaceVectorOffset:101.1,100,100.2,101.2,100,100.3;rotationFollowsAxis:x;speed:0.01;\x22";
                                         
-                                        gltfsEntities = gltfsEntities + "<a-gltf-model shadow src=\x22#"+m_assetID+"\x22 id=\x22thing-to-clone\x22 visible=\x22true\x22></a-gltf-model>"+
-                                        "<a-entity "+brownian+
-                                        " shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+
-                                        " "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>";
-                                    } else if (locMdl.markerType == "brownian motion") {
-                                        brownian = "brownian-motion=\x22speed:0.1;rotationVariance:.2 .2 .2;positionVariance:2.5 5 2.5;spaceVector:10.1,20.1,30.1,10.1,20.1,30.1;\x22";
+                            //             gltfsEntities = gltfsEntities + "<a-gltf-model shadow src=\x22#"+m_assetID+"\x22 id=\x22thing-to-clone\x22 visible=\x22true\x22></a-gltf-model>"+
+                            //             "<div "+brownian+
+                            //             " shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+
+                            //             " "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</div>";
+                            //         } else if (locMdl.markerType == "brownian motion") {
+                            //             brownian = "brownian-motion=\x22speed:0.1;rotationVariance:.2 .2 .2;positionVariance:2.5 5 2.5;spaceVector:10.1,20.1,30.1,10.1,20.1,30.1;\x22";
                                         
-                                        gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+brownian+" "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
-                                        " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
-                                        " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>"; 
-                                        gltfModel = modelURL;
-                                    }
+                            //             gltfsEntities = gltfsEntities + "<div id=\x22"+id+"\x22 "+brownian+" "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
+                            //             " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
+                            //             " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</div>"; 
+                            //             gltfModel = modelURL;
+                            //         }
                                     
-                                } else { //DEFAULT entity conf (doesn't use brownian)
+                            //     } else { //DEFAULT entity conf (doesn't use brownian)
 
-                                    if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
-                                        console.log("GOTSA AR TARGET ELEMENT");
-                                        arChildElements = arChildElements + "<a-entity id=\x22"+id+"\x22 "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
-                                        " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
-                                        " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>"; 
-                                        gltfModel = modelURL;
-                                    } else {
-                                        gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
-                                        " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
-                                        " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</a-entity>"; 
-                                        gltfModel = modelURL;
-                                    }
-                                }
-                                //INSTANCING (cloned) placement instancing + surface scattering
-                            } else { 
-                                console.log("!!!!tryna instance so0methings!@ " + JSON.stringify(locMdl));
-                                let instancing = "instanced_meshes_mod=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+";\x22";
+                            //         if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
+                            //             console.log("GOTSA AR TARGET ELEMENT");
+                            //             arChildElements = arChildElements + "<div id=\x22"+id+"\x22 "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
+                            //             " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
+                            //             " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</div>"; 
+                            //             gltfModel = modelURL;
+                            //         } else {
+                            //             gltfsEntities = gltfsEntities + "<div id=\x22"+id+"\x22 "+followCurve+" "+physicsMod+" "+modelParent+" "+scatterSurface+" "+modModel+" class=\x22envMap gltf "+entityType+" "+ambientChild+
+                            //             " activeObjexGrab activeObjexRay\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+" gltf-model=\x22#" + m_assetID + "\x22 "+objAnim+" "+cannedAnim+
+                            //             " position=\x22"+locMdl.x+" "+locMdl.y+" "+zFix+"\x22 scale=\x22"+scale+" "+scale+" "+scale+"\x22 data-scale=\x22"+scale+"\x22 rotation=\x22"+rotation+"\x22 >" + offsetPos+ "</div>"; 
+                            //             gltfModel = modelURL;
+                            //         }
+                            //     }
+                            //     //INSTANCING (cloned) placement instancing + surface scattering
+                            // } else { 
+                            //     console.log("!!!!tryna instance so0methings!@ " + JSON.stringify(locMdl));
+                            //     let instancing = "instanced_meshes_mod=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+";\x22";
 
-                                let interaction = "";
-                                if ((locMdl.locationTags && locMdl.locationTags.includes("select")) || (locMdl.locationTags && locMdl.locationTags.includes("click"))){
-                                    interaction = " interaction: select; ";
-                                }
-                                console.log("instancing interaction " + interaction + " TAGS " + locMdl.locationTags);
-                                let objectRef = "";
-                                scale = locMdl.yscale != null ? locMdl.yscale : 1;
+                            //     let interaction = "";
+                            //     if ((locMdl.locationTags && locMdl.locationTags.includes("select")) || (locMdl.locationTags && locMdl.locationTags.includes("click"))){
+                            //         interaction = " interaction: select; ";
+                            //     }
+                            //     console.log("instancing interaction " + interaction + " TAGS " + locMdl.locationTags);
+                            //     let objectRef = "";
+                            //     scale = locMdl.yscale != null ? locMdl.yscale : 1;
 
-                                //TODO if there's a mediaID w/ tagMap, do that length... and use locations?
-                                if (locMdl.objectID) {
-                                    console.log("locMdl WITH OBJECT ID!!!" + locMdl.objectID);
-                                } 
-                                if (locMdl.eventData.toLowerCase().includes("everywhere")) {
+                            //     //TODO if there's a mediaID w/ tagMap, do that length... and use locations?
+                            //     if (locMdl.objectID) {
+                            //         console.log("locMdl WITH OBJECT ID!!!" + locMdl.objectID);
+                            //     } 
+                            //     if (locMdl.eventData.toLowerCase().includes("everywhere")) {
                                     
-                                    if (locMdl.locationTags && locMdl.locationTags.includes('growpop')) { //tags not eventdata?
-                                        interaction = " interaction: growpop; ";
-                                    } else if (locMdl.locationTags && locMdl.locationTags.includes('shrinkpop')) {
-                                        interaction = " interaction: shrinkpop; ";
-                                    } else if (locMdl.locationTags && locMdl.locationTags.includes('wiggle')) {
-                                        interaction = " interaction: wiggle; ";
-                                    }
-                                }
-                                if (locMdl.locationTags && locMdl.locationTags.includes("grass") ) {
-                                    instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; tags: grass; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 3000; scaleFactor: "+scale+"\x22";
-                                } else if (locMdl.eventData.toLowerCase().includes("plants")) {
-                                    instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 500; scaleFactor: 8\x22";
-                                } else if (locMdl.eventData.toLowerCase().includes("shrooms")) {
-                                    instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 50; scaleFactor: 2\x22";
-                                } else if (locMdl.eventData.toLowerCase().includes("rocks")) {
-                                    instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 200; scaleFactor: 32\x22";
-                                } 
-                                if (locMdl.eventData.toLowerCase().includes("~")) {
-                                    let split = locMdl.eventData.split("~");
-                                    if (split.length) {
-                                        instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" objectID: "+locMdl.objectID+"; yMod: "+locMdl.y+"; count: "+split[1]+"; scaleFactor: "+scale+"; tags: "+locMdl.locationTags+"\x22";
-                                        // console.log("!!!tryna spoolit scatter dasta..." + instancing);
-                                        if (locMdl.eventData.toLowerCase().includes("everywhere")) {
-                                            instancingEntity = instancingEntity + "<a-entity instanced_meshes_sphere=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
-                                        }
-                                        if (locMdl.eventData.toLowerCase().includes("physics")) {
-                                            instancingEntity = instancingEntity + "<a-entity scatter_physics=\x22_id: "+locMdl.modelID+"; count: "+split[1]+"; scaleFactor: "+scale+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></a-entity>";
+                            //         if (locMdl.locationTags && locMdl.locationTags.includes('growpop')) { //tags not eventdata?
+                            //             interaction = " interaction: growpop; ";
+                            //         } else if (locMdl.locationTags && locMdl.locationTags.includes('shrinkpop')) {
+                            //             interaction = " interaction: shrinkpop; ";
+                            //         } else if (locMdl.locationTags && locMdl.locationTags.includes('wiggle')) {
+                            //             interaction = " interaction: wiggle; ";
+                            //         }
+                            //     }
+                            //     if (locMdl.locationTags && locMdl.locationTags.includes("grass") ) {
+                            //         instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; tags: grass; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 3000; scaleFactor: "+scale+"\x22";
+                            //     } else if (locMdl.eventData.toLowerCase().includes("plants")) {
+                            //         instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 500; scaleFactor: 8\x22";
+                            //     } else if (locMdl.eventData.toLowerCase().includes("shrooms")) {
+                            //         instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 50; scaleFactor: 2\x22";
+                            //     } else if (locMdl.eventData.toLowerCase().includes("rocks")) {
+                            //         instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; yMod: "+locMdl.y+"; count: 200; scaleFactor: 32\x22";
+                            //     } 
+                            //     if (locMdl.eventData.toLowerCase().includes("~")) {
+                            //         let split = locMdl.eventData.split("~");
+                            //         if (split.length) {
+                            //             instancing = "instanced_surface_meshes=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" objectID: "+locMdl.objectID+"; yMod: "+locMdl.y+"; count: "+split[1]+"; scaleFactor: "+scale+"; tags: "+locMdl.locationTags+"\x22";
+                            //             // console.log("!!!tryna spoolit scatter dasta..." + instancing);
+                            //             if (locMdl.eventData.toLowerCase().includes("everywhere")) {
+                            //                 instancingEntity = instancingEntity + "<div instanced_meshes_sphere=\x22_id: "+locMdl.modelID+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></div>";
+                            //             }
+                            //             if (locMdl.eventData.toLowerCase().includes("physics")) {
+                            //                 instancingEntity = instancingEntity + "<div scatter_physics=\x22_id: "+locMdl.modelID+"; count: "+split[1]+"; scaleFactor: "+scale+"; modelID: "+m_assetID+"; "+interaction+" tags: "+locMdl.locationTags+"\x22></div>";
                                     
-                                        }
-                                    }
-                                }
-                                    let modelString = "gltf-model=\x22#" + m_assetID + "\x22";
-                                    let jsonDataBuff = "";
-                                    let jsonID = "";
-                                    if (locMdl.mediaID) {
-                                        jsonID = locMdl.mediaID;
-                                        // const mID = convertStringToObjectID(locMdl.mediaID);
-                                        // const mediaquery = {"_id": mID};
-                                        // let mediaData = await RunDataQuery("text_items", "findOne", mediaquery);
+                            //             }
+                            //         }
+                            //     }
+                            //         let modelString = "gltf-model=\x22#" + m_assetID + "\x22";
+                            //         let jsonDataBuff = "";
+                            //         let jsonID = "";
+                            //         if (locMdl.mediaID) {
+                            //             jsonID = locMdl.mediaID;
+                            //             // const mID = convertStringToObjectID(locMdl.mediaID);
+                            //             // const mediaquery = {"_id": mID};
+                            //             // let mediaData = await RunDataQuery("text_items", "findOne", mediaquery);
 
-                                        // console.log("mediaData " + JSON.stringify(mediaData));
-                                        // jsonDataBuff = Buffer.from(JSON.stringify(mediaData)).toString("base64");
-                                    }
-                                    // let jsonData = "data-json=" + buff
-                                    gltfsEntities = gltfsEntities + "<a-entity id=\x22"+id+"\x22 "+modelString+" "+instancing+" class=\x22"+entityType+
-                                    " activeObjexGrab activeObjexRay\x22 data-json=\x22"+jsonID+"\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+
-                                    " position=\x220 -200 0\x22></a-entity>";//scatter model below //nm, just load it from here w/ modelString
-                                    gltfModel = modelURL;
+                            //             // console.log("mediaData " + JSON.stringify(mediaData));
+                            //             // jsonDataBuff = Buffer.from(JSON.stringify(mediaData)).toString("base64");
+                            //         }
+                            //         // let jsonData = "data-json=" + buff
+                            //         gltfsEntities = gltfsEntities + "<div id=\x22"+id+"\x22 "+modelString+" "+instancing+" class=\x22"+entityType+
+                            //         " activeObjexGrab activeObjexRay\x22 data-json=\x22"+jsonID+"\x22 shadow=\x22cast:true; receive:true\x22 "+skyboxEnvMap+
+                            //         " position=\x220 -200 0\x22></div>";//scatter model below //nm, just load it from here w/ modelString
+                            //         gltfModel = modelURL;
                                     
-                                // }
-                            }
+                            //     // }
+                            // }
 
                             // if (locMdl.markerType == "navmesh") {
                             //     let visible = false;
@@ -2323,9 +1998,9 @@ webxr_router.get('/:_id', function (req, res) {
                             //         visible = true;
                             //     }
                             //     if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
-                            //         arChildElements = arChildElements + "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            //         arChildElements = arChildElements + "<div id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></div>"; //use big circle if no defined navmesh
                             //     } else {
-                            //         navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            //         navmeshEntity = "<div id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></div>"; //use big circle if no defined navmesh
                             //     }
                             // }
                             // if (locMdl.markerType == "surface") {
@@ -2334,9 +2009,9 @@ webxr_router.get('/:_id', function (req, res) {
                             //         visible = true;
                             //     }
                             //     if (useArParent || (locMdl.locationTags && (locMdl.tags.includes("ar child") || locMdl.tags.includes("archild")))) {
-                            //         arChildElements = arChildElements + "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            //         arChildElements = arChildElements + "<div class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></div>"; //use big circle if no defined navmesh
                             //     } else {
-                            //         surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+                            //         surfaceEntity = "<div class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></div>"; //use big circle if no defined navmesh
                             //     }
                             // }   
                         } //not geo
@@ -2344,25 +2019,25 @@ webxr_router.get('/:_id', function (req, res) {
                     } else {
                         
                      
-                        if (model != null && model.item_type == "usdz" && model.filename) {//not locmdl glb
+                        // if (model != null && model.item_type == "usdz" && model.filename) {//not locmdl glb
                         
-                            let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/usdz/" + model.filename, 6000);
-                            console.log("non-gltf modelURL " + modelURL + " modelType " + model.item_type);
-                            usdzFiles = modelURL;
+                        //     let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/usdz/" + model.filename, 6000);
+                        //     console.log("non-gltf modelURL " + modelURL + " modelType " + model.item_type);
+                        //     usdzFiles = modelURL;
                             
-                            loadUSDZ = "ready(function(){\n" +
-                            "let usdzDataEntity = document.getElementById(\x22usdzData\x22);\n"+
-                            "usdzDataEntity.setAttribute(\x22usdz\x22, \x22usdzData\x22, \x22"+usdzFiles+"\x22);\n"+ 
-                            "});";
-                            usdzModel = modelURL;
+                        //     loadUSDZ = "ready(function(){\n" +
+                        //     "let usdzDataEntity = document.getElementById(\x22usdzData\x22);\n"+
+                        //     "usdzDataEntity.setAttribute(\x22usdz\x22, \x22usdzData\x22, \x22"+usdzFiles+"\x22);\n"+ 
+                        //     "});";
+                        //     usdzModel = modelURL;
                             
-                        } else if (model != null && model.item_type == "splat") {//not locmdl glb //nope do this on esm route..
-                            modSplats = "<script type=\x22module\x22 src=\x22../main/src/component/mod_splats.js\x22 defer=\x22defer\x22></script>"; 
-                            let splatURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
-                            console.log("splatURL " + splatURL + " modelType " + model.item_type);
-                            splatEls = splatEls + "<a-entity mod_splat=\x22url: "+splatURL+"; xpos: "+locMdl.x+"; ypos: "+locMdl.y+"; zpos: "+locMdl.z+"; xscale: "+locMdl.xscale+"; yscale: "+locMdl.yscale+"; zscale: "+locMdl.zscale+"\x22></a-entity>";
+                        // } else if (model != null && model.item_type == "splat") {//not locmdl glb //nope do this on esm route..
+                        //     modSplats = "<script type=\x22module\x22 src=\x22../main/src/component/mod_splats.js\x22 defer=\x22defer\x22></script>"; 
+                        //     let splatURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
+                        //     console.log("splatURL " + splatURL + " modelType " + model.item_type);
+                        //     splatEls = splatEls + "<div mod_splat=\x22url: "+splatURL+"; xpos: "+locMdl.x+"; ypos: "+locMdl.y+"; zpos: "+locMdl.z+"; xscale: "+locMdl.xscale+"; yscale: "+locMdl.yscale+"; zscale: "+locMdl.zscale+"\x22></div>";
 
-                        }
+                        // }
 
                         
                     }
@@ -2373,32 +2048,32 @@ webxr_router.get('/:_id', function (req, res) {
 
                     // }
                      if ((locMdl.model == null || locMdl.modelID == "none") && locMdl.markerType == "navmesh") {
-                        let visible = false;
-                        if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
-                            visible = true;
-                        }
-                        if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
-                            arChildElements = arChildElements + "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                        } else {
-                            console.log("TRYNA COOK A CANNNED NAVMESH");
-                            navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                        }
+                        // let visible = false;
+                        // if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
+                        //     visible = true;
+                        // }
+                        // if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
+                        //     arChildElements = arChildElements + "<div id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></div>"; //use big circle if no defined navmesh
+                        // } else {
+                        //     console.log("TRYNA COOK A CANNNED NAVMESH");
+                        //     navmeshEntity = "<div id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></div>"; //use big circle if no defined navmesh
+                        // }
                     }
                     if ((locMdl.model == null || locMdl.modelID == "none") && locMdl.markerType == "surface") {
                       
-                        let visible = false;
-                        if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
-                            visible = true;
-                        }
-                        if (useArParent || (locMdl.locationTags && (locMdl.tags.includes("ar child") || locMdl.tags.includes("archild")))) {
-                            arChildElements = arChildElements + "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                        } else {
-                            // console.log("TRYNA COOK A CANNED SURFACE");
-                            surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
-                            if (locMdl.locationTags.includes("physics")) {
-                                surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22physics: true\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; 
-                            }
-                        }
+                        // let visible = false;
+                        // if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
+                        //     visible = true;
+                        // }
+                        // if (useArParent || (locMdl.locationTags && (locMdl.tags.includes("ar child") || locMdl.tags.includes("archild")))) {
+                        //     arChildElements = arChildElements + "<div class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22arChild: true;\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></div>"; //use big circle if no defined navmesh
+                        // } else {
+                        //     // console.log("TRYNA COOK A CANNED SURFACE");
+                        //     surfaceEntity = "<div class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></div>"; //use big circle if no defined navmesh
+                        //     if (locMdl.locationTags.includes("physics")) {
+                        //         surfaceEntity = "<div class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22physics: true\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></div>"; 
+                        //     }
+                        // }
                     } 
                 }
             } //end locmdl for loop
@@ -2407,7 +2082,7 @@ webxr_router.get('/:_id', function (req, res) {
             if (attributions != null && attributions != undefined && attributions.length > 0) {
                 attributionsObject.attributions = attributions;
                 let attrib64 = Buffer.from(JSON.stringify(attributionsObject)).toString("base64");
-                attributionsTextEntity = attributionsTextEntity + "<a-entity id=\x22attributionsEntity\x22 data-attributions=\x22"+attrib64+"\x22 attributions_text_control></a-entity>";
+                attributionsTextEntity = attributionsTextEntity + "<div id=\x22attributionsEntity\x22 data-attributions=\x22"+attrib64+"\x22 attributions_text_control></div>";
             }
             ///////////
             // if (sceneResponse.sceneNextScene != null && sceneResponse.sceneNextScene != "") { 
@@ -2430,72 +2105,72 @@ webxr_router.get('/:_id', function (req, res) {
             ////////////////
             if (sceneResponse.sceneText != null && sceneResponse.sceneText != "" && sceneResponse.sceneText.length > 0) {
                 
-                if (!textLocation.length > 0) {textLocation = "-10 1 -5";}
-                let mainText = sceneResponse.sceneText.replace(/([\"]+)/gi, '\'');
-                mainText = mainText.replace(/([\;]+)/gi, '\:');
-                let maintext64 = Buffer.from(JSON.stringify(sceneResponse.sceneText)).toString("base64");
-                textEntities = textEntities + "<a-entity look-at=\x22#player\x22 scale=\x22.25 .25 .25\x22 position=\x22"+textLocation+"\x22>"+
-                "<a-entity "+skyboxEnvMap+" id=\x22mainTextToggle\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1 .5\x22 toggle-main-text  gltf-model=\x22#exclamation\x22></a-entity>"+
-                "<a-entity id=\x22mainTextPanel\x22 visible='false' position=\x220 0 0\x22>" +
-                "<a-entity id=\x22mainTextHeader\x22 visible='false' position=\x225 9.75 0\x22></a-entity>" +
-                "<a-entity id=\x22mainText\x22 data-maintext='"+maintext64+"' main-text-control=\x22font: "+sceneResponse.sceneFontWeb1+"; mainTextString: ; mode: "+sceneResponse.scenePrimaryTextMode+"\x22 position=\x22-5 9.25 0\x22></a-entity>" +
-                "<a-entity visible='false' class=\x22envMap activeObjexRay\x22 id=\x22nextMainText\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x223 -1 2\x22></a-entity>" +
-                "<a-entity visible='false' class=\x22envMap activeObjexRay\x22 id=\x22previousMainText\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-3 -1 2\x22></a-entity>" +
-                "<a-entity gltf-model=\x22#square_panel\x22 scale=\x226 6 6\x22 position=\x220 5 -.5\x22></a-entity>" +
-                "</a-entity></a-entity></a-entity>"; 
+                // if (!textLocation.length > 0) {textLocation = "-10 1 -5";}
+                // let mainText = sceneResponse.sceneText.replace(/([\"]+)/gi, '\'');
+                // mainText = mainText.replace(/([\;]+)/gi, '\:');
+                // let maintext64 = Buffer.from(JSON.stringify(sceneResponse.sceneText)).toString("base64");
+                // textEntities = textEntities + "<div look-at=\x22#player\x22 scale=\x22.25 .25 .25\x22 position=\x22"+textLocation+"\x22>"+
+                // "<div "+skyboxEnvMap+" id=\x22mainTextToggle\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1 .5\x22 toggle-main-text  gltf-model=\x22#exclamation\x22></div>"+
+                // "<div id=\x22mainTextPanel\x22 visible='false' position=\x220 0 0\x22>" +
+                // "<div id=\x22mainTextHeader\x22 visible='false' position=\x225 9.75 0\x22></div>" +
+                // "<div id=\x22mainText\x22 data-maintext='"+maintext64+"' main-text-control=\x22font: "+sceneResponse.sceneFontWeb1+"; mainTextString: ; mode: "+sceneResponse.scenePrimaryTextMode+"\x22 position=\x22-5 9.25 0\x22></div>" +
+                // "<div visible='false' class=\x22envMap activeObjexRay\x22 id=\x22nextMainText\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x223 -1 2\x22></div>" +
+                // "<div visible='false' class=\x22envMap activeObjexRay\x22 id=\x22previousMainText\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-3 -1 2\x22></div>" +
+                // "<div gltf-model=\x22#square_panel\x22 scale=\x226 6 6\x22 position=\x220 5 -.5\x22></div>" +
+                // "</div></div></div>"; 
             }
-            if (sceneResponse.sceneTextItems != null && sceneResponse.sceneTextItems != undefined && sceneResponse.sceneTextItems != "") {
+            // if (sceneResponse.sceneTextItems != null && sceneResponse.sceneTextItems != undefined && sceneResponse.sceneTextItems != "") {
 
-                sceneTextData = "<a-entity scene_text_control id=\x22sceneTextData\x22 data-attribute=\x22"+sceneResponse.sceneTextItems+"\x22></a-entity>"; //this does a fetch clientside using the IDs in data-attribute
+            //     sceneTextData = "<div scene_text_control id=\x22sceneTextData\x22 data-attribute=\x22"+sceneResponse.sceneTextItems+"\x22></div>"; //this does a fetch clientside using the IDs in data-attribute
 
-                if (sceneResponse.sceneWebType != "HTML from Text Item") { //if it's not just a regular html page...
-                    for (let i = 0; i < sceneTextLocations.length; i++) {  
-                        let textID = sceneTextLocations[i].description; //check desc for id, if not then event data
-                        if (!textID || textID.length < 5) {
-                            textID = sceneTextLocations[i].eventData;
-                        }
-                        console.log("tryna get svg " + textID);
-                        if (textID && textID.length > 5) { 
-                            if (sceneTextLocations[i].markerType == "svg canvas billboard") {
+            //     if (sceneResponse.sceneWebType != "HTML from Text Item") { //if it's not just a regular html page...
+            //         for (let i = 0; i < sceneTextLocations.length; i++) {  
+            //             let textID = sceneTextLocations[i].description; //check desc for id, if not then event data
+            //             if (!textID || textID.length < 5) {
+            //                 textID = sceneTextLocations[i].eventData;
+            //             }
+            //             console.log("tryna get svg " + textID);
+            //             if (textID && textID.length > 5) { 
+            //                 if (sceneTextLocations[i].markerType == "svg canvas billboard") {
                             
-                                let oid = ObjectId.createFromHexString(textID.toString());
-                                const query = {"_id": oid};
-                                const text_item = await RunDataQuery("text_items", "findOne", query);    
-                                if (text_item.type == "SVG Document") {
-                                    // console.log("gots svgItem : " + JSON.stringify(text_item));
-                                    let scale = 1;
+            //                     let oid = ObjectId.createFromHexString(textID.toString());
+            //                     const query = {"_id": oid};
+            //                     const text_item = await RunDataQuery("text_items", "findOne", query);    
+            //                     if (text_item.type == "SVG Document") {
+            //                         // console.log("gots svgItem : " + JSON.stringify(text_item));
+            //                         let scale = 1;
 
-                                    sceneTextItemData = sceneTextItemData + "<canvas class=\x22canvasItem\x22 id=\x22svg_canvas_"+textID+"\x22 style=\x22text-align:center;\x22 width=\x221024\x22 height=\x221024\x22></canvas>"+
-                                    "<div style=\x22visibility: hidden\x22 class=\x22svgItem\x22 id=\x22svg_item_"+textID+"\x22 data-attribute=\x22"+text_item._id+"\x22>"+text_item.textstring+"</div>"; //text string is an svg
+            //                         sceneTextItemData = sceneTextItemData + "<canvas class=\x22canvasItem\x22 id=\x22svg_canvas_"+textID+"\x22 style=\x22text-align:center;\x22 width=\x221024\x22 height=\x221024\x22></canvas>"+
+            //                         "<div style=\x22visibility: hidden\x22 class=\x22svgItem\x22 id=\x22svg_item_"+textID+"\x22 data-attribute=\x22"+text_item._id+"\x22>"+text_item.textstring+"</div>"; //text string is an svg
 
-                                    proceduralEntities = proceduralEntities + " <a-plane loadsvg=\x22id:"+textID+"; description: "+sceneTextLocations[i].description+"; eventdata: "+sceneTextLocations[i].eventData+"; tags:  "+sceneTextLocations[i].locationTags+"\x22 id=\x22svg_"+sceneTextLocations[i].timestamp+
-                                    "\x22 look-at=\x22#player\x22 width=\x22"+scale+"\x22 height=\x22"+scale+"\x22 position=\x22"+sceneTextLocations[i].x + " " + sceneTextLocations[i].y + " " + sceneTextLocations[i].z+"\x22></a-plane>";
-                                }
-                            } else if (sceneTextLocations[i].markerType == "svg billboard") {
-                                console.log("tryna get svg billboard " + textID);
-                                let oid = ObjectId.createFromHexString(textID.toString());
-                                const query = {"_id": oid};
-                                const text_item = await RunDataQuery("text_items", "findOne", query);
+            //                         proceduralEntities = proceduralEntities + " <a-plane loadsvg=\x22id:"+textID+"; description: "+sceneTextLocations[i].description+"; eventdata: "+sceneTextLocations[i].eventData+"; tags:  "+sceneTextLocations[i].locationTags+"\x22 id=\x22svg_"+sceneTextLocations[i].timestamp+
+            //                         "\x22 look-at=\x22#player\x22 width=\x22"+scale+"\x22 height=\x22"+scale+"\x22 position=\x22"+sceneTextLocations[i].x + " " + sceneTextLocations[i].y + " " + sceneTextLocations[i].z+"\x22></a-plane>";
+            //                     }
+            //                 } else if (sceneTextLocations[i].markerType == "svg billboard") {
+            //                     console.log("tryna get svg billboard " + textID);
+            //                     let oid = ObjectId.createFromHexString(textID.toString());
+            //                     const query = {"_id": oid};
+            //                     const text_item = await RunDataQuery("text_items", "findOne", query);
                                 
 
-                                if (text_item.type == "SVG Document") {
-                                    let scale = 1;
-                                    proceduralEntities = proceduralEntities + " <a-entity load_threesvg=\x22id:"+textID+"; description: "+sceneTextLocations[i].description+"; eventdata: "+sceneTextLocations[i].eventData+"; tags:  "+sceneTextLocations[i].locationTags+"\x22 id=\x22svg_"+sceneTextLocations[i].timestamp+
-                                    "\x22 look-at=\x22#player\x22 width=\x22"+scale+"\x22 height=\x22"+scale+"\x22 position=\x22"+sceneTextLocations[i].x + " " + sceneTextLocations[i].y + " " + sceneTextLocations[i].z+"\x22></a-entity>";
-                                }
-                            } else { //just "plain" text for now...//TODO markup? urdf? //nm do it clientside
+            //                     if (text_item.type == "SVG Document") {
+            //                         let scale = 1;
+            //                         proceduralEntities = proceduralEntities + " <div load_threesvg=\x22id:"+textID+"; description: "+sceneTextLocations[i].description+"; eventdata: "+sceneTextLocations[i].eventData+"; tags:  "+sceneTextLocations[i].locationTags+"\x22 id=\x22svg_"+sceneTextLocations[i].timestamp+
+            //                         "\x22 look-at=\x22#player\x22 width=\x22"+scale+"\x22 height=\x22"+scale+"\x22 position=\x22"+sceneTextLocations[i].x + " " + sceneTextLocations[i].y + " " + sceneTextLocations[i].z+"\x22></div>";
+            //                     }
+            //                 } else { //just "plain" text for now...//TODO markup? urdf? //nm do it clientside
                             
-                            }
-                        }
-                    } 
-                } else { //if it's an html...
-                    console.log("Tryna fetch scenetextitem " + sceneResponse.sceneTextItems);
-                    let oid = ObjectId.createFromHexString(sceneResponse.sceneTextItems.toString());
-                    const query = {"_id": oid};
-                    const text_item = await RunDataQuery("text_items", "findOne", query);
-                    sceneTextItemData = text_item.textstring; // html with the trimmings...
-                }
-            }
+            //                 }
+            //             }
+            //         } 
+            //     } else { //if it's an html...
+            //         console.log("Tryna fetch scenetextitem " + sceneResponse.sceneTextItems);
+            //         let oid = ObjectId.createFromHexString(sceneResponse.sceneTextItems.toString());
+            //         const query = {"_id": oid};
+            //         const text_item = await RunDataQuery("text_items", "findOne", query);
+            //         sceneTextItemData = text_item.textstring; // html with the trimmings...
+            //     }
+            // }
 
             ////////////// audio //////////////////
             const audioquery = {"_id": {$in: requestedAudioItems }};
@@ -2595,23 +2270,23 @@ webxr_router.get('/:_id', function (req, res) {
                             "src: [\x22"+oggurl+"\x22,\x22"+mp3url+"\x22], "+html5+" ctx: true, volume: 0," + loopable +
                         "});" +
                     "primaryAudioHowl.load();</script>";
-                    primaryAudioEntity = "<a-entity id=\x22primaryAudioParent\x22 look-at=\x22#player\x22 position=\x22"+audioLocation+"\x22>"+ //parent, no window click
+                    // primaryAudioEntity = "<div id=\x22primaryAudioParent\x22 look-at=\x22#player\x22 position=\x22"+audioLocation+"\x22>"+ //parent, no window click
                     
-                    "<a-entity gltf-model=\x22#backpanel_horiz1\x22 position=\x220 0 0\x22 material=\x22color: black; transparent: true;\x22></a-entity>" +
-                    "<a-entity position=\x220 -1.25 0\x22 primary_audio_player id=\x22primaryAudioPlayer\x22 gltf-model=\x22#audioplayer\x22></a-entity>"+
-                    "<a-entity id=\x22primaryAudioText\x22 position=\x22.75 .6 -1\x22 "+
-                    "text=\x22value:Click to play;\x22></a-entity>"+
-                    "<a-entity id=\x22primaryAudio\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; audioID: "+sceneResponse.scenePrimaryAudioID+"; volume: "+scenePrimaryVolume+"; audioevents:"+sceneResponse.scenePrimaryAudioTriggerEvents+"; targetattach:"+sceneResponse.sceneAttachPrimaryAudioToTarget+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
-                    "title: "+primaryAudioTitle+"\x22>"+
+                    // "<div gltf-model=\x22#backpanel_horiz1\x22 position=\x220 0 0\x22 material=\x22color: black; transparent: true;\x22></div>" +
+                    // "<div position=\x220 -1.25 0\x22 primary_audio_player id=\x22primaryAudioPlayer\x22 gltf-model=\x22#audioplayer\x22></div>"+
+                    // "<div id=\x22primaryAudioText\x22 position=\x22.75 .6 -1\x22 "+
+                    // "text=\x22value:Click to play;\x22></div>"+
+                    // "<div id=\x22primaryAudio\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; audioID: "+sceneResponse.scenePrimaryAudioID+"; volume: "+scenePrimaryVolume+"; audioevents:"+sceneResponse.scenePrimaryAudioTriggerEvents+"; targetattach:"+sceneResponse.sceneAttachPrimaryAudioToTarget+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
+                    // "title: "+primaryAudioTitle+"\x22>"+
                     
-                    "</a-entity>"+
+                    // "</div>"+
                     
-                    "</a-entity>";
-                    modelAssets = modelAssets + "<a-asset-item id=\x22backpanel_horiz1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/backpanel_horiz1.glb\x22></a-asset-item>\n";
-                    if (sceneResponse.scenePrimaryAudioTriggerEvents) {
-                        var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
-                        loadAudioEvents = "<a-entity primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></a-entity>"; 
-                    }
+                    // "</div>";
+                    // modelAssets = modelAssets + "<div id=\x22backpanel_horiz1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/backpanel_horiz1.glb\x22></div>\n";
+                    // if (sceneResponse.scenePrimaryAudioTriggerEvents) {
+                    //     var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
+                    //     loadAudioEvents = "<div primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></div>"; 
+                    // }
                 }
             }
             if (hasPrimaryAudioStream) {
@@ -2623,16 +2298,16 @@ webxr_router.get('/:_id', function (req, res) {
                         "src: \x22"+sceneResponse.scenePrimaryAudioStreamURL+"\x22, html5: true, volume: 0, format: ['mp3', 'aac']" +
                     "});" +
                 "</script>";
-                primaryAudioEntity = "<a-entity id=\x22primaryAudioParent\x22 look-at=\x22#player\x22 position=\x22"+audioLocation+"\x22>"+ //parent
-                "<a-entity id=\x22primaryAudioText\x22 geometry=\x22primitive: plane; width: 1; height: .5\x22 position=\x220 .5 2.5\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22"+
-                "text=\x22value:Click to play;\x22></a-entity>"+
-                "<a-entity id=\x22primaryAudioTextBackground\x22 gltf-model=\x22#landscape_panel\x22 scale=\x22.2 .1 .1\x22 position=\x220 .5 2.4\x22 material=\x22color: black; transparent: true; opacity: 0.1\x22></a-entity>" +
-                "<a-entity id=\x22primaryAudio\x22 mixin=\x22grabmix\x22 class=\x22activeObjexGrab activeObjexRay\x22 entity-callout=\x22calloutString: play/pause\n" + primaryAudioTitle+ ";\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; volume: "+scenePrimaryVolume+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
-                "title: "+primaryAudioTitle+"\x22  geometry=\x22primitive: sphere; radius: .25;\x22 material=\x22shader: noise;\x22 position=\x220 0 2.6\x22></a-entity></a-entity>";
-                if (sceneResponse.scenePrimaryAudioTriggerEvents) { //maybe pass a do not listen?
-                    var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
-                    loadAudioEvents = "<a-entity primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></a-entity>"; 
-                }
+                // primaryAudioEntity = "<div id=\x22primaryAudioParent\x22 look-at=\x22#player\x22 position=\x22"+audioLocation+"\x22>"+ //parent
+                // "<div id=\x22primaryAudioText\x22 geometry=\x22primitive: plane; width: 1; height: .5\x22 position=\x220 .5 2.5\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22"+
+                // "text=\x22value:Click to play;\x22></div>"+
+                // "<div id=\x22primaryAudioTextBackground\x22 gltf-model=\x22#landscape_panel\x22 scale=\x22.2 .1 .1\x22 position=\x220 .5 2.4\x22 material=\x22color: black; transparent: true; opacity: 0.1\x22></div>" +
+                // "<div id=\x22primaryAudio\x22 mixin=\x22grabmix\x22 class=\x22activeObjexGrab activeObjexRay\x22 entity-callout=\x22calloutString: play/pause\n" + primaryAudioTitle+ ";\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; volume: "+scenePrimaryVolume+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
+                // "title: "+primaryAudioTitle+"\x22  geometry=\x22primitive: sphere; radius: .25;\x22 material=\x22shader: noise;\x22 position=\x220 0 2.6\x22></div></div>";
+                // if (sceneResponse.scenePrimaryAudioTriggerEvents) { //maybe pass a do not listen?
+                //     var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
+                //     loadAudioEvents = "<div primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></div>"; 
+                // }
             }
             if (hasAmbientAudio) {
                 ambientAudioScript = "<script>" +      
@@ -2640,16 +2315,16 @@ webxr_router.get('/:_id', function (req, res) {
                         "src: [\x22"+ambientOggUrl+"\x22,\x22"+ambientMp3Url+"\x22], volume: 0, loop: true" + 
                     "});" +
                 "ambientAudioHowl.load();</script>";
-                let ambientPosAnim = "animation__yoyo=\x22property: position; to: -25 1 0; dur: 60000; dir: alternate; easing: easeInSine; loop: true;\x22 ";
-                let ambientRotAnim = "animation__rot=\x22property:rotation; dur:60000; to: 0 360 0; loop: true; easing:linear;\x22 ";        
-                ambientAudioEntity = "<a-entity "+ambientRotAnim+"><a-entity id=\x22ambientAudio\x22 ambient_audio_control=\x22oggurl: "+ambientOggUrl+"; mp3url: "+ambientMp3Url+";\x22 volume: "+sceneAmbientVolume+"; "+
-                ambientPosAnim+" position=\x2225 1 0\x22>" +
-                "</a-entity></a-entity>";
+                // let ambientPosAnim = "animation__yoyo=\x22property: position; to: -25 1 0; dur: 60000; dir: alternate; easing: easeInSine; loop: true;\x22 ";
+                // let ambientRotAnim = "animation__rot=\x22property:rotation; dur:60000; to: 0 360 0; loop: true; easing:linear;\x22 ";        
+                // ambientAudioEntity = "<div "+ambientRotAnim+"><div id=\x22ambientAudio\x22 ambient_audio_control=\x22oggurl: "+ambientOggUrl+"; mp3url: "+ambientMp3Url+";\x22 volume: "+sceneAmbientVolume+"; "+
+                // ambientPosAnim+" position=\x2225 1 0\x22>" +
+                // "</div></div>";
                 
             }
             if (hasTriggerAudio) {
-                triggerAudioEntity = "<a-entity id=\x22triggerAudio\x22 trigger_audio_control=\x22volume: "+sceneTriggerVolume+"\x22>"+
-                "</a-entity>";
+                // triggerAudioEntity = "<div id=\x22triggerAudio\x22 trigger_audio_control=\x22volume: "+sceneTriggerVolume+"\x22>"+
+                // "</div>";
                 triggerAudioScript = "<script>" +      
                 "let triggerAudioHowl = new Howl({" + //inject howler for non-streaming
                         "src: [\x22"+triggerOggUrl+"\x22,\x22"+triggerMp3Url+"\x22], volume: 1, loop: false" + 
@@ -2726,10 +2401,10 @@ webxr_router.get('/:_id', function (req, res) {
 
                         vProps.videoTitle = video_items[0].title;
                     
-                        videoEntity = "<a-sphere id=\x22primary_video\x22 shadow=\x22receive: false\x22 class=\x22activeObjexGrab activeObjexRay\x22 scale=\x22-50 -50 50\x22 vid_materials_embed=\x22id:"+vProps.id+"; isSkybox: true;\x22 play-on-vrdisplayactivate-or-enter-vr crossOrigin=\x22anonymous\x22 rotation=\x220 180 0\x22 material=\x22shader: flat;\x22></a-sphere>";
+                        // videoEntity = "<a-sphere id=\x22primary_video\x22 shadow=\x22receive: false\x22 class=\x22activeObjexGrab activeObjexRay\x22 scale=\x22-50 -50 50\x22 vid_materials_embed=\x22id:"+vProps.id+"; isSkybox: true;\x22 play-on-vrdisplayactivate-or-enter-vr crossOrigin=\x22anonymous\x22 rotation=\x220 180 0\x22 material=\x22shader: flat;\x22></a-sphere>";
                         hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>";
                     } else {
-                        videosphereAsset = "<video id=\x22videosphere\x22 autoplay loop crossOrigin=\x22anonymous\x22 src=\x22" + vidUrl + "\x22></video>";
+                        // videosphereAsset = "<video id=\x22videosphere\x22 autoplay loop crossOrigin=\x22anonymous\x22 src=\x22" + vidUrl + "\x22></video>";
                         videoEntity = "<a-videosphere play-on-window-click play-on-vrdisplayactivate-or-enter-vr crossOrigin=\x22anonymous\x22 src=\x22#videosphere\x22 rotation=\x220 180 0\x22 material=\x22shader: flat;\x22></a-videosphere>";
                     }
                 
@@ -2780,19 +2455,21 @@ webxr_router.get('/:_id', function (req, res) {
                     }
                 }
                 var buff = Buffer.from(JSON.stringify(requestedVideoGroups)).toString("base64");
-                if (sceneResponse.sceneWebType == "Video Landing") {
+                // if (sceneResponse.sceneWebType == "Video Landing") {
                     videoGroupsEntity = "<div id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></div>"; 
-                } else {
-                    videoGroupsEntity = "<a-entity video_groups_data id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></a-entity>"; 
-                }
+                // } else {
+                    // videoGroupsEntity = "<div video_groups_data id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></div>"; 
+                // }
                 hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>"; //v 1.0.6 client hls player ref
             }
             
             ////////////// cook some output, ui elements, etc. -- TODO move up or down?
             let youtubeSniffer = "";
+            //NOPE - now this is na, and stored in sceneEnabledClientTypes
             let iosIcon = "<span class=\x22apple_no\x22>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
             let androidIcon = "<span class=\x22android_no\x22>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
             let windowsIcon = "<span class=\x22windows_no\x22>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+            //
             let getAppLink = "<span class=\x22smallfont\x22><a class=\x22btn\x22 href=\x22https://servicemedia.net/landing/builds\x22 target=\x22_blank\x22>Get the app</a></span>&nbsp;";
 
             let connectLink = "<span class=\x22smallfont\x22><a class=\x22btn\x22 href=\x22https://strr.us/connect/?scene="+sceneResponse.short_id+"\x22 target=\x22_blank\x22>Connect</a></span>&nbsp;";
@@ -2832,14 +2509,14 @@ webxr_router.get('/:_id', function (req, res) {
                         "firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);\n"+
                     "</script>";
                     
-                    youtubeEntity = "<a-entity id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
+                    youtubeEntity = "<div id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
 
-                    "<a-entity id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayerModel\x22 youtube_player=\x22yt_id: "+
-                    sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></a-entity>"+
+                    "<div id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayerModel\x22 youtube_player=\x22yt_id: "+
+                    sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></div>"+
                     "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 1.7 .1\x22 id=\x22youtubeTitle\x22></a-text>"+
                     "<a-text width=\x223\x22 position=\x22-.95 .7 .1\x22 id=\x22youtubeState\x22></a-text>"+
                     "<a-text width=\x223\x22 position=\x22-.95 .6 .1\x22 id=\x22youtubeStats\x22></a-text>"+
-                    "</a-entity>";
+                    "</div>";
                 }
             }
             if (hasPrimaryAudio || hasPrimaryAudioStream) {
@@ -2866,7 +2543,7 @@ webxr_router.get('/:_id', function (req, res) {
             "<a href=\x22"+vttLink+"\x22 id=\x22landingButton\x22 type=\x22button\x22 class=\x22btn\x22>VTT </a>&nbsp;&nbsp;"+
 
             // "<button id=\x22landingButton\x22 type=\x22button\x22 class=\x22btn\x22>Landing </button>&nbsp;&nbsp;"+
-            // "<button id=\x22VTTButton\x22 type=\x22button\x22 class=\x22btn\x22>WebXR </button>"+
+            // "<button id=\x22VTTButton\x22 type=\x22button\x22 class=\x22btn\x22>geomap </button>"+
             "</div><hr>";
             if (isGuest) {
                 userText = "<div><span id=\x22userName\x22 class=\x22smallfont\x22>Welcome Guest known as " + avatarName+ "</span>"+
@@ -2972,28 +2649,28 @@ webxr_router.get('/:_id', function (req, res) {
                             requestedPictureGroups.push(picGroup);
                         }
                             if (picturegroupLocation != "") {
-                                pictureGroupsEntity = "<a-entity scale=\x22.75 .75 .75\x22 id=\x22picGroupParent\x22 look-at=\x22#player\x22 position=\x22"+picturegroupLocation+"\x22>"+ 
-                                "<a-entity position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22pictureGroupsControl\x22 class=\x22envMap activeObjexRay\x22 "+skyboxEnvMap+" toggle-picture-group gltf-model=\x22#camera_icon\x22></a-entity>"+
-                                "<a-entity id=\x22pictureGroupPanel\x22 visible=\x22false\x22 position=\x220 -1 0\x22>"+
-                                "<a-entity id=\x22pictureGroupPicLandscape\x22 visible=\x22true\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatrect2\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                                "rotation='0 0 0'></a-entity>"+
-                                "<a-entity id=\x22pictureGroupPicPortrait\x22 visible=\x22false\x22 position=\x220 3.25 -.1\x22 gltf-model=\x22#portrait_panel\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                                "rotation='0 0 0'></a-entity>"+
-                                "<a-entity id=\x22pictureGroupPicSquare\x22 visible=\x22false\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatsquare\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                                "rotation='0 0 0'></a-entity>"+
-                                "<a-entity id=\x22pictureGroupPicCircle\x22 visible=\x22false\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatcircle\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-                                "rotation='0 0 0'></a-entity>"+
-                                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupFlyButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.25 .25 .25\x22 position=\x223.25 -.75 0\x22></a-entity>" +
-                                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupLayoutButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.25 .25 .25\x22 position=\x22-3.25 -.75 0\x22></a-entity>" +
-                                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x222.25 -.75 0\x22></a-entity>" +
-                                "<a-entity visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupPreviousButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-2.25  -.75 0\x22></a-entity>" +
-                                "</a-entity></a-entity>";
+                                // pictureGroupsEntity = "<div scale=\x22.75 .75 .75\x22 id=\x22picGroupParent\x22 look-at=\x22#player\x22 position=\x22"+picturegroupLocation+"\x22>"+ 
+                                // "<div position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22pictureGroupsControl\x22 class=\x22envMap activeObjexRay\x22 "+skyboxEnvMap+" toggle-picture-group gltf-model=\x22#camera_icon\x22></div>"+
+                                // "<div id=\x22pictureGroupPanel\x22 visible=\x22false\x22 position=\x220 -1 0\x22>"+
+                                // "<div id=\x22pictureGroupPicLandscape\x22 visible=\x22true\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatrect2\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                                // "rotation='0 0 0'></div>"+
+                                // "<div id=\x22pictureGroupPicPortrait\x22 visible=\x22false\x22 position=\x220 3.25 -.1\x22 gltf-model=\x22#portrait_panel\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                                // "rotation='0 0 0'></div>"+
+                                // "<div id=\x22pictureGroupPicSquare\x22 visible=\x22false\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatsquare\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                                // "rotation='0 0 0'></div>"+
+                                // "<div id=\x22pictureGroupPicCircle\x22 visible=\x22false\x22 position=\x220 2.25 -.1\x22 gltf-model=\x22#flatcircle\x22 scale=\x224 4 4\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
+                                // "rotation='0 0 0'></div>"+
+                                // "<div visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupFlyButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.25 .25 .25\x22 position=\x223.25 -.75 0\x22></div>" +
+                                // "<div visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupLayoutButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.25 .25 .25\x22 position=\x22-3.25 -.75 0\x22></div>" +
+                                // "<div visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x222.25 -.75 0\x22></div>" +
+                                // "<div visible='true' class=\x22envMap activeObjexRay\x22 id=\x22pictureGroupPreviousButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-2.25  -.75 0\x22></div>" +
+                                // "</div></div>";
                             }
                             var buff = Buffer.from(JSON.stringify(requestedPictureGroups)).toString("base64");
-                            pictureGroupsData = "<a-entity picture_groups_control id=\x22pictureGroupsData\x22 data-picture-groups='"+buff+"'></a-entity>"; //to be picked up by aframe, but data is in data-attribute
-                            modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatrect2_portrait.glb\x22></a-asset-item>\n" +
-                            "<a-asset-item id=\x22flatrect2\x22 crossorigin=\x22anonymous\x22 id=\x22flatrect2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatrect2.glb\x22></a-asset-item>"+
-                            "\n<a-asset-item id=\x22camera_icon\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/camera1.glb\x22></a-asset-item>\n";
+                            pictureGroupsData = "<div picture_groups_control id=\x22pictureGroupsData\x22 data-picture-groups='"+buff+"'></div>"; //to be picked up by aframe, but data is in data-attribute
+                            modelAssets = modelAssets + "<div id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatrect2_portrait.glb\x22></div>\n" +
+                            "<div id=\x22flatrect2\x22 crossorigin=\x22anonymous\x22 id=\x22flatrect2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatrect2.glb\x22></div>"+
+                            "\n<div id=\x22camera_icon\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/camera1.glb\x22></div>\n";
                             "});";
                         // }
                     }
@@ -3125,36 +2802,36 @@ webxr_router.get('/:_id', function (req, res) {
 
                         }
                         if (picture_item.hasAlphaChannel && scatterPics) {
-                            imageEntities = imageEntities + "<a-entity "+link+""+lookat+" geometry=\x22primitive: plane; height: 10; width: 10\x22 material=\x22shader: flat; transparent: true; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                            " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
+                            // imageEntities = imageEntities + "<div "+link+""+lookat+" geometry=\x22primitive: plane; height: 10; width: 10\x22 material=\x22shader: flat; transparent: true; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                            // " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</div>";
                         } else {
                             console.log("picture_item.orientation " + picture_item);
                             if (picture_item.orientation != "equirectangular" && picture_item.orientation != "Equirectangular" && scatterPics) {  //what if linkType is undefined?
 
-                                if (picture_item.orientation == "portrait" || picture_item.orientation == "Portrait") {
-                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                                    index+"\x22 gltf-model=\x22#portrait_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                                    modelAssets = modelAssets + "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5c.glb\x22></a-asset-item>\n";
-                                } else if (picture_item.orientation == "square" || picture_item.orientation == "Square") {
-                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                                    index+"\x22 gltf-model=\x22#square_panel\x22 scale=\x223 3 3\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                                } else if (picture_item.orientation == "circle" || picture_item.orientation == "Circle") {
-                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                                    index+"\x22 gltf-model=\x22#circle_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                                    modelAssets = modelAssets + "<a-asset-item id=\x22circle_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelcircle1.glb\x22></a-asset-item>\n";
-                                } else {
-                                    imageEntities = imageEntities + "<a-entity "+link+""+lookat+"  mod-materials=\x22index:"+
-                                    index+"\x22 gltf-model=\x22#landscape_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                    " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</a-entity>";
-                                }
+                                // if (picture_item.orientation == "portrait" || picture_item.orientation == "Portrait") {
+                                //     imageEntities = imageEntities + "<div "+link+""+lookat+"  mod-materials=\x22index:"+
+                                //     index+"\x22 gltf-model=\x22#portrait_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</div>";
+                                //     modelAssets = modelAssets + "<div id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5c.glb\x22></div>\n";
+                                // } else if (picture_item.orientation == "square" || picture_item.orientation == "Square") {
+                                //     imageEntities = imageEntities + "<div "+link+""+lookat+"  mod-materials=\x22index:"+
+                                //     index+"\x22 gltf-model=\x22#square_panel\x22 scale=\x223 3 3\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</div>";
+                                // } else if (picture_item.orientation == "circle" || picture_item.orientation == "Circle") {
+                                //     imageEntities = imageEntities + "<div "+link+""+lookat+"  mod-materials=\x22index:"+
+                                //     index+"\x22 gltf-model=\x22#circle_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</div>";
+                                //     modelAssets = modelAssets + "<div id=\x22circle_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelcircle1.glb\x22></div>\n";
+                                // } else {
+                                //     imageEntities = imageEntities + "<div "+link+""+lookat+"  mod-materials=\x22index:"+
+                                //     index+"\x22 gltf-model=\x22#landscape_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
+                                //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</div>";
+                                // }
                             }
                         }
                     }
                     var buff = Buffer.from(JSON.stringify(scenePictureItems)).toString("base64");
-                    scenePictureData = "<a-entity scene_pictures_control id=\x22scenePictureData\x22 data-scene-pictures='"+buff+"'></a-entity>";
+                    scenePictureData = "<div id=\x22scenePictureData\x22 data-scene-pictures='"+buff+"'><div>";
                 }
                 /////////////// skyboxen /////////////////////
                 var oo_id = null;
@@ -3328,29 +3005,29 @@ webxr_router.get('/:_id', function (req, res) {
                         sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
                     }
 
-                    let grabMix = "<a-mixin id=\x22grabmix\x22" + //mixin for grabbable objex
-                        "event-set__grab=\x22material.color: #FFEF4F\x22" +
-                        "event-set__grabend=\x22material.color: #F2E646\x22" +
-                        "event-set__hit=\x22material.color: #F2E646\x22" +
-                        "event-set__hitend=\x22material.color: #EF2D5E\x22" +
-                        "event-set__mousedown=\x22material.color: #FFEF4F\x22" +
-                        "event-set__mouseenter=\x22material.color: #F2E646\x22" +
-                        "event-set__mouseleave=\x22material.color: #EF2D5E\x22" +
-                        "event-set__mouseup=\x22material.color: #F2E646\x22" +
-                        "geometry=\x22primitive: box; height: 0.30; width: 0.30; depth: 0.30\x22" +
-                        "material=\x22color: #EF2D5E;\x22></a-mixin>";
+                    // let grabMix = "<a-mixin id=\x22grabmix\x22" + //mixin for grabbable objex
+                    //     "event-set__grab=\x22material.color: #FFEF4F\x22" +
+                    //     "event-set__grabend=\x22material.color: #F2E646\x22" +
+                    //     "event-set__hit=\x22material.color: #F2E646\x22" +
+                    //     "event-set__hitend=\x22material.color: #EF2D5E\x22" +
+                    //     "event-set__mousedown=\x22material.color: #FFEF4F\x22" +
+                    //     "event-set__mouseenter=\x22material.color: #F2E646\x22" +
+                    //     "event-set__mouseleave=\x22material.color: #EF2D5E\x22" +
+                    //     "event-set__mouseup=\x22material.color: #F2E646\x22" +
+                    //     "geometry=\x22primitive: box; height: 0.30; width: 0.30; depth: 0.30\x22" +
+                    //     "material=\x22color: #EF2D5E;\x22></a-mixin>";
 
                     let playerAvatarTemplate = "";
-                    if (sceneResponse.sceneWebType != undefined && (sceneResponse.sceneWebType.toLowerCase() == "aframe" || sceneResponse.sceneWebType.toLowerCase() == "default")) { // and what else?  networking isOn?
-                        playerAvatarTemplate = "<template id=\x22avatar-template\x22>"+ 
+                    // if (sceneResponse.sceneWebType != undefined && (sceneResponse.sceneWebType.toLowerCase() == "aframe" || sceneResponse.sceneWebType.toLowerCase() == "default")) { // and what else?  networking isOn?
+                    //     playerAvatarTemplate = "<template id=\x22avatar-template\x22>"+ 
                         
-                        "<a-entity "+skyboxEnvMap+" gltf-model=\x22#avatar_model\x22>"+
-                        "<a-text class=\x22playerName\x22 look-at=\x22#player\x22 rotation=\x220 0 0\x22 position=\x22.5 .75 -.15\x22 value=\x22"+avatarName+"\x22></a-text>"+
-                        "</a-entity>"+
-                        "</template>";
-                    }
+                    //     "<div "+skyboxEnvMap+" gltf-model=\x22#avatar_model\x22>"+
+                    //     "<a-text class=\x22playerName\x22 look-at=\x22#player\x22 rotation=\x220 0 0\x22 position=\x22.5 .75 -.15\x22 value=\x22"+avatarName+"\x22></a-text>"+
+                    //     "</div>"+
+                    //     "</template>";
+                    // }
                  
-                    let webxrFeatures = "";
+                    let geomapFeatures = "";
                     // let arHitTest = "";
                     let arElements = "";
                     let handsTemplate = "";
@@ -3364,330 +3041,330 @@ webxr_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneWebType == null || sceneResponse.sceneWebType == undefined || (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "default") || 
                         (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "aframe")) { 
 
-                        // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
-                        if (sceneResponse.sceneTags == null) {
-                            sceneResponse.sceneTags = "";
-                        }
-                        let xrExtras = "";
-                        let hitCasterComponent = "";
-                        if ((sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hit test"))) {
-                            xrExtras = "ar-hit-test"; //added to a-scene
-                            // ARScript = "<script type=\x22module\x22 src=\x22../main/src/component/ar_hit_caster.js\x22></script>"; 
-                            hitCasterComponent = "ar_hit_caster"; //added to ar_parent
+                        // // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
+                        // if (sceneResponse.sceneTags == null) {
+                        //     sceneResponse.sceneTags = "";
+                        // }
+                        // let xrExtras = "";
+                        // let hitCasterComponent = "";
+                        // if ((sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hit test"))) {
+                        //     xrExtras = "ar-hit-test"; //added to a-scene
+                        //     // ARScript = "<script type=\x22module\x22 src=\x22../main/src/component/ar_hit_caster.js\x22></script>"; 
+                        //     hitCasterComponent = "ar_hit_caster"; //added to ar_parent
 
-                        }
-                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("xr room physics")) {
-                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
-                            xrExtras = "xr_room_physics";
-                            webxrFeatures = "webxr=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
-                            xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
-                        } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("real world meshing")) {
-                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
-                            xrExtras = " real_world_meshing_mod=\x22meshesEnabled: true;\x22";
-                            webxrFeatures = " " + xrExtras;
-                            xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
-                        } else {
-                            webxrFeatures = "webxr=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
-                        }
-                        if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hand controls") || sceneResponse.sceneTags.toString().toLowerCase().includes("hand controllers")) {
-                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/hand_equip.js\x22></script>";
-                        }
-                        // arElements = "<a-entity material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
-                        // "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></a-entity>"+
-                        // <a-light type="directional" light="castShadow:true;" position="1 1 1" intensity="1.57" shadow-camera-automatic="#ar_parent"></a-light>
-                        arElements = "<a-plane follow-shadow=\x22#ar_parent\x22 material=\x22shader:shadow\x22 shadow=\x22cast:false;\x22 rotation=\x22-90 0 0\x22 width=\x222\x22 height=\x222\x22></a-plane>"+
-                        "<a-entity scale=\x221 1 1\x22 id=\x22ar_parent\x22 "+hitCasterComponent+">" +
-                        arChildElements +
-                        "</a-entity>";
-                        // "<a-entity show-in-ar-mode visible=\x22false\x22 id=\x22hitCaster\x22 ar_hit_caster=\x22targetEl: #ar_parent\x22 gltf-model=\x22#reticle2\x22></a-entity>\n";
-                        handsTemplate = "<template id=\x22hand-template\x22><a-entity><a-box scale=\x220.1 0.1 0.1\x22 visible=false></a-box></a-entity></template>";
+                        // }
+                        // if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("xr room physics")) {
+                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
+                        //     xrExtras = "xr_room_physics";
+                        //     geomapFeatures = "geomap=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
+                        //     xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
+                        // } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("real world meshing")) {
+                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
+                        //     xrExtras = " real_world_meshing_mod=\x22meshesEnabled: true;\x22";
+                        //     geomapFeatures = " " + xrExtras;
+                        //     xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
+                        // } else {
+                        //     geomapFeatures = "geomap=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
+                        // }
+                        // if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hand controls") || sceneResponse.sceneTags.toString().toLowerCase().includes("hand controllers")) {
+                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/hand_equip.js\x22></script>";
+                        // }
+                        // // arElements = "<div material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
+                        // // "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></div>"+
+                        // // <a-light type="directional" light="castShadow:true;" position="1 1 1" intensity="1.57" shadow-camera-automatic="#ar_parent"></a-light>
+                        // arElements = "<a-plane follow-shadow=\x22#ar_parent\x22 material=\x22shader:shadow\x22 shadow=\x22cast:false;\x22 rotation=\x22-90 0 0\x22 width=\x222\x22 height=\x222\x22></a-plane>"+
+                        // "<div scale=\x221 1 1\x22 id=\x22ar_parent\x22 "+hitCasterComponent+">" +
+                        // arChildElements +
+                        // "</div>";
+                        // // "<div show-in-ar-mode visible=\x22false\x22 id=\x22hitCaster\x22 ar_hit_caster=\x22targetEl: #ar_parent\x22 gltf-model=\x22#reticle2\x22></div>\n";
+                        // handsTemplate = "<template id=\x22hand-template\x22><div><a-box scale=\x220.1 0.1 0.1\x22 visible=false></a-box></div></template>";
                        
                     } 
                     if (sceneResponse.sceneWebType == "Model Viewer") {
-                        let extraScripts = "";
-                        let sky = "environment-image=\x22neutral\x22";
-                        if (skyboxUrl != null) {
-                            sky = "skybox-image=\x22"+skyboxUrl+"\x22";
-                        }  
-                        let planeDetectMode = "floor";
-                        let arScaleMode = "";
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("wall")) {
-                            planeDetectMode = "wall";
-                        } 
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale fixed")) {
-                            arScaleMode = "fixed";
-                        }
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale auto")) {
-                            arScaleMode = "auto";
-                        } 
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("show overlay")) {
-                            canvasOverlay = canvasOverlay + socketScripts;
-                        } else {
-                            canvasOverlay = "";
-                        }   
-                        let sceneGreeting = sceneResponse.sceneDescription;
-                        if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
-                            sceneGreeting = sceneResponse.sceneGreeting;
-                        }      
-                        let sceneQuest = "";
-                        if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
-                            sceneQuest = sceneResponse.sceneQuest;
-                        }
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes('show dialog')) {
-                            dialogButton = dialogButton +  //set with the actual button above?
-                            "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>" +
-                            "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>" +
-                            "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
-                            extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                            "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>" +
-                            "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
-                            geoScripts +
-                            locationScripts +
-                            locationData +
-                            modelData;
-                            // inventoryData;
-                        } else {
-                            dialogButton = "";
-                            socketScripts = "";
-                        }
-                        htmltext = "<!DOCTYPE html>\n" +
-                            "<head> " +
-                            "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                            "<meta charset=\x22UTF-8\x22>"+
-                            "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                            "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                            "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                            "<meta charset='utf-8'/>" +
-                            "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
-                            "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
-                            "<meta property='og:type' content='website' /> " +
-                            "<meta property='og:image' content='" + postcard1 + "' /> " +
-                            "<meta property='og:image:height' content='1024' /> " +
-                            "<meta property='og:image:width' content='1024' /> " +
-                            "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
-                            "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
-                            "<meta property='name' content='modelviewer' /> " +
-                            "<title>" + sceneResponse.sceneTitle + "</title>" +
-                            "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
-                            "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                            "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                            "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                            "<link href=\x22/css/modelviewer.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                            "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                            "<script type=\x22module\x22 src=\x22https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js\x22></script>"+
-                            extraScripts + 
-                            "</head>\n" +
-                            "<body style=\x22background-color: black;\x22>\n" +
-                            "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                            "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                            "<model-viewer autoplay shadow-intensity=\x221\x22 camera-controls camera-target=\x220m 0m 0m\x22 src=\x22"+gltfModel+"\x22"+ 
-                            " ar ar-placement=\x22"+planeDetectMode+"\x22 ar-modes=\x22webxr scene-viewer quick-look\x22 ar-scale=\x22"+arScaleMode+"\x22 alt=\x22Viewer for single 3D Model\x22"+ 
-                            sky +
-                            "ios-src=\x22"+usdzModel+"\x22>"+
-                            "<button slot=\x22ar-button\x22 style=\x22background-color: red; color: white; font-size: 36px; border-radius: 4px; border: 1px; position: absolute; bottom: 16px; right: 16px; z-index: 100;\x22>"+
-                            "AR"+
-                            "</button>"+
-                            "</model-viewer>" +
-                            audioSliders +
-                            canvasOverlay +
-                            dialogButton +
+                        // let extraScripts = "";
+                        // let sky = "environment-image=\x22neutral\x22";
+                        // if (skyboxUrl != null) {
+                        //     sky = "skybox-image=\x22"+skyboxUrl+"\x22";
+                        // }  
+                        // let planeDetectMode = "floor";
+                        // let arScaleMode = "";
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("wall")) {
+                        //     planeDetectMode = "wall";
+                        // } 
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale fixed")) {
+                        //     arScaleMode = "fixed";
+                        // }
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale auto")) {
+                        //     arScaleMode = "auto";
+                        // } 
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("show overlay")) {
+                        //     canvasOverlay = canvasOverlay + socketScripts;
+                        // } else {
+                        //     canvasOverlay = "";
+                        // }   
+                        // let sceneGreeting = sceneResponse.sceneDescription;
+                        // if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
+                        //     sceneGreeting = sceneResponse.sceneGreeting;
+                        // }      
+                        // let sceneQuest = "";
+                        // if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
+                        //     sceneQuest = sceneResponse.sceneQuest;
+                        // }
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes('show dialog')) {
+                        //     dialogButton = dialogButton +  //set with the actual button above?
+                        //     "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>" +
+                        //     "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>" +
+                        //     "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
+                        //     extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                        //     "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>" +
+                        //     "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
+                        //     geoScripts +
+                        //     locationScripts +
+                        //     locationData +
+                        //     modelData;
+                        //     // inventoryData;
+                        // } else {
+                        //     dialogButton = "";
+                        //     socketScripts = "";
+                        // }
+                        // htmltext = "<!DOCTYPE html>\n" +
+                        //     "<head> " +
+                        //     "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
+                        //     "<meta charset=\x22UTF-8\x22>"+
+                        //     "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
+                        //     "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
+                        //     "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
+                        //     "<meta charset='utf-8'/>" +
+                        //     "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
+                        //     "<meta property='og:url' content='" + process.env.ROOT_HOST + "/geomap/" + sceneResponse.short_id + "' /> " +
+                        //     "<meta property='og:type' content='website' /> " +
+                        //     "<meta property='og:image' content='" + postcard1 + "' /> " +
+                        //     "<meta property='og:image:height' content='1024' /> " +
+                        //     "<meta property='og:image:width' content='1024' /> " +
+                        //     "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
+                        //     "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
+                        //     "<meta property='name' content='modelviewer' /> " +
+                        //     "<title>" + sceneResponse.sceneTitle + "</title>" +
+                        //     "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
+                        //     "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                        //     "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                        //     "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                        //     "<link href=\x22/css/modelviewer.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
+                        //     "<link href=\x22/css/geomap.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
+                        //     "<script type=\x22module\x22 src=\x22https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js\x22></script>"+
+                        //     extraScripts + 
+                        //     "</head>\n" +
+                        //     "<body style=\x22background-color: black;\x22>\n" +
+                        //     "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
+                        //     "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
+                        //     "<model-viewer autoplay shadow-intensity=\x221\x22 camera-controls camera-target=\x220m 0m 0m\x22 src=\x22"+gltfModel+"\x22"+ 
+                        //     " ar ar-placement=\x22"+planeDetectMode+"\x22 ar-modes=\x22geomap scene-viewer quick-look\x22 ar-scale=\x22"+arScaleMode+"\x22 alt=\x22Viewer for single 3D Model\x22"+ 
+                        //     sky +
+                        //     "ios-src=\x22"+usdzModel+"\x22>"+
+                        //     "<button slot=\x22ar-button\x22 style=\x22background-color: red; color: white; font-size: 36px; border-radius: 4px; border: 1px; position: absolute; bottom: 16px; right: 16px; z-index: 100;\x22>"+
+                        //     "AR"+
+                        //     "</button>"+
+                        //     "</model-viewer>" +
+                        //     audioSliders +
+                        //     canvasOverlay +
+                        //     dialogButton +
                            
-                            attributionsTextEntity +
-                            "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
-                            "</body>\n" +
-                            socketScripts +
-                            "</html>";
-                            console.log("Tryna do a model viewer");
+                        //     attributionsTextEntity +
+                        //     "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
+                        //     "</body>\n" +
+                        //     socketScripts +
+                        //     "</html>";
+                        //     console.log("Tryna do a model viewer");
                     } else if (sceneResponse.sceneWebType == "HTML from Text Item") {
 
-                        htmltext = sceneTextItemData;
-                        console.log("Tryna send html from text itme " + htmltext);
+                        // htmltext = sceneTextItemData;
+                        // console.log("Tryna send html from text itme " + htmltext);
                     
                     } else if (sceneResponse.sceneWebType == "Video Landing") {
-                        let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
-                        if (tilepicUrl != "") {
-                            bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
-                        }
+                        // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
+                        // if (tilepicUrl != "") {
+                        //     bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
+                        // }
 
-                        htmltext = "<!DOCTYPE html>\n" +
-                        "<head> " +
-                        "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
-                        "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        "<meta charset=\x22UTF-8\x22>"+
-                        "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        "<meta charset=\x22utf-8\x22/>" +
-                        "<meta name=\x22viewport\x22 content=\x22width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no\x22/>" +
-                        "<meta property=\x22og:url\x22 content=\x22" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "\x22 /> " +
-                        "<meta property=\x22og:type\x22 content=\x22website\x22 /> " +
-                        "<meta property=\x22og:image\x22 content=\x22" + postcard1 + "\x22 /> " +
-                        "<meta property=\x22og:image:height\x22 content=\x221024\x22 /> " +
-                        "<meta property=\x22og:image:width\x22 content=\x221024\x22 /> " +
-                        "<meta property=\x22og:title\x22 content=\x22" + sceneResponse.sceneTitle + "\x22 /> " +
-                        "<meta property=\x22og:description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22 /> " +
-                        "<meta property=\x22name\x22 content=\x22modelviewer\x22 /> " +
-                        "<title>" + sceneResponse.sceneTitle + "</title>" +
-                        "<meta name=\x22description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22/>" +
-                        "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
-                        "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
+                        // htmltext = "<!DOCTYPE html>\n" +
+                        // "<head> " +
+                        // "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
+                        // "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
+                        // "<meta charset=\x22UTF-8\x22>"+
+                        // "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
+                        // "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
+                        // "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
+                        // "<meta charset=\x22utf-8\x22/>" +
+                        // "<meta name=\x22viewport\x22 content=\x22width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no\x22/>" +
+                        // "<meta property=\x22og:url\x22 content=\x22" + process.env.ROOT_HOST + "/geomap/" + sceneResponse.short_id + "\x22 /> " +
+                        // "<meta property=\x22og:type\x22 content=\x22website\x22 /> " +
+                        // "<meta property=\x22og:image\x22 content=\x22" + postcard1 + "\x22 /> " +
+                        // "<meta property=\x22og:image:height\x22 content=\x221024\x22 /> " +
+                        // "<meta property=\x22og:image:width\x22 content=\x221024\x22 /> " +
+                        // "<meta property=\x22og:title\x22 content=\x22" + sceneResponse.sceneTitle + "\x22 /> " +
+                        // "<meta property=\x22og:description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22 /> " +
+                        // "<meta property=\x22name\x22 content=\x22modelviewer\x22 /> " +
+                        // "<title>" + sceneResponse.sceneTitle + "</title>" +
+                        // "<meta name=\x22description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22/>" +
+                        // "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                        // "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
+                        // "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                        // "<link href=\x22/css/geomap.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
                        
-                        "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                        // "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
                         
-                        "</head>\n" +
-                        "<body "+bgstyle+">" +
-                        "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                        "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                        settingsData +
-                        sceneTimedEventsData +
-                        hlsScript +
-                        videoGroupsEntity +
-                        "<center><div><br><br><div class=\x22header\x22>"+sceneResponse.sceneGreeting+ " - " + sceneResponse.sceneQuest+"</div><video controls width=\x2280%\x22 height=\x2210%\x22 id=\x22video\x22></video>"+
-                        "<div id=\x22sceneGreeting\x22 class=\x22linkfooter\x22>"+
-                        "<h4><a href=\x22https://servicemedia.net/webxr/"+ sceneResponse.sceneNextScene + "\x22>Click Here to Enter Immersive Scene!</a></h4><br>"+
-                        "</div></center>"+
-                        audioSliders +
-                        canvasOverlay +
-                        "<div id=\x22theModal\x22 class=\x22modal\x22 ><div id=\x22modalContent\x22 class=\x22modal-content\x22></div>";
-                        attributionsTextEntity +
-                        "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
-                        "</body>\n" +
-                        "</html>";
-                        console.log("Tryna do a Video Landing scene");
+                        // "</head>\n" +
+                        // "<body "+bgstyle+">" +
+                        // "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
+                        // "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
+                        // settingsData +
+                        // sceneTimedEventsData +
+                        // hlsScript +
+                        // videoGroupsEntity +
+                        // "<center><div><br><br><div class=\x22header\x22>"+sceneResponse.sceneGreeting+ " - " + sceneResponse.sceneQuest+"</div><video controls width=\x2280%\x22 height=\x2210%\x22 id=\x22video\x22></video>"+
+                        // "<div id=\x22sceneGreeting\x22 class=\x22linkfooter\x22>"+
+                        // "<h4><a href=\x22https://servicemedia.net/geomap/"+ sceneResponse.sceneNextScene + "\x22>Click Here to Enter Immersive Scene!</a></h4><br>"+
+                        // "</div></center>"+
+                        // audioSliders +
+                        // canvasOverlay +
+                        // "<div id=\x22theModal\x22 class=\x22modal\x22 ><div id=\x22modalContent\x22 class=\x22modal-content\x22></div>";
+                        // attributionsTextEntity +
+                        // "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
+                        // "</body>\n" +
+                        // "</html>";
+                        // console.log("Tryna do a Video Landing scene");
 
                     } else if (sceneResponse.sceneWebType == "AR Image Tracking") { //aframe plus mindar
-                        // dialogButton = "";
-                        let extraScripts = "";
-                        let sky = "environment-image=\x22neutral\x22";
-                        if (skyboxUrl != null) {
-                            sky = "skybox-image=\x22"+skyboxUrl+"\x22";
-                        }  
-                        let planeDetectMode = "floor";
-                        let arScaleMode = "auto";
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("wall")) {
-                            planeDetectMode = "wall";
-                        } 
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("scale fixed")) {
-                            arScaleMode = "fixed";
-                        } 
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show overlay")) {
-                            canvasOverlay = canvasOverlay + socketScripts;
+                        // // dialogButton = "";
+                        // let extraScripts = "";
+                        // let sky = "environment-image=\x22neutral\x22";
+                        // if (skyboxUrl != null) {
+                        //     sky = "skybox-image=\x22"+skyboxUrl+"\x22";
+                        // }  
+                        // let planeDetectMode = "floor";
+                        // let arScaleMode = "auto";
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("wall")) {
+                        //     planeDetectMode = "wall";
+                        // } 
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("scale fixed")) {
+                        //     arScaleMode = "fixed";
+                        // } 
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show overlay")) {
+                        //     canvasOverlay = canvasOverlay + socketScripts;
 
-                        } else {
-                            canvasOverlay = "";
-                        }   
-                        let sceneGreeting = sceneResponse.sceneDescription;
-                        if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
-                            sceneGreeting = sceneResponse.sceneGreeting;
-                        }      
-                        let sceneQuest = "";
-                         if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
-                             sceneQuest = sceneResponse.sceneQuest;
-                         }
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('show dialog')) {
-                            dialogButton = dialogButton +  //set with the actual button above?
-                            "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>"+
-                            "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
-                            "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
-                            extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                            "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>"+
-                            "<script src=\x22/connect/indexedDb.js\x22></script>" +
-                            "<script src=\x22/connect/traffic.js\x22></script>" +
+                        // } else {
+                        //     canvasOverlay = "";
+                        // }   
+                        // let sceneGreeting = sceneResponse.sceneDescription;
+                        // if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
+                        //     sceneGreeting = sceneResponse.sceneGreeting;
+                        // }      
+                        // let sceneQuest = "";
+                        //  if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
+                        //      sceneQuest = sceneResponse.sceneQuest;
+                        //  }
+                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('show dialog')) {
+                        //     dialogButton = dialogButton +  //set with the actual button above?
+                        //     "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>"+
+                        //     "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
+                        //     "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
+                        //     extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                        //     "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>"+
+                        //     "<script src=\x22/connect/indexedDb.js\x22></script>" +
+                        //     "<script src=\x22/connect/traffic.js\x22></script>" +
                             
-                            geoScripts +
-                            locationScripts +
-                            locationData +
-                            modelData;
+                        //     geoScripts +
+                        //     locationScripts +
+                        //     locationData +
+                        //     modelData;
                                             
-                        } else {
-                            dialogButton = "";
-                            socketScripts = "";
-                        }
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix')) {
-                        //     extraScripts = extraScripts + "<script src=\x22../main/js/browser-matrix.min.js\x22></script>"; 
-                        //     extraEntities = "<a-entity matrix_meshes=\x22init: true\x22></a-entity>";
+                        // } else {
+                        //     dialogButton = "";
+                        //     socketScripts = "";
                         // }
+                        // // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix')) {
+                        // //     extraScripts = extraScripts + "<script src=\x22../main/js/browser-matrix.min.js\x22></script>"; 
+                        // //     extraEntities = "<div matrix_meshes=\x22init: true\x22></div>";
+                        // // }
                       
-                        htmltext = "<!DOCTYPE html>\n" +
-                        "<head> " +
-                        "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
-                        "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        "<meta charset=\x22UTF-8\x22>"+
-                        "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        "<meta charset='utf-8'/>" +
-                        "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
-                        "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
-                        "<meta property='og:type' content='website' /> " +
-                        "<meta property='og:image' content='" + postcard1 + "' /> " +
-                        "<meta property='og:image:height' content='1024' /> " +
-                        "<meta property='og:image:width' content='1024' /> " +
-                        "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
-                        "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
-                        "<meta property='name' content='modelviewer' /> " +
-                        "<title>" + sceneResponse.sceneTitle + "</title>" +
-                        "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
-                        "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
-                        "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
+                        // htmltext = "<!DOCTYPE html>\n" +
+                        // "<head> " +
+                        // "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
+                        // "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
+                        // "<meta charset=\x22UTF-8\x22>"+
+                        // "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
+                        // "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
+                        // "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
+                        // "<meta charset='utf-8'/>" +
+                        // "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
+                        // "<meta property='og:url' content='" + process.env.ROOT_HOST + "/geomap/" + sceneResponse.short_id + "' /> " +
+                        // "<meta property='og:type' content='website' /> " +
+                        // "<meta property='og:image' content='" + postcard1 + "' /> " +
+                        // "<meta property='og:image:height' content='1024' /> " +
+                        // "<meta property='og:image:width' content='1024' /> " +
+                        // "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
+                        // "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
+                        // "<meta property='name' content='modelviewer' /> " +
+                        // "<title>" + sceneResponse.sceneTitle + "</title>" +
+                        // "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
+                        // "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                        // "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
+                        // "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                        // "<link href=\x22/css/geomap.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
                        
-                        "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
-                        settingsData +
-                        sceneTimedEventsData +
-                        // aframeScript + 
-                        // contentUtils +
-                        modObjex +
-                        modModels +
-                        modSplats +
-                        extraScripts + 
+                        // "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                        // settingsData +
+                        // sceneTimedEventsData +
+                        // // aframeScript + 
+                        // // contentUtils +
+                        // modObjex +
+                        // modModels +
+                        // modSplats +
+                        // extraScripts + 
 
                       
-                        hlsScript +
-                        "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
-                        "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>"+
+                        // hlsScript +
+                        // "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
+                        // "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>"+
 
-                        "<script src=\x22../main/src/util/mindar/mindar-image.js\x22></script>"+
-                        "<script src=\x22../main/src/util/mindar/mindar-image-aframe.js\x22></script>"+
-                        "<script src=\x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22></script>"+
-                        "<script src=\x22../main/src/component/mod-materials.js\x22></script>"+
-                        "</head>\n" +
-                        "<body>\n" +
-                        "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                        "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                        "<div class=\x22ar-container\x22>"+
-                        "<a-scene mindar-image=\x22imageTargetSrc: "+arImageTargets[0]+";\x22 embedded color-space=\x22sRGB\x22"+    
-                            " renderer=\x22colorManagement: true, physicallyCorrectLights\x22 xr-mode-ui=\x22enabled: false\x22 device-orientation-permission-ui=\x22enabled: false\x22>"+
-                        "<a-assets>"+
-                        videoAsset +
-                        gltfsAssets +    
-                        "</a-assets>"+
-                        videoGroupsEntity+
-                        "<a-entity mindar-image-target=\x22targetIndex: 0\x22>" +
-                            "<a-gltf-model rotation=\x2290 0 0\x22 position=\x220 0 0.1\x22 scale=\x220.25 0.25 0.25\x22 src=\x22#gltfasset2\x22>"+
-                        "</a-entity>"+
-                        "<a-camera id=\x22player\x22 position=\x220 0 0\x22 look-controls=\x22enabled: false\x22></a-camera>"
-                        "</a-scene>"+
-                        "</div>"+    
+                        // "<script src=\x22../main/src/util/mindar/mindar-image.js\x22></script>"+
+                        // "<script src=\x22../main/src/util/mindar/mindar-image-aframe.js\x22></script>"+
+                        // "<script src=\x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22></script>"+
+                        // "<script src=\x22../main/src/component/mod-materials.js\x22></script>"+
+                        // "</head>\n" +
+                        // "<body>\n" +
+                        // "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
+                        // "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
+                        // "<div class=\x22ar-container\x22>"+
+                        // "<a-scene mindar-image=\x22imageTargetSrc: "+arImageTargets[0]+";\x22 embedded color-space=\x22sRGB\x22"+    
+                        //     " renderer=\x22colorManagement: true, physicallyCorrectLights\x22 xr-mode-ui=\x22enabled: false\x22 device-orientation-permission-ui=\x22enabled: false\x22>"+
+                        // "<a-assets>"+
+                        // videoAsset +
+                        // gltfsAssets +    
+                        // "</a-assets>"+
+                        // videoGroupsEntity+
+                        // "<div mindar-image-target=\x22targetIndex: 0\x22>" +
+                        //     "<a-gltf-model rotation=\x2290 0 0\x22 position=\x220 0 0.1\x22 scale=\x220.25 0.25 0.25\x22 src=\x22#gltfasset2\x22>"+
+                        // "</div>"+
+                        // "<a-camera id=\x22player\x22 position=\x220 0 0\x22 look-controls=\x22enabled: false\x22></a-camera>"
+                        // "</a-scene>"+
+                        // "</div>"+    
                         
-                        audioSliders +
-                        canvasOverlay +
-                        dialogButton +
-                        attributionsTextEntity +
+                        // audioSliders +
+                        // canvasOverlay +
+                        // dialogButton +
+                        // attributionsTextEntity +
                        
-                        "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
-                        "</body>\n" +
-                        socketScripts + //?
-                        "</html>";
-                        console.log("Tryna do a AR Image Tracking scene");
+                        // "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
+                        // "</body>\n" +
+                        // socketScripts + //?
+                        // "</html>";
+                        // console.log("Tryna do a AR Image Tracking scene");
 
                     } else { /////////////////////////////////////////////////////////------------- Default / AFrame response below ------------------------------
                         let joystick = "joystick=\x22useNavmesh: false\x22";
@@ -3712,7 +3389,7 @@ webxr_router.get('/:_id', function (req, res) {
                             sceneManglerButtons = "";
                         }
                         if (locationPictures.length == 0) { //in no pic locations, use circle layout
-                            // imageEntities = "<a-entity id=\x22imageEntitiesParent\x22 position='0 3.5 0' rotation=\x2290 0 33\x22 layout=\x22type: circle; radius: 20\x22>"+imageEntities+"</a-entity>\n";
+                            // imageEntities = "<div id=\x22imageEntitiesParent\x22 position='0 3.5 0' rotation=\x2290 0 33\x22 layout=\x22type: circle; radius: 20\x22>"+imageEntities+"</div>\n";
                         }
                         if (sceneResponse.sceneUseDynCubeMap) {
                             skyboxEnvMap = "skybox-env-map";   
@@ -3724,18 +3401,18 @@ webxr_router.get('/:_id', function (req, res) {
                            obbDebug = "obb-collider=\x22showColliders: true\x22";
                         }
                         if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix')) { //see matrix.org
-                            extraScripts = extraScripts + "<script src=\x22../main/js/browser-matrix.min.js\x22></script>"; 
-                            extraEntities = "<a-entity id=\x22matrix_meshes\x22 matrix_meshes=\x22init: true\x22></a-entity>";
+                            // extraScripts = extraScripts + "<script src=\x22../main/js/browser-matrix.min.js\x22></script>"; 
+                            // extraEntities = "<div id=\x22matrix_meshes\x22 matrix_meshes=\x22init: true\x22></div>";
                         }
                         if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('parametric')) {
-                            hasParametricCurve = true;
-                            extraScripts = extraScripts + "<script src=\x22../main/js/parser.js\x22></script>"; 
-                            curveEntities = curveEntities + "<a-entity id=\x22p_path\x22 parametric_curve=\x22xyzFunctions: 50*cos(t), 3*cos(3*t) + 20, 50*sin(t);tRange: 0, -6.283;\x22></a-entity>"; //TODODO 
+                            // hasParametricCurve = true;
+                            // extraScripts = extraScripts + "<script src=\x22../main/js/parser.js\x22></script>"; 
+                            // curveEntities = curveEntities + "<div id=\x22p_path\x22 parametric_curve=\x22xyzFunctions: 50*cos(t), 3*cos(3*t) + 20, 50*sin(t);tRange: 0, -6.283;\x22></div>"; //TODODO 
                         }
                        
                         if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('traffic')) {
                             extraScripts = extraScripts + "<script src=\x22/connect/traffic.js\x22 ></script><script src=\x22/main/vendor/axios/axios.min.js\x22></script>"; 
-                            // extraEntities = extraEntities + "<a-entity id=\x22traffic_data\x22 traffic_data_viz=\x22init: true\x22></a-entity>";
+                            // extraEntities = extraEntities + "<div id=\x22traffic_data\x22 traffic_data_viz=\x22init: true\x22></div>";
                         }
                         let sceneQuest = "";
                         if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest != "") {
@@ -3749,15 +3426,15 @@ webxr_router.get('/:_id', function (req, res) {
 
                             if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("greeting")) {
                                 console.log("greeting is " + sceneResponse.sceneGreeting);
-                                textEntities = textEntities + "<a-entity id=\x22sceneGreetingDialog\x22 class=\x22activeObjexRay\x22 look-at=\x22#player\x22 scene_greeting_dialog=\x22fillColor : "+sceneResponse.sceneFontFillColor+
-                                "; outlineColor : "+sceneResponse.sceneFontOutlineColor+"; backgroundColor : "+sceneResponse.sceneTextBackgroundColor+"; font1 : "+sceneResponse.sceneFontWeb1+"; font2 : "+sceneResponse.sceneFontWeb2+"; greetingText : "+sceneResponse.sceneGreeting+"; questText : "+sceneQuest+";\x22></a-entity>";
+                                textEntities = textEntities + "<div id=\x22sceneGreetingDialog\x22 class=\x22activeObjexRay\x22 look-at=\x22#player\x22 scene_greeting_dialog=\x22fillColor : "+sceneResponse.sceneFontFillColor+
+                                "; outlineColor : "+sceneResponse.sceneFontOutlineColor+"; backgroundColor : "+sceneResponse.sceneTextBackgroundColor+"; font1 : "+sceneResponse.sceneFontWeb1+"; font2 : "+sceneResponse.sceneFontWeb2+"; greetingText : "+sceneResponse.sceneGreeting+"; questText : "+sceneQuest+";\x22></div>";
                             }
                             if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("greeting hide")) {
                                 console.log("greeting is " + sceneResponse.sceneGreeting);
-                                textEntities = textEntities + "<a-entity id=\x22sceneGreetingDialog\x22 class=\x22activeObjexRay\x22 look-at=\x22#player\x22 scene_greeting_dialog=\x22behavior: hide; fillColor : "+sceneResponse.sceneFontFillColor+
-                                "; outlineColor : "+sceneResponse.sceneFontOutlineColor+"; backgroundColor : "+sceneResponse.sceneTextBackgroundColor+"; font1 : "+sceneResponse.sceneFontWeb1+"; font2 : "+sceneResponse.sceneFontWeb2+"; greetingText : "+sceneResponse.sceneGreeting+"; questText : "+sceneQuest+";\x22></a-entity>";
+                                textEntities = textEntities + "<div id=\x22sceneGreetingDialog\x22 class=\x22activeObjexRay\x22 look-at=\x22#player\x22 scene_greeting_dialog=\x22behavior: hide; fillColor : "+sceneResponse.sceneFontFillColor+
+                                "; outlineColor : "+sceneResponse.sceneFontOutlineColor+"; backgroundColor : "+sceneResponse.sceneTextBackgroundColor+"; font1 : "+sceneResponse.sceneFontWeb1+"; font2 : "+sceneResponse.sceneFontWeb2+"; greetingText : "+sceneResponse.sceneGreeting+"; questText : "+sceneQuest+";\x22></div>";
                             }
-                            modelAssets = modelAssets + "<a-asset-item id=\x22flat_round_rect\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatroundrect.glb\x22></a-asset-item>\n";
+                            modelAssets = modelAssets + "<div id=\x22flat_round_rect\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatroundrect.glb\x22></div>\n";
                         }
                         
                         let sceneShadows = "shadow=\x22enabled: false\x22";
@@ -3798,27 +3475,27 @@ webxr_router.get('/:_id', function (req, res) {
                         if (!sceneResponse.sceneUseDynamicSky) {
                             defaultLights = "light=\x22defaultLightsEnabled: false;\x22";
                         }
-                        /////////AFRAME SCENE DECLARATION////////////////// 
+                        /////////AFRAME SCENE DECLARATION////////////////// NOOOPE
                         
-                        let aScene = "<a-scene "+webxrFeatures+" "+sceneBackground+" "+physicsInsert+" "+pool_target+" "+pool_launcher+" gesture-detector " + aframeRenderSettings +
-                        " reflection=\x22directionalLight:#real-light\x22 "+sceneShadows+" raycaster=\x22objects: .activeObjexRay a-sphere\x22 "+
-                        "screen-controls shadow " + xrmode + " " + magicWindow + " " + obbDebug + " " +
-                        "loading-screen=\x22dotsColor: white; backgroundColor: black; enabled: false\x22 " + fogSettings + " "+networkedscene+" "+ARSceneArg+" " + defaultLights +">";
+                        // let aScene = "<a-scene "+geomapFeatures+" "+sceneBackground+" "+physicsInsert+" "+pool_target+" "+pool_launcher+" gesture-detector " + aframeRenderSettings +
+                        // " reflection=\x22directionalLight:#real-light\x22 "+sceneShadows+" raycaster=\x22objects: .activeObjexRay a-sphere\x22 "+
+                        // "screen-controls shadow " + xrmode + " " + magicWindow + " " + obbDebug + " " +
+                        // "loading-screen=\x22dotsColor: white; backgroundColor: black; enabled: false\x22 " + fogSettings + " "+networkedscene+" "+ARSceneArg+" " + defaultLights +">";
                         
-                        let mainDiv = "<div id=\x22mainDiv\x22 style=\x22width:100%; height:100%\x22>";
+                        // let mainDiv = "<div id=\x22mainDiv\x22 style=\x22width:100%; height:100%\x22>";
 
-                        if (sceneResponse.sceneWebType == 'Mapbox') { //no, non-aframe version above - maybe later?
-                            aScene = "<a-scene loading-screen=\x22dotsColor: white; backgroundColor: black\x22 xr-mode-ui=\x22enabled: false\x22 keyboard-shortcuts=\x22enterVR: false\x22 device-orientation-permission-ui=\x22enabled: false\x22>";
-                            mainDiv = "<div id=\x22map\x22 class=\x22map\x22 style=\x22width:100%; height:100%\x22>"; //closed at end
-                            joystickContainer = "";
-                        }
-                        if (sceneResponse.sceneWebType == 'AR Location Tracking') {
-                            console.log("AR Location Tracking mdoe...");
-                            aScene = "<a-scene gps-position webxr=\x22referenceSpaceType: unbounded; requiredFeatures: unbounded;\x22 keyboard-shortcuts=\x22enterVR: false\x22 loading-screen=\x22dotsColor: white; backgroundColor: black\x22 xr-mode-ui=\x22enabled: false\x22 device-orientation-permission-ui=\x22enabled: false\x22>";
-                            // <a-scene gps-position webxr="referenceSpaceType: unbounded; requiredFeatures: unbounded;"></a-scene>
-                            joystickContainer = "";
+                        // // if (sceneResponse.sceneWebType == 'Mapbox') { //no, non-aframe version above - maybe later?
+                        //     aScene = "<a-scene loading-screen=\x22dotsColor: white; backgroundColor: black\x22 xr-mode-ui=\x22enabled: false\x22 keyboard-shortcuts=\x22enterVR: false\x22 device-orientation-permission-ui=\x22enabled: false\x22>";
+                        let mainDiv = "<div id=\x22map\x22 class=\x22map\x22 style=\x22width:100%; height:100%\x22>"; //closed at end
+                        //     joystickContainer = "";
+                        // // }
+                        // if (sceneResponse.sceneWebType == 'AR Location Tracking') {
+                        //     console.log("AR Location Tracking mdoe...");
+                        //     aScene = "<a-scene gps-position geomap=\x22referenceSpaceType: unbounded; requiredFeatures: unbounded;\x22 keyboard-shortcuts=\x22enterVR: false\x22 loading-screen=\x22dotsColor: white; backgroundColor: black\x22 xr-mode-ui=\x22enabled: false\x22 device-orientation-permission-ui=\x22enabled: false\x22>";
+                        //     // <a-scene gps-position geomap="referenceSpaceType: unbounded; requiredFeatures: unbounded;"></a-scene>
+                        //     joystickContainer = "";
                   
-                        } //else { //default AFRAME with trimmings
+                        // } //else { //default AFRAME with trimmings
                         //AR Image Tracking...?
                         let uid = "0000000000000";
                         if (req.session.user) {
@@ -3833,7 +3510,7 @@ webxr_router.get('/:_id', function (req, res) {
                         "<meta charset=\x22utf-8\x22/>" +
                         "<meta charset=\x22utf-8\x22/>" +
                         "<meta name=\x22viewport\x22 content=\x22width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no\x22/>" +
-                        "<meta property=\x22og:url\x22 content=\x22" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "\x22 /> " +
+                        "<meta property=\x22og:url\x22 content=\x22" + process.env.ROOT_HOST + "/geomap/" + sceneResponse.short_id + "\x22 /> " +
                         "<meta property=\x22og:type\x22 content=\x22website\x22 /> " +
                         "<meta property=\x22og:image\x22 content=\x22" + postcard1 + "\x22 /> " + //why postcards must be static!
                         "<meta property=\x22og:image:height\x22 content=\x221024\x22 /> " +
@@ -3850,9 +3527,9 @@ webxr_router.get('/:_id', function (req, res) {
 
                         /////////// script includes /////////////////
                        
-                        "<script async src=\x22https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js\x22></script>"+
+                        // "<script async src=\x22https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js\x22></script>"+
 
-                        importMap + 
+                        // importMap + 
                         
                         
                         "<script src=\x22/main/vendor/jquery/jquery-3.7.1.js\x22></script>" +
@@ -3862,61 +3539,62 @@ webxr_router.get('/:_id', function (req, res) {
                         // aframeScript +
                         // contentUtils +
                         // troikaScript +
-                        physicsScripts +
-                        logScripts +
-                        // aframeExtrasScript +
-                        extraScripts + //catch all...
+                        // physicsScripts +
+                        // logScripts +
+                        // // aframeExtrasScript +
+                        // extraScripts + //catch all...
 
                         "<script src=\x22../main/vendor/howler/src/howler.core.js\x22></script>"+
                         "<script src=\x22../main/vendor/howler/src/howler.spatial.js\x22></script>"+
                         hlsScript +
                         
-                        "<script type=\x22module\x22 src=\x22/connect/navigation.js\x22></script>" + //includes navmesh components (simple and not), and extended_wasd_controls
-                        blinkScript +   //TODO - check if req comes from vr headset
-                        enviromentScript +
-                        joystickScript +
-                        "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-look-at-component.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-layout-component.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22/connect/navigation.js\x22></script>" + //includes navmesh components (simple and not), and extended_wasd_controls
+                        // blinkScript +   //TODO - check if req comes from vr headset
+                        // enviromentScript +
+                        // joystickScript +
+                        // "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-look-at-component.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-layout-component.js\x22></script>"+
 
-                        "<script type=\x22module\x22 src=\x22../main/src/component/cloud-marker.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22../main/src/component/local-marker.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22../main/src/component/mod-materials.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22../main/src/component/cloud-marker.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22../main/src/component/local-marker.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22../main/src/component/mod-materials.js\x22></script>"+
 
                         // "<script src=\x22../main/src/component/ar-shadow-helper.js\x22></script>"+
                         // "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>"+
-                        // "<script src=\x22../main/vendor/html2canvas/aframe-html-shader.min.js\x22></script>"+
+                        
                         primaryAudioScript +
                         ambientAudioScript +
                         triggerAudioScript +
-                        // skyGradientScript +
-                        ARScript +
-                        // cameraEnvMap +
-                        modModels +
-                        modSplats +
-                        modObjex +
+                            // // skyGradientScript +
+                            // ARScript +
+                            // // cameraEnvMap +
+                            // modModels +
+                            // modSplats +
+                            // modObjex +
 
 
-                        audioVizScript +
-                        meshUtilsScript +
-                        synthScripts +
-                        surfaceScatterScript +
-                        brownianScript +
+                            // audioVizScript +
+                            // meshUtilsScript +
+                            // synthScripts +
+                            // surfaceScatterScript +
+                            // brownianScript +
                       
 
                         ///TODO make these conditional
 
-                        particleScript +
-                        "<script type=\x22module\x22 src=\x22../main/src/component/spawn-in-circle.js\x22></script>"+
-                        "<script src=\x22https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22../main/src/shaders/aframe/aframe-makewaves-shader.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22/main/src/shaders/aframe/aframe-wavy-shader.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
-
+                        // particleScript +
+                        // "<script type=\x22module\x22 src=\x22../main/src/component/spawn-in-circle.js\x22></script>"+
+                        // "<script src=\x22https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22../main/src/shaders/aframe/aframe-makewaves-shader.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22/main/src/shaders/aframe/aframe-wavy-shader.js\x22></script>"+
+                        // "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
+                        geoScripts +
                         "</head>" +
                         "<body bgcolor=\x22black\x22>" +
                         
                         modal +
-                        mainDiv + //main Div wrapper, different for map
+                        // mainDiv + //main Div wrapper, different for map
+                        "<div id=\x22map\x22></div>"+
 
                         "<div class=\x22primaryAudioParams\x22 "+primaryAudioParams+" id="+streamPrimaryAudio+ "_" +oggurl+"></div>"+  //TODO Fix!  concatting the id is stupid, use data-attributes
                         "<div class=\x22ambientAudioParams\x22 id="+ambientUrl+"></div>"+
@@ -3924,11 +3602,11 @@ webxr_router.get('/:_id', function (req, res) {
                         settingsData +
                         sceneTimedEventsData +
                         "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                        audioControl +
+                        // audioControl +
                         containers +
                         locationScripts +
                         locationData +
-                        geoScripts +
+                        
                         "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>"+
 
                         "<div id=\x22dom-overlay\x22 style=\x22visibility: hidden\x22><div id=\x22ar_overlay_message\x22></div>" +
@@ -3939,46 +3617,46 @@ webxr_router.get('/:_id', function (req, res) {
                         "<div><button id=\x22arRotRightButton\x22 style=\x22float:right; margin: auto\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>rot -</button></div><br><br><br>"+            
                         "<div><button id=\x22arRotLeftButton\x22 style=\x22float:right; margin: auto\x22 type=\x22button\x22 class=\x22arOverlayButton\x22>rot +</button></div></div></div>"+                        
                         // threeDeeTextComponent +
-                        aScene +
+                        // aScene +
                         "<div id=\x22overlay\x22></div>"+
-                        skySettings +
+                        // skySettings +
                        
-                        ////////////////ASSETS/////////////
-                        // "<a-assets timeout=\x222000\x22>" +
-                        "<a-assets>" +
+                        // ////////////////ASSETS/////////////
+                        // // "<a-assets timeout=\x222000\x22>" +
+                        // "<a-assets>" +
                         "<canvas id=\x22topCameraCanvas\x22 crossOrigin=\x22anonymous\x22></canvas>"+
-                        playerAvatarTemplate +
-                        handsTemplate + 
-                        pAudioWaveform +
+                        // playerAvatarTemplate +
+                        // handsTemplate + 
+                        // pAudioWaveform +
                         modelAssets +
-                        externalAssets +
-                        "<a-asset-item id=\x22reticle\x22 src=\x22https://cdn.aframe.io/examples/ar/models/reticle/reticle.gltf\x22 response-type=\x22arraybuffer\x22 crossorigin=\x22anonymous\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22square1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/square1.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22rectangle1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/rectangle1.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22avatar_model\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22flatsquare\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatsquare.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22landscape_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/landscape_panel8.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22landscape_panel_wide\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/wide_landscape_panel8.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22dialog_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/dialogpanel2.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/portrait_panel8.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22square_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelsquare1.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22square_panel_plain\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/plainsquare_panel8.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22textbackground\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/textbackground1b.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22texticon\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/texticon1b.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22exclamation\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/exclamation.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22previous_button\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/previous.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22next_button\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/next.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22mailbox\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/mailbox2.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22links\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/links.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22poi1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22gate2\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/gate2.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22plane150\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/plane150.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22key\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/key1b.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22talkbubble\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/talkbubble1b.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22thoughtbubble\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/thoughtbubble1.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22youtubeplayerModel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/youtubeplayer2.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22audioplayer\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/audioplayer_3x1_d.glb\x22></a-asset-item>\n"+
-                        "<a-asset-item id=\x22reticle2\x22 response-type=\x22arraybuffer\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/reticle2.glb\x22></a-asset-item>\n"+
+                        // externalAssets +
+                        "<div id=\x22reticle\x22 src=\x22https://cdn.aframe.io/examples/ar/models/reticle/reticle.gltf\x22 response-type=\x22arraybuffer\x22 crossorigin=\x22anonymous\x22></div>\n"+
+                        "<div id=\x22square1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/square1.glb\x22></div>\n"+
+                        "<div id=\x22rectangle1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/rectangle1.glb\x22></div>\n"+
+                        "<div id=\x22avatar_model\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb\x22></div>\n"+
+                        "<div id=\x22flatsquare\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/flatsquare.glb\x22></div>\n"+
+                        "<div id=\x22landscape_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/landscape_panel8.glb\x22></div>\n"+
+                        "<div id=\x22landscape_panel_wide\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/wide_landscape_panel8.glb\x22></div>\n"+
+                        "<div id=\x22dialog_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/dialogpanel2.glb\x22></div>\n"+
+                        "<div id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/portrait_panel8.glb\x22></div>\n"+
+                        "<div id=\x22square_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelsquare1.glb\x22></div>\n"+
+                        "<div id=\x22square_panel_plain\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/plainsquare_panel8.glb\x22></div>\n"+
+                        "<div id=\x22textbackground\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/textbackground1b.glb\x22></div>\n"+
+                        "<div id=\x22texticon\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/texticon1b.glb\x22></div>\n"+
+                        "<div id=\x22exclamation\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/exclamation.glb\x22></div>\n"+
+                        "<div id=\x22previous_button\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/previous.glb\x22></div>\n"+
+                        "<div id=\x22next_button\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/next.glb\x22></div>\n"+
+                        "<div id=\x22mailbox\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/mailbox2.glb\x22></div>\n"+
+                        "<div id=\x22links\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/links.glb\x22></div>\n"+
+                        "<div id=\x22poi1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb\x22></div>\n"+
+                        "<div id=\x22gate2\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/gate2.glb\x22></div>\n"+
+                        "<div id=\x22plane150\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/plane150.glb\x22></div>\n"+
+                        "<div id=\x22key\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/key1b.glb\x22></div>\n"+
+                        "<div id=\x22talkbubble\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/talkbubble1b.glb\x22></div>\n"+
+                        "<div id=\x22thoughtbubble\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/thoughtbubble1.glb\x22></div>\n"+
+                        "<div id=\x22youtubeplayerModel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/youtubeplayer2.glb\x22></div>\n"+
+                        "<div id=\x22audioplayer\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/audioplayer_3x1_d.glb\x22></div>\n"+
+                        // "<div id=\x22reticle2\x22 response-type=\x22arraybuffer\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/reticle2.glb\x22></div>\n"+
                         "<a-mixin id=\x22bar\x22 geometry=\x22primitive: box\x22 material=\x22color: black\x22 scale-y-color=\x22from: 10 60 10; to: 180 255 180; maxScale: 15\x22></a-mixin>\n"+
                         videosphereAsset +
                         webcamAsset +
@@ -3998,19 +3676,19 @@ webxr_router.get('/:_id', function (req, res) {
                         weblinkAssets +
                         gltfsAssets +
                         videoAsset +
-                        grabMix +
+                        // grabMix +
                         skyboxAsset +
-                        navmeshAsset +
+                        // navmeshAsset +
 
-                        "</a-assets>\n"+
+                        // "</a-assets>\n"+
 
                         //////////////ENTITIES////////////////////
-                        aframeEnvironment +
-                        ambientLight + 
-                        cameraRigEntity +
-                        ocean +
-                        terrain +
-                        curveEntities +
+                        // aframeEnvironment +
+                        // ambientLight + 
+                        // cameraRigEntity +
+                        // ocean +
+                        // terrain +
+                        // curveEntities +
                         renderPanel +
                         weblinkEntities +
                         gltfsEntities + 
@@ -4042,21 +3720,21 @@ webxr_router.get('/:_id', function (req, res) {
                         placeholderEntities +
                         proceduralEntities +
                         loadLocations +
-                        "<a-entity id=\x22createAvatars\x22 create_avatars></a-entity>"+
-                        "<a-entity id=\x22particleSpawner\x22 particle_spawner></a-entity>"+
+                        "<div id=\x22createAvatars\x22 create_avatars></div>"+
+                        "<div id=\x22particleSpawner\x22 particle_spawner></div>"+
                         
                         audioVizEntity +
                         instancingEntity + 
                         arElements +
                         loadAudioEvents +
-                        "<a-entity id=\x22youtube_element\x22 youtube_element_aframe=\x22init: ''\x22></a-entity>"+
+                        "<div id=\x22youtube_element\x22 youtube_element_aframe=\x22init: ''\x22></div>"+
 
                         //create these at runtime now...//nm
-                        "<a-entity id=\x22player_hud\x22 visible=\x22false\x22 look-at=\x22#player\x22 player_hud=\x22mode: 'info'\x22></a-entity>"+
-                        "<a-entity id=\x22mod_dialog\x22 visible=\x22false\x22 look-at=\x22#player\x22 mod_dialog=\x22mode: 'confirm'\x22>"+
-                        "<a-entity id=\x22mod_dialog_text\x22 position=\x22.05 .05 .05\x22></a-entity>"+
-                        "<a-entity id=\x22mod_dialog_panel\x22 class=\x22gltf activeObjexRay\x22 gltf-model=\x22#dialog_panel\x22></a-entity>" +
-                        "</a-entity>" + //end dialog
+                        // "<div id=\x22player_hud\x22 visible=\x22false\x22 look-at=\x22#player\x22 player_hud=\x22mode: 'info'\x22></div>"+
+                        "<div id=\x22mod_dialog\x22 visible=\x22false\x22 look-at=\x22#player\x22 mod_dialog=\x22mode: 'confirm'\x22>"+
+                        "<div id=\x22mod_dialog_text\x22 position=\x22.05 .05 .05\x22></div>"+
+                        "<div id=\x22mod_dialog_panel\x22 class=\x22gltf activeObjexRay\x22 gltf-model=\x22#dialog_panel\x22></div>" +
+                        "</div>" + //end dialog
                         
                         modelData +
                         objectData +
@@ -4064,15 +3742,15 @@ webxr_router.get('/:_id', function (req, res) {
                         
 
                         ////////// render hudmap - this one works! ///////////////////
-                            // "<a-entity id=\x22renderCamera\x22 camera=\x22active: false; fov: 120; aspect: 1;\x22 position=\x220 120 0\x22 rotation=\x22-90 0 0\x22>"+
-                            // "</a-entity>"+
+                            // "<div id=\x22renderCamera\x22 camera=\x22active: false; fov: 120; aspect: 1;\x22 position=\x220 120 0\x22 rotation=\x22-90 0 0\x22>"+
+                            // "</div>"+
 
 
                             // "<a-plane position=\x22-4 12 0\x22 rotation=\x220 20 0\x22 width=\x2210\x22 height=\x2210\x22 "+
                             //     "material=\x22shader: flat; src:#topCameraCanvas; opacity: 1\x22 canvas-updater></a-plane> "+
 
 
-                        "</a-scene>\n"+ ///////////////////////----- CLOSE AFRAME SCENE !
+                        // "</a-scene>\n"+ ///////////////////////----- CLOSE AFRAME SCENE !
                         
                         "</div>\n"+
                         sceneTextItemData +
@@ -4131,13 +3809,13 @@ webxr_router.get('/:_id', function (req, res) {
                     res.send(htmltext).end();   
                 }
         } catch (e) {
-            console.log("error in webxr route : " + e);
-            res.send("error in webxr route " + e);
+            console.log("error in geomap route : " + e);
+            res.send("error in geomap route " + e);
         }
     })();
         
 });
-///// END PRIMARY SERVERSIDE /webxr/ ROUTE //////////////////////
+///// END PRIMARY SERVERSIDE /geomap/ ROUTE //////////////////////
 
 
-export default webxr_router;
+export default mapbox_router;

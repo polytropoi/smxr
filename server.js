@@ -174,6 +174,12 @@ server.listen(process.env.PORT || 3000, function() {
 import webxr_routes from './routes/webxr_routes.js';
 app.use('/webxr', webxr_routes); 
 
+import mapbox_routes from './routes/mapbox_routes.js';
+app.use('/mapbox', mapbox_routes); 
+
+// import mapbox_routes from './routes/mapbox_routes.js';
+// app.use('/mapbox', mapbox_routes); 
+
 // import aframe_esm_routes from './routes/aframe_esm_routes.js';
 // app.use('/esm', aframe_esm_routes); 
 
