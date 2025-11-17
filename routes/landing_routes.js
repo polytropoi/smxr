@@ -942,53 +942,53 @@ landing_router.get('/:_id', function (req, res) {
                             
             } else if (sceneData.sceneWebType == 'Mapbox') { 
                 
-                dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
-                locationButton = "<div id=\x22loc_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                if (!sceneData.sceneTextUseModals) {
-                    //renderPanel = "<a-entity visible=\x22false\x22 render_canvas id=\x22renderCanvas\x22 look-at=\x22#player\x22 geometry=\x22primitive: plane; width:1; height:1;\x22 scale=\x221 1 1\x22 position=\x220 3.5 -.25\x22 material=\x22shader: html; transparent: true; width:1024; height:1024; fps: 10; target: #renderPanel;\x22></a-entity>\n";
-                }
-                transportButtons = "<div class=\x22transport_buttons\x22><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
-                "<div class=\x22transport_play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
-                // "<div visible=\x22false\x22 class=\x22pause_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PauseButton()\x22><i class=\x22fas fa-pause-circle fa-2x\x22></i></div>" +
+                // dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
+                // locationButton = "<div id=\x22loc_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                // if (!sceneData.sceneTextUseModals) {
+                //     //renderPanel = "<a-entity visible=\x22false\x22 render_canvas id=\x22renderCanvas\x22 look-at=\x22#player\x22 geometry=\x22primitive: plane; width:1; height:1;\x22 scale=\x221 1 1\x22 position=\x220 3.5 -.25\x22 material=\x22shader: html; transparent: true; width:1024; height:1024; fps: 10; target: #renderPanel;\x22></a-entity>\n";
+                // }
+                // transportButtons = "<div class=\x22transport_buttons\x22><div class=\x22previous_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PreviousButton()\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
+                // "<div class=\x22transport_play_button\x22 style=\x22float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>" +
+                // // "<div visible=\x22false\x22 class=\x22pause_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PauseButton()\x22><i class=\x22fas fa-pause-circle fa-2x\x22></i></div>" +
 
-                "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>";
-                geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>" +
+                // "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>";
+                // geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>" +
                 
-                // "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js\x22></script>"+
-                // "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>";
-                "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js\x22></script>"+
-                "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>";
+                // // "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js\x22></script>"+
+                // // "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>";
+                // "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js\x22></script>"+
+                // "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>";
 
-                locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
+                // locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
                 
-                cameraRigEntity = "<a-camera id=\x22player\x22 look-controls-enabled=\x22false\x22 listen-from-camera gps-camera rotation-reader><a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
-                // "<a-entity id=\x22player\x22 networked=\x22template:#avatar-template;attachTemplateToLocal:false;\x22 spawn-in-circle=\x22radius:3;\x22>" + //ENABLE LATER
-                        "</a-camera>";
-                let doBuildings = false;
-                let doTerrain = false;        
-                if (sceneData.sceneTags != null && sceneData.sceneTags.includes("buildings")) {
-                    doBuildings = true;
-                } 
-                if (sceneData.sceneTags != null && sceneData.sceneTags.includes("terrain")) {
-                    doTerrain = true;
-                }
-                locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_mapbox=\x22zoomLevel: "+sceneData.sceneMapZoom+"; doBuildings: "+doBuildings+"; doTerrain: "+doTerrain+"; mbid: "+process.env.MAPBOX_KEY+";\x22 position=\x220 2 -5\x22>"+
-                "</a-entity>";
+                // cameraRigEntity = "<a-camera id=\x22player\x22 look-controls-enabled=\x22false\x22 listen-from-camera gps-camera rotation-reader><a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
+                // // "<a-entity id=\x22player\x22 networked=\x22template:#avatar-template;attachTemplateToLocal:false;\x22 spawn-in-circle=\x22radius:3;\x22>" + //ENABLE LATER
+                //         "</a-camera>";
+                // let doBuildings = false;
+                // let doTerrain = false;        
+                // if (sceneData.sceneTags != null && sceneData.sceneTags.includes("buildings")) {
+                //     doBuildings = true;
+                // } 
+                // if (sceneData.sceneTags != null && sceneData.sceneTags.includes("terrain")) {
+                //     doTerrain = true;
+                // }
+                // locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_mapbox=\x22zoomLevel: "+sceneData.sceneMapZoom+"; doBuildings: "+doBuildings+"; doTerrain: "+doTerrain+"; mbid: "+process.env.MAPBOX_KEY+";\x22 position=\x220 2 -5\x22>"+
+                // "</a-entity>";
             
-                mapButtons = "<div id=\x22button_left_1\x22 style=\x22float: left; margin: 10px 10px;\x22 class=\x22\x22 onclick=\x22ToggleDragPan()\x22><i class=\x22fas fa-level-down-alt fa-2x\x22></i></div>"+
-                "<div id=\x22button_left_2\x22 class=\x22\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22ZoomOut()\x22 class=\x22tooltip\x22><i class=\x22fas fa-search-minus  fa-2x\x22></i><span class=\x22tooltiptext\x22></span></div>"+
-                "<div id=\x22button_left_3\x22 class=\x22\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22ZoomIn()\x22 class=\x22tooltip\x22><i class=\x22fas fa-search-plus fa-2x\x22></i><span class=\x22tooltiptext\x22></span></div>" +
-                "<div id=\x22button_left_4\x22 class=\x22\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22RotateCamera(0)\x22 class=\x22tooltip\x22><i class=\x22fas fa-sync-alt fa-2x\x22></i><span class=\x22tooltiptext\x22></span></div>";
+                // mapButtons = "<div id=\x22button_left_1\x22 style=\x22float: left; margin: 10px 10px;\x22 class=\x22\x22 onclick=\x22ToggleDragPan()\x22><i class=\x22fas fa-level-down-alt fa-2x\x22></i></div>"+
+                // "<div id=\x22button_left_2\x22 class=\x22\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22ZoomOut()\x22 class=\x22tooltip\x22><i class=\x22fas fa-search-minus  fa-2x\x22></i><span class=\x22tooltiptext\x22></span></div>"+
+                // "<div id=\x22button_left_3\x22 class=\x22\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22ZoomIn()\x22 class=\x22tooltip\x22><i class=\x22fas fa-search-plus fa-2x\x22></i><span class=\x22tooltiptext\x22></span></div>" +
+                // "<div id=\x22button_left_4\x22 class=\x22\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22RotateCamera(0)\x22 class=\x22tooltip\x22><i class=\x22fas fa-sync-alt fa-2x\x22></i><span class=\x22tooltiptext\x22></span></div>";
                 
-                mapStyleSelector = "<div id=\x22button_left_5\x22 class=\x22\x22>" +   
-                    "<select id=\x22mapStyle\x22>" +
-                        "<option value=\x22\x22 selected>Select Map Style:</option>" +
-                            "<option>Satellite</option>" +
-                            "<option>Terrain</option>" +
-                            "<option>Dark</option>" +
-                            "<option>Light</option>" +
-                    "</select>" +
-                "</div>";
+                // mapStyleSelector = "<div id=\x22button_left_5\x22 class=\x22\x22>" +   
+                //     "<select id=\x22mapStyle\x22>" +
+                //         "<option value=\x22\x22 selected>Select Map Style:</option>" +
+                //             "<option>Satellite</option>" +
+                //             "<option>Terrain</option>" +
+                //             "<option>Dark</option>" +
+                //             "<option>Light</option>" +
+                //     "</select>" +
+                // "</div>";
             } else { //"sceneWebType == "Default or AFrame"
                                 
 
@@ -3265,6 +3265,10 @@ landing_router.get('/:_id', function (req, res) {
                             if (sceneResponse.sceneEnabledClientTypes.unityWeb == true) {
                                 platformButtons = platformButtons + "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22mx-auto btn btn-xl btn-primary float-right\x22>Unity Web</a>";
                                 picLink = "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22>";
+                            }
+                            if (sceneResponse.sceneEnabledClientTypes.mapboxWeb == true) {
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../mapbox/"+ sceneResponse.short_id + "\x22> Mapbox </a>" + platformButtons;
+                                picLink = "<a href=\x22../mapbox/"+ sceneResponse.short_id + "\x22>";
                             }
                         }
                         // if (sceneResponse.sceneEnabledClientTypes != undefined) {

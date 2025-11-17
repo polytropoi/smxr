@@ -1592,3 +1592,5 @@ canvas {
     color: rgb(255, 255, 255);
     opacity:.75;
 }
+
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }

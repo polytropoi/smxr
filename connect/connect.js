@@ -123,9 +123,11 @@ export let avatarName = "";
 let writeCount = 0;
 window.LocationRowClick = LocationRowClick;
 
-$(function() { 
+// $(function() { 
+export function InitConnect() {
    // InitIDB();
       // LoadPrimaryAudioHowl();
+      console.log("InitConnect!");
    if (avatarNameEl) {
       avatarName = avatarNameEl.id;
    }
@@ -175,7 +177,7 @@ $(function() {
    }, 1000);
    $('#room_id').append($('<button><h4><strong>').text("Welcome to scene " + room).append("</strong></h4></button>"));
 
-   if (settings && settings.sceneType == "Default" || settings.sceneType == "AFrame" || settings.sceneType == "default" || settings.sceneType == "aframe") {
+   if (settings && settings.sceneType && (settings.sceneType == "Default" || settings.sceneType == "AFrame" || settings.sceneType == "default" || settings.sceneType == "aframe")) {
       // window.sceneType == "aframe";
       if (settings.hideAvatars) {
          player.setAttribute("player_mover", "init", true);
@@ -230,7 +232,7 @@ $(function() {
    } else {
       console.log("not aframe or default scenetype!");
       // GetTextItems(); //only for plain pages or text adventure, scene_text_control fetches for aframe
-      if (settings.sceneType == "landing") {
+      if (settings && settings.sceneType && settings.sceneType == "landing") {
          if (settings.sceneTags && settings.sceneTags.includes("landing pics")) {
             let picGroupMgr = document.getElementById("pictureGroupsData");
             if (picGroupMgr) {
@@ -251,7 +253,7 @@ $(function() {
       }   
       // InitIDB();
    }
-   console.log("room: " +room + " vid " + settings.sceneVideoStreams + " type " + settings.sceneType);
+   // console.log("room: " +room + " vid " + settings.sceneVideoStreams + " type " + settings.sceneType);
 
    lastCloudUpdate = settings.sceneLastUpdate;
    if (settings.useMatrix) {
@@ -486,7 +488,7 @@ $(function() {
     
 
 
-}); //end onload
+} //end onload
 
 // export function UpdateUserProfile (profile) {
 //    userProfile = profile;
@@ -562,6 +564,7 @@ function UpdateSceneLocations () { //unused?
 
 export function SetSceneLocations (sceneLocs) { //e.g. from vtt/non aframe, not set in content-utils
    sceneLocations.locations = sceneLocs;
+   console.log(JSON.stringify(sceneLocations));
 }
 
 export function getExtension(filename) {

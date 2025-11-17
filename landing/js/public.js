@@ -83,6 +83,9 @@ function generateSuccessHTMLOutput(response) {
           if (shuffledArray[i].sceneEnabledClientTypes.unityWeb == true) {
             buttons = buttons + "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Unity Web</a>";
           }
+          if (shuffledArray[i].sceneEnabledClientTypes.mapboxWeb == true) {
+            buttons = buttons + "<a href=\x22/mapbox/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Mapbox</a>";
+          }       
         }
 
            

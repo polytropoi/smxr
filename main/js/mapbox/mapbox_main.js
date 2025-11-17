@@ -1,5 +1,28 @@
 // import { SetTimeKeysData, eventEl } from '../connect/events.js';
 // import { poiLocations } from '../connect/connect.js';
+import {} from 'mapbox-gl';
+import {localData, sceneLocations, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "../../../connect/connect.js";
+
+
+const locstyle = "position:fixed;display:block;width:200px;height:400px;right:0px;bottom:0px;background-color:#ffffff;z-index:20;"
+let mapZoomInt = "13";
+let mapType = "hybrid";
+let mapSize = "2048x2048";
+let showGeoPanel = false;
+
+let ipLookupData = null;
+let currentLocation = [];
+let geoEntity = 'geo-location';
+// let mode = 'map';
+let initialized = false;
+let gpsElements = document.querySelectorAll(".poi,.geo");
+
+// let sceneLocations;
+let locationData;
+let data_location_
+// let doBuildings = false;
+// let doTerrain = false;
+let googleMapsKey = "";
 
       let latitude = 0;
       let longitude = 0;
@@ -8,9 +31,20 @@
       let doBuildings = false;
       let doTerrain = false;
       let zoomLevel = 19;
-      let mbid = "";
+    //   let mbid = settings.mbid;
 
-MapboxInit();
+      const mode = 'mapbox';
+
+      setTimeout(() => {
+        
+            MapboxInit();           
+      }, 3000);
+
+
+   $('#geoloc_button').on('click', function(e) {
+    // console.log("color 1 changed " + e.target.value);
+   ShowHideGeoPanel();
+  });
 
 function UpdateGeoPanel(nwString) {
     
@@ -93,7 +127,7 @@ function UpdateButtons() {
   }
 }
 
-function geoip(json){
+export function geoip(json){
   // console.log(JSON.stringify(json));
   ipLookupData = json;
 }
@@ -149,8 +183,8 @@ function geoip(json){
           for (var i = 0; i < gpsElements.length; i++) {
             if (gpsElements[i].classList.contains('poi')) {
             console.log("element has poi class: " + gpsElements[i].id + " " + geoEntity);
-            let lat = gpsElements[i].getAttribute(geoEntity.toString()).latitude;
-            let lng = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+            let lat = gpsElements[i].dataset.latitude;
+            let lng = gpsElements[i].dataset.longitude;
             console.log("tryna get distance to " + lat + " " + lng);
             index++; //zero index is used for player position in mapURL below
             // console.log(currentLocString);
@@ -186,25 +220,25 @@ function geoip(json){
             // let eventdata = "";
             // let label = "";
             // for (let m = 0; m < sceneLocations.locations.length; m++) {
-            //   if (gpsElements[i].getAttribute(geoEntity.toString())._id == sceneLocations.locations[m]._id) {//match the id to get the sceneLcoation data
+            //   if (gpsElements[i].dataset._id == sceneLocations.locations[m]._id) {//match the id to get the sceneLcoation data
             //     console.log("gotsa match " + sceneLocations.locations[m]);
             //     label = sceneLocations.locations[m].name; // to do : event data
             //   }
             // }
             // currentLocString = currentLocString + "\nLocation "+index +" distance: " +distance.toFixed(3)+ "<br>";
-            // currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[i].getAttribute(geoEntity.toString()).latitude+"\x22>"+index +" " + label + " "+distance.toFixed(2)+ " km</button><br>";
+            // currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>"+index +" " + label + " "+distance.toFixed(2)+ " km</button><br>";
             console.log("mode is " + mode);
             if (mode != "mapbox") {
               console.log("NOT MAPBOX");
               let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+location.coords.longitude+"_"+location.coords.latitude+"\x22>0 You Are Here</button><br>";
-              currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[i].getAttribute(geoEntity.toString()).latitude+"\x22>Location "+index +" "+distance.toFixed(2)+ " miles</button><br>";
-              markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].getAttribute(geoEntity.toString()).latitude+ "," + gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+              currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>Location "+index +" "+distance.toFixed(2)+ " miles</button><br>";
+              markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
               // console.log(markers);
               let gpsThing = {};
               gpsThing.currentLatitude = location.coords.latitude;
               gpsThing.currentLongitude = location.coords.longitude;
-              gpsThing.latitude = gpsElements[i].getAttribute(geoEntity.toString()).latitude;
-              gpsThing.longitude = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+              gpsThing.latitude = gpsElements[i].dataset.latitude;
+              gpsThing.longitude = gpsElements[i].dataset.longitude;
               gpsThing.index = index;
               gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
               "&zoom=17&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
@@ -279,8 +313,8 @@ function geoip(json){
                     fromToValues.to = {};
                     fromToValues.from.latitude = ipLookupData.latitude;
                     fromToValues.from.longitude = ipLookupData.longitude;
-                    fromToValues.to.latitude = gpsElements[i].getAttribute(geoEntity.toString()).latitude;
-                    fromToValues.to.longitude = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+                    fromToValues.to.latitude = gpsElements[i].dataset.latitude;
+                    fromToValues.to.longitude = gpsElements[i].dataset.longitude;
                     fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
                     fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
 
@@ -293,15 +327,15 @@ function geoip(json){
                     //   window.location.href = "/landing/gf_1.html";
                     // }
 
-                      currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[i].getAttribute(geoEntity.toString()).latitude+"\x22>Location "+index +"</button> distance: " +distance.toFixed(3)+ " miles<br>";
+                      currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>Location "+index +"</button> distance: " +distance.toFixed(3)+ " miles<br>";
 
-                      markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].getAttribute(geoEntity.toString()).latitude+ "," + gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+                      markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
                       // console.log(markers);
                       let gpsThing = {};
                       gpsThing.currentLatitude = ipLookupData.latitude;
                       gpsThing.currentLongitude = ipLookupData.longitude;
-                      gpsThing.latitude = gpsElements[i].getAttribute(geoEntity.toString()).latitude;
-                      gpsThing.longitude = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+                      gpsThing.latitude = gpsElements[i].dataset.latitude;
+                      gpsThing.longitude = gpsElements[i].dataset.longitude;
                       gpsThing.index = index;
                       gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
                       "&zoom=14&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
@@ -355,8 +389,8 @@ function geoip(json){
           fromToValues.from.latitude = ipLookupData.latitude;
           fromToValues.from.longitude = ipLookupData.longitude;
           console.log("geoEntity.toString() is " + geoEntity.toString());
-          fromToValues.to.latitude = gpsElements[i].getAttribute(geoEntity.toString()).latitude;
-          fromToValues.to.longitude = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+          fromToValues.to.latitude = gpsElements[i].dataset.latitude;
+          fromToValues.to.longitude = gpsElements[i].dataset.longitude;
           fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
           fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
 
@@ -365,14 +399,14 @@ function geoip(json){
             mostDistant = distance;
           }
 
-          currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[i].getAttribute(geoEntity.toString()).latitude+"\x22>Location "+index +"</button> distance: " +distance.toFixed(3)+ " miles<br>";
-          markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].getAttribute(geoEntity.toString()).latitude+ "," + gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+          currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>Location "+index +"</button> distance: " +distance.toFixed(3)+ " miles<br>";
+          markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
           // console.log(markers);
           let gpsThing = {};
           gpsThing.currentLatitude = location.coords.latitude;
           gpsThing.currentLongitude = location.coords.longitude;
-          gpsThing.latitude = gpsElements[i].getAttribute(geoEntity.toString()).latitude;
-          gpsThing.longitude = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+          gpsThing.latitude = gpsElements[i].dataset.latitude;
+          gpsThing.longitude = gpsElements[i].dataset.longitude;
           gpsThing.index = index;
           gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
           "&zoom=15&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
@@ -594,14 +628,14 @@ function geoip(json){
         // create a HTML element for each feature
       // var el = document.createElement('div');
       // el.className = 'marker';
-      let lat = gpsElements[i].getAttribute(geoEntity.toString()).latitude;
-      let lng = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+      let lat = gpsElements[i].dataset.latitude;
+      let lng = gpsElements[i].dataset.longitude;
       let eventData = "";
       let label = "";
 
       if (sceneLocations != undefined && sceneLocations.locations != undefined) {
         for (let m = 0; m < sceneLocations.locations.length; m++) {
-          if (gpsElements[i].getAttribute(geoEntity.toString())._id == sceneLocations.locations[m].timestamp) {//match the timestamp to get the sceneLcoation data
+          if (gpsElements[i].dataset._id == sceneLocations.locations[m].timestamp) {//match the timestamp to get the sceneLcoation data
             // console.log("gotsa match " + sceneLocations.locations[m].eventData);
             // label = sceneLocations.locations[m].label != undefined ? sceneLocations.locations[m].label : sceneLocations.locations[m].name; //whatever
             label = sceneLocations.locations[m].name;
@@ -623,8 +657,8 @@ function geoip(json){
         
         let indexMinusOne = i > 0 ? i - 1 : gpsElements.length - 1;
         let indexPlusOne = i < gpsElements.length - 1 ? i + 1 : 0;
-        let latlngStringPrevious = gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).latitude;
-        let latlngStringNext = gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).latitude;
+        let latlngStringPrevious = gpsElements[indexMinusOne].dataset.longitude+"_"+gpsElements[indexMinusOne].dataset.latitude;
+        let latlngStringNext = gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude;
 
         let href = "";
             if (eventData != "" && eventData.includes("link")) {
@@ -642,7 +676,7 @@ function geoip(json){
               }
             }
 
-        currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[i].getAttribute(geoEntity.toString()).latitude+"\x22>"+ label + " "+distance.toFixed(2)+ " miles</button><br>";
+        currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>"+ label + " "+distance.toFixed(2)+ " miles</button><br>";
         // console.log("index " + i + " plusONe " + indexPlusOne +  " minus " + indexMinusOne);
         var popup = new mapboxgl.Popup({className: "mode1-popup"})
         // .setText("loc " + (i + 1).toString() + ": " + label) //zero = you are here
@@ -650,21 +684,21 @@ function geoip(json){
         // .setHTML('<h4>' + (i + 1).toString() + ' ' + label + 
         .setHTML('<h4>' + label + 
         '<br>distance: '+distance.toFixed(2)+' miles</h4>'+
-        '<div id=\x22'+gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).latitude+'\x22 onclick=\x22PopupNextPreviousButtons(\x27'+latlngStringNext+'\x27)\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-arrow-circle-right fa-2x\x22></i><span class=\x22tooltiptext\x22>Next Location</span></div>'+
+        '<div id=\x22'+gpsElements[indexPlusOne].dataset.longitude+'_'+gpsElements[indexPlusOne].dataset.latitude+'\x22 onclick=\x22PopupNextPreviousButtons(\x27'+latlngStringNext+'\x27)\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-arrow-circle-right fa-2x\x22></i><span class=\x22tooltiptext\x22>Next Location</span></div>'+
         
-        // '</h4><div id=\x22'+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).latitude+'\x22 class=\x22locbutton tooltip\x22><i  style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>'+
-        // '<div id=\x22'+gpsElements[i].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[i].getAttribute(geoEntity.toString()).latitude+'\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-bullseye fa-2x\x22></i><span class=\x22tooltiptext\x22>Center</span></div>'+
+        // '</h4><div id=\x22'+gpsElements[indexMinusOne].dataset.longitude+'_'+gpsElements[indexMinusOne].dataset.latitude+'\x22 class=\x22locbutton tooltip\x22><i  style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>'+
+        // '<div id=\x22'+gpsElements[i].dataset.longitude+'_'+gpsElements[i].dataset.latitude+'\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-bullseye fa-2x\x22></i><span class=\x22tooltiptext\x22>Center</span></div>'+
         '<div onclick=\x22PopupLinkButtons(\x27'+href+'\x27)\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-link fa-2x\x22></i><span class=\x22tooltiptext\x22>Link</span></div>'+
         // '<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-envelope fa-2x\x22></i><span class=\x22tooltiptext\x22>Messages</span></div>'+
         // '<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-camera fa-2x\x22></i><span class=\x22tooltiptext\x22>Pictures</span></div>'+
         // '<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-walking fa-2x\x22></i><span class=\x22tooltiptext\x22>Directions</span></div>'+
-        '</h4><div id=\x22'+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).latitude+'\x22 onclick=\x22PopupNextPreviousButtons(\x27'+latlngStringPrevious+'\x27)\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>')
+        '</h4><div id=\x22'+gpsElements[indexMinusOne].dataset.longitude+'_'+gpsElements[indexMinusOne].dataset.latitude+'\x22 onclick=\x22PopupNextPreviousButtons(\x27'+latlngStringPrevious+'\x27)\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>')
         
         .addTo(theMap);
         
         let marker = new mapboxgl
           .Marker()
-            .setLngLat([gpsElements[i].getAttribute(geoEntity.toString()).longitude, gpsElements[i].getAttribute(geoEntity.toString()).latitude])
+            .setLngLat([gpsElements[i].dataset.longitude, gpsElements[i].dataset.latitude])
             .addTo(theMap)
             .setPopup(popup);
           popup.remove();
@@ -763,24 +797,36 @@ function geoip(json){
   }
 
 function MapboxInit() {
-      mode = 'mapbox';
+      
+    let locationDataEl = document.getElementById('locationData');
+    if (locationDataEl) {
+        let theLocationData = locationDataEl.getAttribute('data-locations');
+
+        locationData = JSON.parse(atob(theLocationData));
+        SetSceneLocations(locationData);
+        // console.log("locationData " + JSON.stringify(locationData));
+
+    }
+    
       window.sceneType = mode;
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoicG9seXRyb3BvaSIsImEiOiJjbDU0M2F6eWgwNWNzM2txZm5icm5pNndhIn0.BQBeZQ2KClEInphAQQ-wGA';
       // InitSceneHooks();
       UpdateLocationInfo();
-      mapboxgl.accessToken = this.data.mbid;
-      // console.log("tryna mapbox with toik,e mn " + mapbox_config.accessToken);
-      gpsElements = document.querySelectorAll(".geopoi,.geo");
+
+    //   console.log("tryna mapbox with toik,e mn " + mapbox_config.accessToken);
+      const gpsElements = document.querySelectorAll(".poi,.geo");
       if (gpsElements.length > 0) {
-      let latitude = gpsElements[0].getAttribute(geoEntity.toString()).latitude;
-      let longitude = gpsElements[0].getAttribute(geoEntity.toString()).longitude;
-      // console.log("lat " )
+      let latitude = gpsElements[0].dataset.latitude;
+      let longitude = gpsElements[0].dataset.longitude;
+      console.log("lat " + latitude + " long " + longitude);
       var map = new mapboxgl.Map({
         // style: 'mapbox://styles/mapbox/light-v10',
         // style: 'mapbox://styles/mapbox-map-design/ckhqrf2tz0dt119ny6azh975y',
         // style: 'mapbox://styles/polytropoi/ckke5tnp40mrt17ohfhkxy29q',
         
         container: 'map',
-        zoom: this.data.zoomLevel,
+        zoom: zoomLevel,
         center: [longitude, latitude],
         pitch: 75,
         bearing: 90,
@@ -801,10 +847,10 @@ function MapboxInit() {
         //   }
         // );
 
-        doBuildings = this.data.doBuildings;
-        doTerrain = this.data.doTerrain;
+        doBuildings = true;
+        doTerrain = true;
 
-        let that = this;
+        // let that = this;
         console.log("do builtings " + doBuildings + " do terrain " + doTerrain);
         map.on('load', function () {
           // map.addControl(
@@ -869,7 +915,7 @@ function MapboxInit() {
           // JSON.stringify(e.point) +
           // '<br />' +
           // `e.lngLat` is the longitude, latitude geographical position of the event.
-          console.log(JSON.stringify(e.lngLat.wrap()));
+        //   console.log(JSON.stringify(e.lngLat.wrap()));
           });
         // map.scrollZoom.enable({ around: 'center' });
             // if (doBuildings) {
@@ -915,20 +961,21 @@ function MapboxInit() {
         let index = 0; 
         for (let i = 0; i < gpsElements.length; i++) {
           
-          console.log("gpsElements: " + gpsElements.length);
+          console.log("gpsElements: " + gpsElements[i].id);
           index++; 
             // create a HTML element for each feature
           // var el = document.createElement('div');
           // el.className = 'marker';
-          let lat = gpsElements[i].getAttribute(geoEntity.toString()).latitude;
-          let lng = gpsElements[i].getAttribute(geoEntity.toString()).longitude;
+          let lat = gpsElements[i].dataset.latitude;
+          let lng = gpsElements[i].dataset.longitude;
           // let eventdata = "";
           let label = "";
           let scale = 10;
           let eventData = null;
-          if (sceneLocations.locations != undefined) {
+          if (sceneLocations && sceneLocations.locations != undefined) {
             for (let m = 0; m < sceneLocations.locations.length; m++) {
-              if (gpsElements[i].getAttribute(geoEntity.toString())._id == sceneLocations.locations[m].timestamp) { //match the id to get the sceneLcoation data
+                console.log(sceneLocations.locations[m].name +" " + sceneLocations.locations[m].timestamp);
+              if (gpsElements[i].id == sceneLocations.locations[m].timestamp) { //match the id to get the sceneLcoation data
                 let modelUrl = 'https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb';
                 if (sceneLocations.locations[m].modelID != null) {
                   console.log("Looking for model id: " + sceneLocations.locations[m].modelID);   
@@ -948,7 +995,7 @@ function MapboxInit() {
                 if (sceneLocations.locations[m].eventData != null && sceneLocations.locations[m].eventData != undefined) {
                   eventData = sceneLocations.locations[m].eventData;
                 }
-                label = sceneLocations.locations[m].label != undefined ? sceneLocations.locations[m].label : sceneLocations.locations[m].name; // to do : event data
+                label = sceneLocations.locations[m].name; // to do : event data
                       //maybe this inside the map.addLayer below...
                             // let modelEntity = document.createElement("a-entity");
                             //     modelEntity.setAttribute('gltf-model', modelUrl);
@@ -1009,14 +1056,14 @@ function MapboxInit() {
             // if (distance > mostDistant) {
             //   mostDistant = distance;
             // }
-            // let latlngString = gpsElements[i].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[i].getAttribute(geoEntity.toString()).latitude;
+            // let latlngString = gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude;
             let indexMinusOne = i > 0 ? i - 1 : gpsElements.length - 1;
             let indexPlusOne = i < gpsElements.length - 1 ? i + 1 : 0;
            
-            let latlngStringPrevious = gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).latitude;
-            let latlngStringNext = gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).latitude;
+            let latlngStringPrevious = gpsElements[indexMinusOne].dataset.longitude+"_"+gpsElements[indexMinusOne].dataset.latitude;
+            let latlngStringNext = gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude;
 
-            currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].getAttribute(geoEntity.toString()).longitude+"_"+gpsElements[i].getAttribute(geoEntity.toString()).latitude+"\x22>" + label + " "+distance.toFixed(2)+ " miles</button><br>";
+            currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>" + label + " "+distance.toFixed(2)+ " miles</button><br>";
             // console.log("gpsElements index " + i + " " + currentLocString);
             let href = "";
             if (eventData != null && eventData != "" && eventData.toString().includes("link")) {
@@ -1038,26 +1085,26 @@ function MapboxInit() {
               var popup = new mapboxgl.Popup( {className: "mode1-popup"})
               .setHTML('<h4>' + label + 
               '<br>distance: '+distance.toFixed(2)+' miles</h4>'+
-              '<div id=\x22'+gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).latitude+'\x22'+
+              '<div id=\x22'+gpsElements[indexPlusOne].dataset.longitude+'_'+gpsElements[indexPlusOne].dataset.latitude+'\x22'+
               'class=\x22locbutton tooltip\x22 onclick=\x22PopupNextPreviousButtons(\x27'+latlngStringNext+'\x27)\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-arrow-circle-right fa-2x\x22></i><span class=\x22tooltiptext\x22>Next Location</span></div>'+
               
-              // '<div id=\x22'+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).latitude+'\x22 class=\x22locbutton tooltip\x22><i  style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>'+
-              // // id=\x22'+gpsElements[i].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[i].getAttribute(geoEntity.toString()).latitude+'\x22 
-              // '<div id=\x22'+gpsElements[i].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[i].getAttribute(geoEntity.toString()).latitude+'\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-bullseye fa-2x\x22></i><span class=\x22tooltiptext\x22>Center</span></div>'+
+              // '<div id=\x22'+gpsElements[indexMinusOne].dataset.longitude+'_'+gpsElements[indexMinusOne].dataset.latitude+'\x22 class=\x22locbutton tooltip\x22><i  style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>'+
+              // // id=\x22'+gpsElements[i].dataset.longitude+'_'+gpsElements[i].dataset.latitude+'\x22 
+              // '<div id=\x22'+gpsElements[i].dataset.longitude+'_'+gpsElements[i].dataset.latitude+'\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-bullseye fa-2x\x22></i><span class=\x22tooltiptext\x22>Center</span></div>'+
               '<div onclick=\x22PopupLinkButtons(\x27'+href+'\x27)\x22 class=\x22locbutton tooltip\x22><i style=\x22 margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-link fa-2x\x22></i><span class=\x22tooltiptext\x22>Link</span></div>'+
               // '<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-envelope fa-2x\x22></i><span class=\x22tooltiptext\x22>Messages</span></div>'+
               // '<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-camera fa-2x\x22></i><span class=\x22tooltiptext\x22>Pictures</span></div>'+
               // '<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-walking fa-2x\x22></i><span class=\x22tooltiptext\x22>Directions</span></div>'+
-              // '<div id=\x22'+gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[indexPlusOne].getAttribute(geoEntity.toString()).latitude+'\x22'+
+              // '<div id=\x22'+gpsElements[indexPlusOne].dataset.longitude+'_'+gpsElements[indexPlusOne].dataset.latitude+'\x22'+
               // 'class=\x22locbutton tooltip\x22><i  style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-arrow-circle-right fa-2x\x22></i><span class=\x22tooltiptext\x22>Next Location</span></div>'
-              '<div id=\x22'+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).longitude+'_'+gpsElements[indexMinusOne].getAttribute(geoEntity.toString()).latitude+
+              '<div id=\x22'+gpsElements[indexMinusOne].dataset.longitude+'_'+gpsElements[indexMinusOne].dataset.latitude+
               '\x22 class=\x22locbutton tooltip\x22 onclick=\x22PopupNextPreviousButtons(\x27'+latlngStringPrevious+'\x27)\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>')
               .addTo(theMap);
 
               
             let marker = new mapboxgl
               .Marker()
-                .setLngLat([gpsElements[i].getAttribute(geoEntity.toString()).longitude, gpsElements[i].getAttribute(geoEntity.toString()).latitude])
+                .setLngLat([gpsElements[i].dataset.longitude, gpsElements[i].dataset.latitude])
                 .addTo(map)
                 .setPopup(popup);
               popup.remove();  

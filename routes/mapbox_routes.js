@@ -83,21 +83,23 @@ function HexToRgbValues (c) {
 
  
 ////////// test / example of aframe response
-mapbox_router.get('/simple_aframe', function (req, res) { 
+mapbox_router.get('/simple_mapbox', function (req, res) { 
 
     let response =
         "<!DOCTYPE html> <html lang=\x22en\x22>" +
         "<head>"+
-        "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>"+
+
+        // "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>"+
+        "<script src='https://api.mapbox.com/mapbox-gl-js/v3.17.0-beta.1/mapbox-gl.js'></script>"+
+        "<link href='https://api.mapbox.com/mapbox-gl-js/v3.17.0-beta.1/mapbox-gl.css' rel='stylesheet' />"+
+        "<style>body { margin: 0; padding: 0; } #map { position: absolute; top: 0; bottom: 0; width: 100%; }</style>"+
         "</head>"+
         "<body>"+
-            "<a-scene>"+
-            "<a-box position=\x22-1 0.5 -3\x22 rotation=\x220 45 0\x22 color=\x22#4CC3D9\x22></a-box>"+
-                "<a-sphere position=\x220 1.25 -5\x22 radius=\x221.25\x22 color=\x22#EF2D5E\x22></a-sphere>"+
-                "<a-cylinder position=\x221 0.75 -3\x22 radius=\x220.5\x22 height=\x221.5\x22 color=\x22#FFC65D\x22></a-cylinder>"+
-                "<a-plane position=\x220 0 -4\x22rotation=\x22-90 0 0\x22 width=\x224\x22 height=\x224\x22 color=\x22#7BC8A4\x22></a-plane>"+
-                "<a-sky color=\x22#ECECEC\x22></a-sky>"+
-            "</a-scene>"+
+        "<div id=\x22map\x22></div>"+
+        "<script>"+
+            "mapboxgl.accessToken = '';"+
+            "const map = new mapboxgl.Map({container: 'map', center: [-74.5, 40], zoom: 9 });"+
+        "</script>"+
         "</body>"+
         "</html>";
     
@@ -320,7 +322,7 @@ mapbox_router.get('/:_id', function (req, res) {
     let sceneBackground = " background ";
     let skyboxEnvMap = "";
     let geoEntities = "";
-    let geoEntity = 'geo-location'; //may be set to "gps-entity-place" for arjs locationing
+    let geoEntity = 'data-geo-location'; //may be set to "gps-entity-place" for arjs locationing
     let usdzModel = "";
     let gltfModel = "";
     let cameraScripts = "";
@@ -375,28 +377,29 @@ mapbox_router.get('/:_id', function (req, res) {
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
-    // let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+    let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
-    //                     "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+                        // "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
+                                        // "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js\x22></script>"+
                        
-    //                     "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-    //                     "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-    //                     // "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
+                        "\x22mapbox-gl\x22: \x22../main/js/mapbox/mapbox_gl_v3.15.0.mjs\x22"+
+                        // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
+                        // // "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
                                                
-    //                     "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
-    //                     "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-    //                     "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
-    //                     // "\x22aframe-physics-system\x22: \x22../main/vendor/aframe/aframe-physics-system.min.js\x22,"+ 
-    //                     // "\x22Ammo\x22: \x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22,"+ 
-    //                     "\x22aframe-extras\x22: \x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22,"+ 
+                        // "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
+                        // "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
+                        // "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
+                        // // "\x22aframe-physics-system\x22: \x22../main/vendor/aframe/aframe-physics-system.min.js\x22,"+ 
+                        // // "\x22Ammo\x22: \x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22,"+ 
+                        // "\x22aframe-extras\x22: \x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22,"+ 
                         
                         
                         
-    //                     "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                        // "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
                         
-    //                     "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
-    //                     "}"+
-    //                 "}</script>";
+                        // "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
+                        "}"+
+                    "}</script>";
 
     
     (async () => {
@@ -745,15 +748,15 @@ mapbox_router.get('/:_id', function (req, res) {
                             //     // console.log(geoEntities);
                             // } else {
                                 //for mapbox just using aframe to pass data
-                                geoEntities = geoEntities + "<div class=\x22geo poi\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
-                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></div>";
+                                geoEntities = geoEntities + "<div class=\x22geo poi\x22 data-latitude=\x22"+sceneResponse.sceneLocations[i].latitude+
+                                "\x22 data-longitude=\x22"+sceneResponse.sceneLocations[i].longitude+"\x22 id=\x22"+sceneResponse.sceneLocations[i].timestamp+"\x22></div>";
                                 // console.log("mapbox geoEntities: " + geoEntities);
                             // }
                         } else {
                             if (sceneResponse.sceneLocations[i].modelID != null) {
                                 console.log("gotsa modelID at a geographic location " + sceneResponse.sceneLocations[i].modelID );
-                                geoEntities = geoEntities + "<div class=\x22geo\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
-                                "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></div>";
+                                geoEntities = geoEntities + "<div class=\x22geo\x22  data-latitude=\x22"+sceneResponse.sceneLocations[i].latitude+
+                                "\x22 data-longitude=\x22"+sceneResponse.sceneLocations[i].longitude+"\x22 id=\x22"+sceneResponse.sceneLocations[i].timestamp+"\x22></div>";
                             } else {
                                 console.log("modelID is null at this location"); 
                             }
@@ -1037,7 +1040,7 @@ mapbox_router.get('/:_id', function (req, res) {
             } else if (sceneData.sceneWebType == 'Mapbox') { 
                 
                 dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
-                locationButton = "<div id=\x22loc_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                locationButton = "<div id=\x22geoloc_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
                 if (!sceneData.sceneTextUseModals) {
                     //renderPanel = "<div visible=\x22false\x22 render_canvas id=\x22renderCanvas\x22 look-at=\x22#player\x22 geometry=\x22primitive: plane; width:1; height:1;\x22 scale=\x221 1 1\x22 position=\x220 3.5 -.25\x22 material=\x22shader: html; transparent: true; width:1024; height:1024; fps: 10; target: #renderPanel;\x22></div>\n";
                 }
@@ -1046,10 +1049,11 @@ mapbox_router.get('/:_id', function (req, res) {
                 // "<div visible=\x22false\x22 class=\x22pause_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22PauseButton()\x22><i class=\x22fas fa-pause-circle fa-2x\x22></i></div>" +
 
                 "<div class=\x22next_button\x22 style=\x22float: left; margin: 10px 10px;\x22 onclick=\x22NextButton()\x22><i class=\x22fas fa-step-forward fa-2x\x22></i></div></div>";
-                geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>" +
-                "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js\x22></script>"+
-                "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>"+
-                "<script src=\x22../main/js/mapbox/mapbox_main.js\x22></script>";
+                geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
+
+                // <script async src="https://get.geojs.io/v1/ip/geo.js"></script>
+                // "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js\x22></script>"+
+               
                 
                 // "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js\x22></script>"+
                 // "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>";
@@ -2867,7 +2871,7 @@ mapbox_router.get('/:_id', function (req, res) {
                 let settings = {};  
                     settings._id = sceneResponse._id;
                     settings.sceneLastUpdate = sceneResponse.sceneLastUpdate;
-                    settings.sceneType = sceneResponse.sceneWebType;
+                    settings.sceneType = null; //deprecated ?
                     settings.sceneDomain = sceneResponse.sceneDomain;
                     settings.sceneTitle = sceneResponse.sceneTitle;
                     settings.sceneKeynote = sceneResponse.sceneKeynote;
@@ -2950,6 +2954,7 @@ mapbox_router.get('/:_id', function (req, res) {
                     settings.sceneGreeting = sceneGreeting;
                     settings.sceneQuest = sceneQuest;
                     settings.hasBgMap = hasBgMap;
+                    settings.mbid = process.env.MAPBOX_KEY;
                 
                     // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
                     //     settings.useXrRoomPhysics = true;
@@ -3524,18 +3529,24 @@ mapbox_router.get('/:_id', function (req, res) {
                         styleIncludes +
                         "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
                         "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-
+                        "<link href=\x22../css/mapbox-gl.v3.15.0.css\x22 rel=\x22stylesheet\x22/>"+
                         /////////// script includes /////////////////
                        
                         // "<script async src=\x22https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js\x22></script>"+
 
-                        // importMap + 
+                        importMap + 
                         
                         
+
+                        
+                        "<script type=\x22module\x22 src=\x22../main/js/mapbox/mapbox_main.js\x22></script>"+
                         "<script src=\x22/main/vendor/jquery/jquery-3.7.1.js\x22></script>" +
                         "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22/connect/settings.js\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
                         
+
+
                         // aframeScript +
                         // contentUtils +
                         // troikaScript +
