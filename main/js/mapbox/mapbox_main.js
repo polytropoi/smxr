@@ -1,7 +1,7 @@
 // import { SetTimeKeysData, eventEl } from '../connect/events.js';
 // import { poiLocations } from '../connect/connect.js';
 import {} from 'mapbox-gl';
-import {localData, sceneLocations, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "../../../connect/connect.js";
+import {ReturnPlayerData, sceneLocations, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "../../../connect/connect.js";
 
 
 const locstyle = "position:fixed;display:block;width:200px;height:400px;right:0px;bottom:0px;background-color:#ffffff;z-index:20;"
@@ -41,10 +41,26 @@ let googleMapsKey = "";
       }, 3000);
 
 
-   $('#geoloc_button').on('click', function(e) {
+$('#geoloc_button').on('click', function(e) {
     // console.log("color 1 changed " + e.target.value);
-   ShowHideGeoPanel();
-  });
+    ShowHideGeoPanel();
+});
+
+$('#popupLinkButton').on('click', function(e) {
+    console.log("link button " + e.target.value);
+    // ShowHideGeoPanel();
+});
+$('#nextButton').on('click', function(e) {
+        console.log("next button " + e.target.value);
+    // console.log("color 1 changed " + e.target.value);
+    // ShowHideGeoPanel();
+});
+$('#previousButton').on('click', function(e) {
+        console.log("previous button " + e.target.value);
+    // console.log("color 1 changed " + e.target.value);
+    // ShowHideGeoPanel();
+});
+
 
 function UpdateGeoPanel(nwString) {
     
@@ -127,9 +143,24 @@ function UpdateButtons() {
   }
 }
 
-export function geoip(json){
-  // console.log(JSON.stringify(json));
-  ipLookupData = json;
+// function geoip(json){
+//   console.log("geoip : " +JSON.stringify(json));
+//   ipLookupData = json;
+  
+
+// }
+
+function ipLookup () {
+    fetch('https://get.geojs.io/v1/ip/geo.json')
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        ipLookupData = data;
+        UseIPLocation();
+        // return ipLookupData;
+        // Access location details like data.city, data.country_name, data.latitude, data.longitude
+      })
+      .catch(error => console.error('Error fetching IP geolocation:', error));
 }
 
 
@@ -174,12 +205,14 @@ export function geoip(json){
     };
     let range = .05;
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(success, error, options);
-      function success(location) {
+        console.log("gotsa navigator..");
+      navigator.geolocation.getCurrentPosition(
+      (position) => {
+        
           let mostDistant = 0;
-          console.log("locatiuon: "+ location.coords.longitude + " " + location.coords.latitude);
+          console.log("locatiuon: "+ position.coords.longitude + " " + position.coords.latitude);
 
-          currentLocation = [location.coords.longitude, location.coords.latitude]; //to match the order and form of the mapbox coords
+          currentLocation = [position.coords.longitude, position.coords.latitude]; //to match the order and form of the mapbox coords
           for (var i = 0; i < gpsElements.length; i++) {
             if (gpsElements[i].classList.contains('poi')) {
             console.log("element has poi class: " + gpsElements[i].id + " " + geoEntity);
@@ -192,15 +225,15 @@ export function geoip(json){
             let fromToValues = {};
             fromToValues.from = {};
             fromToValues.to = {};
-            fromToValues.from.latitude = location.coords.latitude;
-            fromToValues.from.longitude = location.coords.longitude;
+            fromToValues.from.latitude = position.coords.latitude;
+            fromToValues.from.longitude = position.coords.longitude;
             fromToValues.to.latitude = lat;
             fromToValues.to.longitude = lng;
             fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
             fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
             
             //var distance = geolocator.calcDistance(fromToValues);
-            var distance = DistanceBetweenTwoCoordinates(location.coords.latitude, location.coords.longitude, lat, lng);
+            var distance = DistanceBetweenTwoCoordinates(position.coords.latitude, position.coords.longitude, lat, lng);
             console.log("distance " + distance);
             if (distance > mostDistant) {
               mostDistant = distance;
@@ -228,152 +261,234 @@ export function geoip(json){
             // currentLocString = currentLocString + "\nLocation "+index +" distance: " +distance.toFixed(3)+ "<br>";
             // currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>"+index +" " + label + " "+distance.toFixed(2)+ " km</button><br>";
             console.log("mode is " + mode);
-            if (mode != "mapbox") {
-              console.log("NOT MAPBOX");
-              let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+location.coords.longitude+"_"+location.coords.latitude+"\x22>0 You Are Here</button><br>";
-              currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>Location "+index +" "+distance.toFixed(2)+ " miles</button><br>";
-              markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
-              // console.log(markers);
-              let gpsThing = {};
-              gpsThing.currentLatitude = location.coords.latitude;
-              gpsThing.currentLongitude = location.coords.longitude;
-              gpsThing.latitude = gpsElements[i].dataset.latitude;
-              gpsThing.longitude = gpsElements[i].dataset.longitude;
-              gpsThing.index = index;
-              gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
-              "&zoom=17&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
-              // gps.data.push(gpsThing);
-              let gpsPanel = document.createElement("a-entity");
-              var sceneEl = document.querySelector('a-scene');
-              sceneEl.appendChild(gpsPanel);
-              // gpsElements[i].appendChild(gpsPanel);
-              gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
-              //                   let pos = gpsElements[i].getAttribute('position').x + " " + (gpsElements[i].getAttribute('position').y + 3) + " " + gpsElements[i].getAttribute('position').z;
-              // gpsPanel.setAttribute('position', pos);
-              // gpsPanel.setAttribute('position', gpsElements[i].getAttribute('position'));
-              gpsPanel.setAttribute('look-at', '#player');
-            } else {
+            // if (mode != "mapbox") {
+            //   console.log("NOT MAPBOX");
+            //   let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+position.coords.longitude+"_"+position.coords.latitude+"\x22>0 You Are Here</button><br>";
+            //   currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>position "+index +" "+distance.toFixed(2)+ " miles</button><br>";
+            //   markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
+            //   // console.log(markers);
+            //   let gpsThing = {};
+            //   gpsThing.currentLatitude = position.coords.latitude;
+            //   gpsThing.currentLongitude = position.coords.longitude;
+            //   gpsThing.latitude = gpsElements[i].dataset.latitude;
+            //   gpsThing.longitude = gpsElements[i].dataset.longitude;
+            //   gpsThing.index = index;
+            //   gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
+            //   "&zoom=17&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
+            //   // gps.data.push(gpsThing);
+            //   let gpsPanel = document.createElement("a-entity");
+            //   var sceneEl = document.querySelector('a-scene');
+            //   sceneEl.appendChild(gpsPanel);
+            //   // gpsElements[i].appendChild(gpsPanel);
+            //   gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
+            //   //                   let pos = gpsElements[i].getAttribute('position').x + " " + (gpsElements[i].getAttribute('position').y + 3) + " " + gpsElements[i].getAttribute('position').z;
+            //   // gpsPanel.setAttribute('position', pos);
+            //   // gpsPanel.setAttribute('position', gpsElements[i].getAttribute('position'));
+            //   gpsPanel.setAttribute('look-at', '#player');
+            // } else {
               UpdateMarkers();
               
-            }
+            // }
           } else {
               console.log("non poi geoElement");
           }
         }
-            if (mode != "mapbox") {
-              // UpdateGeoPanel(currentLocString);
+            // if (mode != "mapbox") {
+            //   // UpdateGeoPanel(currentLocString);
             
-            let mapEl = document.getElementById('youAreHere');
-            mapJSON = {};
-            mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + location.coords.latitude + "," + location.coords.longitude + // shows everhthing, need to scale zoom by max distance
-            "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + location.coords.latitude + "," + location.coords.longitude + markers;
-            mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
-            // $(".map-overlay").css('visibility','visible');
-            // $(".map-overlay").backstretch(mapURL);
-            } else {
+            // let mapEl = document.getElementById('youAreHere');
+            // let mapJSON = {};
+            // mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + position.coords.latitude + "," + position.coords.longitude + // shows everhthing, need to scale zoom by max distance
+            // "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + position.coords.latitude + "," + position.coords.longitude + markers;
+            // mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
+            // // $(".map-overlay").css('visibility','visible');
+            // // $(".map-overlay").backstretch(mapURL);
+            // } else {
               SetYouAreHereMarker();
-            }
+            // }
 
 
-      };
-      function error(error) { //best location mode not available, try some other stuff if it timed out
-          // console.warn('ERROR(' + err.code + '): ' + err.message);
+      },
+      (error) => { //best location mode not available, try some other stuff if it timed out
+        //   console.warn('ERROR(' + error.code + '): ' + error.message);
+           ipLookup();
           switch(error.code) {
-            case error.PERMISSION_DENIED:
-              UpdateGeoPanel("User denied the request for Geolocation.");
+            case 1: //error.PERMISSION_DENIED:
+              console.log("User denied the request for Geolocation.");
+            //   UseIPLocation();
               break;
-            case error.POSITION_UNAVAILABLE:
-              UpdateGeoPanel("Location information is unavailable.");
-              if (ipLookupData != null) {
-                UpdateGeoPanel("position 0 - \nlatitude: " + ipLookupData.latitude + " longitude: " + ipLookupData.longitude);
-              }
+            case 2: //error.POSITION_UNAVAILABLE:
+               
+              console.log("Location information is unavailable.");
+            //   if (ipLookupData != null) {
+            //     UpdateGeoPanel("position 0 - \nlatitude: " + ipLookupData.latitude + " longitude: " + ipLookupData.longitude);
+            //   }
+            //   UseIPLocation();
               break;
-            case error.TIMEOUT:
-              UpdateGeoPanel("The request to get user location timed out.");
-              if (ipLookupData != null) {
-                console.log("iplookup mode");
-                gpsElements = document.querySelectorAll(".poi,.geo"); //these will have a different target attribute that needs getting, depending on if arjs or not (geo-location vs gps-entity-place), s the geoEntity var
-                console.log(gpsElements.length + " IPLoikupDatas " + JSON.stringify(ipLookupData));
-                let currentLocString = "Location 0 - You Are Here (via ip)<br>";
-                UpdateGeoPanel(currentLocString);
-                let mostDistant = 0;
-                // console.log(JSON.stringify(gpsElements));
-                currentLocation = [ipLookupData.longitude, ipLookupData.latitude]; 
-                // SetYouAreHereMarker();
-                for (var i = 0; i < gpsElements.length; i++) {
-                  if (gpsElements[i].classList.contains('poi')) {
-                    for (let name of gpsElements[i].getAttributeNames()) {
-                      let value = gpsElements[i].getAttribute(name);
-                      // console.log(name, value);
-                    }
-                    index++; //zero index is used for player position in mapURL below
+            case 3: //error.TIMEOUT:
+              console.log("The request to get user location timed out.");
+            //   UseIPLocation();
+            //   if (ipLookupData != null) {
+            //     console.log("iplookup mode");
+            //     gpsElements = document.querySelectorAll(".poi,.geo"); //these will have a different target attribute that needs getting, depending on if arjs or not (geo-location vs gps-entity-place), s the geoEntity var
+            //     console.log(gpsElements.length + " IPLoikupDatas " + JSON.stringify(ipLookupData));
+            //     let currentLocString = "Location 0 - You Are Here (via ip)<br>";
+            //     UpdateGeoPanel(currentLocString);
+            //     let mostDistant = 0;
+            //     // console.log(JSON.stringify(gpsElements));
+            //     currentLocation = [ipLookupData.longitude, ipLookupData.latitude]; 
+            //     // SetYouAreHereMarker();
+            //     for (var i = 0; i < gpsElements.length; i++) {
+            //       if (gpsElements[i].classList.contains('poi')) {
+            //         for (let name of gpsElements[i].getAttributeNames()) {
+            //           let value = gpsElements[i].getAttribute(name);
+            //           // console.log(name, value);
+            //         }
+            //         index++; //zero index is used for player position in mapURL below
 
-                    let fromToValues = {};
-                    fromToValues.from = {};
-                    fromToValues.to = {};
-                    fromToValues.from.latitude = ipLookupData.latitude;
-                    fromToValues.from.longitude = ipLookupData.longitude;
-                    fromToValues.to.latitude = gpsElements[i].dataset.latitude;
-                    fromToValues.to.longitude = gpsElements[i].dataset.longitude;
-                    fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
-                    fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
+            //         let fromToValues = {};
+            //         fromToValues.from = {};
+            //         fromToValues.to = {};
+            //         fromToValues.from.latitude = ipLookupData.latitude;
+            //         fromToValues.from.longitude = ipLookupData.longitude;
+            //         fromToValues.to.latitude = gpsElements[i].dataset.latitude;
+            //         fromToValues.to.longitude = gpsElements[i].dataset.longitude;
+            //         fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
+            //         fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
 
-                    var distance = geolocator.calcDistance(fromToValues);
+            //         var distance = geolocator.calcDistance(fromToValues);
                     
-                    if (distance > mostDistant) {
-                      mostDistant = distance;
-                    }
-                    // if (distance > .05) {
-                    //   window.location.href = "/landing/gf_1.html";
-                    // }
+            //         if (distance > mostDistant) {
+            //           mostDistant = distance;
+            //         }
+            //         // if (distance > .05) {
+            //         //   window.location.href = "/landing/gf_1.html";
+            //         // }
 
-                      currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>Location "+index +"</button> distance: " +distance.toFixed(3)+ " miles<br>";
+            //           currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>Location "+index +"</button> distance: " +distance.toFixed(3)+ " miles<br>";
 
-                      markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
-                      // console.log(markers);
-                      let gpsThing = {};
-                      gpsThing.currentLatitude = ipLookupData.latitude;
-                      gpsThing.currentLongitude = ipLookupData.longitude;
-                      gpsThing.latitude = gpsElements[i].dataset.latitude;
-                      gpsThing.longitude = gpsElements[i].dataset.longitude;
-                      gpsThing.index = index;
-                      gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
-                      "&zoom=14&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
-                      // gps.data.push(gpsThing);
-                    if (mode != 'mapbox') {
-                      let gpsPanel = document.createElement("a-entity");
-                      gpsElements[i].appendChild(gpsPanel);
-                      gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
-                      // let pos = gpsElements[i].getAttribute('position').x + " " + (gpsElements[i].getAttribute('position').y + 3) + " " + gpsElements[i].getAttribute('position').z;
-                      // gpsPanel.setAttribute('position', pos);
-                      // gpsPanel.setAttribute('position', gpsElements[i].getAttribute('position'));
-                      gpsPanel.setAttribute('look-at', '#player');
-                    } else {
-                      UpdateMarkers();
+            //           markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
+            //           // console.log(markers);
+            //           let gpsThing = {};
+            //           gpsThing.currentLatitude = ipLookupData.latitude;
+            //           gpsThing.currentLongitude = ipLookupData.longitude;
+            //           gpsThing.latitude = gpsElements[i].dataset.latitude;
+            //           gpsThing.longitude = gpsElements[i].dataset.longitude;
+            //           gpsThing.index = index;
+            //           gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
+            //           "&zoom=14&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
+            //           // gps.data.push(gpsThing);
+            //         if (mode != 'mapbox') {
+            //           let gpsPanel = document.createElement("a-entity");
+            //           gpsElements[i].appendChild(gpsPanel);
+            //           gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
+            //           // let pos = gpsElements[i].getAttribute('position').x + " " + (gpsElements[i].getAttribute('position').y + 3) + " " + gpsElements[i].getAttribute('position').z;
+            //           // gpsPanel.setAttribute('position', pos);
+            //           // gpsPanel.setAttribute('position', gpsElements[i].getAttribute('position'));
+            //           gpsPanel.setAttribute('look-at', '#player');
+            //         } else {
+            //           UpdateMarkers();
                       
-                    }
-                  }
-                }
-                SetYouAreHereMarker();
-                UpdateGeoPanel(currentLocString);
-                let mapEl = document.getElementById('youAreHere');
-                mapJSON = {};
-                mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + ipLookupData.latitude + "," + ipLookupData.longitude + // shows everhthing, need to scale zoom by max distance
-                "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + ipLookupData.latitude + "," + ipLookupData.longitude + markers;
-                mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
-              }
+            //         }
+            //       }
+            //     }
+            //     SetYouAreHereMarker();
+            //     UpdateGeoPanel(currentLocString);
+            //     let mapEl = document.getElementById('youAreHere');
+            //     mapJSON = {};
+            //     mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + ipLookupData.latitude + "," + ipLookupData.longitude + // shows everhthing, need to scale zoom by max distance
+            //     "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + ipLookupData.latitude + "," + ipLookupData.longitude + markers;
+            //     mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
+            //   }
               break;
             case error.UNKNOWN_ERROR:
-              UpdateGeoPanel("An unknown error occurred.");
-              break;
+                UpdateGeoPanel("An unknown error occurred.");
+                break;
           }
-      };
+      });
     } else {
       //////////////////////////// this is for iplookup
-      if (ipLookupData != null) { 
-        console.log("iplookup mode");
+        // UseIPLocation();
+        ipLookup();
+    //   console.log("NO NAVIGATOR");
+      
+    //   if (ipLookupData != null) { 
+    //     console.log("NO NAVIGATOR iplookup mode");
+    //     let currentLocString = "Location 0 - You Are Here (via ip)<br>";
+    //     UpdateGeoPanel(currentLocString);
+    //     let mostDistant = 0;
+    //     currentLocation = [ipLookupData.longitude, ipLookupData.latitude]; 
+    //     SetYouAreHereMarker();
+    //     for (var i = 0; i < gpsElements[i].length; i++) {
+    //       for (let name of gpsElements[i].getAttributeNames()) {
+    //         let value = gpsElements[i].getAttribute(name);
+    //         console.log(name, value);
+    //       }
+    //       index++; //zero index is used for player position in mapURL below
+    //       let fromToValues = {};
+    //       fromToValues.from = {};
+    //       fromToValues.to = {};
+    //       fromToValues.from.latitude = ipLookupData.latitude;
+    //       fromToValues.from.longitude = ipLookupData.longitude;
+    //       console.log("geoEntity.toString() is " + geoEntity.toString());
+    //       fromToValues.to.latitude = gpsElements[i].dataset.latitude;
+    //       fromToValues.to.longitude = gpsElements[i].dataset.longitude;
+    //       fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
+    //       fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
+
+    //       var distance = geolocator.calcDistance(fromToValues);
+    //       if (distance > mostDistant) {
+    //         mostDistant = distance;
+    //       }
+
+    //       currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>Location "+index +"</button> distance: " +distance.toFixed(3)+ " miles<br>";
+    //       markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
+    //       // console.log(markers);
+    //       let gpsThing = {};
+    //       gpsThing.currentLatitude = location.coords.latitude;
+    //       gpsThing.currentLongitude = location.coords.longitude;
+    //       gpsThing.latitude = gpsElements[i].dataset.latitude;
+    //       gpsThing.longitude = gpsElements[i].dataset.longitude;
+    //       gpsThing.index = index;
+    //       gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
+    //       "&zoom=15&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
+    //       // gps.data.push(gpsThing);
+    //       if (mode != 'mapbox') {
+    //         let gpsPanel = document.createElement("a-entity");
+    //         gpsElements[i].appendChild(gpsPanel);
+    //         gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
+    //         // let pos = gpsElements[i].getAttribute('position').x + " " + (gpsElements[i].getAttribute('position').y + 3) + " " + gpsElements[i].getAttribute('position').z;
+    //         // gpsPanel.setAttribute('position', gpsElements[i].getAttribute('position'));
+    //         gpsPanel.setAttribute('look-at', '#player');
+    //       } else {
+    //         UpdateMarkers();
+    //         SetYouAreHereMarker();
+    //       }
+    //     }
+    //     UpdateGeoPanel(currentLocString);
+    //     let mapEl = document.getElementById('youAreHere');
+    //     mapJSON = {};
+    //     mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + location.coords.latitude + "," + location.coords.longitude + // shows everhthing, need to scale zoom by max distance
+    //     "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + location.coords.latitude + "," + location.coords.longitude + markers;
+    //     mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
+    //     // $(".map-overlay").css('visibility','visible');
+    //     // $(".map-overlay").backstretch(mapURL);
+    //   }
+    }
+    // if (theModal == null) {
+    //   theModal = document.getElementById('theModal');
+    // }
+
+  }
+
+  function UseIPLocation () {
+
+      console.log("NO NAVIGATOR");
+      
+    if (ipLookupData != null) { 
+        console.log("NO NAVIGATOR iplookup mode");
         let currentLocString = "Location 0 - You Are Here (via ip)<br>";
-        UpdateGeoPanel(currentLocString);
+        // UpdateGeoPanel(currentLocString);
         let mostDistant = 0;
         currentLocation = [ipLookupData.longitude, ipLookupData.latitude]; 
         SetYouAreHereMarker();
@@ -400,43 +515,40 @@ export function geoip(json){
           }
 
           currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>Location "+index +"</button> distance: " +distance.toFixed(3)+ " miles<br>";
-          markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
+          let markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
           // console.log(markers);
           let gpsThing = {};
-          gpsThing.currentLatitude = location.coords.latitude;
-          gpsThing.currentLongitude = location.coords.longitude;
+          gpsThing.currentLatitude = ipLookupData.latitude;
+          gpsThing.currentLongitude = ipLookupData.longitude;
           gpsThing.latitude = gpsElements[i].dataset.latitude;
           gpsThing.longitude = gpsElements[i].dataset.longitude;
           gpsThing.index = index;
           gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
           "&zoom=15&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
           // gps.data.push(gpsThing);
-          if (mode != 'mapbox') {
-            let gpsPanel = document.createElement("a-entity");
-            gpsElements[i].appendChild(gpsPanel);
-            gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
-            // let pos = gpsElements[i].getAttribute('position').x + " " + (gpsElements[i].getAttribute('position').y + 3) + " " + gpsElements[i].getAttribute('position').z;
-            // gpsPanel.setAttribute('position', gpsElements[i].getAttribute('position'));
-            gpsPanel.setAttribute('look-at', '#player');
-          } else {
+        //   if (mode != 'mapbox') {
+        //     let gpsPanel = document.createElement("a-entity");
+        //     gpsElements[i].appendChild(gpsPanel);
+        //     gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
+        //     // let pos = gpsElements[i].getAttribute('position').x + " " + (gpsElements[i].getAttribute('position').y + 3) + " " + gpsElements[i].getAttribute('position').z;
+        //     // gpsPanel.setAttribute('position', gpsElements[i].getAttribute('position'));
+        //     gpsPanel.setAttribute('look-at', '#player');
+        //   } else {
             UpdateMarkers();
             SetYouAreHereMarker();
-          }
+        //   }
         }
-        UpdateGeoPanel(currentLocString);
+        console.log(currentLocString);
+        // UpdateGeoPanel(currentLocString);
         let mapEl = document.getElementById('youAreHere');
-        mapJSON = {};
-        mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + location.coords.latitude + "," + location.coords.longitude + // shows everhthing, need to scale zoom by max distance
-        "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + location.coords.latitude + "," + location.coords.longitude + markers;
+        let mapJSON = {};
+        mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + ipLookupData.latitude + "," + ipLookupData.longitude + // shows everhthing, need to scale zoom by max distance
+        "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + ipLookupData.latitude + "," + ipLookupData.longitude;
         mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
         // $(".map-overlay").css('visibility','visible');
         // $(".map-overlay").backstretch(mapURL);
-      }
-    }
-    // if (theModal == null) {
-    //   theModal = document.getElementById('theModal');
-    // }
 
+    }
   }
   function ReturnMapZoom (mostDistant) {
     let zoom = 20;
@@ -616,7 +728,7 @@ export function geoip(json){
 
     // let gpsElements = document.querySelectorAll('.poi');
 
-    let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+currentLocation[0]+"_"+currentLocation[1]+"\x22>You Are Here</button><br>";
+    let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+currentLocation[0]+"_"+currentLocation[1]+"\x22>You Are Here</button><br><br><br>";
     // console.log(currentLocString);
     let index = 0; 
     // let poiMarkers = [];
@@ -650,7 +762,7 @@ export function geoip(json){
       }
       if (isPoi) {
         var distance = DistanceBetweenTwoCoordinates(currentLocation[1], currentLocation[0], lat, lng);
-        // console.log("distance " + distance);
+        console.log("distance " + distance);
         // if (distance > mostDistant) {
         //   mostDistant = distance;
         // }      
@@ -837,7 +949,11 @@ function MapboxInit() {
         map.scrollZoom.enable();
         theMap = map;
 
-       
+        map.on('error', e => {
+            // Hide those annoying non-error errors
+            if (e && e.error !== 'Error: Not Found')
+                console.error(e);
+        });
         // window.tb = new Threebox(
         //   map,
         //   map.getCanvas().getContext('webgl'),
@@ -908,6 +1024,8 @@ function MapboxInit() {
         // map.on('style.load', () => {
           map.setConfigProperty('basemap', 'lightPreset', 'dusk');
       // });
+
+
         map.on('mousemove', (e) => {
           // document.getElementById('info').innerHTML =
           // // `e.point` is the x, y coordinates of the `mousemove` event
@@ -956,12 +1074,12 @@ function MapboxInit() {
             //     labelLayerId
             //   );
             // }
-        let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+currentLocation[0]+"_"+currentLocation[1]+"\x22>You are here</button><br><br>";
+        let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+currentLocation[0]+"_"+currentLocation[1]+"\x22>You are here</button><br><br><br>";
         // console.log(currentLocString);
         let index = 0; 
         for (let i = 0; i < gpsElements.length; i++) {
           
-          console.log("gpsElements: " + gpsElements[i].id);
+        //   console.log("gpsElements: " + gpsElements[i].id);
           index++; 
             // create a HTML element for each feature
           // var el = document.createElement('div');
@@ -974,7 +1092,7 @@ function MapboxInit() {
           let eventData = null;
           if (sceneLocations && sceneLocations.locations != undefined) {
             for (let m = 0; m < sceneLocations.locations.length; m++) {
-                console.log(sceneLocations.locations[m].name +" " + sceneLocations.locations[m].timestamp);
+                // console.log(sceneLocations.locations[m].name +" " + sceneLocations.locations[m].timestamp);
               if (gpsElements[i].id == sceneLocations.locations[m].timestamp) { //match the id to get the sceneLcoation data
                 let modelUrl = 'https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb';
                 if (sceneLocations.locations[m].modelID != null) {

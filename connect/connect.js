@@ -2887,7 +2887,7 @@ function _arrayBufferToBase64( buffer ) {
 
 //todo -  mod EmitSelfPosition to send lat/lng/elevation instead if mapbox mode
 //todo - get a list of all OTHER players than me, with updated locations attached
-function ReturnPlayerData() { //return my un/color to set marker at current map coordinates
+export function ReturnPlayerData() { //return my un/color to set marker at current map coordinates
    if (sceneEl != null) {
       mode = "mapbox"; //this is called only from mapbox context in location-fu
       var keys = Object.keys(roomUsers);

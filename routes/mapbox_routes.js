@@ -3599,7 +3599,7 @@ mapbox_router.get('/:_id', function (req, res) {
                         // "<script type=\x22module\x22 src=\x22../main/src/shaders/aframe/aframe-makewaves-shader.js\x22></script>"+
                         // "<script type=\x22module\x22 src=\x22/main/src/shaders/aframe/aframe-wavy-shader.js\x22></script>"+
                         // "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
-                        geoScripts +
+                        // geoScripts +
                         "</head>" +
                         "<body bgcolor=\x22black\x22>" +
                         
