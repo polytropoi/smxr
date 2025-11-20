@@ -177,6 +177,9 @@ app.use('/webxr', webxr_routes);
 import mapbox_routes from './routes/mapbox_routes.js';
 app.use('/mapbox', mapbox_routes); 
 
+import maplibre_routes from './routes/maplibre_routes.js';
+app.use('/maplibre', maplibre_routes); 
+
 // import mapbox_routes from './routes/mapbox_routes.js';
 // app.use('/mapbox', mapbox_routes); 
 

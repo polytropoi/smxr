@@ -1,6 +1,6 @@
 // import { SetTimeKeysData, eventEl } from '../connect/events.js';
 // import { poiLocations } from '../connect/connect.js';
-import {} from 'mapbox-gl';
+import {} from 'maplibre-gl';
 import {ReturnPlayerData, sceneLocations, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "../../../connect/connect.js";
 
 
@@ -33,11 +33,11 @@ let googleMapsKey = "";
       let zoomLevel = 19;
     //   let mbid = settings.mbid;
 
-      const mode = 'mapbox';
+      const mode = 'maplibre';
 
       setTimeout(() => {
         
-            MapboxInit();           
+            maplibreInit();           
       }, 3000);
 
 
@@ -114,7 +114,7 @@ function PopupNextPreviousButtons(locstring) {
   // let lbData = loc;
   // console.log("lbData " + lbData );
   FlyToMapPosition(locstring.split("_")[0],locstring.split("_")[1], false);
-  const popup = document.getElementsByClassName('mapboxgl-popup');
+  const popup = document.getElementsByClassName('maplibregl-popup');
   if ( popup.length ) {
       popup[0].remove();  
   }
@@ -222,7 +222,7 @@ function ipLookup () {
           let mostDistant = 0;
           console.log("locatiuon: "+ position.coords.longitude + " " + position.coords.latitude);
 
-          currentLocation = [position.coords.longitude, position.coords.latitude]; //to match the order and form of the mapbox coords
+          currentLocation = [position.coords.longitude, position.coords.latitude]; //to match the order and form of the maplibre coords
           for (var i = 0; i < gpsElements.length; i++) {
             if (gpsElements[i].classList.contains('poi')) {
             console.log("element has poi class: " + gpsElements[i].id + " " + geoEntity);
@@ -239,8 +239,11 @@ function ipLookup () {
             fromToValues.from.longitude = position.coords.longitude;
             fromToValues.to.latitude = lat;
             fromToValues.to.longitude = lng;
-            fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
-            fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
+            // if (geolocator != undefined) {
+            //     fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
+            //     fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
+            // }
+          
             
             //var distance = geolocator.calcDistance(fromToValues);
             var distance = DistanceBetweenTwoCoordinates(position.coords.latitude, position.coords.longitude, lat, lng);
@@ -259,7 +262,7 @@ function ipLookup () {
               // window.location.href = "/landing/geo.html?ld=" + data64;
             }
 
-            // let marker = new mapboxgl
+            // let marker = new maplibregl
             // let eventdata = "";
             // let label = "";
             // for (let m = 0; m < sceneLocations.locations.length; m++) {
@@ -271,8 +274,8 @@ function ipLookup () {
             // currentLocString = currentLocString + "\nLocation "+index +" distance: " +distance.toFixed(3)+ "<br>";
             // currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>"+index +" " + label + " "+distance.toFixed(2)+ " km</button><br>";
             console.log("mode is " + mode);
-            // if (mode != "mapbox") {
-            //   console.log("NOT MAPBOX");
+            // if (mode != "maplibre") {
+            //   console.log("NOT maplibre");
             //   let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+position.coords.longitude+"_"+position.coords.latitude+"\x22>0 You Are Here</button><br>";
             //   currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>position "+index +" "+distance.toFixed(2)+ " miles</button><br>";
             //   markers = markers + "&markers=color:red%7Clabel:"+index+"%7C" + gpsElements[i].dataset.latitude+ "," + gpsElements[i].dataset.longitude;
@@ -303,7 +306,7 @@ function ipLookup () {
               console.log("non poi geoElement");
           }
         }
-            // if (mode != "mapbox") {
+            // if (mode != "maplibre") {
             //   // UpdateGeoPanel(currentLocString);
             
             // let mapEl = document.getElementById('youAreHere');
@@ -388,7 +391,7 @@ function ipLookup () {
             //           gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
             //           "&zoom=14&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
             //           // gps.data.push(gpsThing);
-            //         if (mode != 'mapbox') {
+            //         if (mode != 'maplibre') {
             //           let gpsPanel = document.createElement("a-entity");
             //           gpsElements[i].appendChild(gpsPanel);
             //           gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
@@ -463,7 +466,7 @@ function ipLookup () {
     //       gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
     //       "&zoom=15&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
     //       // gps.data.push(gpsThing);
-    //       if (mode != 'mapbox') {
+    //       if (mode != 'maplibre') {
     //         let gpsPanel = document.createElement("a-entity");
     //         gpsElements[i].appendChild(gpsPanel);
     //         gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
@@ -516,10 +519,11 @@ function ipLookup () {
           console.log("geoEntity.toString() is " + geoEntity.toString());
           fromToValues.to.latitude = gpsElements[i].dataset.latitude;
           fromToValues.to.longitude = gpsElements[i].dataset.longitude;
-          fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
-          fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
+        //   fromToValues.formula = geolocator.DistanceFormula.HAVERSINE;
+        //   fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
 
-          var distance = geolocator.calcDistance(fromToValues);
+        //   var distance = geolocator.calcDistance(fromToValues);\
+            var distance = DistanceBetweenTwoCoordinates(position.coords.latitude, position.coords.longitude, lat, lng);
           if (distance > mostDistant) {
             mostDistant = distance;
           }
@@ -536,7 +540,7 @@ function ipLookup () {
           gpsThing.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + gpsThing.latitude + "," + gpsThing.longitude + 
           "&zoom=15&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:red%7Clabel:"+index+"%7C" + gpsThing.latitude + "," + gpsThing.longitude;
           // gps.data.push(gpsThing);
-        //   if (mode != 'mapbox') {
+        //   if (mode != 'maplibre') {
         //     let gpsPanel = document.createElement("a-entity");
         //     gpsElements[i].appendChild(gpsPanel);
         //     gpsPanel.setAttribute('poi-map-materials', 'jsonData', JSON.stringify(gpsThing));
@@ -719,16 +723,16 @@ function ipLookup () {
       console.log("tryna switch to style " + style);
 
       if (style == "Satellite") {
-        theMap.setStyle('mapbox://styles/polytropoi/ckkfufmj103fq17k627oww4ez');
+        theMap.setStyle('maplibre://styles/polytropoi/ckkfufmj103fq17k627oww4ez');
       }
       if (style == "Terrain") {
-        theMap.setStyle('mapbox://styles/polytropoi/ckkftoa7x02np17rubtzwe8lj');
+        theMap.setStyle('maplibre://styles/polytropoi/ckkftoa7x02np17rubtzwe8lj');
       }
       if (style == "Dark") {
-        theMap.setStyle('mapbox://styles/polytropoi/ckkftume002vf17pdecs602bp');
+        theMap.setStyle('maplibre://styles/polytropoi/ckkftume002vf17pdecs602bp');
       }
       if (style == "Light") {
-        theMap.setStyle('mapbox://styles/polytropoi/ckkfvm7h504kx17tib6g7hsrb');
+        theMap.setStyle('maplibre://styles/polytropoi/ckkfvm7h504kx17tib6g7hsrb');
       }
     }
   }
@@ -800,7 +804,7 @@ function ipLookup () {
 
         currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>"+ label + " "+distance.toFixed(2)+ " miles</button><br>";
         // console.log("index " + i + " plusONe " + indexPlusOne +  " minus " + indexMinusOne);
-        var popup = new mapboxgl.Popup({className: "mode1-popup"})
+        var popup = new maplibregl.Popup({className: "mode1-popup"})
         // .setText("loc " + (i + 1).toString() + ": " + label) //zero = you are here
 
         // .setHTML('<h4>' + (i + 1).toString() + ' ' + label + 
@@ -818,7 +822,7 @@ function ipLookup () {
         
         .addTo(theMap);
         
-        let marker = new mapboxgl
+        let marker = new maplibregl
           .Marker()
             .setLngLat([gpsElements[i].dataset.longitude, gpsElements[i].dataset.latitude])
             .addTo(theMap)
@@ -855,7 +859,7 @@ function ipLookup () {
       if (yahMarker == null) {
         console.log("creating yahMarker");
         let gpsElementsLength = gpsElements.length - 1;
-        var popup = new mapboxgl.Popup({className: "mode1-popup"})
+        var popup = new maplibregl.Popup({className: "mode1-popup"})
         
         .setHTML('<h4>' + un + ' - you are here' +
         '</h4>'+
@@ -864,7 +868,7 @@ function ipLookup () {
         // '<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-envelope fa-2x\x22></i><span class=\x22tooltiptext\x22>Messages</span></div>'+
         // '<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-camera fa-2x\x22></i><span class=\x22tooltiptext\x22>Pictures</span></div>')
         .addTo(theMap);
-        yahMarker = new mapboxgl
+        yahMarker = new maplibregl
         .Marker({color: color})
           .setLngLat([currentLocation[0], currentLocation[1]])
           .addTo(theMap)
@@ -918,7 +922,7 @@ function ipLookup () {
       }
   }
 
-function MapboxInit() {
+function maplibreInit() {
       
     let locationDataEl = document.getElementById('locationData');
     if (locationDataEl) {
@@ -932,20 +936,20 @@ function MapboxInit() {
     
       window.sceneType = mode;
 
-        mapboxgl.accessToken = '';
+        // maplibregl.accessToken = 'pk.eyJ1IjoicG9seXRyb3BvaSIsImEiOiJjbDU0M2F6eWgwNWNzM2txZm5icm5pNndhIn0.BQBeZQ2KClEInphAQQ-wGA';
       // InitSceneHooks();
       UpdateLocationInfo();
 
-    //   console.log("tryna mapbox with toik,e mn " + mapbox_config.accessToken);
+    //   console.log("tryna maplibre with toik,e mn " + maplibre_config.accessToken);
       const gpsElements = document.querySelectorAll(".poi,.geo");
       if (gpsElements.length > 0) {
       let latitude = gpsElements[0].dataset.latitude;
       let longitude = gpsElements[0].dataset.longitude;
       console.log("lat " + latitude + " long " + longitude);
-      var map = new mapboxgl.Map({
-        // style: 'mapbox://styles/mapbox/light-v10',
-        // style: 'mapbox://styles/mapbox-map-design/ckhqrf2tz0dt119ny6azh975y',
-        // style: 'mapbox://styles/polytropoi/ckke5tnp40mrt17ohfhkxy29q',
+      var map = new maplibregl.Map({
+        // style: 'maplibre://styles/maplibre/light-v10',
+        // style: 'maplibre://styles/maplibre-map-design/ckhqrf2tz0dt119ny6azh975y',
+        // style: 'maplibre://styles/polytropoi/ckke5tnp40mrt17ohfhkxy29q',
         
         container: 'map',
         zoom: zoomLevel,
@@ -980,16 +984,16 @@ function MapboxInit() {
         console.log("do builtings " + doBuildings + " do terrain " + doTerrain);
         map.on('load', function () {
           // map.addControl(
-          //   new MapboxDirections({
-          //   accessToken: mapboxgl.accessToken
+          //   new maplibreDirections({
+          //   accessToken: maplibregl.accessToken
           //   }),
           //   'top-right'
           //   );
 
           if (doTerrain) {
-            map.addSource('mapbox-dem', {
+            map.addSource('maplibre-dem', {
             'type': 'raster-dem',
-            'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+            'url': 'maplibre://maplibre.maplibre-terrain-dem-v1',
             'tileSize': 512,
             'maxzoom': 20
             });
@@ -997,7 +1001,7 @@ function MapboxInit() {
               // add the DEM source as a terrain layer with exaggerated height
               
             // }
-            map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.25 });
+            map.setTerrain({ 'source': 'maplibre-dem', 'exaggeration': 1.25 });
           }
           // add a sky layer that will show when the map is highly pitched
           // map.addLayer({
@@ -1129,7 +1133,7 @@ function MapboxInit() {
                             //     modelEntity.setAttribute('gltf-model', modelUrl);
                                 
                             //     sceneEl.appendChild(modelEntity);
-                            //     const convertedLocation = mapboxgl.MercatorCoordinate.fromLngLat({
+                            //     const convertedLocation = maplibregl.MercatorCoordinate.fromLngLat({
                             //       lng: sceneLocations.locations[m].longitude,
                             //       lat: sceneLocations.locations[m].latitude,
                             //       });
@@ -1211,7 +1215,7 @@ function MapboxInit() {
             }
             if (gpsElements[i].classList.contains("poi")) {
 
-              var popup = new mapboxgl.Popup( {className: "mode1-popup"})
+              var popup = new maplibregl.Popup( {className: "mode1-popup"})
               .setHTML("<h4>" + label + 
               "<br>distance: "+distance.toFixed(2)+" miles</h4>"+
             //   "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
@@ -1236,7 +1240,7 @@ function MapboxInit() {
               .addTo(theMap);
 
               
-            let marker = new mapboxgl
+            let marker = new maplibregl
               .Marker()
                 .setLngLat([gpsElements[i].dataset.longitude, gpsElements[i].dataset.latitude])
                 .addTo(map)
@@ -1285,4 +1289,4 @@ function MapboxInit() {
     }//gpsElements is empty
     
     
-  } // end mapbox init
+  } // end maplibre init
