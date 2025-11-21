@@ -90,15 +90,17 @@ maplibre_router.get('/simple_maplibre', function (req, res) {
         "<head>"+
 
         // "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>"+
-        "<script src='https://api.maplibre.com/maplibre-gl-js/v3.17.0-beta.1/maplibre-gl.js'></script>"+
-        "<link href='https://api.maplibre.com/maplibre-gl-js/v3.17.0-beta.1/maplibre-gl.css' rel='stylesheet' />"+
+        // "<script src='../main/js/maplibre/maplibre_gl_v3.15.0.mjs'></script>"+
+        // "<link href='../css/maplibre-gl.v3.15.0.css' rel='stylesheet' />"+
+        "<script src=\x22https://unpkg.com/maplibre-gl@^5.13.0/dist/maplibre-gl.js\x22></script>"+
+        "<link href=\x22https://unpkg.com/maplibre-gl@^5.13.0/dist/maplibre-gl.css\x22 rel=\x22stylesheet\x22 />"+
         "<style>body { margin: 0; padding: 0; } #map { position: absolute; top: 0; bottom: 0; width: 100%; }</style>"+
         "</head>"+
         "<body>"+
         "<div id=\x22map\x22></div>"+
         "<script>"+
-            "maplibregl.accessToken = '';"+
-            "const map = new maplibregl.Map({container: 'map', center: [-74.5, 40], zoom: 9 });"+
+            // "maplibregl.accessToken = '';"+
+            "const map = new maplibregl.Map({container: 'map', center: [-74.5, 40], style: 'https://demotiles.maplibre.org/globe.json', zoom: 9 });"+
         "</script>"+
         "</body>"+
         "</html>";
@@ -3527,9 +3529,16 @@ maplibre_router.get('/:_id', function (req, res) {
                         "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
                         "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
                         styleIncludes +
+                        "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22>\x22" +
+                        "<link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.13.0/dist/maplibre-gl.css' />" +
+                        "<style>" +
+                            "body { margin: 0; padding: 0; }"+
+                            "html, body, #map { height: 100%; }"+
+                        "</style>" +
                         "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
                         "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        "<link href=\x22../css/maplibre-gl.v3.15.0.css\x22 rel=\x22stylesheet\x22/>"+
+                        // "<link href=\x22../css/maplibre-gl.v3.15.0.css\x22 rel=\x22stylesheet\x22/>"+
+
                         /////////// script includes /////////////////
                        
                         // "<script async src=\x22https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js\x22></script>"+

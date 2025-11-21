@@ -2,7 +2,7 @@
 // import { poiLocations } from '../connect/connect.js';
 import {} from 'mapbox-gl';
 import {ReturnPlayerData, sceneLocations, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "../../../connect/connect.js";
-
+import {settings} from "../../../connect/settings.js";
 
 const locstyle = "position:fixed;display:block;width:200px;height:400px;right:0px;bottom:0px;background-color:#ffffff;z-index:20;"
 let mapZoomInt = "13";
@@ -932,7 +932,7 @@ function MapboxInit() {
     
       window.sceneType = mode;
 
-        mapboxgl.accessToken = '';
+        mapboxgl.accessToken = settings.mbid;
       // InitSceneHooks();
       UpdateLocationInfo();
 

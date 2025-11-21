@@ -30,7 +30,7 @@ let googleMapsKey = "";
       let range = .1;
       let doBuildings = false;
       let doTerrain = false;
-      let zoomLevel = 19;
+      let zoomLevel = 15;
     //   let mbid = settings.mbid;
 
       const mode = 'maplibre';
@@ -558,7 +558,7 @@ function ipLookup () {
         let mapJSON = {};
         mapJSON.mapURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + ipLookupData.latitude + "," + ipLookupData.longitude + // shows everhthing, need to scale zoom by max distance
         "&zoom="+ReturnMapZoom(mostDistant)+"&size=2048x2048&maptype=hybrid&key="+googleMapsKey+"&markers=color:green%7Clabel:0%7C" + ipLookupData.latitude + "," + ipLookupData.longitude;
-        mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
+        // mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
         // $(".map-overlay").css('visibility','visible');
         // $(".map-overlay").backstretch(mapURL);
 
@@ -936,27 +936,31 @@ function maplibreInit() {
     
       window.sceneType = mode;
 
-        // maplibregl.accessToken = 'pk.eyJ1IjoicG9seXRyb3BvaSIsImEiOiJjbDU0M2F6eWgwNWNzM2txZm5icm5pNndhIn0.BQBeZQ2KClEInphAQQ-wGA';
+
       // InitSceneHooks();
       UpdateLocationInfo();
 
     //   console.log("tryna maplibre with toik,e mn " + maplibre_config.accessToken);
       const gpsElements = document.querySelectorAll(".poi,.geo");
       if (gpsElements.length > 0) {
-      let latitude = gpsElements[0].dataset.latitude;
-      let longitude = gpsElements[0].dataset.longitude;
-      console.log("lat " + latitude + " long " + longitude);
-      var map = new maplibregl.Map({
-        // style: 'maplibre://styles/maplibre/light-v10',
-        // style: 'maplibre://styles/maplibre-map-design/ckhqrf2tz0dt119ny6azh975y',
-        // style: 'maplibre://styles/polytropoi/ckke5tnp40mrt17ohfhkxy29q',
-        
-        container: 'map',
-        zoom: zoomLevel,
-        center: [longitude, latitude],
-        pitch: 75,
-        bearing: 90,
-        antialias: true
+        let latitude = gpsElements[0].dataset.latitude;
+        let longitude = gpsElements[0].dataset.longitude;
+        console.log("lat " + latitude + " long " + longitude);
+        var map = new maplibregl.Map({
+            // style: 'maplibre://styles/maplibre/light-v10',
+            // style: 'maplibre://styles/maplibre-map-design/ckhqrf2tz0dt119ny6azh975y',
+            // style: 'maplibre://styles/polytropoi/ckke5tnp40mrt17ohfhkxy29q',
+            
+            container: 'map',
+            zoom: zoomLevel,
+            center: [longitude, latitude],
+            style: '../../main/ref/openstreetmap.json',
+            // style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+            // style: 'https://americanamap.org/style.json',
+            // style: 'https://tiles.versatiles.org/assets/styles/colorful.json',
+            pitch: 75,
+            bearing: 90,
+            antialias: true
 
 
         });
@@ -982,307 +986,327 @@ function maplibreInit() {
 
         // let that = this;
         console.log("do builtings " + doBuildings + " do terrain " + doTerrain);
+
         map.on('load', function () {
-          // map.addControl(
-          //   new maplibreDirections({
-          //   accessToken: maplibregl.accessToken
-          //   }),
-          //   'top-right'
-          //   );
-
-          if (doTerrain) {
-            map.addSource('maplibre-dem', {
-            'type': 'raster-dem',
-            'url': 'maplibre://maplibre.maplibre-terrain-dem-v1',
-            'tileSize': 512,
-            'maxzoom': 20
-            });
-
-              // add the DEM source as a terrain layer with exaggerated height
-              
-            // }
-            map.setTerrain({ 'source': 'maplibre-dem', 'exaggeration': 1.25 });
-          }
-          // add a sky layer that will show when the map is highly pitched
-          // map.addLayer({
-          //   'id': 'sky',
-          //   'type': 'sky',
-          //   'paint': {
-          //   'sky-type': 'atmosphere',
-          //   'sky-atmosphere-sun': [0.0, 0.0],
-          //   'sky-atmosphere-sun-intensity': 15
-          //   }
-          // });
-
-     
-        var layers = map.getStyle().layers;
-        var labelLayerId;
-        for (var i = 0; i < layers.length; i++) {
-          if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
-           labelLayerId = layers[i].id;
-          break;
-          }
-        }
-        map.dragPan.enable({
-          linearity: 0.3,
-          // easing: bezier(0, 0, 0.3, 1),
-          maxSpeed: 3,
-          deceleration: 1.5,
-          });
-                // map.dragPan.disable();
-                map.scrollZoom.enable();
-                // map['doubleClickZoom'].disable();
-        map['dragRotate'].enable();
-        map.touchPitch.enable();
-        map.touchZoomRotate.enable({ around: 'center' });
-        // map.on('style.load', () => {
-          map.setConfigProperty('basemap', 'lightPreset', 'dusk');
-      // });
-
-
-        map.on('mousemove', (e) => {
-          // document.getElementById('info').innerHTML =
-          // // `e.point` is the x, y coordinates of the `mousemove` event
-          // // relative to the top-left corner of the map.
-          // JSON.stringify(e.point) +
-          // '<br />' +
-          // `e.lngLat` is the longitude, latitude geographical position of the event.
-        //   console.log(JSON.stringify(e.lngLat.wrap()));
-          });
-        // map.scrollZoom.enable({ around: 'center' });
-            // if (doBuildings) {
-            //   console.log("tryna do buildingz");
-            //   map.addLayer({
-            //     'id': '3d-buildings',
-            //     'source': 'composite',
-            //     'source-layer': 'building',
-            //     'filter': ['==', 'extrude', 'true'],
-            //     'type': 'fill-extrusion',
-            //     'minzoom': 15,
-            //     'paint': {
-            //       'fill-extrusion-color': '#aaa',
-                  
-            //       // use an 'interpolate' expression to add a smooth transition effect to the
-            //       // buildings as the user zooms in
-            //       'fill-extrusion-height': [
-            //       'interpolate',
-            //       ['linear'],
-            //       ['zoom'],
-            //       15,
-            //       0,
-            //       15.05,
-            //       ['get', 'height']
-            //       ],
-            //       'fill-extrusion-base': [
-            //       'interpolate',
-            //       ['linear'],
-            //       ['zoom'],
-            //       15,
-            //       0,
-            //       15.05,
-            //       ['get', 'min_height']
-            //       ],
-            //       'fill-extrusion-opacity': 0.6
-            //       } 
-            //     },
-            //     labelLayerId
-            //   );
-            // }
-        let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+currentLocation[0]+"_"+currentLocation[1]+"\x22>You are here</button><br><br><br>";
-        // console.log(currentLocString);
-        let index = 0; 
-        for (let i = 0; i < gpsElements.length; i++) {
-          
-        //   console.log("gpsElements: " + gpsElements[i].id);
-          index++; 
-            // create a HTML element for each feature
-          // var el = document.createElement('div');
-          // el.className = 'marker';
-          let lat = gpsElements[i].dataset.latitude;
-          let lng = gpsElements[i].dataset.longitude;
-          // let eventdata = "";
-          let label = "";
-          let scale = 10;
-          let eventData = null;
-          if (sceneLocations && sceneLocations.locations != undefined) {
-            for (let m = 0; m < sceneLocations.locations.length; m++) {
-                // console.log(sceneLocations.locations[m].name +" " + sceneLocations.locations[m].timestamp);
-              if (gpsElements[i].id == sceneLocations.locations[m].timestamp) { //match the id to get the sceneLcoation data
-                let modelUrl = 'https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb';
-                if (sceneLocations.locations[m].modelID != null) {
-                  console.log("Looking for model id: " + sceneLocations.locations[m].modelID);   
-
-                  let locationModel = document.getElementById(sceneLocations.locations[m].modelID.toString());               
-                  // console.log("Looking for model : " + locationModel.getAttribute('src'));
-                  if (locationModel) {
-                    modelUrl = locationModel.getAttribute('src');
-                  }
-                  
-                }
-                if (sceneLocations.locations[m].markerObjScale != null && sceneLocations.locations[m].markerObjScale != undefined) {
-                  scale = parseFloat(sceneLocations.locations[m].markerObjScale);
-                  console.log("parsing scale " + scale);
-                }
-
-                if (sceneLocations.locations[m].eventData != null && sceneLocations.locations[m].eventData != undefined) {
-                  eventData = sceneLocations.locations[m].eventData;
-                }
-                label = sceneLocations.locations[m].name; // to do : event data
-                      //maybe this inside the map.addLayer below...
-                            // let modelEntity = document.createElement("a-entity");
-                            //     modelEntity.setAttribute('gltf-model', modelUrl);
-                                
-                            //     sceneEl.appendChild(modelEntity);
-                            //     const convertedLocation = maplibregl.MercatorCoordinate.fromLngLat({
-                            //       lng: sceneLocations.locations[m].longitude,
-                            //       lat: sceneLocations.locations[m].latitude,
-                            //       });
-                            //     console.log("tryna set model " + modelUrl + " at " + JSON.stringify(convertedLocation));
-                            //     modelEntity.setAttribute('position', convertedLocation);
-
-
-                    // modelEntity.setAttribute('scale', 100, 100, 100);
-
-                    // gpsElements[i].appendChild(gpsPanel);
-
-                /*
-                map.addLayer({
-                  id: 'custom_layer'+index.toString(),
-                  type: 'custom',
-                  renderingMode: '3d',
-                  onAdd: function (map, mbxContext) {
-                    var options = {
-                      obj: modelUrl,
-                      type: 'gltf',
-                      scale: scale,
-                      units: 'meters',
-                      rotation: { x: 90, y: 180, z: 0}, //default rotation
-                      anchor: 'bottom'
-                    }
-                    tb.loadObj(options, function (model) {
-                      // if (model != undefined && model != null) {
-                      let theModel = model.setCoords([sceneLocations.locations[m].longitude, sceneLocations.locations[m].latitude]);
-
-                      // theModel.addEventListener('ObjectMouseOver', onObjectMouseOver, false);
-                      let obj = null;
-                      tb.add(theModel);
-                      // let modelEntity = document.createElement("a-entity");
-                      // modelEntity.setAttribute("mod-model");
-                      // modelEntity.setObject3D("Object3D", model);
-                      // modelEntity.classList.add("activeObjexRay");
-                      // gpsElements[i].appendChild(gpsPanel);
-                      // }
-                    });
-                  },
-                  render: function (gl, matrix) {
-                  tb.update();
-                  }
-                });
-                */
-              }
-            }
-          }
-          if (gpsElements[i].classList.contains('poi')) { //only show poi markers in list
-            var distance = DistanceBetweenTwoCoordinates(currentLocation[1], currentLocation[0], lat, lng);
-            // console.log("distance " + distance);
-            // if (distance > mostDistant) {
-            //   mostDistant = distance;
-            // }
-            // let latlngString = gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude;
-            let indexMinusOne = i > 0 ? i - 1 : gpsElements.length - 1;
-            let indexPlusOne = i < gpsElements.length - 1 ? i + 1 : 0;
-           
-            let latlngStringPrevious = gpsElements[indexMinusOne].dataset.longitude+"_"+gpsElements[indexMinusOne].dataset.latitude;
-            let latlngStringNext = gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude;
-
-            currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>" + label + " "+distance.toFixed(2)+ " miles</button><br>";
-            // console.log("gpsElements index " + i + " " + currentLocString);
-            let href = "";
-            if (eventData != null && eventData != "" && eventData.toString().includes("link")) {
-              console.log("gotsa link " +eventData);
-              let splitchar = null;
-              if (eventData.toString().includes("=")) {
-                splitchar = "=";
-              }
-              if (eventData.toString().includes("~")) {
-                splitchar = "~";
-              }
-              if (splitchar != null) {
-                let split = eventData.toString().split(splitchar);
-                href = split[1].trim();
-                
-              }
-            }
-            if (gpsElements[i].classList.contains("poi")) {
-
-              var popup = new maplibregl.Popup( {className: "mode1-popup"})
-              .setHTML("<h4>" + label + 
-              "<br>distance: "+distance.toFixed(2)+" miles</h4>"+
-            //   "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
-            "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
-            "class=\x22next_locbutton tooltip\x22 data-longitude=\x22"+ gpsElements[indexPlusOne].dataset.longitude+"\x22 data-latitude=\x22"+ gpsElements[indexPlusOne].dataset.latitude+"\x22"+
-            // " onclick=\x22PopupNextPreviousButtons(\x22"+latlngStringNext+"\x22)\x22>
-            "<i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-arrow-circle-right fa-2x\x22></i><span class=\x22tooltiptext\x22>Next Location</span></div>"+
-              
-              // "<div id=\x22"+gpsElements[indexMinusOne].dataset.longitude+"_"+gpsElements[indexMinusOne].dataset.latitude+"\x22 class=\x22locbutton tooltip\x22><i  style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>"+
-              // // id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22 
-              // "<div id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-bullseye fa-2x\x22></i><span class=\x22tooltiptext\x22>Center</span></div>"+
-              "<div onclick=\x22PopupLinkButtons(\x22"+href+"\x22)\x22 class=\x22locbutton tooltip\x22><i style=\x22 margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-link fa-2x\x22></i><span class=\x22tooltiptext\x22>Link</span></div>"+
-              // "<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-envelope fa-2x\x22></i><span class=\x22tooltiptext\x22>Messages</span></div>"+
-              // "<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-camera fa-2x\x22></i><span class=\x22tooltiptext\x22>Pictures</span></div>"+
-              // "<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-walking fa-2x\x22></i><span class=\x22tooltiptext\x22>Directions</span></div>"+
-              // "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
-              // "class=\x22locbutton tooltip\x22><i  style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-arrow-circle-right fa-2x\x22></i><span class=\x22tooltiptext\x22>Next Location</span></div>"
-              "<div id=\x22"+gpsElements[indexMinusOne].dataset.longitude+"_"+gpsElements[indexMinusOne].dataset.latitude+"\x22" +
-              "class=\x22previous_locbutton tooltip\x22 data-longitude=\x22"+ gpsElements[indexPlusOne].dataset.longitude+"\x22 data-latitude=\x22"+ gpsElements[indexPlusOne].dataset.latitude+"\x22"+  
-            //   "onclick=\x22PopupNextPreviousButtons(\x22"+latlngStringPrevious+"\x22)\x22>"
-              "<i style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>")
-              .addTo(theMap);
-
-              
-            let marker = new maplibregl
-              .Marker()
-                .setLngLat([gpsElements[i].dataset.longitude, gpsElements[i].dataset.latitude])
-                .addTo(map)
-                .setPopup(popup);
-              popup.remove();  
-            }
-          // HideMarkers();
-        }
-      }
-
-        
-        UpdateGeoPanel(currentLocString);
-        initialized = true;
-
-        map.on('flystart', function(){
-          flying = true;
-        });
-        map.on('flyend', function(){
-          flying = false;
-        });
-        map.on('click', function(e) {
-          if (rotator != null) {
-            cancelAnimationFrame(rotator); //stop rotation on click if needed
-            // rotateOn = false;
-          }
-        });
-
-            // let mapStyle = document.getElementById('mapStyle');
-            // console.log(mapStyle)
-            // if (mapStyle != null) {
-            //   console.log(mapStyle.value);
-
-            // // map['touchZoomRotate'].enable();
             
-            //   mapStyle.addEventListener('change', (event) => {
-            //     // MapStyleSelectChange(event.target.value);
-            //   });
+        
+         const layers = map.getStyle().layers;
 
-            //   // mapStyle.addEventListener("change", MapStyleSelectChange(mapStyle.value));
-            // }
-        // UpdateMarkers();
-      }); //map load end
+        let labelLayerId;
+        for (let i = 0; i < layers.length; i++) {
+            if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+                labelLayerId = layers[i].id;
+                break;
+            }
+        }
+
+        map.addSource('openfreemap', {
+            url: `https://tiles.openfreemap.org/planet`,
+            type: 'vector',
+        });
+
+        map.addLayer(
+            {
+                'id': '3d-buildings',
+                'source': 'openfreemap',
+                'source-layer': 'building',
+                'type': 'fill-extrusion',
+                'minzoom': 14,
+                'filter': ['!=', ['get', 'hide_3d'], true],
+                'paint': {
+                    'fill-extrusion-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'render_height'], 0, 'lightgray', 200, 'royalblue', 400, 'lightblue'
+                    ],
+                    'fill-extrusion-height': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        14,
+                        0,
+                        17,
+                        ['get', 'render_height']
+                    ],
+                    'fill-extrusion-base': ['case',
+                        ['>=', ['get', 'zoom'], 13],
+                        ['get', 'render_min_height'], 0
+                    ]
+                }
+            },
+            labelLayerId
+        );
+
+    }); //map load end
+
+
+            map.dragPan.enable({
+            linearity: 0.3,
+            // easing: bezier(0, 0, 0.3, 1),
+            maxSpeed: 3,
+            deceleration: 1.5,
+            });
+                    // map.dragPan.disable();
+                    map.scrollZoom.enable();
+                    // map['doubleClickZoom'].disable();
+            map['dragRotate'].enable();
+            map.touchPitch.enable();
+            map.touchZoomRotate.enable({ around: 'center' });
+            // map.on('style.load', () => {
+            //   map.setConfigProperty('basemap', 'lightPreset', 'dusk');
+        // });
+
+        map.addControl(
+            new maplibregl.NavigationControl({
+                visualizePitch: true,
+                showZoom: true,
+                showCompass: true
+            })
+            );
+
+            map.addControl(
+                new maplibregl.TerrainControl({
+                    source: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
+                    exaggeration: 1
+                })
+            );
+
+
+            map.on('mousemove', (e) => {
+                // document.getElementById('info').innerHTML =
+                // // `e.point` is the x, y coordinates of the `mousemove` event
+                // // relative to the top-left corner of the map.
+                // JSON.stringify(e.point) +
+                // '<br />' +
+                // `e.lngLat` is the longitude, latitude geographical position of the event.
+                //   console.log(JSON.stringify(e.lngLat.wrap()));
+                });
+            
+            let currentLocString = "<button class=\x22locbutton\x22 id=\x22"+currentLocation[0]+"_"+currentLocation[1]+"\x22>You are here</button><br><br><br>";
+            // console.log(currentLocString);
+            let index = 0; 
+            for (let i = 0; i < gpsElements.length; i++) {
+            
+            //   console.log("gpsElements: " + gpsElements[i].id);
+            index++; 
+                // create a HTML element for each feature
+            // var el = document.createElement('div');
+            // el.className = 'marker';
+            let lat = gpsElements[i].dataset.latitude;
+            let lng = gpsElements[i].dataset.longitude;
+            // let eventdata = "";
+            let label = "";
+            let scale = 10;
+            let eventData = null;
+            if (sceneLocations && sceneLocations.locations != undefined) {
+                for (let m = 0; m < sceneLocations.locations.length; m++) {
+                    // console.log(sceneLocations.locations[m].name +" " + sceneLocations.locations[m].timestamp);
+                if (gpsElements[i].id == sceneLocations.locations[m].timestamp) { //match the id to get the sceneLcoation data
+                    let modelUrl = 'https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb';
+                    if (sceneLocations.locations[m].modelID != null) {
+                    console.log("Looking for model id: " + sceneLocations.locations[m].modelID);   
+
+                    let locationModel = document.getElementById(sceneLocations.locations[m].modelID.toString());               
+                    // console.log("Looking for model : " + locationModel.getAttribute('src'));
+                    if (locationModel) {
+                        modelUrl = locationModel.getAttribute('src');
+                    }
+                    
+                    }
+                    if (sceneLocations.locations[m].markerObjScale != null && sceneLocations.locations[m].markerObjScale != undefined) {
+                    scale = parseFloat(sceneLocations.locations[m].markerObjScale);
+                    console.log("parsing scale " + scale);
+                    }
+
+                    if (sceneLocations.locations[m].eventData != null && sceneLocations.locations[m].eventData != undefined) {
+                    eventData = sceneLocations.locations[m].eventData;
+                    }
+                    label = sceneLocations.locations[m].name; // to do : event data
+                        //maybe this inside the map.addLayer below...
+                                // let modelEntity = document.createElement("a-entity");
+                                //     modelEntity.setAttribute('gltf-model', modelUrl);
+                                    
+                                //     sceneEl.appendChild(modelEntity);
+                                //     const convertedLocation = maplibregl.MercatorCoordinate.fromLngLat({
+                                //       lng: sceneLocations.locations[m].longitude,
+                                //       lat: sceneLocations.locations[m].latitude,
+                                //       });
+                                //     console.log("tryna set model " + modelUrl + " at " + JSON.stringify(convertedLocation));
+                                //     modelEntity.setAttribute('position', convertedLocation);
+
+
+                        // modelEntity.setAttribute('scale', 100, 100, 100);
+
+                        // gpsElements[i].appendChild(gpsPanel);
+
+                    /*
+                    map.addLayer({
+                    id: 'custom_layer'+index.toString(),
+                    type: 'custom',
+                    renderingMode: '3d',
+                    onAdd: function (map, mbxContext) {
+                        var options = {
+                        obj: modelUrl,
+                        type: 'gltf',
+                        scale: scale,
+                        units: 'meters',
+                        rotation: { x: 90, y: 180, z: 0}, //default rotation
+                        anchor: 'bottom'
+                        }
+                        tb.loadObj(options, function (model) {
+                        // if (model != undefined && model != null) {
+                        let theModel = model.setCoords([sceneLocations.locations[m].longitude, sceneLocations.locations[m].latitude]);
+
+                        // theModel.addEventListener('ObjectMouseOver', onObjectMouseOver, false);
+                        let obj = null;
+                        tb.add(theModel);
+                        // let modelEntity = document.createElement("a-entity");
+                        // modelEntity.setAttribute("mod-model");
+                        // modelEntity.setObject3D("Object3D", model);
+                        // modelEntity.classList.add("activeObjexRay");
+                        // gpsElements[i].appendChild(gpsPanel);
+                        // }
+                        });
+                    },
+                    render: function (gl, matrix) {
+                    tb.update();
+                    }
+                    });
+                    */
+                }
+                }
+            }
+            if (gpsElements[i].classList.contains('poi')) { //only show poi markers in list
+                var distance = DistanceBetweenTwoCoordinates(currentLocation[1], currentLocation[0], lat, lng);
+                // console.log("distance " + distance);
+                // if (distance > mostDistant) {
+                //   mostDistant = distance;
+                // }
+                // let latlngString = gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude;
+                let indexMinusOne = i > 0 ? i - 1 : gpsElements.length - 1;
+                let indexPlusOne = i < gpsElements.length - 1 ? i + 1 : 0;
+            
+                let latlngStringPrevious = gpsElements[indexMinusOne].dataset.longitude+"_"+gpsElements[indexMinusOne].dataset.latitude;
+                let latlngStringNext = gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude;
+
+                currentLocString = currentLocString + "\n<button class=\x22locbutton\x22 id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22>" + label + " "+distance.toFixed(2)+ " miles</button><br>";
+                // console.log("gpsElements index " + i + " " + currentLocString);
+                let href = "";
+                if (eventData != null && eventData != "" && eventData.toString().includes("link")) {
+                console.log("gotsa link " +eventData);
+                let splitchar = null;
+                if (eventData.toString().includes("=")) {
+                    splitchar = "=";
+                }
+                if (eventData.toString().includes("~")) {
+                    splitchar = "~";
+                }
+                if (splitchar != null) {
+                    let split = eventData.toString().split(splitchar);
+                    href = split[1].trim();
+                    
+                }
+                }
+                if (gpsElements[i].classList.contains("poi")) {
+
+                    // let marker = new Marker({
+                    //     color: "#FFFFFF",
+                    //     draggable: true
+                    // }).setLngLat([gpsElements[i].dataset.longitude, gpsElements[i].dataset.longitude])
+                    // .addTo(map);
+
+                //     let markerHeight = 50, markerRadius = 10, linearOffset = 25;
+                //     let popupOffsets = {
+                //     'top': [0, 0],
+                //     'top-left': [0,0],
+                //     'top-right': [0,0],
+                //     'bottom': [0, -markerHeight],
+                //     'bottom-left': [linearOffset, (markerHeight - markerRadius + linearOffset) * -1],
+                //     'bottom-right': [-linearOffset, (markerHeight - markerRadius + linearOffset) * -1],
+                //     'left': [markerRadius, (markerHeight - markerRadius) * -1],
+                //     'right': [-markerRadius, (markerHeight - markerRadius) * -1]
+                //     };
+                //     let popup = new Popup({offset: popupOffsets, className: 'my-class'})
+                //     .setLngLat(e.lngLat)
+                //     .setHTML("<h1>Hello World!</h1>")
+                //     .setMaxWidth("300px")
+                //     .addTo(map);
+
+                var popup = new maplibregl.Popup( {className: "mode1-popup", offset: 25})
+                // .setText(
+                //     'Poppoin'
+                // );
+                
+                  .setHTML("<h4>" + label + 
+                  "<br>distance: "+distance.toFixed(2)+" miles</h4>"+
+                //   "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
+                "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
+                "class=\x22next_locbutton tooltip\x22 data-longitude=\x22"+ gpsElements[indexPlusOne].dataset.longitude+"\x22 data-latitude=\x22"+ gpsElements[indexPlusOne].dataset.latitude+"\x22"+
+                // " onclick=\x22PopupNextPreviousButtons(\x22"+latlngStringNext+"\x22)\x22>
+                "<i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-arrow-circle-right fa-2x\x22></i><span class=\x22tooltiptext\x22>Next Location</span></div>"+
+                
+                  // "<div id=\x22"+gpsElements[indexMinusOne].dataset.longitude+"_"+gpsElements[indexMinusOne].dataset.latitude+"\x22 class=\x22locbutton tooltip\x22><i  style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>"+
+                  // // id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22 
+                  // "<div id=\x22"+gpsElements[i].dataset.longitude+"_"+gpsElements[i].dataset.latitude+"\x22 class=\x22locbutton tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-bullseye fa-2x\x22></i><span class=\x22tooltiptext\x22>Center</span></div>"+
+                  "<div onclick=\x22PopupLinkButtons(\x22"+href+"\x22)\x22 class=\x22locbutton tooltip\x22><i style=\x22 margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-link fa-2x\x22></i><span class=\x22tooltiptext\x22>Link</span></div>"+
+                  // "<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-envelope fa-2x\x22></i><span class=\x22tooltiptext\x22>Messages</span></div>"+
+                  // "<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-camera fa-2x\x22></i><span class=\x22tooltiptext\x22>Pictures</span></div>"+
+                  // "<div class=\x22tooltip\x22><i style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-walking fa-2x\x22></i><span class=\x22tooltiptext\x22>Directions</span></div>"+
+                  // "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
+                  // "class=\x22locbutton tooltip\x22><i  style=\x22margin-left: 10px; margin-right: 10px;\x22class=\x22fas fa-arrow-circle-right fa-2x\x22></i><span class=\x22tooltiptext\x22>Next Location</span></div>"
+                  "<div id=\x22"+gpsElements[indexMinusOne].dataset.longitude+"_"+gpsElements[indexMinusOne].dataset.latitude+"\x22" +
+                  "class=\x22previous_locbutton tooltip\x22 data-longitude=\x22"+ gpsElements[indexPlusOne].dataset.longitude+"\x22 data-latitude=\x22"+ gpsElements[indexPlusOne].dataset.latitude+"\x22"+  
+                //   "onclick=\x22PopupNextPreviousButtons(\x22"+latlngStringPrevious+"\x22)\x22>"
+                  "<i style=\x22margin-left: 10px; margin-right: 10px;\x22 class=\x22fas fa-arrow-circle-left fa-2x\x22></i><span class=\x22tooltiptext\x22>Previous Location</span></div>");
+                // //   .addTo(theMap);
+
+                    const el = document.createElement('div');
+                    el.id = 'marker';
+                    let lngLat = [parseFloat(gpsElements[i].dataset.longitude), parseFloat(gpsElements[i].dataset.latitude)];
+                    console.log("tryna set marker at " + lngLat);
+                    let marker = new maplibregl.Marker({element: el})
+                            .setLngLat(lngLat)
+                            // .addTo(map)
+                            .setPopup(popup)
+                        //   popup.remove();  
+                            .addTo(map);
+                        }
+                    // HideMarkers();
+                    }
+                }
+
+            
+                UpdateGeoPanel(currentLocString);
+                initialized = true;
+
+                map.on('flystart', function(){
+                flying = true;
+                });
+                map.on('flyend', function(){
+                flying = false;
+                });
+                map.on('click', function(e) {
+                if (rotator != null) {
+                    cancelAnimationFrame(rotator); //stop rotation on click if needed
+                    // rotateOn = false;
+                }
+                });
+
+                // let mapStyle = document.getElementById('mapStyle');
+                // console.log(mapStyle)
+                // if (mapStyle != null) {
+                //   console.log(mapStyle.value);
+
+                // // map['touchZoomRotate'].enable();
+                
+                //   mapStyle.addEventListener('change', (event) => {
+                //     // MapStyleSelectChange(event.target.value);
+                //   });
+
+                //   // mapStyle.addEventListener("change", MapStyleSelectChange(mapStyle.value));
+                // }
+                // UpdateMarkers();
+        // }); //map load end
 
       // UpdateGeoPanel(currentLocString);
       
