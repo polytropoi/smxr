@@ -2290,7 +2290,7 @@ export function SceneManglerModal(mode, autoHide) {
     let SaveLocalAndCloseButton = "<button id=\x22saveLocalAndCloseButton\x22 style=\x22float: right;\x22 class=\x22addButton\x22>Save Local and Close</button>";
     let ownerButton = "";
     let sendAdminMessageButton = "";
-    if (settings && (settings.sceneType && settings.sceneType.toLowerCase() == 'aframe' || settings.sceneType.toLowerCase() == 'default') && settings.hasBgMap ) {
+    if (settings && (settings.sceneType && settings.sceneType.toLowerCase() == 'aframe' || settings.sceneType && settings.sceneType.toLowerCase() == 'default') && settings.hasBgMap ) {
       // //hide the save buttons if in 3d mode using map positions
       // const modal = document.getElementById("modalContent");  
       // modal.getElementById('saveModsToCloudButton').style.display = 'none';

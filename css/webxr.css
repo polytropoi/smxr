@@ -308,12 +308,33 @@ body {
     box-sizing: border-box;
     border-radius: 16px;
     padding: .25em;
-    color: #FFF;
+    color: #c5ffbc;
     /* background: rgba(0, 0, 0, 0.25); */
     font-family: Source Sans Pro, Helvetica Neue, Helvetica, Arial, sans-serif;
     /* overflow-y:auto; */
     overflow:auto;
 }
+.geoloc_button {
+    z-index: 50;
+    position: absolute;
+    /* display: none; */
+    top: 0px;
+    right: 50px;
+    width: 32px; 
+  height: 32px;
+  text-align: center;
+    /* padding: .25em; */
+     box-sizing: border-box;
+    border-radius: 8px;
+    padding: .25em;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.5);
+        /* margin: 0px; */
+    overflow: hidden;
+        /* max-width: 32px; */
+
+}
+
 body {
     margin: 0px;
     overflow: hidden;

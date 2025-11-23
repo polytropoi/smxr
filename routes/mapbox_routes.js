@@ -1040,7 +1040,7 @@ mapbox_router.get('/:_id', function (req, res) {
             } else if (sceneData.sceneWebType == 'Mapbox') { 
                 
                 dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
-                locationButton = "<div id=\x22geoloc_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
+                locationButton = "<div id=\x22geoloc_button\x22 class=\x22geoloc_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
                 if (!sceneData.sceneTextUseModals) {
                     //renderPanel = "<div visible=\x22false\x22 render_canvas id=\x22renderCanvas\x22 look-at=\x22#player\x22 geometry=\x22primitive: plane; width:1; height:1;\x22 scale=\x221 1 1\x22 position=\x220 3.5 -.25\x22 material=\x22shader: html; transparent: true; width:1024; height:1024; fps: 10; target: #renderPanel;\x22></div>\n";
                 }
