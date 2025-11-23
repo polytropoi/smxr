@@ -161,16 +161,20 @@ function UpdateButtons() {
 // }
 
 function ipLookup () {
-    fetch('https://get.geojs.io/v1/ip/geo.json')
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        ipLookupData = data;
-        UseIPLocation();
-        // return ipLookupData;
-        // Access location details like data.city, data.country_name, data.latitude, data.longitude
-      })
-      .catch(error => console.error('Error fetching IP geolocation:', error));
+    console.log("tryna lookupIPdata has data " + ipLookupData);
+    if (!ipLookupData) {
+        fetch('https://get.geojs.io/v1/ip/geo.json')
+        .then(response => response.json())
+        .then(data => {
+            // console.log(data);
+            ipLookupData = data;
+            currentLocation = [ipLookupData.longitude, ipLookupData.latitude]; 
+            UseIPLocation();
+            // return ipLookupData;
+            // Access location details like data.city, data.country_name, data.latitude, data.longitude
+        })
+        .catch(error => console.error('Error fetching IP geolocation:', error));
+    }
 }
 
 
@@ -499,11 +503,11 @@ function ipLookup () {
       console.log("NO NAVIGATOR");
       
     if (ipLookupData != null) { 
-        console.log("NO NAVIGATOR iplookup mode");
+        console.log("NO NAVIGATOR iplookup mode " + JSON.stringify(ipLookupData));
         let currentLocString = "Location 0 - You Are Here (via ip)<br>";
         // UpdateGeoPanel(currentLocString);
         let mostDistant = 0;
-        currentLocation = [ipLookupData.longitude, ipLookupData.latitude]; 
+        // currentLocation = [ipLookupData.longitude, ipLookupData.latitude]; 
         SetYouAreHereMarker();
         for (var i = 0; i < gpsElements[i].length; i++) {
           for (let name of gpsElements[i].getAttributeNames()) {
@@ -523,7 +527,7 @@ function ipLookup () {
         //   fromToValues.unitSystem = geolocator.UnitSystem.METRIC;
 
         //   var distance = geolocator.calcDistance(fromToValues);\
-            var distance = DistanceBetweenTwoCoordinates(position.coords.latitude, position.coords.longitude, lat, lng);
+            var distance = DistanceBetweenTwoCoordinates(gpsElements[i].dataset.latitude, gpsElements[i].dataset.longitude, parseFloat(ipLookupData.latitude), parseFloat(ipLookupData.longitude));
           if (distance > mostDistant) {
             mostDistant = distance;
           }
@@ -548,11 +552,10 @@ function ipLookup () {
         //     // gpsPanel.setAttribute('position', gpsElements[i].getAttribute('position'));
         //     gpsPanel.setAttribute('look-at', '#player');
         //   } else {
-            UpdateMarkers();
-            SetYouAreHereMarker();
+           
         //   }
         }
-        console.log(currentLocString);
+        console.log(currentLocation);
         // UpdateGeoPanel(currentLocString);
         let mapEl = document.getElementById('youAreHere');
         let mapJSON = {};
@@ -561,7 +564,11 @@ function ipLookup () {
         // mapEl.setAttribute('map-materials', 'jsonData', JSON.stringify(mapJSON));
         // $(".map-overlay").css('visibility','visible');
         // $(".map-overlay").backstretch(mapURL);
+         UpdateMarkers();
+            SetYouAreHereMarker();
 
+    } else {
+        ipLookup();
     }
   }
   function ReturnMapZoom (mostDistant) {
@@ -738,6 +745,7 @@ function ipLookup () {
   }
 
   function UpdateMarkers() {
+    console.log("tryna UpdateMarkers with currentLocaiton " + currentLocation)
     if (theMap && currentLocation != []) {
 
     // let gpsElements = document.querySelectorAll('.poi');
@@ -746,7 +754,7 @@ function ipLookup () {
     // console.log(currentLocString);
     let index = 0; 
     // let poiMarkers = [];
-    let isPoi = false;
+    let isPoi = true; //fornow
     let eventData = "";
     for (let i = 0; i < gpsElements.length; i++) {
       
@@ -776,7 +784,7 @@ function ipLookup () {
       }
       if (isPoi) {
         var distance = DistanceBetweenTwoCoordinates(currentLocation[1], currentLocation[0], lat, lng);
-        console.log("distance " + distance);
+        console.log("updated marker distance " + distance);
         // if (distance > mostDistant) {
         //   mostDistant = distance;
         // }      
@@ -1239,7 +1247,8 @@ function maplibreInit() {
                 
                   .setHTML("<h4>" + label + 
                   "<br>distance: "+distance.toFixed(2)+" miles</h4>"+
-                //   "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
+                
+                  //   "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
                 "<div id=\x22"+gpsElements[indexPlusOne].dataset.longitude+"_"+gpsElements[indexPlusOne].dataset.latitude+"\x22"+
                 "class=\x22next_locbutton tooltip\x22 data-longitude=\x22"+ gpsElements[indexPlusOne].dataset.longitude+"\x22 data-latitude=\x22"+ gpsElements[indexPlusOne].dataset.latitude+"\x22"+
                 // " onclick=\x22PopupNextPreviousButtons(\x22"+latlngStringNext+"\x22)\x22>
