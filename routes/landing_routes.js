@@ -3259,7 +3259,7 @@ landing_router.get('/:_id', function (req, res) {
                                 picLink = "";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.pixiWeb == true) {
-                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22> Virtual Table Top </a>" + platformButtons;
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22> Pixi </a>" + platformButtons;
                                 picLink = "<a href=\x22../vtt/"+ sceneResponse.short_id + "\x22>";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.unityWeb == true) {
@@ -3269,6 +3269,18 @@ landing_router.get('/:_id', function (req, res) {
                             if (sceneResponse.sceneEnabledClientTypes.mapboxWeb == true) {
                                 platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../mapbox/"+ sceneResponse.short_id + "\x22> Mapbox </a>" + platformButtons;
                                 picLink = "<a href=\x22../mapbox/"+ sceneResponse.short_id + "\x22>";
+                            }
+                            if (sceneResponse.sceneEnabledClientTypes.maplibreWeb == true) {
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../maplibre/"+ sceneResponse.short_id + "\x22> Maplibre </a>" + platformButtons;
+                                picLink = "<a href=\x22../maplibre/"+ sceneResponse.short_id + "\x22>";
+                            }
+                            if (sceneResponse.sceneEnabledClientTypes.threeWeb == true) {
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../three/"+ sceneResponse.short_id + "\x22> Three </a>" + platformButtons;
+                                picLink = "<a href=\x22../three/"+ sceneResponse.short_id + "\x22>";
+                            }
+                            if (sceneResponse.sceneEnabledClientTypes.babylonWeb == true) {
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../babylon/"+ sceneResponse.short_id + "\x22> Bablyon </a>" + platformButtons;
+                                picLink = "<a href=\x22../babylon/"+ sceneResponse.short_id + "\x22>";
                             }
                         }
                         // if (sceneResponse.sceneEnabledClientTypes != undefined) {

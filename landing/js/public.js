@@ -78,13 +78,22 @@ function generateSuccessHTMLOutput(response) {
             buttons = "<a href=\x22/landing/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>";
           }
           if (shuffledArray[i].sceneEnabledClientTypes.pixiWeb == true) {
-            buttons = buttons + "<a href=\x22/vtt/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Virtual Table Top</a>";
+            buttons = buttons + "<a href=\x22/vtt/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Pixi</a>";
           }
           if (shuffledArray[i].sceneEnabledClientTypes.unityWeb == true) {
             buttons = buttons + "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Unity Web</a>";
           }
           if (shuffledArray[i].sceneEnabledClientTypes.mapboxWeb == true) {
             buttons = buttons + "<a href=\x22/mapbox/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Mapbox</a>";
+          }    
+          if (shuffledArray[i].sceneEnabledClientTypes.maplibreWeb == true) {
+            buttons = buttons + "<a href=\x22/maplibre/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Maplibre</a>";
+          }    
+          if (shuffledArray[i].sceneEnabledClientTypes.threeWeb == true) {
+            buttons = buttons + "<a href=\x22/three/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Three</a>";
+          }       
+          if (shuffledArray[i].sceneEnabledClientTypes.babylonWeb == true) {
+            buttons = buttons + "<a href=\x22/babylon/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Babylon</a>";
           }       
         }
 
