@@ -1016,7 +1016,7 @@ maplibre_router.get('/:_id', function (req, res) {
             } //end locations
 
             ///scene types/////////
-            if (sceneData.sceneWebType == 'AR Location Tracking') {
+            // if (sceneData.sceneWebType == 'AR Location Tracking') {
 
                 // geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
                 // ARScript = "<script src=\x22https://raw.githack.com/MediaComem/LBAR.js/main/dist/lbar-v0.2.min.js\x22></script>";
@@ -1039,7 +1039,7 @@ maplibre_router.get('/:_id', function (req, res) {
                 // "</div>";
                 // locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
                             
-            } else {  //maplibre
+            // } else {  //maplibre
                 
                 dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
                 locationButton = "<div id=\x22geoloc_button\x22 class=\x22geoloc_button\x22 style=\x22float: left; margin: 10px 10px; width: 50px; height: 50px\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
@@ -1093,7 +1093,7 @@ maplibre_router.get('/:_id', function (req, res) {
                 "</div>";
 
 
-            } //end AFrame scene variations
+            // } //end AFrame scene variations
             let geomapEnv = "default";
             let shadow = "";
             let sunVector = "0 -.5 -.5";
@@ -1105,7 +1105,7 @@ maplibre_router.get('/:_id', function (req, res) {
             if (!sceneResponse.sceneEnvironmentPreset && sceneResponse.scenegeomapEnvironment) {
                 sceneResponse.sceneEnvironmentPreset = sceneResponse.scenegeomapEnvironment; //the old setting is still out there!
             }
-            if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) {
+            // if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) {
 
                 // geomapEnv = sceneResponse.sceneEnvironmentPreset;
                 // enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
@@ -1188,26 +1188,26 @@ maplibre_router.get('/:_id', function (req, res) {
                 // aframeEnvironment = "<div id=\x22enviroEl\x22 class=\x22groundMesh\x22 environment=\x22preset: "+geomapEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
                 // " "+envLighting+";\x22 hide-on-enter-ar "+tweakColors+"></div>";
 
-            } else {
-                if (sceneResponse.sceneUseDynamicSky) {
-                    // if (sceneResponse.sceneUseDynamicShadows) {
-                    //     shadow = " light=\x22castShadow: true\x22 ";
-                    // }
+            // } else {
+            //     if (sceneResponse.sceneUseDynamicSky) {
+            //         // if (sceneResponse.sceneUseDynamicShadows) {
+            //         //     shadow = " light=\x22castShadow: true\x22 ";
+            //         // }
 
-                    // if (sceneResponse.sceneSunVector) {
-                    //     sunVector = sceneResponse.sceneSunVector;
-                    // }
-                    // if (sceneResponse.sceneSunIntensity) {
-                    //     intensity = sceneResponse.sceneSunIntensity;
-                    // }
+            //         // if (sceneResponse.sceneSunVector) {
+            //         //     sunVector = sceneResponse.sceneSunVector;
+            //         // }
+            //         // if (sceneResponse.sceneSunIntensity) {
+            //         //     intensity = sceneResponse.sceneSunIntensity;
+            //         // }
 
-                    // let skyRad = parseInt(sceneResponse.sceneSkyRadius) - (parseInt(sceneResponse.sceneSkyRadius) * .2);
-                    // skySettings =  "<a-sky hide-on-enter-ar id=\x22skyEl\x22 color=\x22" + sceneResponse.sceneColor1 + "\x22 radius=\x22" + skyRad + "\x22 mod_sky=\x22enabled: true; color: "+sceneResponse.sceneColor1+";\x22></a-sky>";
-                    // lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22"+sceneResponse.sceneColor1+"\x22 "+
-                    // "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><div id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></div></a-light>" +
-                    // "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
-                }
-            }
+            //         // let skyRad = parseInt(sceneResponse.sceneSkyRadius) - (parseInt(sceneResponse.sceneSkyRadius) * .2);
+            //         // skySettings =  "<a-sky hide-on-enter-ar id=\x22skyEl\x22 color=\x22" + sceneResponse.sceneColor1 + "\x22 radius=\x22" + skyRad + "\x22 mod_sky=\x22enabled: true; color: "+sceneResponse.sceneColor1+";\x22></a-sky>";
+            //         // lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22"+sceneResponse.sceneColor1+"\x22 "+
+            //         // "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><div id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></div></a-light>" +
+            //         // "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
+            //     }
+            // }
             sceneResponse.scenePostcards = sceneData.scenePostcards;
             if (sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3) {
                 //
@@ -1226,68 +1226,29 @@ maplibre_router.get('/:_id', function (req, res) {
             }
             
             if (sceneResponse.sceneSkyParticles != undefined && sceneResponse.sceneSkyParticles != null && sceneResponse.sceneSkyParticles != "None") { 
-                // if (sceneResponse.sceneSkyParticles.toLowerCase() == "dust") {
-                //     skyParticles = "<div position=\x220 0 0\x22 sky_particle_points=\x22type: dust\x22></div>";
-                //     imageAssets = imageAssets + "<img id=\x22sparkle1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/sparkle.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "rain") {
-                //     skyParticles = "<div position=\x220 0 0\x22 rotation=\x220 0 90\x22 scale=\x221 1 1\x22 sky_particles=\x22type: rain; size: .1; src: http://servicemedia.s3.amazonaws.com/assets/pics/raindrop2.png\x22></div>";
-                //     imageAssets = imageAssets + "<img id=\x22raindrop2\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/raindrop2.png\x22 crossorigin=\x22anonymous\x22>";
-                
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "rain/fog") {
-                //     skyParticles = "<div scale=\x2220 10 20\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #raindrop; color: " +sceneResponse.sceneColor2 + "; position: -1 1 -1..1 1 1; spawnRate: 1000; velocity: 0 -.75 0; lifeTime: 10; scale: .15,.25; opacity: 1\x22></div>"+
-                //     "<div scale=\x2250 10 50\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #cloud1; color: " +sceneResponse.sceneColor2 + "; blending: additive; position: -1 -1 -1..1 1 1; velocity: -.05 -.025 -.05 .. .05 .025 .05; spawnRate: 5; lifeTime: 20; scale: 200,400; opacity: 0,.3,0; rotation: 0..360\x22></div>";
-                //     imageAssets = imageAssets + "<img id=\x22raindrop2\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/raindrop.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "rain/fog/add") {
-                //     skyParticles = "<div scale=\x2220 10 20\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #raindrop; color: " +sceneResponse.sceneColor2 + "; blending: additive; position: -1 1 -1..1 1 1; spawnRate: 1000; velocity: 0 -.75 0; lifeTime: 10; scale: .15,.25; opacity: 1\x22></div>"+
-                //     "<div scale=\x2250 10 50\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #cloud1; color: " +sceneResponse.sceneColor2 + "; blending: additive; position: -1 -1 -1..1 1 1; velocity: -.05 -.025 -.05 .. .05 .025 .05; spawnRate: 5; lifeTime: 20; scale: 100,200; opacity: 0,.3,0; rotation: 0..360\x22></div>";
-                //     imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "snow") {
-                //     skyParticles = "<div position=\x220 0 0\x22 rotation=\x220 0 90\x22 scale=\x221 1 1\x22 sky_particles=\x22type: rain; size: .2; src: https://servicemedia.s3.amazonaws.com/assets/pics/snowflake.png\x22></div>";
-                //     imageAssets = imageAssets + "<img id=\x22snowflake\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/snowflake.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "smoke") {
-                //     skyParticles = "<div position=\x220 0 0\x22 sky_particle_points=\x22type: smoke\x22></div>";
-                //     imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "explosions") {
-                //     skyParticles = "<div scale=\x2220 20 20\x22 position=\x220 20 0\x22 sprite-particles=\x22texture: #explosion1; textureFrame: 8 8; blending: additive; color: black..white;"+
-                //     " position: -1 -1 -1..1 1 1; velocity: -.1 -.05 -.1 .. .1 .05 .1; spawnRate: 20; lifeTime: 1; scale: 50,200; opacity: 0,1,0; rotation: 0..360\x22></div>";
-                    
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "fireworks") {
-                //     skyParticles = "<div scale=\x2240 10 40\x22 position=\x220 40 0\x22 sprite-particles=\x22texture: #fireworksanim1; textureFrame: 5 5; blending: additive; color: black..white;"+
-                //     " position: -1 -1 -1..1 1 1; velocity: -.1 -.05 -.1 .. .1 .05 .1; spawnRate: 10; lifeTime: 1; scale: 50,200; opacity: 0,1,0; rotation: 0..360\x22></div>";
-                //     imageAssets = imageAssets + "<img id=\x22fireworksanim1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/fireworks_sheet.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "fog") {
-                //     skyParticles = "<div position=\x220 0 0\x22 sky_particle_points=\x22type: fog\x22></div>";
-                //     imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "fog/add") {
-                //     skyParticles = "<div scale=\x2250 10 50\x22 position=\x220 10 0\x22 sprite-particles=\x22texture: #cloud1; blending: additive; color: " +sceneResponse.sceneColor2 + "; position: -1 -1 -1..1 1 1; velocity: -.05 -.025 -.05 .. .05 .025 .05; spawnRate: 5; lifeTime: 20; scale: 100,200; opacity: 0,.3,0; rotation: 0..360\x22></div>";
-                //     imageAssets = imageAssets + "<img id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "clouds") {
-                //     // skyParticles = "<div scale='15 5 15' position='0 10 0' particle_mangler particle-system=\x22preset: dust; maxAge: 25; velocityValue: 0 -.01 0; direction: -.01; positionSpread: 30 15 30; opacity: .2; particleCount: 50; size: 1000; blending: 2; texture: https://realitymangler.com/assets/textures/cloud_lg.png; color: " + sceneResponse.sceneColor1 + "," + sceneResponse.sceneColor2 +"\x22></div>";
-                // } else if (sceneResponse.sceneSkyParticles.toLowerCase() == "stars") {    
-                //     // skyParticles = "<div scale='2 2 2' position='0 15 0' particle_mangler particle-system=\x22preset: stars; particleCount: 3000; texture: https://realitymangler.com/assets/textures/star2b.png; color: " + sceneResponse.sceneColor1 + "," + sceneResponse.sceneColor2 +"\x22></div>";
-                // }
+                //hrm..
                 
             }
-            if (sceneResponse.sceneUseFloorPlane) {
-                // groundPlane = "<a-plane rotation='-90 0 0' visible=\x22false\x22 position='0 0 0' width='100' height='100' mod_physics=\x22type: static; model: collider;\x22 color=\x22" + sceneResponse.sceneColor2+ "\x22></a-plane>"; //deprecated for environment component
-            }
-            if (sceneResponse.sceneWater != null) {
-                // if (sceneResponse.sceneWater.name == "water2") {
-                //     ocean = "<a-plane position=\x220  "+sceneResponse.sceneWater.level+" 0\x22 width=\x22300\x22 height=\x22300\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22100\x22 segments-width=\x22100\x22 "+skyboxEnvMap+" material=\x22color: "+sceneResponse.sceneColor3+"; shader:makewaves; uMap: #water; repeat: 500 500;\x22></a-plane>";
-                //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2c.jpeg\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneWater.name == "water1") {
-                //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2264\x22 segments-width=\x2264\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water2; repeat: 500 500; transparent: true\x22></a-plane>";
-                //     imageAssets = imageAssets + "<img id=\x22water2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneWater.name == "water3") {
-                //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2216\x22 segments-width=\x2216\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water; repeat: 50 50; transparent: false\x22></a-plane>";
-                //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/watertile3.png\x22 crossorigin=\x22anonymous\x22>";
-                // } else if (sceneResponse.sceneWater.name == "water4") {
-                //     ocean = "<a-ocean></a-ocean>";
-                // }
-            }
-            if (sceneResponse.sceneUseHeightmap != null && sceneResponse.sceneUseHeightmap) {
-                // terrain = "<a-plane class=\x22surface activeObjexRay\x22 position=\x220 -20 0\x22 width=\x22512\x22 height=\x22512\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22512\x22 segments-width=\x22512\x22 terrain-mangler></a-plane>";
-            }
+            // if (sceneResponse.sceneUseFloorPlane) {
+            //     // groundPlane = "<a-plane rotation='-90 0 0' visible=\x22false\x22 position='0 0 0' width='100' height='100' mod_physics=\x22type: static; model: collider;\x22 color=\x22" + sceneResponse.sceneColor2+ "\x22></a-plane>"; //deprecated for environment component
+            // }
+            // if (sceneResponse.sceneWater != null) {
+            //     // if (sceneResponse.sceneWater.name == "water2") {
+            //     //     ocean = "<a-plane position=\x220  "+sceneResponse.sceneWater.level+" 0\x22 width=\x22300\x22 height=\x22300\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22100\x22 segments-width=\x22100\x22 "+skyboxEnvMap+" material=\x22color: "+sceneResponse.sceneColor3+"; shader:makewaves; uMap: #water; repeat: 500 500;\x22></a-plane>";
+            //     //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2c.jpeg\x22 crossorigin=\x22anonymous\x22>";
+            //     // } else if (sceneResponse.sceneWater.name == "water1") {
+            //     //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2264\x22 segments-width=\x2264\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water2; repeat: 500 500; transparent: true\x22></a-plane>";
+            //     //     imageAssets = imageAssets + "<img id=\x22water2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2.png\x22 crossorigin=\x22anonymous\x22>";
+            //     // } else if (sceneResponse.sceneWater.name == "water3") {
+            //     //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2216\x22 segments-width=\x2216\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water; repeat: 50 50; transparent: false\x22></a-plane>";
+            //     //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/watertile3.png\x22 crossorigin=\x22anonymous\x22>";
+            //     // } else if (sceneResponse.sceneWater.name == "water4") {
+            //     //     ocean = "<a-ocean></a-ocean>";
+            //     // }
+            // }
+            // if (sceneResponse.sceneUseHeightmap != null && sceneResponse.sceneUseHeightmap) {
+            //     // terrain = "<a-plane class=\x22surface activeObjexRay\x22 position=\x220 -20 0\x22 width=\x22512\x22 height=\x22512\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22512\x22 segments-width=\x22512\x22 terrain-mangler></a-plane>";
+            // }
             
             // if (sceneResponse.sceneNextScene != null && sceneResponse.sceneNextScene != "") {
             //     nextSceneLink = "href=\x22../geomap/" + sceneResponse.sceneNextScene + "\x22";

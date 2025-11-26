@@ -54,7 +54,7 @@ body {
         /* overflow-y:auto; */
         /* overflow:auto; */
 }
-.dialog_button {
+.three_dialog_button {
     z-index: 100;
     /* max-width: 30px; */
     position: absolute;
@@ -63,8 +63,8 @@ body {
     height: 30; */
     top: 5px;
     right: 20px;
-    color: rgb(0, 0, 0);
-    opacity:.75;
+    color: rgb(255, 255, 255);
+    /* opacity:.75; */
 }
 
 .dialog_button:xr-overlay {

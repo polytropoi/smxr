@@ -192,6 +192,9 @@ app.use('/landing', landing_routes);
 import vtt_routes from './routes/vtt_routes.js';
 app.use('/vtt', vtt_routes);  
 
+import three_routes from './routes/three_routes.js';
+app.use('/three', three_routes);  
+
 /// uncomment to add these optional routes
 import unity_routes from './routes/unity_routes.js';
 app.use('/unity', unity_routes);  

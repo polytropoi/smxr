@@ -16,6 +16,7 @@ $(function() {
 
     settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
     InitConnect();
+    
 
 });
 
