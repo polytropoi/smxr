@@ -22,7 +22,8 @@ export let timedEventsListenerMode = "";
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
 
 
-export function SetSelectedPosition(tilename, xpos, ypos) { //for vtt/not aframe views
+
+export function SetSelectedPosition(tilename, xpos, ypos) { //bit for aframe
    selectedPosition.x = parseFloat(xpos).toFixed(2);
    selectedPosition.y = parseFloat(ypos).toFixed(2);
    selectedPosition.tilename = tilename; 
@@ -35,7 +36,6 @@ export function InitAudioViz (mode) {
    }
       audio_viz.details = mode;
       eventEl.dispatchEvent(audio_viz);
-   
 }
 export function ResetTimedEvents () {
     timeKeysIndex = 0;
@@ -61,15 +61,10 @@ export function MapUpdate(phID) {
 
 function TimedEventListener () { 
 //  console.log("TimedEventsListener " + timedEventsListenerMode + " isplaying " +primaryAudioHowl.playing());
- // let primaryAudioTime = 0;
+
  timeKeysIndex = 0;
  let timekey = 0;
-//  let vidz = document.getElementsByTagName("video");
-//  let videoEl = null;
-//  if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
-//    videoEl = vidz[0];
-//    console.log("videoEl " + videoEl.id);
-//  }
+
  if (timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0) {
    
    let listenerInterval = setInterval(function () {

@@ -384,7 +384,7 @@ maplibre_router.get('/:_id', function (req, res) {
                         // "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
                                         // "<script src=\x22https://api.maplibre.com/maplibre-gl-js/v3.15.0/maplibre-gl.js\x22></script>"+
                        
-                        "\x22maplibre-gl\x22: \x22../main/js/maplibre/maplibre_gl_v3.15.0.mjs\x22"+
+                        "\x22maplibre-gl\x22: \x22../platforms/maplibre/maplibre_gl_v3.15.0.mjs\x22"+
                         // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
                         // // "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
                                                
@@ -3509,7 +3509,7 @@ maplibre_router.get('/:_id', function (req, res) {
                         
 
                         
-                        "<script type=\x22module\x22 src=\x22../main/js/maplibre/maplibre_main.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../platforms/maplibre/maplibre_main.js\x22></script>"+
                         "<script src=\x22/main/vendor/jquery/jquery-3.7.1.js\x22></script>" +
                         "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
                         // "<script type=\x22module\x22 src=\x22/connect/settings.js\x22></script>" +

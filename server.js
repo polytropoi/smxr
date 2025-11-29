@@ -141,23 +141,11 @@ export const ses = new SESClient({
     }
 });
 
-///////// minio init ///////////////////////////////
-// var minioClient = null;
-// if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
-//     const minio = require('minio');
-//         minioClient = new minio.Client({
-//         endPoint: process.env.MINIOENDPOINT,
-//         port: 9000,
-//         useSSL: false,
-//         accessKey: process.env.MINIOKEY,
-//         secretKey: process.env.MINIOSECRET
-//     });
+
+
+// if (process.env.GRAB_AND_SQUEEZE && process.env.GRAB_AND_SQUEEZE === "YES") { //snort
+//     //import the media libs and enabled the gs routes
 // }
-
-
-if (process.env.GRAB_AND_SQUEEZE && process.env.GRAB_AND_SQUEEZE === "YES") {
-    //import the media libs and enabled the gs routes
-}
 ////////////////////////////////////
 var appAuth = "noauth";
 
@@ -170,6 +158,8 @@ server.listen(process.env.PORT || 3000, function() {
 
 // INCLUDE EXTERNAL ROUTES BELOW
 
+import aframe_routes from './routes/aframe_routes.js';
+app.use('/aframe', aframe_routes); 
 
 import webxr_routes from './routes/webxr_routes.js';
 app.use('/webxr', webxr_routes); 
@@ -180,14 +170,11 @@ app.use('/mapbox', mapbox_routes);
 import maplibre_routes from './routes/maplibre_routes.js';
 app.use('/maplibre', maplibre_routes); 
 
-// import mapbox_routes from './routes/mapbox_routes.js';
-// app.use('/mapbox', mapbox_routes); 
-
-// import aframe_esm_routes from './routes/aframe_esm_routes.js';
-// app.use('/esm', aframe_esm_routes); 
-
 import landing_routes from './routes/landing_routes.js';
 app.use('/landing', landing_routes);  
+
+import pixi_routes from './routes/pixi_routes.js';
+app.use('/pixi', pixi_routes);  
 
 import vtt_routes from './routes/vtt_routes.js';
 app.use('/vtt', vtt_routes);  
@@ -201,9 +188,6 @@ app.use('/unity', unity_routes);
 
 import stripe_routes from './routes/stripe_routes.js';
 app.use('/stripe', stripe_routes);
-
-// import utility_routes from './routes/utility_routes.js'; //NOTE you must npm install sharp, ffmpeg-fluent, and ffmpeg-static!  These modules are not included in package.json
-// app.use('/utils', utils_routes);  
 
 // import oculus_routes from './routes/oculus_routes.js';
 // app.use('/oculus', oculus_routes)

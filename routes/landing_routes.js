@@ -96,7 +96,7 @@ landing_router.get('/simple_aframe', function (req, res) {
     }
 );
 
-////////////////////PRIMARY /WEBXR ROUTE  e.g. /webxr/<short_id> ///////////////////
+////////////////////PRIMARY /WEBXR ROUTE  e.g. /landing/<short_id> ///////////////////
 landing_router.get('/:_id', function (req, res) { 
     
     var reqstring = entities.decodeHTML(req.params._id);
@@ -440,24 +440,7 @@ landing_router.get('/:_id', function (req, res) {
             // } 
             if (sceneData.sceneTags != null) {        
                 for (let i = 0; i < sceneData.sceneTags.length; i++) { //not ideal, but it's temporary... //no it isn't
-                    if (sceneData.sceneTags[i].toLowerCase().includes("spark") || sceneData.sceneTags[i].toLowerCase().includes("splat")) {    
-                        
-                    //     importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
-                          
-                    //     "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
-                       
-                    //     "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-                    //     "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-                    //     "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.2/spark.module.js\x22,"+  
-                                               
-                    //     "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
-                    //     "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                    //     "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
-                        
-                    //     "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
-                    //     "}"+
-                    // "}</script>";
-                    }
+
 
                     // aframe-physics-system.min
 
@@ -475,21 +458,7 @@ landing_router.get('/:_id', function (req, res) {
                     if (sceneData.sceneTags[i].toLowerCase().includes("webcam")) {
                         webcamAsset = "<video id=\x22webcam\x22 src=\x22''\x22 playsinline></video>";
                     }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("physics")) { 
-                    //     usePhysicsType = "ammo";
-                    //     physicsScripts =  "<script src=\x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22></script>"+
-                    //     "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-physics-system.min.js\x22></script>";     
-                    // }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("brownian")) {
-                    //     brownianScript =  "<script type=\x22module\x22 src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
-                    // }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("instancing")) {
-                    //     meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22></script>"; //imports MeshSurfaceScatter
-                    //     instancingEntity = "";
-                    // } 
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("grid effects" )) {
-                    //     meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/shaders/grid_shaders.js\x22></script><script src=\x22../main/src/component/grid_effects.js\x22></script>"; //imports MeshSurfaceScatter
-                    // } 
+
                     if (sceneData.sceneTags[i] == "show transport") {
                         showTransport = true;
                     }
@@ -584,59 +553,7 @@ landing_router.get('/:_id', function (req, res) {
                     }
 
                     // console.log("sceneResponse.sceneLocations[i].eventData "+ sceneResponse.sceneLocations[i].eventData);
-                    if ((sceneResponse.sceneLocationTracking != null && sceneResponse.sceneLocationTracking == true) || sceneResponse.sceneWebType == "AR Location Tracking") {  
-                        // if (sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //just to set scripts and restrict to location
-                        //     if (sceneResponse.sceneWebType == "AR Location Tracking") {
-                        //         if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict_ar position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>";
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 ><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         } else {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_ar position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>"; 
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         }
-                        //         geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                        //         locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
-                        //         var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                        //         locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                        //     } else if (sceneResponse.sceneWebType == "Model Viewer") { 
-                        //         console.log("sceneResponse.sceneLocations[i].eventData : " + sceneResponse.sceneLocations[i].eventData);
-                        //         if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //         geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                        //         locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
-                        //         var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                        //         locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                        //         }
-                        //     } else if (sceneResponse.sceneWebType == "Mapbox") { //just location tracking, for any sceneWebType
-                        //         if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>";
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         } else {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_init position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>"; 
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         }
-                        //     } else {
-                        //         console.log("tryna set geo loc " + sceneResponse.sceneLocations[i].eventData);
-                        //         if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //             geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                        //             locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
-                        //             var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                        //             locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                        //         }
-                        //     }
-                        // }
-                    }
+                   
                     if (sceneResponse.sceneLocations[i].type != undefined && sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //set actual locs below
                         // // let id = sceneResponse.sceneLocations[i]._id != undefined ? 
                         // if (sceneResponse.sceneLocations[i].markerType == "poi") {
@@ -676,7 +593,7 @@ landing_router.get('/:_id', function (req, res) {
                     if (sceneResponse.sceneLocations[i].model != undefined && sceneResponse.sceneLocations[i].model != "none" && sceneResponse.sceneLocations[i].model) { //new way of attaching gltf to location w/out object
                         sceneModelLocations.push(sceneResponse.sceneLocations[i]);
                     } 
-                    if (sceneResponse.sceneLocations[i].model == "none" || sceneResponse.sceneLocations[i].model == null) {
+                    if (sceneResponse.sceneLocations[i].model == "none" || sceneResponse.sceneLocations[i].model == null || sceneResponse.sceneLocations[i].model == "") {
                         if (sceneResponse.sceneLocations[i].markerType == "navmesh") { 
                             console.log("PUSSHING A CANNED NAVMESH!");
                             sceneModelLocations.push(sceneResponse.sceneLocations[i]); // if no model will set a primitive default below
@@ -722,7 +639,7 @@ landing_router.get('/:_id', function (req, res) {
                             || sceneResponse.sceneLocations[i].markerType.toLowerCase() == "mailbox") {
                             
                             let tLoc = sceneResponse.sceneLocations[i];
-                            tLoc.phID = sceneResponse.sceneLocations[i].timestamp; //just use location timestamp, ditch the "*_marker" stuff...
+                            tLoc.phID = sceneResponse.sceneLocations[i].timestamp; //just use location timestamp, ditch the "*_marker" stuff... // this was a mistake! #id not supposed to start with number...
                             if (!tLoc.markerObjScale) {
                                 tLoc.markerObjScale = 1;
                             }
