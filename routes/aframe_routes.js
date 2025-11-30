@@ -2,7 +2,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const express = require("express");
-const webxr_router = express.Router();
+const aframe_router = express.Router();
 const entities = require("entities");
 // const async = require('async'); ///goodbye to you my confusing friend...
 
@@ -59,7 +59,7 @@ function UppercaseFirst(s) {
         }
     };
     
-webxr_router.get("/test", function (req, res) {
+aframe_router.get("/test", function (req, res) {
     res.send("OK!");
 });    
 
@@ -83,7 +83,7 @@ function HexToRgbValues (c) {
 
  
 ////////// test / example of aframe response
-webxr_router.get('/simple_aframe', function (req, res) { 
+aframe_router.get('/simple_aframe', function (req, res) { 
 
     let response =
         "<!DOCTYPE html> <html lang=\x22en\x22>" +
@@ -105,8 +105,8 @@ webxr_router.get('/simple_aframe', function (req, res) {
     }
 );
 
-////////////////////PRIMARY /WEBXR ROUTE  e.g. /webxr/<short_id> ///////////////////
-webxr_router.get('/:_id', function (req, res) { 
+////////////////////PRIMARY /AFRAME ROUTE  e.g. /aframe/<short_id> ///////////////////
+aframe_router.get('/:_id', function (req, res) { 
     
     var reqstring = entities.decodeHTML(req.params._id);
     console.log("NEW WEBXR SCENE REQUEST : " + reqstring);
@@ -212,7 +212,7 @@ webxr_router.get('/:_id', function (req, res) {
     let styleIncludes = "";
     let synthScripts = "";
     let streamPrimaryAudio = false;
-    let audioControl = "<script type=\x22module\x22 src=\x22../main/src/component/audio_control.js\x22 defer=\x22defer\x22></script>";
+    let audioControl = "<script type=\x22module\x22 src=\x22../platforms/aframe/audio_control.js\x22 defer=\x22defer\x22></script>";
     let primaryAudioScript = "";
     let primaryAudioParams = "";
     let primaryAudioEntity = "";
@@ -249,9 +249,9 @@ webxr_router.get('/:_id', function (req, res) {
     // let cubeMapAsset = ""; //deprecated, all at runtime now..
     let ts = Date.now();
     let contentUtils = ""; 
-    // let contentUtils = "<script type=\x22module\x22 src=\x22../main/src/component/content-utils.js?v=1\x22 defer=\x22defer\x22></script>"; 
-    let modObjex = "<script type=\x22module\x22 src=\x22../main/src/component/mod_objex.js\x22 defer=\x22defer\x22></script>"; 
-    let modModels = "<script type=\x22module\x22 src=\x22../main/src/component/mod_models.js\x22 defer=\x22defer\x22></script>"; 
+    // let contentUtils = "<script type=\x22module\x22 src=\x22../platforms/aframe/content-utils.js?v=1\x22 defer=\x22defer\x22></script>"; 
+    let modObjex = "<script type=\x22module\x22 src=\x22../platforms/aframe/mod_objex.js\x22 defer=\x22defer\x22></script>"; 
+    let modModels = "<script type=\x22module\x22 src=\x22../platforms/aframe/mod_models.js\x22 defer=\x22defer\x22></script>"; 
     let modSplats = ""; 
     let videosphereAsset = "";
     let webcamAsset = "";
@@ -341,7 +341,7 @@ webxr_router.get('/:_id', function (req, res) {
     let youtubeContent = "";
     let youtubeEntity = "";
     let instancingEntity = "";
-    let meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22 defer=\x22defer\x22></script>";
+    let meshUtilsScript = "<script type=\x22module\x22 src=\x22../platforms/aframe/mesh-utils.js\x22 defer=\x22defer\x22></script>";
     let physicsScripts = "";
     let blinkScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-blink-controls.min.js\x22></script>"
     // let blinkScript = "";
@@ -349,10 +349,10 @@ webxr_router.get('/:_id', function (req, res) {
     let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
     let enviromentScript = ""; //for aframe env component
-    // let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
+    // let troikaScript = "<script type=\x22module\x22 src=\x22../platforms/aframe/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
     let troikaScript = "<script src=\x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22></script>";
     
-    let particleScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>";    
+    let particleScript = "<script type=\x22module\x22 src=\x22../platforms/aframe/aframe-sprite-particles-component.js\x22></script>";    
     // let aframeScript = "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>";
     let threejsVersion = "173";
     let surfaceScatterScript = "";
@@ -392,9 +392,9 @@ webxr_router.get('/:_id', function (req, res) {
                         
                         
                         
-                        "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                        "\x22content-utils\x22: \x22../platforms/aframe/content-utils.js\x22,"+  
                         
-                        "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
+                        "\x22ar_hit_caster\x22: \x22../platforms/aframe/ar_hit_caster.js\x22"+  
                         "}"+
                     "}</script>";
 
@@ -484,9 +484,9 @@ webxr_router.get('/:_id', function (req, res) {
                         
                         // "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
                         // "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                        "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                        "\x22content-utils\x22: \x22../platforms/aframe/content-utils.js\x22,"+  
                         
-                        "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+  
+                        "\x22ar_hit_caster\x22: \x22../platforms/aframe/ar_hit_caster.js\x22"+  
                         "}"+
                     "}</script>";
                     }
@@ -515,14 +515,14 @@ webxr_router.get('/:_id', function (req, res) {
                        
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("brownian")) {
-                        brownianScript =  "<script type=\x22module\x22 src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
+                        brownianScript =  "<script type=\x22module\x22 src=\x22../platforms/aframe/aframe-brownian-motion.js\x22></script>";
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("instancing")) {
-                        meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22></script>"; //imports MeshSurfaceScatter
+                        meshUtilsScript = "<script type=\x22module\x22 src=\x22../platforms/aframe/mesh-utils.js\x22></script>"; //imports MeshSurfaceScatter
                         instancingEntity = "";
                     } 
                     if (sceneData.sceneTags[i].toLowerCase().includes("grid effects" )) {
-                        meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/shaders/grid_shaders.js\x22></script><script src=\x22../main/src/component/grid_effects.js\x22></script>"; //imports MeshSurfaceScatter
+                        meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/shaders/grid_shaders.js\x22></script><script src=\x22../platforms/aframe/grid_effects.js\x22></script>"; //imports MeshSurfaceScatter
                     } 
                     if (sceneData.sceneTags[i] == "show transport") {
                         showTransport = true;
@@ -591,9 +591,9 @@ webxr_router.get('/:_id', function (req, res) {
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/examples/jsm/\x22,"+
                             "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
                             "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                            "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
+                            "\x22content-utils\x22: \x22../platforms/aframe/content-utils.js\x22,"+  
                             
-                            "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+                  
+                            "\x22ar_hit_caster\x22: \x22../platforms/aframe/ar_hit_caster.js\x22"+                  
                         
                             "}"+
                         "}</script>"+
@@ -603,7 +603,7 @@ webxr_router.get('/:_id', function (req, res) {
                         troikaScript = "";
                         particleScript = "";
                         // aframeScript = "";
-                        // contentUtils = "<script type=\x22module\x22 ssrc=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
+                        // contentUtils = "<script type=\x22module\x22 ssrc=\x22../platforms/aframe/content_utils_esm.js\x22></script>"; 
                         
                     }
                     
@@ -719,14 +719,14 @@ webxr_router.get('/:_id', function (req, res) {
                                     locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
                                 }
                                 geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                                locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
+                                locationScripts = "<script src=\x22../platforms/aframe/location-fu.js\x22></script>";
                                 var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
                                 locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
                             } else if (sceneResponse.sceneWebType == "Model Viewer") { 
                                 console.log("sceneResponse.sceneLocations[i].eventData : " + sceneResponse.sceneLocations[i].eventData);
                                 if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
                                 geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                                locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
+                                locationScripts = "<script src=\x22../platforms/aframe/location-fu-noaframe.js\x22></script>";
                                 var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
                                 locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
                                 }
@@ -748,7 +748,7 @@ webxr_router.get('/:_id', function (req, res) {
                                 console.log("tryna set geo loc " + sceneResponse.sceneLocations[i].eventData);
                                 if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
                                     geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                                    locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
+                                    locationScripts = "<script src=\x22../platforms/aframe/location-fu-noaframe.js\x22></script>";
                                     var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
                                     locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
                                 }
@@ -848,7 +848,7 @@ webxr_router.get('/:_id', function (req, res) {
                         }
                     }
                     if (sceneResponse.sceneLocations[i].markerType == "3D text") { //unused
-                        threeDeeTextComponent = "<script src=\x22../main/src/component/aframe-text-geometry-component.min.js\x22></script>"; //TODO - these must all be arrays, like sceneModelLocations above!
+                        threeDeeTextComponent = "<script src=\x22../platforms/aframe/aframe-text-geometry-component.min.js\x22></script>"; //TODO - these must all be arrays, like sceneModelLocations above!
                         externalAssets = externalAssets + "<a-asset-item id=\x22optimerBoldFont\x22 src=\x22https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json\x22></a-asset-item>";
                     }
                     if (sceneResponse.sceneLocations[i].markerType == "player") {
@@ -1040,7 +1040,7 @@ webxr_router.get('/:_id', function (req, res) {
 
                 geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
                 ARScript = "<script src=\x22https://raw.githack.com/MediaComem/LBAR.js/main/dist/lbar-v0.2.min.js\x22></script>";
-                locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
+                locationScripts = "<script src=\x22../platforms/aframe/location-fu.js\x22></script>";
                 // locationScripts = "<script>window.onload = () => { navigator.geolocation.getCurrentPosition((position) => {"+ //put this where?
                 // "document.querySelector('a-text').setAttribute('"+geoEntity+"', `latitude: ${position.coords.latitude}; longitude: ${position.coords.longitude};`)});}</script>";
                 ARSceneArg = "gps-position webxr=\x22referenceSpaceType: unbounded; requiredFeatures: unbounded;\x22 xr-mode-ui=\x22enabled: false\x22 arjs=\x22sourceType: webcam; debugUIEnabled: false;\x22";
@@ -1077,7 +1077,7 @@ webxr_router.get('/:_id', function (req, res) {
                 "<script src=\x22https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js\x22></script>"+
                 "<link href=\x22https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css\x22 rel=\x22stylesheet\x22/>";
 
-                locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
+                locationScripts = "<script src=\x22../platforms/aframe/location-fu.js\x22></script>";
                 
                 cameraRigEntity = "<a-camera id=\x22player\x22 look-controls-enabled=\x22false\x22 listen-from-camera gps-camera rotation-reader><a-entity id=\x22mouseCursor\x22 cursor=\x22rayOrigin: mouse\x22 raycaster=\x22objects: .activeObjexRay\x22></a-entity>"+
                 // "<a-entity id=\x22player\x22 networked=\x22template:#avatar-template;attachTemplateToLocal:false;\x22 spawn-in-circle=\x22radius:3;\x22>" + //ENABLE LATER
@@ -1153,7 +1153,7 @@ webxr_router.get('/:_id', function (req, res) {
                
                 if (sceneResponse.sceneCameraMode == "Orbit") {
                     // joystickScript = "<script src=\x22../main/vendor/aframe/aframe-orbit-controls.min.js\x22></script>";
-                    // joystickScript = "<script src=\x22../main/src/component/aframe-orbit-controls.min.js\x22></script>";
+                    // joystickScript = "<script src=\x22../platforms/aframe/aframe-orbit-controls.min.js\x22></script>";
                     joystickScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-orbit-controls.min.js\x22></script>";
                     
                     // wasd = "orbit-controls=\x22target: 0 0 0; minDistance: .5; maxDistance: 100; initialPosition: 0 1 -5; enableDamping: true;\x22";
@@ -1426,7 +1426,7 @@ webxr_router.get('/:_id', function (req, res) {
             if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) {
 
                 webxrEnv = sceneResponse.sceneEnvironmentPreset;
-                enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
+                enviromentScript = "<script type=\x22module\x22 src=\x22../platforms/aframe/aframe-environment-component_m3.js\x22></script>";
                 let ground = "ground: hills;";
                 let dressing = "";
                 let skycolor = "";
@@ -2357,7 +2357,7 @@ webxr_router.get('/:_id', function (req, res) {
                             usdzModel = modelURL;
                             
                         } else if (model != null && model.item_type == "splat") {//not locmdl glb //nope do this on esm route..
-                            modSplats = "<script type=\x22module\x22 src=\x22../main/src/component/mod_splats.js\x22 defer=\x22defer\x22></script>"; 
+                            modSplats = "<script type=\x22module\x22 src=\x22../platforms/aframe/mod_splats.js\x22 defer=\x22defer\x22></script>"; 
                             let splatURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
                             console.log("splatURL " + splatURL + " modelType " + model.item_type);
                             splatEls = splatEls + "<a-entity mod_splat=\x22url: "+splatURL+"; xpos: "+locMdl.x+"; ypos: "+locMdl.y+"; zpos: "+locMdl.z+"; xscale: "+locMdl.xscale+"; yscale: "+locMdl.yscale+"; zscale: "+locMdl.zscale+"\x22></a-entity>";
@@ -3372,7 +3372,7 @@ webxr_router.get('/:_id', function (req, res) {
                         let hitCasterComponent = "";
                         if ((sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hit test"))) {
                             xrExtras = "ar-hit-test"; //added to a-scene
-                            // ARScript = "<script type=\x22module\x22 src=\x22../main/src/component/ar_hit_caster.js\x22></script>"; 
+                            // ARScript = "<script type=\x22module\x22 src=\x22../platforms/aframe/ar_hit_caster.js\x22></script>"; 
                             hitCasterComponent = "ar_hit_caster"; //added to ar_parent
 
                         }
@@ -3382,7 +3382,7 @@ webxr_router.get('/:_id', function (req, res) {
                             webxrFeatures = "webxr=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
                             xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
                         } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("real world meshing")) {
-                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
+                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../platforms/aframe/aframe_real_world_meshing_mod.js\x22></script>";
                             xrExtras = " real_world_meshing_mod=\x22meshesEnabled: true;\x22";
                             webxrFeatures = " " + xrExtras;
                             xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
@@ -3390,7 +3390,7 @@ webxr_router.get('/:_id', function (req, res) {
                             webxrFeatures = "webxr=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
                         }
                         if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hand controls") || sceneResponse.sceneTags.toString().toLowerCase().includes("hand controllers")) {
-                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/hand_equip.js\x22></script>";
+                            meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../platforms/aframe/hand_equip.js\x22></script>";
                         }
                         // arElements = "<a-entity material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
                         // "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></a-entity>"+
@@ -3653,12 +3653,12 @@ webxr_router.get('/:_id', function (req, res) {
                         hlsScript +
                         "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js\x22></script>"+
                         "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
-                        "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>"+
+                        "<script src=\x22../platforms/aframe/aframe-sprite-particles-component.js\x22></script>"+
 
                         "<script src=\x22../main/src/util/mindar/mindar-image.js\x22></script>"+
                         "<script src=\x22../main/src/util/mindar/mindar-image-aframe.js\x22></script>"+
                         "<script src=\x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22></script>"+
-                        "<script src=\x22../main/src/component/mod-materials.js\x22></script>"+
+                        "<script src=\x22../platforms/aframe/mod-materials.js\x22></script>"+
                         "</head>\n" +
                         "<body>\n" +
                         "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
@@ -3695,8 +3695,8 @@ webxr_router.get('/:_id', function (req, res) {
                         let hasParametricCurve = false;
                         let obbDebug = ""; //to show obb colliders, physics collider debug set elsewhere...
                        
-                        // let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
-                        // let particleScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>";
+                        // let troikaScript = "<script type=\x22module\x22 src=\x22../platforms/aframe/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
+                        // let particleScript = "<script type=\x22module\x22 src=\x22../platforms/aframe/aframe-sprite-particles-component.js\x22></script>";
                         // if (aframeScript == "") { //i.e. it's in the importmap!
                         //     particleScript = "";
                         //     aframeExtrasScript = "";
@@ -3878,12 +3878,12 @@ webxr_router.get('/:_id', function (req, res) {
                         "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-look-at-component.js\x22></script>"+
                         "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-layout-component.js\x22></script>"+
 
-                        "<script type=\x22module\x22 src=\x22../main/src/component/cloud-marker.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22../main/src/component/local-marker.js\x22></script>"+
-                        "<script type=\x22module\x22 src=\x22../main/src/component/mod-materials.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../platforms/aframe/cloud-marker.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../platforms/aframe/local-marker.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../platforms/aframe/mod-materials.js\x22></script>"+
 
-                        // "<script src=\x22../main/src/component/ar-shadow-helper.js\x22></script>"+
-                        // "<script src=\x22../main/src/component/ar_hit_caster.js\x22></script>"+
+                        // "<script src=\x22../platforms/aframe/ar-shadow-helper.js\x22></script>"+
+                        // "<script src=\x22../platforms/aframe/ar_hit_caster.js\x22></script>"+
                         // "<script src=\x22../main/vendor/html2canvas/aframe-html-shader.min.js\x22></script>"+
                         primaryAudioScript +
                         ambientAudioScript +
@@ -3906,7 +3906,7 @@ webxr_router.get('/:_id', function (req, res) {
                         ///TODO make these conditional
 
                         particleScript +
-                        "<script type=\x22module\x22 src=\x22../main/src/component/spawn-in-circle.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22../platforms/aframe/spawn-in-circle.js\x22></script>"+
                         "<script src=\x22https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js\x22></script>"+
                         "<script type=\x22module\x22 src=\x22../main/src/shaders/aframe/aframe-makewaves-shader.js\x22></script>"+
                         "<script type=\x22module\x22 src=\x22/main/src/shaders/aframe/aframe-wavy-shader.js\x22></script>"+
@@ -4140,4 +4140,4 @@ webxr_router.get('/:_id', function (req, res) {
 ///// END PRIMARY SERVERSIDE /webxr/ ROUTE //////////////////////
 
 
-export default webxr_router;
+export default aframe_router;

@@ -96,7 +96,7 @@ landing_router.get('/simple_aframe', function (req, res) {
     }
 );
 
-////////////////////PRIMARY /WEBXR ROUTE  e.g. /landing/<short_id> ///////////////////
+////////////////////PRIMARY /landing ROUTE  e.g. /landing/<short_id> ///////////////////
 landing_router.get('/:_id', function (req, res) { 
     
     var reqstring = entities.decodeHTML(req.params._id);
@@ -1208,7 +1208,7 @@ landing_router.get('/:_id', function (req, res) {
             }
             
             if (sceneResponse.sceneNextScene != null && sceneResponse.sceneNextScene != "") {
-                nextSceneLink = "href=\x22../webxr/" + sceneResponse.sceneNextScene + "\x22";
+                nextSceneLink = "href=\x22../aframe/" + sceneResponse.sceneNextScene + "\x22";
             }
             if (sceneResponse.scenePreviousScene != null && sceneResponse.scenePreviousScene != "") {
                 prevSceneLink = "href=\x22../" + sceneResponse.scenePreviousScene + "\x22";
@@ -2908,49 +2908,8 @@ landing_router.get('/:_id', function (req, res) {
                     //scenetype filters below...
 
                     console.log("sceneWebType: "+ sceneResponse.sceneWebType + " sceneTags " + sceneResponse.sceneTags); 
-                    ////////DEFAULT/AFRAME Scene type:
-                    if (sceneResponse.sceneWebType == null || sceneResponse.sceneWebType == undefined || (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "default") || 
-                        (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "aframe")) { 
+       
 
-                        // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
-                        // if (sceneResponse.sceneTags == null) {
-                        //     sceneResponse.sceneTags = "";
-                        // }
-                        // let xrExtras = "";
-                        // let hitCasterComponent = "";
-                        // if ((sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hit test"))) {
-                        //     xrExtras = "ar-hit-test"; //added to a-scene
-                        //     // ARScript = "<script type=\x22module\x22 src=\x22../main/src/component/ar_hit_caster.js\x22></script>"; 
-                        //     hitCasterComponent = "ar_hit_caster"; //added to ar_parent
-
-                        // }
-                        // if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("xr room physics")) {
-                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
-                        //     xrExtras = "xr_room_physics";
-                        //     webxrFeatures = "webxr=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
-                        //     xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
-                        // } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("real world meshing")) {
-                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
-                        //     xrExtras = " real_world_meshing_mod=\x22meshesEnabled: true;\x22";
-                        //     webxrFeatures = " " + xrExtras;
-                        //     xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
-                        // } else {
-                        //     webxrFeatures = "webxr=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
-                        // }
-                        // if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hand controls") || sceneResponse.sceneTags.toString().toLowerCase().includes("hand controllers")) {
-                        //     meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/component/hand_equip.js\x22></script>";
-                        // }
-                        // // arElements = "<a-entity material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
-                        // // "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></a-entity>"+
-                        // // <a-light type="directional" light="castShadow:true;" position="1 1 1" intensity="1.57" shadow-camera-automatic="#ar_parent"></a-light>
-                        // arElements = "<a-plane follow-shadow=\x22#ar_parent\x22 material=\x22shader:shadow\x22 shadow=\x22cast:false;\x22 rotation=\x22-90 0 0\x22 width=\x222\x22 height=\x222\x22></a-plane>"+
-                        // "<a-entity scale=\x221 1 1\x22 id=\x22ar_parent\x22 "+hitCasterComponent+">" +
-                        // arChildElements +
-                        // "</a-entity>";
-                        // // "<a-entity show-in-ar-mode visible=\x22false\x22 id=\x22hitCaster\x22 ar_hit_caster=\x22targetEl: #ar_parent\x22 gltf-model=\x22#reticle2\x22></a-entity>\n";
-                        // handsTemplate = "<template id=\x22hand-template\x22><a-entity><a-box scale=\x220.1 0.1 0.1\x22 visible=false></a-box></a-entity></template>";
-                       
-                    } 
                     if (sceneResponse.sceneWebType == "Model Viewer") {
                        
                     } else if (sceneResponse.sceneWebType == "HTML from Text Item") {
@@ -2959,63 +2918,64 @@ landing_router.get('/:_id', function (req, res) {
                         console.log("Tryna send html from text itme " + htmltext);
                     
                     } else if (sceneResponse.sceneWebType == "Video Landing") {
-                        let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
-                        if (tilepicUrl != "") {
-                            bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
-                        }
+                        // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
+                        // if (tilepicUrl != "") {
+                        //     bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
+                        // }
 
-                        htmltext = "<!DOCTYPE html>\n" +
-                        "<head> " +
-                        "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
-                        "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        "<meta charset=\x22UTF-8\x22>"+
-                        "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        "<meta charset=\x22utf-8\x22/>" +
-                        "<meta name=\x22viewport\x22 content=\x22width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no\x22/>" +
-                        "<meta property=\x22og:url\x22 content=\x22" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "\x22 /> " +
-                        "<meta property=\x22og:type\x22 content=\x22website\x22 /> " +
-                        "<meta property=\x22og:image\x22 content=\x22" + postcard1_static + "\x22 /> " +
-                        "<meta property=\x22og:image:height\x22 content=\x221024\x22 /> " +
-                        "<meta property=\x22og:image:width\x22 content=\x221024\x22 /> " +
-                        "<meta property=\x22og:title\x22 content=\x22" + sceneResponse.sceneTitle + "\x22 /> " +
-                        "<meta property=\x22og:description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22 /> " +
-                        "<meta property=\x22name\x22 content=\x22modelviewer\x22 /> " +
-                        "<title>" + sceneResponse.sceneTitle + "</title>" +
-                        "<meta name=\x22description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22/>" +
-                        "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
-                        "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
+                        // htmltext = "<!DOCTYPE html>\n" +
+                        // "<head> " +
+                        // "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
+                        // "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
+                        // "<meta charset=\x22UTF-8\x22>"+
+                        // "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
+                        // "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
+                        // "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
+                        // "<meta charset=\x22utf-8\x22/>" +
+                        // "<meta name=\x22viewport\x22 content=\x22width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no\x22/>" +
+                        // "<meta property=\x22og:url\x22 content=\x22" + process.env.ROOT_HOST + "/landing/" + sceneResponse.short_id + "\x22 /> " +
+                        // "<meta property=\x22og:type\x22 content=\x22website\x22 /> " +
+                        // "<meta property=\x22og:image\x22 content=\x22" + postcard1_static + "\x22 /> " +
+                        // "<meta property=\x22og:image:height\x22 content=\x221024\x22 /> " +
+                        // "<meta property=\x22og:image:width\x22 content=\x221024\x22 /> " +
+                        // "<meta property=\x22og:title\x22 content=\x22" + sceneResponse.sceneTitle + "\x22 /> " +
+                        // "<meta property=\x22og:description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22 /> " +
+                        // "<meta property=\x22name\x22 content=\x22modelviewer\x22 /> " +
+                        // "<title>" + sceneResponse.sceneTitle + "</title>" +
+                        // "<meta name=\x22description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22/>" +
+                        // "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                        // "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
+                        // "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                        // "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
                        
-                        "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                        // "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
                         
-                        "</head>\n" +
-                        "<body "+bgstyle+">" +
-                        "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                        "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                        settingsData +
-                        sceneTimedEventsData +
-                        hlsScript +
-                        videoGroupsEntity +
-                        "<center><div><br><br><div class=\x22header\x22>"+sceneResponse.sceneGreeting+ " - " + sceneResponse.sceneQuest+"</div><video controls width=\x2280%\x22 height=\x2210%\x22 id=\x22video\x22></video>"+
-                        "<div id=\x22sceneGreeting\x22 class=\x22linkfooter\x22>"+
-                        "<h4><a href=\x22https://servicemedia.net/webxr/"+ sceneResponse.sceneNextScene + "\x22>Click Here to Enter Immersive Scene!</a></h4><br>"+
-                        "</div></center>"+
-                        audioSliders +
-                        canvasOverlay +
-                        "<div id=\x22theModal\x22 class=\x22modal\x22 ><div id=\x22modalContent\x22 class=\x22modal-content\x22></div>";
-                        attributionsTextEntity +
-                        "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
-                        "</body>\n" +
-                        "</html>";
-                        console.log("Tryna do a Video Landing scene");
+                        // "</head>\n" +
+                        // "<body "+bgstyle+">" +
+                        // "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
+                        // "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
+                        // settingsData +
+                        // sceneTimedEventsData +
+                        // hlsScript +
+                        // videoGroupsEntity +
+                        // "<center><div><br><br><div class=\x22header\x22>"+sceneResponse.sceneGreeting+ " - " + sceneResponse.sceneQuest+"</div><video controls width=\x2280%\x22 height=\x2210%\x22 id=\x22video\x22></video>"+
+                        // "<div id=\x22sceneGreeting\x22 class=\x22linkfooter\x22>"+
+                        // "<h4><a href=\x22https://servicemedia.net/webxr/"+ sceneResponse.sceneNextScene + "\x22>Click Here to Enter Immersive Scene!</a></h4><br>"+
+                        // "</div></center>"+
+                        // audioSliders +
+                        // canvasOverlay +
+                        // "<div id=\x22theModal\x22 class=\x22modal\x22 ><div id=\x22modalContent\x22 class=\x22modal-content\x22></div>";
+                        // attributionsTextEntity +
+                        // "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
+                        // "</body>\n" +
+                        // "</html>";
+                        // console.log("Tryna do a Video Landing scene");
 
                     } else if (sceneResponse.sceneWebType == "AR Image Tracking") { //aframe plus mindar
                         
+                        //nm
 
                     } else { /////////////////////////////////////////////////////////------------- Default / Landing response below ------------------------------
                        let settings = {};  //TODO move this lower down? 
@@ -3123,13 +3083,13 @@ landing_router.get('/:_id', function (req, res) {
                         }
                         let sceneOwner = "";
                         let sceneEditButton = "";
-                        let vttButton = "";
+                        let pixiButton = "";
                         if (sceneOwner != "" || (!isGuest && req.session.user && req.session.user.authLevel.includes("domain_admin"))) { //hrm..
                             sceneEditButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../main/index.html?type=scene&iid="+sceneResponse._id+"\x22>Edit Scene</a>";
                         }
 
                         // if (mappicURL != "" || backgroundURL != "") {
-                            vttButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22>VTT</a> ";
+                            pixiButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../pixi/"+ sceneResponse.short_id + "\x22>Pixi</a> ";
                         // }
                         // }
                         if (sceneResponse.sceneShareWithSubscribers) {
@@ -3167,17 +3127,17 @@ landing_router.get('/:_id', function (req, res) {
                         //         "<a href=\x22/webxr/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebXR</a>"+
                         //         "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/" +  shuffledArray[i].sceneKey + 
                         //         "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Quest</a>";
-                        let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22> A-Frame </a>"+
-                        "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22> Send to Quest </a>";
-                        let picLink = "<a href=\x22../webxr/"+ sceneResponse.short_id + "\x22>";
+                        let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../aframe/"+ sceneResponse.short_id + "\x22> A-Frame </a>"+
+                        "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/aframe/"+ sceneResponse.short_id + "\x22> Send to Quest </a>";
+                        let picLink = "<a href=\x22../aframe/"+ sceneResponse.short_id + "\x22>";
                         if (sceneResponse.sceneEnabledClientTypes != undefined) {
                             if (sceneResponse.sceneEnabledClientTypes.aframeWeb == false) {
                                 platformButtons = "";
                                 picLink = "";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.pixiWeb == true) {
-                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../vtt/"+ sceneResponse.short_id + "\x22> Pixi </a>" + platformButtons;
-                                picLink = "<a href=\x22../vtt/"+ sceneResponse.short_id + "\x22>";
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../pixi/"+ sceneResponse.short_id + "\x22> Pixi </a>" + platformButtons;
+                                picLink = "<a href=\x22../pixi/"+ sceneResponse.short_id + "\x22>";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.unityWeb == true) {
                                 platformButtons = platformButtons + "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22mx-auto btn btn-xl btn-primary float-right\x22>Unity Web</a>";
@@ -3238,7 +3198,7 @@ landing_router.get('/:_id', function (req, res) {
                         "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
                         "<meta charset='utf-8'/>" +
                         "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
-                        "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
+                        "<meta property='og:url' content='" + process.env.ROOT_HOST + "/landing/" + sceneResponse.short_id + "' /> " +
                         "<meta property='og:type' content='website' /> " +
                         // "<meta property='og:image' content='" + postcard1 + "' /> " +
                         "<meta property='og:image' content='" + postcard1_static + "' /> " +
@@ -3309,7 +3269,7 @@ landing_router.get('/:_id', function (req, res) {
                                     platformButtons +
                                     sceneEditButton + 
                                     "<a href=\x22https://smxr.net/qrcode/" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22mx-auto btn btn-xl btn-primary \x22> QR Code</a>"+
-                                    // vttButton +
+                                    // pixiButton +
                                     "</div>"+
                                     
                                     "<div class=\x22d-flex\x22>"+
@@ -3379,7 +3339,7 @@ landing_router.get('/:_id', function (req, res) {
     })();
         
 });
-///// END PRIMARY SERVERSIDE /webxr/ ROUTE //////////////////////
+///// END PRIMARY SERVERSIDE /aframe/ ROUTE //////////////////////
 
 
 export default landing_router;

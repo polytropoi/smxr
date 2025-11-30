@@ -3005,49 +3005,7 @@ maplibre_router.get('/:_id', function (req, res) {
                     //scenetype filters below...
 
                     console.log("sceneWebType: "+ sceneResponse.sceneWebType + " sceneTags " + sceneResponse.sceneTags); 
-                    ////////DEFAULT/AFRAME Scene type:
-                    if (sceneResponse.sceneWebType == null || sceneResponse.sceneWebType == undefined || (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "default") || 
-                        (sceneResponse.sceneWebType && sceneResponse.sceneWebType.toLowerCase() == "aframe")) { 
-
-                        // // let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
-                        // if (sceneResponse.sceneTags == null) {
-                        //     sceneResponse.sceneTags = "";
-                        // }
-                        // let xrExtras = "";
-                        // let hitCasterComponent = "";
-                        // if ((sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("ar parent")) || (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hit test"))) {
-                        //     xrExtras = "ar-hit-test"; //added to a-scene
-                        //     // ARScript = "<script type=\x22module\x22 src=\x22../main/src/component/ar_hit_caster.js\x22></script>"; 
-                        //     hitCasterComponent = "ar_hit_caster"; //added to ar_parent
-
-                        // }
-                        // if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("xr room physics")) {
-                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
-                        //     xrExtras = "xr_room_physics";
-                        //     geomapFeatures = "geomap=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
-                        //     xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
-                        // } else if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("real world meshing")) {
-                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/aframe_real_world_meshing_mod.js\x22></script>";
-                        //     xrExtras = " real_world_meshing_mod=\x22meshesEnabled: true;\x22";
-                        //     geomapFeatures = " " + xrExtras;
-                        //     xrmode = "xr-mode-ui=\x22XRMode: ar\x22";
-                        // } else {
-                        //     geomapFeatures = "geomap=\x22optionalFeatures: hit-test, dom-overlay; overlayElement: #dom-overlay;\x22 " + xrExtras + " "; 
-                        // }
-                        // if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("hand controls") || sceneResponse.sceneTags.toString().toLowerCase().includes("hand controllers")) {
-                        //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/src/component/hand_equip.js\x22></script>";
-                        // }
-                        // // arElements = "<div material=\x22shader:shadow; depthWrite:false; opacity:0.9;\x22 visible=\x22false\x22 geometry=\x22primitive:shadow-plane;\x22 shadow=\x22cast:false;receive:true;\x22"+
-                        // // "ar-shadow-helper=\x22target:#ar_parent;light:#dirlight;\x22></div>"+
-                        // // <a-light type="directional" light="castShadow:true;" position="1 1 1" intensity="1.57" shadow-camera-automatic="#ar_parent"></a-light>
-                        // arElements = "<a-plane follow-shadow=\x22#ar_parent\x22 material=\x22shader:shadow\x22 shadow=\x22cast:false;\x22 rotation=\x22-90 0 0\x22 width=\x222\x22 height=\x222\x22></a-plane>"+
-                        // "<div scale=\x221 1 1\x22 id=\x22ar_parent\x22 "+hitCasterComponent+">" +
-                        // arChildElements +
-                        // "</div>";
-                        // // "<div show-in-ar-mode visible=\x22false\x22 id=\x22hitCaster\x22 ar_hit_caster=\x22targetEl: #ar_parent\x22 gltf-model=\x22#reticle2\x22></div>\n";
-                        // handsTemplate = "<template id=\x22hand-template\x22><div><a-box scale=\x220.1 0.1 0.1\x22 visible=false></a-box></div></template>";
-                       
-                    } 
+      
                     if (sceneResponse.sceneWebType == "Model Viewer") {
                         // let extraScripts = "";
                         // let sky = "environment-image=\x22neutral\x22";

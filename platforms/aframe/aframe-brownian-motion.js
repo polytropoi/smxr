@@ -1,4 +1,4 @@
-import { settings } from "../../../connect/settings.js";
+import { settings } from "../../connect/settings.js";
 
 (function () {
 

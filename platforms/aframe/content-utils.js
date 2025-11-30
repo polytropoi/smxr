@@ -9,15 +9,15 @@ import * as THREE from 'three';
 import 'troika-text';
 
 
-import {  PauseIntervals, SetVideoEventsData, SetTimeKeysData, SetTimedEventsListenerMode } from "../../../connect/events.js";
-import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../../connect/dialogs.js";
+import {  PauseIntervals, SetVideoEventsData, SetTimeKeysData, SetTimedEventsListenerMode } from "../../connect/events.js";
+import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../connect/dialogs.js";
 // import {  } from "../../js/navigation.js";
 import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation, 
       userData, avatarName, sceneLocations, poiLocations, cloudMarkers, 
-      curveLocations, AvatarClicked, playerPosition, playerRotation } from "../../../connect/connect.js";
-import { DeleteLocalSceneData, InitIDB } from "../../../connect/indexedDb.js";
-import { pixelsPerMeterActual, settings } from "../../../connect/settings.js";
-import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat, LoadPrimaryAudioHowl } from '../../../connect/media.js';
+      curveLocations, AvatarClicked, playerPosition, playerRotation } from "../../connect/connect.js";
+import { DeleteLocalSceneData, InitIDB } from "../../connect/indexedDb.js";
+import { pixelsPerMeterActual, settings } from "../../connect/settings.js";
+import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat, LoadPrimaryAudioHowl } from '../../connect/media.js';
 
 var ua = window.navigator.userAgent;
 var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);

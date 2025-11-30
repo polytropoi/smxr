@@ -1,11 +1,11 @@
 
-import { settings  } from "../../../connect/settings.js";
+import { settings  } from "../../connect/settings.js";
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
-import { mouse } from "../../src/component/content-utils.js";
-import { localData, GoToNext, GoToPrevious, GetMatrixData, sceneLocations } from "../../../connect/connect.js";
-import { timedEventsListenerMode } from "../../../connect/events.js";
-import { SaveLocalData } from "../../../connect/indexedDb.js";
+import { mouse } from "./content-utils.js";
+import { localData, GoToNext, GoToPrevious, GetMatrixData, sceneLocations } from "../../connect/connect.js";
+import { timedEventsListenerMode } from "../../connect/events.js";
+import { SaveLocalData } from "../../connect/indexedDb.js";
 
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
