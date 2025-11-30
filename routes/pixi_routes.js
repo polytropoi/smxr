@@ -3466,13 +3466,13 @@ pixi_router.get('/:_id', function (req, res) {
                         // "</div>"+
                         // pictureGroupsData +
                                                 
-                        "<script type=\x22module\x22 src=\x22/vtt/addBackground.mjs\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/vtt/addElements.mjs\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/vtt/addOverlay.mjs\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/vtt/vtt_filters.mjs\x22></script>" +  
-                        "<script type=\x22module\x22 src=\x22/vtt/vtt_main.mjs\x22 ></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/addBackground.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/addElements.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/addOverlay.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/vtt_filters.mjs\x22></script>" +  
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/vtt_main.mjs\x22 ></script>" +
 
-                        "<script type=\x22module\x22 src=\x22/vtt/vtt_audioViz.mjs\x22 ></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/vtt_audioViz.mjs\x22 ></script>" +
                         "<div id=\x22audioVizContainer\x22></div>"+
                         // audioHtml +
                         // <i class=\x22fas fa-stopwatch \x22></i>

@@ -2,8 +2,8 @@ import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMat
 // import 'pixi.js/advanced-blend-modes';
 // import '../main/js/pixi/pixi.min.mjs/advanced-blend-modes'
 // import { CompositeTilemap } from 'pixi-tilemap';
-import { SetSelectedPosition } from '../connect/events.js';
-import { keydown, CreateNewLocation } from '../connect/dialogs.js';
+import { SetSelectedPosition } from '../../connect/events.js';
+import { keydown, CreateNewLocation } from '../../../connect/dialogs.js';
 import { viewport, sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, 
   viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter, spritesContainer,
   videoGroupsData} from './vtt_main.mjs';

@@ -3167,7 +3167,7 @@ landing_router.get('/:_id', function (req, res) {
                         //         "<a href=\x22/webxr/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebXR</a>"+
                         //         "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/" +  shuffledArray[i].sceneKey + 
                         //         "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Quest</a>";
-                        let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22> WebXR </a>"+
+                        let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22> A-Frame </a>"+
                         "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22> Send to Quest </a>";
                         let picLink = "<a href=\x22../webxr/"+ sceneResponse.short_id + "\x22>";
                         if (sceneResponse.sceneEnabledClientTypes != undefined) {

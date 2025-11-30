@@ -1,8 +1,8 @@
 import { Assets, Graphics, Container, Text } from 'pixi';
-import { eventEl } from '../connect/events.js';
+import { eventEl } from '../../../connect/events.js';
 // import AudioMotionAnalyzer from 'https://cdn.skypack.dev/audiomotion-analyzer?min';
-import AudioMotionAnalyzer from '../main/js/audioMotion-analyzer.js';
-import { primaryAudioElement } from '../connect/media.js';
+import AudioMotionAnalyzer from '../../../main/js/audioMotion-analyzer.js';
+import { primaryAudioElement } from '../../../connect/media.js';
 
 import { Select } from '@pixi/ui';
 import { app} from './vtt_main.mjs';

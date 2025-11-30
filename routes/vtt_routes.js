@@ -347,16 +347,16 @@ vtt_router.get('/:_id', function (req, res) {
 
     // let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
-    //                     "\x22pixi\x22: \x22../main/js/pixi/pixi.min.mjs?v=1\x22,"+  //ok, then
-    //                     "\x22advanced-blend-modes\x22: \x22../main/js/pixi/pixi.min.mjs/advanced-blend-modes\x22,"+
+    //                     "\x22pixi\x22: \x22../platforms/pixi/pixi.min.mjs?v=1\x22,"+  //ok, then
+    //                     "\x22advanced-blend-modes\x22: \x22../platforms/pixi/pixi.min.mjs/advanced-blend-modes\x22,"+
     //                     // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/dist/pixi_viewport.min.js\x22"+
-    //                         // "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
+    //                         // "\x22pixi-viewport\x22: \x22../platforms/pixi/viewport.min.mjs\x22,"+
                         
-    //                     "\x22pixi-contstants\x22: \x22../main/js/pixi/pixi.constants.min.mjs\x22,"+
-    //                     "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
-    //                     "\x22@pixi/ui\x22: \x22../main/js/pixi/pixi.ui.mjs\x22,"+
-    //                     "\x22@pixi/filters\x22: \x22../main/js/pixi/pixi-filters.mjs\x22,"+
-    //                     "\x22@pixi/layout\x22: \x22../main/js/pixi/layout.min.mjs\x22"+
+    //                     "\x22pixi-contstants\x22: \x22../platforms/pixi/pixi.constants.min.mjs\x22,"+
+    //                     "\x22pixi-viewport\x22: \x22../platforms/pixi/viewport.min.mjs\x22,"+
+    //                     "\x22@pixi/ui\x22: \x22../platforms/pixi/pixi.ui.mjs\x22,"+
+    //                     "\x22@pixi/filters\x22: \x22../platforms/pixi/pixi-filters.mjs\x22,"+
+    //                     "\x22@pixi/layout\x22: \x22../platforms/pixi/layout.min.mjs\x22"+
 
     //                     // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22"+
                         
@@ -740,7 +740,7 @@ vtt_router.get('/:_id', function (req, res) {
     //                     }
     //                 }
     //                 if (sceneResponse.sceneLocations[i].markerType == "video") {
-    //                     hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>";//v 1.0.6 
+    //                     hlsScript = "<script src=\x22../platforms/hls.min.js\x22></script>";//v 1.0.6 
     //                     videoLocation = sceneResponse.sceneLocations[i].x + " " + sceneResponse.sceneLocations[i].y + " " + zFix;
     //                     if (sceneResponse.sceneLocations[i].eulerx != undefined && sceneResponse.sceneLocations[i].eulerx != undefined && sceneResponse.sceneLocations[i].eulerx != undefined) {
     //                         videoRotation = sceneResponse.sceneLocations[i].eulerx + " " + sceneResponse.sceneLocations[i].eulery + " " + sceneResponse.sceneLocations[i].eulerz;
@@ -2224,7 +2224,7 @@ vtt_router.get('/:_id', function (req, res) {
     //             sceneTriggerVolume = sceneResponse.sceneTriggerVolume;
     //         }
     //         if (hasSynth) {
-    //             synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script src=\x22../main/js/synth.js\x22></script>";
+    //             synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script src=\x22../platforms/synth.js\x22></script>";
     //         }
     //         if (hasPrimaryAudio) {
     //             if (primary_mp3url.length > 8) {
@@ -2380,7 +2380,7 @@ vtt_router.get('/:_id', function (req, res) {
     //             //         vProps.videoTitle = video_items[0].title;
                     
     //             //         videoEntity = "<a-sphere id=\x22primary_video\x22 shadow=\x22receive: false\x22 class=\x22activeObjexGrab activeObjexRay\x22 scale=\x22-50 -50 50\x22 vid_materials_embed=\x22id:"+vProps.id+"; isSkybox: true;\x22 play-on-vrdisplayactivate-or-enter-vr crossOrigin=\x22anonymous\x22 rotation=\x220 180 0\x22 material=\x22shader: flat;\x22></a-sphere>";
-    //             //         hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>";
+    //             //         hlsScript = "<script src=\x22../platforms/hls.min.js\x22></script>";
     //             //     } else {
     //             //         videosphereAsset = "<video id=\x22videosphere\x22 autoplay loop crossOrigin=\x22anonymous\x22 src=\x22" + vidUrl + "\x22></video>";
     //             //         videoEntity = "<a-videosphere play-on-window-click play-on-vrdisplayactivate-or-enter-vr crossOrigin=\x22anonymous\x22 src=\x22#videosphere\x22 rotation=\x220 180 0\x22 material=\x22shader: flat;\x22></a-videosphere>";
@@ -2450,7 +2450,7 @@ vtt_router.get('/:_id', function (req, res) {
     //             } else {
     //                 videoGroupsEntity = "<a-entity video_groups_data id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></a-entity>"; 
     //             }
-    //             hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>"; //v 1.0.6 client hls player ref
+    //             hlsScript = "<script src=\x22../platforms/hls.min.js\x22></script>"; //v 1.0.6 client hls player ref
                
     //         }
             
@@ -3031,7 +3031,7 @@ vtt_router.get('/:_id', function (req, res) {
 
     //                     // }
     //                     // if (sceneResponse.sceneTags && sceneResponse.sceneTags.toString().toLowerCase().includes("xr room physics")) {
-    //                     //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../main/js/xr-room-physics.min.js\x22></script>";
+    //                     //     meshUtilsScript = meshUtilsScript + "<script type=\x22module\x22 src=\x22../platforms/xr-room-physics.min.js\x22></script>";
     //                     //     xrExtras = "xr_room_physics";
     //                     //     webxrFeatures = "webxr=\x22requiredFeatures: plane-detection,mesh-detection,local-floor; optionalFeatures: hit-test;\x22 " + xrExtras + " "; 
     //                     //     xrmode = "xr-mode-ui=\x22XRMode: ar\x22";

@@ -1,13 +1,13 @@
 import { Assets, Graphics, Container, Text } from 'pixi';
 
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
-import { selectedPosition, eventEl } from '../connect/events.js';
-import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../connect/dialogs.js';
-import { localData, CreateLocationAlt } from '../connect/connect.js';
+import { selectedPosition, eventEl } from '../../../connect/events.js';
+import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../../../connect/dialogs.js';
+import { localData, CreateLocationAlt } from '../../../connect/connect.js';
 
 // import { dragTarget, onDragStart, onDragMove, onDragEnd } from './addElements.mjs';
 import { app, viewport, hasBgMap } from './vtt_main.mjs';
-import { SaveLocalData } from '../connect/indexedDb.js';
+import { SaveLocalData } from '../../../connect/indexedDb.js';
 
 
   let dragTarget = null;

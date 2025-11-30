@@ -9,16 +9,16 @@ import { addText, addPlayerProfileText, addEventText } from './addText.mjs';
 import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './addElements.mjs';
 import { addDisplacementEffect } from './vtt_filters.mjs';
 import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
-import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../connect/vtt.js';
-import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../connect/media.js';
-import { settings, profile, pixelsPerMeterActual } from '../connect/settings.js';
-import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData, SetSelectedPosition} from "../../connect/events.js";
+import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../../../connect/vtt.js';
+import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
+import { settings, profile, pixelsPerMeterActual } from '../../../connect/settings.js';
+import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData, SetSelectedPosition} from "../../../connect/events.js";
 // import { keydown, CreateNewLocation } from '../connect/dialogs.js';
 import { addButtons, addPlayButton, addSimplePlayButton } from './addButtons.mjs';
 
 import { LoadLocations, AddLocation, locationTokenContainer } from './vtt_locations.mjs';
-import { SetTimeKeysData, eventEl } from '../connect/events.js';
-import { poiLocations } from '../connect/connect.js';
+import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
+import { poiLocations } from '../../../connect/connect.js';
 // import { keydown } from '../connect/dialogs.js';
 import { addAudioVizSelect } from './vtt_audioViz.mjs';
 
@@ -311,8 +311,8 @@ async function preload() {
     { alias: 'background', src: backgroundURL, crossOrigin: 'anonymous' },
     { alias: 'backgroundVideo', src: backgroundVideoURL, crossOrigin: 'anonymous' },
     { alias: 'map', src: mappicURL, crossOrigin: 'anonymous' },
-    { alias: 'overlay', src: '/vtt/files/wave_overlay.png' },
-    { alias: 'displacement', src: '/vtt/files/displacement_map.png' }
+    { alias: 'overlay', src: '/platforms/pixi/files/wave_overlay.png' },
+    { alias: 'displacement', src: '/platforms/pixi/files/displacement_map.png' }
   ];
 
   if (spritesData && spritesData.length) { //must flex to +++

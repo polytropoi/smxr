@@ -1,20 +1,14 @@
 
 
 import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLocalPlayerState } from "../connect/indexedDb.js";
-// import { matrixClient } from "../connect/matrix.js";
-// import { youtubePlayer, youtubeIsPlaying, primaryAudioEl, mouse } from "../../main/src/component/content-utils.js";
-// import { youtubePlayer, youtubeIsPlaying } from "content-utils"; //move to ?
+
 
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "./dialogs.js";
 import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition, MapUpdate } from "../connect/events.js";
-// import { SetTimeKeysData } from "./landing.js";
+
 
 import { settings, profile, pixelsPerMeterActual } from "../connect/settings.js";
-// import { selectedPosition } from "../vtt/vtt_main.mjs";
-// import { LoadPrimaryAudioHowl } from "./media.js";
-// import { playerPosition, playerRotation } from "../main/js/navigation.js";
-// import { profileLoaded } from "../connect/vtt.js";
-// import { profileLoaded } from "../vtt/vtt_main.mjs"; //pixi fu here!@
+
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");

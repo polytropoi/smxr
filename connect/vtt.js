@@ -1,10 +1,10 @@
 //loaded with landing pages, instead of connect.js, or landing.js (w/out aframe/three, with pixi refs)
 
-import { GoWithIt, GoToMapLocation } from "../vtt/vtt_main.mjs"; //pixi fu here!@
+import { GoWithIt, GoToMapLocation } from "../platforms/pixi/vtt_main.mjs"; //pixi fu here!@
 
-import {settings, profile} from "../../connect/settings.js";
+import {settings, profile} from "./settings.js";
 
-import {localData, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "../../connect/connect.js";
+import {localData, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "./connect.js";
 
 
 

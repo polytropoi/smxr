@@ -69,8 +69,8 @@ function generateSuccessHTMLOutput(response) {
         }
 
         buttons = "<a href=\x22/landing/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>"+
-                  "<a href=\x22/webxr/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebXR</a>"+
-                  "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/" +  shuffledArray[i].sceneKey + 
+                  "<a href=\x22/aframe/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>A-Frame</a>"+
+                  "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/aframe/" +  shuffledArray[i].sceneKey + 
                   "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Quest</a>";
         
         if (shuffledArray[i].sceneEnabledClientTypes != undefined) {
@@ -78,7 +78,7 @@ function generateSuccessHTMLOutput(response) {
             buttons = "<a href=\x22/landing/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>";
           }
           if (shuffledArray[i].sceneEnabledClientTypes.pixiWeb == true) {
-            buttons = buttons + "<a href=\x22/vtt/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Pixi</a>";
+            buttons = buttons + "<a href=\x22/pixi/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Pixi</a>";
           }
           if (shuffledArray[i].sceneEnabledClientTypes.unityWeb == true) {
             buttons = buttons + "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Unity Web</a>";
@@ -152,7 +152,7 @@ function showScenes(response) {
               "<div class=\x22d-flex justify-content-between align-items-center\x22>"+
                 "<div class=\x22btn-group\x22>"+
                   "<a href=\x22/landing/" +  arr[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>"+
-                  "<a href=\x22/webxr/" +  arr[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebXR</a>"+
+                  "<a href=\x22/aframe/" +  arr[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>A-Frame</a>"+
                   "<a href=\x22https://smxr.net/qrcode/" +  arr[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>QR Code</a>"+
                 "</div>"+
                 // "<small class=\x22text-body-secondary\x22>9 mins</small>"+

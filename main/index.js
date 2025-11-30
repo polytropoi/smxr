@@ -13415,8 +13415,8 @@ function getAllPeople() {
                     "<div class=\x22card-header py-3 d-flex flex-row align-items-center justify-content-between\x22>" +
                         "<h6 class=\x22m-0 font-weight-bold text-primary\x22>Scene Details - "+ sceneTitle +" | _id: "+ response.data._id + " | short_id: "+ response.data.short_id +
                         " | <a target=\x22_blank\x22 href=\x22../landing/"+ response.data.short_id +"\x22>Landing Link</a>" +  
-                        " | <a target=\x22_blank\x22 href=\x22../vtt/"+ response.data.short_id +"\x22>VTT Link</a>" +                       
-                        " | <a target=\x22_blank\x22 href=\x22../webxr/"+ response.data.short_id +"\x22>WebXR Link</a>" +
+                        " | <a target=\x22_blank\x22 href=\x22../pixi/"+ response.data.short_id +"\x22>Pixi Link</a>" +                       
+                        " | <a target=\x22_blank\x22 href=\x22../aframe/"+ response.data.short_id +"\x22>A-Frame Link</a>" +
                         " | <a target=\x22_blank\x22 href=\x22../unity/"+ response.data.short_id +"\x22>Unity Link</a>" +
                         // " | <a target=\x22_blank\x22 href=\x22http://smxr.net/index.html?scene="+ response.data.short_id +"\x22>Unity Web Link</a>" +
                         " | <a target=\x22_blank\x22 href=\x22servicemedia://scene?"+ response.data.short_id +"\x22>App Link</a></h6>" +
@@ -13532,16 +13532,7 @@ function getAllPeople() {
                             "</div>" +
                             "<div class=\x22col form-group col-md-6\x22>" +
                                 sceneButtons +
-                                // "<label for=\x22sceneLinks\x22>Scene Links</label><br>" + //SceneLinks 
-                                // "<div class=\x22input-group\x22>" +
-                                //     "<div class=\x22input-group-prepend\x22>" +
-                                //     "<a href=\x22#\x22 class=\x22btn input-group-text\x22 id=\x22addSceneLinkButton\x22>+</a>" +
-                                //     "</div>" +
-                                //     "<input id=\x22addSceneLinkInput\x22 type=\x22text\x22 class=\x22form-control\x22 placeholder=\x22Add Scene Code or Title\x22 aria-label=\x22Input group example\x22 aria-describedby=\x22x22addSceneLinks\x22>" +
-                                //     "<div class=\x22float-right\x22 id=\x22sceneLinkDisplay\x22>" +
-                                        
-                                //     "</div>" +
-                                // "</div>" +
+                         
                             "</div>" +
                             "<div class=\x22col form-group col-md-6\x22>" +
                                 "<label for=\x22sceneTags\x22>Tags</label><br>" + //Tags
@@ -13604,79 +13595,6 @@ function getAllPeople() {
 
 
 
-
-                            //////////////////////////////////////////
-                            //  "<div class=\x22btn-group\x22 role=\x22group\x22 aria-label=\x22Basic checkbox toggle button group\x22 data-toggle=\x22buttons\x22></div>"+
-                                
-                            //         "<input class=\x22btn-check\x22 type=\x22checkbox\x22  id=\x22sceneAframeOK\x22 autocomplete=\x22off\x22>"+
-                            //         "<label class=\x22btn btn-outline-primary\x22 for=\x22sceneAframeOK\x22>AFrame WebXR</label>" + 
-                                    
-                                     
-                            //         "<input class=\x22btn-check\x22 type=\x22checkbox\x22  id=\x22sceneVTTOK\x22 autocomplete=\x22off\x22>"+
-                            //         "<label class=\x22btn btn-outline-primary\x22 for=\x22sceneVTTOK\x22>Pixi VTT Web</label>" +
-                                     
-                            //         "<input class=\x22btn-check\x22 type=\x22checkbox\x22  id=\x22sceneBabylonOK\x22 autocomplete=\x22off\x22>"+
-                            //         "<label class=\x22btn btn-outline-primary\x22 for=\x22sceneBabylonOK\x22>Babylon Web</label>" +
-                                    
-                            //         "<input class=\x22btn-check\x22 type=\x22checkbox\x22  id=\x22sceneThreeOK\x22 autocomplete=\x22off\x22>"+
-                            //         "<label class=\x22btn btn-outline-primary\x22 for=\x22sceneThreeOK\x22>THREE Web</label>" + 
-                            //  "</div>"+
-
-                            //////////////////////////////////////////////////////
-
-                            // "<div class=\x22col form-group col-md-1\x22>" +
-                            // "<label>Enabled client types:</label><br><br>" + //message to include in sending
-                            //  "</div>" +
-
-
-
-
-                            // "</div>" +
-                                // "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneAframeOK\x22>AFrame WebXR</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneAframeOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                // "</div>" +
-                                // "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneVTTOK\x22>Pixi VTT Web</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneVTTOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                // "</div>" +
-
-                                //  "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneUnityWebOK\x22>Unity Web</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityWebOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                // "</div>" +
-
-                                // "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneBabylonOK\x22>Babylon Web</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneBabylonOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                // "</div>" +
-                                // "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneThreeOK\x22>THREE Web</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneThreeOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                // "</div>" +
-                               
-                                
-                                // "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneUnityIosOK\x22>Unity iOS</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityIosOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                
-                                // "</div>" +
-                                // "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneUnityAndroidOK\x22>Unity Android</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityAndroidOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                // "</div>" +
-                                // "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneUnityWindowsOK\x22>Unity Windows</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityWindowsOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                // "</div>" +
-                                // "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneUnityMacOK\x22>Unity MacOS</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityMacOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                // "</div>" +
-                                // "<div class=\x22col form-group col-md-1\x22>" +
-                                //     "<div class=\x22\x22><label for=\x22sceneUnityLinuxOK\x22>Unity Linux</label><br>" + 
-                                //     "<input class=\x22float-right\x22 type=\x22checkbox\x22  id=\x22sceneUnityLinuxOK\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
-                                // "</div>" +
                             "</div>" +
 
                             "<hr/>" +
@@ -17946,8 +17864,8 @@ function getAllPeople() {
             "<button class=\x22btn btn-sm\x22 onclick=\x22CloneScene('" + arr[i]._id + "', '" + arr[i].short_id + "')\x22><i class=\x22far fa-clone\x22></i></button></td>" +
             "<td><a href=\x22index.html?type=scene&iid=" + arr[i]._id + "\x22 target=\x22_blank\x22>Edit" + 
             "</a> | <a href=\x22/landing/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Landing" +
-            "</a> | <a href=\x22/vtt/" + arr[i].short_id + "\x22 target=\x22_blank\x22>VTT" +  
-            "</a> | <a href=\x22/webxr/" + arr[i].short_id + "\x22 target=\x22_blank\x22>WebXR" + 
+            "</a> | <a href=\x22/pixi/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Pixi" +  
+            "</a> | <a href=\x22/aframe/" + arr[i].short_id + "\x22 target=\x22_blank\x22>A-Frame" + 
             "</a> | <a href=\x22/unity/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Unity</a><br>"  + arr[i].short_id + "</td>" +
             "<td>" + arr[i].sceneStickyness + "</td>" +
             "<td>" + arr[i].sceneShareWithPublic + "</td>" +
