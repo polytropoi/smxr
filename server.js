@@ -2227,7 +2227,7 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
 
 
     if (allEqual(itemsExtensions) && (itemsExtensions[0].toLowerCase() == ".usdz" || itemsExtensions[0].toLowerCase() == ".reality" || 
-    itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".spz" || itemsExtensions[0].toLowerCase() == ".ply" || itemsExtensions[0].toLowerCase() == ".splat" || itemsExtensions[0].toLowerCase() == ".ksplat" || 
+    itemsExtensions[0].toLowerCase() == ".glb" || itemsExtensions[0].toLowerCase() == ".zip" || itemsExtensions[0].toLowerCase() == ".spz" || itemsExtensions[0].toLowerCase() == ".ply" || itemsExtensions[0].toLowerCase() == ".splat" || itemsExtensions[0].toLowerCase() == ".ksplat" || 
     itemsExtensions[0].toLowerCase() == ".webp" ||  itemsExtensions[0].toLowerCase() == ".jpg" || itemsExtensions[0].toLowerCase() == ".jp2" || itemsExtensions[0].toLowerCase() == ".jpeg" || itemsExtensions[0].toLowerCase() == ".png" ||
      itemsExtensions[0].toLowerCase() == ".aif" || itemsExtensions[0].toLowerCase() == ".aiff" || itemsExtensions[0].toLowerCase() == ".ogg" || itemsExtensions[0].toLowerCase() == ".wav" || itemsExtensions[0].toLowerCase() == ".mp3" || 
      itemsExtensions[0].toLowerCase() == ".mp4" || itemsExtensions[0].toLowerCase() == ".webm" || itemsExtensions[0].toLowerCase() == ".mov" || itemsExtensions[0].toLowerCase() == ".mkv")) { //need to think how to flex, and use contenttype
@@ -2247,7 +2247,8 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
             contentType = "video";
         } else if (groupType.toLowerCase()  == ".glb" || groupType.toLowerCase()  == ".usdz") {
             contentType = "model";
-        } else if (groupType.toLowerCase()  == ".ply" || groupType.toLowerCase()  == ".spz" || groupType.toLowerCase()  == ".splat" || groupType.toLowerCase()  == ".ksplat") {
+            ///hrm, add zip to splat?!?!? sog needs that...
+        } else if (groupType.toLowerCase()  == ".zip" || groupType.toLowerCase()  == ".ply" || groupType.toLowerCase()  == ".spz" || groupType.toLowerCase()  == ".splat" || groupType.toLowerCase()  == ".ksplat") {
             contentType = "splat";
         } else {
             console.log("invalid contentType!");
@@ -5475,7 +5476,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                     const updated = await RunDataQuery("scenes","updateOne", query, updoc);
                                     console.log("updated sceneModels with " + JSON.stringify(updoc) + " " + JSON.stringify(updated));
                                 
-                                } else if (getExtension(req.body.localFiles[file].name) == ".ply" || getExtension(req.body.localFiles[file].name) == ".spz" ||
+                                } else if (getExtension(req.body.localFiles[file].name) == ".zip" || getExtension(req.body.localFiles[file].name) == ".ply" || getExtension(req.body.localFiles[file].name) == ".spz" ||
                                              getExtension(req.body.localFiles[file].name) == ".splat" || getExtension(req.body.localFiles[file].name) == ".ksplat"  ) { //should sniff the thing instead, but...
                                     let awskey = 'users/' + req.session.user._id.toString() + '/splat/' + timestamp + '_' + req.body.localFiles[file].name;
                                     let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
