@@ -1578,7 +1578,7 @@ function ReturnAudioVizModeSelectors (selectedType) {
       .enumerateDevices()
       .then((devices) => {
         devices.forEach((device) => {
-          console.log("device " + device.label + `${device.kind}: ${device.label} id = ${device.deviceId}`);
+          // console.log("device " + device.label + `${device.kind}: ${device.label} id = ${device.deviceId}`);
           if (device.kind == "audioinput") {
             if (audioDeviceId == device.deviceId) {
               audioInputDevices = audioInputDevices + "<option value=\x22"+device.deviceId+"\x22 selected>" + device.label + "</option>";

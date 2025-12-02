@@ -558,7 +558,7 @@ function UpdateSceneLocations () { //unused?
 
 export function SetSceneLocations (sceneLocs) { //e.g. from vtt/non aframe, not set in content-utils
    sceneLocations.locations = sceneLocs;
-   console.log(JSON.stringify(sceneLocations));
+   // console.log(JSON.stringify(sceneLocations));
 }
 
 export function getExtension(filename) {

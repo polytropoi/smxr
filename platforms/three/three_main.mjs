@@ -11,7 +11,11 @@ import * as THREE from 'three/webgpu';
 			import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 			import { settings, profile } from '../../../connect/settings.js';
 			import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
-			import { poiLocations } from '../../../connect/connect.js';
+			import { SetSceneLocations } from '../../../connect/connect.js';
+
+
+			let locationData;
+			let modelsData;
 
 			let camera, scene, renderer;
 			let mixer, objects, clock;
@@ -19,10 +23,33 @@ import * as THREE from 'three/webgpu';
 			let postProcessing;
 			let controls;
 
+  			eventEl.addEventListener('ready-event', init); //fired when settings are loaded..
+
+			// export function Ready() {
+			// 	init();
+			// }
+			// init();
+			
 
 
-init()
 			async function init() {
+
+
+				let locationDataEl = document.getElementById('locationData');
+				if (locationDataEl) {
+					const theLocationData = locationDataEl.getAttribute('data-locations');
+
+					locationData = JSON.parse(atob(theLocationData));
+					SetSceneLocations(locationData);
+					console.log("locationData " + JSON.stringify(locationData));
+
+				}
+				let modelsDataEl = document.getElementById('modelsData');
+				if (modelsDataEl) {
+					const theModelsData = modelsDataEl.getAttribute('data-models');
+					modelsData = JSON.parse(atob(theModelsData));
+					console.log("modelsData " + JSON.stringify(modelsData));
+				}
 
 				console.log("settings " + JSON.stringify(settings));
 
@@ -31,10 +58,10 @@ init()
 
 				scene = new THREE.Scene();
 				scene.fog = new THREE.Fog( 0x0487e2, 7, 25 );
-				scene.backgroundNode = normalWorld.y.mix( color( 0x8b72b0 ), color( 0x73114d ) );
+				scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
 				camera.lookAt( 0, 1, 0 );
 
-				const sunLight = new THREE.DirectionalLight( 0x73114d, 5 );
+				const sunLight = new THREE.DirectionalLight( settings.sceneColor2, 5 );
 				sunLight.castShadow = true;
 				sunLight.shadow.camera.near = .1;
 				sunLight.shadow.camera.far = 5;
@@ -47,8 +74,8 @@ init()
 				sunLight.shadow.bias = - 0.001;
 				sunLight.position.set( .5, 3, .5 );
 
-				const waterAmbientLight = new THREE.HemisphereLight( 0x8b72b0, 0x73114d, 5 );
-				const skyAmbientLight = new THREE.HemisphereLight( 0x73114d, 0, 1 );
+				const waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, 5 );
+				const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, 0, 1 );
 
 				scene.add( sunLight );
 				scene.add( skyAmbientLight );
@@ -81,7 +108,7 @@ init()
 				iceDiffuse.wrapT = THREE.RepeatWrapping;
 				iceDiffuse.colorSpace = THREE.NoColorSpace;
 
-				const iceColorNode = triplanarTexture( texture( iceDiffuse ) ).add( color( 0x6f5e8a ) ).mul( .8 );
+				const iceColorNode = triplanarTexture( texture( iceDiffuse ) ).add( color( settings.sceneColor4 ) ).mul( .8 );
 
 				const geometry = new THREE.IcosahedronGeometry( 1, 3 );
 				const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
@@ -121,7 +148,7 @@ init()
 				const waterLayer1 = mx_worley_noise_float( floorUV.mul( 2 ).add( timer ) );
 
 				const waterIntensity = waterLayer0.mul( waterLayer1 );
-				const waterColor = waterIntensity.mul( 1.4 ).mix( color(  0x367363 ), color( 0x365573 ) );
+				const waterColor = waterIntensity.mul( 1.4 ).mix( color(  settings.sceneColor3 ), color( settings.sceneColor4 ) );
 
 				// linearDepth() returns the linear depth of the mesh
 				const depth = linearDepth();

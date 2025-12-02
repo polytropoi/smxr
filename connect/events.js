@@ -8,9 +8,10 @@ let pauseLoops = false;
 let loopIntervals = [];
 let eventTriggersSet = false;
 
-let timed_event = new Event("timed-event");
-let map_update = new Event("map-update");
-let audio_viz = new Event("audio-viz");
+let timed_event = new Event("timed-event"); //good old timedEvents from db
+let map_update = new Event("map-update"); //as in vtt map
+let audio_viz = new Event("audio-viz"); //calling all audio actives
+let ready_event = new Event("ready-event"); //settings and data ready, init the things
 
 export let eventEl = document.createElement("div");
 eventEl.id = "eventEl";
@@ -22,6 +23,11 @@ export let timedEventsListenerMode = "";
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
 
 
+
+export function SettingsLoaded() {
+   console.log("settings loaded READY EVENT");
+      eventEl.dispatchEvent(ready_event);
+}
 
 export function SetSelectedPosition(tilename, xpos, ypos) { //bit for aframe
    selectedPosition.x = parseFloat(xpos).toFixed(2);
