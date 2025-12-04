@@ -2381,7 +2381,8 @@ aframe_router.get('/:_id', function (req, res) {
                             arChildElements = arChildElements + "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
                         } else {
                             console.log("TRYNA COOK A CANNNED NAVMESH");
-                            navmeshEntity = "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
+
+                            navmeshEntity = "<a-entity id=\x22nav-mesh\x22 position=\x22"+locMdl.x+" "+locMdl.y+" "+locMdl.z+"\x22 rotation=\x22-90 0 0\x22 nav-mesh nav_mesh_controller=\x22useDefault: true; xscale: "+locMdl.xscale+"; zscale: "+locMdl.zscale+";\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
                         }
                     }
                     if ((locMdl.model == null || locMdl.modelID == "none") && locMdl.markerType == "surface") {
@@ -2396,7 +2397,7 @@ aframe_router.get('/:_id', function (req, res) {
                             // console.log("TRYNA COOK A CANNED SURFACE");
                             surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
                             if (locMdl.locationTags.includes("physics")) {
-                                surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22physics: true\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; 
+                                surfaceEntity = "<a-entity class=\x22surface\x22 id=\x22scatterSurface\x22 scatter-surface-default=\x22physics: true; xscale: "+locMdl.xscale+"; yscale: "+locMdl.yscale+";\x22 rotation=\x22-90 0 0\x22 visible=\x22"+visible+"\x22></a-entity>"; 
                             }
                         }
                     } 

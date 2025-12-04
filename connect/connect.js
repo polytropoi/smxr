@@ -491,15 +491,17 @@ export function InitConnect() {
 // }
 
 export function SetPlayerToLastPosition () {
-   if (player && profile.history && profile.history.init_scene && profile.history.init_scene[room] && profile.history.init_scene[room].lastPosition) {         
-      player.setAttribute("position", profile.history.init_scene[room].lastPosition);
-      player.setAttribute("rotation", profile.history.init_scene[room].lastRotation);
-      UpdatePlayerAvatars();
-      userData.avatarName = profile.avatarName;
-      // userData = profile;
-      userData.userName = profile.avatarName;
-   } else {
-      console.log("last position not found!");
+   if (settings && settings.sceneTags && settings.sceneTags.includes("last position")) {
+      if (player && profile.history && profile.history.init_scene && profile.history.init_scene[room] && profile.history.init_scene[room].lastPosition) {         
+         player.setAttribute("position", profile.history.init_scene[room].lastPosition);
+         player.setAttribute("rotation", profile.history.init_scene[room].lastRotation);
+         UpdatePlayerAvatars();
+         userData.avatarName = profile.avatarName;
+         // userData = profile;
+         userData.userName = profile.avatarName;
+      } else {
+         console.log("last position not found!");
+      }
    }
 }
 

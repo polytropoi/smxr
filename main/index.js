@@ -10,7 +10,8 @@
         Dashboard,
         Webcam,
         AwsS3
-      } from 'https://releases.transloadit.com/uppy/v4.13.2/uppy.min.mjs'  //mmm. copy locally
+    // } from 'https://releases.transloadit.com/uppy/v4.13.2/uppy.min.mjs'  //mmm. copy locally    
+      } from '../../main/vendor/uppy/uppy.min.mjs'  //mmm. copy locally
 
     // new Uppy().use(Dashboard, { inline: true, target: '#drag-drop-area' });
 

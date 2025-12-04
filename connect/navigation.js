@@ -1471,7 +1471,9 @@ AFRAME.registerComponent('nav_mesh_controller', {
 	schema:{
 		waypoints:{type:'array', default:[]},
 		debug: {default: false},
-		useDefault: {default: false}
+		useDefault: {default: false},
+		xscale: {default: 100},
+		zscale: {default: 100}
 	},
 	init: function() {
 		this.isReady = false;
@@ -1487,17 +1489,30 @@ AFRAME.registerComponent('nav_mesh_controller', {
 		// this.el.setAttribute
 		if (this.data.useDefault) {
 			// // let navmeshGeometry = new THREE.BoxGeometry( 100, .1, 100 ).toNonIndexed();
-			// let navmeshGeometry = new THREE.PlaneGeometry( 100, 100, 10, 10 );
+			let xscale = 100;
+			if (this.data.xscale == 1) {
+				xscale = 100;
+			} else {
+				xscale = this.data.xscale;
+			}
+			let zscale = 100;
+			if (this.data.zscale == 1) {
+				zscale = 100;
+			} else {
+				zscale = this.data.zscale;
+			}
+
+			let navmeshGeometry = new THREE.PlaneGeometry( xscale, zscale, 10, 10 );
 			// // navmeshGeometry.rotation.set(new THREE.Vector3( 0, 0, Math.PI / 2));
 			// // navmeshGeometry.rotateX(Math.PI / 2);
-			// const navmeshMaterial = new THREE.MeshLambertMaterial( { color: "orange", wireframe: false } );
-			// const navmesh = new THREE.Mesh( navmeshGeometry, navmeshMaterial );
-			// this.el.setObject3D('mesh', navmesh);
-			// // this.el.setAttribute("rotation", "90 0 0");
+			const navmeshMaterial = new THREE.MeshLambertMaterial( { color: "orange", wireframe: false } );
+			const navmesh = new THREE.Mesh( navmeshGeometry, navmeshMaterial );
+			this.el.setObject3D('mesh', navmesh);
+			// this.el.setAttribute("rotation", "90 0 0");
 			// this.mesh = this.el.getObject3D('mesh');
 			// this.mesh.rotation.z = Math.PI / 2;
 			// this.loadInit();
-			this.el.setAttribute("gltf-model", "#plane150");
+			// this.el.setAttribute("gltf-model", "#plane150");
 			// this.el.setAttribute("position", "0 .1 0");
 			if (settings.debug) {
 				this.el.setAttribute("material", {color: "purple", transparent: true, opacity: .5});
