@@ -18,8 +18,8 @@ import { ObjectId } from "mongodb";
 import { ReturnPresignedUrl } from "../connect/objectStore.js";
 import { group } from "console";
 
-unity_router.get("/test", function (req, res) {
-    res.send("OK!");
+unity_router.get("/:_id", function (req, res) { //host/unity/shortid like other routes...
+    res.redirect("https://servicemedia.net/unityweb/index.html?scene=" + req.params._id);
 });
 
 ///////////UNITY ROUTE

@@ -29,8 +29,6 @@ if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPO
     });
 }
 
-const nonLocalDomains = ["regalrooms.tv", "bishopstudiosaustin.com"]; //TODO you know what! (put this in sceneDomain object)
-
 function getExtension(filename) {
     if (filename) {
         console.log("tryna get extension of " + filename)
@@ -1105,109 +1103,7 @@ maplibre_router.get('/:_id', function (req, res) {
             if (!sceneResponse.sceneEnvironmentPreset && sceneResponse.scenegeomapEnvironment) {
                 sceneResponse.sceneEnvironmentPreset = sceneResponse.scenegeomapEnvironment; //the old setting is still out there!
             }
-            // if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) {
-
-                // geomapEnv = sceneResponse.sceneEnvironmentPreset;
-                // enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
-                // let ground = "ground: hills;";
-                // let dressing = "";
-                // let skycolor = "";
-                // let groundcolor = "";
-                // let groundcolor2 = "";
-                // let dressingcolor = "";
-                // let horizoncolor = "";
-                
-                // let fog = "";
-                // let tweakColors = "";
-                // let hasColorMods = false;
-                // //if any of the default colors have changed, use them
-                // if (sceneResponse.sceneColor1 != "#808080" || sceneResponse.sceneColor2 != "#808080" || sceneResponse.sceneColor3 != "#808080" || sceneResponse.sceneColor1 != "#808080") {
-                //     hasColorMods = true;
-                // }
-                // if (geomapEnv == "none") {
-                //     ground = "ground: none;"
-                // }
-
-                // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
-                //     dressing = "dressing: none;"
-                // }
-
-                // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('map')) {
-                //     hasBgMap = true;
-                // }
-                
-                // if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "none") {
-                //     ground = "ground: none;"
-                //     dressing = "dressing: none;"
-                // } else if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "flat") {
-                //     ground = "ground: flat; dressing: none;"
-                //     dressing = "dressing: none;"
-                // } else if  (sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.length > 3) {
-                //     ground = "ground: " + sceneResponse.sceneFloorplaneTexture.toLowerCase() +"; "; //needs refactor to...?
-                // }
-
-                // if (sceneResponse.sceneUseDynamicShadows) {
-                //     shadow = "shadow: true; shadowSize: 50;"
-                // } else {
-                //     shadow = " shadow: false ";
-                // }
-                
-                // if (sceneResponse.sceneTweakColors) {
-                //     // tweakColors = "mod-colors"; //need to animate
-                //     // envLighting = "lighting: none";
-                // }
-                
-                // if (!sceneResponse.sceneUseDynamicSky) {
-                //     envLighting = "lighting: none";
-                // }
-                
-                // if (sceneResponse.sceneUseSceneFog) {
-                //     let fogDistance = sceneResponse.sceneSkyRadius / 2 
-                //     fogSettings = "fog=\x22type: exponential; density:" +sceneResponse.sceneGlobalFogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
-                //     fog = "fog: " +sceneResponse.sceneGlobalFogDensity+ ";";
-                // } else {
-                //     fogSettings = "";
-                //     fog = "";
-                // }
-                
-                // if (hasColorMods && sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3 && sceneResponse.sceneColorizeSky) {
-                //     skycolor = "skyColor: " + sceneResponse.sceneColor1 + ";";
-                // }
-                
-                // if (hasColorMods && sceneResponse.sceneColor2 != null && sceneResponse.sceneColor2.length > 3 && sceneResponse.sceneColorizeSky) {  
-                //     horizoncolor = "horizonColor: " + sceneResponse.sceneColor2 + ";";
-                // } 
-                // if (hasColorMods && sceneResponse.sceneColor3 != null && sceneResponse.sceneColor3.length > 3) { 
-                //     groundcolor = "groundColor: " + sceneResponse.sceneColor3 + ";";
-                // }
-                // if (hasColorMods && sceneResponse.sceneColor4 != null && sceneResponse.sceneColor4.length > 3) {
-                //     dressingcolor = "dressingColor: " + sceneResponse.sceneColor4 + ";";
-                //     groundcolor2 = "groundColor2: " + sceneResponse.sceneColor4 + ";";
-                // }
-
-                // aframeEnvironment = "<div id=\x22enviroEl\x22 class=\x22groundMesh\x22 environment=\x22preset: "+geomapEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
-                // " "+envLighting+";\x22 hide-on-enter-ar "+tweakColors+"></div>";
-
-            // } else {
-            //     if (sceneResponse.sceneUseDynamicSky) {
-            //         // if (sceneResponse.sceneUseDynamicShadows) {
-            //         //     shadow = " light=\x22castShadow: true\x22 ";
-            //         // }
-
-            //         // if (sceneResponse.sceneSunVector) {
-            //         //     sunVector = sceneResponse.sceneSunVector;
-            //         // }
-            //         // if (sceneResponse.sceneSunIntensity) {
-            //         //     intensity = sceneResponse.sceneSunIntensity;
-            //         // }
-
-            //         // let skyRad = parseInt(sceneResponse.sceneSkyRadius) - (parseInt(sceneResponse.sceneSkyRadius) * .2);
-            //         // skySettings =  "<a-sky hide-on-enter-ar id=\x22skyEl\x22 color=\x22" + sceneResponse.sceneColor1 + "\x22 radius=\x22" + skyRad + "\x22 mod_sky=\x22enabled: true; color: "+sceneResponse.sceneColor1+";\x22></a-sky>";
-            //         // lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22"+sceneResponse.sceneColor1+"\x22 "+
-            //         // "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><div id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></div></a-light>" +
-            //         // "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
-            //     }
-            // }
+           
             sceneResponse.scenePostcards = sceneData.scenePostcards;
             if (sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3) {
                 //
@@ -1229,33 +1125,7 @@ maplibre_router.get('/:_id', function (req, res) {
                 //hrm..
                 
             }
-            // if (sceneResponse.sceneUseFloorPlane) {
-            //     // groundPlane = "<a-plane rotation='-90 0 0' visible=\x22false\x22 position='0 0 0' width='100' height='100' mod_physics=\x22type: static; model: collider;\x22 color=\x22" + sceneResponse.sceneColor2+ "\x22></a-plane>"; //deprecated for environment component
-            // }
-            // if (sceneResponse.sceneWater != null) {
-            //     // if (sceneResponse.sceneWater.name == "water2") {
-            //     //     ocean = "<a-plane position=\x220  "+sceneResponse.sceneWater.level+" 0\x22 width=\x22300\x22 height=\x22300\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22100\x22 segments-width=\x22100\x22 "+skyboxEnvMap+" material=\x22color: "+sceneResponse.sceneColor3+"; shader:makewaves; uMap: #water; repeat: 500 500;\x22></a-plane>";
-            //     //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2c.jpeg\x22 crossorigin=\x22anonymous\x22>";
-            //     // } else if (sceneResponse.sceneWater.name == "water1") {
-            //     //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2264\x22 segments-width=\x2264\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water2; repeat: 500 500; transparent: true\x22></a-plane>";
-            //     //     imageAssets = imageAssets + "<img id=\x22water2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2.png\x22 crossorigin=\x22anonymous\x22>";
-            //     // } else if (sceneResponse.sceneWater.name == "water3") {
-            //     //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2216\x22 segments-width=\x2216\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water; repeat: 50 50; transparent: false\x22></a-plane>";
-            //     //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/watertile3.png\x22 crossorigin=\x22anonymous\x22>";
-            //     // } else if (sceneResponse.sceneWater.name == "water4") {
-            //     //     ocean = "<a-ocean></a-ocean>";
-            //     // }
-            // }
-            // if (sceneResponse.sceneUseHeightmap != null && sceneResponse.sceneUseHeightmap) {
-            //     // terrain = "<a-plane class=\x22surface activeObjexRay\x22 position=\x220 -20 0\x22 width=\x22512\x22 height=\x22512\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22512\x22 segments-width=\x22512\x22 terrain-mangler></a-plane>";
-            // }
-            
-            // if (sceneResponse.sceneNextScene != null && sceneResponse.sceneNextScene != "") {
-            //     nextSceneLink = "href=\x22../geomap/" + sceneResponse.sceneNextScene + "\x22";
-            // }
-            // if (sceneResponse.scenePreviousScene != null && sceneResponse.scenePreviousScene != "") {
-            //     prevSceneLink = "href=\x22../" + sceneResponse.scenePreviousScene + "\x22";
-            // }
+         
             if (sceneResponse.sceneLoopPrimaryAudio) {
                 loopable = "loop: true";
             }
@@ -1299,22 +1169,7 @@ maplibre_router.get('/:_id', function (req, res) {
             ///////////////////// location "placeholders" used for "cloud markers" /////////////////////////////////
             if (locationPlaceholders.length > 0) {
                 for (let i = 0; i < locationPlaceholders.length; i++) {
-                    // if (hasBgMap && mapWidth && mapHeight && pixelsPerMeterActual && mapScale) {  ///////// if using 2d coord system, e.g. pixijs
-                    // if (hasBgMap) {
-                    //     console.log("!!!!!!!! gotsa background map!!!!!!!!!! modding locationData... " + mapWidth);
-                    //      if (locationPlaceholders[i].x < mapWidth / 2) {
-                    //         locationPlaceholders[i].x = (((mapWidth / 2) - locationPlaceholders[i].x) * mapScale) * -1; 
-                    //     } else {
-                    //         // locationPlaceholders[i].x = (mapWidth - locationPlaceholders[i].x) * mapScale;
-                    //         locationPlaceholders[i].x = (locationPlaceholders[i].x - (mapWidth / 2)) * mapScale;
-                    //     }
-                    //     // leave the y value as is, use for sorting in 2d mode
-                    //     if (locationPlaceholders[i].z < mapHeight / 2) {
-                    //         locationPlaceholders[i].z = (((mapHeight / 2) - locationPlaceholders[i].z) * mapScale) * -1;
-                    //     } else {
-                    //         locationPlaceholders[i].z = (locationPlaceholders[i].z - (mapHeight / 2)) * mapScale;
-                    //     }
-                    // }
+                    
                     //use the "cloud_marker" component for certain markertypes () TODO rename it to mod_location // nope
                     let scale = 1;
                     let rot = 0;
@@ -1341,23 +1196,9 @@ maplibre_router.get('/:_id', function (req, res) {
 
                     if (useArParent || (locationPlaceholders[i].tags && (locationPlaceholders[i].tags.includes("ar child") ||  locationPlaceholders[i].tags.includes("archild")))) { //used for hit test
                             
-                        // arChildElements = arChildElements + "<div data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
-                        // "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+xpos+"; ypos: "+ypos+"; zpos: "+zpos+";" +
-                        // "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
-                        // "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
-                        // "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
-                        // locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
-                        // locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
-                        // skyboxEnvMap+ " position=\x22"+xpos+" "+ypos+ " " +zpos+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></div>";
+                        
                     } else {
-                        // placeholderEntities = placeholderEntities + "<div data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
-                        // "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+xpos+"; ypos: "+ypos+"; zpos: "+zpos+";" +
-                        // "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
-                        // "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
-                        // "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
-                        // locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
-                        // locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
-                        // skyboxEnvMap+ " position=\x22"+xpos+" "+ypos+ " " +zpos+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></div>";
+                       
                     }
                 }
             }
@@ -2563,10 +2404,10 @@ maplibre_router.get('/:_id', function (req, res) {
                 const picture_item = await RunDataQuery("image_items", "findOne", pquery);
                 // postcards need a "static" host instead of signed URL (which times out), to be used in social posts
                 bucketFolder = sceneResponse.sceneDomain; //TODO use "public" bucket if set in process.ENV
-                if (nonLocalDomains.includes(bucketFolder)) { //TODO this should be a param of domain object // umm, what
-                    bucketFolder = "realitymangler.com";  //THIS! 
-                    console.log("NONLOCALDOMAIN WTF!");
-                }
+                // if (nonLocalDomains.includes(bucketFolder)) { //TODO this should be a param of domain object // umm, what
+                //     bucketFolder = "realitymangler.com";  //THIS! 
+                //     console.log("NONLOCALDOMAIN WTF!");
+                // }
                 if (picture_item && picture_item.filename) {
                     postcard1 = "https://" + process.env.PUBLIC_BUCKET_NAME + '/postcards/' + sceneResponse._id + '/'+ picture_item._id + ".standard." + picture_item.filename;
                     // postcard1 = await ReturnPresignedUrl(process.env.PUBLIC_BUCKET_NAME, 'postcards/' + sceneResponse.short_id + '/'+ 
@@ -2775,25 +2616,6 @@ maplibre_router.get('/:_id', function (req, res) {
                             console.log("picture_item.orientation " + picture_item);
                             if (picture_item.orientation != "equirectangular" && picture_item.orientation != "Equirectangular" && scatterPics) {  //what if linkType is undefined?
 
-                                // if (picture_item.orientation == "portrait" || picture_item.orientation == "Portrait") {
-                                //     imageEntities = imageEntities + "<div "+link+""+lookat+"  mod-materials=\x22index:"+
-                                //     index+"\x22 gltf-model=\x22#portrait_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</div>";
-                                //     modelAssets = modelAssets + "<div id=\x22portrait_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5c.glb\x22></div>\n";
-                                // } else if (picture_item.orientation == "square" || picture_item.orientation == "Square") {
-                                //     imageEntities = imageEntities + "<div "+link+""+lookat+"  mod-materials=\x22index:"+
-                                //     index+"\x22 gltf-model=\x22#square_panel\x22 scale=\x223 3 3\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</div>";
-                                // } else if (picture_item.orientation == "circle" || picture_item.orientation == "Circle") {
-                                //     imageEntities = imageEntities + "<div "+link+""+lookat+"  mod-materials=\x22index:"+
-                                //     index+"\x22 gltf-model=\x22#circle_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</div>";
-                                //     modelAssets = modelAssets + "<div id=\x22circle_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panelcircle1.glb\x22></div>\n";
-                                // } else {
-                                //     imageEntities = imageEntities + "<div "+link+""+lookat+"  mod-materials=\x22index:"+
-                                //     index+"\x22 gltf-model=\x22#landscape_panel\x22 material=\x22shader: flat; src: #smimage" + index + "; alphaTest: 0.5;\x22"+
-                                //     " position=\x22"+position+"\x22 rotation=\x22"+rotation+"\x22 visible='true'>"+caption+"</div>";
-                                // }
                             }
                         }
                     }
@@ -2919,23 +2741,7 @@ maplibre_router.get('/:_id', function (req, res) {
                     settings.hasBgMap = hasBgMap;
                     settings.mbid = process.env.maplibre_KEY;
                 
-                    // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
-                    //     settings.useXrRoomPhysics = true;
-                    // } else {
-                    //     settings.useXrRoomPhysics = false;
-                    // }
-                    // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("right hand blaster")) {
-                    //     settings.useRightHandBlaster = true;
-                    // }
-                    // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("left hand blaster")) {
-                    //     settings.useLeftHandBlaster = true;
-                    // }
-
-                    // if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("real world meshing")) {
-                    //     settings.useRealWorldMeshing = true;
-                    // } else {
-                    //     settings.useRealWorldMeshing = false;
-                    // } 
+                  
 
                     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("no mods")) {
                         settings.allowMods = false;
@@ -2973,27 +2779,10 @@ maplibre_router.get('/:_id', function (req, res) {
                         sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
                     }
 
-                    // let grabMix = "<a-mixin id=\x22grabmix\x22" + //mixin for grabbable objex
-                    //     "event-set__grab=\x22material.color: #FFEF4F\x22" +
-                    //     "event-set__grabend=\x22material.color: #F2E646\x22" +
-                    //     "event-set__hit=\x22material.color: #F2E646\x22" +
-                    //     "event-set__hitend=\x22material.color: #EF2D5E\x22" +
-                    //     "event-set__mousedown=\x22material.color: #FFEF4F\x22" +
-                    //     "event-set__mouseenter=\x22material.color: #F2E646\x22" +
-                    //     "event-set__mouseleave=\x22material.color: #EF2D5E\x22" +
-                    //     "event-set__mouseup=\x22material.color: #F2E646\x22" +
-                    //     "geometry=\x22primitive: box; height: 0.30; width: 0.30; depth: 0.30\x22" +
-                    //     "material=\x22color: #EF2D5E;\x22></a-mixin>";
+  
 
                     let playerAvatarTemplate = "";
-                    // if (sceneResponse.sceneWebType != undefined && (sceneResponse.sceneWebType.toLowerCase() == "aframe" || sceneResponse.sceneWebType.toLowerCase() == "default")) { // and what else?  networking isOn?
-                    //     playerAvatarTemplate = "<template id=\x22avatar-template\x22>"+ 
-                        
-                    //     "<div "+skyboxEnvMap+" gltf-model=\x22#avatar_model\x22>"+
-                    //     "<a-text class=\x22playerName\x22 look-at=\x22#player\x22 rotation=\x220 0 0\x22 position=\x22.5 .75 -.15\x22 value=\x22"+avatarName+"\x22></a-text>"+
-                    //     "</div>"+
-                    //     "</template>";
-                    // }
+
                  
                     let geomapFeatures = "";
                     // let arHitTest = "";
@@ -3006,305 +2795,15 @@ maplibre_router.get('/:_id', function (req, res) {
 
                     console.log("sceneWebType: "+ sceneResponse.sceneWebType + " sceneTags " + sceneResponse.sceneTags); 
       
-                    if (sceneResponse.sceneWebType == "Model Viewer") {
-                        // let extraScripts = "";
-                        // let sky = "environment-image=\x22neutral\x22";
-                        // if (skyboxUrl != null) {
-                        //     sky = "skybox-image=\x22"+skyboxUrl+"\x22";
-                        // }  
-                        // let planeDetectMode = "floor";
-                        // let arScaleMode = "";
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("wall")) {
-                        //     planeDetectMode = "wall";
-                        // } 
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale fixed")) {
-                        //     arScaleMode = "fixed";
-                        // }
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("scale auto")) {
-                        //     arScaleMode = "auto";
-                        // } 
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes("show overlay")) {
-                        //     canvasOverlay = canvasOverlay + socketScripts;
-                        // } else {
-                        //     canvasOverlay = "";
-                        // }   
-                        // let sceneGreeting = sceneResponse.sceneDescription;
-                        // if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
-                        //     sceneGreeting = sceneResponse.sceneGreeting;
-                        // }      
-                        // let sceneQuest = "";
-                        // if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
-                        //     sceneQuest = sceneResponse.sceneQuest;
-                        // }
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.toString().toLowerCase().includes('show dialog')) {
-                        //     dialogButton = dialogButton +  //set with the actual button above?
-                        //     "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>" +
-                        //     "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>" +
-                        //     "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
-                        //     extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        //     "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>" +
-                        //     "<script type=\x22module\x22 src=\x22/connect/connect.js\x22></script>" +
-                        //     geoScripts +
-                        //     locationScripts +
-                        //     locationData +
-                        //     modelData;
-                        //     // inventoryData;
-                        // } else {
-                        //     dialogButton = "";
-                        //     socketScripts = "";
-                        // }
-                        // htmltext = "<!DOCTYPE html>\n" +
-                        //     "<head> " +
-                        //     "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        //     "<meta charset=\x22UTF-8\x22>"+
-                        //     "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        //     "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        //     "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        //     "<meta charset='utf-8'/>" +
-                        //     "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
-                        //     "<meta property='og:url' content='" + process.env.ROOT_HOST + "/geomap/" + sceneResponse.short_id + "' /> " +
-                        //     "<meta property='og:type' content='website' /> " +
-                        //     "<meta property='og:image' content='" + postcard1 + "' /> " +
-                        //     "<meta property='og:image:height' content='1024' /> " +
-                        //     "<meta property='og:image:width' content='1024' /> " +
-                        //     "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
-                        //     "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
-                        //     "<meta property='name' content='modelviewer' /> " +
-                        //     "<title>" + sceneResponse.sceneTitle + "</title>" +
-                        //     "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
-                        //     "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        //     "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        //     "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        //     "<link href=\x22/css/modelviewer.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                        //     "<link href=\x22/css/geomap.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                        //     "<script type=\x22module\x22 src=\x22https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js\x22></script>"+
-                        //     extraScripts + 
-                        //     "</head>\n" +
-                        //     "<body style=\x22background-color: black;\x22>\n" +
-                        //     "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                        //     "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                        //     "<model-viewer autoplay shadow-intensity=\x221\x22 camera-controls camera-target=\x220m 0m 0m\x22 src=\x22"+gltfModel+"\x22"+ 
-                        //     " ar ar-placement=\x22"+planeDetectMode+"\x22 ar-modes=\x22geomap scene-viewer quick-look\x22 ar-scale=\x22"+arScaleMode+"\x22 alt=\x22Viewer for single 3D Model\x22"+ 
-                        //     sky +
-                        //     "ios-src=\x22"+usdzModel+"\x22>"+
-                        //     "<button slot=\x22ar-button\x22 style=\x22background-color: red; color: white; font-size: 36px; border-radius: 4px; border: 1px; position: absolute; bottom: 16px; right: 16px; z-index: 100;\x22>"+
-                        //     "AR"+
-                        //     "</button>"+
-                        //     "</model-viewer>" +
-                        //     audioSliders +
-                        //     canvasOverlay +
-                        //     dialogButton +
-                           
-                        //     attributionsTextEntity +
-                        //     "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
-                        //     "</body>\n" +
-                        //     socketScripts +
-                        //     "</html>";
-                        //     console.log("Tryna do a model viewer");
-                    } else if (sceneResponse.sceneWebType == "HTML from Text Item") {
+             
 
-                        // htmltext = sceneTextItemData;
-                        // console.log("Tryna send html from text itme " + htmltext);
-                    
-                    } else if (sceneResponse.sceneWebType == "Video Landing") {
-                        // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
-                        // if (tilepicUrl != "") {
-                        //     bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
-                        // }
-
-                        // htmltext = "<!DOCTYPE html>\n" +
-                        // "<head> " +
-                        // "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
-                        // "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        // "<meta charset=\x22UTF-8\x22>"+
-                        // "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        // "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        // "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        // "<meta charset=\x22utf-8\x22/>" +
-                        // "<meta name=\x22viewport\x22 content=\x22width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no\x22/>" +
-                        // "<meta property=\x22og:url\x22 content=\x22" + process.env.ROOT_HOST + "/geomap/" + sceneResponse.short_id + "\x22 /> " +
-                        // "<meta property=\x22og:type\x22 content=\x22website\x22 /> " +
-                        // "<meta property=\x22og:image\x22 content=\x22" + postcard1 + "\x22 /> " +
-                        // "<meta property=\x22og:image:height\x22 content=\x221024\x22 /> " +
-                        // "<meta property=\x22og:image:width\x22 content=\x221024\x22 /> " +
-                        // "<meta property=\x22og:title\x22 content=\x22" + sceneResponse.sceneTitle + "\x22 /> " +
-                        // "<meta property=\x22og:description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22 /> " +
-                        // "<meta property=\x22name\x22 content=\x22modelviewer\x22 /> " +
-                        // "<title>" + sceneResponse.sceneTitle + "</title>" +
-                        // "<meta name=\x22description\x22 content=\x22" + sceneResponse.sceneDescription + "\x22/>" +
-                        // "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        // "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
-                        // "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        // "<link href=\x22/css/geomap.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                       
-                        // "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
-                        // "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
+                    // // } else { /////////////////////////////////////////////////////////------------- Default / AFrame response below ------------------------------
                         
-                        // "</head>\n" +
-                        // "<body "+bgstyle+">" +
-                        // "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                        // "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                        // settingsData +
-                        // sceneTimedEventsData +
-                        // hlsScript +
-                        // videoGroupsEntity +
-                        // "<center><div><br><br><div class=\x22header\x22>"+sceneResponse.sceneGreeting+ " - " + sceneResponse.sceneQuest+"</div><video controls width=\x2280%\x22 height=\x2210%\x22 id=\x22video\x22></video>"+
-                        // "<div id=\x22sceneGreeting\x22 class=\x22linkfooter\x22>"+
-                        // "<h4><a href=\x22https://servicemedia.net/geomap/"+ sceneResponse.sceneNextScene + "\x22>Click Here to Enter Immersive Scene!</a></h4><br>"+
-                        // "</div></center>"+
-                        // audioSliders +
-                        // canvasOverlay +
-                        // "<div id=\x22theModal\x22 class=\x22modal\x22 ><div id=\x22modalContent\x22 class=\x22modal-content\x22></div>";
-                        // attributionsTextEntity +
-                        // "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
-                        // "</body>\n" +
-                        // "</html>";
-                        // console.log("Tryna do a Video Landing scene");
-
-                    } else if (sceneResponse.sceneWebType == "AR Image Tracking") { //aframe plus mindar
-                        // // dialogButton = "";
-                        // let extraScripts = "";
-                        // let sky = "environment-image=\x22neutral\x22";
-                        // if (skyboxUrl != null) {
-                        //     sky = "skybox-image=\x22"+skyboxUrl+"\x22";
-                        // }  
-                        // let planeDetectMode = "floor";
-                        // let arScaleMode = "auto";
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("wall")) {
-                        //     planeDetectMode = "wall";
-                        // } 
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("scale fixed")) {
-                        //     arScaleMode = "fixed";
-                        // } 
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show overlay")) {
-                        //     canvasOverlay = canvasOverlay + socketScripts;
-
-                        // } else {
-                        //     canvasOverlay = "";
-                        // }   
-                        // let sceneGreeting = sceneResponse.sceneDescription;
-                        // if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
-                        //     sceneGreeting = sceneResponse.sceneGreeting;
-                        // }      
-                        // let sceneQuest = "";
-                        //  if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
-                        //      sceneQuest = sceneResponse.sceneQuest;
-                        //  }
-                        // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('show dialog')) {
-                        //     dialogButton = dialogButton +  //set with the actual button above?
-                        //     "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>"+
-                        //     "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
-                        //     "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
-                        //     extraScripts = "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        //     "<script type=\x22module\x22 src=\x22/connect/dialogs.js\x22></script>"+
-                        //     "<script src=\x22/connect/indexedDb.js\x22></script>" +
-                        //     "<script src=\x22/connect/traffic.js\x22></script>" +
-                            
-                        //     geoScripts +
-                        //     locationScripts +
-                        //     locationData +
-                        //     modelData;
-                                            
-                        // } else {
-                        //     dialogButton = "";
-                        //     socketScripts = "";
-                        // }
-                        // // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix')) {
-                        // //     extraScripts = extraScripts + "<script src=\x22../main/js/browser-matrix.min.js\x22></script>"; 
-                        // //     extraEntities = "<div matrix_meshes=\x22init: true\x22></div>";
-                        // // }
-                      
-                        // htmltext = "<!DOCTYPE html>\n" +
-                        // "<head> " +
-                        // "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
-                        // "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        // "<meta charset=\x22UTF-8\x22>"+
-                        // "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        // "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        // "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        // "<meta charset='utf-8'/>" +
-                        // "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
-                        // "<meta property='og:url' content='" + process.env.ROOT_HOST + "/geomap/" + sceneResponse.short_id + "' /> " +
-                        // "<meta property='og:type' content='website' /> " +
-                        // "<meta property='og:image' content='" + postcard1 + "' /> " +
-                        // "<meta property='og:image:height' content='1024' /> " +
-                        // "<meta property='og:image:width' content='1024' /> " +
-                        // "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
-                        // "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
-                        // "<meta property='name' content='modelviewer' /> " +
-                        // "<title>" + sceneResponse.sceneTitle + "</title>" +
-                        // "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
-                        // "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        // "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +                        
-                        // "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        // "<link href=\x22/css/geomap.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" + 
-                       
-                        // "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
-                        // "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
-                        // "<script type=\x22module\x22 src=\x22/connect/connect.js\x22 defer=\x22defer\x22></script>" +
-                        // settingsData +
-                        // sceneTimedEventsData +
-                        // // aframeScript + 
-                        // // contentUtils +
-                        // modObjex +
-                        // modModels +
-                        // modSplats +
-                        // extraScripts + 
-
-                      
-                        // hlsScript +
-                        // "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js\x22></script>"+
-                        // "<script type=\x22module\x22 src=\x22../main/src/shaders/noise.js\x22></script>"+
-                        // "<script src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>"+
-
-                        // "<script src=\x22../main/src/util/mindar/mindar-image.js\x22></script>"+
-                        // "<script src=\x22../main/src/util/mindar/mindar-image-aframe.js\x22></script>"+
-                        // "<script src=\x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22></script>"+
-                        // "<script src=\x22../main/src/component/mod-materials.js\x22></script>"+
-                        // "</head>\n" +
-                        // "<body>\n" +
-                        // "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                        // "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                        // "<div class=\x22ar-container\x22>"+
-                        // "<a-scene mindar-image=\x22imageTargetSrc: "+arImageTargets[0]+";\x22 embedded color-space=\x22sRGB\x22"+    
-                        //     " renderer=\x22colorManagement: true, physicallyCorrectLights\x22 xr-mode-ui=\x22enabled: false\x22 device-orientation-permission-ui=\x22enabled: false\x22>"+
-                        // "<a-assets>"+
-                        // videoAsset +
-                        // gltfsAssets +    
-                        // "</a-assets>"+
-                        // videoGroupsEntity+
-                        // "<div mindar-image-target=\x22targetIndex: 0\x22>" +
-                        //     "<a-gltf-model rotation=\x2290 0 0\x22 position=\x220 0 0.1\x22 scale=\x220.25 0.25 0.25\x22 src=\x22#gltfasset2\x22>"+
-                        // "</div>"+
-                        // "<a-camera id=\x22player\x22 position=\x220 0 0\x22 look-controls=\x22enabled: false\x22></a-camera>"
-                        // "</a-scene>"+
-                        // "</div>"+    
-                        
-                        // audioSliders +
-                        // canvasOverlay +
-                        // dialogButton +
-                        // attributionsTextEntity +
-                       
-                        // "<div class=\x22smallfont\x22><span id=\x22users\x22></span></div>"+ 
-                        // "</body>\n" +
-                        // socketScripts + //?
-                        // "</html>";
-                        // console.log("Tryna do a AR Image Tracking scene");
-
-                    } else { /////////////////////////////////////////////////////////------------- Default / AFrame response below ------------------------------
                         let joystick = "joystick=\x22useNavmesh: false\x22";
                         let extraScripts = "";
                         let hasParametricCurve = false;
                         let obbDebug = ""; //to show obb colliders, physics collider debug set elsewhere...
-                       
-                        // let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
-                        // let particleScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>";
-                        // if (aframeScript == "") { //i.e. it's in the importmap!
-                        //     particleScript = "";
-                        //     aframeExtrasScript = "";
-                        //     blinkScript = "";
-                        // }
+                     
                         if (!showTransport) {
                             transportButtons = "";
                         }
@@ -3340,12 +2839,12 @@ maplibre_router.get('/:_id', function (req, res) {
                             extraScripts = extraScripts + "<script src=\x22/connect/traffic.js\x22 ></script><script src=\x22/main/vendor/axios/axios.min.js\x22></script>"; 
                             // extraEntities = extraEntities + "<div id=\x22traffic_data\x22 traffic_data_viz=\x22init: true\x22></div>";
                         }
-                        let sceneQuest = "";
+                        // let sceneQuest = "";
                         if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest != "") {
                             sceneQuest = sceneResponse.sceneQuest;
                         }
 
-                        let sceneGreeting = sceneResponse.sceneDescription;
+                        sceneGreeting = sceneResponse.sceneDescription;
                        
                         if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
                             sceneGreeting = sceneResponse.sceneGreeting;
@@ -3726,7 +3225,7 @@ maplibre_router.get('/:_id', function (req, res) {
 
                         "</body>" +
                     "</html>";
-                }
+                // }
                 if (!accessScene) {
                     let noAccessHTML = "<html xmlns='http://www.w3.org/1999/xhtml'>" +
                     "<head> " +

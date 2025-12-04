@@ -25,12 +25,6 @@ import * as THREE from 'three/webgpu';
 
   			eventEl.addEventListener('ready-event', init); //fired when settings are loaded..
 
-			// export function Ready() {
-			// 	init();
-			// }
-			// init();
-			
-
 
 			async function init() {
 
