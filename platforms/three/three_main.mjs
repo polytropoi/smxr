@@ -8,11 +8,14 @@ import * as THREE from 'three/webgpu';
 
 			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+			import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
 			import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 			import { settings, profile } from '../../../connect/settings.js';
 			import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 			import { SetSceneLocations } from '../../../connect/connect.js';
 
+			import { Pathfinding } from 'three-pathfinding';
 
 			let locationData;
 			let modelsData;
@@ -22,12 +25,38 @@ import * as THREE from 'three/webgpu';
 			let model, floor, floorPosition;
 			let postProcessing;
 			let controls;
+			let pathfinding, navmesh;
 
+			let center = new THREE.Vector3(0,0,0);
   			eventEl.addEventListener('ready-event', init); //fired when settings are loaded..
 
 
+			function initPathfinding () {
+				if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh") && navmesh) {
+					pathfinding = new Pathfinding();
+					// const pathfinding = new Pathfinding();
+					const groupID = 0; 
+					const ZONE = 'myNavmeshZone'; // Define a zone name
+					pathfinding.setZoneData(ZONE, Pathfinding.createZone(navmesh.geometry));
+
+					console.log("looking for navmesh " + navmesh);
+					for (let i = 0; i < 10; i++) {
+    					const randomNode = pathfinding.getRandomNode(ZONE, groupID);
+						console.log("randomNode " + JSON.stringify(randomNode));
+						// const targetPosition = randomNode.position;
+						// console.log("random navmesh position " + targetPosition.x + " " + targetPosition.y + " " +targetPosition.z );
+					}
+				}
+			}
 			async function init() {
 
+
+				let modelsDataEl = document.getElementById('modelsData');
+				if (modelsDataEl) {
+					const theModelsData = modelsDataEl.getAttribute('data-models');
+					modelsData = JSON.parse(atob(theModelsData));
+					console.log("modelsData " + JSON.stringify(modelsData));
+				}
 
 				let locationDataEl = document.getElementById('locationData');
 				if (locationDataEl) {
@@ -36,14 +65,65 @@ import * as THREE from 'three/webgpu';
 					locationData = JSON.parse(atob(theLocationData));
 					SetSceneLocations(locationData);
 					console.log("locationData " + JSON.stringify(locationData));
+					let loader = new GLTFLoader();
+					for (let i = 0; i < locationData.length; i++) {
+						if (locationData[i].modelID && locationData.modelID != "none") {
+							for (let m = 0; m < modelsData.length; m++) {
+								if (locationData[i].modelID == modelsData[m]._id) {
+									console.log("gotsa model! " +modelsData[m]._id);
+									
+
+									loader.load(
+										modelsData[m].modelURL, // Path to your GLB file
+										function (gltf) {
+											const model = gltf.scene;
+											// Success callback: The model has loaded
+											// Add the loaded scene to your Three.js scene
+											
+											console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
+											model.position.set(locationData[i].x,locationData[i].y,locationData[i].z);
+
+											scene.add(model);
+											if (locationData[i].markerType == "navmesh") {
+												gltf.scene.traverse(function (child) {
+													if (child.isMesh){
+														// if (child.name=="navmesh"){
+														navmesh = child;
+															child.material.transparent = true;
+															child.material.opacity = 0.5;
+															// const mesh = new THREE.Mesh(child.geometry, new THREE.MeshBasicMaterial({ wireframe: true, color: 0x111111}));
+															// mesh.position.copy(child.position);
+															// mesh.quaternion.copy(child.quaternion);
+															// gltf.scene.add(mesh);
+															
+															console.log("gotsa NAVMESH!");
+															initPathfinding();
+															
+														}else{
+															child.castShadow = false;
+															child.receiveShadow = true;
+														}
+													// }
+												});
+											}
+										},
+										function (xhr) {
+											// Optional progress callback
+											console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+										},
+										function (error) {
+											// Optional error callback
+											console.error('An error occurred while loading the model:', error);
+										}
+									);
+								}
+							}
+						}
+					}
 
 				}
-				let modelsDataEl = document.getElementById('modelsData');
-				if (modelsDataEl) {
-					const theModelsData = modelsDataEl.getAttribute('data-models');
-					modelsData = JSON.parse(atob(theModelsData));
-					console.log("modelsData " + JSON.stringify(modelsData));
-				}
+
+
 
 				console.log("settings " + JSON.stringify(settings));
 
@@ -199,10 +279,10 @@ import * as THREE from 'three/webgpu';
 
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.minDistance = 1;
-				controls.maxDistance = 10;
+				controls.maxDistance = 100;
 				controls.maxPolarAngle = Math.PI * 0.9;
-				controls.autoRotate = true;
-				controls.autoRotateSpeed = 1;
+				// controls.autoRotate = true;
+				// controls.autoRotateSpeed = 1;
 				controls.target.set( 0, .2, 0 );
 				controls.update();
 
@@ -228,7 +308,7 @@ import * as THREE from 'three/webgpu';
 				const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
 				postProcessing = new THREE.PostProcessing( renderer );
-				postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( 0x74ccf4 ) ).mul( vignette ) );
+				postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
 
 				//
 
