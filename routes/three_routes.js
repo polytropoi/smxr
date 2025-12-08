@@ -2812,6 +2812,7 @@ three_router.get('/:_id', function (req, res) {
                     settings.useNavmesh = useNavmesh; //"real" navmesh w/ pathfinding
                     settings.useSimpleNavmesh = useSimpleNavmesh;
                     settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
+                    settings.sceneWater = sceneResponse.sceneWater; // != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
                     settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
                     settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
                     settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
