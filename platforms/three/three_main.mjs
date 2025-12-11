@@ -1,5 +1,7 @@
 	import * as THREE from 'three/webgpu';
+	
 	import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time } from 'three/tsl';
+	
 	import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
 
 	import { Inspector } from 'three/addons/inspector/Inspector.js';
@@ -18,17 +20,21 @@
 
 	import { InitPathfinding, agents } from './three_nav.js';
 
+	import { getRainbowMaterial } from './tsl/rainbow.js'
+
+
 	import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
 
-	
+	import Stats from './stats.js';
 
 	export let scene, navmesh, surface;
 
 	let locationData;
 	let modelsData;
 
-	let camera, renderer;
-	let mixer, objects, clock;
+	let camera, renderer, stats;
+	let mixer, objects;
+	export let clock;
 	let model, floor, floorPosition;
 	let postProcessing;
 	let controls;
@@ -52,6 +58,14 @@
 	function init() {
 
 		scene = new THREE.Scene();
+
+		if (settings && settings.sceneTags) {
+			// if (settings.sceneTags.includes("debug")) {
+			// stats.showPanel( 0,1,2,3 );
+				stats = new Stats();
+				document.body.appendChild(stats.domElement);
+			// }
+		}
 
 		let modelsDataEl = document.getElementById('modelsData');
 		if (modelsDataEl) {
@@ -80,9 +94,8 @@
 									const model = await loadModel(modelsData[m].modelURL); //needs to wait for navmesh, surfaces, etc.
 																				
 									console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
-									model.position.set(locationData[i].x,locationData[i].y,locationData[i].z);
+									
 													
-									scene.add(model);
 									
 									const transmat = new THREE.MeshBasicNodeMaterial( { transparent: true, opacity: 0, color: 0x111111, depthWrite :false});
 									model.traverse(function (child) {
@@ -120,6 +133,11 @@
 										instancedModel.modelData = modelsData[m];
 										instancedModels.push(instancedModel);
 										console.log("instancedModels length " + instancedModels.length);
+										model.visible = false;
+									} else {
+										model.position.set(locationData[i].x,locationData[i].y,locationData[i].z);
+										scene.add(model);
+									
 									}
 								}
 							}
@@ -153,7 +171,7 @@
 						} 
 					}
 				} catch (e) {
-					console.log("ERROR LOADING GLTF! " + e);
+					console.error("ERROR LOADING GLTF! " + e);
 				}
 			})();
 		}
@@ -217,10 +235,12 @@
 		iceDiffuse.wrapT = THREE.RepeatWrapping;
 		iceDiffuse.colorSpace = THREE.NoColorSpace;
 
-		const iceColorNode = triplanarTexture( texture( iceDiffuse ) ).add( color( settings.sceneColor4 ) ).mul( .8 );
+		const iceColorNode = triplanarTexture( texture( iceDiffuse ) ).add( color( settings.sceneColor1 ) ).mul( .4 );
 
 		const geometry = new THREE.IcosahedronGeometry( 1, 3 );
-		const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
+		// const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
+		const material = getRainbowMaterial();
+		material.colorNode = iceColorNode;
 
 		const count = 100;
 		const scale = 3.5;
@@ -240,7 +260,7 @@
 
 		}
 
-		objects.position.set(
+		objects.position.set (
 			( ( column - 1 ) * scale ) * - .5,
 			- 1,
 			( ( count / column ) * scale ) * - .5
@@ -290,7 +310,8 @@
 
 		// floor
 
-		floor = new THREE.Mesh( new THREE.CylinderGeometry( 1.1, 1.1, 10 ), new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } ) );
+		floor = new THREE.Mesh( new THREE.CylinderGeometry( 2, 2, 10 ), new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } ) );
+		// floor = new THREE.Mesh( new THREE.CylinderGeometry( 1.1, 1.1, 10 ), returnM );
 		floor.position.set( 0, - 5, 0 );
 		scene.add( floor );
 
@@ -370,6 +391,10 @@
 		controls.update();
 
 		const delta = clock.getDelta();
+
+		if (stats) {
+			stats.update();
+		}
 
 		// floor.position.y = floorPosition.y - 5;
 

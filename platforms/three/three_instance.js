@@ -21,6 +21,8 @@ export async function InstanceOnSurface (model, count, scaleFactor) {
     // Assuming 'terrainMesh' is your loaded terrain and 'treeGeometry'/'treeMaterial' are defined
     if (sampler) {
 
+        count = count * 3;
+
         // let scaleFactor = data.yscale;
 
     console.log("gotsa SURFACE for " + model.name + " count " + count);
@@ -53,29 +55,25 @@ export async function InstanceOnSurface (model, count, scaleFactor) {
                         
         const dummy = new THREE.Object3D();
         let position = new THREE.Vector3();
-        
-        // const matrix = new THREE.Matrix4();
-        // // ... inside loop for each point
-        // matrix.compose(position, quaternion, scale); 
+   
         for (let i = 0; i < count; i++) {
-                // Get a point
-            // if (i > 4) { 
-            sampler.sample(position);
-
-            dummy.position.set(position.x, position.y, position.z);
-            // console.log("instance positon " + JSON.stringify(position));
-            // Optional: Add some random rotation
-            dummy.rotation.y = Math.random() * Math.PI * 2;
-            const scale = Math.random() * scaleFactor;
-            dummy.scale.set(scale, scale, scale);
-            dummy.updateMatrix(); // Update matrix based on position/rotation
-            for (let m = 0; m < instancedMeshes.length; m++) {
-                instancedMeshes[m].setMatrixAt(i, dummy.matrix);
-                // console.log("instance count " + i);
-                instancedMeshes[m].instanceMatrix.needsUpdate = true;
             
-            }
-            // }
+                sampler.sample(position);
+
+                dummy.position.set(position.x, position.y, position.z);
+                // console.log("instance positon " + JSON.stringify(position));
+                // Optional: Add some random rotation
+                dummy.rotation.y = Math.random() * Math.PI * 2;
+                const scale = Math.random() * scaleFactor;
+                dummy.scale.set(scale, scale, scale);
+                dummy.updateMatrix(); // Update matrix based on position/rotation
+                for (let m = 0; m < instancedMeshes.length; m++) {
+                    instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                    // console.log("instance count " + i);
+                    instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                
+                }
+            
         }
         for (let s = 0; s < instancedMeshes.length; s++) {
             scene.add(instancedMeshes[s]);
