@@ -33,12 +33,13 @@
 	let modelsData;
 
 	let camera, renderer, stats;
-	let mixer, objects;
+	let mixer, objects, water;// waterLayer0, waterLayer1;
 	export let clock;
 	let model, floor, floorPosition;
 	let postProcessing;
 	let controls;
 
+	let doPostProcessing = true;
 
 	eventEl.addEventListener('ready-event', init); //fired when settings are loaded..
 
@@ -55,17 +56,10 @@
 	}
 
 	
-	function init() {
+	async function init() {
 
 		scene = new THREE.Scene();
 
-		if (settings && settings.sceneTags) {
-			// if (settings.sceneTags.includes("debug")) {
-			// stats.showPanel( 0,1,2,3 );
-				stats = new Stats();
-				document.body.appendChild(stats.domElement);
-			// }
-		}
 
 		let modelsDataEl = document.getElementById('modelsData');
 		if (modelsDataEl) {
@@ -226,7 +220,24 @@
 		// 	scene.add( model );
 
 		// } );
+		if (settings && settings.sceneTags) {
+			// if (settings.sceneTags.includes("debug")) {
+			// stats.showPanel( 0,1,2,3 );
+			stats = new Stats();
+			document.body.appendChild(stats.domElement);
+			// }
+			// if (settings.sceneWater) {
+			const waterModule = await import ('./tsl/tsl_water.js');
+			// const waterModule = await import {Water} from './tsl/tsl_water.js'
+			water = new waterModule.Water();
+			
 
+			// water = waterModule.water;
+			console.log("water is " + water);
+
+
+			// }
+		}
 		// objects
 
 		const textureLoader = new THREE.TextureLoader();
@@ -268,64 +279,27 @@
 
 		scene.add( objects );
 
-		// water
-
-		// if (settings && settings.sceneWater) {
-			const timer = time.mul( .8 );
-			const floorUV = positionWorld.xzy;
-
-			const waterLayer0 = mx_worley_noise_float( floorUV.mul( 4 ).add( timer ) );
-			const waterLayer1 = mx_worley_noise_float( floorUV.mul( 2 ).add( timer ) );
-
-			const waterIntensity = waterLayer0.mul( waterLayer1 );
-			const waterColor = waterIntensity.mul( 1.4 ).mix( color(  settings.sceneColor3 ), color( settings.sceneColor4 ) );
-
-			// linearDepth() returns the linear depth of the mesh
-			const depth = linearDepth();
-			const depthWater = viewportLinearDepth.sub( depth ).toInspector( 'Water / Depth', ( node ) => node.oneMinus() );
-			const depthEffect = depthWater.remapClamp( - .002, .04 );
-
-			const refractionUV = screenUV.add( vec2( 0, waterIntensity.mul( .1 ) ) ).toInspector( 'Water / Refraction UV' );
-
-			// linearDepth( viewportDepthTexture( uv ) ) return the linear depth of the scene
-			const depthTestForRefraction = linearDepth( viewportDepthTexture( refractionUV ) ).sub( depth );
-
-			const depthRefraction = depthTestForRefraction.remapClamp( 0, .1 );
-
-			const finalUV = depthTestForRefraction.lessThan( 0 ).select( screenUV, refractionUV );
-
-			const viewportTexture = viewportSharedTexture( finalUV ).toInspector( 'Water / Viewport Texture + Refraction UV' );
-
-			const waterMaterial = new THREE.MeshBasicNodeMaterial();
-			waterMaterial.colorNode = waterColor.toInspector( 'Water / Color' );
-			waterMaterial.backdropNode = depthEffect.mix( viewportSharedTexture(), viewportTexture.mul( depthRefraction.mix( 1, waterColor ) ) );
-			waterMaterial.backdropAlphaNode = depthRefraction.oneMinus();
-			waterMaterial.transparent = true;
-
-			const water = new THREE.Mesh( new THREE.BoxGeometry( 50, .001, 50 ), waterMaterial );
-			water.position.set( 0, 0, 0 );
-			scene.add( water );
-
-
-
 		// floor
 
 		floor = new THREE.Mesh( new THREE.CylinderGeometry( 2, 2, 10 ), new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } ) );
 		// floor = new THREE.Mesh( new THREE.CylinderGeometry( 1.1, 1.1, 10 ), returnM );
 		floor.position.set( 0, - 5, 0 );
 		scene.add( floor );
+		
 
 		// caustics
+		if (water && water.waterLayer0) {
+			const waterPosY = positionWorld.y.sub( water.position.y );
 
-		const waterPosY = positionWorld.y.sub( water.position.y );
+			let transition = waterPosY.add( .1 ).saturate().oneMinus();
+			transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
+			const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
 
-		let transition = waterPosY.add( .1 ).saturate().oneMinus();
-		transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
+			//material.colorNode = colorNode;
+			floor.material.colorNode = colorNode;
+		}
 
-		const colorNode = transition.mix( material.colorNode, material.colorNode.add( waterLayer0 ) );
-
-		//material.colorNode = colorNode;
-		floor.material.colorNode = colorNode;
+		
 
 		// }
 
@@ -357,23 +331,25 @@
 
 		// post processing
 
-		const scenePass = pass( scene, camera );
-		const scenePassColor = scenePass.getTextureNode();
-		const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+				const scenePass = pass( scene, camera );
+				const scenePassColor = scenePass.getTextureNode();
+				const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
 
-		const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
+				const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
 
-		const scenePassColorBlurred = gaussianBlur( scenePassColor );
-		scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+				const scenePassColorBlurred = gaussianBlur( scenePassColor );
+				scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
 
-		const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
+				const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
-		postProcessing = new THREE.PostProcessing( renderer );
-		postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+				postProcessing = new THREE.PostProcessing( renderer );
+				postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
 
 		//
 
 		window.addEventListener( 'resize', onWindowResize );
+
+
 
 	} //end init!
 
@@ -413,9 +389,11 @@
 
 		}
 
-		// if (doPostProcessing) {
+		if (doPostProcessing) {
 			postProcessing.render();
-		// }
+		} else {
+			renderer.render(scene, camera);
+		}
 		if (agents.length) {
 			for (let i = 0; i < agents.length; i++) {
 				agents[i].update(delta);

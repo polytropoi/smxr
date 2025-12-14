@@ -4,7 +4,7 @@
 
     import { Pathfinding } from 'three-pathfinding';
 
-    	import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time } from 'three/tsl';
+import { uniform, sin, mul, add, time } from 'three/tsl';
 
 
     const ZONE = 'myNavmeshZone'; 
@@ -15,34 +15,38 @@
 
     import { returnMaterial } from './tsl/tsl_materials.js'
 
-    import { uniform, sin } from 'three/tsl';
+    // import { uniform, sin } from 'three/tsl';
     export function CreateAgent (pos) {
             
         const geometry = new THREE.CapsuleGeometry( 1, 1, 4, 8, 1 );
         // const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .5, color: 'orange' });
         const material = returnMaterial('brain');
         const mesh = new THREE.Mesh( geometry, material );
-            
+                    const timeUniform = uniform(0);
+        // material.colorNode.scale = sin(timeUniform).mul(0.75).add(0.3);
+
+        // material.colorNode.scale = sin(timeUniform).mul(0.75);
+
         // mesh.position.set(-0.88, 0.03, -0.38);
         // console.log("position object is type " + pos.type);
         mesh.position.set(pos.x, pos.y, pos.z);
 
         // const time = uniform(0.0);
 
-        // // Use sin() to create a pulsing effect for the emissive intensity
-        // // sin(time * 2.0) oscillates between -1 and 1
-        // // mul(0.3) dampens the effect
-        // // add(0.7) shifts the range to 0.4 to 1.0 (never completely dark)
+        // Use sin() to create a pulsing effect for the emissive intensity
+        // sin(time * 2.0) oscillates between -1 and 1
+        // mul(0.3) dampens the effect
+        // add(0.7) shifts the range to 0.4 to 1.0 (never completely dark)
         // const pulse = sin(time.mul(2.0)).mul(0.3).add(0.7);
 
-        // // Assign the pulsing value to the emissiveNode, multiplied by a base color
-        // // For this example, we'll use a simple vec3 for color
-        // material.emissiveNode = new THREE.Color(1, 0.5, 0).mul(pulse);
-        // // mesh.userData = {
-        // //     update: function () {
-        // //         material.colorNode.size  
-        // //     }
-        // // }
+        // Assign the pulsing value to the emissiveNode, multiplied by a base color
+        // For this example, we'll use a simple vec3 for color
+        // material.emissiveNode = new THREE.Color(1, 0.5, 0).add(pulse);
+        // mesh.userData = {
+        //     update: function () {
+        //         material.colorNode.size  
+        //     }
+        // }
 
 
         // scene.add(mesh);
@@ -239,10 +243,11 @@
             
             if (this.mixer) this.mixer.update(dt);
             
-            if (player.material.colorNode) {
+            // if (player.material.colorNode) {
                 // player.material.colorNode.seed = dt / 10000;
-                player.material.colorNode.seed = performance.now() * 0.1;
-            }
+                // player.material.colorNode.seed = performance.now() * 0.1;
+                this.object.material.colorNode.scale = sin(dt).mul(0.75);
+            // }
             if (this.calculatedPath && this.calculatedPath.length) {
                 const targetPosition = this.calculatedPath[0];
 
