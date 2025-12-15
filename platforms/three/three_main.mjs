@@ -1,4 +1,6 @@
 	import * as THREE from 'three/webgpu';
+
+	import RAPIER from 'rapier';
 	
 	import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time } from 'three/tsl';
 	
@@ -60,6 +62,9 @@
 
 		scene = new THREE.Scene();
 
+		await RAPIER.init();	
+		const gravity = { x: 0.0, y: 0, z: 0.0 };
+		const world = new RAPIER.World(gravity);
 
 		let modelsDataEl = document.getElementById('modelsData');
 		if (modelsDataEl) {

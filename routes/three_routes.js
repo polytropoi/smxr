@@ -378,16 +378,12 @@ three_router.get('/:_id', function (req, res) {
                             "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.tsl.js\x22,"+
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
                             "\x22three-pathfinding\x22: \x22https://unpkg.com/three-pathfinding@latest/dist/three-pathfinding.module.js\x22,"+
-                            "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22"+
-                            
+                            "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
+                            "\x22three-mesh-bvh\x22: \x22//platforms/three/bvh/three-mesh-bvh.9.3.module.min.js\x22,"+
+                            "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
+                            // "rapier": "https://cdn.skypack.dev/@dimforge/rapier3d-compat"
+                           
 
-
-
-                    //     "\x22three\x22: \x22../../main/js/three/three.module.js\x22,"+     
-                    //    "\x22three/webgpu\x22: \x22../../main/js/three/three.webgpu.js\x22,"+
-
-                    //         "\x22three/tsl\x22: \x22../../main/js/three/three.tsl.js\x22"+
-                            // "\x22three/addons/\x22: \x22./jsm/\x22"+
                           
                             "}"+
                         "}</script>";
