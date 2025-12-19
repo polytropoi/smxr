@@ -45,8 +45,9 @@ export class Water {
         waterMaterial.backdropAlphaNode = depthRefraction.oneMinus();
         waterMaterial.transparent = true;
 
-        const water = new THREE.Mesh( new THREE.BoxGeometry( 50, .001, 50 ), waterMaterial );
+        const water = new THREE.Mesh( new THREE.CircleGeometry( 200, 64 ), waterMaterial );
         water.position.set( 0, 0, 0 );
+        water.rotation.x = Math.PI / 2 * -1;
         scene.add(water);
         // return water;
     }

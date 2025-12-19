@@ -23,14 +23,14 @@ function fragNode () {
   const hue = floor(p.mul(10)).mul(0.1);
   const sat = hue.mod(1).oneMinus().mul(0.5);
 //   const alpha = 
-  const col = hsl(hue, 1, sat, t);
+  const col = hsl(hue, 1, sat, 1);
   return col;
 }
 
 
 const mat = new THREE.NodeMaterial();
 mat.transparent = true;
-mat.roughness = .1;
+mat.roughnessNode = .1;
 mat.fragmentNode = fragNode();
 
 export function getRainbowMaterial() {

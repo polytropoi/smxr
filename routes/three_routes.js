@@ -379,7 +379,19 @@ three_router.get('/:_id', function (req, res) {
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
                             "\x22three-pathfinding\x22: \x22https://unpkg.com/three-pathfinding@latest/dist/three-pathfinding.module.js\x22,"+
                             "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
-                            "\x22three-mesh-bvh\x22: \x22//platforms/three/bvh/three-mesh-bvh.9.3.module.min.js\x22,"+
+                            "\x22three-mesh-ui\x22: \x22https://unpkg.com/three-mesh-ui@6.4.0/build/three-mesh-ui.module.js\x22,"+
+                            // https://unpkg.com/three-mesh-ui@6.4.1/build/three-mesh-ui.js
+                            //  "\x22troika-three-text\x22: \x22/platforms/three/troika/three-troika.min.js\x22,"+ //ugh no troika for webgpu yet
+                            //   "\x22troika-three-text\x22: \x22/platforms/three/troika/troika-three-text.esm.js\x22,"+
+                            //    "\x22troika-worker-utils\x22: \x22/platforms/three/troika/troika-worker-utils.esm.js\x22,"+
+                            //     "\x22troika-three-utils\x22: \x22/platforms/three/troika/troika-three-utils.esm.js\x22,"+
+
+                            //    "\x22webgl-sdf-generator\x22: \x22/platforms/three/troika/webgl-sdf-generator.mjs\x22,"+
+                            //     "\x22bidi-js\x22: \x22/platforms/three/troika/bidi.mjs\x22,"+
+                                
+
+                            "\x22three-mesh-bvh\x22: \x22/platforms/three/bvh/three-mesh-bvh.9.3.module.min.js\x22,"+
+
                             "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
                             // "rapier": "https://cdn.skypack.dev/@dimforge/rapier3d-compat"
                            
@@ -2757,7 +2769,32 @@ three_router.get('/:_id', function (req, res) {
                 var buff = Buffer.from(JSON.stringify(scenePictureItems)).toString("base64");
                 scenePicturesData = "<div id=\x22scenePicturesData\x22 data-scene-pictures='"+buff+"'></div>";
             }
-                
+                                /////////////// skyboxen /////////////////////
+                var oo_id = null;
+                console.log("skybox ids beez " + JSON.stringify(skyboxIDs) + " vs single skyboxID " + skyboxID);
+                if (skyboxIDs.length > 0) { //umm...
+                    // skyboxID = skyboxIDs[Math.floor(Math.random() * skyboxIDs.length)];
+                    // oo_id =  ObjectID(skyboxID);
+                } 
+                if (skyboxID != "") {
+                    oo_id = ObjectId.createFromHexString(skyboxID); //set if there's an equirect pic, above
+                } else {
+                    if (sceneResponse.sceneSkybox != null && sceneResponse.sceneSkybox != "") //old way
+                    oo_id = ObjectId.createFromHexString(sceneResponse.sceneSkybox);
+                }
+                if (oo_id) {
+                    const query = {"_id": oo_id};
+                    const picture_item = await RunDataQuery("image_items", "findOne", query); 
+                    const theKey = 'users/' + picture_item.userID + '/pictures/originals/' + picture_item._id + '.original.' + picture_item.filename; //TODO cook smaller equirect versions?
+                    //some old skyboxen aren't saved with .original. in filename, check for that
+                    // if (!ReturnObjectExists(process.env.ROOT_BUCKET_NAME, theKey)) {
+                    //     theKey = 'users/' + picture_item.userID + '/pictures/originals/' + picture_item.filename;
+                    // } 
+                    skyboxUrl = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, theKey, 6000);
+                    console.log("single skybox url " + skyboxUrl);
+
+                }
+
 
                 /////////////////// build the response! ///////////////////////////////
 
@@ -2810,7 +2847,7 @@ three_router.get('/:_id', function (req, res) {
                     settings.useNavmesh = useNavmesh; //"real" navmesh w/ pathfinding
                     settings.useSimpleNavmesh = useSimpleNavmesh;
                     settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
-                    settings.sceneWater = sceneResponse.sceneWater; // != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
+                    settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
                     settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
                     settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
                     settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
@@ -2973,6 +3010,7 @@ three_router.get('/:_id', function (req, res) {
                         settings.skyboxIDs = skyboxIDs;
                         settings.skyboxID = skyboxID;
                         settings.skyboxURL = skyboxUrl;
+                        settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
                         settings.useSynth = hasSynth;
                         settings.mappicURL = mappicURL;
                         settings.backgroundVideoURL = backgroundVideoURL;

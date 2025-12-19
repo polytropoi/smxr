@@ -2,8 +2,11 @@
 
 	import RAPIER from 'rapier';
 	
-	import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time } from 'three/tsl';
+	import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, 
+		viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time, fog, float, triNoise3D, positionView, uniform } from 'three/tsl';
 	
+	// import { ColorNode, MeshBasicNodeMaterial } from 'three/addons/examples/jsm/nodes/Nodes.js';
+
 	import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
 
 	import { Inspector } from 'three/addons/inspector/Inspector.js';
@@ -27,21 +30,40 @@
 
 	import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
 
+	import { UpdateText } from './three_ui.js';
+
+	import { getDynamicBody } from './three_physics.js';
+
+	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
+
+
+	// import { Container } from '@pmndrs/uikit'
+
 	import Stats from './stats.js';
+
+
+// import { sceneObjects } from '../../connect/dialogs.js';
 
 	export let scene, navmesh, surface;
 
 	let locationData;
 	let modelsData;
-
-	let camera, renderer, stats;
+	let raycastHitAgent;
+	let raycaster, stats;
 	let mixer, objects, water;// waterLayer0, waterLayer1;
 	export let clock;
+	export let camera, renderer;
 	let model, floor, floorPosition;
 	let postProcessing;
 	let controls;
 
 	let doPostProcessing = true;
+
+	let activeObjex = [];
+
+
+	const mouse = new THREE.Vector2();
+	
 
 	eventEl.addEventListener('ready-event', init); //fired when settings are loaded..
 
@@ -58,13 +80,19 @@
 	}
 
 	
+	////////////// SCENE INIT FUNCTION 
+
 	async function init() {
 
 		scene = new THREE.Scene();
 
+
 		await RAPIER.init();	
 		const gravity = { x: 0.0, y: 0, z: 0.0 };
 		const world = new RAPIER.World(gravity);
+
+		// UpdateText("HERE WE GO!");
+		
 
 		let modelsDataEl = document.getElementById('modelsData');
 		if (modelsDataEl) {
@@ -112,8 +140,28 @@
 													// child.material = transmat;
 													InitSurface();
 												}
-											}
+											} else {
+												// child.mesh.layers.set(1);
+												// child.mesh.userData = locationData[i];
+												if (locationData[i].eventData.includes("static_")) {
+													const geometry = child.geometry;
+													let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
+														.setTranslation(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z))
+														// .setLinearDamping(1)
+														// .setAngularDamping(1);
+													let rigid = world.createRigidBody(rigidBodyDesc);
+													const positionAttribute = geometry.getAttribute('position');
 
+													let points = positionAttribute.array;
+													let colliderDesc = RAPIER.ColliderDesc.convexHull(points).setDensity(1);
+													world.createCollider(colliderDesc, rigid);
+												} else if  (locationData[i].eventData.includes("dynamic")) {
+
+
+												}
+												
+											}
+											
 																	
 											console.log("loaded mesh with tags " + locationData[i].locationTags);
 											
@@ -121,7 +169,15 @@
 												// child.material = transmat;
 												child.material.transparent = true;
 												child.material.opacity = 0;
+											} else {
+												// if (child.material.envMap) {
+												child.castShadow = true;	
+												child.receiveShadow = true;
+													child.material.envMap = scene.environment;
+												// }
+												
 											}
+											// child.material.envMap = scene.environment;
 										}
 									});
 									if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) {
@@ -135,7 +191,18 @@
 										model.visible = false;
 									} else {
 										model.position.set(locationData[i].x,locationData[i].y,locationData[i].z);
+										model.scale.set(locationData[i].xscale,locationData[i].yscale,locationData[i].zscale)
 										scene.add(model);
+										// model.layers.set(1);
+										model.userData = locationData[i];
+										model.name = "model_" + locationData[i].name;
+										model.castShadow = true;
+										model.receiveShadow = true;
+										// model.material.envMap = scene.environment;
+										// model.envMapIntensity = 2;
+										activeObjex.push(model);
+										
+	
 									
 									}
 								}
@@ -179,12 +246,17 @@
 
 		console.log("settings " + JSON.stringify(settings));
 
-		camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.25, 100 );
+		camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.25, 300 );
 		camera.position.set( 3, 2, 4 );
 
-		scene = new THREE.Scene();
-		scene.fog = new THREE.Fog( settings.sceneColor2, 20, 100 );
-		scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
+		
+		// scene = new THREE.Scene();
+		// // scene.fog = new THREE.Fog( settings.sceneColor2, 20, 300 );
+		// const fogColor = settings.sceneColor2; // Sky blue
+		// // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
+		// scene.fog = new THREE.Fog(fogColor, 1, 300);
+		// InitCustomFog();
+		// scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
 		camera.lookAt( 0, 1, 0 );
 
 		const sunLight = new THREE.DirectionalLight( settings.sceneColor2, 5 );
@@ -231,15 +303,15 @@
 			stats = new Stats();
 			document.body.appendChild(stats.domElement);
 			// }
-			// if (settings.sceneWater) {
-			const waterModule = await import ('./tsl/tsl_water.js');
-			// const waterModule = await import {Water} from './tsl/tsl_water.js'
-			water = new waterModule.Water();
-			
+			if (settings && settings.sceneWater && settings.sceneWater != 0) {
+				const waterModule = await import ('./tsl/tsl_water.js');
+				// const waterModule = await import {Water} from './tsl/tsl_water.js'
+				water = new waterModule.Water();
+				
 
-			// water = waterModule.water;
-			console.log("water is " + water);
-
+				// water = waterModule.water;
+				console.log("water is " + water);
+			}
 
 			// }
 		}
@@ -256,10 +328,10 @@
 		const geometry = new THREE.IcosahedronGeometry( 1, 3 );
 		// const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
 		const material = getRainbowMaterial();
-		material.colorNode = iceColorNode;
+		// material.colorNode = iceColorNode;
 
 		const count = 100;
-		const scale = 3.5;
+		const scale = 10;
 		const column = 10;
 
 		objects = new THREE.Group();
@@ -270,9 +342,11 @@
 			const y = i / column;
 
 			const mesh = new THREE.Mesh( geometry, material );
-			mesh.position.set( x * scale, 0, y * scale );
+			mesh.position.set( x * scale + Math.random(), 0, y * scale * Math.random() );
 			mesh.rotation.set( Math.random(), Math.random(), Math.random() );
 			objects.add( mesh );
+			getDynamicBody(RAPIER, world, mesh);
+			activeObjex.push(mesh);
 
 		}
 
@@ -283,13 +357,13 @@
 		);
 
 		scene.add( objects );
-
+		// activeObjex.push(objects);
 		// floor
 
-		floor = new THREE.Mesh( new THREE.CylinderGeometry( 2, 2, 10 ), new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } ) );
-		// floor = new THREE.Mesh( new THREE.CylinderGeometry( 1.1, 1.1, 10 ), returnM );
-		floor.position.set( 0, - 5, 0 );
-		scene.add( floor );
+		// floor = new THREE.Mesh( new THREE.CylinderGeometry( 2, 2, 10 ), new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } ) );
+		// // floor = new THREE.Mesh( new THREE.CylinderGeometry( 1.1, 1.1, 10 ), returnM );
+		// floor.position.set( 0, - 5, 0 );
+		// scene.add( floor );
 		
 
 		// caustics
@@ -300,8 +374,8 @@
 			transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
 			const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
 
-			//material.colorNode = colorNode;
-			floor.material.colorNode = colorNode;
+			material.colorNode = colorNode;
+			// floor.material.colorNode = colorNode;
 		}
 
 		
@@ -326,6 +400,10 @@
 		controls.target.set( 0, .2, 0 );
 		controls.update();
 
+		InitEnvMap();
+		InitSky();
+		InitFog();
+
 		// gui
 
 		// const gui = renderer.inspector.createParameters( 'Settings' );
@@ -339,7 +417,6 @@
 				const scenePass = pass( scene, camera );
 				const scenePassColor = scenePass.getTextureNode();
 				const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
-
 				const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
 
 				const scenePassColorBlurred = gaussianBlur( scenePassColor );
@@ -352,9 +429,16 @@
 
 		//
 
+		// const pmremGenerator = new THREE.PMREMGenerator( renderer );
+
+		// const loader = new THREE.TextureLoader() ;
+		// // const loader = new RGBELoader() ;
+
+
 		window.addEventListener( 'resize', onWindowResize );
 
 
+		raycaster = new THREE.Raycaster();
 
 	} //end init!
 
@@ -389,7 +473,7 @@
 
 		for ( const object of objects.children ) {
 
-			object.position.y = Math.sin( clock.elapsedTime + object.id ) * .3;
+			// object.position.y = Math.sin( clock.elapsedTime + object.id ) * .3;
 			object.rotation.y += delta * .3;
 
 		}
@@ -405,3 +489,91 @@
 			}
 		}
 	}
+
+
+	/////// events and listeners and handlers
+
+		window.addEventListener('mousemove', onMouseMove);
+
+		function onMouseMove(e) {
+			if (mouse && camera && raycaster) {
+				mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+				mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+				raycaster.setFromCamera(mouse, camera);
+
+				var raycastHits = raycaster.intersectObjects(scene.children, true);
+				let newColor = new THREE.Color(0x26de57);
+				let oldColor = new THREE.Color(0xff0000);
+				if (raycastHits.length > 0) {
+				// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
+				// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+					if (raycastHits[0].object.name.includes("agent")) {
+						
+						if ( raycastHitAgent != raycastHits[ 0 ].object ) {
+							console.log ("new raycast hit on " + raycastHits[0].object.name);
+							raycastHitAgent = raycastHits[ 0 ].object;	
+
+								if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
+							
+									console.log("intersected material found!");
+									raycastHitAgent.material.materialColor = newColor;
+
+									
+								} else if (raycastHitAgent && raycastHitAgent.material) {
+									raycastHitAgent.material.color = newColor;
+								
+								}
+								const navAgentInstance = raycastHitAgent.userData.NavAgentInstance;
+								if (navAgentInstance) {
+									navAgentInstance.agentRaycastHit();
+								}
+								
+								
+						} else {
+							// console.log("rehit agent " + raycastHits[0].object.name));
+						}
+					} else {
+						if ( raycastHitAgent ) {
+							if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+								console.log("tryna reset agent colornode after no hit");
+								raycastHitAgent.material.materialColor = oldColor;
+								raycastHitAgent.material.needsUpdate = true;
+								
+							} else if (raycastHitAgent.material) {
+								console.log("tryna reset agent color after no hit");
+								raycastHitAgent.material.color = oldColor;
+							}
+						}
+						raycastHitAgent = null;
+					}
+				} else {
+					if ( raycastHitAgent ) {
+					// 	{
+						if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+							console.log("tryna reset agent color after no hit");
+							raycastHitAgent.material.materialColor = oldColor;
+							raycastHitAgent.material.needsUpdate = true;
+						} else if (raycastHitAgent.material) {
+							console.log("tryna reset agent color after no hit");
+							raycastHitAgent.material.color = oldColor;
+						}
+					}
+					raycastHitAgent = null;
+				}
+			}
+		}
+
+
+// billboard tsl
+// 	material.positionNode = material.positionNode = tsl.Fn(() => {
+// 	const objectCenter = tsl.modelWorldMatrix.mul(tsl.vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+// 	const up = tsl.vec3(0, 1, 0).toVar();
+// 	const toCamera = tsl.cameraPosition.sub(objectCenter).toVar();
+// 	// set toCamera.y = 0 to only allow rotation around the y-axis (i.e. make it "cylindrical")
+// 	toCamera.assign(tsl.vec3(toCamera.x, 0, toCamera.z).normalize());
+// 	const right = up.cross(toCamera).normalize();
+// 	up.assign(toCamera.cross(right).normalize());
+// 	const rotationMatrix = tsl.mat3(right, up, toCamera);
+// 	return rotationMatrix.mul(tsl.positionGeometry);
+// })();

@@ -16,6 +16,7 @@ $(function() {
     let theSettingsData = settingsEl.getAttribute('data-settings');
 
     settings = JSON.parse(atob(theSettingsData)); //gets copied to localdata ifn mods are 'llowed
+    console.log("settings : " + JSON.stringify(settings));
     InitConnect();
     SettingsLoaded();
 
