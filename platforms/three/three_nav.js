@@ -26,7 +26,7 @@
         agentIndex++;
             
         // if (!model) {
-            const geometry = new THREE.CapsuleGeometry( 1, 1, 4, 8, 1 );
+            const geometry = new THREE.CapsuleGeometry( .5, 1, 4, 8, 1 );
             const material = new THREE.MeshStandardNodeMaterial({ color: 'orange' });
             material.roughness = 0.1;
             material.metalness = 0.3;
@@ -37,9 +37,13 @@
             const timeUniform = uniform(0);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
-            mesh.position.set(pos.x, pos.y, pos.z);
+           
             mesh.name = "agent_" + agentIndex;
-            scene.add(mesh);
+            const agentParent = new THREE.Object3D(); //empty
+            agentParent.position.set(pos.x, pos.y, pos.z);
+            agentParent.add(mesh);
+            mesh.position.set(0,1,0); //offset on parent navagent
+            scene.add(agentParent);
         // }
 
         
@@ -66,9 +70,9 @@
         
         
         const options = {
-            object: mesh,
+            object: agentParent,
             nodeRadius: 0.01,
-            speed: 5,
+            speed: 2,
             // app: this,
             name: 'agent ' + agentIndex,
             npc: true
@@ -136,7 +140,7 @@
             if (this.npc) this.dead = false;
             
             this.speed = options.speed;
-            this.app = options.app;
+            // this.app = options.app;
             
             if (pathfinding){
                 this.pathfinder = pathfinding;

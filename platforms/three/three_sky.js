@@ -8,35 +8,37 @@ import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
 import { color, fog, float, positionWorld, triNoise3D, positionView, normalWorld, uniform } from 'three/tsl';
 
-export function InitCustomFog() {
-    				const skyColor = color( 0xf0f5f5 );
-				const groundColor = color( 0xd0dee7 );
+export function InitCustomFog() { //hrm..
+        const skyColor = color( 0xf0f5f5 );
+    const groundColor = color( 0xd0dee7 );
 
-				const fogNoiseDistance = positionView.z.negate().smoothstep( 0, camera.far - 300 );
+    const fogNoiseDistance = positionView.z.negate().smoothstep( 0, camera.far - 300 );
 
-				const distance = fogNoiseDistance.mul( 20 ).max( 4 );
-				const alpha = .98;
-				const groundFogArea = float( distance ).sub( positionWorld.y ).div( distance ).pow( 3 ).saturate().mul( alpha );
+    const distance = fogNoiseDistance.mul( 20 ).max( 4 );
+    const alpha = .98;
+    const groundFogArea = float( distance ).sub( positionWorld.y ).div( distance ).pow( 3 ).saturate().mul( alpha );
 
-				// a alternative way to create a TimerNode
-				const timer = uniform( 0 ).onFrameUpdate( ( frame ) => frame.time );
+    // a alternative way to create a TimerNode
+    const timer = uniform( 0 ).onFrameUpdate( ( frame ) => frame.time );
 
-				const fogNoiseA = triNoise3D( positionWorld.mul( .005 ), 0.2, timer );
-				const fogNoiseB = triNoise3D( positionWorld.mul( .01 ), 0.2, timer.mul( 1.2 ) );
+    const fogNoiseA = triNoise3D( positionWorld.mul( .005 ), 0.2, timer );
+    const fogNoiseB = triNoise3D( positionWorld.mul( .01 ), 0.2, timer.mul( 1.2 ) );
 
-				const fogNoise = fogNoiseA.add( fogNoiseB ).mul( groundColor );
+    const fogNoise = fogNoiseA.add( fogNoiseB ).mul( groundColor );
 
-				// apply custom fog
+    // apply custom fog
 
-				scene.fogNode = fog( fogNoiseDistance.oneMinus().mix( groundColor, fogNoise ), groundFogArea );
-				scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
+    scene.fogNode = fog( fogNoiseDistance.oneMinus().mix( groundColor, fogNoise ), groundFogArea );
+    scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
 
 }
 export function InitFog() {
-    if (settings && settings.sceneFog) {
-        const fogColor = settings.sceneColor2; // Sky blue
+    if (settings && settings.useSceneFog) {
+        console.log("doin some fog...");
+        const fogColor = settings.sceneColor1; // Sky blue
         // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
-        scene.fog = new THREE.Fog(fogColor, 1, 300);
+        scene.fog = new THREE.Fog(fogColor, 1, 200);
+        // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
     }
 }
 
@@ -51,7 +53,7 @@ export function InitEnvMap () {
         textureEquirect.colorSpace = THREE.SRGBColorSpace;
         scene.background = textureEquirect;
         scene.environment = textureEquirect;
-        scene.environmentIntensity = 10;
+        scene.environmentIntensity = 20;
     }
 }
 export function InitSky() {

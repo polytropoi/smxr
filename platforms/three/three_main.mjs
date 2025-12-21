@@ -44,7 +44,7 @@
 
 // import { sceneObjects } from '../../connect/dialogs.js';
 
-	export let scene, navmesh, surface;
+	export let scene, world, gravity, navmesh, surface;
 
 	let locationData;
 	let modelsData;
@@ -60,6 +60,7 @@
 	let doPostProcessing = true;
 
 	let activeObjex = [];
+	let physicsObjex = [];
 
 
 	const mouse = new THREE.Vector2();
@@ -88,8 +89,8 @@
 
 
 		await RAPIER.init();	
-		const gravity = { x: 0.0, y: 0, z: 0.0 };
-		const world = new RAPIER.World(gravity);
+		gravity = { x: 0.0, y: -9.81 * 2.0, z: 0.0 };
+		world = new RAPIER.World(gravity);
 
 		// UpdateText("HERE WE GO!");
 		
@@ -110,6 +111,10 @@
 			console.log("locationData " + JSON.stringify(locationData));
 			 //reuse the loader
 			// try {
+			// Create the ground
+			let groundColliderDesc = RAPIER.ColliderDesc.cuboid(5.0, 0.1, 5.0)
+			.setTranslation(0.0, -2.0, 0.0);
+			world.createCollider(groundColliderDesc);
 			(async () => {
 				try { 
 					for (let i = 0; i < locationData.length; i++) {
@@ -131,7 +136,7 @@
 											if (locationData[i].markerType == "navmesh" ) {
 												if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
 													navmesh = child;
-													child.material = transmat;
+													// child.material = transmat;
 													InitPathfinding();
 												}
 											} else if (locationData[i].markerType == "surface" ) {
@@ -143,18 +148,26 @@
 											} else {
 												// child.mesh.layers.set(1);
 												// child.mesh.userData = locationData[i];
-												if (locationData[i].eventData.includes("static_")) {
+												if (locationData[i].eventData.includes("static")) {
 													const geometry = child.geometry;
-													let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
-														.setTranslation(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z))
-														// .setLinearDamping(1)
-														// .setAngularDamping(1);
-													let rigid = world.createRigidBody(rigidBodyDesc);
-													const positionAttribute = geometry.getAttribute('position');
+													// let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
+													// 	.setTranslation(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z))
+													// 	// .setLinearDamping(1)
+													// 	// .setAngularDamping(1);
+													// let rigid = world.createRigidBody(rigidBodyDesc);
+													// const positionAttribute = geometry.getAttribute('position');
 
-													let points = positionAttribute.array;
-													let colliderDesc = RAPIER.ColliderDesc.convexHull(points).setDensity(1);
-													world.createCollider(colliderDesc, rigid);
+													// let points = positionAttribute.array;
+													// let colliderDesc = RAPIER.ColliderDesc.convexHull(points).setDensity(1);
+													// world.createCollider(colliderDesc, rigid);
+													// 2. Define a fixed rigid body
+													let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
+														.setTranslation(0.0, 0.0, 0.0);
+													let rigidBody = world.createRigidBody(rigidBodyDesc);
+
+													// 3. Create a collider for the body
+													let colliderDesc = RAPIER.ColliderDesc.cuboid(5.0, 0.1, 5.0); // Size: width, height, depth
+													world.createCollider(colliderDesc, rigidBody);
 												} else if  (locationData[i].eventData.includes("dynamic")) {
 
 
@@ -254,12 +267,12 @@
 		// // scene.fog = new THREE.Fog( settings.sceneColor2, 20, 300 );
 		// const fogColor = settings.sceneColor2; // Sky blue
 		// // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
-		// scene.fog = new THREE.Fog(fogColor, 1, 300);
+		// scene.fog = new THREE.Fog(fogColor, 1, 100);
 		// InitCustomFog();
-		// scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
+		scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
 		camera.lookAt( 0, 1, 0 );
 
-		const sunLight = new THREE.DirectionalLight( settings.sceneColor2, 5 );
+		const sunLight = new THREE.DirectionalLight( settings.sceneColor1, 5 );
 		sunLight.castShadow = true;
 		sunLight.shadow.camera.near = .1;
 		sunLight.shadow.camera.far = 5;
@@ -303,15 +316,18 @@
 			stats = new Stats();
 			document.body.appendChild(stats.domElement);
 			// }
-			if (settings && settings.sceneWater && settings.sceneWater != 0) {
+			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
 				const waterModule = await import ('./tsl/tsl_water.js');
-				// const waterModule = await import {Water} from './tsl/tsl_water.js'
-				water = new waterModule.Water();
+				if (settings.sceneWater.name == "water1") {
 				
-
-				// water = waterModule.water;
+					// const waterModule = await import {Water} from './tsl/tsl_water.js'
+					water = new waterModule.Water1();
+				} else if (settings.sceneWater.name == "water2") {
+					water = new waterModule.Water2;
+				}
+								// water = waterModule.water;
 				console.log("water is " + water);
-			}
+			} 
 
 			// }
 		}
@@ -342,21 +358,22 @@
 			const y = i / column;
 
 			const mesh = new THREE.Mesh( geometry, material );
-			mesh.position.set( x * scale + Math.random(), 0, y * scale * Math.random() );
-			mesh.rotation.set( Math.random(), Math.random(), Math.random() );
-			objects.add( mesh );
-			getDynamicBody(RAPIER, world, mesh);
-			activeObjex.push(mesh);
+			// mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
+			// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
+			// objects.add( mesh );
+			const body = getDynamicBody(RAPIER, world, mesh);
+			physicsObjex.push(body);
+			scene.add(body.mesh);
 
 		}
 
-		objects.position.set (
-			( ( column - 1 ) * scale ) * - .5,
-			- 1,
-			( ( count / column ) * scale ) * - .5
-		);
+		// objects.position.set (
+		// 	( ( column - 1 ) * scale ) * - .5,
+		// 	- 1,
+		// 	( ( count / column ) * scale ) * - .5
+		// );
 
-		scene.add( objects );
+		// scene.add( objects );
 		// activeObjex.push(objects);
 		// floor
 
@@ -402,7 +419,9 @@
 
 		InitEnvMap();
 		InitSky();
-		InitFog();
+		// if (settings && settings.useSceneFog) {
+			InitFog();
+		// }
 
 		// gui
 
@@ -414,18 +433,29 @@
 
 		// post processing
 
+
 				const scenePass = pass( scene, camera );
 				const scenePassColor = scenePass.getTextureNode();
 				const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
-				const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
 
-				const scenePassColorBlurred = gaussianBlur( scenePassColor );
-				scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+				if (water) {
+					const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
+					const scenePassColorBlurred = gaussianBlur( scenePassColor );
+					scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+					const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
-				const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
+					postProcessing = new THREE.PostProcessing( renderer );
+					postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+				} else {
+					const waterMask = objectPosition( camera ).y.greaterThan( -10 );
+					const scenePassColorBlurred = gaussianBlur( scenePassColor );
+					scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+					const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
-				postProcessing = new THREE.PostProcessing( renderer );
-				postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+					postProcessing = new THREE.PostProcessing( renderer );
+					postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+				}
+				
 
 		//
 
@@ -453,6 +483,7 @@
 
 	function animate() {
 
+		  world.step();
 		controls.update();
 
 		const delta = clock.getDelta();
@@ -471,13 +502,16 @@
 
 		// }
 
-		for ( const object of objects.children ) {
+		// for ( const object of objects.children ) {
 
-			// object.position.y = Math.sin( clock.elapsedTime + object.id ) * .3;
-			object.rotation.y += delta * .3;
+		// 	// object.position.y = Math.sin( clock.elapsedTime + object.id ) * .3;
+		// 	object.rotation.y += delta * .3;
 
-		}
-
+		// }
+  		
+		physicsObjex.forEach(b => 
+			b.update());
+		
 		if (doPostProcessing) {
 			postProcessing.render();
 		} else {
@@ -488,6 +522,7 @@
 				agents[i].update(delta);
 			}
 		}
+		// water.material.uniforms['time'].value += 1 / 60;
 	}
 
 
@@ -524,7 +559,7 @@
 									raycastHitAgent.material.color = newColor;
 								
 								}
-								const navAgentInstance = raycastHitAgent.userData.NavAgentInstance;
+								const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
 								if (navAgentInstance) {
 									navAgentInstance.agentRaycastHit();
 								}

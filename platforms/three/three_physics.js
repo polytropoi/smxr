@@ -1,8 +1,17 @@
 
+    import * as THREE from 'three';
+
 	// import RAPIER from 'rapier';
-	
+function getGeometry(size) {
+  const randomGeo = geometries[Math.floor(Math.random() * geometries.length)];
+  const geo = randomGeo.clone();
+  geo.scale(size, size, size);
+  return geo;
+}	
 
 function getDynamicBody(RAPIER, world, model, position) {
+
+    console.log("tryna create dynamic rigidbody from model " + model );
     const size = 0.5;
     const colliderSize = size * 0.5;
     const range = 6;

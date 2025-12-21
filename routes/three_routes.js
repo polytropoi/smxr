@@ -2798,165 +2798,165 @@ three_router.get('/:_id', function (req, res) {
 
                 /////////////////// build the response! ///////////////////////////////
 
-                let settings = {};  
-                    settings._id = sceneResponse._id;
-                    settings.sceneLastUpdate = sceneResponse.sceneLastUpdate;
-                    settings.sceneType = sceneResponse.sceneWebType;
-                    settings.sceneDomain = sceneResponse.sceneDomain;
-                    settings.sceneTitle = sceneResponse.sceneTitle;
-                    settings.sceneKeynote = sceneResponse.sceneKeynote;
-                    settings.sceneDescription = sceneResponse.sceneDescription;
+                // let settings = {};  //um, the old one...
+                //     settings._id = sceneResponse._id;
+                //     settings.sceneLastUpdate = sceneResponse.sceneLastUpdate;
+                //     settings.sceneType = sceneResponse.sceneWebType;
+                //     settings.sceneDomain = sceneResponse.sceneDomain;
+                //     settings.sceneTitle = sceneResponse.sceneTitle;
+                //     settings.sceneKeynote = sceneResponse.sceneKeynote;
+                //     settings.sceneDescription = sceneResponse.sceneDescription;
 
-                    settings.sceneEventStart = sceneResponse.sceneEventStart;
-                    settings.sceneEventEnd = sceneResponse.sceneEventEnd;
-                    settings.hideAvatars = true;
-                    settings.sceneUseFog = sceneResponse.sceneUseSceneFog != undefined ? sceneResponse.sceneUseSceneFog : false;
-                    settings.sceneUseSkybox = sceneResponse.sceneUseSkybox;
-                    settings.sceneSkyRadius = sceneResponse.sceneSkyRadius != undefined ? sceneResponse.sceneSkyRadius : 202;
-                    settings.sceneFogDensity = sceneResponse.sceneGlobalFogDensity != undefined ? sceneResponse.sceneGlobalFogDensity : 0;
-                    settings.sceneGroundLevel = sceneResponse.sceneGroundLevel;
-                    settings.sceneFontWeb1 = sceneResponse.sceneFontWeb1;
-                    settings.sceneFontWeb2 = sceneResponse.sceneFontWeb2;
-                    settings.sceneFontWeb3 = sceneResponse.sceneFontWeb3;
-                    settings.sceneFontFillColor = sceneResponse.sceneFontFillColor;
-                    settings.sceneFontOutlineColor = sceneResponse.sceneFontOutlineColor;
-                    settings.sceneTextBackground = sceneResponse.sceneTextBackground;
-                    settings.sceneTextBackgroundColor = sceneResponse.sceneTextBackgroundColor;
-                    settings.sceneColor1 = sceneResponse.sceneColor1;
-                    settings.sceneColor2 = sceneResponse.sceneColor2;
-                    settings.sceneColor3 = sceneResponse.sceneColor3;
-                    settings.sceneColor4 = sceneResponse.sceneColor4;
-                    settings.sceneColor1Alt = sceneResponse.sceneColor1Alt;
-                    settings.sceneColor2Alt = sceneResponse.sceneColor2Alt;
-                    settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
-                    settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
-                    settings.volumePrimary = sceneResponse.scenePrimaryVolume;
-                    settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
-                    settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
-                    // settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
+                //     settings.sceneEventStart = sceneResponse.sceneEventStart;
+                //     settings.sceneEventEnd = sceneResponse.sceneEventEnd;
+                //     settings.hideAvatars = true;
+                //     settings.sceneUseFog = sceneResponse.sceneUseSceneFog != undefined ? sceneResponse.sceneUseSceneFog : false;
+                //     settings.sceneUseSkybox = sceneResponse.sceneUseSkybox;
+                //     settings.sceneSkyRadius = sceneResponse.sceneSkyRadius != undefined ? sceneResponse.sceneSkyRadius : 202;
+                //     settings.sceneFogDensity = sceneResponse.sceneGlobalFogDensity != undefined ? sceneResponse.sceneGlobalFogDensity : 0;
+                //     settings.sceneGroundLevel = sceneResponse.sceneGroundLevel;
+                //     settings.sceneFontWeb1 = sceneResponse.sceneFontWeb1;
+                //     settings.sceneFontWeb2 = sceneResponse.sceneFontWeb2;
+                //     settings.sceneFontWeb3 = sceneResponse.sceneFontWeb3;
+                //     settings.sceneFontFillColor = sceneResponse.sceneFontFillColor;
+                //     settings.sceneFontOutlineColor = sceneResponse.sceneFontOutlineColor;
+                //     settings.sceneTextBackground = sceneResponse.sceneTextBackground;
+                //     settings.sceneTextBackgroundColor = sceneResponse.sceneTextBackgroundColor;
+                //     settings.sceneColor1 = sceneResponse.sceneColor1;
+                //     settings.sceneColor2 = sceneResponse.sceneColor2;
+                //     settings.sceneColor3 = sceneResponse.sceneColor3;
+                //     settings.sceneColor4 = sceneResponse.sceneColor4;
+                //     settings.sceneColor1Alt = sceneResponse.sceneColor1Alt;
+                //     settings.sceneColor2Alt = sceneResponse.sceneColor2Alt;
+                //     settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
+                //     settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
+                //     settings.volumePrimary = sceneResponse.scenePrimaryVolume;
+                //     settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
+                //     settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
+                //     // settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
 
-                    settings.primary_mp3url = primary_mp3url;
-                    settings.mappicURL = mappicURL;
-                    settings.skyboxIDs = skyboxIDs;
-                    settings.skyboxID = skyboxID;
-                    settings.skyboxURL = skyboxUrl;
-                    settings.useSynth = hasSynth;
-                    settings.useStarterKit = useStarterKit;
-                    settings.useSuperHands = useSuperHands;
-                    settings.usePhysicsType = usePhysicsType;
-                    settings.useNavmesh = useNavmesh; //"real" navmesh w/ pathfinding
-                    settings.useSimpleNavmesh = useSimpleNavmesh;
-                    settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
-                    settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
-                    settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
-                    settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
-                    settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
-                    let audioGroups = {};
-                    audioGroups.triggerGroups = sceneResponse.sceneTriggerAudioGroups;
-                    audioGroups.ambientGroups = sceneResponse.sceneAmbientAudioGroups;
-                    audioGroups.primaryGroups = sceneResponse.scenePrimaryAudioGroups;
-                    audioGroups.objectGroups = objectAudioGroups;
-                    settings.audioGroups = audioGroups; 
-                    settings.clearLocalMods = false;
-                    settings.sceneVideoStreams = (sceneResponse.sceneVideoStreamUrls != undefined && sceneResponse.sceneVideoStreamUrls != null) ? sceneResponse.sceneVideoStreamUrls : [];
-                    settings.socketHost = process.env.SOCKET_HOST;
-                    settings.networking = sceneResponse.sceneNetworking;
-                    settings.playerStartPosition = playerPosition;
-                    settings.playerPositions = playerPositions;
-                    settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
-                    settings.playerHeight = sceneResponse.scenePlayer.playerHeight;
-                    settings.debugMode = debugMode;
-                    settings.scatterObjects = sceneResponse.sceneScatterObjects;
-                    settings.sceneScatterObjectLayers = sceneResponse.sceneScatterObjectLayers;
-                    settings.scatterMeshes = sceneResponse.sceneScatterMeshes;
+                //     settings.primary_mp3url = primary_mp3url;
+                //     settings.mappicURL = mappicURL;
+                //     settings.skyboxIDs = skyboxIDs;
+                //     settings.skyboxID = skyboxID;
+                //     settings.skyboxURL = skyboxUrl;
+                //     settings.useSynth = hasSynth;
+                //     settings.useStarterKit = useStarterKit;
+                //     settings.useSuperHands = useSuperHands;
+                //     settings.usePhysicsType = usePhysicsType;
+                //     settings.useNavmesh = useNavmesh; //"real" navmesh w/ pathfinding
+                //     settings.useSimpleNavmesh = useSimpleNavmesh;
+                //     settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
+                //     settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
+                //     settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
+                //     settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
+                //     settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
+                //     let audioGroups = {};
+                //     audioGroups.triggerGroups = sceneResponse.sceneTriggerAudioGroups;
+                //     audioGroups.ambientGroups = sceneResponse.sceneAmbientAudioGroups;
+                //     audioGroups.primaryGroups = sceneResponse.scenePrimaryAudioGroups;
+                //     audioGroups.objectGroups = objectAudioGroups;
+                //     settings.audioGroups = audioGroups; 
+                //     settings.clearLocalMods = false;
+                //     settings.sceneVideoStreams = (sceneResponse.sceneVideoStreamUrls != undefined && sceneResponse.sceneVideoStreamUrls != null) ? sceneResponse.sceneVideoStreamUrls : [];
+                //     settings.socketHost = process.env.SOCKET_HOST;
+                //     settings.networking = sceneResponse.sceneNetworking;
+                //     settings.playerStartPosition = playerPosition;
+                //     settings.playerPositions = playerPositions;
+                //     settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
+                //     settings.playerHeight = sceneResponse.scenePlayer.playerHeight;
+                //     settings.debugMode = debugMode;
+                //     settings.scatterObjects = sceneResponse.sceneScatterObjects;
+                //     settings.sceneScatterObjectLayers = sceneResponse.sceneScatterObjectLayers;
+                //     settings.scatterMeshes = sceneResponse.sceneScatterMeshes;
 
-                    settings.sceneScatterMeshLayers = sceneResponse.sceneScatterMeshLayers;
-                    settings.allowMods = true;
-                    settings.sceneTags = sceneResponse.sceneTags;
-                    settings.hideGizmos = false;
-                    settings.sceneEnvironmentPreset = sceneResponse.sceneEnvironmentPreset;
-                    settings.showCameraIcon = sceneResponse.showCameraIcon; //for picture group mgr
-                    settings.useArParent = useArParent;
-                    settings.pixelsPerMeterActual = pixelsPerMeterActual; //for 2d to 3d position conversion
-                    settings.pixelsPerMeterActual = pixelsPerMeterVirtual; //hrm
+                //     settings.sceneScatterMeshLayers = sceneResponse.sceneScatterMeshLayers;
+                //     settings.allowMods = true;
+                //     settings.sceneTags = sceneResponse.sceneTags;
+                //     settings.hideGizmos = false;
+                //     settings.sceneEnvironmentPreset = sceneResponse.sceneEnvironmentPreset;
+                //     settings.showCameraIcon = sceneResponse.showCameraIcon; //for picture group mgr
+                //     settings.useArParent = useArParent;
+                //     settings.pixelsPerMeterActual = pixelsPerMeterActual; //for 2d to 3d position conversion
+                //     settings.pixelsPerMeterActual = pixelsPerMeterVirtual; //hrm
 
-                    if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
-                        settings.useXrRoomPhysics = true;
-                    } else {
-                        settings.useXrRoomPhysics = false;
-                    }
-                    if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("right hand blaster")) {
-                        settings.useRightHandBlaster = true;
-                    }
-                    if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("left hand blaster")) {
-                        settings.useLeftHandBlaster = true;
-                    }
+                //     if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
+                //         settings.useXrRoomPhysics = true;
+                //     } else {
+                //         settings.useXrRoomPhysics = false;
+                //     }
+                //     if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("right hand blaster")) {
+                //         settings.useRightHandBlaster = true;
+                //     }
+                //     if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("left hand blaster")) {
+                //         settings.useLeftHandBlaster = true;
+                //     }
 
-                    if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("real world meshing")) {
-                        settings.useRealWorldMeshing = true;
-                    } else {
-                        settings.useRealWorldMeshing = false;
-                    } 
+                //     if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("real world meshing")) {
+                //         settings.useRealWorldMeshing = true;
+                //     } else {
+                //         settings.useRealWorldMeshing = false;
+                //     } 
 
-                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("no mods")) {
-                        settings.allowMods = false;
-                    }
-                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("hide gizmos")) {
-                        settings.hideGizmos = true;
-                    }
-                    if (sceneResponse.scatterObjects) {
-                        settings.sceneScatterObjectLayers = sceneResponse.sceneScatterObjectLayers;
-                    }
-                    if (sceneResponse.scatterMeshes) {
-                        settings.sceneScatterMeshLayers = sceneResponse.sceneScatterMeshLayers;
-                    }
-                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
-                        settings.hideAvatars = false;
-                    }
-                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("clear localmods")) {
-                        settings.clearLocalMods = true;
-                    }
+                //     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("no mods")) {
+                //         settings.allowMods = false;
+                //     }
+                //     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("hide gizmos")) {
+                //         settings.hideGizmos = true;
+                //     }
+                //     if (sceneResponse.scatterObjects) {
+                //         settings.sceneScatterObjectLayers = sceneResponse.sceneScatterObjectLayers;
+                //     }
+                //     if (sceneResponse.scatterMeshes) {
+                //         settings.sceneScatterMeshLayers = sceneResponse.sceneScatterMeshLayers;
+                //     }
+                //     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
+                //         settings.hideAvatars = false;
+                //     }
+                //     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("clear localmods")) {
+                //         settings.clearLocalMods = true;
+                //     }
                     
-                    if (sceneResponse.triggerAudioGroups != null && sceneResponse.triggerAudioGroups.length > 0) {
-                        hasTriggerAudio = true;
-                    }
-                    if (sceneResponse.ambientAudioGroups != null && sceneResponse.ambientAudioGroups.length > 0) {
-                        hasAmbientAudio = true;
-                    }
-                    if (sceneResponse.primaryAudioGroups != null && sceneResponse.primaryAudioGroups.length > 0) {
-                        hasPrimaryAudio = true;
-                    }
-                    var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
-                    settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
-                    var spritebuff = Buffer.from(JSON.stringify(sprites)).toString("base64");
-                    spriteData = "<div id=\x22spritesDataElement\x22 data-sprites=\x22"+spritebuff+"\x22></div>";
+                //     if (sceneResponse.triggerAudioGroups != null && sceneResponse.triggerAudioGroups.length > 0) {
+                //         hasTriggerAudio = true;
+                //     }
+                //     if (sceneResponse.ambientAudioGroups != null && sceneResponse.ambientAudioGroups.length > 0) {
+                //         hasAmbientAudio = true;
+                //     }
+                //     if (sceneResponse.primaryAudioGroups != null && sceneResponse.primaryAudioGroups.length > 0) {
+                //         hasPrimaryAudio = true;
+                //     }
+                //     var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
+                //     settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
+                //     var spritebuff = Buffer.from(JSON.stringify(sprites)).toString("base64");
+                //     spriteData = "<div id=\x22spritesDataElement\x22 data-sprites=\x22"+spritebuff+"\x22></div>";
 
-                    if (sceneResponse.sceneTimedEvents) {
-                        var tebuff = Buffer.from(JSON.stringify(sceneResponse.sceneTimedEvents)).toString("base64");
-                        sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
-                    }
+                //     if (sceneResponse.sceneTimedEvents) {
+                //         var tebuff = Buffer.from(JSON.stringify(sceneResponse.sceneTimedEvents)).toString("base64");
+                //         sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
+                //     }
 
-                    let grabMix = "<a-mixin id=\x22grabmix\x22" + //mixin for grabbable objex
-                        "event-set__grab=\x22material.color: #FFEF4F\x22" +
-                        "event-set__grabend=\x22material.color: #F2E646\x22" +
-                        "event-set__hit=\x22material.color: #F2E646\x22" +
-                        "event-set__hitend=\x22material.color: #EF2D5E\x22" +
-                        "event-set__mousedown=\x22material.color: #FFEF4F\x22" +
-                        "event-set__mouseenter=\x22material.color: #F2E646\x22" +
-                        "event-set__mouseleave=\x22material.color: #EF2D5E\x22" +
-                        "event-set__mouseup=\x22material.color: #F2E646\x22" +
-                        "geometry=\x22primitive: box; height: 0.30; width: 0.30; depth: 0.30\x22" +
-                        "material=\x22color: #EF2D5E;\x22></a-mixin>";
+                //     let grabMix = "<a-mixin id=\x22grabmix\x22" + //mixin for grabbable objex
+                //         "event-set__grab=\x22material.color: #FFEF4F\x22" +
+                //         "event-set__grabend=\x22material.color: #F2E646\x22" +
+                //         "event-set__hit=\x22material.color: #F2E646\x22" +
+                //         "event-set__hitend=\x22material.color: #EF2D5E\x22" +
+                //         "event-set__mousedown=\x22material.color: #FFEF4F\x22" +
+                //         "event-set__mouseenter=\x22material.color: #F2E646\x22" +
+                //         "event-set__mouseleave=\x22material.color: #EF2D5E\x22" +
+                //         "event-set__mouseup=\x22material.color: #F2E646\x22" +
+                //         "geometry=\x22primitive: box; height: 0.30; width: 0.30; depth: 0.30\x22" +
+                //         "material=\x22color: #EF2D5E;\x22></a-mixin>";
 
-                    let playerAvatarTemplate = "";
-                    if (sceneResponse.sceneWebType != undefined && (sceneResponse.sceneWebType.toLowerCase() == "aframe" || sceneResponse.sceneWebType.toLowerCase() == "default")) { // and what else?  networking isOn?
-                        // playerAvatarTemplate = "<template id=\x22avatar-template\x22>"+ 
+                //     let playerAvatarTemplate = "";
+                //     if (sceneResponse.sceneWebType != undefined && (sceneResponse.sceneWebType.toLowerCase() == "aframe" || sceneResponse.sceneWebType.toLowerCase() == "default")) { // and what else?  networking isOn?
+                //         // playerAvatarTemplate = "<template id=\x22avatar-template\x22>"+ 
                         
-                        // "<div "+skyboxEnvMap+" gltf-model=\x22#avatar_model\x22>"+
-                        // "<a-text class=\x22playerName\x22 look-at=\x22#player\x22 rotation=\x220 0 0\x22 position=\x22.5 .75 -.15\x22 value=\x22"+avatarName+"\x22></a-text>"+
-                        // "</div>"+
-                        // "</template>";
-                    }
+                //         // "<div "+skyboxEnvMap+" gltf-model=\x22#avatar_model\x22>"+
+                //         // "<a-text class=\x22playerName\x22 look-at=\x22#player\x22 rotation=\x220 0 0\x22 position=\x22.5 .75 -.15\x22 value=\x22"+avatarName+"\x22></a-text>"+
+                //         // "</div>"+
+                //         // "</template>";
+                //     }
                  
                     // let webxrFeatures = "";
                     // // let arHitTest = "";
@@ -2970,9 +2970,11 @@ three_router.get('/:_id', function (req, res) {
                     console.log("sceneWebType: "+ sceneResponse.sceneWebType + " sceneTags " + sceneResponse.sceneTags); 
                     ////////DEFAULT/AFRAME Scene type:
                     
-                    if (sceneResponse.sceneWebType == "Model Viewer") {
+                    // if (sceneResponse.sceneWebType == "Model Viewer") { //ha
                        
-                    } else { /////////////////////////////////////////////////////////------------- Default Three response below ------------------------------
+                    // } else {
+                        
+                        /////////////////////////////////////////////////////////------------- Default Three response below ------------------------------
 
                         
                         
@@ -3011,6 +3013,7 @@ three_router.get('/:_id', function (req, res) {
                         settings.skyboxID = skyboxID;
                         settings.skyboxURL = skyboxUrl;
                         settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
+                        settings.useSceneFog = sceneResponse.sceneUseSceneFog;
                         settings.useSynth = hasSynth;
                         settings.mappicURL = mappicURL;
                         settings.backgroundVideoURL = backgroundVideoURL;
@@ -3255,36 +3258,36 @@ three_router.get('/:_id', function (req, res) {
                     
                         "</html>";
                                         
-                    // } 
-                    // let htmltext___ = "<!DOCTYPE html>\n" +
+                        // } 
+                        // let htmltext___ = "<!DOCTYPE html>\n" +
 
-                    
-                    //     "<head> " +
-                    //     "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
-                    //     "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                    //     "<meta charset=\x22UTF-8\x22>"+
-                    //     "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                    //     "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                    //     // googleAnalytics +
                         
-                    //     "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                    //     "<meta charset='utf-8'/>" +
-                    //     "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
+                        //     "<head> " +
+                        //     "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
+                        //     "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
+                        //     "<meta charset=\x22UTF-8\x22>"+
+                        //     "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
+                        //     "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
+                        //     // googleAnalytics +
+                            
+                        //     "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
+                        //     "<meta charset='utf-8'/>" +
+                        //     "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
 
-                    //     "<script async src=\x22https://unpkg.com/es-module-shims@latest/dist/es-module-shims.js\x22></script>"+
-                    //     importMap +
-                    //      "</head>\n" +
-                    //     "<body "+bgstyle+">" +
-                    //     // "<body>" +
+                        //     "<script async src=\x22https://unpkg.com/es-module-shims@latest/dist/es-module-shims.js\x22></script>"+
+                        //     importMap +
+                        //      "</head>\n" +
+                        //     "<body "+bgstyle+">" +
+                        //     // "<body>" +
+                            
+                        //     "<script type=\x22module\x22 src=\x22../../main/js/three/three_main.mjs\x22 ></script>" +
+                        //     "</body>\n" +
                         
-                    //     "<script type=\x22module\x22 src=\x22../../main/js/three/three_main.mjs\x22 ></script>" +
-                    //     "</body>\n" +
-                    
-                    //     "</html>";
-                                      
-                        // console.log(htmltext);
-                                                                
-                }
+                        //     "</html>";
+                                        
+                            // console.log(htmltext);
+                                                                    
+                // }
                 if (!accessScene) {
                     let noAccessHTML = "<html xmlns='http://www.w3.org/1999/xhtml'>" +
                     "<head> " +

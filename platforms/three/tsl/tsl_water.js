@@ -3,6 +3,8 @@
 // export let water = 'water';
 import * as THREE from 'three/webgpu';
 
+import { WaterMesh } from 'three/addons/objects/WaterMesh.js';
+
 import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time } from 'three/tsl';
 	
 import { scene } from '../three_main.mjs'
@@ -10,7 +12,7 @@ import { scene } from '../three_main.mjs'
 import { settings } from '../../../connect/settings.js';
 	
 import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
-export class Water {
+export class Water1 {
 
     constructor() {
 
@@ -52,5 +54,31 @@ export class Water {
         // return water;
     }
 // scene.add( water );
+}
+
+export class Water2 { //uses watermesh
+    constructor() {
+       
+        const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
+        const loader = new THREE.TextureLoader();
+        const waterNormals = loader.load( '../../platforms/three/assets/waternormals.jpg' );
+        waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+
+        const water = new WaterMesh(
+            waterGeometry,
+            {
+                waterNormals: waterNormals,
+                sunDirection: new THREE.Vector3(),
+                sunColor: settings.sceneColor1,
+                waterColor: settings.sceneColor2,
+                alpha: .3,
+                distortionScale: 4
+            }
+        );
+
+        water.rotation.x = - Math.PI / 2;
+        scene.add(water);
+
+    }
 }
 // export default Water;
