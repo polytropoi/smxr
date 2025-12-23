@@ -32,7 +32,7 @@
 
 	import { UpdateText } from './three_ui.js';
 
-	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies } from './three_physics.js';
+	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer } from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -497,7 +497,7 @@
 
 		 
 		controls.update();
- 		world.step();
+
 		const delta = clock.getDelta();
 
 		if (stats) {
@@ -521,12 +521,17 @@
 
 		// }
   		if (physicsIsReady) {
+			 		world.step();
 			dynamicBodies.forEach(b => 
 				b.update());
 			kinematicVelocityBodies.forEach(c => 
 				c.update());
+
+			rapierDebugRenderer.update();
+	
 		}
 		
+
 		if (doPostProcessing) {
 			postProcessing.render();
 		} else {
@@ -553,25 +558,26 @@
 				raycaster.setFromCamera(mouse, camera);
 
 				var raycastHits = raycaster.intersectObjects(scene.children, true);
-				let newColor = new THREE.Color(0x26de57);
-				let oldColor = new THREE.Color(0xff0000);
+				let selectColor = new THREE.Color(0xff3333);
+				let stopColor = new THREE.Color(0x26de57);
+				let goColor = new THREE.Color(0xff0000);
 				if (raycastHits.length > 0) {
 				// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
 				// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
 					if (raycastHits[0].object.name.includes("agent")) {
 						
 						if ( raycastHitAgent != raycastHits[ 0 ].object ) {
-							console.log ("new raycast hit on " + raycastHits[0].object.name);
+							console.log ("new raycast hit on agent " + raycastHits[0].object.name);
 							raycastHitAgent = raycastHits[ 0 ].object;	
 
 								if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
 							
 									console.log("intersected material found!");
-									raycastHitAgent.material.materialColor = newColor;
+									raycastHitAgent.material.materialColor = goColor;
 
 									
 								} else if (raycastHitAgent && raycastHitAgent.material) {
-									raycastHitAgent.material.color = newColor;
+									raycastHitAgent.material.color = goColor;
 								
 								}
 								const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
@@ -587,12 +593,12 @@
 						if ( raycastHitAgent ) {
 							if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
 								console.log("tryna reset agent colornode after no hit");
-								raycastHitAgent.material.materialColor = oldColor;
+								raycastHitAgent.material.materialColor = stopColor;
 								raycastHitAgent.material.needsUpdate = true;
 								
 							} else if (raycastHitAgent.material) {
 								console.log("tryna reset agent color after no hit");
-								raycastHitAgent.material.color = oldColor;
+								raycastHitAgent.material.color = stopColor;
 							}
 						}
 						raycastHitAgent = null;
@@ -602,11 +608,11 @@
 					// 	{
 						if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
 							console.log("tryna reset agent color after no hit");
-							raycastHitAgent.material.materialColor = oldColor;
+							raycastHitAgent.material.materialColor = stopColor;
 							raycastHitAgent.material.needsUpdate = true;
 						} else if (raycastHitAgent.material) {
 							console.log("tryna reset agent color after no hit");
-							raycastHitAgent.material.color = oldColor;
+							raycastHitAgent.material.color = stopColor;
 						}
 					}
 					raycastHitAgent = null;

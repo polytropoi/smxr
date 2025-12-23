@@ -19,13 +19,41 @@ export let staticBodies = [];
 
 export async function initRapier () {
 		await RAPIER.init();	
-		gravity = { x: 0.0, y: -9.81 * 2.0, z: 0.0 };
+		gravity = { x: 0.0, y: -9.81, z: 0.0 };
 		world = new RAPIER.World(gravity);
 }
 
 
 import { getRainbowMaterial } from './tsl/rainbow.js'
-export async function createStaticCollider (world, model, position) {
+
+export let rapierDebugRenderer;
+
+class RapierDebugRenderer {
+  mesh
+  world
+  enabled = true
+
+  constructor(scene, world) {
+    this.world = world
+    this.mesh = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: true }))
+    this.mesh.frustumCulled = false
+    scene.add(this.mesh)
+  }
+
+  update() {
+    if (this.enabled) {
+      const { vertices, colors } = this.world.debugRender()
+      this.mesh.geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
+      this.mesh.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 4))
+      this.mesh.visible = true
+    } else {
+      this.mesh.visible = false
+    }
+  }
+}
+
+
+export async function createStaticCollider (world, model, position) { //she's no move
     console.log("tryna set static collider for model " + model);
    
     await model.traverse((child) => {
@@ -46,37 +74,55 @@ export async function createStaticCollider (world, model, position) {
         const staticBody = world.createRigidBody(rbDesc);
         world.createCollider(colliderDesc, staticBody);
         staticBodies.push(staticBody);
+
         physicsIsReady = true;
-        }
+
+    }
     
     });
-  
-    initTestObjex();
+    if (physicsIsReady) {
+        initTestObjex();
+        rapierDebugRenderer = new RapierDebugRenderer(scene, world)
+    }
+
     
 }
-export function getKinematicVelocityBody(model) {
+export function getKinematicVelocityBody(model, position) {
     let size = 1;
-    let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic();
-            // .setTranslation(x, y, z);
+    let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased()
+            .setTranslation(position.x, position.y, position.z);
     let rigidbody = world.createRigidBody(rigidBodyDesc);
-    let dynamicCollider = RAPIER.ColliderDesc.capsule(0.5, 0.2);
-    world.createCollider(dynamicCollider, rigidbody);
-    const mesh = model.clone();
-    mesh.traverse((child) => {
+    let kinematicCollider = RAPIER.ColliderDesc.capsule(.7, .25);
+    world.createCollider(kinematicCollider, rigidbody);
+    
+    // const mesh = model.clone();
+    let childmesh;
+    // let meshPosition = new THREE.Vector3();
+    // meshPosition.get
+
+    model.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
+        childmesh = child;
       }
     });
     // mesh.scale.setScalar(size);
-        mesh.scale.setScalar(size);
+
+    let worldposition = new THREE.Vector3();
+    // mesh.getWorldPosition(worldposition);
+    // childmesh.scale.setScalar(size);
+
     function update () {
-         rigidbody.resetForces(true); 
-      rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y, z: mesh.position.z });
+
+        //  rigidbody.resetForces(true); 
+    //   rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y + 1, z: mesh.position.z });
+        childmesh.getWorldPosition(worldposition);
+      rigidbody.setTranslation(worldposition);
     //   let { x, y, z } = rigidbody.translation();
     //   mouseMesh.position.set(x, y, z);
     }
 
-    return { mesh, rigidbody, update };
+    return { rigidbody, update };
 }
 export function getDynamicBody(model, position) {
 
@@ -84,14 +130,15 @@ export function getDynamicBody(model, position) {
     const size = 0.5;
     const colliderSize = size * 1.25;
     const range = 6;
-    const density = size  * 1;
+    const density = size  * .5;
     let x = Math.random() * range - range * 0.5;
     let y = Math.random() * range - range * 0.5 + 3;
     let z = Math.random() * range - range * 0.5;
 
     // RIGID BODY
     let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(x, y, z);
+            .setTranslation(x, y, z)
+            .setCcdEnabled(false);
     let rigid = world.createRigidBody(rigidBodyDesc);
     // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
 

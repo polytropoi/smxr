@@ -58,7 +58,8 @@ export function SplashText (textString) {
 // }
 
 // Root container – add it to the scene; call root.update in your loop
-export function UpdateText (string) {
+
+export function UpdateText (string) { //uikit, no workie (use vite, they say...)
     const root = new Container({
     backgroundColor: "red",
     sizeX: 8,

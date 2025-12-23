@@ -30,7 +30,7 @@
             
         // if (!model) {
             const geometry = new THREE.CapsuleGeometry( .5, 1, 4, 8, 1 );
-            const material = new THREE.MeshStandardNodeMaterial({ color: 'orange' });
+            const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'orange' });
             material.roughness = 0.1;
             material.metalness = 0.3;
             material.envMap = scene.environment;
@@ -85,7 +85,7 @@
         const agent = new NavAgent( options );
         agents.push(agent);
 
-        const rbody = getKinematicVelocityBody(mesh);
+        const rbody = getKinematicVelocityBody(mesh, pos);
         kinematicVelocityBodies.push(rbody);
     } 
                 
@@ -296,6 +296,13 @@
 
             if (closestNode) {
                 this.readyToNav = !this.readyToNav;    
+                // if (this.readyToNav) {
+                //         this.object.traverse((child) => {
+                //         if (child.isMesh) {
+                //            child.material.color
+                //         }
+                //         });
+                // }
             } else {
                 console.log("don't interrupt now, cain't find a spot to stop");
             }
