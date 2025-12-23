@@ -24,9 +24,7 @@ export async function initRapier () {
 		world = new RAPIER.World(gravity);
         worldIsReady = true;
 
-        setTimeout(() => {
-            WaitAndInit();
-        }, 3000);
+
 }
 
 
@@ -104,8 +102,7 @@ export async function createStaticCollider (world, model, position) { //she's no
     } catch (e) {
         console.error("staticCollider error "+ e);
     } finally {
-
-
+        WaitAndInit();
     }
     
 }
@@ -115,9 +112,18 @@ export async function createStaticCollider (world, model, position) { //she's no
 
 
 function WaitAndInit () {
-                initTestObjex();
-            rapierDebugRenderer = new RapierDebugRenderer(scene, world);
-            physicsIsReady = true;
+    rapierDebugRenderer = new RapierDebugRenderer(scene, world); 
+    physicsIsReady = true;
+            setTimeout(() => {
+                           
+            
+            
+            
+            initTestObjex();
+
+        }, 3000);
+
+
 }
 export function getKinematicVelocityBody(model, position) {
     let size = 1;
@@ -161,8 +167,8 @@ export async function getDynamicBody(model, position) {
     // console.log("tryna create dynamic rigidbody from model " + model );
     const size = 0.5;
     const colliderSize = size * 1.25;
-    const range = 16;
-    const density = size  * .5;
+    const range = 6;
+    const density = size  * 2;
     let x = Math.random() * range - range * 0.5;
     let y = Math.random() * range - range * 0.5 + 3;
     let z = Math.random() * range - range * 0.5;
@@ -257,16 +263,16 @@ export async function getDynamicBody(model, position) {
 
 		}
 
-        		// caustics
-		if (water && water.waterLayer0) {
-			const waterPosY = positionWorld.y.sub( water.position.y );
+        // 		// caustics
+		// if (water && water.waterLayer0) {
+		// 	const waterPosY = positionWorld.y.sub( water.position.y );
 
-			let transition = waterPosY.add( .1 ).saturate().oneMinus();
-			transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
-			const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
+		// 	let transition = waterPosY.add( .1 ).saturate().oneMinus();
+		// 	transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
+		// 	const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
 
-			material.colorNode = colorNode;
-			// floor.material.colorNode = colorNode;
-		}
+		// 	material.colorNode = colorNode;
+		// 	// floor.material.colorNode = colorNode;
+		// }
 
   }
