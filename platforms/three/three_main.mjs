@@ -23,7 +23,7 @@
 	import { SetSceneLocations } from '../../../connect/connect.js';
 
 
-	import { InitPathfinding, agents } from './three_nav.js';
+	import { InitPathfinding, agents, kinematicVelocityBodies } from './three_nav.js';
 
 	import { getRainbowMaterial } from './tsl/rainbow.js'
 
@@ -32,7 +32,7 @@
 
 	import { UpdateText } from './three_ui.js';
 
-	import { getDynamicBody } from './three_physics.js';
+	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies } from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -44,13 +44,14 @@
 
 // import { sceneObjects } from '../../connect/dialogs.js';
 
-	export let scene, world, gravity, navmesh, surface;
+	export let scene, navmesh, surface;
 
 	let locationData;
 	let modelsData;
 	let raycastHitAgent;
 	let raycaster, stats;
-	let mixer, objects, water;// waterLayer0, waterLayer1;
+	// let mixer, objects;
+	export let water;// waterLayer0, waterLayer1;
 	export let clock;
 	export let camera, renderer;
 	let model, floor, floorPosition;
@@ -58,9 +59,14 @@
 	let controls;
 
 	let doPostProcessing = true;
+	
 
 	let activeObjex = [];
-	let physicsObjex = [];
+	let dynamicObjex = [];
+
+	let staticObjex = [];
+	let navmeshObjex = [];
+	let surfaceObjex = [];
 
 
 	const mouse = new THREE.Vector2();
@@ -79,19 +85,27 @@
 			console.error('An error happened during model loading', error);
 		}
 	}
+// async function initRapier() {
+//     // Pass a single configuration object to RAPIER.init()
+//     await RAPIER.init({
+//         gravity: { x: 0.0, y: -9.81, z: 0.0 },
+//         // Add other settings here if needed (e.g., IS_WASM_DEBUG)
+//         IS_WASM_DEBUG: false // Example of another parameter
+// 				// world: new RAPIER.World(gravity)
+//     });
+//     console.log("Rapier initialized with single object!");
+//     // Now you can create physics world, bodies, etc.
+// }
 
 	
 	////////////// SCENE INIT FUNCTION 
 
 	async function init() {
 
+		// initRapier();
 		scene = new THREE.Scene();
 
-
-		await RAPIER.init();	
-		gravity = { x: 0.0, y: -9.81 * 2.0, z: 0.0 };
-		world = new RAPIER.World(gravity);
-
+		await initRapier();
 		// UpdateText("HERE WE GO!");
 		
 
@@ -112,9 +126,9 @@
 			 //reuse the loader
 			// try {
 			// Create the ground
-			let groundColliderDesc = RAPIER.ColliderDesc.cuboid(5.0, 0.1, 5.0)
-			.setTranslation(0.0, -2.0, 0.0);
-			world.createCollider(groundColliderDesc);
+			// let groundColliderDesc = RAPIER.ColliderDesc.cuboid(5.0, 0.1, 5.0)
+			// .setTranslation(0.0, -2.0, 0.0);
+			// world.createCollider(groundColliderDesc);
 			(async () => {
 				try { 
 					for (let i = 0; i < locationData.length; i++) {
@@ -127,7 +141,17 @@
 																				
 									console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
 									
-													
+									if (locationData[i].eventData.includes("static") || locationData[i].locationTags.includes("static")) {
+										console.log("gotsa static object");
+										staticObjex.push(model);
+									} else if  (locationData[i].eventData.includes("dynamic")) {
+										dynamicObjex.push(model);
+
+									} else {
+										// child.mesh.layers.set(1);
+										// child.mesh.userData = locationData[i];	
+									}
+															
 									
 									const transmat = new THREE.MeshBasicNodeMaterial( { transparent: true, opacity: 0, color: 0x111111, depthWrite :false});
 									model.traverse(function (child) {
@@ -145,34 +169,6 @@
 													// child.material = transmat;
 													InitSurface();
 												}
-											} else {
-												// child.mesh.layers.set(1);
-												// child.mesh.userData = locationData[i];
-												if (locationData[i].eventData.includes("static")) {
-													const geometry = child.geometry;
-													// let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
-													// 	.setTranslation(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z))
-													// 	// .setLinearDamping(1)
-													// 	// .setAngularDamping(1);
-													// let rigid = world.createRigidBody(rigidBodyDesc);
-													// const positionAttribute = geometry.getAttribute('position');
-
-													// let points = positionAttribute.array;
-													// let colliderDesc = RAPIER.ColliderDesc.convexHull(points).setDensity(1);
-													// world.createCollider(colliderDesc, rigid);
-													// 2. Define a fixed rigid body
-													let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
-														.setTranslation(0.0, 0.0, 0.0);
-													let rigidBody = world.createRigidBody(rigidBodyDesc);
-
-													// 3. Create a collider for the body
-													let colliderDesc = RAPIER.ColliderDesc.cuboid(5.0, 0.1, 5.0); // Size: width, height, depth
-													world.createCollider(colliderDesc, rigidBody);
-												} else if  (locationData[i].eventData.includes("dynamic")) {
-
-
-												}
-												
 											}
 											
 																	
@@ -186,13 +182,15 @@
 												// if (child.material.envMap) {
 												child.castShadow = true;	
 												child.receiveShadow = true;
-													child.material.envMap = scene.environment;
+												child.material.envMap = scene.environment;
 												// }
 												
 											}
+											
 											// child.material.envMap = scene.environment;
 										}
 									});
+
 									if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) {
 										console.log("EVENT DATA WITH INSTANCING");
 										let instancedModel = {};
@@ -214,9 +212,7 @@
 										// model.material.envMap = scene.environment;
 										// model.envMapIntensity = 2;
 										activeObjex.push(model);
-										
-	
-									
+																			
 									}
 								}
 							}
@@ -249,18 +245,34 @@
 							InstanceOnSurface(instancedModels[i].model, count, scale);
 						} 
 					}
+					// initStaticObjex();
+
 				} catch (e) {
 					console.error("ERROR LOADING GLTF! " + e);
+				} finally {
+					initStaticObjex();
 				}
 			})();
+			
 		}
 
 
+		function initStaticObjex () { //e.g. ground, walls, etc.. this sets physicsIsReady to true if successful
+			console.log("tryna init staticObjex " + staticObjex.length);
+			for (let i = 0; i < staticObjex.length; i++) {
+				// if (staticObjex[i].geometry) {
+				console.log(staticObjex[i]);
+					// const verts = staticObjex[i].geometry.attributes.position;
+					createStaticCollider(world, staticObjex[i]);
+					// scene.add(staticObj);
+				// }
+			}
+		}
 
 		console.log("settings " + JSON.stringify(settings));
 
 		camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.25, 300 );
-		camera.position.set( 3, 2, 4 );
+		camera.position.set( 10, 20, 10 );
 
 		
 		// scene = new THREE.Scene();
@@ -341,31 +353,31 @@
 
 		const iceColorNode = triplanarTexture( texture( iceDiffuse ) ).add( color( settings.sceneColor1 ) ).mul( .4 );
 
-		const geometry = new THREE.IcosahedronGeometry( 1, 3 );
-		// const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
-		const material = getRainbowMaterial();
-		// material.colorNode = iceColorNode;
+				// const geometry = new THREE.IcosahedronGeometry( 1, 3 );
+				// // const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
+				// const material = getRainbowMaterial();
+				// // material.colorNode = iceColorNode;
 
-		const count = 100;
-		const scale = 10;
-		const column = 10;
+				// const count = 100	;
+				// const scale = 10;
+				// const column = 50;
 
-		objects = new THREE.Group();
+				// objects = new THREE.Group();
 
-		for ( let i = 0; i < count; i ++ ) {
+				// for ( let i = 0; i < count; i ++ ) {
 
-			const x = i % column;
-			const y = i / column;
+				// 	const x = i % column;
+				// 	const y = i / column;
 
-			const mesh = new THREE.Mesh( geometry, material );
-			// mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
-			// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
-			// objects.add( mesh );
-			const body = getDynamicBody(RAPIER, world, mesh);
-			physicsObjex.push(body);
-			scene.add(body.mesh);
+				// 	const mesh = new THREE.Mesh( geometry, material );
+				// 	// mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
+				// 	// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
+				// 	// objects.add( mesh );
+				// 	const body = getDynamicBody(RAPIER, world, mesh);
+				// 	dynamicObjex.push(body);
+				// 	scene.add(body.mesh);
 
-		}
+				// }
 
 		// objects.position.set (
 		// 	( ( column - 1 ) * scale ) * - .5,
@@ -383,17 +395,17 @@
 		// scene.add( floor );
 		
 
-		// caustics
-		if (water && water.waterLayer0) {
-			const waterPosY = positionWorld.y.sub( water.position.y );
+		// // caustics
+		// if (water && water.waterLayer0) {
+		// 	const waterPosY = positionWorld.y.sub( water.position.y );
 
-			let transition = waterPosY.add( .1 ).saturate().oneMinus();
-			transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
-			const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
+		// 	let transition = waterPosY.add( .1 ).saturate().oneMinus();
+		// 	transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
+		// 	const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
 
-			material.colorNode = colorNode;
-			// floor.material.colorNode = colorNode;
-		}
+		// 	material.colorNode = colorNode;
+		// 	// floor.material.colorNode = colorNode;
+		// }
 
 		
 
@@ -483,9 +495,9 @@
 
 	function animate() {
 
-		  world.step();
+		 
 		controls.update();
-
+ 		world.step();
 		const delta = clock.getDelta();
 
 		if (stats) {
@@ -508,9 +520,12 @@
 		// 	object.rotation.y += delta * .3;
 
 		// }
-  		
-		physicsObjex.forEach(b => 
-			b.update());
+  		if (physicsIsReady) {
+			dynamicBodies.forEach(b => 
+				b.update());
+			kinematicVelocityBodies.forEach(c => 
+				c.update());
+		}
 		
 		if (doPostProcessing) {
 			postProcessing.render();

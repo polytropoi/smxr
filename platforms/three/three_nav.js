@@ -6,14 +6,17 @@
 
     import { uniform, sin, mul, add, time } from 'three/tsl';
 
+    import { getKinematicVelocityBody } from './three_physics.js';
 
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;
     let pathfinding, helper;
 
     export let agents = [];
+    export let kinematicVelocityBodies = [];
 
     import { returnMaterial } from './tsl/tsl_materials.js'
+
 
     let arrowHelper;
 
@@ -45,6 +48,7 @@
             mesh.position.set(0,1,0); //offset on parent navagent
             scene.add(agentParent);
         // }
+
 
         
 
@@ -81,7 +85,8 @@
         const agent = new NavAgent( options );
         agents.push(agent);
 
-            
+        const rbody = getKinematicVelocityBody(mesh);
+        kinematicVelocityBodies.push(rbody);
     } 
                 
     export function InitPathfinding () {

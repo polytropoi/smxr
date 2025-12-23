@@ -3596,11 +3596,16 @@ AFRAME.registerComponent('enviro_mods', { //tweak properties of environment comp
     }
     if (!settings.sceneUseFog || fogDensity == 0) {
       this.el.sceneEl.removeAttribute("fog");
+      
     } else {
       if (this.enviroEl) {
 
         this.enviroEl.setAttribute("environment", {'preset': preset, 'fog': fogDensity});
-      }
+          if (!settings.sceneUseFog || fogDensity == 0) {
+            this.enviroEl.setAttribute("environment", {'fog': 0});
+            this.el.sceneEl.removeAttribute("fog");
+          } 
+        }
     }
    
   },

@@ -177,8 +177,9 @@ AFRAME.registerComponent('mod_model', {
           this.hasLocationCallout = true;
           this.hasCallout = true;
         }
-        if (this.data.markerType == "navmesh" || this.data.markerType == "surface") {
+        if (this.data.markerType == "navmesh" || this.data.markerType == "surface" || this.data.eventData.includes("static") || this.data.tags.includes("static")) {
           this.el.classList.remove("activeObjexRay");
+          this.el.classList.remove("activeObjexGrab");
         } 
        
         if (this.data.tags && this.data.tags.includes("follow curve")) {
@@ -257,6 +258,7 @@ AFRAME.registerComponent('mod_model', {
           if ((this.data.eventData && this.data.eventData.includes("physics")) || (this.data.tags && this.data.tags.includes("physics"))) {
             if (settings.usePhysicsType == "ammo") {
               if (this.data.eventData.includes("static")) {
+                // this.el.classList.remove(activeObjex)
               // this.el.object3D.visible = false;
               // console.log("GOTSA SCATTER OBJEK@");
                 // this.el.setAttribute("mod_physics", {body: "static", shape: })
@@ -750,6 +752,7 @@ AFRAME.registerComponent('mod_model', {
                 // let child = this.meshChildren[i].clone();
                 this.child = this.el.object3D.getObjectByName(this.meshChildren[i].name, true);
                 this.child.visible = false; //just hide named navmesh, they're loaded externally... 
+
 
   
               } else if (this.meshChildren[i].name.includes("collider")) { //for models just assume this is static
@@ -2244,6 +2247,11 @@ AFRAME.registerComponent('mod_model', {
           this.el.object3D.updateMatrix(); 
         
         this.setModelProperties();
+
+        if (this.data.markerType == "navmesh" || this.data.markerType == "surface" || this.data.eventData.includes("static") || this.data.tags.includes("static")) {
+          this.el.classList.remove("activeObjexRay");
+          this.el.classList.remove("activeObjexGrab");
+        }
       // } else {
       //   this.el.setAttribute("gltf-model", "https://servicemedia.s3.amazonaws.com/assets/models/savedplaceholder.glb");
       // }

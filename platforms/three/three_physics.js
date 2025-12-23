@@ -1,19 +1,88 @@
 
-    import * as THREE from 'three';
+import * as THREE from 'three';
 
-	// import RAPIER from 'rapier';
+import RAPIER from 'rapier';
+import { scene, water } from './three_main.mjs';
+// import {scene, world} from './three_main.mjs'
+
 function getGeometry(size) {
   const randomGeo = geometries[Math.floor(Math.random() * geometries.length)];
   const geo = randomGeo.clone();
   geo.scale(size, size, size);
   return geo;
 }	
+export let world, gravity;
+export let physicsIsReady = false;
+// export let kinematicVelocityBodies = [];
+export let dynamicBodies = [];
+export let staticBodies = [];
 
-function getDynamicBody(RAPIER, world, model, position) {
+export async function initRapier () {
+		await RAPIER.init();	
+		gravity = { x: 0.0, y: -9.81 * 2.0, z: 0.0 };
+		world = new RAPIER.World(gravity);
+}
 
-    console.log("tryna create dynamic rigidbody from model " + model );
+
+import { getRainbowMaterial } from './tsl/rainbow.js'
+export async function createStaticCollider (world, model, position) {
+    console.log("tryna set static collider for model " + model);
+   
+    await model.traverse((child) => {
+    if (child.isMesh) {
+        
+
+        const geometry = child.geometry;
+        const vertices = geometry.attributes.position.array;
+        const indices = geometry.index.array;
+
+        // 3. Create ColliderDesc (Example: Trimesh for complex shape)
+        let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+            
+            // 4. Configure collider properties
+        colliderDesc.setDensity(1.0);
+
+        const rbDesc = RAPIER.RigidBodyDesc.fixed(); //.setTranslation({ x: 0, y: 0, z: 0 });
+        const staticBody = world.createRigidBody(rbDesc);
+        world.createCollider(colliderDesc, staticBody);
+        staticBodies.push(staticBody);
+        physicsIsReady = true;
+        }
+    
+    });
+  
+    initTestObjex();
+    
+}
+export function getKinematicVelocityBody(model) {
+    let size = 1;
+    let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic();
+            // .setTranslation(x, y, z);
+    let rigidbody = world.createRigidBody(rigidBodyDesc);
+    let dynamicCollider = RAPIER.ColliderDesc.capsule(0.5, 0.2);
+    world.createCollider(dynamicCollider, rigidbody);
+    const mesh = model.clone();
+    mesh.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+      }
+    });
+    // mesh.scale.setScalar(size);
+        mesh.scale.setScalar(size);
+    function update () {
+         rigidbody.resetForces(true); 
+      rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y, z: mesh.position.z });
+    //   let { x, y, z } = rigidbody.translation();
+    //   mouseMesh.position.set(x, y, z);
+    }
+
+    return { mesh, rigidbody, update };
+}
+export function getDynamicBody(model, position) {
+
+    // console.log("tryna create dynamic rigidbody from model " + model );
     const size = 0.5;
-    const colliderSize = size * 0.5;
+    const colliderSize = size * 1.25;
     const range = 6;
     const density = size  * 1;
     let x = Math.random() * range - range * 0.5;
@@ -24,7 +93,9 @@ function getDynamicBody(RAPIER, world, model, position) {
     let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
             .setTranslation(x, y, z);
     let rigid = world.createRigidBody(rigidBodyDesc);
-    let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
+    // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
+
+    let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize).setDensity(density);
     world.createCollider(colliderDesc, rigid);
 
     const mesh = model.clone();
@@ -48,7 +119,8 @@ function getDynamicBody(RAPIER, world, model, position) {
         rigid.setTranslation({ x: x, y: 10.0, z: z });
       }
     }
-    return { mesh, rigid, update };
+
+    return { rigid, mesh, update };
   }
 
   function getMouseBall (RAPIER, world) {
@@ -75,4 +147,44 @@ function getDynamicBody(RAPIER, world, model, position) {
     return { mesh: mouseMesh, update };
   }
 
-  export { getDynamicBody, getMouseBall };
+
+  export function initTestObjex () {
+
+		const geometry = new THREE.IcosahedronGeometry( 1, 3 );
+		// const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
+		const material = getRainbowMaterial();
+		// material.colorNode = iceColorNode;
+
+		const count = 100	;
+		const scale = 10;
+		const column = 50;
+
+		for ( let i = 0; i < count; i ++ ) {
+
+			const x = i % column;
+			const y = i / column;
+
+			const mesh = new THREE.Mesh( geometry, material );
+			// mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
+			// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
+			// objects.add( mesh );
+			// const body = getDynamicBody(RAPIER, world, mesh);
+            const body = getDynamicBody(mesh);
+			dynamicBodies.push(body);
+			scene.add(body.mesh);
+
+		}
+
+        		// caustics
+		if (water && water.waterLayer0) {
+			const waterPosY = positionWorld.y.sub( water.position.y );
+
+			let transition = waterPosY.add( .1 ).saturate().oneMinus();
+			transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
+			const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
+
+			material.colorNode = colorNode;
+			// floor.material.colorNode = colorNode;
+		}
+
+  }

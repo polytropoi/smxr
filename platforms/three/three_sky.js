@@ -33,7 +33,7 @@ export function InitCustomFog() { //hrm..
 
 }
 export function InitFog() {
-    if (settings && settings.useSceneFog) {
+    if (settings && settings.sceneUseVolumetricFog) {
         console.log("doin some fog...");
         const fogColor = settings.sceneColor1; // Sky blue
         // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
