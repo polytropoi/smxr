@@ -132,7 +132,7 @@
 			(async () => {
 				try { 
 					for (let i = 0; i < locationData.length; i++) {
-						if (locationData[i].modelID && locationData.modelID != "none") {
+						if (locationData[i].modelID && locationData[i].modelID != "none") {
 							for (let m = 0; m < modelsData.length; m++) {
 								if (locationData[i].modelID == modelsData[m]._id) {
 									console.log("gotsa model! " +modelsData[m].modelURL);
@@ -141,16 +141,7 @@
 																				
 									console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
 									
-									if (locationData[i].eventData.includes("static") || locationData[i].locationTags.includes("static")) {
-										console.log("gotsa static object");
-										staticObjex.push(model);
-									} else if  (locationData[i].eventData.includes("dynamic")) {
-										dynamicObjex.push(model);
-
-									} else {
-										// child.mesh.layers.set(1);
-										// child.mesh.userData = locationData[i];	
-									}
+									
 															
 									
 									const transmat = new THREE.MeshBasicNodeMaterial( { transparent: true, opacity: 0, color: 0x111111, depthWrite :false});
@@ -170,7 +161,16 @@
 													InitSurface();
 												}
 											}
-											
+											if (locationData[i].eventData.includes("static")) {
+												console.log("gotsa static object");
+												staticObjex.push(child);
+											} else if  (locationData[i].eventData.includes("dynamic")) {
+												dynamicObjex.push(model);
+
+											} else {
+												// child.mesh.layers.set(1);
+												// child.mesh.userData = locationData[i];	
+											}
 																	
 											console.log("loaded mesh with tags " + locationData[i].locationTags);
 											
@@ -214,6 +214,7 @@
 										activeObjex.push(model);
 																			
 									}
+									break;
 								}
 							}
 						}
@@ -257,13 +258,13 @@
 		}
 
 
-		function initStaticObjex () { //e.g. ground, walls, etc.. this sets physicsIsReady to true if successful
-			console.log("tryna init staticObjex " + staticObjex.length);
+		async function initStaticObjex () { //e.g. ground, walls, etc.. this sets physicsIsReady to true if successful
+			
 			for (let i = 0; i < staticObjex.length; i++) {
 				// if (staticObjex[i].geometry) {
-				console.log(staticObjex[i]);
+				console.log("tryna init staticObjex " + staticObjex[i].name);
 					// const verts = staticObjex[i].geometry.attributes.position;
-					createStaticCollider(world, staticObjex[i]);
+					await createStaticCollider(world, staticObjex[i]);
 					// scene.add(staticObj);
 				// }
 			}
@@ -520,15 +521,19 @@
 		// 	object.rotation.y += delta * .3;
 
 		// }
-  		if (physicsIsReady) {
-			 		world.step();
+  		if (world && physicsIsReady) {
+			
+			world.step();
+			
 			dynamicBodies.forEach(b => 
 				b.update());
+			
 			kinematicVelocityBodies.forEach(c => 
 				c.update());
 
-			rapierDebugRenderer.update();
-	
+			if (rapierDebugRenderer) {
+				rapierDebugRenderer.update();
+			}
 		}
 		
 

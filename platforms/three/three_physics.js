@@ -13,6 +13,7 @@ function getGeometry(size) {
 }	
 export let world, gravity;
 export let physicsIsReady = false;
+export let worldIsReady = false;
 // export let kinematicVelocityBodies = [];
 export let dynamicBodies = [];
 export let staticBodies = [];
@@ -21,6 +22,11 @@ export async function initRapier () {
 		await RAPIER.init();	
 		gravity = { x: 0.0, y: -9.81, z: 0.0 };
 		world = new RAPIER.World(gravity);
+        worldIsReady = true;
+
+        setTimeout(() => {
+            WaitAndInit();
+        }, 3000);
 }
 
 
@@ -56,36 +62,62 @@ class RapierDebugRenderer {
 export async function createStaticCollider (world, model, position) { //she's no move
     console.log("tryna set static collider for model " + model);
    
-    await model.traverse((child) => {
-    if (child.isMesh) {
-        
+    try {
+        // await model.traverse((child) => {
+        //     if (child.isMesh) {
+                
+        //         const geometry = child.geometry;
+        //         const vertices = geometry.attributes.position.array;
+        //         const indices = geometry.index.array;
 
-        const geometry = child.geometry;
-        const vertices = geometry.attributes.position.array;
-        const indices = geometry.index.array;
+        //         // 3. Create ColliderDesc (Example: Trimesh for complex shape)
+        //         let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+                    
+        //             // 4. Configure collider properties
+        //         colliderDesc.setDensity(1.0);
 
-        // 3. Create ColliderDesc (Example: Trimesh for complex shape)
-        let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
-            
-            // 4. Configure collider properties
-        colliderDesc.setDensity(1.0);
+        //         const rbDesc = RAPIER.RigidBodyDesc.fixed(); //.setTranslation({ x: 0, y: 0, z: 0 });
+        //         const staticBody = world.createRigidBody(rbDesc);
+        //         world.createCollider(colliderDesc, staticBody);
+        //         staticBodies.push(staticBody);
+                
+                
 
-        const rbDesc = RAPIER.RigidBodyDesc.fixed(); //.setTranslation({ x: 0, y: 0, z: 0 });
-        const staticBody = world.createRigidBody(rbDesc);
-        world.createCollider(colliderDesc, staticBody);
-        staticBodies.push(staticBody);
+        //     }
 
-        physicsIsReady = true;
+
+        // });
+                const geometry = model.geometry; //sent as child mesh
+                const vertices = geometry.attributes.position.array;
+                const indices = geometry.index.array;
+
+                // 3. Create ColliderDesc (Example: Trimesh for complex shape)
+                let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+                    
+                    // 4. Configure collider properties
+                colliderDesc.setDensity(1.0);
+
+                const rbDesc = RAPIER.RigidBodyDesc.fixed(); //.setTranslation({ x: 0, y: 0, z: 0 });
+                const staticBody = await world.createRigidBody(rbDesc);
+                await world.createCollider(colliderDesc, staticBody);
+                staticBodies.push(staticBody);
+    } catch (e) {
+        console.error("staticCollider error "+ e);
+    } finally {
+
 
     }
     
-    });
-    if (physicsIsReady) {
-        initTestObjex();
-        rapierDebugRenderer = new RapierDebugRenderer(scene, world)
-    }
+}
+
 
     
+
+
+function WaitAndInit () {
+                initTestObjex();
+            rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+            physicsIsReady = true;
 }
 export function getKinematicVelocityBody(model, position) {
     let size = 1;
@@ -124,12 +156,12 @@ export function getKinematicVelocityBody(model, position) {
 
     return { rigidbody, update };
 }
-export function getDynamicBody(model, position) {
+export async function getDynamicBody(model, position) {
 
     // console.log("tryna create dynamic rigidbody from model " + model );
     const size = 0.5;
     const colliderSize = size * 1.25;
-    const range = 6;
+    const range = 16;
     const density = size  * .5;
     let x = Math.random() * range - range * 0.5;
     let y = Math.random() * range - range * 0.5 + 3;
@@ -137,13 +169,13 @@ export function getDynamicBody(model, position) {
 
     // RIGID BODY
     let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(x, y, z)
-            .setCcdEnabled(false);
-    let rigid = world.createRigidBody(rigidBodyDesc);
+            .setTranslation(x, y, z);
+            // .setCcdEnabled(false);
+    let rigidbody = world.createRigidBody(rigidBodyDesc);
     // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
 
     let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize).setDensity(density);
-    world.createCollider(colliderDesc, rigid);
+    await world.createCollider(colliderDesc, rigidbody);
 
     const mesh = model.clone();
     mesh.traverse((child) => {
@@ -154,20 +186,23 @@ export function getDynamicBody(model, position) {
     mesh.scale.setScalar(size);
     
     function update () {
-      rigid.resetForces(true); 
-      let pos = rigid.translation();
-      mesh.position.copy(pos);
-      let q = rigid.rotation();
-      let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
-      mesh.rotation.setFromQuaternion(rote);
-      if (pos.y < -10) {
-        rigid.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-        rigid.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-        rigid.setTranslation({ x: x, y: 10.0, z: z });
-      }
+    if (mesh && rigidbody) {
+        rigidbody.resetForces(true); 
+        let pos = rigidbody.translation();
+    //   if (mesh.position) {
+        mesh.position.copy(pos);
+        let q = rigidbody.rotation();
+        let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+        mesh.rotation.setFromQuaternion(rote);
+        if (pos.y < -10) {
+            rigidbody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+            rigidbody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+            rigidbody.setTranslation({ x: x, y: 10.0, z: z });
+        }
+    }
     }
 
-    return { rigid, mesh, update };
+    return { rigidbody, mesh, update };
   }
 
   function getMouseBall (RAPIER, world) {
@@ -195,7 +230,7 @@ export function getDynamicBody(model, position) {
   }
 
 
-  export function initTestObjex () {
+  export async function initTestObjex () {
 
 		const geometry = new THREE.IcosahedronGeometry( 1, 3 );
 		// const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
@@ -216,7 +251,7 @@ export function getDynamicBody(model, position) {
 			// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
 			// objects.add( mesh );
 			// const body = getDynamicBody(RAPIER, world, mesh);
-            const body = getDynamicBody(mesh);
+            const body = await getDynamicBody(mesh);
 			dynamicBodies.push(body);
 			scene.add(body.mesh);
 
