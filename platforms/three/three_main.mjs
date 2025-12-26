@@ -336,7 +336,7 @@
 					// const waterModule = await import {Water} from './tsl/tsl_water.js'
 					water = new waterModule.Water1();
 				} else if (settings.sceneWater.name == "water2") {
-					water = new waterModule.Water2;
+					water = new waterModule.Water2();
 				}
 								// water = waterModule.water;
 				console.log("water is " + water);

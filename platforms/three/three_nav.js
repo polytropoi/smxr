@@ -25,7 +25,7 @@
 
 
 
-    export function CreateAgent (pos) {
+    export async function CreateAgent (pos) {
         agentIndex++;
             
         // if (!model) {
@@ -85,11 +85,11 @@
         const agent = new NavAgent( options );
         agents.push(agent);
 
-        const rbody = getKinematicVelocityBody(mesh, pos);
+        const rbody = await getKinematicVelocityBody(mesh, pos);
         kinematicVelocityBodies.push(rbody);
     } 
                 
-    export function InitPathfinding () {
+    export async function InitPathfinding () {
         // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh") && navmesh) {
         if (navmesh) {
             pathfinding = new Pathfinding();
@@ -104,7 +104,7 @@
             console.log("looking for navmesh " + navmesh);
             for (let i = 0; i < 100; i++) {
 
-                CreateAgent(randomNavmeshPoint());
+                await CreateAgent(randomNavmeshPoint());
                 
             }
         }

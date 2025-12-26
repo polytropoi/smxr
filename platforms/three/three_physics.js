@@ -99,7 +99,10 @@ export async function createStaticCollider (world, model, position) { //she's no
 
                 const rbDesc = RAPIER.RigidBodyDesc.fixed(); //.setTranslation({ x: 0, y: 0, z: 0 });
                 const staticBody = await world.createRigidBody(rbDesc);
-                await world.createCollider(colliderDesc, staticBody);
+                let collider = await world.createCollider(colliderDesc, staticBody);
+                collider.setRestitution(.5);
+                collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+
                 staticBodies.push(staticBody);
     } catch (e) {
         console.error("staticCollider error "+ e);
@@ -115,18 +118,22 @@ export async function createStaticCollider (world, model, position) { //she's no
 
 
 function WaitAndInit () {
-                initTestObjex();
+                initObjects();
             rapierDebugRenderer = new RapierDebugRenderer(scene, world);
-            physicsIsReady = true;
-}
-export function getKinematicVelocityBody(model, position) {
+            // physicsIsReady = true;
+  }
+
+export async function getKinematicVelocityBody(model, position) {
     let size = 1;
     let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased()
             .setTranslation(position.x, position.y, position.z);
     let rigidbody = world.createRigidBody(rigidBodyDesc);
     let kinematicCollider = RAPIER.ColliderDesc.capsule(.7, .25);
-    world.createCollider(kinematicCollider, rigidbody);
-    
+    let collider = await world.createCollider(kinematicCollider, rigidbody);
+    collider.setRestitution(3);
+    collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+
+
     // const mesh = model.clone();
     let childmesh;
     // let meshPosition = new THREE.Vector3();
@@ -146,7 +153,7 @@ export function getKinematicVelocityBody(model, position) {
 
     function update () {
 
-        //  rigidbody.resetForces(true); 
+         rigidbody.resetForces(true); 
     //   rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y + 1, z: mesh.position.z });
         childmesh.getWorldPosition(worldposition);
       rigidbody.setTranslation(worldposition);
@@ -159,10 +166,10 @@ export function getKinematicVelocityBody(model, position) {
 export async function getDynamicBody(model, position) {
 
     // console.log("tryna create dynamic rigidbody from model " + model );
-    const size = 0.5;
-    const colliderSize = size * 1.25;
+    const size = 0.75;
+    const colliderSize = size;
     const range = 16;
-    const density = size  * .5;
+    const density = size  * .1;
     let x = Math.random() * range - range * 0.5;
     let y = Math.random() * range - range * 0.5 + 3;
     let z = Math.random() * range - range * 0.5;
@@ -170,12 +177,17 @@ export async function getDynamicBody(model, position) {
     // RIGID BODY
     let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
             .setTranslation(x, y, z);
+            //  .setGravityScale(0.5);
             // .setCcdEnabled(false);
     let rigidbody = world.createRigidBody(rigidBodyDesc);
     // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
 
     let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize).setDensity(density);
-    await world.createCollider(colliderDesc, rigidbody);
+    let collider = await world.createCollider(colliderDesc, rigidbody);
+
+    collider.setRestitution(1.5);
+collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+
 
     const mesh = model.clone();
     mesh.traverse((child) => {
@@ -187,7 +199,7 @@ export async function getDynamicBody(model, position) {
     
     function update () {
     if (mesh && rigidbody) {
-        rigidbody.resetForces(true); 
+        // rigidbody.resetForces(true); 
         let pos = rigidbody.translation();
     //   if (mesh.position) {
         mesh.position.copy(pos);
@@ -229,44 +241,93 @@ export async function getDynamicBody(model, position) {
     return { mesh: mouseMesh, update };
   }
 
+  export async function initObjects () {
+    let count = 1
+     const intervalID = setInterval(() => {
+        count++;
+        // // console.log(count);
+        // const x = count % column;
+        //   const y = count / column;
 
-  export async function initTestObjex () {
+        //   const mesh = new THREE.Mesh( geometry, material );
+        //   // mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
+        //   // mesh.rotation.set( Math.random(), Math.random(), Math.random() );
+        //   // objects.add( mesh );
+        //   // const body = getDynamicBody(RAPIER, world, mesh);
+        //   const body = getDynamicBody(mesh);
+        //   dynamicBodies.push(body);
+        //   scene.add(body.mesh);
+      initTestObjex(count);
+      if (count === 120) {
+        clearInterval(intervalID);
+        console.log("Stopped");
+      }
+    }, 500);
+
+    physicsIsReady = true;
+  }
+
+
+  export async function initTestObjex (count) {
 
 		const geometry = new THREE.IcosahedronGeometry( 1, 3 );
-		// const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
-		const material = getRainbowMaterial();
+		const material = new THREE.MeshStandardMaterial( { color: 'blue' } );
+		// const material = getRainbowMaterial();
 		// material.colorNode = iceColorNode;
 
-		const count = 100	;
+		// let count = 100;
 		const scale = 10;
 		const column = 50;
 
-		for ( let i = 0; i < count; i ++ ) {
+		// for ( let i = 0; i < count; i ++ ) {
 
-			const x = i % column;
-			const y = i / column;
+			const x = count % column;
+			const y = count / column;
 
 			const mesh = new THREE.Mesh( geometry, material );
 			// mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
 			// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
 			// objects.add( mesh );
 			// const body = getDynamicBody(RAPIER, world, mesh);
-            const body = await getDynamicBody(mesh);
+      const body = await getDynamicBody(mesh);
 			dynamicBodies.push(body);
 			scene.add(body.mesh);
+      
+		// }
+    
+//     // let count = 0;
+// const intervalID = setInterval(() => {
+//   count++;
+//   // console.log(count);
+//   	const x = count % column;
+// 			const y = count / column;
 
-		}
+// 			const mesh = new THREE.Mesh( geometry, material );
+// 			// mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
+// 			// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
+// 			// objects.add( mesh );
+// 			// const body = getDynamicBody(RAPIER, world, mesh);
+//       const body = getDynamicBody(mesh);
+// 			dynamicBodies.push(body);
+// 			scene.add(body.mesh);
+  
+//   if (count === 120) {
+//     clearInterval(intervalID);
+//     console.log("Stopped");
+//   }
+// }, 500);
 
-        		// caustics
-		if (water && water.waterLayer0) {
-			const waterPosY = positionWorld.y.sub( water.position.y );
+    // physicsIsReady = true;
+    //     		// caustics
+		// if (water && water.waterLayer0) {
+		// 	const waterPosY = positionWorld.y.sub( water.position.y );
 
-			let transition = waterPosY.add( .1 ).saturate().oneMinus();
-			transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
-			const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
+		// 	let transition = waterPosY.add( .1 ).saturate().oneMinus();
+		// 	transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
+		// 	const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
 
-			material.colorNode = colorNode;
-			// floor.material.colorNode = colorNode;
-		}
+		// 	material.colorNode = colorNode;
+		// 	// floor.material.colorNode = colorNode;
+		// }
 
   }
