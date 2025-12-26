@@ -25,7 +25,7 @@
 
 
 
-    export function CreateAgent (pos) {
+    export async function CreateAgent (pos) {
         agentIndex++;
             
         // if (!model) {
@@ -76,7 +76,7 @@
         const options = {
             object: agentParent,
             nodeRadius: 0.01,
-            speed: 2,
+            speed: 4,
             // app: this,
             name: 'agent ' + agentIndex,
             npc: true
@@ -85,11 +85,11 @@
         const agent = new NavAgent( options );
         agents.push(agent);
 
-        const rbody = getKinematicVelocityBody(mesh, pos);
+        const rbody = await getKinematicVelocityBody(mesh, pos);
         kinematicVelocityBodies.push(rbody);
     } 
                 
-    export function InitPathfinding () {
+    export async function InitPathfinding () {
         // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh") && navmesh) {
         if (navmesh) {
             pathfinding = new Pathfinding();
@@ -104,7 +104,7 @@
             console.log("looking for navmesh " + navmesh);
             for (let i = 0; i < 100; i++) {
 
-                CreateAgent(randomNavmeshPoint());
+                await CreateAgent(randomNavmeshPoint());
                 
             }
         }
@@ -240,6 +240,9 @@
                 this.setTargetDirection();
                 return;
             }
+            // if (Math.random() > .7) {
+            //     return;
+            // }
                     
             // Calculate a path to the target and store it
             this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);

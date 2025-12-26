@@ -32,7 +32,7 @@
 
 	import { UpdateText } from './three_ui.js';
 
-	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer } from './three_physics.js';
+	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, eventQueue } from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -58,7 +58,7 @@
 	let postProcessing;
 	let controls;
 
-	let doPostProcessing = true;
+	let doPostProcessing = false;
 	
 
 	let activeObjex = [];
@@ -85,19 +85,10 @@
 			console.error('An error happened during model loading', error);
 		}
 	}
-// async function initRapier() {
-//     // Pass a single configuration object to RAPIER.init()
-//     await RAPIER.init({
-//         gravity: { x: 0.0, y: -9.81, z: 0.0 },
-//         // Add other settings here if needed (e.g., IS_WASM_DEBUG)
-//         IS_WASM_DEBUG: false // Example of another parameter
-// 				// world: new RAPIER.World(gravity)
-//     });
-//     console.log("Rapier initialized with single object!");
-//     // Now you can create physics world, bodies, etc.
-// }
 
-	
+
+
+
 	////////////// SCENE INIT FUNCTION 
 
 	async function init() {
@@ -323,10 +314,16 @@
 		// 	scene.add( model );
 
 		// } );
+
+
 		if (settings && settings.sceneTags) {
 			// if (settings.sceneTags.includes("debug")) {
 			// stats.showPanel( 0,1,2,3 );
 			stats = new Stats();
+
+			stats.dom.style.right = 'auto';
+			stats.dom.style.left = '0px'; // Positioned at top-right
+			stats.dom.style.bottom = '0px';
 			document.body.appendChild(stats.domElement);
 			// }
 			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
@@ -336,7 +333,7 @@
 					// const waterModule = await import {Water} from './tsl/tsl_water.js'
 					water = new waterModule.Water1();
 				} else if (settings.sceneWater.name == "water2") {
-					water = new waterModule.Water2;
+					water = new waterModule.Water2();
 				}
 								// water = waterModule.water;
 				console.log("water is " + water);
@@ -482,18 +479,14 @@
 
 
 		raycaster = new THREE.Raycaster();
+		doPostProcessing = true;
 
 	} //end init!
 
-	function onWindowResize() {
 
-		camera.aspect = window.innerWidth / window.innerHeight;
-		camera.updateProjectionMatrix();
 
-		renderer.setSize( window.innerWidth, window.innerHeight );
 
-	}
-
+////////////// MAIN LOOP FOR ALL THE THINGS ////////////////
 	function animate() {
 
 		 
@@ -523,7 +516,14 @@
 		// }
   		if (world && physicsIsReady) {
 			
-			world.step();
+			// if (eventQueue) {
+			// 	world.step(eventQueue);
+			// } else {	
+				world.step();
+			// }
+			
+
+			
 			
 			dynamicBodies.forEach(b => 
 				b.update());
@@ -553,68 +553,76 @@
 
 	/////// events and listeners and handlers
 
-		window.addEventListener('mousemove', onMouseMove);
 
-		function onMouseMove(e) {
-			if (mouse && camera && raycaster) {
-				mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-				mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
-				raycaster.setFromCamera(mouse, camera);
+//physics events
+		// eventQueue.drainCollisionEvents((handle1, handle2, started) => {
+		// if (started) {
+		// 	console.log("Collision started between", handle1, "and", handle2);
+		// } else {
+		// 	console.log("Collision stopped between", handle1, "and", handle2);
+		// }
+		// });
 
-				var raycastHits = raycaster.intersectObjects(scene.children, true);
-				let selectColor = new THREE.Color(0xff3333);
-				let stopColor = new THREE.Color(0x26de57);
-				let goColor = new THREE.Color(0xff0000);
-				if (raycastHits.length > 0) {
-				// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
-				// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
-					if (raycastHits[0].object.name.includes("agent")) {
+////////// global events	
+
+
+	function onWindowResize() {
+
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+
+		renderer.setSize( window.innerWidth, window.innerHeight );
+
+	}
+	window.addEventListener('mousemove', onMouseMove);
+
+	function onMouseMove(e) {
+		if (mouse && camera && raycaster) {
+			mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+			mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+			raycaster.setFromCamera(mouse, camera);
+
+			var raycastHits = raycaster.intersectObjects(scene.children, true);
+			let selectColor = new THREE.Color(0xff3333);
+			let stopColor = new THREE.Color(0x26de57);
+			let goColor = new THREE.Color(0xff0000);
+			if (raycastHits.length > 0) {
+			// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
+			// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+				if (raycastHits[0].object.name.includes("agent")) {
+					
+					if ( raycastHitAgent != raycastHits[ 0 ].object ) {
+						console.log ("new raycast hit on agent " + raycastHits[0].object.name);
+						raycastHitAgent = raycastHits[ 0 ].object;	
+
+							if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
 						
-						if ( raycastHitAgent != raycastHits[ 0 ].object ) {
-							console.log ("new raycast hit on agent " + raycastHits[0].object.name);
-							raycastHitAgent = raycastHits[ 0 ].object;	
+								console.log("intersected material found!");
+								raycastHitAgent.material.materialColor = goColor;
 
-								if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
+								
+							} else if (raycastHitAgent && raycastHitAgent.material) {
+								raycastHitAgent.material.color = goColor;
 							
-									console.log("intersected material found!");
-									raycastHitAgent.material.materialColor = goColor;
-
-									
-								} else if (raycastHitAgent && raycastHitAgent.material) {
-									raycastHitAgent.material.color = goColor;
-								
-								}
-								const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
-								if (navAgentInstance) {
-									navAgentInstance.agentRaycastHit();
-								}
-								
-								
-						} else {
-							// console.log("rehit agent " + raycastHits[0].object.name));
-						}
-					} else {
-						if ( raycastHitAgent ) {
-							if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-								console.log("tryna reset agent colornode after no hit");
-								raycastHitAgent.material.materialColor = stopColor;
-								raycastHitAgent.material.needsUpdate = true;
-								
-							} else if (raycastHitAgent.material) {
-								console.log("tryna reset agent color after no hit");
-								raycastHitAgent.material.color = stopColor;
 							}
-						}
-						raycastHitAgent = null;
+							const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
+							if (navAgentInstance) {
+								navAgentInstance.agentRaycastHit();
+							}
+							
+							
+					} else {
+						// console.log("rehit agent " + raycastHits[0].object.name));
 					}
 				} else {
 					if ( raycastHitAgent ) {
-					// 	{
 						if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-							console.log("tryna reset agent color after no hit");
+							console.log("tryna reset agent colornode after no hit");
 							raycastHitAgent.material.materialColor = stopColor;
 							raycastHitAgent.material.needsUpdate = true;
+							
 						} else if (raycastHitAgent.material) {
 							console.log("tryna reset agent color after no hit");
 							raycastHitAgent.material.color = stopColor;
@@ -622,8 +630,22 @@
 					}
 					raycastHitAgent = null;
 				}
+			} else {
+				if ( raycastHitAgent ) {
+				// 	{
+					if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+						console.log("tryna reset agent color after no hit");
+						raycastHitAgent.material.materialColor = stopColor;
+						raycastHitAgent.material.needsUpdate = true;
+					} else if (raycastHitAgent.material) {
+						console.log("tryna reset agent color after no hit");
+						raycastHitAgent.material.color = stopColor;
+					}
+				}
+				raycastHitAgent = null;
 			}
 		}
+	}
 
 
 // billboard tsl
