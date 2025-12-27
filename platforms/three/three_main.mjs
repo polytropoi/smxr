@@ -532,13 +532,15 @@ export function togglePostProcessing () { //call after physics is done, elsewise
 		// 	object.rotation.y += delta * .3;
 
 		// }
-		rapierDebugRenderer.update();
+				
   		if (world && physicsIsReady && worldIsReady) {
 			
 			// if (eventQueue) {
 			// 	world.step(eventQueue);
 			// } else {	
-				world.step();
+
+
+
 			// }
 			
 
@@ -550,22 +552,27 @@ export function togglePostProcessing () { //call after physics is done, elsewise
 			kinematicBodies.forEach(c => 
 				c.update());
 
-			// if (rapierDebugRenderer) {
-				
-			// }
 		
 			if (agents.length) {
 				for (let i = 0; i < agents.length; i++) {
 					agents[i].update(delta);
 				}
 			}
+
+				world.step();
+				
 		}
 		
-
+rapierDebugRenderer.update();
 		if (doPostProcessing) {
 			postProcessing.render();
 		} else {
 			renderer.render(scene, camera);
+		}
+
+
+		if (rapierDebugRenderer) {
+			
 		}
 
 		// water.material.uniforms['time'].value += 1 / 60;

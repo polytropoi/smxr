@@ -47,6 +47,7 @@
                 // mesh.receiveShadow = true;
             
                 // mesh.name = "agent_" + agentIndex;
+                // console.log("tryna CreateAgent number " + agentIndex);
             const agentParent = new THREE.Object3D(); //empty
             agentParent.name = "agentParent_" + agentIndex;
             agentParent.position.set(pos.x, pos.y, pos.z);
@@ -84,7 +85,7 @@
             nodeRadius: 0.1,
             speed: 4,
             // app: this,
-            name: 'agent ' + agentIndex,
+            name: 'agent_' + agentIndex,
             npc: true
         };
 
@@ -136,7 +137,7 @@
 
 
     export function randomNavmeshPoint () {
-        const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 75);
+        const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 50);
         // console.log("random navmesh position " + JSON.stringify(randomNode));
         // randomNode 
         return randomNode;
