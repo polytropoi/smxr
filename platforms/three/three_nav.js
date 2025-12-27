@@ -6,14 +6,15 @@
 
     import { uniform, sin, mul, add, time } from 'three/tsl';
 
-    import { getKinematicVelocityBody } from './three_physics.js';
+    import { getKinematicVelocityBody, world, WaitAndInitAgents } from './three_physics.js';
 
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;
     let pathfinding, helper;
 
     export let agents = [];
-    export let kinematicVelocityBodies = [];
+    export let agentMeshes = [];
+
 
     import { returnMaterial } from './tsl/tsl_materials.js'
 
@@ -25,12 +26,15 @@
 
 
 
-    export async function CreateAgent (pos) {
-        agentIndex++;
+
+    export function CreateAgent (pos) {
+
+        agentIndex = agentIndex + 1;
             
         // if (!model) {
             const geometry = new THREE.CapsuleGeometry( .5, 1, 4, 8, 1 );
-            const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'orange' });
+            // const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'orange' });
+            const material = new THREE.MeshStandardNodeMaterial({ color: 'orange' });
             material.roughness = 0.1;
             material.metalness = 0.3;
             material.envMap = scene.environment;
@@ -75,7 +79,7 @@
         
         const options = {
             object: agentParent,
-            nodeRadius: 0.01,
+            nodeRadius: 0.1,
             speed: 4,
             // app: this,
             name: 'agent ' + agentIndex,
@@ -85,34 +89,50 @@
         const agent = new NavAgent( options );
         agents.push(agent);
 
-        const rbody = await getKinematicVelocityBody(mesh, pos);
-        kinematicVelocityBodies.push(rbody);
-    } 
+        // agentMeshes.push(mesh);
+        console.log("creating agent " + agentIndex);
+        return mesh;
+        // if (RAPIER) {
+
+        // } 
+    }
                 
     export async function InitPathfinding () {
         // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh") && navmesh) {
+ 
         if (navmesh) {
-            pathfinding = new Pathfinding();
-            helper = new PathfindingHelper();
-            scene.add(helper);
-            helper.reset()
-            // const pathfinding = new Pathfinding();
-            
-            // Define a zone name
-            pathfinding.setZoneData(ZONE, Pathfinding.createZone(navmesh.geometry));
-
-            console.log("looking for navmesh " + navmesh);
-            for (let i = 0; i < 100; i++) {
-
-                await CreateAgent(randomNavmeshPoint());
+            try {
+                pathfinding = await new Pathfinding();
+                await world;
+                helper = new PathfindingHelper();
+                scene.add(helper);
+                helper.reset()
+                // const pathfinding = new Pathfinding();
                 
+                // Define a zone name
+                pathfinding.setZoneData(ZONE, Pathfinding.createZone(navmesh.geometry));
+
+                console.log("looking for navmesh " + navmesh);
+
+
+            } catch (e) {
+                console.log("error pathfinding init " + e);
+            } finally{
+                
+               WaitAndInitAgents();
             }
+
+            // await initRapier();
+        } else {
+            // await initRapier();
         }
+
     }
 
 
+
     export function randomNavmeshPoint () {
-        const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 100);
+        const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 75);
         // console.log("random navmesh position " + JSON.stringify(randomNode));
         // randomNode 
         return randomNode;

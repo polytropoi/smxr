@@ -58,7 +58,7 @@ export async function InstanceOnSurface (model, count, scaleFactor) {
    
         for (let i = 0; i < count; i++) {
             
-                sampler.sample(position);
+                await sampler.sample(position);
 
                 dummy.position.set(position.x, position.y, position.z);
                 // console.log("instance positon " + JSON.stringify(position));
@@ -78,6 +78,7 @@ export async function InstanceOnSurface (model, count, scaleFactor) {
         for (let s = 0; s < instancedMeshes.length; s++) {
             scene.add(instancedMeshes[s]);
         }
+        
             
 
                

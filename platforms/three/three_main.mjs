@@ -23,7 +23,7 @@
 	import { SetSceneLocations } from '../../../connect/connect.js';
 
 
-	import { InitPathfinding, agents, kinematicVelocityBodies } from './three_nav.js';
+	import { InitPathfinding, agents } from './three_nav.js';
 
 	import { getRainbowMaterial } from './tsl/rainbow.js'
 
@@ -32,7 +32,7 @@
 
 	import { UpdateText } from './three_ui.js';
 
-	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, eventQueue } from './three_physics.js';
+	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, eventQueue, kinematicVelocityBodies, worldIsReady } from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -242,9 +242,24 @@
 				} catch (e) {
 					console.error("ERROR LOADING GLTF! " + e);
 				} finally {
-					initStaticObjex();
+					initSystems();
 				}
 			})();
+			
+		}
+
+		async function initSystems() {
+			await initStaticObjex();
+			if (navmesh) {
+				await InitPathfinding();
+				
+			}
+		
+			// await initRapier();
+			
+			if (surface) {
+				await InitSurface();
+			}
 			
 		}
 
@@ -321,9 +336,9 @@
 			// stats.showPanel( 0,1,2,3 );
 			stats = new Stats();
 
-			stats.dom.style.right = 'auto';
-			stats.dom.style.left = '0px'; // Positioned at top-right
-			stats.dom.style.bottom = '0px';
+			stats.domElement.style.right = 'auto';
+			stats.domElement.style.left = '0px'; // Positioned at top-right
+			stats.domElement.style.bottom = '0px';
 			document.body.appendChild(stats.domElement);
 			// }
 			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
@@ -479,11 +494,14 @@
 
 
 		raycaster = new THREE.Raycaster();
-		doPostProcessing = true;
+
 
 	} //end init!
 
-
+export function togglePostProcessing () { //call after physics is done, elsewise... :(
+	console.log("tryna toggle post processing");
+	doPostProcessing = !doPostProcessing;
+}
 
 
 ////////////// MAIN LOOP FOR ALL THE THINGS ////////////////
@@ -514,7 +532,7 @@
 		// 	object.rotation.y += delta * .3;
 
 		// }
-  		if (world && physicsIsReady) {
+  		if (world && physicsIsReady && worldIsReady) {
 			
 			// if (eventQueue) {
 			// 	world.step(eventQueue);
@@ -534,6 +552,12 @@
 			if (rapierDebugRenderer) {
 				rapierDebugRenderer.update();
 			}
+		
+			if (agents.length) {
+				for (let i = 0; i < agents.length; i++) {
+					agents[i].update(delta);
+				}
+			}
 		}
 		
 
@@ -542,11 +566,7 @@
 		} else {
 			renderer.render(scene, camera);
 		}
-		if (agents.length) {
-			for (let i = 0; i < agents.length; i++) {
-				agents[i].update(delta);
-			}
-		}
+
 		// water.material.uniforms['time'].value += 1 / 60;
 	}
 
