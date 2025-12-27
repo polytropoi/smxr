@@ -33,14 +33,14 @@ export function InitCustomFog() { //hrm..
 
 }
 export function InitFog() {
-    // if (settings && settings.sceneUseVolumetricFog) {
+    if (settings && settings.sceneUseVolumetricFog) {
         console.log("doin some fog...");
         const fogColor = settings.sceneColor1; // Sky blue
         // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
         // scene.fog = new THREE.Fog(fogColor, 1, 300);
 		scene.fog = new THREE.FogExp2( fogColor, 0.005 );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
-    // }
+    }
 }
 
 export function InitEnvMap () {

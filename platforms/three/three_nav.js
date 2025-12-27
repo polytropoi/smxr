@@ -6,7 +6,7 @@
 
     import { uniform, sin, mul, add, time } from 'three/tsl';
 
-    import { getKinematicVelocityBody, world, WaitAndInitAgents } from './three_physics.js';
+    import { getKinematicBody, world, WaitAndInitAgents } from './three_physics.js';
 
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;
@@ -91,7 +91,7 @@
 
         // agentMeshes.push(mesh);
         console.log("creating agent " + agentIndex);
-        return mesh;
+        return agentParent;
         // if (RAPIER) {
 
         // } 

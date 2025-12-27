@@ -2,6 +2,9 @@
 import * as THREE from 'three';
 
 import RAPIER from 'rapier';
+
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
 import { scene, togglePostProcessing, water } from './three_main.mjs';
 import { CreateAgent, randomNavmeshPoint } from './three_nav.js';
 // import {scene, world} from './three_main.mjs'
@@ -62,11 +65,11 @@ class RapierDebugRenderer {
 
   export async function WaitAndInitAgents () {
         await new Promise(r => setTimeout(r, 1000));
-        for (let i = 0; i < 10; i++) {
-            await new Promise(r => setTimeout(r, 1000));
+        for (let i = 0; i < 50; i++) {
+            await new Promise(r => setTimeout(r, 1000)); //slow the fxk down
             const pos = randomNavmeshPoint();
             const mesh = CreateAgent(randomNavmeshPoint()); //cook the navagent first
-            const rbody = await getKinematicVelocityBody(mesh, pos);
+            const rbody = await getKinematicBody(mesh, pos);
             console.log("creating agent " + i);
             kinematicVelocityBodies.push(rbody);
         }
@@ -75,7 +78,7 @@ class RapierDebugRenderer {
         // if (agentMeshes) {
             
         //     for (let i = 0; i < agentMeshes.length; i++) {
-        //         const rbody = getKinematicVelocityBody(agentMeshes);
+        //         const rbody = getKinematicBody(agentMeshes);
         //         kinematicVelocityBodies.push(rbody);
         //     }
         // }
@@ -113,19 +116,29 @@ export async function createStaticCollider (world, model, position) { //she's no
 
         // });
                 const geometry = model.geometry; //sent as child mesh
+                // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
+
                 const vertices = geometry.attributes.position.array;
+                // for (let i = 0; i < vertices.length; i++) {
+                //   vertices[i] *= fixedGeometry.scale.x; // Example for uniform scale
+                // }
                 const indices = geometry.index.array;
 
                 // 3. Create ColliderDesc (Example: Trimesh for complex shape)
                 let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+                
+                  // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
                     
                     // 4. Configure collider properties
-                colliderDesc.setDensity(1.0);
+                // colliderDesc.setDensity(.1);
 
-                const rbDesc = RAPIER.RigidBodyDesc.fixed(); //.setTranslation({ x: 0, y: 0, z: 0 });
+                // colliderDesc.contactSkin(0.5);
+
+
+                const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0,0,0);
                 const staticBody = await world.createRigidBody(rbDesc);
                 let collider = await world.createCollider(colliderDesc, staticBody);
-                collider.setRestitution(.25);
+                collider.setRestitution(.5);
                 collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
                 staticBodies.push(staticBody);
@@ -149,16 +162,16 @@ function WaitAndInit () {
       togglePostProcessing();
   }
 
-export async function getKinematicVelocityBody(model, position) {
+export async function getKinematicBody(model, position) {
     // await world;
     // if (world) {
     let size = 1;
-    let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased();
+    let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased(); //no, position based...
             // .setTranslation(position.x, position.y, position.z);
     let rigidbody = await world.createRigidBody(rigidBodyDesc);
     let kinematicCollider = RAPIER.ColliderDesc.capsule(.4, .4);
     let collider = await world.createCollider(kinematicCollider, rigidbody);
-    collider.setRestitution(.5);
+    collider.setRestitution(1.5);
     collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
 
@@ -166,8 +179,9 @@ export async function getKinematicVelocityBody(model, position) {
     let childmesh;
     // let meshPosition = new THREE.Vector3();
     // meshPosition.get
-
-    model.traverse((child) => {
+    
+    // const modelClone = model.clone();
+    model.traverse((child) => {    
       if (child.isMesh) {
         child.castShadow = true;
         childmesh = child;
@@ -184,7 +198,7 @@ export async function getKinematicVelocityBody(model, position) {
          rigidbody.resetForces(true); 
     //   rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y + 1, z: mesh.position.z });
         childmesh.getWorldPosition(worldposition);
-      rigidbody.setTranslation(worldposition);
+        rigidbody.setTranslation(worldposition);
     //   let { x, y, z } = rigidbody.translation();
     //   mouseMesh.position.set(x, y, z);
     }
@@ -214,8 +228,8 @@ export async function getDynamicBody(model, position) {
     let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize).setDensity(density);
     let collider = await world.createCollider(colliderDesc, rigidbody);
 
-    collider.setRestitution(1.25);
-collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+    collider.setRestitution(1.5);
+    collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
 
     const mesh = model.clone();
@@ -294,11 +308,13 @@ collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
     //     togglePostProcessing();
     //   }
     // }, 500);
-        worldIsReady = true;
+            
     for (let i = 0; i < 50; i++) { // go easy
-      await new Promise(r => setTimeout(r, 1000));
+         await new Promise(r => setTimeout(r, 500));
       await initTestObjex(i);
     }
+    worldIsReady = true;
+          // await new Promise(r => setTimeout(r, 1000));
 
   }
 
@@ -331,7 +347,7 @@ collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 			// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
 			// objects.add( mesh );
 			// const body = getDynamicBody(RAPIER, world, mesh);
-      const body = await getDynamicBody(mesh);
+      const body = await getDynamicBody(mesh.clone());
 			dynamicBodies.push(body);
 			scene.add(body.mesh);
       
