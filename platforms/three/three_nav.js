@@ -13,7 +13,7 @@
     let pathfinding, helper;
 
     export let agents = [];
-    export let agentMeshes = [];
+    export let agentParents = [];
 
 
     import { returnMaterial } from './tsl/tsl_materials.js'
@@ -22,34 +22,36 @@
     let arrowHelper;
 
     // import { uniform, sin } from 'three/tsl';
-    let agentIndex = 0;
+    // let agentIndex = 0;
 
 
 
 
-    export function CreateAgent (pos) {
 
-        agentIndex = agentIndex + 1;
+    export function CreateAgent (agentIndex, pos) {
+
+        // agentIndex = agentIndex + 1;
             
         // if (!model) {
-            const geometry = new THREE.CapsuleGeometry( .5, 1, 4, 8, 1 );
-            // const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'orange' });
-            const material = new THREE.MeshStandardNodeMaterial({ color: 'orange' });
-            material.roughness = 0.1;
-            material.metalness = 0.3;
-            material.envMap = scene.environment;
-            material.envMapIntensity = 2;
-            // const material = returnMaterial('brain');
-            const mesh = new THREE.Mesh( geometry, material );
-            const timeUniform = uniform(0);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-           
-            mesh.name = "agent_" + agentIndex;
+                // const geometry = new THREE.CapsuleGeometry( .5, 1, 4, 8, 1 );
+                // // const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'orange' });
+                // const material = new THREE.MeshStandardNodeMaterial({ color: 'orange' });
+                // material.roughness = 0.1;
+                // material.metalness = 0.3;
+                // material.envMap = scene.environment;
+                // material.envMapIntensity = 2;
+                // // const material = returnMaterial('brain');
+                // const mesh = new THREE.Mesh( geometry, material );
+                // const timeUniform = uniform(0);
+                // mesh.castShadow = true;
+                // mesh.receiveShadow = true;
+            
+                // mesh.name = "agent_" + agentIndex;
             const agentParent = new THREE.Object3D(); //empty
+            agentParent.name = "agentParent_" + agentIndex;
             agentParent.position.set(pos.x, pos.y, pos.z);
-            agentParent.add(mesh);
-            mesh.position.set(0,1,0); //offset on parent navagent
+            // agentParent.add(mesh);
+            // mesh.position.set(0,1,0); //offset on parent navagent
             scene.add(agentParent);
         // }
 
@@ -88,10 +90,12 @@
 
         const agent = new NavAgent( options );
         agents.push(agent);
+        agentParents.push(agentParent);
 
+        // let resp = {}
         // agentMeshes.push(mesh);
-        console.log("creating agent " + agentIndex);
-        return agentParent;
+        console.log("creating navagent " + agentIndex);
+        // return agentParent;
         // if (RAPIER) {
 
         // } 

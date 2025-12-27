@@ -32,7 +32,7 @@
 
 	import { UpdateText } from './three_ui.js';
 
-	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, eventQueue, kinematicVelocityBodies, worldIsReady } from './three_physics.js';
+	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, eventQueue, kinematicBodies, worldIsReady } from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -532,6 +532,7 @@ export function togglePostProcessing () { //call after physics is done, elsewise
 		// 	object.rotation.y += delta * .3;
 
 		// }
+		rapierDebugRenderer.update();
   		if (world && physicsIsReady && worldIsReady) {
 			
 			// if (eventQueue) {
@@ -546,12 +547,12 @@ export function togglePostProcessing () { //call after physics is done, elsewise
 			dynamicBodies.forEach(b => 
 				b.update());
 			
-			kinematicVelocityBodies.forEach(c => 
+			kinematicBodies.forEach(c => 
 				c.update());
 
-			if (rapierDebugRenderer) {
-				rapierDebugRenderer.update();
-			}
+			// if (rapierDebugRenderer) {
+				
+			// }
 		
 			if (agents.length) {
 				for (let i = 0; i < agents.length; i++) {
