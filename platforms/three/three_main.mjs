@@ -143,7 +143,7 @@
 												if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
 													navmesh = child;
 													// child.material = transmat;
-													InitPathfinding();
+													// InitPathfinding(); //no
 												}
 											} else if (locationData[i].markerType == "surface" ) {
 												if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
@@ -278,8 +278,8 @@
 
 		console.log("settings " + JSON.stringify(settings));
 
-		camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.25, 300 );
-		camera.position.set( 10, 20, 10 );
+		camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.25, 500 );
+		camera.position.set( 10, 50, 10 );
 
 		
 		// scene = new THREE.Scene();
@@ -435,8 +435,8 @@
 
 		controls = new OrbitControls( camera, renderer.domElement );
 		controls.minDistance = 1;
-		controls.maxDistance = 100;
-		controls.maxPolarAngle = Math.PI * 0.9;
+		controls.maxDistance = 300;
+		controls.maxPolarAngle = Math.PI * 0.75;
 		// controls.autoRotate = true;
 		// controls.autoRotateSpeed = 1;
 		controls.target.set( 0, .2, 0 );
@@ -535,6 +535,7 @@ export function togglePostProcessing () { //call after physics is done, elsewise
 				
   		if (world && physicsIsReady && worldIsReady) {
 			
+						world.step(); //!!!
 			// if (eventQueue) {
 			// 	world.step(eventQueue);
 			// } else {	
@@ -542,28 +543,29 @@ export function togglePostProcessing () { //call after physics is done, elsewise
 
 
 			// }
-			
-
-			
-			
+				
 			dynamicBodies.forEach(b => 
 				b.update());
 			
 			kinematicBodies.forEach(c => 
 				c.update());
 
-		
-			if (agents.length) {
-				for (let i = 0; i < agents.length; i++) {
-					agents[i].update(delta);
-				}
-			}
+			agents.forEach(a =>
+				a.update(delta));
 
-				world.step();
+			// if (agents.length) {
+			// 	for (let i = 0; i < agents.length; i++) {
+			// 		agents[i].update(delta);
+			// 	}
+			// }
+
+
 				
 		}
-		
-rapierDebugRenderer.update();
+		if (rapierDebugRenderer) {
+			rapierDebugRenderer.update();
+		}
+
 		if (doPostProcessing) {
 			postProcessing.render();
 		} else {

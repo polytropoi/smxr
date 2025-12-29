@@ -23,15 +23,21 @@ export let dynamicBodies = [];
 export let staticBodies = [];
     export let kinematicBodies = [];
 
+const agentCount = 30;
+const dynamicObjectCount = 30;
 export async function initRapier () {
 		await RAPIER.init();	
 		gravity = { x: 0.0, y: -9.81, z: 0.0 };
 		world = await new RAPIER.World(gravity);
+
+
     // setTimeout( () => {
-     rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+    rapierDebugRenderer = new RapierDebugRenderer(scene, world);
     // }, 3000);
 
+    // await new Promise(r => setTimeout(r, 5000));
 
+    //    worldIsReady = true;
 }
 
 
@@ -66,8 +72,8 @@ class RapierDebugRenderer {
 
   export async function WaitAndInitAgents () {
         // 
-        for (let i = 0; i < 50; i++) {
-            // await new Promise(r => setTimeout(r, 1000)); //slow the fxk down
+        for (let i = 0; i < agentCount; i++) {
+            // await new Promise(r => setTimeout(r, 500)); //slow the fxk down
             const pos = randomNavmeshPoint();
             const agentIndex = i;
             CreateAgent(agentIndex, pos); //cook the navagent first
@@ -77,7 +83,7 @@ class RapierDebugRenderer {
             console.log("creating kinematic body for agent " + agentIndex);
             // kinematicBodies.push(rbody);
         }
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 1000)); //slow the fxk down
         await getKinematicAgentBodies();
 
         // setTimeout( () => {
@@ -136,7 +142,7 @@ export async function createStaticCollider (world, model, position) { //she's no
                   // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
                     
                     // 4. Configure collider properties
-                // colliderDesc.setDensity(.1);
+                colliderDesc.setDensity(2);
 
                 // colliderDesc.contactSkin(0.5);
 
@@ -161,7 +167,7 @@ export async function createStaticCollider (world, model, position) { //she's no
 
 
 function WaitAndInit () {
-      initObjects();
+      
       
       // eventQueue = new RAPIER.EventQueue(true);
       physicsIsReady = true;
@@ -172,11 +178,17 @@ function WaitAndInit () {
   export async function getKinematicAgentBodies () {
     try {
       for (let i = 0; i < agentParents.length; i++) {
-        const body = await getKinematicBody(agentParents[i], i);
+        const body = await getKinematicBody(agentParents[i], i); //pass the index too
         kinematicBodies.push(body);
+        // await new Promise(r => setTimeout(r, 1000));
       }
     } catch (e) {
-
+      console.log("error looping kinematic bodies " + e );
+    } finally {
+      // await new Promise(r => setTimeout(r, 2000));    
+      worldIsReady = true;
+       await new Promise(r => setTimeout(r, 5000));
+      initDynamicObjex();
     }
   }
 
@@ -184,7 +196,9 @@ export async function getKinematicBody(agentParent, agentIndex, position) {
     // await world;
     // if (world) {
 
-                    const geometry = new THREE.CapsuleGeometry( .5, 1, 4, 8, 1 );
+    try {
+              await new Promise(r => setTimeout(r, 100));
+                    const geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
                 const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .75, color: 'orange' });
                 // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
                 material.roughness = 0.1;
@@ -206,11 +220,11 @@ export async function getKinematicBody(agentParent, agentIndex, position) {
                 let worldposition = new THREE.Vector3();
                 mesh.getWorldPosition(worldposition);
 
-    let size = 1;
+    let size = 2;
     let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
             .setTranslation(worldposition.x, worldposition.y, worldposition.z);
     let rigidbody = await world.createRigidBody(rigidBodyDesc);
-    let kinematicCollider = RAPIER.ColliderDesc.capsule(.35, .35);
+    let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 1);
     let collider = await world.createCollider(kinematicCollider, rigidbody);
     collider.setRestitution(1.5);
     collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
@@ -247,63 +261,112 @@ export async function getKinematicBody(agentParent, agentIndex, position) {
     }
 
     return { rigidbody, update };
-  // }
+  } catch (e) {
+    console.log("error creating dynamic rigidbody " + e);
+  }
 }
 export async function getDynamicBody(model, position) {
 
-    // console.log("tryna create dynamic rigidbody from model " + model );
-    const size = 0.75;
-    const colliderSize = size;
-    const range = 30;
-    const density = size  * .5;
-    let x = Math.random() * range - range * 0.5;
-    let y = Math.random() * range - range * 0.5 + 3;
-    let z = Math.random() * range - range * 0.5;
+    try {
 
-    // RIGID BODY
-    let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(x, y, z);
-            //  .setGravityScale(0.5);
-            // .setCcdEnabled(false);
-    let rigidbody = await world.createRigidBody(rigidBodyDesc);
-    // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
+      // console.log("tryna create dynamic rigidbody from model " + model );
 
-    let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize).setDensity(density);
-    let collider = await world.createCollider(colliderDesc, rigidbody);
+            // await new Promise(r => setTimeout(r, 500));
+        const geometry = new THREE.SphereGeometry( 1, 32, 16 );
+    //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
+      const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
 
-    collider.setRestitution(1.5);
-    collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+		// const material = getRainbowMaterial();
+          material.roughness = 0.25;
+      material.metalness = 0.5;
+      material.envMap = scene.environment;
+      material.envMapIntensity = 2;
 
 
-    const mesh = model.clone();
-    mesh.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = true;
+			const mesh = new THREE.Mesh( geometry, material );
+      
+      const size = 2;
+      const colliderSize = size;// * 1.25;
+      const range = 30;
+      // const density = size  * .5;
+      let x = Math.random() * range - range * 0.5;
+      let y = Math.random() * range - range * 0.5 + 3;
+      let z = Math.random() * range - range * 0.5;
+
+      // RIGID BODY
+      let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+              .setTranslation(x, y, z);
+              //  .setGravityScale(0.5);
+              // .setCcdEnabled(false);
+      let rigidbody = await world.createRigidBody(rigidBodyDesc);
+      // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
+      console.log("rigidbody created with handle " + rigidbody.handle);
+      let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize); //.setDensity(density);
+      let collider = await world.createCollider(colliderDesc, rigidbody);
+
+      collider.setRestitution(1.5);
+      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+
+
+      // const mesh = model.clone();
+      // mesh.traverse((child) => {
+      //   if (child.isMesh) {
+      //     child.castShadow = true;
+      //   }
+      // });
+      mesh.scale.setScalar(size);
+      scene.add(mesh);
+      
+      let position = new THREE.Vector3();
+      position = rigidbody.translation();
+      mesh.position.copy(position);
+
+      function update () {
+      if (mesh && mesh.position && rigidbody && rigidbody.handle) {
+          // rigidbody.resetForces(true); 
+          position = rigidbody.translation();
+      //   if (mesh.position) {
+          mesh.position.copy(position);
+          let q = rigidbody.rotation();
+          let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+          mesh.rotation.setFromQuaternion(rote);
+          if (position.y < -10) {
+              rigidbody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+              rigidbody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+              rigidbody.setTranslation({ x: x, y: 10.0, z: z });
+          }
       }
-    });
-    mesh.scale.setScalar(size);
-    
-    function update () {
-    if (mesh && mesh.position && rigidbody) {
-        // rigidbody.resetForces(true); 
-        let pos = rigidbody.translation();
-    //   if (mesh.position) {
-        mesh.position.copy(pos);
-        let q = rigidbody.rotation();
-        let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
-        mesh.rotation.setFromQuaternion(rote);
-        if (pos.y < -10) {
-            rigidbody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-            rigidbody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-            rigidbody.setTranslation({ x: x, y: 10.0, z: z });
-        }
-    }
-    }
+      }
 
-    return { rigidbody, mesh, update };
+      return { rigidbody, update };
+    } catch (e) {
+      console.log("error dynamic body " + e);
+    }
   }
 
-  function getMouseBall (RAPIER, world) {
+
+  export async function initDynamicObjex () {
+
+    try {
+      for (let i = 0; i < dynamicObjectCount; i++) { // go easy
+        // 
+        // await initTestObjex(i);
+        const body = await getDynamicBody(); //spawns a mesh too
+        await new Promise(r => setTimeout(r, 500));
+			  dynamicBodies.push(body);
+        
+      }
+    } catch (e) { 
+      console.log("error init dynamic objex " + e);
+    } finally {
+      // await new Promise(r => setTimeout(r, 3000));
+      // worldIsReady = true;
+    }
+
+  }
+
+
+    function getMouseBall (RAPIER, world) {
     const mouseSize = 0.5;
     const geometry = new THREE.IcosahedronGeometry(mouseSize, 8);
     const material = new THREE.MeshStandardMaterial({
@@ -325,113 +388,4 @@ export async function getDynamicBody(model, position) {
       mouseMesh.position.set(x, y, z);
     }
     return { mesh: mouseMesh, update };
-  }
-
-  export async function initObjects () {
-    // let count = 1
-    //  const intervalID = setInterval(() => {
-    //     count++;
-    //     // // console.log(count);
-    //     // const x = count % column;
-    //     //   const y = count / column;
-
-    //     //   const mesh = new THREE.Mesh( geometry, material );
-    //     //   // mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
-    //     //   // mesh.rotation.set( Math.random(), Math.random(), Math.random() );
-    //     //   // objects.add( mesh );
-    //     //   // const body = getDynamicBody(RAPIER, world, mesh);
-    //     //   const body = getDynamicBody(mesh);
-    //     //   dynamicBodies.push(body);
-    //     //   scene.add(body.mesh);
-    //   initTestObjex(count);
-    //   console.log("spawning test object " + count);
-    //   if (count === 20) {
-    //     clearInterval(intervalID);
-    //     console.log("Stopped");
-    //     togglePostProcessing();
-    //   }
-    // }, 500);
-    // await new Promise(r => setTimeout(r, 1000));
-
-       worldIsReady = true;
-    for (let i = 0; i < 50; i++) { // go easy
-      // 
-      await initTestObjex(i);
-    }
-
-          // a
-
-  }
-
-
-  export async function initTestObjex (count) {
-
-		// const geometry = new THREE.IcosahedronGeometry( 1, 3 );
-    await new Promise(r => setTimeout(r, 500));
-    const geometry = new THREE.SphereGeometry( 1, 32, 16 );
-//  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
-  const material = new THREE.MeshStandardMaterial({ color: 'blue' });
-
-		// const material = getRainbowMaterial();
-                material.roughness = 0.25;
-            material.metalness = 0.5;
-            material.envMap = scene.environment;
-            material.envMapIntensity = 2;
-		// material.colorNode = iceColorNode;
-
-		// let count = 100;
-		const scale = 10;
-		const column = 50;
-
-		// for ( let i = 0; i < count; i ++ ) {
-
-			const x = count % column;
-			const y = count / column;
-
-			const mesh = new THREE.Mesh( geometry, material );
-			// mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
-			// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
-			// objects.add( mesh );
-			// const body = getDynamicBody(RAPIER, world, mesh);
-      const body = await getDynamicBody(mesh.clone());
-			dynamicBodies.push(body);
-			scene.add(body.mesh);
-      
-		// }
-    
-//     // let count = 0;
-// const intervalID = setInterval(() => {
-//   count++;
-//   // console.log(count);
-//   	const x = count % column;
-// 			const y = count / column;
-
-// 			const mesh = new THREE.Mesh( geometry, material );
-// 			// mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
-// 			// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
-// 			// objects.add( mesh );
-// 			// const body = getDynamicBody(RAPIER, world, mesh);
-//       const body = getDynamicBody(mesh);
-// 			dynamicBodies.push(body);
-// 			scene.add(body.mesh);
-  
-//   if (count === 120) {
-//     clearInterval(intervalID);
-//     console.log("Stopped");
-//   }
-// }, 500);
-
-    // physicsIsReady = true;
-    //     		// caustics
-		// if (water && water.waterLayer0) {
-		// 	const waterPosY = positionWorld.y.sub( water.position.y );
-
-		// 	let transition = waterPosY.add( .1 ).saturate().oneMinus();
-		// 	transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
-		// 	const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
-
-		// 	material.colorNode = colorNode;
-		// 	// floor.material.colorNode = colorNode;
-		// }
-
   }
