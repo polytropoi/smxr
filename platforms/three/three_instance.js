@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 
-import {scene, surface} from './three_main.mjs';
+import { settings } from '../../../connect/settings.js'; 
+
+import {scene, surface, water} from './three_main.mjs';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 
@@ -25,7 +27,7 @@ export async function InstanceOnSurface (model, count, scaleFactor) {
 
         // let scaleFactor = data.yscale;
 
-    console.log("gotsa SURFACE for " + model.name + " count " + count);
+        console.log("gotsa SURFACE for " + model.name + " count " + count);
 
         let sampleGeometry, sampleMaterial;
             let sampleGeos = [];
@@ -53,33 +55,71 @@ export async function InstanceOnSurface (model, count, scaleFactor) {
             instancedMeshes.push(instancedMesh);
         }
                         
+        const waterLevel = parseFloat(settings.sceneWater.level);
         const dummy = new THREE.Object3D();
         let position = new THREE.Vector3();
-   
+        let theCount = 0;
         for (let i = 0; i < count; i++) {
-            
-                await sampler.sample(position);
+                                    
 
-                dummy.position.set(position.x, position.y, position.z);
-                // console.log("instance positon " + JSON.stringify(position));
-                // Optional: Add some random rotation
-                dummy.rotation.y = Math.random() * Math.PI * 2;
-                const scale = Math.random() * scaleFactor;
-                dummy.scale.set(scale, scale, scale);
-                dummy.updateMatrix(); // Update matrix based on position/rotation
-                for (let m = 0; m < instancedMeshes.length; m++) {
-                    instancedMeshes[m].setMatrixAt(i, dummy.matrix);
-                    // console.log("instance count " + i);
-                    instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                await sampler.sample(position);
+                // 
+                    if (parseFloat(position.y) < waterLevel)  {
+                        // await sampler.sample(position);
+                        position.y = -50;
+                    }
+                    // if (position.y > waterLevel)  {
+                    //     await sampler.sample(position);
+                    // }
+                        console.log("mesh position " + position.y);
+                    dummy.position.set(position.x, position.y, position.z);
+                    // console.log("instance positon " + JSON.stringify(position));
+                    // Optional: Add some random rotation
+                    dummy.rotation.y = Math.random() * Math.PI * 2;
+                    const scale = Math.random() * scaleFactor;
+                    dummy.scale.set(scale, scale, scale);
+                    dummy.updateMatrix(); // Update matrix based on position/rotation
+                    for (let m = 0; m < instancedMeshes.length; m++) {
+                        
+                        // console.log("instance count " + i);
+                        if (parseFloat(position.y) > waterLevel)  {
+                            instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                            instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                        } else {
+                            dummy.scale.setScalar(0);
+                            instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                        }
+                    }
+
+                //     theCount++  
+                // } else {
+                //     dummy.position.set(position.x, position.y - 100, position.z);
+                //     // console.log("instance positon " + JSON.stringify(position));
+                //     // Optional: Add some random rotation
+                //     dummy.rotation.y = Math.random() * Math.PI * 2;
+                //     const scale = Math.random() * scaleFactor;
+                //     dummy.scale.set(scale, scale, scale);
+                //     dummy.updateMatrix(); // Update matrix based on position/rotation
+                //     for (let m = 0; m < instancedMeshes.length; m++) {
+                //         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                //         // console.log("instance count " + i);
+                //         // instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                    
+                //     }
+                // }
+                            
+                // }
+                // if (theCount == count ) {
+                //     console.log("theCount = count " + count);
+                //     break;
+                // }
                 
-                }
             
         }
         for (let s = 0; s < instancedMeshes.length; s++) {
             scene.add(instancedMeshes[s]);
         }
-        
-            
+
 
                
         // }

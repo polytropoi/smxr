@@ -3014,7 +3014,7 @@ three_router.get('/:_id', function (req, res) {
                         settings.skyboxURL = skyboxUrl;
                         settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
                         settings.useSceneFog = sceneResponse.sceneUseSceneFog;
-                        settings.useSceneVolumeFog = sceneResponse.sceneUseVolumetricFog;
+                        settings.sceneUseVolumetricFog = sceneResponse.sceneUseVolumetricFog;
                         settings.useSynth = hasSynth;
                         settings.mappicURL = mappicURL;
                         settings.backgroundVideoURL = backgroundVideoURL;

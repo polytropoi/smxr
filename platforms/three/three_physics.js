@@ -23,8 +23,10 @@ export let dynamicBodies = [];
 export let staticBodies = [];
     export let kinematicBodies = [];
 
-const agentCount = 30;
-const dynamicObjectCount = 30;
+const agentCount = 20;
+const dynamicObjectCount = 20;
+
+
 export async function initRapier () {
 		await RAPIER.init();	
 		gravity = { x: 0.0, y: -9.81, z: 0.0 };
@@ -99,34 +101,11 @@ class RapierDebugRenderer {
 
     }
 
-export async function createStaticCollider (world, model, position) { //she's no move
+export async function createStaticCollider (model, position) { // may not actually be added to the scene if hidden
     console.log("tryna set static collider for model " + model);
    
     try {
-        // await model.traverse((child) => {
-        //     if (child.isMesh) {
-                
-        //         const geometry = child.geometry;
-        //         const vertices = geometry.attributes.position.array;
-        //         const indices = geometry.index.array;
 
-        //         // 3. Create ColliderDesc (Example: Trimesh for complex shape)
-        //         let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
-                    
-        //             // 4. Configure collider properties
-        //         colliderDesc.setDensity(1.0);
-
-        //         const rbDesc = RAPIER.RigidBodyDesc.fixed(); //.setTranslation({ x: 0, y: 0, z: 0 });
-        //         const staticBody = world.createRigidBody(rbDesc);
-        //         world.createCollider(colliderDesc, staticBody);
-        //         staticBodies.push(staticBody);
-                
-                
-
-        //     }
-
-
-        // });
                 const geometry = model.geometry; //sent as child mesh
                 // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
 
@@ -139,15 +118,12 @@ export async function createStaticCollider (world, model, position) { //she's no
                 // 3. Create ColliderDesc (Example: Trimesh for complex shape)
                 let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
                 
-                  // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
+                // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
                     
-                    // 4. Configure collider properties
-                colliderDesc.setDensity(2);
-
-                // colliderDesc.contactSkin(0.5);
+                // colliderDesc.contactSkin(0.5); // ???
 
 
-                const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0,0,0);
+                const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
                 const staticBody = await world.createRigidBody(rbDesc);
                 let collider = await world.createCollider(colliderDesc, staticBody);
                 collider.setRestitution(.5);
@@ -177,6 +153,7 @@ function WaitAndInit () {
 
   export async function getKinematicAgentBodies () {
     try {
+      
       for (let i = 0; i < agentParents.length; i++) {
         const body = await getKinematicBody(agentParents[i], i); //pass the index too
         kinematicBodies.push(body);
@@ -185,9 +162,10 @@ function WaitAndInit () {
     } catch (e) {
       console.log("error looping kinematic bodies " + e );
     } finally {
-      // await new Promise(r => setTimeout(r, 2000));    
-      worldIsReady = true;
-       await new Promise(r => setTimeout(r, 5000));
+            worldIsReady = true;
+      await new Promise(r => setTimeout(r, 5000));    
+      
+      //  await new Promise(r => setTimeout(r, 4000));
       initDynamicObjex();
     }
   }
@@ -197,7 +175,7 @@ export async function getKinematicBody(agentParent, agentIndex, position) {
     // if (world) {
 
     try {
-              await new Promise(r => setTimeout(r, 100));
+              await new Promise(r => setTimeout(r, 200));
                     const geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
                 const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .75, color: 'orange' });
                 // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
@@ -271,7 +249,7 @@ export async function getDynamicBody(model, position) {
 
       // console.log("tryna create dynamic rigidbody from model " + model );
 
-            // await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 100));
         const geometry = new THREE.SphereGeometry( 1, 32, 16 );
     //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
       const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
@@ -351,8 +329,9 @@ export async function getDynamicBody(model, position) {
       for (let i = 0; i < dynamicObjectCount; i++) { // go easy
         // 
         // await initTestObjex(i);
+         await new Promise(r => setTimeout(r, 500));
         const body = await getDynamicBody(); //spawns a mesh too
-        await new Promise(r => setTimeout(r, 500));
+       
 			  dynamicBodies.push(body);
         
       }

@@ -1,6 +1,6 @@
 	import * as THREE from 'three/webgpu';
 
-	import RAPIER from 'rapier';
+	// import RAPIER from 'rapier';
 	
 	import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, 
 		viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time, fog, float, triNoise3D, positionView, uniform } from 'three/tsl';
@@ -9,7 +9,7 @@
 
 	import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
 
-	import { Inspector } from 'three/addons/inspector/Inspector.js';
+	// import { Inspector } from 'three/addons/inspector/Inspector.js';
 
 	import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -40,6 +40,7 @@
 	// import { Container } from '@pmndrs/uikit'
 
 	import Stats from './stats.js';
+import { Vector3 } from 'three';
 
 
 // import { sceneObjects } from '../../connect/dialogs.js';
@@ -56,6 +57,7 @@
 	export let camera, renderer;
 	let model, floor, floorPosition;
 	let postProcessing;
+	let showDebug = false;
 	let controls;
 
 	let doPostProcessing = false;
@@ -126,49 +128,32 @@
 						if (locationData[i].modelID && locationData[i].modelID != "none") {
 							for (let m = 0; m < modelsData.length; m++) {
 								if (locationData[i].modelID == modelsData[m]._id) {
-									console.log("gotsa model! " +modelsData[m].modelURL);
+									locationData[i].isHidden = false;
+									console.log("gotsa location model! " +modelsData[m].modelURL);
 									
 									const model = await loadModel(modelsData[m].modelURL); //needs to wait for navmesh, surfaces, etc.
 																				
 									console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
 									
+									if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
+									
+										locationData[i].isHidden = true;
+										// console.log("tryna hide model " + child.name);
+									} 
 									
 															
 									
 									const transmat = new THREE.MeshBasicNodeMaterial( { transparent: true, opacity: 0, color: 0x111111, depthWrite :false});
 									model.traverse(function (child) {
+										
 										if (child.isMesh){
-											
-											if (locationData[i].markerType == "navmesh" ) {
-												if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
-													navmesh = child;
-													// child.material = transmat;
-													// InitPathfinding(); //no
-												}
-											} else if (locationData[i].markerType == "surface" ) {
-												if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
-													surface = child;
-													// child.material = transmat;
-													InitSurface();
-												}
-											}
-											if (locationData[i].eventData.includes("static")) {
-												console.log("gotsa static object");
-												staticObjex.push(child);
-											} else if  (locationData[i].eventData.includes("dynamic")) {
-												dynamicObjex.push(model);
-
-											} else {
-												// child.mesh.layers.set(1);
-												// child.mesh.userData = locationData[i];	
-											}
-																	
 											console.log("loaded mesh with tags " + locationData[i].locationTags);
-											
 											if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
 												// child.material = transmat;
 												child.material.transparent = true;
 												child.material.opacity = 0;
+												// locationData[i].isHidden = true;
+												console.log("tryna hide model " + child.name);
 											} else {
 												// if (child.material.envMap) {
 												child.castShadow = true;	
@@ -178,19 +163,70 @@
 												
 											}
 											
+											if (locationData[i].markerType == "navmesh" ) {
+												// if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
+													navmesh = child;
+													// child.material = transmat;
+													// InitPathfinding(); //no
+												// }
+											} else if (locationData[i].markerType == "surface" ) {
+												// if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
+													surface = child;
+													// child.material = transmat;
+													InitSurface();
+												// }
+											}
+											if (locationData[i].eventData.includes("static")) {
+
+												
+												let staticObject = {};
+												staticObject.mesh = child;
+												staticObject.locationData = locationData[i];
+												staticObject.isHidden = locationData[i].locationTags && locationData[i].locationTags.includes("hide");
+												console.log("gotsa static object ishidden " + staticObject.isHidden);
+												staticObjex.push(staticObject);
+											} else if  (locationData[i].eventData.includes("dynamic")) {
+												dynamicObjex.push(model);
+
+											} else {
+												// child.mesh.layers.set(1);
+												// child.mesh.userData = locationData[i];	
+											}
+																	
+											
+											
+											// if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
+											// 	// child.material = transmat;
+											// 	child.material.transparent = true;
+											// 	child.material.opacity = 0;
+
+											// } else {
+											// 	// if (child.material.envMap) {
+											// 	child.castShadow = true;	
+											// 	child.receiveShadow = true;
+											// 	child.material.envMap = scene.environment;
+											// 	// }
+												
+											// }
+											
 											// child.material.envMap = scene.environment;
 										}
 									});
 
 									if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) {
-										console.log("EVENT DATA WITH INSTANCING");
+										console.log("tryna instance model " + locationData[i].name);
 										let instancedModel = {};
+										// const countsplit = locationData[i].eventData.split("~");
+										// const count = countsplit[1];
 										instancedModel.model = model;
 										instancedModel.locationData = locationData[i];
 										instancedModel.modelData = modelsData[m];
+										instancedModel.scale = locationData[i].yscale;
+										// instancedModel.count = count;
 										instancedModels.push(instancedModel);
 										console.log("instancedModels length " + instancedModels.length);
 										model.visible = false;
+										scene.remove(model);
 									} else {
 										model.position.set(locationData[i].x,locationData[i].y,locationData[i].z);
 										model.scale.set(locationData[i].xscale,locationData[i].yscale,locationData[i].zscale)
@@ -223,10 +259,10 @@
 								count = countSplit[1];
 							} else {
 								if (instancedModels[i].locationData.eventData.includes("grass")) {
-									count = 333;
+									count = 100;
 								}
 								if (instancedModels[i].locationData.eventData.includes("rocks")) {
-									count = 333;
+									count = 100;
 								}
 							}	
 
@@ -235,6 +271,7 @@
 							}
 
 							InstanceOnSurface(instancedModels[i].model, count, scale);
+							        
 						} 
 					}
 					// initStaticObjex();
@@ -249,18 +286,18 @@
 		}
 
 		async function initSystems() {
-			await initStaticObjex();
-			if (navmesh) {
-				await InitPathfinding();
-				
-			}
-		
-			// await initRapier();
-			
-			if (surface) {
+			if (surface) { // => scattering instances
 				await InitSurface();
 			}
-			
+
+			if (navmesh) {
+				await InitPathfinding(); //after this the actual physics
+				
+			}
+			if (staticObjex.length) { //eg ground and stuff
+				await initStaticObjex(); 
+			}
+
 		}
 
 
@@ -268,9 +305,13 @@
 			
 			for (let i = 0; i < staticObjex.length; i++) {
 				// if (staticObjex[i].geometry) {
-				console.log("tryna init staticObjex " + staticObjex[i].name);
+				console.log("tryna init staticObjex " + staticObjex[i].mesh.name + " hide " + staticObjex[i].isHidden);
 					// const verts = staticObjex[i].geometry.attributes.position;
-					await createStaticCollider(world, staticObjex[i]);
+					const pos = new THREE.Vector3(staticObjex[i].locationData.x, staticObjex[i].locationData.y, staticObjex[i].locationData.z)
+					await createStaticCollider(staticObjex[i].mesh, pos);
+					if (!staticObjex[i].isHidden) {
+						scene.add(staticObjex[i].mesh);
+					}
 					// scene.add(staticObj);
 				// }
 			}
@@ -358,71 +399,9 @@
 		}
 		// objects
 
-		const textureLoader = new THREE.TextureLoader();
-		const iceDiffuse = textureLoader.load( 'https://servicemedia.s3.amazonaws.com/assets/pics/water2c.jpeg' );
-		iceDiffuse.wrapS = THREE.RepeatWrapping;
-		iceDiffuse.wrapT = THREE.RepeatWrapping;
-		iceDiffuse.colorSpace = THREE.NoColorSpace;
+	
 
-		const iceColorNode = triplanarTexture( texture( iceDiffuse ) ).add( color( settings.sceneColor1 ) ).mul( .4 );
-
-				// const geometry = new THREE.IcosahedronGeometry( 1, 3 );
-				// // const material = new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } );
-				// const material = getRainbowMaterial();
-				// // material.colorNode = iceColorNode;
-
-				// const count = 100	;
-				// const scale = 10;
-				// const column = 50;
-
-				// objects = new THREE.Group();
-
-				// for ( let i = 0; i < count; i ++ ) {
-
-				// 	const x = i % column;
-				// 	const y = i / column;
-
-				// 	const mesh = new THREE.Mesh( geometry, material );
-				// 	// mesh.position.set( x * scale + Math.random(), 10, y * scale * Math.random() );
-				// 	// mesh.rotation.set( Math.random(), Math.random(), Math.random() );
-				// 	// objects.add( mesh );
-				// 	const body = getDynamicBody(RAPIER, world, mesh);
-				// 	dynamicObjex.push(body);
-				// 	scene.add(body.mesh);
-
-				// }
-
-		// objects.position.set (
-		// 	( ( column - 1 ) * scale ) * - .5,
-		// 	- 1,
-		// 	( ( count / column ) * scale ) * - .5
-		// );
-
-		// scene.add( objects );
-		// activeObjex.push(objects);
-		// floor
-
-		// floor = new THREE.Mesh( new THREE.CylinderGeometry( 2, 2, 10 ), new THREE.MeshStandardNodeMaterial( { colorNode: iceColorNode } ) );
-		// // floor = new THREE.Mesh( new THREE.CylinderGeometry( 1.1, 1.1, 10 ), returnM );
-		// floor.position.set( 0, - 5, 0 );
-		// scene.add( floor );
-		
-
-		// // caustics
-		// if (water && water.waterLayer0) {
-		// 	const waterPosY = positionWorld.y.sub( water.position.y );
-
-		// 	let transition = waterPosY.add( .1 ).saturate().oneMinus();
-		// 	transition = waterPosY.lessThan( 0 ).select( transition, normalWorld.y.mix( transition, 0 ) ).toVar();
-		// 	const colorNode = transition.mix( material.colorNode, material.colorNode.add( water.waterLayer0 ) );
-
-		// 	material.colorNode = colorNode;
-		// 	// floor.material.colorNode = colorNode;
-		// }
-
-		
-
-		// }
+				
 
 		// renderer
 
@@ -444,43 +423,37 @@
 
 		InitEnvMap();
 		InitSky();
-		// if (settings && settings.useSceneFog) {
-			InitFog();
-		// }
-
-		// gui
-
-		// const gui = renderer.inspector.createParameters( 'Settings' );
+		InitFog();
 
 		floorPosition = new THREE.Vector3( 0, .2, 0 );
-
-		// gui.add( floorPosition, 'y', - 1, 1, .001 ).name( 'floor position' );
 
 		// post processing
 
 
-				const scenePass = pass( scene, camera );
-				const scenePassColor = scenePass.getTextureNode();
-				const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+		const scenePass = pass( scene, camera );
+		const scenePassColor = scenePass.getTextureNode();
+		const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+		
+		if (water) {
+			const waterLevel = parseFloat(settings.sceneWater.level);
+			// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
+			const waterMask = objectPosition( camera ).y.greaterThan( waterLevel ).toInspector( 'Post-Processing / Water Mask' );
+			const scenePassColorBlurred = gaussianBlur( scenePassColor );
+			scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
-				if (water) {
-					const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
-					const scenePassColorBlurred = gaussianBlur( scenePassColor );
-					scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
-					const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
+			postProcessing = new THREE.PostProcessing( renderer );
+			postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+		} else {
+			const waterMask = objectPosition( camera ).y.greaterThan( -10 );
+			const scenePassColorBlurred = gaussianBlur( scenePassColor );
+			scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
-					postProcessing = new THREE.PostProcessing( renderer );
-					postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
-				} else {
-					const waterMask = objectPosition( camera ).y.greaterThan( -10 );
-					const scenePassColorBlurred = gaussianBlur( scenePassColor );
-					scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
-					const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
-
-					postProcessing = new THREE.PostProcessing( renderer );
-					postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
-				}
-				
+			postProcessing = new THREE.PostProcessing( renderer );
+			postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+		}
+		
 
 		//
 
@@ -498,10 +471,10 @@
 
 	} //end init!
 
-export function togglePostProcessing () { //call after physics is done, elsewise... :(
-	console.log("tryna toggle post processing");
-	doPostProcessing = !doPostProcessing;
-}
+	export function togglePostProcessing () { //call after physics is done, elsewise... :(
+		console.log("tryna toggle post processing");
+		doPostProcessing = !doPostProcessing;
+	}
 
 
 ////////////// MAIN LOOP FOR ALL THE THINGS ////////////////
@@ -533,36 +506,18 @@ export function togglePostProcessing () { //call after physics is done, elsewise
 
 		// }
 				
-  		if (world && physicsIsReady && worldIsReady) {
+  		if (physicsIsReady && worldIsReady) {
 			
-						world.step(); //!!!
-			// if (eventQueue) {
-			// 	world.step(eventQueue);
-			// } else {	
+			world.step(); //!!!
 
-
-
-			// }
-				
 			dynamicBodies.forEach(b => 
 				b.update());
-			
+		
 			kinematicBodies.forEach(c => 
 				c.update());
 
-			agents.forEach(a =>
-				a.update(delta));
-
-			// if (agents.length) {
-			// 	for (let i = 0; i < agents.length; i++) {
-			// 		agents[i].update(delta);
-			// 	}
-			// }
-
-
-				
 		}
-		if (rapierDebugRenderer) {
+		if (rapierDebugRenderer && showDebug) {
 			rapierDebugRenderer.update();
 		}
 
@@ -571,10 +526,9 @@ export function togglePostProcessing () { //call after physics is done, elsewise
 		} else {
 			renderer.render(scene, camera);
 		}
-
-
-		if (rapierDebugRenderer) {
-			
+		if (agents.length) {
+			agents.forEach(a =>
+				a.update(delta));
 		}
 
 		// water.material.uniforms['time'].value += 1 / 60;

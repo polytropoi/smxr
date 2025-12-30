@@ -12,10 +12,19 @@ import { scene } from '../three_main.mjs'
 import { settings } from '../../../connect/settings.js';
 	
 import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
+
+    // const textureLoader = new THREE.TextureLoader();
+    //     const iceDiffuse = textureLoader.load( 'https://servicemedia.s3.amazonaws.com/assets/pics/water2c.jpeg' );
+    //     iceDiffuse.wrapS = THREE.RepeatWrapping;
+    //     iceDiffuse.wrapT = THREE.RepeatWrapping;
+    //     iceDiffuse.colorSpace = THREE.NoColorSpace;
+
+    //     const iceColorNode = triplanarTexture( texture( iceDiffuse ) ).add( color( settings.sceneColor1 ) ).mul( .4 );
+
 export class Water1 {
 
     constructor() {
-
+        console.log("making water 1 at level " + settings.sceneWater.level);
         const timer = time.mul( .8 );
         const floorUV = positionWorld.xzy;
 
@@ -46,9 +55,9 @@ export class Water1 {
         waterMaterial.backdropNode = depthEffect.mix( viewportSharedTexture(), viewportTexture.mul( depthRefraction.mix( 1, waterColor ) ) );
         waterMaterial.backdropAlphaNode = depthRefraction.oneMinus();
         waterMaterial.transparent = true;
-
+        const waterLevel = parseFloat(settings.sceneWater.level);       
         const water = new THREE.Mesh( new THREE.CircleGeometry( 200, 64 ), waterMaterial );
-        water.position.set( 0, 0, 0 );
+        water.position.set( 0, waterLevel, 0 );
         water.rotation.x = Math.PI / 2 * -1;
         scene.add(water);
         // return water;
@@ -59,7 +68,7 @@ export class Water1 {
 export class Water2 { //uses watermesh
     constructor() {
        
-        const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
+        const waterGeometry = new THREE.PlaneGeometry( 500, 500 );
         const loader = new THREE.TextureLoader();
         const waterNormals = loader.load( '../../platforms/three/assets/waternormals.jpg' );
         waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
@@ -71,11 +80,12 @@ export class Water2 { //uses watermesh
                 sunDirection: new THREE.Vector3(),
                 sunColor: settings.sceneColor1,
                 waterColor: settings.sceneColor2,
-                alpha: .3,
+                alpha: .75,
                 distortionScale: 4
             }
         );
-
+        const waterLevel = parseFloat(settings.sceneWater.level);  
+        water.position.set( 0, waterLevel, 0 );
         water.rotation.x = - Math.PI / 2;
         scene.add(water);
 
