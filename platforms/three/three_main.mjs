@@ -280,6 +280,8 @@
 
 						if (instancedModels[i].locationData.yscale) {
 							scale = instancedModels[i].locationData.yscale;
+						} else {
+							scale = 1;
 						}
 
 						InstanceOnSurface(instancedModels[i].model, count, scale);

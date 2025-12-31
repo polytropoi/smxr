@@ -43,11 +43,7 @@ export async function InstanceOnSurface (model, count, scaleFactor) {
                 sampleMats.push(sampleMaterial);
                 
             }
-
-
-
         });
-
 
         console.log("child count for model " + sampleGeos.length);
         for (let c = 0; c < sampleGeos.length; c++) {
@@ -59,104 +55,41 @@ export async function InstanceOnSurface (model, count, scaleFactor) {
         const dummy = new THREE.Object3D();
         let position = new THREE.Vector3();
         let theCount = 0;
-        for (let i = 0; i < count; i++) {
-                                    
-
-                await sampler.sample(position);
-                // 
-                    // if (parseFloat(position.y) < waterLevel)  {
-                    //     // await sampler.sample(position);
-                    //     position.y = -100;
-                    // }
-                    // if (position.y > waterLevel)  {
-                    //     await sampler.sample(position);
-                    // }
-                        console.log("mesh position " + position.y);
-                    dummy.position.set(position.x, position.y, position.z);
-                    // console.log("instance positon " + JSON.stringify(position));
-                    // Optional: Add some random rotation
-                    dummy.rotation.y = Math.random() * Math.PI * 2;
-                    const scale = Math.random() * scaleFactor;
-                    dummy.scale.set(scale, scale, scale);
-                    dummy.updateMatrix(); // Update matrix based on position/rotation
-                    for (let m = 0; m < instancedMeshes.length; m++) {
-                        
-                        // console.log("instance count " + i);
-                        if (parseFloat(position.y) > waterLevel)  {
-                            instancedMeshes[m].setMatrixAt(i, dummy.matrix);
-                            instancedMeshes[m].instanceMatrix.needsUpdate = true;
-                        } else {
-                            dummy.scale.setScalar(0);
-                            instancedMeshes[m].setMatrixAt(i, dummy.matrix);
-                        }
-                    }
-
-                //     theCount++  
-                // } else {
-                //     dummy.position.set(position.x, position.y - 100, position.z);
-                //     // console.log("instance positon " + JSON.stringify(position));
-                //     // Optional: Add some random rotation
-                //     dummy.rotation.y = Math.random() * Math.PI * 2;
-                //     const scale = Math.random() * scaleFactor;
-                //     dummy.scale.set(scale, scale, scale);
-                //     dummy.updateMatrix(); // Update matrix based on position/rotation
-                //     for (let m = 0; m < instancedMeshes.length; m++) {
-                //         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
-                //         // console.log("instance count " + i);
-                //         // instancedMeshes[m].instanceMatrix.needsUpdate = true;
-                    
-                //     }
-                // }
-                            
-                // }
-                // if (theCount == count ) {
-                //     console.log("theCount = count " + count);
-                //     break;
-                // }
+        for (let i = 0; i < count; i++) {            
+            await sampler.sample(position);
+            // 
+            // if (parseFloat(position.y) < waterLevel)  {
+            //     // await sampler.sample(position);
+            //     position.y = -100;
+            // }
+            if (position.y < waterLevel)  {
+                // await sampler.sample(position);
+                position.y = -100;
+            }
+                console.log("mesh position " + position.y);
+            dummy.position.set(position.x, position.y, position.z);
+            // console.log("instance positon " + JSON.stringify(position));
+            // Optional: Add some random rotation
+            dummy.rotation.y = Math.random() * Math.PI * 2;
+            const scale = Math.random() * scaleFactor;
+            dummy.scale.set(scale, scale, scale);
+            dummy.updateMatrix(); // Update matrix based on position/rotation
+            for (let m = 0; m < instancedMeshes.length; m++) {
                 
-            
+                // console.log("instance count " + i);
+                if (position.y > waterLevel)  {
+                    instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                    instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                } else {
+                    dummy.scale.setScalar(0);
+                    instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                }
+            }
+
         }
         for (let s = 0; s < instancedMeshes.length; s++) {
             scene.add(instancedMeshes[s]);
         }
-
-
-               
-        // }
-
-    // const instanceMesh = new THREE.InstancedMesh(model.geometry, model.material, count);
-    // const dummy = new THREE.Object3D();
-    // for (let i = 0; i < count; i++) {
-    //     sampler.sample(dummy.position); // Get a point
-    //     // Optional: Add some random rotation
-    //     dummy.rotation.y = Math.random() * Math.PI * 2;
-    //     dummy.updateMatrix(); // Update matrix based on position/rotation
-    //     instanceMesh.setMatrixAt(i, dummy.matrix);
-    // }
-    // instanceMesh.instanceMatrix.needsUpdate = true; // Tell Three.js to update the buffer
-    // // const count = 1000; // Number of trees
-    // const instancedMesh = new THREE.InstancedMesh(model.geometry, model.material, count);
-    // const matrix = new THREE.Matrix4();
-    // const dummyQuaternion = new THREE.Quaternion();
-
-    // sampler.setWeightAttribute('position'); // Or other attributes
-
-    // for (let i = 0; i < count; i++) {
-    //     sampler.sample((position, normal) => {
-    //         const index = Math.floor(Math.random() * count); // Get a random index for placing
-
-    //         matrix.setPosition(position);
-    //         // Align to surface normal
-    //         dummyQuaternion.setFromNormalAndAxis(normal, new THREE.Vector3(0, 1, 0)); // Align to world Y up
-    //         matrix.setRotationFromQuaternion(dummyQuaternion);
-
-    //         instancedMesh.setMatrixAt(index, matrix);
-    //     });
-    // }
-
-
-    // Add to scene
-    // scene.add(instancedMesh);
     
     } else {
         console.log("NO SURFACE");

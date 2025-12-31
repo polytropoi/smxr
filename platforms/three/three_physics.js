@@ -75,56 +75,50 @@ class RapierDebugRenderer {
 
 
 
-export async function initStaticObjex () { //e.g. ground, walls, etc.. this sets physicsIsReady to true if successful
+export async function initStaticObjex () { //e.g. ground, walls, etc.. 
     
     for (let i = 0; i < staticObjex.length; i++) {
-      // if (staticObjex[i].geometry) {
+  
       console.log("tryna init staticObjex " + staticObjex[i].locationData.name + " hide " + staticObjex[i].isHidden);
-        // const verts = staticObjex[i].geometry.attributes.position;
+     
         const pos = new THREE.Vector3(staticObjex[i].locationData.x, staticObjex[i].locationData.y, staticObjex[i].locationData.z);
-        // staticObjex[i].mesh.position.set(pos);
+      
         await createStaticCollider(staticObjex[i].mesh, pos);
-        // if (!staticObjex[i].isHidden) {
-          
-        //   scene.add(staticObjex[i].mesh);
-        // }
-        // scene.add(staticObj);
-      // }
+        
     }
-            WaitAndInit();
+    WaitAndInit();
   }
-export async function createStaticCollider (model, position) { // may not actually be added to the scene if hidden
+export async function createStaticCollider (model, position) { // may not be added to the scene if hidden?
     console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(position));
    
     try {
+      const geometry = model.geometry; //sent as child mesh
+      // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
 
-                const geometry = model.geometry; //sent as child mesh
-                // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
+      const vertices = geometry.attributes.position.array;
+      // for (let i = 0; i < vertices.length; i++) {
+      //   vertices[i] *= fixedGeometry.scale.x; // Example for uniform scale
+      // }
+      const indices = geometry.index.array;
 
-                const vertices = geometry.attributes.position.array;
-                // for (let i = 0; i < vertices.length; i++) {
-                //   vertices[i] *= fixedGeometry.scale.x; // Example for uniform scale
-                // }
-                const indices = geometry.index.array;
+      // 3. Create ColliderDesc (Example: Trimesh for complex shape)
+      let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+      
+      // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
+          
+      // colliderDesc.contactSkin(0.5); // ???
+      const pos = new THREE.Vector3();
+      model.getWorldPosition(pos);
+      // const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
+                      const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z);
 
-                // 3. Create ColliderDesc (Example: Trimesh for complex shape)
-                let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
-                
-                // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
-                    
-                // colliderDesc.contactSkin(0.5); // ???
-                const pos = new THREE.Vector3();
-                model.getWorldPosition(pos);
-                // const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
-                                const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z);
+      // model.position.set(position);
+      const staticBody = await world.createRigidBody(rbDesc);
+      let collider = await world.createCollider(colliderDesc, staticBody);
+      collider.setRestitution(.5);
+      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
-                // model.position.set(position);
-                const staticBody = await world.createRigidBody(rbDesc);
-                let collider = await world.createCollider(colliderDesc, staticBody);
-                collider.setRestitution(.5);
-                collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-
-                staticBodies.push(staticBody);
+      staticBodies.push(staticBody);
     } catch (e) {
         console.error("staticCollider error "+ e);
     } finally {
@@ -133,24 +127,18 @@ export async function createStaticCollider (model, position) { // may not actual
     
 }
 
-
-    
-
-
-  function WaitAndInit () {
-            
-    // eventQueue = new RAPIER.EventQueue(true);
-    physicsIsReady = true;
-    worldIsReady = true;
-    togglePostProcessing();
-          initDynamicObjex();
-  }
+function WaitAndInit () {
+          
+  // eventQueue = new RAPIER.EventQueue(true);
+  physicsIsReady = true;
+  worldIsReady = true;
+  togglePostProcessing();
+  initDynamicObjex();
+}
 
   export async function getKinematicAgentBodies () {
     try {
-      
       for (let i = 0; i < agentParents.length; i++) {
-        
         const body = await getKinematicBody(agentParents[i], i); //pass the index too
         kinematicBodies.push(body);
         // await new Promise(r => setTimeout(r, 1000));
@@ -158,69 +146,44 @@ export async function createStaticCollider (model, position) { // may not actual
     } catch (e) {
       console.log("error looping kinematic bodies " + e );
     } finally {
-            // worldIsReady = true;
-      // await new Promise(r => setTimeout(r, 5000));    
-      
-      //  await new Promise(r => setTimeout(r, 4000));
-
+   
     }
   }
 
   export async function getKinematicBody(agentParent, agentIndex, position) {
-    // await world;
-    // if (world) {
 
     try {
-              await new Promise(r => setTimeout(r, 0));
-                    const geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
-                const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .75, color: 'orange' });
-                // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
-                material.roughness = 0.1;
-                material.metalness = 0.3;
-                material.envMap = scene.environment;
-                material.envMapIntensity = 2;
-                // const material = returnMaterial('brain');
-                const mesh = new THREE.Mesh( geometry, material );
-                // const timeUniform = uniform(0);
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-            
-                mesh.name = "agent_" + agentIndex;
+      await new Promise(r => setTimeout(r, 0));
+      const geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
+      const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .75, color: 'orange' });
+      // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
+      material.roughness = 0.1;
+      material.metalness = 0.3;
+      material.envMap = scene.environment;
+      material.envMapIntensity = 2;
+      // const material = returnMaterial('brain');
+      const mesh = new THREE.Mesh( geometry, material );
+      // const timeUniform = uniform(0);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
 
-                
-                // scene.add(mesh)
-                agentParent.add(mesh);
-                mesh.position.set(0,2,0);
-                let worldposition = new THREE.Vector3();
-                mesh.getWorldPosition(worldposition);
+      mesh.name = "agent_" + agentIndex;
 
-    let size = 2;
-    let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
-            .setTranslation(worldposition.x, worldposition.y, worldposition.z);
-    let rigidbody = await world.createRigidBody(rigidBodyDesc);
-    let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 1);
-    let collider = await world.createCollider(kinematicCollider, rigidbody);
-    collider.setRestitution(1.5);
-    collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      
+      // scene.add(mesh)
+      agentParent.add(mesh);
+      mesh.position.set(0,2,0);
+      let worldposition = new THREE.Vector3();
+      mesh.getWorldPosition(worldposition);
 
-
-    // // const mesh = model.clone();
-    // let childmesh;
-    // // let meshPosition = new THREE.Vector3();
-    // // meshPosition.get
-    
-    // // const modelClone = model.clone();
-    // model.traverse((child) => {    
-    //   if (child.isMesh) {
-    //     child.castShadow = true;
-    //     childmesh = child;
-    //   }
-    // });
-    // mesh.scale.setScalar(size);
-
-
-    // mesh.getWorldPosition(worldposition);
-    // childmesh.scale.setScalar(size);
+      let size = 2;
+      let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
+              .setTranslation(worldposition.x, worldposition.y, worldposition.z);
+      let rigidbody = await world.createRigidBody(rigidBodyDesc);
+      let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 1);
+      let collider = await world.createCollider(kinematicCollider, rigidbody);
+      collider.setRestitution(1.5);
+      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
     function update () {
 
@@ -244,14 +207,13 @@ export async function getDynamicBody(model, position) {
     try {
 
       // console.log("tryna create dynamic rigidbody from model " + model );
-
-            await new Promise(r => setTimeout(r, 0));
-        const geometry = new THREE.SphereGeometry( 1, 32, 16 );
+      await new Promise(r => setTimeout(r, 0));
+      const geometry = new THREE.SphereGeometry( 1, 32, 16 );
     //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
       const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
 
 		// const material = getRainbowMaterial();
-          material.roughness = 0.25;
+      material.roughness = 0.25;
       material.metalness = 0.5;
       material.envMap = scene.environment;
       material.envMapIntensity = 2;
@@ -281,13 +243,6 @@ export async function getDynamicBody(model, position) {
       collider.setRestitution(1.5);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
-
-      // const mesh = model.clone();
-      // mesh.traverse((child) => {
-      //   if (child.isMesh) {
-      //     child.castShadow = true;
-      //   }
-      // });
       mesh.scale.setScalar(size);
       scene.add(mesh);
       

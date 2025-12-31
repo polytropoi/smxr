@@ -78,7 +78,7 @@
                 pos = randomNavmeshPoint();
                 for (let d = 0; d < agentInitLocations.length; d++) {
                     if (pos.distanceTo(agentInitLocations[d]) > 2) {
-                        goodPosition;
+                        goodPosition = true;
                         break;
                     }
                 }
@@ -89,24 +89,10 @@
             const agentIndex = i;
             CreateAgent(agentIndex, pos); //cook the navagent first
             
-            // const rbody = await getKinematicBody(agentParent, agentIndex, pos);
-            
             console.log("creating kinematic body for agent " + agentIndex);
             // kinematicBodies.push(rbody);
         }
-        // await new Promise(r => setTimeout(r, 1000)); //slow the fxk down
-        // await getKinematicAgentBodies();
-
-        // setTimeout( () => {
-        // if (agentMeshes) {
-            
-        //     for (let i = 0; i < agentMeshes.length; i++) {
-        //         const rbody = getKinematicBody(agentMeshes);
-        //         kinematicBodies.push(rbody);
-        //     }
-        // }
-        // }, 3000);
-        
+      
     }
 
     export async function InitPathfinding () {
