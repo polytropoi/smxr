@@ -3,7 +3,8 @@
 	// import RAPIER from 'rapier';
 	
 	import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, 
-		viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time, fog, float, triNoise3D, positionView, uniform } from 'three/tsl';
+		viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, 
+		time, fog, float, triNoise3D, positionView, uniform } from 'three/tsl';
 	
 	// import { ColorNode, MeshBasicNodeMaterial } from 'three/addons/examples/jsm/nodes/Nodes.js';
 
@@ -32,15 +33,16 @@
 
 	import { UpdateText } from './three_ui.js';
 
-	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, eventQueue, kinematicBodies, worldIsReady } from './three_physics.js';
+	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
+		eventQueue, kinematicBodies, worldIsReady, initStaticObjex } from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
 
-	// import { Container } from '@pmndrs/uikit'
+	// import { Container } from '@pmndrs/uikit' //arghh
 
 	import Stats from './stats.js';
-import { Vector3 } from 'three';
+
 
 
 // import { sceneObjects } from '../../connect/dialogs.js';
@@ -57,7 +59,7 @@ import { Vector3 } from 'three';
 	export let camera, renderer;
 	let model, floor, floorPosition;
 	let postProcessing;
-	let showDebug = false;
+	let showDebug = true;
 	let controls;
 
 	let doPostProcessing = false;
@@ -66,7 +68,7 @@ import { Vector3 } from 'three';
 	let activeObjex = [];
 	let dynamicObjex = [];
 
-	let staticObjex = [];
+	export let staticObjex = [];
 	let navmeshObjex = [];
 	let surfaceObjex = [];
 
@@ -116,12 +118,7 @@ import { Vector3 } from 'three';
 			locationData = JSON.parse(atob(theLocationData));
 			SetSceneLocations(locationData);
 			console.log("locationData " + JSON.stringify(locationData));
-			 //reuse the loader
-			// try {
-			// Create the ground
-			// let groundColliderDesc = RAPIER.ColliderDesc.cuboid(5.0, 0.1, 5.0)
-			// .setTranslation(0.0, -2.0, 0.0);
-			// world.createCollider(groundColliderDesc);
+			
 			(async () => {
 				try { 
 					for (let i = 0; i < locationData.length; i++) {
@@ -131,7 +128,7 @@ import { Vector3 } from 'three';
 									locationData[i].isHidden = false;
 									console.log("gotsa location model! " +modelsData[m].modelURL);
 									
-									const model = await loadModel(modelsData[m].modelURL); //needs to wait for navmesh, surfaces, etc.
+									const model = await loadModel(modelsData[m].modelURL); //wait till all loaded for navmesh, surfaces, physics etc.
 																				
 									console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
 									
@@ -139,11 +136,9 @@ import { Vector3 } from 'three';
 									
 										locationData[i].isHidden = true;
 										// console.log("tryna hide model " + child.name);
-									} 
+									}															
 									
-															
-									
-									const transmat = new THREE.MeshBasicNodeMaterial( { transparent: true, opacity: 0, color: 0x111111, depthWrite :false});
+									// const transmat = new THREE.MeshBasicNodeMaterial( { transparent: true, opacity: 0, color: 0x111111, depthWrite :false});
 									model.traverse(function (child) {
 										
 										if (child.isMesh){
@@ -192,28 +187,12 @@ import { Vector3 } from 'three';
 												// child.mesh.layers.set(1);
 												// child.mesh.userData = locationData[i];	
 											}
-																	
-											
-											
-											// if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
-											// 	// child.material = transmat;
-											// 	child.material.transparent = true;
-											// 	child.material.opacity = 0;
-
-											// } else {
-											// 	// if (child.material.envMap) {
-											// 	child.castShadow = true;	
-											// 	child.receiveShadow = true;
-											// 	child.material.envMap = scene.environment;
-											// 	// }
-												
-											// }
-											
-											// child.material.envMap = scene.environment;
+													
 										}
 									});
 
-									if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) {
+
+									if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { //gonna make a bunch and get scattered
 										console.log("tryna instance model " + locationData[i].name);
 										let instancedModel = {};
 										// const countsplit = locationData[i].eventData.split("~");
@@ -221,16 +200,22 @@ import { Vector3 } from 'three';
 										instancedModel.model = model;
 										instancedModel.locationData = locationData[i];
 										instancedModel.modelData = modelsData[m];
-										instancedModel.scale = locationData[i].yscale;
+										instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
 										// instancedModel.count = count;
 										instancedModels.push(instancedModel);
 										console.log("instancedModels length " + instancedModels.length);
 										model.visible = false;
 										scene.remove(model);
-									} else {
-										model.position.set(locationData[i].x,locationData[i].y,locationData[i].z);
-										model.scale.set(locationData[i].xscale,locationData[i].yscale,locationData[i].zscale)
-										scene.add(model);
+									} else { // regular meshes
+										console.log(locationData[i].name + " adding to scene at location " + locationData[i].x + locationData[i].y + locationData[i].z);
+										
+										
+										model.position.set(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z));
+										const xscale = locationData[i].xscale ? locationData[i].xscale : 1;
+										const yscale = locationData[i].yscale ? locationData[i].yscale : 1;
+										const zscale = locationData[i].zscale ? locationData[i].scale : 1;
+
+										model.scale.set(xscale,yscale,zscale);
 										// model.layers.set(1);
 										model.userData = locationData[i];
 										model.name = "model_" + locationData[i].name;
@@ -238,47 +223,32 @@ import { Vector3 } from 'three';
 										model.receiveShadow = true;
 										// model.material.envMap = scene.environment;
 										// model.envMapIntensity = 2;
+										scene.add(model);
 										activeObjex.push(model);
 																			
 									}
-									break;
+									break; //only match one model per location!?
 								}
 							}
+						} else {
+							if (locationData[i].markerType == "navmesh") {
+								createDefaultNavmesh();
+							}
+							if (locationData[i].markerType == "surface") {
+								createDefaultSurface();
+							}
+
+
+							
 						}
 						// console.log("locationData " + i + " of "  + locationData.length);
 					}
 					// console.log("looking for Surface with models " + instancedModels.length);
-					if (surface) {
-
-						console.log("instantiating on surface with models " + instancedModels.length);
-						for (let i = 0; i < instancedModels.length; i++) {
-							let count = 33;
-							let scale = 1;
-							if (instancedModels[i].locationData.eventData.includes("~")) {
-								let countSplit = instancedModels[i].locationData.eventData.split("~");
-								count = countSplit[1];
-							} else {
-								if (instancedModels[i].locationData.eventData.includes("grass")) {
-									count = 100;
-								}
-								if (instancedModels[i].locationData.eventData.includes("rocks")) {
-									count = 100;
-								}
-							}	
-
-							if (instancedModels[i].locationData.yscale) {
-								scale = instancedModels[i].locationData.yscale * .5;
-							}
-
-							InstanceOnSurface(instancedModels[i].model, count, scale);
-							        
-						} 
-					}
-					// initStaticObjex();
-
+					
 				} catch (e) {
 					console.error("ERROR LOADING GLTF! " + e);
 				} finally {
+					
 					initSystems();
 				}
 			})();
@@ -286,36 +256,46 @@ import { Vector3 } from 'three';
 		}
 
 		async function initSystems() {
+			if (staticObjex.length) { //eg ground and stuff
+				await initStaticObjex(); 
+			}
+
 			if (surface) { // => scattering instances
 				await InitSurface();
+				console.log("instantiating on surface with models " + instancedModels.length);
+					for (let i = 0; i < instancedModels.length; i++) {
+						let count = 33;
+						let scale = 1;
+						if (instancedModels[i].locationData.eventData.includes("~")) {
+							let countSplit = instancedModels[i].locationData.eventData.split("~");
+							count = countSplit[1];
+						} else {
+							if (instancedModels[i].locationData.eventData.includes("grass")) {
+								count = 100;
+							}
+							if (instancedModels[i].locationData.eventData.includes("rocks")) {
+								count = 100;
+							}
+						}	
+
+						if (instancedModels[i].locationData.yscale) {
+							scale = instancedModels[i].locationData.yscale;
+						}
+
+						InstanceOnSurface(instancedModels[i].model, count, scale);
+								
+					} 
 			}
 
 			if (navmesh) {
 				await InitPathfinding(); //after this the actual physics
 				
 			}
-			if (staticObjex.length) { //eg ground and stuff
-				await initStaticObjex(); 
-			}
 
 		}
 
 
-		async function initStaticObjex () { //e.g. ground, walls, etc.. this sets physicsIsReady to true if successful
-			
-			for (let i = 0; i < staticObjex.length; i++) {
-				// if (staticObjex[i].geometry) {
-				console.log("tryna init staticObjex " + staticObjex[i].mesh.name + " hide " + staticObjex[i].isHidden);
-					// const verts = staticObjex[i].geometry.attributes.position;
-					const pos = new THREE.Vector3(staticObjex[i].locationData.x, staticObjex[i].locationData.y, staticObjex[i].locationData.z)
-					await createStaticCollider(staticObjex[i].mesh, pos);
-					if (!staticObjex[i].isHidden) {
-						scene.add(staticObjex[i].mesh);
-					}
-					// scene.add(staticObj);
-				// }
-			}
-		}
+
 
 		console.log("settings " + JSON.stringify(settings));
 
@@ -603,12 +583,12 @@ import { Vector3 } from 'three';
 				} else {
 					if ( raycastHitAgent ) {
 						if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-							console.log("tryna reset agent colornode after no hit");
+							// console.log("tryna reset agent colornode after no hit");
 							raycastHitAgent.material.materialColor = stopColor;
 							raycastHitAgent.material.needsUpdate = true;
 							
 						} else if (raycastHitAgent.material) {
-							console.log("tryna reset agent color after no hit");
+							// console.log("tryna reset agent color after no hit");
 							raycastHitAgent.material.color = stopColor;
 						}
 					}
@@ -618,11 +598,11 @@ import { Vector3 } from 'three';
 				if ( raycastHitAgent ) {
 				// 	{
 					if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-						console.log("tryna reset agent color after no hit");
+						// console.log("tryna reset agent color after no hit");
 						raycastHitAgent.material.materialColor = stopColor;
 						raycastHitAgent.material.needsUpdate = true;
 					} else if (raycastHitAgent.material) {
-						console.log("tryna reset agent color after no hit");
+						// console.log("tryna reset agent color after no hit");
 						raycastHitAgent.material.color = stopColor;
 					}
 				}

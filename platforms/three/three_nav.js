@@ -6,7 +6,7 @@
 
     import { uniform, sin, mul, add, time } from 'three/tsl';
 
-    import { getKinematicBody, world, WaitAndInitAgents } from './three_physics.js';
+    import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './three_physics.js';
 
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;
@@ -14,11 +14,13 @@
 
     export let agents = [];
     export let agentParents = [];
+    // let agentCount = 20;
+    export let agentsAreReady = false;
 
 
     import { returnMaterial } from './tsl/tsl_materials.js'
 
-
+    let agentInitLocations = [];
     let arrowHelper;
 
     // import { uniform, sin } from 'three/tsl';
@@ -30,55 +32,13 @@
 
     export function CreateAgent (agentIndex, pos) {
 
-        // agentIndex = agentIndex + 1;
-            
-        // if (!model) {
-                // const geometry = new THREE.CapsuleGeometry( .5, 1, 4, 8, 1 );
-                // // const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'orange' });
-                // const material = new THREE.MeshStandardNodeMaterial({ color: 'orange' });
-                // material.roughness = 0.1;
-                // material.metalness = 0.3;
-                // material.envMap = scene.environment;
-                // material.envMapIntensity = 2;
-                // // const material = returnMaterial('brain');
-                // const mesh = new THREE.Mesh( geometry, material );
-                // const timeUniform = uniform(0);
-                // mesh.castShadow = true;
-                // mesh.receiveShadow = true;
-            
-                // mesh.name = "agent_" + agentIndex;
-                // console.log("tryna CreateAgent number " + agentIndex);
             const agentParent = new THREE.Object3D(); //empty
             agentParent.name = "agentParent_" + agentIndex;
             agentParent.position.set(pos.x, pos.y, pos.z);
             // agentParent.add(mesh);
             // mesh.position.set(0,1,0); //offset on parent navagent
             scene.add(agentParent);
-        // }
-
-
-        
-
-        // const time = uniform(0.0);
-
-        // Use sin() to create a pulsing effect for the emissive intensity
-        // sin(time * 2.0) oscillates between -1 and 1
-        // mul(0.3) dampens the effect
-        // add(0.7) shifts the range to 0.4 to 1.0 (never completely dark)
-        // const pulse = sin(time.mul(2.0)).mul(0.3).add(0.7);
-
-        // Assign the pulsing value to the emissiveNode, multiplied by a base color
-        // For this example, we'll use a simple vec3 for color
-        // material.emissiveNode = new THREE.Color(1, 0.5, 0).add(pulse);
-        // mesh.userData = {
-        //     update: function () {
-        //         material.colorNode.size  
-        //     }
-        // }
-
-
-        // scene.add(mesh);
-        
+      
         
         const options = {
             object: agentParent,
@@ -101,7 +61,54 @@
 
         // } 
     }
-                
+    export function createDefaultNavmesh() {
+
+    }
+            
+    export async function initAgents () {
+        // 
+        for (let i = 0; i < agentCount; i++) {
+            let pos;
+            let goodPosition = false;
+            // await new Promise(r => setTimeout(r, 500)); //slow the fxk down
+            for (let p = 0; p < 10; p++) {
+                if (goodPosition) {
+                    break;
+                }
+                pos = randomNavmeshPoint();
+                for (let d = 0; d < agentInitLocations.length; d++) {
+                    if (pos.distanceTo(agentInitLocations[d]) > 2) {
+                        goodPosition;
+                        break;
+                    }
+                }
+            }
+            
+
+
+            const agentIndex = i;
+            CreateAgent(agentIndex, pos); //cook the navagent first
+            
+            // const rbody = await getKinematicBody(agentParent, agentIndex, pos);
+            
+            console.log("creating kinematic body for agent " + agentIndex);
+            // kinematicBodies.push(rbody);
+        }
+        // await new Promise(r => setTimeout(r, 1000)); //slow the fxk down
+        // await getKinematicAgentBodies();
+
+        // setTimeout( () => {
+        // if (agentMeshes) {
+            
+        //     for (let i = 0; i < agentMeshes.length; i++) {
+        //         const rbody = getKinematicBody(agentMeshes);
+        //         kinematicBodies.push(rbody);
+        //     }
+        // }
+        // }, 3000);
+        
+    }
+
     export async function InitPathfinding () {
         // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh") && navmesh) {
  
@@ -123,8 +130,9 @@
             } catch (e) {
                 console.log("error pathfinding init " + e);
             } finally{
-                
-               WaitAndInitAgents();
+                agentsAreReady = true;
+            //    WaitAndInitAgents();
+                initAgents();
             }
 
             // await initRapier();
@@ -137,7 +145,12 @@
 
 
     export function randomNavmeshPoint () {
+        
+
+
         const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 50);
+
+        
         // console.log("random navmesh position " + JSON.stringify(randomNode));
         // randomNode 
         return randomNode;
@@ -257,10 +270,10 @@
                             } 
         }
         
-        newPath(pt){
+        newPath(pt) {
             const player = this.object;
             
-            if (this.pathfinder===undefined){
+            if (this.pathfinder===undefined) {
                 this.calculatedPath = [ pt.clone() ];
                 this.setTargetDirection();
                 return;

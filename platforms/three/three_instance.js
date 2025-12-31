@@ -64,10 +64,10 @@ export async function InstanceOnSurface (model, count, scaleFactor) {
 
                 await sampler.sample(position);
                 // 
-                    if (parseFloat(position.y) < waterLevel)  {
-                        // await sampler.sample(position);
-                        position.y = -50;
-                    }
+                    // if (parseFloat(position.y) < waterLevel)  {
+                    //     // await sampler.sample(position);
+                    //     position.y = -100;
+                    // }
                     // if (position.y > waterLevel)  {
                     //     await sampler.sample(position);
                     // }

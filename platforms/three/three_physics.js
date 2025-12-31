@@ -5,7 +5,7 @@ import RAPIER from 'rapier';
 
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-import { scene, togglePostProcessing, water } from './three_main.mjs';
+import { scene, togglePostProcessing, water, staticObjex } from './three_main.mjs';
 import { agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
 // import {scene, world} from './three_main.mjs'
 
@@ -21,9 +21,9 @@ export let worldIsReady = false;
 // export let kinematicBodies = [];
 export let dynamicBodies = [];
 export let staticBodies = [];
-    export let kinematicBodies = [];
+export let kinematicBodies = [];
 
-const agentCount = 20;
+export const agentCount = 20;
 const dynamicObjectCount = 20;
 
 
@@ -72,37 +72,29 @@ class RapierDebugRenderer {
   }
 }
 
-  export async function WaitAndInitAgents () {
-        // 
-        for (let i = 0; i < agentCount; i++) {
-            // await new Promise(r => setTimeout(r, 500)); //slow the fxk down
-            const pos = randomNavmeshPoint();
-            const agentIndex = i;
-            CreateAgent(agentIndex, pos); //cook the navagent first
-            
-            // const rbody = await getKinematicBody(agentParent, agentIndex, pos);
-            
-            console.log("creating kinematic body for agent " + agentIndex);
-            // kinematicBodies.push(rbody);
-        }
-        await new Promise(r => setTimeout(r, 1000)); //slow the fxk down
-        await getKinematicAgentBodies();
 
-        // setTimeout( () => {
-        // if (agentMeshes) {
-            
-        //     for (let i = 0; i < agentMeshes.length; i++) {
-        //         const rbody = getKinematicBody(agentMeshes);
-        //         kinematicBodies.push(rbody);
-        //     }
+
+
+export async function initStaticObjex () { //e.g. ground, walls, etc.. this sets physicsIsReady to true if successful
+    
+    for (let i = 0; i < staticObjex.length; i++) {
+      // if (staticObjex[i].geometry) {
+      console.log("tryna init staticObjex " + staticObjex[i].locationData.name + " hide " + staticObjex[i].isHidden);
+        // const verts = staticObjex[i].geometry.attributes.position;
+        const pos = new THREE.Vector3(staticObjex[i].locationData.x, staticObjex[i].locationData.y, staticObjex[i].locationData.z);
+        // staticObjex[i].mesh.position.set(pos);
+        await createStaticCollider(staticObjex[i].mesh, pos);
+        // if (!staticObjex[i].isHidden) {
+          
+        //   scene.add(staticObjex[i].mesh);
         // }
-        // }, 3000);
-        
-
+        // scene.add(staticObj);
+      // }
     }
-
+            WaitAndInit();
+  }
 export async function createStaticCollider (model, position) { // may not actually be added to the scene if hidden
-    console.log("tryna set static collider for model " + model);
+    console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(position));
    
     try {
 
@@ -121,9 +113,12 @@ export async function createStaticCollider (model, position) { // may not actual
                 // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
                     
                 // colliderDesc.contactSkin(0.5); // ???
+                const pos = new THREE.Vector3();
+                model.getWorldPosition(pos);
+                // const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
+                                const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z);
 
-
-                const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
+                // model.position.set(position);
                 const staticBody = await world.createRigidBody(rbDesc);
                 let collider = await world.createCollider(colliderDesc, staticBody);
                 collider.setRestitution(.5);
@@ -133,7 +128,7 @@ export async function createStaticCollider (model, position) { // may not actual
     } catch (e) {
         console.error("staticCollider error "+ e);
     } finally {
-        WaitAndInit();
+
     }
     
 }
@@ -142,19 +137,20 @@ export async function createStaticCollider (model, position) { // may not actual
     
 
 
-function WaitAndInit () {
-      
-      
-      // eventQueue = new RAPIER.EventQueue(true);
-      physicsIsReady = true;
-      togglePostProcessing();
-      
-    }
+  function WaitAndInit () {
+            
+    // eventQueue = new RAPIER.EventQueue(true);
+    physicsIsReady = true;
+    worldIsReady = true;
+    togglePostProcessing();
+          initDynamicObjex();
+  }
 
   export async function getKinematicAgentBodies () {
     try {
       
       for (let i = 0; i < agentParents.length; i++) {
+        
         const body = await getKinematicBody(agentParents[i], i); //pass the index too
         kinematicBodies.push(body);
         // await new Promise(r => setTimeout(r, 1000));
@@ -162,20 +158,20 @@ function WaitAndInit () {
     } catch (e) {
       console.log("error looping kinematic bodies " + e );
     } finally {
-            worldIsReady = true;
-      await new Promise(r => setTimeout(r, 5000));    
+            // worldIsReady = true;
+      // await new Promise(r => setTimeout(r, 5000));    
       
       //  await new Promise(r => setTimeout(r, 4000));
-      initDynamicObjex();
+
     }
   }
 
-export async function getKinematicBody(agentParent, agentIndex, position) {
+  export async function getKinematicBody(agentParent, agentIndex, position) {
     // await world;
     // if (world) {
 
     try {
-              await new Promise(r => setTimeout(r, 200));
+              await new Promise(r => setTimeout(r, 0));
                     const geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
                 const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .75, color: 'orange' });
                 // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
@@ -194,7 +190,7 @@ export async function getKinematicBody(agentParent, agentIndex, position) {
                 
                 // scene.add(mesh)
                 agentParent.add(mesh);
-                mesh.position.set(0,1,0);
+                mesh.position.set(0,2,0);
                 let worldposition = new THREE.Vector3();
                 mesh.getWorldPosition(worldposition);
 
@@ -249,7 +245,7 @@ export async function getDynamicBody(model, position) {
 
       // console.log("tryna create dynamic rigidbody from model " + model );
 
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 0));
         const geometry = new THREE.SphereGeometry( 1, 32, 16 );
     //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
       const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
@@ -268,7 +264,7 @@ export async function getDynamicBody(model, position) {
       const range = 30;
       // const density = size  * .5;
       let x = Math.random() * range - range * 0.5;
-      let y = Math.random() * range - range * 0.5 + 3;
+      let y = Math.random() * range - range * 0.5 + 10;
       let z = Math.random() * range - range * 0.5;
 
       // RIGID BODY
@@ -329,7 +325,7 @@ export async function getDynamicBody(model, position) {
       for (let i = 0; i < dynamicObjectCount; i++) { // go easy
         // 
         // await initTestObjex(i);
-         await new Promise(r => setTimeout(r, 500));
+         await new Promise(r => setTimeout(r, 0));
         const body = await getDynamicBody(); //spawns a mesh too
        
 			  dynamicBodies.push(body);
@@ -338,8 +334,9 @@ export async function getDynamicBody(model, position) {
     } catch (e) { 
       console.log("error init dynamic objex " + e);
     } finally {
-      // await new Promise(r => setTimeout(r, 3000));
+      await new Promise(r => setTimeout(r, 4000));
       // worldIsReady = true;
+      await getKinematicAgentBodies();
     }
 
   }
@@ -368,3 +365,4 @@ export async function getDynamicBody(model, position) {
     }
     return { mesh: mouseMesh, update };
   }
+
