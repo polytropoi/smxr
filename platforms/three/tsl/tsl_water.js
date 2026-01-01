@@ -68,7 +68,8 @@ export class Water1 {
 export class Water2 { //uses watermesh
     constructor() {
        
-        const waterGeometry = new THREE.PlaneGeometry( 500, 500 );
+        // const waterGeometry = new THREE.PlaneGeometry( 500, 500 );
+        const waterGeometry = new THREE.CircleGeometry( 300, 64 )
         const loader = new THREE.TextureLoader();
         const waterNormals = loader.load( '../../platforms/three/assets/waternormals.jpg' );
         waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;

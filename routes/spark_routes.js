@@ -2,7 +2,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const express = require("express");
-const three_router = express.Router();
+const spark_router = express.Router();
 const entities = require("entities");
 // const async = require('async'); ///goodbye to you my confusing friend...
 
@@ -47,7 +47,7 @@ function UppercaseFirst(s) {
         }
     };
     
-three_router.get("/test", function (req, res) {
+spark_router.get("/test", function (req, res) {
     res.send("OK!");
 });    
 
@@ -71,7 +71,7 @@ function HexToRgbValues (c) {
 
  
 ////////// test / example of aframe response
-three_router.get('/simple_three', function (req, res) { 
+spark_router.get('/simple', function (req, res) { 
 
     let response =
         "<!DOCTYPE html> <html lang=\x22en\x22>" +
@@ -94,7 +94,7 @@ three_router.get('/simple_three', function (req, res) {
 );
 
 ////////////////////PRIMARY /WEBXR ROUTE  e.g. /webxr/<short_id> ///////////////////
-three_router.get('/:_id', function (req, res) { 
+spark_router.get('/:_id', function (req, res) { 
     
     var reqstring = entities.decodeHTML(req.params._id);
     console.log("NEW three SCENE REQUEST : " + reqstring);
@@ -372,25 +372,25 @@ three_router.get('/:_id', function (req, res) {
             // "\x22three\x22: \x22https://unpkg.com/three@0.161.0/build/three.module.js\x22,"+
             // "\x22three/addons/\x22: \x22https://unpkg.com/three@0.161.0/examples/jsm/\x22"+
 
-                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.webgpu.js\x22,"+     
-                       "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.webgpu.js\x22,"+
+                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js\x22,"+     
+                    //    "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.webgpu.js\x22,"+
 
-                            "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.tsl.js\x22,"+
+                            // "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.tsl.js\x22,"+
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
                             "\x22three-pathfinding\x22: \x22https://unpkg.com/three-pathfinding@latest/dist/three-pathfinding.module.js\x22,"+
-                            "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
+                            // "\x22tsl-textures\x22: \x22/platforms/spark/tsl/tsl-textures.js\x22,"+
                             // "\x22three-mesh-ui\x22: \x22https://unpkg.com/three-mesh-ui@6.4.0/build/three-mesh-ui.module.js\x22,"+
                             // https://unpkg.com/three-mesh-ui@6.4.1/build/three-mesh-ui.js
-                            //  "\x22troika-three-text\x22: \x22/platforms/three/troika/three-troika.min.js\x22,"+ //ugh no troika for webgpu yet
-                            //   "\x22troika-three-text\x22: \x22/platforms/three/troika/troika-three-text.esm.js\x22,"+
-                            //    "\x22troika-worker-utils\x22: \x22/platforms/three/troika/troika-worker-utils.esm.js\x22,"+
-                            //     "\x22troika-three-utils\x22: \x22/platforms/three/troika/troika-three-utils.esm.js\x22,"+
+                            //  "\x22troika-three-text\x22: \x22/platforms/spark/troika/three-troika.min.js\x22,"+ //ugh no troika for webgpu yet
+                            //   "\x22troika-three-text\x22: \x22/platforms/spark/troika/troika-three-text.esm.js\x22,"+
+                            //    "\x22troika-worker-utils\x22: \x22/platforms/spark/troika/troika-worker-utils.esm.js\x22,"+
+                            //     "\x22troika-three-utils\x22: \x22/platforms/spark/troika/troika-three-utils.esm.js\x22,"+
 
-                            //    "\x22webgl-sdf-generator\x22: \x22/platforms/three/troika/webgl-sdf-generator.mjs\x22,"+
-                            //     "\x22bidi-js\x22: \x22/platforms/three/troika/bidi.mjs\x22,"+
+                            //    "\x22webgl-sdf-generator\x22: \x22/platforms/spark/troika/webgl-sdf-generator.mjs\x22,"+
+                            //     "\x22bidi-js\x22: \x22/platforms/spark/troika/bidi.mjs\x22,"+
                                 
 
-                            "\x22three-mesh-bvh\x22: \x22/platforms/three/bvh/three-mesh-bvh.9.3.module.min.js\x22,"+
+                            // "\x22three-mesh-bvh\x22: \x22/platforms/spark/bvh/three-mesh-bvh.9.3.module.min.js\x22,"+
 
                             "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
                             // "rapier": "https://cdn.skypack.dev/@dimforge/rapier3d-compat"
@@ -3186,7 +3186,7 @@ three_router.get('/:_id', function (req, res) {
                         
                         importMap +
 
-                        "<script type=\x22module\x22 src=\x22../platforms/three/three_main.mjs\x22 ></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs?t="+Date.now()+"\x22 ></script>" +
 
                         // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +
                         "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +
@@ -3319,4 +3319,4 @@ three_router.get('/:_id', function (req, res) {
 ///// END PRIMARY SERVERSIDE /webxr/ ROUTE //////////////////////
 
 
-export default three_router;
+export default spark_router;

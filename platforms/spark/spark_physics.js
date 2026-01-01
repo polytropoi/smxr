@@ -3,10 +3,10 @@ import * as THREE from 'three';
 
 import RAPIER from 'rapier';
 
-import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+// import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-import { scene, togglePostProcessing, water, staticObjex } from './three_main.mjs';
-import { agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
+import { scene, togglePostProcessing, water, staticObjex } from './spark_main.mjs?t=${Date.now()}';
+import { agentParents, CreateAgent, randomNavmeshPoint } from './spark_nav.js?t=${Date.now()}';
 // import {scene, world} from './three_main.mjs'
 
 function getGeometry(size) {
@@ -23,8 +23,8 @@ export let dynamicBodies = [];
 export let staticBodies = [];
 export let kinematicBodies = [];
 
-export const agentCount = 10;
-const dynamicObjectCount = 20;
+export const agentCount = 0;
+const dynamicObjectCount = 0;
 
 
 export async function initRapier () {
@@ -41,8 +41,6 @@ export async function initRapier () {
     // worldIsReady = true;
 }
 
-
-import { getRainbowMaterial } from './tsl/rainbow.js'
 
 export let rapierDebugRenderer;
 
@@ -211,7 +209,6 @@ export async function getDynamicBody(model, position) {
     //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
       const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
 
-		// const material = getRainbowMaterial();
       material.roughness = 0.25;
       material.metalness = 0.5;
       material.envMap = scene.environment;
