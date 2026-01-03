@@ -138,6 +138,7 @@ function WaitAndInit () {
   export async function getKinematicAgentBodies () {
     try {
       for (let i = 0; i < agentParents.length; i++) {
+         await new Promise(r => setTimeout(r, 1000));
         const body = await getKinematicBody(agentParents[i], i); //pass the index too
         kinematicBodies.push(body);
         // await new Promise(r => setTimeout(r, 1000));

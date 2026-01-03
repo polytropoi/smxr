@@ -18748,7 +18748,7 @@ function getAllPeople() {
         });
         uppy.on('complete', (result) => {
         console.log('Upload complete! We’ve uploaded these files:', result.successful);
-            window.location.href = "./index.html?type=staging";
+            // window.location.href = "./index.html?type=staging";
         });
 
         $(document).on("click",".delete",function(){ //because the button is dynamic, must do it via .on

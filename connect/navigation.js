@@ -1,3 +1,5 @@
+/// move to platforms/aframe and rename! 
+
 import AFRAME from 'aframe'; 
 import * as THREE from 'three';
 
