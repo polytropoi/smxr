@@ -2,7 +2,9 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js';
 
-import {camera, scene, renderer} from './spark_main.mjs?t=${Date.now()}';
+// import {camera, scene, renderer} from './spark_main.mjs';
+
+import {camera, scene, renderer} from './spark_main.mjs';
 
 // import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
@@ -44,18 +46,46 @@ export function InitFog() {
 }
 
 export async function InitEnvMap () {
-    if (scene && settings && settings.skyboxURL) {
-        console.log("gotsa skybox url " + settings.skyboxURL);
-        const envMapURL = settings.skyboxURL;
-        const equirectTextureLoader = new THREE.TextureLoader();
+    // if (scene && settings && settings.skyboxURL) {
+    //     console.log("gotsa skybox url " + settings.skyboxURL);
+    //     const envMapURL = settings.skyboxURL;
+    //     const equirectTextureLoader = new THREE.TextureLoader();
 
-        const textureEquirect = await equirectTextureLoader.loadAsync( envMapURL );
-        textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
-        textureEquirect.colorSpace = THREE.SRGBColorSpace;
-        scene.background = textureEquirect;
-        scene.environment = textureEquirect;
-        scene.environmentIntensity = 20;
-    }
+    //     const textureEquirect = await equirectTextureLoader.loadAsync( envMapURL );
+    //     textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+    //     textureEquirect.colorSpace = THREE.SRGBColorSpace;
+    //     scene.background = textureEquirect;
+    //     scene.environment = textureEquirect;
+    //     scene.environmentIntensity = 2;
+    // }
+
+        if (settings && settings.skyboxURL) {
+            console.log("gotsa skybox url " + settings.skyboxURL);
+            const envMapURL = settings.skyboxURL;
+            const equirectTextureLoader = new THREE.TextureLoader();
+    
+            const textureEquirect = equirectTextureLoader.load( envMapURL );
+            textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+            textureEquirect.colorSpace = THREE.SRGBColorSpace;
+            scene.background = textureEquirect;
+            scene.environment = textureEquirect;
+            scene.environmentIntensity = 3;
+    
+            // 1. Create a large sphere
+            const sphereRadius = 300;
+            const sphereSegments = 60; // Higher for better quality
+            const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
+    
+            // 3. Create material, mapping it to the inside
+            const material = new THREE.MeshBasicMaterial({
+            map: textureEquirect,
+            side: THREE.BackSide // Crucial for skybox
+            });
+    
+            // 4. Create the mesh and add to scene
+            const skySphere = new THREE.Mesh(geometry, material);
+            scene.add(skySphere);
+        }
 }
 
 // export function InitSkyy() {

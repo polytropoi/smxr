@@ -5,8 +5,10 @@ import RAPIER from 'rapier';
 
 // import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-import { scene, water, staticObjex, initModels } from './spark_main.mjs?t=${Date.now()}';
-import { agentParents, CreateAgent, randomNavmeshPoint } from './spark_nav.js?t=${Date.now()}';
+// import { scene, water, staticObjex, initModels } from './spark_main.mjs';
+
+import { scene, water, staticObjex, initModels } from './spark_main.mjs';
+import { agentParents, CreateAgent, randomNavmeshPoint } from './spark_nav.js';
 // import {scene, world} from './three_main.mjs'
 
 
@@ -25,25 +27,41 @@ export let dynamicBodies = [];
 export let staticBodies = [];
 export let kinematicBodies = [];
 
-export const agentCount = 0;
-const dynamicObjectCount = 0;
+export const agentCount = 10;
+const dynamicObjectCount = 20;
 
 
-// export async function initRapier () {
-// 		await RAPIER.init();	
-// 		// gravity = { x: 0.0, y: -9.81, z: 0.0 };
-// 		// world = await new RAPIER.World(gravity);
+export async function initRapier () {
+		await RAPIER.init();	
+		// gravity = { x: 0.0, y: -9.81, z: 0.0 };
+		// world = await new RAPIER.World(gravity);
 
-//     // // setTimeout( () => {
-//     // rapierDebugRenderer = new RapierDebugRenderer(scene, world);
-//     // // }, 3000);
+    // // setTimeout( () => {
+    rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+    // // }, 3000);
 
-//     // await new Promise(r => setTimeout(r, 1000));
-// await RAPIER.init();
-// world = new RAPIER.World({ x: 0.0, y: -9.81, z: 0.0 });
-//     // worldIsReady = true;
-//     initModels();
-// }
+    // await new Promise(r => setTimeout(r, 1000));
+    // await RAPIER.init();
+    world = new RAPIER.World({ x: 0.0, y: -9.81, z: 0.0 });
+    worldIsReady = true;
+
+    const cubeBodyDesc = new RAPIER.RigidBodyDesc()
+    .setTranslation(0, 0, 0); // Position in physics world (meters)
+    // .setLinDamping(0.1) // Optional: damping
+    // .setAngDamping(0.1);
+    const cubeBody = world.createRigidBody(cubeBodyDesc);
+
+    // 3. Create the Rapier Collider (Collision Shape)
+    // Note: cuboid(halfWidth, halfHeight, halfDepth)
+    const cubeColliderDesc = RAPIER.ColliderDesc.cuboid(100, 0.5, 100) // Matches 1x1x1 mesh
+    .setTranslation(0, -5, 0)  
+    .setDensity(1)
+      .setRestitution(0.5); // Bounciness
+    world.createCollider(cubeColliderDesc, cubeBody.handle);
+      // initModels();
+      initDynamicObjex();
+
+}
 
 
 export let rapierDebugRenderer;
@@ -74,35 +92,35 @@ class RapierDebugRenderer {
 }
 
 
-export async function initDefaultCollider () {
-  // Assuming RAPIER and THREE are loaded and initialized
+// export function initDefaultCollider () { //
+//   // Assuming RAPIER and THREE are loaded and initialized
 
-  // 1. Create the Three.js Mesh (Visual Representation)
-  // const cubeGeometry = new THREE.BoxGeometry(1, 1, 1); // 1x1x1 unit cube
-  // const cubeMaterial = new THREE.MeshStandardMaterial({ color: 'hotpink' });
-  // const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-  // cubeMesh.castShadow = true;
-  // scene.add(cubeMesh);
+//   // 1. Create the Three.js Mesh (Visual Representation)
+//   // const cubeGeometry = new THREE.BoxGeometry(1, 1, 1); // 1x1x1 unit cube
+//   // const cubeMaterial = new THREE.MeshStandardMaterial({ color: 'hotpink' });
+//   // const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+//   // cubeMesh.castShadow = true;
+//   // scene.add(cubeMesh);
 
-  // 2. Create the Rapier RigidBody (Physics Body)
-  const cubeBodyDesc = new RAPIER.RigidBodyDesc()
-    .setTranslation(0, 0, 0); // Position in physics world (meters)
-    // .setLinDamping(0.1) // Optional: damping
-    // .setAngDamping(0.1);
-  const cubeBody = world.createRigidBody(cubeBodyDesc);
+//   // 2. Create the Rapier RigidBody (Physics Body)
+//   const cubeBodyDesc = new RAPIER.RigidBodyDesc()
+//     .setTranslation(0, 0, 0); // Position in physics world (meters)
+//     // .setLinDamping(0.1) // Optional: damping
+//     // .setAngDamping(0.1);
+//   const cubeBody = world.createRigidBody(cubeBodyDesc);
 
-  // 3. Create the Rapier Collider (Collision Shape)
-  // Note: cuboid(halfWidth, halfHeight, halfDepth)
-  const cubeColliderDesc = RAPIER.ColliderDesc.cuboid(100, 0.5, 100) // Matches 1x1x1 mesh
-    .setDensity(1)
-    .setRestitution(0.8); // Bounciness
-  world.createCollider(cubeColliderDesc, cubeBody.handle);
+//   // 3. Create the Rapier Collider (Collision Shape)
+//   // Note: cuboid(halfWidth, halfHeight, halfDepth)
+//   const cubeColliderDesc = RAPIER.ColliderDesc.cuboid(100, 0.5, 100) // Matches 1x1x1 mesh
+//     .setDensity(1)
+//     .setRestitution(0.8); // Bounciness
+//   world.createCollider(cubeColliderDesc, cubeBody.handle);
 
-  // Store references to sync them (e.g., in an array)
-  staticBodies.push({ mesh: cubeMesh, body: cubeBody });
+//   // Store references to sync them (e.g., in an array)
+//   staticBodies.push(cubeBody);
 
 
-}
+// }
 
 // export async function initStaticObjex () { //e.g. ground, walls, etc.. 
     
@@ -158,18 +176,19 @@ export async function initDefaultCollider () {
     
 // }
 
-function WaitAndInit () {
+// function WaitAndInit () {
           
-  // eventQueue = new RAPIER.EventQueue(true);
-  physicsIsReady = true;
-  worldIsReady = true;
-  // togglePostProcessing();
-  initDynamicObjex();
-}
+//   // eventQueue = new RAPIER.EventQueue(true);
+//   physicsIsReady = true;
+//   worldIsReady = true;
+//   // togglePostProcessing();
+//   initDynamicObjex();
+// }
 
   export async function getKinematicAgentBodies () {
     try {
       for (let i = 0; i < agentParents.length; i++) {
+         await new Promise(r => setTimeout(r, 2000));
         const body = await getKinematicBody(agentParents[i], i); //pass the index too
         kinematicBodies.push(body);
         // await new Promise(r => setTimeout(r, 1000));
@@ -177,7 +196,7 @@ function WaitAndInit () {
     } catch (e) {
       console.log("error looping kinematic bodies " + e );
     } finally {
-   
+      console.log("kinematic agents are spawned!");
     }
   }
 
@@ -230,7 +249,7 @@ function WaitAndInit () {
 
     return { rigidbody, update };
   } catch (e) {
-    console.log("error creating dynamic rigidbody " + e);
+    console.log("error creating kinematic rigidbody " + e);
   }
 }
 export async function getDynamicBody(model, position) {
@@ -319,6 +338,7 @@ export async function getDynamicBody(model, position) {
     } catch (e) { 
       console.log("error init dynamic objex " + e);
     } finally {
+          physicsIsReady = true;
       await new Promise(r => setTimeout(r, 4000));
       // worldIsReady = true;
       await getKinematicAgentBodies();

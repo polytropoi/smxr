@@ -1,11 +1,12 @@
     import * as THREE from 'three';
 
-    import {scene, navmesh} from './spark_main.mjs?t=${Date.now()}';
+    // import {scene, navmesh} from './spark_main.mjs';
+        import {scene, navmesh} from './spark_main.mjs';
 
     import { Pathfinding, PathfindingHelper } from 'three-pathfinding';
 
 
-    import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './spark_physics.js?t=${Date.now()}';
+    import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './spark_physics.js';
 
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;
@@ -114,8 +115,10 @@
                 console.log("error pathfinding init " + e);
             } finally{
                 agentsAreReady = true;
+                console.log("gotsa navmesh, initAgents()");
             //    WaitAndInitAgents();
-                initAgents();
+                await initAgents();
+                // await getKinematicAgentBodies();
             }
 
             // await initRapier();

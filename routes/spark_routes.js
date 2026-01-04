@@ -369,7 +369,8 @@ spark_router.get('/:_id', function (req, res) {
     let  importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
               
 
-                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js\x22,"+     
+                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js\x22,"+
+                        "\x22sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/0.1.10/spark.module.js\x22,"+     
                              "\x22jsm/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181/examples/jsm/\x22,"+
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
                             "\x22three-pathfinding\x22: \x22https://unpkg.com/three-pathfinding@latest/dist/three-pathfinding.module.js\x22,"+
@@ -1564,8 +1565,14 @@ spark_router.get('/:_id', function (req, res) {
 
                     if (model) {
                     
-                        model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                        locationMdls.push(model);    
+                        if (model.item_type == "splat") {
+                            model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
+                            locationMdls.push(model);   
+                        } else {
+                            model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                            locationMdls.push(model);   
+                        }
+      
                     }
 
                 //     if (model != null && model.item_type && model.item_type == "glb" && model.filename) {
@@ -3167,7 +3174,8 @@ spark_router.get('/:_id', function (req, res) {
                         
                         importMap +
 
-                        "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs?t="+Date.now()+"\x22 ></script>" +
+                        // "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs?t="+Date.now()+"\x22 ></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs\x22></script>" +
 
                         // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +
                         "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +

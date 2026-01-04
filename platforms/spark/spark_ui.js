@@ -11,7 +11,7 @@ import * as THREE from 'three';
 
 // import ThreeMeshUI from 'three-mesh-ui';
 
-import {scene, camera, renderer, navmesh} from './spark_main.mjs?t=${Date.now()}';
+import {scene, camera, renderer, navmesh} from './spark_main.mjs';
 
 
 export function SplashText (textString) {

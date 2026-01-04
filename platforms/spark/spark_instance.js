@@ -2,16 +2,24 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js'; 
 
-import {scene, surface, water} from './spark_main.mjs';
+// import {scene, surface, surfaceObjex, water} from './spark_main.mjs';
+
+import {scene, surface, surfaceObjex, water} from './spark_main.mjs';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 
 let sampler;
+// let surface;
+
+// export let surfaceObjex = [];
 
 export let instancedModels = [];
+
 export async function InitSurface () {
-    console.log("GOTSA SURFACE");
+    // surface = surfaceObjex[0];
     await surface;
+    console.log("GOTSA SURFACE " + surface);
+    // surface;
     sampler = new MeshSurfaceSampler(surface);
     sampler.build(); 
 }
