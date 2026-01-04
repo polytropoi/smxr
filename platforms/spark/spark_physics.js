@@ -5,10 +5,12 @@ import RAPIER from 'rapier';
 
 // import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-import { scene, togglePostProcessing, water, staticObjex } from './spark_main.mjs?t=${Date.now()}';
+import { scene, water, staticObjex, initModels } from './spark_main.mjs?t=${Date.now()}';
 import { agentParents, CreateAgent, randomNavmeshPoint } from './spark_nav.js?t=${Date.now()}';
 // import {scene, world} from './three_main.mjs'
 
+
+  
 function getGeometry(size) {
   const randomGeo = geometries[Math.floor(Math.random() * geometries.length)];
   const geo = randomGeo.clone();
@@ -27,19 +29,21 @@ export const agentCount = 0;
 const dynamicObjectCount = 0;
 
 
-export async function initRapier () {
-		await RAPIER.init();	
-		gravity = { x: 0.0, y: -9.81, z: 0.0 };
-		world = await new RAPIER.World(gravity);
+// export async function initRapier () {
+// 		await RAPIER.init();	
+// 		// gravity = { x: 0.0, y: -9.81, z: 0.0 };
+// 		// world = await new RAPIER.World(gravity);
 
-    // setTimeout( () => {
-    rapierDebugRenderer = new RapierDebugRenderer(scene, world);
-    // }, 3000);
+//     // // setTimeout( () => {
+//     // rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+//     // // }, 3000);
 
-    // await new Promise(r => setTimeout(r, 5000));
-
-    // worldIsReady = true;
-}
+//     // await new Promise(r => setTimeout(r, 1000));
+// await RAPIER.init();
+// world = new RAPIER.World({ x: 0.0, y: -9.81, z: 0.0 });
+//     // worldIsReady = true;
+//     initModels();
+// }
 
 
 export let rapierDebugRenderer;
@@ -70,66 +74,96 @@ class RapierDebugRenderer {
 }
 
 
+export async function initDefaultCollider () {
+  // Assuming RAPIER and THREE are loaded and initialized
+
+  // 1. Create the Three.js Mesh (Visual Representation)
+  // const cubeGeometry = new THREE.BoxGeometry(1, 1, 1); // 1x1x1 unit cube
+  // const cubeMaterial = new THREE.MeshStandardMaterial({ color: 'hotpink' });
+  // const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+  // cubeMesh.castShadow = true;
+  // scene.add(cubeMesh);
+
+  // 2. Create the Rapier RigidBody (Physics Body)
+  const cubeBodyDesc = new RAPIER.RigidBodyDesc()
+    .setTranslation(0, 0, 0); // Position in physics world (meters)
+    // .setLinDamping(0.1) // Optional: damping
+    // .setAngDamping(0.1);
+  const cubeBody = world.createRigidBody(cubeBodyDesc);
+
+  // 3. Create the Rapier Collider (Collision Shape)
+  // Note: cuboid(halfWidth, halfHeight, halfDepth)
+  const cubeColliderDesc = RAPIER.ColliderDesc.cuboid(100, 0.5, 100) // Matches 1x1x1 mesh
+    .setDensity(1)
+    .setRestitution(0.8); // Bounciness
+  world.createCollider(cubeColliderDesc, cubeBody.handle);
+
+  // Store references to sync them (e.g., in an array)
+  staticBodies.push({ mesh: cubeMesh, body: cubeBody });
 
 
-export async function initStaticObjex () { //e.g. ground, walls, etc.. 
-    
-    for (let i = 0; i < staticObjex.length; i++) {
-  
-      console.log("tryna init staticObjex " + staticObjex[i].locationData.name + " hide " + staticObjex[i].isHidden);
-     
-        const pos = new THREE.Vector3(staticObjex[i].locationData.x, staticObjex[i].locationData.y, staticObjex[i].locationData.z);
-      
-        await createStaticCollider(staticObjex[i].mesh, pos);
-        
-    }
-    WaitAndInit();
-  }
-export async function createStaticCollider (model, position) { // may not be added to the scene if hidden?
-    console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(position));
-   
-    try {
-      const geometry = model.geometry; //sent as child mesh
-      // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
-
-      const vertices = geometry.attributes.position.array;
-      // for (let i = 0; i < vertices.length; i++) {
-      //   vertices[i] *= fixedGeometry.scale.x; // Example for uniform scale
-      // }
-      const indices = geometry.index.array;
-
-      // 3. Create ColliderDesc (Example: Trimesh for complex shape)
-      let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
-      
-      // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
-          
-      // colliderDesc.contactSkin(0.5); // ???
-      const pos = new THREE.Vector3();
-      model.getWorldPosition(pos);
-      // const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
-                      const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z);
-
-      // model.position.set(position);
-      const staticBody = await world.createRigidBody(rbDesc);
-      let collider = await world.createCollider(colliderDesc, staticBody);
-      collider.setRestitution(.5);
-      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-
-      staticBodies.push(staticBody);
-    } catch (e) {
-        console.error("staticCollider error "+ e);
-    } finally {
-
-    }
-    
 }
+
+// export async function initStaticObjex () { //e.g. ground, walls, etc.. 
+    
+//     for (let i = 0; i < staticObjex.length; i++) {
+  
+//       console.log("tryna init staticObjex " + staticObjex[i].locationData.name + " hide " + staticObjex[i].isHidden);
+     
+//         const pos = new THREE.Vector3(staticObjex[i].locationData.x, staticObjex[i].locationData.y, staticObjex[i].locationData.z);
+      
+//         await createStaticCollider(staticObjex[i].mesh, pos);
+        
+//     }
+//     WaitAndInit();
+//   }
+
+
+// export async function createStaticCollider (model, position) { // may not be added to the scene if hidden?
+//     console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(position));
+   
+//     try {
+//       const geometry = model.geometry; //sent as child mesh
+//       // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
+
+//       const vertices = geometry.attributes.position.array;
+//       // for (let i = 0; i < vertices.length; i++) {
+//       //   vertices[i] *= fixedGeometry.scale.x; // Example for uniform scale
+//       // }
+//       const indices = geometry.index.array;
+
+//       // 3. Create ColliderDesc (Example: Trimesh for complex shape)
+//       let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+      
+//       // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
+          
+//       // colliderDesc.contactSkin(0.5); // ???
+//       const pos = new THREE.Vector3();
+//       model.getWorldPosition(pos);
+//       // const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
+//                       const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z);
+
+//       // model.position.set(position);
+//       const staticBody = await world.createRigidBody(rbDesc);
+//       let collider = await world.createCollider(colliderDesc, staticBody);
+//       collider.setRestitution(.5);
+//       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+
+//       staticBodies.push(staticBody);
+//     } catch (e) {
+//         console.error("staticCollider error "+ e);
+//     } finally {
+
+//     }
+    
+// }
 
 function WaitAndInit () {
           
   // eventQueue = new RAPIER.EventQueue(true);
   physicsIsReady = true;
   worldIsReady = true;
-  togglePostProcessing();
+  // togglePostProcessing();
   initDynamicObjex();
 }
 

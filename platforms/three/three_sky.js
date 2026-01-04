@@ -29,7 +29,7 @@ export function InitCustomFog() { //hrm..
     // apply custom fog
 
     scene.fogNode = fog( fogNoiseDistance.oneMinus().mix( groundColor, fogNoise ), groundFogArea );
-    scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
+    // scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
 
 }
 export function InitFog() {
@@ -37,8 +37,8 @@ export function InitFog() {
         console.log("doin some fog...");
         const fogColor = settings.sceneColor1; // Sky blue
         // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
-        // scene.fog = new THREE.Fog(fogColor, 1, 300);
-		scene.fog = new THREE.FogExp2( fogColor, 0.01 );
+        scene.fog = new THREE.Fog(fogColor, 10, 500);
+		// scene.fog = new THREE.FogExp2( fogColor, 0.01 );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
     }
 }
@@ -54,10 +54,27 @@ export function InitEnvMap () {
         textureEquirect.colorSpace = THREE.SRGBColorSpace;
         scene.background = textureEquirect;
         scene.environment = textureEquirect;
-        scene.environmentIntensity = 20;
+        scene.environmentIntensity = 10;
+
+		// 1. Create a large sphere
+		const sphereRadius = 300;
+		const sphereSegments = 60; // Higher for better quality
+		const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
+
+		// 3. Create material, mapping it to the inside
+		const material = new THREE.MeshBasicMaterial({
+		map: textureEquirect,
+		side: THREE.BackSide // Crucial for skybox
+		});
+
+		// 4. Create the mesh and add to scene
+		const skySphere = new THREE.Mesh(geometry, material);
+		scene.add(skySphere);
     }
 }
 export function InitSky() {
+
+	if (settings && settings.sceneUseDynamicSky) {
 				// Add Sky
 				const sky = new SkyMesh();
 				sky.scale.setScalar( 450000 );
@@ -97,6 +114,8 @@ export function InitSky() {
 					renderer.toneMappingExposure = effectController.exposure;
 // 
 				}
+
+			}
 
 				// const gui = renderer.inspector.createParameters( 'Settings' );
 

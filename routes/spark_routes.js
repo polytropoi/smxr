@@ -367,34 +367,15 @@ spark_router.get('/:_id', function (req, res) {
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
     let  importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
-                          
-
-            // "\x22three\x22: \x22https://unpkg.com/three@0.161.0/build/three.module.js\x22,"+
-            // "\x22three/addons/\x22: \x22https://unpkg.com/three@0.161.0/examples/jsm/\x22"+
+              
 
                         "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js\x22,"+     
-                    //    "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.webgpu.js\x22,"+
-
-                            // "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.tsl.js\x22,"+
+                             "\x22jsm/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181/examples/jsm/\x22,"+
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
                             "\x22three-pathfinding\x22: \x22https://unpkg.com/three-pathfinding@latest/dist/three-pathfinding.module.js\x22,"+
-                            // "\x22tsl-textures\x22: \x22/platforms/spark/tsl/tsl-textures.js\x22,"+
-                            // "\x22three-mesh-ui\x22: \x22https://unpkg.com/three-mesh-ui@6.4.0/build/three-mesh-ui.module.js\x22,"+
-                            // https://unpkg.com/three-mesh-ui@6.4.1/build/three-mesh-ui.js
-                            //  "\x22troika-three-text\x22: \x22/platforms/spark/troika/three-troika.min.js\x22,"+ //ugh no troika for webgpu yet
-                            //   "\x22troika-three-text\x22: \x22/platforms/spark/troika/troika-three-text.esm.js\x22,"+
-                            //    "\x22troika-worker-utils\x22: \x22/platforms/spark/troika/troika-worker-utils.esm.js\x22,"+
-                            //     "\x22troika-three-utils\x22: \x22/platforms/spark/troika/troika-three-utils.esm.js\x22,"+
-
-                            //    "\x22webgl-sdf-generator\x22: \x22/platforms/spark/troika/webgl-sdf-generator.mjs\x22,"+
-                            //     "\x22bidi-js\x22: \x22/platforms/spark/troika/bidi.mjs\x22,"+
-                                
-
-                            // "\x22three-mesh-bvh\x22: \x22/platforms/spark/bvh/three-mesh-bvh.9.3.module.min.js\x22,"+
-
-                            "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
-                            // "rapier": "https://cdn.skypack.dev/@dimforge/rapier3d-compat"
                            
+                            "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
+                                                      
 
                           
                             "}"+

@@ -1,16 +1,10 @@
-	import * as THREE from 'three/webgpu';
+// Object.keys(require.cache).forEach(key => delete require.cache[key]);
 
-	// import RAPIER from 'rapier';
-	
-	import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, 
-		viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, 
-		time, fog, float, triNoise3D, positionView, uniform } from 'three/tsl';
-	
-	import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
+	import * as THREE from 'three';
 
-	import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+	import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js?t=${Date.now()}';
 
-	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+	import { OrbitControls } from 'three/addons/controls/OrbitControls.js?t=${Date.now()}';
 
 	import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
@@ -19,18 +13,16 @@
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 	import { SetSceneLocations } from '../../../connect/connect.js';
 
-	import { InitPathfinding, agents } from './three_nav.js';
+	import { InitPathfinding, agents } from './spark_nav.js?t=${Date.now()}';
 
-	import { getRainbowMaterial } from './tsl/rainbow.js'
+	import { InitSurface, InstanceOnSurface, instancedModels } from './spark_instance.js?t=${Date.now()}';
 
-	import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
+	// import { UpdateText } from './spark_ui.js';
 
-	import { UpdateText } from './three_ui.js';
+	import { world, gravity, initDefaultCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
+		eventQueue, kinematicBodies, worldIsReady } from './spark_physics.js?t=${Date.now()}';
 
-	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
-		eventQueue, kinematicBodies, worldIsReady, initStaticObjex } from './three_physics.js';
-
-	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
+	import { InitEnvMap, InitFog } from './spark_sky.js?t=${Date.now()}';
 
 
 	// import { Container } from '@pmndrs/uikit' //arghh
@@ -53,7 +45,7 @@
 	export let camera, renderer;
 	let model, floor, floorPosition;
 	let postProcessing;
-	let showDebug = true;
+	let showDebug = false;
 	let controls;
 
 	let doPostProcessing = false;
@@ -88,16 +80,24 @@
 
 
 	////////////// SCENE INIT FUNCTION 
+	async function init () {
+		 	
+		await asyncInit();
+	}
 
-	async function init() {
+	async function asyncInit() {
 
 		// initRapier();
 		scene = new THREE.Scene();
 
 		await initRapier();
+
+		//
 		// UpdateText("HERE WE GO!");
 		
 
+	} 
+	export async function initModels () {
 		let modelsDataEl = document.getElementById('modelsData');
 		if (modelsDataEl) {
 			const theModelsData = modelsDataEl.getAttribute('data-models');
@@ -163,8 +163,9 @@
 											} else if (locationData[i].markerType == "surface" ) {
 												// if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
 													surface = child;
+													surfaceObjex.push(child);
 													// child.material = transmat;
-													// InitSurface();
+													
 												// }
 											}
 											if (locationData[i].eventData.includes("static")) {
@@ -250,10 +251,16 @@
 			})();
 			
 		}
+	// }
 
 		async function initSystems() {
+			// if (surfaceObjex.length) {
+			// 	surface = surfaceObjex[0];
+			// 	InitSurface();
+			// } 
 			if (staticObjex.length) { //eg ground and stuff
-				await initStaticObjex(); 
+				// await initStaticObjex(); 
+				await initDefaultCollider();
 			}
 
 			if (surface) { // => scattering instances
@@ -365,14 +372,14 @@
 			document.body.appendChild(stats.domElement);
 			// }
 			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
-				const waterModule = await import ('./tsl/tsl_water.js');
-				if (settings.sceneWater.name == "water1") {
+				// const waterModule = await import ('./tsl/tsl_water.js');
+				// if (settings.sceneWater.name == "water1") {
 				
-					// const waterModule = await import {Water} from './tsl/tsl_water.js'
-					water = new waterModule.Water1();
-				} else if (settings.sceneWater.name == "water2") {
-					water = new waterModule.Water2();
-				}
+				// 	// const waterModule = await import {Water} from './tsl/tsl_water.js'
+				// 	water = new waterModule.Water1();
+				// } else if (settings.sceneWater.name == "water2") {
+				// 	water = new waterModule.Water2();
+				// }
 								// water = waterModule.water;
 				console.log("water is " + water);
 			} 
@@ -387,7 +394,7 @@
 
 		// renderer
 
-		renderer = new THREE.WebGPURenderer({antialias: true});
+		renderer = new THREE.WebGLRenderer({antialias: true});
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.setAnimationLoop( animate );
@@ -407,7 +414,7 @@
 		controls.update();
 
 		InitEnvMap();
-		InitSky();
+		// InitSky();
 		InitFog();
 
 		floorPosition = new THREE.Vector3( 0, .2, 0 );
@@ -415,29 +422,29 @@
 		// post processing
 
 
-		const scenePass = pass( scene, camera );
-		const scenePassColor = scenePass.getTextureNode();
-		const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+		// const scenePass = pass( scene, camera );
+		// const scenePassColor = scenePass.getTextureNode();
+		// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
 		
-		if (water) {
-			const waterLevel = parseFloat(settings.sceneWater.level);
-			// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
-			const waterMask = objectPosition( camera ).y.greaterThan( waterLevel ).toInspector( 'Post-Processing / Water Mask' );
-			const scenePassColorBlurred = gaussianBlur( scenePassColor );
-			scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
-			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
+		// if (water) {
+		// 	const waterLevel = parseFloat(settings.sceneWater.level);
+		// 	// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
+		// 	const waterMask = objectPosition( camera ).y.greaterThan( waterLevel ).toInspector( 'Post-Processing / Water Mask' );
+		// 	const scenePassColorBlurred = gaussianBlur( scenePassColor );
+		// 	scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+		// 	const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
-			postProcessing = new THREE.PostProcessing( renderer );
-			postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
-		} else {
-			const waterMask = objectPosition( camera ).y.greaterThan( -10 );
-			const scenePassColorBlurred = gaussianBlur( scenePassColor );
-			scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
-			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
+		// 	postProcessing = new THREE.PostProcessing( renderer );
+		// 	postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+		// } else {
+		// 	const waterMask = objectPosition( camera ).y.greaterThan( -10 );
+		// 	const scenePassColorBlurred = gaussianBlur( scenePassColor );
+		// 	scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+		// 	const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
-			postProcessing = new THREE.PostProcessing( renderer );
-			postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
-		}
+		// 	postProcessing = new THREE.PostProcessing( renderer );
+		// 	postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+		// }
 		
 
 		//
@@ -456,7 +463,7 @@
 
 	} //end init!
 
-	export function togglePostProcessing () { //call after physics is done, elsewise... :(
+	export function togglePostProcessing () { //call after physics is done, elsewise... :( //NOPE, webgpu only fnow
 		console.log("tryna toggle post processing");
 		doPostProcessing = !doPostProcessing;
 	}
@@ -495,7 +502,7 @@
 				a.update(delta));
 		}
 				
-  		if (physicsIsReady && worldIsReady) {
+  		if (world && physicsIsReady && worldIsReady) {
 			
 			 world.step();//!!!
 			 
@@ -514,7 +521,7 @@
 		}
 
 		if (doPostProcessing) {
-			postProcessing.render();
+			// postProcessing.render();
 		} else {
 			renderer.render(scene, camera);
 		}
