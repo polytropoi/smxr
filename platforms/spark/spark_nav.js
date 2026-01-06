@@ -59,9 +59,7 @@
 
         // } 
     }
-    export function createDefaultNavmesh() {
 
-    }
             
     export async function initAgents () {
         // 
@@ -69,18 +67,18 @@
             let pos;
             let goodPosition = false;
             // await new Promise(r => setTimeout(r, 500)); //slow the fxk down
-            for (let p = 0; p < 10; p++) {
-                if (goodPosition) {
-                    break;
-                }
+            // for (let p = 0; p < 10; p++) {
+            //     if (goodPosition) {
+            //         break;
+            //     }
                 pos = randomNavmeshPoint();
-                for (let d = 0; d < agentInitLocations.length; d++) {
-                    if (pos.distanceTo(agentInitLocations[d]) > 2) {
-                        goodPosition = true;
-                        break;
-                    }
-                }
-            }
+            //     for (let d = 0; d < agentInitLocations.length; d++) {
+            //         if (pos.distanceTo(agentInitLocations[d]) > 2) {
+            //             goodPosition = true;
+            //             break;
+            //         }
+            //     }
+            // }
             
 
 
@@ -96,26 +94,27 @@
     export async function InitPathfinding () {
         // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh") && navmesh) {
  
-        if (navmesh) {
+        if (navmesh && navmesh.geometry) {
             try {
                 pathfinding = await new Pathfinding();
                 await world;
                 helper = new PathfindingHelper();
-                scene.add(helper);
-                helper.reset()
+                // scene.add(helper);
+                // helper.reset()
                 // const pathfinding = new Pathfinding();
                 
                 // Define a zone name
                 pathfinding.setZoneData(ZONE, Pathfinding.createZone(navmesh.geometry));
-
-                console.log("looking for navmesh " + navmesh);
+                // const theZone = pathfinding.createZone(navmesh.geometry, ZONE);
+                // pathfinding.setZoneData(ZONE, theZone);
+                console.log("creating navmesh " + navmesh);
 
 
             } catch (e) {
                 console.log("error pathfinding init " + e);
             } finally{
                 agentsAreReady = true;
-                console.log("gotsa navmesh, initAgents()");
+                console.log( "navmesh done, initAgents()");
             //    WaitAndInitAgents();
                 await initAgents();
                 // await getKinematicAgentBodies();
@@ -133,13 +132,15 @@
     export function randomNavmeshPoint () {
         
 
+        if (navmesh && pathfinding) {
 
-        const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 50);
+            const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 50);
 
-        
-        // console.log("random navmesh position " + JSON.stringify(randomNode));
-        // randomNode 
-        return randomNode;
+            
+            // console.log("random navmesh position " + JSON.stringify(randomNode));
+            // randomNode 
+            return randomNode;
+        }
     } 
 
     class NavAgent{

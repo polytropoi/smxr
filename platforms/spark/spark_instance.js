@@ -15,6 +15,14 @@ let sampler;
 
 export let instancedModels = [];
 
+export function createDefaultSurface() {
+        const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); // 50 x 50
+        const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
+        surface = new THREE.Mesh(planeGeometry, planeMaterial);
+        scene.add(surface);
+}
+    
+
 export async function InitSurface () {
     // surface = surfaceObjex[0];
     await surface;

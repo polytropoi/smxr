@@ -2377,7 +2377,10 @@ aframe_router.get('/:_id', function (req, res) {
 
                     // }
                      if ((locMdl.model == null || locMdl.modelID == "none") && locMdl.markerType == "navmesh") {
-                        let visible = false;
+                        let visible = true;
+                        if (locMdl.locationTags && (locMdl.locationTags.includes("hide"))) {
+                            visible = false;
+                        }
                         if (sceneResponse.sceneTags != null && (sceneResponse.sceneTags.includes('debug'))) {
                             visible = true;
                         }

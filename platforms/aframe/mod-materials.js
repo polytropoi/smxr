@@ -580,7 +580,7 @@ AFRAME.registerComponent('mod-materials', {
               // width: 4, 
               align: "left",
               value: this.data.videoTitle,
-              font: "/fonts/Exo2Bold.fnt",
+              font: "/fonts/etc/Exo2Bold.fnt",
               anchor: "center",
               wrapCount: 100,
               color: "white",
@@ -597,7 +597,7 @@ AFRAME.registerComponent('mod-materials', {
               // width: 4, 
               align: "left",
               value: "click to play!",
-              font: "/fonts/Exo2Bold.fnt",
+              font: "/fonts/etc/Exo2Bold.fnt",
               anchor: "center",
               wrapCount: 100,
               color: "white",
@@ -985,10 +985,10 @@ AFRAME.registerComponent('mod-materials', {
                 // width: 4, 
                 align: "left",
                 value: this.fancyTimeString,
-                font: "/fonts/Exo2Bold.fnt",
+                font: "/fonts/etc/Exo2Bold.fnt",
                 anchor: "center",
                 wrapCount: 100,
-                color: "white",
+                color: "white", 
               });
               MediaTimeUpdate(this.fancyTimeString);
             }

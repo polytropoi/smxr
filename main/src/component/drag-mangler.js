@@ -110,7 +110,7 @@ AFRAME.registerComponent('moveable-placeholder', {
 		calloutText.setAttribute('text', {
 		  baseline: "bottom",
 		  align: "center",
-		  font: "/fonts/Exo2Bold.fnt",
+		  font: "/fonts/etc/Exo2Bold.fnt",
 		  anchor: "center",
 		  wrapCount: 150,
 		  color: "white",

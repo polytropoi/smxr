@@ -15,12 +15,13 @@
 
 	import { InitPathfinding, agents } from './spark_nav.js';
 
-	import { InitSurface, InstanceOnSurface, instancedModels } from './spark_instance.js';
+	import { InitSurface, InstanceOnSurface, instancedModels, createDefaultSurface } from './spark_instance.js';
 
 	// import { UpdateText } from './spark_ui.js';
 
 	import { world, gravity, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
-		eventQueue, kinematicBodies, worldIsReady } from './spark_physics.js';
+		eventQueue, kinematicBodies, worldIsReady, 
+		initDefaultStaticCollider} from './spark_physics.js';
 
 	import { InitEnvMap, InitFog } from './spark_sky.js';
 
@@ -240,17 +241,21 @@
 									break; //only match one model per location!?
 								}
 							}
-						} else {
-							if (locationData[i].markerType == "navmesh") {
-								// createDefaultNavmesh();
-							}
-							if (locationData[i].markerType == "surface") {
-								// createDefaultSurface();
-							}
-							if (locationData[i].markerType == "player") {
-								playerPosition = locationData[i];
-							}
+						} else { //primitives
+							
+							// if (locationData[i].markerType == "player") {
+							// 	playerPosition = locationData[i];
+							// }
 
+						}
+						//locations with no models...
+
+						// if (locationData[i].markerType == "surface") {
+						// 	createDefaultSurface();
+						// }
+						if (locationData[i].markerType == "player") {
+							console.log("playerposition " + JSON.stringify(locationData[i]));
+							playerPosition = locationData[i];
 						}
 						// console.log("locationData " + i + " of "  + locationData.length);
 					}
@@ -259,11 +264,36 @@
 				} catch (e) {
 					console.error("ERROR LOADING GLTF! " + e);
 				} finally {
-					
+					console.log("settings " + JSON.stringify(settings));
+
+					if (playerPosition) {
+						console.log("tryna set player position " + playerPosition);
+						camera.position.set( playerPosition.x, playerPosition.y, playerPosition.z );
+					} 
+					if (!navmesh) {
+						createDefaultNavmesh();
+					}
+					if (staticObjex.length == 0) {
+						initDefaultStaticCollider();
+					}
 					initSystems();
 				}
 			})();
 			
+		}
+		function createDefaultNavmesh() {
+				  const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
+				//   planeGeometry.rotation.x = Math.PI / 2 * -1;
+					const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+					let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
+					
+					navmeshObject.position.set(0,0,0);
+					navmeshObject.scale.set(1,1,1);
+					navmeshObject.rotation.x = -Math.PI / 2;
+					navmeshObject.updateMatrixWorld();
+					navmesh = navmeshObject;
+					
+					scene.add(navmeshObject);
 		}
 	// }
 
@@ -323,11 +353,9 @@
 		console.log("settings " + JSON.stringify(settings));
 
 		camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.25, 500 );
-		if (playerPosition) {
-			camera.position.set( playerPosition.x, playerPosition.y, playerPosition.z );
-		} else {
+
 			camera.position.set( 10, 50, 10 );
-		}
+		// }
 		
 
 		

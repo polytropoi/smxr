@@ -61,9 +61,9 @@
 
         // } 
     }
-    export function createDefaultNavmesh() {
+    // export function createDefaultNavmesh() {
 
-    }
+    // }
             
     export async function initAgents () {
         // 
@@ -117,8 +117,9 @@
                 console.log("error pathfinding init " + e);
             } finally{
                 agentsAreReady = true;
+                console.log( "navmesh done, initAgents()");
             //    WaitAndInitAgents();
-                initAgents();
+                await initAgents();
             }
 
             // await initRapier();

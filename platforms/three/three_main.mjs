@@ -296,7 +296,20 @@
 
 		}
 
-
+		function createDefaultNavmesh() {
+				  const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
+				//   planeGeometry.rotation.x = Math.PI / 2 * -1;
+					const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+					let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
+					
+					// navmeshObject.position.set(0,0,0);
+					// navmeshObject.scale.set(1,1,1);
+					navmeshObject.rotation.x = Math.PI / 2;
+					navmeshObject.updateMatrixWorld();
+					navmesh = navmeshObject;
+					
+					scene.add(navmeshObject);
+		}
 
 
 		console.log("settings " + JSON.stringify(settings));

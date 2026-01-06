@@ -43,9 +43,28 @@ export async function initRapier () {
     // await new Promise(r => setTimeout(r, 1000));
     // await RAPIER.init();
     world = new RAPIER.World({ x: 0.0, y: -9.81, z: 0.0 });
-    worldIsReady = true;
+    // worldIsReady = true;
 
-    const cubeBodyDesc = new RAPIER.RigidBodyDesc()
+    // const cubeBodyDesc = new RAPIER.RigidBodyDesc()
+    // .setTranslation(0, 0, 0); // Position in physics world (meters)
+    // // .setLinDamping(0.1) // Optional: damping
+    // // .setAngDamping(0.1);
+    // const cubeBody = world.createRigidBody(cubeBodyDesc);
+
+    // // 3. Create the Rapier Collider (Collision Shape)
+    // // Note: cuboid(halfWidth, halfHeight, halfDepth)
+    // const cubeColliderDesc = RAPIER.ColliderDesc.cuboid(100, 0.5, 100) // Matches 1x1x1 mesh
+    // .setTranslation(0, 0, 0)  
+    // .setDensity(1)
+    //   .setRestitution(0.5); // Bounciness
+    // world.createCollider(cubeColliderDesc, cubeBody.handle);
+    //   // initModels();
+    //   // initDynamicObjex();
+    //   WaitAndInit();
+
+}
+export function initDefaultStaticCollider () {
+const cubeBodyDesc = new RAPIER.RigidBodyDesc()
     .setTranslation(0, 0, 0); // Position in physics world (meters)
     // .setLinDamping(0.1) // Optional: damping
     // .setAngDamping(0.1);
@@ -54,16 +73,15 @@ export async function initRapier () {
     // 3. Create the Rapier Collider (Collision Shape)
     // Note: cuboid(halfWidth, halfHeight, halfDepth)
     const cubeColliderDesc = RAPIER.ColliderDesc.cuboid(100, 0.5, 100) // Matches 1x1x1 mesh
-    .setTranslation(0, -5, 0)  
+    .setTranslation(0, 0, 0)  
     .setDensity(1)
       .setRestitution(0.5); // Bounciness
     world.createCollider(cubeColliderDesc, cubeBody.handle);
       // initModels();
-      initDynamicObjex();
-
+      // initDynamicObjex();
+      WaitAndInit();
 }
-
-
+ 
 export let rapierDebugRenderer;
 
 class RapierDebugRenderer {
@@ -176,14 +194,14 @@ class RapierDebugRenderer {
     
 // }
 
-// function WaitAndInit () {
+function WaitAndInit () {
           
-//   // eventQueue = new RAPIER.EventQueue(true);
-//   physicsIsReady = true;
-//   worldIsReady = true;
-//   // togglePostProcessing();
-//   initDynamicObjex();
-// }
+  // eventQueue = new RAPIER.EventQueue(true);
+  physicsIsReady = true;
+  worldIsReady = true;
+  // togglePostProcessing();
+  initDynamicObjex();
+}
 
   export async function getKinematicAgentBodies () {
     try {
