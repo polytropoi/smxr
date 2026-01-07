@@ -7,7 +7,7 @@ import RAPIER from 'rapier';
 
 // import { scene, water, staticObjex, initModels } from './spark_main.mjs';
 
-import { scene, water, staticObjex, initModels } from './spark_main.mjs';
+import { scene } from './spark_main.mjs';
 import { agentParents, CreateAgent, randomNavmeshPoint } from './spark_nav.js';
 // import {scene, world} from './three_main.mjs'
 

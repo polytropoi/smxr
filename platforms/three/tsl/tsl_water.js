@@ -21,7 +21,7 @@ import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
 
     //     const iceColorNode = triplanarTexture( texture( iceDiffuse ) ).add( color( settings.sceneColor1 ) ).mul( .4 );
 
-export class Water1 {
+export class Water2 {
 
     constructor() {
         console.log("making water 1 at level " + settings.sceneWater.level);
@@ -65,7 +65,7 @@ export class Water1 {
 // scene.add( water );
 }
 
-export class Water2 { //uses watermesh
+export class Water1 { //uses watermesh
     constructor() {
        
         // const waterGeometry = new THREE.PlaneGeometry( 500, 500 );

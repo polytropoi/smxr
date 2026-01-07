@@ -3011,8 +3011,8 @@ spark_router.get('/:_id', function (req, res) {
                         settings.primary_mp3url = primary_mp3url;
                         // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
                         // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
-                        // settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
-                        // settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
+                        settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "Orbit"; 
+                        settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
                         let audioGroups = {};
                         audioGroups.triggerGroups = sceneResponse.sceneTriggerAudioGroups;
                         audioGroups.ambientGroups = sceneResponse.sceneAmbientAudioGroups;
@@ -3243,6 +3243,18 @@ spark_router.get('/:_id', function (req, res) {
                                 videoEl+
                                 videoElements+
 
+                                "<div id=\x22blocker\x22>" +
+                                            "<div id=\x22instructions\x22>" +
+                                                "<p style=\x22font-size:36px\x22>" +
+                                                    "Click to play" +
+                                                "</p>" +
+                                                "<p>" +
+                                                    "Move: WASD<br/>" +
+                                                    "Jump: SPACE<br/>" +
+                                                    "Look: MOUSE" +
+                                                "</p>" +
+                                            "</div>" +
+                                       "</div>" +
                                 
                         "</body>\n" +
                     

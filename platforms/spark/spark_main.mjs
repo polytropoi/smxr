@@ -29,6 +29,7 @@
 	// import { Container } from '@pmndrs/uikit' //arghh	
 
 	import Stats from './ui/stats.js';
+import { initWater1, water } from './env/spark_water.js';
 
 
 
@@ -41,13 +42,25 @@
 	let raycastHitAgent;
 	let raycaster, stats;
 	// let mixer, objects;
-	export let water;// waterLayer0, waterLayer1;
+	// export let water;// waterLayer0, waterLayer1;
 	export let clock;
 	export let camera, renderer;
 	let model, floor, floorPosition;
 	let postProcessing;
 	let showDebug = true;
 	let controls;
+
+	let moveForward = false;
+	let moveBackward = false;
+	let moveLeft = false;
+	let moveRight = false;
+	let canJump = false;
+
+	let prevTime = performance.now();
+	const velocity = new THREE.Vector3();
+	const direction = new THREE.Vector3();
+	const vertex = new THREE.Vector3();
+	const color = new THREE.Color();
 
 	let doPostProcessing = false;
 	
@@ -61,6 +74,7 @@
   export let surfaceObjex = [];
 //   let instancedModels = [];
 
+	let sceneCameraMode;
 
 
 	const mouse = new THREE.Vector2();
@@ -347,14 +361,39 @@
 
 		}
 
-
-
-
 		console.log("settings " + JSON.stringify(settings));
+
+		if (settings && settings.sceneTags) {
+			// if (settings.sceneTags.includes("debug")) {
+			// stats.showPanel( 0,1,2,3 );
+			stats = new Stats();
+
+			stats.domElement.style.right = 'auto';
+			stats.domElement.style.left = '0px'; // Positioned at top-right
+			stats.domElement.style.bottom = '0px';
+			document.body.appendChild(stats.domElement);
+			// }
+			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
+				// const waterModule = await import ('./env/spark_water.js');
+				if (settings.sceneWater.name == "water1") {
+					initWater1();
+					// const waterModule = await import {Water} from './tsl/tsl_water.js'
+					// water = new waterModule.Water1();
+				} else if (settings.sceneWater.name == "water2") {
+					// water = new waterModule.Water2();
+				}
+								// water = waterModule.water;
+				console.log("water is " + water);
+			} 
+
+			// }
+		}
+
+
 
 		camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.25, 500 );
 
-			camera.position.set( 10, 50, 10 );
+
 		// }
 		
 
@@ -366,7 +405,7 @@
 		// scene.fog = new THREE.Fog(fogColor, 1, 100);
 		// InitCustomFog();
 		// scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
-		camera.lookAt( 0, 1, 0 );
+
 
 		const sunLight = new THREE.DirectionalLight( settings.sceneColor1, 2 );
 		sunLight.castShadow = true;
@@ -408,31 +447,31 @@
 		// } );
 
 
-		if (settings && settings.sceneTags) {
-			// if (settings.sceneTags.includes("debug")) {
-			// stats.showPanel( 0,1,2,3 );
-			stats = new Stats();
+		// if (settings && settings.sceneTags) {
+		// 	// if (settings.sceneTags.includes("debug")) {
+		// 	// stats.showPanel( 0,1,2,3 );
+		// 	stats = new Stats();
 
-			stats.domElement.style.right = 'auto';
-			stats.domElement.style.left = '0px'; // Positioned at top-right
-			stats.domElement.style.bottom = '0px';
-			document.body.appendChild(stats.domElement);
-			// }
-			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
-				// const waterModule = await import ('./tsl/tsl_water.js');
-				// if (settings.sceneWater.name == "water1") {
+		// 	stats.domElement.style.right = 'auto';
+		// 	stats.domElement.style.left = '0px'; // Positioned at top-right
+		// 	stats.domElement.style.bottom = '0px';
+		// 	document.body.appendChild(stats.domElement);
+		// 	// }
+		// 	if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
+		// 		// const waterModule = await import ('./tsl/tsl_water.js');
+		// 		// if (settings.sceneWater.name == "water1") {
 				
-				// 	// const waterModule = await import {Water} from './tsl/tsl_water.js'
-				// 	water = new waterModule.Water1();
-				// } else if (settings.sceneWater.name == "water2") {
-				// 	water = new waterModule.Water2();
-				// }
-								// water = waterModule.water;
-				console.log("water is " + water);
-			} 
+		// 		// 	// const waterModule = await import {Water} from './tsl/tsl_water.js'
+		// 		// 	water = new waterModule.Water1();
+		// 		// } else if (settings.sceneWater.name == "water2") {
+		// 		// 	water = new waterModule.Water2();
+		// 		// }
+		// 						// water = waterModule.water;
+		// 		console.log("water is " + water);
+		// 	} 
 
-			// }
-		}
+		// 	// }
+		// }
 		// objects
 
 	
@@ -451,55 +490,62 @@
 		// renderer.inspector = new Inspector();
 		document.body.appendChild( renderer.domElement );
 
-		controls = new OrbitControls( camera, renderer.domElement );
-		controls.minDistance = 1;
-		controls.maxDistance = 300;
-		controls.maxPolarAngle = Math.PI * 0.75;
-		// controls.autoRotate = true;
-		// controls.autoRotateSpeed = 1;
-		controls.target.set( 0, .2, 0 );
-		controls.update();
+		if (settings && settings.sceneCameraMode) {
+			if (settings.sceneCameraMode == "First Person") {
+
+				controls = new PointerLockControls( camera, document.body );
+
+				const blocker = document.getElementById( 'blocker' );
+				const instructions = document.getElementById( 'instructions' );
+
+				instructions.addEventListener( 'click', function () {
+
+					controls.lock();
+
+				} );
+
+				controls.addEventListener( 'lock', function () {
+
+					instructions.style.display = 'none';
+					blocker.style.display = 'none';
+
+				} );
+
+				controls.addEventListener( 'unlock', function () {
+
+					blocker.style.display = 'block';
+					instructions.style.display = '';
+
+				} );
+
+				scene.add( controls.object );
+				sceneCameraMode = "First Person";
+			}
+		} else {
+						camera.position.set( 10, 50, 10 );
+					camera.lookAt( 0, 1, 0 );
+			controls = new OrbitControls( camera, renderer.domElement );
+			controls.minDistance = 1;
+			controls.maxDistance = 300;
+			controls.maxPolarAngle = Math.PI * 0.75;
+			// controls.autoRotate = true;
+			// controls.autoRotateSpeed = 1;
+			controls.target.set( 0, .2, 0 );
+			controls.update();
+			sceneCameraMode = "Orbit";
+		}
+		// controls = new OrbitControls( camera, renderer.domElement );
+		// controls.minDistance = 1;
+		// controls.maxDistance = 300;
+		// controls.maxPolarAngle = Math.PI * 0.75;
+		// // controls.autoRotate = true;
+		// // controls.autoRotateSpeed = 1;
+		// controls.target.set( 0, .2, 0 );
+		// controls.update();
 
 		InitEnvMap();
 		// InitSky();
 		InitFog();
-
-		floorPosition = new THREE.Vector3( 0, .2, 0 );
-
-		// post processing
-
-
-		// const scenePass = pass( scene, camera );
-		// const scenePassColor = scenePass.getTextureNode();
-		// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
-		
-		// if (water) {
-		// 	const waterLevel = parseFloat(settings.sceneWater.level);
-		// 	// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
-		// 	const waterMask = objectPosition( camera ).y.greaterThan( waterLevel ).toInspector( 'Post-Processing / Water Mask' );
-		// 	const scenePassColorBlurred = gaussianBlur( scenePassColor );
-		// 	scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
-		// 	const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
-
-		// 	postProcessing = new THREE.PostProcessing( renderer );
-		// 	postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
-		// } else {
-		// 	const waterMask = objectPosition( camera ).y.greaterThan( -10 );
-		// 	const scenePassColorBlurred = gaussianBlur( scenePassColor );
-		// 	scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
-		// 	const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
-
-		// 	postProcessing = new THREE.PostProcessing( renderer );
-		// 	postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
-		// }
-		
-
-		//
-
-		// const pmremGenerator = new THREE.PMREMGenerator( renderer );
-
-		// const loader = new THREE.TextureLoader() ;
-		// // const loader = new RGBELoader() ;
 
 
 		window.addEventListener( 'resize', onWindowResize );
@@ -520,9 +566,11 @@
 	function animate() {
 
 		 
-		controls.update();
+
 
 		const delta = clock.getDelta();
+		const time = performance.now();
+
 
 		if (stats) {
 			stats.update();
@@ -572,6 +620,64 @@
 		} else {
 			renderer.render(scene, camera);
 		}
+
+		if (water) {
+			
+			water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+		}
+
+
+		if ( sceneCameraMode && sceneCameraMode == "First Person" && controls.isLocked === true ) {
+
+					// console.log("tryna use fps controls");
+
+					// raycaster.ray.origin.copy( controls.object.position );
+					// raycaster.ray.origin.y -= 10;
+
+					// const intersections = raycaster.intersectObject( navmesh, false );
+
+					// const onObject = intersections.length > 0;
+
+					const delta = ( time - prevTime ) / 1000;
+
+					velocity.x -= velocity.x * 10.0 * delta;
+					velocity.z -= velocity.z * 10.0 * delta;
+
+					velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+
+					direction.z = Number( moveForward ) - Number( moveBackward );
+					direction.x = Number( moveRight ) - Number( moveLeft );
+					direction.normalize(); // this ensures consistent movements in all directions
+
+					if ( moveForward || moveBackward ) velocity.z -= direction.z * 400.0 * delta;
+					if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
+
+					// if ( onObject === true ) {
+
+					// 	velocity.y = Math.max( 0, velocity.y );
+					// 	canJump = true;
+
+					// }
+
+					controls.moveRight( - velocity.x * delta );
+					controls.moveForward( - velocity.z * delta );
+
+					controls.object.position.y += ( velocity.y * delta ); // new behavior
+
+					// if ( controls.object.position.y < 10 ) {
+
+					// 	velocity.y = 0;
+					// 	controls.object.position.y = 10;
+
+					// 	canJump = true;
+
+					// }
+					prevTime = time;
+				} else {
+					controls.update();
+				}
+
+				
 
 
 		// water.material.uniforms['time'].value += 1 / 60;
@@ -674,6 +780,69 @@
 		}
 	}
 
+	const onKeyDown = function ( event ) {
+
+		switch ( event.code ) {
+
+			case 'ArrowUp':
+			case 'KeyW':
+				moveForward = true;
+				break;
+
+			case 'ArrowLeft':
+			case 'KeyA':
+				moveLeft = true;
+				break;
+
+			case 'ArrowDown':
+			case 'KeyS':
+				moveBackward = true;
+				break;
+
+			case 'ArrowRight':
+			case 'KeyD':
+				moveRight = true;
+				break;
+
+			case 'Space':
+				if ( canJump === true ) velocity.y += 350;
+				canJump = false;
+				break;
+
+		}
+
+	};
+
+	const onKeyUp = function ( event ) {
+
+		switch ( event.code ) {
+
+			case 'ArrowUp':
+			case 'KeyW':
+				moveForward = false;
+				break;
+
+			case 'ArrowLeft':
+			case 'KeyA':
+				moveLeft = false;
+				break;
+
+			case 'ArrowDown':
+			case 'KeyS':
+				moveBackward = false;
+				break;
+
+			case 'ArrowRight':
+			case 'KeyD':
+				moveRight = false;
+				break;
+
+		}
+
+	};
+
+	document.addEventListener( 'keydown', onKeyDown );
+	document.addEventListener( 'keyup', onKeyUp );
 
 // billboard tsl
 // 	material.positionNode = material.positionNode = tsl.Fn(() => {
