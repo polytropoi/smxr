@@ -3022,6 +3022,8 @@ spark_router.get('/:_id', function (req, res) {
                         settings.sceneVideoStreams = sceneResponse.sceneVideoStreamUrls;
                         settings.socketHost = process.env.SOCKET_HOST;
                         settings.networking = sceneResponse.sceneNetworking;
+                        settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
+                        settings.playerHeight = sceneResponse.scenePlayer.playerHeight;
                         // settings.playerStartPosition = playerPosition;
 
                         if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
@@ -3072,7 +3074,8 @@ spark_router.get('/:_id', function (req, res) {
 
                         let availableScenesHTML = ""; //never popped here
                         // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto;\x22";
-                        let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
+                        // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
+                        let bgstyle = "style=\x22height:100%; width:100%; overflow:hidden; background-color: "+sceneResponse.sceneColor1+";\x22"
                         if (tilepicUrl != "") {
                             bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
                         }
@@ -3175,6 +3178,9 @@ spark_router.get('/:_id', function (req, res) {
                         importMap +
 
                         // "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs?t="+Date.now()+"\x22 ></script>" +
+
+                        // "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs?t="+Date.now()+"\x22></script>" +
+
                         "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs\x22></script>" +
 
                         // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +

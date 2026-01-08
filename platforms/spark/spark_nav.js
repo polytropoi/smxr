@@ -127,8 +127,13 @@
 
     }
 
-
-
+    export function closestNavmeshPoint (testPosition) {
+        if (navmesh && pathfinding) {
+            const goodSpot = pathfinding.getClosestNode(testPosition, ZONE, groupID, false);
+            console.log("tryna get testPosition " + JSON.stringify(testPosition) +  " vs goodSpot " + JSON.stringify(goodSpot.centroid));
+            return goodSpot.centroid; 
+        }
+    }
     export function randomNavmeshPoint () {
         
 
