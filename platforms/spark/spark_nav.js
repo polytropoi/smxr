@@ -128,10 +128,18 @@
     }
 
     export function closestNavmeshPoint (testPosition) {
+        // console.log("testing " + (JSON.stringify(testPosition)) + " " + navmesh + " " + pathfinding);
         if (navmesh && pathfinding) {
             const goodSpot = pathfinding.getClosestNode(testPosition, ZONE, groupID, false);
             console.log("tryna get testPosition " + JSON.stringify(testPosition) +  " vs goodSpot " + JSON.stringify(goodSpot.centroid));
             return goodSpot.centroid; 
+        } else {
+            if (navmesh && !pathfinding) { 
+                // InitPathfinding();
+                console.log("pathfinding not found!");
+            }
+            return null;
+
         }
     }
     export function randomNavmeshPoint () {

@@ -197,7 +197,7 @@ function init() {
     document.addEventListener( 'keydown', onKeyDown );
     document.addEventListener( 'keyup', onKeyUp );
 
-    downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
+    downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 200 );
 
     // floor
 
@@ -459,7 +459,7 @@ export async function initModels () {
                     if (!navmesh) {
                         createDefaultNavmesh();
                     } else {
-                       await InitPathfinding();
+                    //    await InitPathfinding();
                     }
                     if (staticObjex.length == 0) {
                         // initDefaultStaticCollider();
@@ -515,7 +515,7 @@ export async function initModels () {
                 }
     
                 if (navmesh) {
-                    // await InitPathfinding(); //after this the actual physics
+                    await InitPathfinding(); //after this the actual physics
                     
                 }
     
@@ -559,7 +559,7 @@ export async function initModels () {
     
 
             function createDefaultNavmesh() {
-                      const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
+                      const planeGeometry = new THREE.PlaneGeometry(10, 10, 10, 10); // 50 x 50
                     //   planeGeometry.rotation.x = Math.PI / 2 * -1;
                         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
                         let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -570,7 +570,9 @@ export async function initModels () {
                         navmeshObject.updateMatrixWorld();
                         navmesh = navmeshObject;
                         
+                        
                         scene.add(navmeshObject);
+                        groundObjex.push(navmesh);
             }
 
 
@@ -591,13 +593,13 @@ function animate() {
     if ( navmesh && controls.isLocked === true ) {
 
         downcaster.ray.origin.copy( controls.object.position );
-        downcaster.ray.origin.y += 5;
-        // console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
+        downcaster.ray.origin.y += 10;
+        console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
         const intersections = downcaster.intersectObjects( groundObjex, true );
 
         const onObject = intersections.length > 0;
         if (onObject) {
-            // console.log("intersections " + intersections.length + " distance to 0th " + intersections[0].distance + " point.y " + intersections[0].point.y + " camera y " + controls.object.position.y);
+            console.log("intersections " + intersections.length + " distance to 0th " + intersections[0].distance + " point.y " + intersections[0].point.y + " camera y " + controls.object.position.y);
         }
 
         const delta = ( time - prevTime ) / 1000;
@@ -635,11 +637,13 @@ function animate() {
 				velocity.y = 0;
 				velocity.z = 0;
                 const goodSpot = closestNavmeshPoint(controls.object.position);
-                controls.object.position.set(goodSpot.x, goodSpot.y + 5, goodSpot.z);
-                console.log(JSON.stringify(goodSpot));
+                if (goodSpot) {
+                    controls.object.position.set(goodSpot.x, goodSpot.y, goodSpot.z); 
+                    console.log("back to goodSpot " + JSON.stringify(goodSpot));
+                }
             } else {
                 velocity.y = 0;
-                controls.object.position.y = intersections[0].point.y + 5;
+                controls.object.position.y = intersections[0].point.y + 2;
 
                 canJump = true;
             }

@@ -988,7 +988,7 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
         default: ''
       },
       fall: {
-        default: 0.5
+        default: 10
       },
       height: {
         default: 1.6
@@ -999,12 +999,12 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
     },
     init: function () {
       
-	//   if (this.data.navmesh != '') {
-	// 	this.hasNavmesh = true; //might get applied without a navmesh assigned
-	// 	console.log("tryna init simple navmesh with a navmesh");
-	//   } else {
-	// 	console.log("tryna init simple navmesh no navmesh found!");
-	//   }
+	  if (this.data.navmesh != '') {
+		this.hasNavmesh = true; //might get applied without a navmesh assigned
+		console.log("tryna init simple navmesh with a navmesh");
+	  } else {
+		console.log("tryna init simple navmesh no navmesh found!");
+	  }
 	  
     },
     update: function () {
@@ -1013,10 +1013,11 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
 			this.excludes = this.data.exclude ? Array.from(document.querySelectorAll(this.data.exclude)):[];
 			const els = Array.from(document.querySelectorAll(this.data.navmesh));
 			if (els === null) {
-				console.warn('navmesh-physics: Did not match any elements');
+				console.warn('nav-mesh: Did not match any elements');
 				this.objects = [];
 			} else {
 				this.objects = els.map(el => el.object3D).concat(this.excludes.map(el => el.object3D));
+				console.log("navmesh objex legnth " + this.objects.length);
 			}
 		// }
     },
@@ -1050,13 +1051,14 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
           this.el.object3D.getWorldPosition(this.lastPosition);
 		 
         }
-        // console.log("position: " + this.lastPosition.x);
+        // console.log("simplelnav position: " + this.lastPosition.x + " this.objects.length " + this.objects.length);
         const el = this.el;
         if (this.objects.length === 0) return;
   
         this.el.object3D.getWorldPosition(nextPosition);
         if (nextPosition.distanceTo(this.lastPosition) === 0) return;
         
+		nextPosition.distanceTo(this.lastPosition)
         let didHit = false;
         // So that it does not get stuck it takes as few samples around the user and finds the most appropriate
         scanPatternLoop:
@@ -1066,11 +1068,13 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
           tempVec.multiplyScalar(distance);
           tempVec.add(this.lastPosition);
           tempVec.y += maxYVelocity;
-          tempVec.y -= this.data.height;
+        //   tempVec.y -= this.data.height + 10;
+			tempVec.y = this.lastPosition.y + 5;
           raycaster.set(tempVec, down);
           raycaster.far = this.data.fall > 0 ? this.data.fall + maxYVelocity : Infinity;
           raycaster.intersectObjects(this.objects, true, results);
           
+		//   console.log(" next pos " + nextPosition.distanceTo(this.lastPosition) + " " + results.length)
           if (results.length) {
             // If it hit something we want to avoid then ignore it and stop looking
             for (const result of results) {
@@ -1479,6 +1483,7 @@ AFRAME.registerComponent('nav_mesh_controller', {
 	},
 	init: function() {
 		this.isReady = false;
+		this.initialized = false;
 		this.goodWaypoints = [];
 		this.waypoints = [];
 		this.waypoints = document.getElementsByClassName('waypoint');
@@ -1490,6 +1495,7 @@ AFRAME.registerComponent('nav_mesh_controller', {
 		// this.helper = new PathfindingHelper();
 		// this.el.setAttribute
 		if (this.data.useDefault) {
+			console.log("tryna useDefault navmesh");
 			// // let navmeshGeometry = new THREE.BoxGeometry( 100, .1, 100 ).toNonIndexed();
 			let xscale = 100;
 			if (this.data.xscale == 1) {
@@ -1507,9 +1513,10 @@ AFRAME.registerComponent('nav_mesh_controller', {
 			let navmeshGeometry = new THREE.PlaneGeometry( xscale, zscale, 10, 10 );
 			// // navmeshGeometry.rotation.set(new THREE.Vector3( 0, 0, Math.PI / 2));
 			// // navmeshGeometry.rotateX(Math.PI / 2);
-			const navmeshMaterial = new THREE.MeshLambertMaterial( { color: "orange", wireframe: false } );
+			const navmeshMaterial = new THREE.MeshBasicMaterial( { color: "orange", wireframe: true } );
 			const navmesh = new THREE.Mesh( navmeshGeometry, navmeshMaterial );
 			this.el.setObject3D('mesh', navmesh);
+			this.mesh = navmesh;
 			// this.el.setAttribute("rotation", "90 0 0");
 			// this.mesh = this.el.getObject3D('mesh');
 			// this.mesh.rotation.z = Math.PI / 2;
@@ -1517,9 +1524,13 @@ AFRAME.registerComponent('nav_mesh_controller', {
 			// this.el.setAttribute("gltf-model", "#plane150");
 			// this.el.setAttribute("position", "0 .1 0");
 			if (settings.debug) {
-				this.el.setAttribute("material", {color: "purple", transparent: true, opacity: .5});
+				this.el.setAttribute("material", {color: "purple", wireframe: true});
 			} else {
-				this.el.setAttribute("visible", false);
+				// this.el.setAttribute("visible", false);
+			}
+			if (!this.initialized) {
+				this.createRandomWaypoints();
+				// this.loadInit();
 			}
 		} 
 			this.el.addEventListener('model-loaded', () => {
@@ -1588,6 +1599,7 @@ AFRAME.registerComponent('nav_mesh_controller', {
 		
 	},
 	loadInit: function () {
+		this.initialized = true;
 		if (settings.scatterObjects) {
 			console.log("scatter objeect layers " + JSON.stringify(settings.sceneScatterObjectLayers));
 			if (settings.sceneScatterObjectLayers.waypoints) {
@@ -1691,6 +1703,7 @@ AFRAME.registerComponent('nav_mesh_controller', {
 		}
 	},
 	createRandomWaypoints: function () {
+		this.initialized = true;
 		// setTimeout(function () {
 			console.log("tryna createRandomWaypoints...");
 			// let testPositions = [];
@@ -1707,10 +1720,16 @@ AFRAME.registerComponent('nav_mesh_controller', {
 					break;	
 				}
 				
+				if (this.data.useDefault) {
+					testPosition.x = this.returnRandomNumber(this.data.xscale * -1, this.data.xscale);
+					testPosition.y = 50;
+					testPosition.z = this.returnRandomNumber(this.data.zscale * -1, this.data.zscale);
+				} else {
+					testPosition.x = this.returnRandomNumber(-100, 100);
+					testPosition.y = 50;
+					testPosition.z = this.returnRandomNumber(-100, 100);
+				}
 				
-				testPosition.x = this.returnRandomNumber(-100, 100);
-				testPosition.y = 50;
-				testPosition.z = this.returnRandomNumber(-100, 100);
 				
 				raycaster.set(new THREE.Vector3(testPosition.x, testPosition.y, testPosition.z), new THREE.Vector3(0, -1, 0));
 				let results = raycaster.intersectObject(this.mesh, true);
@@ -1945,7 +1964,8 @@ AFRAME.registerComponent('nav_agent_controller', {
 				let results = raycaster.intersectObject(this.navMeshControllerEl.getObject3D('mesh'), true);
 				if(results.length > 0) {
 					this.znormal = Math.abs(results[0].face.normal.z);
-					if (this.znormal < 1) {
+					console.log("znormal init spot " + this.znormal);
+					if (this.znormal <= 1) {
 						// console.log("good spot!");
 						let testPosition = {};
 						testPosition.x = results[0].point.x.toFixed(2); //snap y of waypoint to navmesh y

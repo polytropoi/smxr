@@ -2387,7 +2387,7 @@ aframe_router.get('/:_id', function (req, res) {
                         if (useArParent || (locMdl.locationTags && (locMdl.locationTags.includes("ar child") || locMdl.locationTags.includes("archild")))) {
                             arChildElements = arChildElements + "<a-entity id=\x22nav-mesh\x22 nav-mesh nav_mesh_controller=\x22useDefault: true;\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
                         } else {
-                            console.log("TRYNA COOK A CANNNED NAVMESH");
+                            console.log("really COOKING A CANNNED NAVMESH entity");
 
                             navmeshEntity = "<a-entity id=\x22nav-mesh\x22 position=\x22"+locMdl.x+" "+locMdl.y+" "+locMdl.z+"\x22 rotation=\x22-90 0 0\x22 nav-mesh nav_mesh_controller=\x22useDefault: true; xscale: "+locMdl.xscale+"; zscale: "+locMdl.zscale+";\x22 visible=\x22"+visible+"\x22></a-entity>"; //use big circle if no defined navmesh
                         }
