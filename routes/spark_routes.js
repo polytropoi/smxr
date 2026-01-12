@@ -370,7 +370,10 @@ spark_router.get('/:_id', function (req, res) {
               
 
                         "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js\x22,"+
-                        "\x22sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/0.1.10/spark.module.js\x22,"+     
+                        // "\x22sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/0.1.10/spark.module.js\x22,"+  
+                        "\x22sparkjsdev/spark\x22: \x22../platforms/spark/src/spark.module.js\x22,"+     //lod branch!!
+
+                       
                              "\x22jsm/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181/examples/jsm/\x22,"+
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
                             "\x22three-pathfinding\x22: \x22https://unpkg.com/three-pathfinding@latest/dist/three-pathfinding.module.js\x22,"+
@@ -483,21 +486,7 @@ spark_router.get('/:_id', function (req, res) {
                     if (sceneData.sceneTags[i].toLowerCase().includes("webcam")) {
                         webcamAsset = "<video id=\x22webcam\x22 src=\x22''\x22 playsinline></video>";
                     }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("physics")) { 
-                    //     usePhysicsType = "ammo";
-                    //     physicsScripts =  "<script src=\x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22></script>"+
-                    //     "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-physics-system.min.js\x22></script>";     
-                    // }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("brownian")) {
-                    //     brownianScript =  "<script type=\x22module\x22 src=\x22../main/src/component/aframe-brownian-motion.js\x22></script>";
-                    // }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("instancing")) {
-                    //     meshUtilsScript = "<script type=\x22module\x22 src=\x22../main/src/component/mesh-utils.js\x22></script>"; //imports MeshSurfaceScatter
-                    //     instancingEntity = "";
-                    // } 
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("grid effects" )) {
-                    //     meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/shaders/grid_shaders.js\x22></script><script src=\x22../main/src/component/grid_effects.js\x22></script>"; //imports MeshSurfaceScatter
-                    // } 
+
                     if (sceneData.sceneTags[i] == "show transport") {
                         showTransport = true;
                     }
@@ -631,9 +620,7 @@ spark_router.get('/:_id', function (req, res) {
                     // console.log("sceneResponse.sceneLocations[i].model : "+ sceneResponse.sceneLocations[i].model);
                     if (sceneResponse.sceneLocations[i].model != undefined && sceneResponse.sceneLocations[i].model != "none" && sceneResponse.sceneLocations[i].model) { //new way of attaching gltf to location w/out object
                         sceneModelLocations.push(sceneResponse.sceneLocations[i]);
-                                                // let modelURL = "";
-
-
+                                               
                     } 
                     if (sceneResponse.sceneLocations[i].model == "none" || sceneResponse.sceneLocations[i].model == null) {
                         if (sceneResponse.sceneLocations[i].markerType == "navmesh") { 

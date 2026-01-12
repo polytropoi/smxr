@@ -19,24 +19,25 @@ AFRAME.registerComponent('mod_splat', {
         xscale: {type: 'number', default: 1},
         yscale: {type: 'number', default: 1},
         zscale: {type: 'number', default: 1},
+
+        flipY: {default: true}
             
     },
     init() {
 
-        console.log("TRYNA LOAD A SPLAT!");
+        let modFlip = this.data.flipY ? -1 : 1;
+        console.log("TRYNA LOAD A SPLAT!" + JSON.stringify(this.data));
         this.splat = new SplatMesh({ url: this.data.url });
         // this.el.setObject3D('SplatMesh', this.splat);
-        this.splat.quaternion.set(1, 0, 0, 0);
+        // this.splat.quaternion.set(1, 0, 0, 0);
         this.el.sceneEl.object3D.add(this.splat);
-
+        // const euler = new THREE.Euler(this.data.xrot, this.data.yrot, this.data.yrot, 'XYZ');
         this.splat.position.set(this.data.xpos, this.data.ypos, this.data.zpos);
-        let scale = {x: this.data.xscale, y: this.data.yscale, z: this.data.zscale};
-
-                        this.el.removeAttribute("geometry");
-        // this.splat.setAttribute('scale', scale);
-        this.splat.scale.set(this.data.xscale, this.data.yscale, this.data.zscale);
-
-
+        this.splat.rotation.set(this.data.xrot, this.data.yrot, this.data.zrot, 'XYZ');
+        
+        this.splat.scale.set(this.data.xscale, this.data.yscale * modFlip, this.data.zscale);
+// this.splat.rotation.set(0, 0, 0, 'XYZ');     
+        this.el.removeAttribute("geometry");
     //   const splatURL = "https://forge.dev/assets/splats/butterfly.spz"
 
     }  

@@ -471,7 +471,9 @@ aframe_router.get('/:_id', function (req, res) {
                        
                         "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
                         "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-                        "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.10/spark.module.js\x22,"+  
+                        "\x22@forge-gfx/forge\x22: \x22https://sparkjs.dev/releases/spark/0.1.10/spark.module.js\x22,"+ 
+
+                        // "\x22@forge-gfx/forge\x22: \x22../platforms/spark/src/spark.module.js\x22,"+  //this is lod branch! //no workie
                         
                         "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
                         "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
@@ -1476,7 +1478,7 @@ aframe_router.get('/:_id', function (req, res) {
                 }
                 
                 if (!sceneResponse.sceneUseDynamicSky) {
-                    envLighting = "lighting: none";
+                    // envLighting = "lighting: none";
                 }
                 
                 if (sceneResponse.sceneUseSceneFog) {
@@ -1527,7 +1529,7 @@ aframe_router.get('/:_id', function (req, res) {
                 } else {
                      lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22white\x22 "+
                     "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><a-entity id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></a-entity></a-light>" +
-                    "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
+                    "<a-light type='ambient' intensity=\x223\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
                 }
             }
             sceneResponse.scenePostcards = sceneData.scenePostcards;
@@ -2364,7 +2366,12 @@ aframe_router.get('/:_id', function (req, res) {
                             modSplats = "<script type=\x22module\x22 src=\x22../platforms/aframe/mod_splats.js\x22 defer=\x22defer\x22></script>"; 
                             let splatURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
                             console.log("splatURL " + splatURL + " modelType " + model.item_type);
-                            splatEls = splatEls + "<a-entity mod_splat=\x22url: "+splatURL+"; xpos: "+locMdl.x+"; ypos: "+locMdl.y+"; zpos: "+locMdl.z+"; xscale: "+locMdl.xscale+"; yscale: "+locMdl.yscale+"; zscale: "+locMdl.zscale+"\x22></a-entity>";
+                            let modFlip = true;
+                            if (locMdl.locationTags.includes("flipy")) {
+                                modFlip = false;
+                            }
+                            splatEls = splatEls + "<a-entity mod_splat=\x22url: "+splatURL+"; xpos: "+locMdl.x+"; ypos: "+locMdl.y+"; zpos: "+locMdl.z+ " xrot: "+locMdl.eulerx+"; yrot: "+locMdl.eulery+"; zrot: "+locMdl.eulerz+
+                            "; xscale: "+locMdl.xscale+"; yscale: "+locMdl.yscale+"; zscale: "+locMdl.zscale+"; flipY: "+modFlip+"\x22></a-entity>";
 
                         }
 

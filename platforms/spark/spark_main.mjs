@@ -6,6 +6,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
+  import { SparkControls } from "sparkjsdev/spark";
+
 import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 import { settings } from '../../../connect/settings.js';
 import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
@@ -23,7 +25,7 @@ import { world, gravity, initRapier, physicsIsReady, dynamicBodies, rapierDebugR
 
 import { InitEnvMap, InitFog } from './spark_sky.js';
 
-import { splatObjex, initSplats } from './spark_splats.js';
+import { splatObjex, initSplats, InitSpark, spark } from './spark_splats.js';
 // import { Container } from '@pmndrs/uikit' //arghh	
 
 import Stats from './ui/stats.js';
@@ -39,6 +41,7 @@ const objects = [];
 let groundObjex = [];
 let downcaster, mousecaster;
 
+let sparkControlsEnabled = false;
 let moveForward = false;
 let moveBackward = false;
 let moveLeft = false;
@@ -71,11 +74,11 @@ const color = new THREE.Color();
     let dynamicObjex = [];
     export let playerPosition;
 
-      export let staticObjex = [];
-  export let navmeshObjex = [];
-  export let surfaceObjex = [];
+    export let staticObjex = [];
+    export let navmeshObjex = [];
+    export let surfaceObjex = [];
 //   let instancedModels = [];
-    eventEl.addEventListener('ready-event', init);
+    eventEl.addEventListener('ready-event', init);  
 
 
 
@@ -100,38 +103,55 @@ function init() {
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color( 0x00000 );
-    // scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
+
+
+    renderer = new THREE.WebGLRenderer( { antialias: true } );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setAnimationLoop( animate );
+    document.body.appendChild( renderer.domElement );
+
 
     const light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 2.5 );
     light.position.set( 0.5, 1, 0.75 );
     scene.add( light );
+    if (settings.sceneTags && settings.sceneTags.includes("navmesh")) {
 
-    controls = new PointerLockControls( camera, document.body );
-    controls.pointerSpeed = .25;
-    const blocker = document.getElementById( 'blocker' );
-    const instructions = document.getElementById( 'instructions' );
+        controls = new PointerLockControls( camera, document.body ); //use regular fp controls if has navmesh
 
-    instructions.addEventListener( 'click', function () {
 
-        controls.lock();
+        controls.pointerSpeed = .25;
 
-    } );
+        const blocker = document.getElementById( 'blocker' );
+        const instructions = document.getElementById( 'instructions' );
 
-    controls.addEventListener( 'lock', function () {
+        instructions.addEventListener( 'click', function () {
 
-        instructions.style.display = 'none';
-        blocker.style.display = 'none';
+            controls.lock();
 
-    } );
+        } );
 
-    controls.addEventListener( 'unlock', function () {
+        controls.addEventListener( 'lock', function () {
 
-        blocker.style.display = 'block';
-        instructions.style.display = '';
+            instructions.style.display = 'none';
+            blocker.style.display = 'none';
 
-    } );
+        } );
 
-    scene.add( controls.object );
+        controls.addEventListener( 'unlock', function () {
+
+            blocker.style.display = 'block';
+            instructions.style.display = '';
+
+        } );
+
+        scene.add( controls.object );
+    } else {
+        controls = new SparkControls({ canvas: renderer.domElement });
+
+        document.getElementById( 'blocker' ).hidden = true;
+        document.getElementById( 'instructions' ).hidden = true;
+    }
 
     const onKeyDown = function ( event ) {
 
@@ -198,87 +218,6 @@ function init() {
     document.addEventListener( 'keyup', onKeyUp );
 
     downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 200 );
-
-    // floor
-
-    // let floorGeometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
-    // floorGeometry.rotateX( - Math.PI / 2 );
-
-    // // vertex displacement
-
-    // let position = floorGeometry.attributes.position;
-
-    // for ( let i = 0, l = position.count; i < l; i ++ ) {
-
-    //     vertex.fromBufferAttribute( position, i );
-
-    //     vertex.x += Math.random() * 20 - 10;
-    //     vertex.y += Math.random() * 2;
-    //     vertex.z += Math.random() * 20 - 10;
-
-    //     position.setXYZ( i, vertex.x, vertex.y, vertex.z );
-
-    // }
-
-    // floorGeometry = floorGeometry.toNonIndexed(); // ensure each face has unique vertices
-
-    // position = floorGeometry.attributes.position;
-    // const colorsFloor = [];
-
-    // for ( let i = 0, l = position.count; i < l; i ++ ) {
-
-    //     color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75, THREE.SRGBColorSpace );
-    //     colorsFloor.push( color.r, color.g, color.b );
-
-    // }
-
-    // floorGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colorsFloor, 3 ) );
-
-    // const floorMaterial = new THREE.MeshBasicMaterial( { wireframe: true } );
-
-    // const floor = new THREE.Mesh( floorGeometry, floorMaterial );
-    // scene.add( floor );
-
-    // // objects
-
-    // const boxGeometry = new THREE.BoxGeometry( 20, 20, 20 ).toNonIndexed();
-
-    // position = boxGeometry.attributes.position;
-    // const colorsBox = [];
-
-    // for ( let i = 0, l = position.count; i < l; i ++ ) {
-
-    //     color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75, THREE.SRGBColorSpace );
-    //     colorsBox.push( color.r, color.g, color.b );
-
-    // }
-
-    // boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colorsBox, 3 ) );
-
-    // for ( let i = 0; i < 500; i ++ ) {
-
-    //     const boxMaterial = new THREE.MeshPhongMaterial( { specular: 0xffffff, flatShading: true, vertexColors: true } );
-    //     boxMaterial.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75, THREE.SRGBColorSpace );
-
-    //     const box = new THREE.Mesh( boxGeometry, boxMaterial );
-    //     box.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
-    //     box.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
-    //     box.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
-
-    //     scene.add( box );
-    //     objects.push( box );
-
-    // }
-
-    //
-
-    renderer = new THREE.WebGLRenderer( { antialias: true } );
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.setAnimationLoop( animate );
-    document.body.appendChild( renderer.domElement );
-
-    //
 
     window.addEventListener( 'resize', onWindowResize );
 
@@ -439,10 +378,10 @@ export async function initModels () {
                         // if (locationData[i].markerType == "surface") {
                         // 	createDefaultSurface();
                         // }
-                        // if (locationData[i].markerType == "player") {
-                        //     console.log("playerposition " + JSON.stringify(locationData[i]));
-                        //     playerPosition = locationData[i];
-                        // }
+                        if (locationData[i].markerType == "player") {
+                            console.log("playerposition " + JSON.stringify(locationData[i]));
+                            playerPosition = locationData[i];
+                        }
                         // console.log("locationData " + i + " of "  + locationData.length);
                     }
                     // console.log("looking for Surface with models " + instancedModels.length);
@@ -452,10 +391,7 @@ export async function initModels () {
                 } finally {
                     console.log("settings " + JSON.stringify(settings));
 
-                    // if (playerPosition) {
-                    //     console.log("tryna set player position " + playerPosition);
-                    //     camera.position.set( playerPosition.x, playerPosition.y, playerPosition.z );
-                    // } 
+
                     if (!navmesh) {
                         createDefaultNavmesh();
                     } else {
@@ -463,6 +399,21 @@ export async function initModels () {
                     }
                     if (staticObjex.length == 0) {
                         // initDefaultStaticCollider();
+                    }
+                    if (playerPosition) {
+                        console.log("tryna set player position " + playerPosition);
+                        // sparkControlsEnabled = false;
+                        // controls.enabled = false;
+                        // // camera
+                        // controls.position = playerPosition;
+                        // const x = parseFloat.playerPosition.x
+                        // camera.position.copy( playerPosition ); //ouch, borks controls!
+                        // controls = new SparkControls({ canvas: renderer.domElement });
+                        // controls.update(camera);
+                        // sparkControlsEnabled = true;
+                        
+                    } else {
+
                     }
                     initSystems();
                 }
@@ -473,6 +424,7 @@ export async function initModels () {
 
     async function initSystems() {
                 if (splatObjex.length) {
+                    await InitSpark();
                     // surface = surfaceObjex[0];
                     initSplats();
                 } 
@@ -554,7 +506,9 @@ export async function initModels () {
                     // }
                 }
     
-    
+                // controls.object3D.position.set(playerPosition);
+
+
             }
     
 
@@ -647,11 +601,13 @@ function animate() {
 
                 canJump = true;
             }
-        // }
-           
+      
 
+    } else {
+        // if (sparkControlsEnabled) {
+         controls.update(camera); //SparkControls
+         console.log(camera.position);
         // }
-
     }
 
     if (water) {			
