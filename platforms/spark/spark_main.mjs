@@ -77,11 +77,12 @@ const color = new THREE.Color();
     export let staticObjex = [];
     export let navmeshObjex = [];
     export let surfaceObjex = [];
-//   let instancedModels = [];
+    // let instancedModels = [];
+
+    //events from Outside!
     eventEl.addEventListener('ready-event', init);  
 
-
-
+    //utils
 	async function loadModel(url) {
 		const loader = new GLTFLoader();
 		try {
@@ -94,138 +95,136 @@ const color = new THREE.Color();
 	}
 
 
-// init();
+    function init() {
 
-function init() {
+        camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera.position.y = 10;
 
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
-    camera.position.y = 10;
-
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0x00000 );
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color( 0x00000 );
 
 
-    renderer = new THREE.WebGLRenderer( { antialias: true } );
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.setAnimationLoop( animate );
-    document.body.appendChild( renderer.domElement );
+        renderer = new THREE.WebGLRenderer( { antialias: true } );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setAnimationLoop( animate );
+        document.body.appendChild( renderer.domElement );
 
 
-    const light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 2.5 );
-    light.position.set( 0.5, 1, 0.75 );
-    scene.add( light );
-    if (settings.sceneTags && settings.sceneTags.includes("navmesh")) {
+        const light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 2.5 );
+        light.position.set( 0.5, 1, 0.75 );
+        scene.add( light );
+        if (settings.sceneTags && settings.sceneTags.includes("navmesh")) {
 
-        controls = new PointerLockControls( camera, document.body ); //use regular fp controls if has navmesh
+            controls = new PointerLockControls( camera, document.body ); //use regular fp controls if has navmesh
 
 
-        controls.pointerSpeed = .25;
+            controls.pointerSpeed = .25;
 
-        const blocker = document.getElementById( 'blocker' );
-        const instructions = document.getElementById( 'instructions' );
+            const blocker = document.getElementById( 'blocker' );
+            const instructions = document.getElementById( 'instructions' );
 
-        instructions.addEventListener( 'click', function () {
+            instructions.addEventListener( 'click', function () {
 
-            controls.lock();
+                controls.lock();
 
-        } );
+            } );
 
-        controls.addEventListener( 'lock', function () {
+            controls.addEventListener( 'lock', function () {
 
-            instructions.style.display = 'none';
-            blocker.style.display = 'none';
+                instructions.style.display = 'none';
+                blocker.style.display = 'none';
 
-        } );
+            } );
 
-        controls.addEventListener( 'unlock', function () {
+            controls.addEventListener( 'unlock', function () {
 
-            blocker.style.display = 'block';
-            instructions.style.display = '';
+                blocker.style.display = 'block';
+                instructions.style.display = '';
 
-        } );
+            } );
 
-        scene.add( controls.object );
-    } else {
-        controls = new SparkControls({ canvas: renderer.domElement });
+            scene.add( controls.object );
+        } else {
+            controls = new SparkControls({ canvas: renderer.domElement });
 
-        document.getElementById( 'blocker' ).hidden = true;
-        document.getElementById( 'instructions' ).hidden = true;
+            document.getElementById( 'blocker' ).hidden = true;
+            document.getElementById( 'instructions' ).hidden = true;
+        }
+
+        const onKeyDown = function ( event ) {
+
+            switch ( event.code ) {
+
+                case 'ArrowUp':
+                case 'KeyW':
+                    moveForward = true;
+                    break;
+
+                case 'ArrowLeft':
+                case 'KeyA':
+                    moveLeft = true;
+                    break;
+
+                case 'ArrowDown':
+                case 'KeyS':
+                    moveBackward = true;
+                    break;
+
+                case 'ArrowRight':
+                case 'KeyD':
+                    moveRight = true;
+                    break;
+
+                case 'Space':
+                    if ( canJump === true ) velocity.y += 350;
+                    canJump = false;
+                    break;
+
+            }
+
+        };
+
+        const onKeyUp = function ( event ) {
+
+            switch ( event.code ) {
+
+                case 'ArrowUp':
+                case 'KeyW':
+                    moveForward = false;
+                    break;
+
+                case 'ArrowLeft':
+                case 'KeyA':
+                    moveLeft = false;
+                    break;
+
+                case 'ArrowDown':
+                case 'KeyS':
+                    moveBackward = false;
+                    break;
+
+                case 'ArrowRight':
+                case 'KeyD':
+                    moveRight = false;
+                    break;
+
+            }
+
+        };
+
+        document.addEventListener( 'keydown', onKeyDown );
+        document.addEventListener( 'keyup', onKeyUp );
+
+        downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 200 );
+
+        window.addEventListener( 'resize', onWindowResize );
+
+        initModels();
+
     }
 
-    const onKeyDown = function ( event ) {
-
-        switch ( event.code ) {
-
-            case 'ArrowUp':
-            case 'KeyW':
-                moveForward = true;
-                break;
-
-            case 'ArrowLeft':
-            case 'KeyA':
-                moveLeft = true;
-                break;
-
-            case 'ArrowDown':
-            case 'KeyS':
-                moveBackward = true;
-                break;
-
-            case 'ArrowRight':
-            case 'KeyD':
-                moveRight = true;
-                break;
-
-            case 'Space':
-                if ( canJump === true ) velocity.y += 350;
-                canJump = false;
-                break;
-
-        }
-
-    };
-
-    const onKeyUp = function ( event ) {
-
-        switch ( event.code ) {
-
-            case 'ArrowUp':
-            case 'KeyW':
-                moveForward = false;
-                break;
-
-            case 'ArrowLeft':
-            case 'KeyA':
-                moveLeft = false;
-                break;
-
-            case 'ArrowDown':
-            case 'KeyS':
-                moveBackward = false;
-                break;
-
-            case 'ArrowRight':
-            case 'KeyD':
-                moveRight = false;
-                break;
-
-        }
-
-    };
-
-    document.addEventListener( 'keydown', onKeyDown );
-    document.addEventListener( 'keyup', onKeyUp );
-
-    downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 200 );
-
-    window.addEventListener( 'resize', onWindowResize );
-
-    initModels();
-
-}
-
-export async function initModels () {
+    export async function initModels () {
         let modelsDataEl = document.getElementById('modelsData');
         if (modelsDataEl) {
             const theModelsData = modelsDataEl.getAttribute('data-models');
@@ -266,6 +265,7 @@ export async function initModels () {
                                         splat.url = modelsData[m].modelURL;
                                         splat.locationData = locationData[i];
                                         splatObjex.push(splat);
+
                                     } else {
                                         // const transmat = new THREE.MeshBasicNodeMaterial( { transparent: true, opacity: 0, color: 0x111111, depthWrite :false});
                                         const model = await loadModel(modelsData[m].modelURL);
@@ -328,7 +328,7 @@ export async function initModels () {
                                     
 
 
-                                        if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { //gonna make a bunch and get scattered
+                                        if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // make a bunch and get scattered
                                             console.log("tryna instance model " + locationData[i].name);
                                             let instancedModel = {};
                                             // const countsplit = locationData[i].eventData.split("~");
@@ -342,7 +342,10 @@ export async function initModels () {
                                             console.log("instancedModels length " + instancedModels.length);
                                             model.visible = false;
                                             scene.remove(model);
-                                        } else { // regular meshes
+                                        } else { 
+                                            
+                                            if (modelsData[m].item_type != "splat") {
+                                            // regular meshes
                                             console.log(locationData[i].name + " adding to scene at location " + locationData[i].x + locationData[i].y + locationData[i].z);
                                             
                                             model.position.set(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z));
@@ -360,7 +363,7 @@ export async function initModels () {
                                             // model.envMapIntensity = 2;
                                             scene.add(model);
                                             activeObjex.push(model);
-                                                                                
+                                            }                                   
                                         }
                                     }
                                     break; //only match one model per location!?
@@ -606,7 +609,7 @@ function animate() {
     } else {
         // if (sparkControlsEnabled) {
          controls.update(camera); //SparkControls
-         console.log(camera.position);
+        //  console.log(camera.position);
         // }
     }
 

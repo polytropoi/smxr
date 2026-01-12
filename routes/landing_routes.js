@@ -3153,7 +3153,11 @@ landing_router.get('/:_id', function (req, res) {
                             }
                             if (sceneResponse.sceneEnabledClientTypes.threeWeb == true) {
                                 platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../three/"+ sceneResponse.short_id + "\x22> Three </a>" + platformButtons;
-                                picLink = "<a href=\x22../three/"+ sceneResponse.short_id + "\x22>";
+                                // picLink = "<a href=\x22../three/"+ sceneResponse.short_id + "\x22>";
+                            }
+                            if (sceneResponse.sceneEnabledClientTypes.sparkWeb == true) {
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../spark/"+ sceneResponse.short_id + "\x22> Spark </a>" + platformButtons;
+                                // picLink = "<a href=\x22../spark/"+ sceneResponse.short_id + "\x22>";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.babylonWeb == true) {
                                 platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../babylon/"+ sceneResponse.short_id + "\x22> Bablyon </a>" + platformButtons;
