@@ -54,6 +54,8 @@ const direction = new THREE.Vector3();
 const vertex = new THREE.Vector3();
 const color = new THREE.Color();
 
+let navmeshData;
+
 
     export let navmesh, surface;
 
@@ -109,6 +111,7 @@ const color = new THREE.Color();
         renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.setAnimationLoop( animate );
         document.body.appendChild( renderer.domElement );
+
 
 
         const light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 2.5 );
@@ -295,6 +298,7 @@ const color = new THREE.Color();
                                                     // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
                                                         navmesh = child;
                                                         groundObjex.push(navmesh);
+                                                        
                                                         // child.material = transmat;
                                                         // InitPathfinding(); //no
                                                     // }
@@ -378,9 +382,9 @@ const color = new THREE.Color();
                         }
                         //locations with no models...
 
-                        // if (locationData[i].markerType == "surface") {
-                        // 	createDefaultSurface();
-                        // }
+                        if (locationData[i].markerType == "navmesh") {
+                        	navmeshData = locationData[i];
+                        }
                         if (locationData[i].markerType == "player") {
                             console.log("playerposition " + JSON.stringify(locationData[i]));
                             playerPosition = locationData[i];
@@ -396,7 +400,13 @@ const color = new THREE.Color();
 
 
                     if (!navmesh) {
-                        createDefaultNavmesh();
+                        if (!navmeshData) { //no location markertype = navmesh, send defaults
+                            navmeshData = {xscale: 1, zscale: 1, x: 0, y: 0, z: 0};
+                            createDefaultNavmesh(navmeshData);
+                        } else {
+                            createDefaultNavmesh(navmeshData);
+                        }
+                        
                     } else {
                     //    await InitPathfinding();
                     }
@@ -515,13 +525,18 @@ const color = new THREE.Color();
             }
     
 
-            function createDefaultNavmesh() {
-                      const planeGeometry = new THREE.PlaneGeometry(10, 10, 10, 10); // 50 x 50
+            function createDefaultNavmesh(navmeshData) {
+
+                const xscale = navmeshData.xscale;
+                const zscale = navmeshData.zscale;
+                      const planeGeometry = new THREE.PlaneGeometry(xscale, zscale, 10, 10); 
                     //   planeGeometry.rotation.x = Math.PI / 2 * -1;
-                        const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+                    // let planeMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+                let planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+                        
                         let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
                         
-                        navmeshObject.position.set(0,0,0);
+                        navmeshObject.position.set(navmeshData.x,navmeshData.y,navmeshData.z);
                         navmeshObject.scale.set(1,1,1);
                         navmeshObject.rotation.x = -Math.PI / 2;
                         navmeshObject.updateMatrixWorld();
@@ -530,6 +545,12 @@ const color = new THREE.Color();
                         
                         scene.add(navmeshObject);
                         groundObjex.push(navmesh);
+                    if (navmeshData.locationTags && navmeshData.locationTags.includes("hide")) {
+                        navmeshObject.visible = false;
+                    } else {
+                       
+                        
+                    }
             }
 
 
@@ -551,12 +572,12 @@ function animate() {
 
         downcaster.ray.origin.copy( controls.object.position );
         downcaster.ray.origin.y += 10;
-        console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
+        // console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
         const intersections = downcaster.intersectObjects( groundObjex, true );
 
         const onObject = intersections.length > 0;
         if (onObject) {
-            console.log("intersections " + intersections.length + " distance to 0th " + intersections[0].distance + " point.y " + intersections[0].point.y + " camera y " + controls.object.position.y);
+            // console.log("intersections " + intersections.length + " distance to 0th " + intersections[0].distance + " point.y " + intersections[0].point.y + " camera y " + controls.object.position.y);
         }
 
         const delta = ( time - prevTime ) / 1000;

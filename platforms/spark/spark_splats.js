@@ -16,7 +16,25 @@ export async function initSplats () {
     console.log("tryna init splats " + splatObjex.length + splatObjex[0].url);
     for (let i = 0; i < splatObjex.length; i++) {
         const splatURL = splatObjex[i].url;
-        const splat = new SplatMesh({ url: splatURL });
+        // const splat = new SplatMesh({ url: splatURL });
+        const splat = new SplatMesh({
+          url: splatURL,
+          lod: true,
+          nonLod: true,
+          onLoad: (mesh) => {
+            mesh.enableLod = true;
+            mesh.updateGenerator();
+            console.log("!## Mesh loaded enabled LoD");
+          },
+          onProgress: (event) => {
+            if (event.type === "progress") {
+              console.log("Progress: ", event.loaded, event.total);
+            }
+          },
+      });
+      // splats.lodMaxSplats = 1 * 1048576 - 2048;
+      // splats.foveate = 0.5;
+      // splat.quaternion.set(1, 0, 0, 0);
         
         
         // let modFlip = this.data.flipY ? -1 : 1;
