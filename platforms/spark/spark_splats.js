@@ -34,13 +34,16 @@ export async function initSplats () {
       });
       // splats.lodMaxSplats = 1 * 1048576 - 2048;
       // splats.foveate = 0.5;
-      // splat.quaternion.set(1, 0, 0, 0);
+      
         
-        
+        splat.quaternion.set(1, 0, 0, 0);
         // let modFlip = this.data.flipY ? -1 : 1;
         let modFlip = -1;
         if (splatObjex[i].locationData.locationTags.includes("flipy")) {
           modFlip = 1
+          
+        } else {
+          
         }
         const xrot = splatObjex[i].locationData.eulerx ? splatObjex[i].locationData.eulerx : 0;
         const yrot = splatObjex[i].locationData.eulery ? splatObjex[i].locationData.eulery : 0;

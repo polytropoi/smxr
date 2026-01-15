@@ -1,7 +1,9 @@
 // import * as THREE from "three";
  import AFRAME from 'aframe';
 import * as THREE from "three";
-import { SplatMesh } from "@forge-gfx/forge";
+// import { SplatMesh } from "@forge-gfx/forge";
+
+import { SplatMesh } from "@sparkjsdev/spark";
 
 AFRAME.registerComponent('mod_splat', {
     dependencies: ['geometry', 'material'],

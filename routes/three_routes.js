@@ -377,7 +377,7 @@ three_router.get('/:_id', function (req, res) {
 
                             "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.tsl.js\x22,"+
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
-                            "\x22three-pathfinding\x22: \x22https://unpkg.com/three-pathfinding@latest/dist/three-pathfinding.module.js\x22,"+
+                            "\x22three-pathfinding\x22: \x22/platforms/three/src/three-pathfinding.module.js\x22,"+
                             "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
                             // "\x22three-mesh-ui\x22: \x22https://unpkg.com/three-mesh-ui@6.4.0/build/three-mesh-ui.module.js\x22,"+
                             // https://unpkg.com/three-mesh-ui@6.4.1/build/three-mesh-ui.js
