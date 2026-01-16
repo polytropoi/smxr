@@ -19,7 +19,7 @@
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 	import { SetSceneLocations } from '../../../connect/connect.js';
 
-	import { InitPathfinding, agents } from './three_nav.js';
+	import { InitPathfinding, agents, closestNavmeshPoint } from './three_nav.js';
 
 	import { getRainbowMaterial } from './tsl/rainbow.js'
 
@@ -46,15 +46,16 @@
 	let locationData;
 	let modelsData;
 	let raycastHitAgent;
-	let raycaster, stats;
+	let raycaster, downcaster, stats;
 	// let mixer, objects;
 	export let water;// waterLayer0, waterLayer1;
 	export let clock;
 	export let camera, renderer;
 	let model, floor, floorPosition;
 	let postProcessing;
-	let showDebug = true;
+	let showDebug = false;
 	let controls;
+	let isReady = false;
 
 	let doPostProcessing = false;
 	
@@ -66,7 +67,19 @@
 	let navmeshObjex = [];
 	let surfaceObjex = [];
 
+	let cameraMode = "First Person";
 
+	let groundObjex = [];
+	let moveForward = false;
+	let moveBackward = false;
+	let moveLeft = false;
+	let moveRight = false;
+	let canJump = false;
+
+	let playerSpeed = 5;
+	let prevTime = performance.now();
+	const velocity = new THREE.Vector3();
+	const direction = new THREE.Vector3();
 	const mouse = new THREE.Vector2();
 	
 
@@ -87,12 +100,76 @@
 
 
 
+
 	////////////// SCENE INIT FUNCTION 
 
 	async function init() {
 
+
 		// initRapier();
 		scene = new THREE.Scene();
+		// if (settings && settings.sceneCameraMode) {
+		// 	cameraMode = settings.sceneCameraMode;
+			if (cameraMode == "Orbit") {
+											camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
+					camera.position.set( 10, 50, 10 );
+					camera.lookAt( 0, 1, 0 );
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.minDistance = 1;
+				controls.maxDistance = 300;
+				controls.maxPolarAngle = Math.PI * 0.75;
+				// controls.autoRotate = true;
+				// controls.autoRotateSpeed = 1;
+				controls.target.set( 0, .2, 0 );
+				controls.update();
+				isReady = true;
+
+				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
+				// camera.position.set( 10, 50, 10 );
+				// camera.lookAt( 0, 1, 0 );
+			} else {
+				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
+					camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
+					camera.position.set(0,0,0);
+				controls = new PointerLockControls( camera, document.body ); //use regular fp controls if has navmesh
+				downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
+
+				controls.pointerSpeed = .25;
+
+				const blocker = document.getElementById( 'blocker' );
+				const instructions = document.getElementById( 'instructions' );
+
+				instructions.addEventListener( 'click', function () {
+
+					controls.lock();
+
+				} );
+
+				controls.addEventListener( 'lock', function () {
+
+					instructions.style.display = 'none';
+					blocker.style.display = 'none';
+
+				} );
+
+				controls.addEventListener( 'unlock', function () {
+
+					blocker.style.display = 'block';
+					instructions.style.display = '';
+
+				} );
+
+				scene.add( controls.object );
+				// controls.update();
+				isReady = true;
+
+				document.addEventListener( 'keydown', onKeyDown );
+					document.addEventListener( 'keyup', onKeyUp );
+
+			}
+		// }
+			
+
 
 		await initRapier();
 		// UpdateText("HERE WE GO!");
@@ -157,6 +234,7 @@
 											if (locationData[i].markerType == "navmesh" ) {
 												// if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
 													navmesh = child;
+													groundObjex.push(navmesh);
 													// child.material = transmat;
 													// InitPathfinding(); //no
 												// }
@@ -293,6 +371,9 @@
 				await InitPathfinding(); //after this the actual physics
 				
 			}
+			if (cameraMode == "Orbit") {
+
+			}
 
 		}
 
@@ -314,8 +395,6 @@
 
 		console.log("settings " + JSON.stringify(settings));
 
-		camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.25, 500 );
-		camera.position.set( 10, 50, 10 );
 
 		
 		// scene = new THREE.Scene();
@@ -325,7 +404,7 @@
 		// scene.fog = new THREE.Fog(fogColor, 1, 100);
 		// InitCustomFog();
 		// scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
-		camera.lookAt( 0, 1, 0 );
+
 
 		const sunLight = new THREE.DirectionalLight( settings.sceneColor1, 2 );
 		sunLight.castShadow = true;
@@ -410,14 +489,53 @@
 		// renderer.inspector = new Inspector();
 		document.body.appendChild( renderer.domElement );
 
-		controls = new OrbitControls( camera, renderer.domElement );
-		controls.minDistance = 1;
-		controls.maxDistance = 300;
-		controls.maxPolarAngle = Math.PI * 0.75;
-		// controls.autoRotate = true;
-		// controls.autoRotateSpeed = 1;
-		controls.target.set( 0, .2, 0 );
-		controls.update();
+		if (cameraMode == "Orbit") {
+			// 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
+			// 	camera.position.set( 10, 50, 10 );
+			// 	camera.lookAt( 0, 1, 0 );
+			// controls = new OrbitControls( camera, renderer.domElement );
+			// controls.minDistance = 1;
+			// controls.maxDistance = 300;
+			// controls.maxPolarAngle = Math.PI * 0.75;
+			// // controls.autoRotate = true;
+			// // controls.autoRotateSpeed = 1;
+			// controls.target.set( 0, .2, 0 );
+			// controls.update();
+			// isReady = true;
+		} else {
+			// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
+ 			// controls = new PointerLockControls( camera, document.body ); //use regular fp controls if has navmesh
+			// downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 200 );
+
+			// controls.pointerSpeed = .25;
+
+			// const blocker = document.getElementById( 'blocker' );
+			// const instructions = document.getElementById( 'instructions' );
+
+			// instructions.addEventListener( 'click', function () {
+
+			// 	controls.lock();
+
+			// } );
+
+			// controls.addEventListener( 'lock', function () {
+
+			// 	instructions.style.display = 'none';
+			// 	blocker.style.display = 'none';
+
+			// } );
+
+			// controls.addEventListener( 'unlock', function () {
+
+			// 	blocker.style.display = 'block';
+			// 	instructions.style.display = '';
+
+			// } );
+
+			// scene.add( controls.object );
+			// controls.update();
+			// isReady = true;
+		}
 
 		InitEnvMap();
 		InitSky();
@@ -477,61 +595,108 @@
 
 ////////////// MAIN LOOP FOR ALL THE THINGS ////////////////
 	function animate() {
-
-		 
-		controls.update();
-
-		const delta = clock.getDelta();
-
-		if (stats) {
-			stats.update();
-		}
-
-		// floor.position.y = floorPosition.y - 5;
-
-		// if ( model ) {
-
-		// 	mixer.update( delta );
-
-		// 	model.position.y = floorPosition.y;
-
-		// }
-
-		// for ( const object of objects.children ) {
-
-		// 	// object.position.y = Math.sin( clock.elapsedTime + object.id ) * .3;
-		// 	object.rotation.y += delta * .3;
-
-		// }
-		if (agents.length) {
-			agents.forEach(a =>
-				a.update(delta));
-		}
-				
-  		if (physicsIsReady && worldIsReady) {
-			
-			 world.step();//!!!
-			 
-
-			dynamicBodies.forEach(b => 
-				b.update());
-		
-			kinematicBodies.forEach(c => 
-				c.update());
-
-				
-
-		}
-		if (rapierDebugRenderer && showDebug) {
-			rapierDebugRenderer.update();
-		}
-
-		if (doPostProcessing) {
-			postProcessing.render();
+		const time = performance.now();
+	if (isReady) {
+		if (settings && controls && cameraMode == "Orbit") {
+			controls.update();
 		} else {
-			renderer.render(scene, camera);
+			if ( navmesh && controls && controls.isLocked === true ) {
+				
+			
+				downcaster.ray.origin.copy( controls.object.position );
+				downcaster.ray.origin.y += 10;
+				// console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
+				const intersections = downcaster.intersectObjects( groundObjex, false ); //groundObjex == navmesh
+		
+				const onObject = intersections.length > 0;
+				if (onObject) {
+					// console.log(JSON.stringify(controls.object.position) + " pos " + groundObjex.length + " groundObjex with intersections " + intersections.length + " distance to 0th " + intersections[0].distance + " point.y " + intersections[0].point.y + " camera y " + controls.object.position.y);
+				}
+		
+				const delta = ( time - prevTime ) / 1000;
+		
+				velocity.x -= velocity.x * 12 * delta;
+				velocity.z -= velocity.z * 12 * delta;
+		
+				velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+		
+				direction.z = Number( moveForward ) - Number( moveBackward );
+				direction.x = Number( moveRight ) - Number( moveLeft );
+				direction.normalize(); // this ensures consistent movements in all directions
+		
+				if ( moveForward || moveBackward ) velocity.z -= direction.z * 20.0 * (playerSpeed) * delta;
+				if ( moveLeft || moveRight ) velocity.x -= direction.x * 20.0 * (playerSpeed) * delta;
+		
+				if ( onObject === true ) {
+		
+					velocity.y = Math.max( 0, velocity.y );
+					canJump = true;
+		
+				}
+		
+				// console.log("delta " + delta + " direction " + JSON.stringify(direction) + " velocity " + JSON.stringify(velocity));
+				controls.moveRight( - velocity.x * delta );
+				controls.moveForward( - velocity.z * delta );
+		
+				controls.object.position.y += ( velocity.y * delta ); // new behavior
+		
+				// if ( controls.object.position.y < - 10 ) {
+		
+				// } else {
+					if (!intersections.length) {
+						//off the navmesh, get closest point and go back
+						velocity.x = 0;
+						velocity.y = 0;
+						velocity.z = 0;
+						const goodSpot = closestNavmeshPoint(controls.object.position);
+						if (goodSpot) {
+							controls.object.position.set(goodSpot.x, goodSpot.y, goodSpot.z); 
+							console.log("back to goodSpot " + JSON.stringify(goodSpot));
+						}
+					} else {
+						velocity.y = 0;
+						// intersections[0].point.x = 
+						controls.object.position.y = intersections[0].point.y + 4;
+						
+						canJump = true;
+					}
+			
+		
+			}
 		}
+			prevTime = time;
+			const delta = clock.getDelta();
+			if (stats) {
+				stats.update();
+			}
 
+			if (agents.length) {
+				agents.forEach(a =>
+					a.update(delta));
+			}
+					
+			if (physicsIsReady && worldIsReady) {
+				
+				world.step();//!!!
+				
+
+				dynamicBodies.forEach(b => 
+					b.update());
+			
+				kinematicBodies.forEach(c => 
+					c.update());
+
+			}
+			if (rapierDebugRenderer && showDebug) {
+				rapierDebugRenderer.update();
+			}
+
+			if (doPostProcessing) {
+				postProcessing.render();
+			} else {
+				renderer.render(scene, camera);
+			}
+		} //isReady
 
 		// water.material.uniforms['time'].value += 1 / 60;
 	}
@@ -564,7 +729,7 @@
 	window.addEventListener('mousemove', onMouseMove);
 
 	function onMouseMove(e) {
-		if (mouse && camera && raycaster) {
+		if (scene && mouse && camera && raycaster) {
 			mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
 			mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
@@ -632,6 +797,69 @@
 			}
 		}
 	}
+					
+	       const onKeyDown = function ( event ) {
+			console.log("keydown " + event.code);
+            switch ( event.code ) {
+
+                case 'ArrowUp':
+                case 'KeyW':
+                    moveForward = true;
+                    break;
+
+                case 'ArrowLeft':
+                case 'KeyA':
+                    moveLeft = true;
+                    break;
+
+                case 'ArrowDown':
+                case 'KeyS':
+                    moveBackward = true;
+                    break;
+
+                case 'ArrowRight':
+                case 'KeyD':
+                    moveRight = true;
+                    break;
+
+                case 'Space':
+                    if ( canJump === true ) velocity.y += 350;
+                    canJump = false;
+                    break;
+
+            }
+
+        };
+
+        const onKeyUp = function ( event ) {
+			console.log("keyup " + event.code);	
+            switch ( event.code ) {
+
+                case 'ArrowUp':
+                case 'KeyW':
+                    moveForward = false;
+                    break;
+
+                case 'ArrowLeft':
+                case 'KeyA':
+                    moveLeft = false;
+                    break;
+
+                case 'ArrowDown':
+                case 'KeyS':
+                    moveBackward = false;
+                    break;
+
+                case 'ArrowRight':
+                case 'KeyD':
+                    moveRight = false;
+                    break;
+
+            }
+
+        };
+
+
 
 
 // billboard tsl

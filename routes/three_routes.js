@@ -3034,6 +3034,8 @@ three_router.get('/:_id', function (req, res) {
                         settings.sceneVideoStreams = sceneResponse.sceneVideoStreamUrls;
                         settings.socketHost = process.env.SOCKET_HOST;
                         settings.networking = sceneResponse.sceneNetworking;
+                        settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
+                        settings.playerHeight = sceneResponse.scenePlayer.playerHeight
                         // settings.playerStartPosition = playerPosition;
 
                         if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
@@ -3253,7 +3255,19 @@ three_router.get('/:_id', function (req, res) {
 
                                 videoEl+
                                 videoElements+
-
+                                
+                                "<div id=\x22blocker\x22>" +
+                                            "<div id=\x22instructions\x22>" +
+                                                "<p style=\x22font-size:36px\x22>" +
+                                                    "Click to play" +
+                                                "</p>" +
+                                                "<p>" +
+                                                    "Move: WASD<br/>" +
+                                                    "Jump: SPACE<br/>" +
+                                                    "Look: MOUSE" +
+                                                "</p>" +
+                                            "</div>" +
+                                       "</div>" +
                                 
                         "</body>\n" +
                     

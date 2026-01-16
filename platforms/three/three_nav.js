@@ -97,7 +97,7 @@
 
     export async function InitPathfinding () {
         // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh") && navmesh) {
- 
+        console.log("tryna InitPathfinding");
         if (navmesh) {
             try {
                 pathfinding = await new Pathfinding();
@@ -110,7 +110,7 @@
                 // Define a zone name
                 pathfinding.setZoneData(ZONE, Pathfinding.createZone(navmesh.geometry));
 
-                console.log("looking for navmesh " + navmesh);
+                console.log("gotsa navmesh " + navmesh);
 
 
             } catch (e) {
@@ -129,7 +129,21 @@
 
     }
 
+    export function closestNavmeshPoint (testPosition) {
+        // console.log("testing " + (JSON.stringify(testPosition)) + " " + navmesh + " " + pathfinding);
+        if (navmesh && pathfinding) {
+            const goodSpot = pathfinding.getClosestNode(testPosition, ZONE, groupID, false);
+            console.log("tryna get testPosition " + JSON.stringify(testPosition) +  " vs goodSpot " + JSON.stringify(goodSpot.centroid));
+            return goodSpot.centroid; 
+        } else {
+            if (navmesh && !pathfinding) { 
+                // InitPathfinding();
+                console.log("pathfinding not found!");
+            }
+            return null;
 
+        }
+    }
 
     export function randomNavmeshPoint () {
         

@@ -132,7 +132,7 @@
         if (type == null) {
             $("#topPage").show();
             $("#pageTitle").html("");
-            showDashBoid();
+            // showDashBoid();
         } else {
             $("#topPage").hide();
         }
