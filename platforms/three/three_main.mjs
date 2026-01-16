@@ -46,7 +46,8 @@
 	let locationData;
 	let modelsData;
 	let raycastHitAgent;
-	let raycaster, downcaster, stats;
+	let mousecaster = new THREE.Raycaster();
+	let downcaster, stats;
 	// let mixer, objects;
 	export let water;// waterLayer0, waterLayer1;
 	export let clock;
@@ -76,6 +77,7 @@
 	let moveRight = false;
 	let canJump = false;
 
+	let playerPosition;
 	let playerSpeed = 5;
 	let prevTime = performance.now();
 	const velocity = new THREE.Vector3();
@@ -110,6 +112,7 @@
 		scene = new THREE.Scene();
 		// if (settings && settings.sceneCameraMode) {
 		// 	cameraMode = settings.sceneCameraMode;
+
 			if (cameraMode == "Orbit") {
 											camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
 					camera.position.set( 10, 50, 10 );
@@ -163,8 +166,8 @@
 				// controls.update();
 				isReady = true;
 
-				document.addEventListener( 'keydown', onKeyDown );
-					document.addEventListener( 'keyup', onKeyUp );
+				// document.addEventListener( 'keydown', onKeyDown );
+				// 	document.addEventListener( 'keyup', onKeyUp );
 
 			}
 		// }
@@ -311,6 +314,10 @@
 							if (locationData[i].markerType == "surface") {
 								createDefaultSurface();
 							}
+							if (locationData[i].markerType == "player") {
+								console.log("playerposition " + JSON.stringify(locationData[i]));
+								playerPosition = locationData[i];
+							}
 
 
 							
@@ -373,7 +380,12 @@
 			}
 			if (cameraMode == "Orbit") {
 
+			} else {
+				if (playerPosition && controls.object) {
+					// camera.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
+				}
 			}
+			initEvents();
 
 		}
 
@@ -579,10 +591,10 @@
 		// // const loader = new RGBELoader() ;
 
 
-		window.addEventListener( 'resize', onWindowResize );
 
 
-		raycaster = new THREE.Raycaster();
+
+
 
 
 	} //end init!
@@ -717,86 +729,8 @@
 
 ////////// global events	
 
+	function initEvents () {
 
-	function onWindowResize() {
-
-		camera.aspect = window.innerWidth / window.innerHeight;
-		camera.updateProjectionMatrix();
-
-		renderer.setSize( window.innerWidth, window.innerHeight );
-
-	}
-	window.addEventListener('mousemove', onMouseMove);
-
-	function onMouseMove(e) {
-		if (scene && mouse && camera && raycaster) {
-			mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-			mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-			raycaster.setFromCamera(mouse, camera);
-
-			var raycastHits = raycaster.intersectObjects(scene.children, true);
-			let selectColor = new THREE.Color(0xff3333);
-			let stopColor = new THREE.Color(0x26de57);
-			let goColor = new THREE.Color(0xff0000);
-			if (raycastHits.length > 0) {
-			// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
-			// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
-				if (raycastHits[0].object.name.includes("agent")) {
-					
-					if ( raycastHitAgent != raycastHits[ 0 ].object ) {
-						console.log ("new raycast hit on agent " + raycastHits[0].object.name);
-						raycastHitAgent = raycastHits[ 0 ].object;	
-
-							if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
-						
-								console.log("intersected material found!");
-								raycastHitAgent.material.materialColor = goColor;
-
-								
-							} else if (raycastHitAgent && raycastHitAgent.material) {
-								raycastHitAgent.material.color = goColor;
-							
-							}
-							const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
-							if (navAgentInstance) {
-								navAgentInstance.agentRaycastHit();
-							}
-							
-							
-					} else {
-						// console.log("rehit agent " + raycastHits[0].object.name));
-					}
-				} else {
-					if ( raycastHitAgent ) {
-						if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-							// console.log("tryna reset agent colornode after no hit");
-							raycastHitAgent.material.materialColor = stopColor;
-							raycastHitAgent.material.needsUpdate = true;
-							
-						} else if (raycastHitAgent.material) {
-							// console.log("tryna reset agent color after no hit");
-							raycastHitAgent.material.color = stopColor;
-						}
-					}
-					raycastHitAgent = null;
-				}
-			} else {
-				if ( raycastHitAgent ) {
-				// 	{
-					if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-						// console.log("tryna reset agent color after no hit");
-						raycastHitAgent.material.materialColor = stopColor;
-						raycastHitAgent.material.needsUpdate = true;
-					} else if (raycastHitAgent.material) {
-						// console.log("tryna reset agent color after no hit");
-						raycastHitAgent.material.color = stopColor;
-					}
-				}
-				raycastHitAgent = null;
-			}
-		}
-	}
 					
 	       const onKeyDown = function ( event ) {
 			console.log("keydown " + event.code);
@@ -859,8 +793,94 @@
 
         };
 
+		document.addEventListener( 'keydown', onKeyDown );
+		document.addEventListener( 'keyup', onKeyUp );
+
+	} //end init events
+
+		// window.addEventListener('mousemove', onMouseMove);
+		window.addEventListener( 'resize', onWindowResize );
 
 
+	function onWindowResize() {
+
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+
+		renderer.setSize( window.innerWidth, window.innerHeight );
+
+	}
+
+
+	function onMouseMove(e) {
+		if (scene && mouse && camera && mousecaster && isReady) {
+			mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+			mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+			mousecaster.setFromCamera(mouse, camera);
+
+			var raycastHits = mousecaster.intersectObjects(scene.children, true);
+			let selectColor = new THREE.Color(0xff3333);
+			let stopColor = new THREE.Color(0x26de57);
+			let goColor = new THREE.Color(0xff0000);
+			if (raycastHits.length > 0) {
+			// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
+			// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+				if (raycastHits[0].object.name.includes("agent")) {
+					
+					if ( raycastHitAgent != raycastHits[ 0 ].object ) {
+						console.log ("new raycast hit on agent " + raycastHits[0].object.name);
+						raycastHitAgent = raycastHits[ 0 ].object;	
+
+							if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
+						
+								console.log("intersected material found!");
+								raycastHitAgent.material.materialColor = goColor;
+
+								
+							} else if (raycastHitAgent && raycastHitAgent.material) {
+								raycastHitAgent.material.color = goColor;
+							
+							}
+							const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
+							if (navAgentInstance) {
+								navAgentInstance.agentRaycastHit();
+							}
+							
+							
+					} else {
+						// console.log("rehit agent " + raycastHits[0].object.name));
+					}
+				} else {
+					if ( raycastHitAgent ) {
+						if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+							// console.log("tryna reset agent colornode after no hit");
+							raycastHitAgent.material.materialColor = stopColor;
+							raycastHitAgent.material.needsUpdate = true;
+							
+						} else if (raycastHitAgent.material) {
+							// console.log("tryna reset agent color after no hit");
+							raycastHitAgent.material.color = stopColor;
+						}
+					}
+					raycastHitAgent = null;
+				}
+			} else {
+				if ( raycastHitAgent ) {
+				// 	{
+					if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+						// console.log("tryna reset agent color after no hit");
+						raycastHitAgent.material.materialColor = stopColor;
+						raycastHitAgent.material.needsUpdate = true;
+					} else if (raycastHitAgent.material) {
+						// console.log("tryna reset agent color after no hit");
+						raycastHitAgent.material.color = stopColor;
+					}
+				}
+				raycastHitAgent = null;
+			}
+		}
+	}
 
 // billboard tsl
 // 	material.positionNode = material.positionNode = tsl.Fn(() => {
