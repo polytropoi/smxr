@@ -37,7 +37,7 @@ export function InitFog() {
         console.log("doin some fog...");
         const fogColor = settings.sceneColor1; // Sky blue
         // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
-        scene.fog = new THREE.Fog(fogColor, 10, 500);
+        scene.fog = new THREE.Fog(fogColor, 10, 400);
 		// scene.fog = new THREE.FogExp2( fogColor, 0.01 );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
     }

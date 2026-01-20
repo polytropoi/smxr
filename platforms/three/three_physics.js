@@ -141,7 +141,7 @@ function WaitAndInit () {
   // eventQueue = new RAPIER.EventQueue(true);
   physicsIsReady = true;
   worldIsReady = true;
-  togglePostProcessing();
+
   initDynamicObjex();
 }
 
@@ -220,12 +220,14 @@ export async function initAtoms () {
   const center = new THREE.Vector3(0,0,0);
   atomCenter.position.set(0,0,0);
   scene.add(atomCenter);
-  const light = new THREE.PointLight( 'yellow', 5, 100 );
+  const light = new THREE.PointLight( 'orange', 100, 100 );
+
   atomCenter.add(light);
+  light.position.set(0,0,0);
 
   try {
-      for (let i = 0; i < atomicParticlesCount; i++) { // go easy
-       
+      for (let i = 0; i < atomicParticlesCount; i++) {
+        //  await new Promise(r => setTimeout(r, 0));
         let particleType = "neutron";
         if (Math.random() > .5) {
           particleType = "proton";
@@ -270,19 +272,19 @@ async function getAtomicBody(atomCenter, particleType) {
   world.createCollider(colliderDesc, rigidbody);
 
   console.log("tryna cook a particle " + particleType);
-  let material = new THREE.MeshPhysicalMaterial({ color: 'blue', transparent: true, opacity: .95 });
+  let material = new THREE.MeshPhysicalMaterial({ color: 'green', transparent: true, opacity: .75 });
   if (particleType == "proton") {
-    material = new THREE.MeshPhysicalMaterial({ color: 'red', transparent: true, opacity: .95 });
+    material = new THREE.MeshPhysicalMaterial({ color: 'red', transparent: true, opacity: .75 });
   } 
-      material.roughness = 0.05;
+      material.roughness = 0.5;
       material.metalness = 0.15;
       material.envMap = scene.environment;
       material.envMapIntensity = 2;
       material.emissive = 'green';
       material.emissiveIntensity = 2;
       material.transmission = .5;
-      material.thickness = .5;
-      material.reflectivity = .6;
+      material.thickness = 1.5;
+      material.reflectivity = .9;
   const mesh = new THREE.Mesh(geometry, material);
   mesh.scale.setScalar(size);
 
@@ -424,7 +426,7 @@ export async function getDynamicBody(model, position, scale) {
           let q = rigidbody.rotation();
           let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
           mesh.rotation.setFromQuaternion(rote);
-          if (position.y < -10) {
+          if (position.y < -100) {
               rigidbody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
               rigidbody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
               rigidbody.setTranslation({ x: x, y: 10.0, z: z });

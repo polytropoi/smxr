@@ -84,11 +84,12 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             if (position.y < waterLevel)  {
                 // await sampler.sample(position);
                 position.y = -100;
+                // continue;
             }
             // position.y = position.y + yMod;
                 // console.log("mesh position " + position.y);
                 const ypos = parseFloat(position.y) + parseFloat(yMod);
-                console.log("mesh y position " + position.y + " mod " + ypos);
+                // console.log("mesh y position " + position.y + " mod " + ypos);
             dummy.position.set(position.x, ypos, position.z);
             // console.log("instance positon " + JSON.stringify(position));
             // Optional: Add some random rotation

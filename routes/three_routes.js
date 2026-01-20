@@ -3021,6 +3021,7 @@ three_router.get('/:_id', function (req, res) {
                         settings.backgroundURL = backgroundURL;
                         settings.backgroundIsTileable = backgroundIsTileable;
                         settings.primary_mp3url = primary_mp3url;
+                        settings.sceneUseDynamicSky = sceneResponse.sceneUseDynamicSky;
                         // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
                         // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
                         settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
