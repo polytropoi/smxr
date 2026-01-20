@@ -8,6 +8,9 @@
 	
 	import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
 
+
+			import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+
 	import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -28,7 +31,8 @@
 	import { UpdateText } from './three_ui.js';
 
 	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
-		eventQueue, kinematicBodies, worldIsReady, initStaticObjex } from './three_physics.js';
+		eventQueue, kinematicBodies, worldIsReady, initStaticObjex, 
+		initAtoms, atomicBodies} from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -68,7 +72,7 @@
 	let navmeshObjex = [];
 	let surfaceObjex = [];
 
-	let cameraMode = "First Person";
+	let cameraMode = "Orbit";
 
 	let groundObjex = [];
 	let moveForward = false;
@@ -110,8 +114,17 @@
 
 		// initRapier();
 		scene = new THREE.Scene();
+		renderer = new THREE.WebGPURenderer({antialias: true});
+		renderer.setPixelRatio( window.devicePixelRatio );
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		renderer.setAnimationLoop( animate );
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Recommended for better quality
+
+		// renderer.inspector = new Inspector();
+		document.body.appendChild( renderer.domElement );
 		// if (settings && settings.sceneCameraMode) {
-		// 	cameraMode = settings.sceneCameraMode;
+			cameraMode = settings.sceneCameraMode;
 
 			if (cameraMode == "Orbit") {
 											camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
@@ -127,6 +140,11 @@
 				controls.update();
 				isReady = true;
 
+
+				const blocker = document.getElementById( 'blocker' );
+				const instructions = document.getElementById( 'instructions' );
+				blocker.style.display = "none";
+				instructions.style.display = "none";
 				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
 				// camera.position.set( 10, 50, 10 );
 				// camera.lookAt( 0, 1, 0 );
@@ -172,12 +190,14 @@
 			}
 		// }
 			
-
-
-		await initRapier();
-		// UpdateText("HERE WE GO!");
+		if (settings && settings.sceneTags && settings.sceneTags.includes("no gravity") ) {
+			const gravity = {x:0, y:0, z:0};
+			await initRapier(gravity); 
+		} else {
+			const gravity = {x:0, y:-9.81, z:0}; //"earthlike"
+			await initRapier(gravity); //gravityMode
+		}
 		
-
 		let modelsDataEl = document.getElementById('modelsData');
 		if (modelsDataEl) {
 			const theModelsData = modelsDataEl.getAttribute('data-models');
@@ -379,14 +399,20 @@
 				
 			}
 			if (cameraMode == "Orbit") {
-
+				// if (settings && settings.sceneTags && settings.sceneTags.includes("atoms")) {
+					
+				// }
 			} else {
 				if (playerPosition && controls.object) {
 					// camera.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
 				}
 			}
-			initEvents();
 
+			if (settings && settings.sceneTags.includes("atoms")) {
+				initAtoms();
+			}
+
+			initEvents();
 		}
 
 		function createDefaultNavmesh() {
@@ -403,7 +429,6 @@
 					
 					scene.add(navmeshObject);
 		}
-
 
 		console.log("settings " + JSON.stringify(settings));
 
@@ -431,8 +456,8 @@
 		sunLight.shadow.bias = - 0.001;
 		sunLight.position.set( 1, 3, 1 );
 
-		const waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, 5 );
-		const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, 0, 1 );
+		const waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, 1 );
+		const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, 0, 2 );
 
 		scene.add( sunLight );
 		scene.add( skyAmbientLight );
@@ -483,71 +508,7 @@
 
 			// }
 		}
-		// objects
-
-	
-
-				
-
-		// renderer
-
-		renderer = new THREE.WebGPURenderer({antialias: true});
-		renderer.setPixelRatio( window.devicePixelRatio );
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		renderer.setAnimationLoop( animate );
-		renderer.shadowMap.enabled = true;
-		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Recommended for better quality
-
-		// renderer.inspector = new Inspector();
-		document.body.appendChild( renderer.domElement );
-
-		if (cameraMode == "Orbit") {
-			// 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
-			// 	camera.position.set( 10, 50, 10 );
-			// 	camera.lookAt( 0, 1, 0 );
-			// controls = new OrbitControls( camera, renderer.domElement );
-			// controls.minDistance = 1;
-			// controls.maxDistance = 300;
-			// controls.maxPolarAngle = Math.PI * 0.75;
-			// // controls.autoRotate = true;
-			// // controls.autoRotateSpeed = 1;
-			// controls.target.set( 0, .2, 0 );
-			// controls.update();
-			// isReady = true;
-		} else {
-			// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
- 			// controls = new PointerLockControls( camera, document.body ); //use regular fp controls if has navmesh
-			// downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 200 );
-
-			// controls.pointerSpeed = .25;
-
-			// const blocker = document.getElementById( 'blocker' );
-			// const instructions = document.getElementById( 'instructions' );
-
-			// instructions.addEventListener( 'click', function () {
-
-			// 	controls.lock();
-
-			// } );
-
-			// controls.addEventListener( 'lock', function () {
-
-			// 	instructions.style.display = 'none';
-			// 	blocker.style.display = 'none';
-
-			// } );
-
-			// controls.addEventListener( 'unlock', function () {
-
-			// 	blocker.style.display = 'block';
-			// 	instructions.style.display = '';
-
-			// } );
-
-			// scene.add( controls.object );
-			// controls.update();
-			// isReady = true;
-		}
+		
 
 		InitEnvMap();
 		InitSky();
@@ -560,8 +521,10 @@
 
 		const scenePass = pass( scene, camera );
 		const scenePassColor = scenePass.getTextureNode();
-		const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
 		
+		const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+		const bloomPass = bloom( scenePassColor );
+		// scenePassColor.add( bloomPass );
 		if (water) {
 			const waterLevel = parseFloat(settings.sceneWater.level);
 			// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
@@ -571,7 +534,9 @@
 			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
 			postProcessing = new THREE.PostProcessing( renderer );
-			postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+			// postProcessing.outputNode = scenePassColor.add( bloomPass );
+			postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) ).add( bloomPass );
+			// postProcessing.outputNode = scenePassColor.add( bloomPass );
 		} else {
 			const waterMask = objectPosition( camera ).y.greaterThan( -10 );
 			const scenePassColorBlurred = gaussianBlur( scenePassColor );
@@ -579,7 +544,9 @@
 			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
 			postProcessing = new THREE.PostProcessing( renderer );
-			postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) );
+			// postProcessing.outputNode = scenePassColor.add( bloomPass );
+			postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor1 ) ).mul( vignette ) ).add( bloomPass );
+			// postProcessing.outputNode = scenePassColor.add( bloomPass );
 		}
 		
 
@@ -608,7 +575,7 @@
 ////////////// MAIN LOOP FOR ALL THE THINGS ////////////////
 	function animate() {
 		const time = performance.now();
-	if (isReady) {
+	if (clock && isReady) {
 		if (settings && controls && cameraMode == "Orbit") {
 			controls.update();
 		} else {
@@ -686,22 +653,25 @@
 				agents.forEach(a =>
 					a.update(delta));
 			}
-					
+			if (rapierDebugRenderer && showDebug) {
+				rapierDebugRenderer.update();
+			}		
 			if (physicsIsReady && worldIsReady) {
 				
-				world.step();//!!!
 				
+				
+				atomicBodies.forEach(b => 
+					b.update());
 
 				dynamicBodies.forEach(b => 
 					b.update());
 			
 				kinematicBodies.forEach(c => 
 					c.update());
+					world.step();//!!!
 
 			}
-			if (rapierDebugRenderer && showDebug) {
-				rapierDebugRenderer.update();
-			}
+
 
 			if (doPostProcessing) {
 				postProcessing.render();

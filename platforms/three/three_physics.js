@@ -20,16 +20,25 @@ export let physicsIsReady = false;
 export let worldIsReady = false;
 // export let kinematicBodies = [];
 export let dynamicBodies = [];
+export let atomicBodies = [];
 export let staticBodies = [];
 export let kinematicBodies = [];
 
 export const agentCount = 10;
 const dynamicObjectCount = 20;
 
+let atomicParticlesCount = 300;
+  const sceneMiddle = new THREE.Vector3(2, 0, 0);
 
-export async function initRapier () {
+export async function initRapier (gravity) {
+    console.log("tryna init rapier physics " + gravity);
 		await RAPIER.init();	
-		gravity = { x: 0.0, y: -9.81, z: 0.0 };
+    // if (!gravityMode) {
+		//   gravity = { x: 0.0, y: -9.81, z: 0.0 };
+    // } else {
+      
+    //   gravity = { x: 0.0, y: 0, z: 0.0 };
+    // }
 		world = await new RAPIER.World(gravity);
 
     // setTimeout( () => {
@@ -43,6 +52,7 @@ export async function initRapier () {
 
 
 import { getRainbowMaterial } from './tsl/rainbow.js'
+import { DotNoiseMaterial } from './tsl/tsl_materials.js';
 
 export let rapierDebugRenderer;
 
@@ -202,17 +212,172 @@ function WaitAndInit () {
     console.log("error creating dynamic rigidbody " + e);
   }
 }
-export async function getDynamicBody(model, position) {
+
+
+export async function initAtoms () {
+  console.log("tryna init atoms");
+  const atomCenter = new THREE.Object3D();
+  const center = new THREE.Vector3(0,0,0);
+  atomCenter.position.set(0,0,0);
+  scene.add(atomCenter);
+  const light = new THREE.PointLight( 'yellow', 5, 100 );
+  atomCenter.add(light);
+
+  try {
+      for (let i = 0; i < atomicParticlesCount; i++) { // go easy
+       
+        let particleType = "neutron";
+        if (Math.random() > .5) {
+          particleType = "proton";
+        }
+        const body = await getAtomicBody(atomCenter, particleType); //spawns a mesh too
+        
+			  atomicBodies.push(body);
+        
+      }
+    } catch (e) { 
+      console.error("error init atoms " + e);
+    } finally {
+      physicsIsReady = true;
+      worldIsReady = true;
+    }
+} 
+
+
+
+
+
+async function getAtomicBody(atomCenter, particleType) {
+
+  const size = 1;
+  const range = 10;
+  const density = size * .01;
+  const geometry = new THREE.SphereGeometry( 1, 16, 8 );
+
+  let x = Math.random() * range - range;
+  let y = Math.random() * range - range;
+  let z = Math.random() * range - range;
+  // physics
+  let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+  .setLinearDamping(2.0)
+    .setAngularDamping(4.0)
+    .setTranslation(x, y, z, false)
+    .setCcdEnabled(true);
+  let rigidbody = await world.createRigidBody(rigidBodyDesc);
+  // rigid.setGravityScale(16.0, true);
+  let points = geometry.attributes.position.array;
+  let colliderDesc = await RAPIER.ColliderDesc.convexHull(points).setDensity(density);
+  world.createCollider(colliderDesc, rigidbody);
+
+  console.log("tryna cook a particle " + particleType);
+  let material = new THREE.MeshPhysicalMaterial({ color: 'blue', transparent: true, opacity: .95 });
+  if (particleType == "proton") {
+    material = new THREE.MeshPhysicalMaterial({ color: 'red', transparent: true, opacity: .95 });
+  } 
+      material.roughness = 0.05;
+      material.metalness = 0.15;
+      material.envMap = scene.environment;
+      material.envMapIntensity = 2;
+      material.emissive = 'green';
+      material.emissiveIntensity = 2;
+      material.transmission = .5;
+      material.thickness = .5;
+      material.reflectivity = .6;
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.scale.setScalar(size);
+
+  // atomicBodies.push(rigidbody);
+
+  // if (atomicBodies.length == 1) {
+  //   scene.add(mesh);
+  // } else {
+  //   atomicBodies[0].add(mesh);
+  // }
+  atomCenter.add(mesh);
+  // scene.add(mesh);
+  let enabled = true;
+  let distance;
+
+
+
+  // const wireMat = new LineMaterial({
+  //   color: 0x000000,
+  //   linewidth: 7, // in pixels
+  // });
+
+  // const wireGeo = new WireframeGeometry2(geometry);
+  // const wireframe = new Wireframe(wireGeo, wireMat);
+  // wireframe.computeLineDistances();
+  // wireframe.scale.set(1, 1, 1);
+  // mesh.add(wireframe);
+
+  function update() {
+    // if (enabled) {
+    if (rigidbody.isMoving) {
+    rigidbody.resetForces(true);
+    let { x, y, z } = rigidbody.translation(true);
+    let pos = new THREE.Vector3(x, y, z);
+    distance = pos.clone().distanceTo(atomCenter.position.clone());
+    // if (distance > 1) {
+      let dir = pos.clone().sub(atomCenter.position.clone()).normalize();
+
+      let q = rigidbody.rotation();
+      let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+      mesh.rotation.setFromQuaternion(rote);
+
+      
+      rigidbody.addForce(dir.multiplyScalar(distance * -.1), false);
+      mesh.position.set(x, y, z);
+    }
+    // }
+    // if (distance < 1) {
+    //   enabled = false;
+    // }
+      
+    // }
+  }
+  return { mesh, rigidbody, update };
+}
+
+
+export async function initDynamicObjex () {
+
+  try {
+    for (let i = 0; i < dynamicObjectCount; i++) { // go easy
+      // 
+      // await initTestObjex(i);
+        await new Promise(r => setTimeout(r, 0));
+      const body = await getDynamicBody(); //spawns a mesh too
+      
+      dynamicBodies.push(body);
+      
+    }
+  } catch (e) { 
+    console.log("error init dynamic objex " + e);
+  } finally {
+    await new Promise(r => setTimeout(r, 4000));
+    // worldIsReady = true;
+    await getKinematicAgentBodies();
+  }
+
+}
+
+export async function getDynamicBody(model, position, scale) {
 
     try {
 
       // console.log("tryna create dynamic rigidbody from model " + model );
       await new Promise(r => setTimeout(r, 0));
-      const geometry = new THREE.SphereGeometry( 1, 32, 16 );
+      let size = 2;
+      if (scale) {
+        size = scale;
+      }
+      const geometry = new THREE.SphereGeometry( size / 2, 32, 16 );
     //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
-      const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
+      // const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
 
-		// const material = getRainbowMaterial();
+		const material = getRainbowMaterial();
+      // const material = DotNoiseMaterial()
       material.roughness = 0.25;
       material.metalness = 0.5;
       material.envMap = scene.environment;
@@ -221,7 +386,7 @@ export async function getDynamicBody(model, position) {
 
 			const mesh = new THREE.Mesh( geometry, material );
       
-      const size = 2;
+
       const colliderSize = size;// * 1.25;
       const range = 30;
       // const density = size  * .5;
@@ -274,27 +439,7 @@ export async function getDynamicBody(model, position) {
   }
 
 
-  export async function initDynamicObjex () {
 
-    try {
-      for (let i = 0; i < dynamicObjectCount; i++) { // go easy
-        // 
-        // await initTestObjex(i);
-         await new Promise(r => setTimeout(r, 0));
-        const body = await getDynamicBody(); //spawns a mesh too
-       
-			  dynamicBodies.push(body);
-        
-      }
-    } catch (e) { 
-      console.log("error init dynamic objex " + e);
-    } finally {
-      await new Promise(r => setTimeout(r, 4000));
-      // worldIsReady = true;
-      await getKinematicAgentBodies();
-    }
-
-  }
 
 
     function getMouseBall (RAPIER, world) {
