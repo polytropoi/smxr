@@ -202,7 +202,7 @@ aframe_router.get('/:_id', function (req, res) {
     let weblinkEntities = "";
     let shaderScripts = "";
     // var gltfItems = [];
-    var bucketFolder = "eloquentnoise.com";
+    var bucketFolder = "elnoise.smxr.net";
     var playerPosition = "0 1.6 0";
     let playerPositions = [];
     var playerRotation = "0 0 0";
@@ -479,7 +479,8 @@ aframe_router.get('/:_id', function (req, res) {
                         
                         "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
                         "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                        "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
+                        "\x22troika-text\x22: \x22../platforms/aframe/aframe-troika-text.js\x22,"+
+                        // "\x22troika-text\x22: \x22https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js\x22,"+
                         // "\x22aframe-physics-system\x22: \x22../main/vendor/aframe/aframe-physics-system.min.js\x22,"+ 
                         // "\x22Ammo\x22: \x22https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.wasm.js\x22,"+ 
                         
@@ -851,10 +852,10 @@ aframe_router.get('/:_id', function (req, res) {
                             locationPlaceholders.push(tLoc);
                         }
                     }
-                    if (sceneResponse.sceneLocations[i].markerType == "3D text") { //unused
-                        threeDeeTextComponent = "<script src=\x22../platforms/aframe/aframe-text-geometry-component.min.js\x22></script>"; //TODO - these must all be arrays, like sceneModelLocations above!
-                        externalAssets = externalAssets + "<a-asset-item id=\x22optimerBoldFont\x22 src=\x22https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json\x22></a-asset-item>";
-                    }
+                    // if (sceneResponse.sceneLocations[i].markerType == "3D text") { //unused
+                    //     threeDeeTextComponent = "<script src=\x22../platforms/aframe/aframe-text-geometry-component.min.js\x22></script>"; //TODO - these must all be arrays, like sceneModelLocations above!
+                    //     externalAssets = externalAssets + "<a-asset-item id=\x22optimerBoldFont\x22 src=\x22https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json\x22></a-asset-item>";
+                    // }
                     if (sceneResponse.sceneLocations[i].markerType == "player") {
                         playerPosition = sceneResponse.sceneLocations[i].x + " " +  sceneResponse.sceneLocations[i].y + " " +  sceneResponse.sceneLocations[i].z;
                         if (sceneResponse.sceneLocations[i].eulerx && sceneResponse.sceneLocations[i].eulery && sceneResponse.sceneLocations[i].eulerz) {

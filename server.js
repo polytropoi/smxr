@@ -61,7 +61,7 @@ var adminEmail = process.env.ADMIN_EMAIL;
 var domainAdminEmail = process.env.DOMAIN_ADMIN_EMAIL;
 
 var whitelist = ['unityapp', 'http://smxr.net', 'https://smxr.net', 'https://servicemedia.s3.amazonaws.com/', 'http://localhost:3000', 'https://servicemedia.net', 'strr.us.s3.amazonaws.com', 'mvmv.us.s3.amazonaws.com', 'http://strr.us', 'https://strr.us',
- 'https://strr.us/socket.io', 'http://valuebring.com', 'http://elnoise.com', 'philosophersgarden.com', 'http://elnoise.com', 'http://eloquentnoise.com', 'http://thefamilyshare.com', 'http://little-red-schoolhouse.com', 
+ 'https://strr.us/socket.io', 'http://valuebring.com', 'http://elnoise.com', 'philosophersgarden.com', 'http://elnoise.com', 'https://elnoise.smxr.net', 'http://thefamilyshare.com', 'http://little-red-schoolhouse.com', 
  'http://visiblecity.net', 'http://philosophersgarden.net', 'https://realitymangler.com', 'http://regalrooms.tv', 'https://mvmv.us', 'http://mvmv.us', 
  'http://nilch.com', 'https://servicemedia.net', 'http://kork.us', 'http://spacetimerailroad.com'];
 

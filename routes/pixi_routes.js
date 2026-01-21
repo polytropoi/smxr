@@ -194,7 +194,7 @@ pixi_router.get('/:_id', function (req, res) {
     let weblinkEntities = "";
     let shaderScripts = "";
     // var gltfItems = [];
-    var bucketFolder = "eloquentnoise.com";
+    var bucketFolder = "elnoise.smxr.net";
     var playerPosition = "0 1.6 0";
     let playerPositions = [];
     var playerRotation = "0 0 0";
@@ -741,10 +741,10 @@ pixi_router.get('/:_id', function (req, res) {
                             locationPlaceholders.push(tLoc);
                         }
                     }
-                    if (sceneResponse.sceneLocations[i].markerType == "3D text") { //unused
-                        threeDeeTextComponent = "<script src=\x22../main/src/component/aframe-text-geometry-component.min.js\x22></script>"; //TODO - these must all be arrays, like sceneModelLocations above!
-                        externalAssets = externalAssets + "<a-asset-item id=\x22optimerBoldFont\x22 src=\x22https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json\x22></a-asset-item>";
-                    }
+                    // if (sceneResponse.sceneLocations[i].markerType == "3D text") { //unused
+                    //     threeDeeTextComponent = "<script src=\x22../main/src/component/aframe-text-geometry-component.min.js\x22></script>"; //TODO - these must all be arrays, like sceneModelLocations above!
+                    //     externalAssets = externalAssets + "<a-asset-item id=\x22optimerBoldFont\x22 src=\x22https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json\x22></a-asset-item>";
+                    // }
                     if (sceneResponse.sceneLocations[i].markerType == "player") {
                         playerPosition = sceneResponse.sceneLocations[i].x + " " +  sceneResponse.sceneLocations[i].y + " " +  sceneResponse.sceneLocations[i].z;
                         if (sceneResponse.sceneLocations[i].eulerx && sceneResponse.sceneLocations[i].eulery && sceneResponse.sceneLocations[i].eulerz) {
