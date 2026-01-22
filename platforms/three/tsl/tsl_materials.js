@@ -112,7 +112,7 @@ export function returnMaterial (name) {
 
 
 export const DotNoiseMaterial = () => {
-  const materialRef = useRef<MeshBasicNodeMaterial>(null)
+  const materialRef = new THREE.NodeMaterial();
 
   const { scale, speed, steps, color } = useControls({
     scale: { value: 20, min: 5, max: 30, step: 0.1 },
@@ -155,24 +155,24 @@ export const DotNoiseMaterial = () => {
   return materialRef
 }
 
-export function getRainbowMaterial() {
+// export function getRainbowMaterial() {
 
 
-    function fragNode () {
-    const t = time.mul(0.2).fract();
-    const p = positionLocal.x.add(0.3).sub(t);
-    const hue = floor(p.mul(10)).mul(0.1);
-    const sat = hue.mod(1).oneMinus().mul(0.5);
-    //   const alpha = 
-    const col = hsl(hue, 1, sat, 1);
-    return col;
-    }
+//     function fragNode () {
+//     const t = time.mul(0.2).fract();
+//     const p = positionLocal.x.add(0.3).sub(t);
+//     const hue = floor(p.mul(10)).mul(0.1);
+//     const sat = hue.mod(1).oneMinus().mul(0.5);
+//     //   const alpha = 
+//     const col = hsl(hue, 1, sat, 1);
+//     return col;
+//     }
 
 
-    const mat = new THREE.NodeMaterial();
-    mat.transparent = true;
-    mat.roughnessNode = .1;
-    mat.fragmentNode = fragNode();
+//     const mat = new THREE.NodeMaterial();
+//     mat.transparent = true;
+//     mat.roughnessNode = .1;
+//     mat.fragmentNode = fragNode();
 
-  return mat;
-}
+//   return mat;
+// }
