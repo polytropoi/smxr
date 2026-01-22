@@ -58,6 +58,28 @@ export function SplashText (textString) {
 // }
 
 // Root container – add it to the scene; call root.update in your loop
+export function InitReticle () {
+    const material = new THREE.LineBasicMaterial({ color: 0xAAFFAA }); // Green color
+const x = 0.01, y = 0.01; // Adjust size as needed
+
+const geometry = new THREE.BufferGeometry();
+const vertices = new Float32Array([
+    // Vertical line
+    0, y, 0,
+    0, -y, 0,
+    // Center point (optional)
+    // 0, 0, 0,
+    // Horizontal line
+    x, 0, 0,
+    -x, 0, 0
+]);
+geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+// Use THREE.LineSegments for disconnected lines
+const reticle = new THREE.LineSegments(geometry, material); 
+
+return reticle;
+}
 
 export function UpdateText (string) { //uikit, no workie (use vite, they say...)
     const root = new Container({

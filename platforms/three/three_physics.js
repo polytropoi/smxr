@@ -5,7 +5,7 @@ import RAPIER from 'rapier';
 
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-import { scene, togglePostProcessing, water, staticObjex } from './three_main.mjs';
+import { scene, togglePostProcessing, water, staticObjex, activeObjex } from './three_main.mjs';
 import { agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
 // import {scene, world} from './three_main.mjs'
 
@@ -194,6 +194,7 @@ function WaitAndInit () {
       let collider = await world.createCollider(kinematicCollider, rigidbody);
       collider.setRestitution(1.5);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      activeObjex.push(mesh);
 
     function update () {
 
