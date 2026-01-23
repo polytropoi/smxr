@@ -5,13 +5,40 @@
 // import * as THREE from 'three';
 // import { Container } from '@pmndrs/uikit'
 import * as THREE from 'three';
+import { Text } from 'three-text/three';
 
+
+// import { createRequire } from 'module';
+// const require = createRequire(import.meta.url);
+// const { Text } = require('three-text/three');
+
+import {scene, camera, renderer, navmesh} from './three_main.mjs';
+
+// import * as THREE from 'three';
+Text.setHarfBuzzPath('/fonts/hb.wasm');
+
+export async function NewGeoText (textString) {
+
+const result = await Text.create({
+  text: textString,
+  font: '../../fonts/web/Acme.woff',
+  depth: .1,
+  size: 6
+});
+
+console.log("gotsa text result " + result.text);
+const material = new THREE.MeshBasicMaterial({ color: 'hotpink', transparent: true, opacity: .5 });
+const mesh = new THREE.Mesh(result.geometry, material);
+scene.add(mesh);
+mesh.position.set(0, 0, -10);
+
+}
 // import { Container, Text } from "@pmndrs/uikit";
 
 
 // import ThreeMeshUI from 'three-mesh-ui';
 
-import {scene, camera, renderer, navmesh} from './three_main.mjs';
+
 
 
 export function SplashText (textString) {

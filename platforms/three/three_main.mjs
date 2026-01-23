@@ -28,7 +28,7 @@
 
 	import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
 
-	import { UpdateText, InitReticle } from './three_ui.js';
+	import { UpdateText, InitReticle, NewGeoText } from './three_ui.js';
 
 	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, worldIsReady, initStaticObjex, 
@@ -62,6 +62,7 @@
 	let showDebug = false;
 	let controls;
 	let isReady = false;
+	let mouseIsDown = false;
 
 	let doPostProcessing = false;
 	
@@ -155,7 +156,7 @@
 			} else {
 				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
 					camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
-					camera.position.set(0,0,0);
+					camera.position.set(0,10,0);
 				controls = new PointerLockControls( camera, document.body ); //use regular fp controls if has navmesh
 				downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
 			
@@ -424,23 +425,24 @@
 			if (settings && settings.sceneTags.includes("atoms")) {
 				initAtoms();
 			}
-			 await new Promise(r => setTimeout(r, 2000));
+			 await new Promise(r => setTimeout(r, 2000)); //fudge
 			initEvents();
+			NewGeoText("whoa");
 		}
 
 		function createDefaultNavmesh() {
-				  const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
-				//   planeGeometry.rotation.x = Math.PI / 2 * -1;
-					const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
-					let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
-					
-					// navmeshObject.position.set(0,0,0);
-					// navmeshObject.scale.set(1,1,1);
-					navmeshObject.rotation.x = Math.PI / 2;
-					navmeshObject.updateMatrixWorld();
-					navmesh = navmeshObject;
-					
-					scene.add(navmeshObject);
+			const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
+		//   planeGeometry.rotation.x = Math.PI / 2 * -1;
+			const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+			let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
+			
+			// navmeshObject.position.set(0,0,0);
+			// navmeshObject.scale.set(1,1,1);
+			navmeshObject.rotation.x = Math.PI / 2;
+			navmeshObject.updateMatrixWorld();
+			navmesh = navmeshObject;
+			
+			scene.add(navmeshObject);
 		}
 
 		console.log("settings " + JSON.stringify(settings));
@@ -456,7 +458,7 @@
 		// scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
 
 
-		const sunLight = new THREE.DirectionalLight( settings.sceneColor1, 4 );
+		const sunLight = new THREE.DirectionalLight( settings.sceneColor1, 2 );
 		sunLight.castShadow = true;
 		sunLight.shadow.camera.near = .5;
 		sunLight.shadow.camera.far = 50;
@@ -470,7 +472,7 @@
 		sunLight.position.set( 1, 3, 1 );
 
 		const waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, 1 );
-		const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, 0, 4 );
+		const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, 0, 1 );
 
 		scene.add( sunLight );
 		scene.add( skyAmbientLight );
@@ -789,6 +791,8 @@
 
 		document.addEventListener( 'keydown', onKeyDown );
 		document.addEventListener( 'keyup', onKeyUp );
+		document.addEventListener ('mouseDown', onMouseDown );
+		document.addEventListener ('mouseUp', onMouseUp );
 
 		// window.addEventListener('mousemove', onMouseMove);
 
@@ -810,6 +814,7 @@
 
 			centercaster.setFromCamera( new THREE.Vector2(0,0), camera );  
 			const raycastHits = centercaster.intersectObjects(activeObjex, true);
+			let lastHitObject;
 			let selectColor = new THREE.Color(0xff3333);
 			let stopColor = new THREE.Color(0x26de57);
 			let goColor = new THREE.Color(0xff0000);
@@ -870,6 +875,14 @@
 				raycastHitAgent = null;
 			}
 		}
+	}
+
+	function onMouseDown(e) {
+		mouseIsDown = true;
+	}
+
+	function onMouseUp(e) {
+		mouseIsDown = false;
 	}
 
 

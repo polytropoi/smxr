@@ -334,6 +334,24 @@
             }
         }
         agentRaycastHit () {
+            
+            const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
+
+            if (closestNode) {
+                console.log("agent hit!");
+                // this.readyToNav = !this.readyToNav;    
+                // if (this.readyToNav) {
+                //         this.object.traverse((child) => {
+                //         if (child.isMesh) {
+                //            child.material.color
+                //         }
+                //         });
+                // }
+            } else {
+                console.log("don't interrupt now, cain't find a spot to stop");
+            }
+        }
+        agentClick () {
             const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
 
             if (closestNode) {
@@ -349,6 +367,7 @@
                 console.log("don't interrupt now, cain't find a spot to stop");
             }
         }
+
         resetAgent() {
             const player = this.object;
             this.readyToNav = false;

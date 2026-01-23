@@ -379,6 +379,8 @@ three_router.get('/:_id', function (req, res) {
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
                             "\x22three-pathfinding\x22: \x22/platforms/three/src/three-pathfinding.module.js\x22,"+
                             "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
+                             "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
+                            
                             // "\x22three-mesh-ui\x22: \x22https://unpkg.com/three-mesh-ui@6.4.0/build/three-mesh-ui.module.js\x22,"+
                             // https://unpkg.com/three-mesh-ui@6.4.1/build/three-mesh-ui.js
                             //  "\x22troika-three-text\x22: \x22/platforms/three/troika/three-troika.min.js\x22,"+ //ugh no troika for webgpu yet
@@ -3225,6 +3227,18 @@ three_router.get('/:_id', function (req, res) {
                         // "<body>" +
                                 "<div id=\x22dialog_button\x22><i class=\x22three_dialog_button fas fa-info-circle fa-2x\x22></i></div>"+
                                
+                                "<div id=\x22blocker\x22>" +
+                                            "<div id=\x22instructions\x22>" +
+                                                "<p style=\x22font-size:36px\x22>" +
+                                                    "Click to play" +
+                                                "</p>" +
+                                                "<p>" +
+                                                    "Move: WASD<br/>" +
+                                                    "Jump: SPACE<br/>" +
+                                                    "Look: MOUSE" +
+                                                "</p>" +
+                                            "</div>" +
+                                       "</div>" +
                                 // transportButtons+ 
                                 // dialogButton +
                                 canvasOverlay +
@@ -3257,18 +3271,7 @@ three_router.get('/:_id', function (req, res) {
                                 videoEl+
                                 videoElements+
                                 
-                                "<div id=\x22blocker\x22>" +
-                                            "<div id=\x22instructions\x22>" +
-                                                "<p style=\x22font-size:36px\x22>" +
-                                                    "Click to play" +
-                                                "</p>" +
-                                                "<p>" +
-                                                    "Move: WASD<br/>" +
-                                                    "Jump: SPACE<br/>" +
-                                                    "Look: MOUSE" +
-                                                "</p>" +
-                                            "</div>" +
-                                       "</div>" +
+                                
                                 
                         "</body>\n" +
                     
