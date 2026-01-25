@@ -1,37 +1,99 @@
 //// troika not ready for webgpu yet...
 // import {Text} from 'troika-three-text' 
 
-// import { defineWorkerModule }     from 'troika-worker-utils'; 
-// import * as THREE from 'three';
-// import { Container } from '@pmndrs/uikit'
+
 import * as THREE from 'three';
-import { Text } from 'three-text/three';
-
-
-// import { createRequire } from 'module';
-// const require = createRequire(import.meta.url);
-// const { Text } = require('three-text/three');
+import { Text } from 'three-text/three'; //not troika!
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
+Text.init();
 
 import {scene, camera, renderer, navmesh} from './three_main.mjs';
 
-// import * as THREE from 'three';
-Text.setHarfBuzzPath('/fonts/hb.wasm');
 
-export async function NewGeoText (textString) {
+export let lookAtCameraObjects = [];
 
-const result = await Text.create({
-  text: textString,
-  font: '../../fonts/web/Acme.woff',
-  depth: .1,
-  size: 6
-});
+export async function ThreeText (textString, size, parent) { //
 
-console.log("gotsa text result " + result.text);
-const material = new THREE.MeshBasicMaterial({ color: 'hotpink', transparent: true, opacity: .5 });
-const mesh = new THREE.Mesh(result.geometry, material);
-scene.add(mesh);
-mesh.position.set(0, 0, -10);
+    if (!size) {
+        size = 100;
+    }
+    if (!textString) {
+        textString = "Jello! - My name is Inigo Montoya...";
+    }
+    const stringCount = textString.length;
+    const text = await Text.create({
+        // width: 1,
+        text: textString,
+        font: '../../fonts/web/Bitter.woff',
+        depth: 0.02,
+        // align: 'center',
+        size: size / stringCount ,
+        removeOverlaps: true,
+        layout: {
+            width: 6,
+            align: 'justify'
+        }
+    });
 
+    console.log("gotsa text result " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
+    let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
+          material.roughness = 0.1;
+      material.metalness = 0.3;
+      material.envMap = scene.environment;
+      material.envMapIntensity = 2;
+    const textmesh = new THREE.Mesh(text.geometry, material);
+    const ranges = text.query({
+    byCharRange: [
+        { start: 0, end: 20 },   // First 5 characters
+        // { start: 10, end: 20 }, // Characters 10-20
+    ],
+    });
+    const yscale = (Math.abs(text.planeBounds.min.y) * 1.5) + 1
+    const container = new THREE.Object3D();
+
+    if (parent) { // callout or header, no bg?
+
+        let material = new THREE.MeshPhysicalMaterial({ color: 'white', transparent: true, opacity: .95 });
+        material.roughness = 0.1;
+        material.metalness = 0.3;
+        material.envMap = scene.environment;
+        material.envMapIntensity = 2;
+        const textmesh = new THREE.Mesh(text.geometry, material);
+        container.add(textmesh);
+        parent.add(container);
+
+        // const camPos = camera.position.clone();
+        container.position.set(0,4,0);
+        textmesh.position.set(0,0,0);
+
+    } else {
+
+        let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
+        material.roughness = 0.1;
+        material.metalness = 0.3;
+        material.envMap = scene.environment;
+        material.envMapIntensity = 2;
+        const textmesh = new THREE.Mesh(text.geometry, material);
+        const bggeo = new RoundedBoxGeometry(7,yscale,.2, 7, 90); //add background panel
+        const bgmat = new THREE.MeshPhysicalMaterial({ color: 'white', transparent: true, opacity: .5 });
+        const bgmesh = new THREE.Mesh(bggeo, bgmat);
+
+        container.add(textmesh, bgmesh);
+        scene.add(container);
+            const camPos = camera.position.clone();
+        container.position.set(camPos.x, camPos.y, camPos.z - 3);
+        textmesh.position.set(-3,yscale / 5,.25);
+    }
+    
+
+    lookAtCameraObjects.push(container);
+    //  await new Promise(r => setTimeout(r, 3000));
+    // const updated = await text.update({ text: 'Hwlloo World' });
+    // textmesh.geometry.dispose();
+    // textmesh.geometry = updated.geometry;
+    //     console.log("gotsa text result2 " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
+    // result.text
 }
 // import { Container, Text } from "@pmndrs/uikit";
 

@@ -2623,7 +2623,7 @@ app.get('/staging/:_id', requiredAuthentication, function (req, res) {
                 stagedItems.push(itme);
                 // callbackz();
             }
-            console.log(stagedItems.length + ' staging files have been fetched');
+            console.log(stagedItems.length + ' staging files have been fetched ' + process.env.GS_HOST);
             stagedItems.reverse();
             rezponze.stagedItems = stagedItems;
             // rezponze.serverFound = true;

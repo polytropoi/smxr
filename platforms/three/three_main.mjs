@@ -28,9 +28,9 @@
 
 	import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
 
-	import { UpdateText, InitReticle, NewGeoText } from './three_ui.js';
+	import { UpdateText, InitReticle, ThreeText, lookAtCameraObjects } from './three_ui.js';
 
-	import { world, gravity, createStaticCollider, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
+	import { world, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, worldIsReady, initStaticObjex, 
 		initAtoms, atomicBodies} from './three_physics.js';
 
@@ -104,10 +104,6 @@
 			console.error('An error happened during model loading', error);
 		}
 	}
-
-
-
-
 
 	////////////// SCENE INIT FUNCTION 
 
@@ -427,7 +423,8 @@
 			}
 			 await new Promise(r => setTimeout(r, 2000)); //fudge
 			initEvents();
-			NewGeoText("whoa");
+			const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
+			ThreeText(texttest);
 		}
 
 		function createDefaultNavmesh() {
@@ -545,7 +542,7 @@
 			bloomPass = bloom( scenePassColor );
 			bloomPass.strength = .75;
 		} 
-		if (settings && settings.sceneTags && settings.sceneTags.includes("emissive bloom")) {
+		if (settings && settings.sceneTags && settings.sceneTags.includes("emissive bloom")) {//ouch
 			hasBloom = true;
 			// emissivePass = scenePass.getColorNode( 'emissive' ); //fragment error...
 			// bloomPass = bloom( emissivePass, 2.5, .5 );
@@ -696,6 +693,10 @@
 					world.step();//!!!
 
 			}
+
+			lookAtCameraObjects.forEach(l => 
+				l.lookAt(camera.position)
+			)
 
 
 			if (doPostProcessing) {

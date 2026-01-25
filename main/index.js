@@ -18347,12 +18347,12 @@ function getAllPeople() {
                                 // param2: $('#textbox2').val()
                             }),
                             success: function( data, textStatus, xhr ){
-                                console.log(data);
+                                console.log("success data : " + data);
                                 processMe = {};
                                 selected = [];
                                 $.get( "/staging/" + cookie._id, function( data ) {
                                     // console.log("tryna get staging data : " + JSON.stringify(data));
-                                    $( "#staging-area" ).html( showStaging(data) );
+                                    // $( "#staging-area" ).html( showStaging(data) );
                                 });
 
                             },
@@ -18361,8 +18361,8 @@ function getAllPeople() {
                                 processMe = {};
                                 selected = [];
                                 $.get( "/staging/" + cookie._id, function( data ) {
-                                    // console.log("tryna get staging data : " + JSON.stringify(data));
-                                    $( "#staging-area" ).html( showStaging(data) );
+                                    console.log("tryna get staging data : " + JSON.stringify(data));
+                                    // $( "#staging-area" ).html( showStaging(data) );
                                 });
                             }
                         });
