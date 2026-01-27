@@ -18351,8 +18351,8 @@ function getAllPeople() {
                                 processMe = {};
                                 selected = [];
                                 $.get( "/staging/" + cookie._id, function( data ) {
-                                    // console.log("tryna get staging data : " + JSON.stringify(data));
-                                    // $( "#staging-area" ).html( showStaging(data) );
+                                    console.log("tryna get staging data : " + JSON.stringify(data));
+                                    $( "#staging-area" ).html( showStaging(data) );
                                 });
 
                             },
@@ -18362,7 +18362,7 @@ function getAllPeople() {
                                 selected = [];
                                 $.get( "/staging/" + cookie._id, function( data ) {
                                     console.log("tryna get staging data : " + JSON.stringify(data));
-                                    // $( "#staging-area" ).html( showStaging(data) );
+                                    $( "#staging-area" ).html( showStaging(data) );
                                 });
                             }
                         });

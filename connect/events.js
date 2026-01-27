@@ -13,7 +13,7 @@ let map_update = new Event("map-update"); //as in vtt map
 let audio_viz = new Event("audio-viz"); //calling all audio actives
 let ready_event = new Event("ready-event"); //settings and data ready, init the things
 
-export let eventEl = document.createElement("div");
+export let eventEl = document.createElement("div"); //reuse for various events above
 eventEl.id = "eventEl";
 
 export let selectedPosition = {};
@@ -70,10 +70,13 @@ function TimedEventListener () {
 
  timeKeysIndex = 0;
  let timekey = 0;
+ let duration, percentComplete;
 
  if (timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0) {
    
    let listenerInterval = setInterval(function () {
+
+
       timekey = parseFloat(tkStarttimes[timeKeysIndex]);
       //  console.log(timekey);
       if (timekey && timekey != NaN) {//not not a number
@@ -84,7 +87,25 @@ function TimedEventListener () {
             // }
 
             if (primaryAudioHowl && primaryAudioHowl != undefined && primaryAudioHowl != null && primaryAudioHowl.playing()) {
-               
+                  var seek = primaryAudioHowl.playing() ? primaryAudioHowl.seek() : 0;
+               seek = Number(seek).toFixed(1);
+               // this.currentTime = seek;
+               duration = primaryAudioHowl.duration().toFixed(2);
+               // let percentComplete = Math.floor((seek / duration) * 10);
+               percentComplete = ((seek / duration) * 100).toFixed(2);
+               // var el = this.el; 
+               // var seeking = true;
+               // let timeString = "";
+               if (!isNaN(seek) && seek != 0) {
+                  console.log(seek + " of " + duration);
+                  if (primaryAudioHowl.playing()) {
+                      console.log(seek + " of " + duration);
+                     // if (mainTransportSlider != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
+                     //       this.mainTransportSlider.value = this.percentComplete;                  
+                     // }
+                  }
+               }
+                  
                // primaryAudioEl.components.primary_audio_control.updateStatus(true);
 
                let primaryAudioTime = primaryAudioHowl.seek();

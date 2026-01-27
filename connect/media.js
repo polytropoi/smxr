@@ -240,19 +240,19 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
   }
 
   export function MediaTimeUpdate (timeString) {
-   // console.log("MediaTimeUpdate " + fancyTimeString);
-   // transportTimeStatsEl = document.getElementById("transportStats");
-   if (transportTimeStatsEl == null) {
-      transportTimeStatsEl = document.getElementById("transportStats");
-   } else {
-      transportTimeStatsEl.innerHTML = timeString;
-   }
-   modalTimeStatsEl = document.getElementById('modalTimeStats');
-   if (modalTimeStatsEl == null) {
-      } else {
-         modalTimeStatsEl.innerHTML = timeString;
-      }
-      
+    // console.log("MediaTimeUpdate " + fancyTimeString);
+    // transportTimeStatsEl = document.getElementById("transportStats");
+    if (transportTimeStatsEl == null) {
+        transportTimeStatsEl = document.getElementById("transportStats");
+    } else {
+        transportTimeStatsEl.innerHTML = timeString;
+    }
+    modalTimeStatsEl = document.getElementById('modalTimeStats');
+    if (modalTimeStatsEl == null) {
+        } else {
+          modalTimeStatsEl.innerHTML = timeString;
+        }
+        
    }
 
    export function ReturnTimedEventsListenerMode () {

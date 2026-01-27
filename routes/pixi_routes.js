@@ -204,7 +204,7 @@ pixi_router.get('/:_id', function (req, res) {
     let styleIncludes = "";
     let synthScripts = "";
     let streamPrimaryAudio = false;
-    let audioControl = "<script type=\x22module\x22 src=\x22../main/src/component/audio_control.js\x22></script>";
+    // let audioControl = "<script type=\x22module\x22 src=\x22../main/src/component/audio_control.js\x22></script>";
     let primaryAudioScript = "";
     let primaryAudioParams = "";
     let primaryAudioEntity = "";
@@ -597,86 +597,10 @@ pixi_router.get('/:_id', function (req, res) {
 
                     // console.log("sceneResponse.sceneLocations[i].eventData "+ sceneResponse.sceneLocations[i].eventData);
                     if ((sceneResponse.sceneLocationTracking != null && sceneResponse.sceneLocationTracking == true) || sceneResponse.sceneWebType == "AR Location Tracking") {  
-                        // if (sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //just to set scripts and restrict to location
-                        //     if (sceneResponse.sceneWebType == "AR Location Tracking") {
-                        //         if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict_ar position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>";
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 ><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         } else {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_init_ar position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>"; 
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         }
-                        //         geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                        //         locationScripts = "<script src=\x22../main/src/component/location-fu.js\x22></script>";
-                        //         var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                        //         locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                        //     } else if (sceneResponse.sceneWebType == "Model Viewer") { 
-                        //         console.log("sceneResponse.sceneLocations[i].eventData : " + sceneResponse.sceneLocations[i].eventData);
-                        //         if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //         geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                        //         locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
-                        //         var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                        //         locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                        //         }
-                        //     } else if (sceneResponse.sceneWebType == "Mapbox") { //just location tracking, for any sceneWebType
-                        //         if (sceneResponse.sceneLocations[i].eventData != null && sceneResponse.sceneLocations[i].eventData.length > 4 && sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_restrict position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>";
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         } else {
-                        //             locationEntity = "<a-entity id=\x22youAreHere\x22 location_init position=\x220 2 -5\x22>"+
-                        //                 "<a-entity class=\x22gltf\x22 gltf-model=\x22#globe\x22 class=\x22envMap activeObjexRay\x22 position=\x220 -1.5 0\x22>"+
-                        //                 "</a-entity>"+
-                        //             "</a-entity>"; 
-                        //             locationButton = "<div style=\x22float: right; margin: 10px 10px;\x22 onclick=\x22ShowHideGeoPanel()\x22><i class=\x22fas fa-globe fa-2x\x22></i></div>";
-                        //         }
-                        //     } else {
-                        //         console.log("tryna set geo loc " + sceneResponse.sceneLocations[i].eventData);
-                        //         if (sceneResponse.sceneLocations[i].eventData.toLowerCase().includes("restrict")) {
-                        //             geoScripts = "<script async src=\x22https://get.geojs.io/v1/ip/geo.js\x22></script><script src=\x22/main/js/geolocator.js\x22></script>";
-                        //             locationScripts = "<script src=\x22../main/src/component/location-fu-noaframe.js\x22></script>";
-                        //             var buff = Buffer.from(JSON.stringify(sceneResponse.sceneLocations[i])).toString("base64");
-                        //             locationData = "<div id=\x22restrictToLocation\x22 data-location='"+buff+"'></div>";
-                        //         }
-                        //     }
-                        // }
+                       //umm.
                     }
                     if (sceneResponse.sceneLocations[i].type != undefined && sceneResponse.sceneLocations[i].type.toLowerCase() == "geographic") { //set actual locs below
-                        // // let id = sceneResponse.sceneLocations[i]._id != undefined ? 
-                        // if (sceneResponse.sceneLocations[i].markerType == "poi") {
-                        //     poiIndex++;
-                        //     if (sceneResponse.sceneWebType == "AR Location Tracking") {
-                        //         //TODO jack in models / objs here?
-                        //         geoEntities = geoEntities + "<a-entity look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
-                        //         "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><a-entity scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></a-entity></a-entity>";
-                            
-                        //     } else if (sceneResponse.sceneWebType != "Mapbox") {
-                        //         geoEntities = geoEntities + "<a-entity look-at=\x22#player\x22 shadow=\x22cast:true; receive:true\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+
-                        //         "; longitude: "+sceneResponse.sceneLocations[i].longitude+";  _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22 "+skyboxEnvMap+" class=\x22gltf poi envMap\x22 gltf-model=\x22#poi1\x22><a-entity scale=\x22.5 .5 .5\x22 position=\x22-.1 .5 0.1\x22 text-geometry=\x22value: "+poiIndex+"\x22></a-entity></a-entity>";
-                        //         // console.log(geoEntities);
-                        //     } else {
-                        //         //for mapbox just using aframe to pass data
-                        //         geoEntities = geoEntities + "<a-entity class=\x22geo poi\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
-                        //         "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></a-entity>";
-                        //         // console.log("mapbox geoEntities: " + geoEntities);
-                        //     }
-                        // } else {
-                        //     if (sceneResponse.sceneLocations[i].modelID != null) {
-                        //         console.log("gotsa modelID at a geographic location " + sceneResponse.sceneLocations[i].modelID );
-                        //         geoEntities = geoEntities + "<a-entity class=\x22geo\x22 "+geoEntity+"=\x22latitude: "+sceneResponse.sceneLocations[i].latitude+ 
-                        //         "; longitude: "+sceneResponse.sceneLocations[i].longitude+"; _id: "+sceneResponse.sceneLocations[i].timestamp+"\x22></a-entity>";
-                        //     } else {
-                        //         console.log("modelID is null at this location"); 
-                        //     }
-                        // }
+                      ///todo, ?
                     }
                     let zFix = parseFloat(sceneResponse.sceneLocations[i].z); //does nothing    
                     
@@ -1004,7 +928,7 @@ pixi_router.get('/:_id', function (req, res) {
             } else { //"sceneWebType == "Default or AFrame"
                                 
 
-                if (sceneData.sceneTags.includes("transport")) {
+                // if (sceneResponse.sceneTags.includes("show transport")) {
 
                 transportButtons = "<div class=\x22transport_buttons\x22>"+
 
@@ -1014,7 +938,7 @@ pixi_router.get('/:_id', function (req, res) {
                 "<div id=\x22transport_rewind_button\x22 class=\x22rewind_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22 ><i class=\x22fas fa-backward fa-2x\x22></i></div>"+
                 "<div id=\x22transport_previous_button\x22 class=\x22previous_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px;\x22><i class=\x22fas fa-step-backward fa-2x\x22></i></div>"+
                 "<div id=\x22transportStats\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 5px 5px; text-align: left\x22></div></div>";                                
-                }
+                // }
                 dialogButton = "<div id=\x22dialog_button\x22 class=\x22dialog_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: left; margin: 10px 10px;\x22 ><i class=\x22fas fa-info-circle fa-2x\x22></i></div>";
                
                 sceneManglerButtons = "<div class=\x22show-ui-button\x22 onclick=\x22ShowHideUI()\x22><i class=\x22far fa-eye fa-2x\x22></i></div>";
@@ -1099,7 +1023,7 @@ pixi_router.get('/:_id', function (req, res) {
 
 
                 }
-            } //end AFrame scene variations
+            } //end scene variations
             let webxrEnv = "default";
             let shadow = "";
             let sunVector = "0 -.5 -.5";
@@ -1113,102 +1037,102 @@ pixi_router.get('/:_id', function (req, res) {
             }
             if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) {
 
-                webxrEnv = sceneResponse.sceneEnvironmentPreset;
-                enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
-                let ground = "ground: hills;";
-                let dressing = "";
-                let skycolor = "";
-                let groundcolor = "";
-                let groundcolor2 = "";
-                let dressingcolor = "";
-                let horizoncolor = "";
+                // webxrEnv = sceneResponse.sceneEnvironmentPreset;
+                // enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
+                // let ground = "ground: hills;";
+                // let dressing = "";
+                // let skycolor = "";
+                // let groundcolor = "";
+                // let groundcolor2 = "";
+                // let dressingcolor = "";
+                // let horizoncolor = "";
                 
-                let fog = "";
-                let tweakColors = "";
-                let hasColorMods = false;
-                //if any of the default colors have changed, use them
-                if (sceneResponse.sceneColor1 != "#808080" || sceneResponse.sceneColor2 != "#808080" || sceneResponse.sceneColor3 != "#808080" || sceneResponse.sceneColor1 != "#808080") {
-                    hasColorMods = true;
-                }
-                if (webxrEnv == "none") {
-                    ground = "ground: none;"
-                }
+                // let fog = "";
+                // let tweakColors = "";
+                // let hasColorMods = false;
+                // //if any of the default colors have changed, use them
+                // if (sceneResponse.sceneColor1 != "#808080" || sceneResponse.sceneColor2 != "#808080" || sceneResponse.sceneColor3 != "#808080" || sceneResponse.sceneColor1 != "#808080") {
+                //     hasColorMods = true;
+                // }
+                // if (webxrEnv == "none") {
+                //     ground = "ground: none;"
+                // }
 
-                if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
-                    dressing = "dressing: none;"
-                }
+                // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
+                //     dressing = "dressing: none;"
+                // }
                 
-                if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "none") {
-                    ground = "ground: none;"
-                    dressing = "dressing: none;"
-                } else if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "flat") {
-                    ground = "ground: flat; dressing: none;"
-                    dressing = "dressing: none;"
-                } else if  (sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.length > 3) {
-                    ground = "ground: " + sceneResponse.sceneFloorplaneTexture.toLowerCase() +"; "; //needs refactor to...?
-                }
+                // if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "none") {
+                //     ground = "ground: none;"
+                //     dressing = "dressing: none;"
+                // } else if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "flat") {
+                //     ground = "ground: flat; dressing: none;"
+                //     dressing = "dressing: none;"
+                // } else if  (sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.length > 3) {
+                //     ground = "ground: " + sceneResponse.sceneFloorplaneTexture.toLowerCase() +"; "; //needs refactor to...?
+                // }
 
-                if (sceneResponse.sceneUseDynamicShadows) {
-                    shadow = "shadow: true; shadowSize: 50;"
-                } else {
-                    shadow = " shadow: false ";
-                }
+                // if (sceneResponse.sceneUseDynamicShadows) {
+                //     shadow = "shadow: true; shadowSize: 50;"
+                // } else {
+                //     shadow = " shadow: false ";
+                // }
                 
-                if (sceneResponse.sceneTweakColors) {
-                    // tweakColors = "mod-colors"; //need to animate
-                    // envLighting = "lighting: none";
-                }
+                // if (sceneResponse.sceneTweakColors) {
+                //     // tweakColors = "mod-colors"; //need to animate
+                //     // envLighting = "lighting: none";
+                // }
                 
-                if (!sceneResponse.sceneUseDynamicSky) {
-                    envLighting = "lighting: none";
-                }
+                // if (!sceneResponse.sceneUseDynamicSky) {
+                //     envLighting = "lighting: none";
+                // }
                 
-                if (sceneResponse.sceneUseSceneFog) {
-                    let fogDistance = sceneResponse.sceneSkyRadius / 2 
-                    fogSettings = "fog=\x22type: exponential; density:" +sceneResponse.sceneGlobalFogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
-                    fog = "fog: " +sceneResponse.sceneGlobalFogDensity+ ";";
-                } else {
-                    fogSettings = "";
-                    fog = "";
-                }
+                // if (sceneResponse.sceneUseSceneFog) {
+                //     let fogDistance = sceneResponse.sceneSkyRadius / 2 
+                //     fogSettings = "fog=\x22type: exponential; density:" +sceneResponse.sceneGlobalFogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
+                //     fog = "fog: " +sceneResponse.sceneGlobalFogDensity+ ";";
+                // } else {
+                //     fogSettings = "";
+                //     fog = "";
+                // }
                 
-                if (hasColorMods && sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3 && sceneResponse.sceneColorizeSky) {
-                    skycolor = "skyColor: " + sceneResponse.sceneColor1 + ";";
-                }
+                // if (hasColorMods && sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3 && sceneResponse.sceneColorizeSky) {
+                //     skycolor = "skyColor: " + sceneResponse.sceneColor1 + ";";
+                // }
                 
-                if (hasColorMods && sceneResponse.sceneColor2 != null && sceneResponse.sceneColor2.length > 3 && sceneResponse.sceneColorizeSky) {  
-                    horizoncolor = "horizonColor: " + sceneResponse.sceneColor2 + ";";
-                } 
-                if (hasColorMods && sceneResponse.sceneColor3 != null && sceneResponse.sceneColor3.length > 3) { 
-                    groundcolor = "groundColor: " + sceneResponse.sceneColor3 + ";";
-                }
-                if (hasColorMods && sceneResponse.sceneColor4 != null && sceneResponse.sceneColor4.length > 3) {
-                    dressingcolor = "dressingColor: " + sceneResponse.sceneColor4 + ";";
-                    groundcolor2 = "groundColor2: " + sceneResponse.sceneColor4 + ";";
-                }
+                // if (hasColorMods && sceneResponse.sceneColor2 != null && sceneResponse.sceneColor2.length > 3 && sceneResponse.sceneColorizeSky) {  
+                //     horizoncolor = "horizonColor: " + sceneResponse.sceneColor2 + ";";
+                // } 
+                // if (hasColorMods && sceneResponse.sceneColor3 != null && sceneResponse.sceneColor3.length > 3) { 
+                //     groundcolor = "groundColor: " + sceneResponse.sceneColor3 + ";";
+                // }
+                // if (hasColorMods && sceneResponse.sceneColor4 != null && sceneResponse.sceneColor4.length > 3) {
+                //     dressingcolor = "dressingColor: " + sceneResponse.sceneColor4 + ";";
+                //     groundcolor2 = "groundColor2: " + sceneResponse.sceneColor4 + ";";
+                // }
 
-                aframeEnvironment = "<a-entity id=\x22enviroEl\x22 environment=\x22preset: "+webxrEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
-                " "+envLighting+";\x22 hide-on-enter-ar "+tweakColors+"></a-entity>";
+                // aframeEnvironment = "<a-entity id=\x22enviroEl\x22 environment=\x22preset: "+webxrEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
+                // " "+envLighting+";\x22 hide-on-enter-ar "+tweakColors+"></a-entity>";
 
             } else {
-                if (sceneResponse.sceneUseDynamicSky) {
-                    if (sceneResponse.sceneUseDynamicShadows) {
-                        shadow = " light=\x22castShadow: true\x22 ";
-                    }
+                // if (sceneResponse.sceneUseDynamicSky) {
+                //     if (sceneResponse.sceneUseDynamicShadows) {
+                //         shadow = " light=\x22castShadow: true\x22 ";
+                //     }
 
-                    if (sceneResponse.sceneSunVector) {
-                        sunVector = sceneResponse.sceneSunVector;
-                    }
-                    if (sceneResponse.sceneSunIntensity) {
-                        intensity = sceneResponse.sceneSunIntensity;
-                    }
+                //     if (sceneResponse.sceneSunVector) {
+                //         sunVector = sceneResponse.sceneSunVector;
+                //     }
+                //     if (sceneResponse.sceneSunIntensity) {
+                //         intensity = sceneResponse.sceneSunIntensity;
+                //     }
 
-                    let skyRad = parseInt(sceneResponse.sceneSkyRadius) - (parseInt(sceneResponse.sceneSkyRadius) * .2);
-                    skySettings =  "<a-sky hide-on-enter-ar id=\x22skyEl\x22 color=\x22" + sceneResponse.sceneColor1 + "\x22 radius=\x22" + skyRad + "\x22 mod_sky=\x22enabled: true; color: "+sceneResponse.sceneColor1+";\x22></a-sky>";
-                    lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22"+sceneResponse.sceneColor1+"\x22 "+
-                    "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><a-entity id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></a-entity></a-light>" +
-                    "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
-                }
+                //     let skyRad = parseInt(sceneResponse.sceneSkyRadius) - (parseInt(sceneResponse.sceneSkyRadius) * .2);
+                //     skySettings =  "<a-sky hide-on-enter-ar id=\x22skyEl\x22 color=\x22" + sceneResponse.sceneColor1 + "\x22 radius=\x22" + skyRad + "\x22 mod_sky=\x22enabled: true; color: "+sceneResponse.sceneColor1+";\x22></a-sky>";
+                //     lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22"+sceneResponse.sceneColor1+"\x22 "+
+                //     "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><a-entity id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></a-entity></a-light>" +
+                //     "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
+                // }
             }
             sceneResponse.scenePostcards = sceneData.scenePostcards;
             if (sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3) {
