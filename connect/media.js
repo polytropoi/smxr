@@ -3,7 +3,7 @@
 // const {Howl, Howler} = require('../node_modules/howler/dist/howler.js');
 
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData,  
-  ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals, InitAudioViz } from "../../connect/events.js";
+  ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals, InitAudioViz, UpdatePrimaryTransport } from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
 // import { InitAnalyzer, addAudioVizSelect, AudioVizMode } from "../vtt/vtt_audioViz.mjs";
 // import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
@@ -41,6 +41,8 @@ export let audioGroupsData = {};
 
 export let isPlaying = false;
 
+export let currentAudioFileName = "";
+
 let modalTimeStatsEl = null; //stats for timekeys modal
 let transportTimeStatsEl = null;
 
@@ -48,6 +50,36 @@ let youtubeState = "";
 let youtubeTitleEl = "";
 let youtubeData;
 // window.youtubeIsPlaying = youtubeIsPlaying;
+
+const primaryTransportSlider = document.getElementById("primaryTransportSlider");
+InitPrimaryTransportSlider();
+
+function updatePrimaryTransportSlider(percentage) {
+  // console.log("percentage " + percentage);
+  primaryTransportSlider.value = parseFloat(percentage);
+  
+  primaryTransportSlider.style.setProperty('--progress', `${percentage}%`);
+
+ 
+}
+function primaryTransportSliderInput () {
+
+  UpdatePrimaryTransport(primaryTransportSlider.value); //can't mod from here and there (events.js)
+
+}
+
+function InitPrimaryTransportSlider () {
+
+  if (primaryTransportSlider) {
+
+    updatePrimaryTransportSlider(0);
+    primaryTransportSlider.addEventListener('input', primaryTransportSliderInput);
+ 
+  }
+}
+
+
+
 
 window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 
@@ -239,7 +271,7 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
     changeBorderColor(event.data);
   }
 
-  export function MediaTimeUpdate (timeString) {
+  export function MediaTimeUpdate (timeString, percentage) {
     // console.log("MediaTimeUpdate " + fancyTimeString);
     // transportTimeStatsEl = document.getElementById("transportStats");
     if (transportTimeStatsEl == null) {
@@ -253,6 +285,9 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
           modalTimeStatsEl.innerHTML = timeString;
         }
         
+        if (percentage) {
+          updatePrimaryTransportSlider(percentage);
+        }
    }
 
    export function ReturnTimedEventsListenerMode () {
@@ -376,7 +411,7 @@ function PlayPausePrimaryAudio() {
    primaryAudioController.playPauseToggle(); 
 }
 
-export function InitPrimarySlider() {
+export function InitPrimarySlider() { //volume
 // let modal = document.getElementById('modalContent');
 let primaryAudioSlider = document.getElementById("primaryAudioVolumeSlider");
    if (primaryAudioSlider != undefined) {
@@ -471,7 +506,10 @@ export function LoadPrimaryAudioHowl () {
     if (timedEventsListenerMode == "Primary Audio") {
       SetPrimaryAudioEventsData();
     }
+    const primaryAudioParentEl = document.getElementById("primaryAudioParent");
+    currentAudioFileName = primaryAudioParentEl.dataset.primaryaudiotitle;
       
+    console.log("primary audio title " + currentAudioFileName);
     // return primaryAudioHowl;
   }
 }

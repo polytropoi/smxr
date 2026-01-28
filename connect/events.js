@@ -1,9 +1,8 @@
 
 import { sceneLocations, GoToNext, GoToPrevious, videoEl, localData } from "../../connect/connect.js";
-import { primaryAudioEl, youtubePlayer, youtubeIsPlaying, primaryAudioHowl } from "../../connect/media.js";
+import { primaryAudioEl, youtubePlayer, youtubeIsPlaying, primaryAudioHowl, MediaTimeUpdate, currentAudioFileName, fancyTimeFormat} from "../../connect/media.js";
 
 let timeKeysIndex = 0;
-let listenerInterval = null;
 let pauseLoops = false;
 let loopIntervals = [];
 let eventTriggersSet = false;
@@ -13,6 +12,9 @@ let map_update = new Event("map-update"); //as in vtt map
 let audio_viz = new Event("audio-viz"); //calling all audio actives
 let ready_event = new Event("ready-event"); //settings and data ready, init the things
 
+
+ let duration, timeString, percentComplete, listenerInterval, seek;
+
 export let eventEl = document.createElement("div"); //reuse for various events above
 eventEl.id = "eventEl";
 
@@ -21,6 +23,7 @@ export let timeKeysData = {};
 export let tkStarttimes = [];
 export let timedEventsListenerMode = "";
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
+
 
 
 
@@ -64,13 +67,21 @@ export function MapUpdate(phID) {
 //    }
 // });
 // }
+export function UpdatePrimaryTransport(value) {
+   const secs = primaryAudioHowl.duration() * value * .01;
+   console.log("transport slider value " + value +" secs "+ secs);
+      if (primaryAudioHowl) {
+         // primaryAudioHowl.seek(value)
+         primaryAudioHowl.seek(secs);
+      }
+}
 
 function TimedEventListener () { 
 //  console.log("TimedEventsListener " + timedEventsListenerMode + " isplaying " +primaryAudioHowl.playing());
 
  timeKeysIndex = 0;
  let timekey = 0;
- let duration, percentComplete;
+
 
  if (timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0) {
    
@@ -90,20 +101,30 @@ function TimedEventListener () {
                   var seek = primaryAudioHowl.playing() ? primaryAudioHowl.seek() : 0;
                seek = Number(seek).toFixed(1);
                // this.currentTime = seek;
-               duration = primaryAudioHowl.duration().toFixed(2);
+               if (!duration) {
+                  duration = primaryAudioHowl.duration().toFixed(2);
+               }
                // let percentComplete = Math.floor((seek / duration) * 10);
                percentComplete = ((seek / duration) * 100).toFixed(2);
                // var el = this.el; 
                // var seeking = true;
                // let timeString = "";
                if (!isNaN(seek) && seek != 0) {
-                  console.log(seek + " of " + duration);
+                  // console.log(seek + " of " + duration);
                   if (primaryAudioHowl.playing()) {
-                      console.log(seek + " of " + duration);
-                     // if (mainTransportSlider != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
+                     //  console.log(seek + " of " + duration);
+                      timeString = currentAudioFileName + "<br><span style='color: lightgreen'><strong> playing </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
+                     MediaTimeUpdate(timeString, percentComplete);
+                      // if (mainTransportSlider != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
                      //       this.mainTransportSlider.value = this.percentComplete;                  
                      // }
+                  } else {
+                     timeString = currentAudioFileName + "<br><span style='color: red'><strong> stopped </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
+                     MediaTimeUpdate(timeString, percentComplete);
                   }
+               } else {
+                  timeString = currentAudioFileName + "<br><span style='color: red'><strong> stopped </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
+                     MediaTimeUpdate(timeString, MediaTimeUpdate);
                }
                   
                // primaryAudioEl.components.primary_audio_control.updateStatus(true);
@@ -191,6 +212,8 @@ export function PauseIntervals (pauseBool) {
    
    pauseLoops = pauseBool;
    console.log("loops are paused " + pauseLoops);
+   timeString = currentAudioFileName + "<br><span style='color: red'><strong> stopped </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
+   MediaTimeUpdate(timeString, percentComplete);
 
 }
 export function ClearIntervals () {
@@ -246,7 +269,7 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
             if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
                if (primaryAudioEl != null) {
                   // console.log("beat volume " + volume);
-                  primaryAudioEl.components.primary_audio_control.randomTime();
+                  primaryAudioEl.components.primary_audio_control.randomTime();//only for aframe!
                }
             } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
                var videoControllerEl = document.getElementById('primary_video_0');  

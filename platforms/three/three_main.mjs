@@ -952,8 +952,6 @@
 						if (navAgentInstance) {
 							navAgentInstance.agentRaycastHit();
 						}
-						
-						
 				} else {
 					// console.log("rehit agent " + raycastHits[0].object.name));
 				}

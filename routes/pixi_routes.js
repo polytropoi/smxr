@@ -267,6 +267,7 @@ pixi_router.get('/:_id', function (req, res) {
     let mapStyleSelector = "";
     let dialogButton = "";
     let transportButtons = "";
+    let primaryTransportSlider = "";
     let sceneManglerButtons = "";
     let pool_target = "";
     let pool_launcher = "";
@@ -504,6 +505,9 @@ pixi_router.get('/:_id', function (req, res) {
                     // } 
                     if (sceneData.sceneTags[i] == "show transport") {
                         showTransport = true;
+                        primaryTransportSlider = "<div class=\x22slidecontainer\x22> "+
+                        "<input type=\x22range\x22 min=\x221\x22 max=\x22100\x22 value=\x2250\x22 class=\x22slider\x22 id=\x22primaryTransportSlider\x22>"+
+                        "</div>";
                     }
                     // if (sceneData.sceneTags[i] == "show dialog") {
                         showDialog = true;
@@ -2181,24 +2185,9 @@ pixi_router.get('/:_id', function (req, res) {
                             "src: [\x22"+primary_oggurl+"\x22,\x22"+primary_mp3url+"\x22], "+html5+" ctx: true, volume: 0," + loopable +
                         "});" +
                     "primaryAudioHowl.load();</script>";
-                    primaryAudioEntity = "<div id=\x22primaryAudioParent\x22></div>"; //parent, no window click
+                    // var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
+                    primaryAudioEntity = "<div id=\x22primaryAudioParent\x22 data-primaryAudioTitle='"+primaryAudioObject.title+"'></div>"; //parent, no window click
                     
-                    // "<a-entity gltf-model=\x22#backpanel_horiz1\x22 position=\x220 0 0\x22 material=\x22color: black; transparent: true;\x22></a-entity>" +
-                    // "<a-entity position=\x220 -1.25 0\x22 primary_audio_player id=\x22primaryAudioPlayer\x22 gltf-model=\x22#audioplayer\x22></a-entity>"+
-                    // "<a-entity id=\x22primaryAudioText\x22 position=\x22.75 .6 -1\x22 "+
-                    // "text=\x22value:Click to play;\x22></a-entity>"+
-                    // "<a-entity id=\x22primaryAudio\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; audioID: "+sceneResponse.scenePrimaryAudioID+"; volume: "+scenePrimaryVolume+"; audioevents:"+sceneResponse.scenePrimaryAudioTriggerEvents+"; targetattach:"+sceneResponse.sceneAttachPrimaryAudioToTarget+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
-                    // "title: "+primaryAudioTitle+"\x22>"+
-                    
-                    // "</a-entity>"+
-                    
-                    // "</a-entity>";
-                    // modelAssets = modelAssets + "<a-asset-item id=\x22backpanel_horiz1\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/backpanel_horiz1.glb\x22></a-asset-item>\n";
-                    
-                    if (sceneResponse.scenePrimaryAudioTriggerEvents) {
-                        var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
-                        loadAudioEvents = "<a-entity primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></a-entity>"; 
-                    }
                 }
             }
             if (hasPrimaryAudioStream) {
@@ -2210,16 +2199,9 @@ pixi_router.get('/:_id', function (req, res) {
                         "src: \x22"+sceneResponse.scenePrimaryAudioStreamURL+"\x22, html5: true, volume: 0, format: ['mp3', 'aac']" +
                     "});" +
                 "</script>";
-                primaryAudioEntity = "<div id=\x22primaryAudioParent\x22></div>"; //parent
-                // "<a-entity id=\x22primaryAudioText\x22 geometry=\x22primitive: plane; width: 1; height: .5\x22 position=\x220 .5 2.5\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22"+
-                // "text=\x22value:Click to play;\x22></a-entity>"+
-                // "<a-entity id=\x22primaryAudioTextBackground\x22 gltf-model=\x22#landscape_panel\x22 scale=\x22.2 .1 .1\x22 position=\x220 .5 2.4\x22 material=\x22color: black; transparent: true; opacity: 0.1\x22></a-entity>" +
-                // "<a-entity id=\x22primaryAudio\x22 mixin=\x22grabmix\x22 class=\x22activeObjexGrab activeObjexRay\x22 entity-callout=\x22calloutString: play/pause\n" + primaryAudioTitle+ ";\x22 primary_audio_control=\x22oggurl: "+oggurl+"; mp3url: "+mp3url+"; volume: "+scenePrimaryVolume+"; autoplay: "+sceneResponse.sceneAutoplayPrimaryAudio+";"+
-                // "title: "+primaryAudioTitle+"\x22  geometry=\x22primitive: sphere; radius: .25;\x22 material=\x22shader: noise;\x22 position=\x220 0 2.6\x22></a-entity></a-entity>";
-                if (sceneResponse.scenePrimaryAudioTriggerEvents) { //maybe pass a do not listen?
-                    var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
-                    loadAudioEvents = "<div primary_audio_events id=\x22audioEventsData\x22 data-audio-events='"+buff+"'></div>"; 
-                }
+                //  var buff = Buffer.from(JSON.stringify(primaryAudioObject)).toString("base64");
+                primaryAudioEntity = "<div id=\x22primaryAudioParent\x22 data-primaryAudioTitle='"+primaryAudioObject.title+"'></div>"; //parent
+                
             }
             if (hasAmbientAudio) {
                 ambientAudioScript = "<script>" +      
@@ -3004,7 +2986,7 @@ pixi_router.get('/:_id', function (req, res) {
                         videoGroupsEntity +
                         "<center><div><br><br><div class=\x22header\x22>"+sceneResponse.sceneGreeting+ " - " + sceneResponse.sceneQuest+"</div><video controls width=\x2280%\x22 height=\x2210%\x22 id=\x22video\x22></video>"+
                         "<div id=\x22sceneGreeting\x22 class=\x22linkfooter\x22>"+
-                        "<h4><a href=\x22https://servicemedia.net/webxr/"+ sceneResponse.sceneNextScene + "\x22>Click Here to Enter Immersive Scene!</a></h4><br>"+
+                        "<h4><a href=\x22https://smxr.net/webxr/"+ sceneResponse.sceneNextScene + "\x22>Click Here to Enter Immersive Scene!</a></h4><br>"+
                         "</div></center>"+
                         audioSliders +
                         canvasOverlay +
@@ -3238,7 +3220,7 @@ pixi_router.get('/:_id', function (req, res) {
                             "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
 
                             "<script type=\x22module\x22 src=\x22/connect/media.js\x22></script>" +
-                            // "<script src=\x22/connect/traffic.js\x22></script>"+
+                            "<script src=\x22/connect/traffic.js\x22></script>"+
                         
                         // "<script src=\x22../main/vendor/howler/src/howler.core.js\x22></script>"+
                         // "<script src=\x22../main/vendor/howler/src/howler.mjs\x22></script>"+
@@ -3252,10 +3234,12 @@ pixi_router.get('/:_id', function (req, res) {
                         
                         "</head>\n" +
                         "<body "+bgstyle+">" +
+                           
                         canvasOverlay +
                         transportButtons+ 
                         dialogButton +
 
+                     
 
                        
 
@@ -3339,7 +3323,10 @@ pixi_router.get('/:_id', function (req, res) {
                         //         "</div>"+
                         //     "</div>"+
                         // "</div>"+
-                        // pictureGroupsData +
+                        // // pictureGroupsData +
+                        //             "<div style=\x22z-index: 1000, width: 100%, height: 50px, bottom: 0\x22 class=\x22sslidecontainer_\x22>WHATs"+
+                        // // "<input type=\x22range\x22 style=\x22width: 100%, height: 50px\x22 min=\x221\x22 max=\x22100\x22 value=\x2250\x22 class=\x22sslider_\x22 id=\x22primaryAudioSlider_\x22>"+
+                        // "</div>"+
                                                 
                         "<script type=\x22module\x22 src=\x22../platforms/pixi/addBackground.mjs\x22></script>" +
                         "<script type=\x22module\x22 src=\x22../platforms/pixi/addElements.mjs\x22></script>" +
@@ -3349,13 +3336,22 @@ pixi_router.get('/:_id', function (req, res) {
 
                         "<script type=\x22module\x22 src=\x22../platforms/pixi/vtt_audioViz.mjs\x22 ></script>" +
                         "<div id=\x22audioVizContainer\x22></div>"+
+
                         // audioHtml +
                         // <i class=\x22fas fa-stopwatch \x22></i>
+
+            
+
                         "<div id=\x22microphone_button\x22><i class=\x22fa-solid fa-microphone fa-2xl\x22></i></div>" +
                         "<div class=\x22footer\x22><div class=\x22previous-button-2\x22 id=\x22previous_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
                          "<div class=\x22next-button-2\x22 id=\x22next_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div></div>"+
-                        "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
+                        "<div class=\x22footer-container\x22 id=\x22footerslide\x22>"+
+
+                        primaryTransportSlider +
+                        "</div>"+
                         
+
+
                         "<div id=\x22pixi-container\x22>"+
                         // "<canvas id=\x22pixi-canvas\x22></canvas>"+
                         "</div>"+

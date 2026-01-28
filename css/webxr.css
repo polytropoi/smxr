@@ -199,13 +199,31 @@ body {
 .next-button {
   position: absolute; left: 0; right: -264; bottom:30px; margin-left: auto; margin-right: auto; width: 64px; height: 64px; color:white; opacity:0.75;z-index:100;
 }
-
+input[type="range"] {
+  accent-color: #4CAF50; /* A pleasant green color */
+}
 .footer-text {
   position: absolute; 
   left: 0; 
   right: 0; 
   bottom:60px; 
   width: 200px; 
+  height: 64px;
+  text-align: center;
+  margin-left: auto; 
+  margin-right: auto; 
+  color:white; 
+  opacity:0.75;z-index:100;
+  font-family: Source Sans Pro, Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-size: 20px;
+
+}
+.footer-container {
+  position: absolute; 
+  left: 0; 
+  right: 0; 
+  bottom:60px; 
+  width: 90%; 
   height: 64px;
   text-align: center;
   margin-left: auto; 
@@ -689,8 +707,11 @@ background-color: #000000;
   }
 
   .slidecontainer {
-    width: 90%;
+    width: 100%;
     padding: 5px;
+    text-align: center;
+        /* margin-left: -60px;
+                margin-right: 60px; */
   }
   
   .slider {
@@ -708,6 +729,17 @@ background-color: #000000;
   .slider:hover {
     opacity: 1;
   }
+  input[type="range"] {
+    /* Use a CSS variable for the fill percentage */
+    --progress: 50%; /* Default value, updated by JS */
+    background: linear-gradient(to right, #4CAF50 var(--progress), #ddd var(--progress));
+  }
+/* 
+  input[type="range"]::-webkit-slider-runnable-track {
+    background: #ddd;
+    height: 8px;
+    border-radius: 4px;
+  } */
   
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -728,6 +760,7 @@ background-color: #000000;
   }
 
   .sslidecontainer {
+    z-index: 100;
     width: 100%; /* Width of the outside container */
   }
   
@@ -753,7 +786,7 @@ background-color: #000000;
     opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
     -webkit-transition: .2s; /* 0.2 seconds transition on hover */
     transition: opacity .2s;
-    overflow:hidden;
+    /* overflow:hidden; */
   }
   
   /* Mouse-over effects */
