@@ -1635,6 +1635,19 @@ app.post('/updateapp/:appid', requiredAuthentication, admin, function (req, res)
                 const updoc = {$set: {appname: req.body.appname, appStatus: req.body.appStatus, appdomain: req.body.appdomain, appunitydomain: req.body.appunitydomain}};
                 const updated = await RunDataQuery("apps", "updateOne", query, updoc);
                
+                const appquery = {"sceneAppName": req.body.appname};
+                const scenes = await RunDataQuery("scenes", "find", appquery);
+                for (let i = 0; i < scenes.length; i++) {
+                    console.log("sceneDomain " + scenes[i].sceneDomain + " vs " + req.body.appdomain); 
+                    if (scenes[i].sceneDomain != req.body.appdomain) {
+                        
+                        const updatequery = { "_id": scenes[i]._id };
+                        console.log("fixing to fix " + scenes[i].sceneTitle + " query " + updatequery);
+                        const updoc2 = {$set: {"sceneDomain" : req.body.appdomain}};
+                        const updated = await RunDataQuery("scenes", "updateOne", updatequery, updoc2);
+                        console.log("updated " + JSON.stringify(updated)); 
+                    }
+                }
                 res.send("updated " + updated);
             } catch (e) {
                 console.log("error updating domain " + e);

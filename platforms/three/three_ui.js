@@ -82,7 +82,7 @@ export async function ThreeText (textString, size, parent) { //
         container.add(textmesh, bgmesh);
         scene.add(container);
             const camPos = camera.position.clone();
-        container.position.set(camPos.x, camPos.y, camPos.z - 4);
+        container.position.set(camPos.x, camPos.y, camPos.z - 10);
         textmesh.position.set(-3,yscale / 5,.25);
     }
     
