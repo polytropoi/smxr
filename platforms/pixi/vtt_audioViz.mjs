@@ -332,22 +332,13 @@ function energyMeters() {
 let micStream;
 const micButton = document.getElementById('microphone_button');
 let micEnabled = false;
-micButton.addEventListener( 'click', () => {
-        micEnabled = !micEnabled;
-  console.log("micButton click enabled " + micEnabled + " audioMotion is null " + (audioMotion == null));
 
-  // if (!audioMotion) {
-  //     audioMotion = new AudioMotionAnalyzer(
-  //   document.getElementById('audioVizContainer'),
-  //   {
-  //     gradient: 'rainbow',
-  //     height: window.innerHeight - 40,
-  //     showScaleY: true,
-  //     bgAlpha: 0,
-  //     overlay: true
-  //   }
-  // );
-  // }
+if (micButton) {
+    micButton.addEventListener( 'click', () => {
+  
+    micEnabled = !micEnabled;
+    console.log("micButton click enabled " + micEnabled + " audioMotion is null " + (audioMotion == null));
+
     InitAnalyzer("audioDevice");
 
     if ( micEnabled && audioMotion) {
@@ -393,11 +384,8 @@ micButton.addEventListener( 'click', () => {
       }
       
     }
-
-   
-    // function ReturnMediaRecorder
-  
 });
+}
 
 
  function StartAudioRecord() {

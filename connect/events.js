@@ -140,10 +140,14 @@ function TimedEventListener () {
                      // console.log(primaryAudioTime + "less than " + timekey);
                      //just waiting...
                } else {
+
                   if (timeKeysIndex < tkStarttimes.length) {
-                     console.log("TRYNA PLAY TIMEKEY "+ JSON.stringify(timeKeysData.timekeys[timeKeysIndex]) +" at primaryAudioTime "+ primaryAudioTime.toString() );
-                     PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
-                     timeKeysIndex++;
+                     console.log("time delta " + (primaryAudioTime - timekey));
+                     // if ((primaryAudioTime - timekey) < 5) {
+                        console.log("TRYNA PLAY TIMEKEY "+ JSON.stringify(timeKeysData.timekeys[timeKeysIndex]) +" at primaryAudioTime "+ primaryAudioTime.toString() );
+                        PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
+                        timeKeysIndex++;
+                     // }
                   } else {
                      console.log("end");
                      clearInterval(listenerInterval);

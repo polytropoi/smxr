@@ -423,6 +423,8 @@ export async function GoWithIt() { //called from vtt.js
         } else {
             addBackgroundVideos(app);
         }
+      } else if (pictureGroupsData) {
+          addBackgroundPictures(app);
       }
         // if (keydown == "T") {
         //   // viewport.plugins.resume.

@@ -363,6 +363,7 @@ pixi_router.get('/:_id', function (req, res) {
     let activityPubScripts = "";
     let pixelsPerMeterActual = 10; //these need some input.... use for conversion of 2d coord system to 3d units
     let pixelsPerMeterVirtual = .01; //use for speed?
+    let micButton = "";
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
@@ -508,6 +509,9 @@ pixi_router.get('/:_id', function (req, res) {
                         primaryTransportSlider = "<div class=\x22slidecontainer\x22> "+
                         "<input type=\x22range\x22 min=\x221\x22 max=\x22100\x22 value=\x2250\x22 class=\x22slider\x22 id=\x22primaryTransportSlider\x22>"+
                         "</div>";
+                    }
+                    if (sceneData.sceneTags[i] == "show micbutton") {
+                       micButton = "<div id=\x22microphone_button\x22><i class=\x22fa-solid fa-microphone fa-2xl\x22></i></div>";
                     }
                     // if (sceneData.sceneTags[i] == "show dialog") {
                         showDialog = true;
@@ -3342,7 +3346,9 @@ pixi_router.get('/:_id', function (req, res) {
 
             
 
-                        "<div id=\x22microphone_button\x22><i class=\x22fa-solid fa-microphone fa-2xl\x22></i></div>" +
+                        micButton +
+
+                        "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
                         "<div class=\x22footer\x22><div class=\x22previous-button-2\x22 id=\x22previous_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
                          "<div class=\x22next-button-2\x22 id=\x22next_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div></div>"+
                         "<div class=\x22footer-container\x22 id=\x22footerslide\x22>"+
