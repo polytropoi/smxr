@@ -141,7 +141,7 @@
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.minDistance = 1;
 				controls.maxDistance = 300;
-				controls.maxPolarAngle = Math.PI * 0.75;
+				controls.maxPolarAngle = Math.PI * 0.5;
 				// controls.autoRotate = true;
 				// controls.autoRotateSpeed = 1;
 				controls.target.set( 0, .2, 0 );
@@ -165,9 +165,15 @@
 				instructions.style.display = "none";
 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
 					camera.position.set( 0, followDistance, -followDistance );
-					camera.lookAt( 0, 1, 0 );
+					// camera.lookAt( 0, 1, 0 );
 
-					// controls = new OrbitControls( camera, renderer.domElement );
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.minDistance = 1;
+				controls.maxDistance = 300;
+				controls.maxPolarAngle = Math.PI * 0.5;
+				// controls.autoRotate = true;
+				// controls.autoRotateSpeed = 1;
+				
 				mousecaster = new THREE.Raycaster();	
 				downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
 				var geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
@@ -180,13 +186,14 @@
 				goal.add( camera );
 				scene.add( player );
 				console.log("ADDING PLAYER FOR THIRD PERSON");
-				keys = {
-					a: false,
-					s: false,
-					d: false,
-					w: false
-				};
+				// keys = {
+				// 	a: false,
+				// 	s: false,
+				// 	d: false,
+				// 	w: false
+				// };
 				fVelocity = 0.0;
+				// controls.target.set( goal.position );
 				isReady = true;
 			} else {
 				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
@@ -302,7 +309,9 @@
 											if (locationData[i].markerType == "navmesh" ) {
 												// if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
 													navmesh = child;
+													navmesh.userData.name = "navmesh";
 													groundObjex.push(navmesh);
+													activeObjex.push(navmesh);
 													// child.material = transmat;
 													// InitPathfinding(); //no
 												// }
@@ -644,7 +653,7 @@
 			
 			if ( moveForward ) {
 				speed = .2;
-				console.log("speed " + speed);		
+				// console.log("speed " + speed);		
 			} else if ( moveBackward ) {
 				speed = -.2;
 			}
@@ -824,21 +833,36 @@
 
 ////////// global events	
 
+	const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
 	function initEvents () {
 
 	function onMouseWheel(e) {
 		if (!controls) {
-			const v = followDistance + e.deltaY * 0.005;
-			if (v >= .5 && v <= 100) {
+		// if (controls && (controls.getDistance() < 300)) {
+ 			const v = followDistance + e.deltaY * 0.005;
+			// if (v >= 0 && v <= 100) {
 				followDistance = v;
 				camera.position.y = v;
+			// }
+			// return false;
+		} else {
+			const distanceFactor = controls.getDistance();
+			if (distanceFactor < 30) {
+				controls.maxPolarAngle = Math.PI * .5;
+			} else if (distanceFactor < 50) {
+				controls.maxPolarAngle = Math.PI * .4;
+			} else if (distanceFactor < 100) {
+				controls.maxPolarAngle = Math.PI * .3;
 			}
-			return false;
+			// console.log("distanceFactor " + distanceFactor);
+			// controls.maxPolarAngle = Math.PI * distanceFactor;
 		}
+		// }
 	}
 
 	const onKeyDown = function ( event ) {
-		console.log("keydown " + event.code);
+		// console.log("keydown " + event.code);
 		switch ( event.code ) {
 
 			case 'ArrowUp':
@@ -865,13 +889,16 @@
 				if ( canJump === true ) velocity.y += 350;
 				canJump = false;
 				break;
+		
+			case 'KeyO':
 
+				toggleOrbitControl();
+				break;
 			}
-
 		};
 
         const onKeyUp = function ( event ) {
-			console.log("keyup " + event.code);	
+			// console.log("keyup " + event.code);	
             switch ( event.code ) {
 
                 case 'ArrowUp':
@@ -910,6 +937,12 @@
 	window.addEventListener( 'resize', onWindowResize );
 
 
+	function toggleOrbitControl() {
+		console.log("tryna toggle control " + control.enabled);
+		// if (control) {
+		// 	control.enabled = !control.enabled;
+		// }
+	}
 	function onWindowResize() {
 
 		camera.aspect = window.innerWidth / window.innerHeight;
@@ -930,8 +963,8 @@
 		let stopColor = new THREE.Color(0x26de57);
 		let goColor = new THREE.Color(0xff0000);
 		if (raycastHits.length > 0) {
-		// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
-		// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+		console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
+						" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
 			if (raycastHits[0].object.name.includes("agent")) {
 				
 				if ( raycastHitAgent != raycastHits[ 0 ].object ) {
@@ -995,9 +1028,13 @@
 			let stopColor = new THREE.Color(0x26de57);
 			let goColor = new THREE.Color(0xff0000);
 			if (raycastHits.length > 0) {
-			console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
-							" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
-				if (raycastHits[0].object.name.includes("agent")) {
+			// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
+			// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+				
+					if (raycastHits[0].object.userData.name == "navmesh") {
+						console.log("navmesh Mousehit");
+					}
+					if (raycastHits[0].object.name.includes("agent")) {
 					
 					if ( raycastHitAgent != raycastHits[ 0 ].object ) {
 						console.log ("new raycast hit on agent " + raycastHits[0].object.name);
