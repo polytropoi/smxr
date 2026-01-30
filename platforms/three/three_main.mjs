@@ -32,7 +32,7 @@
 
 	import { world, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, worldIsReady, initStaticObjex, 
-		initAtoms, atomicBodies} from './three_physics.js';
+		initAtoms, atomicBodies, getPlayerBody} from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -59,7 +59,7 @@
 	export let camera, renderer;
 	let model, floor, floorPosition;
 	let postProcessing;
-	let showDebug = false;
+	let showDebug = true;
 	let controls;
 	let isReady = false;
 	let mouseIsDown = false;
@@ -90,7 +90,8 @@
 	const direction = new THREE.Vector3();
 	const mouse = new THREE.Vector2();
 
-	let player, goal, keys, follow;
+	export let player;
+	let goal, keys, follow;
 	
 	var dir = new THREE.Vector3;
 	var playerVector = new THREE.Vector3;
@@ -99,6 +100,8 @@
 	let fVelocity = 0.0;
 	var speed = 0.0;
 	let cameraWorldPosition = new THREE.Vector3();
+
+	let pointerGizmo;
 
 
 
@@ -180,6 +183,7 @@
 				var material = new THREE.MeshNormalMaterial();
 
 				player = new THREE.Mesh( geometry, material );
+
 				goal = new THREE.Object3D;
 				follow = new THREE.Object3D;
 				goal.position.z = -followDistance;
@@ -193,6 +197,7 @@
 				// 	w: false
 				// };
 				fVelocity = 0.0;
+				
 				// controls.target.set( goal.position );
 				isReady = true;
 			} else {
@@ -242,6 +247,13 @@
 			}
 		// }
 			
+		const pointerGeo = new THREE.CapsuleGeometry(.2, 2, 4, 4);
+		const pointerMat = new THREE.MeshBasicMaterial({color: 'blue'});
+		pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
+		pointerGizmo.up.set(0, 1, 0);
+		scene.add(pointerGizmo);
+
+
 		if (settings && settings.sceneTags && settings.sceneTags.includes("no gravity") ) {
 			const gravity = {x:0, y:0, z:0};
 			await initRapier(gravity); 
@@ -467,6 +479,11 @@
 			if (settings && settings.sceneTags.includes("atoms")) {
 				initAtoms();
 			}
+
+			if (cameraMode == "Third Person") {
+				const playerBody = await getPlayerBody();
+				kinematicBodies.push(playerBody);
+			}
 			//  await new Promise(r => setTimeout(r, 000)); //fudge
 			initEvents();
 			const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
@@ -488,16 +505,8 @@
 			scene.add(navmeshObject);
 		}
 
-		console.log("settings " + JSON.stringify(settings));
+		// console.log("settings " + JSON.stringify(settings));
 
-
-		
-		// scene = new THREE.Scene();
-		// // scene.fog = new THREE.Fog( settings.sceneColor2, 20, 300 );
-		// const fogColor = settings.sceneColor2; // Sky blue
-		// // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
-		// scene.fog = new THREE.Fog(fogColor, 1, 100);
-		// InitCustomFog();
 		// scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
 
 
@@ -818,7 +827,7 @@
 	}
 
 
-	/////// events and listeners and handlers
+/////// events and listeners and handlers
 
 
 
@@ -963,8 +972,19 @@
 		let stopColor = new THREE.Color(0x26de57);
 		let goColor = new THREE.Color(0xff0000);
 		if (raycastHits.length > 0) {
-		console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
-						" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+		// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
+		// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+			if (raycastHits[0].object.userData.name == "navmesh") {
+				// console.log("gotsa navmesh mousehit " + JSON.stringify(raycastHits[0].point));
+				const localNormal = raycastHits[0].face.normal;
+				
+				const worldNormal = localNormal.clone().transformDirection(raycastHits[0].object.matrixWorld);
+				// console.log("hit worldnormal " + JSON.stringify(worldNormal));
+				pointerGizmo.position.set(raycastHits[0].point.x,raycastHits[0].point.y,raycastHits[0].point.z);
+				// pointerGizmo.lookAt(worldNormal);
+				rotateObjectToNormal(pointerGizmo, worldNormal);
+				
+			}
 			if (raycastHits[0].object.name.includes("agent")) {
 				
 				if ( raycastHitAgent != raycastHits[ 0 ].object ) {
@@ -1106,15 +1126,26 @@
 		}
 	}
 
-// billboard tsl
-// 	material.positionNode = material.positionNode = tsl.Fn(() => {
-// 	const objectCenter = tsl.modelWorldMatrix.mul(tsl.vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-// 	const up = tsl.vec3(0, 1, 0).toVar();
-// 	const toCamera = tsl.cameraPosition.sub(objectCenter).toVar();
-// 	// set toCamera.y = 0 to only allow rotation around the y-axis (i.e. make it "cylindrical")
-// 	toCamera.assign(tsl.vec3(toCamera.x, 0, toCamera.z).normalize());
-// 	const right = up.cross(toCamera).normalize();
-// 	up.assign(toCamera.cross(right).normalize());
-// 	const rotationMatrix = tsl.mat3(right, up, toCamera);
-// 	return rotationMatrix.mul(tsl.positionGeometry);
-// })();
+	function rotateObjectToNormal(object, targetNormal) {
+		object.up.copy(targetNormal).normalize();
+		const tempTarget = new THREE.Vector3(); 
+		const newQuaternion = new THREE.Quaternion();
+		const currentWorldUp = new THREE.Vector3();
+		object.getWorldDirection(currentWorldUp); // actually gets the forward direction -Z
+		
+		const orientationMatrix = new THREE.Matrix4();
+
+	
+		object.up.copy(targetNormal);
+		
+		const direction = new THREE.Vector3(0, 0, -1); // Object's local forward direction (negative Z)
+		
+		object.up.copy(targetNormal);
+		const upVector = new THREE.Vector3(0, 1, 0); // Default object 'up' direction in local space
+		const quaternion = new THREE.Quaternion();
+		quaternion.setFromUnitVectors(upVector, targetNormal.clone().normalize());
+		
+		// Apply the quaternion to the object
+		object.setRotationFromQuaternion(quaternion);
+	}
+

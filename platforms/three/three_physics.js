@@ -5,7 +5,7 @@ import RAPIER from 'rapier';
 
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-import { scene, togglePostProcessing, water, staticObjex, activeObjex } from './three_main.mjs';
+import { scene, togglePostProcessing, water, staticObjex, activeObjex, player } from './three_main.mjs';
 import { agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
 // import {scene, world} from './three_main.mjs'
 
@@ -160,6 +160,27 @@ function WaitAndInit () {
     }
   }
 
+  export async function getPlayerBody() {
+    
+      // const mesh = player;
+       let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
+              .setTranslation(player.position.x, player.position.y, player.position.z);
+      let rigidbody = await world.createRigidBody(rigidBodyDesc);
+      let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 1);
+      let collider = await world.createCollider(kinematicCollider, rigidbody);
+      collider.setRestitution(1.5);
+      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+
+       let worldposition = new THREE.Vector3();
+      player.getWorldPosition(worldposition);
+
+      function update () {
+          player.getWorldPosition(worldposition);
+          rigidbody.setTranslation(worldposition);
+      }
+    
+    return { rigidbody, update };
+  }
   export async function getKinematicBody(agentParent, agentIndex, position) {
 
     try {
@@ -200,11 +221,11 @@ function WaitAndInit () {
 
       if (mesh && rigidbody) {
         //  rigidbody.resetForces(true); 
-    //   rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y + 1, z: mesh.position.z });
+        //   rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y + 1, z: mesh.position.z });
         mesh.getWorldPosition(worldposition);
         rigidbody.setTranslation(worldposition);
-    //   let { x, y, z } = rigidbody.translation();
-    //   mouseMesh.position.set(x, y, z);
+        //   let { x, y, z } = rigidbody.translation();
+        //   mouseMesh.position.set(x, y, z);
       }
     }
 
