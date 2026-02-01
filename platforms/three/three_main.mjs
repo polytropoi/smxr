@@ -22,7 +22,7 @@
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 	import { SetSceneLocations } from '../../../connect/connect.js';
 
-	import { InitPathfinding, agentParents, agents, closestNavmeshPoint } from './three_nav.js';
+	import { CreatePlayerAgent, InitPathfinding, agentParents, agents, closestNavmeshPoint } from './three_nav.js';
 
 	import { getRainbowMaterial } from './tsl/rainbow.js'
 
@@ -96,13 +96,16 @@
 	var dir = new THREE.Vector3;
 	var playerVector = new THREE.Vector3;
 	var goalVector = new THREE.Vector3;
-	var followDistance = 5;
+	var followDistance = 10;
 	let fVelocity = 0.0;
 	var speed = 0.0;
 	let cameraWorldPosition = new THREE.Vector3();
 
 	let pointerGizmo;
-
+	let lastRaycastHitPosition;
+	let lastRaycastHitObject;
+	let playerNavAgent;
+	let playerReadyToNav = false;
 
 
 	eventEl.addEventListener('ready-event', init); //fired when settings are loaded..
@@ -183,13 +186,15 @@
 				var material = new THREE.MeshNormalMaterial();
 
 				player = new THREE.Mesh( geometry, material );
+				player.userData.name = "player";
+				activeObjex.push(player);
 
 				goal = new THREE.Object3D;
 				follow = new THREE.Object3D;
 				goal.position.z = -followDistance;
 				goal.add( camera );
 				scene.add( player );
-				console.log("ADDING PLAYER FOR THIRD PERSON");
+				// console.log("ADDING PLAYER FOR THIRD PERSON");
 				// keys = {
 				// 	a: false,
 				// 	s: false,
@@ -197,8 +202,8 @@
 				// 	w: false
 				// };
 				fVelocity = 0.0;
-				
-				// controls.target.set( goal.position );
+				camera.lookAt(player.position);
+				// controls.target.set(player.position);
 				isReady = true;
 			} else {
 				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
@@ -421,9 +426,9 @@
 		}
 
 		async function initSystems() {
-			if (staticObjex.length) { //eg ground and stuff
-				await initStaticObjex(); 
-			}
+			// if (staticObjex.length) { //eg ground and stuff
+				await initStaticObjex();  //creates default if none provided
+			// }
 
 			if (surface) { // => scattering instances
 				await InitSurface();
@@ -462,16 +467,7 @@
 				await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
 				
 			}
-			if (cameraMode == "Orbit") {
-				// if (settings && settings.sceneTags && settings.sceneTags.includes("atoms")) {
-					
-				// }
-			} else {
-				// if (playerPosition && controls.object) {
-				// 	// camera.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
-				// }
-				
-			}
+
 			if (settings && settings.sceneTags.includes("post processing")) {
 				togglePostProcessing();
 			}
@@ -483,6 +479,7 @@
 			if (cameraMode == "Third Person") {
 				const playerBody = await getPlayerBody();
 				kinematicBodies.push(playerBody);
+				playerNavAgent = CreatePlayerAgent(player);
 			}
 			//  await new Promise(r => setTimeout(r, 000)); //fudge
 			initEvents();
@@ -654,22 +651,27 @@
 		const time = performance.now();
 		// scene.updateMatrixWorld(true);
 	if (clock && isReady) {
-		if (settings && controls && cameraMode == "Orbit") {
+		if (settings && controls && cameraMode == "Orbit") { //easy peasy
 			controls.update();
 			cameraWorldPosition.copy(camera.position);
-		} else if (settings && player && cameraMode == "Third Person") {
+		} else if (settings && player && cameraMode == "Third Person") { // kinda combines follow cam and orbit control
 			speed = 0.0;
 			
 			if ( moveForward ) {
+				camera.lookAt( player.position );
+				// controls.target.set(player.position.x, player.position.z, player.position.z);
 				speed = .2;
 				// console.log("speed " + speed);		
 			} else if ( moveBackward ) {
+				camera.lookAt( player.position );
+				// controls.target.set(player.position.x, player.position.z, player.position.z);
 				speed = -.2;
 			}
 					
 			fVelocity += ( speed - fVelocity ) * .5;
 			player.translateZ( fVelocity );
 			camera.getWorldPosition(cameraWorldPosition); //bc it's a child in this mode
+			camera.lookAt( player.position );
 
 			if ( moveLeft ) {
 				player.rotateY(0.05);
@@ -687,7 +689,7 @@
 			//temp.setFromMatrixPosition(goal.matrixWorld);
 			
 			//camera.position.lerp(temp, 0.2);
-			camera.lookAt( player.position );
+			
 
 			downcaster.ray.origin.copy( player.position );
 			downcaster.ray.origin.y += 10;
@@ -698,19 +700,19 @@
 				// velocity.x = 0;
 				// velocity.y = 0;
 				// velocity.z = 0;
-				const goodSpot = closestNavmeshPoint(playerPosition);
+				const goodSpot = closestNavmeshPoint(player.position);
 				if (goodSpot) {
-					controls.object.position.set(goodSpot.x, goodSpot.y, goodSpot.z); 
+					player.position.set(goodSpot.x, goodSpot.y, goodSpot.z); 
 					console.log("back to goodSpot " + JSON.stringify(goodSpot));
 				}
 			} else {
 				// velocity.y = 0;
 				// intersections[0].point.x = 
-				player.position.y = intersections[0].point.y + 2;
+				player.position.y = intersections[0].point.y + 2; //needs offset var, player location y?
 				
-				canJump = true;
+				canJump = true; //not really
 			}
-			if (controls) {
+			if (controls) { //toggle?
 				controls.update();
 			}
 					
@@ -718,8 +720,7 @@
 		} else { //First personc cam w/ pointer lock and center cursor
 			cameraWorldPosition.copy(camera.position);
 			if ( navmesh && controls && controls.isLocked === true ) {
-				
-			
+							
 				downcaster.ray.origin.copy( controls.object.position );
 				downcaster.ray.origin.y += 10;
 				// console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
@@ -794,9 +795,7 @@
 			if (rapierDebugRenderer && showDebug) {
 				rapierDebugRenderer.update();
 			}		
-			if (physicsIsReady && worldIsReady) {
-				
-				
+			if (world && physicsIsReady && worldIsReady) {
 				
 				atomicBodies.forEach(b => 
 					b.update());
@@ -806,14 +805,17 @@
 			
 				kinematicBodies.forEach(c => 
 					c.update());
-					world.step();//!!!
 
+				world.step();//!!! still wonky with lots of dynamic and kinematic
 			}
 
 			lookAtCameraObjects.forEach(l => 
 				l.lookAt(cameraWorldPosition)
 			)
 
+			if (playerReadyToNav) {
+				playerNavAgent.update();
+			}
 
 			if (doPostProcessing) {
 				postProcessing.render();
@@ -936,8 +938,8 @@
 
 		document.addEventListener( 'keydown', onKeyDown );
 		document.addEventListener( 'keyup', onKeyUp );
-		document.addEventListener ('mouseDown', onMouseDown );
-		document.addEventListener ('mouseUp', onMouseUp );
+		document.addEventListener ('mousedown', onMouseDown );
+		document.addEventListener ('mouseup', onMouseUp );
 		document.addEventListener("wheel", onMouseWheel, false);
 		document.addEventListener('mousemove', onMouseMove);
 
@@ -972,10 +974,13 @@
 		let stopColor = new THREE.Color(0x26de57);
 		let goColor = new THREE.Color(0xff0000);
 		if (raycastHits.length > 0) {
+			
 		// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
 		// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
 			if (raycastHits[0].object.userData.name == "navmesh") {
+				lastRaycastHitObject = raycastHits[0].object; 
 				// console.log("gotsa navmesh mousehit " + JSON.stringify(raycastHits[0].point));
+				lastRaycastHitPosition = raycastHits[0].point;
 				const localNormal = raycastHits[0].face.normal;
 				
 				const worldNormal = localNormal.clone().transformDirection(raycastHits[0].object.matrixWorld);
@@ -983,28 +988,28 @@
 				pointerGizmo.position.set(raycastHits[0].point.x,raycastHits[0].point.y,raycastHits[0].point.z);
 				// pointerGizmo.lookAt(worldNormal);
 				rotateObjectToNormal(pointerGizmo, worldNormal);
-				
-			}
-			if (raycastHits[0].object.name.includes("agent")) {
-				
+			} else if (raycastHits[0].object.userData.name == "player") {
+
+				lastRaycastHitPosition = raycastHits[0].point;
+				lastRaycastHitObject = raycastHits[0].object; 
+
+			} else if (raycastHits[0].object.name.includes("agent")) {
+
+				lastRaycastHitObject = raycastHits[0].object;
 				if ( raycastHitAgent != raycastHits[ 0 ].object ) {
 					console.log ("new raycast hit on agent " + raycastHits[0].object.name);
 					raycastHitAgent = raycastHits[ 0 ].object;	
-
-						if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
+					if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
+						console.log("intersected material found!");
+						raycastHitAgent.material.materialColor = goColor;
+					} else if (raycastHitAgent && raycastHitAgent.material) {
+						raycastHitAgent.material.color = goColor;
 					
-							console.log("intersected material found!");
-							raycastHitAgent.material.materialColor = goColor;
-
-							
-						} else if (raycastHitAgent && raycastHitAgent.material) {
-							raycastHitAgent.material.color = goColor;
-						
-						}
-						const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
-						if (navAgentInstance) {
-							navAgentInstance.agentRaycastHit();
-						}
+					}
+					const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //can do this easier, but good to know
+					if (navAgentInstance) {
+						navAgentInstance.agentRaycastHit();
+					}
 				} else {
 					// console.log("rehit agent " + raycastHits[0].object.name));
 				}
@@ -1021,8 +1026,12 @@
 					}
 				}
 				raycastHitAgent = null;
+				lastRaycastHitObject = null;
 			}
 		} else {
+			if (lastRaycastHitObject) {
+				lastRaycastHitObject = null;
+			}
 			if ( raycastHitAgent ) {
 			// 	{
 				if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
@@ -1112,6 +1121,30 @@
 
 	function onMouseDown(e) {
 		mouseIsDown = true;
+		let lastHitObjectName;
+		if (lastRaycastHitObject && lastRaycastHitPosition) {
+			lastHitObjectName = lastRaycastHitObject.userData ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
+			console.log(JSON.stringify(lastRaycastHitPosition) + " named " + lastHitObjectName);
+			
+			if (lastHitObjectName == "player") {
+				// controls.target.set(player.position);
+				camera.lookAt(player.position);
+				controls.target.set(0,0,0);
+			} else if (lastHitObjectName == "navmesh") {
+				// playerNavAgent.playerNavMode(true);
+				const navAgentInstance = player.userData.NavAgentInstance; //can do this easier, but good to know
+					if (navAgentInstance) {
+						navAgentInstance.playerNav(true);
+					}
+				// controls.target.set(lastRaycastHitPosition.x, lastRaycastHitPosition.y, lastRaycastHitPosition.z);
+			}
+
+			// controls.target.set(lastRaycastHitPosition.x, lastRaycastHitPosition.y, lastRaycastHitPosition.z);
+
+		}
+
+
+		// if ()
 	}
 
 	function onMouseUp(e) {

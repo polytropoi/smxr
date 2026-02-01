@@ -1,6 +1,6 @@
     import * as THREE from 'three';
 
-    import {scene, navmesh} from './three_main.mjs';
+    import {scene, navmesh, player} from './three_main.mjs';
 
     import { Pathfinding, PathfindingHelper } from 'three-pathfinding';
 
@@ -32,23 +32,22 @@
 
     export function CreateAgent (agentIndex, pos) {
 
-            const agentParent = new THREE.Object3D(); //empty
-            agentParent.name = "agentParent_" + agentIndex;
-            agentParent.position.set(pos.x, pos.y, pos.z);
-            // agentParent.add(mesh);
-            // mesh.position.set(0,1,0); //offset on parent navagent
-            scene.add(agentParent);
-      
-        
+        const agentParent = new THREE.Object3D(); //empty
+        agentParent.name = "agentParent_" + agentIndex;
+        agentParent.position.set(pos.x, pos.y, pos.z);
+        // agentParent.add(mesh);
+        // mesh.position.set(0,1,0); //offset on parent navagent
+        scene.add(agentParent);
+            
         const options = {
             object: agentParent,
             nodeRadius: 0.1,
             speed: 4,
+            readyToNav: true,
             // app: this,
             name: 'agent_' + agentIndex,
             npc: true
         };
-
 
         const agent = new NavAgent( options );
         agents.push(agent);
@@ -58,14 +57,33 @@
         // let resp = {}
         // agentMeshes.push(mesh);
         console.log("creating navagent " + agentIndex);
-        // return agentParent;
-        // if (RAPIER) {
-
-        // } 
     }
-    // export function createDefaultNavmesh() {
 
-    // }
+    export function CreatePlayerAgent (object) {
+
+    
+            
+        const options = {
+            object: object,
+            nodeRadius: 0.1,
+            speed: 4,
+            readyToNav: true,
+            // app: this,
+            name: "player",
+            npc: false
+        };
+
+        const agent = new NavAgent( options );
+        agents.push(agent);
+        ThreeText('player', 1, object);
+        
+
+        // let resp = {}
+        // agentMeshes.push(mesh);
+        console.log("creating player navagent ");
+        return agent;
+    }
+   
             
     export async function initAgents () {
         // 
@@ -177,7 +195,7 @@
             this.pathColor = new THREE.Color(0xFFFFFF);
             this.nodeRadius = (options.nodeRadius) ? options.nodeRadius : 0.2;
 
-            this.readyToNav = true;
+            this.readyToNav = options.readyToNav;
             
             scene.add(this.pathLines);
             
@@ -203,6 +221,7 @@
             pt.z += 10;
             this.object.lookAt(pt);
             
+            this.playerNavMode = false;
             if (options.anims){ 
                 //Use this option to crop a single animation into multiple clips
                 this.mixer = new THREE.AnimationMixer(options.object);
@@ -216,7 +235,7 @@
                 this.mixer = new THREE.AnimationMixer(options.object);
                 options.animations.forEach( (animation)=>{
                     self.animations[animation.name.toLowerCase()] = animation;
-                })
+                });
             }
             this.object.userData.NavAgentInstance = this; // add this kinda class object instance to the userdata, to enable fetching instance from e.g. raycast
         }
@@ -272,7 +291,10 @@
                                 // data.waypoints[i].
                             } 
         }
-        
+        playerNav(isOn) {
+            this.playerNavMode = isOn;
+            console.log("playerNavMode " + this.playerNavMode);
+        }
         newPath(pt) {
             const player = this.object;
             
@@ -335,6 +357,7 @@
 
             }
         }
+
         agentRaycastHit () {
             
             const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);

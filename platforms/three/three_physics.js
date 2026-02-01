@@ -24,7 +24,7 @@ export let atomicBodies = [];
 export let staticBodies = [];
 export let kinematicBodies = [];
 
-export const agentCount = 10;
+export const agentCount = 4;
 const dynamicObjectCount = 20;
 
 let atomicParticlesCount = 300;
@@ -86,22 +86,33 @@ class RapierDebugRenderer {
 
 export async function initStaticObjex () { //e.g. ground, walls, etc.. 
     
-    for (let i = 0; i < staticObjex.length; i++) {
-  
-      console.log("tryna init staticObjex " + staticObjex[i].locationData.name + " hide " + staticObjex[i].isHidden);
-     
+  if (staticObjex.length) {
+      for (let i = 0; i < staticObjex.length; i++) {
+    
+        console.log("tryna init staticObjex " + staticObjex[i].locationData.name + " hide " + staticObjex[i].isHidden);
+      
         const pos = new THREE.Vector3(staticObjex[i].locationData.x, staticObjex[i].locationData.y, staticObjex[i].locationData.z);
       
         await createStaticCollider(staticObjex[i].mesh, pos);
-        
+          
+      }
+      WaitAndInit();
+    } else {
+      let colliderDesc = RAPIER.ColliderDesc.cuboid(150,.1,150);
+      const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0,-6.1,0);
+      const staticBody = await world.createRigidBody(rbDesc);
+      let collider = await world.createCollider(colliderDesc, staticBody);
+      collider.setRestitution(.5);
+      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      WaitAndInit();
     }
-    WaitAndInit();
   }
-export async function createStaticCollider (model, position) { // may not be added to the scene if hidden?
-    console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(position));
+export async function createStaticCollider (model) { // may not be added to the scene if hidden?
+    // console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(position));
    
-    try {
-      const geometry = model.geometry; //sent as child mesh
+    try { 
+      
+          const geometry = model.geometry; //sent as child mesh
       // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
 
       const vertices = geometry.attributes.position.array;
