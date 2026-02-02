@@ -17,6 +17,7 @@
     // let agentCount = 20;
     export let agentsAreReady = false;
 
+    export let playerNavAgent;
 
     import { returnMaterial } from './tsl/tsl_materials.js'
 
@@ -59,12 +60,19 @@
         console.log("creating navagent " + agentIndex);
     }
 
-    export function CreatePlayerAgent (object) {
-
+    export function CreatePlayerAgent (object, pos) { //hrm, not yet...
     
+        const agentParent = new THREE.Object3D(); //empty
+        agentParent.name = "player_parent";
+        agentParent.position.set(object.position.x, object.position.y + 1, object.position.z);
+        // agentParent.add(mesh);
+        // mesh.position.set(0,1,0); //offset on parent navagent
+        
+        scene.add(agentParent);
+        agentParent.add(object);
             
         const options = {
-            object: object,
+            object: agentParent,
             nodeRadius: 0.1,
             speed: 4,
             readyToNav: true,
@@ -73,15 +81,15 @@
             npc: false
         };
 
-        const agent = new NavAgent( options );
-        agents.push(agent);
-        ThreeText('player', 1, object);
+        playerNavAgent = new NavAgent( options );
+        // agents.push(agent);
+
         
 
         // let resp = {}
         // agentMeshes.push(mesh);
         console.log("creating player navagent ");
-        return agent;
+        // return playerNavAgent;
     }
    
             
@@ -153,8 +161,13 @@
         // console.log("testing " + (JSON.stringify(testPosition)) + " " + navmesh + " " + pathfinding);
         if (navmesh && pathfinding) {
             const goodSpot = pathfinding.getClosestNode(testPosition, ZONE, groupID, false);
-            console.log("tryna get testPosition " + JSON.stringify(testPosition) +  " vs goodSpot " + JSON.stringify(goodSpot.centroid));
-            return goodSpot.centroid; 
+            // console.log("tryna get testPosition " + JSON.stringify(testPosition) +  " vs goodSpot " + JSON.stringify(goodSpot.centroid));
+            if (goodSpot) {
+                return goodSpot.centroid; 
+            } else {
+                return null;
+            }
+            
         } else {
             if (navmesh && !pathfinding) { 
                 // InitPathfinding();
@@ -294,11 +307,16 @@
         playerNav(isOn) {
             this.playerNavMode = isOn;
             console.log("playerNavMode " + this.playerNavMode);
+            this.readyToNav = true;
         }
         newPath(pt) {
             const player = this.object;
+            if (this.name == "player") {
+                console.log("tryna get player path to " + JSON.stringify(pt));
+            }
             
             if (this.pathfinder===undefined) {
+                console.log("no pathfinder!");
                 this.calculatedPath = [ pt.clone() ];
                 this.setTargetDirection();
                 return;
@@ -308,17 +326,29 @@
             // }
                     
             // Calculate a path to the target and store it
-            this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
+            const startPos = closestNavmeshPoint(player.position);
+            const endPos = closestNavmeshPoint(pt);
+
+            // this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
             
+            this.calculatedPath = this.pathfinder.findPath(startPos, endPos, this.ZONE, this.navMeshGroup);
+            
+
             if (this.calculatedPath && this.calculatedPath.length) {
                 this.action = 'walk';
                 
                 this.setTargetDirection();
+                if (this.name == "player") {
+                    console.log("tryna walk with new path");
+                }
                 
                 // if (debug.showPath && !this.npc){
                 	// this.showPathLines();
                 // }
             } else {
+                if (this.name == "player") {
+                    console.log("cain't find path to " + JSON.stringify(pt));
+                }
                 this.action = 'idle';
 
                 //if we get stuck in bad navmesh spot
@@ -516,6 +546,10 @@
             // }
             if (this.readyToNav) {
                 if (this.calculatedPath && this.calculatedPath.length) {
+
+                    if (this.name == "player") {
+                        console.log("tryna update player on path " + JSON.stringify(player.position));
+                    }
                     const targetPosition = this.calculatedPath[0];
 
                     const vel = targetPosition.clone().sub(player.position);
@@ -527,11 +561,20 @@
                         const prevDistanceSq = player.position.distanceToSquared(targetPosition);
                         vel.normalize();
                         // Move player to target
-                        if (this.quaternion) player.quaternion.slerp(this.quaternion, 0.1);
-                        player.position.add(vel.multiplyScalar(dt * speed));
-                        //Get distance after moving, if greater then we've overshot and this leg is complete
-                        const newDistanceSq = player.position.distanceToSquared(targetPosition);
-                        pathLegComplete = (newDistanceSq > prevDistanceSq);
+                        if (!this.playerNavMode) {
+                            if (this.quaternion) player.quaternion.slerp(this.quaternion, 0.1);
+                            player.position.add(vel.multiplyScalar(dt * speed));
+                            //Get distance after moving, if greater then we've overshot and this leg is complete
+                            const newDistanceSq = player.position.distanceToSquared(targetPosition);
+                            pathLegComplete = (newDistanceSq > prevDistanceSq);
+                        } else {
+                            if (this.quaternion) player.parent.quaternion.slerp(this.quaternion, 0.1);
+                            player.parent.position.add(vel.multiplyScalar(dt * speed));
+                            //Get distance after moving, if greater then we've overshot and this leg is complete
+                            const newDistanceSq = player.parent.position.distanceToSquared(targetPosition);
+                            pathLegComplete = (newDistanceSq > prevDistanceSq);
+                        }
+                        
                     } 
                     
                     if (pathLegComplete){
@@ -541,7 +584,7 @@
                             if (this.npc){
                                 this.newPath(randomNavmeshPoint());
                             }else{
-                                player.position.copy( targetPosition );
+                                // player.position.copy( targetPosition );
                             
                             }
                         }else{

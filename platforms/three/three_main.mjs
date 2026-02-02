@@ -22,7 +22,7 @@
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 	import { SetSceneLocations } from '../../../connect/connect.js';
 
-	import { CreatePlayerAgent, InitPathfinding, agentParents, agents, closestNavmeshPoint } from './three_nav.js';
+	import { CreatePlayerAgent, InitPathfinding, agentParents, agents, closestNavmeshPoint, playerNavAgent } from './three_nav.js';
 
 	import { getRainbowMaterial } from './tsl/rainbow.js'
 
@@ -50,9 +50,10 @@
 	let locationData;
 	let modelsData;
 	let raycastHitAgent;
-	let mousecaster;
-	let centercaster;
-	let downcaster, stats, reticle;
+	// let mousecaster;
+	// let centercaster;
+	// let playcaster
+	let mousecaster, centercaster, playcaster, downcaster, stats, reticle;
 	// let mixer, objects;
 	export let water;// waterLayer0, waterLayer1;
 	export let clock;
@@ -66,15 +67,15 @@
 
 	let doPostProcessing = false;
 	
+	export let activeObjex = []; //raycastable
 
-	export let activeObjex = [];
-	let dynamicObjex = [];
+	export let staticObjex = []; //physics
+	export let dynamicObjex = []; //""
 
-	export let staticObjex = [];
 	let navmeshObjex = [];
 	let surfaceObjex = [];
 
-	let cameraMode = "Orbit";
+	let cameraMode = "Orbit"; //default
 
 	let groundObjex = [];
 	let moveForward = false;
@@ -94,6 +95,7 @@
 	let goal, keys, follow;
 	
 	var dir = new THREE.Vector3;
+	let playerDirection = new THREE.Vector3();
 	var playerVector = new THREE.Vector3;
 	var goalVector = new THREE.Vector3;
 	var followDistance = 10;
@@ -102,9 +104,10 @@
 	let cameraWorldPosition = new THREE.Vector3();
 
 	let pointerGizmo;
+	let arrowHelper;
 	let lastRaycastHitPosition;
 	let lastRaycastHitObject;
-	let playerNavAgent;
+	// let playerNavAgent;
 	let playerReadyToNav = false;
 
 
@@ -170,7 +173,7 @@
 				blocker.style.display = "none";
 				instructions.style.display = "none";
 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
-					camera.position.set( 0, followDistance, -followDistance );
+				camera.position.set( 0, followDistance, -followDistance );
 					// camera.lookAt( 0, 1, 0 );
 
 				controls = new OrbitControls( camera, renderer.domElement );
@@ -182,8 +185,9 @@
 				
 				mousecaster = new THREE.Raycaster();	
 				downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
+				playcaster = new THREE.Raycaster();
 				var geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
-				var material = new THREE.MeshNormalMaterial();
+				var material = new THREE.MeshBasicMaterial({"wireframe": true});
 
 				player = new THREE.Mesh( geometry, material );
 				player.userData.name = "player";
@@ -204,6 +208,13 @@
 				fVelocity = 0.0;
 				camera.lookAt(player.position);
 				// controls.target.set(player.position);
+				const dir = new THREE.Vector3(); // Direction (will be updated)
+				const origin = new THREE.Vector3(); // Origin (will be updated)
+				const length = 10; // Length of the arrow
+				const hex = 0xff0000; // Color (e.g., red)
+
+				arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
+				scene.add(arrowHelper);
 				isReady = true;
 			} else {
 				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
@@ -479,7 +490,9 @@
 			if (cameraMode == "Third Person") {
 				const playerBody = await getPlayerBody();
 				kinematicBodies.push(playerBody);
-				playerNavAgent = CreatePlayerAgent(player);
+
+				ThreeText('player', 10, player);
+				// CreatePlayerAgent(player, player.position.clone());
 			}
 			//  await new Promise(r => setTimeout(r, 000)); //fudge
 			initEvents();
@@ -657,64 +670,80 @@
 		} else if (settings && player && cameraMode == "Third Person") { // kinda combines follow cam and orbit control
 			speed = 0.0;
 			
-			if ( moveForward ) {
-				camera.lookAt( player.position );
-				// controls.target.set(player.position.x, player.position.z, player.position.z);
-				speed = .2;
-				// console.log("speed " + speed);		
-			} else if ( moveBackward ) {
-				camera.lookAt( player.position );
-				// controls.target.set(player.position.x, player.position.z, player.position.z);
-				speed = -.2;
-			}
-					
-			fVelocity += ( speed - fVelocity ) * .5;
-			player.translateZ( fVelocity );
-			camera.getWorldPosition(cameraWorldPosition); //bc it's a child in this mode
-			camera.lookAt( player.position );
-
-			if ( moveLeft ) {
-				player.rotateY(0.05);
-			} else if ( moveRight ) {
-				player.rotateY(-0.05);
-			}
+			// if (!playerReadyToNav) {
 				
-			playerVector.lerp(player.position, .5);
-			goalVector.copy(goal.position);
-			
-			dir.copy( playerVector ).sub( goalVector ).normalize();
-			const dis = playerVector.distanceTo( goalVector ) - followDistance;
-			goal.position.addScaledVector( dir, dis );
-			// console.log("goal position " + JSON.stringify(goal.position));
-			//temp.setFromMatrixPosition(goal.matrixWorld);
-			
-			//camera.position.lerp(temp, 0.2);
-			
-
-			downcaster.ray.origin.copy( player.position );
-			downcaster.ray.origin.y += 10;
-			// console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
-			const intersections = downcaster.intersectObjects( groundObjex, false ); //groundObjex == navmesh
-			if (!intersections.length) {
-				//off the navmesh, get closest point and go back
-				// velocity.x = 0;
-				// velocity.y = 0;
-				// velocity.z = 0;
-				const goodSpot = closestNavmeshPoint(player.position);
-				if (goodSpot) {
-					player.position.set(goodSpot.x, goodSpot.y, goodSpot.z); 
-					console.log("back to goodSpot " + JSON.stringify(goodSpot));
+				
+				if ( moveForward ) {
+					camera.lookAt( player.position );
+					// controls.target.set(player.position.x, player.position.z, player.position.z);
+					speed = .2;
+					// console.log("speed " + speed);		
+				} else if ( moveBackward ) {
+					camera.lookAt( player.position );
+					// controls.target.set(player.position.x, player.position.z, player.position.z);
+					speed = -.2;
 				}
-			} else {
-				// velocity.y = 0;
-				// intersections[0].point.x = 
-				player.position.y = intersections[0].point.y + 2; //needs offset var, player location y?
+						
+				fVelocity += ( speed - fVelocity ) * .5;
+				player.translateZ( fVelocity );
+				camera.getWorldPosition(cameraWorldPosition); //bc it's a child in this mode
+				camera.lookAt( player.position );
+
+				if ( moveLeft ) {
+					player.rotateY(0.025);
+				} else if ( moveRight ) {
+					player.rotateY(-0.025);
+				}
+					
+				playerVector.lerp(player.position, .5);
+				goalVector.copy(goal.position);
 				
-				canJump = true; //not really
-			}
-			if (controls) { //toggle?
-				controls.update();
-			}
+				dir.copy( playerVector ).sub( goalVector ).normalize();
+				const dis = playerVector.distanceTo( goalVector ) - followDistance;
+				goal.position.addScaledVector( dir, dis );
+				// console.log("goal position " + JSON.stringify(goal.position));
+				//temp.setFromMatrixPosition(goal.matrixWorld);
+				
+				//camera.position.lerp(temp, 0.2);
+				
+
+				downcaster.ray.origin.copy( player.position );
+				downcaster.ray.origin.y += 10;
+				// console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
+				const intersections = downcaster.intersectObjects( groundObjex, false ); //groundObjex == navmesh
+				if (!intersections.length) {
+					//off the navmesh, get closest point and go back
+					// velocity.x = 0;
+					// velocity.y = 0;
+					// velocity.z = 0;
+					const goodSpot = closestNavmeshPoint(player.position);
+					if (goodSpot) {
+						player.position.set(goodSpot.x, goodSpot.y, goodSpot.z); 
+						console.log("back to goodSpot " + JSON.stringify(goodSpot));
+					}
+				} else {
+					// velocity.y = 0;
+					// intersections[0].point.x = 
+					player.position.y = intersections[0].point.y + 2; //needs offset var, player location y?
+					
+					canJump = true; //not really
+				}
+
+				
+
+
+
+				if (controls) { //toggle?
+					controls.update();
+				}
+
+			// }
+			const origin = player.position.clone();
+				player.getWorldDirection(playerDirection);
+				playcaster.set(origin, playerDirection);
+			arrowHelper.setDirection(playcaster.ray.direction);
+			arrowHelper.position.copy(playcaster.ray.origin);
+			playerRaycast();
 					
 
 		} else { //First personc cam w/ pointer lock and center cursor
@@ -813,7 +842,7 @@
 				l.lookAt(cameraWorldPosition)
 			)
 
-			if (playerReadyToNav) {
+			if (playerNavAgent && playerReadyToNav) {
 				playerNavAgent.update();
 			}
 
@@ -1047,6 +1076,72 @@
 		}
 	}
 	
+
+	function playerRaycast () {
+
+		if (playcaster) {
+			var raycastHits = playcaster.intersectObjects(activeObjex, true);
+			let selectColor = new THREE.Color(0xff3333);
+			let stopColor = new THREE.Color(0x26de57);
+			let goColor = new THREE.Color(0xff0000);
+			if (raycastHits.length > 0) {
+				
+			// console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
+			// 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+				if (raycastHits[0].object.name.includes("agent")) {
+
+					lastRaycastHitObject = raycastHits[0].object;
+					if ( raycastHitAgent != raycastHits[ 0 ].object ) {
+						console.log ("new raycast hit on agent " + raycastHits[0].object.name);
+						raycastHitAgent = raycastHits[ 0 ].object;	
+						if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
+							console.log("intersected material found!");
+							raycastHitAgent.material.materialColor = goColor;
+						} else if (raycastHitAgent && raycastHitAgent.material) {
+							raycastHitAgent.material.color = goColor;
+						
+						}
+						const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //can do this easier, but good to know
+						if (navAgentInstance) {
+							navAgentInstance.agentRaycastHit();
+						}
+					} else {
+						// console.log("rehit agent " + raycastHits[0].object.name));
+					}
+				} else {
+					if ( raycastHitAgent ) {
+						if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+							// console.log("tryna reset agent colornode after no hit");
+							raycastHitAgent.material.materialColor = stopColor;
+							raycastHitAgent.material.needsUpdate = true;
+							
+						} else if (raycastHitAgent.material) {
+							// console.log("tryna reset agent color after no hit");
+							raycastHitAgent.material.color = stopColor;
+						}
+					}
+					raycastHitAgent = null;
+					lastRaycastHitObject = null;
+				}
+			} else {
+				if (lastRaycastHitObject) {
+					lastRaycastHitObject = null;
+				}
+				if ( raycastHitAgent ) {
+				// 	{
+					if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+						// console.log("tryna reset agent color after no hit");
+						raycastHitAgent.material.materialColor = stopColor;
+						raycastHitAgent.material.needsUpdate = true;
+					} else if (raycastHitAgent.material) {
+						// console.log("tryna reset agent color after no hit");
+						raycastHitAgent.material.color = stopColor;
+					}
+				}
+				raycastHitAgent = null;
+			}
+		}
+	}
 	function centerRaycast () {
 		if (scene && camera && centercaster && isReady) {
 
@@ -1120,6 +1215,7 @@
 	}
 
 	function onMouseDown(e) {
+		playerReadyToNav = true;
 		mouseIsDown = true;
 		let lastHitObjectName;
 		if (lastRaycastHitObject && lastRaycastHitPosition) {
@@ -1135,6 +1231,9 @@
 				const navAgentInstance = player.userData.NavAgentInstance; //can do this easier, but good to know
 					if (navAgentInstance) {
 						navAgentInstance.playerNav(true);
+						// controls
+						// player.position.set(closestNavmeshPoint(player.position.x, player.position.y, player.position.z ));
+						navAgentInstance.newPath(lastRaycastHitPosition);
 					}
 				// controls.target.set(lastRaycastHitPosition.x, lastRaycastHitPosition.y, lastRaycastHitPosition.z);
 			}
@@ -1149,6 +1248,7 @@
 
 	function onMouseUp(e) {
 		mouseIsDown = false;
+		playerReadyToNav = false;
 	}
 
 
