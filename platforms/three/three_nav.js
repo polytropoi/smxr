@@ -326,12 +326,12 @@
             // }
                     
             // Calculate a path to the target and store it
-            const startPos = closestNavmeshPoint(player.position);
-            const endPos = closestNavmeshPoint(pt);
+            // const startPos = closestNavmeshPoint(player.position); 
+            // const endPos = closestNavmeshPoint(pt);
 
-            // this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
+            this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
             
-            this.calculatedPath = this.pathfinder.findPath(startPos, endPos, this.ZONE, this.navMeshGroup);
+            // this.calculatedPath = this.pathfinder.findPath(startPos, endPos, this.ZONE, this.navMeshGroup);
             
 
             if (this.calculatedPath && this.calculatedPath.length) {
