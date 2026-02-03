@@ -1698,7 +1698,13 @@ canvas {
 				cursor: pointer;
 			}
 
-      body {
+body {
     overflow: hidden; /* Hide scrollbars and prevent scrolling */
     margin: 0; /* Ensures no default margin causes overflow issues */
+}
+
+#stats-container {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
 }

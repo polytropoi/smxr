@@ -25,7 +25,7 @@ export async function ThreeText (textString, size, parent) { //
     const text = await Text.create({
         // width: 1,
         text: textString,
-        font: '../../fonts/web/Bitter.woff',
+        font: '../../fonts/web/Acme.woff',
         depth: 0.02,
         // align: 'center',
         size: size / stringCount ,
@@ -82,7 +82,7 @@ export async function ThreeText (textString, size, parent) { //
         container.add(textmesh, bgmesh);
         scene.add(container);
             const camPos = camera.position.clone();
-        container.position.set(camPos.x, camPos.y, camPos.z - 10);
+        container.position.set(camPos.x, camPos.y, camPos.z - 20);
         textmesh.position.set(-3,yscale / 5,.25);
     }
     

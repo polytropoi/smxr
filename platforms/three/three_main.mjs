@@ -20,7 +20,7 @@
 	import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 	import { settings } from '../../../connect/settings.js';
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
-	import { SetSceneLocations } from '../../../connect/connect.js';
+	import { SetSceneLocations, userData } from '../../../connect/connect.js';
 
 	import { CreatePlayerAgent, InitPathfinding, agentParents, agents, closestNavmeshPoint, playerNavAgent } from './three_nav.js';
 
@@ -36,31 +36,26 @@
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
-
-	// import { Container } from '@pmndrs/uikit' //arghh
-
 	import Stats from './ui/stats.js';
-
-
-
-// import { sceneObjects } from '../../connect/dialogs.js';
 
 	export let scene, navmesh, surface;
 
 	let locationData;
 	let modelsData;
 	let raycastHitAgent;
-	// let mousecaster;
-	// let centercaster;
-	// let playcaster
-	let mousecaster, centercaster, playcaster, downcaster, stats, reticle;
+	let isDragging = false;
+	let previousMousePosition = {
+		x: 0,
+		y: 0
+	};
+	let mousecaster, centercaster, playcaster, downcaster, stats, reticle, pivot;
 	// let mixer, objects;
 	export let water;// waterLayer0, waterLayer1;
 	export let clock;
 	export let camera, renderer;
 	let model, floor, floorPosition;
 	let postProcessing;
-	let showDebug = true;
+	let showDebug = false;
 	let controls;
 	let isReady = false;
 	let mouseIsDown = false;
@@ -98,7 +93,7 @@
 	let playerDirection = new THREE.Vector3();
 	var playerVector = new THREE.Vector3;
 	var goalVector = new THREE.Vector3;
-	var followDistance = 10;
+	var followDistance = 16;
 	let fVelocity = 0.0;
 	var speed = 0.0;
 	let cameraWorldPosition = new THREE.Vector3();
@@ -173,16 +168,19 @@
 				blocker.style.display = "none";
 				instructions.style.display = "none";
 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
-				camera.position.set( 0, followDistance, -followDistance );
+				// camera.position.set( 0, followDistance, -followDistance );
+				camera.position.set( 0, followDistance / 2, -followDistance );
 					// camera.lookAt( 0, 1, 0 );
 
-				controls = new OrbitControls( camera, renderer.domElement );
-				controls.minDistance = 1;
-				controls.maxDistance = 300;
-				controls.maxPolarAngle = Math.PI * 0.5;
+					controls = new OrbitControls( camera, renderer.domElement );
+					controls.minDistance = 0;
+					controls.maxDistance = 300;
+					controls.maxPolarAngle = Math.PI * 0.5;
+					// controls.enabled = false;
 				// controls.autoRotate = true;
 				// controls.autoRotateSpeed = 1;
 				
+
 				mousecaster = new THREE.Raycaster();	
 				downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
 				playcaster = new THREE.Raycaster();
@@ -194,9 +192,19 @@
 				activeObjex.push(player);
 
 				goal = new THREE.Object3D;
-				follow = new THREE.Object3D;
+				// follow = new THREE.Object3D;
+
 				goal.position.z = -followDistance;
 				goal.add( camera );
+
+				// pivot = new THREE.Object3D();
+				// scene.add(pivot);
+				// pivot.position.copy(camera.position); // Initialize the pivot at the camera's starting position
+
+				// Optional: offset the camera slightly from the pivot point
+				camera.position.z = 1; // Position the camera slightly behind the pivot
+				// pivot.add(camera);
+
 				scene.add( player );
 				// console.log("ADDING PLAYER FOR THIRD PERSON");
 				// keys = {
@@ -490,14 +498,14 @@
 			if (cameraMode == "Third Person") {
 				const playerBody = await getPlayerBody();
 				kinematicBodies.push(playerBody);
-
-				ThreeText('player', 10, player);
+				const avatarName = userData.avatarName
+				ThreeText(avatarName, 10, player);
 				// CreatePlayerAgent(player, player.position.clone());
 			}
 			//  await new Promise(r => setTimeout(r, 000)); //fudge
 			initEvents();
-			const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
-						ThreeText(texttest);
+			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
+			// 			ThreeText(texttest);
 		}
 
 		function createDefaultNavmesh() {
@@ -563,12 +571,17 @@
 		if (settings && settings.sceneTags) {
 			// if (settings.sceneTags.includes("debug")) {
 			// stats.showPanel( 0,1,2,3 );
-			stats = new Stats();
+					stats = new Stats();
+					const statsContainer = document.createElement('div');
+					statsContainer.id = 'stats-container';
+					document.body.appendChild(statsContainer);
+					statsContainer.appendChild(stats.dom);
 
-			stats.domElement.style.right = 'auto';
-			stats.domElement.style.left = '0px'; // Positioned at top-right
-			stats.domElement.style.bottom = '0px';
-			document.body.appendChild(stats.domElement);
+			// document.body.appendChild(stats.domElement);
+			// stats.domElement.style.right = 'auto';
+			// stats.domElement.style.left = '0px'; // Positioned at top-right
+			// stats.domElement.style.bottom = '20px';
+
 			// }
 			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
 				const waterModule = await import ('./tsl/tsl_water.js');
@@ -581,7 +594,11 @@
 				}
 								// water = waterModule.water;
 				console.log("water is " + water);
-			} 
+			}
+
+			if (settings.sceneTags.includes("debug")) {
+				showDebug = true;
+			}
 
 			// }
 		}
@@ -674,12 +691,12 @@
 				
 				
 				if ( moveForward ) {
-					camera.lookAt( player.position );
+					// camera.lookAt( player.position );
 					// controls.target.set(player.position.x, player.position.z, player.position.z);
 					speed = .2;
 					// console.log("speed " + speed);		
 				} else if ( moveBackward ) {
-					camera.lookAt( player.position );
+					// camera.lookAt( player.position );
 					// controls.target.set(player.position.x, player.position.z, player.position.z);
 					speed = -.2;
 				}
@@ -701,6 +718,8 @@
 				dir.copy( playerVector ).sub( goalVector ).normalize();
 				const dis = playerVector.distanceTo( goalVector ) - followDistance;
 				goal.position.addScaledVector( dir, dis );
+
+				
 				// console.log("goal position " + JSON.stringify(goal.position));
 				//temp.setFromMatrixPosition(goal.matrixWorld);
 				
@@ -725,6 +744,16 @@
 					// velocity.y = 0;
 					// intersections[0].point.x = 
 					player.position.y = intersections[0].point.y + 2; //needs offset var, player location y?
+
+				 
+				// console.log("gotsa navmesh mousehit " + JSON.stringify(raycastHits[0].point));
+				// const localNormal = intersections[0].face.normal;
+				
+				// const worldNormal = localNormal.clone().transformDirection(intersections[0].object.matrixWorld);
+				
+				// player.lookAt(worldNormal);
+				// rotateObjectToNormal(player, worldNormal);
+				// player.rotateZ(worldNormal.z);
 					
 					canJump = true; //not really
 				}
@@ -878,24 +907,27 @@
 	function initEvents () {
 
 	function onMouseWheel(e) {
-		if (!controls) {
+		if (!controls || !controls.enabled) {
 		// if (controls && (controls.getDistance() < 300)) {
  			const v = followDistance + e.deltaY * 0.005;
 			// if (v >= 0 && v <= 100) {
 				followDistance = v;
-				camera.position.y = v;
+				console.log('v is ' + v);
+				camera.position.y = v / 2;
+
+
 			// }
 			// return false;
 		} else {
 			const distanceFactor = controls.getDistance();
-			if (distanceFactor < 30) {
+			if (distanceFactor < 20) {
 				controls.maxPolarAngle = Math.PI * .5;
-			} else if (distanceFactor < 50) {
+			} else if (distanceFactor < 30) {
 				controls.maxPolarAngle = Math.PI * .4;
-			} else if (distanceFactor < 100) {
+			} else if (distanceFactor < 50) {
 				controls.maxPolarAngle = Math.PI * .3;
 			}
-			// console.log("distanceFactor " + distanceFactor);
+			console.log("distanceFactor " + distanceFactor);
 			// controls.maxPolarAngle = Math.PI * distanceFactor;
 		}
 		// }
@@ -1026,7 +1058,7 @@
 
 				lastRaycastHitObject = raycastHits[0].object;
 				if ( raycastHitAgent != raycastHits[ 0 ].object ) {
-					console.log ("new raycast hit on agent " + raycastHits[0].object.name);
+					console.log ("new mouse raycast hit on agent " + raycastHits[0].object.name);
 					raycastHitAgent = raycastHits[ 0 ].object;	
 					if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
 						console.log("intersected material found!");
@@ -1092,7 +1124,7 @@
 
 					lastRaycastHitObject = raycastHits[0].object;
 					if ( raycastHitAgent != raycastHits[ 0 ].object ) {
-						console.log ("new raycast hit on agent " + raycastHits[0].object.name);
+						console.log ("new player raycast hit on agent " + raycastHits[0].object.name);
 						raycastHitAgent = raycastHits[ 0 ].object;	
 						if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
 							console.log("intersected material found!");
@@ -1214,7 +1246,7 @@
 		}
 	}
 
-	function onMouseDown(e) {
+	function onMouseDown(event) {
 		playerReadyToNav = true;
 		mouseIsDown = true;
 		let lastHitObjectName;
@@ -1241,6 +1273,11 @@
 			// controls.target.set(lastRaycastHitPosition.x, lastRaycastHitPosition.y, lastRaycastHitPosition.z);
 
 		}
+		// isDragging = true;
+		previousMousePosition = {
+			x: event.clientX,
+			y: event.clientY
+		};
 
 
 		// if ()
@@ -1249,14 +1286,39 @@
 	function onMouseUp(e) {
 		mouseIsDown = false;
 		playerReadyToNav = false;
+
 	}
 
 
-	function onMouseMove(e) {
+	function onMouseMove(event) {
 		// console.log("mouse move " +scene + mouse + camera + mousecaster + isReady);
 		if (scene && mouse && camera && mousecaster && isReady) {
-			mouseRaycast(e);
+			mouseRaycast(event);
 		}
+
+		//  if (!mouseIsDown) return; //nope, orbit is better
+
+		// 	const deltaX = event.clientX - previousMousePosition.x;
+		// 	const deltaY = event.clientY - previousMousePosition.y;
+
+		// 	// Adjust rotation speed with a sensitivity scale factor
+		// 	const sensitivity = 0.003; 
+
+		// 	// Apply rotation to the pivot
+		// 	// Rotate around the Y-axis for horizontal movement (yaw)
+		// 	goal.rotation.y += deltaX * sensitivity; 
+		// 	// Rotate around the X-axis for vertical movement (pitch)
+		// 	// You might want to limit the pitch rotation to prevent the camera from flipping upside down
+		// 	goal.rotation.x += deltaY * sensitivity;
+
+		// 	// Optional: clamp vertical rotation (e.g., between -PI/2 and PI/2)
+		// 	goal.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, goal.rotation.x));
+
+
+		// 	previousMousePosition = {
+		// 		x: event.clientX,
+		// 		y: event.clientY
+		// 	};
 	}
 
 	function rotateObjectToNormal(object, targetNormal) {
