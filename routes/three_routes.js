@@ -380,6 +380,7 @@ three_router.get('/:_id', function (req, res) {
                             "\x22three-pathfinding\x22: \x22/platforms/three/src/three-pathfinding.module.js\x22,"+
                             "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
                              "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
+                             "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+
                             
                             // "\x22three-mesh-ui\x22: \x22https://unpkg.com/three-mesh-ui@6.4.0/build/three-mesh-ui.module.js\x22,"+
                             // https://unpkg.com/three-mesh-ui@6.4.1/build/three-mesh-ui.js
@@ -898,7 +899,7 @@ three_router.get('/:_id', function (req, res) {
            
                                 
 
-                if (sceneData.sceneTags.includes("transport")) {
+                if (sceneData.sceneTags.includes("transport") || showTransport) {
 
                     transportButtons = "<div class=\x22transport_buttons\x22>"+
 
@@ -3227,7 +3228,7 @@ three_router.get('/:_id', function (req, res) {
                         // "<body>" +
                                 "<div id=\x22dialog_button\x22><i class=\x22three_dialog_button fas fa-info-circle fa-2x\x22></i></div>"+
                                
-                                "<div id=\x22blocker\x22>" +
+                                "<div id=\x22blocker\x22 style=\x22display:none\x22>" +
                                             "<div id=\x22instructions\x22>" +
                                                 "<p style=\x22font-size:36px\x22>" +
                                                     "Click to play" +
@@ -3239,7 +3240,7 @@ three_router.get('/:_id', function (req, res) {
                                                 "</p>" +
                                             "</div>" +
                                        "</div>" +
-                                // transportButtons+ 
+                                transportButtons+ 
                                 // dialogButton +
                                 canvasOverlay +
                                 

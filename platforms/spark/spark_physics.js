@@ -200,7 +200,9 @@ function WaitAndInit () {
   physicsIsReady = true;
   worldIsReady = true;
   // togglePostProcessing();
-  initDynamicObjex();
+  if (settings && settings.sceneTags && settings.sceneTags.includes("test")) {
+    initDynamicObjex();
+  }
 }
 
   export async function getKinematicAgentBodies () {

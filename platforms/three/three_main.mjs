@@ -32,9 +32,13 @@
 
 	import { world, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, worldIsReady, initStaticObjex, 
-		initAtoms, atomicBodies, getPlayerBody} from './three_physics.js';
+		initAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup} from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
+
+		import { getVideo, getHandLandmarker } from './three_vision.js';
+
+				import { createLight, lightMods } from './three_lights.js';
 
 	import Stats from './ui/stats.js';
 
@@ -93,7 +97,7 @@
 	let playerDirection = new THREE.Vector3();
 	var playerVector = new THREE.Vector3;
 	var goalVector = new THREE.Vector3;
-	var followDistance = 16;
+	var followDistance = 20;
 	let fVelocity = 0.0;
 	var speed = 0.0;
 	let cameraWorldPosition = new THREE.Vector3();
@@ -104,7 +108,8 @@
 	let lastRaycastHitObject;
 	// let playerNavAgent;
 	let playerReadyToNav = false;
-
+	let video, videomesh, handLandmarker, useHandLandmarks;
+	// const { video, handLandmarker } = await getVisionStuff();
 
 	eventEl.addEventListener('ready-event', init); //fired when settings are loaded..
 
@@ -137,15 +142,22 @@
 		document.body.appendChild( renderer.domElement );
 
 		cameraMode = settings.sceneCameraMode;
+			if (cameraMode == "Fixed") {
 
-			if (cameraMode == "Orbit") {
+				camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+				camera.position.z = 5;
+				
+				
+				isReady = true;
+			} else if (cameraMode == "Orbit") {
 											camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
-					camera.position.set( 10, 50, 10 );
+					camera.position.set( 0, 5, 15 );
 					camera.lookAt( 0, 1, 0 );
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.minDistance = 1;
 				controls.maxDistance = 300;
 				controls.maxPolarAngle = Math.PI * 0.5;
+
 				// controls.autoRotate = true;
 				// controls.autoRotateSpeed = 1;
 				controls.target.set( 0, .2, 0 );
@@ -163,19 +175,20 @@
 				mousecaster = new THREE.Raycaster();
 			} else if (cameraMode == "Third Person") {
 				
-					const blocker = document.getElementById( 'blocker' );
+				const blocker = document.getElementById( 'blocker' );
 				const instructions = document.getElementById( 'instructions' );
 				blocker.style.display = "none";
 				instructions.style.display = "none";
 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
 				// camera.position.set( 0, followDistance, -followDistance );
-				camera.position.set( 0, followDistance / 2, -followDistance );
+				camera.position.set( 0, 10, -followDistance );
 					// camera.lookAt( 0, 1, 0 );
 
 					controls = new OrbitControls( camera, renderer.domElement );
-					controls.minDistance = 0;
-					controls.maxDistance = 300;
-					controls.maxPolarAngle = Math.PI * 0.5;
+					controls.minDistance = 3;
+					controls.maxDistance = 150;
+					controls.maxPolarAngle = Math.PI * .6;
+										controls.minPolarAngle = Math.PI * .2;
 					// controls.enabled = false;
 				// controls.autoRotate = true;
 				// controls.autoRotateSpeed = 1;
@@ -223,6 +236,8 @@
 
 				arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
 				scene.add(arrowHelper);
+
+
 				isReady = true;
 			} else {
 				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
@@ -231,8 +246,8 @@
 				controls = new PointerLockControls( camera, document.body ); //use regular fp controls if has navmesh
 				downcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
 			
-				// centercaster = new THREE.Raycaster();
-				mousecaster = new THREE.Raycaster();
+				centercaster = new THREE.Raycaster();
+				// mousecaster = new THREE.Raycaster();
 
 				reticle = InitReticle();
 				reticle.position.z = -0.5;
@@ -242,6 +257,8 @@
 
 				const blocker = document.getElementById( 'blocker' );
 				const instructions = document.getElementById( 'instructions' );
+								blocker.style.display = "block";
+				instructions.style.display = "block";
 
 				instructions.addEventListener( 'click', function () {
 
@@ -269,13 +286,14 @@
 
 
 			}
+				const pointerGeo = new THREE.CapsuleGeometry(.2, 2, 4, 4);
+				const pointerMat = new THREE.MeshBasicMaterial({color: 'blue'});
+				pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
+				pointerGizmo.up.set(0, 1, 0);
+				scene.add(pointerGizmo);
 		// }
 			
-		const pointerGeo = new THREE.CapsuleGeometry(.2, 2, 4, 4);
-		const pointerMat = new THREE.MeshBasicMaterial({color: 'blue'});
-		pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
-		pointerGizmo.up.set(0, 1, 0);
-		scene.add(pointerGizmo);
+
 
 
 		if (settings && settings.sceneTags && settings.sceneTags.includes("no gravity") ) {
@@ -428,6 +446,10 @@
 								console.log("playerposition " + JSON.stringify(locationData[i]));
 								playerPosition = locationData[i];
 							}
+							if (locationData[i].markerType == "light") {
+								createLight(locationData[i]);
+							}
+
 			
 						}
 						// console.log("locationData " + i + " of "  + locationData.length);
@@ -456,6 +478,7 @@
 					let count = 33;
 					let scale = 1;
 					let yMod = 0;
+					let shader = "";
 					if (instancedModels[i].locationData.eventData.includes("~")) {
 						let countSplit = instancedModels[i].locationData.eventData.split("~");
 						count = countSplit[1];
@@ -477,7 +500,11 @@
 					if (instancedModels[i].locationData.y != 0) {
 						yMod = instancedModels[i].locationData.y;
 					}
-					InstanceOnSurface(instancedModels[i].model, count, scale, yMod);
+					
+					if (instancedModels[i].locationData.locationTags.includes("wind")) {
+						shader = "wind";
+					} 
+					InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader);
 							
 				} 
 			}
@@ -487,12 +514,39 @@
 				
 			}
 
+			if (settings && settings.sceneTags.includes("webcam background")) {
+
+				// Video Mesh
+				// init video and MediaPipe
+				video = await getVideo();
+
+				
+				
+				const texture = new THREE.VideoTexture(video);
+				texture.colorSpace = THREE.SRGBColorSpace;
+				const geometry = new THREE.PlaneGeometry(1	, 1);
+				const material = new THREE.MeshBasicMaterial({
+				map: texture,
+				depthWrite: false,
+				side: THREE.DoubleSide,
+				});
+				videomesh = new THREE.Mesh(geometry, material);
+				videomesh.rotation.y = Math.PI;
+				scene.add(videomesh);
+			}
+			if (settings.sceneTags.includes("hand")) {
+					handLandmarker = await getHandLandmarker();
+					useHandLandmarks = true;
+					initHandColliderGroup();
+			}
+			
 			if (settings && settings.sceneTags.includes("post processing")) {
 				togglePostProcessing();
 			}
 			  
 			if (settings && settings.sceneTags.includes("atoms")) {
-				initAtoms();
+				const centerPosition = new THREE.Vector3(0,0,0);
+				initAtoms(centerPosition, 10, 1);
 			}
 
 			if (cameraMode == "Third Person") {
@@ -681,7 +735,11 @@
 		const time = performance.now();
 		// scene.updateMatrixWorld(true);
 	if (clock && isReady) {
-		if (settings && controls && cameraMode == "Orbit") { //easy peasy
+		if (cameraMode == "Fixed") {
+			if (useHandLandmarks) {
+				
+			}
+		} else if (settings && controls && cameraMode == "Orbit") { //easy peasy
 			controls.update();
 			cameraWorldPosition.copy(camera.position);
 		} else if (settings && player && cameraMode == "Third Person") { // kinda combines follow cam and orbit control
@@ -867,6 +925,12 @@
 				world.step();//!!! still wonky with lots of dynamic and kinematic
 			}
 
+			if (lightMods.length) {
+				for (let i = 0; i < lightMods.length; i++) {
+					lightMods[i].intensity = Math.sin(time * .001) * 100;
+				}
+				// light.intensity = Math.sin(time) * 5;
+			}
 			lookAtCameraObjects.forEach(l => 
 				l.lookAt(cameraWorldPosition)
 			)
@@ -879,6 +943,35 @@
 				postProcessing.render();
 			} else {
 				renderer.render(scene, camera);
+			}
+
+			if (video && videomesh) {
+				if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+					if (handLandmarker && handColliderGroup) {
+						const handResults = handLandmarker.detectForVideo(video, Date.now());
+
+						if (handResults.landmarks.length > 0) {
+						handResults.landmarks.forEach((landmarks) => {
+							landmarks.forEach((landmark, j) => {
+							const pos = {
+								x: (landmark.x * videomesh.scale.x - videomesh.scale.x * 0.5) * -1,
+								y: -landmark.y * videomesh.scale.y + videomesh.scale.y * 0.5,
+								z: landmark.z,
+							};
+							const mesh = handColliderGroup.children[j];
+							mesh.userData.update(pos);
+							});
+						});
+						} else {
+						// for (let i = 0; i < numBalls; i++) {
+						// 	const mesh = colliderGroup.children[i];
+						// 	mesh.position.set(0, 0, 10);
+						// }
+						}
+					}
+				}
+				videomesh.scale.x = video.videoWidth * 0.016;
+  				videomesh.scale.y = video.videoHeight * 0.016;
 			}
 			
 		} //isReady
@@ -907,7 +1000,9 @@
 	function initEvents () {
 
 	function onMouseWheel(e) {
-		if (!controls || !controls.enabled) {
+		if (cameraMode == "Fixed") {
+
+		} else if (!controls || (controls && !controls.enabled)) {
 		// if (controls && (controls.getDistance() < 300)) {
  			const v = followDistance + e.deltaY * 0.005;
 			// if (v >= 0 && v <= 100) {
@@ -919,16 +1014,21 @@
 			// }
 			// return false;
 		} else {
-			const distanceFactor = controls.getDistance();
-			if (distanceFactor < 20) {
-				controls.maxPolarAngle = Math.PI * .5;
-			} else if (distanceFactor < 30) {
-				controls.maxPolarAngle = Math.PI * .4;
-			} else if (distanceFactor < 50) {
-				controls.maxPolarAngle = Math.PI * .3;
-			}
-			console.log("distanceFactor " + distanceFactor);
+			if (cameraMode != "Orbit") {
+
+			// const distanceFactor = controls.getDistance();
+			// const polarAngle = controls.getPolarAngle();
+			// const azimuthAngle = controls.getAzimuthalAngle();
+			// if (distanceFactor < 20) {
+			// 	controls.maxPolarAngle = Math.PI * .5;
+			// } else if (distanceFactor < 30) {
+			// 	controls.maxPolarAngle = Math.PI * .4;
+			// } else if (distanceFactor < 50) {
+			// 	controls.maxPolarAngle = Math.PI * .3;
+			// }
+			// console.log("distanceFactor " + distanceFactor + " polarAngle " + polarAngle +  " azimuth " + azimuthAngle);
 			// controls.maxPolarAngle = Math.PI * distanceFactor;
+			}
 		}
 		// }
 	}
@@ -1016,11 +1116,12 @@
 		// }
 	}
 	function onWindowResize() {
-
-		camera.aspect = window.innerWidth / window.innerHeight;
-		camera.updateProjectionMatrix();
-		renderer.setSize( window.innerWidth, window.innerHeight );
-
+		if (camera) {
+			console.log("window resize...");
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+		}
 	}
 
 	function mouseRaycast (e) {
@@ -1053,6 +1154,10 @@
 
 				lastRaycastHitPosition = raycastHits[0].point;
 				lastRaycastHitObject = raycastHits[0].object; 
+				// const distance = 5;
+				// camera.position.sub(controls.target).setLength(distance).add(controls.target);
+				// controls.update();
+				// console.log("tryna reset controls");
 
 			} else if (raycastHits[0].object.name.includes("agent")) {
 

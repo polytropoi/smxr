@@ -55,16 +55,31 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let i = 0; i < sampleMats.length; i++) {
 
             if (sampleMats[i].name.includes("green") || shader == "wind" || shader == "grass") {
-                sampleMats[i].positionNode = Fn(() => { // :)
-                const pos = positionLocal;      // Original vertex position
-                const norm = normalLocal;        // Vertex normal direction
+                // sampleMats[i].positionNode = Fn(() => { // :)
+                // const pos = positionLocal;      // Original vertex position
+                // const norm = normalLocal;        // Vertex normal direction
                 
-                // Calculate displacement amount (changes over time and position)
-                const displacement = sin(time.mul(.75).add(pos.z.mul(0.25))).mul(0.05);
+                // // Calculate displacement amount (changes over time and position)
+                // const displacement = sin(time.mul(.75).add(pos.x.mul(0.25))).mul(0.05);
                 
-                // Move vertex along its normal
-                return pos.add(norm.mul(displacement));
-                })();
+                // // Move vertex along its normal
+                // return pos.add(norm.mul(displacement));
+                // })();
+                const windStrength = 0.01;
+                const speed = 2.0;
+
+                // Calculate displacement: sway based on height (y) and time
+                const sway = sin(time.mul(speed).add(positionLocal.y)).mul(positionLocal.y.mul(windStrength));
+
+                // Apply displacement to X-axis
+                const windPosition = vec3(
+                positionLocal.x.add(sway),
+                positionLocal.y,
+                positionLocal.z
+                );
+
+                // const material = new MeshStandardNodeMaterial();
+                sampleMats[i].positionNode = windPosition; 
             }
         }
 

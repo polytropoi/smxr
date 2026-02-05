@@ -7,6 +7,7 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 
 import { scene, togglePostProcessing, water, staticObjex, activeObjex, player } from './three_main.mjs';
 import { agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
+	import { settings } from '../../../connect/settings.js';
 // import {scene, world} from './three_main.mjs'
 
 function getGeometry(size) {
@@ -23,6 +24,8 @@ export let dynamicBodies = [];
 export let atomicBodies = [];
 export let staticBodies = [];
 export let kinematicBodies = [];
+export let useDefaultCollider = false;
+export let handColliderGroup;
 
 export const agentCount = 4;
 const dynamicObjectCount = 20;
@@ -98,13 +101,15 @@ export async function initStaticObjex () { //e.g. ground, walls, etc..
       }
       WaitAndInit();
     } else {
-      let colliderDesc = RAPIER.ColliderDesc.cuboid(150,.1,150);
-      const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0,-6.1,0);
-      const staticBody = await world.createRigidBody(rbDesc);
-      let collider = await world.createCollider(colliderDesc, staticBody);
-      collider.setRestitution(.5);
-      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-      WaitAndInit();
+      if (useDefaultCollider) {
+        let colliderDesc = RAPIER.ColliderDesc.cuboid(150,.1,150);
+        const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0,-6.1,0);
+        const staticBody = await world.createRigidBody(rbDesc);
+        let collider = await world.createCollider(colliderDesc, staticBody);
+        collider.setRestitution(.5);
+        collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+        WaitAndInit();
+      }
     }
   }
 export async function createStaticCollider (model) { // may not be added to the scene if hidden?
@@ -152,8 +157,9 @@ function WaitAndInit () {
   // eventQueue = new RAPIER.EventQueue(true);
   physicsIsReady = true;
   worldIsReady = true;
-
-  initDynamicObjex();
+  if (settings && settings.sceneTags && settings.sceneTags.includes("test")) {
+    initDynamicObjex();
+  }
 }
 
   export async function getKinematicAgentBodies () {
@@ -247,25 +253,26 @@ function WaitAndInit () {
 }
 
 
-export async function initAtoms () {
+export async function initAtoms (centerPosition, nucleusCount, particleSize) {
   console.log("tryna init atoms");
   const atomCenter = new THREE.Object3D();
-  const center = new THREE.Vector3(0,0,0);
-  atomCenter.position.set(0,0,0);
+  // const center = new THREE.Vector3(0,0,0);
+  // atomCenter.position.set(0,0,0);
+  atomCenter.position.copy(centerPosition);
   scene.add(atomCenter);
   const light = new THREE.PointLight( 'orange', 100, 100 );
 
   atomCenter.add(light);
-  light.position.set(0,0,0);
+  light.position.copy(centerPosition);
 
   try {
-      for (let i = 0; i < atomicParticlesCount; i++) {
+      for (let i = 0; i < nucleusCount; i++) {
         //  await new Promise(r => setTimeout(r, 0));
         let particleType = "neutron";
         if (Math.random() > .5) {
           particleType = "proton";
         }
-        const body = await getAtomicBody(atomCenter, particleType); //spawns a mesh too
+        const body = await getAtomicBody(atomCenter, particleType, particleSize); //spawns a mesh too
         
 			  atomicBodies.push(body);
         
@@ -282,12 +289,12 @@ export async function initAtoms () {
 
 
 
-async function getAtomicBody(atomCenter, particleType) {
+async function getAtomicBody(atomCenter, particleType, particleSize) {
 
-  const size = 1;
+  const size = particleSize;
   const range = 10;
   const density = size * .01;
-  const geometry = new THREE.SphereGeometry( 1, 16, 8 );
+  const geometry = new THREE.SphereGeometry( particleSize, 16, 8 );
 
   let x = Math.random() * range - range;
   let y = Math.random() * range - range;
@@ -297,12 +304,16 @@ async function getAtomicBody(atomCenter, particleType) {
   .setLinearDamping(2.0)
     .setAngularDamping(4.0)
     .setTranslation(x, y, z, false)
-    .setCcdEnabled(true);
+    // .setCcdEnabled(true);
   let rigidbody = await world.createRigidBody(rigidBodyDesc);
   // rigid.setGravityScale(16.0, true);
   let points = geometry.attributes.position.array;
   let colliderDesc = await RAPIER.ColliderDesc.convexHull(points).setDensity(density);
-  world.createCollider(colliderDesc, rigidbody);
+  const collider = world.createCollider(colliderDesc, rigidbody);
+  
+      // collider.setRestitution(1.5);
+      // collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+
 
   console.log("tryna cook a particle " + particleType);
   let material = new THREE.MeshPhysicalMaterial({ color: 'green', transparent: true, opacity: .75 });
@@ -351,6 +362,7 @@ async function getAtomicBody(atomCenter, particleType) {
     if (rigidbody.isMoving) {
     rigidbody.resetForces(true);
     let { x, y, z } = rigidbody.translation(true);
+    mesh.position.set(x, y, z);
     let pos = new THREE.Vector3(x, y, z);
     distance = pos.clone().distanceTo(atomCenter.position.clone());
     // if (distance > 1) {
@@ -362,7 +374,7 @@ async function getAtomicBody(atomCenter, particleType) {
 
       
       rigidbody.addForce(dir.multiplyScalar(distance * -.1), false);
-      mesh.position.set(x, y, z);
+      
     }
     // }
     // if (distance < 1) {
@@ -501,3 +513,39 @@ export async function getDynamicBody(model, position, scale) {
     return { mesh: mouseMesh, update };
   }
 
+
+  function getCollider() {
+    const mouseSize = 0.075;
+    const geometry = new THREE.IcosahedronGeometry(mouseSize, 4);
+    const material = new THREE.MeshBasicMaterial({});
+    const mouseMesh = new THREE.Mesh(geometry, material);
+    // RIGID BODY
+    let bodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(0, 0, 0)
+    let mouseRigid = world.createRigidBody(bodyDesc);
+    let dynamicCollider = RAPIER.ColliderDesc.ball(mouseSize * 10.0);
+    world.createCollider(dynamicCollider, mouseRigid);
+      dynamicCollider.setRestitution(5);
+      dynamicCollider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+    function update(pos) {
+      // console.log("collider update " + JSON.stringify(pos));
+      mouseRigid.setTranslation({ x: pos.x, y: pos.y, z: 0.2 });
+      let { x, y, z } = mouseRigid.translation();
+      mouseMesh.position.set(x, y, z);
+    }
+    mouseMesh.userData.update = update;
+        // kinematicBodies.push();
+    return mouseMesh;
+  }
+  export function initHandColliderGroup () {
+
+  // hand-tracking colliders
+  handColliderGroup = new THREE.Group();
+  scene.add(handColliderGroup);
+  const numBalls = 21;
+  for (let i = 0; i < numBalls; i++) {
+    const mesh = getCollider();
+    handColliderGroup.add(mesh);  
+
+  }
+  
+}
