@@ -497,11 +497,20 @@ export async function PrimaryAudioIsPlaying () {
 export function LoadPrimaryAudioHowl () {
   if (!primaryAudioHowl) {
       primaryAudioHowl = globalThis.primaryAudioHowl; //for aframe, howl don't module
-  }
+    console.log("primaryAudioHowl is global!");
+    }
+
   if (!primaryAudioHowl && settings && settings.primary_mp3url) {
-    primaryAudioHowl = new Howl({
-        src: [settings.primary_mp3url]
-    });
+      console.log("primaryAudioHowl is null!");
+      if (settings.hasPrimaryAudioStream) {
+        primaryAudioHowl = new Howl({
+            src: [settings.primary_mp3url], html5: true
+        });
+      } else {
+        primaryAudioHowl = new Howl({
+              src: [settings.primary_mp3url]
+          });
+      }
     primaryAudioHowl.load();
     if (timedEventsListenerMode == "Primary Audio") {
       SetPrimaryAudioEventsData();
@@ -529,11 +538,13 @@ export function SetAudioVizMode (mode) {
 export function PrimaryAudioPlayPauseToggle () { //this is for pixi / non-aframe modes
 
   // if (timedEventsListenerMode && timedEventsListenerMode == "Primary Audio") {
+  console.log("tryna toggle primary udio " + primaryAudioHowl);
     if (primaryAudioHowl && primaryAudioHowl != undefined) {
       // primaryAudioHowl;
       if (!primaryAudioHowl.playing()) {
-              console.log("tryna play " + settings.primary_mp3url);
+              
               primaryAudioHowl.play();
+              console.log("tryna play " + settings.primary_mp3url + " isPlaying " + primaryAudioHowl.playing());
           // const soundId = primaryAudioHowl.play();
           // const soundId = primaryAudioHowl.play('mysound'); // Play the sound and get its ID
           // primaryAudioElement = primaryAudioHowl._soundById(soundId); //for analyzer

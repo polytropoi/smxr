@@ -1,7 +1,5 @@
 	import * as THREE from 'three/webgpu';
 
-	// import RAPIER from 'rapier';
-	
 	import { color, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, objectPosition, screenUV, 
 		viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, 
 		time, fog, float, triNoise3D, positionView, uniform } from 'three/tsl';
@@ -36,9 +34,9 @@
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
-		import { getVideo, getHandLandmarker } from './three_vision.js';
+	import { getVideo, getHandLandmarker } from './three_vision.js';
 
-				import { createLight, lightMods } from './three_lights.js';
+	import { createLight, lightMods } from './three_lights.js';
 
 	import Stats from './ui/stats.js';
 
@@ -182,13 +180,9 @@
 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
 				// camera.position.set( 0, followDistance, -followDistance );
 				camera.position.set( 0, 10, -followDistance );
-					// camera.lookAt( 0, 1, 0 );
+					camera.lookAt( 0, 1, 0 );
 
-					controls = new OrbitControls( camera, renderer.domElement );
-					controls.minDistance = 3;
-					controls.maxDistance = 150;
-					controls.maxPolarAngle = Math.PI * .6;
-										controls.minPolarAngle = Math.PI * .2;
+					
 					// controls.enabled = false;
 				// controls.autoRotate = true;
 				// controls.autoRotateSpeed = 1;
@@ -209,6 +203,12 @@
 
 				goal.position.z = -followDistance;
 				goal.add( camera );
+
+				controls = new OrbitControls( camera, renderer.domElement );
+					controls.minDistance = 1;
+					controls.maxDistance = 150;
+					controls.maxPolarAngle = Math.PI * .4;
+										controls.minPolarAngle = Math.PI * .25;
 
 				// pivot = new THREE.Object3D();
 				// scene.add(pivot);
@@ -652,6 +652,9 @@
 
 			if (settings.sceneTags.includes("debug")) {
 				showDebug = true;
+			}
+			if (settings.hasPrimaryAudio) {
+				LoadPrimaryAudioHowl();
 			}
 
 			// }

@@ -2128,7 +2128,7 @@ three_router.get('/:_id', function (req, res) {
                 console.log("hasPrimaryAudioStream " + sceneResponse.scenePrimaryAudioStreamURL);
                 hasPrimaryAudioStream = true;
                 hasPrimaryAudio = false;
-                transportButtons = "<div id=\x22transport_play_button\x22 class=\x22dialog_button\x22 style=\x22color: rgba(255, 255, 255, 0.75); float: left; margin: 10px 50px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>";
+                transportButtons = "<div id=\x22transport_play_button\x22  style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 10px 50px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>";
 
             }
             if (hasPrimaryAudioStream || hasPrimaryAudio) {
@@ -2165,7 +2165,7 @@ three_router.get('/:_id', function (req, res) {
                     } 
                     primaryAudioScript = "<script>\n" +      
                     "let primaryAudioHowl = new Howl({" + //inject howler for non-streaming
-                            "src: [\x22"+primary_oggurl+"\x22,\x22"+primary_mp3url+"\x22], "+html5+" ctx: true, volume: 0," + loopable +
+                            "src: [\x22"+primary_oggurl+"\x22,\x22"+primary_mp3url+"\x22], "+html5+" ctx: true, volume: 1," + loopable +
                         "});" +
                     "primaryAudioHowl.load();</script>";
                     primaryAudioEntity = "<div id=\x22primaryAudioParent\x22></div>"; //parent, no window click
@@ -2194,7 +2194,7 @@ three_router.get('/:_id', function (req, res) {
                 streamPrimaryAudio = true;
                 primaryAudioScript = "<script>Howler.autoUnlock = false;" + //override if streaming url
                 "let primaryAudioHowl = new Howl({" + //inject howler for non-streaming
-                        "src: \x22"+sceneResponse.scenePrimaryAudioStreamURL+"\x22, html5: true, volume: 0, format: ['mp3', 'aac']" +
+                        "src: \x22"+sceneResponse.scenePrimaryAudioStreamURL+"\x22, html5: true, volume: 1, format: ['mp3', 'aac']" +
                     "});" +
                 "</script>";
                 primaryAudioEntity = "<div id=\x22primaryAudioParent\x22></div>"; //parent
@@ -2934,10 +2934,10 @@ three_router.get('/:_id', function (req, res) {
                 //     var spritebuff = Buffer.from(JSON.stringify(sprites)).toString("base64");
                 //     spriteData = "<div id=\x22spritesDataElement\x22 data-sprites=\x22"+spritebuff+"\x22></div>";
 
-                //     if (sceneResponse.sceneTimedEvents) {
-                //         var tebuff = Buffer.from(JSON.stringify(sceneResponse.sceneTimedEvents)).toString("base64");
-                //         sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
-                //     }
+                    // if (sceneResponse.sceneTimedEvents) {
+                    //     var tebuff = Buffer.from(JSON.stringify(sceneResponse.sceneTimedEvents)).toString("base64");
+                    //     sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
+                    // }
 
                 //     let grabMix = "<a-mixin id=\x22grabmix\x22" + //mixin for grabbable objex
                 //         "event-set__grab=\x22material.color: #FFEF4F\x22" +
@@ -3057,6 +3057,11 @@ three_router.get('/:_id', function (req, res) {
                         }
                         if (sceneResponse.primayAudioGroups != null && sceneResponse.primayAudioGroups.length > 0) {
                             hasPrimaryAudio = true;
+                        }
+
+                        if (sceneResponse.sceneTimedEvents) {
+                            var tebuff = Buffer.from(JSON.stringify(sceneResponse.sceneTimedEvents)).toString("base64");
+                            sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
                         }
 
                         // settings.sceneAmbientAudioGroups = sceneResponse.sceneAmbientAudioGroups;
@@ -3228,7 +3233,7 @@ three_router.get('/:_id', function (req, res) {
                         // "<body>" +
                                 "<div id=\x22dialog_button\x22><i class=\x22three_dialog_button fas fa-info-circle fa-2x\x22></i></div>"+
                                
-                                "<div id=\x22blocker\x22 style=\x22display:none\x22>" +
+                                "<div id=\x22blocker\x22 style=\x22\x22>" +
                                             "<div id=\x22instructions\x22>" +
                                                 "<p style=\x22font-size:36px\x22>" +
                                                     "Click to play" +
@@ -3240,10 +3245,10 @@ three_router.get('/:_id', function (req, res) {
                                                 "</p>" +
                                             "</div>" +
                                        "</div>" +
-                                transportButtons+ 
+                              
                                 // dialogButton +
                                 canvasOverlay +
-                                
+                                  transportButtons+ 
 
                                 "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +
                             

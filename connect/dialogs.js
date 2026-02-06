@@ -2,7 +2,8 @@
 // import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "content-utils";
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
           InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, 
-          RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime } from "./media.js";
+          RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime, 
+          LoadPrimaryAudioHowl} from "./media.js";
 import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz } from "./events.js";
 import { settings, profile } from "./settings.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
@@ -1744,7 +1745,7 @@ let isPlaying = false;
 
 function PlayPauseMedia () {
 
-  console.log("PlayPauseMedia listening to " + timedEventsListenerMode);
+  console.log("PlayPauseMedia listening to " + timedEventsListenerMode + " primaryAudioHowl " + primaryAudioHowl);
   if (timedEventsListenerMode != null) {
     if (timedEventsListenerMode.toLowerCase() == "primary audio") {
       // PlayPausePrimaryAudio();
@@ -1759,6 +1760,8 @@ function PlayPauseMedia () {
       } else {
         if (primaryAudioHowl) {
           PrimaryAudioPlayPauseToggle();
+        } else {
+          LoadPrimaryAudioHowl();
         }
       }
       
