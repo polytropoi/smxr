@@ -3024,6 +3024,7 @@ three_router.get('/:_id', function (req, res) {
                         settings.backgroundURL = backgroundURL;
                         settings.backgroundIsTileable = backgroundIsTileable;
                         settings.primary_mp3url = primary_mp3url;
+                        settings.hasPrimaryAudioStream = hasPrimaryAudioStream;
                         settings.sceneUseDynamicSky = sceneResponse.sceneUseDynamicSky;
                         // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
                         // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
@@ -3233,18 +3234,18 @@ three_router.get('/:_id', function (req, res) {
                         // "<body>" +
                                 "<div id=\x22dialog_button\x22><i class=\x22three_dialog_button fas fa-info-circle fa-2x\x22></i></div>"+
                                
-                                "<div id=\x22blocker\x22 style=\x22\x22>" +
-                                            "<div id=\x22instructions\x22>" +
-                                                "<p style=\x22font-size:36px\x22>" +
-                                                    "Click to play" +
-                                                "</p>" +
-                                                "<p>" +
-                                                    "Move: WASD<br/>" +
-                                                    "Jump: SPACE<br/>" +
-                                                    "Look: MOUSE" +
-                                                "</p>" +
-                                            "</div>" +
-                                       "</div>" +
+                                // "<div id=\x22blocker\x22 style=\x22\x22>" +
+                                //             "<div id=\x22instructions\x22>" +
+                                //                 "<p style=\x22font-size:36px\x22>" +
+                                //                     "Click to play" +
+                                //                 "</p>" +
+                                //                 "<p>" +
+                                //                     "Move: WASD<br/>" +
+                                //                     "Jump: SPACE<br/>" +
+                                //                     "Look: MOUSE" +
+                                //                 "</p>" +
+                                //             "</div>" +
+                                //        "</div>" +
                               
                                 // dialogButton +
                                 canvasOverlay +

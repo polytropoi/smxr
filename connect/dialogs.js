@@ -1603,8 +1603,15 @@ function ReturnAudioVizModeSelectors (selectedType) {
       .finally(() => {
         console.log("returning mediaDevices " + audioInputDevices);
         // const mediaDeviceSeletor = 
-        document.getElementById("audioInputDeviceSelector").innerHTML = "<option value=\x22none\x22>none</option>" + audioInputDevices;
-        document.getElementById("cameraInputDeviceSelector").innerHTML = "<option value=\x22none\x22>none</option>" + cameraInputDevices;
+        const audioSelector = document.getElementById("audioInputDeviceSelector");
+        const cameraSelector = document.getElementById("cameraInputDeviceSelector");
+        if (audioSelector) {
+          audioSelector.innerHTML = "<option value=\x22none\x22>none</option>" + audioInputDevices;
+        }
+        if (cameraSelector) {
+          cameraSelector.innerHTML = "<option value=\x22none\x22>none</option>" + cameraInputDevices;
+        }
+        
       })
       .catch((err) => {
         console.error(`${err.name}: ${err.message}`);
