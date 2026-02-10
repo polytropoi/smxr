@@ -8,8 +8,9 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
 Text.init();
 
-import {scene, camera, renderer, navmesh} from './three_main.mjs';
+import {scene, renderer, navmesh} from './three_main.mjs';
 
+import {camera} from './three_controls.js';
 
 export let lookAtCameraObjects = [];
 

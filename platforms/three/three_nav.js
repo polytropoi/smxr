@@ -1,7 +1,9 @@
     import * as THREE from 'three';
 
-    import {scene, navmesh, player} from './three_main.mjs';
+    import {scene, navmesh} from './three_main.mjs';
 
+    import { player } from './three_controls.js';
+    
     import { Pathfinding, PathfindingHelper } from 'three-pathfinding';
 
     import { uniform, sin, mul, add, time } from 'three/tsl';

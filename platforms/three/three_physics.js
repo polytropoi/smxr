@@ -5,7 +5,8 @@ import RAPIER from 'rapier';
 
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-import { scene, togglePostProcessing, water, staticObjex, activeObjex, player } from './three_main.mjs';
+import { scene, togglePostProcessing, water, staticObjex, activeObjex } from './three_main.mjs';
+import { player } from './three_controls.js';
 import { agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
 	import { settings } from '../../../connect/settings.js';
 // import {scene, world} from './three_main.mjs'

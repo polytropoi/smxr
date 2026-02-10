@@ -2,7 +2,9 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js';
 
-import {camera, scene, renderer} from './three_main.mjs';
+import {scene, renderer} from './three_main.mjs';
+
+import {camera, controls} from './three_controls.js';
 
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 

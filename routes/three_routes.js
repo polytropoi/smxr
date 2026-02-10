@@ -918,6 +918,7 @@ three_router.get('/:_id', function (req, res) {
                 }
                 if (sceneResponse.sceneFlyable) {
                     // wasd = "extended_wasd_controls=\x22flyEnabled: true; moveSpeed: 4; inputType: keyboard\x22";
+                    sceneResponse.sceneCameraMode = "Fly";
                 }
                
                 if (sceneResponse.sceneCameraMode == "Orbit") {
@@ -3234,18 +3235,18 @@ three_router.get('/:_id', function (req, res) {
                         // "<body>" +
                                 "<div id=\x22dialog_button\x22><i class=\x22three_dialog_button fas fa-info-circle fa-2x\x22></i></div>"+
                                
-                                // "<div id=\x22blocker\x22 style=\x22\x22>" +
-                                //             "<div id=\x22instructions\x22>" +
-                                //                 "<p style=\x22font-size:36px\x22>" +
-                                //                     "Click to play" +
-                                //                 "</p>" +
-                                //                 "<p>" +
-                                //                     "Move: WASD<br/>" +
-                                //                     "Jump: SPACE<br/>" +
-                                //                     "Look: MOUSE" +
-                                //                 "</p>" +
-                                //             "</div>" +
-                                //        "</div>" +
+                                "<div id=\x22blocker\x22 style=\x22display: none\x22>" +
+                                            "<div id=\x22instructions\x22>" +
+                                                "<p style=\x22font-size:36px\x22>" +
+                                                    "Click to play" +
+                                                "</p>" +
+                                                "<p>" +
+                                                    "Move: WASD<br/>" +
+                                                    "Jump: SPACE<br/>" +
+                                                    "Look: MOUSE" +
+                                                "</p>" +
+                                            "</div>" +
+                                       "</div>" +
                               
                                 // dialogButton +
                                 canvasOverlay +
