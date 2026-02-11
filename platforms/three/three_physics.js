@@ -29,7 +29,7 @@ export let useDefaultCollider = false;
 export let handColliderGroup;
 
 export const agentCount = 4;
-const dynamicObjectCount = 20;
+const dynamicObjectCount = 10;
 
 let atomicParticlesCount = 300;
   const sceneMiddle = new THREE.Vector3(2, 0, 0);
@@ -302,8 +302,8 @@ async function getAtomicBody(atomCenter, particleType, particleSize) {
   let z = Math.random() * range - range;
   // physics
   let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-  .setLinearDamping(2.0)
-    .setAngularDamping(4.0)
+  .setLinearDamping(1.0)
+    .setAngularDamping(2.0)
     .setTranslation(x, y, z, false)
     // .setCcdEnabled(true);
   let rigidbody = await world.createRigidBody(rigidBodyDesc);

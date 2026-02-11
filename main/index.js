@@ -13304,6 +13304,7 @@ function getAllPeople() {
                                     "<option value=\x22\x22 disabled selected>Select:</option>" +
                                     "<option>First Person</option>" +
                                     "<option>Orbit</option>" +
+                                    "<option>Map</option>" +
                                     "<option>Third Person</option>" +
                                     "<option>Follow Path</option>" +
                                     "<option>Fixed</option>" +

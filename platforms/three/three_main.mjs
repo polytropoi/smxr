@@ -36,7 +36,7 @@
 	import { createLight, lightMods } from './three_lights.js';
 
 
-	import { controls, player, camera, isReady, ControlsUpdate, cameraWorldPosition } from './three_controls.js';
+	import { controls, player, camera, isReady, UpdateControls, cameraWorldPosition } from './three_controls.js';
 
 	import Stats from './ui/stats.js';
 	
@@ -422,12 +422,11 @@
 										scene.remove(model);
 									} else { // regular meshes
 										console.log(locationData[i].name + " adding to scene at location " + locationData[i].x + locationData[i].y + locationData[i].z);
-										
-										
+																				
 										model.position.set(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z));
 										const xscale = locationData[i].xscale ? locationData[i].xscale : 1;
 										const yscale = locationData[i].yscale ? locationData[i].yscale : 1;
-										const zscale = locationData[i].zscale ? locationData[i].scale : 1;
+										const zscale = locationData[i].zscale ? locationData[i].zscale : 1;
 
 										model.scale.set(xscale,yscale,zscale);
 										// model.layers.set(1);
@@ -912,7 +911,7 @@
 					// 	}
 					// }
 					// 	prevTime = time;
-			ControlsUpdate();
+			UpdateControls();
 
 			const delta = clock.getDelta();
 			if (stats) {

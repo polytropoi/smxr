@@ -2129,7 +2129,7 @@ three_router.get('/:_id', function (req, res) {
                 console.log("hasPrimaryAudioStream " + sceneResponse.scenePrimaryAudioStreamURL);
                 hasPrimaryAudioStream = true;
                 hasPrimaryAudio = false;
-                transportButtons = "<div id=\x22transport_play_button\x22  style=\x22color: rgba(255, 255, 255, 0.75); float: right; margin: 10px 50px;\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>";
+                transportButtons = "<div id=\x22transport_play_button\x22 class=\x22three_play_button\x22 style=\x22color: rgba(255, 255, 255, 0.75);\x22 ><i class=\x22fas fa-play-circle fa-2x\x22></i></div>";
 
             }
             if (hasPrimaryAudioStream || hasPrimaryAudio) {
@@ -3232,7 +3232,8 @@ three_router.get('/:_id', function (req, res) {
                         
                         "</head>\n" +
                         "<body "+bgstyle+">" +
-                        // "<body>" +
+                        // "<body>" +'
+                                 transportButtons+ 
                                 "<div id=\x22dialog_button\x22><i class=\x22three_dialog_button fas fa-info-circle fa-2x\x22></i></div>"+
                                
                                 "<div id=\x22blocker\x22 style=\x22display: none\x22>" +
@@ -3250,7 +3251,7 @@ three_router.get('/:_id', function (req, res) {
                               
                                 // dialogButton +
                                 canvasOverlay +
-                                  transportButtons+ 
+                                 
 
                                 "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +
                             

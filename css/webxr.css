@@ -67,6 +67,19 @@ body {
     /* opacity:.75; */
 }
 
+.three_play_button {
+    z-index: 100;
+    /* max-width: 30px; */
+    position: absolute;
+    display: inline-block;
+    /* width: 30;
+    height: 30; */
+    top: 5px;
+    right: 75px;
+    color: rgb(255, 255, 255);
+    /* opacity:.75; */
+}
+
 .dialog_button:xr-overlay {
     display: initial;
 }
