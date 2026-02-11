@@ -7,7 +7,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint } from './three_nav.js';
 
-import { scene, navmesh, cameraMode, activeObjex, renderer, clock, groundObjex } from './three_main.mjs';
+import { scene, navmesh, cameraMode, activeObjex, renderer, clock, groundObjex, selectedObjects } from './three_main.mjs';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
@@ -59,6 +59,8 @@ let reticle;
 let mouseIsDown = false;
 const mouse = new THREE.Vector2();
 
+let targetLocation = new THREE.Vector3();
+let validTarget = false;
 
 export function SetControls(cameraMode) {
 
@@ -70,21 +72,38 @@ export function SetControls(cameraMode) {
         
         isReady = true;
     } else if (cameraMode == "Fly") {
-        const blocker = document.getElementById( 'blocker' );
-        const instructions = document.getElementById( 'instructions' );
-        if (blocker) {
-            blocker.style.display = "none";
-            instructions.style.display = "none";
-        }
-        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, .01, 1000);
-        camera.position.set( 0, 0, 5 );
-            camera.lookAt( 0, 1, 0 );
+        // const blocker = document.getElementById( 'blocker' );
+        // const instructions = document.getElementById( 'instructions' );
+        // if (blocker) {
+        //     blocker.style.display = "none";
+        //     instructions.style.display = "none";
+        // }
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+        scene.add(camera);
+        // camera.position.set( 0, 10, 5 );
+            // camera.lookAt( 0, 1, 0 );
+        const geo = new THREE.SphereGeometry(.01, 10);
+        const mat = new THREE.MeshBasicMaterial({color: "red", side: THREE.DoubleSide, opacity:0.5, transparent: true});
+        const mesh = new THREE.Mesh(geo, mat);
+        // reticle.position.z = -.5;
+                       
+        scene.add(mesh);
+        // camera.add(mesh);
+        mesh.position.z = -1;
+                reticle = InitReticle();
+        reticle.position.z = -.5;
+        camera.attach(reticle);
+        camera.attach(mesh);
         controls = new FlyControls( camera, renderer.domElement );
         controls.dragToLook = true;
         controls.movementSpeed = 1;
         controls.rollSpeed = Math.PI / 24;
         controls.autoForward = false;
         console.log("tryna set fly controls");
+        centercaster = new THREE.Raycaster();
+
+
+        centercaster = new THREE.Raycaster();
         isReady = true;
     } else if (cameraMode == "Map") {
         const blocker = document.getElementById( 'blocker' );
@@ -204,7 +223,7 @@ export function SetControls(cameraMode) {
         scene.add(pointerGizmo);
 
         isReady = true;
-    } else { //first persosn
+    } else { //default first person
         // camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
         camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
         camera.position.set(0,10,0);
@@ -215,7 +234,7 @@ export function SetControls(cameraMode) {
         // mousecaster = new THREE.Raycaster();
 
         reticle = InitReticle();
-        reticle.position.z = -0.5;
+        reticle.position.z = -.5;
         camera.add(reticle);
 
         controls.pointerSpeed = .25;
@@ -271,7 +290,8 @@ export function UpdateControls() {
             const delta = clock.getDelta();
             
             controls.update( delta );
-    
+            cameraWorldPosition.copy(camera.position);
+        centerRaycast();
     } else if (settings && controls && cameraMode == "Orbit") { //easy peasy
         controls.update();
         cameraWorldPosition.copy(camera.position);
@@ -279,6 +299,7 @@ export function UpdateControls() {
         speed = 0.0;
         
         // if (!playerReadyToNav) {
+
             
             
             if ( moveForward ) {
@@ -297,10 +318,16 @@ export function UpdateControls() {
             camera.getWorldPosition(cameraWorldPosition); //bc it's a child in this mode
             camera.lookAt( player.position );
 
-            if ( moveLeft ) {
-                player.rotateY(0.025);
-            } else if ( moveRight ) {
-                player.rotateY(-0.025);
+            if (mouseIsDown && targetLocation && validTarget) {
+                player.lookAt(targetLocation);
+                console.log("tryna look at " + JSON.stringify(targetLocation));
+            // return;
+            } else {
+                if ( moveLeft ) {
+                    player.rotateY(0.025);
+                } else if ( moveRight ) {
+                    player.rotateY(-0.025);
+                }
             }
                 
             playerVector.lerp(player.position, .5);
@@ -425,11 +452,15 @@ export function UpdateControls() {
     
         }
     }
-        prevTime = time;
+    prevTime = time;
 }
 
 
 function RaycastHit (type, hit) {
+    if (lastRaycastHitObject != hit.object) {
+        selectedObjects.length = 0;
+    }
+
 
     lastRaycastHitObject = hit.object; 
     lastRaycastHitPosition = hit.point;
@@ -444,13 +475,23 @@ function RaycastHit (type, hit) {
             // console.log("hit worldnormal " + JSON.stringify(worldNormal));
             
             pointerGizmo.position.set(hit.point.x,hit.point.y,hit.point.z);
+
+            
             // pointerGizmo.lookAt(worldNormal);
             rotateObjectToNormal(pointerGizmo, worldNormal);
         }
         if (name == "navmesh") {
-
-            
-        } else if (name == "player") {
+            if (type == "mouse" && mouseIsDown) {
+                targetLocation.copy(lastRaycastHitPosition);
+                validTarget = true;
+            } else {
+                validTarget = false;
+            }
+        } else {
+            validTarget = false;
+        } 
+        
+        if (name == "player") {
 
 
         } else if (name.includes("agent")) {
@@ -472,6 +513,8 @@ function RaycastHit (type, hit) {
             } else {
                 // console.log("rehit agent " + raycastHits[0].object.name));
             }
+        } else {
+            selectedObjects.push(hit.object);
         }
 
 }
@@ -494,6 +537,7 @@ export function mouseRaycast (e) {
         if (raycastHits[0].object.userData) {
             RaycastHit("mouse", raycastHits[0]);
         } else {
+            selectedObjects.length = 0;
             if (raycastHitAgent) {
                  if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
                     raycastHitAgent.material.materialColor = stopColor;
@@ -505,65 +549,9 @@ export function mouseRaycast (e) {
                 }
             }
         }
-        // if (raycastHits[0].object.userData.name == "navmesh") {
-            
-        //     lastRaycastHitObject = raycastHits[0].object; 
-        //     // console.log("hit the navmesh " + lastRaycastHitObject);
-        //     // console.log("gotsa navmesh mousehit " + JSON.stringify(raycastHits[0].point));
-        //     lastRaycastHitPosition = raycastHits[0].point;
-        //     const localNormal = raycastHits[0].face.normal;
-            
-        //     const worldNormal = localNormal.clone().transformDirection(raycastHits[0].object.matrixWorld);
-        //     // console.log("hit worldnormal " + JSON.stringify(worldNormal));
-        //     pointerGizmo.position.set(raycastHits[0].point.x,raycastHits[0].point.y,raycastHits[0].point.z);
-        //     // pointerGizmo.lookAt(worldNormal);
-        //     rotateObjectToNormal(pointerGizmo, worldNormal);
-        // } else if (raycastHits[0].object.userData.name == "player") {
-
-        //     lastRaycastHitPosition = raycastHits[0].point;
-        //     lastRaycastHitObject = raycastHits[0].object; 
-        //     // const distance = 5;
-        //     // camera.position.sub(controls.target).setLength(distance).add(controls.target);
-        //     // controls.update();
-        //     // console.log("tryna reset controls");
-
-        // } else if (raycastHits[0].object.name.includes("agent")) {
-
-        //     lastRaycastHitObject = raycastHits[0].object;
-        //     if ( raycastHitAgent != raycastHits[ 0 ].object ) {
-        //         // console.log ("new mouse raycast hit on agent " + raycastHits[0].object.name);
-        //         raycastHitAgent = raycastHits[ 0 ].object;	
-        //         if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
-        //             // console.log("intersected material found!");
-        //             raycastHitAgent.material.materialColor = goColor;
-        //         } else if (raycastHitAgent && raycastHitAgent.material) {
-        //             raycastHitAgent.material.color = goColor;
-                
-        //         }
-        //         const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //can do this easier, but good to know
-        //         if (navAgentInstance) {
-        //             navAgentInstance.agentRaycastHit();
-        //         }
-        //     } else {
-        //         // console.log("rehit agent " + raycastHits[0].object.name));
-        //     }
-
-        // } else {
-        //     if ( raycastHitAgent ) {
-        //         if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-        //             // console.log("tryna reset agent colornode after no hit");
-        //             raycastHitAgent.material.materialColor = stopColor;
-        //             raycastHitAgent.material.needsUpdate = true;
-                    
-        //         } else if (raycastHitAgent.material) {
-        //             // console.log("tryna reset agent color after no hit");
-        //             raycastHitAgent.material.color = stopColor;
-        //         }
-        //     }
-        //     raycastHitAgent = null;
-        //     lastRaycastHitObject = null;
-        // }
+  
     } else {
+         selectedObjects.length = 0;
         if (lastRaycastHitObject) {
             lastRaycastHitObject = null;
         }
@@ -593,45 +581,12 @@ export function playerRaycast () {
         if (raycastHits.length > 0) {
             if (raycastHits[0].object.userData) {
                 RaycastHit("player", raycastHits[0]);
+            } else {
+                 selectedObjects.length = 0;
             }
-        // console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
-        // 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
-            // if (raycastHits[0].object.name.includes("agent")) {
-
-            //     lastRaycastHitObject = raycastHits[0].object;
-            //     if ( raycastHitAgent != raycastHits[ 0 ].object ) {
-            //         console.log ("new player raycast hit on agent " + raycastHits[0].object.name);
-            //         raycastHitAgent = raycastHits[ 0 ].object;	
-            //         if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
-            //             console.log("intersected material found!");
-            //             raycastHitAgent.material.materialColor = goColor;
-            //         } else if (raycastHitAgent && raycastHitAgent.material) {
-            //             raycastHitAgent.material.color = goColor;
-                    
-            //         }
-            //         const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //can do this easier, but good to know
-            //         if (navAgentInstance) {
-            //             navAgentInstance.agentRaycastHit();
-            //         }
-            //     } else {
-            //         // console.log("rehit agent " + raycastHits[0].object.name));
-            //     }
-            // } else {
-            //     if ( raycastHitAgent ) {
-            //         if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-            //             // console.log("tryna reset agent colornode after no hit");
-            //             raycastHitAgent.material.materialColor = stopColor;
-            //             raycastHitAgent.material.needsUpdate = true;
-                        
-            //         } else if (raycastHitAgent.material) {
-            //             // console.log("tryna reset agent color after no hit");
-            //             raycastHitAgent.material.color = stopColor;
-            //         }
-            //     }
-            //     raycastHitAgent = null;
-            //     // lastRaycastHitObject = null;
-            // }
+      
         } else {
+             selectedObjects.length = 0;
             if (lastRaycastHitObject) {
                 // lastRaycastHitObject = null;
             }
@@ -665,50 +620,12 @@ export function centerRaycast () {
         // 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
             if (raycastHits[0].object.userData) {
                 RaycastHit("center", raycastHits[0]);
+            } else {
+                 selectedObjects.length = 0;
             }
-            //     if (raycastHits[0].object.userData.name == "navmesh") {
-            //         console.log("navmesh Mousehit");
-            //     }
-            //     if (raycastHits[0].object.name.includes("agent")) {
-                
-            //     if ( raycastHitAgent != raycastHits[ 0 ].object ) {
-            //         console.log ("new raycast hit on agent " + raycastHits[0].object.name);
-            //         raycastHitAgent = raycastHits[ 0 ].object;	
-
-            //             if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode )  {
-                    
-            //                 console.log("intersected material found!");
-            //                 raycastHitAgent.material.materialColor = goColor;
-
-                            
-            //             } else if (raycastHitAgent && raycastHitAgent.material) {
-            //                 raycastHitAgent.material.color = goColor;
-                        
-            //             }
-            //             const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
-            //             if (navAgentInstance) {
-            //                 navAgentInstance.agentRaycastHit();
-            //             }
-                        
-                        
-            //     } else {
-            //         // console.log("rehit agent " + raycastHits[0].object.name));
-            //     }
-            // } else {
-            //     if ( raycastHitAgent ) {
-            //         if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-            //             // console.log("tryna reset agent colornode after no hit");
-            //             raycastHitAgent.material.materialColor = stopColor;
-            //             raycastHitAgent.material.needsUpdate = true;
-                        
-            //         } else if (raycastHitAgent.material) {
-            //             // console.log("tryna reset agent color after no hit");
-            //             raycastHitAgent.material.color = stopColor;
-            //         }
-            //     }
-            //     raycastHitAgent = null;
-            // }
+          
         } else {
+             selectedObjects.length = 0;
             if ( raycastHitAgent ) {
             // 	{
                 if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
@@ -727,8 +644,12 @@ export function centerRaycast () {
 
 export function onMouseDown(event) {
     // playerReadyToNav = true;
+        mouseIsDown = true;
+    if (scene && mouse && camera && mousecaster && isReady) {
+        mouseRaycast(event);
+    }
     console.log("mousedown "+ lastRaycastHitObject + " " + lastRaycastHitPosition );
-    mouseIsDown = true;
+
     let lastHitObjectName;
     if (lastRaycastHitObject && lastRaycastHitPosition) {
         lastHitObjectName = lastRaycastHitObject.userData ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
@@ -758,7 +679,9 @@ export function onMouseDown(event) {
         x: event.clientX,
         y: event.clientY
     };
-
+    if (cameraMode == "Fly") {
+            controls.dragToLook = true;
+    }
 
     // if ()
 }
@@ -766,15 +689,18 @@ export function onMouseDown(event) {
 	export function onMouseUp(e) {
 		mouseIsDown = false;
 		// playerReadyToNav = false;
+        if (cameraMode == "Fly") {
+             controls.dragToLook = true;
+        }
 
 	}
 
 
 	export function onMouseMove(event) {
 		// console.log("mouse move " +scene + mouse + camera + mousecaster + isReady);
-		if (scene && mouse && camera && mousecaster && isReady) {
-			mouseRaycast(event);
-		}
+            if (scene && mouse && camera && mousecaster && isReady) {
+                mouseRaycast(event);
+            }
 		//  if (!mouseIsDown) return; //nope, orbit is better
 
 		// 	const deltaX = event.clientX - previousMousePosition.x;

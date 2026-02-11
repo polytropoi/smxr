@@ -149,6 +149,7 @@ export function SplashText (textString) {
 
 // Root container – add it to the scene; call root.update in your loop
 export function InitReticle () {
+    console.log("tryna init reticle");
     const material = new THREE.LineBasicMaterial({ color: 0xAAFFAA }); // Green color
 const x = 0.01, y = 0.01; // Adjust size as needed
 
