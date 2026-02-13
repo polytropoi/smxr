@@ -90,6 +90,7 @@
 	eventEl.addEventListener('ready-event', init); //fired when settings are loaded..
 
 
+
 	async function loadModel(url) {
 		const loader = new GLTFLoader();
 		try {
@@ -120,6 +121,9 @@
 		SetControls(cameraMode);
 		
 			
+		InitEnvMap();
+	// 		const pmremGenerator = new THREE.PMREMGenerator(renderer);
+	// scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
 
 
 
@@ -180,10 +184,19 @@
 												console.log("tryna hide model " + child.name);
 											} else {
 												// if (child.material.envMap) {
-												child.castShadow = true;	
-												child.receiveShadow = true;
-												child.material.envMap = scene.environment;
+												// child.castShadow = true;	
+												// child.receiveShadow = true;
+												// child.material.envMap = scene.environment;
 												// }
+												
+												if (child.material) {
+													console.log("setting scene.environment envmap " + scene.environment );
+													// child.material.roughness = 0.5;
+													child.material.envMap = scene.environment;
+													child.envMapIntensity = 5;
+													child.castShadow = true;	
+													child.receiveShadow = true;
+												}
 												
 											}
 											
@@ -250,11 +263,13 @@
 										// model.layers.set(1);
 										model.userData = locationData[i];
 										model.name = "model_" + locationData[i].name;
-										model.castShadow = true;
-										model.receiveShadow = true;
-										activeObjex.push(model);
-										// model.material.envMap = scene.environment;
-										// model.envMapIntensity = 2;
+										// model.castShadow = true;
+										// model.receiveShadow = true;
+										if (locationData[i].locationTags.includes("active")) {
+											activeObjex.push(model);
+										}
+										
+										
 										scene.add(model);
 										// activeObjex.push(model);
 																			
@@ -409,6 +424,7 @@
 		// scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
 
 
+		
 		const sunLight = new THREE.DirectionalLight( settings.sceneColor1, 2 );
 		sunLight.castShadow = true;
 		sunLight.shadow.camera.near = .5;
@@ -422,8 +438,8 @@
 		sunLight.shadow.bias = - 0.001;
 		sunLight.position.set( 1, 3, 1 );
 
-		const waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, 1 );
-		const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, 0, 1 );
+		const waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, .5 );
+		const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, settings.sceneColor3, .5 );
 
 		scene.add( sunLight );
 		scene.add( skyAmbientLight );
@@ -488,7 +504,7 @@
 		}
 		
 
-		InitEnvMap();
+		// InitEnvMap();
 		InitSky();
 		InitFog();
 
@@ -573,8 +589,9 @@
 	} //end init!
 
 	export function togglePostProcessing () { //call after physics is done, elsewise... :(
-		console.log("tryna toggle post processing");
+
 		doPostProcessing = !doPostProcessing;
+				console.log("tryna toggle post processing " + doPostProcessing);
 	}
 
 

@@ -46,7 +46,7 @@ export function InitFog() {
 }
 
 export function InitEnvMap () {
-    if (settings && settings.skyboxURL) {
+    if (scene && settings && settings.skyboxURL) {
         console.log("gotsa skybox url " + settings.skyboxURL);
         const envMapURL = settings.skyboxURL;
         const equirectTextureLoader = new THREE.TextureLoader();
@@ -54,9 +54,10 @@ export function InitEnvMap () {
         const textureEquirect = equirectTextureLoader.load( envMapURL );
         textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
         textureEquirect.colorSpace = THREE.SRGBColorSpace;
-        scene.background = textureEquirect;
+        // scene.background = textureEquirect;
         scene.environment = textureEquirect;
-        scene.environmentIntensity = 10;
+	
+        // scene.environmentIntensity = 3;
 
 		// 1. Create a large sphere
 		const sphereRadius = 300;
@@ -65,8 +66,8 @@ export function InitEnvMap () {
 
 		// 3. Create material, mapping it to the inside
 		const material = new THREE.MeshBasicMaterial({
-		map: textureEquirect,
-		side: THREE.BackSide // Crucial for skybox
+			map: textureEquirect,
+			side: THREE.BackSide // Crucial for skybox
 		});
 
 		// 4. Create the mesh and add to scene
