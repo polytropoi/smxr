@@ -62,6 +62,27 @@ const mouse = new THREE.Vector2();
 let targetLocation = new THREE.Vector3();
 let validTarget = false;
 
+let controlObject;
+
+export function SetPlayerLocation (locationData) {
+    // if (controls && controls.object) {
+    //      console.log("tryna set first person player lcoationDarta " + JSON.stringify(locationData));
+    //     controls.object.position.set(locationData.x, locationData.y, locationData.z);
+    // } else {
+        if (player) {
+            console.log("tryna set third person player to lcoationDarta " + JSON.stringify(locationData));
+            player.position.set(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
+        } else {
+            if (controlObject) {
+                console.log("tryna set first person player lcoationDarta " + JSON.stringify(locationData));
+                // controlObject.position.set(locationData.x, locationData.y, locationData.z);
+                controls.object.position.set(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
+                controls.update();
+            }
+        }
+    // }
+}
+
 export function SetControls(cameraMode) {
 
     if (cameraMode == "Fixed") {
@@ -265,7 +286,8 @@ export function SetControls(cameraMode) {
 
         });
 
-        scene.add(controls.object);
+        controlObject = controls.object;
+        scene.add(controlObject);
         // controls.update();
         isReady = true;
 
@@ -274,6 +296,7 @@ export function SetControls(cameraMode) {
         pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
         pointerGizmo.up.set(0, 1, 0);
         scene.add(pointerGizmo);
+
 
 
     }
@@ -317,17 +340,17 @@ export function UpdateControls() {
         camera.getWorldPosition(cameraWorldPosition); //bc it's a child in this mode
         camera.lookAt(player.position);
 
-        if (mouseIsDown && targetLocation && validTarget) {
-            player.lookAt(targetLocation);
-            // console.log("tryna look at " + JSON.stringify(targetLocation));
-            // return;
-        } else {
+        // if (mouseIsDown && targetLocation && validTarget) {
+        //     // player.lookAt(targetLocation);
+        //     console.log("target location " + JSON.stringify(targetLocation));
+        //     // return;
+        // } else {
             if (moveLeft) {
                 player.rotateY(0.025);
             } else if (moveRight) {
                 player.rotateY(-0.025);
             }
-        }
+        // }
 
         playerVector.lerp(player.position, .5);
         goalVector.copy(goal.position);
@@ -672,7 +695,7 @@ export function onMouseDown(event) {
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
     }
-    console.log("mousedown " + lastRaycastHitObject + " " + lastRaycastHitPosition);
+    console.log("mousedown " + lastRaycastHitObject + " " + JSON.stringify(lastRaycastHitPosition));
 
         // let lastHitObjectName;
         // if (lastRaycastHitObject && lastRaycastHitPosition) {

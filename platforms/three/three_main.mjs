@@ -35,10 +35,10 @@
 
 	import { getVideo, getHandLandmarker } from './three_vision.js';
 
-	import { createLight, lightMods } from './three_lights.js';
+	import { lightMods, modLights } from './three_lights.js';
 
 
-	import { controls, player, camera, isReady, UpdateControls, cameraWorldPosition } from './three_controls.js';
+	import { controls, player, camera, isReady, UpdateControls, cameraWorldPosition, SetPlayerLocation } from './three_controls.js';
 
 	import Stats from './ui/stats.js';
 	
@@ -287,6 +287,7 @@
 							if (locationData[i].markerType == "player") {
 								console.log("playerposition " + JSON.stringify(locationData[i]));
 								playerPosition = locationData[i];
+								SetPlayerLocation(locationData[i]);
 							}
 							if (locationData[i].markerType == "light") {
 								createLight(locationData[i]);
@@ -508,6 +509,8 @@
 		InitSky();
 		InitFog();
 
+		
+
 		const scenePass = pass( scene, camera );
 		const scenePassColor = scenePass.getTextureNode();
 		const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
@@ -533,6 +536,7 @@
 			.mul( edgeStrength );
 		
 		let hasBloom = false;
+		let hasOutline = false;
 
 		let emissivePass;
 		let bloomPass;
@@ -578,15 +582,25 @@
 			if (hasBloom) {
 				// postProcessing.outputNode = scenePassColorBlurred.add( bloomPass );
 				postProcessing.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
-			} else {
+			} else if (hasOutline) {
 				// postProcessing.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
 				postProcessing.outputNode = outlineColor.add(scenePassColorBlurred);
+			} else {
+				postProcessing.outputNode = scenePassColorBlurred;
 			}
 	
 		}
 		
 
 	} //end init!
+
+	function createLight(locationData) {
+		console.log("tryna create light ");
+		const light = new THREE.PointLight( 0xff0000, 25, 100 );
+		light.position.set(locationData.x, locationData.y, locationData.z);
+		scene.add(light);
+		lightMods.push(light);
+	}
 
 	export function togglePostProcessing () { //call after physics is done, elsewise... :(
 
@@ -597,7 +611,7 @@
 
 ////////////// MAIN LOOP FOR ALL THE THINGS ////////////////
 	function animate() {
-		// const time = performance.now();
+		const time = performance.now();
 		// scene.updateMatrixWorld(true);
 	if (clock && isReady) {
 				
@@ -630,9 +644,8 @@
 			}
 
 			if (lightMods.length) {
-				for (let i = 0; i < lightMods.length; i++) {
-					lightMods[i].intensity = Math.sin(time * .001) * 100;
-				}
+				// console.log("lightmods length " + lightMods.length);
+				modLights(time);
 				// light.intensity = Math.sin(time) * 5;
 			}
 			lookAtCameraObjects.forEach(l => 

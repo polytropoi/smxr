@@ -12926,6 +12926,8 @@ function getAllPeople() {
                     "<div class=\x22card shadow mb-4\x22>" +
                     "<div class=\x22card-header py-3 d-flex flex-row align-items-center justify-content-between\x22>" +
                         "<h6 class=\x22m-0 font-weight-bold text-primary\x22>Scene Details - "+ sceneTitle +" | _id: "+ response.data._id + " | short_id: "+ response.data.short_id +
+                       
+                        " | <a target=\x22_blank\x22  href=\x22index.html?type=ascenes&appid="+ appid +"\x22>App Scenes</a>" + 
                         " | <a target=\x22_blank\x22 href=\x22../landing/"+ response.data.short_id +"\x22>Landing Link</a>" +  
                         " | <a target=\x22_blank\x22 href=\x22../pixi/"+ response.data.short_id +"\x22>Pixi Link</a>" +                       
                         " | <a target=\x22_blank\x22 href=\x22../aframe/"+ response.data.short_id +"\x22>A-Frame Link</a>" +
