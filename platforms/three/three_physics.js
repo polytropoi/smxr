@@ -5,7 +5,7 @@ import RAPIER from 'rapier';
 
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-import { scene, togglePostProcessing, water, staticObjex, activeObjex } from './three_main.mjs';
+import { scene, togglePostProcessing, water, staticObjex, activeObjex, cameraMode } from './three_main.mjs';
 import { player } from './three_controls.js';
 import { agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
 	import { settings } from '../../../connect/settings.js';
@@ -52,6 +52,13 @@ export async function initRapier (gravity) {
     // await new Promise(r => setTimeout(r, 5000));
 
     // worldIsReady = true;
+    if (player) {
+      //  const body = await getKinematicBody(player, -1); //pass the index too
+
+        const body = await getPlayerBody(player); //pass the index too
+        kinematicBodies.push(body);
+      // getPlayerBody(player);
+    }
 }
 
 
@@ -161,6 +168,7 @@ function WaitAndInit () {
   if (settings && settings.sceneTags && settings.sceneTags.includes("test")) {
     initDynamicObjex();
   }
+
 }
 
   export async function getKinematicAgentBodies () {
@@ -178,26 +186,31 @@ function WaitAndInit () {
     }
   }
 
-  export async function getPlayerBody() {
-    
-      // const mesh = player;
-       let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
-              .setTranslation(player.position.x, player.position.y, player.position.z);
-      let rigidbody = await world.createRigidBody(rigidBodyDesc);
-      let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 1);
-      let collider = await world.createCollider(kinematicCollider, rigidbody);
-      collider.setRestitution(1.5);
-      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+  export async function getPlayerBody(player) { //
 
-       let worldposition = new THREE.Vector3();
-      player.getWorldPosition(worldposition);
-
-      function update () {
-          player.getWorldPosition(worldposition);
-          rigidbody.setTranslation(worldposition);
-      }
+      // if (player) {
     
-    return { rigidbody, update };
+        // const mesh = player;
+        let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
+                .setTranslation(player.position.x, player.position.y, player.position.z);
+        let rigidbody = await world.createRigidBody(rigidBodyDesc);
+        let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
+        let collider = await world.createCollider(kinematicCollider, rigidbody);
+        collider.setRestitution(1.5);
+        collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+
+        let worldposition = new THREE.Vector3();
+        player.getWorldPosition(worldposition);
+
+        function update () {
+            player.getWorldPosition(worldposition);
+            rigidbody.setTranslation(worldposition);
+        }
+        console.log("created rigidbody for player!");
+        // player.userData.update = update;
+        // kinematicBodies.push(player);
+        return { rigidbody, update };
+ 
   }
   export async function getKinematicBody(agentParent, agentIndex, position) {
 

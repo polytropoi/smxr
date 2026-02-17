@@ -20,6 +20,7 @@ import { MapControls } from 'three/addons/controls/MapControls.js';
 import { InitReticle } from './three_ui.js';
 
 import {PlayPauseMedia} from '../../../connect/dialogs.js';
+import { getPlayerBody } from './three_physics.js';
 
 export let camera, controls, player;
 export let isReady = false;
@@ -66,6 +67,7 @@ let targetLocation = new THREE.Vector3();
 let validTarget = false;
 
 let controlObject;
+let lastPosition = new THREE.Vector3();
 
 export function SetPlayerLocation (locationData) {
     // if (controls && controls.object) {
@@ -91,7 +93,7 @@ export function SetControls(cameraMode) {
     if (cameraMode == "Mouse Look") { //no pointer lock or controller at all!  drag to look is better imo
 
         var geometry = new THREE.CapsuleGeometry(1, 2, 4, 8, 1);
-        var material = new THREE.MeshBasicMaterial({ "wireframe": true });
+        var material = new THREE.MeshBasicMaterial({ 'visible': false });
 
         player = new THREE.Mesh(geometry, material);
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
@@ -100,10 +102,12 @@ export function SetControls(cameraMode) {
         scene.add(player);
         player.add(camera);
 
+
         downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 100);
 
         // centercaster = new THREE.Raycaster();
         mousecaster = new THREE.Raycaster();
+        
         isReady = true;
 
     } else if (cameraMode == "Fixed") {
@@ -504,12 +508,21 @@ export function UpdateControls() {
             centerRaycast();
 
         }
-    } else if (cameraMode == "Mouse Look") { //First personc cam w/ pointer lock and center cursor
-        cameraWorldPosition.copy(camera.position);
+    } else if (cameraMode == "Mouse Look") { //First person with no cursor lock, with mouse caster
+        cameraWorldPosition.copy(player.position);
         if (navmesh && player) {
 
             downcaster.ray.origin.copy(player.position);
             downcaster.ray.origin.y += 10;
+
+
+            if (lastPosition === null) {   
+                // firstTry = true;
+                lastPosition = new THREE.Vector3();
+                player.getWorldPosition(lastPosition);
+                // if (this.data.xzOrigin) this.lastPosition.y -= this.xzOrigin.object3D.position.y;
+            }
+    
             // console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
             const intersections = downcaster.intersectObjects(groundObjex, false); //groundObjex == navmesh
 
@@ -529,6 +542,7 @@ export function UpdateControls() {
             direction.x = Number(moveRight) - Number(moveLeft);
 
             direction.normalize(); // this ensures consistent movements in all directions
+
 
             // player.getWorldDirection(direction);
             // direction.normalize();
@@ -551,12 +565,6 @@ export function UpdateControls() {
             const right = new THREE.Vector3();
             right.crossVectors(forward, up).normalize(); // Calculate right vector
 
-            // Move right (positive) or left (negative)
-            player.position.addScaledVector(right, -velocity.x);
-
-            // Move forward:
-            player.position.addScaledVector(forward, -velocity.z);
-
             if (onObject === true) {
 
                 velocity.y = Math.max(0, velocity.y);
@@ -564,28 +572,26 @@ export function UpdateControls() {
 
             }
 
-            // // console.log("delta " + delta + " direction " + JSON.stringify(direction) + " velocity " + JSON.stringify(velocity));
-            // controls.moveRight(- velocity.x * delta);
-            // controls.moveForward(- velocity.z * delta);
-
-            // controls.object.position.y += (velocity.y * delta); // new behavior
-
-            // if ( controls.object.position.y < - 10 ) {
-
-            // } else {
             if (!intersections.length) {
                 //off the navmesh, get closest point and go back
                 velocity.x = 0;
                 velocity.y = 0;
                 velocity.z = 0;
-                const goodSpot = closestNavmeshPoint(player.position);
-                if (goodSpot) {
-                    player.position.set(goodSpot.x, goodSpot.y, goodSpot.z);
-                    console.log("back to goodSpot " + JSON.stringify(goodSpot));
-                }
+                player.position.copy(lastPosition)
+                // const goodSpot = closestNavmeshPoint(player.position);
+                // if (goodSpot) {
+                //     player.position.set(goodSpot.x, goodSpot.y, goodSpot.z);
+                //     console.log("back to goodSpot " + JSON.stringify(goodSpot));
+                // }
             } else {
                 // velocity.y = 0;
                 // intersections[0].point.x = 
+                player.getWorldPosition(lastPosition);
+                            // Move right (positive) or left (negative)
+                player.position.addScaledVector(right, -velocity.x);
+
+                // Move forward:
+                player.position.addScaledVector(forward, -velocity.z);
                 player.position.y = intersections[0].point.y + 1.6;
 
                 canJump = true;
@@ -598,6 +604,9 @@ export function UpdateControls() {
 
 }
 
+function NavmeshConstraint () {
+
+}
 
 function RaycastHit(type, hit) {
     if (lastRaycastHitObject && lastRaycastHitObject != hit.object) {
@@ -923,6 +932,9 @@ export function onMouseWheel(e) {
                 
                 camera.position.y = v / 2;
                 camera.position.z = v / 2;
+            } else {
+                camera.position.y = 1;
+                camera.position.z = 0;
             }
             // }
             // return false;
@@ -942,13 +954,7 @@ export function onMouseWheel(e) {
                 // console.log("distanceFactor " + distanceFactor + " polarAngle " + polarAngle +  " azimuth " + azimuthAngle);
                 // controls.maxPolarAngle = Math.PI * distanceFactor;
             }
-            if (cameraMode == "Third Person") {
-                //     const v = followDistance + e.deltaY * 0.005;
-                // // if (v >= 0 && v <= 100) {
-                // 	followDistance = v;
-                // 	console.log('v is ' + v);
-                // camera.position.y = v / 2;
-            }
+           
         }
     }
     // }

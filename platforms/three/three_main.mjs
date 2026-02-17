@@ -397,8 +397,8 @@
 			}
 
 			if (cameraMode == "Third Person") {
-				const playerBody = await getPlayerBody();
-				kinematicBodies.push(playerBody);
+				// const playerBody = await getPlayerBody(player);
+				// kinematicBodies.push(playerBody);
 				const avatarName = userData.avatarName
 				ThreeText(avatarName, 10, player);
 				// CreatePlayerAgent(player, player.position.clone());
