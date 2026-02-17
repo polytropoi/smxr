@@ -5,10 +5,10 @@ import RAPIER from 'rapier';
 
 // import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-// import { scene, water, staticObjex, initModels } from './spark_main.mjs';
+// import { scene, water, staticObjex, initModels } from './threegl_main.mjs';
 
-import { scene } from './spark_main.mjs';
-import { agentParents, CreateAgent, randomNavmeshPoint } from './spark_nav.js';
+import { scene } from './threegl_main.mjs';
+import { agentParents, CreateAgent, randomNavmeshPoint } from './threegl_nav.js';
 // import {scene, world} from './three_main.mjs'
 
 

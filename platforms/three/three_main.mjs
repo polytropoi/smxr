@@ -118,6 +118,10 @@
 
 		cameraMode = settings.sceneCameraMode;
 
+		// cameraMode = "Mouse Look";
+		if (cameraMode == "First Person") {
+			cameraMode = "Mouse Look";
+		}
 		SetControls(cameraMode);
 		
 			

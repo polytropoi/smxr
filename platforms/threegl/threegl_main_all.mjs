@@ -13,9 +13,9 @@ import getLayer from "./getLayer.js";
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
   import { SetSceneLocations } from '../../../connect/connect.js';
 
-	// import { InitSurface, InstanceOnSurface, instancedModels } from './spark_instance.js';
+	// import { InitSurface, InstanceOnSurface, instancedModels } from './threegl_instance.js';
 
-  	import { InitPathfinding, agents } from './spark_nav.js';
+  	import { InitPathfinding, agents } from './threegl_nav.js';
 
     import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 

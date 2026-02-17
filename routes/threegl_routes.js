@@ -2,7 +2,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const express = require("express");
-const spark_router = express.Router();
+const threegl_router = express.Router();
 const entities = require("entities");
 // const async = require('async'); ///goodbye to you my confusing friend...
 
@@ -47,7 +47,7 @@ function UppercaseFirst(s) {
         }
     };
     
-spark_router.get("/test", function (req, res) {
+threegl_router.get("/test", function (req, res) {
     res.send("OK!");
 });    
 
@@ -71,7 +71,7 @@ function HexToRgbValues (c) {
 
  
 ////////// test / example of aframe response
-spark_router.get('/simple', function (req, res) { 
+threegl_router.get('/simple', function (req, res) { 
 
     let response =
         "<!DOCTYPE html> <html lang=\x22en\x22>" +
@@ -94,7 +94,7 @@ spark_router.get('/simple', function (req, res) {
 );
 
 ////////////////////PRIMARY /WEBXR ROUTE  e.g. /webxr/<short_id> ///////////////////
-spark_router.get('/:_id', function (req, res) { 
+threegl_router.get('/:_id', function (req, res) { 
     
     var reqstring = entities.decodeHTML(req.params._id);
     console.log("NEW three SCENE REQUEST : " + reqstring);
@@ -371,7 +371,7 @@ spark_router.get('/:_id', function (req, res) {
 
                         "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js\x22,"+
                         // "\x22sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/0.1.10/spark.module.js\x22,"+  
-                        "\x22sparkjsdev/spark\x22: \x22../platforms/spark/src/spark.module.js\x22,"+     //lod branch!!
+                        "\x22sparkjsdev/spark\x22: \x22../platforms/threegl/src/spark.module.js\x22,"+     //lod branch!!
 
                        
                              "\x22jsm/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181/examples/jsm/\x22,"+
@@ -3164,11 +3164,11 @@ spark_router.get('/:_id', function (req, res) {
                         
                         importMap +
 
-                        // "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs?t="+Date.now()+"\x22 ></script>" +
+                        // "<script type=\x22module\x22 src=\x22../platforms/threegl/threegl_main.mjs?t="+Date.now()+"\x22 ></script>" +
 
-                        // "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs?t="+Date.now()+"\x22></script>" +
+                        // "<script type=\x22module\x22 src=\x22../platforms/threegl/threegl_main.mjs?t="+Date.now()+"\x22></script>" +
 
-                        "<script type=\x22module\x22 src=\x22../platforms/spark/spark_main.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/threegl/threegl_main.mjs\x22></script>" +
 
                         // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +
                         "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +
@@ -3313,4 +3313,4 @@ spark_router.get('/:_id', function (req, res) {
 ///// END PRIMARY SERVERSIDE /webxr/ ROUTE //////////////////////
 
 
-export default spark_router;
+export default threegl_router;

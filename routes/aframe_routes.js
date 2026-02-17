@@ -475,7 +475,7 @@ aframe_router.get('/:_id', function (req, res) {
                         // "\x22@sparkjsdev/spark\x22: \x22https://cdn.jsdelivr.net/gh/sparkjsdev/spark@71c8358b5dae4bed0cc2647795fe6bb64152580d/dist/spark.module.js\x22,"+ 
                        
 
-                        // "\x22@forge-gfx/forge\x22: \x22../platforms/spark/src/spark.module.js\x22,"+  //this is lod branch! //no workie
+                        // "\x22@forge-gfx/forge\x22: \x22../platforms/threegl/src/spark.module.js\x22,"+  //this is lod branch! //no workie
                         
                         "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
                         "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  

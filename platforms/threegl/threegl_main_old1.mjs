@@ -13,23 +13,23 @@
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 	import { SetSceneLocations } from '../../../connect/connect.js';
 
-	import { InitPathfinding, agents } from './spark_nav.js';
+	import { InitPathfinding, agents } from './threegl_nav.js';
 
-	import { InitSurface, InstanceOnSurface, instancedModels, createDefaultSurface } from './spark_instance.js';
+	import { InitSurface, InstanceOnSurface, instancedModels, createDefaultSurface } from './threegl_instance.js';
 
-	// import { UpdateText } from './spark_ui.js';
+	// import { UpdateText } from './threegl_ui.js';
 
 	import { world, gravity, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, worldIsReady, 
-		initDefaultStaticCollider} from './spark_physics.js';
+		initDefaultStaticCollider} from './threegl_physics.js';
 
-	import { InitEnvMap, InitFog } from './spark_sky.js';
+	import { InitEnvMap, InitFog } from './threegl_sky.js';
 
-	import { splatObjex, initSplats } from './spark_splats.js';
+	import { splatObjex, initSplats } from './threegl_splats.js';
 	// import { Container } from '@pmndrs/uikit' //arghh	
 
 	import Stats from './ui/stats.js';
-import { initWater1, water } from './env/spark_water.js';
+import { initWater1, water } from './env/threegl_water.js';
 
 
 
@@ -450,7 +450,7 @@ import { initWater1, water } from './env/spark_water.js';
 			document.body.appendChild(stats.domElement);
 			// }
 			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
-				// const waterModule = await import ('./env/spark_water.js');
+				// const waterModule = await import ('./env/threegl_water.js');
 				if (settings.sceneWater.name == "water1") {
 					initWater1();
 					// const waterModule = await import {Water} from './tsl/tsl_water.js'

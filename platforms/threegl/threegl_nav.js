@@ -1,12 +1,12 @@
     import * as THREE from 'three';
 
-    // import {scene, navmesh} from './spark_main.mjs';
-        import {scene, navmesh} from './spark_main.mjs';
+    // import {scene, navmesh} from './threegl_main.mjs';
+        import {scene, navmesh} from './threegl_main.mjs';
 
     import { Pathfinding, PathfindingHelper } from 'three-pathfinding';
 
 
-    import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './spark_physics.js';
+    import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './threegl_physics.js';
 
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;

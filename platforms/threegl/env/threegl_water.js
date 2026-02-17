@@ -1,7 +1,7 @@
 
 import * as THREE from 'three';
 
-import { scene } from '../spark_main.mjs'
+import { scene } from '../threegl_main.mjs'
 
 import { settings } from '../../../connect/settings.js';
 

@@ -1750,7 +1750,7 @@ let isPlaying = false;
 
 
 
-function PlayPauseMedia () {
+export function PlayPauseMedia () {
 
   console.log("PlayPauseMedia listening to " + timedEventsListenerMode + " primaryAudioHowl " + primaryAudioHowl);
   if (timedEventsListenerMode != null) {

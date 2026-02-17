@@ -1,6 +1,6 @@
   import * as THREE from "three";
   import { SplatMesh, NewSparkRenderer } from "sparkjsdev/spark";
-import {scene, renderer} from "./spark_main.mjs";
+import {scene, renderer} from "./threegl_main.mjs";
 
 export let splatObjex = [];
 export let spark;
@@ -19,7 +19,7 @@ export async function initSplats () {
         // const splat = new SplatMesh({ url: splatURL });
         const splat = new SplatMesh({
           url: splatURL,
-          lod: true,
+          lod: false,
           nonLod: true,
           onLoad: (mesh) => {
             mesh.enableLod = true;

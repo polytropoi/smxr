@@ -2,9 +2,9 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js'; 
 
-// import {scene, surface, surfaceObjex, water} from './spark_main.mjs';
+// import {scene, surface, surfaceObjex, water} from './threegl_main.mjs';
 
-import {scene, surface } from './spark_main.mjs';
+import {scene, surface } from './threegl_main.mjs';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 

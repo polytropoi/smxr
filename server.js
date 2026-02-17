@@ -182,8 +182,8 @@ app.use('/vtt', vtt_routes);
 import three_routes from './routes/three_routes.js';
 app.use('/three', three_routes); 
 
-import spark_routes from './routes/spark_routes.js';
-app.use('/spark', spark_routes); 
+import threegl_routes from './routes/threegl_routes.js';
+app.use('/threegl', threegl_routes); 
 
 /// uncomment to add these optional routes
 import unity_routes from './routes/unity_routes.js';

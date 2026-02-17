@@ -18,6 +18,9 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
 import { InitReticle } from './three_ui.js';
+
+import {PlayPauseMedia} from '../../../connect/dialogs.js';
+
 export let camera, controls, player;
 export let isReady = false;
 export let followDistance = 16;
@@ -85,7 +88,25 @@ export function SetPlayerLocation (locationData) {
 
 export function SetControls(cameraMode) {
 
-    if (cameraMode == "Fixed") {
+    if (cameraMode == "Mouse Look") { //no pointer lock or controller at all!  drag to look is better imo
+
+        var geometry = new THREE.CapsuleGeometry(1, 2, 4, 8, 1);
+        var material = new THREE.MeshBasicMaterial({ "wireframe": true });
+
+        player = new THREE.Mesh(geometry, material);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+        
+        camera.position.set(0, 1, 0);
+        scene.add(player);
+        player.add(camera);
+
+        downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 100);
+
+        // centercaster = new THREE.Raycaster();
+        mousecaster = new THREE.Raycaster();
+        isReady = true;
+
+    } else if (cameraMode == "Fixed") {
 
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
         camera.position.z = 5;
@@ -218,7 +239,7 @@ export function SetControls(cameraMode) {
 
         controls = new OrbitControls(camera, renderer.domElement);
         controls.minDistance = .5;
-        controls.maxDistance = 150;
+        controls.maxDistance = 50;
         controls.maxPolarAngle = Math.PI * .4;
         controls.minPolarAngle = Math.PI * .25;
         // controls.enableZoom = false; 
@@ -245,11 +266,13 @@ export function SetControls(cameraMode) {
         scene.add(pointerGizmo);
 
         isReady = true;
-    } else { //default first person
+    } else if (cameraMode == "First Person") { //default first person
         // camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
         camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500);
         camera.position.set(0, 10, 0);
+
         controls = new PointerLockControls(camera, document.body); //use regular fp controls if has navmesh
+        
         downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 100);
 
         centercaster = new THREE.Raycaster();
@@ -276,6 +299,7 @@ export function SetControls(cameraMode) {
 
             instructions.style.display = 'none';
             blocker.style.display = 'none';
+            PlayPauseMedia();
 
         });
 
@@ -287,7 +311,9 @@ export function SetControls(cameraMode) {
         });
 
         controlObject = controls.object;
+
         scene.add(controlObject);
+        
         // controls.update();
         isReady = true;
 
@@ -299,6 +325,8 @@ export function SetControls(cameraMode) {
 
 
 
+    } else {
+        console.log("no valid camera Mode!");
     }
 
 }
@@ -409,7 +437,7 @@ export function UpdateControls() {
         arrowHelper.position.copy(playcaster.ray.origin);
         playerRaycast();
 
-    } else { //First personc cam w/ pointer lock and center cursor
+    } else if (cameraMode == "First Person") { //First personc cam w/ pointer lock and center cursor
         cameraWorldPosition.copy(camera.position);
         if (navmesh && controls && controls.isLocked === true) {
 
@@ -434,7 +462,10 @@ export function UpdateControls() {
             direction.x = Number(moveRight) - Number(moveLeft);
             direction.normalize(); // this ensures consistent movements in all directions
 
-            if (moveForward || moveBackward) velocity.z -= direction.z * 20.0 * (playerSpeed) * delta;
+            if (moveForward || moveBackward) {
+                velocity.z -= direction.z * 20.0 * (playerSpeed) * delta;
+                console.log("velocity on " + velocity.z);
+            }
             if (moveLeft || moveRight) velocity.x -= direction.x * 20.0 * (playerSpeed) * delta;
 
             if (onObject === true) {
@@ -473,8 +504,98 @@ export function UpdateControls() {
             centerRaycast();
 
         }
+    } else if (cameraMode == "Mouse Look") { //First personc cam w/ pointer lock and center cursor
+        cameraWorldPosition.copy(camera.position);
+        if (navmesh && player) {
+
+            downcaster.ray.origin.copy(player.position);
+            downcaster.ray.origin.y += 10;
+            // console.log("tryna downcast from " + JSON.stringify(downcaster.ray.origin));
+            const intersections = downcaster.intersectObjects(groundObjex, false); //groundObjex == navmesh
+
+            const onObject = intersections.length > 0;
+            if (onObject) {
+                // console.log(JSON.stringify(controls.object.position) + " pos " + groundObjex.length + " groundObjex with intersections " + intersections.length + " distance to 0th " + intersections[0].distance + " point.y " + intersections[0].point.y + " camera y " + controls.object.position.y);
+            }
+
+            const delta = (time - prevTime) / 1000;
+            
+            velocity.x -= velocity.x * 12 * delta;
+            velocity.z -= velocity.z * 12 * delta;
+
+            velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+
+            direction.z = Number(moveForward) - Number(moveBackward);
+            direction.x = Number(moveRight) - Number(moveLeft);
+
+            direction.normalize(); // this ensures consistent movements in all directions
+
+            // player.getWorldDirection(direction);
+            // direction.normalize();
+            if (moveForward || moveBackward) {
+                velocity.z -= direction.z * .2 * (playerSpeed) * delta;
+            
+            }
+            if (moveLeft || moveRight) {
+                velocity.x -= direction.x * .2 * (playerSpeed) * delta;
+                // console.log("sideways " + velocity.x);
+            }
+            // player.position.lerp(direction, .01);
+            // player.translateZ(velocity.z);
+            // player.translateX(velocity.x);
+
+            const forward = new THREE.Vector3();
+            camera.getWorldDirection(forward);
+
+            const up = new THREE.Vector3(0, 1, 0);
+            const right = new THREE.Vector3();
+            right.crossVectors(forward, up).normalize(); // Calculate right vector
+
+            // Move right (positive) or left (negative)
+            player.position.addScaledVector(right, -velocity.x);
+
+            // Move forward:
+            player.position.addScaledVector(forward, -velocity.z);
+
+            if (onObject === true) {
+
+                velocity.y = Math.max(0, velocity.y);
+                canJump = true;
+
+            }
+
+            // // console.log("delta " + delta + " direction " + JSON.stringify(direction) + " velocity " + JSON.stringify(velocity));
+            // controls.moveRight(- velocity.x * delta);
+            // controls.moveForward(- velocity.z * delta);
+
+            // controls.object.position.y += (velocity.y * delta); // new behavior
+
+            // if ( controls.object.position.y < - 10 ) {
+
+            // } else {
+            if (!intersections.length) {
+                //off the navmesh, get closest point and go back
+                velocity.x = 0;
+                velocity.y = 0;
+                velocity.z = 0;
+                const goodSpot = closestNavmeshPoint(player.position);
+                if (goodSpot) {
+                    player.position.set(goodSpot.x, goodSpot.y, goodSpot.z);
+                    console.log("back to goodSpot " + JSON.stringify(goodSpot));
+                }
+            } else {
+                // velocity.y = 0;
+                // intersections[0].point.x = 
+                player.position.y = intersections[0].point.y + 1.6;
+
+                canJump = true;
+            }
+            // centerRaycast();
+
+        }
     }
-    prevTime = time;
+        prevTime = time;
+
 }
 
 
@@ -748,6 +869,20 @@ export function onMouseMove(event) {
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
     }
+    if (mouseIsDown && cameraMode == "Mouse Look" && scene && mouse && camera ) {
+        // Calculate mouse position relative to the center of the screen
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        // Adjust camera rotation based on mouse movement deltas
+        // Use an appropriate rotation order (e.g., 'YXZ') to avoid gimbal lock issues
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y -= movementX * 0.002; // Adjust sensitivity
+        camera.rotation.x -= movementY * 0.002;
+
+        // Constrain vertical look to prevent the camera from flipping over
+        camera.rotation.x = Math.max( -Math.PI / 2, Math.min( Math.PI / 2, camera.rotation.x ) );
+    }
     //  if (!mouseIsDown) return; //nope, orbit is better
 
     // 	const deltaX = event.clientX - previousMousePosition.x;
@@ -775,46 +910,52 @@ export function onMouseMove(event) {
 
 
 export function onMouseWheel(e) {
-    if (cameraMode == "Fixed") {
+    if (camera) {
+        if (cameraMode == "Fixed") {
 
-    } else if (!controls || (controls && !controls.enabled)) {
-        // if (controls && (controls.getDistance() < 300)) {
-        const v = followDistance + e.deltaY * 0.005;
-        // if (v >= 0 && v <= 100) {
-        followDistance = v;
-        console.log('v is ' + v);
-        camera.position.y = v / 2;
-        // }
-        // return false;
-    } else {
-        if (cameraMode != "Orbit") {
-
-            // const distanceFactor = controls.getDistance();
-            // const polarAngle = controls.getPolarAngle();
-            // const azimuthAngle = controls.getAzimuthalAngle();
-            // if (distanceFactor < 20) {
-            // 	controls.maxPolarAngle = Math.PI * .5;
-            // } else if (distanceFactor < 30) {
-            // 	controls.maxPolarAngle = Math.PI * .4;
-            // } else if (distanceFactor < 50) {
-            // 	controls.maxPolarAngle = Math.PI * .3;
+        } else if (!controls || (controls && !controls.enabled)) {
+            // if (controls && (controls.getDistance() < 300)) {
+            const v = followDistance + e.deltaY * 0.005;
+            // if (v >= 0 && v <= 100) {
+            followDistance = v;
+            console.log('v is ' + v);
+            if (v / 2 > 0) {
+                
+                camera.position.y = v / 2;
+                camera.position.z = v / 2;
+            }
             // }
-            // console.log("distanceFactor " + distanceFactor + " polarAngle " + polarAngle +  " azimuth " + azimuthAngle);
-            // controls.maxPolarAngle = Math.PI * distanceFactor;
-        }
-        if (cameraMode == "Third Person") {
-            //     const v = followDistance + e.deltaY * 0.005;
-            // // if (v >= 0 && v <= 100) {
-            // 	followDistance = v;
-            // 	console.log('v is ' + v);
-            // camera.position.y = v / 2;
+            // return false;
+        } else {
+            if (cameraMode != "Orbit") {
+
+                // const distanceFactor = controls.getDistance();
+                // const polarAngle = controls.getPolarAngle();
+                // const azimuthAngle = controls.getAzimuthalAngle();
+                // if (distanceFactor < 20) {
+                // 	controls.maxPolarAngle = Math.PI * .5;
+                // } else if (distanceFactor < 30) {
+                // 	controls.maxPolarAngle = Math.PI * .4;
+                // } else if (distanceFactor < 50) {
+                // 	controls.maxPolarAngle = Math.PI * .3;
+                // }
+                // console.log("distanceFactor " + distanceFactor + " polarAngle " + polarAngle +  " azimuth " + azimuthAngle);
+                // controls.maxPolarAngle = Math.PI * distanceFactor;
+            }
+            if (cameraMode == "Third Person") {
+                //     const v = followDistance + e.deltaY * 0.005;
+                // // if (v >= 0 && v <= 100) {
+                // 	followDistance = v;
+                // 	console.log('v is ' + v);
+                // camera.position.y = v / 2;
+            }
         }
     }
     // }
 }
 
 export const onKeyDown = function (event) {
-    // console.log("keydown " + event.code);
+    console.log("keydown " + event.code);
     switch (event.code) {
 
         case 'ArrowUp':
