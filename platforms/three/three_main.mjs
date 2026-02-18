@@ -23,7 +23,7 @@
 
 	import { getRainbowMaterial } from './tsl/rainbow.js'
 
-	import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
+	import { InitSurface, InstanceOnSurface, Starfield, instancedModels } from './three_instance.js';
 
 	import { UpdateText, InitReticle, ThreeText, lookAtCameraObjects } from './three_ui.js';
 
@@ -406,7 +406,7 @@
 			//  await new Promise(r => setTimeout(r, 000)); //fudge
 			initEvents();
 			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
-			// 			ThreeText(texttest);
+			// ThreeText(texttest);
 		}
 
 		function createDefaultNavmesh() {
@@ -503,6 +503,9 @@
 			}
 			if (settings.hasPrimaryAudio) {
 				LoadPrimaryAudioHowl();
+			}
+			if (settings.sceneTags.includes("stars")) {
+				Starfield(1000, 2, 100, null);
 			}
 
 			// }

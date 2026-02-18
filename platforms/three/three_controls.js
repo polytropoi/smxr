@@ -687,7 +687,7 @@ function RaycastHit(type, hit) {
                     selectedObjects.length = 0;
                     selectedObjects.push(hit.object);
                 }
-                console.log("seelected objex " + selectedObjects.length + " name " + name + " type hit " + type);
+                // console.log("seelected objex " + selectedObjects.length + " name " + name + " type hit " + type);
             }
         // }
 

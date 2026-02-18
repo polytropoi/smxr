@@ -1,16 +1,20 @@
 import * as THREE from 'three';
 
+
+
+import { floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry } from 'three/tsl';
+
 import { settings } from '../../../connect/settings.js'; 
 
 import {scene, surface, water} from './three_main.mjs';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 
+
+// import { uniform, sin, range } from 'three/tsl';
+
 let sampler;
 
-import { floor, Fn, max, min, positionLocal, normalLocal, sub, time, vec3, vec4 } from 'three/tsl';
-
-import { uniform, sin } from 'three/tsl';
 
 export let instancedModels = [];
 export async function InitSurface () {
@@ -136,4 +140,60 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
     } else {
         console.log("NO SURFACE");
     }
+}
+
+export function Starfield(count, size, scale, animation) {
+
+    const geometry = new THREE.PlaneGeometry(size, size);
+    const material = new THREE.MeshBasicNodeMaterial({color: 0xff0066});
+    const mesh = new THREE.InstancedMesh(geometry, material, count);
+    const positionRange = range(new THREE.Vector3(-scale, -scale, -scale), new THREE.Vector3(scale,scale,scale));
+    material.positionNode = positionLocal.add(positionRange);
+    
+    scene.add(mesh);
+
+    // material.positionNode = positionLocal.add(positionRange).Fn(({object: mesh}) => {
+    //     // 
+    //     const objectCenter = getMatrix().element(3).xyz;
+    //     const toCamera = cameraPosition.sub(objectCenter).toVar();
+    //     // set toCamera.y = 0 to only allow rotation around the y-axis (i.e. make it "cylindrical")
+    //     toCamera.assign(vec3(toCamera.x, 0, toCamera.z).normalize());
+    //     const up = vec3(0, 1, 0).toVar();
+    //     const right = up.cross(toCamera).normalize();
+    //     up.assign(toCamera.cross(right).normalize());
+    //     const rotationMatrix = mat3(right, up, toCamera);
+    //     return rotationMatrix.mul(positionGeometry);
+
+    //     function getMatrix() {
+    //         if (mesh.isInstancedMesh) {
+    //             // Can I use tsl.instance() to make this code cleaner?
+    //             // I tried using tsl.instance().instanceMatrixNode but it's always null.
+    //             // Leaving this line here but commented out.
+    //             // tsl.instance(mesh.count, mesh.instanceMatrix).toStack();
+    //             const attribute = mesh.instanceMatrix;
+    //             const matrices = attribute.array;
+    //             if (mesh.count <= 1000) {
+    //                 const bufferNode = buffer(matrices, 'mat4', Math.max(mesh.count, 1));
+    //                 return bufferNode.element(instanceIndex);
+    //             } else {
+    //                 const buffer = new three.InstancedInterleavedBuffer(matrices, 16, 1);
+    //                 let bufferFn = instancedBufferAttribute;
+    //                 if (attribute.usage === three.DynamicDrawUsage) {
+    //                     bufferFn = instancedDynamicBufferAttribute;
+    //                 }
+    //                 // F.Signature -> bufferAttribute( array, type, stride, offset )
+    //                 const b0 = bufferFn(buffer, 'vec4', 16, 0);
+    //                 const b1 = bufferFn(buffer, 'vec4', 16, 4);
+    //                 const b2 = bufferFn(buffer, 'vec4', 16, 8);
+    //                 const b3 = bufferFn(buffer, 'vec4', 16, 12);
+    //                 return mat4(b0, b1, b2, b3);
+    //             }
+    //         }
+    //         return modelWorldMatrix;
+    //     }
+    // })();
+
+        // material.positionNode = positionLocal.add(positionRange);
+    
+
 }
