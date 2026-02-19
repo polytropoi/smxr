@@ -372,11 +372,11 @@ three_router.get('/:_id', function (req, res) {
             // "\x22three\x22: \x22https://unpkg.com/three@0.161.0/build/three.module.js\x22,"+
             // "\x22three/addons/\x22: \x22https://unpkg.com/three@0.161.0/examples/jsm/\x22"+
 
-                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.webgpu.js\x22,"+     
-                       "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.webgpu.js\x22,"+
+                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.webgpu.js\x22,"+     
+                       "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.webgpu.js\x22,"+
 
-                            "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.tsl.js\x22,"+
-                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
+                            "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.tsl.js\x22,"+
+                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/examples/jsm/\x22,"+
                             "\x22three-pathfinding\x22: \x22/platforms/three/src/three-pathfinding.module.js\x22,"+
                             "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
                              "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
@@ -3232,6 +3232,11 @@ three_router.get('/:_id', function (req, res) {
                         
                         "</head>\n" +
                         "<body "+bgstyle+">" +
+                         "<img hidden visible=\x22false\x22 id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>"+
+                        "<img hidden visible=\x22false\x22 id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>"+
+                        "<img hidden visible=\x22false\x22 id=\x22smoke1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>"+
+                        "<img hidden visible=\x22false\x22 id=\x22explosion1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/explosion1.png\x22 crossorigin=\x22anonymous\x22>"+
+                        "<img hidden visible=\x22false\x22 id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>"+
                         // "<body>" +'
                                  transportButtons+ 
                                 "<div id=\x22dialog_button\x22><i class=\x22three_dialog_button fas fa-info-circle fa-2x\x22></i></div>"+

@@ -24,7 +24,7 @@ import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
 export class Water2 {
 
     constructor() {
-        console.log("making water 1 at level " + settings.sceneWater.level);
+        console.log("making water 2 at level " + settings.sceneWater.level);
         const timer = time.mul( .8 );
         const floorUV = positionWorld.xzy;
 
@@ -67,7 +67,7 @@ export class Water2 {
 
 export class Water1 { //uses watermesh
     constructor() {
-       
+        console.log("making water 2 at level " + settings.sceneWater.level);
         // const waterGeometry = new THREE.PlaneGeometry( 500, 500 );
         const waterGeometry = new THREE.CircleGeometry( 300, 64 )
         const loader = new THREE.TextureLoader();
@@ -77,12 +77,14 @@ export class Water1 { //uses watermesh
         const water = new WaterMesh(
             waterGeometry,
             {
+                alpha: .25,
+                // size: 30,
                 waterNormals: waterNormals,
                 sunDirection: new THREE.Vector3(),
                 sunColor: settings.sceneColor1,
                 waterColor: settings.sceneColor2,
-                alpha: .75,
-                distortionScale: 4
+                
+                distortionScale: 2
             }
         );
         const waterLevel = parseFloat(settings.sceneWater.level);  

@@ -17,7 +17,10 @@ export function createLight(locationData) {
 
 export function modLights (time) {
     for (let i = 0; i < lightMods.length; i++) {
-        lightMods[i].intensity = Math.sin(time * .001) * 200;
+        // lightMods[i].intensity = Math.sin(time * .01) * (200 * Math.random());
+        if (Math.random() > .75) {
+        lightMods[i].intensity = Math.random() * 200;
+        }
         // lightMods[i].intensity = Math.sin(time * 2);
     }
 }

@@ -23,7 +23,7 @@
 
 	import { getRainbowMaterial } from './tsl/rainbow.js'
 
-	import { InitSurface, InstanceOnSurface, Starfield, instancedModels } from './three_instance.js';
+	import { InitSurface, InstanceOnSurface, Starfield, Sprites, instancedModels } from './three_instance.js';
 
 	import { UpdateText, InitReticle, ThreeText, lookAtCameraObjects } from './three_ui.js';
 
@@ -43,6 +43,7 @@
 	import Stats from './ui/stats.js';
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel} from './three_controls.js';
+import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene, navmesh, surface;
 
@@ -80,6 +81,7 @@
 
 	export let groundObjex = [];
 
+	let animatedSprites = [];
 
 	let playerPosition;
 	
@@ -109,8 +111,11 @@
 		scene = new THREE.Scene();
 		renderer = new THREE.WebGPURenderer({antialias: true});
 		renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setPixelRatio( 2.0 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.setAnimationLoop( animate );
+		// renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		// renderer.toneMappingExposure = 0.1;
 		renderer.shadowMap.enabled = true;
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
 
@@ -507,8 +512,7 @@
 			if (settings.sceneTags.includes("stars")) {
 				Starfield(1000, 2, 100, null);
 			}
-
-			// }
+			
 		}
 		
 
@@ -602,11 +606,25 @@
 	} //end init!
 
 	function createLight(locationData) {
+		if (locationData.locationTags.includes("fire")) {
 		console.log("tryna create light ");
-		const light = new THREE.PointLight( 0xff0000, 25, 100 );
+		
+		const light = new THREE.PointLight( settings.sceneColor1Alt, 100, 0);
 		light.position.set(locationData.x, locationData.y, locationData.z);
 		scene.add(light);
+		
 		lightMods.push(light);
+
+		const smoke = Sprites(10, 30, 50, null);
+		smoke.position.set(locationData.x, locationData.y, locationData.z);
+		scene.add(smoke);
+			// }
+			const animatedSprite = AnimatedSprite(locationData.yscale);
+			scene.add(animatedSprite.sprite);
+			animatedSprite.sprite.position.set(locationData.x, locationData.y, locationData.z);
+			animatedSprites.push(animatedSprite);
+		}
+
 	}
 
 	export function togglePostProcessing () { //call after physics is done, elsewise... :(
@@ -622,13 +640,17 @@
 		// scene.updateMatrixWorld(true);
 	if (clock && isReady) {
 				
+
 			UpdateControls();
 
 			const delta = clock.getDelta();
 			if (stats) {
 				stats.update();
 			}
-
+			if (animatedSprites.length) {
+				animatedSprites.forEach(a =>
+					a.update(time));
+			}
 			if (agents.length) {
 				agents.forEach(a =>
 					a.update(delta));

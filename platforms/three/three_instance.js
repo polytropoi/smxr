@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 
 
-import { floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry } from 'three/tsl';
+import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
 
 import { settings } from '../../../connect/settings.js'; 
 
@@ -149,7 +149,7 @@ export function Starfield(count, size, scale, animation) {
     const mesh = new THREE.InstancedMesh(geometry, material, count);
     const positionRange = range(new THREE.Vector3(-scale, -scale, -scale), new THREE.Vector3(scale,scale,scale));
     material.positionNode = positionLocal.add(positionRange);
-    
+    // material.vertexNode = billboarding();
     scene.add(mesh);
 
     // material.positionNode = positionLocal.add(positionRange).Fn(({object: mesh}) => {
@@ -195,5 +195,60 @@ export function Starfield(count, size, scale, animation) {
 
         // material.positionNode = positionLocal.add(positionRange);
     
+
+}
+
+export function Sprites (count, size, scale, animation) {
+    const positions = [];
+
+        for ( let i = 0; i < count; i ++ ) {
+
+            positions.push( scale * Math.random() - scale/2, scale * Math.random() - scale/2, scale * Math.random() - scale/2 );
+
+        }
+
+        const positionAttribute = new THREE.InstancedBufferAttribute( new Float32Array( positions ), 3 );
+
+        // texture
+
+        const url = document.getElementById("cloud1").src;
+        const map = new THREE.TextureLoader().load( url );
+        map.colorSpace = THREE.SRGBColorSpace;
+
+        // material
+
+        const material = new THREE.SpriteNodeMaterial( { 
+            sizeAttenuation: true,  
+            map: map, 
+            transparent: true, 
+            alphaToCoverage: true, 
+            alphaMap: map, 
+            // alphaTest: 0.1, 
+            depthWrite: false, 
+            // depthTest: false
+            } );
+        // material.color.setHSL( Math.random(), Math.random(), Math.random(), THREE.SRGBColorSpace );
+
+        // material.color.setHex( settings.sceneColor1Alt, THREE.SRGBColorSpace );
+        const color = new THREE.Color(settings.sceneColor2Alt);
+        material.color = color;
+
+// 1. Create a uniform node for the color
+// const spriteColorUniform = uniform(new THREE.Color(0xff0000)); // Start with red
+
+// 2. Assign the uniform node to colorNode
+// material.colorNode = spriteColorUniform;
+        // material.colorNode = new THREE.Color(settings.sceneColor2);
+        material.positionNode = instancedBufferAttribute( positionAttribute );
+        material.rotationNode = time.add( instanceIndex ).sin().mul(.1);
+        //   material.vertexNode = billboarding();
+        material.scaleNode = uniform( size );
+        // sprites
+
+        const particles = new THREE.Sprite( material );
+        particles.count = count;
+
+        return particles;
+        scene.add( partic/les );
 
 }
