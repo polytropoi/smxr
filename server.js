@@ -7710,6 +7710,7 @@ app.post('/update_scene/:_id', requiredAuthentication, function (req, res) {
           sceneType : (req.body.sceneType != null && req.body.sceneType.length > 2) ? req.body.sceneType : "Default",
           sceneWebType : (req.body.sceneWebType != null && req.body.sceneWebType.length > 2) ? req.body.sceneWebType : "Default",
           sceneCameraMode : req.body.sceneCameraMode != null ? req.body.sceneCameraMode : "First Person",
+          sceneCameraFOV : req.body.sceneCameraFOV != null ? req.body.sceneCameraFOV : 75,
           sceneDebugMode : req.body.sceneDebugMode != null ? req.body.sceneDebugMode : "",
           sceneUseThreeDeeText : req.body.sceneUseThreeDeeText != null ? req.body.sceneUseThreeDeeText : false,
 

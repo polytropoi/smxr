@@ -2940,27 +2940,6 @@ three_router.get('/:_id', function (req, res) {
                     //     sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
                     // }
 
-                //     let grabMix = "<a-mixin id=\x22grabmix\x22" + //mixin for grabbable objex
-                //         "event-set__grab=\x22material.color: #FFEF4F\x22" +
-                //         "event-set__grabend=\x22material.color: #F2E646\x22" +
-                //         "event-set__hit=\x22material.color: #F2E646\x22" +
-                //         "event-set__hitend=\x22material.color: #EF2D5E\x22" +
-                //         "event-set__mousedown=\x22material.color: #FFEF4F\x22" +
-                //         "event-set__mouseenter=\x22material.color: #F2E646\x22" +
-                //         "event-set__mouseleave=\x22material.color: #EF2D5E\x22" +
-                //         "event-set__mouseup=\x22material.color: #F2E646\x22" +
-                //         "geometry=\x22primitive: box; height: 0.30; width: 0.30; depth: 0.30\x22" +
-                //         "material=\x22color: #EF2D5E;\x22></a-mixin>";
-
-                //     let playerAvatarTemplate = "";
-                //     if (sceneResponse.sceneWebType != undefined && (sceneResponse.sceneWebType.toLowerCase() == "aframe" || sceneResponse.sceneWebType.toLowerCase() == "default")) { // and what else?  networking isOn?
-                //         // playerAvatarTemplate = "<template id=\x22avatar-template\x22>"+ 
-                        
-                //         // "<div "+skyboxEnvMap+" gltf-model=\x22#avatar_model\x22>"+
-                //         // "<a-text class=\x22playerName\x22 look-at=\x22#player\x22 rotation=\x220 0 0\x22 position=\x22.5 .75 -.15\x22 value=\x22"+avatarName+"\x22></a-text>"+
-                //         // "</div>"+
-                //         // "</template>";
-                //     }
                  
                     // let webxrFeatures = "";
                     // // let arHitTest = "";

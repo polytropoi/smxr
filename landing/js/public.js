@@ -69,9 +69,9 @@ function generateSuccessHTMLOutput(response) {
         }
 
         buttons = "<a href=\x22/landing/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Landing</a>"+
-                  "<a href=\x22/aframe/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>A-Frame</a>"+
-                  "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/aframe/" +  shuffledArray[i].sceneKey + 
-                  "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Quest</a>";
+                  "<a href=\x22/aframe/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>A-Frame</a>";
+                  // "<a href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/aframe/" +  shuffledArray[i].sceneKey + 
+                  // "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Quest</a>";
         
         if (shuffledArray[i].sceneEnabledClientTypes != undefined) {
           if (shuffledArray[i].sceneEnabledClientTypes.aframeWeb == false) {

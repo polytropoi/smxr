@@ -7,7 +7,7 @@ import { texture, vec2, time, mix } from 'three/tsl';
 
 
 
-let renderer, scene, camera, clock;
+// let renderer, scene, camera, clock;
 
 let currentFrame = 0;
 const frameDuration = 25; // milliseconds per frame
@@ -164,60 +164,60 @@ export function Fire() {
 
     }
 
-    export function AnimatedSprite() {
+    // export function AnimatedSprite(scale) {
 
-        const rows = 6;
-        const cols = 6;
-        const totalFrames = rows * cols;
-        const textureLoader = new THREE.TextureLoader();
-        const url = document.getElementById("fireanim1").src;
-        const spriteMap = textureLoader.load(url, (texture) => {
-            // Configure texture for sprite sheet animation
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            // Set the repeat to show only one frame initially (1/cols, 1/rows)
-            texture.repeat.set(1 / cols, 1 / rows);
-        });
+    //     const rows = 6;
+    //     const cols = 6;
+    //     const totalFrames = rows * cols;
+    //     const textureLoader = new THREE.TextureLoader();
+    //     const url = document.getElementById("fireanim1").src;
+    //     const spriteMap = textureLoader.load(url, (texture) => {
+    //         // Configure texture for sprite sheet animation
+    //         texture.wrapS = THREE.RepeatWrapping;
+    //         texture.wrapT = THREE.RepeatWrapping;
+    //         // Set the repeat to show only one frame initially (1/cols, 1/rows)
+    //         texture.repeat.set(1 / cols, 1 / rows);
+    //     });
 
-        // 4. Create the sprite material and object
-        // const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, transparent: true });
-                const material = new THREE.SpriteNodeMaterial( { 
-                    sizeAttenuation: true,  
-                    map: spriteMap, 
-                    transparent: true, 
-                    // alphaToCoverage: true, 
-                    // alphaMap: spriteMap, 
-                    alphaTest: 0.01, 
-                    // depthWrite: false, 
-                    // depthTest: false
-                    } );
-        sprite = new THREE.Sprite(material);
-        sprite.scale.set(32, 32, 1); // Scale the sprite up
+    //     // 4. Create the sprite material and object
+    //     // const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, transparent: true });
+    //             const material = new THREE.SpriteNodeMaterial( { 
+    //                 sizeAttenuation: true,  
+    //                 map: spriteMap, 
+    //                 transparent: true, 
+    //                 // alphaToCoverage: true, 
+    //                 // alphaMap: spriteMap, 
+    //                 // alphaTest: 0.01, 
+    //                 // depthWrite: false, 
+    //                 // depthTest: false
+    //                 } );
+    //     sprite = new THREE.Sprite(material);
+    //     sprite.scale.set(scale, scale, 1); // Scale the sprite up
 
         
-        function update (timestamp) {
-            // timestamp = performance.now()
-            // timestamp = time();
-            // 5. Animation logic
-            if (timestamp - lastFrameTime > frameDuration) {
-                // Calculate current frame index and position in the texture atlas
-                const frameX = currentFrame % cols;
-                const frameY = Math.floor(currentFrame / cols);
+    //     function update (timestamp) {
+    //         // timestamp = performance.now()
+    //         // timestamp = time();
+    //         // 5. Animation logic
+    //         if (timestamp - lastFrameTime > frameDuration) {
+    //             // Calculate current frame index and position in the texture atlas
+    //             const frameX = currentFrame % cols;
+    //             const frameY = Math.floor(currentFrame / cols);
 
-                // Update the texture offset (top-left corner of the frame)
-                // Y offset is inverted in Three.js textures
-                sprite.material.map.offset.x = frameX / cols;
-                sprite.material.map.offset.y = (rows - 1 - frameY) / rows;
+    //             // Update the texture offset (top-left corner of the frame)
+    //             // Y offset is inverted in Three.js textures
+    //             sprite.material.map.offset.x = frameX / cols;
+    //             sprite.material.map.offset.y = (rows - 1 - frameY) / rows;
 
-                currentFrame = (currentFrame + 1) % totalFrames;
-                lastFrameTime = timestamp;
-            }
-        }
+    //             currentFrame = (currentFrame + 1) % totalFrames;
+    //             lastFrameTime = timestamp;
+    //         }
+    //     }
 
-        sprite.userData.update = update();
-        // scene.add(sprite);
-        return {sprite, update};
-        // scene.add(sprite);
-    }
+    //     sprite.userData.update = update();
+    //     // scene.add(sprite);
+    //     return {sprite, update};
+    //     // scene.add(sprite);
+    // }
 
    

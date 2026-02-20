@@ -12166,6 +12166,7 @@ function getAllPeople() {
             let mapWidth;
             let mapHeight;
             let pixelsPerMeterActual = 10;
+            let sceneCameraFOV = response.data.sceneCameraFOV;
 
             // console.log(sceneModelz);
             // axios.get('/gltf/' + userid)
@@ -13366,6 +13367,10 @@ function getAllPeople() {
 
                             "</div>" + 
                             "<div class=\x22form-row\x22>" +
+                                "<div class=\x22col form-group col-md-3\x22>" +
+                                    "<div class=\x22\x22><label for=\x22sceneCameraFOV\x22>Camera Field of View</label><br>" +
+                                    "<input class=\x22form-control\x22 type=\x22number\x22 id=\x22sceneCameraFOV\x22 placeholder=\x2275\x22 value=\x22" + sceneCameraFOV + "\x22></div>" +
+                                "</div>" + 
                                 "<div class=\x22col form-group col-md-2\x22>" +
                                     "<div class=\x22\x22><label for=\x22scenePlayerHeight\x22>Player Height</label><br>" +
                                     "<input class=\x22form-control\x22  type=\x22number\x22 step=\x220.01\x22 id=\x22scenePlayerHeight\x22 placeholder=\x222\x22 value=\x22" + scenePlayer.playerHeight + "\x22></div>" +
@@ -13374,6 +13379,7 @@ function getAllPeople() {
                                     "<div class=\x22\x22><label for=\x22scenePlayerSpeed\x22>Player Speed</label><br>" +
                                     "<input class=\x22form-control\x22 type=\x22number\x22 step=\x220.01\x22 id=\x22scenePlayerSpeed\x22 placeholder=\x226\x22 value=\x22" + scenePlayer.playerSpeed + "\x22></div>" +
                                 "</div>" + 
+
                             "</div>" + 
 
                             "<hr/>" +
@@ -14885,6 +14891,7 @@ function getAllPeople() {
                 $("#sceneShareWithGroups").val(response.data.sceneShareWithGroups);
                 $("#sceneCameraPath").val(response.data.sceneCameraPath);
                 $("#sceneCameraMode").val(response.data.sceneCameraMode);
+                $("#sceneCameraFOV").val(response.data.sceneCameraFOV);
                 $("#sceneWater").val(response.data.sceneWater != null ? response.data.sceneWater.name : "");
                 $("#sceneTime").val(response.data.sceneTime != null ? response.data.sceneTime.name : "");
                 $("#sceneTimeSpeed").val(response.data.sceneTimeSpeed != null ? response.data.sceneTimeSpeed.name : "");
@@ -16774,6 +16781,7 @@ function getAllPeople() {
 
                         // let sceneCameraPath = document.getElementById("sceneCameraPath").value;
                         let sceneCameraMode = document.getElementById("sceneCameraMode").value;
+                        let sceneCameraFOV = document.getElementById("sceneCameraFOV").value;
 
                         let sceneShareWithPublic = document.getElementById("scenePublicToggle").checked;
                         let sceneShareWithSubscribers = document.getElementById("sceneSubscriberToggle").checked;
@@ -16909,6 +16917,7 @@ function getAllPeople() {
                         // let scenePrimaryTextMode = document.getElementById(response.data.scenePrimaryTextMode); 
                         // let sceneCameraPath = document.getElementById(response.data.sceneCameraPath); 
                         // let sceneCameraMode = document.getElementById(response.data.sceneCameraMode); 
+                        
                         scenePlayer.playerHeight = document.getElementById("scenePlayerHeight").value;
                         scenePlayer.playerSpeed = document.getElementById("scenePlayerSpeed").value;
                         if (scenePlayer.playerHeight == "" || scenePlayer.playerHeight == null || scenePlayer.playerHeight == undefined) {
@@ -17114,6 +17123,7 @@ function getAllPeople() {
                             sceneShowAds: sceneShowAds,
                             sceneWebLinks: sceneWebLinks,
                             sceneCameraMode: sceneCameraMode,
+                            sceneCameraFOV: sceneCameraFOV,
                             sceneFlyable: sceneFlyable,
                             sceneFaceTracking: sceneFaceTracking,
                             sceneHPlanesToggle: sceneHPlanesToggle,

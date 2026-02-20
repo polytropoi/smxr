@@ -23,7 +23,10 @@
 
 	import { getRainbowMaterial } from './tsl/rainbow.js'
 
-	import { InitSurface, InstanceOnSurface, Starfield, Sprites, instancedModels } from './three_instance.js';
+	import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
+
+	import { Starfield, CreateSprites, } from './three_fx.js';
+
 
 	import { UpdateText, InitReticle, ThreeText, lookAtCameraObjects } from './three_ui.js';
 
@@ -35,7 +38,7 @@
 
 	import { getVideo, getHandLandmarker } from './three_vision.js';
 
-	import { lightMods, modLights } from './three_lights.js';
+	import { lightMods, modLights, CreateLight } from './three_lights.js';
 
 
 	import { controls, player, camera, isReady, UpdateControls, cameraWorldPosition, SetPlayerLocation } from './three_controls.js';
@@ -43,7 +46,7 @@
 	import Stats from './ui/stats.js';
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel} from './three_controls.js';
-import { AnimatedSprite } from './tsl/tsl_fx.js';
+// import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene, navmesh, surface;
 
@@ -78,10 +81,11 @@ import { AnimatedSprite } from './tsl/tsl_fx.js';
 	let surfaceObjex = [];
 
 	export let cameraMode = "Orbit"; //default
+	let cameraFOV = 75;
 
 	export let groundObjex = [];
 
-	let animatedSprites = [];
+	export let animatedSprites = [];
 
 	let playerPosition;
 	
@@ -121,13 +125,20 @@ import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 		document.body.appendChild( renderer.domElement );
 
-		cameraMode = settings.sceneCameraMode;
-
+		// cameraMode = settings.sceneCameraMode;
+		if (settings.sceneCameraFOV) {
+			cameraFOV = settings.sceneCameraFOV;
+		}
+		if (settings.sceneCameraMode) {
+			cameraMode = settings.sceneCameraMode;
+		}
+		
 		// cameraMode = "Mouse Look";
 		if (cameraMode == "First Person") {
 			cameraMode = "Mouse Look";
 		}
-		SetControls(cameraMode);
+
+		SetControls(cameraMode, cameraFOV);
 		
 			
 		InitEnvMap();
@@ -299,7 +310,7 @@ import { AnimatedSprite } from './tsl/tsl_fx.js';
 								SetPlayerLocation(locationData[i]);
 							}
 							if (locationData[i].markerType == "light") {
-								createLight(locationData[i]);
+								CreateLight(locationData[i]);
 							}
 
 			
@@ -605,27 +616,27 @@ import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	} //end init!
 
-	function createLight(locationData) {
-		if (locationData.locationTags.includes("fire")) {
-		console.log("tryna create light ");
+	// function createLight(locationData) {
+	// 	if (locationData.locationTags.includes("fire")) {
+	// 	console.log("tryna create light ");
 		
-		const light = new THREE.PointLight( settings.sceneColor1Alt, 100, 0);
-		light.position.set(locationData.x, locationData.y, locationData.z);
-		scene.add(light);
+	// 	const light = new THREE.PointLight( settings.sceneColor1Alt, 100, 0);
+	// 	light.position.set(locationData.x, locationData.y, locationData.z);
+	// 	scene.add(light);
 		
-		lightMods.push(light);
+	// 	lightMods.push(light);
 
-		const smoke = Sprites(10, 30, 50, null);
-		smoke.position.set(locationData.x, locationData.y, locationData.z);
-		scene.add(smoke);
-			// }
-			const animatedSprite = AnimatedSprite(locationData.yscale);
-			scene.add(animatedSprite.sprite);
-			animatedSprite.sprite.position.set(locationData.x, locationData.y, locationData.z);
-			animatedSprites.push(animatedSprite);
-		}
+	// 	const smoke = Sprites(10, 30, 50, null);
+	// 	smoke.position.set(locationData.x, locationData.y, locationData.z);
+	// 	scene.add(smoke);
+	// 		// }
+	// 		const animatedSprite = AnimatedSprite(locationData.yscale);
+	// 		scene.add(animatedSprite.sprite);
+	// 		animatedSprite.sprite.position.set(locationData.x, locationData.y, locationData.z);
+	// 		animatedSprites.push(animatedSprite);
+	// 	}
 
-	}
+	// }
 
 	export function togglePostProcessing () { //call after physics is done, elsewise... :(
 
