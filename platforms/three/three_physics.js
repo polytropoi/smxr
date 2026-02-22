@@ -27,6 +27,7 @@ export let staticBodies = [];
 export let kinematicBodies = [];
 export let useDefaultCollider = false;
 export let handColliderGroup;
+export let colliders = {}
 
 export const agentCount = 4;
 const dynamicObjectCount = 10;
@@ -59,6 +60,7 @@ export async function initRapier (gravity) {
         kinematicBodies.push(body);
       // getPlayerBody(player);
     }
+    eventQueue = new RAPIER.EventQueue(true); // `true` for generating contact force events
 }
 
 
@@ -125,7 +127,7 @@ export async function createStaticCollider (model) { // may not be added to the 
    
     try { 
       
-          const geometry = model.geometry; //sent as child mesh
+      const geometry = model.geometry; //sent as child mesh
       // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
 
       const vertices = geometry.attributes.position.array;
@@ -194,11 +196,13 @@ function WaitAndInit () {
         let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
                 .setTranslation(player.position.x, player.position.y, player.position.z);
         let rigidbody = await world.createRigidBody(rigidBodyDesc);
+        colliders[rigidbody.handle] = "player";
         let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
         let collider = await world.createCollider(kinematicCollider, rigidbody);
         collider.setRestitution(1.5);
         collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-
+        collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+        collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
         let worldposition = new THREE.Vector3();
         player.getWorldPosition(worldposition);
 
@@ -242,10 +246,13 @@ function WaitAndInit () {
       let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
               .setTranslation(worldposition.x, worldposition.y, worldposition.z);
       let rigidbody = await world.createRigidBody(rigidBodyDesc);
+      colliders[rigidbody.handle] = "agent_" + agentIndex;
       let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 1);
       let collider = await world.createCollider(kinematicCollider, rigidbody);
       collider.setRestitution(1.5);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+      
       activeObjex.push(mesh);
 
     function update () {

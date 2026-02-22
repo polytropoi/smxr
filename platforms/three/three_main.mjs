@@ -12,8 +12,6 @@
 
 	import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-
-
 	import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 	import { settings } from '../../../connect/settings.js';
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
@@ -32,7 +30,7 @@
 
 	import { world, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, worldIsReady, initStaticObjex, 
-		initAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup} from './three_physics.js';
+		initAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders} from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -312,6 +310,10 @@
 							if (locationData[i].markerType == "light") {
 								CreateLight(locationData[i]);
 							}
+							if (locationData[i].markerType == "gate") {
+								// CreateSceneGate(locationData[i]);
+							}
+							
 
 			
 						}
@@ -680,7 +682,20 @@
 				kinematicBodies.forEach(c => 
 					c.update());
 
-				world.step();//!!! still wonky with lots of dynamic and kinematic
+				// world.step();//!!! still wonky with lots of dynamic and kinematic
+
+				world.step(eventQueue); // Pass eventQueue to collect events
+
+				// Handle collision events
+				eventQueue.drainCollisionEvents((handle1, handle2, started) => {
+					if (started) {
+
+						console.log("Collision started between colliders " + colliders[handle1] + " and " + colliders[handle2]);
+						// You can add logic here, e.g., change color of the collided objects
+					} else {
+						console.log("Collision stopped between colliders " + colliders[handle1] + " and " + colliders[handle2]);
+					}
+				});
 			}
 
 			if (lightMods.length) {
