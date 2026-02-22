@@ -23,7 +23,7 @@ export function CreateLight(locationData) {
             if (locationData.locationTags.includes("fire")) {
             console.log("tryna create fire size " + locationData.yscale);
             
-            const light = new THREE.PointLight( settings.sceneColor1Alt, parseFloat(locationData.yscale) * 8, parseFloat(locationData.yscale) * 8);
+            const light = new THREE.PointLight( settings.sceneColor1Alt, parseFloat(locationData.yscale) * 8, parseFloat(locationData.yscale) * 4);
             light.position.set(locationData.x, locationData.y, locationData.z);
             scene.add(light);
             
@@ -41,7 +41,7 @@ export function CreateLight(locationData) {
             } else if (locationData.locationTags.includes("candle")) {
                 console.log("tryna create candle size " + locationData.yscale);
             
-            const light = new THREE.PointLight( settings.sceneColor1Alt, parseFloat(locationData.yscale) * 2, parseFloat(locationData.yscale) * 4, (.9 * parseFloat(locationData.yscale)));
+            const light = new THREE.PointLight( settings.sceneColor1Alt, parseFloat(locationData.yscale) * 2, parseFloat(locationData.yscale) * 4, parseFloat(locationData.yscale));
                         // const light = new THREE.PointLight( settings.sceneColor1Alt, 100, 100);
             light.position.set(locationData.x, locationData.y, locationData.z);
             scene.add(light);

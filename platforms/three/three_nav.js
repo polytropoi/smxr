@@ -1,6 +1,8 @@
     import * as THREE from 'three';
 
-    import {scene, navmesh} from './three_main.mjs';
+    import {scene} from './three_main.mjs';
+
+    import { navmesh } from './three_locations.js';
 
     import { player } from './three_controls.js';
     

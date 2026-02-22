@@ -7,7 +7,9 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint } from './three_nav.js';
 
-import { scene, navmesh, cameraMode, activeObjex, renderer, clock, groundObjex, selectedObjects } from './three_main.mjs';
+import { activeObjex, groundObjex, navmesh } from './three_locations.js';
+
+import { scene, cameraMode, renderer, clock, selectedObjects } from './three_main.mjs';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
@@ -26,7 +28,7 @@ export let camera, controls, player;
 export let isReady = false;
 export let followDistance = 16;
 
-let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitObject;
+let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitObject, lastHitObjectName;
 
 export let dir = new THREE.Vector3;
 export let playerDirection = new THREE.Vector3();
@@ -36,6 +38,8 @@ export var goalVector = new THREE.Vector3;
 export let fVelocity = 0.0;
 export let speed = 0.0;
 export let cameraWorldPosition = new THREE.Vector3();
+
+	// export let playerPosition;
 
 let selectColor = new THREE.Color(0xff3333);
 let stopColor = new THREE.Color(0x26de57);
@@ -118,6 +122,12 @@ export function SetControls(cameraMode, cameraFOV) {
         mousecaster = new THREE.Raycaster();
         
         isReady = true;
+
+                const pointerGeo = new THREE.CapsuleGeometry(.1, .5, 4, 4);
+        const pointerMat = new THREE.MeshBasicMaterial({ color: 'blue' });
+        pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
+        pointerGizmo.up.set(0, 1, 0);
+        scene.add(pointerGizmo);
 
     } else if (cameraMode == "Fixed") {
 
@@ -601,13 +611,13 @@ export function UpdateControls() {
 
                 // Move forward:
 
-                player.position.y = intersections[0].point.y + playerHeight;
+                player.position.y = intersections[0].point.y + playerHeight; //snap y to navmesh
                 player.position.addScaledVector(forward, -velocity.z);
                 
 
-                canJump = true;
+                canJump = true; //hrm...
             }
-            // centerRaycast();
+          
 
         }
     }
@@ -631,6 +641,7 @@ function RaycastHit(type, hit) {
 
 
     lastRaycastHitObject = hit.object;
+    lastHitObjectName = lastRaycastHitObject.userData ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     lastRaycastHitPosition = hit.point;
     const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     // console.log(type + " hit object " + name + " pos " + JSON.stringify(lastRaycastHitPosition));
@@ -836,7 +847,8 @@ export function onMouseDown(event) {
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
     }
-    console.log("mousedown " + lastRaycastHitObject + " " + JSON.stringify(lastRaycastHitPosition));
+     
+    console.log("mousedown " + lastHitObjectName + " " + JSON.stringify(lastRaycastHitPosition));
 
         // let lastHitObjectName;
         // if (lastRaycastHitObject && lastRaycastHitPosition) {

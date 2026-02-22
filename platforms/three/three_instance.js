@@ -6,7 +6,9 @@ import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, s
 
 import { settings } from '../../../connect/settings.js'; 
 
-import {scene, surface, water} from './three_main.mjs';
+import { scene } from './three_main.mjs';
+
+import { surface } from './three_locations.js';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 

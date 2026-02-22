@@ -10,23 +10,21 @@
 
 	import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 
-	import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 	import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 	import { settings } from '../../../connect/settings.js';
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
-	import { SetSceneLocations, userData } from '../../../connect/connect.js';
+	import { userData } from '../../../connect/connect.js';
 
-	import { CreatePlayerAgent, InitPathfinding, agentParents, agents, closestNavmeshPoint, playerNavAgent } from './three_nav.js';
+	import { InitPathfinding, agents } from './three_nav.js';
 
 	import { getRainbowMaterial } from './tsl/rainbow.js'
 
-	import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
+	// import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
 
 	import { Starfield, CreateSprites, } from './three_fx.js';
 
-
-	import { UpdateText, InitReticle, ThreeText, lookAtCameraObjects } from './three_ui.js';
+	import { ThreeText, lookAtCameraObjects } from './three_ui.js';
 
 	import { world, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, worldIsReady, initStaticObjex, 
@@ -36,20 +34,20 @@
 
 	import { getVideo, getHandLandmarker } from './three_vision.js';
 
-	import { lightMods, modLights, CreateLight } from './three_lights.js';
+	import { lightMods, modLights } from './three_lights.js';
 
+	import { InitSurface, instancedModels, InstanceOnSurface } from './three_instance.js';
 
-	import { controls, player, camera, isReady, UpdateControls, cameraWorldPosition, SetPlayerLocation } from './three_controls.js';
+	import { initLocations, navmesh, surface, groundObjex, locations, staticObjex, activeObjex, dynamicObjex } from './three_locations.js';
 
 	import Stats from './ui/stats.js';
 	
-	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel} from './three_controls.js';
+	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition } from './three_controls.js';
 // import { AnimatedSprite } from './tsl/tsl_fx.js';
 
-	export let scene, navmesh, surface;
+	export let scene;
 
-	let locationData;
-	let modelsData;
+
 	// let raycastHitAgent;
 	// let isDragging = false;
 	// let previousMousePosition = {
@@ -70,10 +68,10 @@
 
 	let doPostProcessing = false;
 	
-	export let activeObjex = []; //raycastable
+	// export let activeObjex = []; //raycastable
 
-	export let staticObjex = []; //physics
-	export let dynamicObjex = []; //""
+	// export let staticObjex = []; //physics
+	// export let dynamicObjex = []; //""
 
 	let navmeshObjex = [];
 	let surfaceObjex = [];
@@ -81,11 +79,11 @@
 	export let cameraMode = "Orbit"; //default
 	let cameraFOV = 75;
 
-	export let groundObjex = [];
+	// export let groundObjex = [];
 
 	export let animatedSprites = [];
 
-	let playerPosition;
+	export let playerPosition;
 	
 	let speed = 0.0;
 	
@@ -95,16 +93,6 @@
 
 
 
-	async function loadModel(url) {
-		const loader = new GLTFLoader();
-		try {
-			const gltf = await loader.loadAsync(url);
-			// scene.add(gltf.scene);
-			return gltf.scene;
-		} catch (error) {
-			console.error('An error happened during model loading', error);
-		}
-	}
 
 	////////////// SCENE INIT FUNCTION 
 
@@ -140,10 +128,6 @@
 		
 			
 		InitEnvMap();
-	// 		const pmremGenerator = new THREE.PMREMGenerator(renderer);
-	// scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-
-
 
 		if (settings && settings.sceneTags && settings.sceneTags.includes("no gravity") ) {
 			const gravity = {x:0, y:0, z:0};
@@ -153,294 +137,109 @@
 			await initRapier(gravity); //gravityMode
 		}
 		
-		let modelsDataEl = document.getElementById('modelsData');
-		if (modelsDataEl) {
-			const theModelsData = modelsDataEl.getAttribute('data-models');
-			modelsData = JSON.parse(atob(theModelsData));
-			console.log("modelsData " + JSON.stringify(modelsData));
-		}
+		await initLocations(); //calls initSystems...
 
-		let locationDataEl = document.getElementById('locationData');
-		if (locationDataEl) {
-			const theLocationData = locationDataEl.getAttribute('data-locations');
-
-			locationData = JSON.parse(atob(theLocationData));
-			SetSceneLocations(locationData);
-			console.log("locationData " + JSON.stringify(locationData));
-			
-			(async () => {
-				try { 
-					for (let i = 0; i < locationData.length; i++) {
-						if (locationData[i].modelID && locationData[i].modelID != "none") {
-							for (let m = 0; m < modelsData.length; m++) {
-								if (locationData[i].modelID == modelsData[m]._id) {
-									locationData[i].isHidden = false;
-									console.log("gotsa location model! " +modelsData[m].modelURL);
-									
-									const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
-																				
-									console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
-									
-									if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
-									
-										locationData[i].isHidden = true;
-										// console.log("tryna hide model " + child.name);
-									}															
-									
-									// const transmat = new THREE.MeshBasicNodeMaterial( { transparent: true, opacity: 0, color: 0x111111, depthWrite :false});
-									model.traverse(function (child) {
-										
-										if (child.isMesh){
-											child.castShadow = true;
-            								child.receiveShadow = true;
-											console.log("loaded mesh with tags " + locationData[i].locationTags);
-											if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
-												// child.material = transmat;
-												child.material.transparent = true;
-												child.material.opacity = 0;
-												// locationData[i].isHidden = true;
-												console.log("tryna hide model " + child.name);
-											} else {
-												// if (child.material.envMap) {
-												// child.castShadow = true;	
-												// child.receiveShadow = true;
-												// child.material.envMap = scene.environment;
-												// }
-												
-												if (child.material) {
-													console.log("setting scene.environment envmap " + scene.environment );
-													// child.material.roughness = 0.5;
-													child.material.envMap = scene.environment;
-													child.envMapIntensity = 5;
-													child.castShadow = true;	
-													child.receiveShadow = true;
-												}
-												
-											}
-											
-											if (locationData[i].markerType == "navmesh" ) {
-												// if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
-													navmesh = child;
-													navmesh.userData.name = "navmesh";
-													groundObjex.push(navmesh);
-													activeObjex.push(navmesh);
-													// child.material = transmat;
-													// InitPathfinding(); //no
-												// }
-											} else if (locationData[i].markerType == "surface" ) {
-												// if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
-													surface = child;
-													// child.material = transmat;
-													// InitSurface();
-												// }
-											}
-											if (locationData[i].eventData.includes("static")) {
-
-												
-												let staticObject = {};
-												staticObject.mesh = child;
-												staticObject.locationData = locationData[i];
-												staticObject.isHidden = locationData[i].locationTags && locationData[i].locationTags.includes("hide");
-												console.log("gotsa static object ishidden " + staticObject.isHidden);
-												staticObjex.push(staticObject);
-											} else if  (locationData[i].eventData.includes("dynamic")) {
-												dynamicObjex.push(model);
-
-											} else {
-												// child.mesh.layers.set(1);
-												// child.mesh.userData = locationData[i];	
-											}
-													
-										}
-									});
+		// initSystems();
+	}
 
 
-									if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { //gonna make a bunch and get scattered
-										console.log("tryna instance model " + locationData[i].name);
-										let instancedModel = {};
-										// const countsplit = locationData[i].eventData.split("~");
-										// const count = countsplit[1];
-										instancedModel.model = model;
-										instancedModel.locationData = locationData[i];
-										instancedModel.modelData = modelsData[m];
-										instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
-										// instancedModel.count = count;
-										instancedModels.push(instancedModel);
-										console.log("instancedModels length " + instancedModels.length);
-										model.visible = false;
-										scene.remove(model);
-									} else { // regular meshes
-										console.log(locationData[i].name + " adding to scene at location " + locationData[i].x + locationData[i].y + locationData[i].z);
-																				
-										model.position.set(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z));
-										const xscale = locationData[i].xscale ? locationData[i].xscale : 1;
-										const yscale = locationData[i].yscale ? locationData[i].yscale : 1;
-										const zscale = locationData[i].zscale ? locationData[i].zscale : 1;
 
-										model.scale.set(xscale,yscale,zscale);
-										// model.layers.set(1);
-										model.userData = locationData[i];
-										model.name = "model_" + locationData[i].name;
-										// model.castShadow = true;
-										// model.receiveShadow = true;
-										if (locationData[i].locationTags.includes("active")) {
-											activeObjex.push(model);
-										}
-										
-										
-										scene.add(model);
-										// activeObjex.push(model);
-																			
-									}
-									break; //only match one model per location!?
-								}
-							}
-						} else {
-							if (locationData[i].markerType == "navmesh") {
-								createDefaultNavmesh();
-							}
-							if (locationData[i].markerType == "surface") {
-								createDefaultSurface();
-							}
-							if (locationData[i].markerType == "player") {
-								console.log("playerposition " + JSON.stringify(locationData[i]));
-								playerPosition = locationData[i];
-								SetPlayerLocation(locationData[i]);
-							}
-							if (locationData[i].markerType == "light") {
-								CreateLight(locationData[i]);
-							}
-							if (locationData[i].markerType == "gate") {
-								// CreateSceneGate(locationData[i]);
-							}
-							
+	export async function initSystems() { 
 
-			
-						}
-						// console.log("locationData " + i + " of "  + locationData.length);
+		await initStaticObjex();  //creates default if none provided
+
+		if (surface) { // => scattering instances
+			await InitSurface();
+			console.log("instantiating on surface with models " + instancedModels.length);
+			for (let i = 0; i < instancedModels.length; i++) {
+				let count = 33;
+				let scale = 1;
+				let yMod = 0;
+				let shader = "";
+				if (instancedModels[i].locationData.eventData.includes("~")) {
+					let countSplit = instancedModels[i].locationData.eventData.split("~");
+					count = countSplit[1];
+				} else {
+					if (instancedModels[i].locationData.eventData.includes("grass")) {
+						count = 100;
 					}
-					// console.log("looking for Surface with models " + instancedModels.length);
-					
-				} catch (e) {
-					console.error("ERROR LOADING GLTF! " + e);
-				} finally {
-					
-					initSystems();
+					if (instancedModels[i].locationData.eventData.includes("rocks")) {
+						count = 100;
+					}
+				}	
+
+				if (instancedModels[i].locationData.yscale) {
+					scale = instancedModels[i].locationData.yscale;
+				} else {
+					scale = 1;
 				}
-			})();
+
+				if (instancedModels[i].locationData.y != 0) {
+					yMod = instancedModels[i].locationData.y;
+				}
+				
+				if (instancedModels[i].locationData.locationTags.includes("wind")) {
+					shader = "wind";
+				} 
+				InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader);
+						
+			} 
+		}
+
+		if (navmesh) {
+			await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
 			
 		}
 
-		async function initSystems() {
-			// if (staticObjex.length) { //eg ground and stuff
-				await initStaticObjex();  //creates default if none provided
-			// }
+		if (settings && settings.sceneTags.includes("webcam background")) {
 
-			if (surface) { // => scattering instances
-				await InitSurface();
-				console.log("instantiating on surface with models " + instancedModels.length);
-				for (let i = 0; i < instancedModels.length; i++) {
-					let count = 33;
-					let scale = 1;
-					let yMod = 0;
-					let shader = "";
-					if (instancedModels[i].locationData.eventData.includes("~")) {
-						let countSplit = instancedModels[i].locationData.eventData.split("~");
-						count = countSplit[1];
-					} else {
-						if (instancedModels[i].locationData.eventData.includes("grass")) {
-							count = 100;
-						}
-						if (instancedModels[i].locationData.eventData.includes("rocks")) {
-							count = 100;
-						}
-					}	
+			// Video Mesh
+			// init video and MediaPipe
+			video = await getVideo();
 
-					if (instancedModels[i].locationData.yscale) {
-						scale = instancedModels[i].locationData.yscale;
-					} else {
-						scale = 1;
-					}
-
-					if (instancedModels[i].locationData.y != 0) {
-						yMod = instancedModels[i].locationData.y;
-					}
-					
-					if (instancedModels[i].locationData.locationTags.includes("wind")) {
-						shader = "wind";
-					} 
-					InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader);
-							
-				} 
-			}
-
-			if (navmesh) {
-				await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
-				
-			}
-
-			if (settings && settings.sceneTags.includes("webcam background")) {
-
-				// Video Mesh
-				// init video and MediaPipe
-				video = await getVideo();
-
-				
-				
-				const texture = new THREE.VideoTexture(video);
-				texture.colorSpace = THREE.SRGBColorSpace;
-				const geometry = new THREE.PlaneGeometry(1	, 1);
-				const material = new THREE.MeshBasicMaterial({
-				map: texture,
-				depthWrite: false,
-				side: THREE.DoubleSide,
-				});
-				videomesh = new THREE.Mesh(geometry, material);
-				videomesh.rotation.y = Math.PI;
-				scene.add(videomesh);
-			}
-			if (settings.sceneTags.includes("hand")) {
-					handLandmarker = await getHandLandmarker();
-					useHandLandmarks = true;
-					initHandColliderGroup();
-			}
 			
-			if (settings && settings.sceneTags.includes("post processing")) {
-				togglePostProcessing();
-			}
-			  
-			if (settings && settings.sceneTags.includes("atoms")) {
-				const centerPosition = new THREE.Vector3(0,0,0);
-				initAtoms(centerPosition, 10, 1);
-			}
+			
+			const texture = new THREE.VideoTexture(video);
+			texture.colorSpace = THREE.SRGBColorSpace;
+			const geometry = new THREE.PlaneGeometry(1	, 1);
+			const material = new THREE.MeshBasicMaterial({
+			map: texture,
+			depthWrite: false,
+			side: THREE.DoubleSide,
+			});
+			videomesh = new THREE.Mesh(geometry, material);
+			videomesh.rotation.y = Math.PI;
+			scene.add(videomesh);
+		}
+		if (settings.sceneTags.includes("hand")) {
+				handLandmarker = await getHandLandmarker();
+				useHandLandmarks = true;
+				initHandColliderGroup();
+		}
+		
+		if (settings && settings.sceneTags.includes("post processing")) {
+			togglePostProcessing();
+		}
+			
+		if (settings && settings.sceneTags.includes("atoms")) {
+			const centerPosition = new THREE.Vector3(0,0,0);
+			initAtoms(centerPosition, 10, 1);
+		}
 
-			if (cameraMode == "Third Person") {
-				// const playerBody = await getPlayerBody(player);
-				// kinematicBodies.push(playerBody);
-				const avatarName = userData.avatarName
-				ThreeText(avatarName, 10, player);
-				// CreatePlayerAgent(player, player.position.clone());
-			}
-			//  await new Promise(r => setTimeout(r, 000)); //fudge
-			initEvents();
+		if (cameraMode == "Third Person") {
+			// const playerBody = await getPlayerBody(player);
+			// kinematicBodies.push(playerBody);
+			const avatarName = userData.avatarName
+			ThreeText(avatarName, 10, player);
+			// CreatePlayerAgent(player, player.position.clone());
+		}
+		//  await new Promise(r => setTimeout(r, 000)); //fudge
+		initEvents();
 			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
 			// ThreeText(texttest);
-		}
+		
 
-		function createDefaultNavmesh() {
-			const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
-		//   planeGeometry.rotation.x = Math.PI / 2 * -1;
-			const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
-			let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
-			
-			// navmeshObject.position.set(0,0,0);
-			// navmeshObject.scale.set(1,1,1);
-			navmeshObject.rotation.x = Math.PI / 2;
-			navmeshObject.updateMatrixWorld();
-			navmesh = navmeshObject;
-			
-			scene.add(navmeshObject);
-		}
+
 
 		// console.log("settings " + JSON.stringify(settings));
 
@@ -470,22 +269,6 @@
 
 		clock = new THREE.Clock();
 
-		// animated model
-
-		// const loader = new GLTFLoader();
-		// loader.load( 'models/gltf/Michelle.glb', function ( gltf ) {
-
-		// 	model = gltf.scene;
-		// 	model.children[ 0 ].children[ 0 ].castShadow = true;
-
-		// 	mixer = new THREE.AnimationMixer( model );
-
-		// 	const action = mixer.clipAction( gltf.animations[ 0 ] );
-		// 	action.play();
-
-		// 	scene.add( model );
-
-		// } );
 
 
 		if (settings && settings.sceneTags) {
@@ -618,27 +401,21 @@
 
 	} //end init!
 
-	// function createLight(locationData) {
-	// 	if (locationData.locationTags.includes("fire")) {
-	// 	console.log("tryna create light ");
+	function createDefaultNavmesh() {
+		const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
+	//   planeGeometry.rotation.x = Math.PI / 2 * -1;
+		const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+		let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
 		
-	// 	const light = new THREE.PointLight( settings.sceneColor1Alt, 100, 0);
-	// 	light.position.set(locationData.x, locationData.y, locationData.z);
-	// 	scene.add(light);
+		// navmeshObject.position.set(0,0,0);
+		// navmeshObject.scale.set(1,1,1);
+		navmeshObject.rotation.x = Math.PI / 2;
+		navmeshObject.updateMatrixWorld();
+		navmesh = navmeshObject;
 		
-	// 	lightMods.push(light);
+		scene.add(navmeshObject);
+	}
 
-	// 	const smoke = Sprites(10, 30, 50, null);
-	// 	smoke.position.set(locationData.x, locationData.y, locationData.z);
-	// 	scene.add(smoke);
-	// 		// }
-	// 		const animatedSprite = AnimatedSprite(locationData.yscale);
-	// 		scene.add(animatedSprite.sprite);
-	// 		animatedSprite.sprite.position.set(locationData.x, locationData.y, locationData.z);
-	// 		animatedSprites.push(animatedSprite);
-	// 	}
-
-	// }
 
 	export function togglePostProcessing () { //call after physics is done, elsewise... :(
 
@@ -711,7 +488,7 @@
 			// 	playerNavAgent.update();
 			// }
 
-			if (doPostProcessing) {
+			if (doPostProcessing && postProcessing) {
 				postProcessing.render();
 			} else {
 				renderer.render(scene, camera);
@@ -752,18 +529,6 @@
 	}
 
 
-/////// events and listeners and handlers
-
-
-
-//physics events
-		// eventQueue.drainCollisionEvents((handle1, handle2, started) => {
-		// if (started) {
-		// 	console.log("Collision started between", handle1, "and", handle2);
-		// } else {
-		// 	console.log("Collision stopped between", handle1, "and", handle2);
-		// }
-		// });
 
 ////////// global events	
 

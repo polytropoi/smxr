@@ -1,10 +1,9 @@
 
 import * as THREE from 'three';
 
+import { settings } from '../../../connect/settings.js';
 
-	import { settings } from '../../../connect/settings.js';
-
-
+import { scene } from './three_main.mjs';
 
 import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
 
