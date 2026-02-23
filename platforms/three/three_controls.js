@@ -109,7 +109,7 @@ export function SetControls(cameraMode, cameraFOV) {
         var material = new THREE.MeshBasicMaterial({ 'visible': false });
 
         player = new THREE.Mesh(geometry, material);
-        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .1, 1000);
+        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .1, 500);
         
         camera.position.set(0, 1, 0);
         scene.add(player);
@@ -123,7 +123,7 @@ export function SetControls(cameraMode, cameraFOV) {
         
         isReady = true;
 
-                const pointerGeo = new THREE.CapsuleGeometry(.1, .5, 4, 4);
+        const pointerGeo = new THREE.CapsuleGeometry(.1, .5, 4, 4);
         const pointerMat = new THREE.MeshBasicMaterial({ color: 'blue' });
         pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
         pointerGizmo.up.set(0, 1, 0);
@@ -643,7 +643,12 @@ function RaycastHit(type, hit) {
     lastRaycastHitObject = hit.object;
     lastHitObjectName = lastRaycastHitObject.userData ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     lastRaycastHitPosition = hit.point;
+    const locationData = lastRaycastHitObject.userData.locationData;
+    // console.log(hit.object.userData);
     const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
+    if (locationData) {
+        console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp);
+    }
     // console.log(type + " hit object " + name + " pos " + JSON.stringify(lastRaycastHitPosition));
 
 

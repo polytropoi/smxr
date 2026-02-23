@@ -10,8 +10,9 @@ import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
 import { color, fog, float, positionWorld, triNoise3D, positionView, normalWorld, uniform } from 'three/tsl';
 
-export function InitCustomFog() { //hrm..
-        const skyColor = color( 0xf0f5f5 );
+export function InitCustomFog() { //hrm...
+
+	const skyColor = color( 0xf0f5f5 );
     const groundColor = color( 0xd0dee7 );
 
     const fogNoiseDistance = positionView.z.negate().smoothstep( 0, camera.far - 300 );
@@ -38,8 +39,12 @@ export function InitFog() {
     if (settings && settings.sceneUseVolumetricFog) {
         console.log("doin some fog...");
         const fogColor = settings.sceneColor1; // Sky blue
+		let radius = 400;
+		if (settings.sceneSkyRadius) {
+			radius = settings.sceneSkyRadius;
+		}
         // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
-        scene.fog = new THREE.Fog(fogColor, 10, 400);
+        scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
 		// scene.fog = new THREE.FogExp2( fogColor, 0.01 );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
     }

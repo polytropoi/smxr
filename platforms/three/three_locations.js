@@ -82,6 +82,7 @@ export function initLocations() {
                                         child.castShadow = true;
                                         child.receiveShadow = true;
                                         console.log("loaded mesh with tags " + locationData[i].locationTags);
+                                        child.userData.locationData = locationData[i];
                                         if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
                                         
                                             // child.material = transmat;
@@ -106,6 +107,7 @@ export function initLocations() {
                                             // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
                                                 navmesh = child;
                                                 navmesh.userData.name = "navmesh";
+                                                
                                                 groundObjex.push(navmesh);
                                                 activeObjex.push(navmesh);
                                                 // child.material = transmat;
@@ -172,8 +174,9 @@ export function initLocations() {
                                     model.scale.set(xscale,yscale,zscale);
                                     
                                     // model.layers.set(1);
-                                    model.userData = locationData[i];
-                                    model.name = "model_" + locationData[i].name;
+                                    model.userData.locationData = locationData[i];
+                                    // model.name = "model_" + locationData[i].name;
+                                    
                                     // model.castShadow = true;
                                     // model.receiveShadow = true;
                                     if (locationData[i].locationTags.includes("active")) {

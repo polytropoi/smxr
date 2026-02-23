@@ -1,7 +1,7 @@
 	import * as THREE from 'three/webgpu';
 
-	import { color, vec2, pass, objectPosition, screenUV, 
-		time, uniform } from 'three/tsl';
+	import { color, objectPosition, screenUV, 
+		uniform, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time } from 'three/tsl';
 	
 	import { outline } from 'three/addons/tsl/display/OutlineNode.js';
 	// import { PostProcessing } from 'three/addons/nodes/PostProcessing.js';
@@ -61,6 +61,7 @@
 	export let renderer;
 	// let model, floor, floorPosition;
 	let postProcessing;
+	let renderPipeline;
 	let showDebug = false;
 	// export let controls;
 
@@ -99,15 +100,15 @@
 	async function init() {
 
 		scene = new THREE.Scene();
-		renderer = new THREE.WebGPURenderer({antialias: true});
+		renderer = new THREE.WebGPURenderer({});
 		renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setPixelRatio( 2.0 );
+				// renderer.setPixelRatio( 2.0 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.setAnimationLoop( animate );
 		// renderer.toneMapping = THREE.ACESFilmicToneMapping;
 		// renderer.toneMappingExposure = 0.1;
-		renderer.shadowMap.enabled = true;
-		renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+		// renderer.shadowMap.enabled = true;
+		// renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
 
 		document.body.appendChild( renderer.domElement );
 
@@ -247,21 +248,21 @@
 
 
 		
-		const sunLight = new THREE.DirectionalLight( settings.sceneColor1, 2 );
-		sunLight.castShadow = true;
-		sunLight.shadow.camera.near = .5;
-		sunLight.shadow.camera.far = 50;
-		sunLight.shadow.camera.right = 2;
-		sunLight.shadow.camera.left = - 2;
-		sunLight.shadow.camera.top = 1;
-		sunLight.shadow.camera.bottom = - 2;
-		sunLight.shadow.mapSize.width = 2048;
-		sunLight.shadow.mapSize.height = 2048;
-		sunLight.shadow.bias = - 0.001;
+		const sunLight = new THREE.DirectionalLight( settings.sceneColor1, 3 );
+		// sunLight.castShadow = false;
+		// sunLight.shadow.camera.near = .5;
+		// sunLight.shadow.camera.far = 50;
+		// sunLight.shadow.camera.right = 2;
+		// sunLight.shadow.camera.left = - 2;
+		// sunLight.shadow.camera.top = 1;
+		// sunLight.shadow.camera.bottom = - 2;
+		// sunLight.shadow.mapSize.width = 2048;
+		// sunLight.shadow.mapSize.height = 2048;
+		// sunLight.shadow.bias = - 0.001;
 		sunLight.position.set( 1, 3, 1 );
 
 		const waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, .5 );
-		const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, settings.sceneColor3, .5 );
+		const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, settings.sceneColor3, 1 );
 
 		scene.add( sunLight );
 		scene.add( skyAmbientLight );
@@ -320,7 +321,7 @@
 
 		const scenePass = pass( scene, camera );
 		const scenePassColor = scenePass.getTextureNode();
-		const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+		// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
 		// const selectedObjects = [ mesh ]; // Array of meshes to outline
 		const edgeStrength = uniform( 3.0 );
 
@@ -364,36 +365,53 @@
 		// scenePassColor.add( bloomPass );
 		if (water) { // set uwfx
 			const waterLevel = parseFloat(settings.sceneWater.level);
-			// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) ).toInspector( 'Post-Processing / Water Mask' );
+			
+
+			// const scenePass = pass( scene, camera );
+			// const scenePassColor = scenePass.getTextureNode();
+			const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+
+			// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) );
 			const waterMask = objectPosition( camera ).y.greaterThan( waterLevel );
 			const scenePassColorBlurred = gaussianBlur( scenePassColor );
 			scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+
 			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
-			postProcessing = new THREE.PostProcessing( renderer );
+			renderPipeline = new THREE.RenderPipeline( renderer );
+				
+			console.log('post processing with water level ' + waterLevel );
 			// postProcessing.outputNode = scenePassColor.add( bloomPass );
 			if (hasBloom) {
 				console.log("bloom with waater");
-				postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( vignette ) ).add( bloomPass );
+				// postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( vignette ) ).add( bloomPass );
+				renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( bloomPass ));
 			} else {
-				postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( vignette ) );
+				renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ));
 			}
-			// postProcessing.outputNode = scenePassColor.add( bloomPass );
+			// renderPipeline.outputNode = scenePassColor.add( bloomPass );
 		} else {
 			// const waterMask = objectPosition( camera ).y.greaterThan( -10 );
+
+			renderPipeline = new THREE.RenderPipeline( renderer );
+			// const scenePass = pass( scene, camera );
+			// const scenePassColor = scenePass.getTextureNode();
 			const scenePassColorBlurred = gaussianBlur( scenePassColor );
+
+			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
 			
-			scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 2 ) //just fake dof
-			postProcessing = new THREE.PostProcessing( renderer );
-			// postProcessing.outputNode = scenePassColor.add( bloomPass );
+			scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 5 ); //just fake dof
+			// renderPipeline = new THREE.renderPipeline( renderer );
+			// renderPipeline.outputNode = scenePassColor.add( bloomPass );
 			if (hasBloom) {
-				// postProcessing.outputNode = scenePassColorBlurred.add( bloomPass );
-				postProcessing.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
+				// renderPipeline.outputNode = scenePassColorBlurred.add( bloomPass );
+				renderPipeline.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
 			} else if (hasOutline) {
-				// postProcessing.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
-				postProcessing.outputNode = outlineColor.add(scenePassColorBlurred);
+				// renderPipeline.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
+				renderPipeline.outputNode = outlineColor.add(scenePassColorBlurred);
 			} else {
-				postProcessing.outputNode = scenePassColorBlurred;
+				console.log('post processing no water');
+				renderPipeline.outputNode = scenePassColorBlurred;
 			}
 	
 		}
@@ -488,8 +506,10 @@
 			// 	playerNavAgent.update();
 			// }
 
-			if (doPostProcessing && postProcessing) {
-				postProcessing.render();
+			if (doPostProcessing) {
+				if (renderPipeline) {
+					renderPipeline.render();
+				}
 			} else {
 				renderer.render(scene, camera);
 			}
