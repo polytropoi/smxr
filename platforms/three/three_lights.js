@@ -29,7 +29,7 @@ export function CreateLight(locationData) {
         
         lightMods.push(light);
 
-        const smoke = CreateSprites(10, parseFloat(locationData.yscale), parseFloat(locationData.yscale), null);
+        const smoke = CreateSprites(6, parseFloat(locationData.yscale), parseFloat(locationData.yscale), null);
         smoke.position.set(locationData.x, locationData.y, locationData.z);
         scene.add(smoke);
             // }

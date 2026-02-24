@@ -195,6 +195,9 @@ export function initLocations() {
                             }
                         }
                     } else {
+                        if (locationData[i].markerType == "poi") {
+                            CreateLocationMarker("poi", locationData[i]);
+                        }
                         if (locationData[i].markerType == "navmesh") {
                             createDefaultNavmesh();
                         }
@@ -230,4 +233,60 @@ export function initLocations() {
         
     }
 
+}
+
+async function LoadLocationModel (url, locationData) {
+    const model = await loadModel(url); 
+
+    model.position.set(parseFloat(locationData.x),parseFloat(locationData.y),parseFloat(locationData.z));
+    const xscale = locationData.xscale ? locationData.xscale : 1;
+    const yscale = locationData.yscale ? locationData.yscale : 1;
+    const zscale = locationData.zscale ? locationData.zscale : 1;
+
+    const eulerx = locationData.eulerx ? locationData.eulerx : 0;
+    const eulery = locationData.eulery ? locationData.eulery : 0;
+    const eulerz = locationData.eulerz ? locationData.eulerz : 0;
+
+    model.rotation.x = eulerx;
+    model.rotation.y = eulery;
+    model.rotation.z = eulerz;
+
+    // model.scale.set(xscale,yscale,zscale);
+
+        model.scale.set(20,20,20);
+    
+    // model.layers.set(1);
+    model.userData.locationData = locationData;
+    // model.name = "model_" + locationData.name;
+    
+    // model.castShadow = true;
+    // model.receiveShadow = true;
+    // if (locationData.locationTags.includes("active")) {
+        // activeObjex.push(model);
+    // } 
+    if (locationData.locationTags.includes("billboard")) {
+        lookAtCameraObjects.push(model);
+    }
+
+    model.traverse(function (child) {
+                                    
+        if (child.isMesh){
+            child.userData.locationData = locationData;
+            activeObjex.push(child);
+        }
+    });
+    // scene.add(model);
+    return model;
+    
+}
+
+async function CreateLocationMarker(type, locationData) {
+    switch (type) {
+        case "poi":
+        
+        const model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData);
+        scene.add(model);
+        console.log("adding poi! " + model);
+        break;
+    }
 }
