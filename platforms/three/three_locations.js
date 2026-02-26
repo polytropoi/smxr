@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import {scene, initSystems} from './three_main.mjs';
+import {scene, InitSystems} from './three_main.mjs';
 
 import {SetPlayerLocation} from './three_controls.js';
 
@@ -15,6 +15,7 @@ export let locations = {};
 
 export let locationData;
 export let modelsData;
+export let objexData;
 
 export let activeObjex = []; //raycastable
 
@@ -27,7 +28,7 @@ export let navmesh, surface;
 
 export let playerPosition;
 
-async function loadModel(url) {
+async function LoadModel(url) {
     const loader = new GLTFLoader();
     try {
         const gltf = await loader.loadAsync(url);
@@ -38,12 +39,19 @@ async function loadModel(url) {
     }
 }
 
-export function initLocations() {
-    let modelsDataEl = document.getElementById('modelsData');
+export function InitLocations() {
+    let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, basic interaction
     if (modelsDataEl) {
         const theModelsData = modelsDataEl.getAttribute('data-models');
         modelsData = JSON.parse(atob(theModelsData));
         console.log("modelsData " + JSON.stringify(modelsData));
+    }
+
+    let objexDataEl = document.getElementById('objexData'); //"complex" entities, with possible actions/behavior 
+    if (objexDataEl) {
+        // const theObjexData = modelsDataEl.getAttribute('data-objex');
+        // objexData = JSON.parse(atob(theObjexData));
+        // console.log("modelsData " + JSON.stringify(objexData));
     }
 
     let locationDataEl = document.getElementById('locationData');
@@ -52,152 +60,100 @@ export function initLocations() {
 
         locationData = JSON.parse(atob(theLocationData));
         SetSceneLocations(locationData);
-        console.log("locationData " + JSON.stringify(locationData));
+        // console.log("locationData " + JSON.stringify(locationData));
         
         (async () => {
             try { 
                 for (let i = 0; i < locationData.length; i++) {
 
-                    locations[locationData[i].timestamp] = locationData[i];
-
-                    if (locationData[i].modelID && locationData[i].modelID != "none") {
-                        for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match
-                            if (locationData[i].modelID == modelsData[m]._id) {
-                                locationData[i].isHidden = false;
-                                console.log("gotsa location model! " +modelsData[m].modelURL);
-                                
-                                const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
-                                                                            
-                                console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
-                                
-                                if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
-                                
-                                    locationData[i].isHidden = true;
-                                    // console.log("tryna hide model " + child.name);
-                                }															
-
-                                model.traverse(function (child) {
+                    locations[locationData[i].timestamp] = locationData[i]; //cook an object instead of array for faster lookups by timestamp
+                    
+                    if (locationData.markerType != "none" && locationData[i].modelID && !locationData[i].modelID.includes("primitive") && locationData[i].modelID != "none") {
+                        let model;
+                        // if (locationData[i].modelID.includes("primitive")) {
+                        //     console.log("gotsa primitive " + locationData[i].model);
+                            
+                        //     model = await LoadLocationModel(null, locationData[i]);
+                        //     scene.add(model);
+                        // } else { //it's a gltf
+                            for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match
+                                if (locationData[i].modelID == modelsData[m]._id) {
+                                    locationData[i].isHidden = false;
                                     
-                                    if (child.isMesh){
-                                        child.castShadow = true;
-                                        child.receiveShadow = true;
-                                        console.log("loaded mesh with tags " + locationData[i].locationTags);
-                                        child.userData.locationData = locationData[i];
-                                        if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
+                                    console.log("gotsa location model! " +modelsData[m].modelURL);
+                                    
+                                    // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
+                                                                                
+                                    model = await LoadLocationModel(modelsData[m].modelURL, locationData[i]);
+                                    
+                                    console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
+                                    
+                                    if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
+                                    
+                                        locationData[i].isHidden = true;
+                                        // console.log("tryna hide model " + child.name);
+                                    }															
+
+                               
+
+
+                                    if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
+                                        console.log("tryna instance model " + locationData[i].name);
+                                        let instancedModel = {};
+                                        // const countsplit = locationData[i].eventData.split("~");
+                                        // const count = countsplit[1];
+                                        instancedModel.model = model;
+                                        instancedModel.locationData = locationData[i];
+                                        instancedModel.modelData = modelsData[m];
+                                        instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
+                                        // instancedModel.count = count;
+                                        instancedModels.push(instancedModel);
+                                        console.log("instancedModels length " + instancedModels.length);
+                                        model.visible = false;
+                                        scene.remove(model);  //don't need the reference model
+                                    } else { // regular meshes
+                                        // console.log(locationData[i].name + " adding to scene at location " + locationData[i].x + locationData[i].y + locationData[i].z);
+                                                                                
+                                        // model.position.set(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z));
+                                        // const xscale = locationData[i].xscale ? locationData[i].xscale : 1;
+                                        // const yscale = locationData[i].yscale ? locationData[i].yscale : 1;
+                                        // const zscale = locationData[i].zscale ? locationData[i].zscale : 1;
+
+                                        // const eulerx = locationData[i].eulerx ? locationData[i].eulerx : 0;
+                                        // const eulery = locationData[i].eulery ? locationData[i].eulery : 0;
+                                        // const eulerz = locationData[i].eulerz ? locationData[i].eulerz : 0;
+
+                                        // model.rotation.x = eulerx;
+                                        // model.rotation.y = eulery;
+                                        // model.rotation.z = eulerz;
+
+                                        // model.scale.set(xscale,yscale,zscale);
                                         
-                                            // child.material = transmat;
-                                            child.material.transparent = true;
-                                            child.material.opacity = 0;
-                                            // locationData[i].isHidden = true;
-                                            console.log("tryna hide model " + child.name);
-                                        } else {
-                                                                                            
-                                            if (child.material) {
-                                                console.log("setting scene.environment envmap " + scene.environment );
-                                                // child.material.roughness = 0.5;
-                                                child.material.envMap = scene.environment;
-                                                child.envMapIntensity = 5;
-                                                child.castShadow = true;	
-                                                child.receiveShadow = true;
-                                            }
-                                            
-                                        }
+                                        // // model.layers.set(1);
+                                        // model.userData.locationData = locationData[i];
+                                        // // model.name = "model_" + locationData[i].name;
                                         
-                                        if (locationData[i].markerType == "navmesh" ) {
-                                            // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
-                                                navmesh = child;
-                                                navmesh.userData.name = "navmesh";
-                                                
-                                                groundObjex.push(navmesh);
-                                                activeObjex.push(navmesh);
-                                                // child.material = transmat;
-                                                // InitPathfinding(); //no
-                                            // }
-                                        } else if (locationData[i].markerType == "surface" ) {
-                                            console.log("gotsa ssurface");
-                                            // if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
-                                                surface = child;
-                                                // child.material = transmat;
-                                                // InitSurface();
-                                            // }
-                                        }
-                                        if (locationData[i].eventData.includes("static")) {
-                                            
-                                            let staticObject = {};
-                                            staticObject.mesh = child;
-                                            staticObject.locationData = locationData[i];
-                                            staticObject.isHidden = locationData[i].locationTags && locationData[i].locationTags.includes("hide");
-                                            console.log("gotsa static object ishidden " + staticObject.isHidden);
-                                            staticObjex.push(staticObject);
-                                        } else if  (locationData[i].eventData.includes("dynamic")) {
-                                            dynamicObjex.push(model);
-
-                                        } else {
-                                            // child.mesh.layers.set(1);
-                                            // child.mesh.userData = locationData[i];	
-                                        }
-                                                
-                                    }
-                                });
-
-
-                                if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
-                                    console.log("tryna instance model " + locationData[i].name);
-                                    let instancedModel = {};
-                                    // const countsplit = locationData[i].eventData.split("~");
-                                    // const count = countsplit[1];
-                                    instancedModel.model = model;
-                                    instancedModel.locationData = locationData[i];
-                                    instancedModel.modelData = modelsData[m];
-                                    instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
-                                    // instancedModel.count = count;
-                                    instancedModels.push(instancedModel);
-                                    console.log("instancedModels length " + instancedModels.length);
-                                    model.visible = false;
-                                    scene.remove(model);
-                                } else { // regular meshes
-                                    console.log(locationData[i].name + " adding to scene at location " + locationData[i].x + locationData[i].y + locationData[i].z);
+                                        // // model.castShadow = true;
+                                        // // model.receiveShadow = true;
+                                        // if (locationData[i].locationTags.includes("active")) {
+                                        //     activeObjex.push(model);
+                                        // } 
+                                        // if (locationData[i].locationTags.includes("billboard")) {
+                                        //     lookAtCameraObjects.push(model);
+                                        // }
+                                        
+                                        
+                                        scene.add(model);
+                                        // activeObjex.push(model);
                                                                             
-                                    model.position.set(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z));
-                                    const xscale = locationData[i].xscale ? locationData[i].xscale : 1;
-                                    const yscale = locationData[i].yscale ? locationData[i].yscale : 1;
-                                    const zscale = locationData[i].zscale ? locationData[i].zscale : 1;
-
-                                    const eulerx = locationData[i].eulerx ? locationData[i].eulerx : 0;
-                                    const eulery = locationData[i].eulery ? locationData[i].eulery : 0;
-                                    const eulerz = locationData[i].eulerz ? locationData[i].eulerz : 0;
-
-                                    model.rotation.x = eulerx;
-                                    model.rotation.y = eulery;
-                                    model.rotation.z = eulerz;
-
-                                    model.scale.set(xscale,yscale,zscale);
-                                    
-                                    // model.layers.set(1);
-                                    model.userData.locationData = locationData[i];
-                                    // model.name = "model_" + locationData[i].name;
-                                    
-                                    // model.castShadow = true;
-                                    // model.receiveShadow = true;
-                                    if (locationData[i].locationTags.includes("active")) {
-                                        activeObjex.push(model);
-                                    } 
-                                    if (locationData[i].locationTags.includes("billboard")) {
-                                        lookAtCameraObjects.push(model);
                                     }
-                                    
-                                    
-                                    scene.add(model);
-                                    // activeObjex.push(model);
-                                                                        
+                                    break; //only match one model per location!?
                                 }
-                                break; //only match one model per location!?
                             }
-                        }
+                        // }
                     } else {
-                        if (locationData[i].markerType == "poi") {
-                            CreateLocationMarker("poi", locationData[i]);
-                        }
+                        CreateDefaultLocationMarker(locationData[i]); //use primitive or default models
+                        
                         if (locationData[i].markerType == "navmesh") {
                             createDefaultNavmesh();
                         }
@@ -209,15 +165,12 @@ export function initLocations() {
                             playerPosition = locationData[i];
                             SetPlayerLocation(locationData[i]);
                         }
-                        if (locationData[i].markerType == "light") {
-                            CreateLight(locationData[i]);
-                        }
-                        if (locationData[i].markerType == "gate") {
-                            // CreateSceneGate(locationData[i]);
-                        }
-                        
-
-        
+                        // if (locationData[i].markerType == "light") {
+                        //     CreateLight(locationData[i]);
+                        // }
+                        // if (locationData[i].markerType == "gate") {
+                        //     // CreateSceneGate(locationData[i]);
+                        // }                        
                     }
                     // console.log("locationData " + i + " of "  + locationData.length);
                 }
@@ -227,7 +180,7 @@ export function initLocations() {
                 console.error("ERROR LOADING GLTF! " + e);
             } finally {
                 console.log("locations loaded! " + JSON.stringify(locations));
-                initSystems();
+                InitSystems();
             }
         })();
         
@@ -235,58 +188,245 @@ export function initLocations() {
 
 }
 
-async function LoadLocationModel (url, locationData) {
-    const model = await loadModel(url); 
+async function ModifyLocationModel(id) {
 
-    model.position.set(parseFloat(locationData.x),parseFloat(locationData.y),parseFloat(locationData.z));
-    const xscale = locationData.xscale ? locationData.xscale : 1;
-    const yscale = locationData.yscale ? locationData.yscale : 1;
-    const zscale = locationData.zscale ? locationData.zscale : 1;
-
-    const eulerx = locationData.eulerx ? locationData.eulerx : 0;
-    const eulery = locationData.eulery ? locationData.eulery : 0;
-    const eulerz = locationData.eulerz ? locationData.eulerz : 0;
-
-    model.rotation.x = eulerx;
-    model.rotation.y = eulery;
-    model.rotation.z = eulerz;
-
-    // model.scale.set(xscale,yscale,zscale);
-
-        model.scale.set(20,20,20);
-    
-    // model.layers.set(1);
-    model.userData.locationData = locationData;
-    // model.name = "model_" + locationData.name;
-    
-    // model.castShadow = true;
-    // model.receiveShadow = true;
-    // if (locationData.locationTags.includes("active")) {
-        // activeObjex.push(model);
-    // } 
-    if (locationData.locationTags.includes("billboard")) {
-        lookAtCameraObjects.push(model);
-    }
-
-    model.traverse(function (child) {
-                                    
-        if (child.isMesh){
-            child.userData.locationData = locationData;
-            activeObjex.push(child);
-        }
-    });
-    // scene.add(model);
-    return model;
-    
 }
 
-async function CreateLocationMarker(type, locationData) {
-    switch (type) {
-        case "poi":
+async function LoadLocationModel (url, locationData, isActive) {
+
+    let model;
+    if (!url) { //i.e. it's a primitive, not gltf
+        console.log("no model url " + locationData.modelID);
+        if (locationData.modelID.includes("sphere")) {
+            console.log("gotsa sphere primitive");
+            const geometry = new THREE.SphereGeometry(1,16,16);
+            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .5});
+            model = new THREE.Mesh(geometry, material);
+        } else if (locationData.modelID.includes("cube")) {
+            const geometry = new THREE.BoxGeometry(1,1,1,16,16);
+            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .5});
+            model = new THREE.Mesh(geometry, material);
+        } else if (locationData.modelID.includes("capsule")) {
+            const geometry = new THREE.CapsuleGeometry( 1, 1, 4, 8, 1 );
+            const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+            model = new THREE.Mesh( geometry, material );
+        } else if (locationData.modelID.includes("cylinder")) {
+            const geometry = new THREE.PlaneGeometry( 1, 1, 20, 24 );
+            const material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
+            model = new THREE.Mesh( geometry, material );
+        } else if (locationData.modelID.includes("plane")) {
+            const geometry = new THREE.PlaneGeometry( 1, 1 );
+            const material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
+            model = new THREE.Mesh( geometry, material );
+        } else if (locationData.modelID.includes("torus")) {
         
-        const model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData);
-        scene.add(model);
-        console.log("adding poi! " + model);
+        }
+    } else { 
+        model = await LoadModel(url); 
+    }
+
+    if (model) {
+   
+        model.position.set(parseFloat(locationData.x),parseFloat(locationData.y),parseFloat(locationData.z));
+        const xscale = locationData.xscale ? locationData.xscale : 1;
+        const yscale = locationData.yscale ? locationData.yscale : 1;
+        const zscale = locationData.zscale ? locationData.zscale : 1;
+
+        const eulerx = locationData.eulerx ? locationData.eulerx : 0;
+        const eulery = locationData.eulery ? locationData.eulery : 0;
+        const eulerz = locationData.eulerz ? locationData.eulerz : 0;
+
+        model.rotation.x = eulerx;
+        model.rotation.y = eulery;
+        model.rotation.z = eulerz;
+
+        model.scale.set(xscale,yscale,zscale);
+
+            // model.scale.set(20,20,20);
+        
+        // model.layers.set(1);
+        model.userData.locationData = locationData;
+
+        model.name = locationData.timestamp;
+        
+        // model.castShadow = true;
+        // model.receiveShadow = true;
+        // if (locationData.locationTags.includes("active")) {
+            // activeObjex.push(model);
+        // } 
+
+        if (locationData.locationTags.includes("billboard")) {
+            lookAtCameraObjects.push(model);
+        }
+
+        model.traverse(function (child) {
+                                        
+            // if (child.isMesh){
+                child.userData.locationData = locationData; //
+
+            // }
+
+            if (child.isMesh){
+                child.castShadow = true;
+                child.receiveShadow = true;
+                // console.log("loaded mesh with tags " + locationData.locationTags);
+                child.userData.locationData = locationData;
+                if (locationData.locationTags && locationData.locationTags.includes("hide") ) {
+            
+                    // child.material = transmat;
+                    child.material.transparent = true;
+                    child.material.opacity = 0;
+                    // locationData.isHidden = true;
+                    console.log("tryna hide model " + child.name);
+                } else {
+                                                                
+                    if (child.material) {
+                        // console.log("setting scene.environment envmap " + scene.environment );
+                        // child.material.roughness = 0.5;
+                        child.material.envMap = scene.environment;
+                        child.envMapIntensity = 5;
+                        child.castShadow = true;	
+                        child.receiveShadow = true;
+                    }
+                    // activeObjex.push(navmesh);
+                
+                }
+                if (isActive || locationData.markerType == "navmesh" || locationData.locationTags.includes("active")) {
+                    activeObjex.push(child);
+                }
+            
+                if (locationData.markerType == "navmesh" ) {
+                    // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
+                        navmesh = child;
+                        navmesh.userData.name = "navmesh";
+                    
+                        groundObjex.push(navmesh);
+                    
+                } else if (locationData.markerType == "surface" ) {
+                    console.log("gotsa ssurface");
+                    // if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
+                        surface = child;
+                        // child.material = transmat;
+                        // InitSurface();
+                    // }
+                }
+                if (locationData.eventData.includes("static")) {
+                
+                    let staticObject = {};
+                    staticObject.mesh = child;
+                    staticObject.locationData = locationData;
+                    staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
+                    console.log("gotsa static object ishidden " + staticObject.isHidden);
+                    staticObjex.push(staticObject);
+                } else if  (locationData.eventData.includes("dynamic")) {
+                    dynamicObjex.push(model);
+
+                } else {
+                    // child.mesh.layers.set(1);
+                    // child.mesh.userData = locationData[i];	
+                }
+                    
+                
+            }
+        });
+        // scene.add(model);
+        return model;
+    } else {
+        
+    }
+}
+
+async function CreateDefaultLocationMarker(locationData) { //use default model or primitive
+
+    console.log("tryna load default or primitive " + locationData.modelID + " for " + locationData.markerType);
+    let model;
+    switch (locationData.markerType) {
+
+        case "poi":
+            
+        if (locationData.modelID.includes("primitive")) {
+            model = await LoadLocationModel(null, locationData, true);
+        } else {
+            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+        }
+        if (model) {
+            scene.add(model);
+            // model.material.color = "orange";
+            console.log("adding poi! " + model);
+        }
+        break;
+        
+        case "placeholder":
+
+        if (locationData.modelID.includes("primitive")) {
+            model = await LoadLocationModel(null, locationData, true);
+        } else {
+            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+        }
+        if (model) {
+            scene.add(model);
+            // model.material.color = "orange";
+            console.log("adding placeholder! " + model);
+        }
+        break;
+
+        case "trigger":
+
+        if (locationData.modelID.includes("primitive")) {
+            model = await LoadLocationModel(null, locationData, true);
+        } else {
+            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+        }
+        if (model) {
+            scene.add(model);
+            // model.material.color = "orange";
+            console.log("adding trigger! " + model);
+        }
+        break;
+
+        case "collider":
+
+        if (locationData.modelID.includes("primitive")) {
+            model = await LoadLocationModel(null, locationData, true);
+        } else {
+            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+        }
+        if (model) {
+            scene.add(model);
+            // model.material.color = "orange";
+            console.log("adding collider! " + model);
+        }
+        break;
+
+        case "gate":
+
+        if (locationData.modelID.includes("primitive")) {
+            model = await LoadLocationModel(null, locationData, true);
+        } else {
+            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/gate2.glb', locationData, true);
+        }
+        if (model) {
+            scene.add(model);
+            // model.material.color = "orange";
+            console.log("adding a gate! " + model);
+        }
+        break;
+
+        case "light":
+
+        if (locationData.modelID.includes("primitive")) {
+            model = await LoadLocationModel(null, locationData, true);
+        } else {
+            // model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+        }
+        // if (model) {
+            CreateLight(locationData);
+            if (model)
+            scene.add(model);
+            // model.material.color = "orange";
+            console.log("adding a light! " + model);
+        // }
         break;
     }
 }
+

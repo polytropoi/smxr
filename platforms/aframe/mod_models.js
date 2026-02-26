@@ -844,13 +844,14 @@ AFRAME.registerComponent('mod_model', {
                   calloutChild.classList.add("activeObjexRay");
                   calloutChild.setObject3D("Object3D", child);
                   this.calloutTag = this.meshChildren[i].name.split("_")[1];
-                  // console.log("gotsa tag! " + this.calloutString);
+                  console.log("gotsa tag! " + this.calloutString);
 
                   let type = "textCallout";
                   if (this.data.eventData && this.data.eventData.includes("pic")) {
                     type = "picCallout";
                   } //etc..
                   // if (this.data.tags.includes("link")) 
+                  console.log("calloutTag " + this.calloutTag);
                   calloutChild.setAttribute("model-callout", {'calloutTag': this.calloutTag, 'type': type, 'parentTags': this.data.tags, 'parentEventData': this.data.eventData});
                   this.el.appendChild(calloutChild);
 
@@ -1238,14 +1239,18 @@ AFRAME.registerComponent('mod_model', {
             textData = tdata.mainTextString.split("~");
             this.hasCallout = true;
           } else {
-            
-            textData = this.data.description.split("~");
-            if (textData.length == 0) {
-              if (this.data.description != ''){
-                textData.push(this.data.description);
-              } else {
-                textData.push(this.data.name);
+            if (this.data.description && this.data.description != "") {
+              textData = this.data.description.split("~");
+              if (textData.length == 0) {
+                if (this.data.description != ''){
+                  textData.push(this.data.description);
+                } else {
+                  textData.push(this.data.name);
+                }
               }
+            } else {
+
+              textData.push("");
             }
           }
           // if (this.hasCallout || this.hasLocationCallout) {
@@ -1493,12 +1498,12 @@ AFRAME.registerComponent('mod_model', {
               
             
               if (evt.detail.intersection != null && !this.data.tags.includes("static")) {
-                console.log(this.data.markerType + " MOD_MODEL mouseovewr model " + this.data.modelName + " " + this.hasLocationCallout + " " + this.data.markerType + " " + this.hasCallout);
-                if (textData.length > 0) {
+                console.log(this.data.markerType + " MOD_MODEL mouseovewr model " + this.data.modelName + " " + this.hasLocationCallout + " " + this.data.markerType + " " + this.hasCallout + " textData " + textData);
+                if (textData && textData.length > 0) {
                   this.calloutString = textData[textIndex];
                 } else {
                   
-                  this.calloutString = this.data.name;
+                  this.calloutString = "";//this.data.name;
                 }
                 let min = this.data.scale * .05;
                 let max = 22;
@@ -1533,7 +1538,7 @@ AFRAME.registerComponent('mod_model', {
               
 
     
-                if (this.hasCalloutBackground && distance) { //eg thought or speech bubble
+                if (this.hasCalloutBackground && distance && this.calloutString && this.calloutString != undefined && this.calloutString != "undefined") { //eg thought or speech bubble
                   if (distance > 1 && distance < 15) {
                     const min = .05;
                     const max = .6;
@@ -1598,7 +1603,7 @@ AFRAME.registerComponent('mod_model', {
                     this.bubbleText.setAttribute('scale', '1 1 1' );
                   }
                 } else {
-                  if (this.hasLocationCallout || this.data.markerType === "character") {
+                  if (this.hasLocationCallout || this.data.markerType === "character" && this.calloutString && this.calloutString != undefined && this.calloutString != "undefined") {
                     // console.log("mod_model not bubble callout is " + textData[textIndex]);
                     distance = evt.detail.intersection.distance;
                     let scalefactor = (distance * .1) / 2; 
@@ -1610,8 +1615,11 @@ AFRAME.registerComponent('mod_model', {
                     // this.bubbleText.setAttribute("position", "-.5 .2 .51");
                     // let scalerange = Math.max(parseFloat(this.data.scale), 3);
                     // let scalerange = Math.min(Math.max(parseFloat(this.data.scale), .1), 20);
+                    if (!this.calloutString.toString() || this.calloutString == undefined || this.calloutString == "undefined") {
+                      this.calloutString = "";
+                    }
                     let scalerange = 1 + this.data.scale / 2;
-                    console.log("showing callout with z offset " + scalerange.toString());
+                    console.log("showing callout with z offset " + scalerange.toString() + " " +  this.calloutString);
                     this.bubbleText.setAttribute('position', '0 .75 ' + scalerange.toString()); //
                     this.bubbleText.setAttribute('troika-text', {
                       baseline: "bottom",

@@ -38,7 +38,7 @@
 
 	import { InitSurface, instancedModels, InstanceOnSurface } from './three_instance.js';
 
-	import { initLocations, navmesh, surface, groundObjex, locations, staticObjex, activeObjex, dynamicObjex } from './three_locations.js';
+	import { InitLocations, navmesh, surface, groundObjex, locations, staticObjex, activeObjex, dynamicObjex } from './three_locations.js';
 
 	import Stats from './ui/stats.js';
 	
@@ -90,14 +90,14 @@
 	
 	let video, videomesh, handLandmarker, useHandLandmarks;
 	
-	eventEl.addEventListener('ready-event', init); //fired when settings are loaded..
+	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
 
 
 
 
 	////////////// SCENE INIT FUNCTION 
 
-	async function init() {
+	async function Start() {
 
 		scene = new THREE.Scene();
 		renderer = new THREE.WebGPURenderer({});
@@ -138,14 +138,14 @@
 			await initRapier(gravity); //gravityMode
 		}
 		
-		await initLocations(); //calls initSystems...
+		await InitLocations(); //calls initSystems...
 
 		// initSystems();
 	}
 
 
 
-	export async function initSystems() { 
+	export async function InitSystems() { 
 
 		await initStaticObjex();  //creates default if none provided
 
@@ -400,7 +400,7 @@
 
 			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
 			
-			scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 5 ); //just fake dof
+			scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 ); //just fake dof
 			// renderPipeline = new THREE.renderPipeline( renderer );
 			// renderPipeline.outputNode = scenePassColor.add( bloomPass );
 			if (hasBloom) {

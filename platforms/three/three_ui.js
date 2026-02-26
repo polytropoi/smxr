@@ -1,7 +1,6 @@
 //// troika not ready for webgpu yet...
 // import {Text} from 'troika-three-text' 
 
-
 import * as THREE from 'three';
 import { Text } from 'three-text/three'; //not troika!
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
@@ -14,28 +13,48 @@ import {camera} from './three_controls.js';
 
 export let lookAtCameraObjects = [];
 
-export async function ThreeText (textString, size, parent) { //
+export let textContainers = [];
 
-    if (!size) {
-        size = 100;
+export async function ThreeText (textString, size, parent, position) { //
+
+    const textContainer = parent.getObjectByName('textContainer');
+    if (textContainer) {
+        console.log("gotsa textContainer!");
+        parent.updateMatrixWorld(true);
+        parent.worldToLocal(position);
+        // console.log("position is " + JSON.stringify(position));
+        textContainer.visible = true;
+        textContainer.position.set(position.x, position.y, position.z + 1);
+
+        return;
     }
+    // if (!size) {
+    //     size = 100;
+    // }
     if (!textString) {
         textString = "Jello! - My name is Inigo Montoya...";
     }
+    const splitString = textString.split("_");
+    if (splitString[1]) {
+        textString = splitString[1];
+    }
     const stringCount = textString.length;
+    const width = stringCount < 6 ? stringCount : 6;
     const text = await Text.create({
         // width: 1,
         text: textString,
         font: '../../fonts/web/Acme.woff',
         depth: 0.02,
         // align: 'center',
-        size: size / stringCount ,
+        size: size / stringCount,
+        // size: size,
         removeOverlaps: true,
         layout: {
-            width: 6,
+            width: width,
             align: 'justify'
         }
     });
+
 
     console.log("gotsa text result " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
     let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
@@ -52,21 +71,34 @@ export async function ThreeText (textString, size, parent) { //
     });
     const yscale = (Math.abs(text.planeBounds.min.y) * 1.5) + 1
     const container = new THREE.Object3D();
+    container.name = "textContainer";
 
+    textContainers.push(container);
     if (parent) { // callout or header, no bg?
+        
 
-        let material = new THREE.MeshPhysicalMaterial({ color: 'white', transparent: true, opacity: .95 });
+        let material = new THREE.MeshStandardMaterial({ color: 'white', transparent: true, opacity: .95, emissive: 'white', emissiveIntensity: 2 });
         material.roughness = 0.1;
         material.metalness = 0.3;
         material.envMap = scene.environment;
-        material.envMapIntensity = 2;
+        material.envMapIntensity = 10;
         const textmesh = new THREE.Mesh(text.geometry, material);
         container.add(textmesh);
         parent.add(container);
 
         // const camPos = camera.position.clone();
-        container.position.set(0,4,0);
-        textmesh.position.set(0,0,0);
+        console.log("position is " + JSON.stringify(position));
+        parent.updateMatrixWorld(true);
+       
+        // const targetWorldPosition = new THREE.Vector3();
+
+        parent.worldToLocal(position);
+        
+        console.log("position is " + JSON.stringify(position));
+        // container.position.set(0,4,0);
+        // container.position.copy(position);
+        // textmesh.position.set(0,0,0);
+                container.position.copy(position);
 
     } else {
 

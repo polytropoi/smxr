@@ -62,14 +62,14 @@ export function CreateLight(locationData) {
         scene.add(light);
     }
 }
-export function modLights (time) {
+export function modLights () {
      let intensity = 10;
     for (let i = 0; i < lightMods.length; i++) {
         // lightMods[i].intensity = Math.sin(time * .01) * (200 * Math.random());
         if (Math.random() > .75) {
-         intensity = Math.random() * 100;
-         if ( intensity < 50 ) 
-          intensity = 50;
+         intensity = Math.random() * 50;
+         if ( intensity < 25 ) 
+          intensity = 25;
         }
         lightMods[i].intensity = intensity;
         // Math.clamp(Math.random() * 100, 50, 100);

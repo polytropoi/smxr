@@ -19,7 +19,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { InitReticle } from './three_ui.js';
+import { InitReticle, textContainers, ThreeText } from './three_ui.js';
 
 import {PlayPauseMedia} from '../../../connect/dialogs.js';
 import { getPlayerBody } from './three_physics.js';
@@ -123,8 +123,8 @@ export function SetControls(cameraMode, cameraFOV) {
         
         isReady = true;
 
-        const pointerGeo = new THREE.CapsuleGeometry(.1, .5, 4, 4);
-        const pointerMat = new THREE.MeshBasicMaterial({ color: 'blue' });
+        const pointerGeo = new THREE.CapsuleGeometry(.05, .2, 8, 8);
+        const pointerMat = new THREE.MeshBasicMaterial({ color: 'blue', transparent: true, opacity: .5 });
         pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
         pointerGizmo.up.set(0, 1, 0);
         scene.add(pointerGizmo);
@@ -219,7 +219,7 @@ export function SetControls(cameraMode, cameraFOV) {
         // camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
         // camera.position.set( 10, 50, 10 );
         // camera.lookAt( 0, 1, 0 );
-        const pointerGeo = new THREE.CapsuleGeometry(.2, 2, 4, 4);
+        const pointerGeo = new THREE.CapsuleGeometry(.05, .1, 4, 4);
         const pointerMat = new THREE.MeshBasicMaterial({ color: 'blue' });
         pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
         pointerGizmo.up.set(0, 1, 0);
@@ -630,13 +630,27 @@ function NavmeshConstraint () {
 }
 
 function RaycastHit(type, hit) {
-    if (lastRaycastHitObject && lastRaycastHitObject != hit.object) {
-        selectedObjects.length = 0;
-    } else {
-        // if (lastRaycastHitObject) {
-        //     return;
-        // }
 
+    if (lastRaycastHitObject) {
+        if (lastRaycastHitObject != hit.object) {
+            selectedObjects.length = 0;
+            for (let i = 0; i < textContainers.length; i++) {
+                textContainers[i].visible = false;
+            }
+            // const textContainer = lastRaycastHitObject.getObjectByName('textContainer');
+            // if (textContainer) {
+            //     textContainer.visible = false;
+            // }
+        } else {
+            // if (lastRaycastHitObject) {
+            //     return;
+            // }
+
+        }
+    } else {
+
+        lastRaycastHitObject = hit.object;
+        return;
     }
 
 
@@ -646,9 +660,18 @@ function RaycastHit(type, hit) {
     const locationData = lastRaycastHitObject.userData.locationData;
     // console.log(hit.object.userData);
     const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
-    if (locationData) {
+    if (type == "mouse" && name != "navmesh" && locationData) {
+
         console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp);
+        // if (locationData.locationTags.includes("callout")) { 
+
+            
+            
+            ThreeText(locationData.markerType,2,lastRaycastHitObject, lastRaycastHitPosition);
+        // }
     }
+
+
     // console.log(type + " hit object " + name + " pos " + JSON.stringify(lastRaycastHitPosition));
 
 
@@ -730,6 +753,9 @@ export function mouseRaycast(e) {
     // console.log("mouse pos " + JSON.stringify(mouse));
     mousecaster.setFromCamera(mouse, camera);
 
+    if (!activeObjex.length) {
+        return;
+    } 
     var raycastHits = mousecaster.intersectObjects(activeObjex, true);
     let selectColor = new THREE.Color(0xff3333);
     let stopColor = new THREE.Color(0x26de57);
@@ -756,6 +782,9 @@ export function mouseRaycast(e) {
 
     } else {
         selectedObjects.length = 0;
+        for (let i = 0; i < textContainers.length; i++) {
+            textContainers[i].visible = false;
+        }
         if (lastRaycastHitObject) {
             lastRaycastHitObject = null;
         }
@@ -957,11 +986,11 @@ export function onMouseWheel(e) {
             followDistance = v;
             console.log('v is ' + v);
             if (v / 2 > 0) {
-                
+                // camera.lookAt(player);
                 camera.position.y = v / 2;
                 camera.position.z = v / 2;
             } else {
-                camera.position.y = 1;
+                camera.position.y = 0;
                 camera.position.z = 0;
             }
             // }
