@@ -15,7 +15,14 @@ export let lookAtCameraObjects = [];
 
 export let textContainers = [];
 
-export async function ThreeText (textString, size, parent, position) { //
+export async function ThreeDeeText (textString, size, parent, position, distance) { //
+
+    let scaleFactor = 1;
+    if (distance) {
+        if (distance > 1) {
+            scaleFactor = distance * .25;
+        }
+    }
 
     const textContainer = parent.getObjectByName('textContainer');
     if (textContainer) {
@@ -25,7 +32,7 @@ export async function ThreeText (textString, size, parent, position) { //
         // console.log("position is " + JSON.stringify(position));
         textContainer.visible = true;
         textContainer.position.set(position.x, position.y, position.z + 1);
-
+        textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
         return;
     }
     // if (!size) {
@@ -51,7 +58,7 @@ export async function ThreeText (textString, size, parent, position) { //
         removeOverlaps: true,
         layout: {
             width: width,
-            align: 'justify'
+            align: 'left'
         }
     });
 
@@ -77,28 +84,30 @@ export async function ThreeText (textString, size, parent, position) { //
     if (parent) { // callout or header, no bg?
         
 
-        let material = new THREE.MeshStandardMaterial({ color: 'white', transparent: true, opacity: .95, emissive: 'white', emissiveIntensity: 2 });
+        let material = new THREE.MeshStandardMaterial({ color: 'white', emissive: 'white', emissiveIntensity: .5 });
         material.roughness = 0.1;
         material.metalness = 0.3;
         material.envMap = scene.environment;
-        material.envMapIntensity = 10;
+        material.envMapIntensity = 2;
         const textmesh = new THREE.Mesh(text.geometry, material);
         container.add(textmesh);
         parent.add(container);
 
         // const camPos = camera.position.clone();
-        console.log("position is " + JSON.stringify(position));
+        console.log("textContainer position is " + JSON.stringify(position));
         parent.updateMatrixWorld(true);
        
         // const targetWorldPosition = new THREE.Vector3();
 
-        parent.worldToLocal(position);
-        
-        console.log("position is " + JSON.stringify(position));
-        // container.position.set(0,4,0);
-        // container.position.copy(position);
-        // textmesh.position.set(0,0,0);
-                container.position.copy(position);
+        if (position) {
+            parent.worldToLocal(position);
+            
+            console.log("position is " + JSON.stringify(position));
+            // container.position.set(0,4,0);
+            // container.position.copy(position);
+            // textmesh.position.set(0,0,0);
+            container.position.copy(position);
+        }
 
     } else {
 
@@ -114,7 +123,7 @@ export async function ThreeText (textString, size, parent, position) { //
 
         container.add(textmesh, bgmesh);
         scene.add(container);
-            const camPos = camera.position.clone();
+        const camPos = camera.position.clone();
         container.position.set(camPos.x, camPos.y, camPos.z - 20);
         textmesh.position.set(-3,yscale / 5,.25);
     }

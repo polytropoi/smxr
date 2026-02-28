@@ -344,7 +344,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
 
         case "poi":
             
-        if (locationData.modelID.includes("primitive")) {
+        if (locationData.modelID &&locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
@@ -358,7 +358,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         
         case "placeholder":
 
-        if (locationData.modelID.includes("primitive")) {
+        if (locationData.modelID &&locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
@@ -372,7 +372,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
 
         case "trigger":
 
-        if (locationData.modelID.includes("primitive")) {
+        if (locationData.modelID && locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
@@ -386,7 +386,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
 
         case "collider":
 
-        if (locationData.modelID.includes("primitive")) {
+        if (locationData.modelID && locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
@@ -400,7 +400,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
 
         case "gate":
 
-        if (locationData.modelID.includes("primitive")) {
+        if (locationData.modelID && locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/gate2.glb', locationData, true);
@@ -414,7 +414,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
 
         case "light":
 
-        if (locationData.modelID.includes("primitive")) {
+        if (locationData.modelID && locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
             // model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);

@@ -372,28 +372,38 @@ three_router.get('/:_id', function (req, res) {
             // "\x22three\x22: \x22https://unpkg.com/three@0.161.0/build/three.module.js\x22,"+
             // "\x22three/addons/\x22: \x22https://unpkg.com/three@0.161.0/examples/jsm/\x22"+
 
-                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.webgpu.js\x22,"+     
-                       "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.webgpu.js\x22,"+
+                                //     "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.webgpu.js\x22,"+     
+                                // "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.webgpu.js\x22,"+
 
-                            "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.tsl.js\x22,"+
-                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/examples/jsm/\x22,"+
+                                "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
+                                "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+
+
+// node_modules/three/build/three.webgpu.js
+    // "three": "./node_modules/three/build/three.webgpu.js",
+    // "three/examples/jsm/": "./node_modules/three/examples/jsm/"
+
+                            // "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.tsl.js\x22,"+
+                            // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/examples/jsm/\x22,"+
+
+                            "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
+                            "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
+
+
                             "\x22three-pathfinding\x22: \x22/platforms/three/src/three-pathfinding.module.js\x22,"+
                             "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
                              "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
                              "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+
                             
-                            // "\x22three-mesh-ui\x22: \x22https://unpkg.com/three-mesh-ui@6.4.0/build/three-mesh-ui.module.js\x22,"+
-                            // https://unpkg.com/three-mesh-ui@6.4.1/build/three-mesh-ui.js
-                            //  "\x22troika-three-text\x22: \x22/platforms/three/troika/three-troika.min.js\x22,"+ //ugh no troika for webgpu yet
-                            //   "\x22troika-three-text\x22: \x22/platforms/three/troika/troika-three-text.esm.js\x22,"+
-                            //    "\x22troika-worker-utils\x22: \x22/platforms/three/troika/troika-worker-utils.esm.js\x22,"+
-                            //     "\x22troika-three-utils\x22: \x22/platforms/three/troika/troika-three-utils.esm.js\x22,"+
+                            
+                            //  "\x22troika-three-text\x22: \x22../node_modules/troika-three-text/dist/troika-three-text.esm.js\x22,"+ //ugh no troika for webgpu yet
+                            //    "\x22troika-worker-utils\x22: \x22../node_modules/troika-worker-utils/dist/troika-worker-utils.esm.js\x22,"+
+                            //     "\x22troika-three-utils\x22: \x22../node_modules/troika-three-utils/dist/troika-three-utils.esm.js\x22,"+
 
-                            //    "\x22webgl-sdf-generator\x22: \x22/platforms/three/troika/webgl-sdf-generator.mjs\x22,"+
-                            //     "\x22bidi-js\x22: \x22/platforms/three/troika/bidi.mjs\x22,"+
+                            //    "\x22webgl-sdf-generator\x22: \x22../node_modules/webgl-sdf-generator/dist/webgl-sdf-generator.mjs\x22,"+
+                            //     "\x22bidi-js\x22: \x22../node_modules/bidi-js/dist/bidi.mjs\x22,"+
                                 
 
-                            "\x22three-mesh-bvh\x22: \x22/platforms/three/bvh/three-mesh-bvh.9.3.module.min.js\x22,"+
+                            // "\x22three-mesh-bvh\x22: \x22/platforms/three/bvh/three-mesh-bvh.9.3.module.min.js\x22,"+
 
                             "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
                             // "rapier": "https://cdn.skypack.dev/@dimforge/rapier3d-compat"

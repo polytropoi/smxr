@@ -19,7 +19,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { InitReticle, textContainers, ThreeText } from './three_ui.js';
+import { InitReticle, textContainers, ThreeDeeText } from './three_ui.js';
 
 import {PlayPauseMedia} from '../../../connect/dialogs.js';
 import { getPlayerBody } from './three_physics.js';
@@ -654,26 +654,34 @@ function RaycastHit(type, hit) {
     }
 
 
+
     lastRaycastHitObject = hit.object;
     lastHitObjectName = lastRaycastHitObject.userData ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     lastRaycastHitPosition = hit.point;
     const locationData = lastRaycastHitObject.userData.locationData;
-    // console.log(hit.object.userData);
     const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
-    if (type == "mouse" && name != "navmesh" && locationData) {
+    let showCallout = false;
 
-        console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp);
-        // if (locationData.locationTags.includes("callout")) { 
+    if (type == "mouse" &&
+        locationData && 
+        locationData.markerType != "navmesh" &&
+        name != "navmesh" &&
+        ((locationData.locationTags && locationData.locationTags.includes("callout") || 
 
-            
-            
-            ThreeText(locationData.markerType,2,lastRaycastHitObject, lastRaycastHitPosition);
-        // }
+        locationData.markerType == "poi" || 
+        locationData.markerType == "gate" ||
+        locationData.markerType == "placeholder"))      
+        ) {
+
+        showCallout = true;
+   
+        console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp + " distance " + hit.distance);
+                 
+        ThreeDeeText(locationData.markerType,2,lastRaycastHitObject, lastRaycastHitPosition, hit.distance);
+     
     }
 
-
     // console.log(type + " hit object " + name + " pos " + JSON.stringify(lastRaycastHitPosition));
-
 
     if (pointerGizmo && (type == "mouse" || type == "center")) {
         const localNormal = hit.face.normal;

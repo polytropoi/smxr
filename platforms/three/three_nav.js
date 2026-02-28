@@ -11,7 +11,7 @@
     import { uniform, sin, mul, add, time } from 'three/tsl';
 
     import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './three_physics.js';
-	import { ThreeText } from './three_ui.js';
+	import { ThreeDeeText } from './three_ui.js';
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;
     let pathfinding, helper;
@@ -56,7 +56,7 @@
 
         const agent = new NavAgent( options );
         agents.push(agent);
-        ThreeText(agentIndex.toString(), 1, agentParent);
+        ThreeDeeText(agentIndex.toString(), 1, agentParent);
         agentParents.push(agentParent);
 
         // let resp = {}

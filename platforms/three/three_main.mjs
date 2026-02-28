@@ -24,7 +24,7 @@
 
 	import { Starfield, CreateSprites, } from './three_fx.js';
 
-	import { ThreeText, lookAtCameraObjects } from './three_ui.js';
+	import { ThreeDeeText, lookAtCameraObjects } from './three_ui.js';
 
 	import { world, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, worldIsReady, initStaticObjex, 
@@ -231,7 +231,7 @@
 			// const playerBody = await getPlayerBody(player);
 			// kinematicBodies.push(playerBody);
 			const avatarName = userData.avatarName
-			ThreeText(avatarName, 10, player);
+			ThreeDeeText(avatarName, 2, player);
 			// CreatePlayerAgent(player, player.position.clone());
 		}
 		//  await new Promise(r => setTimeout(r, 000)); //fudge
