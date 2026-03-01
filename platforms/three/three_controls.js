@@ -733,20 +733,20 @@ function RaycastHit(type, hit) {
         //    
         // } else { 
             // 
-            if ( type != "player") {
-                    validTarget = true;
-                if (cameraMode == "Third Person" && type == "mouse") {
-                    selectedObjects.length = 0;
-                    selectedObjects.push(hit.object);
-                } else if ((cameraMode == "First Person" || cameraMode == "Fly") && type == "center") {
-                    selectedObjects.length = 0;
-                    selectedObjects.push(hit.object);
-                } else if ((cameraMode == "Orbit" || cameraMode == "Map") && type == "mouse") {
-                    selectedObjects.length = 0;
-                    selectedObjects.push(hit.object);
-                }
-                // console.log("seelected objex " + selectedObjects.length + " name " + name + " type hit " + type);
-            }
+            // if ( type != "player") {
+            //         validTarget = true;
+            //     if (cameraMode == "Third Person" && type == "mouse") {
+            //         selectedObjects.length = 0;
+            //         selectedObjects.push(hit.object);
+            //     } else if ((cameraMode == "First Person" || cameraMode == "Fly") && type == "center") {
+            //         selectedObjects.length = 0;
+            //         selectedObjects.push(hit.object);
+            //     } else if ((cameraMode == "Orbit" || cameraMode == "Map") && type == "mouse") {
+            //         selectedObjects.length = 0;
+            //         selectedObjects.push(hit.object);
+            //     }
+            //     // console.log("seelected objex " + selectedObjects.length + " name " + name + " type hit " + type);
+            // }
         // }
 
 

@@ -27,6 +27,9 @@
 
     let agentInitLocations = [];
     let arrowHelper;
+    let assignedIndex = 0;
+
+    export let agentModels = [];
 
     // import { uniform, sin } from 'three/tsl';
     // let agentIndex = 0;
@@ -35,8 +38,9 @@
 
 
 
-    export function CreateAgent (agentIndex, pos) {
+    export async function CreateAgent (agentIndex, pos) {
 
+        await new Promise(r => setTimeout(r, 0));
         const agentParent = new THREE.Object3D(); //empty
         agentParent.name = "agentParent_" + agentIndex;
         agentParent.position.set(pos.x, pos.y, pos.z);
@@ -47,7 +51,7 @@
         const options = {
             object: agentParent,
             nodeRadius: 0.1,
-            speed: 4,
+            speed: 2,
             readyToNav: true,
             // app: this,
             name: 'agent_' + agentIndex,
@@ -58,6 +62,7 @@
         agents.push(agent);
         ThreeDeeText(agentIndex.toString(), 1, agentParent, null, null, true);
         agentParents.push(agentParent);
+        
 
         // let resp = {}
         // agentMeshes.push(mesh);
@@ -96,13 +101,37 @@
         // return playerNavAgent;
     }
    
-            
-    export async function initAgents () {
+    // export function AssignModelsToAgents() { //nope
+
+    //     console.log("assignedIndex vs agentParents.length vs agentModels.lenght " + assignedIndex + " "+ agentParents.length + " " + agentModels.length);
+    //     if (agentModels.length) {
+    //         for (let a = 0; a < agentModels.length; a++ ) {
+    //             if (assignedIndex < agentModels.length && assignedIndex < agentParents.length) {
+    //                 // AssignModelToAgent(agentModels[assignedIndex]);
+    //                 agentModels[a].position.set(0,0,0);
+                   
+    //                  agentParents[assignedIndex].traverse((child) => {
+    //                     if (child.isMesh) {
+    //                         child.material.transparent = true;
+    //                        child.material.opacity = 0;
+    //                     }
+    //                     });
+    //                  agentParents[assignedIndex].add(agentModels[a]);
+    //                 assignedIndex++;
+                    
+    //             }
+    //         }
+    //     }
+
+     
+    // }        
+
+    export async function InitAgents () {
         // 
         for (let i = 0; i < agentCount; i++) {
             let pos;
             let goodPosition = false;
-            // await new Promise(r => setTimeout(r, 500)); //slow the fxk down
+            
             for (let p = 0; p < 10; p++) {
                 if (goodPosition) {
                     break;
@@ -119,7 +148,7 @@
 
 
             const agentIndex = i;
-            CreateAgent(agentIndex, pos); //cook the navagent first
+            await CreateAgent(agentIndex, pos); //cook the navagent first
             
             console.log("creating kinematic body for agent " + agentIndex);
             // kinematicBodies.push(rbody);
@@ -151,7 +180,9 @@
                 agentsAreReady = true;
                 console.log( "navmesh done, initAgents()");
             //    WaitAndInitAgents();
-                await initAgents();
+                await InitAgents();
+                // await new Promise(r => setTimeout(r, 4000)); //slow the fxk down
+                // AssignModelsToAgents();
             }
 
             // await initRapier();
@@ -183,15 +214,15 @@
     }
 
     export function randomNavmeshPoint () {
-        
+        if (pathfinding) {
+            const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 50);
 
-
-        const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 50);
-
-        
-        // console.log("random navmesh position " + JSON.stringify(randomNode));
-        // randomNode 
-        return randomNode;
+            // console.log("random navmesh position " + JSON.stringify(randomNode));
+            // randomNode 
+            return randomNode;
+        } else {
+            return null;
+        }
     } 
 
     class NavAgent{

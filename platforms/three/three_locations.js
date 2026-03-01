@@ -11,7 +11,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { instancedModels } from './three_instance.js';
 
 import { CreateLight } from './three_lights.js';
-import { getTriggerBody, kinematicBodies } from './three_physics.js';
+import { getTriggerBody, staticBodies } from './three_physics.js';
+import { agentModels } from './three_nav.js';
 
 export let locations = {};
 
@@ -147,7 +148,7 @@ export function InitLocations() {
                         //     // CreateSceneGate(locationData[i]);
                         // }                        
                     }
-                    if (locationData[i].objectID) {
+                    if (locationData[i].objectID) { // objects can have (rigged) models, and actions, which can also summon objects with models.  should be object type only?
                         
                         for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
                             if (locationData[i].objectID == objexData[o]._id) {
@@ -156,10 +157,20 @@ export function InitLocations() {
                                 console.log("gotsa location objectID! " + objexData[o].name +" looking for " + objexData[o].modelID);
 
                                 if (objexData[o].modelID) {
-                                    for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match
+                                    for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match - all model deps should have been added to the response serverside
                                         console.log(modelsData[m]._id + " vs " + objexData[o].modelID );
                                         if (modelsData[m]._id == objexData[o].modelID) {
                                             console.log("gotsa location object modelID " + modelsData[m].name);
+                                            const locData = locationData[i];
+                                            locData.objectData = objexData[o]; //add the object data to the thing
+                                            const model = await LoadLocationModel(modelsData[m].modelURL, locData, true);
+                                            if (locData.markerType == "character") {
+                                                console.log("tryna assign model to navagent !");
+                                                // scene.add(model);
+                                                // AssignModelToAgent(model);
+                                                agentModels.push(model);
+                                            
+                                            }
                                         }
                                     }
                                 }
@@ -327,7 +338,7 @@ async function LoadLocationModel (url, locationData, isActive) {
         // scene.add(model);
         return model;
     } else {
-        
+        // return null;
     }
 }
 
@@ -373,9 +384,11 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
         }
         if (model) {
-            const triggerBody = await getTriggerBody(model, locationData);
-            kinematicBodies.push(triggerBody);
+            
+            
             scene.add(model);
+            const triggerBody = await getTriggerBody(model, locationData);
+            staticBodies.push(triggerBody);
             // model.material.color = "orange";
             console.log("adding trigger! " + model);
         }
@@ -400,7 +413,8 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         if (locationData.modelID && locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
-            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/gate2.glb', locationData, true);
+            locationData.modelID = "primitive_cube";
+            model = await LoadLocationModel(null, locationData, true);
         }
         if (model) {
             scene.add(model);

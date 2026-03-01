@@ -9,7 +9,7 @@ import { scene, togglePostProcessing, water, cameraMode } from './three_main.mjs
 
 import { staticObjex, activeObjex } from './three_locations.js';
 import { player } from './three_controls.js';
-import { agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
+import { agentModels, agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
 	import { settings } from '../../../connect/settings.js';
 // import {scene, world} from './three_main.mjs'
 
@@ -33,11 +33,13 @@ export let colliders = {}
 
 export const agentCount = 4;
 const dynamicObjectCount = 10;
+let playerWorldPosition = new THREE.Vector3();
+        
 
 let atomicParticlesCount = 300;
   const sceneMiddle = new THREE.Vector3(2, 0, 0);
 
-export async function initRapier (gravity) {
+export async function InitRapier (gravity) {
     console.log("tryna init rapier physics " + gravity);
 		await RAPIER.init();	
     // if (!gravityMode) {
@@ -55,13 +57,7 @@ export async function initRapier (gravity) {
     // await new Promise(r => setTimeout(r, 5000));
 
     // worldIsReady = true;
-    if (player) {
-      //  const body = await getKinematicBody(player, -1); //pass the index too
 
-        const body = await getPlayerBody(player); //pass the index too
-        kinematicBodies.push(body);
-      // getPlayerBody(player);
-    }
     eventQueue = new RAPIER.EventQueue(true); // `true` for generating contact force events
 }
 
@@ -99,7 +95,7 @@ class RapierDebugRenderer {
 
 
 
-export async function initStaticObjex () { //e.g. ground, walls, etc.. 
+export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do first
     
   if (staticObjex.length) {
       for (let i = 0; i < staticObjex.length; i++) {
@@ -169,9 +165,10 @@ function WaitAndInit () {
   // eventQueue = new RAPIER.EventQueue(true);
   physicsIsReady = true;
   worldIsReady = true;
-  if (settings && settings.sceneTags && settings.sceneTags.includes("test")) {
+ 
     initDynamicObjex();
-  }
+  
+
 
 }
 
@@ -185,8 +182,14 @@ function WaitAndInit () {
       }
     } catch (e) {
       console.log("error looping kinematic bodies " + e );
-    } finally {
-   
+    } finally {      
+      if (player) {
+      //  const body = await getKinematicBody(player, -1); //pass the index too
+
+        const body = await getPlayerBody(player); //pass the index too
+        kinematicBodies.push(body);
+      // getPlayerBody(player);
+      }
     }
   }
 
@@ -195,9 +198,11 @@ function WaitAndInit () {
       // if (player) {
     
         // const mesh = player;
+        await new Promise(r => setTimeout(r, 1000));
         const colliderSize = locationData.xscale;
-        let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
-                .setTranslation(triggerObject.position.x, triggerObject.position.y, triggerObject.position.z);
+        // let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
+        let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
+                .setTranslation(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
         let rigidbody = await world.createRigidBody(rigidBodyDesc);
         colliders[rigidbody.handle] = locationData.timestamp;
         // let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
@@ -208,16 +213,18 @@ function WaitAndInit () {
         collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
         collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
         let worldposition = new THREE.Vector3();
-        triggerObject.getWorldPosition(worldposition);
+        // triggerObject.getWorldPosition(worldposition);
 
-        function update () {
-            triggerObject.getWorldPosition(worldposition);
-            rigidbody.setTranslation(worldposition);
-        }
+        // function update () {
+        //   if (triggerObject && rigidbody) {
+        //     // triggerObject.getWorldPosition(worldposition);
+        //     // rigidbody.setTranslation(worldposition);
+        //   }
+        // }
         console.log("created rigidbody for player!");
         // player.userData.update = update;
         // kinematicBodies.push(player);
-        return { rigidbody, update };
+        return { rigidbody };
  
   }
 
@@ -236,12 +243,15 @@ function WaitAndInit () {
         collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
         collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
         collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
-        let worldposition = new THREE.Vector3();
-        player.getWorldPosition(worldposition);
+
+        player.getWorldPosition(playerWorldPosition);
 
         function update () {
-            player.getWorldPosition(worldposition);
-            rigidbody.setTranslation(worldposition);
+          if (player && rigidbody && playerWorldPosition) {
+            // player.updateMatrixWorld();
+            player.getWorldPosition(playerWorldPosition);
+            rigidbody.setTranslation(playerWorldPosition);
+          }
         }
         console.log("created rigidbody for player!");
         // player.userData.update = update;
@@ -254,7 +264,7 @@ function WaitAndInit () {
     try {
       await new Promise(r => setTimeout(r, 0));
       const geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
-      const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .75, color: 'orange' });
+      const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .25, wireframe: true, color: 'orange' });
       // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
       material.roughness = 0.1;
       material.metalness = 0.3;
@@ -262,15 +272,22 @@ function WaitAndInit () {
       material.envMapIntensity = 2;
       // const material = returnMaterial('brain');
       const mesh = new THREE.Mesh( geometry, material );
+      
       // const timeUniform = uniform(0);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
 
       mesh.name = "agent_" + agentIndex;
-
-      
-      // scene.add(mesh)
       agentParent.add(mesh);
+
+      if (agentModels.length) {
+        const index = Math.floor(Math.random() * agentModels.length);
+
+        agentParent.add(agentModels[index]);
+        agentModels[index].position.set(0,0,0);
+      }
+      // scene.add(mesh)
+
       mesh.position.set(0,2,0);
       let worldposition = new THREE.Vector3();
       mesh.getWorldPosition(worldposition);
@@ -307,7 +324,7 @@ function WaitAndInit () {
 }
 
 
-export async function initAtoms (centerPosition, nucleusCount, particleSize) {
+export async function InitAtoms (centerPosition, nucleusCount, particleSize) {
   console.log("tryna init atoms");
   const atomCenter = new THREE.Object3D();
   // const center = new THREE.Vector3(0,0,0);
@@ -444,19 +461,21 @@ async function getAtomicBody(atomCenter, particleType, particleSize) {
 export async function initDynamicObjex () {
 
   try {
-    for (let i = 0; i < dynamicObjectCount; i++) { // go easy
-      // 
-      // await initTestObjex(i);
-        await new Promise(r => setTimeout(r, 0));
-      const body = await getDynamicBody(); //spawns a mesh too
-      
-      dynamicBodies.push(body);
-      
+     if (settings && settings.sceneTags && settings.sceneTags.includes("test")) {
+      for (let i = 0; i < dynamicObjectCount; i++) { // go easy
+        // 
+        // await initTestObjex(i);
+          await new Promise(r => setTimeout(r, 0));
+        const body = await getDynamicBody(); //spawns a mesh too
+        
+        dynamicBodies.push(body);
+        
+      }
     }
   } catch (e) { 
     console.log("error init dynamic objex " + e);
   } finally {
-    await new Promise(r => setTimeout(r, 4000));
+    await new Promise(r => setTimeout(r, 2000));
     // worldIsReady = true;
     await getKinematicAgentBodies();
   }

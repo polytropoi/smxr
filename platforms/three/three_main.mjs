@@ -26,9 +26,9 @@
 
 	import { ThreeDeeText, lookAtCameraObjects } from './three_ui.js';
 
-	import { world, initRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
-		eventQueue, kinematicBodies, worldIsReady, initStaticObjex, 
-		initAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders} from './three_physics.js';
+	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
+		eventQueue, kinematicBodies, worldIsReady, InitStaticObjex, 
+		InitAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders} from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -132,10 +132,10 @@
 
 		if (settings && settings.sceneTags && settings.sceneTags.includes("no gravity") ) {
 			const gravity = {x:0, y:0, z:0};
-			await initRapier(gravity); 
+			await InitRapier(gravity); 
 		} else {
 			const gravity = {x:0, y:-9.81, z:0}; //"earthlike"
-			await initRapier(gravity); //gravityMode
+			await InitRapier(gravity); //gravityMode
 		}
 		
 		await InitLocations(); //calls initSystems...
@@ -147,7 +147,13 @@
 
 	export async function InitSystems() { 
 
-		await initStaticObjex();  //creates default if none provided
+		if (navmesh) {
+			await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
+			// AssignModelsToAgents();
+		}
+
+
+		await InitStaticObjex();  //creates default if none provided
 
 		if (surface) { // => scattering instances
 			await InitSurface();
@@ -187,10 +193,6 @@
 			} 
 		}
 
-		if (navmesh) {
-			await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
-			
-		}
 
 		if (settings && settings.sceneTags.includes("webcam background")) {
 
@@ -224,7 +226,7 @@
 			
 		if (settings && settings.sceneTags.includes("atoms")) {
 			const centerPosition = new THREE.Vector3(0,0,0);
-			initAtoms(centerPosition, 10, 1);
+			InitAtoms(centerPosition, 10, 1);
 		}
 
 		if (cameraMode == "Third Person") {
