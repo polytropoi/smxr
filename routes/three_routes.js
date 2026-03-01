@@ -1449,95 +1449,98 @@ three_router.get('/:_id', function (req, res) {
             //     }
             // }
             //////////////////////// objects ////////////////////////
-            // let objex = [];
-            // let actionModels = [];
-            // console.log("tryna get all sceneObjects " + JSON.stringify(sceneResponse.sceneObjects));
-            // let objectIDs = []; //to prevent dupes in objex response below
-            // for (let i = 0; i < sceneResponse.sceneObjects.length; i++) {
-            //     let objectID = sceneResponse.sceneObjects[i].toString();
-            //     // if (objectID != undefined && objectID != "none" && sceneResponse.sceneObjects.indexOf(objectID) != -1 && objectIDs.indexOf(objectID) == -1) {
-            //     objectIDs.push(objectID);
-            //     console.log("objectID " + objectID);
-            //     const o_id = ObjectId.createFromHexString(objectID);
-            //     const objquery = {"_id": o_id};
-            //     let objekt = await RunDataQuery("obj_items", "findOne", objquery);
+            let objex = [];
+            let actionModels = [];
+            console.log("tryna get all sceneObjects " + JSON.stringify(sceneResponse.sceneObjects));
+            let objectIDs = []; //to prevent dupes in objex response below
+            for (let i = 0; i < sceneResponse.sceneObjects.length; i++) {
+                let objectID = sceneResponse.sceneObjects[i].toString();
+                // if (objectID != undefined && objectID != "none" && sceneResponse.sceneObjects.indexOf(objectID) != -1 && objectIDs.indexOf(objectID) == -1) {
+                objectIDs.push(objectID);
+                console.log("objectID " + objectID);
+                const o_id = ObjectId.createFromHexString(objectID);
+                const objquery = {"_id": o_id};
+                let objekt = await RunDataQuery("obj_items", "findOne", objquery);
 
-            //     ///////////// actions associated with this object ///////////
-            //     if (objekt && objekt.actionIDs && objekt.actionIDs != undefined && objekt.actionIDs.length > 0) {
-            //         // console.log("tryna add obj actions " + objekt.actionIDs);
-            //         const aids = objekt.actionIDs.map(item => {
-            //             return ObjectId.createFromHexString(item.toString());
-            //         });
-            //         const actionquery = {"_id": {$in: aids }};
-            //         const actions = await RunDataQuery("actions", "find", actionquery);
-            //         objekt.actions = actions;
-            //         for (let a = 0; a < actions.length; a++) { //whew, now actions may have models, check for that and get urls below
-            //             if (actions[a].modelID != undefined && actions[a].modelID != null && actions[a].modelID != "") {
-            //                 actionModels.push(actions[a]);
-            //             }
-            //         }
-            //     }
+                ///////////// actions associated with this object ///////////
+                if (objekt && objekt.actionIDs && objekt.actionIDs != undefined && objekt.actionIDs.length > 0) {
+                    // console.log("tryna add obj actions " + objekt.actionIDs);
+                    const aids = objekt.actionIDs.map(item => {
+                        return ObjectId.createFromHexString(item.toString());
+                    });
+                    const actionquery = {"_id": {$in: aids }};
+                    const actions = await RunDataQuery("actions", "find", actionquery);
+                    objekt.actions = actions;
+                    for (let a = 0; a < actions.length; a++) { //whew, now actions may have models, check for that and get urls below
+                        if (actions[a].modelID != undefined && actions[a].modelID != null && actions[a].modelID != "") {
+                            actionModels.push(actions[a]);
+                        }
+                    }
+                }
 
-            //     ////////// audiogroup associated with this object
-            //     if (objekt && objekt.audiogroupID && objekt.audiogroupID.length > 4) {
-            //         console.log("AUDIO OBJECT GROUP!!!! " + objekt.audiogroupID);
-            //         objectAudioGroups.push(objekt.audiogroupID);
-            //         const groupquery = {"_id": ObjectId.createFromHexString(objekt.audiogroupID.toString())};
-            //         const group = await RunDataQuery("groups", "findOne", groupquery);
-            //         requestedAudioItems.push(group.items);    //TODO whatabout DUPES?!?!
-            //     }   
+                ////////// audiogroup associated with this object
+                if (objekt && objekt.audiogroupID && objekt.audiogroupID.length > 4) {
+                    console.log("AUDIO OBJECT GROUP!!!! " + objekt.audiogroupID);
+                    objectAudioGroups.push(objekt.audiogroupID);
+                    const groupquery = {"_id": ObjectId.createFromHexString(objekt.audiogroupID.toString())};
+                    const group = await RunDataQuery("groups", "findOne", groupquery);
+                    requestedAudioItems.push(group.items);    //TODO whatabout DUPES?!?!
+                }   
 
-            //     ////sprite sheets for object particle system // 
-            //     if (objekt && objekt.particles != undefined && objekt.particles != null && objekt.particles != "None" ) { //maybe a "use flames" tag?
-            //         if (objekt.particles.toString().includes("Fire")) {
-            //             imageAssets = imageAssets + "<img id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>";
-            //         }
-            //         if (objekt.particles.toString().includes("Candle")) {
-            //             imageAssets = imageAssets + "<img id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>";
-            //         }
-            //         if (objekt.particles.toString().includes("Smoke")) {
-            //             imageAssets = imageAssets + "<img id=\x22smoke1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>";
-            //         }
-            //     }
-            //     /////// get the model associated with this object, if any ////////////////
-            //     if (objekt && objekt.modelID != undefined && objekt.modelID != null) {
-            //         const m_id = ObjectId.createFromHexString(objekt.modelID.toString());
-            //         const modelquery = {"_id": m_id};
-            //         const model = await RunDataQuery("models", "findOne", modelquery);
+                ////sprite sheets for object particle system // 
+                if (objekt && objekt.particles != undefined && objekt.particles != null && objekt.particles != "None" ) { //maybe a "use flames" tag?
+                    if (objekt.particles.toString().includes("Fire")) {
+                        imageAssets = imageAssets + "<img id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>";
+                    }
+                    if (objekt.particles.toString().includes("Candle")) {
+                        imageAssets = imageAssets + "<img id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>";
+                    }
+                    if (objekt.particles.toString().includes("Smoke")) {
+                        imageAssets = imageAssets + "<img id=\x22smoke1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>";
+                    }
+                }
+                /////// get the model associated with this object, if any ////////////////
+                if (objekt && objekt.modelID != undefined && objekt.modelID != null) {
+                    const m_id = ObjectId.createFromHexString(objekt.modelID.toString());
+                    const modelquery = {"_id": m_id};
+                    const model = await RunDataQuery("models", "findOne", modelquery);
 
-            //         if (model && model.item_type == "glb" && model.filename) {
-            //             let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-            //             objekt.modelURL = modelURL;
-            //             gltfsAssets = gltfsAssets + "<div id=\x22" + objekt.modelID + "\x22 src=\x22"+ modelURL +"\x22></div>";
-                        
-            //         }
-            //     }
+                    if (model && model.item_type == "glb" && model.filename) {
+                        let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                        objekt.modelURL = modelURL;
+                        model.modelURL = modelURL;
+                        // gltfsAssets = gltfsAssets + "<div id=\x22" + objekt.modelID + "\x22 src=\x22"+ modelURL +"\x22></div>";
+                        locationMdls.push(model);
+                    }
+                }
 
                 
-            //     // console.log("pushing ojekt " + JSON.stringify(objekt));
-            //     if (objekt) {
-            //        objex.push(objekt);
-            //     }
-            // }
-            // var buff = Buffer.from(JSON.stringify(objex)).toString("base64");
-            // var buff2 = Buffer.from(JSON.stringify(sceneObjectLocations)).toString("base64");
-            // objectData = "<div mod_objex id=\x22sceneObjects\x22 data-objex-locations='"+buff2+"' data-objex='"+buff+"'></div>"; //doublebuff
+                // console.log("pushing ojekt " + JSON.stringify(objekt));
+                if (objekt) {
+                   objex.push(objekt);
+                }
+            }
+            var buff = Buffer.from(JSON.stringify(objex)).toString("base64");
+            var buff2 = Buffer.from(JSON.stringify(sceneObjectLocations)).toString("base64");
+            objectData = "<div id=\x22objexData\x22 data-objex-locations='"+buff2+"' data-objex='"+buff+"'></div>"; //doublebuff
 
-            //////// get models associated with the actions on the objects //////////
-            // if (actionModels.length > 0) {
-            //     for (let i = 0; i < actionModels.length; i++) {
-            //         let actionModel = actionModels[i];
-            //         const m_id = ObjectId.createFromHexString(actionModel.modelID.toString());
-            //         const mquery = {"_id": m_id};
-            //         const model = await RunDataQuery("models", "findOne", mquery);
-            //         if (model && model.userID && model.item_type && model.item_type == "glb" && model.filename) {
-            //             let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-            //             gltfsAssets = gltfsAssets + "<div class=\x22gltfAssets\x22 crossorigin=\x22anonymous\x22 response-type=\x22arraybuffer\x22 id=\x22" + 
-            //             actionModel.modelID + "\x22 src=\x22"+ modelURL +"\x22></div>";  
-            //             console.log("adding actionModel :" + actionModel.modelName);
-            //         }
-            //     }
-            // }
+            ////// get models associated with the actions on the objects //////////
+            if (actionModels.length > 0) {
+                for (let i = 0; i < actionModels.length; i++) {
+                    let actionModel = actionModels[i];
+                    const m_id = ObjectId.createFromHexString(actionModel.modelID.toString());
+                    const mquery = {"_id": m_id};
+                    const model = await RunDataQuery("models", "findOne", mquery);
+                    if (model && model.userID && model.item_type && model.item_type == "glb" && model.filename) {
+                        let modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                        // gltfsAssets = gltfsAssets + "<div class=\x22gltfAssets\x22 crossorigin=\x22anonymous\x22 response-type=\x22arraybuffer\x22 id=\x22" + 
+                        // actionModel.modelID + "\x22 src=\x22"+ modelURL +"\x22></div>";  
+                        model.modelURL = modelURL;
+                        console.log("adding actionModel :" + actionModel.modelName);
+                        locationMdls.push(model);
+                    }
+                }
+            }
 
             for (let i = 0; i < sceneModelLocations.length; i++) {
                 let locMdl = sceneModelLocations[i];
@@ -3260,7 +3263,7 @@ three_router.get('/:_id', function (req, res) {
                                 loadLocations +
                                 locationModelsEl +
                                 sceneTimedEventsData +
-                               
+                                objectData +
                                 
                                 cloudMarkerElements+
 

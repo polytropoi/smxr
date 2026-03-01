@@ -190,6 +190,37 @@ function WaitAndInit () {
     }
   }
 
+  export async function getTriggerBody(triggerObject, locationData) { //
+
+      // if (player) {
+    
+        // const mesh = player;
+        const colliderSize = locationData.xscale;
+        let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
+                .setTranslation(triggerObject.position.x, triggerObject.position.y, triggerObject.position.z);
+        let rigidbody = await world.createRigidBody(rigidBodyDesc);
+        colliders[rigidbody.handle] = locationData.timestamp;
+        // let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
+        let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize);
+        let collider = await world.createCollider(colliderDesc, rigidbody);
+        // collider.setRestitution(1.5);
+        // collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+        collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+        collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
+        let worldposition = new THREE.Vector3();
+        triggerObject.getWorldPosition(worldposition);
+
+        function update () {
+            triggerObject.getWorldPosition(worldposition);
+            rigidbody.setTranslation(worldposition);
+        }
+        console.log("created rigidbody for player!");
+        // player.userData.update = update;
+        // kinematicBodies.push(player);
+        return { rigidbody, update };
+ 
+  }
+
   export async function getPlayerBody(player) { //
 
       // if (player) {

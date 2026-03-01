@@ -15,12 +15,15 @@ export let lookAtCameraObjects = [];
 
 export let textContainers = [];
 
-export async function ThreeDeeText (textString, size, parent, position, distance) { //
+export async function ThreeDeeText (textString, size, parent, position, distance, persist, parentScale) { //
 
-    let scaleFactor = 1;
+    let scaleFactor = .5;
     if (distance) {
         if (distance > 1) {
-            scaleFactor = distance * .25;
+            scaleFactor = distance * .05;
+            if (parentScale) {
+                scaleFactor = scaleFactor/parentScale;
+            }
         }
     }
 
@@ -29,7 +32,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
         console.log("gotsa textContainer!");
         parent.updateMatrixWorld(true);
         parent.worldToLocal(position);
-        // console.log("position is " + JSON.stringify(position));
+        console.log("ui scale " + scaleFactor);
         textContainer.visible = true;
         textContainer.position.set(position.x, position.y, position.z + 1);
         textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
@@ -45,15 +48,17 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     if (splitString[1]) {
         textString = splitString[1];
     }
-    const stringCount = textString.length;
-    const width = stringCount < 6 ? stringCount : 6;
+    const stringCount = textString.toString().length;
+    // const width = stringCount < 6 ? stringCount : 6;
+    const width = 6;
+    console.log("tryna set ui size " + size + " width " + width + " stringcount " + stringCount);
     const text = await Text.create({
         // width: 1,
         text: textString,
         font: '../../fonts/web/Acme.woff',
         depth: 0.02,
         // align: 'center',
-        size: size / stringCount,
+        size: size,
         // size: size,
         removeOverlaps: true,
         layout: {
@@ -79,8 +84,10 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     const yscale = (Math.abs(text.planeBounds.min.y) * 1.5) + 1
     const container = new THREE.Object3D();
     container.name = "textContainer";
-
-    textContainers.push(container);
+    if (!persist) {
+        textContainers.push(container);
+    }
+   
     if (parent) { // callout or header, no bg?
         
 
@@ -107,6 +114,10 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             // container.position.copy(position);
             // textmesh.position.set(0,0,0);
             container.position.copy(position);
+        } else {
+            container.position.set(0,4,0);
+            
+            textmesh.position.set(0,0,0);
         }
 
     } else {

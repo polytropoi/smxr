@@ -56,7 +56,7 @@
 
         const agent = new NavAgent( options );
         agents.push(agent);
-        ThreeDeeText(agentIndex.toString(), 1, agentParent);
+        ThreeDeeText(agentIndex.toString(), 1, agentParent, null, null, true);
         agentParents.push(agentParent);
 
         // let resp = {}
@@ -314,6 +314,13 @@
             this.readyToNav = true;
         }
         newPath(pt) {
+
+            const rand = Math.random(); {
+                if (rand > .5) {
+                    this.agentPause();
+                    return;
+                }
+            }
             const player = this.object;
             if (this.name == "player") {
                 console.log("tryna get player path to " + JSON.stringify(pt));
@@ -391,6 +398,15 @@
 
             }
         }
+        agentPause () {
+            this.readyToNav = false;  
+            const randTime = Math.random() * 3000;
+            setTimeout(() => {
+                this.readyToNav = true;
+                this.randomPath();
+
+            }, randTime);
+        }
 
         agentRaycastHit () {
             
@@ -398,13 +414,20 @@
 
             if (closestNode) {
                 console.log("agent hit!");
-                // this.readyToNav = !this.readyToNav;    
+                  this.agentPause();
                 // if (this.readyToNav) {
-                //         this.object.traverse((child) => {
-                //         if (child.isMesh) {
-                //            child.material.color
-                //         }
-                //         });
+                        this.object.traverse((child) => {
+                        if (child.isMesh) {
+                           const randomColorHex = Math.random() * 0xffffff; 
+                             const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .75, color: randomColorHex });
+                                // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
+                                material.roughness = 0.1;
+                                material.metalness = 0.3;
+                                material.envMap = scene.environment;
+                                material.envMapIntensity = 2;
+                            child.material = material;
+                        }
+                    });
                 // }
             } else {
                 console.log("don't interrupt now, cain't find a spot to stop");
@@ -467,7 +490,13 @@
         }
         randomPath() {
             console.log("tryna set random path");
-            this.newPath(randomNavmeshPoint());
+            const rand = Math.random();
+            if (rand > .25) {
+                this.newPath(randomNavmeshPoint());
+            } else {
+                
+                this.agentPause();
+            }
         }
         
         setTargetDirection(){

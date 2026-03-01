@@ -11,6 +11,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { instancedModels } from './three_instance.js';
 
 import { CreateLight } from './three_lights.js';
+import { getTriggerBody, kinematicBodies } from './three_physics.js';
+
 export let locations = {};
 
 export let locationData;
@@ -39,6 +41,7 @@ async function LoadModel(url) {
     }
 }
 
+
 export function InitLocations() {
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, basic interaction
     if (modelsDataEl) {
@@ -49,9 +52,9 @@ export function InitLocations() {
 
     let objexDataEl = document.getElementById('objexData'); //"complex" entities, with possible actions/behavior 
     if (objexDataEl) {
-        // const theObjexData = modelsDataEl.getAttribute('data-objex');
-        // objexData = JSON.parse(atob(theObjexData));
-        // console.log("modelsData " + JSON.stringify(objexData));
+        const theObjexData = objexDataEl.getAttribute('data-objex');
+        objexData = JSON.parse(atob(theObjexData));
+        console.log("objexData " + JSON.stringify(objexData));
     }
 
     let locationDataEl = document.getElementById('locationData');
@@ -112,45 +115,17 @@ export function InitLocations() {
                                         model.visible = false;
                                         scene.remove(model);  //don't need the reference model
                                     } else { // regular meshes
-                                        // console.log(locationData[i].name + " adding to scene at location " + locationData[i].x + locationData[i].y + locationData[i].z);
-                                                                                
-                                        // model.position.set(parseFloat(locationData[i].x),parseFloat(locationData[i].y),parseFloat(locationData[i].z));
-                                        // const xscale = locationData[i].xscale ? locationData[i].xscale : 1;
-                                        // const yscale = locationData[i].yscale ? locationData[i].yscale : 1;
-                                        // const zscale = locationData[i].zscale ? locationData[i].zscale : 1;
-
-                                        // const eulerx = locationData[i].eulerx ? locationData[i].eulerx : 0;
-                                        // const eulery = locationData[i].eulery ? locationData[i].eulery : 0;
-                                        // const eulerz = locationData[i].eulerz ? locationData[i].eulerz : 0;
-
-                                        // model.rotation.x = eulerx;
-                                        // model.rotation.y = eulery;
-                                        // model.rotation.z = eulerz;
-
-                                        // model.scale.set(xscale,yscale,zscale);
-                                        
-                                        // // model.layers.set(1);
-                                        // model.userData.locationData = locationData[i];
-                                        // // model.name = "model_" + locationData[i].name;
-                                        
-                                        // // model.castShadow = true;
-                                        // // model.receiveShadow = true;
-                                        // if (locationData[i].locationTags.includes("active")) {
-                                        //     activeObjex.push(model);
-                                        // } 
-                                        // if (locationData[i].locationTags.includes("billboard")) {
-                                        //     lookAtCameraObjects.push(model);
-                                        // }
-                                        
-                                        
+                                                                             
                                         scene.add(model);
-                                        // activeObjex.push(model);
                                                                             
                                     }
                                     break; //only match one model per location!?
                                 }
                             }
                         // }
+                        // } else 
+
+                    
                     } else {
                         CreateDefaultLocationMarker(locationData[i]); //use primitive or default models
                         
@@ -171,6 +146,26 @@ export function InitLocations() {
                         // if (locationData[i].markerType == "gate") {
                         //     // CreateSceneGate(locationData[i]);
                         // }                        
+                    }
+                    if (locationData[i].objectID) {
+                        
+                        for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
+                            if (locationData[i].objectID == objexData[o]._id) {
+                                // locationData[i].isHidden = false;
+                                
+                                console.log("gotsa location objectID! " + objexData[o].name +" looking for " + objexData[o].modelID);
+
+                                if (objexData[o].modelID) {
+                                    for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match
+                                        console.log(modelsData[m]._id + " vs " + objexData[o].modelID );
+                                        if (modelsData[m]._id == objexData[o].modelID) {
+                                            console.log("gotsa location object modelID " + modelsData[m].name);
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
                     }
                     // console.log("locationData " + i + " of "  + locationData.length);
                 }
@@ -378,6 +373,8 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
         }
         if (model) {
+            const triggerBody = await getTriggerBody(model, locationData);
+            kinematicBodies.push(triggerBody);
             scene.add(model);
             // model.material.color = "orange";
             console.log("adding trigger! " + model);

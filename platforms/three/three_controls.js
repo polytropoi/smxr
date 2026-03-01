@@ -111,7 +111,7 @@ export function SetControls(cameraMode, cameraFOV) {
         player = new THREE.Mesh(geometry, material);
         camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .1, 500);
         
-        camera.position.set(0, 1, 0);
+        camera.position.set(0, 0, 0);
         scene.add(player);
         player.add(camera);
 
@@ -677,7 +677,7 @@ function RaycastHit(type, hit) {
    
         console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp + " distance " + hit.distance);
                  
-        ThreeDeeText(locationData.markerType,2,lastRaycastHitObject, lastRaycastHitPosition, hit.distance);
+        ThreeDeeText(locationData.markerType,1,lastRaycastHitObject, lastRaycastHitPosition, hit.distance, null, locationData.yscale);
      
     }
 

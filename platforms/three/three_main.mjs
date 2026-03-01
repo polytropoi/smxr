@@ -105,8 +105,8 @@
 				// renderer.setPixelRatio( 2.0 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.setAnimationLoop( animate );
-		// renderer.toneMapping = THREE.ACESFilmicToneMapping;
-		// renderer.toneMappingExposure = 0.1;
+		renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		renderer.toneMappingExposure = 1;
 		// renderer.shadowMap.enabled = true;
 		// renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
 
@@ -442,6 +442,18 @@
 	}
 
 
+	function CollisionStart(h1, h2) {
+		console.log("Collision started between colliders " + colliders[h1] + " and " + colliders[h2]);
+		if (colliders[h1]) {
+			if (!colliders[h2].includes("agent")) {
+				console.log("player hit trigger " + JSON.stringify(locations[colliders[h2]]));
+			}
+		}
+	}
+	function CollisionEnd(h1, h2) {
+		console.log("Collision stopped between colliders " + colliders[h1] + " and " + colliders[h2]);
+	}
+
 ////////////// MAIN LOOP FOR ALL THE THINGS ////////////////
 	function animate() {
 		const time = performance.now();
@@ -484,11 +496,12 @@
 				// Handle collision events
 				eventQueue.drainCollisionEvents((handle1, handle2, started) => {
 					if (started) {
-
-						console.log("Collision started between colliders " + colliders[handle1] + " and " + colliders[handle2]);
+						CollisionStart(handle1, handle2);
+						
 						// You can add logic here, e.g., change color of the collided objects
 					} else {
-						console.log("Collision stopped between colliders " + colliders[handle1] + " and " + colliders[handle2]);
+						CollisionEnd(handle1, handle2);
+						
 					}
 				});
 			}
