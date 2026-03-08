@@ -27,9 +27,11 @@ export let dynamicBodies = [];
 export let atomicBodies = [];
 export let staticBodies = [];
 export let kinematicBodies = [];
+export let npcKinematicBodies = [];
 export let useDefaultCollider = false;
 export let handColliderGroup;
 export let colliders = {}
+
 
 export const agentCount = 4;
 const dynamicObjectCount = 10;
@@ -188,7 +190,16 @@ function WaitAndInit () {
 
         const body = await getPlayerBody(player); //pass the index too
         kinematicBodies.push(body);
+        
       // getPlayerBody(player);
+      }
+      if (npcKinematicBodies.length) {
+        console.log("adding npcKinematicBodies " + npcKinematicBodies.length);
+        // for (let k = 0; k < npcKinematicBodies.length; k++) {
+         
+        //   kinematicBodies.push(npcKinematicBodies[k]);
+        // }
+        // kinematicBodies.concat(npcKinematicBodies);
       }
     }
   }
@@ -259,6 +270,46 @@ function WaitAndInit () {
         return { rigidbody, update };
  
   }
+
+
+  export async function getModelKinematicBody(mesh) { 
+
+    try {
+    
+      let worldposition = new THREE.Vector3();
+      mesh.getWorldPosition(worldposition);
+
+      let size = 2;
+      let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
+              .setTranslation(worldposition.x, worldposition.y, worldposition.z);
+      let rigidbody = await world.createRigidBody(rigidBodyDesc);
+      colliders[rigidbody.handle] = "agent_" + agentIndex;
+      let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
+      let collider = await world.createCollider(kinematicCollider, rigidbody);
+      collider.setRestitution(1.5);
+      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+      
+
+    function update () {
+
+      if (mesh && rigidbody) {
+        //  rigidbody.resetForces(true); 
+        //   rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y + 1, z: mesh.position.z });
+        mesh.getWorldPosition(worldposition);
+        rigidbody.setTranslation(worldposition.x, worldposition.y, worldposition.z);
+        // console.log("worldposition " + JSON.stringify(worldposition));
+        //   let { x, y, z } = rigidbody.translation();
+        //   mouseMesh.position.set(x, y, z);
+      }
+    }
+
+    return { rigidbody, update };
+  } catch (e) {
+    console.log("error creating model kinematic rigidbody " + e);
+  }
+}
+
   export async function getKinematicBody(agentParent, agentIndex, position) {
 
     try {

@@ -27,7 +27,7 @@
 	import { ThreeDeeText, lookAtCameraObjects } from './three_ui.js';
 
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
-		eventQueue, kinematicBodies, worldIsReady, InitStaticObjex, 
+		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
 		InitAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders} from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
@@ -42,7 +42,7 @@
 
 	import Stats from './ui/stats.js';
 	
-	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition } from './three_controls.js';
+	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './three_controls.js';
 // import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene;
@@ -482,14 +482,17 @@
 			}		
 			if (world && physicsIsReady && worldIsReady) {
 				
-				atomicBodies.forEach(b => 
-					b.update());
+				atomicBodies.forEach(a => 
+					a.update());
 
 				dynamicBodies.forEach(b => 
 					b.update());
 			
 				kinematicBodies.forEach(c => 
 					c.update());
+
+				// npcKinematicBodies.forEach(k => 
+				// 	k.update());
 
 				// world.step();//!!! still wonky with lots of dynamic and kinematic
 
@@ -516,6 +519,9 @@
 			lookAtCameraObjects.forEach(l => 
 				l.lookAt(cameraWorldPosition)
 			)
+			// if (!cameraAtZero) {
+			// 	camera.lookAt(camera.parent);
+			// }
 
 			// if (playerNavAgent && playerReadyToNav) {
 			// 	playerNavAgent.update();

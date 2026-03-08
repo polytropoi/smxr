@@ -27,17 +27,22 @@ export async function ThreeDeeText (textString, size, parent, position, distance
         }
     }
 
-    const textContainer = parent.getObjectByName('textContainer');
-    if (textContainer) {
-        console.log("gotsa textContainer!");
-        parent.updateMatrixWorld(true);
-        parent.worldToLocal(position);
-        console.log("ui scale " + scaleFactor);
-        textContainer.visible = true;
-        textContainer.position.set(position.x, position.y, position.z + 1);
-        textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        return;
-    }
+    let textContainer;
+    if (parent) {  
+       textContainer = parent.getObjectByName('textContainer');
+        if (textContainer) {
+            console.log("gotsa textContainer!");
+            parent.updateMatrixWorld(true);
+            parent.worldToLocal(position);
+            console.log("ui scale " + scaleFactor);
+            textContainer.visible = true;
+            textContainer.position.set(position.x, position.y, position.z + 1);
+            textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            return;
+        }
+    } else {
+        console.log("init textContainer for " + textString);
+    } 
     // if (!size) {
     //     size = 100;
     // }

@@ -27,6 +27,7 @@ import { getPlayerBody } from './three_physics.js';
 export let camera, controls, player;
 export let isReady = false;
 export let followDistance = 16;
+export let cameraAtZero = true;
 
 let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitObject, lastHitObjectName;
 
@@ -997,9 +998,11 @@ export function onMouseWheel(e) {
                 // camera.lookAt(player);
                 camera.position.y = v / 2;
                 camera.position.z = v / 2;
+                cameraAtZero = false;
             } else {
                 camera.position.y = 0;
                 camera.position.z = 0;
+                cameraAtZero = true;
             }
             // }
             // return false;

@@ -100,6 +100,27 @@
         console.log("creating player navagent ");
         // return playerNavAgent;
     }
+
+    export function CreateNPCAgent (model, name) { //hrm, not yet...
+        
+
+        const options = {
+            object: model,
+            nodeRadius: 0.1,
+            speed: 2,
+            readyToNav: true,
+            // app: this,
+            name: name,
+            npc: true
+        };
+
+        const npc = new NavAgent( options );
+        agents.push(npc);
+        ThreeDeeText(name, 1, model, null, null, true);
+        console.log("creating npc navagent ");
+
+        // return playerNavAgent;
+    }
    
     // export function AssignModelsToAgents() { //nope
 
@@ -576,7 +597,7 @@
             });
         }
         
-        set action(name){
+        set action(name){ //hrm...
             //Make a copy of the clip if this is a remote player
             if (this.actionName == name.toLowerCase()) return;
             

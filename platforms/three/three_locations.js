@@ -8,11 +8,13 @@ import { SetSceneLocations, userData } from '../../../connect/connect.js';
 
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+
 import { instancedModels } from './three_instance.js';
 
 import { CreateLight } from './three_lights.js';
-import { getTriggerBody, staticBodies } from './three_physics.js';
-import { agentModels } from './three_nav.js';
+import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './three_physics.js';
+import { agentModels, CreateNPCAgent } from './three_nav.js';
 
 export let locations = {};
 
@@ -102,7 +104,7 @@ export function InitLocations() {
 
 
                                     if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
-                                        console.log("tryna instance model " + locationData[i].name);
+                                        // console.log("tryna instance model " + locationData[i].name);
                                         let instancedModel = {};
                                         // const countsplit = locationData[i].eventData.split("~");
                                         // const count = countsplit[1];
@@ -154,21 +156,43 @@ export function InitLocations() {
                             if (locationData[i].objectID == objexData[o]._id) {
                                 // locationData[i].isHidden = false;
                                 
-                                console.log("gotsa location objectID! " + objexData[o].name +" looking for " + objexData[o].modelID);
+                                console.log("gotsa location objectID! " + objexData[o]._id +" looking for " + objexData[o].modelID);
 
                                 if (objexData[o].modelID) {
                                     for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match - all model deps should have been added to the response serverside
                                         console.log(modelsData[m]._id + " vs " + objexData[o].modelID );
                                         if (modelsData[m]._id == objexData[o].modelID) {
-                                            console.log("gotsa location object modelID " + modelsData[m].name);
+                                            console.log("gotsa location object modelID " + modelsData[m].modelURL);
                                             const locData = locationData[i];
                                             locData.objectData = objexData[o]; //add the object data to the thing
                                             const model = await LoadLocationModel(modelsData[m].modelURL, locData, true);
-                                            if (locData.markerType == "character") {
-                                                console.log("tryna assign model to navagent !");
+                                            let count = 1;
+                                            if (locationData[i].eventData && locationData[i].eventData.includes("scatter")) {
+                                                if (locationData[i].eventData.includes("~")) {
+                                                    count = parseFloat(locationData[i].eventData.split("~")[1]);
+                                                }
+                                            }
+                                            console.log("count is " + count);
+
+                                            if (locationData[i].markerType == "character") {
+                                                for (let z = 0; z < count; z++) {
+                                                console.log("tryna assign model to navagent ! " + z);
                                                 // scene.add(model);
                                                 // AssignModelToAgent(model);
-                                                agentModels.push(model);
+                                                // agentModels.push(model);
+                                                // Assuming 'model' is the loaded scene or group
+                                                const clonedModel = SkeletonUtils.clone(model); 
+
+                                                scene.add(clonedModel);
+                                                
+                                                const body = await getModelKinematicBody(clonedModel); //pass the index too
+                                                // kinematicBodies.push(body);
+                                                npcKinematicBodies.push(body);
+
+                                                CreateNPCAgent(clonedModel, locationData[i].name + " " + z.toString());
+
+                                                
+                                                }
                                             
                                             }
                                         }
@@ -228,11 +252,13 @@ async function LoadLocationModel (url, locationData, isActive) {
         
         }
     } else { 
+        console.log("tryna fetch model " + url)
         model = await LoadModel(url); 
     }
 
     if (model) {
    
+        console.log("gotsa model !" + JSON.stringify(locationData));
         model.position.set(parseFloat(locationData.x),parseFloat(locationData.y),parseFloat(locationData.z));
         const xscale = locationData.xscale ? locationData.xscale : 1;
         const yscale = locationData.yscale ? locationData.yscale : 1;
@@ -253,7 +279,7 @@ async function LoadLocationModel (url, locationData, isActive) {
         // model.layers.set(1);
         model.userData.locationData = locationData;
 
-        model.name = locationData.timestamp;
+        model.userData.timestamp = locationData.timestamp;
         
         // model.castShadow = true;
         // model.receiveShadow = true;
@@ -261,13 +287,14 @@ async function LoadLocationModel (url, locationData, isActive) {
             // activeObjex.push(model);
         // } 
 
-        if (locationData.locationTags.includes("billboard")) {
+        if (locationData.locationTags && locationData.locationTags.includes("billboard")) {
             lookAtCameraObjects.push(model);
         }
 
         model.traverse(function (child) {
                                         
             // if (child.isMesh){
+            child.userData = {};
                 child.userData.locationData = locationData; //
 
             // }
@@ -283,7 +310,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                     child.material.transparent = true;
                     child.material.opacity = 0;
                     // locationData.isHidden = true;
-                    console.log("tryna hide model " + child.name);
+                    // console.log("tryna hide model " + child.name);
                 } else {
                                                                 
                     if (child.material) {
@@ -338,7 +365,7 @@ async function LoadLocationModel (url, locationData, isActive) {
         // scene.add(model);
         return model;
     } else {
-        // return null;
+        return null;
     }
 }
 
