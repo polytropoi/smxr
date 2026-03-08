@@ -662,7 +662,7 @@ function RaycastHit(type, hit) {
     const locationData = lastRaycastHitObject.userData.locationData;
     const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     let showCallout = false;
-
+    
     if (type == "mouse" &&
         locationData && 
         locationData.markerType != "navmesh" &&
@@ -678,20 +678,18 @@ function RaycastHit(type, hit) {
    
         console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp + " distance " + hit.distance);
                  
-        ThreeDeeText(locationData.markerType,1,lastRaycastHitObject, lastRaycastHitPosition, hit.distance, null, locationData.yscale);
+        ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, hit.distance, null, locationData.yscale);
      
     }
-
-    // console.log(type + " hit object " + name + " pos " + JSON.stringify(lastRaycastHitPosition));
+    if (name != "navmesh") {
+        console.log(type + " hit object " + name + " pos " + JSON.stringify(lastRaycastHitPosition));
+    }
 
     if (pointerGizmo && (type == "mouse" || type == "center")) {
         const localNormal = hit.face.normal;
-
         const worldNormal = localNormal.clone().transformDirection(hit.object.matrixWorld);
         // console.log("hit worldnormal " + JSON.stringify(worldNormal));
-
         pointerGizmo.position.set(hit.point.x, hit.point.y, hit.point.z);
-
 
         // pointerGizmo.lookAt(worldNormal);
         rotateObjectToNormal(pointerGizmo, worldNormal);
@@ -709,7 +707,7 @@ function RaycastHit(type, hit) {
     } else if (name == "player") {
 
         selectedObjects.length = 0;
-    } else if (name.includes("agent")) {
+    } else if (name && name.includes("agent")) {
         validTarget = true;
         if (raycastHitAgent != hit.object) {
             // console.log ("new mouse raycast hit on agent " + raycastHits[0].object.name);
@@ -757,14 +755,15 @@ function RaycastHit(type, hit) {
 
 export function mouseRaycast(e) {
 
+    if (!activeObjex.length) {
+        return;
+    } 
+    scene.updateMatrixWorld(true);
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     // console.log("mouse pos " + JSON.stringify(mouse));
     mousecaster.setFromCamera(mouse, camera);
 
-    if (!activeObjex.length) {
-        return;
-    } 
     var raycastHits = mousecaster.intersectObjects(activeObjex, true);
     let selectColor = new THREE.Color(0xff3333);
     let stopColor = new THREE.Color(0x26de57);

@@ -150,7 +150,7 @@ export function InitLocations() {
                         //     // CreateSceneGate(locationData[i]);
                         // }                        
                     }
-                    if (locationData[i].objectID) { // objects can have (rigged) models, and actions, which can also summon objects with models.  should be object type only?
+                    if (locationData[i].objectID) { // objects can have (rigged) models, and actions, which can summon other objects with models and actions.  should be object type only?
                         
                         for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
                             if (locationData[i].objectID == objexData[o]._id) {
@@ -181,15 +181,16 @@ export function InitLocations() {
                                                 // AssignModelToAgent(model);
                                                 // agentModels.push(model);
                                                 // Assuming 'model' is the loaded scene or group
-                                                const clonedModel = SkeletonUtils.clone(model); 
+                                                const clonedModel = SkeletonUtils.clone(model); // gots to use this util, normal clone/copy doesn't work
 
                                                 scene.add(clonedModel);
+                                                activeObjex.push(clonedModel);
                                                 
                                                 const body = await getModelKinematicBody(clonedModel); //pass the index too
                                                 // kinematicBodies.push(body);
                                                 npcKinematicBodies.push(body);
 
-                                                CreateNPCAgent(clonedModel, locationData[i].name + " " + z.toString());
+                                                CreateNPCAgent(clonedModel, z.toString(), locationData[i]);
 
                                                 
                                                 }
@@ -292,14 +293,12 @@ async function LoadLocationModel (url, locationData, isActive) {
         }
 
         model.traverse(function (child) {
-                                        
-            // if (child.isMesh){
-            child.userData = {};
-                child.userData.locationData = locationData; //
-
-            // }
-
+           
             if (child.isMesh){
+
+                child.userData = {};
+                child.userData.locationData = locationData; //
+                
                 child.castShadow = true;
                 child.receiveShadow = true;
                 // console.log("loaded mesh with tags " + locationData.locationTags);
@@ -360,6 +359,30 @@ async function LoadLocationModel (url, locationData, isActive) {
                 }
                     
                 
+            } else if (child.isBone && !child.parent.isBone) {
+                // const geometry = new THREE.CapsuleGeometry(1, 1, 8, 8); // Base size
+                const geometry = new THREE.CylinderGeometry(1, 1, 4, 8, 8); // Base size
+                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: .5 });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.material.side = THREE.DoubleSide;
+
+                    // Position and orient the mesh to span the bone
+                mesh.position.set(0, 0, 0); // Usually at the parent bone
+                
+                // Scale mesh based on bone's position vector length
+                const boneLength = child.position.length();
+                if (boneLength > 1) {
+                    mesh.scale.set(1, boneLength, 1);
+                    mesh.position.y = boneLength / 2; // Adjust based on pivot
+                }
+
+                // Rotate if necessary to match bone direction
+                // mesh.rotation.x = Math.PI / 2;
+                mesh.userData = {};
+                mesh.userData.name = "agent_" + locationData.timestamp;
+                mesh.userData.locationData = locationData;
+                activeObjex.push(mesh);
+                child.add(mesh);
             }
         });
         // scene.add(model);

@@ -17,7 +17,7 @@ export let textContainers = [];
 
 export async function ThreeDeeText (textString, size, parent, position, distance, persist, parentScale) { //
 
-    let scaleFactor = .5;
+    let scaleFactor = .1;
     if (distance) {
         if (distance > 1) {
             scaleFactor = distance * .05;

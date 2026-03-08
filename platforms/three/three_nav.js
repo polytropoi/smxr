@@ -101,8 +101,9 @@
         // return playerNavAgent;
     }
 
-    export function CreateNPCAgent (model, name) { //hrm, not yet...
+    export function CreateNPCAgent (model, index, locationData) { //hrm, not yet...
         
+        const name = locationData.name;
 
         const options = {
             object: model,
@@ -116,7 +117,7 @@
 
         const npc = new NavAgent( options );
         agents.push(npc);
-        ThreeDeeText(name, 1, model, null, null, true);
+        ThreeDeeText(name, 1, model, null, null, false);
         console.log("creating npc navagent ");
 
         // return playerNavAgent;
