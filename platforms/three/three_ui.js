@@ -36,7 +36,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             parent.worldToLocal(position);
             console.log("ui scale " + scaleFactor);
             textContainer.visible = true;
-            textContainer.position.set(position.x, position.y, position.z + 1);
+            textContainer.position.set(position.x, position.y, position.z - 2);
             textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
             return;
         }

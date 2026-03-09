@@ -15,6 +15,7 @@ import { instancedModels } from './three_instance.js';
 import { CreateLight } from './three_lights.js';
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './three_physics.js';
 import { agentModels, CreateNPCAgent } from './three_nav.js';
+import { modelViewProjection } from 'three/tsl';
 
 export let locations = {};
 
@@ -29,6 +30,8 @@ export let dynamicObjex = []; //""
 
 export let groundObjex = [];
 
+export let animationMixers = [];
+
 export let navmesh, surface;
 
 export let playerPosition;
@@ -38,7 +41,7 @@ async function LoadModel(url) {
     try {
         const gltf = await loader.loadAsync(url);
         // scene.add(gltf.scene);
-        return gltf.scene;
+        return gltf;
     } catch (error) {
         console.error('An error happened during model loading', error);
     }
@@ -90,8 +93,8 @@ export function InitLocations() {
                                     
                                     // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
                                                                                 
-                                    model = await LoadLocationModel(modelsData[m].modelURL, locationData[i]);
-                                    
+                                    const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i]);
+                                    model = modelData.model;
                                     console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
                                     
                                     if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
@@ -165,7 +168,11 @@ export function InitLocations() {
                                             console.log("gotsa location object modelID " + modelsData[m].modelURL);
                                             const locData = locationData[i];
                                             locData.objectData = objexData[o]; //add the object data to the thing
-                                            const model = await LoadLocationModel(modelsData[m].modelURL, locData, true);
+                                            // const model = await LoadLocationModel(modelsData[m].modelURL, locData, true);
+
+                                            const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i]);
+                                            const model = modelData.model;
+                                            const animations = modelData.animations;
                                             let count = 1;
                                             if (locationData[i].eventData && locationData[i].eventData.includes("scatter")) {
                                                 if (locationData[i].eventData.includes("~")) {
@@ -191,11 +198,29 @@ export function InitLocations() {
                                                 npcKinematicBodies.push(body);
 
                                                 CreateNPCAgent(clonedModel, z.toString(), locationData[i]);
+                                                console.log("model animations: " + animations);
+                                                if (animations && animations.length) {
+
+                                                    const mixer = new THREE.AnimationMixer(clonedModel);
+                                                    // const clip 
+                                                    // console.log()
+                                                    // Play all animations
+                                                    animations.forEach((clip) => {
+                                                        console.log("tryna play clip " + clip.name);
+                                                        mixer.clipAction(clip).play();
+                                                    });
+                                                    animationMixers.push(mixer);
+
+                                                        // You'll need to update the mixer in your animation loop
+                                                        // ... (see the Animation Loop section below)
+                                                    }
 
                                                 
                                                 }
                                             
                                             }
+                                      
+                                            // }
                                         }
                                     }
                                 }
@@ -226,6 +251,7 @@ async function ModifyLocationModel(id) {
 async function LoadLocationModel (url, locationData, isActive) {
 
     let model;
+    let animations;
     if (!url) { //i.e. it's a primitive, not gltf
         console.log("no model url " + locationData.modelID);
         if (locationData.modelID.includes("sphere")) {
@@ -254,7 +280,10 @@ async function LoadLocationModel (url, locationData, isActive) {
         }
     } else { 
         console.log("tryna fetch model " + url)
-        model = await LoadModel(url); 
+        const gltf = await LoadModel(url);
+        model = gltf.scene;
+        animations = gltf.animations;
+
     }
 
     if (model) {
@@ -359,23 +388,25 @@ async function LoadLocationModel (url, locationData, isActive) {
                 }
                     
                 
-            } else if (child.isBone && !child.parent.isBone) {
+            } else if (child.isBone && !child.parent.isBone) { //add raycast/collision meshes to root bone(s)
                 // const geometry = new THREE.CapsuleGeometry(1, 1, 8, 8); // Base size
                 const geometry = new THREE.CylinderGeometry(1, 1, 4, 8, 8); // Base size
-                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: .5 });
+                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0 });
                 const mesh = new THREE.Mesh(geometry, material);
                 mesh.material.side = THREE.DoubleSide;
 
                     // Position and orient the mesh to span the bone
                 mesh.position.set(0, 0, 0); // Usually at the parent bone
                 
+                // if (settings && settings.)
+               
                 // Scale mesh based on bone's position vector length
                 const boneLength = child.position.length();
                 if (boneLength > 1) {
                     mesh.scale.set(1, boneLength, 1);
                     mesh.position.y = boneLength / 2; // Adjust based on pivot
                 }
-
+                mesh.layers.set(1);
                 // Rotate if necessary to match bone direction
                 // mesh.rotation.x = Math.PI / 2;
                 mesh.userData = {};
@@ -383,10 +414,12 @@ async function LoadLocationModel (url, locationData, isActive) {
                 mesh.userData.locationData = locationData;
                 activeObjex.push(mesh);
                 child.add(mesh);
-            }
+                mesh.visible = false;
+            } 
+
         });
         // scene.add(model);
-        return model;
+        return {"model" : model, "animations" : animations};
     } else {
         return null;
     }
@@ -406,7 +439,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
         }
         if (model) {
-            scene.add(model);
+            scene.add(model.model);
             // model.material.color = "orange";
             console.log("adding poi! " + model);
         }
@@ -420,7 +453,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
         }
         if (model) {
-            scene.add(model);
+            scene.add(model.model);
             // model.material.color = "orange";
             console.log("adding placeholder! " + model);
         }
@@ -436,8 +469,8 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         if (model) {
             
             
-            scene.add(model);
-            const triggerBody = await getTriggerBody(model, locationData);
+            scene.add(model.model);
+            const triggerBody = await getTriggerBody(model.model, locationData);
             staticBodies.push(triggerBody);
             // model.material.color = "orange";
             console.log("adding trigger! " + model);
@@ -452,7 +485,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
         }
         if (model) {
-            scene.add(model);
+            scene.add(model.model);
             // model.material.color = "orange";
             console.log("adding collider! " + model);
         }
@@ -467,7 +500,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             model = await LoadLocationModel(null, locationData, true);
         }
         if (model) {
-            scene.add(model);
+            scene.add(model.model);
             // model.material.color = "orange";
             console.log("adding a gate! " + model);
         }
@@ -483,7 +516,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         // if (model) {
             CreateLight(locationData);
             if (model)
-            scene.add(model);
+            scene.add(model.model);
             // model.material.color = "orange";
             console.log("adding a light! " + model);
         // }

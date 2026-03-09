@@ -38,7 +38,7 @@
 
 	import { InitSurface, instancedModels, InstanceOnSurface } from './three_instance.js';
 
-	import { InitLocations, navmesh, surface, groundObjex, locations, staticObjex, activeObjex, dynamicObjex } from './three_locations.js';
+	import { InitLocations, navmesh, surface, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex } from './three_locations.js';
 
 	import Stats from './ui/stats.js';
 	
@@ -101,6 +101,7 @@
 
 		scene = new THREE.Scene();
 		renderer = new THREE.WebGPURenderer({});
+		await renderer.init(); 
 		renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setPixelRatio( 2.0 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
@@ -473,6 +474,10 @@
 				animatedSprites.forEach(a =>
 					a.update(time));
 			}
+			if (animationMixers.length) {
+				animationMixers.forEach(m => 
+					m.update(delta));
+			}
 			if (agents.length) {
 				agents.forEach(a =>
 					a.update(delta));
@@ -488,8 +493,10 @@
 				dynamicBodies.forEach(b => 
 					b.update());
 			
-				kinematicBodies.forEach(c => 
+				if (kinematicBodies.length) {
+					kinematicBodies.forEach(c => 
 					c.update());
+				}
 
 				// npcKinematicBodies.forEach(k => 
 				// 	k.update());

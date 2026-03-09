@@ -668,7 +668,7 @@ function RaycastHit(type, hit) {
         locationData.markerType != "navmesh" &&
         name != "navmesh" &&
         ((locationData.locationTags && locationData.locationTags.includes("callout") || 
-
+        locationData.markerType == "character" || 
         locationData.markerType == "poi" || 
         locationData.markerType == "gate" ||
         locationData.markerType == "placeholder"))      
@@ -681,9 +681,11 @@ function RaycastHit(type, hit) {
         ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, hit.distance, null, locationData.yscale);
      
     }
-    if (name != "navmesh") {
-        console.log(type + " hit object " + name + " pos " + JSON.stringify(lastRaycastHitPosition));
-    }
+    // if (name != "navmesh") {
+    //     // if (lastRaycastHitObject != hit.object) {
+    //        console.log(type + " hit object " + name + " pos " + JSON.stringify(locationData));
+    //     // }
+    // }
 
     if (pointerGizmo && (type == "mouse" || type == "center")) {
         const localNormal = hit.face.normal;

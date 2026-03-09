@@ -117,7 +117,7 @@
 
         const npc = new NavAgent( options );
         agents.push(npc);
-        ThreeDeeText(name, 1, model, null, null, false);
+        ThreeDeeText(name, 1, model, null, null, false, null);
         console.log("creating npc navagent ");
 
         // return playerNavAgent;
