@@ -15,6 +15,10 @@ export let lookAtCameraObjects = [];
 
 export let textContainers = [];
 
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
 export async function ThreeDeeText (textString, size, parent, position, distance, persist, parentScale) { //
 
     let scaleFactor = .1;
@@ -26,17 +30,19 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             }
         }
     }
+    console.log("ui scale factor " + scaleFactor);
+    scaleFactor = clamp(scaleFactor, .5, 3);
 
     let textContainer;
     if (parent) {  
        textContainer = parent.getObjectByName('textContainer');
         if (textContainer) {
-            console.log("gotsa textContainer!");
+            // console.log("gotsa textContainer!");
             parent.updateMatrixWorld(true);
             parent.worldToLocal(position);
-            console.log("ui scale " + scaleFactor);
+            // console.log("ui scale " + scaleFactor);
             textContainer.visible = true;
-            textContainer.position.set(position.x, position.y, position.z - 2);
+            textContainer.position.set(position.x, position.y + scaleFactor, position.z - scaleFactor * 2);
             textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
             return;
         }

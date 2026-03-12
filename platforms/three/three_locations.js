@@ -190,14 +190,18 @@ export function InitLocations() {
                                                 // Assuming 'model' is the loaded scene or group
                                                 const clonedModel = SkeletonUtils.clone(model); // gots to use this util, normal clone/copy doesn't work
 
-                                                scene.add(clonedModel);
+                                                const agentID = locationData[i].timestamp + "_" + z.toString();
+
+                                                clonedModel.name = agentID;
+                                                
+
                                                 activeObjex.push(clonedModel);
                                                 
-                                                const body = await getModelKinematicBody(clonedModel); //pass the index too
-                                                // kinematicBodies.push(body);
-                                                npcKinematicBodies.push(body);
+                                                // const body = await getModelKinematicBody(clonedModel); //pass the index too
+                                                // // kinematicBodies.push(body);
+                                                // npcKinematicBodies.push(body);
 
-                                                CreateNPCAgent(clonedModel, z.toString(), locationData[i]);
+                                                await CreateNPCAgent(clonedModel, z.toString(), locationData[i]);
                                                 console.log("model animations: " + animations);
                                                 if (animations && animations.length) {
 
@@ -214,7 +218,7 @@ export function InitLocations() {
                                                         // You'll need to update the mixer in your animation loop
                                                         // ... (see the Animation Loop section below)
                                                     }
-
+                                                    scene.add(clonedModel);
                                                 
                                                 }
                                             
@@ -391,7 +395,7 @@ async function LoadLocationModel (url, locationData, isActive) {
             } else if (child.isBone && !child.parent.isBone) { //add raycast/collision meshes to root bone(s)
                 // const geometry = new THREE.CapsuleGeometry(1, 1, 8, 8); // Base size
                 const geometry = new THREE.CylinderGeometry(1, 1, 4, 8, 8); // Base size
-                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0 });
+                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: .5 });
                 const mesh = new THREE.Mesh(geometry, material);
                 mesh.material.side = THREE.DoubleSide;
 
@@ -410,11 +414,11 @@ async function LoadLocationModel (url, locationData, isActive) {
                 // Rotate if necessary to match bone direction
                 // mesh.rotation.x = Math.PI / 2;
                 mesh.userData = {};
-                mesh.userData.name = "agent_" + locationData.timestamp;
+                mesh.userData.name = "bone_" + locationData.timestamp;
                 mesh.userData.locationData = locationData;
                 activeObjex.push(mesh);
                 child.add(mesh);
-                mesh.visible = false;
+                // mesh.visible = false;
             } 
 
         });

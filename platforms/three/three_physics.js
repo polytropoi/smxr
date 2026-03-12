@@ -33,7 +33,7 @@ export let handColliderGroup;
 export let colliders = {}
 
 
-export const agentCount = 4;
+export const agentCount = 0;
 const dynamicObjectCount = 10;
 let playerWorldPosition = new THREE.Vector3();
         

@@ -17,6 +17,7 @@
     let pathfinding, helper;
 
     export let agents = [];
+    export let navAgentInstances = {};
     export let agentParents = [];
     // let agentCount = 20;
     export let agentsAreReady = false;
@@ -69,8 +70,10 @@
         console.log("creating navagent " + agentIndex);
     }
 
-    export function CreatePlayerAgent (object, pos) { //hrm, not yet...
+    export async function CreatePlayerAgent (object, pos) { //hrm, not yet...
     
+
+        await new Promise(r => setTimeout(r, 0));
         const agentParent = new THREE.Object3D(); //empty
         agentParent.name = "player_parent";
         agentParent.position.set(object.position.x, object.position.y + 1, object.position.z);
@@ -101,8 +104,10 @@
         // return playerNavAgent;
     }
 
-    export function CreateNPCAgent (model, index, locationData) { //hrm, not yet...
+    export async function CreateNPCAgent (model, index, locationData) { //hrm, not yet...
         
+
+        await new Promise(r => setTimeout(r, 0));
         const name = locationData.name;
 
         const options = {
@@ -120,6 +125,9 @@
         ThreeDeeText(name, 1, model, null, null, false, null);
         console.log("creating npc navagent ");
 
+        const agentID = locationData.timestamp + "_" + index;
+        navAgentInstances[agentID] = npc;
+        // return npc;
         // return playerNavAgent;
     }
    
@@ -258,7 +266,7 @@
             
             this.worldPosition = new THREE.Vector3();
 
-            scene.add(options.object);
+            // scene.add(options.object);
             
             this.object = options.object;
             this.pathLines = new THREE.Object3D();
@@ -267,7 +275,7 @@
 
             this.readyToNav = options.readyToNav;
             
-            scene.add(this.pathLines);
+            // scene.add(this.pathLines);
             
             this.npc = options.npc;
             
@@ -307,6 +315,7 @@
                     self.animations[animation.name.toLowerCase()] = animation;
                 });
             }
+
             this.object.userData.NavAgentInstance = this; // add this kinda class object instance to the userdata, to enable fetching instance from e.g. raycast
         }
         raycastedPosition() {
@@ -462,44 +471,57 @@
         }
 
         agentRaycastHit () {
-            
-            const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
+            console.log("agentHit pathfinder " + this.pathfinder);
+            if (this.pathfinder) {
+                const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
 
-            if (closestNode) {
-                console.log("agent hit!");
-                  this.agentPause();
-                // if (this.readyToNav) {
-                        this.object.traverse((child) => {
-                        if (child.isMesh) {
-                           const randomColorHex = Math.random() * 0xffffff; 
-                             const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .75, color: randomColorHex });
-                                // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
-                                material.roughness = 0.1;
-                                material.metalness = 0.3;
-                                material.envMap = scene.environment;
-                                material.envMapIntensity = 2;
-                            child.material = material;
-                        }
-                    });
-                // }
+                if (closestNode) {
+                    console.log("agent hit!");
+                    this.agentPause();
+                    // if (this.readyToNav) {
+                        //     this.object.traverse((child) => {
+                        //     if (child.isMesh) {
+                        //     const randomColorHex = Math.random() * 0xffffff; 
+                        //         const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .75, color: randomColorHex });
+                        //             // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
+                        //             material.roughness = 0.1;
+                        //             material.metalness = 0.3;
+                        //             material.envMap = scene.environment;
+                        //             material.envMapIntensity = 2;
+                        //         child.material = material;
+                        //     }
+                        // });
+                    // }
+                } else {
+                    console.log("don't interrupt now, cain't find a spot to stop");
+                }
             } else {
-                console.log("don't interrupt now, cain't find a spot to stop");
+                console.log("reset pathfinder");
+                if (pathfinding){
+                    this.pathfinder = pathfinding;
+                    this.ZONE = ZONE;
+                    this.navMeshGroup = this.pathfinder.getGroup(this.ZONE, this.object.position);	
+                } else {
+                    console.log("no patfhiding");
+                }
             }
         }
         agentClick () {
-            const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
+            if (this.pathfinder) {
+                const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
 
-            if (closestNode) {
-                this.readyToNav = !this.readyToNav;    
-                // if (this.readyToNav) {
-                //         this.object.traverse((child) => {
-                //         if (child.isMesh) {
-                //            child.material.color
-                //         }
-                //         });
-                // }
-            } else {
-                console.log("don't interrupt now, cain't find a spot to stop");
+                if (closestNode) {
+                    this.readyToNav = !this.readyToNav;    
+                    // if (this.readyToNav) {
+                    //         this.object.traverse((child) => {
+                    //         if (child.isMesh) {
+                    //            child.material.color
+                    //         }
+                    //         });
+                    // }
+                } else {
+                    console.log("don't interrupt now, cain't find a spot to stop");
+                }
             }
         }
 

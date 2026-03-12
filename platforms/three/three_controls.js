@@ -5,7 +5,7 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js';
 
-import { closestNavmeshPoint } from './three_nav.js';
+import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
 import { activeObjex, groundObjex, navmesh } from './three_locations.js';
 
@@ -676,14 +676,14 @@ function RaycastHit(type, hit) {
 
         showCallout = true;
    
-        console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp + " distance " + hit.distance);
+        // console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp + " distance " + hit.distance);
                  
         ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, hit.distance, null, locationData.yscale);
      
     }
     // if (name != "navmesh") {
     //     // if (lastRaycastHitObject != hit.object) {
-    //        console.log(type + " hit object " + name + " pos " + JSON.stringify(locationData));
+    //        console.log(type + " hit object " + name );
     //     // }
     // }
 
@@ -717,9 +717,9 @@ function RaycastHit(type, hit) {
             selectedObjects.push(hit.object);
             if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode) {
                 // console.log("intersected material found!");
-                raycastHitAgent.material.materialColor = goColor;
+                // raycastHitAgent.material.materialColor = goColor;
             } else if (raycastHitAgent && raycastHitAgent.material) {
-                raycastHitAgent.material.color = goColor;
+                // raycastHitAgent.material.color = goColor;
 
             }
             const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //can do this easier, but good to know
@@ -728,6 +728,41 @@ function RaycastHit(type, hit) {
             }
         } else {
             // console.log("rehit agent " + raycastHits[0].object.name));
+        }
+    } else if (locationData && locationData.markerType == "character" ) {
+        if (raycastHitAgent != hit.object) {
+        
+        raycastHitAgent = hit.object;
+            selectedObjects.push(hit.object);
+            // if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+            //     // console.log("intersected material found!");
+            //     raycastHitAgent.material.materialColor = goColor;
+            // } else if (raycastHitAgent && raycastHitAgent.material) {
+            //     raycastHitAgent.material.color = goColor;
+
+            // }
+            // console.log("character object name : " + raycastHitAgent.name + " " + JSON.stringify(raycastHitAgent.userData));
+            // hit.object.parent.parent.traverse(function (child) {
+            //     console.log("child type " + child.type); 
+            // });
+
+            console.log("hit character object name : " + raycastHitAgent.parent.parent.parent.name + " locID " + locationData.timestamp);
+            // const rootObject = getRoot(raycastHitAgent)
+            // logHierarchy(raycastHitAgent);
+            // raycastHitAgent.traverse (
+
+            // )
+            // const agentID = raycastHitAgent.parent.parent.name;
+            
+            const navAgentInstance = raycastHitAgent.parent.parent.userData.NavAgentInstance; //hrm
+            // const navAgentInstance = raycastHitAgent.parent.getObjectByName("NavAgent");
+            // const navAgentInstance = navAgentInstances[agentID];
+            if (navAgentInstance) {
+                console.log("gotsa navagent");
+                navAgentInstance.agentRaycastHit();
+            } else {
+                console.log("no navagent found on character!");
+            }
         }
     } else {
         // if (lastRaycastHitObject && lastRaycastHitObject != hit.object) {
@@ -755,6 +790,24 @@ function RaycastHit(type, hit) {
 
 }
 
+function getRoot(object) {
+  let current = object;
+  while (current.parent !== null) {
+    current = current.parent;
+  }
+  return current;
+}
+
+function logHierarchy(object, depth = 0) {
+    let indent = '  '.repeat(depth);
+    console.log(`${indent}- ${object.name || object.type}`);
+
+    // Recursively call this function for all children
+    for (const child of object.children) {
+        logHierarchy(child, depth + 1);
+    }
+}
+
 export function mouseRaycast(e) {
 
     if (!activeObjex.length) {
@@ -779,13 +832,14 @@ export function mouseRaycast(e) {
         } else {
             selectedObjects.length = 0;
             if (raycastHitAgent) {
+                
                 if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-                    raycastHitAgent.material.materialColor = stopColor;
-                    raycastHitAgent.material.needsUpdate = true;
+                    // raycastHitAgent.material.materialColor = stopColor;
+                    // raycastHitAgent.material.needsUpdate = true;
 
                 } else if (raycastHitAgent.material) {
                     // console.log("tryna reset agent color after no hit");
-                    raycastHitAgent.material.color = stopColor;
+                    // raycastHitAgent.material.color = stopColor;
                 }
             }
         }
@@ -802,11 +856,11 @@ export function mouseRaycast(e) {
             // 	{
             if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
                 // console.log("tryna reset agent color after no hit");
-                raycastHitAgent.material.materialColor = stopColor;
-                raycastHitAgent.material.needsUpdate = true;
+                // raycastHitAgent.material.materialColor = stopColor;
+                // raycastHitAgent.material.needsUpdate = true;
             } else if (raycastHitAgent.material) {
                 // console.log("tryna reset agent color after no hit");
-                raycastHitAgent.material.color = stopColor;
+                // raycastHitAgent.material.color = stopColor;
             }
         }
         raycastHitAgent = null;
@@ -837,11 +891,11 @@ export function playerRaycast() {
                 // 	{
                 if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
                     // console.log("tryna reset agent color after no hit");
-                    raycastHitAgent.material.materialColor = stopColor;
-                    raycastHitAgent.material.needsUpdate = true;
+                    // raycastHitAgent.material.materialColor = stopColor;
+                    // raycastHitAgent.material.needsUpdate = true;
                 } else if (raycastHitAgent.material) {
                     // console.log("tryna reset agent color after no hit");
-                    raycastHitAgent.material.color = stopColor;
+                    // raycastHitAgent.material.color = stopColor;
                 }
             }
             raycastHitAgent = null;
@@ -873,11 +927,11 @@ export function centerRaycast() {
                 // 	{
                 if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
                     // console.log("tryna reset agent color after no hit");
-                    raycastHitAgent.material.materialColor = stopColor;
-                    raycastHitAgent.material.needsUpdate = true;
+                    // raycastHitAgent.material.materialColor = stopColor;
+                    // raycastHitAgent.material.needsUpdate = true;
                 } else if (raycastHitAgent.material) {
                     // console.log("tryna reset agent color after no hit");
-                    raycastHitAgent.material.color = stopColor;
+                    // raycastHitAgent.material.color = stopColor;
                 }
             }
             raycastHitAgent = null;
