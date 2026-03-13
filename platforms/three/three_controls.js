@@ -29,7 +29,7 @@ export let isReady = false;
 export let followDistance = 16;
 export let cameraAtZero = true;
 
-let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitObject, lastHitObjectName;
+let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHitObject, lastHitObjectName;
 
 export let dir = new THREE.Vector3;
 export let playerDirection = new THREE.Vector3();
@@ -657,8 +657,9 @@ function RaycastHit(type, hit) {
 
 
     lastRaycastHitObject = hit.object;
-    lastHitObjectName = lastRaycastHitObject.userData ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
+    lastHitObjectName = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     lastRaycastHitPosition = hit.point;
+    lastRaycastHitDistance = hit.distance;
     const locationData = lastRaycastHitObject.userData.locationData;
     const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     let showCallout = false;
@@ -678,7 +679,7 @@ function RaycastHit(type, hit) {
    
         // console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp + " distance " + hit.distance);
                  
-        ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, hit.distance, null, locationData.yscale);
+        ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
      
     }
     // if (name != "navmesh") {
@@ -945,8 +946,27 @@ export function onMouseDown(event) {
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
     }
+    if (lastRaycastHitObject) {
      
-    console.log("mousedown " + lastHitObjectName + " " + JSON.stringify(lastRaycastHitPosition));
+        if (lastRaycastHitObject.userData) {
+            console.log("mousedown on " + lastHitObjectName + " userData.name " + lastRaycastHitObject.userData.name);
+            if (lastRaycastHitObject.userData.locationData) {
+
+                if (lastRaycastHitObject.userData.locationData.objectData) {
+                    console.log("objectData : "+ JSON.stringify(lastRaycastHitObject.userData.locationData.objectData));
+                    if (lastRaycastHitObject.userData.locationData.objectData.callouttext.length) {
+                        console.log("callout text " + lastRaycastHitObject.userData.locationData.objectData.callouttext);
+                        const calloutsplit = lastRaycastHitObject.userData.locationData.objectData.callouttext.split("~");
+                        const randomIndex = Math.floor(Math.random() * calloutsplit.length);
+                        const textstring = calloutsplit[randomIndex];
+                        console.log("textstring is " + textstring);
+                        ThreeDeeText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, lastRaycastHitObject.userData.locationData.yscale);
+                    }
+                   
+                }
+            }
+        }
+    }
 
         // let lastHitObjectName;
         // if (lastRaycastHitObject && lastRaycastHitPosition) {

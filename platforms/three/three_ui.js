@@ -30,21 +30,45 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             }
         }
     }
-    console.log("ui scale factor " + scaleFactor);
-    scaleFactor = clamp(scaleFactor, .5, 3);
+    // console.log("ui scale factor " + scaleFactor);
+    scaleFactor = clamp(scaleFactor, .25, 4);
+    const width = 6;
 
+    console.log("tryna show textstring " + textString);
     let textContainer;
+    let textmesh;
     if (parent) {  
        textContainer = parent.getObjectByName('textContainer');
         if (textContainer) {
-            // console.log("gotsa textContainer!");
+            console.log("gotsa textContainer for text string " + textString);
             parent.updateMatrixWorld(true);
             parent.worldToLocal(position);
             // console.log("ui scale " + scaleFactor);
+            textmesh = textContainer.getObjectByName('textmesh');
+            if (textmesh) {
+                textmesh.geometry.dispose();
+                const text = await Text.create({
+                    // width: 1,
+                    text: textString,
+                    font: '../../fonts/web/Acme.woff',
+                    depth: 0.02,
+                    // align: 'center',
+                    size: size,
+                    // size: size,
+                    removeOverlaps: true,
+                    layout: {
+                        width: width,
+                        align: 'left'
+                    }
+                });
+                textmesh.geometry = text.geometry;
+            }
             textContainer.visible = true;
-            textContainer.position.set(position.x, position.y + scaleFactor, position.z - scaleFactor * 2);
+            textContainer.position.set(position.x, position.y + (scaleFactor * 2), position.z - (scaleFactor * 4));
             textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
             return;
+        } else {
+            console.log("gotsa parent but no textContainer");
         }
     } else {
         console.log("init textContainer for " + textString);
@@ -61,7 +85,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     }
     const stringCount = textString.toString().length;
     // const width = stringCount < 6 ? stringCount : 6;
-    const width = 6;
+
     console.log("tryna set ui size " + size + " width " + width + " stringcount " + stringCount);
     const text = await Text.create({
         // width: 1,
@@ -85,7 +109,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
       material.metalness = 0.3;
       material.envMap = scene.environment;
       material.envMapIntensity = 2;
-    const textmesh = new THREE.Mesh(text.geometry, material);
+    textmesh = new THREE.Mesh(text.geometry, material);
     const ranges = text.query({
     byCharRange: [
         { start: 0, end: 20 },   // First 5 characters

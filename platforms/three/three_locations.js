@@ -31,6 +31,7 @@ export let dynamicObjex = []; //""
 export let groundObjex = [];
 
 export let animationMixers = [];
+export let animationData = {};
 
 export let navmesh, surface;
 
@@ -49,21 +50,21 @@ async function LoadModel(url) {
 
 
 export function InitLocations() {
-    let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, basic interaction
+    let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction
     if (modelsDataEl) {
         const theModelsData = modelsDataEl.getAttribute('data-models');
         modelsData = JSON.parse(atob(theModelsData));
         console.log("modelsData " + JSON.stringify(modelsData));
     }
 
-    let objexDataEl = document.getElementById('objexData'); //"complex" entities, with possible actions/behavior 
+    let objexDataEl = document.getElementById('objexData'); //"complex" entities, with possible actions/behavior e.g. characters
     if (objexDataEl) {
         const theObjexData = objexDataEl.getAttribute('data-objex');
         objexData = JSON.parse(atob(theObjexData));
         console.log("objexData " + JSON.stringify(objexData));
     }
 
-    let locationDataEl = document.getElementById('locationData');
+    let locationDataEl = document.getElementById('locationData'); //locations have ids, types, can have models and objects assigned
     if (locationDataEl) {
         const theLocationData = locationDataEl.getAttribute('data-locations');
 
@@ -182,43 +183,46 @@ export function InitLocations() {
                                             console.log("count is " + count);
 
                                             if (locationData[i].markerType == "character") {
+                                                animationData[locationData[i].timestamp] = animations;
                                                 for (let z = 0; z < count; z++) {
-                                                console.log("tryna assign model to navagent ! " + z);
+                                                console.log("tryna clone a skinned mesh " + z);
                                                 // scene.add(model);
                                                 // AssignModelToAgent(model);
                                                 // agentModels.push(model);
-                                                // Assuming 'model' is the loaded scene or group
-                                                const clonedModel = SkeletonUtils.clone(model); // gots to use this util, normal clone/copy doesn't work
+ 
+                                                const clonedModel = SkeletonUtils.clone(model); // normal clone/copy doesn't work
 
                                                 const agentID = locationData[i].timestamp + "_" + z.toString();
 
                                                 clonedModel.name = agentID;
                                                 
-
+                                                clonedModel.userData.name = agentID;
                                                 activeObjex.push(clonedModel);
                                                 
                                                 // const body = await getModelKinematicBody(clonedModel); //pass the index too
                                                 // // kinematicBodies.push(body);
                                                 // npcKinematicBodies.push(body);
 
-                                                await CreateNPCAgent(clonedModel, z.toString(), locationData[i]);
-                                                console.log("model animations: " + animations);
-                                                if (animations && animations.length) {
+                                                await CreateNPCAgent(clonedModel, animations, z.toString(), locationData[i]);
+                                                // console.log("model animations: " + animations);
+                                               
+                                                // if (animations && animations.length) {
+                                                  
 
-                                                    const mixer = new THREE.AnimationMixer(clonedModel);
-                                                    // const clip 
-                                                    // console.log()
-                                                    // Play all animations
-                                                    animations.forEach((clip) => {
-                                                        console.log("tryna play clip " + clip.name);
-                                                        mixer.clipAction(clip).play();
-                                                    });
-                                                    animationMixers.push(mixer);
+                                                //     const mixer = new THREE.AnimationMixer(clonedModel);
+                                                //     clonedModel.userData.animationMixer = mixer;
 
-                                                        // You'll need to update the mixer in your animation loop
-                                                        // ... (see the Animation Loop section below)
-                                                    }
-                                                    scene.add(clonedModel);
+                                                //     //     // const clip 
+                                                //     //     // console.log()
+                                                //     //     // Play all animations
+                                                //     animations.forEach((clip) => {
+                                                //         console.log("tryna play clip " + clip.name);
+                                                //         mixer.clipAction(clip).play();
+                                                //     });
+                                                //     animationMixers.push(mixer);
+                                                // }
+
+                                                scene.add(clonedModel);
                                                 
                                                 }
                                             

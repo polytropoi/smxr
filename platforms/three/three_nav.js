@@ -104,7 +104,7 @@
         // return playerNavAgent;
     }
 
-    export async function CreateNPCAgent (model, index, locationData) { //hrm, not yet...
+    export async function CreateNPCAgent (model, animations, index, locationData) { //hrm, not yet...
         
 
         await new Promise(r => setTimeout(r, 0));
@@ -117,7 +117,8 @@
             readyToNav: true,
             // app: this,
             name: name,
-            npc: true
+            npc: true,
+            animations: animations
         };
 
         const npc = new NavAgent( options );
@@ -274,6 +275,11 @@
             this.nodeRadius = (options.nodeRadius) ? options.nodeRadius : 0.2;
 
             this.readyToNav = options.readyToNav;
+            this.walkAnims = [];
+            this.idleAnims = [];
+            this.danceAnims = [];
+            this.talkAnims = [];
+            
             
             // scene.add(this.pathLines);
             
@@ -312,10 +318,32 @@
                 //Use this option to set multiple animations directly
                 this.mixer = new THREE.AnimationMixer(options.object);
                 options.animations.forEach( (animation)=>{
+                    console.log("navagent animation  " + animation.name.toLowerCase());
                     self.animations[animation.name.toLowerCase()] = animation;
+                    if (animation.name.toLowerCase().includes("walk")) {
+                        this.walkAnims.push(animation.name.toLowerCase());
+                    } else if (animation.name.toLowerCase().includes("idle")) {
+                        this.idleAnims.push(animation.name.toLowerCase());
+                    }  else if (animation.name.toLowerCase().includes("dance")) {
+                        this.danceAnims.push(animation.name.toLowerCase());
+                    }  else if (animation.name.toLowerCase().includes("talk")) {
+                        this.talkAnims.push(animation.name.toLowerCase());
+                    }
                 });
-            }
+                
+                if (!this.walkAnims.length) {
+                    this.walkAnims.push(options.animations[0].name.toLowerCase());
+                }
 
+                if (this.idleAnims.length) {
+                    const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
+                    console.log(this.name + " tryna get idle animation " + this.idleAnims[randomIndex]);
+                    this.action = this.idleAnims[randomIndex];
+                } else {
+                    this.idleAnims.push(options.animations[0].name.toLowerCase());
+                    this.action = options.animations[0].name.toLowerCase();
+                }
+            }
             this.object.userData.NavAgentInstance = this; // add this kinda class object instance to the userdata, to enable fetching instance from e.g. raycast
         }
         raycastedPosition() {
@@ -408,8 +436,12 @@
             
 
             if (this.calculatedPath && this.calculatedPath.length) {
-                this.action = 'walk';
-                
+
+               
+                const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
+                console.log(this.name + " tryna get walk animation " + this.walkAnims[randomIndex]);
+                this.action = this.walkAnims[randomIndex];
+
                 this.setTargetDirection();
                 if (this.name == "player") {
                     console.log("tryna walk with new path");
@@ -422,7 +454,9 @@
                 if (this.name == "player") {
                     console.log("cain't find path to " + JSON.stringify(pt));
                 }
-                this.action = 'idle';
+                // this.action = 'idle';
+                const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
+                this.action = this.idleAnims[randomIndex];
 
                 //if we get stuck in bad navmesh spot
                 const closestNode = this.pathfinder.getClosestNode(player.position, this.ZONE, this.navMeshGroup, true);
@@ -449,7 +483,9 @@
                
 
                  if (this.calculatedPath && this.calculatedPath.length) {
-                    this.action = 'walk';
+                    // this.action = 'walk';
+                    const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
+                    this.action = this.walkAnims[randomIndex];
                     
                     this.setTargetDirection();
                     console.log("retargeting agent...");
@@ -463,10 +499,13 @@
         agentPause () {
             this.readyToNav = false;  
             const randTime = Math.random() * 3000;
+             const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
+            this.action = this.idleAnims[randomIndex];
             setTimeout(() => {
                 this.readyToNav = true;
                 this.randomPath();
-
+                  const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
+                this.action = this.walkAnims[randomIndex];
             }, randTime);
         }
 
@@ -478,6 +517,7 @@
                 if (closestNode) {
                     console.log("agent hit!");
                     this.agentPause();
+
                     // if (this.readyToNav) {
                         //     this.object.traverse((child) => {
                         //     if (child.isMesh) {
@@ -564,7 +604,7 @@
             //     } 
         }
         randomPath() {
-            console.log("tryna set random path");
+            // console.log("tryna set random path");
             const rand = Math.random();
             if (rand > .25) {
                 this.newPath(randomNavmeshPoint());
@@ -622,22 +662,25 @@
         
         set action(name){ //hrm...
             //Make a copy of the clip if this is a remote player
-            if (this.actionName == name.toLowerCase()) return;
+            // if (this.actionName == name.toLowerCase()) return;
             
-            const clip = this.animations[name.toLowerCase()];
+            const clip = this.animations[name];
             
             delete this.curAction;
             
             if (clip!==undefined){
+                // console.log(this.name + " tryna play animation " + name );
                 const action = this.mixer.clipAction( clip );
                 action.loop = clip.loop;
                 action.time = 0;
                 this.mixer.stopAllAction();
                 this.actionName = name.toLowerCase();
                 this.actionTime = Date.now();
-                action.fadeIn(0.5);	
+                action.fadeIn(0.25);	
                 action.play();
                 this.curAction = action;
+            } else {
+                console.log("no clip named " + name);
             }
         }
         
@@ -698,7 +741,9 @@
                         }else{
                             this.setTargetDirection();
                         }
-                    } this.action = 'idle';
+                    } //this.action = 'idle';
+                    //  const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
+                    // this.action = this.idleAnims[randomIndex];
                 } else{
                     // if (this.npc && !this.dead) this.newPath(randomNavmeshPoint());
                     this.newPath(randomNavmeshPoint());
