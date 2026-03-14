@@ -2,7 +2,7 @@
 
     import {scene} from './three_main.mjs';
 
-    import { navmesh } from './three_locations.js';
+    import { navmesh, LoadLocationObjex } from './three_locations.js';
 
     import { player } from './three_controls.js';
     
@@ -109,7 +109,8 @@
 
         await new Promise(r => setTimeout(r, 0));
         const name = locationData.name;
-
+        const pos = randomNavmeshPoint();
+         model.position.set(pos.x, pos.y, pos.z);
         const options = {
             object: model,
             nodeRadius: 0.1,
@@ -128,6 +129,7 @@
 
         const agentID = locationData.timestamp + "_" + index;
         navAgentInstances[agentID] = npc;
+
         // return npc;
         // return playerNavAgent;
     }
@@ -184,6 +186,7 @@
             console.log("creating kinematic body for agent " + agentIndex);
             // kinematicBodies.push(rbody);
         }
+
       
     }
 
@@ -214,6 +217,8 @@
                 await InitAgents();
                 // await new Promise(r => setTimeout(r, 4000)); //slow the fxk down
                 // AssignModelsToAgents();
+
+                await LoadLocationObjex();
             }
 
             // await initRapier();
@@ -662,7 +667,7 @@
         
         set action(name){ //hrm...
             //Make a copy of the clip if this is a remote player
-            // if (this.actionName == name.toLowerCase()) return;
+            if (this.actionName == name.toLowerCase()) return;
             
             const clip = this.animations[name];
             
@@ -676,7 +681,7 @@
                 this.mixer.stopAllAction();
                 this.actionName = name.toLowerCase();
                 this.actionTime = Date.now();
-                action.fadeIn(0.25);	
+                action.fadeIn(0.5);	
                 action.play();
                 this.curAction = action;
             } else {
