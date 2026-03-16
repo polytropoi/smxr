@@ -8,7 +8,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { scene } from './three_main.mjs';
 
-import { surface } from './three_locations.js';
+// import { surface } from './three_locations.js';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 
@@ -16,6 +16,7 @@ import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 // import { uniform, sin, range } from 'three/tsl';
 
 let sampler;
+export let surface;
 
 
 export let instancedModels = [];
@@ -25,6 +26,17 @@ export async function InitSurface () {
     sampler = new MeshSurfaceSampler(surface);
     sampler.build(); 
 }
+
+export function SetSurface(mesh) { //if assigned to a mesh in locations
+    surface = mesh;
+}
+export function createDefaultSurface() {
+        const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); // 50 x 50
+        const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
+        surface = new THREE.Mesh(planeGeometry, planeMaterial);
+        scene.add(surface);
+}
+    
 
 export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader) {
 

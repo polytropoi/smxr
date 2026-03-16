@@ -667,13 +667,13 @@
         
         set action(name){ //hrm...
             //Make a copy of the clip if this is a remote player
-            if (this.actionName == name.toLowerCase()) return;
+            if (name && this.actionName == name.toString().toLowerCase()) return;
             
             const clip = this.animations[name];
             
             delete this.curAction;
             
-            if (clip!==undefined){
+            if (clip!==undefined && clip != "undefined") {
                 // console.log(this.name + " tryna play animation " + name );
                 const action = this.mixer.clipAction( clip );
                 action.loop = clip.loop;

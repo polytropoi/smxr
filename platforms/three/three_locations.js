@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import {scene, InitSystems} from './three_main.mjs';
+import {scene, InitSystems } from './three_main.mjs';
 
 import {SetPlayerLocation} from './three_controls.js';
 
@@ -10,7 +10,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
-import { instancedModels } from './three_instance.js';
+import { instancedModels, createDefaultSurface, SetSurface } from './three_instance.js';
 
 import { CreateLight } from './three_lights.js';
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './three_physics.js';
@@ -34,7 +34,7 @@ export let groundObjex = [];
 export let animationMixers = [];
 export let animationData = {};
 
-export let navmesh, surface;
+export let navmesh;
 
 export let playerPosition;
 
@@ -49,6 +49,20 @@ async function LoadModel(url) {
     }
 }
 
+export function createDefaultNavmesh() {
+        const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
+    //   planeGeometry.rotation.x = Math.PI / 2 * -1;
+        const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+        let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
+        
+        // navmeshObject.position.set(0,0,0);
+        // navmeshObject.scale.set(1,1,1);
+        navmeshObject.rotation.x = Math.PI / 2;
+        navmeshObject.updateMatrixWorld();
+        navmesh = navmeshObject;
+        
+        scene.add(navmeshObject);
+    }
 
 export function InitLocations() {
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction
@@ -442,7 +456,8 @@ async function LoadLocationModel (url, locationData, isActive) {
                 } else if (locationData.markerType == "surface" ) {
                     console.log("gotsa ssurface");
                     // if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
-                        surface = child;
+                    SetSurface(child);
+                        // surface = child;
                         // child.material = transmat;
                         // InitSurface();
                     // }
