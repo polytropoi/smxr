@@ -482,7 +482,7 @@ async function LoadLocationModel (url, locationData, isActive) {
             } else if (child.isBone && !child.parent.isBone) { //add raycast/collision meshes to root bone(s)
                 // const geometry = new THREE.CapsuleGeometry(1, 1, 8, 8); // Base size
                 const geometry = new THREE.CylinderGeometry(1, 1, 4, 8, 8); // Base size
-                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: .5 });
+                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
                 const mesh = new THREE.Mesh(geometry, material);
                 mesh.material.side = THREE.DoubleSide;
 

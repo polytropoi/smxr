@@ -34,127 +34,170 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     scaleFactor = clamp(scaleFactor, .25, 4);
     const width = 6;
 
-    console.log("tryna show textstring " + textString);
+    // console.log("tryna show textstring " + textString);
     let textContainer;
     let textmesh;
+    let text;
     if (parent) {  
        textContainer = parent.getObjectByName('textContainer');
         if (textContainer) {
-            console.log("gotsa textContainer for text string " + textString);
-            parent.updateMatrixWorld(true);
-            parent.worldToLocal(position);
-            // console.log("ui scale " + scaleFactor);
-            textmesh = textContainer.getObjectByName('textmesh');
-            if (textmesh) {
-                textmesh.geometry.dispose();
-                const text = await Text.create({
-                    // width: 1,
-                    text: textString,
-                    font: '../../fonts/web/Acme.woff',
-                    depth: 0.02,
-                    // align: 'center',
-                    size: size,
-                    // size: size,
-                    removeOverlaps: true,
-                    layout: {
-                        width: width,
-                        align: 'left'
-                    }
-                });
-                textmesh.geometry = text.geometry;
-            }
+
+            // console.log("gotsa textContainer for text string " + textString);
+                // textmesh.geometry.dispose();
+                parent.updateMatrixWorld(true);
+                parent.worldToLocal(position);
+                // // console.log("ui scale " + scaleFactor);
+                // // textmesh = textContainer.getObjectByName('textmesh');
+                // // if (textmesh) {
+                    
+                //     const text = await Text.create({
+                //         // width: 1,
+                //         text: textString,
+                //         font: '../../fonts/web/Acme.woff',
+                //         depth: 0.02,
+                //         // align: 'center',
+                //         size: size,
+                //         // size: size,
+                //         removeOverlaps: true,
+                //         layout: {
+                //             width: width,
+                //             align: 'left'
+                //         }
+                //     });
+                //     textmesh.geometry = text.geometry;
+                // // }
+
+
             textContainer.visible = true;
-            textContainer.position.set(position.x, position.y + (scaleFactor * 2), position.z - (scaleFactor * 4));
+            textContainer.position.set(position.x + scaleFactor, position.y + (scaleFactor * 2), position.z - (scaleFactor * 4));
             textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            // textContainer.position.set(position.x, position.y, position.z);
+            // textmesh.position.set(0, -scaleFactor, -(scaleFactor * 4));
+            // textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
             return;
         } else {
             console.log("gotsa parent but no textContainer");
+                    const splitString = textString.split("_");
+            if (splitString[1]) {
+                textString = splitString[1];
+            }
+            const stringCount = textString.toString().length;
+            // const width = stringCount < 6 ? stringCount : 6;
+
+            console.log("tryna set ui size " + size + " width " + width + " stringcount " + stringCount);
+            text = await Text.create({
+                // width: 1,
+                text: textString,
+                font: '../../fonts/web/Acme.woff',
+                depth: 0.02,
+                // align: 'center',
+                size: size,
+                // size: size,
+                removeOverlaps: true,
+                layout: {
+                    width: width,
+                    align: 'left'
+                }
+            });
+
+            console.log("gotsa text result " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
+            // let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
+            //     material.roughness = 0.1;
+            // material.metalness = 0.3;
+            // material.envMap = scene.environment;
+            // material.envMapIntensity = 2;
+            // textmesh = new THREE.Mesh(text.geometry, material);
+           
+
+            let material = new THREE.MeshStandardMaterial({ color: 'white', emissive: 'white', emissiveIntensity: .5 });
+            material.roughness = 0.1;
+            material.metalness = 0.3;
+            material.envMap = scene.environment;
+            material.envMapIntensity = 2;
+           
+           
+             const ranges = text.query({
+            byCharRange: [
+                { start: 0, end: 20 },   // First 5 characters
+                // { start: 10, end: 20 }, // Characters 10-20
+            ],
+            });
+            const yscale = (Math.abs(text.planeBounds.min.y) * 1.5) + 1
+            textContainer = new THREE.Object3D();
+            textContainer.name = "textContainer";
+            if (!persist) {
+                textContainers.push(textContainer);
+            }
+            // const camPos = camera.position.clone();
+            console.log("textContainer position is " + JSON.stringify(position));
+            parent.updateMatrixWorld(true);
+        
+            // const targetWorldPosition = new THREE.Vector3();
+            textmesh = new THREE.Mesh(text.geometry, material);
+            textmesh.position.set(0, 0, 0);
+            textContainer.add(textmesh);
+            parent.add(textContainer);
+
+            // if (position) {
+            //     parent.worldToLocal(position);
+                
+            //     console.log("position is " + JSON.stringify(position));
+            //     // container.position.set(0,4,0);
+            //     // container.position.copy(position);
+            //     // textmesh.position.set(0,0,0);
+            //     textContainer.position.copy(position);
+            // } else {
+            //     textContainer.position.set(0,0,0);
+                
+            //     textmesh.position.set(0,0,0);
+            // }
+        
+            lookAtCameraObjects.push(textContainer);
         }
     } else {
         console.log("init textContainer for " + textString);
+            
     } 
     // if (!size) {
     //     size = 100;
     // }
-    if (!textString) {
-        textString = "Jello! - My name is Inigo Montoya...";
-    }
-    const splitString = textString.split("_");
-    if (splitString[1]) {
-        textString = splitString[1];
-    }
-    const stringCount = textString.toString().length;
-    // const width = stringCount < 6 ? stringCount : 6;
 
-    console.log("tryna set ui size " + size + " width " + width + " stringcount " + stringCount);
-    const text = await Text.create({
-        // width: 1,
-        text: textString,
-        font: '../../fonts/web/Acme.woff',
-        depth: 0.02,
-        // align: 'center',
-        size: size,
-        // size: size,
-        removeOverlaps: true,
-        layout: {
-            width: width,
-            align: 'left'
-        }
-    });
-
-
-    console.log("gotsa text result " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
-    let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
-          material.roughness = 0.1;
-      material.metalness = 0.3;
-      material.envMap = scene.environment;
-      material.envMapIntensity = 2;
-    textmesh = new THREE.Mesh(text.geometry, material);
-    const ranges = text.query({
-    byCharRange: [
-        { start: 0, end: 20 },   // First 5 characters
-        // { start: 10, end: 20 }, // Characters 10-20
-    ],
-    });
-    const yscale = (Math.abs(text.planeBounds.min.y) * 1.5) + 1
-    const container = new THREE.Object3D();
-    container.name = "textContainer";
-    if (!persist) {
-        textContainers.push(container);
-    }
    
+
+
     if (parent) { // callout or header, no bg?
         
 
-        let material = new THREE.MeshStandardMaterial({ color: 'white', emissive: 'white', emissiveIntensity: .5 });
-        material.roughness = 0.1;
-        material.metalness = 0.3;
-        material.envMap = scene.environment;
-        material.envMapIntensity = 2;
-        const textmesh = new THREE.Mesh(text.geometry, material);
-        container.add(textmesh);
-        parent.add(container);
-
-        // const camPos = camera.position.clone();
-        console.log("textContainer position is " + JSON.stringify(position));
-        parent.updateMatrixWorld(true);
+        // let material = new THREE.MeshStandardMaterial({ color: 'white', emissive: 'white', emissiveIntensity: .5 });
+        // material.roughness = 0.1;
+        // material.metalness = 0.3;
+        // material.envMap = scene.environment;
+        // material.envMapIntensity = 2;
+        // const textmesh = new THREE.Mesh(text.geometry, material);
+        // container.add(textmesh);
+        // parent.add(container);
+        // textmesh.position.set(0, 0, 0);
+        
+        // // const camPos = camera.position.clone();
+        // console.log("textContainer position is " + JSON.stringify(position));
+        // parent.updateMatrixWorld(true);
        
-        // const targetWorldPosition = new THREE.Vector3();
+        // // const targetWorldPosition = new THREE.Vector3();
 
-        if (position) {
-            parent.worldToLocal(position);
+        // if (position) {
+        //     parent.worldToLocal(position);
             
-            console.log("position is " + JSON.stringify(position));
-            // container.position.set(0,4,0);
-            // container.position.copy(position);
-            // textmesh.position.set(0,0,0);
-            container.position.copy(position);
-        } else {
-            container.position.set(0,4,0);
+        //     console.log("position is " + JSON.stringify(position));
+        //     // container.position.set(0,4,0);
+        //     // container.position.copy(position);
+        //     // textmesh.position.set(0,0,0);
+        //     container.position.copy(position);
+        // } else {
+        //     container.position.set(0,0,0);
             
-            textmesh.position.set(0,0,0);
-        }
-
+        //     textmesh.position.set(0,0,0);
+        // }
+        // container.scale.set(0,0,0); //scale up on second hit above
     } else {
 
         let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
@@ -175,7 +218,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     }
     
 
-    lookAtCameraObjects.push(container);
+
     //  await new Promise(r => setTimeout(r, 3000));
     // const updated = await text.update({ text: 'Hwlloo World' });
     // textmesh.geometry.dispose();

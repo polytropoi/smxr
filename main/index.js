@@ -7812,11 +7812,14 @@
                 let appDomain = !isEmpty ? response.data.appdomain : "";
                 let appStatus = !isEmpty ? response.data.appStatus : "";
                 let appUnityDomain = !isEmpty ? response.data.appunitydomain : "";
+                let appHomeScene = (!isEmpty && response.data.appHomeScene) ? response.data.appHomeScene : "";
                 let extraButtons = "";
                 let submitButtonName = !isEmpty ? "Update" : "Create";
                 submitButtonRoute = !isEmpty ? "/updateapp/" + response.data._id : "/createapp/";
                 if (!isEmpty) {
                     extraButtons = "<a href=\x22#\x22 id=\x22deleteButton\x22 class=\x22btn btn-danger btn-sm float-left\x22 onclick=\x22deleteItem('holditasecondtherechief','" + response.data._id + "')\x22>Delete App</a>" +
+                        // "<a class=\x22btn btn-primary btn-sm float-right\x22 href=\x22index.html?appid=" + response.data._id + "&type=pictures&mode=select&parent=app&iid=" + response.data._id + "\x22>Add App Pic</a>" +
+                        "<a class=\x22btn btn-dark btn-sm float-right\x22 href=\x22index.html?appid=" + response.data._id + "&type=users&mode=selectadmin&parent=app&iid=" + response.data._id + "\x22>Add App Administrator</a>";
                         "<a class=\x22btn btn-primary btn-sm float-right\x22 href=\x22index.html?appid=" + response.data._id + "&type=pictures&mode=select&parent=app&iid=" + response.data._id + "\x22>Add App Pic</a>" +
                         "<a class=\x22btn btn-dark btn-sm float-right\x22 href=\x22index.html?appid=" + response.data._id + "&type=users&mode=selectadmin&parent=app&iid=" + response.data._id + "\x22>Add App Administrator</a>";
                 } else {
@@ -7860,6 +7863,12 @@
                                     "<label for=\x22appUnityDomain\x22>Unity Web Domain</label>" +
                                     "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22appUnityDomain\x22 placeholder=\x22Unity Web Domain\x22 value=\x22" + appUnityDomain + "\x22 >" +
                                 "</div>" +
+                                    "<div class=\x22col form-group\x22>" +
+                                    "<label for=\x22appHomeScene\x22>App Home Scene ID</label>" +
+                                    "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22appHomeScene\x22 placeholder=\x22Scene Short ID\x22 value=\x22" + appHomeScene + "\x22 >" +
+                                "</div>" +
+
+
                             //     "<div class=\x22col form-group\x22>" +
                             //     "<label for=\x22siName\x22>Add Admin UserID</label>" +
                             //     "<input type=\x22text\x22 class=\x22form-control\x22 id=\x22appName\x22 placeholder=\x22Enter Admin User ID\x22 value=\x22" + adminUID + "\x22 required>" +

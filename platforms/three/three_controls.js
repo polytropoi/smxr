@@ -26,7 +26,7 @@ import { getPlayerBody } from './three_physics.js';
 
 export let camera, controls, player;
 export let isReady = false;
-export let followDistance = 16;
+export let followDistance = 8;
 export let cameraAtZero = true;
 
 let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHitObject, lastHitObjectName;
@@ -117,7 +117,7 @@ export function SetControls(cameraMode, cameraFOV) {
         player.add(camera);
 
 
-        downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 100);
+        downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 50);
 
         // centercaster = new THREE.Raycaster();
         mousecaster = new THREE.Raycaster();
@@ -679,8 +679,18 @@ function RaycastHit(type, hit) {
    
         // console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp + " distance " + hit.distance);
                  
-        ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+        // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
      
+         if (locationData.objectData && locationData.objectData.callouttext.length) {
+            console.log("callout text " + locationData.objectData.callouttext);
+            const calloutsplit = locationData.objectData.callouttext.split("~");
+            const randomIndex = Math.floor(Math.random() * calloutsplit.length);
+            const textstring = calloutsplit[randomIndex];
+            console.log("textstring is " + textstring);
+            ThreeDeeText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+        } else {
+            ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+        }
     }
     // if (name != "navmesh") {
     //     // if (lastRaycastHitObject != hit.object) {
@@ -733,7 +743,7 @@ function RaycastHit(type, hit) {
     } else if (locationData && locationData.markerType == "character" ) {
         if (raycastHitAgent != hit.object) {
         
-        raycastHitAgent = hit.object;
+            raycastHitAgent = hit.object;
             selectedObjects.push(hit.object);
             // if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode) {
             //     // console.log("intersected material found!");

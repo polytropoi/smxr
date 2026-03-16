@@ -10,7 +10,7 @@ import { scene, togglePostProcessing, water, cameraMode } from './three_main.mjs
 import { staticObjex, activeObjex } from './three_locations.js';
 import { player } from './three_controls.js';
 import { agentModels, agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
-	import { settings } from '../../../connect/settings.js';
+import { settings } from '../../../connect/settings.js';
 // import {scene, world} from './three_main.mjs'
 
 function getGeometry(size) {
@@ -33,8 +33,8 @@ export let handColliderGroup;
 export let colliders = {}
 
 
-export const agentCount = 8;
-const dynamicObjectCount = 10;
+export const agentCount = 0;
+const dynamicObjectCount = 8;
 let playerWorldPosition = new THREE.Vector3();
         
 

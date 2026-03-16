@@ -251,7 +251,7 @@
 
     export function randomNavmeshPoint () {
         if (pathfinding) {
-            const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 50);
+            const randomNode = pathfinding.getRandomNode(ZONE, groupID, new THREE.Vector3(0,0,0), 250);
 
             // console.log("random navmesh position " + JSON.stringify(randomNode));
             // randomNode 
@@ -287,7 +287,7 @@
             
             
             // scene.add(this.pathLines);
-            
+            this.frameCount = 0;
             this.npc = options.npc;
             
             if (this.npc) this.dead = false;
@@ -350,60 +350,63 @@
                 }
             }
             this.object.userData.NavAgentInstance = this; // add this kinda class object instance to the userdata, to enable fetching instance from e.g. raycast
+            this.downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
         }
         raycastedPosition() {
-               let raycaster = new THREE.Raycaster();
+            //    let raycaster = new THREE.Raycaster();
                 this.object.getWorldPosition(this.worldPosition);
                 let testPosition = new THREE.Vector3(this.worldPosition.x, this.worldPosition.y + 10, this.worldPosition.z);
                 
-                let direction = new THREE.Vector3(0, -1, 0);//down                          
-                console.log("tryna raycast from " + JSON.stringify(testPosition) + " dir " + direction);
-                raycaster.set(testPosition, direction);
-
+                // let direction = new THREE.Vector3(0, -1, 0);//down                          
+                // console.log("tryna raycast from " + JSON.stringify(testPosition));
+                // this.downcaster.set(testPosition);
+                this.downcaster.ray.origin.copy(testPosition);
                 // const origin = new THREE.Vector3(0, 0, 0);
                 // const direction = new THREE.Vector3(0, 0, -1);
-                arrowHelper = new THREE.ArrowHelper(direction, testPosition, 10, 0xff0000);
-                scene.add(arrowHelper);
-                let results = raycaster.intersectObject(navmesh, false);
+                // arrowHelper = new THREE.ArrowHelper(direction, testPosition, 10, 0xff0000);
+                // scene.add(arrowHelper);
+                let results = this.downcaster.intersectObject(navmesh, false);
 
+                if(results.length > 0) {
+                    //                 console.log("gotsa navmesh intersect: " + results.length + " " +results[0].object.name + " " +  results[0].point  );
+                    // console.log("tryna snap to " + JSON.stringify(results[0].point)); 
+                    return (results[0].point);
 
-                            if(results.length > 0) {
-                                                console.log("gotsa navmesh intersect: " + results.length + " " +results[0].object.name + " " +  results[0].point  );
-                                console.log("tryna snap to " + JSON.stringify(results[0].point)); 
-                                return (results[0].point);
-                                // this.helper.set
-                                // this.object.position.set(results[0].point);
-                                // // this.znormal = Math.abs(results[0].face.normal.z);
-                                // // if (this.znormal < .1) {
-                                //     // console.log(" gotsa good navmesh intersect face normal: " + this.znormal );
-                                //     testPosition.y = results[0].point.y.toFixed(2); //snap y of waypoint to navmesh y
-                                //     testPosition.x = results[0].point.x.toFixed(2);
-                                //     testPosition.z = results[0].point.z.toFixed(2);
-                                //     let waypointEl = document.createElement("a-box");
-                                //     waypointEl.setAttribute('scale', '.1 .1 .1');
-                                //     waypointEl.setAttribute('position', testPosition);
-                                //     this.el.sceneEl.appendChild(waypointEl);
-                                    
-                                //     this.goodWaypoints.push(waypointEl);
-                                //     goodWaypointCount++;
-            
-                                //     // let position = this.waypoints[i].getAttribute('position');
-                                    
-                                // if (settings & settings.debugMode) {
-                                //     var testLineMaterial = new THREE.LineBasicMaterial({ color: 0xFF0000 });
-                                //     var points = [];
-                                //     points.push(new THREE.Vector3(testPosition.x, testPosition.y + 10, testPosition.z));
-                                //     points.push(new THREE.Vector3(testPosition.x, testPosition.y - 10, testPosition.z));
-                                //     var geometry = new THREE.BufferGeometry().setFromPoints(points);
-                                //     var line = new THREE.Line(geometry, testLineMaterial);
-            
-                                //     this.el.sceneEl.object3D.add(line);
-                                // }
-                                // // }
-                                // data.waypoints[i].
-                            } 
+                    // this.helper.set
+                    // this.object.position.set(results[0].point);
+                    // // this.znormal = Math.abs(results[0].face.normal.z);
+                    // // if (this.znormal < .1) {
+                    //     // console.log(" gotsa good navmesh intersect face normal: " + this.znormal );
+                    //     testPosition.y = results[0].point.y.toFixed(2); //snap y of waypoint to navmesh y
+                    //     testPosition.x = results[0].point.x.toFixed(2);
+                    //     testPosition.z = results[0].point.z.toFixed(2);
+                    //     let waypointEl = document.createElement("a-box");
+                    //     waypointEl.setAttribute('scale', '.1 .1 .1');
+                    //     waypointEl.setAttribute('position', testPosition);
+                    //     this.el.sceneEl.appendChild(waypointEl);
+                        
+                    //     this.goodWaypoints.push(waypointEl);
+                    //     goodWaypointCount++;
+
+                    //     // let position = this.waypoints[i].getAttribute('position');
+                        
+                    // if (settings & settings.debugMode) {
+                    //     var testLineMaterial = new THREE.LineBasicMaterial({ color: 0xFF0000 });
+                    //     var points = [];
+                    //     points.push(new THREE.Vector3(testPosition.x, testPosition.y + 10, testPosition.z));
+                    //     points.push(new THREE.Vector3(testPosition.x, testPosition.y - 10, testPosition.z));
+                    //     var geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    //     var line = new THREE.Line(geometry, testLineMaterial);
+
+                    //     this.el.sceneEl.object3D.add(line);
+                    // }
+                    // // }
+                    // data.waypoints[i].
+                } else {
+                    return null
+                }
         }
-        playerNav(isOn) {
+        playerNav(isOn) { //umm, no
             this.playerNavMode = isOn;
             console.log("playerNavMode " + this.playerNavMode);
             this.readyToNav = true;
@@ -691,8 +694,8 @@
         
         update(dt){
             const speed = this.speed;
-            const player = this.object;
-            
+            const player = this.object; //um, not necessarily...
+            let raypos;
             if (this.mixer) this.mixer.update(dt);
             
             // if (player.material.colorNode) {
@@ -707,7 +710,11 @@
                         console.log("tryna update player on path " + JSON.stringify(player.position));
                     }
                     const targetPosition = this.calculatedPath[0];
-
+                   
+                    // if (raypos) {
+                    //     console.log(console.log)
+                    //     targetPosition.y = raypos.y;
+                    // }
                     const vel = targetPosition.clone().sub(player.position);
                     
                     let pathLegComplete = (vel.lengthSq()<0.01);
@@ -720,15 +727,34 @@
                         if (!this.playerNavMode) {
                             if (this.quaternion) player.quaternion.slerp(this.quaternion, 0.1);
                             player.position.add(vel.multiplyScalar(dt * speed));
+                            // if (this.npc) {
+                            //     // if (dt/2 == 0) {
+                            //     raypos = this.raycastedPosition();
+                            //     console.log(dt);
+                            //     if (raypos) {
+                                    
+                            //         player.position.y = raypos.y; //snap to y on navmesh
+                            //     }
+                            // }
+                             if (this.npc) {
+                                this.frameCount++;
+                                if (this.frameCount % 2 == 0) {
+                                    raypos = this.raycastedPosition();
+                                }
+                            }
                             //Get distance after moving, if greater then we've overshot and this leg is complete
                             const newDistanceSq = player.position.distanceToSquared(targetPosition);
                             pathLegComplete = (newDistanceSq > prevDistanceSq);
-                        } else {
-                            if (this.quaternion) player.parent.quaternion.slerp(this.quaternion, 0.1);
-                            player.parent.position.add(vel.multiplyScalar(dt * speed));
-                            //Get distance after moving, if greater then we've overshot and this leg is complete
-                            const newDistanceSq = player.parent.position.distanceToSquared(targetPosition);
-                            pathLegComplete = (newDistanceSq > prevDistanceSq);
+                        } else { //no
+                            // if (this.quaternion) player.parent.quaternion.slerp(this.quaternion, 0.1);
+                            // player.parent.position.add(vel.multiplyScalar(dt * speed));
+                            //  if (raypos) {
+                                
+                            //     player.parent.position.y = raypos.y;
+                            // }
+                            // //Get distance after moving, if greater then we've overshot and this leg is complete
+                            // const newDistanceSq = player.parent.position.distanceToSquared(targetPosition);
+                            // pathLegComplete = (newDistanceSq > prevDistanceSq);
                         }
                         
                     } 

@@ -234,7 +234,7 @@
 			// const playerBody = await getPlayerBody(player);
 			// kinematicBodies.push(playerBody);
 			const avatarName = userData.avatarName
-			ThreeDeeText(avatarName, 2, player);
+			ThreeDeeText(avatarName, 1, player);
 			// CreatePlayerAgent(player, player.position.clone());
 		}
 		//  await new Promise(r => setTimeout(r, 000)); //fudge
