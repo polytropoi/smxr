@@ -19,6 +19,135 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+// let htmlCanvas;
+const canvas = document.createElement('canvas');
+canvas.width = 512;
+canvas.height = 256;
+const ctx = canvas.getContext('2d');
+ ctx.clearRect(0, 0, canvas.width, canvas.height);
+ // Example for color management
+
+let texture;
+let textContainer;
+
+export async function HTMLText (textString, size, parent, position, distance, persist, parentScale) {
+    // Setup canvas with 2D context
+
+    // let textContainer = scene.getObjectByName('htmlCanvasContainer');
+    // let canvas = document.getElementById("htmlcanvas");
+
+
+     let scaleFactor = .1;
+    if (distance) {
+        if (distance > 1) {
+            scaleFactor = distance * .1;
+            if (parentScale) {
+                scaleFactor = scaleFactor/parentScale;
+            }
+        }
+    }
+    // console.log("ui scale factor " + scaleFactor);
+    scaleFactor = clamp(scaleFactor, 1, 4);
+    if (textContainer) {
+        // console.log("htmlCanvasContainer found");
+        // canvas = document.createElement('canvas');
+        // canvas.width = 512;
+        // canvas.height = 256;
+        // canvas.id = "htmlcanvas";
+        // ctx = canvas.getContext('2d');
+        // ctx.beginPath();
+        // ctx.fillStyle = '#3b3b3b';
+        // ctx.roundRect(0, 0, canvas.width, canvas.height, 60); // 20px radius on all corners
+        // ctx.stroke(); 
+        // // ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // ctx.fillStyle = '#ffffff';
+        // ctx.font = '48px Arial';
+        // ctx.fillText(textString, 50, 130);
+
+        // Create texture, material, and mesh
+        // const texture = new THREE.CanvasTexture(canvas);
+        // texture.colorSpace = THREE.SRGBColorSpace;
+        // textContainer = new THREE.Mesh(
+        //     new THREE.PlaneGeometry(4, 2),
+        //     new THREE.MeshBasicMaterial({ map: texture })
+        // );
+        // textContainer.name = "htmlCanvasContainer";
+        // textContainer.add(textmesh);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //  ctx.beginPath();
+            // ctx.fillStyle = '#3b3b3b';
+            // ctx.roundRect(0, 0, canvas.width, canvas.height, 20); // 20px radius on all corners
+            // ctx.stroke(); 
+            // ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // ctx.fillStyle = 'rgba(0,0,0,0)';
+            // ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '48px Arial';
+            ctx.fillText(textString, 50, 130);
+        parent.attach(textContainer);
+        // textContainer.position.y = 1;
+        textContainer.position.set(0,2,-3);
+        texture.needsUpdate = true;
+        
+        textContainer.scale.set(scaleFactor,scaleFactor,scaleFactor);
+
+            // if (position) {
+            //     parent.worldToLocal(position);
+                
+            //     console.log("position is " + JSON.stringify(position));
+            //     // container.position.set(0,4,0);
+            //     // container.position.copy(position);
+            //     // textmesh.position.set(0,0,0);
+            //     textContainer.position.copy(position);
+            // } else {
+            //     textContainer.position.set(0,0,0);
+                
+            //     textmesh.position.set(0,0,0);
+            // }
+        
+        
+    } else {
+        // 3. Use the texture in a material
+        texture = new THREE.CanvasTexture(canvas);
+        // You can set other properties like format, filters, etc. here if needed
+        texture.colorSpace = THREE.SRGBColorSpace;
+        if (texture) {
+            console.log("tryna init htmlcanvas text")
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+            textContainer = new THREE.Mesh(new THREE.PlaneGeometry(2, 1), material);
+            scene.add(textContainer);
+            parent.attach(textContainer);
+            textContainer.position.set(0,2,-3);
+           
+            // ctx.beginPath();
+            // ctx.fillStyle = '#3b3b3b';
+            // ctx.roundRect(0, 0, canvas.width, canvas.height, 20); // 20px radius on all corners
+            // ctx.stroke(); 
+            //  ctx.fillStyle = 'rgba(0,0,0,0)';
+            // ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '48px Arial';
+            ctx.fillText(textString, 50, 130);
+            textContainer.scale.set(scaleFactor,scaleFactor,scaleFactor);
+             lookAtCameraObjects.push(textContainer);
+        }
+    }
+    // else {
+    //     console.log("has text container");
+    //     if (canvas) {
+    //         console.log("has canvas");
+    //         let ctx = canvas.getContext('2d');
+    //         parent.attach(textContainer);
+    //         textContainer.position.set(0,2,-2);
+            
+    //         textContainer.scale.set(scaleFactor,scaleFactor,scaleFactor);
+    //         ctx.fillText(textString, 50, 130);
+    //     } 
+    // }
+    //     // parent.add(mesh);
+}
+
 export async function ThreeDeeText (textString, size, parent, position, distance, persist, parentScale) { //
 
     let scaleFactor = .1;

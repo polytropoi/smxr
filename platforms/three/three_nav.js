@@ -11,7 +11,7 @@
     import { uniform, sin, mul, add, time } from 'three/tsl';
 
     import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './three_physics.js';
-	import { ThreeDeeText } from './three_ui.js';
+	import { HTMLText, ThreeDeeText } from './three_ui.js';
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;
     let pathfinding, helper;
@@ -124,7 +124,8 @@
 
         const npc = new NavAgent( options );
         agents.push(npc);
-        ThreeDeeText(name, 1, model, null, null, false, null);
+        // ThreeDeeText(name, 1, model, null, null, false, null);
+        HTMLText(name, 1, model, null, null, false, null);
         console.log("creating npc navagent ");
 
         const agentID = locationData.timestamp + "_" + index;

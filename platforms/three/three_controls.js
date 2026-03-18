@@ -19,7 +19,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { InitReticle, textContainers, ThreeDeeText } from './three_ui.js';
+import { InitReticle, textContainers, ThreeDeeText, HTMLText } from './three_ui.js';
 
 import {PlayPauseMedia} from '../../../connect/dialogs.js';
 import { getPlayerBody } from './three_physics.js';
@@ -677,7 +677,9 @@ function RaycastHit(type, hit) {
 
         showCallout = true;
    
-        // console.log(type + " hit object type " + locationData.markerType + " desc  " + locationData.timestamp + " distance " + hit.distance);
+        // console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+
+        console.log(type + " hit object type " + JSON.stringify(locationData));//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                  
         // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
      
@@ -687,9 +689,11 @@ function RaycastHit(type, hit) {
             const randomIndex = Math.floor(Math.random() * calloutsplit.length);
             const textstring = calloutsplit[randomIndex];
             console.log("textstring is " + textstring);
-            ThreeDeeText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+            // ThreeDeeText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+            HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         } else {
-            ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+            // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+            HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         }
     }
     // if (name != "navmesh") {
@@ -970,7 +974,7 @@ export function onMouseDown(event) {
                         const randomIndex = Math.floor(Math.random() * calloutsplit.length);
                         const textstring = calloutsplit[randomIndex];
                         console.log("textstring is " + textstring);
-                        ThreeDeeText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, lastRaycastHitObject.userData.locationData.yscale);
+                        HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, lastRaycastHitObject.userData.locationData.yscale);
                     }
                    
                 }

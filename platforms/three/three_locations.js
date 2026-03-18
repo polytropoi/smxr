@@ -278,6 +278,8 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
         for (let i = 0; i < locationObjex.length; i++) {
             const modelData = await LoadLocationModel(locationObjex[i].modelData.modelURL, locationObjex[i].locationData);
             const model = modelData.model;
+            model.userData.locationData = locationObjex[i].locationData;
+            model.userData.objectData = locationObjex[i].objectData;
             const animations = modelData.animations;
             let count = 1;
             if (locationObjex[i].locationData.eventData && locationObjex[i].locationData.eventData.includes("scatter")) {
@@ -310,7 +312,39 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                 // // kinematicBodies.push(body);
                 // npcKinematicBodies.push(body);
 
-                await CreateNPCAgent(clonedModel, animations, z.toString(), locationObjex[i].locationData);
+                
+
+                // clonedModel.traverse(function (child) { 
+                //     if (child.isBone && !child.parent.isBone) { //add raycast/collision meshes to root bone(s)
+                //         // const geometry = new THREE.CapsuleGeometry(1, 1, 8, 8); // Base size
+                //         console.log("gotsa bone! " + child);
+                //         const geometry = new THREE.CylinderGeometry(2, 2, 4, 8, 8); // Base size
+                //         const material = new THREE.MeshBasicMaterial({ color: 'red' });
+                //         const mesh = new THREE.Mesh(geometry, material);
+                //         mesh.material.side = THREE.DoubleSide;
+
+                //             // Position and orient the mesh to span the bone
+                //         mesh.position.set(0, 0, 0); // Usually at the parent bone
+                        
+                //         // if (settings && settings.)
+                    
+                //         // Scale mesh based on bone's position vector length
+                //         const boneLength = child.position.length();
+                //         if (boneLength > 1) {
+                //             mesh.scale.set(1, boneLength, 1);
+                //             mesh.position.y = boneLength / 2; // Adjust based on pivot
+                //         }
+                //         mesh.layers.set(1);
+                //         // Rotate if necessary to match bone direction
+                //         // mesh.rotation.x = Math.PI / 2;
+                //         mesh.userData = {};
+                //         mesh.userData.name = "bone_" + locationData.timestamp;
+                //         mesh.userData.locationData = locationData;
+                //         activeObjex.push(mesh);
+                //         child.add(mesh);
+                //         // mesh.visible = true;
+                //     } 
+                // });
                 // console.log("model animations: " + animations);
                 
                 // if (animations && animations.length) {
@@ -330,6 +364,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                 // }
 
                 scene.add(clonedModel);
+                await CreateNPCAgent(clonedModel, animations, z.toString(), locationObjex[i].locationData);
                 
                 }
             
@@ -481,31 +516,32 @@ async function LoadLocationModel (url, locationData, isActive) {
                 
             } else if (child.isBone && !child.parent.isBone) { //add raycast/collision meshes to root bone(s)
                 // const geometry = new THREE.CapsuleGeometry(1, 1, 8, 8); // Base size
-                const geometry = new THREE.CylinderGeometry(1, 1, 4, 8, 8); // Base size
-                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-                const mesh = new THREE.Mesh(geometry, material);
-                mesh.material.side = THREE.DoubleSide;
+                console.log("gotsa bone! " + child);
+                // const geometry = new THREE.CylinderGeometry(2, 2, 2, 8, 8); // Base size
+                // const material = new THREE.MeshBasicMaterial({ color: 'red' });
+                // const mesh = new THREE.Mesh(geometry, material);
+                // mesh.material.side = THREE.DoubleSide;
 
-                    // Position and orient the mesh to span the bone
-                mesh.position.set(0, 0, 0); // Usually at the parent bone
+                //     // Position and orient the mesh to span the bone
+                // mesh.position.set(0, 0, 0); // Usually at the parent bone
                 
-                // if (settings && settings.)
+                // // if (settings && settings.)
                
-                // Scale mesh based on bone's position vector length
-                const boneLength = child.position.length();
-                if (boneLength > 1) {
-                    mesh.scale.set(1, boneLength, 1);
-                    mesh.position.y = boneLength / 2; // Adjust based on pivot
-                }
-                mesh.layers.set(1);
-                // Rotate if necessary to match bone direction
-                // mesh.rotation.x = Math.PI / 2;
-                mesh.userData = {};
-                mesh.userData.name = "bone_" + locationData.timestamp;
-                mesh.userData.locationData = locationData;
-                activeObjex.push(mesh);
-                child.add(mesh);
-                // mesh.visible = false;
+                // // Scale mesh based on bone's position vector length
+                // const boneLength = child.position.length();
+                // if (boneLength > 1) {
+                //     mesh.scale.set(1, boneLength, 1);
+                //     mesh.position.y = boneLength / 2; // Adjust based on pivot
+                // }
+                // mesh.layers.set(1);
+                // // Rotate if necessary to match bone direction
+                // // mesh.rotation.x = Math.PI / 2;
+                // mesh.userData = {};
+                // mesh.userData.name = "bone_" + locationData.timestamp;
+                // mesh.userData.locationData = locationData;
+                // activeObjex.push(mesh);
+                // child.add(mesh);
+                // mesh.visible = true;
             } 
 
         });
