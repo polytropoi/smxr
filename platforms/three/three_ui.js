@@ -47,8 +47,10 @@ export async function HTMLText (textString, size, parent, position, distance, pe
         }
     }
     // console.log("ui scale factor " + scaleFactor);
-    scaleFactor = clamp(scaleFactor, 1, 4);
+    scaleFactor = clamp(scaleFactor, 1, 5);
     if (textContainer) {
+        // textContainer.attach(scene);
+        // textContainer.position.set(position.x, position.y, position.z);
         // console.log("htmlCanvasContainer found");
         // canvas = document.createElement('canvas');
         // canvas.width = 512;
@@ -82,14 +84,14 @@ export async function HTMLText (textString, size, parent, position, distance, pe
             // ctx.fillStyle = 'rgba(0,0,0,0)';
             // ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#ffffff';
-            ctx.font = '48px Arial';
+            ctx.font = '32px Arial';
             ctx.fillText(textString, 50, 130);
         parent.attach(textContainer);
         // textContainer.position.y = 1;
-        textContainer.position.set(0,2,-3);
+        textContainer.position.set(0,2 * scaleFactor,-2 * scaleFactor);
         texture.needsUpdate = true;
         
-        textContainer.scale.set(scaleFactor,scaleFactor,scaleFactor);
+        textContainer.scale.set(scaleFactor * 2,scaleFactor * 2,scaleFactor * 2);
 
             // if (position) {
             //     parent.worldToLocal(position);

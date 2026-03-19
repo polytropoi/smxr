@@ -290,7 +290,7 @@
             // scene.add(this.pathLines);
             this.frameCount = 0;
             this.npc = options.npc;
-            
+            this.isPaused = false;
             if (this.npc) this.dead = false;
             
             this.speed = options.speed;
@@ -351,16 +351,17 @@
                 }
             }
             this.object.userData.NavAgentInstance = this; // add this kinda class object instance to the userdata, to enable fetching instance from e.g. raycast
-            this.downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
+            this.downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 50);
         }
         raycastedPosition() {
             //    let raycaster = new THREE.Raycaster();
-                this.object.getWorldPosition(this.worldPosition);
-                let testPosition = new THREE.Vector3(this.worldPosition.x, this.worldPosition.y + 10, this.worldPosition.z);
+            const player = this.object;
+                player.getWorldPosition(this.worldPosition);
+                let testPosition = new THREE.Vector3(this.worldPosition.x, this.worldPosition.y + 20, this.worldPosition.z);
                 
                 // let direction = new THREE.Vector3(0, -1, 0);//down                          
                 // console.log("tryna raycast from " + JSON.stringify(testPosition));
-                // this.downcaster.set(testPosition);
+                // this.downcaster.set(this.worldPosition);
                 this.downcaster.ray.origin.copy(testPosition);
                 // const origin = new THREE.Vector3(0, 0, 0);
                 // const direction = new THREE.Vector3(0, 0, -1);
@@ -407,23 +408,23 @@
                     return null
                 }
         }
-        playerNav(isOn) { //umm, no
-            this.playerNavMode = isOn;
-            console.log("playerNavMode " + this.playerNavMode);
-            this.readyToNav = true;
-        }
+        // playerNav(isOn) { //umm, no
+        //     this.playerNavMode = isOn;
+        //     console.log("playerNavMode " + this.playerNavMode);
+        //     this.readyToNav = true;
+        // }
         newPath(pt) {
 
-            const rand = Math.random(); {
-                if (rand > .5) {
-                    this.agentPause();
-                    return;
-                }
-            }
+            // const rand = Math.random(); {
+            //     if (rand > .5) {
+            //         this.agentPause();
+            //         return;
+            //     }
+            // }
             const player = this.object;
-            if (this.name == "player") {
-                console.log("tryna get player path to " + JSON.stringify(pt));
-            }
+            // if (this.name == "player") {
+            //     console.log("tryna get player path to " + JSON.stringify(pt));
+            // }
             
             if (this.pathfinder===undefined) {
                 console.log("no pathfinder!");
@@ -431,6 +432,9 @@
                 this.setTargetDirection();
                 return;
             }
+            // if (!this.readyToNav) {
+            //     return;
+            // }
             // if (Math.random() > .7) {
             //     return;
             // }
@@ -444,17 +448,17 @@
             // this.calculatedPath = this.pathfinder.findPath(startPos, endPos, this.ZONE, this.navMeshGroup);
             
 
-            if (this.calculatedPath && this.calculatedPath.length) {
+            if (this.calculatedPath && this.calculatedPath.length && this.readyToNav) {
 
-               
+                this.isPaused = false;
                 const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
                 console.log(this.name + " tryna get walk animation " + this.walkAnims[randomIndex]);
                 this.action = this.walkAnims[randomIndex];
 
                 this.setTargetDirection();
-                if (this.name == "player") {
-                    console.log("tryna walk with new path");
-                }
+                // if (this.name == "player") {
+                //     console.log("tryna walk with new path");
+                // }
                 
                 // if (debug.showPath && !this.npc){
                 	// this.showPathLines();
@@ -466,67 +470,102 @@
                 // this.action = 'idle';
                 const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
                 this.action = this.idleAnims[randomIndex];
+                this.isPaused = true;
 
-                //if we get stuck in bad navmesh spot
-                const closestNode = this.pathfinder.getClosestNode(player.position, this.ZONE, this.navMeshGroup, true);
+                this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
 
-                if (closestNode) {
-                    // The closest point on the navmesh surface
-                    this.calculatedPath = null;
-                    const closestPoint = new THREE.Vector3(closestNode.centroid.x, closestNode.centroid.y, closestNode.centroid.z);
-                    console.log(JSON.stringify(player.position) + " vs pllayer postion to " + JSON.stringify(closestPoint));
-                    player.position.set(closestPoint);
-                     this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
-                    // You can now use closestPoint for other operations,
-                    // such as the start or end point for findPath()
-                } else {
-                    // console.log("LOST PLAYER!");
-                    // this.destroy();
-                    // this.resetAgent();
-                    // this.readyToNav = !this.readyToNav;
-                    // this.snapToNavmesh();
+                // //if we get stuck in bad navmesh spot
+                // const closestNode = this.pathfinder.getClosestNode(player.position, this.ZONE, this.navMeshGroup, true);
+
+                // if (closestNode) {
+                //     // The closest point on the navmesh surface
+                //     this.calculatedPath = null;
+                //     const closestPoint = new THREE.Vector3(closestNode.centroid.x, closestNode.centroid.y, closestNode.centroid.z);
+                //     const distance = player.position.distanceTo(closestPoint);
+                //     // console.log(JSON.stringify(player.position) + " vs pllayer postion to " + JSON.stringify(closestPoint));
+                //     console.log("distance to closest point "+ distance);
+                //     player.position.set(closestPoint);
+                //      this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
+                //     // You can now use closestPoint for other operations,
+                //     // such as the start or end point for findPath()
+                // } else {
+                //     // console.log("LOST PLAYER!");
+                //     // this.destroy();
+                //     // this.resetAgent();
+                //     // this.readyToNav = !this.readyToNav;
+                //     // this.snapToNavmesh();
 
 
-                }           
+                // }           
 
                
 
-                 if (this.calculatedPath && this.calculatedPath.length) {
-                    // this.action = 'walk';
-                    const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
-                    this.action = this.walkAnims[randomIndex];
+                //  if (this.calculatedPath && this.calculatedPath.length) {
+                //     // this.action = 'walk';
+                //     // const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
+                //     // this.action = this.walkAnims[randomIndex];
                     
-                    this.setTargetDirection();
-                    console.log("retargeting agent...");
-                    this.readyToNav = true;
-                 }
+                //     this.setTargetDirection();
+                //     console.log("retargeting agent...");
+                //     this.readyToNav = true;
+                //  }
                 // if (this.pathLines) scene.remove(this.pathLines);
 
 
             }
         }
         agentPause () {
-            this.readyToNav = false;  
-            const randTime = Math.random() * 3000;
-             const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
-            this.action = this.idleAnims[randomIndex];
-            setTimeout(() => {
-                this.readyToNav = true;
+           
+            console.log("agentPause isPaused " + this.isPaused);
+            let interval;
+            if (!this.isPaused) {
+                this.readyToNav = false;  
+                // const randTime = Math.random() * 3000;
+                const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
+                this.action = this.idleAnims[randomIndex];
+                this.isPaused = true;
+           
+                interval = setInterval(function (){
+                    if (Math.random() > .7) {
+                        clearInterval(interval);
+                        unpause();
+                    }
+                }, 1000);
+                const unpause = () => {
+                    console.log("tryna unpause");
+                     this.readyToNav = true;
+                    this.randomPath();
+                }
+                // setTimeout(() => {
+                //     // this.readyToNav = true;
+                //     this.randomPath();
+
+                // }, randTime);
+            } else {
+                 clearInterval(interval);
+                //  this.isPaused = false;
+                 this.readyToNav = true;
                 this.randomPath();
-                  const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
-                this.action = this.walkAnims[randomIndex];
-            }, randTime);
+            }
         }
+        // agentUnpause() 
 
         agentRaycastHit () {
             console.log("agentHit pathfinder " + this.pathfinder);
             if (this.pathfinder) {
-                const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
+                            const player = this.object;
+                const closestNode = this.pathfinder.getClosestNode(player.position, this.ZONE, this.navMeshGroup, true);
 
                 if (closestNode) {
-                    console.log("agent hit!");
-                    this.agentPause();
+                    console.log("agent hit this.isPaused " + this.isPaused);
+                    // this.isPaused = !this.isPaused;
+                    // if (!this.isPaused) {
+                    //     this.randomPath();
+                    // } else {
+                    //     // this.agentPause();
 
+                    // }
+                    this.agentPause();
                     // if (this.readyToNav) {
                         //     this.object.traverse((child) => {
                         //     if (child.isMesh) {
@@ -543,6 +582,7 @@
                     // }
                 } else {
                     console.log("don't interrupt now, cain't find a spot to stop");
+
                 }
             } else {
                 console.log("reset pathfinder");
@@ -574,7 +614,7 @@
             }
         }
 
-        resetAgent() {
+        resetAgent_() {
             const player = this.object;
             this.readyToNav = false;
             this.calculatedPath = null;
@@ -613,14 +653,10 @@
             //     } 
         }
         randomPath() {
-            // console.log("tryna set random path");
-            const rand = Math.random();
-            if (rand > .25) {
-                this.newPath(randomNavmeshPoint());
-            } else {
-                
-                this.agentPause();
-            }
+            
+            this.isPaused = false;
+            this.newPath(randomNavmeshPoint());
+            
         }
         
         setTargetDirection(){
@@ -704,7 +740,8 @@
                 // player.material.colorNode.seed = performance.now() * 0.1;
                 // this.object.material.colorNode.scale = sin(dt).mul(0.75);
             // }
-            if (this.readyToNav) {
+            // console.log(this.readyToNav +" " + this.isPaused)
+            if (this.readyToNav && !this.isPaused) {
                 if (this.calculatedPath && this.calculatedPath.length) {
 
                     if (this.name == "player") {
@@ -723,54 +760,68 @@
                     if (!pathLegComplete) {
                         //Get the distance to the target before moving
                         const prevDistanceSq = player.position.distanceToSquared(targetPosition);
+                       
+                        // if (prevDistanceSq < 10) {
+                        //     if (this.npc) {
+                        //         this.frameCount++; //hrm...
+                        //         if (this.frameCount % 2 == 0) {
+                        //             raypos = this.raycastedPosition();
+                        //         }
+                        //     }
+                        //     return;
+                        // }
                         vel.normalize();
                         // Move player to target
-                        if (!this.playerNavMode) {
+                        // if (!this.playerNavMode) {
                             if (this.quaternion) player.quaternion.slerp(this.quaternion, 0.1);
+
                             player.position.add(vel.multiplyScalar(dt * speed));
-                            // if (this.npc) {
-                            //     // if (dt/2 == 0) {
-                            //     raypos = this.raycastedPosition();
-                            //     console.log(dt);
-                            //     if (raypos) {
-                                    
-                            //         player.position.y = raypos.y; //snap to y on navmesh
-                            //     }
-                            // }
-                             if (this.npc) {
-                                this.frameCount++;
-                                if (this.frameCount % 2 == 0) {
-                                    raypos = this.raycastedPosition();
-                                }
-                            }
+                                                        
                             //Get distance after moving, if greater then we've overshot and this leg is complete
                             const newDistanceSq = player.position.distanceToSquared(targetPosition);
+                            //  console.log(newDistanceSq + " vs " + prevDistanceSq );
                             pathLegComplete = (newDistanceSq > prevDistanceSq);
-                        } else { //no
-                            // if (this.quaternion) player.parent.quaternion.slerp(this.quaternion, 0.1);
-                            // player.parent.position.add(vel.multiplyScalar(dt * speed));
-                            //  if (raypos) {
+                            if (this.npc) {
+                                // this.frameCount++; //hrm...
+                                // if (this.frameCount % 2 == 0) {
+                                if (Math.random() > .3) {
+                                    raypos = this.raycastedPosition();
+                                    if (raypos && raypos.y) {
+                                        // console.log("tryna snap to raypos.y " + raypos.y);
+                                        player.position.y = raypos.y;
+                                    }
+                                }
+                            }
+                        // } else { //no
+                        //     // if (this.quaternion) player.parent.quaternion.slerp(this.quaternion, 0.1);
+                        //     // player.parent.position.add(vel.multiplyScalar(dt * speed));
+                        //     //  if (raypos) {
                                 
-                            //     player.parent.position.y = raypos.y;
-                            // }
-                            // //Get distance after moving, if greater then we've overshot and this leg is complete
-                            // const newDistanceSq = player.parent.position.distanceToSquared(targetPosition);
-                            // pathLegComplete = (newDistanceSq > prevDistanceSq);
-                        }
+                        //     //     player.parent.position.y = raypos.y;
+                        //     // }
+                        //     // //Get distance after moving, if greater then we've overshot and this leg is complete
+                        //     // const newDistanceSq = player.parent.position.distanceToSquared(targetPosition);
+                        //     // pathLegComplete = (newDistanceSq > prevDistanceSq);
+                        // }
                         
                     } 
                     
                     if (pathLegComplete){
                         // Remove node from the path we calculated
+                        console.log("pathLegComplete paths " + this.calculatedPath.length);
                         this.calculatedPath.shift();
                         if (this.calculatedPath.length==0){
-                            if (this.npc){
+                            // if (this.npc){
+                                // this.isPaused = false;
+
                                 this.newPath(randomNavmeshPoint());
-                            }else{
+                                
+                            // }else{
                                 // player.position.copy( targetPosition );
                             
-                            }
+                            // }
                         }else{
+                            
                             this.setTargetDirection();
                         }
                     } //this.action = 'idle';
@@ -781,7 +832,17 @@
                     this.newPath(randomNavmeshPoint());
                 }
             } else {
+                // if (this.isPaused) {
+                //     if (Math.random > .9) {
+                //         this.isPaused = false;
+                //     }
+                // }
+                // if (this.isPaused) {
+                    // this.agentPause();
+                    // this.newPath(randomNavmeshPoint());
+                // }
                 // this.raycastedPosition();
+                
             }
         }
     }

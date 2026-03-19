@@ -661,6 +661,7 @@ function RaycastHit(type, hit) {
     lastRaycastHitPosition = hit.point;
     lastRaycastHitDistance = hit.distance;
     const locationData = lastRaycastHitObject.userData.locationData;
+    const objectData = lastRaycastHitObject.userData.objectData;
     const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     let showCallout = false;
     
@@ -679,16 +680,17 @@ function RaycastHit(type, hit) {
    
         // console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
 
-        console.log(type + " hit object type " + JSON.stringify(locationData));//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+        console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                  
         // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
      
-         if (locationData.objectData && locationData.objectData.callouttext.length) {
-            console.log("callout text " + locationData.objectData.callouttext);
-            const calloutsplit = locationData.objectData.callouttext.split("~");
+         if (objectData && objectData.callouttext.length) {
+            console.log("callout text "  + objectData.callouttext);
+            const calloutsplit = objectData.callouttext.split("~");
             const randomIndex = Math.floor(Math.random() * calloutsplit.length);
             const textstring = calloutsplit[randomIndex];
             console.log("textstring is " + textstring);
+
             // ThreeDeeText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         } else {
@@ -745,7 +747,7 @@ function RaycastHit(type, hit) {
             // console.log("rehit agent " + raycastHits[0].object.name));
         }
     } else if (locationData && locationData.markerType == "character" ) {
-        if (raycastHitAgent != hit.object) {
+        // if (raycastHitAgent != hit.object) {
         
             raycastHitAgent = hit.object;
             selectedObjects.push(hit.object);
@@ -778,7 +780,7 @@ function RaycastHit(type, hit) {
             } else {
                 console.log("no navagent found on character!");
             }
-        }
+        // }
     } else {
         // if (lastRaycastHitObject && lastRaycastHitObject != hit.object) {
         //    

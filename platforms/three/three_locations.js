@@ -69,14 +69,14 @@ export function InitLocations() {
     if (modelsDataEl) {
         const theModelsData = modelsDataEl.getAttribute('data-models');
         modelsData = JSON.parse(atob(theModelsData));
-        console.log("modelsData " + JSON.stringify(modelsData));
+        // console.log("modelsData " + JSON.stringify(modelsData));
     }
 
     let objexDataEl = document.getElementById('objexData'); //"complex" entities, with possible actions/behavior e.g. characters
     if (objexDataEl) {
         const theObjexData = objexDataEl.getAttribute('data-objex');
         objexData = JSON.parse(atob(theObjexData));
-        console.log("objexData " + JSON.stringify(objexData));
+        // console.log("objexData " + JSON.stringify(objexData));
     }
 
     let locationDataEl = document.getElementById('locationData'); //locations have ids, types, can have models and objects assigned
@@ -189,67 +189,8 @@ export function InitLocations() {
                                             // const model = await LoadLocationModel(modelsData[m].modelURL, locData, true);
 
                                             locationObjex.push(locData);
-
-                                            // const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i]);
-                                            // const model = modelData.model;
-                                            // const animations = modelData.animations;
-                                            // let count = 1;
-                                            // if (locationData[i].eventData && locationData[i].eventData.includes("scatter")) {
-                                            //     if (locationData[i].eventData.includes("~")) {
-                                            //         count = parseFloat(locationData[i].eventData.split("~")[1]);
-                                            //     }
-                                            // }
-                                            // console.log("count is " + count);
-
-                                            // if (locationData[i].markerType == "character") {
-                                            //     animationData[locationData[i].timestamp] = animations;
-                                            //     for (let z = 0; z < count; z++) {
-                                            //     console.log("tryna clone a skinned mesh " + z);
-                                            //     // scene.add(model);
-                                            //     // AssignModelToAgent(model);
-                                            //     // agentModels.push(model);
- 
-                                            //     const clonedModel = SkeletonUtils.clone(model); // normal clone/copy doesn't work
-
-                                            //     const agentID = locationData[i].timestamp + "_" + z.toString();
-
-                                            //     clonedModel.name = agentID;
-                                                
-                                            //     // const pos = randomNavmeshPoint();
-                                               
-                                            //     clonedModel.userData.name = agentID;
-                                            //     activeObjex.push(clonedModel);
-                                                
-                                            //     // const body = await getModelKinematicBody(clonedModel); //pass the index too
-                                            //     // // kinematicBodies.push(body);
-                                            //     // npcKinematicBodies.push(body);
-
-                                            //     await CreateNPCAgent(clonedModel, animations, z.toString(), locationData[i]);
-                                            //     // console.log("model animations: " + animations);
-                                               
-                                            //     // if (animations && animations.length) {
-                                                  
-
-                                            //     //     const mixer = new THREE.AnimationMixer(clonedModel);
-                                            //     //     clonedModel.userData.animationMixer = mixer;
-
-                                            //     //     //     // const clip 
-                                            //     //     //     // console.log()
-                                            //     //     //     // Play all animations
-                                            //     //     animations.forEach((clip) => {
-                                            //     //         console.log("tryna play clip " + clip.name);
-                                            //     //         mixer.clipAction(clip).play();
-                                            //     //     });
-                                            //     //     animationMixers.push(mixer);
-                                            //     // }
-
-                                            //     scene.add(clonedModel);
-                                                
-                                            //     }
                                             
-                                            // }
-                                      
-                                            // }
+                                           
                                         }
                                     }
                                 }
@@ -264,7 +205,7 @@ export function InitLocations() {
             } catch (e) {
                 console.error("ERROR LOADING GLTF! " + e);
             } finally {
-                console.log("locations loaded! " + JSON.stringify(locations));
+                // console.log("locations loaded! " + locations);
                 InitSystems();
             }
         })();
@@ -312,6 +253,15 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                 // // kinematicBodies.push(body);
                 // npcKinematicBodies.push(body);
 
+                clonedModel.traverse(function (child) { 
+                    if (child.isMesh) {
+                        child.userData.locationData = locationObjex[i].locationData;
+                        child.userData.objectData = locationObjex[i].objectData;
+
+
+
+                    }
+                });
                 
 
                 // clonedModel.traverse(function (child) { 
