@@ -30,7 +30,7 @@ const ctx = canvas.getContext('2d');
 let texture;
 let textContainer;
 
-export async function HTMLText (textString, size, parent, position, distance, persist, parentScale) {
+export async function HTMLText (textString, size, parent, position, distance, persist, parentScale) { //this is rendered to texture and put on a plane
     // Setup canvas with 2D context
 
     // let textContainer = scene.getObjectByName('htmlCanvasContainer');

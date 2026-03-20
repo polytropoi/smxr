@@ -126,7 +126,7 @@
         const npc = new NavAgent( options );
         agents.push(npc);
         // ThreeDeeText(name, 1, model, null, null, false, null);
-        HTMLText(name, 1, model, null, null, false, null);
+        // HTMLText(name, 1, model, null, null, false, null);
         console.log("creating npc navagent ");
 
         const agentID = locationData.timestamp + "_" + index;
@@ -549,10 +549,13 @@
 
                 // }, randTime);
             } else {
-                 clearInterval(interval);
-                 this.isPaused = false;
-                 this.readyToNav = true;
-                this.randomPath();
+                 
+                 if (Math.random() > .5) {
+                    clearInterval(interval);
+                    this.isPaused = false;
+                    this.readyToNav = true;
+                    this.randomPath();
+                 }
             }
         }
         // agentUnpause() 

@@ -218,6 +218,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
     if (locationObjex.length) {
         for (let i = 0; i < locationObjex.length; i++) {
             const modelData = await LoadLocationModel(locationObjex[i].modelData.modelURL, locationObjex[i].locationData);
+            
             const model = modelData.model;
             model.userData.locationData = locationObjex[i].locationData;
             model.userData.objectData = locationObjex[i].objectData;
@@ -228,96 +229,60 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     count = parseFloat(locationObjex[i].locationData.eventData.split("~")[1]);
                 }
             }
-            console.log("count is " + count);
+            // console.log("count is " + count);
 
             if (locationObjex[i].locationData.markerType == "character") {
                 animationData[locationData[i].timestamp] = animations;
                 for (let z = 0; z < count; z++) {
-                console.log("tryna clone a skinned mesh " + z);
-                // scene.add(model);
-                // AssignModelToAgent(model);
-                // agentModels.push(model);
+                    console.log("tryna clone a skinned mesh " + z);
+                    // scene.add(model);
+                    // AssignModelToAgent(model);
+                    // agentModels.push(model);
 
-                const clonedModel = SkeletonUtils.clone(model); // normal clone/copy doesn't work
+                    const clonedModel = SkeletonUtils.clone(model); // normal clone/copy doesn't work
 
-                const agentID = locationObjex[i].locationData.timestamp + "_" + z.toString();
+                    const agentID = locationObjex[i].locationData.timestamp + "_" + z.toString();
 
-                clonedModel.name = agentID;
-                
-                // const pos = randomNavmeshPoint();
-                
-                clonedModel.userData.name = agentID;
-                activeObjex.push(clonedModel);
-                
-                // const body = await getModelKinematicBody(clonedModel); //pass the index too
-                // // kinematicBodies.push(body);
-                // npcKinematicBodies.push(body);
-
-                clonedModel.traverse(function (child) { 
-                    if (child.isMesh) {
-                        child.userData.locationData = locationObjex[i].locationData;
-                        child.userData.objectData = locationObjex[i].objectData;
-
-
-
-                    }
-                });
-                
-
-                // clonedModel.traverse(function (child) { 
-                //     if (child.isBone && !child.parent.isBone) { //add raycast/collision meshes to root bone(s)
-                //         // const geometry = new THREE.CapsuleGeometry(1, 1, 8, 8); // Base size
-                //         console.log("gotsa bone! " + child);
-                //         const geometry = new THREE.CylinderGeometry(2, 2, 4, 8, 8); // Base size
-                //         const material = new THREE.MeshBasicMaterial({ color: 'red' });
-                //         const mesh = new THREE.Mesh(geometry, material);
-                //         mesh.material.side = THREE.DoubleSide;
-
-                //             // Position and orient the mesh to span the bone
-                //         mesh.position.set(0, 0, 0); // Usually at the parent bone
-                        
-                //         // if (settings && settings.)
+                    clonedModel.name = agentID;
                     
-                //         // Scale mesh based on bone's position vector length
-                //         const boneLength = child.position.length();
-                //         if (boneLength > 1) {
-                //             mesh.scale.set(1, boneLength, 1);
-                //             mesh.position.y = boneLength / 2; // Adjust based on pivot
-                //         }
-                //         mesh.layers.set(1);
-                //         // Rotate if necessary to match bone direction
-                //         // mesh.rotation.x = Math.PI / 2;
-                //         mesh.userData = {};
-                //         mesh.userData.name = "bone_" + locationData.timestamp;
-                //         mesh.userData.locationData = locationData;
-                //         activeObjex.push(mesh);
-                //         child.add(mesh);
-                //         // mesh.visible = true;
-                //     } 
-                // });
-                // console.log("model animations: " + animations);
-                
-                // if (animations && animations.length) {
+                    // const pos = randomNavmeshPoint();
                     
+                    clonedModel.userData.name = agentID;
+                    activeObjex.push(clonedModel);
+                    
+                
+                    // npcKinematicBodies.push(body);
 
-                //     const mixer = new THREE.AnimationMixer(clonedModel);
-                //     clonedModel.userData.animationMixer = mixer;
-
-                //     //     // const clip 
-                //     //     // console.log()
-                //     //     // Play all animations
-                //     animations.forEach((clip) => {
-                //         console.log("tryna play clip " + clip.name);
-                //         mixer.clipAction(clip).play();
-                //     });
-                //     animationMixers.push(mixer);
-                // }
-
-                scene.add(clonedModel);
-                await CreateNPCAgent(clonedModel, animations, z.toString(), locationObjex[i].locationData);
+                    clonedModel.traverse(function (child) { 
+                        if (child.isMesh) {
+                            child.userData.locationData = locationObjex[i].locationData;
+                            child.userData.objectData = locationObjex[i].objectData;
+                        }
+                    });
+                    
+                    scene.add(clonedModel);
+                    // const body = await getModelKinematicBody(clonedModel); //pass the index too
+                    // kinematicBodies.push(body);
+                    await CreateNPCAgent(clonedModel, animations, z.toString(), locationObjex[i].locationData);
                 
                 }
             
+            } else {
+                // if (count != 1) {
+                //     for (let z = 0; z < count; z++) {
+                    console.log("tryna place an object " + locationObjex[i].locationData.name + " " + locationObjex[i].modelData.modelURL);
+                //     }
+                // } else {
+                  const clonedObject = model.clone();
+                    const x = parseFloat(locationObjex[i].locationData.x);
+                    const y = parseFloat(locationObjex[i].locationData.y);
+                    const z = parseFloat(locationObjex[i].locationData.z);
+                    clonedObject.scale.set(4,4,4);
+                    clonedObject.position.set(x,y,z);
+                      scene.add(clonedObject);
+                      clonedObject.visible = true;
+
+                // }
             }
         }
     }
