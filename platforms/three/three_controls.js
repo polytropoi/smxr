@@ -680,16 +680,16 @@ function RaycastHit(type, hit) {
    
         // console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
 
-        console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+        // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                  
         // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
      
-         if (objectData && objectData.callouttext.length) {
-            console.log("callout text "  + objectData.callouttext);
+         if (objectData && objectData.callouttext && objectData.callouttext.length) {
+            // console.log("callout text "  + objectData.callouttext);
             const calloutsplit = objectData.callouttext.split("~");
             const randomIndex = Math.floor(Math.random() * calloutsplit.length);
             const textstring = calloutsplit[randomIndex];
-            console.log("textstring is " + textstring);
+            // console.log("textstring is " + textstring);
 
             // ThreeDeeText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
@@ -763,7 +763,7 @@ function RaycastHit(type, hit) {
             //     console.log("child type " + child.type); 
             // });
 
-            console.log("hit character object name : " + raycastHitAgent.parent.parent.parent.name + " locID " + locationData.timestamp);
+            // console.log("hit character object name : " + raycastHitAgent.parent.parent.parent.name + " locID " + locationData.timestamp);
             // const rootObject = getRoot(raycastHitAgent)
             // logHierarchy(raycastHitAgent);
             // raycastHitAgent.traverse (
@@ -775,10 +775,10 @@ function RaycastHit(type, hit) {
             // const navAgentInstance = raycastHitAgent.parent.getObjectByName("NavAgent");
             // const navAgentInstance = navAgentInstances[agentID];
             if (navAgentInstance) {
-                console.log("gotsa navagent");
+                // console.log("gotsa navagent");
                 navAgentInstance.agentRaycastHit();
             } else {
-                console.log("no navagent found on character!");
+                // console.log("no navagent found on character!");
             }
         // }
     } else {
@@ -968,18 +968,25 @@ export function onMouseDown(event) {
             console.log("mousedown on " + lastHitObjectName + " userData.name " + lastRaycastHitObject.userData.name);
             if (lastRaycastHitObject.userData.locationData) {
 
-                if (lastRaycastHitObject.userData.locationData.objectData) {
-                    console.log("objectData : "+ JSON.stringify(lastRaycastHitObject.userData.locationData.objectData));
-                    if (lastRaycastHitObject.userData.locationData.objectData.callouttext.length) {
-                        console.log("callout text " + lastRaycastHitObject.userData.locationData.objectData.callouttext);
-                        const calloutsplit = lastRaycastHitObject.userData.locationData.objectData.callouttext.split("~");
-                        const randomIndex = Math.floor(Math.random() * calloutsplit.length);
-                        const textstring = calloutsplit[randomIndex];
-                        console.log("textstring is " + textstring);
+                if (lastRaycastHitObject.userData.objectData) {
+                    console.log("objectData : "+ JSON.stringify(lastRaycastHitObject.userData.objectData));
+                    // if (lastRaycastHitObject.userData.locationData.objectData.callouttext.length) {
+                    //     console.log("callout text " + lastRaycastHitObject.userData.locationData.objectData.callouttext);
+                        // const calloutsplit = lastRaycastHitObject.userData.locationData.objectData.callouttext.split("~");
+                        // const randomIndex = Math.floor(Math.random() * calloutsplit.length);
+                        // const textstring = calloutsplit[randomIndex];
+                        // console.log("textstring is " + textstring);
+                        const textstring = "what!?!";
                         HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, lastRaycastHitObject.userData.locationData.yscale);
-                    }
+                    // }
+
                    
                 }
+            }
+
+             const navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance; //can do this easier, but good to know
+            if (navAgentInstance) {
+                navAgentInstance.agentClick();
             }
         }
     }

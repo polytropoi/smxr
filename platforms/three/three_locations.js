@@ -175,7 +175,7 @@ export function InitLocations() {
                             if (locationData[i].objectID == objexData[o]._id) {
                                 // locationData[i].isHidden = false;
                                 
-                                console.log("gotsa location objectID! " + objexData[o]._id +" looking for " + objexData[o].modelID);
+                                // console.log("gotsa location objectID! " + objexData[o]._id +" looking for " + objexData[o].modelID);
 
                                 if (objexData[o].modelID) {
                                     for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match - model deps/urls should have been added to the response serverside

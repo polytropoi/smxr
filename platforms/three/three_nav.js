@@ -120,6 +120,7 @@
             name: name,
             npc: true,
             animations: animations
+            // yOffset: locationData.y
         };
 
         const npc = new NavAgent( options );
@@ -276,6 +277,7 @@
             // scene.add(options.object);
             
             this.object = options.object;
+            // this.object.position.y = options.yOffset;
             this.pathLines = new THREE.Object3D();
             this.pathColor = new THREE.Color(0xFFFFFF);
             this.nodeRadius = (options.nodeRadius) ? options.nodeRadius : 0.2;
@@ -295,7 +297,7 @@
             
             this.speed = options.speed;
             // this.app = options.app;
-            
+            this.isSelected = false;
             if (pathfinding){
                 this.pathfinder = pathfinding;
                 this.ZONE = ZONE;
@@ -324,7 +326,7 @@
                 //Use this option to set multiple animations directly
                 this.mixer = new THREE.AnimationMixer(options.object);
                 options.animations.forEach( (animation)=>{
-                    console.log("navagent animation  " + animation.name.toLowerCase());
+                    // console.log("navagent animation  " + animation.name.toLowerCase());
                     self.animations[animation.name.toLowerCase()] = animation;
                     if (animation.name.toLowerCase().includes("walk")) {
                         this.walkAnims.push(animation.name.toLowerCase());
@@ -343,7 +345,7 @@
 
                 if (this.idleAnims.length) {
                     const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
-                    console.log(this.name + " tryna get idle animation " + this.idleAnims[randomIndex]);
+                    // console.log(this.name + " tryna get idle animation " + this.idleAnims[randomIndex]);
                     this.action = this.idleAnims[randomIndex];
                 } else {
                     this.idleAnims.push(options.animations[0].name.toLowerCase());
@@ -452,7 +454,7 @@
 
                 this.isPaused = false;
                 const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
-                console.log(this.name + " tryna get walk animation " + this.walkAnims[randomIndex]);
+                // console.log(this.name + " tryna get walk animation " + this.walkAnims[randomIndex]);
                 this.action = this.walkAnims[randomIndex];
 
                 this.setTargetDirection();
@@ -518,6 +520,10 @@
            
             console.log("agentPause isPaused " + this.isPaused);
             let interval;
+            if (this.isSelected) {
+                console.log("agent isSelected");
+                return;
+            }
             if (!this.isPaused) {
                 this.readyToNav = false;  
                 // const randTime = Math.random() * 3000;
@@ -525,17 +531,18 @@
                 this.action = this.idleAnims[randomIndex];
                 this.isPaused = true;
            
-                interval = setInterval(function (){
-                    if (Math.random() > .7) {
+                interval = setInterval(() => {
+                    if (Math.random() > .95) {
                         clearInterval(interval);
-                        unpause();
+                         this.readyToNav = true;
+                    this.randomPath();
+                    console.log("tryna unpause");
                     }
                 }, 1000);
-                const unpause = () => {
-                    console.log("tryna unpause");
-                     this.readyToNav = true;
-                    this.randomPath();
-                }
+                // const unpause = () => {
+                //     console.log("tryna unpause");
+                    
+                // }
                 // setTimeout(() => {
                 //     // this.readyToNav = true;
                 //     this.randomPath();
@@ -543,7 +550,7 @@
                 // }, randTime);
             } else {
                  clearInterval(interval);
-                //  this.isPaused = false;
+                 this.isPaused = false;
                  this.readyToNav = true;
                 this.randomPath();
             }
@@ -551,13 +558,13 @@
         // agentUnpause() 
 
         agentRaycastHit () {
-            console.log("agentHit pathfinder " + this.pathfinder);
+            // console.log("agentHit pathfinder " + this.pathfinder);
             if (this.pathfinder) {
                             const player = this.object;
                 const closestNode = this.pathfinder.getClosestNode(player.position, this.ZONE, this.navMeshGroup, true);
 
                 if (closestNode) {
-                    console.log("agent hit this.isPaused " + this.isPaused);
+                    // console.log("agent hit this.isPaused " + this.isPaused);
                     // this.isPaused = !this.isPaused;
                     // if (!this.isPaused) {
                     //     this.randomPath();
@@ -596,11 +603,13 @@
             }
         }
         agentClick () {
-            if (this.pathfinder) {
-                const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
+            // if (this.pathfinder) {
+            //     const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
 
-                if (closestNode) {
-                    this.readyToNav = !this.readyToNav;    
+            //     if (closestNode) {
+            console.log("clicked an agent!");
+            this.isSelected = !this.isSelected;
+                    this.readyToNav = this.isSelected;    
                     // if (this.readyToNav) {
                     //         this.object.traverse((child) => {
                     //         if (child.isMesh) {
@@ -608,10 +617,10 @@
                     //         }
                     //         });
                     // }
-                } else {
-                    console.log("don't interrupt now, cain't find a spot to stop");
-                }
-            }
+            //     } else {
+            //         console.log("don't interrupt now, cain't find a spot to stop");
+            //     }
+            // }
         }
 
         resetAgent_() {
@@ -744,10 +753,11 @@
             if (this.readyToNav && !this.isPaused) {
                 if (this.calculatedPath && this.calculatedPath.length) {
 
-                    if (this.name == "player") {
-                        console.log("tryna update player on path " + JSON.stringify(player.position));
-                    }
+                    // if (this.name == "player") {
+                    //     console.log("tryna update player on path " + JSON.stringify(player.position));
+                    // }
                     const targetPosition = this.calculatedPath[0];
+                    
                    
                     // if (raypos) {
                     //     console.log(console.log)
@@ -755,7 +765,18 @@
                     // }
                     const vel = targetPosition.clone().sub(player.position);
                     
+
+
                     let pathLegComplete = (vel.lengthSq()<0.01);
+
+                    // raypos = this.raycastedPosition();
+                    // if (raypos && raypos.y) {
+                    //     // if ((raypos.y - player.position.y) > .3) {
+                    //     // console.log("tryna snap to raypos.y " + raypos.y);
+                    //     vel.y = raypos.y;
+                    //     // }
+                    // }
+
                     
                     if (!pathLegComplete) {
                         //Get the distance to the target before moving
@@ -784,13 +805,16 @@
                             if (this.npc) {
                                 // this.frameCount++; //hrm...
                                 // if (this.frameCount % 2 == 0) {
-                                if (Math.random() > .3) {
+                                // if (Math.random() > .2) {
                                     raypos = this.raycastedPosition();
                                     if (raypos && raypos.y) {
+                                        // if ((raypos.y - player.position.y) > .3) {
                                         // console.log("tryna snap to raypos.y " + raypos.y);
                                         player.position.y = raypos.y;
+                                        // }
                                     }
-                                }
+
+                                // }
                             }
                         // } else { //no
                         //     // if (this.quaternion) player.parent.quaternion.slerp(this.quaternion, 0.1);
@@ -808,7 +832,7 @@
                     
                     if (pathLegComplete){
                         // Remove node from the path we calculated
-                        console.log("pathLegComplete paths " + this.calculatedPath.length);
+                        // console.log("pathLegComplete paths " + this.calculatedPath.length);
                         this.calculatedPath.shift();
                         if (this.calculatedPath.length==0){
                             // if (this.npc){
