@@ -670,7 +670,8 @@ function RaycastHit(type, hit) {
         locationData.markerType != "navmesh" &&
         name != "navmesh" &&
         ((locationData.locationTags && locationData.locationTags.includes("callout") || 
-        locationData.markerType == "character" || 
+        locationData.markerType == "character" ||
+        locationData.markerType == "object" || 
         locationData.markerType == "poi" || 
         locationData.markerType == "gate" ||
         locationData.markerType == "placeholder"))      
@@ -984,7 +985,10 @@ export function onMouseDown(event) {
                 }
             }
 
-             const navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance; //hrm
+            let navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance; //hrm
+            if (!navAgentInstance) {
+                navAgentInstance = lastRaycastHitObject.parent.userData.NavAgentInstance; //hrm
+            }
             if (navAgentInstance) {
                 navAgentInstance.agentClick();
                 const popup = document.getElementById("popup");
@@ -1007,6 +1011,30 @@ export function onMouseDown(event) {
                 
                
                                 
+            } else if (lastRaycastHitObject.userData.objectData) {
+                 const popup = document.getElementById("popup");
+                  Object.assign(popup.style, {
+                    left: `${event.clientX - 150}px`,
+                    top: `${event.clientY - 100}px`,
+                    display: 'block',
+                });
+                if (lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
+                        if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
+                            const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
+                            const randomIndex = Math.floor(Math.random() * labelSplit.length);
+                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
+                        } else {
+                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
+                        }
+                    } else if (lastRaycastHitObject.userData.objectData.callouttext && lastRaycastHitObject.userData.objectData.callouttext.length) {
+                        if (lastRaycastHitObject.userData.objectData.callouttext.includes("~")) {
+                            const calloutSplit = lastRaycastHitObject.userData.objectData.callouttext.split("~");
+                            const randomIndex = Math.floor(Math.random() * calloutSplit.length);
+                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
+                        } else {
+                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
+                        }
+                    }
             } else {
                 const popup = document.getElementById("popup");
                 popup.style.display = "none";

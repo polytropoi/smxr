@@ -322,7 +322,7 @@
                 });
             }
             
-            if (options.animations){
+            if (options.animations && options.animations.length){
                 //Use this option to set multiple animations directly
                 this.mixer = new THREE.AnimationMixer(options.object);
                 options.animations.forEach( (animation)=>{

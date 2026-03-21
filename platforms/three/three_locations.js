@@ -269,20 +269,29 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
             
             } else {
                 // if (count != 1) {
-                //     for (let z = 0; z < count; z++) {
+                    for (let z = 0; z < count; z++) {
                     console.log("tryna place an object " + locationObjex[i].locationData.name + " " + locationObjex[i].modelData.modelURL);
                 //     }
                 // } else {
                   const clonedObject = model.clone();
-                    const x = parseFloat(locationObjex[i].locationData.x);
-                    const y = parseFloat(locationObjex[i].locationData.y);
-                    const z = parseFloat(locationObjex[i].locationData.z);
-                    clonedObject.scale.set(4,4,4);
+
+                    const randomPoint = randomNavmeshPoint();
+                    const x = randomPoint.x;
+                    const y = randomPoint.y;
+                    const z = randomPoint.z;
+                    clonedObject.scale.set(1,1,1);
                     clonedObject.position.set(x,y,z);
                       scene.add(clonedObject);
                       clonedObject.visible = true;
+                      activeObjex.push(clonedObject);
+                      clonedObject.traverse(function (child) { 
+                        if (child.isMesh) {
+                            child.userData.locationData = locationObjex[i].locationData;
+                            child.userData.objectData = locationObjex[i].objectData;
+                        }
+                    });
 
-                // }
+                }
             }
         }
     }
