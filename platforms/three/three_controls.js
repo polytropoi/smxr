@@ -654,7 +654,9 @@ function RaycastHit(type, hit) {
         return;
     }
 
-
+    if (hit.instanceId) {
+            console.log("INSTANCE HIT " + hit.instanceId);
+    }
 
     lastRaycastHitObject = hit.object;
     lastHitObjectName = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
@@ -982,10 +984,16 @@ export function onMouseDown(event) {
                     // }
 
                    
+                } else {
+                    console.log("locationData : "+ JSON.stringify(lastRaycastHitObject.userData.locationData));
                 }
+
             }
 
-            let navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance; //hrm
+            let navAgentInstance;
+            if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
+                navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance;
+            }//hrm
             if (!navAgentInstance) {
                 navAgentInstance = lastRaycastHitObject.parent.userData.NavAgentInstance; //hrm
             }

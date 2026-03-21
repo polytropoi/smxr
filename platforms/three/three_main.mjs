@@ -38,7 +38,7 @@
 
 	import { InitSurface, instancedModels, InstanceOnSurface, surface } from './three_instance.js';
 
-	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex } from './three_locations.js';
+	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData } from './three_locations.js';
 
 	import Stats from './ui/stats.js';
 	
@@ -191,7 +191,7 @@
 				if (instancedModels[i].locationData.locationTags.includes("wind")) {
 					shader = "wind";
 				} 
-				InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader);
+				InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 						
 			} 
 		}

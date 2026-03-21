@@ -11,6 +11,7 @@ import { scene } from './three_main.mjs';
 // import { surface } from './three_locations.js';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
+import { locationData, activeObjex } from './three_locations.js';
 
 
 // import { uniform, sin, range } from 'three/tsl';
@@ -38,7 +39,7 @@ export function createDefaultSurface() {
 }
     
 
-export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader) {
+export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader, locData) {
 
     await sampler;
     console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count);
@@ -72,7 +73,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         
         for (let i = 0; i < sampleMats.length; i++) {
 
-            if (sampleMats[i].name.includes("green") || shader == "wind" || shader == "grass") {
+            if (sampleMats[i].name.includes("green") || shader == "wind" || shader == "grass") { //hrm, how to only wave the leaves
                 // sampleMats[i].positionNode = Fn(() => { // :)
                 // const pos = positionLocal;      // Original vertex position
                 // const norm = normalLocal;        // Vertex normal direction
@@ -147,7 +148,8 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let s = 0; s < instancedMeshes.length; s++) {
             instancedMeshes[s].castShadow = true;
             instancedMeshes[s].receiveShadow = true;
-					
+            activeObjex.push(instancedMeshes[s]);
+            instancedMeshes[s].userData.locationData = locData;
             scene.add(instancedMeshes[s]);
         }
     
