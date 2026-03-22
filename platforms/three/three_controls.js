@@ -29,7 +29,7 @@ export let isReady = false;
 export let followDistance = 8;
 export let cameraAtZero = true;
 
-let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHitObject, lastHitObjectName;
+let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHit, lastRaycastHitObject, lastHitObjectName;
 
 export let dir = new THREE.Vector3;
 export let playerDirection = new THREE.Vector3();
@@ -638,6 +638,7 @@ function RaycastHit(type, hit) {
             for (let i = 0; i < textContainers.length; i++) {
                 textContainers[i].visible = false;
             }
+            // lastRaycastHit = null;
             // const textContainer = lastRaycastHitObject.getObjectByName('textContainer');
             // if (textContainer) {
             //     textContainer.visible = false;
@@ -649,20 +650,26 @@ function RaycastHit(type, hit) {
 
         }
     } else {
-
+        lastRaycastHit = hit;
         lastRaycastHitObject = hit.object;
         return;
     }
 
-    if (hit.instanceId) {
-            console.log("INSTANCE HIT " + hit.instanceId);
-    }
-
+  
+    lastRaycastHit = hit;
     lastRaycastHitObject = hit.object;
     lastHitObjectName = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     lastRaycastHitPosition = hit.point;
     lastRaycastHitDistance = hit.distance;
     const locationData = lastRaycastHitObject.userData.locationData;
+    if (!locationData) {
+        return;
+    }
+
+    if (hit.instanceId) {
+            console.log("INSTANCE HIT " + hit.instanceId + JSON.stringify(locationData));
+        
+    }
     const objectData = lastRaycastHitObject.userData.objectData;
     const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     let showCallout = false;
@@ -670,13 +677,13 @@ function RaycastHit(type, hit) {
     if (type == "mouse" &&
         locationData && 
         locationData.markerType != "navmesh" &&
-        name != "navmesh" &&
-        ((locationData.locationTags && locationData.locationTags.includes("callout") || 
-        locationData.markerType == "character" ||
-        locationData.markerType == "object" || 
-        locationData.markerType == "poi" || 
-        locationData.markerType == "gate" ||
-        locationData.markerType == "placeholder"))      
+        name != "navmesh"
+        // ((locationData.locationTags && locationData.locationTags.includes("callout") || 
+        // locationData.markerType == "character" ||
+        // locationData.markerType == "object" || 
+        // locationData.markerType == "poi" || 
+        // locationData.markerType == "gate" ||
+        // locationData.markerType == "placeholder"))      
         ) {
 
         showCallout = true;
@@ -716,9 +723,9 @@ function RaycastHit(type, hit) {
         // pointerGizmo.lookAt(worldNormal);
         rotateObjectToNormal(pointerGizmo, worldNormal);
     }
-    if (name == "navmesh") {
+    if (name == "navmesh" || locationData.markerType == "navmesh") {
         if (type == "mouse" && mouseIsDown) {
-            targetLocation.copy(lastRaycastHitPosition);
+            targetLocation.copy(lastRaycastHitPosition); //to move stuff around
             validTarget = true;
         } else {
             validTarget = false;
@@ -729,7 +736,7 @@ function RaycastHit(type, hit) {
     } else if (name == "player") {
 
         selectedObjects.length = 0;
-    } else if (name && name.includes("agent")) {
+    } else if (name && name.includes("agent")) { //just test agents
         validTarget = true;
         if (raycastHitAgent != hit.object) {
             // console.log ("new mouse raycast hit on agent " + raycastHits[0].object.name);
@@ -742,7 +749,7 @@ function RaycastHit(type, hit) {
                 // raycastHitAgent.material.color = goColor;
 
             }
-            const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //can do this easier, but good to know
+            const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //but skinned meshes are parent.parent.userData
             if (navAgentInstance) {
                 navAgentInstance.agentRaycastHit();
             }
@@ -785,6 +792,9 @@ function RaycastHit(type, hit) {
             }
         // }
     } else {
+        // if (lastRaycastHit.instanceId) {
+
+        // }
         // if (lastRaycastHitObject && lastRaycastHitObject != hit.object) {
         //    
         // } else { 
@@ -851,17 +861,20 @@ export function mouseRaycast(e) {
             RaycastHit("mouse", raycastHits[0]);
         } else {
             selectedObjects.length = 0;
-            if (raycastHitAgent) {
+            // lastRaycastHit = null;
+            lastRaycastHitObject = null;
+            raycastHitAgent = null;
+            // if (raycastHitAgent) {
                 
-                if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-                    // raycastHitAgent.material.materialColor = stopColor;
-                    // raycastHitAgent.material.needsUpdate = true;
+            //     if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+            //         // raycastHitAgent.material.materialColor = stopColor;
+            //         // raycastHitAgent.material.needsUpdate = true;
 
-                } else if (raycastHitAgent.material) {
-                    // console.log("tryna reset agent color after no hit");
-                    // raycastHitAgent.material.color = stopColor;
-                }
-            }
+            //     } else if (raycastHitAgent.material) {
+            //         // console.log("tryna reset agent color after no hit");
+            //         // raycastHitAgent.material.color = stopColor;
+            //     }
+            // }
         }
 
     } else {
@@ -870,20 +883,22 @@ export function mouseRaycast(e) {
             textContainers[i].visible = false;
         }
         if (lastRaycastHitObject) {
+            lastRaycastHit = null;
             lastRaycastHitObject = null;
+            raycastHitAgent = null;
         }
-        if (raycastHitAgent) {
-            // 	{
-            if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-                // console.log("tryna reset agent color after no hit");
-                // raycastHitAgent.material.materialColor = stopColor;
-                // raycastHitAgent.material.needsUpdate = true;
-            } else if (raycastHitAgent.material) {
-                // console.log("tryna reset agent color after no hit");
-                // raycastHitAgent.material.color = stopColor;
-            }
-        }
-        raycastHitAgent = null;
+        // if (raycastHitAgent) {
+        //     // 	{
+        //     if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+        //         // console.log("tryna reset agent color after no hit");
+        //         // raycastHitAgent.material.materialColor = stopColor;
+        //         // raycastHitAgent.material.needsUpdate = true;
+        //     } else if (raycastHitAgent.material) {
+        //         // console.log("tryna reset agent color after no hit");
+        //         // raycastHitAgent.material.color = stopColor;
+        //     }
+        // }
+        
     }
 }
 
@@ -966,29 +981,30 @@ export function onMouseDown(event) {
         mouseRaycast(event);
     }
     if (lastRaycastHitObject) {
-     
-        if (lastRaycastHitObject.userData) {
-            console.log("mousedown on " + lastHitObjectName + " userData.name " + lastRaycastHitObject.userData.name);
-            if (lastRaycastHitObject.userData.locationData) {
+        const popup = document.getElementById("popup");
+        if (lastRaycastHitObject.userData && lastRaycastHitObject.userData.locationData) {
+            console.log("mousedown on " + lastRaycastHitObject.userData.locationData.name + " " + lastRaycastHit.instanceId);
+            
+            // if (lastRaycastHitObject.userData.locationData) {
 
-                if (lastRaycastHitObject.userData.objectData) {
-                    console.log("objectData : "+ JSON.stringify(lastRaycastHitObject.userData.objectData));
-                    // if (lastRaycastHitObject.userData.locationData.objectData.callouttext.length) {
-                    //     console.log("callout text " + lastRaycastHitObject.userData.locationData.objectData.callouttext);
-                        // const calloutsplit = lastRaycastHitObject.userData.locationData.objectData.callouttext.split("~");
-                        // const randomIndex = Math.floor(Math.random() * calloutsplit.length);
-                        // const textstring = calloutsplit[randomIndex];
-                        // console.log("textstring is " + textstring);
-                        const textstring = "what!?!";
-                        // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, lastRaycastHitObject.userData.locationData.yscale);
-                    // }
+            //     if (lastRaycastHitObject.userData.objectData) {
+            //         console.log("objectData : "+ JSON.stringify(lastRaycastHitObject.userData.objectData));
+            //         // if (lastRaycastHitObject.userData.locationData.objectData.callouttext.length) {
+            //         //     console.log("callout text " + lastRaycastHitObject.userData.locationData.objectData.callouttext);
+            //             // const calloutsplit = lastRaycastHitObject.userData.locationData.objectData.callouttext.split("~");
+            //             // const randomIndex = Math.floor(Math.random() * calloutsplit.length);
+            //             // const textstring = calloutsplit[randomIndex];
+            //             // console.log("textstring is " + textstring);
+            //             const textstring = "what!?!";
+            //             // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, lastRaycastHitObject.userData.locationData.yscale);
+            //         // }
 
                    
-                } else {
-                    console.log("locationData : "+ JSON.stringify(lastRaycastHitObject.userData.locationData));
-                }
+            //     } else {
+            //         console.log("locationData : "+ JSON.stringify(lastRaycastHitObject.userData.locationData));
+            //     }
 
-            }
+            // }
 
             let navAgentInstance;
             if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
@@ -999,7 +1015,7 @@ export function onMouseDown(event) {
             }
             if (navAgentInstance) {
                 navAgentInstance.agentClick();
-                const popup = document.getElementById("popup");
+                // const popup = document.getElementById("popup");
                   Object.assign(popup.style, {
                     left: `${event.clientX - 150}px`,
                     top: `${event.clientY - 100}px`,
@@ -1016,11 +1032,8 @@ export function onMouseDown(event) {
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.description;
                     }
                     
-                
-               
-                                
             } else if (lastRaycastHitObject.userData.objectData) {
-                 const popup = document.getElementById("popup");
+                //  const popup = document.getElementById("popup");
                   Object.assign(popup.style, {
                     left: `${event.clientX - 150}px`,
                     top: `${event.clientY - 100}px`,
@@ -1043,12 +1056,21 @@ export function onMouseDown(event) {
                             popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
                         }
                     }
+            } else if (lastRaycastHit.instanceId) {
+                // const popup = document.getElementById("popup");
+                console.log(lastRaycastHit.instanceId);
+                  Object.assign(popup.style, {
+                    left: `${event.clientX - 150}px`,
+                    top: `${event.clientY - 100}px`,
+                    display: 'block',
+                });
+                popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
             } else {
-                const popup = document.getElementById("popup");
+                // const popup = document.getElementById("popup");
                 popup.style.display = "none";
             }
         } else {
-            const popup = document.getElementById("popup");
+            // const popup = document.getElementById("popup");
             popup.style.display = "none";
         }
     }

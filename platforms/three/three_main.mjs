@@ -101,8 +101,7 @@
 
 		const three_canvas = document.getElementById("three_canvas");
 		scene = new THREE.Scene();
-		renderer = new THREE.WebGPURenderer({antialias:true,
-    canvas: three_canvas});
+		renderer = new THREE.WebGPURenderer({antialias:true, canvas: three_canvas});
 		await renderer.init(); 
 		renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setPixelRatio( 2.0 );

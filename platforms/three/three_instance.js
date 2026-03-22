@@ -148,8 +148,12 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let s = 0; s < instancedMeshes.length; s++) {
             instancedMeshes[s].castShadow = true;
             instancedMeshes[s].receiveShadow = true;
-            activeObjex.push(instancedMeshes[s]);
-            instancedMeshes[s].userData.locationData = locData;
+            
+            if (locData.locationTags && locData.locationTags.includes("active")) {
+                activeObjex.push(instancedMeshes[s]);
+                instancedMeshes[s].userData.locationData = locData;
+            }
+            
             scene.add(instancedMeshes[s]);
         }
     
