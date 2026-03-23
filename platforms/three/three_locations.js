@@ -547,8 +547,8 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         if (locationData.modelID && locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
-            locationData.modelID = "primitive_cube";
-            model = await LoadLocationModel(null, locationData, true);
+            // locationData.modelID = "primitive_cube";
+            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/gate2.glb', locationData, true);
         }
         if (model) {
             scene.add(model.model);

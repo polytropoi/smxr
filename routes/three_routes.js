@@ -3247,13 +3247,15 @@ three_router.get('/:_id', function (req, res) {
                                        "</div>" +
                               
                                 // dialogButton +
-                                canvasOverlay +
+                               
                                  
 
                                 "<canvas id=\x22three_canvas\x22></canvas>" + //assign to custom canvas to match positions
 
                                 // "<div id=\x22popup\x22 class=\x22popup\x22 style=\x22position: absolute; display: none; background: white; padding: 10px; border: 1px solid black;\x22>Some text</div>"+
                                 "<div id=\x22popup\x22 class=\x22popup\x22>Some text</div>"+
+
+                                canvasOverlay +
                                 "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +
                             
 

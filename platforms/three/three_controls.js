@@ -667,7 +667,7 @@ function RaycastHit(type, hit) {
     }
 
     if (hit.instanceId) {
-            console.log("INSTANCE HIT " + hit.instanceId + JSON.stringify(locationData));
+            console.log("INSTANCE HIT " + hit.instanceId);
         
     }
     const objectData = lastRaycastHitObject.userData.objectData;
@@ -791,6 +791,8 @@ function RaycastHit(type, hit) {
                 // console.log("no navagent found on character!");
             }
         // }
+    } else if (locationData && locationData.markerType == "gate" ) {
+        
     } else {
         // if (lastRaycastHit.instanceId) {
 
@@ -974,8 +976,11 @@ export function centerRaycast() {
     }
 }
 
-export function onMouseDown(event) {
+export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
+    console.log(event);
+    event.preventDefault();
+    event.stopPropagation();
     mouseIsDown = true;
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
@@ -1034,7 +1039,7 @@ export function onMouseDown(event) {
                     
             } else if (lastRaycastHitObject.userData.objectData) {
                 //  const popup = document.getElementById("popup");
-                  Object.assign(popup.style, {
+                Object.assign(popup.style, {
                     left: `${event.clientX - 150}px`,
                     top: `${event.clientY - 100}px`,
                     display: 'block',
@@ -1065,6 +1070,16 @@ export function onMouseDown(event) {
                     display: 'block',
                 });
                 popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
+            } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
+                Object.assign(popup.style, {
+                    left: `${event.clientX - 150}px`,
+                    top: `${event.clientY - 100}px`,
+                    display: 'block',
+                });
+                popup.innerHTML = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
+                "<br><br><div><button id=\x22popup_yesButton\x22 data-sceneid=\x22"+lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22saveButton\x22>Go</button>"+
+                "<button id=\x22popup_cancelButton\x22 class=\x22deleteButton\x22>Cancel</button></div>";
+
             } else {
                 // const popup = document.getElementById("popup");
                 popup.style.display = "none";

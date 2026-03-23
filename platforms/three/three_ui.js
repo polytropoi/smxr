@@ -171,14 +171,15 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     let text;
     if (parent) {  
        textContainer = parent.getObjectByName('textContainer');
-        if (textContainer) {
+        if (textContainer && Text) {
 
+            // if (textmesh) {
             // console.log("gotsa textContainer for text string " + textString);
                 // textmesh.geometry.dispose();
                 parent.updateMatrixWorld(true);
                 parent.worldToLocal(position);
                 // // console.log("ui scale " + scaleFactor);
-                // // textmesh = textContainer.getObjectByName('textmesh');
+                textmesh = textContainer.getObjectByName('textmesh');
                 // // if (textmesh) {
                     
                 //     const text = await Text.create({
@@ -199,15 +200,38 @@ export async function ThreeDeeText (textString, size, parent, position, distance
                 // // }
 
 
-            textContainer.visible = true;
-            textContainer.position.set(position.x + scaleFactor, position.y + (scaleFactor * 2), position.z - (scaleFactor * 4));
-            textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            // textContainer.position.set(position.x, position.y, position.z);
-            // textmesh.position.set(0, -scaleFactor, -(scaleFactor * 4));
-            // textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            return;
-        } else {
-            console.log("gotsa parent but no textContainer");
+                textContainer.visible = true;
+                textContainer.position.set(position.x + scaleFactor, position.y + (scaleFactor * 2), position.z - (scaleFactor * 4));
+                textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+                // Later, update the text
+                // console.log("updating callout " + textString);
+                const updated = await Text.create({ text: textString,
+                            font: '../../fonts/web/Acme.woff',
+                            depth: 0.02,
+                            // align: 'center',
+                            size: size,
+                            // size: size,
+                            removeOverlaps: true,
+                            layout: {
+                                width: width,
+                                align: 'left'
+                            } 
+                    });
+                if (textmesh) {
+                    // console.log("updateing textmesh "  + textString);
+                    textmesh.geometry.dispose();
+                    textmesh.geometry = updated.geometry;
+                }
+            } else {
+                
+            //     }
+            //     // textContainer.position.set(position.x, position.y, position.z);
+            //     // textmesh.position.set(0, -scaleFactor, -(scaleFactor * 4));
+            //     // textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            //     // return;
+            // } else {
+            console.log("creating textmesh and textContainer");
                     const splitString = textString.split("_");
             if (splitString[1]) {
                 textString = splitString[1];
@@ -215,7 +239,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             const stringCount = textString.toString().length;
             // const width = stringCount < 6 ? stringCount : 6;
 
-            console.log("tryna set ui size " + size + " width " + width + " stringcount " + stringCount);
+            // console.log("tryna set ui size " + size + " width " + width + " stringcount " + stringCount);
             text = await Text.create({
                 // width: 1,
                 text: textString,
@@ -231,7 +255,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
                 }
             });
 
-            console.log("gotsa text result " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
+            // console.log("gotsa text result " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
             // let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
             //     material.roughness = 0.1;
             // material.metalness = 0.3;
@@ -266,6 +290,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             // const targetWorldPosition = new THREE.Vector3();
             textmesh = new THREE.Mesh(text.geometry, material);
             textmesh.position.set(0, 0, 0);
+            textmesh.name = "textmesh";
             textContainer.add(textmesh);
             parent.add(textContainer);
 
@@ -284,6 +309,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             // }
         
             lookAtCameraObjects.push(textContainer);
+            // }
         }
     } else {
         console.log("init textContainer for " + textString);
