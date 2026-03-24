@@ -16,6 +16,7 @@ import { room, lerp, sceneLocations, localData, ReturnLocationTable,
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "./indexedDb.js";
 // import shortid from "shortid";
 
+
 export let showDialogPanel = false;
 let dialogInitialized = false;
 
@@ -168,18 +169,18 @@ window.addEventListener( 'keydown',  ( event ) => {
   // onclick=\x22AddTimekey()\x22
   // $(function (){ //needs onload for class to pop
   // onclick=\x22SaveTimekeysToLocal()\x22
-    $('#popup').on('click', '#popup_yesButton', function(e) {
-      console.log("popup yes button click on target " + e.target);
-      if (e.target.dataset.sceneid) {
-        console.log("tryna goto " + e.target.dataset.sceneid );
-      }
+    // $('#popup').on('click', '#popup_yesButton', function(e) {
+    //   console.log("popup yes button click on target " + e.target);
+    //   if (e.target.dataset.sceneid) {
+    //     console.log("tryna goto " + e.target.dataset.sceneid );
+    //   }
 
       
-    });
-    $('#popup').on('click', '#popup_cancelButton', function(e) {
-      console.log("popup cancel button click on target " + e.target);
+    // });
+    // $('#popup').on('click', '#popup_cancelButton', function(e) {
+    //   console.log("popup cancel button click on target " + e.target);
       
-    });
+    // });
     $('#modalContent').on('click', '#saveTimeKeysLocalButton', function(e) {
       console.log("tryna save timekey to local!");
       SaveTimekeysToLocal();

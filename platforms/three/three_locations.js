@@ -108,8 +108,11 @@ export function InitLocations() {
                                     console.log("gotsa location model! " +modelsData[m].modelURL);
                                     
                                     // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
-                                                                                
-                                    const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i]);
+                                    let isActive = false;             
+                                    if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
+                                        isActive = true;
+                                    } 
+                                    const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
                                     model = modelData.model;
                                     console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
                                     
@@ -337,7 +340,7 @@ async function LoadLocationModel (url, locationData, isActive) {
 
     if (model) {
    
-        console.log("gotsa model !" + JSON.stringify(locationData));
+        console.log("gotsa model !" + JSON.stringify(locationData) + " " + isActive);
         model.position.set(parseFloat(locationData.x),parseFloat(locationData.y),parseFloat(locationData.z));
         const xscale = locationData.xscale ? locationData.xscale : 1;
         const yscale = locationData.yscale ? locationData.yscale : 1;
@@ -575,3 +578,55 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
     }
 }
 
+export function EnterSceneGate (eventData) {
+
+    if (eventData != null && eventData != "") {
+        console.log("tryna gate with eventData " + eventData);
+        if (eventData.toString().toLowerCase().includes("tag")) { //if it's a tag look up matches
+        if (eventData.toString().toLowerCase().includes("~")) {
+            const tagSplit = eventData.toString().toLowerCase().split("~");
+            (async () => { //hrm where to put this?
+                try {
+                console.log("tryna fetch scenes with tags " + tagSplit[1]);
+                const response = await fetch('/scenedata', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                    tags: tagSplit[1]
+                    })
+                });
+                const data = await response.json();
+                if (data.short_id) {
+                    // let url = "/webxr/" + data.short_id;
+                    window.location.href = "/webxr/" + data.short_id;
+                    // that.dialogEl.components.mod_dialog.showPanel("Go to " + data.sceneTitle +" ?", "href~"+ url, "gatePass", 5000 );
+                } else {
+                    console.log("no scenes found with tags " + eventData);
+                }
+                } catch(error) {
+                    console.log(error);
+                } 
+            })();  
+        }
+        } else { //if not a tag assume it's a short_id
+        console.log("no tags but going to " + eventData);
+        window.location.href = "/three/" + eventData;
+        // window.location.href = locData.eventData;
+        }
+        
+    } else { //otherwise go to a random domain scene
+        console.log("tryna go to random domain scene");
+        let ascenesEl = document.getElementById("availableScenesControl");
+        if (ascenesEl) {
+        let asControl = ascenesEl.components.available_scenes_control; //available scenes in this domain
+        if (asControl) {
+            let scene = asControl.returnRandomScene();
+            let url = "/three/" + scene.sceneKey;
+            window.location.href = url; 
+            
+        }
+        }
+    }
+}

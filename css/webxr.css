@@ -1180,6 +1180,21 @@ background-color: #000000;
         font-size: 12px;
         font-weight: bold;
       }
+
+      .yesButton {
+          /* float: right; */
+        /* width: 120px; */
+        background-color: #479149;
+        color: white;
+        padding: 10px 10px;
+        margin: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
       .infoButton {
         float: right;
       /* width: 120px; */
@@ -1234,6 +1249,19 @@ background-color: #000000;
     }
       .deleteButton {
         float: left;
+        /* width: 100px; */
+        background-color: #af4c4c;
+        color: white;
+        padding: 10px 10px;
+        margin: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+      }
+        .cancelButton {
+        /* float: left; */
         /* width: 100px; */
         background-color: #af4c4c;
         color: white;

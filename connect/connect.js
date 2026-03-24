@@ -117,6 +117,10 @@ export let avatarName = "";
 let writeCount = 0;
 window.LocationRowClick = LocationRowClick;
 
+// export function SetPlayer(thePlayer) { //for non-dom routes
+//    player = thePlayer;
+// }
+
 // $(function() { 
 export function InitConnect() {
    // InitIDB();
@@ -127,6 +131,7 @@ export function InitConnect() {
    }
 
    player = document.getElementById("player");
+   
    // player = document.getElementById("cameraRig");
    // let settingsEl = document.getElementById('settingsDataElement'); //volume, color, etc...
    // let theSettingsData = settingsEl.getAttribute('data-settings');
@@ -1304,7 +1309,7 @@ export function GoToPosRot (pos, rot) {
    }
 }
 
-export function GoToLocation(locationKey) {
+export function GoToLocation(locationKey) { //aframe only.. :(
    console.log("tryna goat locatioKey " + locationKey);
    // let location = JSON.parse(localStorage.getItem(locationKey));
    // if ((settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default") && settings.hasBgMap) {

@@ -2,12 +2,12 @@
 
 import * as THREE from 'three';
 
-
+// import {SetPlayer} from '../../../connect/connect.js';
 import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
-import { activeObjex, groundObjex, navmesh } from './three_locations.js';
+import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './three_locations.js';
 
 import { scene, cameraMode, renderer, clock, selectedObjects } from './three_main.mjs';
 
@@ -74,6 +74,20 @@ let validTarget = false;
 
 let controlObject;
 let lastPosition = new THREE.Vector3();
+
+    // $('#popup').on('click', '#popup_yesButton', function(e) {
+    //   console.log("popup yes button click on target " + e.target);
+    //   if (e.target.dataset.eventdata) {
+    //     console.log("tryna goto " + e.target.dataset.eventdata );
+    //     EnterSceneGate(e.target.dataset.eventdata);
+    //   }
+
+      
+    // });
+    // $('#popup').on('click', '#popup_cancelButton', function(e) {
+    //   console.log("popup cancel button click on target " + e.target);
+    //   popup.style.display = "none";
+    // });
 
 export function SetPlayerLocation (locationData) {
     // if (controls && controls.object) {
@@ -976,17 +990,42 @@ export function centerRaycast() {
     }
 }
 
+export function EventSwitch (event) {
+      const type = event.target.dataset.markertype;
+        const eventdata = event.target.dataset.eventdata;
+        const tags = event.target.dataset.tags;
+        console.log(type + " " + eventdata + " " + tags);
+
+
+        switch (type) {
+            case "gate":
+                EnterSceneGate(eventdata);
+            break;
+        }
+}
+
 export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
-    console.log(event);
-    event.preventDefault();
-    event.stopPropagation();
+    // console.log(event.target.id);
+    const popup = document.getElementById("popup");
+    if (event.target.id == "popup_yesButton") {
+      EventSwitch(event);
+      popup.style.display = "none";
+      return;
+
+    } else if (event.target.id == "popup_cancelButton") {
+      popup.style.display = "none";
+      return;
+    }
+    // if (event.target.)
+    // event.preventDefault();
+    // event.stopPropagation();
     mouseIsDown = true;
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
     }
     if (lastRaycastHitObject) {
-        const popup = document.getElementById("popup");
+        // const popup = document.getElementById("popup");
         if (lastRaycastHitObject.userData && lastRaycastHitObject.userData.locationData) {
             console.log("mousedown on " + lastRaycastHitObject.userData.locationData.name + " " + lastRaycastHit.instanceId);
             
@@ -1020,12 +1059,13 @@ export function onMouseDown(event) { //clicked on threejs object
             }
             if (navAgentInstance) {
                 navAgentInstance.agentClick();
-                // const popup = document.getElementById("popup");
-                  Object.assign(popup.style, {
-                    left: `${event.clientX - 150}px`,
-                    top: `${event.clientY - 100}px`,
-                    display: 'block',
-                });
+                // // const popup = document.getElementById("popup");
+                //   Object.assign(popup.style, {
+                //     left: `${event.clientX - 150}px`,
+                //     top: `${event.clientY - 100}px`,
+                //     display: 'block',
+                // });
+                ShowPopup(event);
                 
                     if (lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
                         if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
@@ -1039,11 +1079,12 @@ export function onMouseDown(event) { //clicked on threejs object
                     
             } else if (lastRaycastHitObject.userData.objectData) {
                 //  const popup = document.getElementById("popup");
-                Object.assign(popup.style, {
-                    left: `${event.clientX - 150}px`,
-                    top: `${event.clientY - 100}px`,
-                    display: 'block',
-                });
+                // Object.assign(popup.style, {
+                //     left: `${event.clientX - 150}px`,
+                //     top: `${event.clientY - 100}px`,
+                //     display: 'block',
+                // });
+                ShowPopup(event);
                 if (lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
                         if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
                             const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
@@ -1062,23 +1103,35 @@ export function onMouseDown(event) { //clicked on threejs object
                         }
                     }
             } else if (lastRaycastHit.instanceId) {
-                // const popup = document.getElementById("popup");
-                console.log(lastRaycastHit.instanceId);
-                  Object.assign(popup.style, {
-                    left: `${event.clientX - 150}px`,
-                    top: `${event.clientY - 100}px`,
-                    display: 'block',
-                });
+                // // const popup = document.getElementById("popup");
+                // console.log(lastRaycastHit.instanceId);
+                //   Object.assign(popup.style, {
+                //     left: `${event.clientX - 150}px`,
+                //     top: `${event.clientY - 100}px`,
+                //     display: 'block',
+                // });
+                ShowPopup(event);
                 popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
+
             } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
-                Object.assign(popup.style, {
-                    left: `${event.clientX - 150}px`,
-                    top: `${event.clientY - 100}px`,
-                    display: 'block',
-                });
+                // console.log(event.clientX + " " + window.innerWidth);
+                // let xpos = event.clientX - 150;
+                // if ((window.innerWidth - event.clientX) < 150) {
+                //     xpos = event.clientX - 300;
+                // } else if (event.clientX < 150) {
+                //     xpos = 0;
+                // }
+                // let ypos = event.clientY - 100;
+                // Object.assign(popup.style, {
+                //     left: `${xpos}px`,
+                //     top: `${ypos}px`,
+                //     display: 'block',
+                // });
+                ShowPopup(event);
                 popup.innerHTML = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
-                "<br><br><div><button id=\x22popup_yesButton\x22 data-sceneid=\x22"+lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22saveButton\x22>Go</button>"+
-                "<button id=\x22popup_cancelButton\x22 class=\x22deleteButton\x22>Cancel</button></div>";
+                "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+"\x22 data-markertype=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-eventdata=\x22"+
+                lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Go</button>"+
+                "</div>";
 
             } else {
                 // const popup = document.getElementById("popup");
@@ -1124,6 +1177,23 @@ export function onMouseDown(event) { //clicked on threejs object
     }
 
     // if ()
+}
+
+function ShowPopup (event) {
+    const popup = document.getElementById("popup");
+    // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
+    let xpos = event.clientX - 150;
+    if ((window.innerWidth - event.clientX) < 150) {
+        xpos = event.clientX - 300;
+    } else if (event.clientX < 150) {
+        xpos = 0;
+    }
+    let ypos = event.clientY - 100;
+    Object.assign(popup.style, {
+        left: `${xpos}px`,
+        top: `${ypos}px`,
+        display: 'block',
+    });
 }
 
 export function onMouseUp(e) {
