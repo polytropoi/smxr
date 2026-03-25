@@ -32,6 +32,9 @@
 
     export let agentModels = [];
 
+
+    let lastTime = 0;
+    const throttleInterval = 1000 / 10; // 30 FPS
     // import { uniform, sin } from 'three/tsl';
     // let agentIndex = 0;
 
@@ -741,96 +744,54 @@
             }
         }
         
-        update(dt){
+        update(dt, currentTime){ //move it!
             const speed = this.speed;
             const player = this.object; //um, not necessarily...
             let raypos;
+
+            // console.log(currentTime + " " + lastTime + " " + throttleInterval);
+
             if (this.mixer) this.mixer.update(dt);
             
-            // if (player.material.colorNode) {
-                // player.material.colorNode.seed = dt / 10000;
-                // player.material.colorNode.seed = performance.now() * 0.1;
-                // this.object.material.colorNode.scale = sin(dt).mul(0.75);
-            // }
-            // console.log(this.readyToNav +" " + this.isPaused)
+        
             if (this.readyToNav && !this.isPaused) {
                 if (this.calculatedPath && this.calculatedPath.length) {
 
-                    // if (this.name == "player") {
-                    //     console.log("tryna update player on path " + JSON.stringify(player.position));
-                    // }
                     const targetPosition = this.calculatedPath[0];
-                    
-                   
-                    // if (raypos) {
-                    //     console.log(console.log)
-                    //     targetPosition.y = raypos.y;
-                    // }
                     const vel = targetPosition.clone().sub(player.position);
-                    
-
-
                     let pathLegComplete = (vel.lengthSq()<0.01);
-
-                    // raypos = this.raycastedPosition();
-                    // if (raypos && raypos.y) {
-                    //     // if ((raypos.y - player.position.y) > .3) {
-                    //     // console.log("tryna snap to raypos.y " + raypos.y);
-                    //     vel.y = raypos.y;
-                    //     // }
-                    // }
-
-                    
+  
                     if (!pathLegComplete) {
                         //Get the distance to the target before moving
                         const prevDistanceSq = player.position.distanceToSquared(targetPosition);
                        
-                        // if (prevDistanceSq < 10) {
-                        //     if (this.npc) {
-                        //         this.frameCount++; //hrm...
-                        //         if (this.frameCount % 2 == 0) {
-                        //             raypos = this.raycastedPosition();
-                        //         }
-                        //     }
-                        //     return;
-                        // }
+                    
                         vel.normalize();
-                        // Move player to target
-                        // if (!this.playerNavMode) {
-                            if (this.quaternion) player.quaternion.slerp(this.quaternion, 0.1);
+     
+                        if (this.quaternion) {
+                            player.quaternion.slerp(this.quaternion, 0.1);
+                        }
 
-                            player.position.add(vel.multiplyScalar(dt * speed));
-                                                        
-                            //Get distance after moving, if greater then we've overshot and this leg is complete
-                            const newDistanceSq = player.position.distanceToSquared(targetPosition);
-                            //  console.log(newDistanceSq + " vs " + prevDistanceSq );
-                            pathLegComplete = (newDistanceSq > prevDistanceSq);
-                            if (this.npc) {
-                                // this.frameCount++; //hrm...
-                                // if (this.frameCount % 2 == 0) {
-                                // if (Math.random() > .2) {
-                                    raypos = this.raycastedPosition();
-                                    if (raypos && raypos.y) {
-                                        // if ((raypos.y - player.position.y) > .3) {
-                                        // console.log("tryna snap to raypos.y " + raypos.y);
-                                        player.position.y = raypos.y;
-                                        // }
-                                    }
-
-                                // }
+                        player.position.add(vel.multiplyScalar(dt * speed));
+                                                    
+                        //Get distance after moving, if greater then we've overshot and this leg is complete
+                        const newDistanceSq = player.position.distanceToSquared(targetPosition);
+                        //  console.log(newDistanceSq + " vs " + prevDistanceSq );
+                        pathLegComplete = (newDistanceSq > prevDistanceSq);
+                        if (this.npc) {
+                            
+                            if (currentTime - lastTime > throttleInterval) { 
+                                // console.log("throttled update!");
+                                lastTime = currentTime;
+                                raypos = this.raycastedPosition(); //expensive, so throttle...
+                                if (raypos && raypos.y) {
+                                    // if ((raypos.y - player.position.y) > .3) {
+                                    // console.log("tryna snap to raypos.y " + raypos.y);
+                                    player.position.y = raypos.y;
+                                    // }
+                                }
                             }
-                        // } else { //no
-                        //     // if (this.quaternion) player.parent.quaternion.slerp(this.quaternion, 0.1);
-                        //     // player.parent.position.add(vel.multiplyScalar(dt * speed));
-                        //     //  if (raypos) {
-                                
-                        //     //     player.parent.position.y = raypos.y;
-                        //     // }
-                        //     // //Get distance after moving, if greater then we've overshot and this leg is complete
-                        //     // const newDistanceSq = player.parent.position.distanceToSquared(targetPosition);
-                        //     // pathLegComplete = (newDistanceSq > prevDistanceSq);
-                        // }
-                        
+                        }
                     } 
                     
                     if (pathLegComplete){
@@ -838,20 +799,15 @@
                         // console.log("pathLegComplete paths " + this.calculatedPath.length);
                         this.calculatedPath.shift();
                         if (this.calculatedPath.length==0){
-                            // if (this.npc){
-                                // this.isPaused = false;
-
-                                this.newPath(randomNavmeshPoint());
-                                
-                            // }else{
-                                // player.position.copy( targetPosition );
                             
-                            // }
+                            this.newPath(randomNavmeshPoint());
+                                
                         }else{
                             
                             this.setTargetDirection();
                         }
-                    } //this.action = 'idle';
+                    } 
+                    //this.action = 'idle';
                     //  const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
                     // this.action = this.idleAnims[randomIndex];
                 } else{
@@ -859,17 +815,7 @@
                     this.newPath(randomNavmeshPoint());
                 }
             } else {
-                // if (this.isPaused) {
-                //     if (Math.random > .9) {
-                //         this.isPaused = false;
-                //     }
-                // }
-                // if (this.isPaused) {
-                    // this.agentPause();
-                    // this.newPath(randomNavmeshPoint());
-                // }
-                // this.raycastedPosition();
-                
+               //? 
             }
         }
     }

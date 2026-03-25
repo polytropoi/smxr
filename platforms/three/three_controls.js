@@ -7,6 +7,9 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
+import { EventSwitch } from './three_events.js';
+
+
 import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './three_locations.js';
 
 import { scene, cameraMode, renderer, clock, selectedObjects } from './three_main.mjs';
@@ -990,19 +993,6 @@ export function centerRaycast() {
     }
 }
 
-export function EventSwitch (event) {
-      const type = event.target.dataset.markertype;
-        const eventdata = event.target.dataset.eventdata;
-        const tags = event.target.dataset.tags;
-        console.log(type + " " + eventdata + " " + tags);
-
-
-        switch (type) {
-            case "gate":
-                EnterSceneGate(eventdata);
-            break;
-        }
-}
 
 export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;

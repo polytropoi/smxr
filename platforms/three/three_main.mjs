@@ -481,7 +481,7 @@
 			}
 			if (agents.length) {
 				agents.forEach(a =>
-					a.update(delta));
+					a.update(delta, time));
 			}
 			if (rapierDebugRenderer && showDebug) {
 				rapierDebugRenderer.update();
