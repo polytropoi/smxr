@@ -150,8 +150,12 @@ export async function HTMLText (textString, size, parent, position, distance, pe
     //     // parent.add(mesh);
 }
 
+let cooldown = false;
 export async function ThreeDeeText (textString, size, parent, position, distance, persist, parentScale) { //
 
+    if (!cooldown) {
+        cooldown = true;
+        
     let scaleFactor = .1;
     if (distance) {
         if (distance > 1) {
@@ -284,7 +288,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
                 textContainers.push(textContainer);
             }
             // const camPos = camera.position.clone();
-            console.log("textContainer position is " + JSON.stringify(position));
+            // console.log("textContainer position is " + JSON.stringify(position));
             parent.updateMatrixWorld(true);
         
             // const targetWorldPosition = new THREE.Vector3();
@@ -293,6 +297,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             textmesh.name = "textmesh";
             textContainer.add(textmesh);
             parent.add(textContainer);
+            textContainer.visible = false;
 
             // if (position) {
             //     parent.worldToLocal(position);
@@ -382,6 +387,15 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     // textmesh.geometry = updated.geometry;
     //     console.log("gotsa text result2 " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
     // result.text
+    Cooldown();
+    } 
+}
+
+function Cooldown () {
+    setTimeout(() => {
+    console.log('cooled down!');
+    cooldown = false;
+    }, 100);
 }
 // import { Container, Text } from "@pmndrs/uikit";
 

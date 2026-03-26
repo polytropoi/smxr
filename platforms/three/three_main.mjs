@@ -11,7 +11,7 @@
 	import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 
 
-	import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
+	import { LoadPrimaryAudioHowl, PlayTriggerWithTag, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 	import { settings } from '../../../connect/settings.js';
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 	import { userData } from '../../../connect/connect.js';
@@ -43,6 +43,8 @@
 	import Stats from './ui/stats.js';
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './three_controls.js';
+	
+	import { InitAudioGroups } from './three_media.js';
 // import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene;
@@ -62,7 +64,7 @@
 	// let model, floor, floorPosition;
 	let postProcessing;
 	let renderPipeline;
-	let showDebug = false;
+	let showDebug = true;
 	// export let controls;
 
 	export let selectedObjects = [];
@@ -239,7 +241,11 @@
 			// CreatePlayerAgent(player, player.position.clone());
 		}
 		//  await new Promise(r => setTimeout(r, 000)); //fudge
-		initEvents();
+		InitEvents();
+
+		if (settings.audioGroups) {
+			InitAudioGroups();
+		}
 			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
 			// ThreeText(texttest);
 		
@@ -451,8 +457,11 @@
 		if (colliders[h1]) {
 			if (!colliders[h2].includes("agent")) {
 				console.log("player hit trigger " + JSON.stringify(locations[colliders[h2]]));
+				// PlayTriggerWithTag('hit');
 			}
+			
 		}
+		PlayTriggerWithTag('hit');
 	}
 	function CollisionEnd(h1, h2) {
 		console.log("Collision stopped between colliders " + colliders[h1] + " and " + colliders[h2]);
@@ -583,7 +592,7 @@
 
 	const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-	function initEvents () {
+	function InitEvents () {
 
 
 		document.addEventListener( 'keydown', onKeyDown );

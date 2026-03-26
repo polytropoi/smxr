@@ -251,7 +251,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     // const pos = randomNavmeshPoint();
                     
                     clonedModel.userData.name = agentID;
-                    activeObjex.push(clonedModel);
+                    // activeObjex.push(clonedModel);
                     
                 
                     // npcKinematicBodies.push(body);
@@ -264,10 +264,11 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     });
                     
                     scene.add(clonedModel);
-                    // const body = await getModelKinematicBody(clonedModel); //pass the index too
-                    // kinematicBodies.push(body);
                     await CreateNPCAgent(clonedModel, animations, z.toString(), locationObjex[i].locationData);
-                
+                    const body = await getModelKinematicBody(clonedModel, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
+                    kinematicBodies.push(body);
+                   
+                     
                 }
             
             } else {

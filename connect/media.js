@@ -615,6 +615,7 @@ export function PrimaryAudioInit() { //this one is for aframe
   // }
 }
 
+
 export function FetchAudioGroupsData(groupArray) { //sets data in aframe component
     console.log("tryna fetch audioGroups: " +JSON.stringify(groupArray));
     var posting = $.ajax({
@@ -657,7 +658,7 @@ export async function ReturnAudioGroupsData() { //use outside aframe
           body: JSON.stringify(groupArray)
         });
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         audioGroupsData = data;
         return data;
       } catch(error) {

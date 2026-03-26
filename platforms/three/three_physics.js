@@ -34,7 +34,7 @@ export let colliders = {}
 
 
 export const agentCount = 0;
-const dynamicObjectCount = 8;
+const dynamicObjectCount = 0;
 let playerWorldPosition = new THREE.Vector3();
         
 
@@ -53,7 +53,7 @@ export async function InitRapier (gravity) {
 		world = await new RAPIER.World(gravity);
 
     // setTimeout( () => {
-    rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+   
     // }, 3000);
 
     // await new Promise(r => setTimeout(r, 5000));
@@ -61,6 +61,8 @@ export async function InitRapier (gravity) {
     // worldIsReady = true;
 
     eventQueue = new RAPIER.EventQueue(true); // `true` for generating contact force events
+
+    //  rapierDebugRenderer = new RapierDebugRenderer(scene, world);
 }
 
 
@@ -272,18 +274,33 @@ function WaitAndInit () {
   }
 
 
-  export async function getModelKinematicBody(mesh) { 
+  export async function getModelKinematicBody(parent, locData, objData) { 
 
-    try {
-    
+      await new Promise(r => setTimeout(r, 0));
       let worldposition = new THREE.Vector3();
-      mesh.getWorldPosition(worldposition);
+      parent.getWorldPosition(worldposition);
+      const geometry = new THREE.CapsuleGeometry( .5, 2, 4, 8, 1 );
+      const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .25, wireframe: true, color: 'orange' });
+      // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
+      // material.roughness = 0.1;
+      // material.metalness = 0.3;
+      // material.envMap = scene.environment;
+      // material.envMapIntensity = 2;
+      // const material = returnMaterial('brain');
+    
+      const mesh = new THREE.Mesh( geometry, material );
+      parent.add(mesh);
+      mesh.position.y += 1.5;
 
+      mesh.visible = false;
+      mesh.userData.locationData = locData;
+      mesh.userData.objectData = objData;
+      activeObjex.push(mesh);
       let size = 2;
-      let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
+      let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased()//no, position based...
               .setTranslation(worldposition.x, worldposition.y, worldposition.z);
       let rigidbody = await world.createRigidBody(rigidBodyDesc);
-      colliders[rigidbody.handle] = "agent_" + agentIndex;
+      colliders[rigidbody.handle] = "agent_";
       let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
       let collider = await world.createCollider(kinematicCollider, rigidbody);
       collider.setRestitution(1.5);
@@ -294,6 +311,7 @@ function WaitAndInit () {
     function update () {
 
       if (mesh && rigidbody) {
+        
         //  rigidbody.resetForces(true); 
         //   rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y + 1, z: mesh.position.z });
         mesh.getWorldPosition(worldposition);
@@ -304,10 +322,13 @@ function WaitAndInit () {
       }
     }
 
-    return { rigidbody, update };
-  } catch (e) {
-    console.log("error creating model kinematic rigidbody " + e);
-  }
+  
+  // } catch (e) {
+  //   console.log("error creating model kinematic rigidbody " + e);
+  // } finally {
+      return { rigidbody, update };
+  // }
+
 }
 
   export async function getKinematicBody(agentParent, agentIndex, position) {
@@ -516,7 +537,7 @@ export async function initDynamicObjex () {
       for (let i = 0; i < dynamicObjectCount; i++) { // go easy
         // 
         // await initTestObjex(i);
-          await new Promise(r => setTimeout(r, 0));
+          await new Promise(r => setTimeout(r, 1000));
         const body = await getDynamicBody(); //spawns a mesh too
         
         dynamicBodies.push(body);
@@ -581,7 +602,7 @@ export async function getDynamicBody(model, position, scale) {
 
       mesh.scale.setScalar(size);
       scene.add(mesh);
-      
+      // mesh.name = "dynamic";
       let position = new THREE.Vector3();
       position = rigidbody.translation();
       mesh.position.copy(position);
@@ -595,6 +616,7 @@ export async function getDynamicBody(model, position, scale) {
           let q = rigidbody.rotation();
           let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
           mesh.rotation.setFromQuaternion(rote);
+          
           if (position.y < -100) {
               rigidbody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
               rigidbody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);

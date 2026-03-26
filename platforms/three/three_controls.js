@@ -7,7 +7,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
-import { EventSwitch } from './three_events.js';
+import { ActionSwitch } from './three_actions.js';
 
 
 import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './three_locations.js';
@@ -647,6 +647,7 @@ function NavmeshConstraint () {
 
 }
 
+//////////////////////////. PROCESS RAYCAST HIT /////////////////
 function RaycastHit(type, hit) {
 
     if (lastRaycastHitObject) {
@@ -718,7 +719,7 @@ function RaycastHit(type, hit) {
             const textstring = calloutsplit[randomIndex];
             // console.log("textstring is " + textstring);
 
-            ThreeDeeText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+            ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         } else {
             ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
@@ -775,7 +776,7 @@ function RaycastHit(type, hit) {
         }
     } else if (locationData && locationData.markerType == "character" ) {
         // if (raycastHitAgent != hit.object) {
-        
+            console.log("gotsa character hit " + locationData.name);
             raycastHitAgent = hit.object;
             selectedObjects.push(hit.object);
             // if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode) {
@@ -798,14 +799,14 @@ function RaycastHit(type, hit) {
             // )
             // const agentID = raycastHitAgent.parent.parent.name;
             
-            const navAgentInstance = raycastHitAgent.parent.parent.userData.NavAgentInstance; //hrm
+            const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //hrm
             // const navAgentInstance = raycastHitAgent.parent.getObjectByName("NavAgent");
             // const navAgentInstance = navAgentInstances[agentID];
             if (navAgentInstance) {
-                // console.log("gotsa navagent");
+                console.log("gotsa navagent");
                 navAgentInstance.agentRaycastHit();
             } else {
-                // console.log("no navagent found on character!");
+                console.log("no navagent found on character!");
             }
         // }
     } else if (locationData && locationData.markerType == "gate" ) {
@@ -999,7 +1000,7 @@ export function onMouseDown(event) { //clicked on threejs object
     // console.log(event.target.id);
     const popup = document.getElementById("popup");
     if (event.target.id == "popup_yesButton") {
-      EventSwitch(event);
+      ActionSwitch(event);
       popup.style.display = "none";
       return;
 
