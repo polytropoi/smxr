@@ -706,7 +706,7 @@ function RaycastHit(type, hit) {
 
         showCallout = true;
    
-        // console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+        console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
 
         // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                  
@@ -717,7 +717,7 @@ function RaycastHit(type, hit) {
             const calloutsplit = objectData.callouttext.split("~");
             const randomIndex = Math.floor(Math.random() * calloutsplit.length);
             const textstring = calloutsplit[randomIndex];
-            // console.log("textstring is " + textstring);
+            console.log("gotsa object with textstring " + textstring);
 
             ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
@@ -799,7 +799,7 @@ function RaycastHit(type, hit) {
             // )
             // const agentID = raycastHitAgent.parent.parent.name;
             
-            const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //hrm
+            const navAgentInstance = raycastHitAgent.parent.parent.userData.NavAgentInstance; //hrm
             // const navAgentInstance = raycastHitAgent.parent.getObjectByName("NavAgent");
             // const navAgentInstance = navAgentInstances[agentID];
             if (navAgentInstance) {

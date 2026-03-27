@@ -262,11 +262,23 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                             child.userData.objectData = locationObjex[i].objectData;
                         }
                     });
+
+                    const geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
+                    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
+                    const parent = new THREE.Mesh( geometry, material );
+                    scene.add(parent);
+                    parent.userData.locationData = locationObjex[i].locationData;
+                    parent.userData.objectData = locationObjex[i].objectData;
                     
-                    scene.add(clonedModel);
-                    await CreateNPCAgent(clonedModel, animations, z.toString(), locationObjex[i].locationData);
-                    const body = await getModelKinematicBody(clonedModel, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
-                    kinematicBodies.push(body);
+                    parent.add(clonedModel);
+                    clonedModel.position.set(0,0,0);
+                       activeObjex.push(parent);
+                    // clonedModel.add(collider);
+                    
+                   
+                    await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
+                    // const body = await getModelKinematicBody(clonedModel, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
+                    // kinematicBodies.push(body);
                    
                      
                 }
@@ -461,12 +473,13 @@ async function LoadLocationModel (url, locationData, isActive) {
                 //     mesh.scale.set(1, boneLength, 1);
                 //     mesh.position.y = boneLength / 2; // Adjust based on pivot
                 // }
-                // mesh.layers.set(1);
+                // // mesh.layers.set(1);
                 // // Rotate if necessary to match bone direction
                 // // mesh.rotation.x = Math.PI / 2;
                 // mesh.userData = {};
                 // mesh.userData.name = "bone_" + locationData.timestamp;
                 // mesh.userData.locationData = locationData;
+                // // mesh.userData.objectData = objectData;
                 // activeObjex.push(mesh);
                 // child.add(mesh);
                 // mesh.visible = true;

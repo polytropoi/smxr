@@ -107,15 +107,16 @@
         // return playerNavAgent;
     }
 
-    export async function CreateNPCAgent (model, animations, index, locationData) { //hrm, not yet...
+    export async function CreateNPCAgent (parent, model, animations, index, locationData) { //hrm, not yet...
         
 
         await new Promise(r => setTimeout(r, 0));
         const name = locationData.name;
         const pos = randomNavmeshPoint();
-        model.position.set(pos.x, pos.y, pos.z);
+        parent.position.set(pos.x, pos.y, pos.z);
         const options = {
-            object: model,
+            object: parent,
+            model: model,
             nodeRadius: 0.1,
             speed: 2,
             readyToNav: true,
@@ -315,6 +316,8 @@
             const pt = this.object.position.clone();
             pt.z += 10;
             this.object.lookAt(pt);
+
+            this.firstPlay = true;
             
             this.playerNavMode = false;
             if (options.anims){ 
@@ -328,7 +331,7 @@
             if (options.animations && options.animations.length){
                 this.hasAnims = true;
                 //Use this option to set multiple animations directly
-                this.mixer = new THREE.AnimationMixer(options.object);
+                this.mixer = new THREE.AnimationMixer(options.model);
                 options.animations.forEach( (animation)=>{
                     // console.log("navagent animation  " + animation.name.toLowerCase());
                     self.animations[animation.name.toLowerCase()] = animation;
@@ -735,17 +738,28 @@
         set action(name){ //hrm...
             //Make a copy of the clip if this is a remote player
             if (this.hasAnims) {
-                if (name && this.actionName == name.toString().toLowerCase()) return;
-                
+                if (name && this.actionName == name.toString().toLowerCase()) {
+                    return;
+                }
                 const clip = this.animations[name];
                 
                 delete this.curAction;
                 
                 if (clip!==undefined && clip != "undefined") {
-                    // console.log(this.name + " tryna play animation " + name );
                     const action = this.mixer.clipAction( clip );
                     action.loop = clip.loop;
-                    action.time = 0;
+                    // if (this.firstPlay) {
+                        // this.firstPlay = false;
+                        const duration = action.getClip().duration; // Duration in seconds
+                        const randomTime = Math.random() * duration; 
+                        action.time = randomTime;
+                    // } else {
+                    //     action.time = 0;
+                    // }
+                    // console.log(this.name + " tryna play animation " + name );
+                    
+                    
+                   
                     this.mixer.stopAllAction();
                     this.actionName = name.toLowerCase();
                     this.actionTime = Date.now();
