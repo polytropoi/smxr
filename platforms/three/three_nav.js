@@ -113,10 +113,10 @@
         await new Promise(r => setTimeout(r, 0));
         const name = locationData.name;
         const pos = randomNavmeshPoint();
-        parent.position.set(pos.x, pos.y, pos.z);
+        model.position.set(pos.x, pos.y, pos.z);
         const options = {
-            object: parent,
-            model: model,
+            object: model,
+            // model: parent,
             nodeRadius: 0.1,
             speed: 2,
             readyToNav: true,
@@ -280,7 +280,8 @@
 
             // scene.add(options.object);
             
-            this.object = options.object;
+            this.object = options.object; //parent to simple geo
+            // this.model = options.model; //actual mesh
             // this.object.position.y = options.yOffset;
             this.pathLines = new THREE.Object3D();
             this.pathColor = new THREE.Color(0xFFFFFF);
@@ -331,7 +332,7 @@
             if (options.animations && options.animations.length){
                 this.hasAnims = true;
                 //Use this option to set multiple animations directly
-                this.mixer = new THREE.AnimationMixer(options.model);
+                this.mixer = new THREE.AnimationMixer(options.object);
                 options.animations.forEach( (animation)=>{
                     // console.log("navagent animation  " + animation.name.toLowerCase());
                     self.animations[animation.name.toLowerCase()] = animation;

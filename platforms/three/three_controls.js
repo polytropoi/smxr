@@ -798,17 +798,64 @@ function RaycastHit(type, hit) {
 
             // )
             // const agentID = raycastHitAgent.parent.parent.name;
-            
-            const navAgentInstance = raycastHitAgent.parent.parent.userData.NavAgentInstance; //hrm
-            // const navAgentInstance = raycastHitAgent.parent.getObjectByName("NavAgent");
-            // const navAgentInstance = navAgentInstances[agentID];
-            if (navAgentInstance) {
-                console.log("gotsa navagent");
+            let navAgentInstance;
+            if (raycastHitAgent.userData) {
+              
+                navAgentInstance = raycastHitAgent.userData.NavAgentInstance;
+                if (navAgentInstance) {
+                console.log("gotsa raycastHitAgent.userData ");
                 navAgentInstance.agentRaycastHit();
-            } else {
-                console.log("no navagent found on character!");
-            }
-        // }
+                }
+                
+            } if (raycastHitAgent.parent.userData) {
+                
+                navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
+                if (navAgentInstance) {
+                    console.log("gotsa raycastHitAgent.parent.userData.navAgentInstance");
+                    navAgentInstance.agentRaycastHit();
+                }
+               
+            } if (raycastHitAgent.parent.parent.userData) {
+               
+                navAgentInstance = raycastHitAgent.parent.parent.userData.NavAgentInstance;
+                if (navAgentInstance) {
+                     console.log("gotsa raycastHitAgent.parent.parent.userData");
+                navAgentInstance.agentRaycastHit();
+                }
+            } if (raycastHitAgent.parent.parent.parent.userData) {
+               
+                navAgentInstance = raycastHitAgent.parent.parent.parent.userData.NavAgentInstance;
+                if (navAgentInstance) {
+                     console.log("gotsa rraycastHitAgent.parent.parent.prent.userData");
+                    navAgentInstance.agentRaycastHit();
+                }
+            } 
+            // if (raycastHitAgent.parent.parent.parent.parent.userData) {
+            //     console.log("gotsa rraycastHitAgent.parent.parent.prent.porenbt.userData");
+            //     navAgentInstance = raycastHitAgent.parent.parent.parent.parent.userData.NavAgentInstance;
+            //     if (navAgentInstance)
+            //     navAgentInstance.agentRaycastHit();
+            // } 
+                // const navParent = raycastHitAgent.getObjectByName("navagent", true);
+                // if (navParent) { 
+
+                //     navAgentInstance = navParent.userData.navAgentInstance;
+                //     navAgentInstance.agentRaycastHit();
+                // } else {
+                //     console.log("no navagent found on character!");
+                // }
+            // }
+        
+        
+        // const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //hrm
+        // const navAgentInstance = raycastHitAgent.parent.getObjectByName("NavAgent");
+        // const navAgentInstance = navAgentInstances[agentID];
+        // if (navAgentInstance) {
+        //     console.log("gotsa navagent");
+        //     navAgentInstance.agentRaycastHit();
+        // } else {
+            
+    // }
     } else if (locationData && locationData.markerType == "gate" ) {
         
     } else {

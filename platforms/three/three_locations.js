@@ -220,9 +220,10 @@ export function InitLocations() {
 export async function LoadLocationObjex() { //got to wait to load these, might need navagent etc
     if (locationObjex.length) {
         for (let i = 0; i < locationObjex.length; i++) {
-            const modelData = await LoadLocationModel(locationObjex[i].modelData.modelURL, locationObjex[i].locationData);
+            // const modelData = await LoadLocationModel(locationObjex[i].modelData.modelURL, locationObjex[i].locationData);
+            const modelData = await LoadModel(locationObjex[i].modelData.modelURL);
             
-            const model = modelData.model;
+            const model = modelData.scene;
             model.userData.locationData = locationObjex[i].locationData;
             model.userData.objectData = locationObjex[i].objectData;
             const animations = modelData.animations;
@@ -263,20 +264,24 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                         }
                     });
 
-                    const geometry = new THREE.CapsuleGeometry( 1, 2, 4, 8, 1 );
-                    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
-                    const parent = new THREE.Mesh( geometry, material );
-                    scene.add(parent);
-                    parent.userData.locationData = locationObjex[i].locationData;
-                    parent.userData.objectData = locationObjex[i].objectData;
+                    const geometry = new THREE.CapsuleGeometry( 1, .5, 4, 8, 1 );
+                    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true, transparent: true, opacity: 0  } );
                     
-                    parent.add(clonedModel);
+                    // const parent = new THREE.Mesh( geometry, material );
+                    // scene.add(parent);
+                    // parent.userData.locationData = locationObjex[i].locationData;
+                    // parent.userData.objectData = locationObjex[i].objectData;
+                    // parent.add(clonedModel);
+                    
                     clonedModel.position.set(0,0,0);
-                       activeObjex.push(parent);
+                    scene.add(clonedModel);
+                    activeObjex.push(clonedModel);
+                    // activeObjex.push(parent);
                     // clonedModel.add(collider);
                     
-                   
-                    await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
+                    // parent.name = "navagent";
+                    // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
+                    await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData);
                     // const body = await getModelKinematicBody(clonedModel, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
                     // kinematicBodies.push(body);
                    
