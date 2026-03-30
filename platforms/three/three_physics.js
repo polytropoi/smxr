@@ -274,13 +274,13 @@ function WaitAndInit () {
   }
 
 
-  export async function getModelKinematicBody(parent, locData, objData) { 
+  export async function getModelKinematicBody(mesh, locData, objData) { 
 
-      await new Promise(r => setTimeout(r, 0));
+      await new Promise(r => setTimeout(r, 1000));
       let worldposition = new THREE.Vector3();
-      parent.getWorldPosition(worldposition);
-      const geometry = new THREE.CapsuleGeometry( .5, 2, 4, 8, 1 );
-      const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .25, wireframe: true, color: 'orange' });
+      mesh.getWorldPosition(worldposition);
+      // const geometry = new THREE.CapsuleGeometry( .5, 2, 4, 8, 1 );
+      // const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .25, wireframe: true, color: 'orange' });
       // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
       // material.roughness = 0.1;
       // material.metalness = 0.3;
@@ -288,14 +288,14 @@ function WaitAndInit () {
       // material.envMapIntensity = 2;
       // const material = returnMaterial('brain');
     
-      const mesh = new THREE.Mesh( geometry, material );
-      parent.add(mesh);
-      mesh.position.y += 1.5;
+      // const mesh = new THREE.Mesh( geometry, material );
+      // parent.add(mesh);
+      // mesh.position.y += 1.5;
 
-      mesh.visible = false;
+      // mesh.visible = false;
       mesh.userData.locationData = locData;
       mesh.userData.objectData = objData;
-      activeObjex.push(mesh);
+      // activeObjex.push(mesh);
       let size = 2;
       let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased()//no, position based...
               .setTranslation(worldposition.x, worldposition.y, worldposition.z);

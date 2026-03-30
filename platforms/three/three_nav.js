@@ -298,6 +298,7 @@
             this.frameCount = 0;
             this.npc = options.npc;
             this.isPaused = false;
+            this.targetPosition = null;
             if (this.npc) this.dead = false;
             
             this.speed = options.speed;
@@ -476,7 +477,7 @@
 
             if (this.calculatedPath && this.calculatedPath.length && this.readyToNav) {
 
-                this.isPaused = false;
+                // this.isPaused = false;
                 const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
                 // console.log(this.name + " tryna get walk animation " + this.walkAnims[randomIndex]);
                 this.action = this.walkAnims[randomIndex];
@@ -496,7 +497,7 @@
                 // this.action = 'idle';
                 const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
                 this.action = this.idleAnims[randomIndex];
-                this.isPaused = true;
+                // this.isPaused = true;
 
                 this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
 
@@ -542,77 +543,88 @@
         }
         agentPause () {
            
-            console.log("agentPause isPaused " + this.isPaused);
-            let interval;
-            if (this.isSelected) {
-                console.log("agent isSelected");
-                return;
+            this.calculatedPath = null;
+            this.targetPosition = null;
+            this.readyToNav = !this.readyToNav;
+            if (!this.readyToNav) {
+                this.action = 'idle';
+                     const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
+                    this.action = this.idleAnims[randomIndex];
             }
-            if (!this.isPaused) {
-                this.readyToNav = false;  
-                // const randTime = Math.random() * 3000;
-                const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
-                this.action = this.idleAnims[randomIndex];
-                this.isPaused = true;
-           
-                // interval = setInterval(() => {
-                //     if (Math.random() > .5) {
-                //         clearInterval(interval);
-                //          this.readyToNav = true;
-                //     this.randomPath();
-                //     console.log("tryna unpause");
-                //     }
-                // }, 1000);
-                // const unpause = () => {
-                //     console.log("tryna unpause");
-                    
-                // }
-                // setTimeout(() => {
-                //     // this.readyToNav = true;
-                //     this.randomPath();
+            // console.log("agentPause isPaused " + this.isPaused);
+            // let interval;
+            // if (this.isSelected) {
+            //     console.log("agent isSelected");
+            //     return;
+            // }
 
-                // }, randTime);
-            } else {
+            // this.readyToNav = !this.readyToNav;
+            // if (!this.isPaused) {
+            //     // this.readyToNav = false;  
+            //     // const randTime = Math.random() * 3000;
+            //     const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
+            //     this.action = this.idleAnims[randomIndex];
+            //     this.isPaused = true;
+           
+            //     // interval = setInterval(() => {
+            //     //     if (Math.random() > .5) {
+            //     //         clearInterval(interval);
+            //     //          this.readyToNav = true;
+            //     //     this.randomPath();
+            //     //     console.log("tryna unpause");
+            //     //     }
+            //     // }, 1000);
+            //     // const unpause = () => {
+            //     //     console.log("tryna unpause");
+                    
+            //     // }
+            //     // setTimeout(() => {
+            //     //     // this.readyToNav = true;
+            //     //     this.randomPath();
+
+            //     // }, randTime);
+            // } else {
                  
-                 if (Math.random() > .5) {
-                    clearInterval(interval);
-                    this.isPaused = false;
-                    this.readyToNav = true;
-                    this.randomPath();
-                 }
-            }
+            //      if (Math.random() > .75) {
+            //         // clearInterval(interval);
+            //         // this.isPaused = false;
+            //         // this.readyToNav = true;
+            //         this.randomPath();
+            //      }
+            // }
         }
         // agentUnpause() 
 
         agentRaycastHit () {
             // console.log("agentHit pathfinder " + this.pathfinder);
             if (this.pathfinder) {
-                            const player = this.object;
-                const closestNode = this.pathfinder.getClosestNode(player.position, this.ZONE, this.navMeshGroup, true);
+                //             const player = this.object;
+                // const closestNode = this.pathfinder.getClosestNode(player.position, this.ZONE, this.navMeshGroup, true);
 
-                if (closestNode) {
+                // if (closestNode) {
                   
                     this.agentPause();
-                     const raypos = this.raycastedPosition(); //try to snap to navmesh
-                    if (raypos && raypos.y) {
-                        // if ((raypos.y - player.position.y) > .3) {
-                        console.log("tryna snap to raypos.y " + raypos.y);
-                        player.position.y = raypos.y;
-                        // }
-                    }
+
+                    //  const raypos = this.raycastedPosition(); //try to snap to navmesh
+                    // if (raypos && raypos.y) {
+                    //     // if ((raypos.y - player.position.y) > .3) {
+                    //     console.log("tryna snap to raypos.y " + raypos.y);
+                    //     player.position.y = raypos.y;
+                    //     // }
+                    // }
                    
-                } else {
+                // } else {
 
-                    console.log("don't interrupt now, cain't find a spot to stop");
-                    const raypos = this.raycastedPosition(); //try to snap to navmesh
-                    if (raypos && raypos.y) {
-                        // if ((raypos.y - player.position.y) > .3) {
-                        console.log("tryna snap to raypos.y " + raypos.y);
-                        player.position.y = raypos.y;
-                        // }
-                    }
+                //     console.log("don't interrupt now, cain't find a spot to stop");
+                //     const raypos = this.raycastedPosition(); //try to snap to navmesh
+                //     if (raypos && raypos.y) {
+                //         // if ((raypos.y - player.position.y) > .3) {
+                //         console.log("tryna snap to raypos.y " + raypos.y);
+                //         player.position.y = raypos.y;
+                //         // }
+                //     }
 
-                }
+                // }
             } else {
                 console.log("reset pathfinder");
                 if (pathfinding){
@@ -630,8 +642,10 @@
 
             //     if (closestNode) {
             console.log("clicked an agent!");
-            this.isSelected = !this.isSelected;
-                    this.readyToNav = this.isSelected;    
+            // this.isSelected = !this.isSelected;
+            //         this.readyToNav = this.isSelected;    
+                    this.agentPause();
+
                     // if (this.readyToNav) {
                     //         this.object.traverse((child) => {
                     //         if (child.isMesh) {
@@ -782,11 +796,11 @@
 
             if (this.mixer) this.mixer.update(dt);
             
-        
-            if (this.readyToNav && !this.isPaused) {
+            
+            if (this.readyToNav) {
                 if (this.calculatedPath && this.calculatedPath.length) {
 
-                    const targetPosition = this.calculatedPath[0];
+                    this.targetPosition = this.calculatedPath[0];
 
                     // if (currentTime - lastTime > throttleInterval) { 
                                 // console.log("throttled update!");
@@ -800,12 +814,12 @@
                                 // }
                             // }
 
-                    const vel = targetPosition.clone().sub(player.position);
+                    const vel = this.targetPosition.clone().sub(player.position);
                     let pathLegComplete = (vel.lengthSq()<0.01);
   
                     if (!pathLegComplete) {
                         //Get the distance to the target before moving
-                        const prevDistanceSq = player.position.distanceToSquared(targetPosition);
+                        const prevDistanceSq = player.position.distanceToSquared(this.targetPosition);
                        
                     
                         vel.normalize();
@@ -817,17 +831,17 @@
                         player.position.add(vel.multiplyScalar(dt * speed));
                                                     
                         //Get distance after moving, if greater then we've overshot and this leg is complete
-                        const newDistanceSq = player.position.distanceToSquared(targetPosition);
+                        const newDistanceSq = player.position.distanceToSquared(this.targetPosition);
                         //  console.log(newDistanceSq + " vs " + prevDistanceSq );
                         pathLegComplete = (newDistanceSq > prevDistanceSq);
-                        if (this.npc && !this.isPaused) {
+                        if (this.npc) {
                             
                             if (currentTime - lastTime > throttleInterval) { 
-                                // console.log("throttled update!");
+                                
                                 lastTime = currentTime;
                                 raypos = this.raycastedPosition(); //expensive, so throttle...
                                 if (raypos && raypos.y) {
-                                   
+                                //    console.log("throttled update " + raypos.y);
                                     player.position.y = raypos.y;
                                     // }
                                 }
@@ -865,7 +879,7 @@
                     //  const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
                     // this.action = this.idleAnims[randomIndex];
                 } else{
-                    // if (this.npc && !this.dead) this.newPath(randomNavmeshPoint());
+                    // if (this.npc && !agentClick) this.newPath(randomNavmeshPoint());
 
                     this.newPath(randomNavmeshPoint());
                     raypos = this.raycastedPosition(); //expensive, so throttle...
@@ -876,7 +890,10 @@
                     }
                 }
             } else {
+                this.targetPosition = null;
+                this.calculatedPath = [];
                //? 
+            //    console.log("paused...");
             }
         }
     }

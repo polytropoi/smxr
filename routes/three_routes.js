@@ -3017,6 +3017,7 @@ three_router.get('/:_id', function (req, res) {
                         settings.backgroundURL = backgroundURL;
                         settings.backgroundIsTileable = backgroundIsTileable;
                         settings.primary_mp3url = primary_mp3url;
+                        settings.ambient_oggurl = ambientOggUrl;
                         settings.hasPrimaryAudioStream = hasPrimaryAudioStream;
                         settings.sceneUseDynamicSky = sceneResponse.sceneUseDynamicSky;
                         // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));

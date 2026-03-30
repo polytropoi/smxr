@@ -504,8 +504,11 @@
 					b.update());
 			
 				if (kinematicBodies.length) {
-					kinematicBodies.forEach(c => 
-					c.update());
+					kinematicBodies.forEach(c => {
+						// if (c.readyToNav) {
+							c.update();
+						// }
+					});
 				}
 
 				// npcKinematicBodies.forEach(k => 

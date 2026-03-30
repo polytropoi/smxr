@@ -663,14 +663,14 @@ function RaycastHit(type, hit) {
             // }
         } else {
             // if (lastRaycastHitObject) {
-            //     return;
+                return;
             // }
 
         }
     } else {
         lastRaycastHit = hit;
         lastRaycastHitObject = hit.object;
-        return;
+        // return;
     }
 
   
@@ -706,7 +706,7 @@ function RaycastHit(type, hit) {
 
         showCallout = true;
    
-        console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+        // console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
 
         // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                  
@@ -737,9 +737,11 @@ function RaycastHit(type, hit) {
         const worldNormal = localNormal.clone().transformDirection(hit.object.matrixWorld);
         // console.log("hit worldnormal " + JSON.stringify(worldNormal));
         pointerGizmo.position.set(hit.point.x, hit.point.y, hit.point.z);
-
+        pointerGizmo.visible = true;
         // pointerGizmo.lookAt(worldNormal);
         rotateObjectToNormal(pointerGizmo, worldNormal);
+    } else {
+        pointerGizmo.visible = false;
     }
     if (name == "navmesh" || locationData.markerType == "navmesh") {
         if (type == "mouse" && mouseIsDown) {
@@ -755,25 +757,25 @@ function RaycastHit(type, hit) {
 
         selectedObjects.length = 0;
     } else if (name && name.includes("agent")) { //just test agents
-        validTarget = true;
-        if (raycastHitAgent != hit.object) {
-            // console.log ("new mouse raycast hit on agent " + raycastHits[0].object.name);
-            raycastHitAgent = hit.object;
-            selectedObjects.push(hit.object);
-            if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-                // console.log("intersected material found!");
-                // raycastHitAgent.material.materialColor = goColor;
-            } else if (raycastHitAgent && raycastHitAgent.material) {
-                // raycastHitAgent.material.color = goColor;
+        // validTarget = true;
+        // if (raycastHitAgent != hit.object) {
+        //     // console.log ("new mouse raycast hit on agent " + raycastHits[0].object.name);
+        //     raycastHitAgent = hit.object;
+        //     selectedObjects.push(hit.object);
+        //     if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode) {
+        //         // console.log("intersected material found!");
+        //         // raycastHitAgent.material.materialColor = goColor;
+        //     } else if (raycastHitAgent && raycastHitAgent.material) {
+        //         // raycastHitAgent.material.color = goColor;
 
-            }
-            const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //but skinned meshes are parent.parent.userData
-            if (navAgentInstance) {
-                navAgentInstance.agentRaycastHit();
-            }
-        } else {
-            // console.log("rehit agent " + raycastHits[0].object.name));
-        }
+        //     }
+        //     const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //but skinned meshes are parent.parent.userData
+        //     if (navAgentInstance) {
+        //         navAgentInstance.agentRaycastHit();
+        //     }
+        // } else {
+        //     // console.log("rehit agent " + raycastHits[0].object.name));
+        // }
     } else if (locationData && locationData.markerType == "character" ) {
         // if (raycastHitAgent != hit.object) {
             console.log("gotsa character hit " + locationData.name);
@@ -798,38 +800,38 @@ function RaycastHit(type, hit) {
 
             // )
             // const agentID = raycastHitAgent.parent.parent.name;
-            let navAgentInstance;
-            if (raycastHitAgent.userData) {
-              
-                navAgentInstance = raycastHitAgent.userData.NavAgentInstance;
-                if (navAgentInstance) {
-                console.log("gotsa raycastHitAgent.userData ");
-                navAgentInstance.agentRaycastHit();
-                }
-                
-            } if (raycastHitAgent.parent.userData) {
-                
-                navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
-                if (navAgentInstance) {
-                    console.log("gotsa raycastHitAgent.parent.userData.navAgentInstance");
-                    navAgentInstance.agentRaycastHit();
-                }
+                        // let navAgentInstance;
+                        // if (raycastHitAgent.userData) {
+                        
+                        //     navAgentInstance = raycastHitAgent.userData.NavAgentInstance;
+                        //     if (navAgentInstance) {
+                        //         console.log("gotsa raycastHitAgent.userData ");
+                        //         navAgentInstance.agentRaycastHit();
+                        //     } else if (raycastHitAgent.parent.userData) {
+                            
+                        //         navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
+                        //         if (navAgentInstance) {
+                        //             console.log("gotsa raycastHitAgent.parent.userData.navAgentInstance");
+                        //             navAgentInstance.agentRaycastHit();
+                        //         } else if (raycastHitAgent.parent.parent.userData) {
+                                
+                        //             navAgentInstance = raycastHitAgent.parent.parent.userData.NavAgentInstance;
+                        //             if (navAgentInstance) {
+                        //                 console.log("gotsa raycastHitAgent.parent.parent.userData");
+                        //                 navAgentInstance.agentRaycastHit();
+                        //             }
+                        //         } 
+                        // }
+                            
+                        // } 
+            // if (raycastHitAgent.parent.parent.parent.userData) {
                
-            } if (raycastHitAgent.parent.parent.userData) {
-               
-                navAgentInstance = raycastHitAgent.parent.parent.userData.NavAgentInstance;
-                if (navAgentInstance) {
-                     console.log("gotsa raycastHitAgent.parent.parent.userData");
-                navAgentInstance.agentRaycastHit();
-                }
-            } if (raycastHitAgent.parent.parent.parent.userData) {
-               
-                navAgentInstance = raycastHitAgent.parent.parent.parent.userData.NavAgentInstance;
-                if (navAgentInstance) {
-                     console.log("gotsa rraycastHitAgent.parent.parent.prent.userData");
-                    navAgentInstance.agentRaycastHit();
-                }
-            } 
+            //     navAgentInstance = raycastHitAgent.parent.parent.parent.userData.NavAgentInstance;
+            //     if (navAgentInstance) {
+            //          console.log("gotsa rraycastHitAgent.parent.parent.prent.userData");
+            //         navAgentInstance.agentRaycastHit();
+            //     }
+            // } 
             // if (raycastHitAgent.parent.parent.parent.parent.userData) {
             //     console.log("gotsa rraycastHitAgent.parent.parent.prent.porenbt.userData");
             //     navAgentInstance = raycastHitAgent.parent.parent.parent.parent.userData.NavAgentInstance;
@@ -1059,13 +1061,13 @@ export function onMouseDown(event) { //clicked on threejs object
     // event.preventDefault();
     // event.stopPropagation();
     mouseIsDown = true;
-    if (scene && mouse && camera && mousecaster && isReady) {
-        mouseRaycast(event);
-    }
+    // if (scene && mouse && camera && mousecaster && isReady) {
+    //     mouseRaycast(event);
+    // }
     if (lastRaycastHitObject) {
         // const popup = document.getElementById("popup");
-        if (lastRaycastHitObject.userData && lastRaycastHitObject.userData.locationData) {
-            console.log("mousedown on " + lastRaycastHitObject.userData.locationData.name + " " + lastRaycastHit.instanceId);
+        // if (lastRaycastHitObject.userData && lastRaycastHitObject.userData.locationData) {
+        //     console.log("mousedown on " + lastRaycastHitObject.userData.locationData.name + " " + lastRaycastHit.instanceId);
             
             // if (lastRaycastHitObject.userData.locationData) {
 
@@ -1179,7 +1181,7 @@ export function onMouseDown(event) { //clicked on threejs object
             // const popup = document.getElementById("popup");
             popup.style.display = "none";
         }
-    }
+    // }
 
         // let lastHitObjectName;
         // if (lastRaycastHitObject && lastRaycastHitPosition) {
@@ -1215,6 +1217,7 @@ export function onMouseDown(event) { //clicked on threejs object
     }
 
     // if ()
+
 }
 
 function ShowPopup (event) {

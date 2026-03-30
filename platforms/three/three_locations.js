@@ -38,6 +38,8 @@ export let navmesh;
 
 export let playerPosition;
 
+let kinematicAgentMeshes = []; //children of navagents, for physics collisions
+
 async function LoadModel(url) {
     const loader = new GLTFLoader();
     try {
@@ -259,59 +261,84 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
 
                     clonedModel.traverse(function (child) { 
                         if (child.isMesh) {
+                            child.userData.name = agentID;
                             child.userData.locationData = locationObjex[i].locationData;
                             child.userData.objectData = locationObjex[i].objectData;
                         }
                     });
 
-                    const geometry = new THREE.CapsuleGeometry( 1, .5, 4, 8, 1 );
-                    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true, transparent: true, opacity: 0  } );
-                    
+                    const geometry = new THREE.CapsuleGeometry( .25, .5, 4, 8, 1 );
+                    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
+                    const physicsColliderMesh = new THREE.Mesh( geometry, material );
+                    clonedModel.add(physicsColliderMesh);
                     // const parent = new THREE.Mesh( geometry, material );
                     // scene.add(parent);
                     // parent.userData.locationData = locationObjex[i].locationData;
                     // parent.userData.objectData = locationObjex[i].objectData;
                     // parent.add(clonedModel);
-                    
+                    const xscale = locationObjex[i].locationData.xscale ? parseFloat(locationObjex[i].locationData.xscale) : 1;
+                    const yscale = locationObjex[i].locationData.yscale ? parseFloat(locationObjex[i].locationData.yscale) : 1;
+                    const zscale = locationObjex[i].locationData.zscale ? parseFloat(locationObjex[i].locationData.zscale) : 1;
+                    const random = Math.random();
+                    console.log("tryna scale agentID " + agentID + "  " + xscale + " " + yscale + " " + zscale);
                     clonedModel.position.set(0,0,0);
+                    clonedModel.scale.set(xscale * (random * 2), yscale * (random * 2), zscale * (random * 2));
                     scene.add(clonedModel);
                     activeObjex.push(clonedModel);
                     // activeObjex.push(parent);
-                    // clonedModel.add(collider);
+
                     
+                    physicsColliderMesh.layers.enable(0);
                     // parent.name = "navagent";
                     // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
                     await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData);
-                    // const body = await getModelKinematicBody(clonedModel, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
+                    kinematicAgentMeshes.push(physicsColliderMesh);
+                    // const body = await getModelKinematicBody(physicsColliderMesh, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
                     // kinematicBodies.push(body);
                    
                      
                 }
             
             } else {
-                // if (count != 1) {
+                if (count != 1) {
                     for (let z = 0; z < count; z++) {
                     console.log("tryna place an object " + locationObjex[i].locationData.name + " " + locationObjex[i].modelData.modelURL);
-                //     }
-                // } else {
-                  const clonedObject = model.clone();
+                    //     }
+                    // } else {
+                    const clonedObject = model.clone();
 
-                    const randomPoint = randomNavmeshPoint();
-                    const x = randomPoint.x;
-                    const y = randomPoint.y;
-                    const z = randomPoint.z;
-                    clonedObject.scale.set(1,1,1);
-                    clonedObject.position.set(x,y,z);
-                      scene.add(clonedObject);
-                      clonedObject.visible = true;
-                      activeObjex.push(clonedObject);
-                      clonedObject.traverse(function (child) { 
+                        const randomPoint = randomNavmeshPoint();
+                        const x = randomPoint.x;
+                        const y = randomPoint.y;
+                        const z = randomPoint.z;
+                        clonedObject.scale.set(1,1,1);
+                        clonedObject.position.set(x,y,z);
+                        scene.add(clonedObject);
+                        clonedObject.visible = true;
+                        activeObjex.push(clonedObject);
+                        clonedObject.traverse(function (child) { 
                         if (child.isMesh) {
                             child.userData.locationData = locationObjex[i].locationData;
                             child.userData.objectData = locationObjex[i].objectData;
+                            }
+                        });
+
+                    }
+                } else {
+                    // const clonedObject = model.clone();
+
+
+                    model.scale.set(locationObjex[i].locationData.xscale,locationObjex[i].locationData.yscale,locationObjex[i].locationData.zscale);
+                    model.position.set(locationObjex[i].locationData.x,locationObjex[i].locationData.y,locationObjex[i].locationData.z);
+                    scene.add(model);
+                    model.visible = true;
+                    activeObjex.push(model);
+                    model.traverse(function (child) { 
+                    if (child.isMesh) {
+                        child.userData.locationData = locationObjex[i].locationData;
+                        child.userData.objectData = locationObjex[i].objectData;
                         }
                     });
-
                 }
             }
         }

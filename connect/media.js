@@ -523,6 +523,35 @@ export function LoadPrimaryAudioHowl () {
   }
 }
 
+export function LoadAmbientAudioHowl () {
+  if (!ambientAudioHowl) {
+      ambientAudioHowl = globalThis.ambientAudioHowl; //for aframe, howl don't module
+    console.log("ambientAudioHowl is global!");
+    }
+
+  if (!ambientAudioHowl && settings && settings.ambient_oggurl) {
+      console.log("ambientAudioHowl is null!");
+      // if (settings.hasPrimaryAudioStream) {
+      //   primaryAudioHowl = new Howl({
+      //       src: [settings.primary_mp3url], html5: true
+      //   });
+      // } else {
+        ambientAudioHowl = new Howl({
+              src: [settings.ambient_mp3url]
+          });
+      }
+    ambientAudioHowl.load();
+    ambientAudioHowl.play();
+
+  
+    // const primaryAudioParentEl = document.getElementById("primaryAudioParent");
+    // currentAudioFileName = primaryAudioParentEl.dataset.primaryaudiotitle;
+      
+    // console.log("primary audio title " + currentAudioFileName);
+    // return primaryAudioHowl;
+}
+
+
 export function GetCurrentPrimaryAudioTime() {
   if (primaryAudioHowl) {
     return primaryAudioHowl.seek();
