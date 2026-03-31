@@ -56,12 +56,12 @@ class AmbientAudioControl {
                 src: [this.ambientURL],
                 loop: true
             });
-                this.ambientAudioHowl.load();
+            this.ambientAudioHowl.load();
             this.ambientAudioHowl.play();
         }
         this.modVolume();
     }
-        modVolume() {
+    modVolume() {
                 // console.log("tryna mod primaryAUdioStreamVolume to " + newVolume);
                 // primaryAudioHowl.volume(normalizedVolume);
                 const newVolume = .1;
@@ -69,5 +69,8 @@ class AmbientAudioControl {
                 console.log("normalizedVolume is " + normalizedVolume);
                 this.ambientAudioHowl.volume(.25);
     
+    }
+    modPosition() {
+        
     }
 }

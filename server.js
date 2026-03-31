@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 import express, { query } from "express";
 import http from "http";
 import jwt from "jsonwebtoken";
-import axios from "axios"; //you're next to go buddy
+// import axios from "axios"; //you're next to go buddy
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
@@ -2150,7 +2150,8 @@ app.post('/process_video_hls', requiredAuthentication, function (req, res) {
       };
     let iID = req.body.id;
     //TODO USE LOCAL ROUTES!
-    axios.get(process.env.GS_HOST + "/process_video_hls/"+iID, options)
+    // axios.get(process.env.GS_HOST + "/process_video_hls/"+iID, options)
+    fetch(process.env.GS_HOST + "/process_video_hls/"+iID, options)
     .then((response) => {
     //   console.log(response.data);
       console.log("grabAndSqueeze response: " + response.status);
@@ -2173,7 +2174,8 @@ app.get('/process_video_hls_local', requiredAuthentication, function (req, res) 
         headers: {'X-Access-Token': token}
       };
     
-    axios.get(process.env.GS_HOST + "/process_video_hls_local", options)
+    // axios.get(process.env.GS_HOST + "/process_video_hls_local", options)
+    fetch(process.env.GS_HOST + "/process_video_hls_local", options)
     .then((response) => {
     //   console.log(response.data);
       console.log("grabAndSqueeze response: " + response.status);
@@ -2197,7 +2199,8 @@ app.post('/ipfs_up', requiredAuthentication, function (req, res) {
         headers: {'X-Access-Token': token}
       };
     let iID = req.body.id;
-    axios.get(process.env.GS_HOST + "/ipfs_upl/" + req.body.type + "/"+iID, options)
+    // axios.get(process.env.GS_HOST + "/ipfs_upl/" + req.body.type + "/"+iID, options)
+    fetch(process.env.GS_HOST + "/ipfs_upl/" + req.body.type + "/"+iID, options)
     .then((response) => {
     //   console.log(response.data);
       console.log("grabAndSqueeze ipfs add response: " + JSON.stringify(response.data));
@@ -2315,7 +2318,8 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             const options = {
                                 headers: {'X-Access-Token': token}
                                 };
-                            axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+item_id, options)//pictures automatically Grabbed and Squeezed...
+                            // axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+item_id, options)//pictures automatically Grabbed and Squeezed...
+                            fetch(process.env.GS_HOST + "/resize_uploaded_picture/"+item_id, options)//pictures automatically Grabbed and Squeezed...
                             .then((response) => {
                                 console.log("resize_uploaded_picture gs response: " + response.status);
                             })
@@ -2351,7 +2355,8 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                             const options = {
                                 headers: {'X-Access-Token': token}
                                 };
-                            axios.get(process.env.GS_HOST + "/process_audio_download/"+item_id, options)// audio automatically Grabbed and Squeezed...
+                            // axios.get(process.env.GS_HOST + "/process_audio_download/"+item_id, options)// audio automatically Grabbed and Squeezed...
+                            fetch(process.env.GS_HOST + "/process_audio_download/"+item_id, options)// audio automatically Grabbed and Squeezed...
                             .then((response) => {
                                 console.log("process audio gs response: " + response.status);
                             })
@@ -5564,7 +5569,7 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                                     const options = {
                                         headers: {'X-Access-Token': token}
                                     };
-                                    const response = await axios.get(process.env.GS_HOST + "/resize_uploaded_picture/"+saved.insertedId, options);
+                                    const response = await fetch(process.env.GS_HOST + "/resize_uploaded_picture/"+saved.insertedId, options);
                                     console.log("grabAndSqueezepic response: " + response.status);
                                     var s_id = scene._id;   
                                     var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
@@ -7357,7 +7362,8 @@ app.post('/update_weblink/', requiredAuthentication, function (req, res) { //ref
     const data = {
         "_id" : req.body.sceneID
     };
-    axios.post(process.env.GS_HOST + "/scrapeweb/", data, options) //it does a validation lookup over there
+    // axios.post(process.env.GS_HOST + "/scrapeweb/", data, options) //it does a validation lookup over there
+    fetch.post(process.env.GS_HOST + "/scrapeweb/", data, options) //it does a validation lookup over there
     .then((response) => {
       console.log("scrapeweb response: " + response.data);
       res.send("ok");
@@ -7388,7 +7394,7 @@ app.post('/scrape_weblink/', requiredAuthentication, function (req, res) {
                 const data = {
                     "_id" : link._id
                 };
-                axios.post(process.env.GS_HOST + "/scrapeweb/", data, options)
+                fetch.post(process.env.GS_HOST + "/scrapeweb/", data, options)
                 .then((response) => {
                   console.log(response.data);
                   
@@ -7414,7 +7420,7 @@ app.post('/scrape_weblink/', requiredAuthentication, function (req, res) {
                 const data = {
                     "_id" : savedLink._id
                 };
-                axios.post(process.env.GS_HOST + "/scrapeweb/", data, options)
+                fetch.post(process.env.GS_HOST + "/scrapeweb/", data, options)
                 .then((response) => {
                   console.log(response.data);
                   

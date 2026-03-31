@@ -38,7 +38,7 @@ export let navmesh;
 
 export let playerPosition;
 
-let kinematicAgentMeshes = []; //children of navagents, for physics collisions
+export let kinematicAgentMeshes = []; //children of navagents, for physics collisions
 
 async function LoadModel(url) {
     const loader = new GLTFLoader();
@@ -240,13 +240,16 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
             if (locationObjex[i].locationData.markerType == "character") {
                 animationData[locationData[i].timestamp] = animations;
                 for (let z = 0; z < count; z++) {
-                    console.log("tryna clone a skinned mesh " + z);
+                    console.log("tryna clone a character mesh " + z);
                     // scene.add(model);
                     // AssignModelToAgent(model);
                     // agentModels.push(model);
-
-                    const clonedModel = SkeletonUtils.clone(model); // normal clone/copy doesn't work
-
+                    let clonedModel;
+                    if (animations && animations.length) {
+                        clonedModel = SkeletonUtils.clone(model); // normal clone/copy doesn't work
+                    } else {
+                        clonedModel = model.clone();
+                    }
                     const agentID = locationObjex[i].locationData.timestamp + "_" + z.toString();
 
                     clonedModel.name = agentID;
@@ -264,6 +267,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                             child.userData.name = agentID;
                             child.userData.locationData = locationObjex[i].locationData;
                             child.userData.objectData = locationObjex[i].objectData;
+                            // child.bindMode = "detached";
                         }
                     });
 
@@ -289,10 +293,14 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
 
                     
                     physicsColliderMesh.layers.enable(0);
+                    // physicsColliderMesh.visible = false;
+                    physicsColliderMesh.userData.locationData = locationObjex[i].locationData;
+                    physicsColliderMesh.userData.objectData = locationObjex[i].objectData;
                     // parent.name = "navagent";
                     // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
                     await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData);
-                    kinematicAgentMeshes.push(physicsColliderMesh);
+                    kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
+
                     // const body = await getModelKinematicBody(physicsColliderMesh, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
                     // kinematicBodies.push(body);
                    

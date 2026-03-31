@@ -47,7 +47,7 @@ export async function HTMLText (textString, size, parent, position, distance, pe
         }
     }
     // console.log("ui scale factor " + scaleFactor);
-    scaleFactor = clamp(scaleFactor, 1, 5);
+    scaleFactor = clamp(scaleFactor, .5, 3);
     if (textContainer) {
         // textContainer.attach(scene);
         // textContainer.position.set(position.x, position.y, position.z);
@@ -159,15 +159,15 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     let scaleFactor = .1;
     if (distance) {
         if (distance > 1) {
-            scaleFactor = distance * .05;
+            scaleFactor = distance * .01;
             if (parentScale) {
                 scaleFactor = scaleFactor/parentScale;
             }
         }
     }
     // console.log("ui scale factor " + scaleFactor);
-    scaleFactor = clamp(scaleFactor, .25, 4);
-    const width = 6;
+    scaleFactor = clamp(scaleFactor, .25, 3);
+    const width = 10;
 
     // console.log("tryna show textstring " + textString);
     let textContainer;
@@ -205,7 +205,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
 
 
                 textContainer.visible = true;
-                textContainer.position.set(position.x + scaleFactor, position.y + (scaleFactor * 2), position.z - (scaleFactor * 4));
+                textContainer.position.set(position.x - scaleFactor, position.y + (scaleFactor * 2), position.z - (scaleFactor * 4));
                 textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
                 // Later, update the text
@@ -213,7 +213,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
                 const updated = await Text.create({ text: textString,
                             font: '../../fonts/web/Acme.woff',
                             depth: 0.02,
-                            // align: 'center',
+                            // align: 'left',
                             size: size,
                             // size: size,
                             removeOverlaps: true,
@@ -249,7 +249,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
                 text: textString,
                 font: '../../fonts/web/Acme.woff',
                 depth: 0.02,
-                // align: 'center',
+                // align: 'left',
                 size: size,
                 // size: size,
                 removeOverlaps: true,
@@ -289,13 +289,14 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             }
             // const camPos = camera.position.clone();
             // console.log("textContainer position is " + JSON.stringify(position));
-            parent.updateMatrixWorld(true);
+            // parent.updateMatrixWorld(true);
         
             // const targetWorldPosition = new THREE.Vector3();
             textmesh = new THREE.Mesh(text.geometry, material);
-            textmesh.position.set(0, 0, 0);
+           
             textmesh.name = "textmesh";
             textContainer.add(textmesh);
+             textmesh.position.set(0, 0, 0);
             parent.add(textContainer);
             textContainer.visible = false;
 
@@ -392,10 +393,10 @@ export async function ThreeDeeText (textString, size, parent, position, distance
 }
 
 function Cooldown () {
-    setTimeout(() => {
-    console.log('cooled down!');
+    // setTimeout(() => {
+    // console.log('cooled down!');
     cooldown = false;
-    }, 100);
+    // }, 100);
 }
 // import { Container, Text } from "@pmndrs/uikit";
 

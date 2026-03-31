@@ -705,6 +705,8 @@ function RaycastHit(type, hit) {
         ) {
 
         showCallout = true;
+
+        
    
         // console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
 
@@ -725,6 +727,19 @@ function RaycastHit(type, hit) {
             ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         }
+    
+        if (pointerGizmo && (type == "mouse" || type == "center")) {
+            const localNormal = hit.face.normal;
+            const worldNormal = localNormal.clone().transformDirection(hit.object.matrixWorld);
+            // console.log("hit worldnormal " + JSON.stringify(worldNormal));
+            pointerGizmo.position.set(hit.point.x, hit.point.y, hit.point.z);
+            pointerGizmo.visible = true;
+            // pointerGizmo.lookAt(worldNormal);
+            rotateObjectToNormal(pointerGizmo, worldNormal);
+        } else {
+            pointerGizmo.visible = false;
+        }
+        
     }
     // if (name != "navmesh") {
     //     // if (lastRaycastHitObject != hit.object) {
@@ -732,17 +747,7 @@ function RaycastHit(type, hit) {
     //     // }
     // }
 
-    if (pointerGizmo && (type == "mouse" || type == "center")) {
-        const localNormal = hit.face.normal;
-        const worldNormal = localNormal.clone().transformDirection(hit.object.matrixWorld);
-        // console.log("hit worldnormal " + JSON.stringify(worldNormal));
-        pointerGizmo.position.set(hit.point.x, hit.point.y, hit.point.z);
-        pointerGizmo.visible = true;
-        // pointerGizmo.lookAt(worldNormal);
-        rotateObjectToNormal(pointerGizmo, worldNormal);
-    } else {
-        pointerGizmo.visible = false;
-    }
+
     if (name == "navmesh" || locationData.markerType == "navmesh") {
         if (type == "mouse" && mouseIsDown) {
             targetLocation.copy(lastRaycastHitPosition); //to move stuff around
@@ -956,6 +961,7 @@ export function mouseRaycast(e) {
             lastRaycastHitObject = null;
             raycastHitAgent = null;
         }
+         pointerGizmo.visible = false;
         // if (raycastHitAgent) {
         //     // 	{
         //     if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
@@ -1107,14 +1113,16 @@ export function onMouseDown(event) { //clicked on threejs object
                 // });
                 ShowPopup(event);
                 
-                    if (lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
+                    if (lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
                         if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
                             const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
                             const randomIndex = Math.floor(Math.random() * labelSplit.length);
                             popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
                         } 
                     } else {
+                        if (lastRaycastHitObject.userData.objectData) {
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.description;
+                        }
                     }
                     
             } else if (lastRaycastHitObject.userData.objectData) {

@@ -7,7 +7,7 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 
 import { scene, togglePostProcessing, water, cameraMode } from './three_main.mjs';
 
-import { staticObjex, activeObjex } from './three_locations.js';
+import { staticObjex, activeObjex, kinematicAgentMeshes } from './three_locations.js';
 import { player } from './three_controls.js';
 import { agentModels, agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
 import { settings } from '../../../connect/settings.js';
@@ -51,6 +51,8 @@ export async function InitRapier (gravity) {
     //   gravity = { x: 0.0, y: 0, z: 0.0 };
     // }
 		world = await new RAPIER.World(gravity);
+    // const framerate = 1/30;
+    // world.timestep = framerate;
 
     // setTimeout( () => {
    
@@ -274,6 +276,12 @@ function WaitAndInit () {
   }
 
 
+  export async function LoadKinematicAgentMeshes () {
+    for (let i = 0; i < kinematicAgentMeshes.length; i++) {
+      const body = await getModelKinematicBody(kinematicAgentMeshes[i], kinematicAgentMeshes[i].userData.locationData, kinematicAgentMeshes[i].userData.objectData); //pass the index too
+      // kinematicBodies.push(body);
+    }
+  }
   export async function getModelKinematicBody(mesh, locData, objData) { 
 
       await new Promise(r => setTimeout(r, 1000));
@@ -331,7 +339,7 @@ function WaitAndInit () {
 
 }
 
-  export async function getKinematicBody(agentParent, agentIndex, position) {
+  export async function getKinematicBody(agentParent, agentIndex, position) { //test objex
 
     try {
       await new Promise(r => setTimeout(r, 0));

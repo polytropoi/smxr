@@ -28,7 +28,8 @@
 
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
-		InitAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders} from './three_physics.js';
+		InitAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders,
+		LoadKinematicAgentMeshes} from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -104,16 +105,22 @@
 		const three_canvas = document.getElementById("three_canvas");
 		scene = new THREE.Scene();
 		renderer = new THREE.WebGPURenderer({antialias:true, canvas: three_canvas});
+		// renderer = new THREE.WebGPURenderer( { antialias: true } );
+				// renderer.setPixelRatio( window.devicePixelRatio );
+				// renderer.setSize( window.innerWidth, window.innerHeight );
+				// renderer.setAnimationLoop( animate );
+				// renderer.toneMapping = THREE.LinearToneMapping;
+				// renderer.toneMappingExposure = 0.4;
 		await renderer.init(); 
 		renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setPixelRatio( 2.0 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
-		renderer.setAnimationLoop( animate );
+		
 		renderer.toneMapping = THREE.ACESFilmicToneMapping;
 		renderer.toneMappingExposure = 1;
 		// renderer.shadowMap.enabled = true;
 		// renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
-
+			renderer.setAnimationLoop( animate );
 		document.body.appendChild( renderer.domElement );
 
 		// cameraMode = settings.sceneCameraMode;
@@ -246,6 +253,7 @@
 		if (settings.audioGroups) {
 			InitAudioGroups();
 		}
+		
 			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
 			// ThreeText(texttest);
 		
@@ -425,9 +433,9 @@
 			}
 	
 		}
-		
+		LoadKinematicAgentMeshes();
 
-	} //end init!
+	} //end init systems
 
 	// export function createDefaultNavmesh() {
 	// 	const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50

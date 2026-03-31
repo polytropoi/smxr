@@ -40,8 +40,6 @@
 
 
 
-
-
     export async function CreateAgent (agentIndex, pos) {
 
         await new Promise(r => setTimeout(r, 0));
@@ -224,7 +222,7 @@
                 // await new Promise(r => setTimeout(r, 4000)); //slow the fxk down
                 // AssignModelsToAgents();
 
-                await LoadLocationObjex();
+                await LoadLocationObjex(); //e.g. navagent characters
             }
 
             // await initRapier();
@@ -365,15 +363,18 @@
             this.downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 50);
 
              const raypos = this.raycastedPosition(); //expensive, so throttle...
-                                if (raypos && raypos.y) {
-                                    // if ((raypos.y - player.position.y) > .3) {
-                                    console.log("tryna snap to raypos.y " + raypos.y);
-                                    this.object.position.y = raypos.y;
-                                    // }
-                                }
+            if (raypos && raypos.y) {
+                // if ((raypos.y - player.position.y) > .3) {
+                console.log("tryna snap to raypos.y " + raypos.y);
+                this.object.position.y = raypos.y;
+                // }
+            }
         }
         raycastedPosition() {
             //    let raycaster = new THREE.Raycaster();
+            if (!this.downcaster) {
+                return;
+            }
             const player = this.object;
                 player.getWorldPosition(this.worldPosition);
                 let testPosition = new THREE.Vector3(this.worldPosition.x, this.worldPosition.y + 20, this.worldPosition.z);
@@ -427,19 +428,9 @@
                     return null
                 }
         }
-        // playerNav(isOn) { //umm, no
-        //     this.playerNavMode = isOn;
-        //     console.log("playerNavMode " + this.playerNavMode);
-        //     this.readyToNav = true;
-        // }
+        
         newPath(pt) {
 
-            // const rand = Math.random(); {
-            //     if (rand > .5) {
-            //         this.agentPause();
-            //         return;
-            //     }
-            // }
             const player = this.object;
 
             const raypos = this.raycastedPosition(); //try to snap to navmesh
@@ -525,8 +516,6 @@
 
                 // }           
 
-               
-
                 //  if (this.calculatedPath && this.calculatedPath.length) {
                 //     // this.action = 'walk';
                 //     // const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
@@ -538,15 +527,14 @@
                 //  }
                 // if (this.pathLines) scene.remove(this.pathLines);
 
-
             }
         }
         agentPause () {
            
-            this.calculatedPath = null;
-            this.targetPosition = null;
+            // this.calculatedPath = null;
+            // this.targetPosition = null;
             this.readyToNav = !this.readyToNav;
-            if (!this.readyToNav) {
+            if (!this.readyToNav && this.hasAnims) {
                 this.action = 'idle';
                      const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
                     this.action = this.idleAnims[randomIndex];
@@ -598,12 +586,16 @@
         agentRaycastHit () {
             // console.log("agentHit pathfinder " + this.pathfinder);
             if (this.pathfinder) {
+                const raypos = this.raycastedPosition(); //expensive, so throttle...
+                if (raypos && raypos.y) {
+                    this.object.position.y = raypos.y;
+                }
                 //             const player = this.object;
                 // const closestNode = this.pathfinder.getClosestNode(player.position, this.ZONE, this.navMeshGroup, true);
 
                 // if (closestNode) {
                   
-                    this.agentPause();
+                    // this.agentPause();
 
                     //  const raypos = this.raycastedPosition(); //try to snap to navmesh
                     // if (raypos && raypos.y) {
@@ -785,6 +777,10 @@
                     console.log("no clip named " + name);
                 }
             }
+            const raypos = this.raycastedPosition(); //expensive, so throttle...
+            if (raypos && raypos.y) {
+                this.object.position.y = raypos.y;
+            }
         }
         
         update(dt, currentTime){ //move it!
@@ -793,13 +789,26 @@
             let raypos;
 
             // console.log(currentTime + " " + lastTime + " " + throttleInterval);
-
-            if (this.mixer) this.mixer.update(dt);
-            
+            if (this.hasAnims) {
+                if (this.mixer) this.mixer.update(dt);
+            }
             
             if (this.readyToNav) {
                 if (this.calculatedPath && this.calculatedPath.length) {
 
+                    if (this.npc) {
+                        
+                        // if (currentTime - lastTime > throttleInterval) { 
+                            
+                        //     lastTime = currentTime;
+                        //     raypos = this.raycastedPosition(); //expensive, so throttle...
+                        //     if (raypos && raypos.y) {
+                        //     //    console.log("throttled update " + raypos.y);
+                        //         player.position.y = raypos.y;
+                        //         // }
+                        //     }
+                        // }
+                    }
                     this.targetPosition = this.calculatedPath[0];
 
                     // if (currentTime - lastTime > throttleInterval) { 
@@ -818,6 +827,7 @@
                     let pathLegComplete = (vel.lengthSq()<0.01);
   
                     if (!pathLegComplete) {
+
                         //Get the distance to the target before moving
                         const prevDistanceSq = player.position.distanceToSquared(this.targetPosition);
                        
@@ -834,45 +844,34 @@
                         const newDistanceSq = player.position.distanceToSquared(this.targetPosition);
                         //  console.log(newDistanceSq + " vs " + prevDistanceSq );
                         pathLegComplete = (newDistanceSq > prevDistanceSq);
-                        if (this.npc) {
-                            
-                            if (currentTime - lastTime > throttleInterval) { 
-                                
-                                lastTime = currentTime;
-                                raypos = this.raycastedPosition(); //expensive, so throttle...
-                                if (raypos && raypos.y) {
-                                //    console.log("throttled update " + raypos.y);
-                                    player.position.y = raypos.y;
-                                    // }
-                                }
-                            }
-                        }
+
                     } 
                     
                     if (pathLegComplete){
                         // Remove node from the path we calculated
                         // console.log("pathLegComplete paths " + this.calculatedPath.length);
-                        this.calculatedPath.shift();
-                        if (this.calculatedPath.length==0){
-                            
-                            this.newPath(randomNavmeshPoint());
-                             raypos = this.raycastedPosition(); //expensive, so throttle...
-                                if (raypos && raypos.y) {
-                                   
-                                    player.position.y = raypos.y;
-                                   
-                                }
-                                
-                        }else{
-                            
-                            this.setTargetDirection(); 
-
-                            raypos = this.raycastedPosition(); //expensive, so throttle...
+                         raypos = this.raycastedPosition(); //expensive, so throttle...
                             if (raypos && raypos.y) {
                                
                                 player.position.y = raypos.y;
                                 
                             }
+                        this.calculatedPath.shift();
+                        if (this.calculatedPath.length==0){
+                            
+                            this.newPath(randomNavmeshPoint());
+                            //  raypos = this.raycastedPosition(); //expensive, so throttle...
+                            //     if (raypos && raypos.y) {
+                                   
+                            //         player.position.y = raypos.y;
+                                   
+                            //     }
+                                
+                        }else{
+                            
+                            this.setTargetDirection(); 
+
+                           
                         }
                     } 
                     //this.action = 'idle';
