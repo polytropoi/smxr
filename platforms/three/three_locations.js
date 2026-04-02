@@ -298,7 +298,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     physicsColliderMesh.userData.objectData = locationObjex[i].objectData;
                     // parent.name = "navagent";
                     // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
-                    await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData);
+                    await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData, locationObjex[i].objectData);
                     kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
 
                     // const body = await getModelKinematicBody(physicsColliderMesh, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too

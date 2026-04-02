@@ -105,18 +105,25 @@
         // return playerNavAgent;
     }
 
-    export async function CreateNPCAgent (parent, model, animations, index, locationData) { //hrm, not yet...
+    export async function CreateNPCAgent (parent, model, animations, index, locationData, objectData) { //hrm, not yet...
         
 
         await new Promise(r => setTimeout(r, 0));
         const name = locationData.name;
         const pos = randomNavmeshPoint();
         model.position.set(pos.x, pos.y, pos.z);
+    
+        let agentSpeed = 1;
+        console.log("NPC objectData " + JSON.stringify(objectData))
+        if (objectData && objectData.speedFactor) {
+            agentSpeed = objectData.speedFactor;
+            console.log("agentSpeed is " + agentSpeed );
+        }
         const options = {
             object: model,
             // model: parent,
             nodeRadius: 0.1,
-            speed: 2,
+            speed: agentSpeed,
             readyToNav: true,
             // app: this,
             name: name,
