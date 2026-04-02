@@ -46,7 +46,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
 
     if (sampler) {
 
-        count = count * 3;
+        count = count * 2;
 
         // let scaleFactor = data.yscale;
 
@@ -152,6 +152,16 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             if (locData.locationTags && locData.locationTags.includes("active")) {
                 activeObjex.push(instancedMeshes[s]);
                 instancedMeshes[s].userData.locationData = locData;
+            }
+            if (locData.locationTags && locData.locationTags.includes("random color")) {
+                let randomColor = new THREE.Color();
+                for (let i = 0; i < count; i++) {
+                // this.color = this.highlightColor.setHex( Math.random() * 0xffffff );
+                instancedMeshes[s].setColorAt( i, randomColor.setHex( Math.random() * 0xffffff ));
+                instancedMeshes[s].instanceColor.needsUpdate = true;
+                }
+                // this.iMesh.setColorAt( this.instanceId, this.highlightColor.setHex( Math.random() * 0xffffff ) );
+                // this.iMesh.instanceColor.needsUpdate = true;
             }
             
             scene.add(instancedMeshes[s]);

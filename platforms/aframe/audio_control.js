@@ -1178,7 +1178,7 @@ AFRAME.registerComponent('primary_audio_player', {  //setup and controls for the
 // }
 
 function AudioTimeUpdate (timeString) {
-    console.log("AudioTimeUpdate " + timeString);
+    // console.log("AudioTimeUpdate " + timeString);
     let transportTimeStatsEl = document.getElementById("transportStats");
     if (transportTimeStatsEl == null) {
         transportTimeStatsEl = document.getElementById("transportStats");
