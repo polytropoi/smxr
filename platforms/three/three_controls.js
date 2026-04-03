@@ -7,6 +7,8 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
+import { sceneTextController } from './three_media.js';
+
 import { ActionSwitch } from './three_actions.js';
 
 
@@ -724,6 +726,11 @@ function RaycastHit(type, hit) {
             ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         } else {
+            console.log("mediaID " + locationData.mediaID);
+            if (locationData.mediaID) {
+                const textData = sceneTextController.returnTextData(locationData.mediaID);
+                console.log("text item " + JSON.stringify(textData));
+            }
             ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         }

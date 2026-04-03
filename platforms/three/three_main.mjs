@@ -45,7 +45,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './three_controls.js';
 	
-	import { InitAudioGroups } from './three_media.js';
+	import { InitAudioGroups, ambientAudioController, InitSceneText } from './three_media.js';
 // import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene;
@@ -253,6 +253,7 @@
 		if (settings.audioGroups) {
 			InitAudioGroups();
 		}
+		InitSceneText();
 		
 			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
 			// ThreeText(texttest);
@@ -592,6 +593,9 @@
   				videomesh.scale.y = video.videoHeight * 0.016;
 			}
 			
+			// if (ambientAudioController) {
+			// 	ambientAudioController.modPosition(time);
+			// }
 		} //isReady
 
 		// water.material.uniforms['time'].value += 1 / 60;

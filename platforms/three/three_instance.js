@@ -282,3 +282,12 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
 //         scene.add( partic/les );
 
 // }
+
+class InstanceDataSource {
+    constructor(options){
+
+        
+        
+
+    }
+}

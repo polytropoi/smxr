@@ -2035,7 +2035,7 @@ three_router.get('/:_id', function (req, res) {
             }
             if (sceneResponse.sceneTextItems != null && sceneResponse.sceneTextItems != undefined && sceneResponse.sceneTextItems != "") {
 
-                sceneTextData = "<div scene_text_control id=\x22sceneTextData\x22 data-attribute=\x22"+sceneResponse.sceneTextItems+"\x22></div>"; //this does a fetch clientside using the IDs in data-attribute
+                sceneTextData = "<div id=\x22sceneTextData\x22 data-attribute=\x22"+sceneResponse.sceneTextItems+"\x22></div>"; //this does a fetch clientside using the IDs in data-attribute
 
                 if (sceneResponse.sceneWebType != "HTML from Text Item") { //if it's not just a regular html page...
                     for (let i = 0; i < sceneTextLocations.length; i++) {  
@@ -3265,6 +3265,7 @@ three_router.get('/:_id', function (req, res) {
                                 settingsData +
                                 // spriteData + 
                                 scenePicturesData +
+                                sceneTextData +
                                 pictureGroupsData +
                                 videoGroupsEntity +
                                 loadLocations +
