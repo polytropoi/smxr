@@ -123,6 +123,7 @@ class SceneTextData {
         
         }
         popTextData (data) {
+            // const parsedText = JSON.stringify(data);
             this.jsonData.push(data);
             console.log("sceneTextItems " + JSON.stringify(this.jsonData));
         }
@@ -131,12 +132,19 @@ class SceneTextData {
         // console.log("loading sceneTextItems " + JSON.stringify(sceneTextItems));
         // this.textItems = data;
         }
-        returnTextData (mediaID) {
-            // console.log(JSON.stringify(this.jsonData));
+        returnTextData (mediaID, index) {
+            console.log(JSON.stringify(this.jsonData));
             // console.log("tryna get text media for " + mediaID);
             for (let i = 0; i < this.jsonData.length; i++) {
             if (mediaID == this.jsonData[i]._id) {
-                return this.jsonData[i];
+
+                console.log("textstring " + this.jsonData[i].textstring);
+                const textData = JSON.parse(this.jsonData[i].textstring);
+                const rindex = Math.floor(Math.random() * textData.length);
+
+                return textData[rindex];
+
+                
 
             }
         }

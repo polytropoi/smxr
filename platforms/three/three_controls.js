@@ -727,10 +727,7 @@ function RaycastHit(type, hit) {
             // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         } else {
             console.log("mediaID " + locationData.mediaID);
-            if (locationData.mediaID) {
-                const textData = sceneTextController.returnTextData(locationData.mediaID);
-                console.log("text item " + JSON.stringify(textData));
-            }
+            
             ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         }
@@ -1165,9 +1162,19 @@ export function onMouseDown(event) { //clicked on threejs object
                 //     top: `${event.clientY - 100}px`,
                 //     display: 'block',
                 // });
-                ShowPopup(event);
-                popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
-
+                let textData;
+                if (lastRaycastHitObject.userData.locationData.mediaID) {
+                    textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                    console.log("text item " + JSON.stringify(textData));
+                }
+                if (textData) {
+                    ShowPopup(event);
+                    popup.innerHTML = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                
+                } else {
+                    ShowPopup(event);
+                    popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
+                }
             } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                 // console.log(event.clientX + " " + window.innerWidth);
                 // let xpos = event.clientX - 150;
