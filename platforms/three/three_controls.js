@@ -1136,24 +1136,39 @@ export function onMouseDown(event) { //clicked on threejs object
                 //     top: `${event.clientY - 100}px`,
                 //     display: 'block',
                 // });
+                let textData;
+                if (lastRaycastHitObject.userData.locationData.mediaID) {
+                    textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                    console.log("text item " + JSON.stringify(textData));
+                }
                 ShowPopup(event);
-                if (lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
-                        if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
-                            const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
-                            const randomIndex = Math.floor(Math.random() * labelSplit.length);
-                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
-                        } else {
-                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
-                        }
-                    } else if (lastRaycastHitObject.userData.objectData.callouttext && lastRaycastHitObject.userData.objectData.callouttext.length) {
-                        if (lastRaycastHitObject.userData.objectData.callouttext.includes("~")) {
-                            const calloutSplit = lastRaycastHitObject.userData.objectData.callouttext.split("~");
-                            const randomIndex = Math.floor(Math.random() * calloutSplit.length);
-                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
-                        } else {
-                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
-                        }
+                if (textData) {
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData;
+                    
+                } else if (lastRaycastHitObject.userData.objectData.labeltext && 
+                    lastRaycastHitObject.userData.objectData.labeltext.length) {
+                        // let textData;
+                        // if (lastRaycastHitObject.userData.locationData.mediaID) {
+                        //     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                        //     console.log("text item " + JSON.stringify(textData));
+                        // } 
+                    if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
+                        const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
+                        const randomIndex = Math.floor(Math.random() * labelSplit.length);
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
+                    } else {
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + 
+                        " : </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
                     }
+                } else if (lastRaycastHitObject.userData.objectData.callouttext && lastRaycastHitObject.userData.objectData.callouttext.length) {
+                    if (lastRaycastHitObject.userData.objectData.callouttext.includes("~")) {
+                        const calloutSplit = lastRaycastHitObject.userData.objectData.callouttext.split("~");
+                        const randomIndex = Math.floor(Math.random() * calloutSplit.length);
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
+                    } else {
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
+                    }
+                }
             } else if (lastRaycastHit.instanceId) {
                 // // const popup = document.getElementById("popup");
                 // console.log(lastRaycastHit.instanceId);
