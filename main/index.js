@@ -15523,7 +15523,7 @@ function getAllPeople() {
                                     // console.log ("gotsa text location with mediaID : "+ sceneLocations[k].mediaID);
                                     const z = document.getElementById("mediaSelect_" + sceneLocations[k].timestamp);
                                     for (let l = 0; l < textItems.length; l++) {
-                                        console.log("text item title "+ textItems[l].title);
+                                        
                                         if (textItems[l]._id != undefined) {
                                             // console.log(sceneObjex[l]._id + " vs " + sceneLocations[k].objectID);
                                             
@@ -15533,6 +15533,7 @@ function getAllPeople() {
                                         
                                         if (textItems[l]._id == sceneLocations[k].mediaID) {
                                             option.selected = true;
+                                            console.log("text item selected "+ textItems[l].title);
                                         } 
                                         z.add(option);
                                         }
@@ -16408,7 +16409,7 @@ function getAllPeople() {
                         for (let s = 0; s < sceneLocations.length; s++) {   
                             let locid = this.id.split("_")[1];
                             if (locid == sceneLocations[s].timestamp || this.id == sceneLocations[s].timestamp) {
-                                if (sceneLocations[s].markerType == "picture" || sceneLocations[s].markerType == "text" || sceneLocations[s].markerType == "model") { //todo model, vid?
+                                // if (sceneLocations[s].markerType == "picture" || sceneLocations[s].markerType == "text" || sceneLocations[s].markerType == "model") { //todo model, vid?
 
                                     sceneLocations[s].mediaName = $(this).find('option:selected').text();
                                     sceneLocations[s].mediaID = this.value;
@@ -16417,7 +16418,7 @@ function getAllPeople() {
                                         // sceneLocations[s].mediaID = '';
                                         // sceneLocations[s].mediaName = '';
                                     }
-                                }
+                                // }s
                             }
                         }
                     });

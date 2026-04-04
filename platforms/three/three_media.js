@@ -133,12 +133,13 @@ class SceneTextData {
         // this.textItems = data;
         }
         returnTextData (mediaID, index) {
-            console.log(JSON.stringify(this.jsonData));
+            console.log("tryna get mediaID " + mediaID);
             // console.log("tryna get text media for " + mediaID);
             for (let i = 0; i < this.jsonData.length; i++) {
+                console.log("mediaID " + mediaID + " vs " + this.jsonData[i]._id);
             if (mediaID == this.jsonData[i]._id) {
 
-                console.log("textstring " + this.jsonData[i].textstring);
+                // console.log("textstring " + this.jsonData[i].textstring);
                 const textData = JSON.parse(this.jsonData[i].textstring);
                 const rindex = Math.floor(Math.random() * textData.length);
 

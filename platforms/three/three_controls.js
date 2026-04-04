@@ -1115,20 +1115,30 @@ export function onMouseDown(event) { //clicked on threejs object
                 //     top: `${event.clientY - 100}px`,
                 //     display: 'block',
                 // });
-                ShowPopup(event);
+                let textData;
+                if (lastRaycastHitObject.userData.locationData.mediaID) {
+                    textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                    console.log("text item " + textData);
+                }
                 
-                    if (lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
-                        if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
-                            const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
-                            const randomIndex = Math.floor(Math.random() * labelSplit.length);
-                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
-                        } 
+                
+                if (textData != null && textData != undefined && textData != "" && textData != "none") {
+                    popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
+                    ShowPopup(event);
+                } else if (lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
+                    if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
+                        const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
+                        const randomIndex = Math.floor(Math.random() * labelSplit.length);
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
+                         ShowPopup(event);
                     } else {
                         if (lastRaycastHitObject.userData.objectData) {
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.description;
+                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.description;
+                            ShowPopup(event);
                         }
                     }
-                    
+                }
+                
             } else if (lastRaycastHitObject.userData.objectData) {
                 //  const popup = document.getElementById("popup");
                 // Object.assign(popup.style, {
@@ -1141,10 +1151,10 @@ export function onMouseDown(event) { //clicked on threejs object
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                     console.log("text item " + JSON.stringify(textData));
                 }
-                ShowPopup(event);
-                if (textData) {
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData;
-                    
+                
+                if (textData != null && textData != undefined && textData != "" && textData != "none") {
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData.text;
+                    ShowPopup(event);
                 } else if (lastRaycastHitObject.userData.objectData.labeltext && 
                     lastRaycastHitObject.userData.objectData.labeltext.length) {
                         // let textData;
@@ -1155,18 +1165,22 @@ export function onMouseDown(event) { //clicked on threejs object
                     if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
                         const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
                         const randomIndex = Math.floor(Math.random() * labelSplit.length);
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
+                        ShowPopup(event);
                     } else {
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + 
-                        " : </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
+                        "  </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
+                        ShowPopup(event);
                     }
                 } else if (lastRaycastHitObject.userData.objectData.callouttext && lastRaycastHitObject.userData.objectData.callouttext.length) {
                     if (lastRaycastHitObject.userData.objectData.callouttext.includes("~")) {
                         const calloutSplit = lastRaycastHitObject.userData.objectData.callouttext.split("~");
                         const randomIndex = Math.floor(Math.random() * calloutSplit.length);
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
+                        ShowPopup(event);
                     } else {
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
+                        ShowPopup(event);
                     }
                 }
             } else if (lastRaycastHit.instanceId) {
@@ -1182,7 +1196,7 @@ export function onMouseDown(event) { //clicked on threejs object
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                     console.log("text item " + JSON.stringify(textData));
                 }
-                if (textData) {
+                if (textData != null && textData != undefined && textData != "" && textData != "none") {
                     ShowPopup(event);
                     popup.innerHTML = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
                 
@@ -1210,8 +1224,21 @@ export function onMouseDown(event) { //clicked on threejs object
                 lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Go</button>"+
                 "</div>";
 
+            } else if (lastRaycastHitObject.userData.locationData.mediaID) {
+            // const popup = document.getElementById("popup");
+                let textData;
+                if (lastRaycastHitObject.userData.locationData.mediaID) {
+                    textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                    console.log("text item " + JSON.stringify(textData));
+                }
+                
+                if (textData != null && textData != undefined && textData != "" && textData != "none") {
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
+                    ShowPopup(event);
+                } else {
+                    popup.style.display = "none";
+                }
             } else {
-                // const popup = document.getElementById("popup");
                 popup.style.display = "none";
             }
         } else {
