@@ -7,7 +7,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
-import { sceneTextController } from './three_media.js';
+import { sceneTextController, triggerAudioController } from './three_media.js';
 
 import { ActionSwitch } from './three_actions.js';
 
@@ -685,11 +685,14 @@ function RaycastHit(type, hit) {
     if (!locationData) {
         return;
     }
-
-    if (hit.instanceId) {
-            console.log("INSTANCE HIT " + hit.instanceId);
-        
+    if (locationData.locationTags && triggerAudioController) {
+        console.log("hit with locationTags " + lastRaycastHitObject.userData.locationData.locationTags);
+        triggerAudioController.playTriggerAudioWithTags(lastRaycastHitObject.userData.locationData.locationTags, hit.distance, hit.point);
     }
+    if (hit.instanceId) {
+        console.log("INSTANCE HIT " + hit.instanceId);    
+    }
+
     const objectData = lastRaycastHitObject.userData.objectData;
     const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     let showCallout = false;
@@ -726,7 +729,7 @@ function RaycastHit(type, hit) {
             ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         } else {
-            console.log("mediaID " + locationData.mediaID);
+            // console.log("mediaID " + locationData.mediaID);
             
             ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
@@ -1075,31 +1078,7 @@ export function onMouseDown(event) { //clicked on threejs object
     //     mouseRaycast(event);
     // }
     if (lastRaycastHitObject) {
-        // const popup = document.getElementById("popup");
-        // if (lastRaycastHitObject.userData && lastRaycastHitObject.userData.locationData) {
-        //     console.log("mousedown on " + lastRaycastHitObject.userData.locationData.name + " " + lastRaycastHit.instanceId);
-            
-            // if (lastRaycastHitObject.userData.locationData) {
-
-            //     if (lastRaycastHitObject.userData.objectData) {
-            //         console.log("objectData : "+ JSON.stringify(lastRaycastHitObject.userData.objectData));
-            //         // if (lastRaycastHitObject.userData.locationData.objectData.callouttext.length) {
-            //         //     console.log("callout text " + lastRaycastHitObject.userData.locationData.objectData.callouttext);
-            //             // const calloutsplit = lastRaycastHitObject.userData.locationData.objectData.callouttext.split("~");
-            //             // const randomIndex = Math.floor(Math.random() * calloutsplit.length);
-            //             // const textstring = calloutsplit[randomIndex];
-            //             // console.log("textstring is " + textstring);
-            //             const textstring = "what!?!";
-            //             // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, lastRaycastHitObject.userData.locationData.yscale);
-            //         // }
-
-                   
-            //     } else {
-            //         console.log("locationData : "+ JSON.stringify(lastRaycastHitObject.userData.locationData));
-            //     }
-
-            // }
-
+ 
             let navAgentInstance;
             if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
                 navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance;
@@ -1109,12 +1088,7 @@ export function onMouseDown(event) { //clicked on threejs object
             }
             if (navAgentInstance) {
                 navAgentInstance.agentClick();
-                // // const popup = document.getElementById("popup");
-                //   Object.assign(popup.style, {
-                //     left: `${event.clientX - 150}px`,
-                //     top: `${event.clientY - 100}px`,
-                //     display: 'block',
-                // });
+ 
                 let textData;
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
@@ -1138,6 +1112,7 @@ export function onMouseDown(event) { //clicked on threejs object
                         }
                     }
                 }
+               
                 
             } else if (lastRaycastHitObject.userData.objectData) {
                 //  const popup = document.getElementById("popup");

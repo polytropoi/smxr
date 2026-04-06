@@ -2294,31 +2294,7 @@ AFRAME.registerComponent('audio_groups_control', { //element and component are a
   
                      }
                     }
-                    // console.log("matching iotems " + matchingItems);
-                    // if (matchingItems.length) {
-                    //     // return matchingItems[Math.floor(Math.random()*matchingItems.length)];
-                    // } else {
-                    //     return null;
-                    // }
-               
-        //     } catch (e) {
-        //         return null;
-        //     }
-        // })();
-            // if (i == triggerGroup.items.length - 1) {
-                // if (matchingItems.length) {
-                //     // return matchingItems[Math.floor(Math.random()*matchingItems.length)];
-                // } else {
-                //     console.log("matching audio id not found for tag " + tag);
-                //     return null;
-                // }
-               
-            // }
-
-
-        // } else {
-        //     // console.log("trigger audio not found!");
-        //     return null;
+                 
         }
     }
 });
