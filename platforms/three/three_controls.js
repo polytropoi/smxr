@@ -54,8 +54,8 @@ let selectColor = new THREE.Color(0xff3333);
 let stopColor = new THREE.Color(0x26de57);
 let goColor = new THREE.Color(0xff0000);
 
-let moveX, moveZ; //joystick
-let useJoystick = true;
+let moveX, moveZ, joystick; //joystick
+let useJoystick = false;
 let moveForward = false;
 let moveBackward = false;
 let moveLeft = false;
@@ -120,18 +120,18 @@ export function SetPlayerLocation (locationData) {
 
 function SetInputMode () {
 
-        const joystickContainer = document.getElementById("joystickEl");
-        joystickContainer.style.visibility = "visible";
+
         // joystickEl.
-        // if (navigator.maxTouchPoints > 0) {  //i.e. a touch device
-					
+        if (navigator.maxTouchPoints > 0) {  //i.e. a touch device
+					useJoystick = true;
 				// const joystickEl = document.getElementById("joystickEl");
                 // if (joystickEl) {
 				// 	let joystick1 = new Joystick("joystickEl", 64, 8);
 				// 	console.log("controls initialized : JOYSTICK" );
 				// }
-
-            const joystick = nipplejs.create({
+            const joystickContainer = document.getElementById("joystickEl");
+            joystickContainer.style.visibility = "visible";
+            joystick = nipplejs.create({
                 zone: document.getElementById('joystickEl'),
                 mode: 'dynamic',
                 position: { left: '50%', bottom: '50px' },
@@ -152,12 +152,13 @@ function SetInputMode () {
                 moveX = 0;
                 moveZ = 0;
             });
+        }
 			// } else {
-				// let jsContainer = document.getElementById('joystickContainer');
-			// 	// if (this.jsContainer != null) {
-			// 	// 	this.jsContainer.style.display = 'none';
-			// 	// }
-			// 	console.log("controls initialized : KEYBOID" );
+			// 	// let jsContainer = document.getElementById('joystickContainer');
+			// // 	// if (this.jsContainer != null) {
+			// // 	// 	this.jsContainer.style.display = 'none';
+			// // 	// }
+			// // 	console.log("controls initialized : KEYBOID" );
 			// }
 
 }
@@ -1362,7 +1363,7 @@ export function onMouseMove(event) {
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
     }
-    if (mouseIsDown && cameraMode == "Mouse Look" && scene && mouse && camera && (moveX == 0) && (moveZ == 0) ) {
+    if (mouseIsDown && cameraMode == "Mouse Look" && scene && mouse && camera && (!joystick || ((moveX == 0) && (moveZ == 0))) ) { //don't drag during joystick events
         // Calculate mouse position relative to the center of the screen
         const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
         const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
@@ -1374,6 +1375,7 @@ export function onMouseMove(event) {
         camera.rotation.x -= movementY * 0.002;
 
         // Constrain vertical look to prevent the camera from flipping over
+         
         camera.rotation.x = Math.max( -Math.PI / 2, Math.min( Math.PI / 2, camera.rotation.x ) );
     }
     //  if (!mouseIsDown) return; //nope, orbit is better
