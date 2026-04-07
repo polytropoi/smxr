@@ -27,6 +27,9 @@ import { MapControls } from 'three/addons/controls/MapControls.js';
 import { InitReticle, textContainers, ThreeDeeText, HTMLText } from './three_ui.js';
 
 import {PlayPauseMedia} from '../../../connect/dialogs.js';
+
+import * as nipplejs from '../../../main/js/nipple.mjs';
+
 import { getPlayerBody } from './three_physics.js';
 
 export let camera, controls, player;
@@ -51,6 +54,8 @@ let selectColor = new THREE.Color(0xff3333);
 let stopColor = new THREE.Color(0x26de57);
 let goColor = new THREE.Color(0xff0000);
 
+let moveX, moveZ; //joystick
+let useJoystick = true;
 let moveForward = false;
 let moveBackward = false;
 let moveLeft = false;
@@ -113,8 +118,53 @@ export function SetPlayerLocation (locationData) {
     // }
 }
 
+function SetInputMode () {
+
+        const joystickContainer = document.getElementById("joystickEl");
+        joystickContainer.style.visibility = "visible";
+        // joystickEl.
+        // if (navigator.maxTouchPoints > 0) {  //i.e. a touch device
+					
+				// const joystickEl = document.getElementById("joystickEl");
+                // if (joystickEl) {
+				// 	let joystick1 = new Joystick("joystickEl", 64, 8);
+				// 	console.log("controls initialized : JOYSTICK" );
+				// }
+
+            const joystick = nipplejs.create({
+                zone: document.getElementById('joystickEl'),
+                mode: 'dynamic',
+                position: { left: '50%', bottom: '50px' },
+                color: 'red'
+            });
+
+            moveX = 0;
+            moveZ = 0;
+
+            joystick.on('move', (evt) => {
+                // nippleJS y-axis is inverted relative to Three.js world space
+                moveX = evt.data.vector.x;
+                moveZ = -evt.data.vector.y; 
+                // console.log(moveX + " " + moveZ);
+            });
+
+            joystick.on('end', () => {
+                moveX = 0;
+                moveZ = 0;
+            });
+			// } else {
+				// let jsContainer = document.getElementById('joystickContainer');
+			// 	// if (this.jsContainer != null) {
+			// 	// 	this.jsContainer.style.display = 'none';
+			// 	// }
+			// 	console.log("controls initialized : KEYBOID" );
+			// }
+
+}
+
 export function SetControls(cameraMode, cameraFOV) {
 
+    SetInputMode();
     if (settings) {
         if (settings.playerHeight) {
             playerHeight = parseFloat(settings.playerHeight);
@@ -585,13 +635,25 @@ export function UpdateControls() {
 
             // player.getWorldDirection(direction);
             // direction.normalize();
-            if (moveForward || moveBackward) {
-                velocity.z -= direction.z * .2 * (playerSpeed) * delta;
+            if (useJoystick) {
+                if (moveX != 0) {
+                    // console.log("moveX " + moveX);
+                    velocity.x -= moveX * .075 * (playerSpeed) * delta;
+                }
+               if (moveZ != 0) {
+                    // console.log("moveZ " +moveZ)
+                    velocity.z += moveZ * .075 * (playerSpeed) * delta;
+                }
+            } else {
             
-            }
-            if (moveLeft || moveRight) {
-                velocity.x -= direction.x * .2 * (playerSpeed) * delta;
-                // console.log("sideways " + velocity.x);
+                if (moveForward || moveBackward) {
+                    velocity.z -= direction.z * .2 * (playerSpeed) * delta;
+                
+                }
+                if (moveLeft || moveRight) {
+                    velocity.x -= direction.x * .2 * (playerSpeed) * delta;
+                    // console.log("sideways " + velocity.x);
+                }
             }
             // player.position.lerp(direction, .01);
             // player.translateZ(velocity.z);
@@ -611,6 +673,8 @@ export function UpdateControls() {
 
             }
 
+            // player.rotation.copy(forward);
+            // player.quaternion.copy(camera.quaternion);
             if (!intersections.length) {
                 //off the navmesh, get closest point and go back
                 velocity.x = 0;
@@ -630,9 +694,16 @@ export function UpdateControls() {
                 player.position.addScaledVector(right, -velocity.x);
 
                 // Move forward:
-
                 player.position.y = intersections[0].point.y + playerHeight; //snap y to navmesh
-                player.position.addScaledVector(forward, -velocity.z);
+                // if (moveX != 0) {
+                //     player.position.x += moveX * playerSpeed * .01; 
+                //     player.position.z += moveZ * playerSpeed * .01; 
+                    
+                // } else {
+                    player.position.addScaledVector(forward, -velocity.z);  
+                // }
+                
+                
                 
 
                 canJump = true; //hrm...
@@ -1291,7 +1362,7 @@ export function onMouseMove(event) {
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
     }
-    if (mouseIsDown && cameraMode == "Mouse Look" && scene && mouse && camera ) {
+    if (mouseIsDown && cameraMode == "Mouse Look" && scene && mouse && camera && (moveX == 0) && (moveZ == 0) ) {
         // Calculate mouse position relative to the center of the screen
         const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
         const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
@@ -1461,4 +1532,116 @@ function rotateObjectToNormal(object, targetNormal) {
 
     // Apply the quaternion to the object
     object.setRotationFromQuaternion(quaternion);
+}
+
+
+
+class Joystick
+{
+	// stickID: ID of HTML element (representing joystick) that will be dragged
+	// maxDistance: maximum amount joystick can move in any direction
+	// deadzone: joystick must move at least this amount from origin to register value change
+	constructor( stickID, maxDistance, deadzone )
+	{
+		this.id = stickID;
+        console.log("tryna get joystick el callede " + this.id);
+		let stick = document.getElementById(stickID);
+
+		// location from which drag begins, used to calculate offsets
+		this.dragStart = null;
+
+		// track touch identifier in case multiple joysticks present
+		this.touchId = null;
+		
+		this.active = false;
+		this.value = { x: 0, y: 0 }; 
+
+		let self = this;
+
+		function handleDown(event)
+		{
+		    self.active = true;
+
+			// all drag movements are instantaneous
+			stick.style.transition = '0s';
+
+			// touch event fired before mouse event; prevent redundant mouse event from firing
+			event.preventDefault();
+
+		    if (event.changedTouches)
+		    	self.dragStart = { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+		    else
+		    	self.dragStart = { x: event.clientX, y: event.clientY };
+
+			// if this is a touch event, keep track of which one
+		    if (event.changedTouches)
+		    	self.touchId = event.changedTouches[0].identifier;
+		}
+		
+		function handleMove(event) 
+		{
+		    if ( !self.active ) return;
+
+		    // if this is a touch event, make sure it is the right one
+		    // also handle multiple simultaneous touchmove events
+		    let touchmoveId = null;
+		    if (event.changedTouches)
+		    {
+		    	for (let i = 0; i < event.changedTouches.length; i++)
+		    	{
+		    		if (self.touchId == event.changedTouches[i].identifier)
+		    		{
+		    			touchmoveId = i;
+		    			event.clientX = event.changedTouches[i].clientX;
+		    			event.clientY = event.changedTouches[i].clientY;
+		    		}
+		    	}
+
+		    	if (touchmoveId == null) return;
+		    }
+
+		    const xDiff = event.clientX - self.dragStart.x;
+		    const yDiff = event.clientY - self.dragStart.y;
+		    const angle = Math.atan2(yDiff, xDiff);
+			const distance = Math.min(maxDistance, Math.hypot(xDiff, yDiff));
+			const xPosition = distance * Math.cos(angle);
+			const yPosition = distance * Math.sin(angle);
+
+			// move stick image to new position
+		    stick.style.transform = `translate3d(${xPosition}px, ${yPosition}px, 0px)`;
+
+			// deadzone adjustment
+			const distance2 = (distance < deadzone) ? 0 : maxDistance / (maxDistance - deadzone) * (distance - deadzone);
+		    const xPosition2 = distance2 * Math.cos(angle);
+			const yPosition2 = distance2 * Math.sin(angle);
+		    const xPercent = parseFloat((xPosition2 / maxDistance).toFixed(4));
+		    const yPercent = parseFloat((yPosition2 / maxDistance).toFixed(4));
+		    
+		    self.value = { x: xPercent, y: yPercent };
+		  }
+
+		function handleUp(event) 
+		{
+		    if ( !self.active ) return;
+
+		    // if this is a touch event, make sure it is the right one
+		    if (event.changedTouches && self.touchId != event.changedTouches[0].identifier) return;
+        event.preventDefault();
+		    // transition the joystick position back to center
+		    stick.style.transition = '.2s';
+		    stick.style.transform = `translate3d(0px, 0px, 0px)`;
+
+		    // reset everything
+		    self.value = { x: 0, y: 0 };
+		    self.touchId = null;
+		    self.active = false;
+		}
+
+		stick.addEventListener('mousedown', handleDown);
+		stick.addEventListener('touchstart', handleDown);
+		document.addEventListener('mousemove', handleMove, {passive: false});
+		document.addEventListener('touchmove', handleMove, {passive: false});
+		document.addEventListener('mouseup', handleUp);
+		document.addEventListener('touchend', handleUp);
+	}
 }

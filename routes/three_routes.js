@@ -3090,6 +3090,15 @@ three_router.get('/:_id', function (req, res) {
 
                         let availableScenesHTML = ""; //never popped here
                         // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto;\x22";
+
+                        joystickContainer = "<div id=\x22joystickContainer\x22 class=\x22JoystickRegionUI\x22 style=\x22z-index: 1000; visibility: hidden\x22>" + //initialized in navigation / content-utils
+                            "<div class=\x22JoystickButtonUI\x22 style=\x22width: 128px; opacity:0.50;\x22>" +
+                                "<img src=\x22/css/joystick-base.png\x22/>" +
+                                "<div id=\x22joystickEl\x22 style=\x22position: absolute; left:32px; top:32px;\x22>" +
+                                "<img src=\x22/css/joystick-red.png\x22/>" +
+                                "</div>" +
+                                "</div>" +
+                            "</div>";
                         let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
                         if (tilepicUrl != "") {
                             bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
@@ -3208,7 +3217,7 @@ three_router.get('/:_id', function (req, res) {
                             "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
 
                             "<script type=\x22module\x22 src=\x22/connect/media.js\x22></script>" +
-
+                            "<script type=\x22module\x22 src=\x22../main/js/nipple.mjs\x22></script>"+
                             // "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js\x22></script>" +
 
                             // "<script src=\x22/connect/traffic.js\x22></script>"+
@@ -3225,6 +3234,9 @@ three_router.get('/:_id', function (req, res) {
                         
                         "</head>\n" +
                         "<body "+bgstyle+">" +
+
+                        joystickContainer+
+
                          "<img hidden visible=\x22false\x22 id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>"+
                         "<img hidden visible=\x22false\x22 id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>"+
                         "<img hidden visible=\x22false\x22 id=\x22smoke1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>"+
@@ -3284,6 +3296,7 @@ three_router.get('/:_id', function (req, res) {
 
                                 videoEl+
                                 videoElements+
+                               
                                 
                                 
                                 
