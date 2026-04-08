@@ -382,7 +382,7 @@ class AmbientAudioControl {
         
         camera.getWorldPosition(this.cameraPosition);
         Howler.pos(this.cameraPosition.x/100, this.cameraPosition.y/100, this.cameraPosition.z/100); //listener position
-        this.soundPositionChild.position.z = 1+ (.05 * Math.sin(time));//10 * Math.random(); //lerp me
+        this.soundPositionChild.position.z = 1+ (.01 * Math.sin(time));//10 * Math.random(); //lerp me
         if (this.rotateLeft) {
             this.soundPositionParent.rotation.y += .1;
         } else {

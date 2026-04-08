@@ -4,6 +4,8 @@ import { settings } from '../../../connect/settings.js';
 
 import {scene, renderer} from './three_main.mjs';
 
+import {sunLight} from './three_lights.js';
+
 import {camera, controls} from './three_controls.js';
 
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
@@ -95,14 +97,47 @@ export function InitSky() {
 
 				/// GUI
 
+
+				// const effectController = { //low sun twilight
+				// 	turbidity: 10,
+				// 	rayleigh: 3,
+				// 	mieCoefficient: 0.005,
+				// 	mieDirectionalG: 0.7,
+				// 	elevation: 2,
+				// 	azimuth: 180,
+				// 	exposure: renderer.toneMappingExposure
+				// };
+				console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
+				let elevation = 45;
+				let sceneClouds = "medium";
+				let cloudCoverage = .85;
+				let cloudDensity = .85;
+				let cloudElevation = .75;
+				if (settings.sceneClouds.name) {
+					sceneClouds = settings.sceneClouds.name;
+				}
+				if (settings.sceneTime.name) {
+					if (settings.sceneTime.name == "morning" || settings.sceneTime.name == "evening") {
+						elevation = 0;
+					} else if (settings.sceneTime.name == "afternoon") {
+						elevation = 45;
+					} else if (settings.sceneTime.name == "noon" || settings.sceneTime.name == "midday") {
+						elevation = 90;
+					}
+
+				}
+				
 				const effectController = {
 					turbidity: 10,
-					rayleigh: 3,
+					rayleigh: .75,
 					mieCoefficient: 0.005,
 					mieDirectionalG: 0.7,
-					elevation: 2,
+					elevation: elevation,
 					azimuth: 180,
-					exposure: renderer.toneMappingExposure
+					exposure: renderer.toneMappingExposure,
+					cloudCoverage: cloudCoverage,
+					cloudDensity: cloudDensity,
+					cloudElevation: cloudElevation
 				};
 
 				// function guiChanged() {
@@ -119,6 +154,7 @@ export function InitSky() {
 
 					sky.sunPosition.value.copy( sun );
 
+					sunLight.position.copy(sun);
 					renderer.toneMappingExposure = effectController.exposure;
 // 
 				}

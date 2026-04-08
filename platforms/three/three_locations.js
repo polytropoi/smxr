@@ -218,7 +218,7 @@ export function InitLocations() {
     }
 
 }
-
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 export async function LoadLocationObjex() { //got to wait to load these, might need navagent etc
     if (locationObjex.length) {
         for (let i = 0; i < locationObjex.length; i++) {
@@ -283,10 +283,11 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     const xscale = locationObjex[i].locationData.xscale ? parseFloat(locationObjex[i].locationData.xscale) : 1;
                     const yscale = locationObjex[i].locationData.yscale ? parseFloat(locationObjex[i].locationData.yscale) : 1;
                     const zscale = locationObjex[i].locationData.zscale ? parseFloat(locationObjex[i].locationData.zscale) : 1;
-                    const random = Math.random();
+                    const random = clamp(Math.random() * 2, .75, 1.25);
                     console.log("tryna scale agentID " + agentID + "  " + xscale + " " + yscale + " " + zscale);
                     clonedModel.position.set(0,0,0);
-                    clonedModel.scale.set(xscale * (random * 2), yscale * (random * 2), zscale * (random * 2));
+                    
+                    clonedModel.scale.set(xscale * random, yscale * random, zscale * random);
                     scene.add(clonedModel);
                     activeObjex.push(clonedModel);
                     // activeObjex.push(parent);

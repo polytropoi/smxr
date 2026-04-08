@@ -215,6 +215,8 @@ three_router.get('/:_id', function (req, res) {
     let triggerAudioEntity = "";
     let pAudioWaveform = "";
     let networkedscene = "";
+
+
     let socketHost = process.env.SOCKET_HOST;
     let avatarName = "guest";
     let textLocation = "";
@@ -311,6 +313,11 @@ three_router.get('/:_id', function (req, res) {
     let triggerOggUrl = "";
     let triggerMp3Url = "";
     let hasTriggerAudio = true;
+
+    let sceneTime;
+    let sceneTimeSpeed;
+    let sceneWeather;
+    let sceneClouds;
     let wasd = "";
     let sceneData = "";
     let nftIDs = "";
@@ -477,6 +484,11 @@ three_router.get('/:_id', function (req, res) {
             // if (!accessScene) { //catch it at the end...?
             //     res.end("you are not authorized to view this resource...");
             // } 
+            sceneTime = sceneData.sceneTime
+            sceneTimeSpeed = sceneData.sceneTimeSpeed;
+            sceneWeather = sceneData.sceneWeather;
+            sceneClouds = sceneData.sceneClouds;
+
             if (sceneData.sceneTags != null) {        
                 for (let i = 0; i < sceneData.sceneTags.length; i++) { //not ideal, but it's temporary... //no it isn't
                     if (sceneData.sceneTags[i].toLowerCase().includes("spark") || sceneData.sceneTags[i].toLowerCase().includes("splat")) {    
@@ -3001,6 +3013,8 @@ three_router.get('/:_id', function (req, res) {
                         settings.sceneColor2Alt = sceneResponse.sceneColor2Alt;
                         settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
                         settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
+                        settings.sceneClouds = sceneClouds;
+                        settings.sceneTime = sceneTime;
                         settings.volumePrimary = sceneResponse.scenePrimaryVolume;
                         settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
                         settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 

@@ -1363,7 +1363,8 @@ export function onMouseMove(event) {
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
     }
-    if (mouseIsDown && cameraMode == "Mouse Look" && scene && mouse && camera && (!joystick || ((moveX == 0) && (moveZ == 0))) ) { //don't drag during joystick events
+    // if (mouseIsDown && cameraMode == "Mouse Look" && scene && mouse && camera && (!joystick || ((moveX == 0) && (moveZ == 0))) ) {
+    if (mouseIsDown && cameraMode == "Mouse Look" && scene && mouse && camera ) { //don't drag during joystick events?
         // Calculate mouse position relative to the center of the screen
         const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
         const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
@@ -1371,8 +1372,12 @@ export function onMouseMove(event) {
         // Adjust camera rotation based on mouse movement deltas
         // Use an appropriate rotation order (e.g., 'YXZ') to avoid gimbal lock issues
         camera.rotation.order = 'YXZ';
-        camera.rotation.y -= movementX * 0.002; // Adjust sensitivity
-        camera.rotation.x -= movementY * 0.002;
+        let rotspeed = 1;
+        if (useJoystick) {
+            rotspeed = 10;
+        }
+        camera.rotation.y -= movementX * 0.002 * rotspeed; // Adjust sensitivity
+        camera.rotation.x -= movementY * 0.002 * rotspeed;
 
         // Constrain vertical look to prevent the camera from flipping over
          

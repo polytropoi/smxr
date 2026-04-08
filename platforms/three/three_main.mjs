@@ -35,7 +35,7 @@
 
 	import { getVideo, getHandLandmarker } from './three_vision.js';
 
-	import { lightMods, modLights } from './three_lights.js';
+	import { lightMods, modLights, InitSceneLights } from './three_lights.js';
 
 	import { InitSurface, instancedModels, InstanceOnSurface, surface } from './three_instance.js';
 
@@ -72,6 +72,7 @@
 
 	let doPostProcessing = false;
 	
+	
 	// export let activeObjex = []; //raycastable
 
 	// export let staticObjex = []; //physics
@@ -92,6 +93,7 @@
 	let speed = 0.0;
 	
 	let video, videomesh, handLandmarker, useHandLandmarks;
+	
 	
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
 
@@ -267,25 +269,7 @@
 
 
 		
-		const sunLight = new THREE.DirectionalLight( settings.sceneColor1, 3 );
-		// sunLight.castShadow = false;
-		// sunLight.shadow.camera.near = .5;
-		// sunLight.shadow.camera.far = 50;
-		// sunLight.shadow.camera.right = 2;
-		// sunLight.shadow.camera.left = - 2;
-		// sunLight.shadow.camera.top = 1;
-		// sunLight.shadow.camera.bottom = - 2;
-		// sunLight.shadow.mapSize.width = 2048;
-		// sunLight.shadow.mapSize.height = 2048;
-		// sunLight.shadow.bias = - 0.001;
-		sunLight.position.set( 1, 3, 1 );
 
-		const waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, .5 );
-		const skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, settings.sceneColor3, 1 );
-
-		scene.add( sunLight );
-		scene.add( skyAmbientLight );
-		scene.add( waterAmbientLight );
 
 		clock = new THREE.Clock();
 
@@ -333,6 +317,7 @@
 		
 
 		// InitEnvMap();
+		InitSceneLights();
 		InitSky();
 		InitFog();
 
