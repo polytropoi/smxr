@@ -612,10 +612,14 @@
 
 		document.addEventListener( 'keydown', onKeyDown );
 		document.addEventListener( 'keyup', onKeyUp );
-		document.addEventListener ('mousedown', onMouseDown );
-		document.addEventListener ('mouseup', onMouseUp );
+		// document.addEventListener ('mousedown', onMouseDown );
+		// document.addEventListener ('mouseup', onMouseUp );
+
+		document.addEventListener ('pointerdown', onMouseDown );
+		document.addEventListener ('pointerup', onMouseUp );
 		document.addEventListener("wheel", onMouseWheel, false);
-		document.addEventListener('mousemove', onMouseMove);
+		// document.addEventListener('mousemove', onMouseMove);
+		document.addEventListener('pointermove', onMouseMove);
 
 	} //end init events
 
