@@ -1,3 +1,4 @@
+
 export function ActionSwitch (event) {
     const type = event.target.dataset.markertype;
     const eventdata = event.target.dataset.eventdata;
@@ -13,6 +14,15 @@ export function ActionSwitch (event) {
     }
 }
 
+export class SceneObject {
+    constructor(object, objectData) {
+
+        this.object = object;
+        this.objectData = objectData;
+        this.object.sceneObjectInstance = this;
+        console.log("new sceneObject " + JSON.stringify(this.objectData));
+    }
+}
 
 
 function EnterSceneGate (eventData) {

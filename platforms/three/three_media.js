@@ -342,6 +342,7 @@ class AmbientAudioControl {
         this.soundPositionParent = new THREE.Object3D();
         this.soundPosition = new THREE.Vector3();
         this.cameraPosition = new THREE.Vector3();
+        this.cameraRotation = new THREE.Vector3();
         const geometry = new THREE.SphereGeometry(.1,16,16);
         const material = new THREE.MeshBasicNodeMaterial({color: 'red', wireframe: true});
         this.soundPositionChild = new THREE.Mesh(geometry, material);
@@ -360,7 +361,7 @@ class AmbientAudioControl {
             if (this.count % 100 === 0) {
                 this.rotateLeft = !this.rotateLeft;
             }
-        }, 500);
+        }, 100);
         this.modVolume();
     }
     modVolume() {
@@ -381,8 +382,10 @@ class AmbientAudioControl {
     modPosition(time) {
         
         camera.getWorldPosition(this.cameraPosition);
+        camera.getWorldDirection(this.cameraRotation);
         Howler.pos(this.cameraPosition.x/100, this.cameraPosition.y/100, this.cameraPosition.z/100); //listener position
-        this.soundPositionChild.position.z = 1+ (.01 * Math.sin(time));//10 * Math.random(); //lerp me
+        Howler.orientation(this.cameraRotation.x, 0, this.cameraRotation.z, 0, 1, 0);
+        this.soundPositionChild.position.z = 1 + (.01 * Math.sin(time));//10 * Math.random(); //lerp me
         if (this.rotateLeft) {
             this.soundPositionParent.rotation.y += .1;
         } else {
@@ -391,15 +394,15 @@ class AmbientAudioControl {
         
         this.soundPositionChild.getWorldPosition(this.soundPosition);
 
-        this.volMod = this.volMod + Math.sin(time);
+        // this.volMod = this.volMod + (.1 * Math.sin(time));
         this.distance = this.cameraPosition.distanceTo(this.soundPosition);
         // console.log(JSON.stringify(this.soundPosition) + " distance: " + this.distance);
         if (this.distance) {
            const rate = clampNumber(1 - (this.distance/2), .25, 1.25);
            this.ambientAudioHowl.rate(rate + .1);
-           const vol = clampNumber(1 - (this.distance/2), .1, .9);
+           const vol = clampNumber(1 - (this.distance/2), .25, .75);
            this.ambientAudioHowl.volume(vol * this.volMod);
-        //    console.log("rate " + rate + " vol " + vol);
+        //    console.log("rate " + rate + " vol " + (vol * this.volMod));
         }
         this.ambientAudioHowl.pos(this.soundPosition.x/100, this.soundPosition.y/100, this.soundPosition.z/100);
         // this.ambientAudioHowl.volume(1);

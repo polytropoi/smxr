@@ -107,6 +107,7 @@ export function SetPlayerLocation (locationData) {
         if (player) {
             console.log("tryna set third person player to lcoationDarta " + JSON.stringify(locationData));
             player.position.set(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
+
         } else {
             if (controlObject) {
                 console.log("tryna set first person player lcoationDarta " + JSON.stringify(locationData));
@@ -422,6 +423,13 @@ export function SetControls(cameraMode, cameraFOV) {
     } else {
         console.log("no valid camera Mode!");
     }
+
+    const viewportPlaceholder = new THREE.Object3D();
+    camera.add(viewportPlaceholder);
+    viewportPlaceholder.name == "viewportPlaceholder1";
+    viewportPlaceholder.position.z = 2;
+
+
 
 }
 
@@ -1187,6 +1195,9 @@ export function onMouseDown(event) { //clicked on threejs object
                
                 
             } else if (lastRaycastHitObject.userData.objectData) {
+                if (lastRaycastHitObject.userData.objectData.actions) {
+                    console.log(JSON.stringify(lastRaycastHitObject.userData.objectData.actions));
+                }
                 //  const popup = document.getElementById("popup");
                 // Object.assign(popup.style, {
                 //     left: `${event.clientX - 150}px`,
@@ -1230,6 +1241,8 @@ export function onMouseDown(event) { //clicked on threejs object
                         ShowPopup(event);
                     }
                 }
+
+                
             } else if (lastRaycastHit.instanceId) {
                 // // const popup = document.getElementById("popup");
                 // console.log(lastRaycastHit.instanceId);

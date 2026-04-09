@@ -4,6 +4,8 @@ import {scene, InitSystems } from './three_main.mjs';
 
 import {SetPlayerLocation} from './three_controls.js';
 
+import {SceneObject} from './three_actions.js';
+
 import { SetSceneLocations, userData } from '../../../connect/connect.js';
 
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -130,9 +132,10 @@ export function InitLocations() {
                                     if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
                                         // console.log("tryna instance model " + locationData[i].name);
                                         let instancedModel = {};
+                                        const originalModel = await LoadModel(modelsData[m].modelURL)
                                         // const countsplit = locationData[i].eventData.split("~");
                                         // const count = countsplit[1];
-                                        instancedModel.model = model;
+                                        instancedModel.model = originalModel.scene;
                                         instancedModel.locationData = locationData[i];
                                         instancedModel.modelData = modelsData[m];
                                         instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
@@ -256,6 +259,8 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     
                     // const pos = randomNavmeshPoint();
                     
+                    locationObjex[i].objectData.instanceID = agentID;
+
                     clonedModel.userData.name = agentID;
                     // activeObjex.push(clonedModel);
                     
@@ -292,16 +297,17 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     activeObjex.push(clonedModel);
                     // activeObjex.push(parent);
 
-                    
                     physicsColliderMesh.layers.enable(0);
                     // physicsColliderMesh.visible = false;
                     physicsColliderMesh.userData.locationData = locationObjex[i].locationData;
                     physicsColliderMesh.userData.objectData = locationObjex[i].objectData;
                     // parent.name = "navagent";
                     // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
-                    await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData, locationObjex[i].objectData);
+                    const sceneObject = new SceneObject(clonedModel, locationObjex[i].objectData);
+                    await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData, locationObjex[i].objectData, sceneObject);
                     kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
 
+                    
                     // const body = await getModelKinematicBody(physicsColliderMesh, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
                     // kinematicBodies.push(body);
                    
