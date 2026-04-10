@@ -1,5 +1,5 @@
 
-import { lastRaycastHitObject } from './three_controls.js';
+import { lastRaycastHitObject, ShowPopup } from './three_controls.js';
 
 export function HTMLActionSwitch (event) { //input from simple html popups
     const type = event.target.dataset.markertype;
@@ -104,7 +104,30 @@ export class SceneObject { //things with actions and fancy params, e.g. characte
        
     onClick (event) {
         console.log("clicked sceneObject with actions " + JSON.stringify(this.objectData.actions));
-       
+           
+        // if (textData != null && textData != undefined && textData != "" && textData != "none") {
+        //     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
+        //     ShowPopup(event);
+        // } else 
+            if (this.hasPickupAction) {
+                popup.innerHTML = "<h1>"+this.objectData.name+" </h1> <div>Pickup object?</div>" +
+                "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-markertype=\x22pickup\x22 data-eventdata=\x22"+
+                this+"\x22 class=\x22yesButton\x22>Yes</button>"+
+                "</div>";
+                ShowPopup(event);
+            } else if (lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
+                if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
+                    const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
+                    const randomIndex = Math.floor(Math.random() * labelSplit.length);
+                    popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
+                        ShowPopup(event);
+                } else {
+                    if (lastRaycastHitObject.userData.objectData) {
+                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.description;
+                        ShowPopup(event);
+                    }
+                }
+         }
         
     }
 

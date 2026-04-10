@@ -1177,22 +1177,22 @@ export function onMouseDown(event) { //clicked on threejs object
                 }
                 
                 
-                if (textData != null && textData != undefined && textData != "" && textData != "none") {
-                    popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
-                    ShowPopup(event);
-                } else if (lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
-                    if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
-                        const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
-                        const randomIndex = Math.floor(Math.random() * labelSplit.length);
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
-                         ShowPopup(event);
-                    } else {
-                        if (lastRaycastHitObject.userData.objectData) {
-                            popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.description;
-                            ShowPopup(event);
-                        }
-                    }
-                }
+                // if (textData != null && textData != undefined && textData != "" && textData != "none") {
+                //     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
+                //     ShowPopup(event);
+                // } else if (lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
+                //     if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
+                //         const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
+                //         const randomIndex = Math.floor(Math.random() * labelSplit.length);
+                //         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
+                //          ShowPopup(event);
+                //     } else {
+                //         if (lastRaycastHitObject.userData.objectData) {
+                //             popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.description;
+                //             ShowPopup(event);
+                //         }
+                //     }
+                // }
                 //like above, need to sniff the parent
                 let sceneObjectInstance;
                 if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
@@ -1202,7 +1202,7 @@ export function onMouseDown(event) { //clicked on threejs object
                     sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance; //hrm
                 }
                 if (sceneObjectInstance) {
-                   sceneObjectInstance.onClick();
+                   sceneObjectInstance.onClick(event);
                 }
                
                 
@@ -1370,7 +1370,7 @@ export function onMouseDown(event) { //clicked on threejs object
 
 }
 
-function ShowPopup (event) {
+export function ShowPopup (event) { //hrm move to UI
     const popup = document.getElementById("popup");
     // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
     let xpos = event.clientX - 150;
