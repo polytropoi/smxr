@@ -187,7 +187,7 @@ export function InitLocations() {
 
                                 if (objexData[o].modelID) {
                                     for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match - model deps/urls should have been added to the response serverside
-                                        console.log(modelsData[m]._id + " vs " + objexData[o].modelID );
+                                        // console.log(modelsData[m]._id + " vs " + objexData[o].modelID );
                                         if (modelsData[m]._id == objexData[o].modelID) {
                                             console.log("gotsa location object modelID " + modelsData[m].modelURL);
                                             const locData = {};
@@ -338,6 +338,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                             }
                         });
 
+                        const sceneObject = new SceneObject(clonedObject, locationObjex[i].objectData);
                     }
                 } else {
                     // const clonedObject = model.clone();
@@ -354,6 +355,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                         child.userData.objectData = locationObjex[i].objectData;
                         }
                     });
+                    const sceneObject = new SceneObject(model, locationObjex[i].objectData);
                 }
             }
         }
@@ -365,9 +367,9 @@ async function LoadLocationModel (url, locationData, isActive) {
     let model;
     let animations;
     if (!url) { //i.e. it's a primitive, not gltf
-        console.log("no model url " + locationData.modelID);
+        // console.log("no model url " + locationData.modelID);
         if (locationData.modelID.includes("sphere")) {
-            console.log("gotsa sphere primitive");
+            // console.log("gotsa sphere primitive");
             const geometry = new THREE.SphereGeometry(1,16,16);
             const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .5});
             model = new THREE.Mesh(geometry, material);

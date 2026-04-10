@@ -114,7 +114,7 @@
         model.position.set(pos.x, pos.y, pos.z);
     
         let agentSpeed = 1;
-        console.log("NPC objectData " + JSON.stringify(objectData))
+        // console.log("NPC objectData " + JSON.stringify(objectData))
         if (objectData && objectData.speedFactor) {
             agentSpeed = objectData.speedFactor;
             console.log("agentSpeed is " + agentSpeed );
@@ -440,13 +440,7 @@
 
             const player = this.object;
 
-            const raypos = this.raycastedPosition(); //try to snap to navmesh
-            if (raypos && raypos.y) {
-                // if ((raypos.y - player.position.y) > .3) {
-                console.log("tryna snap to raypos.y " + raypos.y);
-                player.position.y = raypos.y;
-                // }
-            }
+
             // if (this.name == "player") {
             //     console.log("tryna get player path to " + JSON.stringify(pt));
             // }
@@ -534,6 +528,13 @@
                 //  }
                 // if (this.pathLines) scene.remove(this.pathLines);
 
+            }
+            const raypos = this.raycastedPosition(); //try to snap to navmesh
+            if (raypos && raypos.y) {
+                // if ((raypos.y - player.position.y) > .3) {
+                console.log("tryna snap to raypos.y " + raypos.y);
+                player.position.y = raypos.y;
+                // }
             }
         }
         agentPause () {

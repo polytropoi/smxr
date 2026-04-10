@@ -20,7 +20,7 @@ export async function InitAudioGroups() {
         ambientAudioGroups = settings.audioGroups.ambientAudioGroups;
         triggerAudioGroups = settings.audioGroups.triggerAudioGroups;
         audioGroupsData = await ReturnAudioGroupsData(settings.audioGroups);
-        console.log("audioGroupsData " + JSON.stringify(audioGroupsData));
+        // console.log("audioGroupsData " + JSON.stringify(audioGroupsData));
     }
     InitAmbientAudio(settings.ambient_mp3url);
 }
@@ -65,40 +65,7 @@ class SceneTextData {
         }
         //xhr
         fetchTextData (data) {
-        //     // this.textData = [];
-        //      let sceneTextItems = [];
-        //     if (data.length > 0) {
-        //     this.textData = JSON.stringify({
-        //         textIDs: data //just send the ids
-        //     }),
-            // $.ajax({
-            // url: "/scene_text_items",
-            // type: 'POST',
-            // contentType: "application/json; charset=utf-8",
-            // dataType: "json",
-            // data: JSON.stringify({
-            //         textIDs: this.textIDs //just send the ids
-            //     }),
-            //     success: function( data, textStatus, xhr ){           
-            //         for (let i = 0; i < data.length; i++) { //check for text type?
-            //         // 
-            //          this.popTextData(data[i]); //textstring should be a valid json, from defined template//not, just an array of objex saved in global
-            //         // console.log("sceneTextData " + JSON.stringify(data[i]));
-            //         }
-            //         //  this.jsonData = sceneTextItems;
-            //         // console.log("sceneTextItems " + JSON.stringify(this.jsonData));
-            //     },
-            //     // then: function () {
-                   
-            //     // },
-            //     error: function( xhr, textStatus, errorThrown ){
-            //         console.log( "error fetching text: " + xhr.responseText );
-            //     }
-            // });
-            // if (data.length > 0) {
-            // this.textData = JSON.stringify({
-            //     textIDs: data //just send the ids
-            // })
+       
             fetch('/scene_text_items', {
             method: 'POST',
             headers: {

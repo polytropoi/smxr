@@ -9,7 +9,7 @@ import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
 import { sceneTextController, triggerAudioController } from './three_media.js';
 
-import { ActionSwitch } from './three_actions.js';
+import { HTMLActionSwitch } from './three_actions.js';
 
 
 import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './three_locations.js';
@@ -37,7 +37,8 @@ export let isReady = false;
 export let followDistance = 8;
 export let cameraAtZero = true;
 
-let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHit, lastRaycastHitObject, lastHitObjectName;
+let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHit, lastHitObjectName;
+export let lastRaycastHitObject;
 
 export let dir = new THREE.Vector3;
 export let playerDirection = new THREE.Vector3();
@@ -766,11 +767,11 @@ function RaycastHit(type, hit) {
         return;
     }
     if (locationData.locationTags && triggerAudioController) {
-        console.log("hit with locationTags " + lastRaycastHitObject.userData.locationData.locationTags);
+        // console.log("hit with locationTags " + lastRaycastHitObject.userData.locationData.locationTags);
         triggerAudioController.playTriggerAudioWithTags(lastRaycastHitObject.userData.locationData.locationTags, hit.distance, hit.point);
     }
     if (hit.instanceId) {
-        console.log("INSTANCE HIT " + hit.instanceId);    
+        // console.log("INSTANCE HIT " + hit.instanceId);    
     }
 
     const objectData = lastRaycastHitObject.userData.objectData;
@@ -799,12 +800,12 @@ function RaycastHit(type, hit) {
                  
         // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
      
-         if (objectData && objectData.callouttext && objectData.callouttext.length) {
+        if (objectData && objectData.callouttext && objectData.callouttext.length) {
             // console.log("callout text "  + objectData.callouttext);
             const calloutsplit = objectData.callouttext.split("~");
             const randomIndex = Math.floor(Math.random() * calloutsplit.length);
             const textstring = calloutsplit[randomIndex];
-            console.log("gotsa object with textstring " + textstring);
+            // console.log("gotsa object with textstring " + textstring);
 
             ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
@@ -1142,7 +1143,7 @@ export function onMouseDown(event) { //clicked on threejs object
     // console.log(event.target.id);
     const popup = document.getElementById("popup");
     if (event.target.id == "popup_yesButton") {
-      ActionSwitch(event);
+      HTMLActionSwitch(event);
       popup.style.display = "none";
       return;
 
@@ -1157,7 +1158,7 @@ export function onMouseDown(event) { //clicked on threejs object
     // if (scene && mouse && camera && mousecaster && isReady) {
     //     mouseRaycast(event);
     // }
-    if (lastRaycastHitObject) {
+    if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
  
             let navAgentInstance;
             if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
@@ -1192,18 +1193,24 @@ export function onMouseDown(event) { //clicked on threejs object
                         }
                     }
                 }
+                //like above, need to sniff the parent
+                let sceneObjectInstance;
+                if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
+                    sceneObjectInstance = lastRaycastHitObject.parent.parent.userData.sceneObjectInstance;
+                }//hrm
+                if (!sceneObjectInstance) {
+                    sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance; //hrm
+                }
+                if (sceneObjectInstance) {
+                   sceneObjectInstance.onClick();
+                }
                
                 
             } else if (lastRaycastHitObject.userData.objectData) {
-                if (lastRaycastHitObject.userData.objectData.actions) {
-                    console.log(JSON.stringify(lastRaycastHitObject.userData.objectData.actions));
-                }
-                //  const popup = document.getElementById("popup");
-                // Object.assign(popup.style, {
-                //     left: `${event.clientX - 150}px`,
-                //     top: `${event.clientY - 100}px`,
-                //     display: 'block',
-                // });
+                // if (lastRaycastHitObject.userData.objectData.actions) {
+                //     console.log(JSON.stringify(lastRaycastHitObject.userData.objectData.actions));
+                // }
+               
                 let textData;
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
@@ -1241,6 +1248,25 @@ export function onMouseDown(event) { //clicked on threejs object
                         ShowPopup(event);
                     }
                 }
+
+                let sceneObjectInstance = lastRaycastHitObject.userData.sceneObjectInstance; 
+                if (!sceneObjectInstance) {
+                    if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
+                        sceneObjectInstance = lastRaycastHitObject.parent.parent.userData.sceneObjectInstance;
+                    }//hrm
+                    if (!sceneObjectInstance) {
+                        sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance; //hrm
+                    }
+                    if (sceneObjectInstance) {
+                        sceneObjectInstance.onClick(event);
+                    } else {
+                        console.log("caint find sceneObjectInstance!");
+                    }
+
+                } else {
+                    sceneObjectInstance.onClick();
+                }
+               
 
                 
             } else if (lastRaycastHit.instanceId) {
