@@ -4,7 +4,7 @@ import {scene, InitSystems } from './three_main.mjs';
 
 import {SetPlayerLocation} from './three_controls.js';
 
-import {SceneObject} from './three_actions.js';
+import {SceneObject, sceneObjects} from './three_actions.js';
 
 import { SetSceneLocations, userData } from '../../../connect/connect.js';
 
@@ -18,6 +18,7 @@ import { CreateLight } from './three_lights.js';
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './three_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint } from './three_nav.js';
 import { modelViewProjection } from 'three/tsl';
+// import { sceneObjects } from '../../connect/dialogs.js';
 
 export let locations = {};
 
@@ -35,6 +36,8 @@ export let groundObjex = [];
 
 export let animationMixers = [];
 export let animationData = {};
+
+// export let sceneObjects = {};
 
 export let navmesh;
 
@@ -225,6 +228,8 @@ const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 export async function LoadLocationObjex() { //got to wait to load these, might need navagent etc
     if (locationObjex.length) {
         for (let i = 0; i < locationObjex.length; i++) {
+
+
             // const modelData = await LoadLocationModel(locationObjex[i].modelData.modelURL, locationObjex[i].locationData);
             const modelData = await LoadModel(locationObjex[i].modelData.modelURL);
             
@@ -253,23 +258,24 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     } else {
                         clonedModel = model.clone();
                     }
-                    const agentID = locationObjex[i].locationData.timestamp + "_" + z.toString();
-
-                    clonedModel.name = agentID;
+                    const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + z.toString();
+                    locationObjex[i].objectData.sceneObjectID = sceneObjectID;
+                    clonedModel.name = sceneObjectID;
                     
                     // const pos = randomNavmeshPoint();
                     
-                    locationObjex[i].objectData.instanceID = agentID;
+                    
 
-                    clonedModel.userData.name = agentID;
+
+                    clonedModel.userData.name = sceneObjectID;
                     // activeObjex.push(clonedModel);
                     
-                
+                    
                     // npcKinematicBodies.push(body);
 
                     clonedModel.traverse(function (child) { 
                         if (child.isMesh) {
-                            child.userData.name = agentID;
+                            child.userData.name = sceneObjectID;
                             child.userData.locationData = locationObjex[i].locationData;
                             child.userData.objectData = locationObjex[i].objectData;
                             // child.bindMode = "detached";
@@ -289,7 +295,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     const yscale = locationObjex[i].locationData.yscale ? parseFloat(locationObjex[i].locationData.yscale) : 1;
                     const zscale = locationObjex[i].locationData.zscale ? parseFloat(locationObjex[i].locationData.zscale) : 1;
                     const random = clamp(Math.random() * 2, .75, 1.25);
-                    console.log("tryna scale agentID " + agentID + "  " + xscale + " " + yscale + " " + zscale);
+                    console.log("tryna scale sceneObjectID " + sceneObjectID + "  " + xscale + " " + yscale + " " + zscale);
                     clonedModel.position.set(0,0,0);
                     
                     clonedModel.scale.set(xscale * random, yscale * random, zscale * random);
@@ -304,6 +310,12 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     // parent.name = "navagent";
                     // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
                     const sceneObject = new SceneObject(clonedModel, locationObjex[i].objectData);
+                    // const sceneObjectInstance = {sceneObjectID : sceneObject};
+                    // sceneObjects.push(sceneObjectInstance);
+                    sceneObjects[sceneObjectID] = sceneObject;
+                        // const sceneObjectInstance = {sceneObjectID : sceneObject};
+                        // sceneObjects.push(sceneObject);
+                    // sceneObjectInstance.
                     await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData, locationObjex[i].objectData, sceneObject);
                     kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
 
@@ -316,11 +328,13 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
             
             } else {
                 if (count != 1) {
-                    for (let z = 0; z < count; z++) {
-                    console.log("tryna place an object " + locationObjex[i].locationData.name + " " + locationObjex[i].modelData.modelURL);
-                    //     }
-                    // } else {
-                    const clonedObject = model.clone();
+                    for (let zm = 0; zm < count; zm++) {
+                        // console.log("tryna place an object " + zm + " " + locationObjex[i].locationData.name + " " + locationObjex[i].modelData.modelURL);
+                        //     }
+                        // } else {
+                        const clonedObject = model.clone();
+                        const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + zm;
+                        locationObjex[i].objectData.sceneObjectID = sceneObjectID;
 
                         const randomPoint = randomNavmeshPoint();
                         const x = randomPoint.x;
@@ -339,11 +353,15 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                         });
 
                         const sceneObject = new SceneObject(clonedObject, locationObjex[i].objectData);
+                        sceneObjects[sceneObjectID] = sceneObject;
+                        // const sceneObjectInstance = {sceneObjectID : sceneObject};
+                        // sceneObjects.push(sceneObject);
                     }
                 } else {
                     // const clonedObject = model.clone();
 
-
+                    const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + 1;
+                    locationObjex[i].objectData.sceneObjectID = sceneObjectID;
                     model.scale.set(locationObjex[i].locationData.xscale,locationObjex[i].locationData.yscale,locationObjex[i].locationData.zscale);
                     model.position.set(locationObjex[i].locationData.x,locationObjex[i].locationData.y,locationObjex[i].locationData.z);
                     scene.add(model);
@@ -356,6 +374,9 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                         }
                     });
                     const sceneObject = new SceneObject(model, locationObjex[i].objectData);
+                    sceneObjects[sceneObjectID] = sceneObject;
+                        // const sceneObjectInstance = {sceneObjectID : sceneObject};
+                        // sceneObjects.push(sceneObject);
                 }
             }
         }

@@ -1,28 +1,39 @@
 
 import { lastRaycastHitObject, ShowPopup } from './three_controls.js';
 
+import { settings } from '../../../connect/settings.js';
+
+export const sceneObjects = {};
+
 export function HTMLActionSwitch (event) { //input from simple html popups
-    const type = event.target.dataset.markertype;
-    const eventdata = event.target.dataset.eventdata;
+    const type = event.target.dataset.type;
+    const data = event.target.dataset.data;
     const tags = event.target.dataset.tags;
     
-    console.log(type + " " + eventdata + " " + tags);
+    console.log(type + " " + data + " " + tags);
 
+    const sceneObject = sceneObjects[data];
+    console.log("sceneObject?> " + JSON.stringify(sceneObject.objectData));
 
     switch (type) {
         case "gate":
-            EnterSceneGate(eventdata);
+            EnterSceneGate(data);
+        break;
+
+        case "pickup":
+            // console.log("tryna pickup " + data +" from json "+ JSON.stringify(sceneObject));
+            sceneObjects[data].confirmed("pickup");
         break;
     }
 }
 
-export class SceneObject { //things with actions and fancy params, e.g. characters, magic items
+export class SceneObject { //things with maybe actions and fancy params, e.g. characters, magic items
     constructor(object, objectData, locationData) {
 
         this.object = object;
         this.objectData = objectData;
         this.object.userData.sceneObjectInstance = this;
-        console.log("new sceneObject " + JSON.stringify(this.objectData));
+        // console.log("new sceneObject " + this.objectData.sceneObjectID);
 
         this.isEquipped = false;
         this.fromSceneInventory = false;
@@ -109,10 +120,11 @@ export class SceneObject { //things with actions and fancy params, e.g. characte
         //     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
         //     ShowPopup(event);
         // } else 
+
             if (this.hasPickupAction) {
                 popup.innerHTML = "<h1>"+this.objectData.name+" </h1> <div>Pickup object?</div>" +
-                "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-markertype=\x22pickup\x22 data-eventdata=\x22"+
-                this+"\x22 class=\x22yesButton\x22>Yes</button>"+
+                "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22pickup\x22 data-data=\x22"+
+                this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Yes</button>"+
                 "</div>";
                 ShowPopup(event);
             } else if (lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
@@ -136,11 +148,11 @@ export class SceneObject { //things with actions and fancy params, e.g. characte
             console.log(JSON.stringify(this.pickupAction));
             let data = {};
             data.sceneID = settings._id;
-            data.fromSceneInventory = this.data.fromSceneInventory;
-            data.timestamp = this.data.timestamp;
-            data.fromScene = room;
-            data.object_item = this.objectData;
-            data.userData = userData;
+            // data.fromSceneInventory = this.data.fromSceneInventory;
+            // data.timestamp = this.data.timestamp;
+            // data.fromScene = room;
+            // data.object_item = this.objectData;
+            // data.userData = userData;
             data.action = this.pickupAction;
             console.log("pickupaction " + JSON.stringify(data));
     
