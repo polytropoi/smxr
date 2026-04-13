@@ -2,8 +2,11 @@
 import { lastRaycastHitObject, ShowPopup } from './three_controls.js';
 
 import { settings } from '../../../connect/settings.js';
+import { locationObjex } from './three_locations.js';
 
-export const sceneObjects = {};
+export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
+
+// export const sceneObjectsArray = []; //array with all the object data
 
 export function HTMLActionSwitch (event) { //input from simple html popups
     const type = event.target.dataset.type;
@@ -26,6 +29,24 @@ export function HTMLActionSwitch (event) { //input from simple html popups
         break;
     }
 }
+
+
+export function ReturnObjectData (objectID) { //not the instance ID, but original mongoID of the object, to get the prototype
+    let objek = null;
+    console.log(JSON.stringify(locationObjex));
+    if (locationObjex.length > 0) {
+        for (let i = 0; i < locationObjex.length; i++) {
+        console.log('tryna match object data for ' +objectID + " vs " + locationObjex[i].objectData._id);
+        if (locationObjex[i].objectData._id == objectID) {
+            console.log('gotsa objectID match to return data ' + objectID);
+            // hasObj = true;
+            objek = locationObjex[i].objectData;
+            break;
+        }
+        }
+    }
+    return objek;
+    }
 
 export class SceneObject { //things with maybe actions and fancy params, e.g. characters, magic items
     constructor(object, objectData, locationData) {

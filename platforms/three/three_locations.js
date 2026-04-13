@@ -375,6 +375,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
                     });
                     const sceneObject = new SceneObject(model, locationObjex[i].objectData);
                     sceneObjects[sceneObjectID] = sceneObject;
+                    // sceneObjectsArray.push(locationObjex[i].data)
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
                         // sceneObjects.push(sceneObject);
                 }

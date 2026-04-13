@@ -1,11 +1,10 @@
-// import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "../src/component/content-utils.js";
-// import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems } from "content-utils";
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
           InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, 
           RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime, 
           LoadPrimaryAudioHowl} from "./media.js";
-import { timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz } from "./events.js";
+import { equip_inventory_object, timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz } from "./events.js";
 import { settings, profile } from "./settings.js";
+import { eventEl } from "./events.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
   userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
@@ -20,7 +19,7 @@ import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, D
 export let showDialogPanel = false;
 let dialogInitialized = false;
 
-let userInventory = null;
+export let userInventory = null;
 
 let modalContentElID = 'modalContent';
 let theModal = null;
@@ -1979,7 +1978,7 @@ function ColorMods(event, value) {
     }
     // SaveLocalData();
  }
-function GetUserInventory () {
+export function GetUserInventory () {
   // let data = {};
   // data.fromScene = room;
   // data.userData = userData;
@@ -2018,7 +2017,9 @@ function GetUserInventory () {
                 let buttonNameString = itemNames[uniqueItems[u]] + " (" + itemCounts[uniqueItems[u]]+ ")";
                 // console.log("buttonNameStirng: " + buttonNameString);
                 response = response + "<button class=\x22btnInventory\x22 data-inventoryID=\x22"+uniqueItems[u]+"\x22 >"+buttonNameString+"</button>";
-                inventoryDisplayEl.innerHTML = response;
+                if (inventoryDisplayEl) {
+                  inventoryDisplayEl.innerHTML = response;
+                }
               }
               
             }
@@ -2153,6 +2154,11 @@ function EquipInventoryItem (objectID) {
         } 
       }
     }
+  } else {
+    const eventDetails = {};
+    eventDetails.objectID = objectID;
+    equip_inventory_object.details = eventDetails;
+    eventEl.dispatchEvent(equip_inventory_object);
   }
 }
 

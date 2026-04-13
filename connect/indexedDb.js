@@ -508,6 +508,7 @@ export function InitIDB() {
                   if (pcursor.value.equipment && pcursor.value.equipment.main) {
                      if (pcursor.value.equipment.main.equipped) {
                         console.log("player is equipped!");
+                        
                         const modObjexEl = document.getElementById("sceneObjects");
                         if (modObjexEl) {
                            if (modObjexEl.components.mod_objex) {
@@ -524,6 +525,8 @@ export function InitIDB() {
                            }
                         } else {
                            console.log("cain't find mod_objex");
+
+
                         }
                      } else {
                         const playerHudEl = document.getElementById("player_hud");

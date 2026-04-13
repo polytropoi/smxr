@@ -1256,7 +1256,7 @@ three_router.get('/:_id', function (req, res) {
             }
 
             ///////////////////// location "placeholders" used for "cloud markers" /////////////////////////////////
-            if (locationPlaceholders.length > 0) {
+            if (locationPlaceholders.length > 0) { //nah, just do on client
                 for (let i = 0; i < locationPlaceholders.length; i++) {
                     //use the "cloud_marker" component for certain markertypes () TODO rename it to mod_location // nope
                     let scale = 1;
@@ -1309,7 +1309,7 @@ three_router.get('/:_id', function (req, res) {
             console.log("inventory items: " + JSON.stringify(inventoryitems));
             if (inventoryitems && inventoryitems.length > 0) {
                 var buff = Buffer.from(JSON.stringify(inventoryitems)).toString("base64");
-                inventoryData = "<div mod_scene_inventory id=\x22sceneInventory\x22 data-inventory='"+buff+"'></div>";
+                inventoryData = "<div id=\x22sceneInventory\x22 data-inventory='"+buff+"'></div>";
             }
             ///////////////// scene models //////////////////
             // var modelz = [];
@@ -2825,528 +2825,348 @@ three_router.get('/:_id', function (req, res) {
                 }
 
 
-                /////////////////// build the response! ///////////////////////////////
-
-                // let settings = {};  //um, the old one...
-                //     settings._id = sceneResponse._id;
-                //     settings.sceneLastUpdate = sceneResponse.sceneLastUpdate;
-                //     settings.sceneType = sceneResponse.sceneWebType;
-                //     settings.sceneDomain = sceneResponse.sceneDomain;
-                //     settings.sceneTitle = sceneResponse.sceneTitle;
-                //     settings.sceneKeynote = sceneResponse.sceneKeynote;
-                //     settings.sceneDescription = sceneResponse.sceneDescription;
-
-                //     settings.sceneEventStart = sceneResponse.sceneEventStart;
-                //     settings.sceneEventEnd = sceneResponse.sceneEventEnd;
-                //     settings.hideAvatars = true;
-                //     settings.sceneUseFog = sceneResponse.sceneUseSceneFog != undefined ? sceneResponse.sceneUseSceneFog : false;
-                //     settings.sceneUseSkybox = sceneResponse.sceneUseSkybox;
-                //     settings.sceneSkyRadius = sceneResponse.sceneSkyRadius != undefined ? sceneResponse.sceneSkyRadius : 202;
-                //     settings.sceneFogDensity = sceneResponse.sceneGlobalFogDensity != undefined ? sceneResponse.sceneGlobalFogDensity : 0;
-                //     settings.sceneGroundLevel = sceneResponse.sceneGroundLevel;
-                //     settings.sceneFontWeb1 = sceneResponse.sceneFontWeb1;
-                //     settings.sceneFontWeb2 = sceneResponse.sceneFontWeb2;
-                //     settings.sceneFontWeb3 = sceneResponse.sceneFontWeb3;
-                //     settings.sceneFontFillColor = sceneResponse.sceneFontFillColor;
-                //     settings.sceneFontOutlineColor = sceneResponse.sceneFontOutlineColor;
-                //     settings.sceneTextBackground = sceneResponse.sceneTextBackground;
-                //     settings.sceneTextBackgroundColor = sceneResponse.sceneTextBackgroundColor;
-                //     settings.sceneColor1 = sceneResponse.sceneColor1;
-                //     settings.sceneColor2 = sceneResponse.sceneColor2;
-                //     settings.sceneColor3 = sceneResponse.sceneColor3;
-                //     settings.sceneColor4 = sceneResponse.sceneColor4;
-                //     settings.sceneColor1Alt = sceneResponse.sceneColor1Alt;
-                //     settings.sceneColor2Alt = sceneResponse.sceneColor2Alt;
-                //     settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
-                //     settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
-                //     settings.volumePrimary = sceneResponse.scenePrimaryVolume;
-                //     settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
-                //     settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
-                //     // settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
-
-                //     settings.primary_mp3url = primary_mp3url;
-                //     settings.mappicURL = mappicURL;
-                //     settings.skyboxIDs = skyboxIDs;
-                //     settings.skyboxID = skyboxID;
-                //     settings.skyboxURL = skyboxUrl;
-                //     settings.useSynth = hasSynth;
-                //     settings.useStarterKit = useStarterKit;
-                //     settings.useSuperHands = useSuperHands;
-                //     settings.usePhysicsType = usePhysicsType;
-                //     settings.useNavmesh = useNavmesh; //"real" navmesh w/ pathfinding
-                //     settings.useSimpleNavmesh = useSimpleNavmesh;
-                //     settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
-                //     settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
-                //     settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
-                //     settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
-                //     settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
-                //     let audioGroups = {};
-                //     audioGroups.triggerGroups = sceneResponse.sceneTriggerAudioGroups;
-                //     audioGroups.ambientGroups = sceneResponse.sceneAmbientAudioGroups;
-                //     audioGroups.primaryGroups = sceneResponse.scenePrimaryAudioGroups;
-                //     audioGroups.objectGroups = objectAudioGroups;
-                //     settings.audioGroups = audioGroups; 
-                //     settings.clearLocalMods = false;
-                //     settings.sceneVideoStreams = (sceneResponse.sceneVideoStreamUrls != undefined && sceneResponse.sceneVideoStreamUrls != null) ? sceneResponse.sceneVideoStreamUrls : [];
-                //     settings.socketHost = process.env.SOCKET_HOST;
-                //     settings.networking = sceneResponse.sceneNetworking;
-                //     settings.playerStartPosition = playerPosition;
-                //     settings.playerPositions = playerPositions;
-                //     settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
-                //     settings.playerHeight = sceneResponse.scenePlayer.playerHeight;
-                //     settings.debugMode = debugMode;
-                //     settings.scatterObjects = sceneResponse.sceneScatterObjects;
-                //     settings.sceneScatterObjectLayers = sceneResponse.sceneScatterObjectLayers;
-                //     settings.scatterMeshes = sceneResponse.sceneScatterMeshes;
-
-                //     settings.sceneScatterMeshLayers = sceneResponse.sceneScatterMeshLayers;
-                //     settings.allowMods = true;
-                //     settings.sceneTags = sceneResponse.sceneTags;
-                //     settings.hideGizmos = false;
-                //     settings.sceneEnvironmentPreset = sceneResponse.sceneEnvironmentPreset;
-                //     settings.showCameraIcon = sceneResponse.showCameraIcon; //for picture group mgr
-                //     settings.useArParent = useArParent;
-                //     settings.pixelsPerMeterActual = pixelsPerMeterActual; //for 2d to 3d position conversion
-                //     settings.pixelsPerMeterActual = pixelsPerMeterVirtual; //hrm
-
-                //     if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("xr room physics")) {
-                //         settings.useXrRoomPhysics = true;
-                //     } else {
-                //         settings.useXrRoomPhysics = false;
-                //     }
-                //     if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("right hand blaster")) {
-                //         settings.useRightHandBlaster = true;
-                //     }
-                //     if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("left hand blaster")) {
-                //         settings.useLeftHandBlaster = true;
-                //     }
-
-                //     if (sceneResponse.sceneTags && sceneResponse.sceneTags.includes("real world meshing")) {
-                //         settings.useRealWorldMeshing = true;
-                //     } else {
-                //         settings.useRealWorldMeshing = false;
-                //     } 
-
-                //     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("no mods")) {
-                //         settings.allowMods = false;
-                //     }
-                //     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("hide gizmos")) {
-                //         settings.hideGizmos = true;
-                //     }
-                //     if (sceneResponse.scatterObjects) {
-                //         settings.sceneScatterObjectLayers = sceneResponse.sceneScatterObjectLayers;
-                //     }
-                //     if (sceneResponse.scatterMeshes) {
-                //         settings.sceneScatterMeshLayers = sceneResponse.sceneScatterMeshLayers;
-                //     }
-                //     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
-                //         settings.hideAvatars = false;
-                //     }
-                //     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("clear localmods")) {
-                //         settings.clearLocalMods = true;
-                //     }
+                console.log("sceneWebType: "+ sceneResponse.sceneWebType + " sceneTags " + sceneResponse.sceneTags); 
+            
                     
-                //     if (sceneResponse.triggerAudioGroups != null && sceneResponse.triggerAudioGroups.length > 0) {
-                //         hasTriggerAudio = true;
-                //     }
-                //     if (sceneResponse.ambientAudioGroups != null && sceneResponse.ambientAudioGroups.length > 0) {
-                //         hasAmbientAudio = true;
-                //     }
-                //     if (sceneResponse.primaryAudioGroups != null && sceneResponse.primaryAudioGroups.length > 0) {
-                //         hasPrimaryAudio = true;
-                //     }
-                //     var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
-                //     settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
-                //     var spritebuff = Buffer.from(JSON.stringify(sprites)).toString("base64");
-                //     spriteData = "<div id=\x22spritesDataElement\x22 data-sprites=\x22"+spritebuff+"\x22></div>";
+                /////////////////////////////////////////////////////////------------- Default Three response below ------------------------------
 
-                    // if (sceneResponse.sceneTimedEvents) {
-                    //     var tebuff = Buffer.from(JSON.stringify(sceneResponse.sceneTimedEvents)).toString("base64");
-                    //     sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
+                    
+                    
+                    let settings = {};  //TODO move this lower down? 
+                                            
+                    settings._id = sceneResponse._id;
+                    settings.sceneType = "three";
+                    settings.sceneTags = sceneResponse.sceneTags;
+                    settings.sceneTitle = sceneResponse.sceneTitle;
+                    settings.sceneKeynote = sceneResponse.sceneKeynote;
+                    settings.sceneDescription = sceneResponse.sceneDescription;
+                    settings.sceneEventStart = sceneResponse.sceneEventStart;
+                    settings.sceneEventEnd = sceneResponse.sceneEventEnd;
+                    settings.hideAvatars = true;
+                    settings.sceneSkyRadius = sceneResponse.sceneSkyRadius != undefined ? sceneResponse.sceneSkyRadius : 202;
+                    settings.sceneFontWeb1 = sceneResponse.sceneFontWeb1;
+                    settings.sceneFontWeb2 = sceneResponse.sceneFontWeb2;
+                    settings.sceneFontWeb3 = sceneResponse.sceneFontWeb3;
+                    settings.sceneFontFillColor = sceneResponse.sceneFontFillColor;
+                    settings.sceneFontOutlineColor = sceneResponse.sceneFontOutlineColor;
+                    settings.sceneTextBackground = sceneResponse.sceneTextBackground;
+                    settings.sceneTextBackgroundColor = sceneResponse.sceneTextBackgroundColor;
+                    settings.sceneColor1 = sceneResponse.sceneColor1;
+                    settings.sceneColor2 = sceneResponse.sceneColor2;
+                    settings.sceneColor3 = sceneResponse.sceneColor3;
+                    settings.sceneColor4 = sceneResponse.sceneColor4;
+                    settings.sceneColor1Alt = sceneResponse.sceneColor1Alt;
+                    settings.sceneColor2Alt = sceneResponse.sceneColor2Alt;
+                    settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
+                    settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
+                    settings.sceneClouds = sceneClouds;
+                    settings.sceneTime = sceneTime;
+                    settings.volumePrimary = sceneResponse.scenePrimaryVolume;
+                    settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
+                    settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
+                    settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
+                    settings.skyboxIDs = skyboxIDs;
+                    settings.skyboxID = skyboxID;
+                    settings.skyboxURL = skyboxUrl;
+                    settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
+                    settings.useSceneFog = sceneResponse.sceneUseSceneFog;
+                    settings.sceneUseVolumetricFog = sceneResponse.sceneUseVolumetricFog;
+                    settings.useSynth = hasSynth;
+                    settings.mappicURL = mappicURL;
+                    settings.backgroundVideoURL = backgroundVideoURL;
+                    settings.backgroundURL = backgroundURL;
+                    settings.backgroundIsTileable = backgroundIsTileable;
+                    settings.primary_mp3url = primary_mp3url;
+                    settings.ambient_oggurl = ambientOggUrl;
+                    settings.hasPrimaryAudioStream = hasPrimaryAudioStream;
+                    settings.sceneUseDynamicSky = sceneResponse.sceneUseDynamicSky;
+                    // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
+                    // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
+                    settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
+                    settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
+                    let audioGroups = {};
+                    audioGroups.triggerGroups = sceneResponse.sceneTriggerAudioGroups;
+                    audioGroups.ambientGroups = sceneResponse.sceneAmbientAudioGroups;
+                    audioGroups.primaryGroups = sceneResponse.scenePrimaryAudioGroups;
+                    settings.audioGroups = audioGroups; 
+                    settings.clearLocalMods = false;
+                    settings.sceneVideoStreams = sceneResponse.sceneVideoStreamUrls;
+                    settings.socketHost = process.env.SOCKET_HOST;
+                    settings.networking = sceneResponse.sceneNetworking;
+                    settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
+                    settings.playerHeight = sceneResponse.scenePlayer.playerHeight
+                    // settings.playerStartPosition = playerPosition;
+
+                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
+                        settings.hideAvatars = false;
+                    }
+                    if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("clear localmods")) {
+                        settings.clearLocalMods = true;
+                    }
+                    
+                    if (sceneResponse.triggerAudioGroups != null && sceneResponse.triggerAudioGroups.length > 0) {
+                        hasTriggerAudio = true;
+                    }
+                    if (sceneResponse.ambientAudioGroups != null && sceneResponse.ambientAudioGroups.length > 0) {
+                        hasAmbientAudio = true;
+                    }
+                    if (sceneResponse.primayAudioGroups != null && sceneResponse.primayAudioGroups.length > 0) {
+                        hasPrimaryAudio = true;
+                    }
+
+                    if (sceneResponse.sceneTimedEvents) {
+                        var tebuff = Buffer.from(JSON.stringify(sceneResponse.sceneTimedEvents)).toString("base64");
+                        sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
+                    }
+
+                    // settings.sceneAmbientAudioGroups = sceneResponse.sceneAmbientAudioGroups;
+                    // settings.scenePrimaryAudioGroups = sceneResponse.scenePrimaryAudioGroups;
+
+                    // settingsDataEntity = "<div id=\x22settingsDataEntity\x22 data-settings=\x22"+sbuff+"\x22></div>"; ? maybe
+
+                    let picGroups = "";
+                    let sceneGreeting = sceneResponse.sceneDescription;
+                    if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
+                        sceneGreeting = sceneResponse.sceneGreeting;
+                    }      
+                    let sceneQuest = "";
+                    if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
+                        sceneQuest = sceneResponse.sceneQuest;
+                    }
+                    settings.sceneGreeting = sceneGreeting;
+                    settings.sceneQuest = sceneQuest;
+                    
+                    var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
+                    settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
+
+                    
+                    
+                    // if (sceneResponse.sceneWebType != "Video Landinggggg") {
+                    // if (!sceneGreeting || !sceneGreeting.length) {
+                    //     sceneGreeting = "Welcome!";
+                    // } 
+                    // let hasTile = false;
+                    // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
+
+                    let availableScenesHTML = ""; //never popped here
+                    // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto;\x22";
+
+                    joystickContainer = "<div id=\x22joystickContainer\x22 class=\x22JoystickRegionUI\x22 style=\x22z-index: 1000; visibility: hidden\x22>" + //initialized in navigation / content-utils
+                        "<div class=\x22JoystickButtonUI\x22 style=\x22width: 128px; opacity:0.50;\x22>" +
+                            "<img src=\x22/css/joystick-base.png\x22/>" +
+                            "<div id=\x22joystickEl\x22 style=\x22position: absolute; left:32px; top:32px;\x22>" +
+                            "<img src=\x22/css/joystick-red.png\x22/>" +
+                            "</div>" +
+                            "</div>" +
+                        "</div>";
+                    let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
+                    if (tilepicUrl != "") {
+                        bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
+                    }
+                    let sceneAccess = "Access Open to Public"
+                    // if (sceneResponse.sceneShareWithSubscribers) {
+                    //     sceneAccess ="<span>Access Requires Subscription</span><br>";
                     // }
+                    // bgcolor=\x22"+sceneResponse.sceneColor1+"\x22>\n
+                    if (tilepicUrl != "") {
+                        bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
+                    }
+                    let sceneOwner = "";
+                    let sceneEditButton = "";
+                    if (sceneOwner != "" || (!isGuest && req.session.user && req.session.user.authLevel.includes("domain_admin"))) { //hrm..
+                        sceneEditButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../main/index.html?type=scene&iid="+sceneResponse._id+"\x22>Edit Scene</a>";
+                    }
 
-                 
-                    // let webxrFeatures = "";
-                    // // let arHitTest = "";
-                    // let arElements = "";
-                    // let handsTemplate = "";
-                    // let aframeRenderSettings = "renderer=\x22colorManagement: true; physicallyCorrectLights: true; exposure: 2; sortObjects: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;\x22";
-     
-
-                    //scenetype filters below...
-
-                    console.log("sceneWebType: "+ sceneResponse.sceneWebType + " sceneTags " + sceneResponse.sceneTags); 
-                    ////////DEFAULT/AFRAME Scene type:
-                    
-                    // if (sceneResponse.sceneWebType == "Model Viewer") { //ha
-                       
-                    // } else {
-                        
-                        /////////////////////////////////////////////////////////------------- Default Three response below ------------------------------
-
-                        
-                        
-                       let settings = {};  //TODO move this lower down? 
-                                              
-                        settings._id = sceneResponse._id;
-                        settings.sceneType = "three";
-                        settings.sceneTags = sceneResponse.sceneTags;
-                        settings.sceneTitle = sceneResponse.sceneTitle;
-                        settings.sceneKeynote = sceneResponse.sceneKeynote;
-                        settings.sceneDescription = sceneResponse.sceneDescription;
-                        settings.sceneEventStart = sceneResponse.sceneEventStart;
-                        settings.sceneEventEnd = sceneResponse.sceneEventEnd;
-                        settings.hideAvatars = true;
-                        settings.sceneSkyRadius = sceneResponse.sceneSkyRadius != undefined ? sceneResponse.sceneSkyRadius : 202;
-                        settings.sceneFontWeb1 = sceneResponse.sceneFontWeb1;
-                        settings.sceneFontWeb2 = sceneResponse.sceneFontWeb2;
-                        settings.sceneFontWeb3 = sceneResponse.sceneFontWeb3;
-                        settings.sceneFontFillColor = sceneResponse.sceneFontFillColor;
-                        settings.sceneFontOutlineColor = sceneResponse.sceneFontOutlineColor;
-                        settings.sceneTextBackground = sceneResponse.sceneTextBackground;
-                        settings.sceneTextBackgroundColor = sceneResponse.sceneTextBackgroundColor;
-                        settings.sceneColor1 = sceneResponse.sceneColor1;
-                        settings.sceneColor2 = sceneResponse.sceneColor2;
-                        settings.sceneColor3 = sceneResponse.sceneColor3;
-                        settings.sceneColor4 = sceneResponse.sceneColor4;
-                        settings.sceneColor1Alt = sceneResponse.sceneColor1Alt;
-                        settings.sceneColor2Alt = sceneResponse.sceneColor2Alt;
-                        settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
-                        settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
-                        settings.sceneClouds = sceneClouds;
-                        settings.sceneTime = sceneTime;
-                        settings.volumePrimary = sceneResponse.scenePrimaryVolume;
-                        settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
-                        settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
-                        settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
-                        settings.skyboxIDs = skyboxIDs;
-                        settings.skyboxID = skyboxID;
-                        settings.skyboxURL = skyboxUrl;
-                        settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
-                        settings.useSceneFog = sceneResponse.sceneUseSceneFog;
-                        settings.sceneUseVolumetricFog = sceneResponse.sceneUseVolumetricFog;
-                        settings.useSynth = hasSynth;
-                        settings.mappicURL = mappicURL;
-                        settings.backgroundVideoURL = backgroundVideoURL;
-                        settings.backgroundURL = backgroundURL;
-                        settings.backgroundIsTileable = backgroundIsTileable;
-                        settings.primary_mp3url = primary_mp3url;
-                        settings.ambient_oggurl = ambientOggUrl;
-                        settings.hasPrimaryAudioStream = hasPrimaryAudioStream;
-                        settings.sceneUseDynamicSky = sceneResponse.sceneUseDynamicSky;
-                        // settings.useMatrix = (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('matrix'));
-                        // settings.sceneWaterLevel = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater.level : 0;
-                        settings.sceneCameraMode = sceneResponse.sceneCameraMode != undefined ? sceneResponse.sceneCameraMode : "First Person"; 
-                        settings.sceneCameraFlyable = sceneResponse.sceneFlyable != undefined ? sceneResponse.sceneFlyable : false;
-                        let audioGroups = {};
-                        audioGroups.triggerGroups = sceneResponse.sceneTriggerAudioGroups;
-                        audioGroups.ambientGroups = sceneResponse.sceneAmbientAudioGroups;
-                        audioGroups.primaryGroups = sceneResponse.scenePrimaryAudioGroups;
-                        settings.audioGroups = audioGroups; 
-                        settings.clearLocalMods = false;
-                        settings.sceneVideoStreams = sceneResponse.sceneVideoStreamUrls;
-                        settings.socketHost = process.env.SOCKET_HOST;
-                        settings.networking = sceneResponse.sceneNetworking;
-                        settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
-                        settings.playerHeight = sceneResponse.scenePlayer.playerHeight
-                        // settings.playerStartPosition = playerPosition;
-
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
-                            settings.hideAvatars = false;
-                        }
-                        if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("clear localmods")) {
-                            settings.clearLocalMods = true;
-                        }
-                        
-                        if (sceneResponse.triggerAudioGroups != null && sceneResponse.triggerAudioGroups.length > 0) {
-                            hasTriggerAudio = true;
-                        }
-                        if (sceneResponse.ambientAudioGroups != null && sceneResponse.ambientAudioGroups.length > 0) {
-                            hasAmbientAudio = true;
-                        }
-                        if (sceneResponse.primayAudioGroups != null && sceneResponse.primayAudioGroups.length > 0) {
-                            hasPrimaryAudio = true;
-                        }
-
-                        if (sceneResponse.sceneTimedEvents) {
-                            var tebuff = Buffer.from(JSON.stringify(sceneResponse.sceneTimedEvents)).toString("base64");
-                            sceneTimedEventsData = "<div id=\x22timedEventsDataElement\x22 data-timedevents=\x22"+tebuff+"\x22></div>";
-                        }
-
-                        // settings.sceneAmbientAudioGroups = sceneResponse.sceneAmbientAudioGroups;
-                        // settings.scenePrimaryAudioGroups = sceneResponse.scenePrimaryAudioGroups;
-
-                        // settingsDataEntity = "<div id=\x22settingsDataEntity\x22 data-settings=\x22"+sbuff+"\x22></div>"; ? maybe
-
-                        let picGroups = "";
-                        let sceneGreeting = sceneResponse.sceneDescription;
-                        if (sceneResponse.sceneGreeting != null && sceneResponse.sceneGreeting != undefined && sceneResponse.sceneGreeting != "") {
-                            sceneGreeting = sceneResponse.sceneGreeting;
-                        }      
-                        let sceneQuest = "";
-                        if (sceneResponse.sceneQuest != null && sceneResponse.sceneQuest != undefined && sceneResponse.sceneQuest) {
-                            sceneQuest = sceneResponse.sceneQuest;
-                        }
-                        settings.sceneGreeting = sceneGreeting;
-                        settings.sceneQuest = sceneQuest;
-                        
-                        var sbuff = Buffer.from(JSON.stringify(settings)).toString("base64");
-                        settingsData = "<div id=\x22settingsDataElement\x22 data-settings=\x22"+sbuff+"\x22></div>";
-
-                        
-                        
-                        // if (sceneResponse.sceneWebType != "Video Landinggggg") {
-                        // if (!sceneGreeting || !sceneGreeting.length) {
-                        //     sceneGreeting = "Welcome!";
-                        // } 
-                        // let hasTile = false;
-                        // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
-
-                        let availableScenesHTML = ""; //never popped here
-                        // let bgstyle = "style=\x22height:100%; width:100%; overflow:auto;\x22";
-
-                        joystickContainer = "<div id=\x22joystickContainer\x22 class=\x22JoystickRegionUI\x22 style=\x22z-index: 1000; visibility: hidden\x22>" + //initialized in navigation / content-utils
-                            "<div class=\x22JoystickButtonUI\x22 style=\x22width: 128px; opacity:0.50;\x22>" +
-                                "<img src=\x22/css/joystick-base.png\x22/>" +
-                                "<div id=\x22joystickEl\x22 style=\x22position: absolute; left:32px; top:32px;\x22>" +
-                                "<img src=\x22/css/joystick-red.png\x22/>" +
-                                "</div>" +
-                                "</div>" +
-                            "</div>";
-                        let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
-                        if (tilepicUrl != "") {
-                            bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
-                        }
-                        let sceneAccess = "Access Open to Public"
-                        // if (sceneResponse.sceneShareWithSubscribers) {
-                        //     sceneAccess ="<span>Access Requires Subscription</span><br>";
-                        // }
-                        // bgcolor=\x22"+sceneResponse.sceneColor1+"\x22>\n
-                        if (tilepicUrl != "") {
-                            bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
-                        }
-                        let sceneOwner = "";
-                        let sceneEditButton = "";
-                        if (sceneOwner != "" || (!isGuest && req.session.user && req.session.user.authLevel.includes("domain_admin"))) { //hrm..
-                            sceneEditButton = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../main/index.html?type=scene&iid="+sceneResponse._id+"\x22>Edit Scene</a>";
-                        }
-
-                        if (sceneResponse.sceneShareWithSubscribers) {
-                            if (isGuest) {
-                                sceneAccess ="<span>Access Requires Subscription</span><br>"+
-                                // "<form action=\x22../create-checkout-session\x22 method=\x22POST\x22>"+
-                                // "<button class=\x22mx-auto btn btn-xl btn-success \x22 type=\x22submit\x22>Become a Subscriber!</button>"+
-                                // "</form>";
-                                
-                                "<a class=\x22mx-auto btn btn-xl btn-info \x22 href=\x22../main/sign_in.html\x22>Subscriber Login</a> "+
-                                "<p>Login if you're a subscriber, or </p>" +
-                                "<p><a class=\x22mx-auto btn btn-xl btn-success \x22 href=\x22https://buy.stripe.com/test_fZe6pdebx9vB7LO8wx\x22>Become a Subscriber!</a> </p>";
-                            } else {
-                                sceneAccess ="<span>Access Requires Subscription</span><br>"+
-                                "<h4 class=\x22text-success\x22>Welcome <strong>" + avatarName + "</strong>!</h4>";
-                            }
-                            //  "Subscribe or Login to access this scene - "
+                    if (sceneResponse.sceneShareWithSubscribers) {
+                        if (isGuest) {
+                            sceneAccess ="<span>Access Requires Subscription</span><br>"+
+                            // "<form action=\x22../create-checkout-session\x22 method=\x22POST\x22>"+
+                            // "<button class=\x22mx-auto btn btn-xl btn-success \x22 type=\x22submit\x22>Become a Subscriber!</button>"+
+                            // "</form>";
+                            
+                            "<a class=\x22mx-auto btn btn-xl btn-info \x22 href=\x22../main/sign_in.html\x22>Subscriber Login</a> "+
+                            "<p>Login if you're a subscriber, or </p>" +
+                            "<p><a class=\x22mx-auto btn btn-xl btn-success \x22 href=\x22https://buy.stripe.com/test_fZe6pdebx9vB7LO8wx\x22>Become a Subscriber!</a> </p>";
                         } else {
-                            if (!isGuest) {
-                                sceneAccess += "<p><h4 class=\x22text-success\x22>Welcome <strong>" + avatarName + "</strong>!</h4></p>";
-                            }
-                            
-                        // }
+                            sceneAccess ="<span>Access Requires Subscription</span><br>"+
+                            "<h4 class=\x22text-success\x22>Welcome <strong>" + avatarName + "</strong>!</h4>";
                         }
-                        let styleTheme = "slate";
-                        if (sceneResponse.sceneStyleTheme != null && sceneResponse.sceneStyleTheme != undefined && sceneResponse.sceneStyleTheme.length > 0 && sceneResponse.sceneStyleTheme != 'undefined') {
-                            styleTheme = sceneResponse.sceneStyleTheme;
+                        //  "Subscribe or Login to access this scene - "
+                    } else {
+                        if (!isGuest) {
+                            sceneAccess += "<p><h4 class=\x22text-success\x22>Welcome <strong>" + avatarName + "</strong>!</h4></p>";
                         }
-
-                        // // platformButtons = "";
-                        // let buttonLabel = sceneResponse.sceneWebType == "Video Landing" ? "Watch Video" : "Enter WebXR Scene"
-
-                        // let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22>"+buttonLabel+"</a>"+
-                        // "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22>Send to Quest</a>"
-                        // if (sceneResponse.sceneShareWithSubscribers) {
-                        //     if (isGuest) {
-                        //         platformButtons = "";
-                        //     }
-                            
-                        //     //  "Subscribe or Login to access this scene - "
-                        // }
-                        // if (!sceneResponse.sceneShareWithSubscribers && sceneResponse.sceneUnityWebOK) {
-                        //     platformButtons += "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../unity/"+ sceneResponse.short_id + "\x22>Enter Unity Scene</a> ";
-                        // }
-                        var audioHtml = "";
-                        let uid = "0000000000000";
-                        if (req.session.user) {
-                            uid = req.session.user._id;
-                        }
-                        if (primary_mp3url != undefined && primary_mp3url.length > 6) {
-                            audioHtml = '<div id=\z22primaryAudioControls\x22><audio controls><source src=\x22' + primary_mp3url + '\x22 type=\x22audio/mp3\x22></audio></div>';
-                        }
-                        var token=jwt.sign({userId:uid,shortID:sceneResponse.short_id},process.env.JWT_SECRET, { expiresIn: '1h' }); 
-                        // console.log("avatar name: " + avatarName + " token " + token);
-                        htmltext = "<!DOCTYPE html>\n" +
-                        "<head> " +
-                        "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
-                        "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        "<meta charset=\x22UTF-8\x22>"+
-                        "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        // googleAnalytics +
                         
-                        "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        "<meta charset='utf-8'/>" +
-                        "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
-                        "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
-                        "<meta property='og:type' content='website' /> " +
-                        // "<meta property='og:image' content='" + postcard1 + "' /> " +
-                        "<meta property='og:image' content='" + postcard1_static + "' /> " +
-                        "<meta property='og:image:height' content='1024' /> " +
-                        "<meta property='og:image:width' content='1024' /> " +
-                        "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
-                        "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
-                        "<meta property='name' content='" + sceneResponse.sceneTitle + "' /> " +
-                        "<title>" + sceneResponse.sceneTitle + "</title>" +
-                        "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
-                        // "<meta name=\x22monetization\x22 content=\x22"+process.env.COIL_PAYMENT_POINTER+"\x22>" +
-                        "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
-                        "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
-                        socketScripts +
+                    // }
+                    }
+                    let styleTheme = "slate";
+                    if (sceneResponse.sceneStyleTheme != null && sceneResponse.sceneStyleTheme != undefined && sceneResponse.sceneStyleTheme.length > 0 && sceneResponse.sceneStyleTheme != 'undefined') {
+                        styleTheme = sceneResponse.sceneStyleTheme;
+                    }
+
+                    // // platformButtons = "";
+                    // let buttonLabel = sceneResponse.sceneWebType == "Video Landing" ? "Watch Video" : "Enter WebXR Scene"
+
+                    // let platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../webxr/"+ sceneResponse.short_id + "\x22>"+buttonLabel+"</a>"+
+                    // "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22https://www.oculus.com/open_url/?url=https://smxr.net/webxr/"+ sceneResponse.short_id + "\x22>Send to Quest</a>"
+                    // if (sceneResponse.sceneShareWithSubscribers) {
+                    //     if (isGuest) {
+                    //         platformButtons = "";
+                    //     }
                         
-                        importMap +
+                    //     //  "Subscribe or Login to access this scene - "
+                    // }
+                    // if (!sceneResponse.sceneShareWithSubscribers && sceneResponse.sceneUnityWebOK) {
+                    //     platformButtons += "<a class=\x22mx-auto btn btn-xl btn-primary \x22 href=\x22../unity/"+ sceneResponse.short_id + "\x22>Enter Unity Scene</a> ";
+                    // }
+                    var audioHtml = "";
+                    let uid = "0000000000000";
+                    if (req.session.user) {
+                        uid = req.session.user._id;
+                    }
+                    if (primary_mp3url != undefined && primary_mp3url.length > 6) {
+                        audioHtml = '<div id=\z22primaryAudioControls\x22><audio controls><source src=\x22' + primary_mp3url + '\x22 type=\x22audio/mp3\x22></audio></div>';
+                    }
+                    var token=jwt.sign({userId:uid,shortID:sceneResponse.short_id},process.env.JWT_SECRET, { expiresIn: '1h' }); 
+                    // console.log("avatar name: " + avatarName + " token " + token);
+                    htmltext = "<!DOCTYPE html>\n" +
+                    "<head> " +
+                    "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
+                    "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
+                    "<meta charset=\x22UTF-8\x22>"+
+                    "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
+                    "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
+                    // googleAnalytics +
+                    
+                    "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
+                    "<meta charset='utf-8'/>" +
+                    "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
+                    "<meta property='og:url' content='" + process.env.ROOT_HOST + "/webxr/" + sceneResponse.short_id + "' /> " +
+                    "<meta property='og:type' content='website' /> " +
+                    // "<meta property='og:image' content='" + postcard1 + "' /> " +
+                    "<meta property='og:image' content='" + postcard1_static + "' /> " +
+                    "<meta property='og:image:height' content='1024' /> " +
+                    "<meta property='og:image:width' content='1024' /> " +
+                    "<meta property='og:title' content='" + sceneResponse.sceneTitle + "' /> " +
+                    "<meta property='og:description' content='" + sceneResponse.sceneDescription + "' /> " +
+                    "<meta property='name' content='" + sceneResponse.sceneTitle + "' /> " +
+                    "<title>" + sceneResponse.sceneTitle + "</title>" +
+                    "<meta name='description' content='" + sceneResponse.sceneDescription + "'/>" +
+                    // "<meta name=\x22monetization\x22 content=\x22"+process.env.COIL_PAYMENT_POINTER+"\x22>" +
+                    "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                    "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
+                    "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                    "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
+                    socketScripts +
+                    
+                    importMap +
 
-                        "<script type=\x22module\x22 src=\x22../platforms/three/three_main.mjs\x22 ></script>" +
+                    "<script type=\x22module\x22 src=\x22../platforms/three/three_main.mjs\x22 ></script>" +
 
-                        // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +
-                        "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +
-                        // "<script type=\x22module\x22 src=\x22/connect/three.js\x22 defer=\x22defer\x22></script>" + //this one talks to pixi
-                        // "<script type=\x22module\x22 src=\x22/connect/media.js\x22 defer=\x22defer\x22></script>" +
-                        "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                    // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +
+                    "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +
+                    // "<script type=\x22module\x22 src=\x22/connect/three.js\x22 defer=\x22defer\x22></script>" + //this one talks to pixi
+                    // "<script type=\x22module\x22 src=\x22/connect/media.js\x22 defer=\x22defer\x22></script>" +
+                    "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
 
-                            // "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>"+
-                            // "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
-                            // "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
+                        // "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>"+
+                        // "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+
+                        // "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>";
+
+                        "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>"+
+                        "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+
+                        "<script type=\x22module\x22 src=\x22/connect/media.js\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22../main/js/nipple.mjs\x22></script>"+
+                        // "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js\x22></script>" +
+
+                        // "<script src=\x22/connect/traffic.js\x22></script>"+
+                    
+                    // "<script src=\x22../main/vendor/howler/src/howler.core.js\x22></script>"+
+                    // "<script src=\x22../main/vendor/howler/src/howler.mjs\x22></script>"+
+                    "<style> audio {"+
+                            "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 
+                            "width: 100%;"+
+                            "height: 66px;"+
+                        "}"+
+                    "</style>"+ 
+
+                    
+                    "</head>\n" +
+                    "<body "+bgstyle+">" +
+
+                    joystickContainer+
+
+                        "<img hidden visible=\x22false\x22 id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>"+
+                    "<img hidden visible=\x22false\x22 id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>"+
+                    "<img hidden visible=\x22false\x22 id=\x22smoke1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>"+
+                    "<img hidden visible=\x22false\x22 id=\x22explosion1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/explosion1.png\x22 crossorigin=\x22anonymous\x22>"+
+                    "<img hidden visible=\x22false\x22 id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>"+
+                    // "<body>" +'
+                                transportButtons+ 
+                            "<div id=\x22dialog_button\x22><i class=\x22three_dialog_button fas fa-info-circle fa-2x\x22></i></div>"+
+                            
+                            "<div id=\x22blocker\x22 style=\x22display: none\x22>" +
+                                        "<div id=\x22instructions\x22>" +
+                                            "<p style=\x22font-size:36px\x22>" +
+                                                "Click to play" +
+                                            "</p>" +
+                                            "<p>" +
+                                                "Move: WASD<br/>" +
+                                                "Jump: SPACE<br/>" +
+                                                "Look: MOUSE" +
+                                            "</p>" +
+                                        "</div>" +
+                                    "</div>" +
+                            
+                            // dialogButton +
+                            
+                                
+
+                            "<canvas id=\x22three_canvas\x22></canvas>" + //assign to custom canvas to match positions
+
+                            // "<div id=\x22popup\x22 class=\x22popup\x22 style=\x22position: absolute; display: none; background: white; padding: 10px; border: 1px solid black;\x22>Some text</div>"+
+                            "<div id=\x22popup\x22 class=\x22popup\x22>Some text</div>"+
+
+                            canvasOverlay +
+                            "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +
+                        
+
+                            "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
+                            "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
+                            settingsData +
+                            // spriteData + 
+                            scenePicturesData +
+                            sceneTextData +
+                            pictureGroupsData +
+                            videoGroupsEntity +
+                            loadLocations +
+                            locationModelsEl +
+                            sceneTimedEventsData +
+                            objectData +
+                            inventoryData +
+                            
+                        // cloudMarkerElements+ //? 
 
                             "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>"+
-                            "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
+                            "<script type=\x22module\x22 src=\x22../connect/indexedDb.js\x22></script>" +
 
-                            "<script type=\x22module\x22 src=\x22/connect/media.js\x22></script>" +
-                            "<script type=\x22module\x22 src=\x22../main/js/nipple.mjs\x22></script>"+
-                            // "<script src=\x22https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js\x22></script>" +
+                            primaryAudioScript +
+                            primaryAudioEntity +
+                            audioSliders +
 
-                            // "<script src=\x22/connect/traffic.js\x22></script>"+
-                        
-                        // "<script src=\x22../main/vendor/howler/src/howler.core.js\x22></script>"+
-                        // "<script src=\x22../main/vendor/howler/src/howler.mjs\x22></script>"+
-                        "<style> audio {"+
-                                "filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(92%);"+ 
-                                "width: 100%;"+
-                                "height: 66px;"+
-                            "}"+
-                        "</style>"+ 
-
-                        
-                        "</head>\n" +
-                        "<body "+bgstyle+">" +
-
-                        joystickContainer+
-
-                         "<img hidden visible=\x22false\x22 id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>"+
-                        "<img hidden visible=\x22false\x22 id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>"+
-                        "<img hidden visible=\x22false\x22 id=\x22smoke1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>"+
-                        "<img hidden visible=\x22false\x22 id=\x22explosion1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/explosion1.png\x22 crossorigin=\x22anonymous\x22>"+
-                        "<img hidden visible=\x22false\x22 id=\x22cloud1\x22 src=\x22http://servicemedia.s3.amazonaws.com/assets/pics/cloud_lg.png\x22 crossorigin=\x22anonymous\x22>"+
-                        // "<body>" +'
-                                 transportButtons+ 
-                                "<div id=\x22dialog_button\x22><i class=\x22three_dialog_button fas fa-info-circle fa-2x\x22></i></div>"+
-                               
-                                "<div id=\x22blocker\x22 style=\x22display: none\x22>" +
-                                            "<div id=\x22instructions\x22>" +
-                                                "<p style=\x22font-size:36px\x22>" +
-                                                    "Click to play" +
-                                                "</p>" +
-                                                "<p>" +
-                                                    "Move: WASD<br/>" +
-                                                    "Jump: SPACE<br/>" +
-                                                    "Look: MOUSE" +
-                                                "</p>" +
-                                            "</div>" +
-                                       "</div>" +
-                              
-                                // dialogButton +
-                               
-                                 
-
-                                "<canvas id=\x22three_canvas\x22></canvas>" + //assign to custom canvas to match positions
-
-                                // "<div id=\x22popup\x22 class=\x22popup\x22 style=\x22position: absolute; display: none; background: white; padding: 10px; border: 1px solid black;\x22>Some text</div>"+
-                                "<div id=\x22popup\x22 class=\x22popup\x22>Some text</div>"+
-
-                                canvasOverlay +
-                                "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +
+                            videoEl+
+                            videoElements+
                             
-
-                                "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
-                                "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
-                                settingsData +
-                                // spriteData + 
-                                scenePicturesData +
-                                sceneTextData +
-                                pictureGroupsData +
-                                videoGroupsEntity +
-                                loadLocations +
-                                locationModelsEl +
-                                sceneTimedEventsData +
-                                objectData +
-                                
-                                cloudMarkerElements+
-
-                                "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>"+
-                                "<script type=\x22module\x22 src=\x22/connect/indexedDb.js\x22></script>" +
-
-                                primaryAudioScript +
-                                primaryAudioEntity +
-                                audioSliders +
-
-                                videoEl+
-                                videoElements+
-                               
-                                
-                                
-                                
-                        "</body>\n" +
-                    
-                        "</html>";
-                                        
-                        // } 
-                        // let htmltext___ = "<!DOCTYPE html>\n" +
-
-                        
-                        //     "<head> " +
-                        //     "<meta name=\x22viewport\x22 content=\x22width=device-width, initial-scale=1\x22 />"+
-                        //     "<html lang=\x22en\x22 xml:lang=\x22en\x22 xmlns= \x22http://www.w3.org/1999/xhtml\x22>"+
-                        //     "<meta charset=\x22UTF-8\x22>"+
-                        //     "<meta name=\x22google\x22 content=\x22notranslate\x22>" +
-                        //     "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
-                        //     // googleAnalytics +
                             
-                        //     "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
-                        //     "<meta charset='utf-8'/>" +
-                        //     "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
-
-                        //     "<script async src=\x22https://unpkg.com/es-module-shims@latest/dist/es-module-shims.js\x22></script>"+
-                        //     importMap +
-                        //      "</head>\n" +
-                        //     "<body "+bgstyle+">" +
-                        //     // "<body>" +
                             
-                        //     "<script type=\x22module\x22 src=\x22../../main/js/three/three_main.mjs\x22 ></script>" +
-                        //     "</body>\n" +
-                        
-                        //     "</html>";
-                                        
-                            // console.log(htmltext);
-                                                                    
+                            
+                    "</body>\n" +
+                
+                    "</html>";
+                                    
+
+                                                                
                 // }
                 if (!accessScene) {
                     let noAccessHTML = "<html xmlns='http://www.w3.org/1999/xhtml'>" +

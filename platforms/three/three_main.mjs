@@ -46,6 +46,8 @@
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './three_controls.js';
 	
 	import { InitAudioGroups, ambientAudioController, InitSceneText } from './three_media.js';
+	
+	import { LoadInventories } from './three_inventory.js';
 // import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene;
@@ -322,7 +324,7 @@
 		InitFog();
 
 		
-
+		LoadInventories();
 		const scenePass = pass( scene, camera );
 		const scenePassColor = scenePass.getTextureNode();
 		// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
