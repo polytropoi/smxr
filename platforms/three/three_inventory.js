@@ -1,47 +1,94 @@
 
-import { userInventory } from '../../../connect/dialogs.js';
+import { userInventory, ShowHideDialogPanel } from '../../../connect/dialogs.js';
 
 import { eventEl } from '../../../connect/events.js';
 
-import { ReturnObjectData } from './three_actions.js';
+import { ReturnObjectData, SceneObject } from './three_actions.js';
+
+import { viewportPlaceholder } from './three_controls.js';
+
+import { scene } from './three_main.mjs';
+
+import { activeObjex, LoadModel } from './three_locations.js';
+
+
+
 export let sceneInventory = [];
 
-export function LoadInventories () {
+export function LoadSceneInventory () { //  user inventory loaded in dialogs.js
 
     // GetUserInventory();
-    const sceneInventoryEl = document.getElementById("sceneInventory");
+    const sceneInventoryEl = document.getElementById("sceneInventory"); //popped serverside
 
     if (sceneInventoryEl) {
     
-    const theData = sceneInventoryEl.getAttribute('data-inventory');
-    sceneInventory = JSON.parse(atob(theData));
-  
-    // sceneInventory = jsonIn
-        console.log("scene inventory: " + JSON.stringify(sceneInventory));
-        // let objexEl = document.getElementById('sceneObjects');    
-        // objexEl.components.mod_objex.addSceneInventoryObjects(this.data.jsonInventoryData);
+        const theData = sceneInventoryEl.getAttribute('data-inventory');
+        sceneInventory = JSON.parse(atob(theData));
+    
+    // console.log("scene inventory: " + JSON.stringify(sceneInventory));
     }
 
-    console.log("userInventory " + JSON.stringify(userInventory));
+    // console.log("userInventory " + JSON.stringify(userInventory));
 }
 
-    eventEl.addEventListener('equip-inventory-object-event', EquipInventoryItem);
+eventEl.addEventListener('equip-inventory-object-event', EquipInventoryItem);
 
-function EquipInventoryItem(event) { //equip button in modal, from dialogs.js
+
+function EquipInventoryItem(event) { //equip button in modal, from dialogs.js//skip
 
 
     const objectData = ReturnObjectData(event.details.objectID);
         console.log("equip event for object " + JSON.stringify(objectData));
 
+          if (objectData.actions != undefined && objectData.actions.length > 0) {
+              for (let i = 0; i < objectData.actions.length; i++) {
+                
+                if (objectData.actions[i].actionType.toLowerCase().includes("equip")) {
+                    console.log("ACTION " + JSON.stringify(objectData.actions[i]));
+                //   action = objectData.actions[i];
+                  // console.log(JSON.stringify(action));
+                  for (let i = 0; i < userInventory.inventoryItems.length; i++) {
+                    if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
+                      // inventoryObj = userInventory[i];
+                        EquipInventoryObject(objectData);
+                        ShowHideDialogPanel();
+                        break;
+                    }
+                  }
+                break;
+                } 
+              }
+            }
+
+
 }
 
-function EquipInventoryObject (objectID, tags, eventData) { //for onload equip ...?
+async function EquipInventoryObject (objectData) { //for onload equip ...?
 
-        console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
+        // console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
         
-        let objectData = ReturnObjectData(objectID);
+        // let objectData = ReturnObjectData(objectID);
         if (objectData) {        
-          console.log("tryna equip object " + objectData.name);  
+            objectData.isEquipped = true;
+            console.log("tryna equip object " + objectData.modelURL);  
+
+            const equippedModelData = await LoadModel(objectData.modelURL);
+            const equippedModel = equippedModelData.scene;
+            // scene.add(equippedModel);
+            viewportPlaceholder.add(equippedModel);
+
+            equippedModel.traverse(function (child) {
+                if (child.isMesh) {
+                    child.userData.name = objectData.name;
+                    child.userData.locationData = {};
+                    child.userData.isEquipped = true;
+                    child.userData.objectData = objectData;
+                    // child.bindMode = "detached";
+                }
+            });
+            
+            activeObjex.push(equippedModel);
+            equippedModel.userData.sceneObjectInstance = new SceneObject(equippedModel, objectData);
           // console.log("tryna equip object " + this.el.id);
         //   dropPos = new THREE.Vector3();
         //   objEl = document.createElement("a-entity");

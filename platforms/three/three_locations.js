@@ -45,7 +45,7 @@ export let playerPosition;
 
 export let kinematicAgentMeshes = []; //children of navagents, for physics collisions
 
-async function LoadModel(url) {
+export async function LoadModel(url) {
     const loader = new GLTFLoader();
     try {
         const gltf = await loader.loadAsync(url);
@@ -222,10 +222,16 @@ export function InitLocations() {
         })();
         
     }
-
 }
+
+// export async function LoadLocationObject (objectData) {
+//      return modelData = await LoadModel(objectData.modelData.modelURL);
+            
+// }
+
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-export async function LoadLocationObjex() { //got to wait to load these, might need navagent etc
+
+export async function LoadLocationObjex() { // wait to load these, might need navagent etc
     if (locationObjex.length) {
         for (let i = 0; i < locationObjex.length; i++) {
 
@@ -238,7 +244,7 @@ export async function LoadLocationObjex() { //got to wait to load these, might n
             model.userData.objectData = locationObjex[i].objectData;
             const animations = modelData.animations;
             let count = 1;
-            if (locationObjex[i].locationData.eventData && locationObjex[i].locationData.eventData.includes("scatter")) {
+            if (locationObjex[i].locationData.eventData && locationObjex[i].locationData.eventData.includes("scatter")) { //scatter, not instancing, but cloning multiples
                 if (locationObjex[i].locationData.eventData.includes("~")) {
                     count = parseFloat(locationObjex[i].locationData.eventData.split("~")[1]);
                 }

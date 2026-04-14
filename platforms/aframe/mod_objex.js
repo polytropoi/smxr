@@ -3612,7 +3612,7 @@ AFRAME.registerComponent('mod_object', {
             // console.log("gotsa scatterPosition for object " + this.data.objectData.name + " intersect: " + results.length + " " +results[0].object.name + 
             //   "scatterCount " + scatterCount + " vs count " + count +  " scale " + this.scale + " equippable " + equippable + " locationData " + JSON.stringify(this.data.locationData));
             // console.log("scattered scale " + scale + " ymod " + yMod + " test.y " + testPosition.y  + " location.y " + location.y + " location " + JSON.stringify(location));
-            console.log("tryna scatter " + JSON.stringify(this.data.objectData));
+            console.log("tryna scatter " + this.data.objectData.name);
             scatteredEl.setAttribute("mod_object", {eventData: eventData, markerType: this.data.markerType, xscale: location.xscale * scale, yscale: location.yscale * scale, zscale: location.zscale * scale, ypos: location.y, tags: this.data.tags, 
                                                     description: this.data.description, locationData: location, objectData: this.data.objectData, isEquippable: equippable, tags: this.data.locationData.locationTags});
             scatteredEl.setAttribute("shadow", {cast: true, receive: true});
@@ -3651,7 +3651,7 @@ AFRAME.registerComponent('mod_object', {
               clearInterval(interval);
             }
           }
-        }, 2000);
+        }, 200);
       } else {
         console.log("could not find a surface to scatter upon..");
       }

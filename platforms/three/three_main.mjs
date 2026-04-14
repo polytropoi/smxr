@@ -47,7 +47,7 @@
 	
 	import { InitAudioGroups, ambientAudioController, InitSceneText } from './three_media.js';
 	
-	import { LoadInventories } from './three_inventory.js';
+	import { LoadSceneInventory } from './three_inventory.js';
 // import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene;
@@ -324,7 +324,8 @@
 		InitFog();
 
 		
-		LoadInventories();
+		LoadSceneInventory(); //both scene and user inventories
+
 		const scenePass = pass( scene, camera );
 		const scenePassColor = scenePass.getTextureNode();
 		// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );

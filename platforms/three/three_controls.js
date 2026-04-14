@@ -9,7 +9,7 @@ import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
 import { sceneTextController, triggerAudioController } from './three_media.js';
 
-import { HTMLActionSwitch } from './three_actions.js';
+import { ActionSwitch } from './three_actions.js';
 
 
 import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './three_locations.js';
@@ -85,6 +85,8 @@ let validTarget = false;
 
 let controlObject;
 let lastPosition = new THREE.Vector3();
+
+export const viewportPlaceholder = new THREE.Object3D();
 
     // $('#popup').on('click', '#popup_yesButton', function(e) {
     //   console.log("popup yes button click on target " + e.target);
@@ -425,10 +427,11 @@ export function SetControls(cameraMode, cameraFOV) {
         console.log("no valid camera Mode!");
     }
 
-    const viewportPlaceholder = new THREE.Object3D();
+
     camera.add(viewportPlaceholder);
     viewportPlaceholder.name == "viewportPlaceholder1";
-    viewportPlaceholder.position.z = 2;
+    viewportPlaceholder.position.z = -1;
+    viewportPlaceholder.position.y = -.5;
 
 
 
@@ -757,11 +760,13 @@ function RaycastHit(type, hit) {
     }
 
   
+    
     lastRaycastHit = hit;
     lastRaycastHitObject = hit.object;
     lastHitObjectName = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     lastRaycastHitPosition = hit.point;
     lastRaycastHitDistance = hit.distance;
+    // console.log(JSON.stringify(lastRaycastHitObject.userData));
     const locationData = lastRaycastHitObject.userData.locationData;
     if (!locationData) {
         return;
@@ -790,50 +795,47 @@ function RaycastHit(type, hit) {
         // locationData.markerType == "placeholder"))      
         ) {
 
-        showCallout = true;
-
-        
-   
-        // console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
-
-        // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
-                 
-        // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-     
-        if (objectData && objectData.callouttext && objectData.callouttext.length) {
-            // console.log("callout text "  + objectData.callouttext);
-            const calloutsplit = objectData.callouttext.split("~");
-            const randomIndex = Math.floor(Math.random() * calloutsplit.length);
-            const textstring = calloutsplit[randomIndex];
-            // console.log("gotsa object with textstring " + textstring);
-
-            ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-            // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+        if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
+            console.log("that's equipped!");
         } else {
-            // console.log("mediaID " + locationData.mediaID);
-            
-            ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-            // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-        }
-    
-        if (pointerGizmo && (type == "mouse" || type == "center")) {
-            const localNormal = hit.face.normal;
-            const worldNormal = localNormal.clone().transformDirection(hit.object.matrixWorld);
-            // console.log("hit worldnormal " + JSON.stringify(worldNormal));
-            pointerGizmo.position.set(hit.point.x, hit.point.y, hit.point.z);
-            pointerGizmo.visible = true;
-            // pointerGizmo.lookAt(worldNormal);
-            rotateObjectToNormal(pointerGizmo, worldNormal);
-        } else {
-            pointerGizmo.visible = false;
-        }
+
+            showCallout = true;
+
+            console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+
+            // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+                    
+            // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         
+            if (objectData && objectData.callouttext && objectData.callouttext.length) {
+                // console.log("callout text "  + objectData.callouttext);
+                const calloutsplit = objectData.callouttext.split("~");
+                const randomIndex = Math.floor(Math.random() * calloutsplit.length);
+                const textstring = calloutsplit[randomIndex];
+                // console.log("gotsa object with textstring " + textstring);
+
+                ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+            } else {
+                // console.log("mediaID " + locationData.mediaID);
+                
+                ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+            }
+        
+            if (pointerGizmo && (type == "mouse" || type == "center")) {
+                const localNormal = hit.face.normal;
+                const worldNormal = localNormal.clone().transformDirection(hit.object.matrixWorld);
+                // console.log("hit worldnormal " + JSON.stringify(worldNormal));
+                pointerGizmo.position.set(hit.point.x, hit.point.y, hit.point.z);
+                pointerGizmo.visible = true;
+                // pointerGizmo.lookAt(worldNormal);
+                rotateObjectToNormal(pointerGizmo, worldNormal);
+            } else {
+                pointerGizmo.visible = false;
+            }
+        }
     }
-    // if (name != "navmesh") {
-    //     // if (lastRaycastHitObject != hit.object) {
-    //        console.log(type + " hit object " + name );
-    //     // }
-    // }
 
 
     if (name == "navmesh" || locationData.markerType == "navmesh") {
@@ -1143,7 +1145,7 @@ export function onMouseDown(event) { //clicked on threejs object
     // console.log(event.target.id);
     const popup = document.getElementById("popup");
     if (event.target.id == "popup_yesButton") {
-      HTMLActionSwitch(event);
+      ActionSwitch(event);
       popup.style.display = "none";
       return;
 
@@ -1158,7 +1160,15 @@ export function onMouseDown(event) { //clicked on threejs object
     // if (scene && mouse && camera && mousecaster && isReady) {
     //     mouseRaycast(event);
     // }
-    if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
+    if (lastRaycastHitObject && lastRaycastHitObject.userData && lastRaycastHitObject.userData.isEquipped) {
+        console.log("clicked on equipped object! " + lastRaycastHitObject.userData.objectData.name );
+        const sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance;
+        sceneObjectInstance.onClick();
+        // if (lastRaycastHitObject.userData.objectData.actions) {
+            
+        // }
+        return;
+    } else if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
  
             let navAgentInstance;
             if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
@@ -1249,23 +1259,25 @@ export function onMouseDown(event) { //clicked on threejs object
                     }
                 }
 
-                let sceneObjectInstance = lastRaycastHitObject.userData.sceneObjectInstance; 
-                if (!sceneObjectInstance) {
-                    if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
-                        sceneObjectInstance = lastRaycastHitObject.parent.parent.userData.sceneObjectInstance;
-                    }//hrm
+                
+                    let sceneObjectInstance = lastRaycastHitObject.userData.sceneObjectInstance; 
                     if (!sceneObjectInstance) {
-                        sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance; //hrm
-                    }
-                    if (sceneObjectInstance) {
-                        sceneObjectInstance.onClick(event);
-                    } else {
-                        console.log("caint find sceneObjectInstance!");
-                    }
+                        if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
+                            sceneObjectInstance = lastRaycastHitObject.parent.parent.userData.sceneObjectInstance;
+                        }//hrm
+                        if (!sceneObjectInstance) {
+                            sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance; //hrm
+                        }
+                        if (sceneObjectInstance) {
+                            sceneObjectInstance.onClick(event);
+                        } else {
+                            console.log("caint find sceneObjectInstance!");
+                        }
 
-                } else {
-                    sceneObjectInstance.onClick();
-                }
+                    } else {
+                        sceneObjectInstance.onClick();
+                    }
+                
                
 
                 

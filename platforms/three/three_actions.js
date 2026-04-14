@@ -1,17 +1,20 @@
 
 import { lastRaycastHitObject, ShowPopup } from './three_controls.js';
 
+import { scene } from './three_main.mjs';
+
 import { settings } from '../../../connect/settings.js';
 import { locationObjex } from './three_locations.js';
+import { AddDynamicBody, AddForceToDynamicBody, dynamicBodies } from './three_physics.js';
 
 export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
 
 // export const sceneObjectsArray = []; //array with all the object data
 
-export function HTMLActionSwitch (event) { //input from simple html popups
-    const type = event.target.dataset.type;
-    const data = event.target.dataset.data;
-    const tags = event.target.dataset.tags;
+export function ActionSwitch (event) { //input from simple html popups
+    const type = event.target.dataset.type; //e.g. markerType
+    const data = event.target.dataset.data; //e.g. eventData
+    const tags = event.target.dataset.tags; //e.g. location tags (or object tags?)
     
     console.log(type + " " + data + " " + tags);
 
@@ -32,10 +35,10 @@ export function HTMLActionSwitch (event) { //input from simple html popups
 
 
 export function ReturnObjectData (objectID) { //not the instance ID, but original mongoID of the object, to get the prototype
-    let objek = null;
+    let objek;
     console.log(JSON.stringify(locationObjex));
     if (locationObjex.length > 0) {
-        for (let i = 0; i < locationObjex.length; i++) {
+        for (let i = 0; i < locationObjex.length; i++) { //spin through the original array to match object's mongoID
         console.log('tryna match object data for ' +objectID + " vs " + locationObjex[i].objectData._id);
         if (locationObjex[i].objectData._id == objectID) {
             console.log('gotsa objectID match to return data ' + objectID);
@@ -46,7 +49,7 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
         }
     }
     return objek;
-    }
+}
 
 export class SceneObject { //things with maybe actions and fancy params, e.g. characters, magic items
     constructor(object, objectData, locationData) {
@@ -141,6 +144,44 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
         //     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
         //     ShowPopup(event);
         // } else 
+        if (this.objectData.isEquipped) {
+            console.log("clicked on equipped object!");
+
+             if (this.hasThrowAction) {
+                console.log("throw action " + JSON.stringify(this.throwAction));
+                if (this.throwAction.sourceObjectMod.toLowerCase() == "persist") { //transfer to scene inventory
+                    this.object.visible = false;
+                    this.dropObject(this.objectData._id); //just drop for now...throw/shoot/swing next!
+                    
+                } else if (this.throwAction.sourceObjectMod.toLowerCase() == "remove") {
+                    if (this.mouseDowntime <= 0) {
+                        this.mouseDowntime = 1;
+                    }
+                    this.throwObject(this.objectData._id, this.mouseDowntime, "5");
+                }
+                // if (this.triggerAudioController != null) {
+                //     // this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(this.hitpoint, this.distance, ["throw"], .5);//tagmangler needs an array
+                // }
+            }
+            if (this.hasShootAction) {
+                console.log("shoot action " + JSON.stringify(this.shootAction));
+            
+                // if (this.triggerAudioController != null) {
+                // this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(this.hitpoint, this.distance, ["shoot"], .5);//tagmangler needs an array, add vol mod 
+                // }
+                // this.el.object3D.visible = false;
+                this.el.classList.remove("activeObjexRay");
+            
+                this.shootObject(this.data.objectData._id);
+                // this.restoreEquipped;
+                setTimeout(() => {
+                // this.el.object3D.visible = true;
+                this.el.classList.add("activeObjexRay");
+                }, 1000);
+                // this.applyForce();
+                
+            } 
+        } else { //not an equipped object
 
             if (this.hasPickupAction) {
                 popup.innerHTML = "<h1>"+this.objectData.name+" </h1> <div>Pickup object?</div>" +
@@ -160,7 +201,8 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
                         ShowPopup(event);
                     }
                 }
-         }
+            }
+        }
         
     }
 
@@ -182,8 +224,15 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
             // this.pickup(data);
         }
     }
+    async throwObject() {
+        const rbody = await AddDynamicBody(this.object, this.object.position, 1);
+        scene.add(this.object);
+        
+        dynamicBodies.push(rbody);
+        rbody.AddForce();
+    }
 
-    drop (data) {
+    dropObject (data) {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", '/drop/', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
