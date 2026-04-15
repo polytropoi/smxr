@@ -32,9 +32,11 @@ export let useDefaultCollider = false;
 export let handColliderGroup;
 export let colliders = {}
 
+// export let equippedRigidbody;
+
 
 export const agentCount = 0;
-const dynamicObjectCount = 0;
+const dynamicObjectCount = 5;
 let playerWorldPosition = new THREE.Vector3();
         
 
@@ -64,7 +66,7 @@ export async function InitRapier (gravity) {
 
     eventQueue = new RAPIER.EventQueue(true); // `true` for generating contact force events
 
-    //  rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+     rapierDebugRenderer = new RapierDebugRenderer(scene, world);
 }
 
 
@@ -99,7 +101,9 @@ class RapierDebugRenderer {
 }
 
 
-
+export function SetEquippedRigidbody(rbody) {
+  equippedRigidbody = rbody;
+}
 
 export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do first
     
@@ -644,42 +648,33 @@ export function AddForceToDynamicBody (rigidbody) {
     rigidbody.addImpulse({x:0, y: 0, z: 2}, true);
 }
 
-export async function AddDynamicBody(model, position, scale) {
+export async function AddDynamicBody(mesh, meshposition, scale, isEquipped, parent) {
 
     try {
 
       // console.log("tryna create dynamic rigidbody from model " + model );
       await new Promise(r => setTimeout(r, 0));
-      let size = 2;
+      let size = .5;
       if (scale) {
         size = scale;
       }
-    //   const geometry = new THREE.SphereGeometry( size / 2, 32, 16 );
-    // //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
-    //   // const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
-
-		//   const material = getRainbowMaterial();
-    //   // const material = DotNoiseMaterial()
-    //   material.roughness = 0.25;
-    //   material.metalness = 0.5;
-    //   material.envMap = scene.environment;
-    //   material.envMapIntensity = 2;
-
-
-		// 	const mesh = new THREE.Mesh( geometry, material );
-      const mesh = model;
-      
 
       const colliderSize = size;// * 1.25;
       const range = 30;
-      // const density = size  * .5;
-      // let x = Math.random() * range - range * 0.5;
-      // let y = Math.random() * range - range * 0.5 + 10;
-      // let z = Math.random() * range - range * 0.5;
+  
 
-      // RIGID BODY
+      let worldPosition = new THREE.Vector3();
+      // mesh.getWorldPosition(worldPosition);
+      if (parent) {
+        // worldPosition.copy(parent.position);
+         parent.getWorldPosition(worldPosition);
+      } else {
+        mesh.getWorldPosition(worldPosition);
+      }
+      console.log("worldposition " + JSON.stringify(worldPosition) + " vs " + JSON.stringify(meshposition));
       let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-              .setTranslation(x, y, z);
+          // .setEnabled(false)
+          .setTranslation(worldPosition.x, worldPosition.y, worldPosition.z);
               //  .setGravityScale(0.5);
               // .setCcdEnabled(false);
       let rigidbody = await world.createRigidBody(rigidBodyDesc);
@@ -695,37 +690,80 @@ export async function AddDynamicBody(model, position, scale) {
       // scene.add(mesh);
       // mesh.name = "dynamic";
       let position = new THREE.Vector3();
+      rigidbody.setEnabled(false);
       // position = rigidbody.translation();
       // mesh.position.copy(position);
 
+      function rbPosition () {
+          // worldPosition = parent.position.copy();
+          // mesh.getWorldPosition(worldPosition)
+          parent.getWorldPosition(worldPosition);
+          rigidbody.setTranslation({ x: worldPosition.x, y: worldPosition.y, z: worldPosition.z });
+          // worldPosition = parent.position.copy();
+      }
       function update () {
-      if (mesh && mesh.position && rigidbody && rigidbody.handle) {
-          // rigidbody.resetForces(true); 
-          position = rigidbody.translation();
-      //   if (mesh.position) {
-          mesh.position.copy(position);
-          let q = rigidbody.rotation();
-          let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
-          mesh.rotation.setFromQuaternion(rote);
-          
-          if (position.y < -100) {
-              rigidbody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-              rigidbody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-              // rigidbody.setTranslation({ x: x, y: 10.0, z: z });
-          }
-      }
+
+        // console.log(rigidbody.isEnabled());
+        if (rigidbody.isEnabled() == false) {
+          rbPosition();
+        } else {
+
+           if (rigidbody.isEnabled()) {
+
+          // mesh.updateMatrixWorld(); 
+            // rigidbody.resetForces(true); 
+            position = rigidbody.translation();
+          //   if (mesh.position) {
+          // console.log("equippedRigidbody position " + JSON.stringify(position));
+            // 
+            // mesh.worldToLocal(position);
+            mesh.position.copy(position);
+            let q = rigidbody.rotation();
+            let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+            mesh.rotation.setFromQuaternion(rote);
+            
+            // if (position.y < -100) {
+            //     rigidbody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+            //     rigidbody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+            //     // rigidbody.setTranslation({ x: x, y: 10.0, z: z });
+            // }
+        }
 
       }
+    }
 
-      function AddForce () {
-        rigidbody.addImpulse({x:0, y: 0, z: 2}, true);
+      function addForce (worldPos) {
+        console.log("adding force!");
+        rigidbody.setEnabled(true);
+        // rigidbody.setTranslation(worldPos.x, worldPos.y, worldPos.z);
+      //   rigidbody.resetForces(true);
+      //   let { x, y, z } = rigidbody.translation(true);
+      //   mesh.position.set(x, y, z);
+      //   let pos = new THREE.Vector3(x, y, z);
+      // //  let distance = pos.clone().distanceTo(atomCenter.position.clone());
+      // // if (distance > 1) {
+      //   let dir = pos.clone().sub(atomCenter.position.clone()).normalize();
+
+      //   let q = rigidbody.rotation();
+      //   let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+      //   mesh.rotation.setFromQuaternion(rote);
+
+        
+        // rigidbody.addForce(dir.multiplyScalar(-.1), false);
+        
+        console.log("rigidbody isEnabled " + rigidbody.isEnabled());
+        rigidbody.addForce({x:0, y: 0, z: 1}, true);
       }
 
-      return { rigidbody, update, AddForce };
+      // if (isEquipped) {
+      //   equippedRigidbody = this;
+      // }
+      return { rigidbody, update, addForce };
     } catch (e) {
       console.log("error dynamic body " + e);
     }
-  }
+}
+
 
 
 

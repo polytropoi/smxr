@@ -33,6 +33,8 @@
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
+		import { equippedRigidbody } from './three_actions.js';
+
 	import { getVideo, getHandLandmarker } from './three_vision.js';
 
 	import { lightMods, modLights, InitSceneLights } from './three_lights.js';
@@ -493,12 +495,16 @@
 				rapierDebugRenderer.update();
 			}		
 			if (world && physicsIsReady && worldIsReady) {
+
+				world.step(eventQueue); 
 				
 				atomicBodies.forEach(a => 
 					a.update());
 
 				dynamicBodies.forEach(b => 
 					b.update());
+
+				
 			
 				if (kinematicBodies.length) {
 					kinematicBodies.forEach(c => {
@@ -508,12 +514,18 @@
 					});
 				}
 
+				if (equippedRigidbody) {
+
+					equippedRigidbody.update();
+				}
+
+
 				// npcKinematicBodies.forEach(k => 
 				// 	k.update());
 
 				// world.step();//!!! still wonky with lots of dynamic and kinematic
 
-				world.step(eventQueue); // Pass eventQueue to collect events
+				// Pass eventQueue to collect events
 
 				// Handle collision events
 				eventQueue.drainCollisionEvents((handle1, handle2, started) => {
@@ -570,10 +582,10 @@
 							});
 						});
 						} else {
-						// for (let i = 0; i < numBalls; i++) {
-						// 	const mesh = colliderGroup.children[i];
-						// 	mesh.position.set(0, 0, 10);
-						// }
+							// for (let i = 0; i < numBalls; i++) {
+							// 	const mesh = colliderGroup.children[i];
+							// 	mesh.position.set(0, 0, 10);
+							// }
 						}
 					}
 				}

@@ -1,4 +1,6 @@
 
+import * as THREE from 'three';
+
 import { userInventory, ShowHideDialogPanel } from '../../../connect/dialogs.js';
 
 import { eventEl } from '../../../connect/events.js';
@@ -6,6 +8,8 @@ import { eventEl } from '../../../connect/events.js';
 import { ReturnObjectData, SceneObject } from './three_actions.js';
 
 import { viewportPlaceholder } from './three_controls.js';
+
+import { AddDynamicBody, SetEquippedRigidbody } from './three_physics.js';
 
 import { scene } from './three_main.mjs';
 
@@ -31,39 +35,38 @@ export function LoadSceneInventory () { //  user inventory loaded in dialogs.js
     // console.log("userInventory " + JSON.stringify(userInventory));
 }
 
-eventEl.addEventListener('equip-inventory-object-event', EquipInventoryItem);
+eventEl.addEventListener('equip-inventory-object-event', EquipInventoryCheck);
 
 
-function EquipInventoryItem(event) { //equip button in modal, from dialogs.js//skip
-
+function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js
 
     const objectData = ReturnObjectData(event.details.objectID);
-        console.log("equip event for object " + JSON.stringify(objectData));
+    console.log("equip event for object " + JSON.stringify(objectData));
 
-          if (objectData.actions != undefined && objectData.actions.length > 0) {
-              for (let i = 0; i < objectData.actions.length; i++) {
-                
-                if (objectData.actions[i].actionType.toLowerCase().includes("equip")) {
-                    console.log("ACTION " + JSON.stringify(objectData.actions[i]));
-                //   action = objectData.actions[i];
-                  // console.log(JSON.stringify(action));
-                  for (let i = 0; i < userInventory.inventoryItems.length; i++) {
-                    if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
-                      // inventoryObj = userInventory[i];
-                        EquipInventoryObject(objectData);
-                        ShowHideDialogPanel();
-                        break;
-                    }
-                  }
-                break;
-                } 
-              }
+    if (objectData.actions != undefined && objectData.actions.length > 0) {
+        for (let i = 0; i < objectData.actions.length; i++) {
+        
+        if (objectData.actions[i].actionType.toLowerCase().includes("equip")) {
+            console.log("ACTION " + JSON.stringify(objectData.actions[i]));
+        //   action = objectData.actions[i];
+            // console.log(JSON.stringify(action));
+            for (let i = 0; i < userInventory.inventoryItems.length; i++) {
+                if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
+                    // inventoryObj = userInventory[i];
+                    EquipInventoryObject(objectData);
+                    ShowHideDialogPanel();
+                    break;
+                }
             }
-
-
+        break;
+        } 
+        }
+    } else {
+        console.log("cain't equip that!");
+    }
 }
 
-async function EquipInventoryObject (objectData) { //for onload equip ...?
+async function EquipInventoryObject (objectData) { 
 
         // console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
         
@@ -86,9 +89,11 @@ async function EquipInventoryObject (objectData) { //for onload equip ...?
                     // child.bindMode = "detached";
                 }
             });
-            
+            // const worldPosition = new THREE.Vector3();
+            // equippedModel.getWorldPosition(worldPosition);
             activeObjex.push(equippedModel);
-            equippedModel.userData.sceneObjectInstance = new SceneObject(equippedModel, objectData);
+            const equippedSceneObject = new SceneObject(equippedModel, objectData, true, viewportPlaceholder);
+           
           // console.log("tryna equip object " + this.el.id);
         //   dropPos = new THREE.Vector3();
         //   objEl = document.createElement("a-entity");

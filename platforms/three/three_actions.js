@@ -1,14 +1,20 @@
 
+
+import * as THREE from 'three';
+
 import { lastRaycastHitObject, ShowPopup } from './three_controls.js';
 
 import { scene } from './three_main.mjs';
 
 import { settings } from '../../../connect/settings.js';
 import { locationObjex } from './three_locations.js';
-import { AddDynamicBody, AddForceToDynamicBody, dynamicBodies } from './three_physics.js';
+
+import { AddDynamicBody } from './three_physics.js';
+// import { equippedRigidbody } from './three_physics.js';
 
 export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
 
+export let equippedRigidbody;
 // export const sceneObjectsArray = []; //array with all the object data
 
 export function ActionSwitch (event) { //input from simple html popups
@@ -52,7 +58,8 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
 }
 
 export class SceneObject { //things with maybe actions and fancy params, e.g. characters, magic items
-    constructor(object, objectData, locationData) {
+    constructor(object, objectData, isEquipped, objectParent) {
+
 
         this.object = object;
         this.objectData = objectData;
@@ -134,7 +141,19 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
             this.findAction = this.objectData.actions[a];
           }
         }
-      }
+
+        if (isEquipped) {
+        this.objectParent = objectParent;
+            this.isEquipped = true;
+            this.setEquippedRigidbody();
+        }
+    }
+}
+    async setEquippedRigidbody () {
+        const worldPosition = new THREE.Vector3();
+        this.object.getWorldPosition(worldPosition);
+        equippedRigidbody = await AddDynamicBody(this.object, worldPosition, 1, true, this.objectParent);
+        // SetEquippedRigidbody(rbody);
     }
        
     onClick (event) {
@@ -151,7 +170,7 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
                 console.log("throw action " + JSON.stringify(this.throwAction));
                 if (this.throwAction.sourceObjectMod.toLowerCase() == "persist") { //transfer to scene inventory
                     this.object.visible = false;
-                    this.dropObject(this.objectData._id); //just drop for now...throw/shoot/swing next!
+                    this.dropObject(this.objectData._id); //just drop for now...throw/shoot/swing next! --< ?
                     
                 } else if (this.throwAction.sourceObjectMod.toLowerCase() == "remove") {
                     if (this.mouseDowntime <= 0) {
@@ -225,11 +244,21 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
         }
     }
     async throwObject() {
-        const rbody = await AddDynamicBody(this.object, this.object.position, 1);
-        scene.add(this.object);
         
-        dynamicBodies.push(rbody);
-        rbody.AddForce();
+        scene.add(this.object);
+        console.log(JSON.stringify(this.object.position));
+        const worldPosition = new THREE.Vector3();
+        this.object.getWorldPosition(worldPosition);
+        
+
+        //     SetEquippedRigidbody(rbody);
+        // console.log("tryna throw");
+        // await equippedRigidbody;
+        // if (equippedRigidbody) {
+        equippedRigidbody.addForce(worldPosition);
+        // }
+        // dynamicBodies.push(rbody);
+        // rbody.AddForce();
     }
 
     dropObject (data) {
