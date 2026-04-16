@@ -9,7 +9,7 @@ import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
 import { sceneTextController, triggerAudioController } from './three_media.js';
 
-import { ActionSwitch } from './three_actions.js';
+import { ActionSwitch, SetPlayerRigidbody } from './three_actions.js';
 
 
 import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './three_locations.js';
@@ -30,7 +30,7 @@ import {PlayPauseMedia} from '../../../connect/dialogs.js';
 
 import * as nipplejs from '../../../main/js/nipple.mjs';
 
-import { getPlayerBody } from './three_physics.js';
+// import { getPlayerBody } from './three_physics.js';
 
 export let camera, controls, player;
 export let isReady = false;
@@ -119,6 +119,8 @@ export function SetPlayerLocation (locationData) {
                 controls.update();
             }
         }
+
+        SetPlayerRigidbody();
     // }
 }
 

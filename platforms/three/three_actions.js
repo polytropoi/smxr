@@ -2,19 +2,20 @@
 
 import * as THREE from 'three';
 
-import { lastRaycastHitObject, ShowPopup } from './three_controls.js';
+import { player, lastRaycastHitObject, ShowPopup } from './three_controls.js';
 
 import { scene } from './three_main.mjs';
 
 import { settings } from '../../../connect/settings.js';
 import { locationObjex } from './three_locations.js';
 
-import { AddDynamicBody } from './three_physics.js';
+import { AddDynamicBody, getPlayerBody, kinematicBodies } from './three_physics.js';
 // import { equippedRigidbody } from './three_physics.js';
 
 export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
 
 export let equippedRigidbody;
+export let playerRigidbody;
 // export const sceneObjectsArray = []; //array with all the object data
 
 export function ActionSwitch (event) { //input from simple html popups
@@ -39,6 +40,10 @@ export function ActionSwitch (event) { //input from simple html popups
     }
 }
 
+export async function SetPlayerRigidbody() {
+        playerRigidbody = await getPlayerBody(player); 
+        kinematicBodies.push(playerRigidbody);
+}
 
 export function ReturnObjectData (objectID) { //not the instance ID, but original mongoID of the object, to get the prototype
     let objek;
@@ -57,9 +62,8 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
     return objek;
 }
 
-export class SceneObject { //things with maybe actions and fancy params, e.g. characters, magic items
+export class SceneObject { //things that might have models and actions and fancy params, e.g. characters, magic swords, etc
     constructor(object, objectData, isEquipped, objectParent) {
-
 
         this.object = object;
         this.objectData = objectData;
@@ -78,72 +82,69 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
         
         for (let a = 0; a < this.objectData.actions.length; a++) {
             
-          if (this.objectData.actions[a].objectID && this.objectData.actions[a].objectID.length > 8 ) {
-            // FetchSceneInventoryObject(this.objectData.actions[a].objectID); //different object connected to this action, should check if this is already fetched
-          }
-            // console.log("action: " + JSON.stringify(this.objectData.actions[a].actionType));
-          if (this.objectData.actions[a].actionType.toLowerCase() == "onload") {
-            // this.hasSelectAction = true;
-            this.loadAction = this.objectData.actions[a];
-            console.log("object has loadAction! " + this.objectData.name);
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "select") {
-            this.hasSelectAction = true;
-            this.selectAction = this.objectData.actions[a];
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "highlight") {
-            this.hasHighlightAction = true;
-            this.highlightAction = this.objectData.actions[a];
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "collide") {
-            this.hasCollideAction = true;
-            this.collideAction = this.objectData.actions[a];
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "kill") { 
-            this.hasKillAction = true;
-            this.killAction = this.objectData.actions[a];
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "pickup") {
-            this.hasPickupAction = true;
-            this.pickupAction = this.objectData.actions[a];
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "drop") {
-            this.hasDropAction = true;
-            this.dropAction = this.objectData.actions[a];
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "throw") {
-            this.hasThrowAction = true;
-            this.throwAction = this.objectData.actions[a];
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "trigger") {
-            this.hasTriggerAction = true;
-            // this.throwAction = this.objectData.actions[a];
-            // this.el.setAttribute("equipped_object_control", {init: true});
-            
-            
-          }
-  
-          if (this.objectData.actions[a].actionType.toLowerCase() == "shoot") {
-            this.hasShootAction = true;
-            this.shootAction = this.objectData.actions[a];
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "equip") {
-            this.hasEquipAction = true;
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "return") {
-            // this.hasDropAction = true;
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "use") {
-            // this.hasDropAction = true;
-          }
-          if (this.objectData.actions[a].actionType.toLowerCase() == "find") {
-            // this.hasDropAction = true;
-            this.findAction = this.objectData.actions[a];
-          }
+            if (this.objectData.actions[a].objectID && this.objectData.actions[a].objectID.length > 8 ) {
+                // FetchSceneInventoryObject(this.objectData.actions[a].objectID); //different object connected to this action, should check if this is already fetched
+            }
+                // console.log("action: " + JSON.stringify(this.objectData.actions[a].actionType));
+            if (this.objectData.actions[a].actionType.toLowerCase() == "onload") {
+                // this.hasSelectAction = true;
+                this.loadAction = this.objectData.actions[a];
+                console.log("object has loadAction! " + this.objectData.name);
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "select") {
+                this.hasSelectAction = true;
+                this.selectAction = this.objectData.actions[a];
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "highlight") {
+                this.hasHighlightAction = true;
+                this.highlightAction = this.objectData.actions[a];
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "collide") {
+                this.hasCollideAction = true;
+                this.collideAction = this.objectData.actions[a];
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "kill") { 
+                this.hasKillAction = true;
+                this.killAction = this.objectData.actions[a];
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "pickup") {
+                this.hasPickupAction = true;
+                this.pickupAction = this.objectData.actions[a];
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "drop") {
+                this.hasDropAction = true;
+                this.dropAction = this.objectData.actions[a];
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "throw") {
+                this.hasThrowAction = true;
+                this.throwAction = this.objectData.actions[a];
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "trigger") {
+                this.hasTriggerAction = true;
+                // this.throwAction = this.objectData.actions[a];
+                // this.el.setAttribute("equipped_object_control", {init: true});
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "shoot") {
+                this.hasShootAction = true;
+                this.shootAction = this.objectData.actions[a];
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "equip") {
+                this.hasEquipAction = true;
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "return") {
+                // this.hasDropAction = true;
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "use") {
+                // this.hasDropAction = true;
+            }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "find") {
+                // this.hasDropAction = true;
+                this.findAction = this.objectData.actions[a];
+            }
         }
 
         if (isEquipped) {
-        this.objectParent = objectParent;
+            this.objectParent = objectParent;
             this.isEquipped = true;
             this.setEquippedRigidbody();
         }
@@ -152,7 +153,10 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
     async setEquippedRigidbody () {
         const worldPosition = new THREE.Vector3();
         this.object.getWorldPosition(worldPosition);
-        equippedRigidbody = await AddDynamicBody(this.object, worldPosition, 1, true, this.objectParent);
+        const colliderScale = this.objectData.colliderScale ? this.objectData.colliderScale : 1;
+        const yPosFudge = this.objectData.yPosFudge ? this.objectData.yPosFudge : 0; //offset the collider on y axis
+        equippedRigidbody = await AddDynamicBody(this.object, worldPosition, colliderScale, yPosFudge, true, this.objectParent);        
+        // playerRigidbody.disable();
         // SetEquippedRigidbody(rbody);
     }
        
@@ -163,7 +167,7 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
         //     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
         //     ShowPopup(event);
         // } else 
-        if (this.objectData.isEquipped) {
+        if (this.isEquipped) {
             console.log("clicked on equipped object!");
 
              if (this.hasThrowAction) {
@@ -255,6 +259,7 @@ export class SceneObject { //things with maybe actions and fancy params, e.g. ch
         // console.log("tryna throw");
         // await equippedRigidbody;
         // if (equippedRigidbody) {
+
         equippedRigidbody.addForce(worldPosition);
         // }
         // dynamicBodies.push(rbody);

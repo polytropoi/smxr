@@ -8,7 +8,8 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 import { scene, togglePostProcessing, water, cameraMode } from './three_main.mjs';
 
 import { staticObjex, activeObjex, kinematicAgentMeshes } from './three_locations.js';
-import { player } from './three_controls.js';
+import { player, camera } from './three_controls.js';
+import { playerRigidbody } from './three_actions.js';
 import { agentModels, agentParents, CreateAgent, randomNavmeshPoint } from './three_nav.js';
 import { settings } from '../../../connect/settings.js';
 // import {scene, world} from './three_main.mjs'
@@ -32,13 +33,14 @@ export let useDefaultCollider = false;
 export let handColliderGroup;
 export let colliders = {}
 
+
 // export let equippedRigidbody;
 
 
 export const agentCount = 0;
 const dynamicObjectCount = 5;
 let playerWorldPosition = new THREE.Vector3();
-        
+// export let playerRigidbody;        
 
 let atomicParticlesCount = 300;
   const sceneMiddle = new THREE.Vector3(2, 0, 0);
@@ -196,9 +198,10 @@ function WaitAndInit () {
       if (player) {
       //  const body = await getKinematicBody(player, -1); //pass the index too
 
-        const body = await getPlayerBody(player); //pass the index too
-        kinematicBodies.push(body);
         
+        // playerRigidbody = await getPlayerBody(player); 
+        // kinematicBodies.push(playerRigidbody);
+        // playerRigidbody = body
       // getPlayerBody(player);
       }
       if (npcKinematicBodies.length) {
@@ -252,7 +255,7 @@ function WaitAndInit () {
       // if (player) {
     
         // const mesh = player;
-        let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
+        let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased() //no, position based...
                 .setTranslation(player.position.x, player.position.y, player.position.z);
         let rigidbody = await world.createRigidBody(rigidBodyDesc);
         colliders[rigidbody.handle] = "player";
@@ -272,10 +275,21 @@ function WaitAndInit () {
             rigidbody.setTranslation(playerWorldPosition);
           }
         }
+
+        function enable () {
+          rigidbody.setEnabled(true);
+          console.log("playerbody enabled!");
+        }
+
+        function disable () {
+          // rigidbody.setEnabled(false);
+          console.log("playerbody disabled!");
+          collider.setSensor(true);
+        }
         console.log("created rigidbody for player!");
         // player.userData.update = update;
         // kinematicBodies.push(player);
-        return { rigidbody, update };
+        return { rigidbody, update, enable, disable };
  
   }
 
@@ -648,7 +662,7 @@ export function AddForceToDynamicBody (rigidbody) {
     rigidbody.addImpulse({x:0, y: 0, z: 2}, true);
 }
 
-export async function AddDynamicBody(mesh, meshposition, scale, isEquipped, parent) {
+export async function AddDynamicBody(mesh, meshposition, scale, yFudge, isEquipped, parent) {
 
     try {
 
@@ -660,32 +674,34 @@ export async function AddDynamicBody(mesh, meshposition, scale, isEquipped, pare
       }
 
       const colliderSize = size;// * 1.25;
-      const range = 30;
+      // const range = 30;
   
 
-      let worldPosition = new THREE.Vector3();
+      let worldPosition = new THREE.Vector3();  
       // mesh.getWorldPosition(worldPosition);
       if (parent) {
         // worldPosition.copy(parent.position);
-         parent.getWorldPosition(worldPosition);
+         parent.getWorldPosition(worldPosition); //if equipped or attached
       } else {
         mesh.getWorldPosition(worldPosition);
       }
-      console.log("worldposition " + JSON.stringify(worldPosition) + " vs " + JSON.stringify(meshposition));
+      // console.log("worldposition " + JSON.stringify(worldPosition) + " vs " + JSON.stringify(meshposition));
       let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
           // .setEnabled(false)
-          .setTranslation(worldPosition.x, worldPosition.y, worldPosition.z);
+          .setTranslation(worldPosition.x, worldPosition.y, worldPosition.z);  //match rigidbody to mesh/parent position - rotation?
               //  .setGravityScale(0.5);
               // .setCcdEnabled(false);
       let rigidbody = await world.createRigidBody(rigidBodyDesc);
       // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
       console.log("rigidbody created with handle " + rigidbody.handle);
-      let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize); //.setDensity(density);
+      let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize)
+         .setDensity(2);
       let collider = await world.createCollider(colliderDesc, rigidbody);
+      collider.setTranslation(0, yFudge, 0);
+      collider.setRestitution(.25);
+      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Max);
 
-      collider.setRestitution(1.5);
-      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-
+      let direction = new THREE.Vector3();
       // mesh.scale.setScalar(size);
       // scene.add(mesh);
       // mesh.name = "dynamic";
@@ -694,7 +710,7 @@ export async function AddDynamicBody(mesh, meshposition, scale, isEquipped, pare
       // position = rigidbody.translation();
       // mesh.position.copy(position);
 
-      function rbPosition () {
+      function rbPosition () { //update position to match the mesh even if disabled
           // worldPosition = parent.position.copy();
           // mesh.getWorldPosition(worldPosition)
           parent.getWorldPosition(worldPosition);
@@ -708,7 +724,7 @@ export async function AddDynamicBody(mesh, meshposition, scale, isEquipped, pare
           rbPosition();
         } else {
 
-           if (rigidbody.isEnabled()) {
+          //  if (rigidbody.isEnabled()) {
 
           // mesh.updateMatrixWorld(); 
             // rigidbody.resetForces(true); 
@@ -727,7 +743,7 @@ export async function AddDynamicBody(mesh, meshposition, scale, isEquipped, pare
             //     rigidbody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
             //     // rigidbody.setTranslation({ x: x, y: 10.0, z: z });
             // }
-        }
+        // }
 
       }
     }
@@ -748,11 +764,15 @@ export async function AddDynamicBody(mesh, meshposition, scale, isEquipped, pare
       //   let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
       //   mesh.rotation.setFromQuaternion(rote);
 
+        camera.getWorldDirection(direction);
         
-        // rigidbody.addForce(dir.multiplyScalar(-.1), false);
+        // rigidbody.addForce(dir.multiplyScalar(100), false);
         
         console.log("rigidbody isEnabled " + rigidbody.isEnabled());
-        rigidbody.addForce({x:0, y: 0, z: 1}, true);
+        // rigidbody.applyImpulse({x:0.0, y: 10000000.0, z: 0.0}, true);
+      // rigidbody.setLinvel({ x: 0.0, y: 0.0, z: 10.0 }, true);
+        rigidbody.setLinvel({ x: direction.x * 20, y: direction.y * 20, z: direction.z * 20 }, true);
+        rigidbody.setAngvel({ x: 0.0, y: 10.0, z: 0.0 }, true);
       }
 
       // if (isEquipped) {

@@ -315,7 +315,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     physicsColliderMesh.userData.objectData = locationObjex[i].objectData;
                     // parent.name = "navagent";
                     // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
-                    const sceneObject = new SceneObject(clonedModel, locationObjex[i].objectData);
+                    const sceneObject = new SceneObject(clonedModel, locationObjex[i].objectData, false, null);
                     // const sceneObjectInstance = {sceneObjectID : sceneObject};
                     // sceneObjects.push(sceneObjectInstance);
                     sceneObjects[sceneObjectID] = sceneObject;
@@ -358,7 +358,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             }
                         });
 
-                        const sceneObject = new SceneObject(clonedObject, locationObjex[i].objectData);
+                        const sceneObject = new SceneObject(clonedObject, locationObjex[i].objectData, false, null);
                         sceneObjects[sceneObjectID] = sceneObject;
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
                         // sceneObjects.push(sceneObject);
@@ -379,7 +379,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         child.userData.objectData = locationObjex[i].objectData;
                         }
                     });
-                    const sceneObject = new SceneObject(model, locationObjex[i].objectData);
+                    const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null);
                     sceneObjects[sceneObjectID] = sceneObject;
                     // sceneObjectsArray.push(locationObjex[i].data)
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
