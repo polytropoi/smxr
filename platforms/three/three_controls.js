@@ -32,12 +32,12 @@ import * as nipplejs from '../../../main/js/nipple.mjs';
 
 // import { getPlayerBody } from './three_physics.js';
 
-export let camera, controls, player;
+export let camera, controls, player, mouseDownTime;
 export let isReady = false;
 export let followDistance = 8;
 export let cameraAtZero = true;
 
-let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHit, lastHitObjectName;
+let mousecaster, mouseDownStarttime, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHit, lastHitObjectName;
 export let lastRaycastHitObject;
 
 export let dir = new THREE.Vector3;
@@ -1145,6 +1145,11 @@ export function centerRaycast() {
 export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
     // console.log(event.target.id);
+
+    mouseDownStarttime = Date.now() / 1000;    
+    
+
+
     const popup = document.getElementById("popup");
     if (event.target.id == "popup_yesButton") {
       ActionSwitch(event);
@@ -1403,6 +1408,8 @@ export function ShowPopup (event) { //hrm move to UI
 }
 
 export function onMouseUp(e) {
+    mouseDowntime = (Date.now() / 1000) - mouseDownStarttime; 
+    
     mouseIsDown = false;
     // playerReadyToNav = false;
     if (cameraMode == "Fly") {
