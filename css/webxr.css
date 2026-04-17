@@ -199,6 +199,36 @@ body {
     margin: 10px;
     padding: .5em;
 }
+.collect_button {
+    background-color: rgb(113, 185, 190);
+    width: 100px;
+    border-radius: 8px;
+    color: rgb(0, 0, 0);
+    font-family: Source Sans Pro, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    margin: 10px;
+    padding: .5em;
+}
+.equip_button {
+    background-color: rgb(208, 146, 84);
+    width: 100px;
+    border-radius: 8px;
+    color: rgb(0, 0, 0);
+    font-family: Source Sans Pro, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    margin: 10px;
+    padding: .5em;
+}
+.consume_button {
+    background-color: rgb(190, 113, 167);
+    width: 100px;
+    border-radius: 8px;
+    color: rgb(0, 0, 0);
+    font-family: Source Sans Pro, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    margin: 10px;
+    padding: .5em;
+}
 .no_button {
     background-color: rgb(255, 78, 78);
     width: 100px;
@@ -1194,6 +1224,45 @@ background-color: #000000;
         font-size: 12px;
         font-weight: bold;
       }
+      .equipButton {
+          /* float: right; */
+        /* width: 120px; */
+        background-color: #b6673f;
+        color: white;
+        padding: 10px 10px;
+        margin: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+      }
+        .collectButton {
+          /* float: right; */
+        /* width: 120px; */
+        background-color: #3b8596;
+        color: white;
+        padding: 10px 10px;
+        margin: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      .consumeButton {
+          /* float: right; */
+        /* width: 120px; */
+        background-color: #914770;
+        color: white;
+        padding: 10px 10px;
+        margin: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+      }
 
       .infoButton {
         float: right;
@@ -1778,7 +1847,7 @@ body {
         /* left: 0;
         top: 0; */
         /* width: 600px; */
-        width: 300px;
+        width: 350px;
         /* height: 400px; */
         height: 200px;
         overflow-y: initial !important;

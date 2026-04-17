@@ -32,12 +32,14 @@ import * as nipplejs from '../../../main/js/nipple.mjs';
 
 // import { getPlayerBody } from './three_physics.js';
 
-export let camera, controls, player, mouseDownTime;
+export let camera, controls, player;
 export let isReady = false;
 export let followDistance = 8;
 export let cameraAtZero = true;
+export let mouseDowntime = 0;
+let mouseDownStarttime = 0;
 
-let mousecaster, mouseDownStarttime, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHit, lastHitObjectName;
+let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHit, lastHitObjectName;
 export let lastRaycastHitObject;
 
 export let dir = new THREE.Vector3;

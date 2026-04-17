@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 
-import { player, lastRaycastHitObject, ShowPopup } from './three_controls.js';
+import { player, lastRaycastHitObject, ShowPopup, mouseDowntime } from './three_controls.js';
 
 import { scene } from './three_main.mjs';
 
@@ -25,12 +25,14 @@ export function ActionSwitch (event) { //input from simple html popups
     
     console.log(type + " " + data + " " + tags);
 
-    const sceneObject = sceneObjects[data];
-    console.log("sceneObject?> " + JSON.stringify(sceneObject.objectData));
-
     switch (type) {
         case "gate":
             EnterSceneGate(data);
+        break;
+
+        case "equip":
+            // console.log("tryna pickup " + data +" from json "+ JSON.stringify(sceneObject));
+            sceneObjects[data].confirmed("equip");
         break;
 
         case "pickup":
@@ -41,8 +43,8 @@ export function ActionSwitch (event) { //input from simple html popups
 }
 
 export async function SetPlayerRigidbody() {
-        playerRigidbody = await getPlayerBody(player); 
-        kinematicBodies.push(playerRigidbody);
+    playerRigidbody = await getPlayerBody(player); 
+    kinematicBodies.push(playerRigidbody);
 }
 
 export function ReturnObjectData (objectID) { //not the instance ID, but original mongoID of the object, to get the prototype
@@ -131,6 +133,9 @@ export class SceneObject { //things that might have models and actions and fancy
             if (this.objectData.actions[a].actionType.toLowerCase() == "equip") {
                 this.hasEquipAction = true;
             }
+            if (this.objectData.actions[a].actionType.toLowerCase() == "consume") {
+                this.hasConsumeAction = true;
+            }
             if (this.objectData.actions[a].actionType.toLowerCase() == "return") {
                 // this.hasDropAction = true;
             }
@@ -168,7 +173,7 @@ export class SceneObject { //things that might have models and actions and fancy
         //     ShowPopup(event);
         // } else 
         if (this.isEquipped) {
-            console.log("clicked on equipped object!");
+            console.log("clicked on equipped object! mousedowntime id " + mouseDowntime);
 
              if (this.hasThrowAction) {
                 console.log("throw action " + JSON.stringify(this.throwAction));
@@ -177,10 +182,10 @@ export class SceneObject { //things that might have models and actions and fancy
                     this.dropObject(this.objectData._id); //just drop for now...throw/shoot/swing next! --< ?
                     
                 } else if (this.throwAction.sourceObjectMod.toLowerCase() == "remove") {
-                    if (this.mouseDowntime <= 0) {
-                        this.mouseDowntime = 1;
+                    if (mouseDowntime <= 0) {
+                        mouseDowntime = 1;
                     }
-                    this.throwObject(this.objectData._id, this.mouseDowntime, "5");
+                    this.throwObject(this.objectData._id, mouseDowntime, "5");
                 }
                 // if (this.triggerAudioController != null) {
                 //     // this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(this.hitpoint, this.distance, ["throw"], .5);//tagmangler needs an array
@@ -205,26 +210,72 @@ export class SceneObject { //things that might have models and actions and fancy
                 
             } 
         } else { //not an equipped object
-
-            if (this.hasPickupAction) {
-                popup.innerHTML = "<h1>"+this.objectData.name+" </h1> <div>Pickup object?</div>" +
-                "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22pickup\x22 data-data=\x22"+
-                this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Yes</button>"+
-                "</div>";
-                ShowPopup(event);
-            } else if (lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
-                if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
-                    const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
-                    const randomIndex = Math.floor(Math.random() * labelSplit.length);
-                    popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
-                        ShowPopup(event);
-                } else {
-                    if (lastRaycastHitObject.userData.objectData) {
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.description;
-                        ShowPopup(event);
-                    }
-                }
+                console.log("clicked on unequipped object! mousedowntime id " + mouseDowntime);
+            popup.innerHTML = "";
+            let header = "";
+            // if (this.objectData && this.objectData.labeltext && this.objectData.labeltext.length) {
+            if (this.objectData.labeltext && this.objectData.labeltext.includes("~")) {
+                const labelSplit = this.objectData.labeltext.split("~");
+                const randomIndex = Math.floor(Math.random() * labelSplit.length);
+                header = "<h1>" + this.objectData.name + " : </h1> <div>"+ labelSplit[randomIndex]+"</div>";
+                    // ShowPopup(event);
+            } else {
+                // if (this.objectData) {
+                header = "<h1>" + this.objectData.name + " : </h1> <div>"+ this.objectData.description+"</div>";
+                    // ShowPopup(event);
+                // }
             }
+            // }
+            let pickupButton = "";
+            let equipButton = "";
+            let consumeButton = "";
+            let hasActions = false;
+            let cancelButton = "";
+            // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+            if (this.hasPickupAction) {
+                // popup.innerHTML += "<h1>"+this.objectData.name+" </h1> <div>"+this.objectData.description+"</div>" +
+                // popup.innerHTML +=
+
+                pickupButton = "<button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22pickup\x22 data-data=\x22"+
+                this.objectData.sceneObjectID+"\x22 class=\x22collectButton\x22>Collect</button>";
+
+                // popup.innerHTML += "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>"+
+                // "<button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22pickup\x22 data-data=\x22"+
+                // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Collect</button>"+
+                // "</div>";
+                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+                
+            } 
+            if (this.hasEquipAction) {
+                // popup.innerHTML += "<h1>"+this.objectData.name+" </h1> <div>"+this.objectData.description+"</div>" +
+                // popup.innerHTML +=
+
+                equipButton = "<button id=\x22popup_yesButton1\x22 data-tags=\x22\x22 data-type=\x22equip\x22 data-data=\x22"+
+                this.objectData.sceneObjectID+"\x22 class=\x22equipButton\x22>Equip</button>";
+
+                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+                // popup.innerHTML += "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>"+
+                // "<button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22equip\x22 data-data=\x22"+
+                // this.objectData._id+"\x22 class=\x22yesButton\x22>Equip</button>"+
+                // "</div>";
+            }
+            if (this.hasConsumeAction || this.objectData.objtype == "Consumable") {
+                // popup.innerHTML += "<h1>"+this.objectData.name+" </h1> <div>"+this.objectData.description+"</div>" +
+                // popup.innerHTML +=
+                consumeButton = "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
+                this.objectData.sceneObjectID+"\x22 class=\x22consumeButton\x22>Consume</button>";
+
+                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+                // popup.innerHTML += "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>"+
+                // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
+                // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
+                // "</div>";
+            } 
+                popup.innerHTML = header + cancelButton + pickupButton + equipButton + consumeButton + "</div>";
+                // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
+                // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
+                // "</div>";
+            ShowPopup(event);
         }
         
     }
