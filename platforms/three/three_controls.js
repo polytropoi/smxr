@@ -1149,15 +1149,20 @@ export function onMouseDown(event) { //clicked on threejs object
     // console.log(event.target.id);
 
     mouseDownStarttime = Date.now() / 1000;    
-    
-
-
+   
     const popup = document.getElementById("popup");
     if (event.target.id == "popup_yesButton") {
       ActionSwitch(event);
       popup.style.display = "none";
       return;
-
+    } if (event.target.id == "popup_yesButton1") {
+      ActionSwitch(event);
+      popup.style.display = "none";
+      return;
+    } if (event.target.id == "popup_yesButton2") {
+      ActionSwitch(event);
+      popup.style.display = "none";
+      return;
     } else if (event.target.id == "popup_cancelButton") {
       popup.style.display = "none";
       return;
@@ -1172,7 +1177,7 @@ export function onMouseDown(event) { //clicked on threejs object
     if (lastRaycastHitObject && lastRaycastHitObject.userData && lastRaycastHitObject.userData.isEquipped) {
         console.log("clicked on equipped object! " + lastRaycastHitObject.userData.objectData.name );
         const sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance;
-        sceneObjectInstance.onClick();
+        sceneObjectInstance.onDown();
         // if (lastRaycastHitObject.userData.objectData.actions) {
             
         // }
@@ -1416,6 +1421,15 @@ export function onMouseUp(e) {
     // playerReadyToNav = false;
     if (cameraMode == "Fly") {
         controls.dragToLook = true;
+    }
+    if (lastRaycastHitObject && lastRaycastHitObject.userData && lastRaycastHitObject.userData.isEquipped) {
+        console.log("clicked on equipped object! " + lastRaycastHitObject.userData.objectData.name );
+        const sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance;
+        sceneObjectInstance.onClick();
+        // if (lastRaycastHitObject.userData.objectData.actions) {
+            
+        // }
+        // return;
     }
 
 }

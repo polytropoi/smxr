@@ -7,6 +7,7 @@ import { player, lastRaycastHitObject, ShowPopup, mouseDowntime } from './three_
 import { scene } from './three_main.mjs';
 
 import { settings } from '../../../connect/settings.js';
+import { userData, room } from '../../../connect/connect.js';
 import { locationObjex } from './three_locations.js';
 
 import { AddDynamicBody, getPlayerBody, kinematicBodies } from './three_physics.js';
@@ -16,13 +17,16 @@ export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp +
 
 export let equippedRigidbody;
 export let playerRigidbody;
+export let lastEvent;
 // export const sceneObjectsArray = []; //array with all the object data
 
 export function ActionSwitch (event) { //input from simple html popups
+    console.log("ActionSwitch event " + JSON.stringify(event));
     const type = event.target.dataset.type; //e.g. markerType
     const data = event.target.dataset.data; //e.g. eventData
     const tags = event.target.dataset.tags; //e.g. location tags (or object tags?)
     
+    lastEvent = event;
     console.log(type + " " + data + " " + tags);
 
     switch (type) {
@@ -164,8 +168,15 @@ export class SceneObject { //things that might have models and actions and fancy
         // playerRigidbody.disable();
         // SetEquippedRigidbody(rbody);
     }
+    onOver () {
+
+    }
+    onDown () {
+
+    }
        
     onClick (event) {
+        lastEvent = event;
         console.log("clicked sceneObject with actions " + JSON.stringify(this.objectData.actions));
            
         // if (textData != null && textData != undefined && textData != "" && textData != "none") {
@@ -186,6 +197,7 @@ export class SceneObject { //things that might have models and actions and fancy
                         mouseDowntime = 1;
                     }
                     this.throwObject(this.objectData._id, mouseDowntime, "5");
+
                 }
                 // if (this.triggerAudioController != null) {
                 //     // this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(this.hitpoint, this.distance, ["throw"], .5);//tagmangler needs an array
@@ -288,17 +300,26 @@ export class SceneObject { //things that might have models and actions and fancy
             // data.fromSceneInventory = this.data.fromSceneInventory;
             // data.timestamp = this.data.timestamp;
             // data.fromScene = room;
-            // data.object_item = this.objectData;
+            data.object_item = this.objectData;
             // data.userData = userData;
             data.action = this.pickupAction;
+
+                //  let data = {};
+                      data.sceneID = settings._id;
+                      data.fromSceneInventory = false;
+                      data.timestamp = this.timestamp;
+                      data.fromScene = room;
+                      data.object_item = this.objectData;
+                      data.userData = userData;
+                      data.action = this.pickupAction;
             console.log("pickupaction " + JSON.stringify(data));
     
             //   Pickup(data, this.el.id);
             
-            // this.pickup(data);
+            this.pickupObject(data);
         }
     }
-    async throwObject() {
+    throwObject() {
         
         scene.add(this.object);
         console.log(JSON.stringify(this.object.position));
@@ -311,18 +332,18 @@ export class SceneObject { //things that might have models and actions and fancy
         // await equippedRigidbody;
         // if (equippedRigidbody) {
 
-        equippedRigidbody.addForce(worldPosition);
+        equippedRigidbody.addForce(worldPosition, mouseDowntime);
         // }
         // dynamicBodies.push(rbody);
         // rbody.AddForce();
     }
+    removeFromInventory (data, waitTime) { //i.e. destroy
 
-    dropObject (data) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", '/drop/', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send(JSON.stringify(data));
-    xhr.onload = function () {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/remove_from_user_inventory/', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(data));
+        xhr.onload = function () {
             // do something to response
             console.log(this.responseText);
             if (this.responseText.toLowerCase().includes('updated')) {
@@ -341,12 +362,46 @@ export class SceneObject { //things that might have models and actions and fancy
             }
             } 
         };
+
+    }
+
+    dropObject (data) { //transfer from user to scene inventory
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/drop/', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(data));
+        xhr.onload = function () {
+            // do something to response
+            console.log(this.responseText);
+            if (this.responseText.toLowerCase().includes('updated')) {
+                 const worldPosition = new THREE.Vector3();
+                this.object.getWorldPosition(worldPosition);
+                scene.attach(this.object);
+                // const colliderScale = this.objectData.colliderScale ? this.objectData.colliderScale : 1;
+                // const yPosFudge = this.objectData.yPosFudge ? this.objectData.yPosFudge : 0; //offset the collider on y axis
+                // equippedRigidbody = await AddDynamicBody(this.object, worldPosition, colliderScale, yPosFudge, true, this.objectParent);       
+
+            // let objexEl = document.getElementById('sceneObjects');    
+            // objexEl.components.mod_objex.dropObject(data.inventoryObj.objectID);
+            
+            } else if (this.responseText.toLowerCase().includes('no drop')) {
+                // this.dialogEl = document.getElementById('mod_dialog');
+                // if (this.dialogEl != null) {
+                //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop that here.");
+                // }
+            } else if (this.responseText.toLowerCase().includes('maxxed')) {
+                // this.dialogEl = document.getElementById('mod_dialog');
+                // if (this.dialogEl != null) {
+                //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop any more of those here.");
+                // }
+            } 
+        };
     }
     // hide
-    pickup (data, id) {
+    pickupObject (data, id) { //i.e. collect, put into user inventory
     console.log("tryna act on " + id);
-    let objEl = document.getElementById(id);
-    if (objEl != null) {
+    // let objEl = document.getElementById(id);
+    // if (objEl != null) {
         var xhr = new XMLHttpRequest();
         xhr.open("POST", '/pickup/', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -354,45 +409,53 @@ export class SceneObject { //things that might have models and actions and fancy
         xhr.onload = function () {
         // do something to response
         console.log(this.responseText);
-        this.dialogEl = document.getElementById('mod_dialog');
-        if (this.dialogEl != null) {
-            
-            if (this.responseText.toLowerCase().includes("saved")) { //put in inventory
-            if (data.action.sourceObjectMod.toLowerCase() == "remove") {
-                objEl.components.mod_object.hideObject();
-            }
-            this.dialogEl.components.mod_dialog.confirmResponse("Saved to inventory!");
-            console.log('pickedup!');
-            } else if (this.responseText.toLowerCase().includes("consume")) { //
-            
-            console.log("tryuna consumobjEl");
-            if (data.action.sourceObjectMod.toLowerCase() == "remove") {
-                objEl.components.mod_object.hideObject();
-            }
-            if (data.action.sourceObjectMod.toLowerCase() == "replace model") {
-                objEl.components.mod_object.replaceModel(data.action.modelID);
-            }
-            if (data.action.sourceObjectMod.toLowerCase() == "replace object") {
-                objEl.components.mod_object.replaceObject(data.action.objectID);
-            }
-            // if (data.action.sourceObjectMod.toLowerCase() == "equip") {
-            //   objEl.components.mod_object.equipObject(data.action.objectID);
-            // }
 
-            if (data.action.sourceObjectMod.toLowerCase() == "random location") {
-                objEl.components.mod_object.randomLocation();
-            }
-            this.dialogEl.components.mod_dialog.confirmResponse("Refreshing!");
-            console.log("consumed");
-            } else if (this.responseText.toLowerCase().includes("equip")) {
-            console.log("tryna equi9p dout");
-            } else {
-            console.log("maxed");
-            this.dialogEl.components.mod_dialog.confirmResponse("You can't have any more of those");
-            }
+        if (this.responseText.toLowerCase().includes("max")) {
+            popup.innerHTML = "<br><br><h3>Sorry, you can't have any more of those!</h3>";
+            ShowPopup(lastEvent);
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 3000);
         }
+        // this.dialogEl = document.getElementById('mod_dialog');
+        // if (this.dialogEl != null) {
+            
+        //     if (this.responseText.toLowerCase().includes("saved")) { //put in inventory
+        //     if (data.action.sourceObjectMod.toLowerCase() == "remove") {
+        //         objEl.components.mod_object.hideObject();
+        //     }
+        //     this.dialogEl.components.mod_dialog.confirmResponse("Saved to inventory!");
+        //     console.log('pickedup!');
+        //     } else if (this.responseText.toLowerCase().includes("consume")) { //
+            
+        //     console.log("tryuna consumobjEl");
+        //     if (data.action.sourceObjectMod.toLowerCase() == "remove") {
+        //         objEl.components.mod_object.hideObject();
+        //     }
+        //     if (data.action.sourceObjectMod.toLowerCase() == "replace model") {
+        //         objEl.components.mod_object.replaceModel(data.action.modelID);
+        //     }
+        //     if (data.action.sourceObjectMod.toLowerCase() == "replace object") {
+        //         objEl.components.mod_object.replaceObject(data.action.objectID);
+        //     }
+        //     // if (data.action.sourceObjectMod.toLowerCase() == "equip") {
+        //     //   objEl.components.mod_object.equipObject(data.action.objectID);
+        //     // }
+
+        //     if (data.action.sourceObjectMod.toLowerCase() == "random location") {
+        //         objEl.components.mod_object.randomLocation();
+        //     }
+        //     this.dialogEl.components.mod_dialog.confirmResponse("Refreshing!");
+        //     console.log("consumed");
+        //     } else if (this.responseText.toLowerCase().includes("equip")) {
+        //     console.log("tryna equi9p dout");
+        //     } else {
+        //     console.log("maxed");
+        //     this.dialogEl.components.mod_dialog.confirmResponse("You can't have any more of those");
+        //     }
+        // }
         };
-    }
+    // }
     }
 
 }

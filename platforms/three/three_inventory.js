@@ -36,6 +36,38 @@ export function LoadSceneInventory () { //  user inventory loaded in dialogs.js
 }
 
 eventEl.addEventListener('equip-inventory-object-event', EquipInventoryCheck);
+eventEl.addEventListener('drop-inventory-object-event', DropInventoryCheck);
+// eventEl.addEventListener('remove-inventory-object-event', RemoveInventoryCheck);
+
+
+
+function DropInventoryCheck(event) { //equip button in modal, from dialogs.js
+
+    const objectData = ReturnObjectData(event.details.objectID);
+    console.log("equip event for object " + JSON.stringify(objectData));
+
+    if (objectData.actions != undefined && objectData.actions.length > 0) {
+        for (let i = 0; i < objectData.actions.length; i++) {
+        
+        if (objectData.actions[i].actionType.toLowerCase().includes("equip")) {
+            console.log("ACTION " + JSON.stringify(objectData.actions[i]));
+        //   action = objectData.actions[i];
+            // console.log(JSON.stringify(action));
+            for (let i = 0; i < userInventory.inventoryItems.length; i++) {
+                if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
+                    // inventoryObj = userInventory[i];
+                    EquipInventoryObject(objectData);
+                    ShowHideDialogPanel();
+                    break;
+                }
+            }
+        break;
+        } 
+        }
+    } else {
+        console.log("cain't equip that!");
+    }
+}
 
 
 function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js

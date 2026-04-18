@@ -748,7 +748,7 @@ export async function AddDynamicBody(mesh, meshposition, scale, yFudge, isEquipp
       }
     }
 
-      function addForce (worldPos) {
+      function addForce (worldPos, force) {
         console.log("adding force!");
         rigidbody.setEnabled(true);
         // rigidbody.setTranslation(worldPos.x, worldPos.y, worldPos.z);
@@ -768,10 +768,10 @@ export async function AddDynamicBody(mesh, meshposition, scale, yFudge, isEquipp
         
         // rigidbody.addForce(dir.multiplyScalar(100), false);
         
-        console.log("rigidbody isEnabled " + rigidbody.isEnabled());
+        console.log("rigidbody isEnabled " + rigidbody.isEnabled() + " adding force " + force);
         // rigidbody.applyImpulse({x:0.0, y: 10000000.0, z: 0.0}, true);
       // rigidbody.setLinvel({ x: 0.0, y: 0.0, z: 10.0 }, true);
-        rigidbody.setLinvel({ x: direction.x * 20, y: direction.y * 20, z: direction.z * 20 }, true);
+        rigidbody.setLinvel({ x: direction.x * 10 * force, y: direction.y * 10 * force, z: direction.z * 10 * force }, true);
         rigidbody.setAngvel({ x: 0.0, y: 10.0, z: 0.0 }, true);
       }
 
