@@ -1915,7 +1915,7 @@ app.post('/remove_from_user_inventory/', requiredAuthentication, function (req, 
             console.log("tryna remove from user inventory!");
             res.send("updated " + updated);
                 
-            }
+            // }
         } catch (e) {
             console.log("error dropping an inventory item! " + e);
             res.send("error dropping " + e);
