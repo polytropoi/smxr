@@ -5,7 +5,7 @@ import RAPIER from 'rapier';
 
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-import { scene, togglePostProcessing, water, cameraMode } from './three_main.mjs';
+import { scene, togglePostProcessing, water, cameraMode, showDebug } from './three_main.mjs';
 
 import { staticObjex, activeObjex, kinematicAgentMeshes } from './three_locations.js';
 import { player, camera } from './three_controls.js';
@@ -68,7 +68,9 @@ export async function InitRapier (gravity) {
 
     eventQueue = new RAPIER.EventQueue(true); // `true` for generating contact force events
 
-     rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+    if (showDebug) {
+      rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+    }
 }
 
 
@@ -296,15 +298,16 @@ function WaitAndInit () {
 
   export async function LoadKinematicAgentMeshes () {
     for (let i = 0; i < kinematicAgentMeshes.length; i++) {
+      // await new Promise(r => setTimeout(r, 300));
       const body = await getModelKinematicBody(kinematicAgentMeshes[i], kinematicAgentMeshes[i].userData.locationData, kinematicAgentMeshes[i].userData.objectData); //pass the index too
-      // kinematicBodies.push(body);
+      kinematicBodies.push(body);
     }
   }
   export async function getModelKinematicBody(mesh, locData, objData) { 
 
-      await new Promise(r => setTimeout(r, 1000));
-      let worldposition = new THREE.Vector3();
-      mesh.getWorldPosition(worldposition);
+      await world;
+      // let worldposition = new THREE.Vector3();
+      // mesh.getWorldPosition(worldposition);
       // const geometry = new THREE.CapsuleGeometry( .5, 2, 4, 8, 1 );
       // const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: .25, wireframe: true, color: 'orange' });
       // const material = new THREE.MeshStandardMaterial({ color: 'orange' });
@@ -323,8 +326,8 @@ function WaitAndInit () {
       mesh.userData.objectData = objData;
       // activeObjex.push(mesh);
       let size = 2;
-      let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased()//no, position based...
-              .setTranslation(worldposition.x, worldposition.y, worldposition.z);
+      let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased();//no, position based...
+              // .setTranslation(worldposition.x, worldposition.y, worldposition.z)
       let rigidbody = await world.createRigidBody(rigidBodyDesc);
       colliders[rigidbody.handle] = "agent_";
       let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
@@ -339,9 +342,9 @@ function WaitAndInit () {
       if (mesh && rigidbody) {
         
         //  rigidbody.resetForces(true); 
-        //   rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y + 1, z: mesh.position.z });
-        mesh.getWorldPosition(worldposition);
-        rigidbody.setTranslation(worldposition.x, worldposition.y, worldposition.z);
+          rigidbody.setTranslation({ x: mesh.parent.position.x, y: mesh.parent.position.y + 1, z: mesh.parent.position.z });
+        // mesh.getWorldPosition(worldposition);
+        // rigidbody.setTranslation(worldposition.x, worldposition.y, worldposition.z);
         // console.log("worldposition " + JSON.stringify(worldposition));
         //   let { x, y, z } = rigidbody.translation();
         //   mouseMesh.position.set(x, y, z);

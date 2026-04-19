@@ -2,7 +2,7 @@ import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, Tran
           InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, 
           RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime, 
           LoadPrimaryAudioHowl} from "./media.js";
-import { equip_inventory_object_event, timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz } from "./events.js";
+import { equip_inventory_object_event, drop_inventory_object_event, timedEventsListenerMode, timeKeysData, tkStarttimes, PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz } from "./events.js";
 import { settings, profile } from "./settings.js";
 import { eventEl } from "./events.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 

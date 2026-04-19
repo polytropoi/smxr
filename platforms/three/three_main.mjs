@@ -69,7 +69,7 @@
 	// let model, floor, floorPosition;
 	let postProcessing;
 	let renderPipeline;
-	let showDebug = true;
+	export let showDebug = false;
 	// export let controls;
 
 	export let selectedObjects = [];
@@ -135,6 +135,9 @@
 		}
 		if (settings.sceneCameraMode) {
 			cameraMode = settings.sceneCameraMode;
+		}
+		if (settings.sceneTags.includes("debug")) {
+			showDebug = true;
 		}
 		
 		// cameraMode = "Mouse Look";
@@ -494,7 +497,7 @@
 			if (rapierDebugRenderer && showDebug) {
 				rapierDebugRenderer.update();
 			}		
-			if (world && physicsIsReady && worldIsReady) {
+			if (world && physicsIsReady && worldIsReady && eventQueue) {
 
 				world.step(eventQueue); 
 				

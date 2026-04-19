@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
-import {scene, InitSystems } from './three_main.mjs';
+import {scene, InitSystems, showDebug } from './three_main.mjs';
 
-import {SetPlayerLocation} from './three_controls.js';
+import {SetPlayerLocation, viewportPlaceholder} from './three_controls.js';
 
 import {SceneObject, sceneObjects} from './three_actions.js';
 
@@ -310,7 +310,9 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     // activeObjex.push(parent);
 
                     physicsColliderMesh.layers.enable(0);
-                    // physicsColliderMesh.visible = false;
+                    if (!showDebug) {
+                        physicsColliderMesh.visible = false;
+                    }
                     physicsColliderMesh.userData.locationData = locationObjex[i].locationData;
                     physicsColliderMesh.userData.objectData = locationObjex[i].objectData;
                     // parent.name = "navagent";
@@ -325,11 +327,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData, locationObjex[i].objectData, sceneObject);
                     kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
 
-                    
                     // const body = await getModelKinematicBody(physicsColliderMesh, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
                     // kinematicBodies.push(body);
-                   
-                     
                 }
             
             } else {
@@ -388,6 +387,35 @@ export async function LoadLocationObjex() { // wait to load these, might need na
             }
         }
     }
+}
+
+export async function LoadAndDropSingleObject (objectData) { //eg drop
+    const sceneObjectID = objectData._id + "_so_" + 1;
+    objectData.sceneObjectID = sceneObjectID;
+
+     const modelData = await LoadModel(objectData.modelURL);
+            
+    const model = modelData.scene;
+    model.userData.locationData = locationObjex[i].locationData;
+    model.userData.objectData = locationObjex[i].objectData;
+    const animations = modelData.animations;
+    // model.scale.set(objectData.locationData.xscale,objectData.locationData.yscale,objectData.locationData.zscale);
+    // model.position.set(objectData.locationData.x,objectData.locationData.y,objectData.locationData.z);
+    scene.add(model);
+    model.visible = true;
+    activeObjex.push(model);
+    model.traverse(function (child) { 
+    if (child.isMesh) {
+        child.userData.locationData = locationData;
+        child.userData.objectData = objectData;
+        }
+    });
+
+    const worldPosition = new THREE.Vector3();
+    viewportPlaceholder.getWorldPosition(worldPosition);
+    model.position.set(worldPosition.x, worldPosition.y, worldPosition.z);
+    const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null);
+    sceneObjects[sceneObjectID] = sceneObject;
 }
 
 async function LoadLocationModel (url, locationData, isActive) {

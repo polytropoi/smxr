@@ -11,9 +11,11 @@ import { viewportPlaceholder } from './three_controls.js';
 
 import { AddDynamicBody, SetEquippedRigidbody } from './three_physics.js';
 
-import { scene } from './three_main.mjs';
+// import { room } from './three_main.mjs';
 
-import { activeObjex, LoadModel } from './three_locations.js';
+import { activeObjex, LoadAndDropSingleObject, LoadModel } from './three_locations.js';
+
+import { userData, room } from '../../../connect/connect.js';
 
 
 
@@ -29,7 +31,8 @@ export function LoadSceneInventory () { //  user inventory loaded in dialogs.js
         const theData = sceneInventoryEl.getAttribute('data-inventory');
         sceneInventory = JSON.parse(atob(theData));
     
-    // console.log("scene inventory: " + JSON.stringify(sceneInventory));
+        console.log("scene inventory: " + JSON.stringify(sceneInventory));
+        AddSceneInventoryItems();
     }
 
     // console.log("userInventory " + JSON.stringify(userInventory));
@@ -49,14 +52,14 @@ function DropInventoryCheck(event) { //equip button in modal, from dialogs.js
     if (objectData.actions != undefined && objectData.actions.length > 0) {
         for (let i = 0; i < objectData.actions.length; i++) {
         
-        if (objectData.actions[i].actionType.toLowerCase().includes("equip")) {
+        if (objectData.actions[i].actionType.toLowerCase().includes("drop")) {
             console.log("ACTION " + JSON.stringify(objectData.actions[i]));
         //   action = objectData.actions[i];
             // console.log(JSON.stringify(action));
             for (let i = 0; i < userInventory.inventoryItems.length; i++) {
                 if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
                     // inventoryObj = userInventory[i];
-                    EquipInventoryObject(objectData);
+                    DropInventoryObject(objectData, objectData.actions[i]);
                     ShowHideDialogPanel();
                     break;
                 }
@@ -75,7 +78,8 @@ function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js
     const objectData = ReturnObjectData(event.details.objectID);
     console.log("equip event for object " + JSON.stringify(objectData));
 
-    if (objectData.actions != undefined && objectData.actions.length > 0) {
+    if (objectData) {
+        if (objectData.actions != undefined && objectData.actions.length > 0) {
         for (let i = 0; i < objectData.actions.length; i++) {
         
         if (objectData.actions[i].actionType.toLowerCase().includes("equip")) {
@@ -88,10 +92,11 @@ function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js
                     EquipInventoryObject(objectData);
                     ShowHideDialogPanel();
                     break;
+                    }
                 }
+                break;
+                } 
             }
-        break;
-        } 
         }
     } else {
         console.log("cain't equip that!");
@@ -126,44 +131,59 @@ async function EquipInventoryObject (objectData) {
             activeObjex.push(equippedModel);
             const equippedSceneObject = new SceneObject(equippedModel, objectData, true, viewportPlaceholder);
            
-          // console.log("tryna equip object " + this.el.id);
-        //   dropPos = new THREE.Vector3();
-        //   objEl = document.createElement("a-entity");
-        //   equipHolder = document.getElementById("equipPlaceholder");
-        //   if (equipHolder) {
-        //     // equipHolder.object3D.getWorldPosition( dropPos );
-        //     locData = {};
-        //     // locData.x = dropPos.x;
-        //     // locData.y = dropPos.y;
-        //     // locData.z = dropPos.z;
-        //     locData.x = 0;
-        //     locData.y = 0;
-        //     locData.z = 0;
-        //     locData.locationTags = tags;
-        //     locData.eventData = eventData;
-        //     locData.markerObjScale = (objectData.objScale != undefined && objectData.objScale != "") ? objectData.objScale : 1; //these come from objectData, not locData
-        //     locData.eulerx = (objectData.eulerx != undefined && objectData.eulerx != "") ? objectData.eulerx : 0;
-        //     locData.eulery = (objectData.eulery != undefined && objectData.eulery != "") ? objectData.eulery : 0;
-        //     locData.eulerz = (objectData.eulerz != undefined && objectData.eulerz != "") ? objectData.eulerz : 0;
-        //     locData.timestamp = Date.now();
-        //     objEl.setAttribute("mod_object", {'eventData': null, 'locationData': locData, 'objectData': objectData, 'isEquipped': true, 'isSpawned': true});
-        //     objEl.id = "obj" + objectData._id + "_" + locData.timestamp;
-            
-        //     objEl.classList.add('equipped');
-            
-        //     objEl.classList.add('activeObjexRay');
-        //     equipHolder.appendChild(this.objEl); //parent to equip holder instead of scene as below
-        //     const updoc = {"equipped": true, "objectID": objectID, "objectName": this.objectData.name , "tags": tags, "eventData": eventData}; //saved to profile.equipment.main
-        //     UpdateLocalEquipment(updoc);
-        //   } else {
-        //     console.log("caint equip!");
-        //   }
+       
         } else {
           
             FetchSceneInventoryObject(objectID, true, tags, eventData);
         }
         // this.el.setAttribute('gltf-model', '#' + modelID.toString());
 
+    }
+
+
+async function DropInventoryObject (objectData, action) { 
+
+        // console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
+        
+        // let objectData = ReturnObjectData(objectID)
+
+        if (objectData) {        
+            objectData.isEquipped = false;
+                let data = {};
+                data.inScene = room;
+                // data.inScene
+                // data.inventoryID = inventoryID;
+                data.userData = userData;
+                // data.object_item = this.data.objectData;
+                // data.userData = userData;
+                data.action = action;
+               
+                data.inventoryObj = objectData;
+            console.log("tryna drop object " + objectData);  
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", '/drop/', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify(data));
+            xhr.onload = function () {
+                // do something to response
+                console.log(this.responseText);
+                if (this.responseText.toLowerCase().includes('updated')) {
+                    
+                    LoadAndDropSingleObject(objectData);
+                
+                } else if (this.responseText.toLowerCase().includes('no drop')) {
+                //   this.dialogEl = document.getElementById('mod_dialog');
+                //   if (this.dialogEl != null) {
+                //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop that here.");
+                //   }
+                } else if (this.responseText.toLowerCase().includes('maxxed')) {
+                //   this.dialogEl = document.getElementById('mod_dialog');
+                //   if (this.dialogEl != null) {
+                //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop any more of those here.");
+                //   }
+                } 
+            };
+        } 
     }
 
   
@@ -198,37 +218,142 @@ async function EquipInventoryObject (objectData) {
     }
   }
   
+    
+  function AddSceneInventoryItems () { //
+    let oIDs = [];
+    // this.fromSceneInventory = true;
+    // // this.fromSceneInventory = objex._id //top level of inventory object, items are array property //NO, this is now the sceneID, set in each inventory_item//NOOO, it's nothing
+    // // if (objex.inventoryItems != undefined && objex.inventoryItems.length > 0) {
+    //     this.sceneInventoryItems = inventory_items;
+    // }
+    console.log("gots scene inventory items: " + JSON.stringify(sceneInventory));
+    //wait, need to cache the locations where to place the fetched objs... :|
+    if (sceneInventory) {
+        for (let i = 0; i < sceneInventory.length; i++) {
+        if (ReturnObjectData(sceneInventory[i].objectID) == null) { //if we don't already have this object data, need to fetch it
+            if (!oIDs.includes(sceneInventory[i].objectID)) { //prevent duplicates
+            oIDs.push(sceneInventory[i].objectID);
+            console.log("gotsa oID from scene inventory that needs fetching!");
+            }
+        }
+        }
+    }
+    console.log("need to fetch inventory: " + oIDs);
+    FetchSceneInventoryObjex(oIDs); //do fetch in external function, below, bc ajax response can't get to component scope if it's here (?)
+    
+}
+
   function FetchSceneInventoryObjex(oIDs) { //fetch scene inventory objects, i.e. stuff dropped by users, at start to populate scene
-    let objexEl = document.getElementById('sceneObjects');    
+    // let objexEl = document.getElementById('sceneObjects');    
     if (oIDs.length > 0) {
       // objexEl.components.mod_objex.dropObject(data.inventoryObj.objectID);
       let data = {};
       data.oIDs = oIDs;
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", '/scene_inventory_objex/', true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send(JSON.stringify(data));
-      xhr.onload = function () {
-        // do something to response
-        // console.log("fetched obj resp: " +this.responseText);
-        let response = JSON.parse(this.responseText);
-        // console.log("gotsome objex: " + response.objex.length);
-        if (response.objex.length > 0) {
-  
-          for (let i = 0; i < response.objex.length; i++) {
-            objexEl.components.mod_objex.addFetchedObject(response.objex[i]); //add to scene object collection, so don't have to fetch again
-            //use locs and instantiate!
-            // console.log(i + " vs " + response.objex.length - 1);
-            if (i == response.objex.length - 1) {
-              objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
+        console.log("tryna fetch sceneInventory oids " + oIDs);
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/scene_inventory_objex/', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(data));
+        xhr.onload = function () {
+            // do something to response
+            // console.log("fetched obj resp: " +this.responseText);
+            let response = JSON.parse(this.responseText);
+            // console.log("gotsome objex: " + response.objex.length);
+            if (response.objex.length > 0) {
+    
+            for (let i = 0; i < response.objex.length; i++) {
+                // objexEl.components.mod_objex.addFetchedObject(response.objex[i]); //add to scene object collection, so don't have to fetch again
+                //use locs and instantiate!
+                // console.log(i + " vs " + response.objex.length - 1);
+                sceneInventory
+                if (i == response.objex.length - 1) {
+                //   objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
+                }
             }
-          }
-        } else {
-          objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
+            } else {
+            //   objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
+            }
         }
-      }
     } else {
-      objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
+    //   objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
     }
   }
   
+
+
+
+// export function Drop (data) {
+//   var xhr = new XMLHttpRequest();
+//   xhr.open("POST", '/drop/', true);
+//   xhr.setRequestHeader('Content-Type', 'application/json');
+//   xhr.send(JSON.stringify(data));
+//   xhr.onload = function () {
+//     // do something to response
+//     console.log(this.responseText);
+//     if (this.responseText.toLowerCase().includes('updated')) {
+     
+      
+//     } else if (this.responseText.toLowerCase().includes('no drop')) {
+//     //   this.dialogEl = document.getElementById('mod_dialog');
+//     //   if (this.dialogEl != null) {
+//     //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop that here.");
+//     //   }
+//     } else if (this.responseText.toLowerCase().includes('maxxed')) {
+//     //   this.dialogEl = document.getElementById('mod_dialog');
+//     //   if (this.dialogEl != null) {
+//     //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop any more of those here.");
+//     //   }
+//     } 
+//   };
+// }
+// export function Pickup (data, id) {
+//   console.log("tryna act on " + id);
+//   let objEl = document.getElementById(id);
+//   if (objEl != null) {
+//     var xhr = new XMLHttpRequest();
+//     xhr.open("POST", '/pickup/', true);
+//     xhr.setRequestHeader('Content-Type', 'application/json');
+//     xhr.send(JSON.stringify(data));
+//     xhr.onload = function () {
+//       // do something to response
+//       console.log(this.responseText);
+//       this.dialogEl = document.getElementById('mod_dialog');
+//       if (this.dialogEl != null) {
+        
+//         if (this.responseText.toLowerCase().includes("saved")) { //put in inventory
+//           if (data.action.sourceObjectMod.toLowerCase() == "remove") {
+//             objEl.components.mod_object.hideObject();
+//           }
+//           this.dialogEl.components.mod_dialog.confirmResponse("Saved to inventory!");
+//           console.log('pickedup!');
+//         } else if (this.responseText.toLowerCase().includes("consume")) { //
+          
+//           console.log("tryuna consumobjEl");
+//           if (data.action.sourceObjectMod.toLowerCase() == "remove") {
+//             objEl.components.mod_object.hideObject();
+//           }
+//           if (data.action.sourceObjectMod.toLowerCase() == "replace model") {
+//             objEl.components.mod_object.replaceModel(data.action.modelID);
+//           }
+//           if (data.action.sourceObjectMod.toLowerCase() == "replace object") {
+//             objEl.components.mod_object.replaceObject(data.action.objectID);
+//           }
+//           // if (data.action.sourceObjectMod.toLowerCase() == "equip") {
+//           //   objEl.components.mod_object.equipObject(data.action.objectID);
+//           // }
+
+//           if (data.action.sourceObjectMod.toLowerCase() == "random location") {
+//             objEl.components.mod_object.randomLocation();
+//           }
+//           this.dialogEl.components.mod_dialog.confirmResponse("Refreshing!");
+//           console.log("consumed");
+//         } else if (this.responseText.toLowerCase().includes("equip")) {
+//           console.log("tryna equi9p dout");
+//         } else {
+//           console.log("maxed");
+//           this.dialogEl.components.mod_dialog.confirmResponse("You can't have any more of those");
+//         }
+//       }
+//     };
+//   }
+// }
