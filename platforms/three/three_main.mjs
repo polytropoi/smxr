@@ -50,6 +50,7 @@
 	import { InitAudioGroups, ambientAudioController, InitSceneText } from './three_media.js';
 	
 	import { LoadSceneInventory } from './three_inventory.js';
+import { GetUserInventory } from '../../connect/dialogs.js';
 // import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene;
@@ -328,7 +329,7 @@
 		InitSky();
 		InitFog();
 
-		
+		GetUserInventory();
 		LoadSceneInventory(); //both scene and user inventories
 
 		const scenePass = pass( scene, camera );

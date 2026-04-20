@@ -389,33 +389,51 @@ export async function LoadLocationObjex() { // wait to load these, might need na
     }
 }
 
-export async function LoadAndDropSingleObject (objectData) { //eg drop
-    const sceneObjectID = objectData._id + "_so_" + 1;
-    objectData.sceneObjectID = sceneObjectID;
+export async function LoadAndDropSingleObject (oData, locationData) { //eg drop
 
-     const modelData = await LoadModel(objectData.modelURL);
-            
-    const model = modelData.scene;
-    model.userData.locationData = locationObjex[i].locationData;
-    model.userData.objectData = locationObjex[i].objectData;
-    const animations = modelData.animations;
-    // model.scale.set(objectData.locationData.xscale,objectData.locationData.yscale,objectData.locationData.zscale);
-    // model.position.set(objectData.locationData.x,objectData.locationData.y,objectData.locationData.z);
-    scene.add(model);
-    model.visible = true;
-    activeObjex.push(model);
-    model.traverse(function (child) { 
-    if (child.isMesh) {
-        child.userData.locationData = locationData;
-        child.userData.objectData = objectData;
-        }
-    });
+    try {
+    const sceneObjectID = oData._id + "_so_" + 1;
+    // objectData.sceneObjectID = sceneObjectID;
 
-    const worldPosition = new THREE.Vector3();
-    viewportPlaceholder.getWorldPosition(worldPosition);
-    model.position.set(worldPosition.x, worldPosition.y, worldPosition.z);
-    const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null);
-    sceneObjects[sceneObjectID] = sceneObject;
+    console.log("tryna drop object " + JSON.stringify(oData));
+    let matchedObject = oData;
+     
+
+    // for (let i = 0; i < locationObjex.length; i++) {
+    //     if (oData.objectID == locationObjex[i]._id) {
+    //         matchedObject = locationObjex[i];
+    //     }
+    // }
+
+    if (matchedObject) {
+        // console.log("matched inventory to location object " + JSON.stringify(matchedObject));
+        matchedObject.sceneObjectID = sceneObjectID;
+        const modelData = await LoadModel(matchedObject.modelURL);        
+        const model = modelData.scene;
+        model.userData.locationData = locationData;
+        model.userData.objectData = matchedObject;
+        const animations = modelData.animations;
+        // model.scale.set(objectData.locationData.xscale,objectData.locationData.yscale,objectData.locationData.zscale);
+        // model.position.set(objectData.locationData.x,objectData.locationData.y,objectData.locationData.z);
+        scene.add(model);
+        model.visible = true;
+        activeObjex.push(model);
+        model.traverse(function (child) { 
+        if (child.isMesh) {
+            child.userData.locationData = locationData;
+            child.userData.objectData = matchedObject;
+            }
+        });
+
+        // const worldPosition = new THREE.Vector3();
+        // viewportPlaceholder.getWorldPosition(worldPosition);
+        model.position.set(locationData.x, locationData.y, locationData.z);
+        const sceneObject = new SceneObject(model, matchedObject, false, null);
+        sceneObjects[sceneObjectID] = sceneObject;
+    }
+    } catch (e) {
+        console.log("error tryna LoadAndDropSingleObject " + e);    
+    }
 }
 
 async function LoadLocationModel (url, locationData, isActive) {

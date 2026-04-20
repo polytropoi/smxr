@@ -13,7 +13,7 @@ import { AddDynamicBody, SetEquippedRigidbody } from './three_physics.js';
 
 // import { room } from './three_main.mjs';
 
-import { activeObjex, LoadAndDropSingleObject, LoadModel } from './three_locations.js';
+import { activeObjex, LoadAndDropSingleObject, LoadModel, locationObjex } from './three_locations.js';
 
 import { userData, room } from '../../../connect/connect.js';
 
@@ -32,10 +32,14 @@ export function LoadSceneInventory () { //  user inventory loaded in dialogs.js
         sceneInventory = JSON.parse(atob(theData));
     
         console.log("scene inventory: " + JSON.stringify(sceneInventory));
-        AddSceneInventoryItems();
+        AddSceneInventoryObjects();
     }
 
-    // console.log("userInventory " + JSON.stringify(userInventory));
+    console.log("userInventory " + JSON.stringify(userInventory));
+    if (userInventory) { //hrm still null
+        
+        AddUserInventoryObjects();
+    }
 }
 
 eventEl.addEventListener('equip-inventory-object-event', EquipInventoryCheck);
@@ -43,34 +47,6 @@ eventEl.addEventListener('drop-inventory-object-event', DropInventoryCheck);
 // eventEl.addEventListener('remove-inventory-object-event', RemoveInventoryCheck);
 
 
-
-function DropInventoryCheck(event) { //equip button in modal, from dialogs.js
-
-    const objectData = ReturnObjectData(event.details.objectID);
-    console.log("equip event for object " + JSON.stringify(objectData));
-
-    if (objectData.actions != undefined && objectData.actions.length > 0) {
-        for (let i = 0; i < objectData.actions.length; i++) {
-        
-        if (objectData.actions[i].actionType.toLowerCase().includes("drop")) {
-            console.log("ACTION " + JSON.stringify(objectData.actions[i]));
-        //   action = objectData.actions[i];
-            // console.log(JSON.stringify(action));
-            for (let i = 0; i < userInventory.inventoryItems.length; i++) {
-                if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
-                    // inventoryObj = userInventory[i];
-                    DropInventoryObject(objectData, objectData.actions[i]);
-                    ShowHideDialogPanel();
-                    break;
-                }
-            }
-        break;
-        } 
-        }
-    } else {
-        console.log("cain't equip that!");
-    }
-}
 
 
 function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js
@@ -141,7 +117,37 @@ async function EquipInventoryObject (objectData) {
     }
 
 
-async function DropInventoryObject (objectData, action) { 
+function DropInventoryCheck(event) { //equip button in modal, from dialogs.js
+
+
+    const objectData = ReturnObjectData(event.details.objectID); //um, check inventory not locationObjex...
+    console.log("check drop event for object " + event.details.objectID);
+
+    if (objectData && objectData.actions != undefined && objectData.actions.length > 0) {
+        for (let i = 0; i < objectData.actions.length; i++) {
+        
+        if (objectData.actions[i].actionType.toLowerCase().includes("drop")) {
+            console.log("ACTION " + JSON.stringify(objectData.actions[i]));
+        //   action = objectData.actions[i];
+            // console.log(JSON.stringify(action));
+            for (let i = 0; i < userInventory.inventoryItems.length; i++) {
+                if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
+                    // inventoryObj = userInventory[i];
+                    DropInventoryObject(objectData, objectData.actions[i], userInventory.inventoryItems[i]._id );
+                    ShowHideDialogPanel();
+                    break;
+                }
+            }
+        break;
+        } 
+        }
+    } else {
+        console.log("cain't equip that!");
+    }
+}
+
+
+async function DropInventoryObject (objectData, action, inventoryID) { 
 
         // console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
         
@@ -157,19 +163,25 @@ async function DropInventoryObject (objectData, action) {
                 // data.object_item = this.data.objectData;
                 // data.userData = userData;
                 data.action = action;
-               
+                
                 data.inventoryObj = objectData;
-            console.log("tryna drop object " + objectData);  
+                data.inventoryObj.objectID = objectData._id;
+                data.inventoryObj._id = inventoryID;
+                    const worldPosition = new THREE.Vector3();
+                    viewportPlaceholder.getWorldPosition(worldPosition);
+                    data.inventoryObj.location = worldPosition;
+            // console.log("tryna drop object " + JSO>objectData);  
             var xhr = new XMLHttpRequest();
             xhr.open("POST", '/drop/', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send(JSON.stringify(data));
+
             xhr.onload = function () {
                 // do something to response
-                console.log(this.responseText);
+                console.log(JSON.stringify(this.responseText));
                 if (this.responseText.toLowerCase().includes('updated')) {
                     
-                    LoadAndDropSingleObject(objectData);
+                    LoadAndDropSingleObject(objectData, worldPosition);
                 
                 } else if (this.responseText.toLowerCase().includes('no drop')) {
                 //   this.dialogEl = document.getElementById('mod_dialog');
@@ -206,9 +218,9 @@ async function DropInventoryObject (objectData, action) {
         let response = JSON.parse(this.responseText);
         // console.log("gotsome objex: " + response.objex.length);
         if (response.objex.length > 0) {
-            objexEl.components.mod_objex.addFetchedObject(response.objex[0]); //add to scene object collection, so don't have to fetch again
+            // objexEl.components.mod_objex.addFetchedObject(response.objex[0]); //add to scene object collection, so don't have to fetch again
             if (equip) {
-              objexEl.components.mod_objex.equipInventoryObject(oID, tags, eventData)
+            //   objexEl.components.mod_objex.equipInventoryObject(oID, tags, eventData)
             } 
         }
        
@@ -218,8 +230,23 @@ async function DropInventoryObject (objectData, action) {
     }
   }
   
+  function AddUserInventoryObjects () {
+    let oIDs = [];
+    if (userInventory) {
+        for (let i = 0; i < userInventory.length; i++) {
+            // if (sceneInventory[i].objectID && ReturnObjectData(sceneInventory[i].objectID) == null) { //if we don't already have this object data, need to fetch it
+            //     if (!oIDs.includes(sceneInventory[i` ].objectID)) { //prevent duplicates
+            //     // if ()
+            if (userInventory[i].objectID) {
+                console.log("userInventory object " + userInventory[i].objectID)
+                oIDs.push(userInventory[i].objectID);
+                }
+            } 
+        }
+        FetchUserInventoryObjex(oIDs); 
+    }
     
-  function AddSceneInventoryItems () { //
+  function AddSceneInventoryObjects () { //get full list of objects in scene inventory, id those not already part of scene
     let oIDs = [];
     // this.fromSceneInventory = true;
     // // this.fromSceneInventory = objex._id //top level of inventory object, items are array property //NO, this is now the sceneID, set in each inventory_item//NOOO, it's nothing
@@ -230,18 +257,51 @@ async function DropInventoryObject (objectData, action) {
     //wait, need to cache the locations where to place the fetched objs... :|
     if (sceneInventory) {
         for (let i = 0; i < sceneInventory.length; i++) {
-        if (ReturnObjectData(sceneInventory[i].objectID) == null) { //if we don't already have this object data, need to fetch it
-            if (!oIDs.includes(sceneInventory[i].objectID)) { //prevent duplicates
+        // if (sceneInventory[i].objectID && ReturnObjectData(sceneInventory[i].objectID) == null) { //if we don't already have this object data, need to fetch it
+        //     if (!oIDs.includes(sceneInventory[i].objectID)) { //prevent duplicates
+        //     // if ()
+        if (sceneInventory[i].objectID) {
+            console.log( sceneInventory[i].objectID)
             oIDs.push(sceneInventory[i].objectID);
-            console.log("gotsa oID from scene inventory that needs fetching!");
-            }
         }
+        //     console.log("gotsa oID from scene inventory that needs fetching!");
+        //     }
+        // }
         }
     }
     console.log("need to fetch inventory: " + oIDs);
-    FetchSceneInventoryObjex(oIDs); //do fetch in external function, below, bc ajax response can't get to component scope if it's here (?)
+    FetchSceneInventoryObjex(oIDs); 
     
 }
+
+  function FetchUserInventoryObjex(oIDs) { //fetch scene inventory objects, i.e. stuff dropped by users, at start to populate scene
+    // let objexEl = document.getElementById('sceneObjects');    
+    if (oIDs.length > 0) {
+      // objexEl.components.mod_objex.dropObject(data.inventoryObj.objectID);
+      let data = {};
+      data.oIDs = oIDs;
+        console.log("tryna fetch sceneInventory oids " + oIDs);
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/user_inventory_objex/', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(data));
+        xhr.onload = function () {
+            // do something to response
+            // console.log("fetched obj resp: " +this.responseText);
+            let response = JSON.parse(this.responseText);
+            // console.log("gotsome objex: " + response.objex.length);
+            if (response.objex.length > 0) {
+                for (let i = 0; i < response.objex.length; i++) {
+                    console.log("pushing userInventory object ");
+                    locationObjex.push(response.objex[i]);
+                }
+            }
+
+            }
+        }
+    }
+
+
 
   function FetchSceneInventoryObjex(oIDs) { //fetch scene inventory objects, i.e. stuff dropped by users, at start to populate scene
     // let objexEl = document.getElementById('sceneObjects');    
@@ -261,22 +321,40 @@ async function DropInventoryObject (objectData, action) {
             // console.log("gotsome objex: " + response.objex.length);
             if (response.objex.length > 0) {
     
-            for (let i = 0; i < response.objex.length; i++) {
-                // objexEl.components.mod_objex.addFetchedObject(response.objex[i]); //add to scene object collection, so don't have to fetch again
-                //use locs and instantiate!
-                // console.log(i + " vs " + response.objex.length - 1);
-                sceneInventory
-                if (i == response.objex.length - 1) {
-                //   objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
+                for (let s = 0; s < sceneInventory.length; s++) {
+                    for (let i = 0; i < response.objex.length; i++) {
+                        console.log(sceneInventory[s].objectID +" VS " + response.objex[i]._id);
+                        if (sceneInventory[s].objectID == response.objex[i]._id) {
+                        // objexEl.components.mod_objex.addFetchedObject(response.objex[i]); //add to scene object collection, so don't have to fetch again
+                        //use locs and instantiate!
+                        // console.log(i + " vs " + response.objex.length - 1);
+                        console.log("scene inventory object " + JSON.stringify(response.objex[i]));
+                        // locationObjex.push(response.objex[i]);
+                        
+                        LoadAndDropSingleObject(response.objex[i], sceneInventory[s].location);
+                        
+                        }
+                    }
+                    // sceneInventory.push(response.objex[i]);
+                    // if (i == response.objex.length - 1) {
+                    // //   objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
+                    // }
                 }
-            }
-            } else {
-            //   objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
-            }
+                    //     } else {
+                    //     //   objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
+                    //     }
+                    // }
+                // } else {
+                // //   objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
+                // }
+
+                // for (let s = 0; s < sceneInventory.length; s++) {
+                //     LoadAndDropSingleObject(sceneInventory[s], sceneInventory[s].locationData);
+                // }
+}
         }
-    } else {
-    //   objexEl.components.mod_objex.loadSceneInventoryObjects(); //ok load em up
     }
+
   }
   
 

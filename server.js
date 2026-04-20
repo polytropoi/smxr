@@ -1928,6 +1928,7 @@ app.post('/drop/', requiredAuthentication, function (req, res) { //remove from p
     let i_id = ObjectId.createFromHexString(req.body.inventoryObj._id); //id of the inventory_item
     // let sceneInventoryID = null; //scene inventory
     // let sceneInventory = null;
+    console.log("drop : " + req.body.inventoryObj._id);
     let maxperscene = 0;
 
     (async () => {
@@ -1942,14 +1943,15 @@ app.post('/drop/', requiredAuthentication, function (req, res) { //remove from p
             const scene = await RunDataQuery("scenes", "findOne", scenequery);
             const invquery = {$and: [{"sceneID" : scene._id, "objectID": ObjectId.createFromHexString(req.body.inventoryObj.objectID)}]};
             const inv_items = await RunDataQuery("inventory_items", "find", invquery);
+            console.log("matching inventory items in scene " + inv_items.length);
             if (inv_items.length > maxperscene) {
                 res.send("maxed per scene!");
             } else {
                 const upinvquery = {"_id": i_id};
                 const updoc = {$unset: {userID: ""}, $set: {"sceneID" : scene._id, "location": req.body.inventoryObj.location}};
                 const updated = await RunDataQuery("inventory_items", "updateOne", upinvquery, updoc);
-                console.log("drop has dropped");
-                res.send("updated " + updated);
+                console.log("drop has dropped " + JSON.stringify(updated));
+                res.send("updated " + updated.toString());
                 
             }
         } catch (e) {
@@ -4503,6 +4505,7 @@ app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
 
 app.post('/scene_inventory_objex/', function(req, res) {
     console.log('tryna return scene_inventory_objex : ' + req.body.oIDs);
+
     const iids = req.body.oIDs.map(item => {
         return ObjectId.createFromHexString(item.toString());
     });
@@ -4561,6 +4564,72 @@ app.post('/scene_inventory_objex/', function(req, res) {
         } catch (e) {
             console.log("scene_objex_inventory error " +e);
             res.send("scene_objex_inventory error " +e);
+        }
+    })();
+});
+
+
+app.post('/user_inventory_objex/', function(req, res) {
+    console.log('tryna return scene_inventory_objex : ' + req.body.oIDs);
+
+    const iids = req.body.oIDs.map(item => {
+        return ObjectId.createFromHexString(item.toString());
+    });
+
+    (async () => {
+        try {
+            const query = {"_id": {$in: iids}};
+            const obj_items = await RunDataQuery("obj_items", "find", query);
+            let response = {};
+            let objex = [];
+            response.objex = objex;
+            console.log("gots scene inventory items length " + obj_items.length);
+            for (let obj_item of obj_items) {
+
+                if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) { //unused?
+                    const query = {_id: {$in: oids }};
+                    const pic_items = await RunDataQuery("image_items", "find", query);
+                    objectPictures = [];
+                // pic_items.forEach(function(picture_item) {               
+                    for (let i = 0; i < pic_items.length; i++) { 
+                        var imageItem = {};
+                        var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".thumb." + pic_items[i].filename, 6000);
+                        var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".half." + pic_items[i].filename, 6000);
+                        // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
+                        imageItem.urlThumb = urlThumb;
+                        imageItem.urlHalf = urlHalf;
+                        // imageItem.urlStandard = urlStandard;
+                        imageItem._id = pic_items[i]._id;
+                        imageItem.filename = pic_items[i].filename;
+                        objectPictures.push(imageItem);
+                        obj_item.objectPictures = objectPictures;
+                    }
+                }
+                if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) { //the good stuff!
+                    const aids = obj_item.actionIDs.map(item => {
+                        return ObjectId.createFromHexString(item.toString());
+                    });
+                    const query = {"_id": {$in: aids}};
+                    const actions = await RunDataQuery("actions", "find", query);
+                    if (actions && actions.length) {
+                        obj_item.actions = actions;
+                    } 
+                } 
+                if (obj_item.modelID) {
+                    const oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
+                    const query = {"_id": oo_id};
+                    const model = await RunDataQuery("models", "findOne", query);
+                    if (model) {
+                        let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                        obj_item.modelURL = url;
+                    } 
+                }
+                response.objex.push(obj_item);
+            }
+            res.send(response);
+        } catch (e) {
+            console.log("user_objex_inventory error " +e);
+            res.send("user_objex_inventory error " +e);
         }
     })();
 });

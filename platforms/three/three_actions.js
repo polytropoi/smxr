@@ -53,8 +53,8 @@ export async function SetPlayerRigidbody() {
 
 export function ReturnObjectData (objectID) { //not the instance ID, but original mongoID of the object, to get the prototype
     let objek;
-    console.log(JSON.stringify(locationObjex));
-    if (locationObjex.length > 0) {
+    // console.log(JSON.stringify(locationObjex));
+    if (locationObjex.length > 0) { 
         for (let i = 0; i < locationObjex.length; i++) { //spin through the original array to match object's mongoID
         console.log('tryna match object data for ' +objectID + " vs " + locationObjex[i].objectData._id);
         if (locationObjex[i].objectData._id == objectID) {
@@ -65,6 +65,9 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
         }
         }
     }
+    // if (!objek) {
+
+    // }
     return objek;
 }
 
@@ -222,7 +225,7 @@ export class SceneObject { //things that might have models and actions and fancy
                 
             } 
         } else { //not an equipped object
-                console.log("clicked on unequipped object! mousedowntime id " + mouseDowntime);
+                console.log("clicked on unequipped object! mousedowntime id " + mouseDowntime + " sceneObjectID " + this.objectData.sceneObjectID);
             popup.innerHTML = "";
             let header = "";
             // if (this.objectData && this.objectData.labeltext && this.objectData.labeltext.length) {
