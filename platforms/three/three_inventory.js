@@ -1,7 +1,7 @@
 
 import * as THREE from 'three';
 
-import { userInventory, ShowHideDialogPanel } from '../../../connect/dialogs.js';
+import { userInventory, ShowHideDialogPanel, GetUserInventoryAsync, uniqueItems } from '../../../connect/dialogs.js';
 
 import { eventEl } from '../../../connect/events.js';
 
@@ -16,12 +16,14 @@ import { AddDynamicBody, SetEquippedRigidbody } from './three_physics.js';
 import { activeObjex, LoadAndDropSingleObject, LoadModel, locationObjex } from './three_locations.js';
 
 import { userData, room } from '../../../connect/connect.js';
+// import {  } from '../../connect/dialogs.js';
+// import { GetUserInventory } from '../../connect/dialogs.js';
 
 
 
 export let sceneInventory = [];
 
-export function LoadSceneInventory () { //  user inventory loaded in dialogs.js
+export async function LoadSceneInventory () { //  user inventory loaded in dialogs.js
 
     // GetUserInventory();
     const sceneInventoryEl = document.getElementById("sceneInventory"); //popped serverside
@@ -35,10 +37,15 @@ export function LoadSceneInventory () { //  user inventory loaded in dialogs.js
         AddSceneInventoryObjects();
     }
 
-    console.log("userInventory " + JSON.stringify(userInventory));
-    if (userInventory) { //hrm still null
+    
+
+    let items = await GetUserInventoryAsync();
+    // 
+    console.log("three userInventory " + JSON.stringify(uniqueItems));
+    if (uniqueItems && uniqueItems.length) { //hrm still null
         
-        AddUserInventoryObjects();
+        // AddUserInventoryObjects(uniqueItems);
+        FetchUserInventoryObjex(uniqueItems)
     }
 }
 
@@ -121,7 +128,7 @@ function DropInventoryCheck(event) { //equip button in modal, from dialogs.js
 
 
     const objectData = ReturnObjectData(event.details.objectID); //um, check inventory not locationObjex...
-    console.log("check drop event for object " + event.details.objectID);
+    console.log("check drop event for object " + JSON.stringify(objectData));
 
     if (objectData && objectData.actions != undefined && objectData.actions.length > 0) {
         for (let i = 0; i < objectData.actions.length; i++) {
@@ -230,16 +237,16 @@ async function DropInventoryObject (objectData, action, inventoryID) {
     }
   }
   
-  function AddUserInventoryObjects () {
+  function AddUserInventoryObjects (items) {
     let oIDs = [];
-    if (userInventory) {
-        for (let i = 0; i < userInventory.length; i++) {
+    if (items) {
+        for (let i = 0; i < items.length; i++) {
             // if (sceneInventory[i].objectID && ReturnObjectData(sceneInventory[i].objectID) == null) { //if we don't already have this object data, need to fetch it
             //     if (!oIDs.includes(sceneInventory[i` ].objectID)) { //prevent duplicates
             //     // if ()
-            if (userInventory[i].objectID) {
-                console.log("userInventory object " + userInventory[i].objectID)
-                oIDs.push(userInventory[i].objectID);
+            if (items[i].objectID) {
+                console.log("userInventory object " + items[i])
+                oIDs.push(items[i]);
                 }
             } 
         }
@@ -280,7 +287,7 @@ async function DropInventoryObject (objectData, action, inventoryID) {
       // objexEl.components.mod_objex.dropObject(data.inventoryObj.objectID);
       let data = {};
       data.oIDs = oIDs;
-        console.log("tryna fetch sceneInventory oids " + oIDs);
+        console.log("tryna fetch userInventory oids " + oIDs);
         var xhr = new XMLHttpRequest();
         xhr.open("POST", '/user_inventory_objex/', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -289,11 +296,14 @@ async function DropInventoryObject (objectData, action, inventoryID) {
             // do something to response
             // console.log("fetched obj resp: " +this.responseText);
             let response = JSON.parse(this.responseText);
-            // console.log("gotsome objex: " + response.objex.length);
+            console.log("gotsome objex: " + JSON.stringify(response.objex));
             if (response.objex.length > 0) {
                 for (let i = 0; i < response.objex.length; i++) {
-                    console.log("pushing userInventory object ");
-                    locationObjex.push(response.objex[i]);
+                    // console.log("pushing userInventory object " + JSON.stringify(response.objex[i]));
+                    let locObj = {};
+                    locObj.objectData = structuredClone(response.objex[i]);
+                    
+                    locationObjex.push(locObj);
                 }
             }
 
@@ -325,11 +335,13 @@ async function DropInventoryObject (objectData, action, inventoryID) {
                     for (let i = 0; i < response.objex.length; i++) {
                         console.log(sceneInventory[s].objectID +" VS " + response.objex[i]._id);
                         if (sceneInventory[s].objectID == response.objex[i]._id) {
+
                         // objexEl.components.mod_objex.addFetchedObject(response.objex[i]); //add to scene object collection, so don't have to fetch again
                         //use locs and instantiate!
                         // console.log(i + " vs " + response.objex.length - 1);
                         console.log("scene inventory object " + JSON.stringify(response.objex[i]));
                         // locationObjex.push(response.objex[i]);
+                        response.objex[i].fromSceneInventory = true;
                         
                         LoadAndDropSingleObject(response.objex[i], sceneInventory[s].location);
                         

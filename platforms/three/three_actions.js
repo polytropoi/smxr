@@ -53,14 +53,14 @@ export async function SetPlayerRigidbody() {
 
 export function ReturnObjectData (objectID) { //not the instance ID, but original mongoID of the object, to get the prototype
     let objek;
-    // console.log(JSON.stringify(locationObjex));
+    console.log("looking for " + objectID + " in locationObjex length : " + locationObjex.length);
     if (locationObjex.length > 0) { 
         for (let i = 0; i < locationObjex.length; i++) { //spin through the original array to match object's mongoID
         console.log('tryna match object data for ' +objectID + " vs " + locationObjex[i].objectData._id);
         if (locationObjex[i].objectData._id == objectID) {
             console.log('gotsa objectID match to return data ' + objectID);
             // hasObj = true;
-            objek = locationObjex[i].objectData;
+            objek = structuredClone(locationObjex[i].objectData);
             break;
         }
         }
@@ -402,9 +402,9 @@ export class SceneObject { //things that might have models and actions and fancy
     }
     // hide
     pickupObject (data, id) { //i.e. collect, put into user inventory
-    console.log("tryna act on " + id);
-    // let objEl = document.getElementById(id);
-    // if (objEl != null) {
+        console.log("tryna act on " + id);
+        // let objEl = document.getElementById(id);
+        // if (objEl != null) {
         var xhr = new XMLHttpRequest();
         xhr.open("POST", '/pickup/', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -412,6 +412,15 @@ export class SceneObject { //things that might have models and actions and fancy
         xhr.onload = function () {
         // do something to response
         console.log(this.responseText);
+
+        if (this.responseText.toLowerCase().includes("saved")) {
+            popup.innerHTML = "<br><br><h3>Saved to inventory!</h3>";
+            ShowPopup(lastEvent);
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 3000);
+            // this.object.visible = false;
+        }
 
         if (this.responseText.toLowerCase().includes("max")) {
             popup.innerHTML = "<br><br><h3>Sorry, you can't have any more of those!</h3>";

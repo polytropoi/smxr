@@ -1848,7 +1848,7 @@ app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
  
                     // console.log("addedObjects " + JSON.stringify(addedObjects)); 
                     if (inventory_items[i].objectID in addedObjects) {
-                    //    console.log("already stashed objectID " + inventory_items[i].objectID);
+                       console.log("already stashed objectID " + inventory_items[i].objectID);
                         // addedIt.push(addedObject);
                     } else {
                         console.log("looking up inventory item with objectID " + inventory_items[i].objectID);
@@ -1862,7 +1862,7 @@ app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
                     inventory_item.objectID = inventory_items[i].objectID;
                     inventory_item.timestamp = inventory_items[i].timestamp; //creation?
                     inventory_item.fromScene = inventory_items[i].fromScene; //short id
-                    inventory_item.objectData = addedObjects[inventory_items[i].objectID];
+                    inventory_item.objectData = structuredClone(addedObjects[inventory_items[i].objectID]);
                     inventoryItems.push(inventory_item);
 
                 }

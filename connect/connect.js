@@ -1511,7 +1511,7 @@ export function GoToPrevious() {
 export function ReturnLocationTable () { //just show em all now!
 
    let tablerows = "";
-   console.log("localData.locations " + JSON.stringify(localData.locations) );
+   // console.log("localData.locations " + JSON.stringify(localData.locations) );
    if (!localData.locations.length) {
      
       for (let i = 0; i < sceneLocations.locations.length; i++) {

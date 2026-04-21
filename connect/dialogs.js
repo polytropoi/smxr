@@ -13,14 +13,13 @@ import { room, lerp, sceneLocations, localData, ReturnLocationTable,
   CreateLocationAlt
   } from "./connect.js";
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "./indexedDb.js";
-// import shortid from "shortid";
 
 
 export let showDialogPanel = false;
 let dialogInitialized = false;
 
 export let userInventory = null;
-
+export let uniqueItems = [];
 let modalContentElID = 'modalContent';
 let theModal = null;
 let theRenderCanvas = null;
@@ -1978,10 +1977,75 @@ function ColorMods(event, value) {
     }
     // SaveLocalData();
  }
+
+export async function GetUserInventoryAsync () {
+  uniqueItems = [];
+  let inventoryDisplayEl = document.getElementById('inventory_display');
+  console.log("tryna get userinventory for " + userData.userID);
+  if (!userData.isGuest) {
+    console.log("getuserprofile " + userData.userID);
+    let responseString = "<button id=\x22dequipButton\x22 class=\x22uploadButton \x22 style=\x22float: right;\x22 >Dequip</button>Items in player inventory:<br><hr>";
+      //  (async () => { //hrm where to put this?
+        try {
+          
+          const response = await fetch('/user_inventory/' + userData.userID);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          let inventoryObjs = await response.json();
+                        //  let inventoryObjs = JSON.parse(this.responseText);
+          console.log("userinventory: " + JSON.stringify(inventoryObjs));
+          userInventory = inventoryObjs;
+          if (inventoryObjs != undefined) {
+
+            // let itemNames = {}
+            let itemCounts = {};
+            let itemNames = {};
+
+            for (let i = 0; i < inventoryObjs.inventoryItems.length; i++) {
+              if (inventoryObjs.inventoryItems[i].objectData) {
+                if (!uniqueItems.includes(inventoryObjs.inventoryItems[i].objectID)) {
+                  // if (!inventoryObjs.inventoryItems[i].objectData) {
+                  //   inventoryObjs.inventoryItems[i].objectData = returnObjectData(inventoryObjs.inventoryItems[i].objectID);
+                  // }
+                  uniqueItems.push(inventoryObjs.inventoryItems[i].objectID);
+                  itemCounts[inventoryObjs.inventoryItems[i].objectID] = 1;
+                  // console.log("inventoryObject " + JSON.stringify(inventoryObjs.inventoryItems[i].objectData.name));
+                  itemNames[inventoryObjs.inventoryItems[i].objectID] = inventoryObjs.inventoryItems[i].objectData.name;
+                } else {
+                  itemCounts[inventoryObjs.inventoryItems[i].objectID] = itemCounts[inventoryObjs.inventoryItems[i].objectID] + 1;
+                }
+                if ( i == inventoryObjs.inventoryItems.length - 1 ) {
+                  console.log("unique items in userinventory: " + JSON.stringify(uniqueItems) + " counts : " + JSON.stringify(itemCounts) + " names : " + JSON.stringify(itemNames));
+                  for (let u = 0; u < uniqueItems.length; u++) {
+                    let buttonNameString = itemNames[uniqueItems[u]] + " (" + itemCounts[uniqueItems[u]]+ ")";
+                    // console.log("buttonNameStirng: " + buttonNameString);
+                    responseString = responseString + "<button class=\x22btnInventory\x22 data-inventoryID=\x22"+uniqueItems[u]+"\x22 >"+buttonNameString+"</button>";
+                    if (inventoryDisplayEl) {
+                      inventoryDisplayEl.innerHTML = responseString;
+                      console.log("inventoryDisplay string " + responseString );
+                    }
+                  }
+                  //  console.log("UNIQUE USERINVENTORY ITEMS " + uniqueItems);
+                  //   return uniqueItems;
+                }
+              } else {
+                console.log("userInventory with no objectData! " + JSON.stringify(inventoryObjs.inventoryItems[i]));
+              }
+            }
+          }
+         
+        } catch(error) {
+            console.log(error);
+        } 
+    // })();  
+  }
+}
 export function GetUserInventory () {
   // let data = {};
   // data.fromScene = room;
   // data.userData = userData;
+  let uniqueItems = [];
   let inventoryDisplayEl = document.getElementById('inventory_display');
   if (!userData.isGuest) {
     console.log("getuserprofile " + userData.userID);
@@ -1998,7 +2062,7 @@ export function GetUserInventory () {
         // console.log("inventory: " +inventoryObj.inventoryItems[0].objectName);
         userInventory = inventoryObjs;
         if (inventoryObjs != undefined) {
-          let uniqueItems = [];
+
           // let itemNames = {}
           let itemCounts = {};
           let itemNames = {};
@@ -2012,7 +2076,7 @@ export function GetUserInventory () {
               itemCounts[inventoryObjs.inventoryItems[i].objectID] = itemCounts[inventoryObjs.inventoryItems[i].objectID] + 1;
             }
             if ( i == inventoryObjs.inventoryItems.length - 1 ) {
-              console.log("unique items in player inventory: " + JSON.stringify(uniqueItems) + " counts : " + JSON.stringify(itemCounts) + " names : " + JSON.stringify(itemNames));
+              console.log("unique items in userinventory: " + JSON.stringify(uniqueItems) + " counts : " + JSON.stringify(itemCounts) + " names : " + JSON.stringify(itemNames));
               for (let u = 0; u < uniqueItems.length; u++) {
                 let buttonNameString = itemNames[uniqueItems[u]] + " (" + itemCounts[uniqueItems[u]]+ ")";
                 // console.log("buttonNameStirng: " + buttonNameString);
@@ -2021,7 +2085,7 @@ export function GetUserInventory () {
                   inventoryDisplayEl.innerHTML = response;
                 }
               }
-              
+
             }
 
             
@@ -2040,8 +2104,9 @@ export function GetUserInventory () {
   } else {
     inventoryDisplayEl.innerHTML = "You must be <a href=\x22../main/login.html\x22>logged in</a> to access your inventory <button id=\x22dequipButton\x22 class=\x22uploadButton \x22 style=\x22float: right;\x22>Dequip</button>";
   }
-  DisplayLocalFiles();
   
+  DisplayLocalFiles();
+
 }
 
 export function DropInventoryItem(objectID) {
@@ -2655,7 +2720,7 @@ export function SceneManglerModal(mode, autoHide) {
                 //     tagnameEl.style.display = "block";
                 // }
             }
-            GetUserInventory();
+            GetUserInventoryAsync();
             DisplayLocalFiles();
             InitLocalFiles();
           }
