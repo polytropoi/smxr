@@ -88,6 +88,7 @@ let validTarget = false;
 let controlObject;
 let lastPosition = new THREE.Vector3();
 
+export const popup = document.getElementById("popup");
 export const viewportPlaceholder = new THREE.Object3D();
 
     // $('#popup').on('click', '#popup_yesButton', function(e) {
@@ -1150,7 +1151,7 @@ export function onMouseDown(event) { //clicked on threejs object
 
     mouseDownStarttime = Date.now() / 1000;    
    
-    const popup = document.getElementById("popup");
+
     if (event.target.id == "popup_yesButton") {
       ActionSwitch(event);
       popup.style.display = "none";
@@ -1399,19 +1400,32 @@ export function onMouseDown(event) { //clicked on threejs object
 
 export function ShowPopup (event) { //hrm move to UI
     const popup = document.getElementById("popup");
-    // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
-    let xpos = event.clientX - 150;
-    if ((window.innerWidth - event.clientX) < 150) {
-        xpos = event.clientX - 300;
-    } else if (event.clientX < 150) {
-        xpos = 0;
+
+    if (!event) {
+        let xpos = window.innerWidth / 2;
+        let ypos = window.innerHeight / 2;
+        Object.assign(popup.style, {
+            left: `${xpos}px`,
+            top: `${ypos}px`,
+            display: 'block',
+        });
+    } else {
+        // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
+        let xpos = event.clientX - 150;
+        if ((window.innerWidth - event.clientX) < 150) {
+            xpos = event.clientX - 300;
+        } else if (event.clientX < 150) {
+            xpos = 0;
+        }
+        let ypos = event.clientY - 100;
+         Object.assign(popup.style, {
+            left: `${xpos}px`,
+            top: `${ypos}px`,
+            display: 'block',
+        });
     }
-    let ypos = event.clientY - 100;
-    Object.assign(popup.style, {
-        left: `${xpos}px`,
-        top: `${ypos}px`,
-        display: 'block',
-    });
+    
+
 }
 
 export function onMouseUp(e) {

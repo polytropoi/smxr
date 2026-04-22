@@ -300,26 +300,37 @@ export class SceneObject { //things that might have models and actions and fancy
             console.log(JSON.stringify(this.pickupAction));
             let data = {};
             data.sceneID = settings._id;
-            // data.fromSceneInventory = this.data.fromSceneInventory;
-            // data.timestamp = this.data.timestamp;
-            // data.fromScene = room;
             data.object_item = this.objectData;
-            // data.userData = userData;
             data.action = this.pickupAction;
-
-                //  let data = {};
-                      data.sceneID = settings._id;
-                      data.fromSceneInventory = this.fromSceneInventory;
-                      data.timestamp = this.timestamp;
-                      data.fromScene = room;
-                      data.object_item = this.objectData;
-                      data.userData = userData;
-                      data.action = this.pickupAction;
+            data.sceneID = settings._id;
+            data.fromSceneInventory = this.fromSceneInventory;
+            data.timestamp = this.timestamp;
+            data.fromScene = room;
+            data.object_item = this.objectData;
+            data.userData = userData;
+            data.action = this.pickupAction;
             console.log("pickupaction " + JSON.stringify(data));
     
             //   Pickup(data, this.el.id);
             
             this.pickupObject(data, this.object);
+        } else if (type == "equip" && this.hasEquipAction) {
+          let data = {};
+            data.sceneID = settings._id;
+            data.object_item = this.objectData;
+            data.action = this.pickupAction;
+            data.sceneID = settings._id;
+            data.fromSceneInventory = this.fromSceneInventory;
+            data.timestamp = this.timestamp;
+            data.fromScene = room;
+            data.object_item = this.objectData;
+            data.userData = userData;
+            data.action = this.pickupAction;
+            console.log("pickupaction " + JSON.stringify(data));
+    
+            //   Pickup(data, this.el.id);
+            
+            this.equipObject(data, this.object);
         }
     }
     throwObject() {
@@ -340,7 +351,7 @@ export class SceneObject { //things that might have models and actions and fancy
         // dynamicBodies.push(rbody);
         // rbody.AddForce();
     }
-    removeFromInventory (data, waitTime) { //i.e. destroy
+    removeFromInventory (data, waitTime) { //i.e. destroy, consume
 
         var xhr = new XMLHttpRequest();
         xhr.open("POST", '/remove_from_user_inventory/', true);
@@ -392,7 +403,7 @@ export class SceneObject { //things that might have models and actions and fancy
                 // if (this.dialogEl != null) {
                 //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop that here.");
                 // }
-            } else if (this.responseText.toLowerCase().includes('maxxed')) {
+            } else if (this.responseText.toLowerCase().includes('maxed')) {
                 // this.dialogEl = document.getElementById('mod_dialog');
                 // if (this.dialogEl != null) {
                 //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop any more of those here.");
@@ -400,6 +411,11 @@ export class SceneObject { //things that might have models and actions and fancy
             } 
         };
     }
+
+    equipObject (data) { //transfer from user to scene inventory
+       
+    }
+
     // hide
     pickupObject (data, thisObject) { //i.e. collect, put into user inventory
         // console.log("tryna pickup " + JSON.stringify(data) + " this.objectData " + JSON.stringify(this.object));
@@ -424,13 +440,6 @@ export class SceneObject { //things that might have models and actions and fancy
             // // scene.remove(mesh);
             // thisObject.geometry.dispose();
             // thisObject.material.dispose();
-
-                    // thisObject.traverse(function (child) { 
-                    //     if (child.isMesh) {
-                    //         child.parent.remove(child);
-                    //         // child.bindMode = "detached";
-                    //     }
-                    // });
 
         }
 

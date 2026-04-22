@@ -5,9 +5,9 @@ import { userInventory, ShowHideDialogPanel, GetUserInventoryAsync, uniqueItemsÂ
 
 import { eventEl } from '../../../connect/events.js';
 
-import { ReturnObjectData, SceneObject } from './three_actions.js';
+import { ReturnObjectData, SceneObject, lastEvent} from './three_actions.js';
 
-import { viewportPlaceholder } from './three_controls.js';
+import { viewportPlaceholder, popup, ShowPopup } from './three_controls.js';
 
 import { AddDynamicBody, SetEquippedRigidbody } from './three_physics.js';
 
@@ -56,7 +56,7 @@ eventEl.addEventListener('drop-inventory-object-event', DropInventoryCheck);
 
 
 
-function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js
+function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js - TODO flex if from scene or scene inventory
 
     const objectData = ReturnObjectData(event.details.objectID);
     console.log("equip event for object " + JSON.stringify(objectData));
@@ -65,10 +65,12 @@ function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js
         if (objectData.actions != undefined && objectData.actions.length > 0) {
         for (let i = 0; i < objectData.actions.length; i++) {
         
-        if (objectData.actions[i].actionType.toLowerCase().includes("equip")) {
+        if (objectData.actions[i].actionType.toLowerCase().includes("equip")) { // fromSceneInventory, fromUserInventory?
+
             console.log("ACTION " + JSON.stringify(objectData.actions[i]));
         //   action = objectData.actions[i];
             // console.log(JSON.stringify(action));
+            
             for (let i = 0; i < userInventory.inventoryItems.length; i++) {
                 if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
                     // inventoryObj = userInventory[i];
@@ -119,8 +121,6 @@ async function EquipInventoryObject (objectData) {
           
             FetchSceneInventoryObject(objectID, true, tags, eventData);
         }
-        // this.el.setAttribute('gltf-model', '#' + modelID.toString());
-
     }
 
 
@@ -162,21 +162,21 @@ async function DropInventoryObject (objectData, action, inventoryID) {
 
         if (objectData) {        
             objectData.isEquipped = false;
-                let data = {};
-                data.inScene = room;
-                // data.inScene
-                // data.inventoryID = inventoryID;
-                data.userData = userData;
-                // data.object_item = this.data.objectData;
-                // data.userData = userData;
-                data.action = action;
-                
-                data.inventoryObj = objectData;
-                data.inventoryObj.objectID = objectData._id;
-                data.inventoryObj._id = inventoryID;
-                    const worldPosition = new THREE.Vector3();
-                    viewportPlaceholder.getWorldPosition(worldPosition);
-                    data.inventoryObj.location = worldPosition;
+            let data = {};
+            data.inScene = room;
+            // data.inScene
+            // data.inventoryID = inventoryID;
+            data.userData = userData;
+            // data.object_item = this.data.objectData;
+            // data.userData = userData;
+            data.action = action;
+            
+            data.inventoryObj = objectData;
+            data.inventoryObj.objectID = objectData._id;
+            data.inventoryObj._id = inventoryID;
+            const worldPosition = new THREE.Vector3();
+            viewportPlaceholder.getWorldPosition(worldPosition);
+            data.inventoryObj.location = worldPosition;
             // console.log("tryna drop object " + JSO>objectData);  
             var xhr = new XMLHttpRequest();
             xhr.open("POST", '/drop/', true);
@@ -191,11 +191,22 @@ async function DropInventoryObject (objectData, action, inventoryID) {
                     LoadAndDropSingleObject(objectData, worldPosition);
                 
                 } else if (this.responseText.toLowerCase().includes('no drop')) {
+
+                    popup.innerHTML = "<br><br><h3>Sorry, you can't drop that here!</h3>";
+                    ShowPopup();
+                    setTimeout(() => {
+                        popup.style.display = "none";
+                    }, 3000);
                 //   this.dialogEl = document.getElementById('mod_dialog');
                 //   if (this.dialogEl != null) {
                 //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop that here.");
                 //   }
-                } else if (this.responseText.toLowerCase().includes('maxxed')) {
+                } else if (this.responseText.toLowerCase().includes('maxed')) {
+                    popup.innerHTML = "<br><br><h3>Sorry, no more of these can be here!</h3>";
+                    ShowPopup();
+                    setTimeout(() => {
+                        popup.style.display = "none";
+                    }, 3000);
                 //   this.dialogEl = document.getElementById('mod_dialog');
                 //   if (this.dialogEl != null) {
                 //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop any more of those here.");

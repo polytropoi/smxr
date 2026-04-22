@@ -285,17 +285,20 @@
 
 		if (settings && settings.sceneTags) {
 			// if (settings.sceneTags.includes("debug")) {
-			// stats.showPanel( 0,1,2,3 );
+			// 
 					stats = new Stats();
-					const statsContainer = document.createElement('div');
-					statsContainer.id = 'stats-container';
-					document.body.appendChild(statsContainer);
-					statsContainer.appendChild(stats.dom);
-
+					stats.showPanel( 0,1,2,3 );
+					// const statsContainer = document.createElement('div');
+					// statsContainer.id = 'stats-container';
+					// document.body.appendChild(statsContainer);
+					document.body.appendChild( stats.dom );
+					stats.dom.style.position = 'absolute';
+					stats.dom.style.bottom = '20px';
+					stats.dom.style.right = 'auto';
 			// document.body.appendChild(stats.domElement);
 			// stats.domElement.style.right = 'auto';
-			// stats.domElement.style.left = '0px'; // Positioned at top-right
-			// stats.domElement.style.bottom = '20px';
+			// statsContainer.domElement.style.left = '0px'; // Positioned at top-right
+			// statsContainer.domElement.style.bottom = '20px';
 
 			// }
 			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {

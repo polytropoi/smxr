@@ -1848,7 +1848,7 @@ app.get('/user_inventory/:_id', requiredAuthentication, function(req, res){
  
                     // console.log("addedObjects " + JSON.stringify(addedObjects)); 
                     if (inventory_items[i].objectID in addedObjects) {
-                       console.log("already stashed objectID " + inventory_items[i].objectID);
+                    //    console.log("already stashed objectID " + inventory_items[i].objectID);
                         // addedIt.push(addedObject);
                     } else {
                         console.log("looking up inventory item with objectID " + inventory_items[i].objectID);
