@@ -1197,7 +1197,7 @@ function ReturnMediaSelections (mediaID, mtype) {
   }
 }
 
-function ReturnSceneEnviromentPreset (selected) {
+function ReturnSceneEnviromentPreset (selected) { //aframe only fn
 
   // if (!selected) {
   //   selected = 'none';
@@ -1216,7 +1216,7 @@ function ReturnSceneEnviromentPreset (selected) {
   }
   return types;
 }
-function ReturnLocationMarkerTypeSelect (selected) {
+function ReturnLocationMarkerTypeSelect (selected) { //should match those in the index.js. but don't
 
     let types = "";
     const typesArray = [
@@ -1981,9 +1981,9 @@ function ColorMods(event, value) {
 export async function GetUserInventoryAsync () {
   uniqueItems = [];
   let inventoryDisplayEl = document.getElementById('inventory_display');
-  console.log("tryna get userinventory for " + userData.userID);
+  console.log("tryna get userinventory");
   if (!userData.isGuest) {
-    console.log("getuserprofile " + userData.userID);
+    // console.log("getuserprofile " + userData.userID);
     let responseString = "<button id=\x22dequipButton\x22 class=\x22uploadButton \x22 style=\x22float: right;\x22 >Dequip</button>Items in player inventory:<br><hr>";
       //  (async () => { //hrm where to put this?
         try {
@@ -1994,7 +1994,7 @@ export async function GetUserInventoryAsync () {
           }
           let inventoryObjs = await response.json();
                         //  let inventoryObjs = JSON.parse(this.responseText);
-          console.log("userinventory: " + JSON.stringify(inventoryObjs));
+          // console.log("userinventory: " + JSON.stringify(inventoryObjs));
           userInventory = inventoryObjs;
           if (inventoryObjs != undefined) {
 
@@ -2015,29 +2015,42 @@ export async function GetUserInventoryAsync () {
                 } else {
                   itemCounts[inventoryObjs.inventoryItems[i].objectID] = itemCounts[inventoryObjs.inventoryItems[i].objectID] + 1;
                 }
-                if ( i == inventoryObjs.inventoryItems.length - 1 ) {
+                // if ( i == inventoryObjs.inventoryItems.length - 1 ) {
+                //   console.log("unique items in userinventory: " + JSON.stringify(uniqueItems) + " counts : " + JSON.stringify(itemCounts) + " names : " + JSON.stringify(itemNames));
+                //   for (let u = 0; u < uniqueItems.length; u++) {
+                //     let buttonNameString = itemNames[uniqueItems[u]] + " (" + itemCounts[uniqueItems[u]]+ ")";
+                //     // console.log("buttonNameStirng: " + buttonNameString);
+                //     responseString = responseString + "<button class=\x22btnInventory\x22 data-inventoryID=\x22"+uniqueItems[u]+"\x22 >"+buttonNameString+"</button>";
+                    
+                //   }
+                //   //  console.log("UNIQUE USERINVENTORY ITEMS " + uniqueItems);
+                //   //   return uniqueItems;
+                // }
+              } else {
+                console.log("userInventory with no objectData! " + JSON.stringify(inventoryObjs.inventoryItems[i]));
+              }
+              if ( i == inventoryObjs.inventoryItems.length - 1 ) {
                   console.log("unique items in userinventory: " + JSON.stringify(uniqueItems) + " counts : " + JSON.stringify(itemCounts) + " names : " + JSON.stringify(itemNames));
                   for (let u = 0; u < uniqueItems.length; u++) {
                     let buttonNameString = itemNames[uniqueItems[u]] + " (" + itemCounts[uniqueItems[u]]+ ")";
                     // console.log("buttonNameStirng: " + buttonNameString);
                     responseString = responseString + "<button class=\x22btnInventory\x22 data-inventoryID=\x22"+uniqueItems[u]+"\x22 >"+buttonNameString+"</button>";
-                    if (inventoryDisplayEl) {
-                      inventoryDisplayEl.innerHTML = responseString;
-                      console.log("inventoryDisplay string " + responseString );
-                    }
+                    
                   }
                   //  console.log("UNIQUE USERINVENTORY ITEMS " + uniqueItems);
                   //   return uniqueItems;
-                }
-              } else {
-                console.log("userInventory with no objectData! " + JSON.stringify(inventoryObjs.inventoryItems[i]));
               }
             }
           }
          
         } catch(error) {
             console.log(error);
-        } 
+        } finally {
+            if (inventoryDisplayEl) {
+              inventoryDisplayEl.innerHTML = responseString;
+              console.log("inventoryDisplay string " + responseString );
+            }
+        }
     // })();  
   }
 }

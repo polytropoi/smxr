@@ -529,13 +529,13 @@
                 // if (this.pathLines) scene.remove(this.pathLines);
 
             }
-            const raypos = this.raycastedPosition(); //try to snap to navmesh
-            if (raypos && raypos.y) {
-                // if ((raypos.y - player.position.y) > .3) {
-                console.log("tryna snap to raypos.y " + raypos.y);
-                player.position.y = raypos.y;
-                // }
-            }
+            // const raypos = this.raycastedPosition(); //try to snap to navmesh
+            // if (raypos && raypos.y) {
+            //     // if ((raypos.y - player.position.y) > .3) {
+            //     console.log("tryna snap to raypos.y " + raypos.y);
+            //     player.position.y = raypos.y;
+            //     // }
+            // }
         }
         agentPause () {
            
@@ -790,11 +790,20 @@
                 this.object.position.y = raypos.y;
             }
         }
+        snapToGround () {
+            if (Math.random() > .75) {
+                let raypos;
+                raypos = this.raycastedPosition(); //expensive, so throttle...
+                if (raypos && raypos.y) {
+                    this.object.position.y = raypos.y;
+                }
+            }
+        }
         
         update(dt, currentTime){ //move it!
             const speed = this.speed;
             const player = this.object; //um, not necessarily...
-            let raypos;
+
 
             // console.log(currentTime + " " + lastTime + " " + throttleInterval);
             if (this.hasAnims) {
@@ -816,6 +825,7 @@
                         //         // }
                         //     }
                         // }
+                        // this.snapToGround
                     }
                     this.targetPosition = this.calculatedPath[0];
 
@@ -852,18 +862,19 @@
                         const newDistanceSq = player.position.distanceToSquared(this.targetPosition);
                         //  console.log(newDistanceSq + " vs " + prevDistanceSq );
                         pathLegComplete = (newDistanceSq > prevDistanceSq);
+                        this.snapToGround();
 
                     } 
                     
                     if (pathLegComplete){
                         // Remove node from the path we calculated
                         // console.log("pathLegComplete paths " + this.calculatedPath.length);
-                         raypos = this.raycastedPosition(); //expensive, so throttle...
-                            if (raypos && raypos.y) {
+                        //  raypos = this.raycastedPosition(); //expensive, so throttle...
+                        //     if (raypos && raypos.y) {
                                
-                                player.position.y = raypos.y;
+                        //         player.position.y = raypos.y;
                                 
-                            }
+                        //     }
                         this.calculatedPath.shift();
                         if (this.calculatedPath.length==0){
                             
@@ -874,10 +885,11 @@
                             //         player.position.y = raypos.y;
                                    
                             //     }
-                                
+                                this.snapToGround();
                         }else{
                             
                             this.setTargetDirection(); 
+                            this.snapToGround();
 
                            
                         }
@@ -887,14 +899,14 @@
                     // this.action = this.idleAnims[randomIndex];
                 } else{
                     // if (this.npc && !agentClick) this.newPath(randomNavmeshPoint());
-
+                    this.snapToGround();
                     this.newPath(randomNavmeshPoint());
-                    raypos = this.raycastedPosition(); //expensive, so throttle...
-                    if (raypos && raypos.y) {
+                    // raypos = this.raycastedPosition(); //expensive, so throttle...
+                    // if (raypos && raypos.y) {
                       
-                        player.position.y = raypos.y;
+                    //     player.position.y = raypos.y;
                         
-                    }
+                    // }
                 }
             } else {
                 this.targetPosition = null;

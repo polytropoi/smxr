@@ -2014,11 +2014,11 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                             console.log("MAXED - userCurrentCount: " + inventory_items.length + " maxPerUser: " + req.body.object_item.maxPerUser);
                             res.send("user is maxed on this item!");
                         } else {
-                            console.log("tryna lookup scene inventory " + req.body.fromSceneInventory + " sceneID " + req.body.sceneID + " obhjectID " + req.body.object_item._id); //this is sceneID now
+                            console.log("tryna lookup scene inventory with max " + req.body.fromSceneInventory + " sceneID " + req.body.sceneID + " obhjectID " + req.body.object_item._id); //this is sceneID now
                             const iquery = {$and: [{"sceneID" : ObjectId.createFromHexString(req.body.sceneID), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]};
                             // const inventory = await RunDataQuery("inventory_items", "findOne", iquery);
                             // sceneInventoryID = inventory._id;
-                            const updoc = {$unset: {sceneID: ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData.userID)}};
+                            const updoc = {$unset: {"sceneID": ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData.userID)}};
                             const updated = await RunDataQuery("inventory_items", "updateOne", iquery, updoc);
                             console.log("updated an inv item ! " + JSON.stringify(updated));
                             const asaved = await RunDataQuery("activities", "insertOne", actionItem);
@@ -2035,7 +2035,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                         const iquery = {$and: [{"sceneID" : ObjectId.createFromHexString(req.body.sceneID), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]};
                         // const inventory = await RunDataQuery("inventory_items", "findOne", iquery);
                         // sceneInventoryID = inventory._id;
-                        const updoc = {$unset: {sceneID: ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData.userID)}};
+                        const updoc = {$unset: {"sceneID": ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData.userID)}};
                         const updated = await RunDataQuery("inventory_items", "updateOne", iquery, updoc);
                         console.log("updated an inv item ! " + JSON.stringify(updated));
                         const asaved = await RunDataQuery("activities", "insertOne", actionItem);
@@ -2052,7 +2052,7 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
                     const iquery = {$and: [{"sceneID" : ObjectId.createFromHexString(req.body.sceneID), "objectID": ObjectId.createFromHexString(req.body.object_item._id)}]};
                     // const inventory = await RunDataQuery("inventory_items", "findOne", iquery);
                     // sceneInventoryID = inventory._id;
-                    const updoc = {$unset: {sceneID: ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData.userID)}};
+                    const updoc = {$unset: {"sceneID": ""}, $set: {"userID" : ObjectId.createFromHexString(req.body.userData.userID)}};
                     const updated = await RunDataQuery("inventory_items", "updateOne", iquery, updoc);
                     console.log("updated an inv item ! " + JSON.stringify(updated));
                     const asaved = await RunDataQuery("activities", "insertOne", actionItem);

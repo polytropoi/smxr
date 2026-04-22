@@ -296,7 +296,7 @@ async function DropInventoryObject (objectData, action, inventoryID) {
             // do something to response
             // console.log("fetched obj resp: " +this.responseText);
             let response = JSON.parse(this.responseText);
-            console.log("gotsome objex: " + JSON.stringify(response.objex));
+            // console.log("gotsome objex: " + JSON.stringify(response.objex));
             if (response.objex.length > 0) {
                 for (let i = 0; i < response.objex.length; i++) {
                     // console.log("pushing userInventory object " + JSON.stringify(response.objex[i]));

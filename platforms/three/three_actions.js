@@ -80,7 +80,7 @@ export class SceneObject { //things that might have models and actions and fancy
         // console.log("new sceneObject " + this.objectData.sceneObjectID);
 
         this.isEquipped = false;
-        this.fromSceneInventory = false;
+        this.fromSceneInventory = objectData.fromSceneInventory;
         // this.loadAction;
         // this.hasSelectAction = false;
         // this.selectAction;
@@ -309,7 +309,7 @@ export class SceneObject { //things that might have models and actions and fancy
 
                 //  let data = {};
                       data.sceneID = settings._id;
-                      data.fromSceneInventory = false;
+                      data.fromSceneInventory = this.fromSceneInventory;
                       data.timestamp = this.timestamp;
                       data.fromScene = room;
                       data.object_item = this.objectData;
@@ -319,7 +319,7 @@ export class SceneObject { //things that might have models and actions and fancy
     
             //   Pickup(data, this.el.id);
             
-            this.pickupObject(data);
+            this.pickupObject(data, this.object);
         }
     }
     throwObject() {
@@ -350,19 +350,19 @@ export class SceneObject { //things that might have models and actions and fancy
             // do something to response
             console.log(this.responseText);
             if (this.responseText.toLowerCase().includes('updated')) {
-            let objexEl = document.getElementById('sceneObjects');    
-            objexEl.components.mod_objex.dropObject(data.inventoryObj.objectID);
+            // let objexEl = document.getElementById('sceneObjects');    
+            // objexEl.components.mod_objex.dropObject(data.inventoryObj.objectID);
             
             } else if (this.responseText.toLowerCase().includes('no drop')) {
-            this.dialogEl = document.getElementById('mod_dialog');
-            if (this.dialogEl != null) {
-                this.dialogEl.components.mod_dialog.confirmResponse("You can't drop that here.");
-            }
+            // this.dialogEl = document.getElementById('mod_dialog');
+            // if (this.dialogEl != null) {
+            //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop that here.");
+            // }
             } else if (this.responseText.toLowerCase().includes('maxxed')) {
-            this.dialogEl = document.getElementById('mod_dialog');
-            if (this.dialogEl != null) {
-                this.dialogEl.components.mod_dialog.confirmResponse("You can't drop any more of those here.");
-            }
+            // this.dialogEl = document.getElementById('mod_dialog');
+            // if (this.dialogEl != null) {
+            //     this.dialogEl.components.mod_dialog.confirmResponse("You can't drop any more of those here.");
+            // }
             } 
         };
 
@@ -401,8 +401,8 @@ export class SceneObject { //things that might have models and actions and fancy
         };
     }
     // hide
-    pickupObject (data, id) { //i.e. collect, put into user inventory
-        console.log("tryna act on " + id);
+    pickupObject (data, thisObject) { //i.e. collect, put into user inventory
+        // console.log("tryna pickup " + JSON.stringify(data) + " this.objectData " + JSON.stringify(this.object));
         // let objEl = document.getElementById(id);
         // if (objEl != null) {
         var xhr = new XMLHttpRequest();
@@ -420,6 +420,18 @@ export class SceneObject { //things that might have models and actions and fancy
                 popup.style.display = "none";
             }, 3000);
             // this.object.visible = false;
+            thisObject.parent.remove(thisObject);
+            // // scene.remove(mesh);
+            // thisObject.geometry.dispose();
+            // thisObject.material.dispose();
+
+                    // thisObject.traverse(function (child) { 
+                    //     if (child.isMesh) {
+                    //         child.parent.remove(child);
+                    //         // child.bindMode = "detached";
+                    //     }
+                    // });
+
         }
 
         if (this.responseText.toLowerCase().includes("max")) {
