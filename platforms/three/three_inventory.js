@@ -56,39 +56,51 @@ eventEl.addEventListener('drop-inventory-object-event', DropInventoryCheck);
 
 
 
-function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js - TODO flex if from scene or scene inventory
+function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js - TODO flex if from scene or scene inventory -- no, this only for userinventory
 
     const objectData = ReturnObjectData(event.details.objectID);
     console.log("equip event for object " + JSON.stringify(objectData));
 
     if (objectData) {
         if (objectData.actions != undefined && objectData.actions.length > 0) {
-        for (let i = 0; i < objectData.actions.length; i++) {
-        
-        if (objectData.actions[i].actionType.toLowerCase().includes("equip")) { // fromSceneInventory, fromUserInventory?
+            for (let i = 0; i < objectData.actions.length; i++) {
+                if (objectData.actions[i].actionType.toLowerCase().includes("equip")) { // fromSceneInventory, fromUserInventory?
 
-            console.log("ACTION " + JSON.stringify(objectData.actions[i]));
-        //   action = objectData.actions[i];
-            // console.log(JSON.stringify(action));
-            
-            for (let i = 0; i < userInventory.inventoryItems.length; i++) {
-                if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
-                    // inventoryObj = userInventory[i];
-                    EquipInventoryObject(objectData);
-                    ShowHideDialogPanel();
-                    break;
-                    }
-                }
-                break;
-                } 
+                console.log("gots equip ACTION " + objectData.actions[i].actionName);
+            //   action = objectData.actions[i];
+                // console.log(JSON.stringify(action));
+                // if (objectData.fromUserInventory) {
+                    for (let i = 0; i < userInventory.inventoryItems.length; i++) {
+                        if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
+                            // inventoryObj = userInventory[i];
+                            EquipObject(objectData);
+                            ShowHideDialogPanel();
+                            break;
+                            }
+                        }
+                            
+                // } 
+                // else if (objectData.fromSceneInventory) {
+                //                 for (let i = 0; i < sceneInventory.inventoryItems.length; i++) {
+                //         if (sceneInventory.inventoryItems[i].objectID == event.details.objectID) {
+                //             // inventoryObj = userInventory[i];
+                //             EquipInventoryObject(objectData);
+                //             // ShowHideDialogPanel();
+                //             break;
+                //             }
+                //         }
+                // } else {
+                //     EquipInventoryObject(objectData);
+                // }
             }
-        }
+        } 
+    }
     } else {
         console.log("cain't equip that!");
     }
 }
 
-async function EquipInventoryObject (objectData) { 
+export async function EquipObject (objectData) { 
 
         // console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
         
@@ -123,6 +135,9 @@ async function EquipInventoryObject (objectData) {
         }
     }
 
+function RemoveFromSceneInventory (sceneObjectID) {
+
+}
 
 function DropInventoryCheck(event) { //equip button in modal, from dialogs.js
 
@@ -218,9 +233,9 @@ async function DropInventoryObject (objectData, action, inventoryID) {
 
   
   function FetchSceneInventoryObject(oID, equip, tags, eventData) { //add a single scene inventory object, e.g. child object spawn that isn't in initial collection, but don't init everything
-    let objexEl = document.getElementById('sceneObjects');   
+    // let objexEl = document.getElementById('sceneObjects');   
 
-    if (objexEl && !objexEl.components.mod_objex.returnObjectExists(oID)) {
+    // if (objexEl && !objexEl.components.mod_objex.returnObjectExists(oID)) {
  
     // if (oIDs.length > 0) {
       // objexEl.components.mod_objex.dropObject(data.inventoryObj.objectID);
@@ -243,9 +258,9 @@ async function DropInventoryObject (objectData, action, inventoryID) {
         }
        
       }
-    } else {
-      console.log("already have that object...");
-    }
+    // } else {
+    //   console.log("already have that object...");
+    // }
   }
   
   function AddUserInventoryObjects (items) {
@@ -339,7 +354,7 @@ async function DropInventoryObject (objectData, action, inventoryID) {
             // do something to response
             // console.log("fetched obj resp: " +this.responseText);
             let response = JSON.parse(this.responseText);
-            // console.log("gotsome objex: " + response.objex.length);
+            console.log("gotsome sceneInventory objex: " + response.objex.length);
             if (response.objex.length > 0) {
     
                 for (let s = 0; s < sceneInventory.length; s++) {
@@ -347,14 +362,16 @@ async function DropInventoryObject (objectData, action, inventoryID) {
                         console.log(sceneInventory[s].objectID +" VS " + response.objex[i]._id);
                         if (sceneInventory[s].objectID == response.objex[i]._id) {
 
-                        // objexEl.components.mod_objex.addFetchedObject(response.objex[i]); //add to scene object collection, so don't have to fetch again
-                        //use locs and instantiate!
-                        // console.log(i + " vs " + response.objex.length - 1);
-                        console.log("scene inventory object " + JSON.stringify(response.objex[i]));
-                        // locationObjex.push(response.objex[i]);
-                        response.objex[i].fromSceneInventory = true;
-                        
-                        LoadAndDropSingleObject(response.objex[i], sceneInventory[s].location);
+                            
+                            // objexEl.components.mod_objex.addFetchedObject(response.objex[i]); //add to scene object collection, so don't have to fetch again
+                            //use locs and instantiate!
+                            // console.log(i + " vs " + response.objex.length - 1);
+                            
+                            // locationObjex.push(response.objex[i]);
+                            response.objex[i].fromSceneInventory = true;
+                            response.objex[i].sceneInventoryID = sceneInventory[s]._id;
+                            console.log("scene inventory object " + response.objex[i].name + " inventoryID " + response.objex[i].sceneInventoryID);
+                            LoadAndDropSingleObject(response.objex[i], sceneInventory[s].location);
                         
                         }
                     }

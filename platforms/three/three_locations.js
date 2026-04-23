@@ -264,7 +264,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     } else {
                         clonedModel = model.clone();
                     }
-                    const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + z.toString();
+                    const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Math.floor(Date.now()/1000);
                     locationObjex[i].objectData.sceneObjectID = sceneObjectID;
                     clonedModel.name = sceneObjectID;
                     
@@ -338,7 +338,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         //     }
                         // } else {
                         const clonedObject = model.clone();
-                        const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + zm;
+                        const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Math.floor(Date.now()/1000);
                         locationObjex[i].objectData.sceneObjectID = sceneObjectID;
 
                         const randomPoint = randomNavmeshPoint();
@@ -365,7 +365,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                 } else {
                     // const clonedObject = model.clone();
 
-                    const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + 1;
+                    const sceneObjectID = locationObjex[i].locationData.timestamp;
                     locationObjex[i].objectData.sceneObjectID = sceneObjectID;
                     model.scale.set(locationObjex[i].locationData.xscale,locationObjex[i].locationData.yscale,locationObjex[i].locationData.zscale);
                     model.position.set(locationObjex[i].locationData.x,locationObjex[i].locationData.y,locationObjex[i].locationData.z);
@@ -392,10 +392,10 @@ export async function LoadLocationObjex() { // wait to load these, might need na
 export async function LoadAndDropSingleObject (oData, locationData) { //eg drop
 
     try {
-    const sceneObjectID = oData._id + "_so_" + 1;
+    const sceneObjectID = oData._id + "_so_" +  Math.floor(Date.now()/1000);
     // objectData.sceneObjectID = sceneObjectID;
 
-    console.log("tryna drop object " + JSON.stringify(oData));
+    console.log("tryna LoadAndDropSingleObject " + oData.name);
     let matchedObject = oData;
      
 

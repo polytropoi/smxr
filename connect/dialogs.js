@@ -1612,7 +1612,7 @@ function ReturnAudioVizModeSelectors (selectedType) {
 
       })
       .finally(() => {
-        console.log("returning mediaDevices " + audioInputDevices);
+        // console.log("returning mediaDevices " + audioInputDevices);
         // const mediaDeviceSeletor = 
         const audioSelector = document.getElementById("audioInputDeviceSelector");
         const cameraSelector = document.getElementById("cameraInputDeviceSelector");
@@ -2048,7 +2048,7 @@ export async function GetUserInventoryAsync () {
         } finally {
             if (inventoryDisplayEl) {
               inventoryDisplayEl.innerHTML = responseString;
-              console.log("inventoryDisplay string " + responseString );
+              // console.log("inventoryDisplay string " + responseString );
             }
         }
     // })();  

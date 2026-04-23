@@ -9,6 +9,7 @@ import { scene } from './three_main.mjs';
 import { settings } from '../../../connect/settings.js';
 import { userData, room } from '../../../connect/connect.js';
 import { locationObjex } from './three_locations.js';
+import { EquipObject } from './three_inventory.js';
 
 import { AddDynamicBody, getPlayerBody, kinematicBodies } from './three_physics.js';
 // import { equippedRigidbody } from './three_physics.js';
@@ -76,11 +77,14 @@ export class SceneObject { //things that might have models and actions and fancy
 
         this.object = object;
         this.objectData = objectData;
+        this.sceneObjectID = objectData.sceneObjectID;
+        this.sceneInventoryID = objectData.sceneInventoryID;
         this.object.userData.sceneObjectInstance = this;
         // console.log("new sceneObject " + this.objectData.sceneObjectID);
 
         this.isEquipped = false;
         this.fromSceneInventory = objectData.fromSceneInventory;
+
         // this.loadAction;
         // this.hasSelectAction = false;
         // this.selectAction;
@@ -225,7 +229,7 @@ export class SceneObject { //things that might have models and actions and fancy
                 
             } 
         } else { //not an equipped object
-                console.log("clicked on unequipped object! mousedowntime id " + mouseDowntime + " sceneObjectID " + this.objectData.sceneObjectID);
+                console.log("clicked on unequipped object named " + this.objectData.sceneObjectID);
             popup.innerHTML = "";
             let header = "";
             // if (this.objectData && this.objectData.labeltext && this.objectData.labeltext.length) {
@@ -301,6 +305,7 @@ export class SceneObject { //things that might have models and actions and fancy
             let data = {};
             data.sceneID = settings._id;
             data.object_item = this.objectData;
+            
             data.action = this.pickupAction;
             data.sceneID = settings._id;
             data.fromSceneInventory = this.fromSceneInventory;
@@ -317,16 +322,18 @@ export class SceneObject { //things that might have models and actions and fancy
         } else if (type == "equip" && this.hasEquipAction) {
           let data = {};
             data.sceneID = settings._id;
-            data.object_item = this.objectData;
-            data.action = this.pickupAction;
+            data.objectID = this.objectData._id;
+            data.action = this.equipAction;
+            data.sceneObjectID = this.sceneObjectID;
+            data.sceneInventoryID = this.sceneInventoryID;
             data.sceneID = settings._id;
             data.fromSceneInventory = this.fromSceneInventory;
             data.timestamp = this.timestamp;
             data.fromScene = room;
             data.object_item = this.objectData;
             data.userData = userData;
-            data.action = this.pickupAction;
-            console.log("pickupaction " + JSON.stringify(data));
+            
+            // console.log("equip action " + JSON.stringify(data));
     
             //   Pickup(data, this.el.id);
             
@@ -412,8 +419,22 @@ export class SceneObject { //things that might have models and actions and fancy
         };
     }
 
-    equipObject (data) { //transfer from user to scene inventory
-       
+    equipObject (data, thisObject) { //transfer from scene or scene inventory...to what?
+        console.log("tryna equip from scene or scene inventory");
+        // let event = {};
+        // event.details.object
+        // EquipInventoryCheck(data.objectID);
+        if (data.fromSceneInventory) {
+            // console.log("tryna equip from sceneinventory : " +JSON.stringify(data);
+            console.log("tryna equip from sceneinventory : " + data.sceneInventoryID);
+            EquipObject(this.objectData);
+            thisObject.parent.remove(thisObject);
+        } else {
+            console.log("tryna equip from scene : " + data.sceneObjectID);
+             EquipObject(this.objectData);
+            // thisObject.parent.remove(thisObject);
+        }
+
     }
 
     // hide
@@ -487,7 +508,7 @@ export class SceneObject { //things that might have models and actions and fancy
         //     this.dialogEl.components.mod_dialog.confirmResponse("You can't have any more of those");
         //     }
         // }
-        };
+        }
     // }
     }
 
