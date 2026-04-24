@@ -4482,7 +4482,7 @@
             });    
         let textAlignment = response.data.alignment;
         let textMode = response.data.mode;
-        console.log(JSON.stringify(response.data));
+        
         if (response.data.alignment) {
             let selection = document.getElementById(textAlignment); //radio
             $(selection).closest('.btn').button('toggle');
@@ -4492,6 +4492,10 @@
             $(selection).closest('.btn').button('toggle');
         }
         let theString = response.data.textstring != undefined ? response.data.textstring : "";
+        if (theString == "") {
+            theString = response.data.toString();
+        }
+        console.log(response.data);
         document.getElementById("textstring").value = theString;
         // document.getElementById("json")
         document.getElementById("fontFillColor").value = response.data.fillColor;
@@ -4544,6 +4548,24 @@
                     }
                 }
                 if ($(e).val() == 'Javascript') {
+                    if (!editor) {
+                        editor = CodeMirror.fromTextArea(textArea, {
+                            mode: {
+                                name: "javascript",
+                                json: true
+                            },
+                            lineNumbers: true,
+                            styleActiveLine: true,
+                            matchBrackets: true
+                        });
+                        if (document.getElementById("textstring").value == "") {
+                            editor.setValue("boilerplace javascript here..");
+                        }
+
+                        isJson = true;
+                    }
+                }
+                if ($(e).val() == 'JSON') {
                     if (!editor) {
                         editor = CodeMirror.fromTextArea(textArea, {
                             mode: {
@@ -4819,6 +4841,7 @@
         .then(function (response) {
             // console.log(JSON.stringify(response));
             // var jsonResponse = response.data;
+            // var selectHeader = "<th></th>";
             var selectHeader = "";
             var arr = response.data;
          
@@ -4842,11 +4865,14 @@
             "</thead>"+
             "<tbody>";
             var tableBody = "";
+            // var selectButton = "<td></td>";
             var selectButton = "";
+            let hiddenIndex = 3;
             for(var i = 0; i < arr.length; i++) {
                
                 if (mode == "select") {
                     selectButton = "<td><button type=\x22button\x22 class=\x22btn btn-primary\x22 onclick=\x22selectItem('" + parent + "','text','" + itemid + "','" + arr[i]._id + "')\x22>Select Text Item</button></td>"
+                    hiddenIndex = 4;
                 }  
                 let timestamp = 0;
                 if (arr[i].lastUpdateTimestamp != null) {
@@ -4859,6 +4885,8 @@
                 if (arr[i].isPublic != null) {
                     isPublic = arr[i].isPublic;
                 }
+                console.log()
+                let tags = arr[i].tags ? arr[i].tags : "";
                 // var detailsPicLink = "<a href=\x22#page-top\x22 onclick=\x22showPicture('" + arr[i]._id + "')\x22><img class=\x22rounded\x22 src=\x22" + arr[i].URLthumb + "\x22></a>"
                 var detailsLink = "<a href=\x22index.html?type=text&iid=" + arr[i]._id + "\x22>" + arr[i].title + "</a>";
 
@@ -4867,9 +4895,10 @@
                     selectButton +
                 // "<td>" + detailsLink + "</td>" +
                 "<td>" + detailsLink + "</td>" +
+                 "<td>" + arr[i].type + "</td>" +
                 "<td>" + convertTimestamp(timestamp) + "</td>" +
                 "<td>" + timestamp + "</td>" +
-                "<td>" + arr[i].tags + "</td>" +
+                "<td>" + tags + "</td>" +
                 "<td>" + isPublic + "</td>" +
                 "</tr>";
                 }
@@ -4879,6 +4908,7 @@
                 selectHeader +
                 // "<th></th>"+
                 "<th>Name</th>"+
+                "<th>Type</th>"+
                 "<th>Date</th>"+
                 "<th>HiddenDate</th>"+
                 "<th>Tags</th>"+
@@ -4890,11 +4920,11 @@
             resultElement.innerHTML = tableHead + tableBody + tableFoot;
 
             $('#dataTable1').DataTable(
-                {"order": [[ 2, "desc" ]],
+                {"order": [[ hiddenIndex, "desc" ]],
                 'columnDefs': [
-                    { 'orderData':[1], 'targets': [1] },
+                    { 'orderData':[hiddenIndex], 'targets': [1] },
                     {
-                        'targets': [2],
+                        'targets': [hiddenIndex],
                         'visible': false,
                         'searchable': false
                     },
