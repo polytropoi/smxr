@@ -52,7 +52,7 @@ class SceneTextData {
         this.textIDs = textIDs
        
        
-        console.log("TEXtITEMS AHOY!" + textIDs + " length " + textIDs.length);
+        console.log("textData AHOY!" + textIDs + " length " + textIDs.length);
         // let tempArray = []; 
         if (!textIDs.indexOf(",") == -1) { //make sure to send request with an array
             this.textIDs[0] = textIDs;
@@ -63,9 +63,10 @@ class SceneTextData {
             this.fetchTextData(this.textIDs);
             this.textItems = null;
         }
+
         //xhr
         fetchTextData (data) {
-       
+            console.log("tryna fetch text data " + data);
             fetch('/scene_text_items', {
             method: 'POST',
             headers: {
@@ -77,7 +78,7 @@ class SceneTextData {
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Success:', data);
+                console.log('textData Success:', data);
 
                 for (let i = 0; i < data.length; i++) { //check for text type?
                     this.popTextData(data[i]); //textstring should be a valid json, from defined template//not, just an array of objex saved in global
@@ -108,11 +109,21 @@ class SceneTextData {
                 console.log("mediaID " + mediaID + " vs " + this.jsonData[i]._id);
             if (mediaID == this.jsonData[i]._id) {
 
+                const textObject = JSON.parse(this.jsonData[i].textstring);
                 // console.log("textstring " + this.jsonData[i].textstring);
-                const textData = JSON.parse(this.jsonData[i].textstring);
-                const rindex = Math.floor(Math.random() * textData.length);
+                if (textObject.data && textObject.data.length) {    
+                    // console.log("textstring " + this.jsonData[i].textstring.data);            
+                    // const textData = JSON.parse(this.jsonData[i].textstring.data);
+                    const rindex = Math.floor(Math.random() * textObject.data.length);
 
-                return textData[rindex];
+                    return textObject.data[rindex];
+                } else {
+                    // console.log("textstring " + this.jsonData[i].textstring);
+                    // const textData = JSON.parse(this.jsonData[i].textstring);
+                    const rindex = Math.floor(Math.random() * textObject.length);
+
+                    return textObject[rindex];
+                }
 
                 
 

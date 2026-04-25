@@ -1309,9 +1309,17 @@ export function onMouseDown(event) { //clicked on threejs object
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                     console.log("text item " + JSON.stringify(textData));
                 }
+            
                 if (textData != null && textData != undefined && textData != "" && textData != "none") {
-                    ShowPopup(event);
-                    popup.innerHTML = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                    if (Array.isArray(textData)) { //not kv pairs as nested objects, but an array of values
+                        ShowPopup(event); 
+                        //keyd to a specific schema, hrm... data[0] from source textObject returnd from sceneTextController above should have field names...
+                        popup.innerHTML = "<h4>ATU " + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br>" + textData[4] + "<br>" + textData[5];
+                    } else {
+
+                        ShowPopup(event);
+                        popup.innerHTML = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                    }
                 
                 } else {
                     ShowPopup(event);
@@ -1347,7 +1355,7 @@ export function onMouseDown(event) { //clicked on threejs object
                 }
                 
                 if (textData != null && textData != undefined && textData != "" && textData != "none") {
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
+                    popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
                     ShowPopup(event);
                 } else {
                     popup.style.display = "none";
