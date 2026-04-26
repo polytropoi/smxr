@@ -131,8 +131,8 @@ function SetInputMode () {
 
 
         // joystickEl.
-        if (navigator.maxTouchPoints > 0) {  //i.e. a touch device
-					useJoystick = true;
+        // if (navigator.maxTouchPoints > 0) {  //i.e. a touch device
+		// 			useJoystick = true;
 				// const joystickEl = document.getElementById("joystickEl");
                 // if (joystickEl) {
 				// 	let joystick1 = new Joystick("joystickEl", 64, 8);
@@ -161,7 +161,7 @@ function SetInputMode () {
                 moveX = 0;
                 moveZ = 0;
             });
-        }
+        // }
 			// } else {
 			// 	// let jsContainer = document.getElementById('joystickContainer');
 			// // 	// if (this.jsContainer != null) {
@@ -653,7 +653,7 @@ export function UpdateControls() {
 
             // player.getWorldDirection(direction);
             // direction.normalize();
-            if (useJoystick) {
+            // if (useJoystick) {
                 if (moveX != 0) {
                     // console.log("moveX " + moveX);
                     velocity.x -= moveX * .075 * (playerSpeed) * delta;
@@ -662,7 +662,7 @@ export function UpdateControls() {
                     // console.log("moveZ " +moveZ)
                     velocity.z += moveZ * .075 * (playerSpeed) * delta;
                 }
-            } else {
+            // } else {
             
                 if (moveForward || moveBackward) {
                     velocity.z -= direction.z * .2 * (playerSpeed) * delta;
@@ -672,7 +672,7 @@ export function UpdateControls() {
                     velocity.x -= direction.x * .2 * (playerSpeed) * delta;
                     // console.log("sideways " + velocity.x);
                 }
-            }
+            // }
             // player.position.lerp(direction, .01);
             // player.translateZ(velocity.z);
             // player.translateX(velocity.x);
@@ -1314,7 +1314,7 @@ export function onMouseDown(event) { //clicked on threejs object
                     if (Array.isArray(textData)) { //not kv pairs as nested objects, but an array of values
                         ShowPopup(event); 
                         //keyd to a specific schema, hrm... data[0] from source textObject returnd from sceneTextController above should have field names...
-                        popup.innerHTML = "<h4>ATU " + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br>" + textData[4] + "<br>" + textData[5];
+                        popup.innerHTML = "<h4>ATU " + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];
                     } else {
 
                         ShowPopup(event);
@@ -1354,7 +1354,7 @@ export function onMouseDown(event) { //clicked on threejs object
                     console.log("text item " + JSON.stringify(textData));
                 }
                 
-                if (textData != null && textData != undefined && textData != "" && textData != "none") {
+                if (textData != null && textData != undefined && textData != "" && textData != "none" && textData.text) {
                     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
                     ShowPopup(event);
                 } else {

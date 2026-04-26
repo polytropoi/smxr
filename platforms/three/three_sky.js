@@ -110,15 +110,15 @@ export function InitSky() {
 				console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
 				let elevation = 45;
 				let sceneClouds = "medium";
-				let cloudCoverage = .85;
-				let cloudDensity = .85;
+				let cloudCoverage = .95;
+				let cloudDensity = .95;
 				let cloudElevation = .75;
 				if (settings.sceneClouds.name) {
 					sceneClouds = settings.sceneClouds.name;
 				}
 				if (settings.sceneTime.name) {
 					if (settings.sceneTime.name == "morning" || settings.sceneTime.name == "evening") {
-						elevation = 0;
+						elevation = 25;
 					} else if (settings.sceneTime.name == "afternoon") {
 						elevation = 45;
 					} else if (settings.sceneTime.name == "noon" || settings.sceneTime.name == "midday") {

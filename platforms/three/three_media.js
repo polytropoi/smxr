@@ -333,12 +333,13 @@ class AmbientAudioControl {
         this.rotateLeft = true;
         
         this.interval = setInterval(() => {
-        
+            if (Howler) {
             this.modPosition(performance.now());
             this.count++;
             if (this.count % 100 === 0) {
                 this.rotateLeft = !this.rotateLeft;
             }
+        }
         }, 100);
         this.modVolume();
     }
@@ -359,8 +360,12 @@ class AmbientAudioControl {
     }
     modPosition(time) {
         
+        if (camera && Howler) {
+        //  return;
+        // }
         camera.getWorldPosition(this.cameraPosition);
         camera.getWorldDirection(this.cameraRotation);
+        if (this.cameraPosition.x) {
         Howler.pos(this.cameraPosition.x/100, this.cameraPosition.y/100, this.cameraPosition.z/100); //listener position
         Howler.orientation(this.cameraRotation.x, 0, this.cameraRotation.z, 0, 1, 0);
         this.soundPositionChild.position.z = 1 + (.01 * Math.sin(time));//10 * Math.random(); //lerp me
@@ -384,5 +389,7 @@ class AmbientAudioControl {
         }
         this.ambientAudioHowl.pos(this.soundPosition.x/100, this.soundPosition.y/100, this.soundPosition.z/100);
         // this.ambientAudioHowl.volume(1);
+    }
+    }
     }
 }
