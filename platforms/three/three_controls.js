@@ -806,7 +806,7 @@ function RaycastHit(type, hit) {
 
             showCallout = true;
 
-            console.log(type + " hit object type " + locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+            console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
 
             // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
@@ -878,7 +878,7 @@ function RaycastHit(type, hit) {
         // }
     } else if (locationData && locationData.markerType == "character" ) {
         // if (raycastHitAgent != hit.object) {
-            console.log("gotsa character hit " + locationData.name);
+            console.log("gotsa character rayhit " + locationData.name);
             raycastHitAgent = hit.object;
             selectedObjects.push(hit.object);
             // if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode) {
@@ -1188,9 +1188,24 @@ export function onMouseDown(event) { //clicked on threejs object
             let navAgentInstance;
             if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
                 navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance;
+                console.log("no parent parent");
             }//hrm
             if (!navAgentInstance) {
                 navAgentInstance = lastRaycastHitObject.parent.userData.NavAgentInstance; //hrm
+                console.log("no parent");
+            }
+            if (!navAgentInstance) {
+                navAgentInstance = lastRaycastHitObject.userData.NavAgentInstance; //hrm
+                console.log("no no parent");
+            }
+            if (!navAgentInstance) {
+                    lastRaycastHitObject.traverse(function (child) {
+                        if (child.userData && child.userData.NavAgentInstance) {
+                            navAgentInstance = lastRaycastHitObject.userData.NavAgentInstance;
+                            console.log("gotsa navAgentInstance!"); 
+                        }
+                    
+                });
             }
             if (navAgentInstance) {
                 navAgentInstance.agentClick();

@@ -63,6 +63,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
 
                 console.log("node material name " + node.material.name);
                 sampleGeometry = node.geometry;
+
                 sampleGeos.push(sampleGeometry);
                 sampleMaterial = node.material;
                 sampleMats.push(sampleMaterial);
@@ -73,7 +74,8 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         
         for (let i = 0; i < sampleMats.length; i++) {
 
-            if (sampleMats[i].name.includes("green") || shader == "wind" || shader == "grass") { //hrm, how to only wave the leaves
+            console.log("SampleGEo " + i + " name " + sampleGeos[i].name);
+            if (sampleGeos[i].name.includes("leaves") || sampleMats[i].name.includes("leaves") ||  sampleMats[i].name.includes("green") || shader == "wind" || shader == "grass") { //hrm, how to only wave the leaves
                 // sampleMats[i].positionNode = Fn(() => { // :)
                 // const pos = positionLocal;      // Original vertex position
                 // const norm = normalLocal;        // Vertex normal direction

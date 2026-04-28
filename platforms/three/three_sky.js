@@ -110,15 +110,15 @@ export function InitSky() {
 				console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
 				let elevation = 45;
 				let sceneClouds = "medium";
-				let cloudCoverage = .95;
-				let cloudDensity = .95;
-				let cloudElevation = .75;
+				let cloudCoverage = .35;
+				let cloudDensity = .5;
+				let cloudElevation = .5;
 				if (settings.sceneClouds.name) {
 					sceneClouds = settings.sceneClouds.name;
 				}
 				if (settings.sceneTime.name) {
 					if (settings.sceneTime.name == "morning" || settings.sceneTime.name == "evening") {
-						elevation = 25;
+						elevation = 2;
 					} else if (settings.sceneTime.name == "afternoon") {
 						elevation = 45;
 					} else if (settings.sceneTime.name == "noon" || settings.sceneTime.name == "midday") {
@@ -129,12 +129,13 @@ export function InitSky() {
 				
 				const effectController = {
 					turbidity: 10,
-					rayleigh: .75,
+					rayleigh: 3,
 					mieCoefficient: 0.005,
 					mieDirectionalG: 0.7,
 					elevation: elevation,
 					azimuth: 180,
-					exposure: renderer.toneMappingExposure,
+					// exposure: renderer.toneMappingExposure,
+					exposure: .75,
 					cloudCoverage: cloudCoverage,
 					cloudDensity: cloudDensity,
 					cloudElevation: cloudElevation
