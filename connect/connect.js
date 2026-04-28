@@ -415,7 +415,7 @@ export function InitConnect() {
    // let player = document.getElementById("player");
    // document.body.addEventListener("obbcollisionstarted", function (e) {
    if (player) {
-      player.addEventListener("obbcollisionstarted", function (e) {
+      player.addEventListener("obbcollisionstarted", function (e) { //used in AFRAME scenes
          if (e.detail) {
             console.log("player obbcollision start  " + e.detail.withEl.id); 
             let el = document.getElementById(e.detail.withEl.id);
@@ -468,7 +468,7 @@ export function InitConnect() {
    
    if (player) {
       
-    player.addEventListener("obbcollisionended", function (e) {
+    player.addEventListener("obbcollisionended", function (e) { //used in AFRAME scenes
          if (e.detail) {
          console.log("player obbcollision end  " + e.detail.withEl.id); 
             let el = document.getElementById(e.detail.withEl.id);

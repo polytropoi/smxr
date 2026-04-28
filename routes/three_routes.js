@@ -2889,6 +2889,7 @@ three_router.get('/:_id', function (req, res) {
                     audioGroups.ambientGroups = sceneResponse.sceneAmbientAudioGroups;
                     audioGroups.primaryGroups = sceneResponse.scenePrimaryAudioGroups;
                     settings.audioGroups = audioGroups; 
+                    settings.pictureGroups = sceneResponse.scenePictureGroups;
                     settings.clearLocalMods = false;
                     settings.sceneVideoStreams = sceneResponse.sceneVideoStreamUrls;
                     settings.socketHost = process.env.SOCKET_HOST;

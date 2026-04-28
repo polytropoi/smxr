@@ -12,6 +12,16 @@ export let triggerAudioGroups;
 
 export let sceneTextController;
 export let audioGroupsData;
+export let pictureGroupsData;
+
+export function InitPictureGroups () {
+    let pictureGroupsDataEl = document.getElementById('pictureGroupsData');
+   if (pictureGroupsDataEl) {
+      let thePictureGroupsData = pictureGroupsDataEl.getAttribute('data-picture-groups');
+      pictureGroupsData = JSON.parse(atob(thePictureGroupsData));
+   }
+   console.log("pictureGroupsData " + JSON.stringify(pictureGroupsData));
+}
 
 
 export async function InitAudioGroups() {
@@ -164,7 +174,7 @@ class TriggerAudioControl {
                 // console.log("looking fo rtag " + tags[i].trim());
                 const audioItemID = this.returnTriggerAudioIDWithTag(tags[i].trim());
                 if (audioItemID) {
-                    console.log("gotsa audioItem "  + audioItemID + " from tag " + tags[i]);
+
                     
                     this.audioItem = this.returnAudioItem(audioItemID);
 
@@ -198,6 +208,10 @@ class TriggerAudioControl {
                         if (this.volMod != null) {
                             volume = volume * this.volMod;
                         }
+                        if (volume < .1) {
+                            volume = .1;
+                        }
+                        console.log("gotsa audioItem "  + audioItemID + " from tag " + tags[i] + " volMod " + this.volMod + " final volume " + volume);
                         this.triggerAudioHowl.volume(volume);
                         
                             
@@ -223,34 +237,38 @@ class TriggerAudioControl {
     returnTriggerAudioIDWithTag (tag) {
         if (tag && audioGroupsData && audioGroupsData.triggerGroupItems) {
             // console.log("looking for audio trigger with tag " + tag + " in groups " + audioGroupsData.triggerGroupItems.length);
-            // let matchingItems = [];
+            let matchingItems = [];
             // let triggerGroup = this.data.audioGroupsData.triggerGroupItems[0];
 
             // (async () => {
             //     try {
-                    for (const triggerGroup of audioGroupsData.triggerGroupItems) {
-                    // for (let a = 0; a < this.data.audioGroupsData.triggerGroupItems.length; a++) {
-                        for (let i = 0; i < triggerGroup.items.length; i++) {
-                            // console.log("looking for triggerGroup.item " + triggerGroup.items[i]);
-                            for (let j = 0; j < audioGroupsData.audioItems.length; j++) { //MAYBE SHUFFLE?
-                                // console.log("Ccchekin trigger group item " +triggerGroup.items[i]+ " vs " + audioGroupsData.audioItems[j]._id);
-                                if (triggerGroup.items[i] === audioGroupsData.audioItems[j]._id) {
-                                    // console.log(triggerGroup._id + " match trigger group item " +triggerGroup.items[i]+ " vs " + audioGroupsData.audioItems[j]._id);
-                                    //not ideal, maybe the groupitems can store tags? or cache them when loaded below?
-                                    
-                                    //TODO need to split the string and match eggzackly!!!!!
-                                    if (audioGroupsData.audioItems[j].tags && audioGroupsData.audioItems[j].tags.toString().toLowerCase().includes(tag)) {
-                                        // console.log("tag match to " + tag);  
-                                        // return triggerGroup.items[i];
-                                        // console.log("matched triggeraudiotem w/ tag " + tag);
-                                        // matchingItems.push(triggerGroup.items[i]);
-                                        return triggerGroup.items[i]; //ok to not return?
-                                    }
-                                }
+            for (const triggerGroup of audioGroupsData.triggerGroupItems) {
+            // for (let a = 0; a < this.data.audioGroupsData.triggerGroupItems.length; a++) {
+                for (let i = 0; i < triggerGroup.items.length; i++) {
+                    // console.log("looking for triggerGroup.item " + triggerGroup.items[i]);
+                    for (let j = 0; j < audioGroupsData.audioItems.length; j++) { //MAYBE SHUFFLE?
+                        // console.log("Ccchekin trigger group item " +triggerGroup.items[i]+ " vs " + audioGroupsData.audioItems[j]._id);
+                        if (triggerGroup.items[i] === audioGroupsData.audioItems[j]._id) {
+                            // console.log(triggerGroup._id + " match trigger group item " +triggerGroup.items[i]+ " vs " + audioGroupsData.audioItems[j]._id);
+                            //not ideal, maybe the groupitems can store tags? or cache them when loaded below?
+                            
+                            //TODO need to split the string and match eggzackly!!!!!
+                            if (audioGroupsData.audioItems[j].tags && audioGroupsData.audioItems[j].tags.toString().toLowerCase().includes(tag)) {
+                                // console.log("tag match to " + tag);  
+                                // return triggerGroup.items[i];
+                                // console.log("matched triggeraudiotem w/ tag " + tag);
+                                matchingItems.push(triggerGroup.items[i]);
+                                // return triggerGroup.items[i]; //ok to not return?
                             }
-  
-                     }
+                        }
                     }
+
+                }
+            }
+            if (matchingItems.length) {
+                const rIndex = Math.floor(Math.random() * matchingItems.length);
+                return matchingItems[rIndex];
+            }
                  
         }
     }
@@ -365,7 +383,7 @@ class AmbientAudioControl {
         // }
         camera.getWorldPosition(this.cameraPosition);
         camera.getWorldDirection(this.cameraRotation);
-        if (this.cameraPosition.x) {
+        // if (this.cameraPosition.x) {
         Howler.pos(this.cameraPosition.x/100, this.cameraPosition.y/100, this.cameraPosition.z/100); //listener position
         Howler.orientation(this.cameraRotation.x, 0, this.cameraRotation.z, 0, 1, 0);
         this.soundPositionChild.position.z = 1 + (.01 * Math.sin(time));//10 * Math.random(); //lerp me
@@ -389,7 +407,7 @@ class AmbientAudioControl {
         }
         this.ambientAudioHowl.pos(this.soundPosition.x/100, this.soundPosition.y/100, this.soundPosition.z/100);
         // this.ambientAudioHowl.volume(1);
-    }
+    // }
     }
     }
 }

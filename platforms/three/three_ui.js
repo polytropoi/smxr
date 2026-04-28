@@ -162,12 +162,12 @@ export async function ThreeDeeText (textString, size, parent, position, distance
         if (distance > 1) {
             scaleFactor = distance * .025;
             if (parentScale) {
-                scaleFactor = scaleFactor/parentScale;
+                scaleFactor = scaleFactor * parentScale;
             }
         }
     }
     // console.log("ui scale factor " + scaleFactor);
-    scaleFactor = clamp(scaleFactor, .25, 3);
+    scaleFactor = clamp(scaleFactor, .25, 1.5);
     const width = 10;
 
     // console.log("tryna show textstring " + textString);

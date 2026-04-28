@@ -47,7 +47,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './three_controls.js';
 	
-	import { InitAudioGroups, ambientAudioController, InitSceneText } from './three_media.js';
+	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText } from './three_media.js';
 	
 	import { LoadSceneInventory } from './three_inventory.js';
 // import { GetUserInventory } from '../../connect/dialogs.js';
@@ -260,8 +260,11 @@
 		//  await new Promise(r => setTimeout(r, 000)); //fudge
 		InitEvents();
 
-		if (settings.audioGroups) {
+		if (settings.audioGroups && settings.audioGroups.length) {
 			InitAudioGroups();
+		}
+		if (settings.pictureGroups && settings.pictureGroups.length) {
+			InitPictureGroups();
 		}
 		InitSceneText();
 		

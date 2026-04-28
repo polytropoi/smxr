@@ -26,7 +26,7 @@ import { MapControls } from 'three/addons/controls/MapControls.js';
 
 import { InitReticle, textContainers, ThreeDeeText, HTMLText } from './three_ui.js';
 
-import {PlayPauseMedia} from '../../../connect/dialogs.js';
+import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
 import * as nipplejs from '../../../main/js/nipple.mjs';
 
@@ -806,7 +806,7 @@ function RaycastHit(type, hit) {
 
             showCallout = true;
 
-            console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+            console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
 
             // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
@@ -1009,9 +1009,17 @@ function logHierarchy(object, depth = 0) {
 
 export function mouseRaycast(e) {
 
+        // console.log("showDialogPanel " + showDialogPanel);
+
+    if (showDialogPanel) {
+        return;
+    }
     if (!activeObjex.length) {
         return;
     } 
+    // if (e.clientY < 100) {
+    //     return;
+    // }
     scene.updateMatrixWorld(true);
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -1148,6 +1156,14 @@ export function centerRaycast() {
 export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
     // console.log(event.target.id);
+        console.log("showDialogPanel " + showDialogPanel);
+
+    if (showDialogPanel) {
+        return;
+    }
+     if (event.clientY < 100) {
+        return;
+    }
 
     mouseDownStarttime = Date.now() / 1000;    
    
@@ -1423,7 +1439,11 @@ export function onMouseDown(event) { //clicked on threejs object
 
 export function ShowPopup (event) { //hrm move to UI
     const popup = document.getElementById("popup");
+    console.log("showDialogPanel " + showDialogPanel);
 
+    if (showDialogPanel) {
+        return;
+    }
     if (!event) {
         let xpos = window.innerWidth / 2;
         let ypos = window.innerHeight / 2;
@@ -1440,7 +1460,14 @@ export function ShowPopup (event) { //hrm move to UI
         } else if (event.clientX < 150) {
             xpos = 0;
         }
+        
         let ypos = event.clientY - 100;
+        if (event.clientY < 100) {
+            ypos = 0;
+        }
+        // if (event.clientY > (window.innerHeight - 300)) {
+        //     ypos = window.innerHeight - 300;
+        // }
          Object.assign(popup.style, {
             left: `${xpos}px`,
             top: `${ypos}px`,
@@ -1473,6 +1500,9 @@ export function onMouseUp(e) {
 
 
 export function onMouseMove(event) {
+    if (!showDialogPanel) {
+
+    
     // console.log("mouse move " +scene + mouse + camera + mousecaster + isReady);
     if (scene && mouse && camera && mousecaster && isReady) {
         mouseRaycast(event);
@@ -1520,6 +1550,7 @@ export function onMouseMove(event) {
     // 		x: event.clientX,
     // 		y: event.clientY
     // 	};
+}
 }
 
 
