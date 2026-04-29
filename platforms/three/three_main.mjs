@@ -260,9 +260,9 @@
 		//  await new Promise(r => setTimeout(r, 000)); //fudge
 		InitEvents();
 
-		if (settings.audioGroups && settings.audioGroups.length) {
+		// if (settings.audioGroups && settings.audioGroups.length) {
 			InitAudioGroups();
-		}
+		// }
 		if (settings.pictureGroups && settings.pictureGroups.length) {
 			InitPictureGroups();
 		}

@@ -136,10 +136,11 @@
         agents.push(npc);
         // ThreeDeeText(name, 1, model, null, null, false, null);
         // HTMLText(name, 1, model, null, null, false, null);
-        console.log("creating npc navagent ");
+                const agentID = locationData.timestamp + "_" + index;
+        console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID );
 
-        const agentID = locationData.timestamp + "_" + index;
-        navAgentInstances[agentID] = npc;
+
+        navAgentInstances[model.userData.name] = npc;
 
         // return npc;
         // return playerNavAgent;
@@ -331,6 +332,7 @@
                 //Use this option to crop a single animation into multiple clips
                 this.mixer = new THREE.AnimationMixer(options.object);
                 options.anims.forEach(function(anim){
+
                     self.animations[anim.name] = THREE.AnimationUtils.subclip(clip, anim.name, anim.start, anim.end);
                 });
             }
@@ -342,6 +344,7 @@
                 options.animations.forEach( (animation)=>{
                     // console.log("navagent animation  " + animation.name.toLowerCase());
                     self.animations[animation.name.toLowerCase()] = animation;
+                    console.log("animation name " + animation.name);
                     if (animation.name.toLowerCase().includes("walk")) {
                         this.walkAnims.push(animation.name.toLowerCase());
                     } else if (animation.name.toLowerCase().includes("idle")) {
@@ -362,7 +365,7 @@
                     // console.log(this.name + " tryna get idle animation " + this.idleAnims[randomIndex]);
                     this.action = this.idleAnims[randomIndex];
                 } else {
-                    this.idleAnims.push(options.animations[0].name.toLowerCase());
+                    // this.idleAnims.push(options.animations[0].name.toLowerCase());
                     this.action = options.animations[0].name.toLowerCase();
                 }
             }
@@ -543,9 +546,23 @@
             // this.targetPosition = null;
             this.readyToNav = !this.readyToNav;
             if (!this.readyToNav && this.hasAnims) {
-                this.action = 'idle';
+                    // this.action = 'idle';
                      const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
                     this.action = this.idleAnims[randomIndex];
+                    console.log("setting idle action");
+            } else {
+                if (this.hasAnims) {
+                    // this.action = 'walk';
+
+                    if (this.walkAnims.length) {
+                        const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
+                        this.action = this.walkAnims[randomIndex];
+                    } else {
+                        // this.action = this.animations[0].name.toLowerCase();
+                    }
+                } else {
+                    // this.action = this.animations[0].name.toLowerCase();
+                }
             }
             // console.log("agentPause isPaused " + this.isPaused);
             // let interval;
@@ -641,11 +658,11 @@
             //     const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
 
             //     if (closestNode) {
-            console.log("clicked an agent!");
+            console.log("clicked an agent hasAnims " + this.hasAnims);
             // this.isSelected = !this.isSelected;
             //         this.readyToNav = this.isSelected;    
-                    this.agentPause();
-
+            this.agentPause();
+            this.object.lookAt(player.position);
                     // if (this.readyToNav) {
                     //         this.object.traverse((child) => {
                     //         if (child.isMesh) {
@@ -752,6 +769,7 @@
         
         set action(name){ //hrm...
             //Make a copy of the clip if this is a remote player
+            console.log("new action " + name);
             if (this.hasAnims) {
                 if (name && this.actionName == name.toString().toLowerCase()) {
                     return;
@@ -783,6 +801,9 @@
                     this.curAction = action;
                 } else {
                     console.log("no clip named " + name);
+                    this.actionName = "";
+                    this.mixer.stopAllAction();
+                    // this.curAction = "";
                 }
             }
             const raypos = this.raycastedPosition(); //expensive, so throttle...

@@ -806,7 +806,7 @@ function RaycastHit(type, hit) {
 
             showCallout = true;
 
-            console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
+            // console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
 
             // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
@@ -895,7 +895,7 @@ function RaycastHit(type, hit) {
 
             // console.log("hit character object name : " + raycastHitAgent.parent.parent.parent.name + " locID " + locationData.timestamp);
             // const rootObject = getRoot(raycastHitAgent)
-            // logHierarchy(raycastHitAgent);
+            // logHierarchy(rootObject);
             // raycastHitAgent.traverse (
 
             // )
@@ -1156,7 +1156,7 @@ export function centerRaycast() {
 export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
     // console.log(event.target.id);
-        console.log("showDialogPanel " + showDialogPanel);
+        // console.log("showDialogPanel " + showDialogPanel);
 
     if (showDialogPanel) {
         return;
@@ -1201,28 +1201,33 @@ export function onMouseDown(event) { //clicked on threejs object
         return;
     } else if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
  
-            let navAgentInstance;
-            if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
-                navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance;
-                console.log("no parent parent");
-            }//hrm
+            let navAgentInstance
+            if (lastRaycastHitObject.parent.parent) {
+                navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance; 
+            }
             if (!navAgentInstance) {
                 navAgentInstance = lastRaycastHitObject.parent.userData.NavAgentInstance; //hrm
-                console.log("no parent");
+
             }
             if (!navAgentInstance) {
                 navAgentInstance = lastRaycastHitObject.userData.NavAgentInstance; //hrm
-                console.log("no no parent");
+                // console.log("no no parent");
             }
+            // if (!navAgentInstance) {
+
+            //         lastRaycastHitObject.traverse(function (child) {
+            //         // console.log(child.name);
+            //         if (child.isMesh && child.userData && child.userData.NavAgentInstance) {
+                        
+            //             navAgentInstance = lastRaycastHitObject.userData.NavAgentInstance;
+            //             console.log("gotsa navAgentInstance!"); 
+            //         }
+            //     });
+            // }
             if (!navAgentInstance) {
-                    lastRaycastHitObject.traverse(function (child) {
-                        if (child.userData && child.userData.NavAgentInstance) {
-                            navAgentInstance = lastRaycastHitObject.userData.NavAgentInstance;
-                            console.log("gotsa navAgentInstance!"); 
-                        }
-                    
-                });
+                navAgentInstance = navAgentInstances[lastRaycastHitObject.userData.name];
             }
+            // console.log("navAgentInstance" + lastRaycastHitObject.userData.name);
             if (navAgentInstance) {
                 navAgentInstance.agentClick();
  

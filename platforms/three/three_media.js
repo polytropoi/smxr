@@ -32,12 +32,15 @@ export async function InitAudioGroups() {
         audioGroupsData = await ReturnAudioGroupsData(settings.audioGroups);
         // console.log("audioGroupsData " + JSON.stringify(audioGroupsData));
     }
-    InitAmbientAudio(settings.ambient_mp3url);
+    // InitAmbientAudio(settings.ambient_mp3url);
+        InitAmbientAudio();
 }
 
 export let ambientAudioController;
 export let triggerAudioController;
+
 export async function InitAmbientAudio () {
+    console.log("tryna ambient and trigger audio");
     if (settings && settings.ambient_oggurl) {
         ambientAudioController = new AmbientAudioControl();
     }
@@ -148,8 +151,8 @@ class TriggerAudioControl {
     constructor(options) {
         this.triggerAudioGroups = triggerAudioGroups;
         
-        if (!this.ambientAudioHowl && this.ambientURL != "") {
-        console.log("ambientAudioHowl is null, creating");
+        if (!this.triggerAudioHowl) {
+        console.log("triggerAudioHowl is null, creating");
         // if (settings.hasPrimaryAudioStream) {
         //   primaryAudioHowl = new Howl({
         //       src: [settings.primary_mp3url], html5: true

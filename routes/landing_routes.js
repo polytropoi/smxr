@@ -3141,7 +3141,7 @@ landing_router.get('/:_id', function (req, res) {
                             }
                             if (sceneResponse.sceneEnabledClientTypes.unityWeb == true) {
                                 platformButtons = platformButtons + "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22mx-auto btn btn-xl btn-primary float-right\x22>Unity Web</a>";
-                                picLink = "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22>";
+                                // picLink = "<a href=\x22https://servicemedia.net/unityweb/index.html?scene=" +  sceneResponse.short_id + "\x22 target=\x22_blank\x22>";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.mapboxWeb == true) {
                                 platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../mapbox/"+ sceneResponse.short_id + "\x22> Mapbox </a>" + platformButtons;
@@ -3149,11 +3149,11 @@ landing_router.get('/:_id', function (req, res) {
                             }
                             if (sceneResponse.sceneEnabledClientTypes.maplibreWeb == true) {
                                 platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../maplibre/"+ sceneResponse.short_id + "\x22> Maplibre </a>" + platformButtons;
-                                picLink = "<a href=\x22../maplibre/"+ sceneResponse.short_id + "\x22>";
+                                // picLink = "<a href=\x22../maplibre/"+ sceneResponse.short_id + "\x22>";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.threeWeb == true) {
                                 platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../three/"+ sceneResponse.short_id + "\x22> Three </a>" + platformButtons;
-                                // picLink = "<a href=\x22../three/"+ sceneResponse.short_id + "\x22>";
+                                picLink = "<a href=\x22../three/"+ sceneResponse.short_id + "\x22>";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.sparkWeb == true) {
                                 platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../spark/"+ sceneResponse.short_id + "\x22> Spark </a>" + platformButtons;
@@ -3343,7 +3343,7 @@ landing_router.get('/:_id', function (req, res) {
     })();
         
 });
-///// END PRIMARY SERVERSIDE /aframe/ ROUTE //////////////////////
+///// END PRIMARY SERVERSIDE /landing/ ROUTE //////////////////////
 
 
 export default landing_router;

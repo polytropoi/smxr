@@ -264,14 +264,15 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     } else {
                         clonedModel = model.clone();
                     }
-                    const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Math.floor(Date.now()/1000);
+                    const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Date.now();
                     locationObjex[i].objectData.sceneObjectID = sceneObjectID;
                     clonedModel.name = sceneObjectID;
                     
                     // const pos = randomNavmeshPoint();
                     
                     
-
+                    clonedModel.userData.locationData = locationObjex[i].locationData;
+                    clonedModel.userData.objectData = locationObjex[i].objectData;
 
                     clonedModel.userData.name = sceneObjectID;
                     // activeObjex.push(clonedModel);
