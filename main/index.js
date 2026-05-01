@@ -12563,9 +12563,16 @@ function getAllPeople() {
                                 // "<option value=\x22none\x22> none</option>" +
                                 "</select>" +
                             "</div>" +
+                            "<div id=\x22selectLocationGroup_" + locationID + "\x22>" +
+                                "<label for=\x22\x22>Location Group: </label>" + 
+                                "<select class=\x22form-control groupSelector\x22 id=\x22groupSelect_"+locationID+"\x22>" +
+                                "<option value=\x22none\x22 selected>none</option>" +
+                                // "<option value=\x22none\x22> none</option>" +
+                                "</select>" +
+                            "</div>" +
                             // "<label for=\x22markerObjectScale_" + locationID + "\x22>Object Scale</label>" + 
                             // "<input type=\x22number\x22 step=\x220.001\x22 class=\x22form-control locationObjectScale\x22 id=\x22scale_" + locationID + "\x22 placeholder=\x220\x22 value=\x22" + sceneLocations[i].markerObjScale + "\x22 >" +
-                        "<br><span> location id: "+ locationID +"</span>" +
+                        // "<br><span> location id: "+ locationID +"</span>" +
                             "</div>";
                         // "<div class=\x22col form-group col-md-3\x22>"+
                         //     // "<button type=\x22button\x22 class=\x22remSceneLocation btn btn-xs btn-danger float-left\x22 id=\x22" + i + "\x22>Remove</button>"+
@@ -12586,8 +12593,8 @@ function getAllPeople() {
                         "<label for=\x22longitude_" + locationID + "\x22>Longitude:</label>" + 
                         "<input type=\x22text\x22 class=\x22form-control locationObjLongitude\x22 id=\x22longitude_" + locationID + "\x22 placeholder=\x220\x22 value=\x22" + sceneLocations[i].longitude + "\x22 >"+
                         "<label for=\x22elevation_" + locationID + "\x22>Elevation:</label>" + 
-                        "<input type=\x22text\x22 class=\x22form-control locationObjGeoElevation\x22 id=\x22elevation_" + locationID + "\x22 placeholder=\x220\x22 value=\x22" + sceneLocations[i].elevation + "\x22 ></div>";
-
+                        "<input type=\x22text\x22 class=\x22form-control locationObjGeoElevation\x22 id=\x22elevation_" + locationID + "\x22 placeholder=\x220\x22 value=\x22" + sceneLocations[i].elevation + "\x22 >"+
+                        "<br><span> location id: "+ locationID +"</span></div>";
                     } else {
 
                         // location = "x: " + sceneLocations[i].x + "<br>y: " + sceneLocations[i].y + "<br>z: " + sceneLocations[i].z; 
@@ -12596,7 +12603,8 @@ function getAllPeople() {
                         "<label for=\x22yposition_" + locationID + "\x22>Y Pos</label>" + 
                         "<input type=\x22text\x22 class=\x22form-control locationObjectY\x22 id=\x22ypos_" + locationID + "\x22 placeholder=\x220\x22 value=\x22" + sceneLocations[i].y + "\x22 >" +
                         "<label for=\x22zposition_" + locationID + "\x22>Z Pos</label>" + 
-                        "<input type=\x22text\x22 class=\x22form-control locationObjectZ\x22 id=\x22zpos_" + locationID + "\x22 placeholder=\x220\x22 value=\x22" + sceneLocations[i].z + "\x22 ></div>";
+                        "<input type=\x22text\x22 class=\x22form-control locationObjectZ\x22 id=\x22zpos_" + locationID + "\x22 placeholder=\x220\x22 value=\x22" + sceneLocations[i].z + "\x22 >"+
+                        "<br><span> location id: "+ locationID +"</span></div>";
 
                         if (sceneLocations[i].x != undefined && sceneLocations[i].z != undefined) { //svg map values //hrm...
                             let scaleString = "";
@@ -15400,6 +15408,7 @@ function getAllPeople() {
                 $(function() { 
                     let reloadOnSubmit = false;
                        
+                    let sceneGroups = response.data.sceneGroups;
                             for (let l = 0; l < sceneLocations.length; l++) {
                                 // console.log(sceneModelz[j].name);
 
@@ -15524,7 +15533,7 @@ function getAllPeople() {
 
                             // console.log(JSON.stringify(sceneObjex));
                             for (let k = 0; k < sceneLocations.length; k++) {
-                                if (sceneLocations[k].markerType == "picture") {
+                                // if (sceneLocations[k].markerType == "picture") {
                                     console.log ("gotsa picture with mediaID : "+ sceneLocations[k].mediaID);
                                     const z = document.getElementById("mediaSelect_" + sceneLocations[k].timestamp);
                                     for (let l = 0; l < pictures.length; l++) {
@@ -15542,7 +15551,7 @@ function getAllPeople() {
                                         z.add(option);
                                         }
                                     }
-                                }
+                                // }
                             }
                         }
                         if (sceneTextItems != null && sceneTextItems != undefined && sceneTextItems.length > 0) { //TODO refactor this to scenePictureItems or something..
@@ -15564,6 +15573,32 @@ function getAllPeople() {
                                         if (textItems[l]._id == sceneLocations[k].mediaID) {
                                             option.selected = true;
                                             console.log("text item selected "+ textItems[l].title);
+                                        } 
+                                        z.add(option);
+                                        }
+                                    }
+                                // }
+                            }
+                        }
+                        if (sceneGroups != null && sceneGroups != undefined && sceneGroups.length > 0) { 
+
+                            // console.log("textitems: " +JSON.stringify(textItems));
+                            for (let k = 0; k < sceneLocations.length; k++) {
+                                // if (sceneLocations[k].markerType == "text") {
+                                    // console.log ("gotsa text location with mediaID : "+ sceneLocations[k].mediaID);
+                                    const z = document.getElementById("groupSelect_" + sceneLocations[k].timestamp);
+                                    for (let l = 0; l < sceneGroups.length; l++) {
+                                        
+                                        if (sceneGroups[l]._id != undefined) {
+                                            // console.log(sceneObjex[l]._id + " vs " + sceneLocations[k].objectID);
+                                            
+                                            var option = document.createElement("option"); 
+                                            option.text = sceneGroups[l].name;
+                                            option.value = sceneGroups[l]._id;
+                                        
+                                        if (sceneGroups[l]._id == sceneLocations[k].groupID) {
+                                            option.selected = true;
+                                            console.log("group item selected "+ sceneGroups[l].name);
                                         } 
                                         z.add(option);
                                         }
@@ -16435,7 +16470,7 @@ function getAllPeople() {
                             }
                         }
                     });
-                    $(document).on('change', '.mediaSelector', function() { //depends on markertype
+                    $(document).on('change', '.mediaSelector', function() { //depends on markertype //no it doesn't
                         for (let s = 0; s < sceneLocations.length; s++) {   
                             let locid = this.id.split("_")[1];
                             if (locid == sceneLocations[s].timestamp || this.id == sceneLocations[s].timestamp) {
@@ -16449,6 +16484,23 @@ function getAllPeople() {
                                         // sceneLocations[s].mediaName = '';
                                     }
                                 // }s
+                            }
+                        }
+                    });
+                    $(document).on('change', '.groupSelector', function() { //depends on markertype // no it doesn't
+                        for (let s = 0; s < sceneLocations.length; s++) {   
+                            let locid = this.id.split("_")[1];
+                            if (locid == sceneLocations[s].timestamp || this.id == sceneLocations[s].timestamp) {
+                               
+
+                                    sceneLocations[s].groupName = $(this).find('option:selected').text();
+                                    sceneLocations[s].groupID = this.value;
+                                    console.log("location group set " + $(this).find('option:selected').text());
+                                    if (sceneLocations[s].groupID == null || sceneLocations[s].groupID == undefined) {
+                                        // sceneLocations[s].mediaID = '';
+                                        // sceneLocations[s].mediaName = '';
+                                    }
+                                
                             }
                         }
                     });

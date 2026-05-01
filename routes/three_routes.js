@@ -289,7 +289,7 @@ three_router.get('/:_id', function (req, res) {
     let pictureGroupsData = "";
     let scenePicturesData = "";
     let sceneTextData = "";
-   
+    let sceneGroups = "";
     let videoGroupsEntity = "";
     let videoElements = "";
     let videoEl = "";
@@ -2410,6 +2410,29 @@ three_router.get('/:_id', function (req, res) {
                 hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>"; //v 1.0.6 client hls player ref
                
             }
+            ////////////// all sceneGroups 
+            let allgroups = [];
+            if (sceneResponse.sceneVideoGroups != null) {
+                allgroups.push(...sceneResponse.sceneVideoGroups);
+            };                
+            if (sceneResponse.scenePictureGroups != null) {
+                allgroups.push(...sceneResponse.scenePictureGroups);
+            };
+            if (sceneResponse.sceneAudioGroups != null) {
+                allgroups.push(...sceneResponse.sceneAudioGroups);
+            };
+            if (sceneResponse.sceneLocationGroups != null) {
+                allgroups.push(...sceneResponse.sceneLocationGroups);
+            };
+            if (allgroups.length > 0) {
+                console.log("checking groups " + allgroups);
+                const moids = allgroups.map(convertStringToObjectID);
+                const query = {"_id": {$in: moids }};
+                const items = await RunDataQuery("groups", "find", query);
+                if (items) {
+                    sceneResponse.sceneGroups = items;
+                }            
+            }
             
             ////////////// cook some output, ui elements, etc. -- TODO move up or down?
             let youtubeSniffer = "";
@@ -2895,7 +2918,9 @@ three_router.get('/:_id', function (req, res) {
                     settings.socketHost = process.env.SOCKET_HOST;
                     settings.networking = sceneResponse.sceneNetworking;
                     settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
-                    settings.playerHeight = sceneResponse.scenePlayer.playerHeight
+                    settings.playerHeight = sceneResponse.scenePlayer.playerHeight;
+
+                    settings.sceneGroups = sceneResponse.sceneGroups;
                     // settings.playerStartPosition = playerPosition;
 
                     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {

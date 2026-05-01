@@ -23,6 +23,14 @@ export function InitPictureGroups () {
    console.log("pictureGroupsData " + JSON.stringify(pictureGroupsData));
 }
 
+export function ReturnPictureFromGroup (groupID, tags, groupIndex) {
+    for (let i = 0; i < pictureGroupsData.length; i++) {
+        if (pictureGroupsData[i]._id == groupID) {
+            const imageIndex = Math.floor(Math.random() * pictureGroupsData[i].images.length);
+            return pictureGroupsData[i].images[imageIndex];
+        }
+    }
+}
 
 export async function InitAudioGroups() {
     if (settings && settings.audioGroups) {

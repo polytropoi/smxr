@@ -7,7 +7,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
-import { sceneTextController, triggerAudioController } from './three_media.js';
+import { ReturnPictureFromGroup, sceneTextController, triggerAudioController } from './three_media.js';
 
 import { ActionSwitch, SetPlayerRigidbody } from './three_actions.js';
 
@@ -1272,6 +1272,7 @@ export function onMouseDown(event) { //clicked on threejs object
                 //     console.log(JSON.stringify(lastRaycastHitObject.userData.objectData.actions));
                 // }
                
+
                 let textData;
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
@@ -1340,6 +1341,47 @@ export function onMouseDown(event) { //clicked on threejs object
                 //     top: `${event.clientY - 100}px`,
                 //     display: 'block',
                 // });
+                let groupData;
+                if (lastRaycastHitObject.userData.locationData.groupID) {
+                    console.log(lastRaycastHitObject.userData.locationData.name + " gotsa groupID " + lastRaycastHitObject.userData.locationData.groupID);
+                    let locationGroup;
+                    for (let i = 0; i < settings.sceneGroups.length; i++) {
+                        if (settings.sceneGroups[i]._id == lastRaycastHitObject.userData.locationData.groupID) {
+                            console.log("gotsa location groupID of type " +settings.sceneGroups[i].type);
+                            locationGroup = settings.sceneGroups[i];
+                            
+                        }
+                    }
+                    if (locationGroup) {
+                        if (locationGroup.type == "picture") {
+                            const pictureItem = ReturnPictureFromGroup(locationGroup._id);
+                            console.log("pictureITem " + JSON.stringify(pictureItem));
+                            if (pictureItem) {
+                                if (pictureItem.orientation == "Landscape") {
+                                    let landscapePicPanel = scene.getObjectByName('landscapePanel');
+                                    if (!landscapePicPanel) {
+                                        console.log("t4eryna make a landscape panel " + lastRaycastHit.point.x + lastRaycastHit.point.y + lastRaycastHit.point.z);
+                                        const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4); 
+                                        const planeMaterial = new THREE.MeshStandardMaterial({ color: 'hotpink' });
+                                        landscapePicPanel = new THREE.Mesh(planeGeometry, planeMaterial);
+                                        landscapePicPanel.name = "landscapePanel";
+                                        scene.add(landscapePicPanel);
+                                         landscapePicPanel.position.set(lastRaycastHit.point.x, lastRaycastHit.point.y,lastRaycastHit.point.z );
+                                        landscapePicPanel.lookAt(player);
+                                        landscapePicPanel.visible = true;
+
+                                    } else {
+                                        console.log("t4eryna position a landscape panel " + lastRaycastHit.point.x + lastRaycastHit.point.y + lastRaycastHit.point.z);
+                                        landscapePicPanel.position.set(lastRaycastHit.point.x, lastRaycastHit.point.y,lastRaycastHit.point.z );
+                                        landscapePicPanel.lookAt(player);
+                                        landscapePicPanel.visible = true;
+                                    }
+                                   
+                                }
+                            }
+                        }
+                    }
+                }
                 let textData;
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);

@@ -360,13 +360,15 @@
                     this.walkAnims.push(options.animations[0].name.toLowerCase());
                 }
 
-                if (this.idleAnims.length) {
-                    const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
-                    // console.log(this.name + " tryna get idle animation " + this.idleAnims[randomIndex]);
-                    this.action = this.idleAnims[randomIndex];
-                } else {
-                    // this.idleAnims.push(options.animations[0].name.toLowerCase());
-                    this.action = options.animations[0].name.toLowerCase();
+                if (this.curAction != "idle") {
+                    if (this.idleAnims.length) {
+                        const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
+                        // console.log(this.name + " tryna get idle animation " + this.idleAnims[randomIndex]);
+                        this.action = this.idleAnims[randomIndex];
+                    } else {
+                        // this.idleAnims.push(options.animations[0].name.toLowerCase());
+                        this.action = options.animations[0].name.toLowerCase();
+                    }
                 }
             }
             this.object.userData.NavAgentInstance = this; // add this kinda class object instance to the userdata, to enable fetching instance from e.g. raycast
@@ -491,8 +493,10 @@
                 }
                 // this.action = 'idle';
                 const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
-                this.action = this.idleAnims[randomIndex];
+                if (this.idleAnims.length) {
+                    this.action = this.idleAnims[randomIndex];
                 // this.isPaused = true;
+                }
 
                 this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
 
@@ -800,7 +804,7 @@
                     action.play();
                     this.curAction = action;
                 } else {
-                    console.log("no clip named " + name);
+                    // console.log("no clip named " + name);
                     this.actionName = "";
                     this.mixer.stopAllAction();
                     // this.curAction = "";

@@ -267,6 +267,8 @@
 			InitPictureGroups();
 		}
 		InitSceneText();
+
+		console.log("settings.sceneGroups " + JSON.stringify(settings.sceneGroups));
 		
 			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
 			// ThreeText(texttest);
