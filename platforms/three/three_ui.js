@@ -3,17 +3,22 @@
 
 import * as THREE from 'three';
 import { Text } from 'three-text/three'; //not troika!
+
+import { ReturnPictureFromGroup, ScenePicture } from './three_media.js';
+
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
 Text.init();
 
 import {scene, renderer} from './three_main.mjs';
 
-import {camera} from './three_controls.js';
+import {player, camera} from './three_controls.js';
 
 export let lookAtCameraObjects = [];
 
 export let textContainers = [];
+
+export let scenePictures = {};
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -29,6 +34,7 @@ const ctx = canvas.getContext('2d');
 
 let texture;
 let textContainer;
+// export let landscapePanel;
 
 export async function HTMLText (textString, size, parent, position, distance, persist, parentScale) { //this is rendered to texture and put on a plane
     // Setup canvas with 2D context
@@ -483,4 +489,86 @@ export function UpdateText (string) { //uikit, no workie (use vite, they say...)
     root.update(delta)
     renderer.render(scene, camera)
     }
+}
+
+export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, position, visible, lookAtCamera) {
+
+    let scenePictureInstance;
+
+    if (instanceId && locationGroupId) {
+        console.log("looking for scenePicture from locationGroup "+ locationGroupId + "_" + instanceId);
+        scenePictureInstance = scenePictures[locationGroupId + "_" + instanceId];
+        if (scenePictureInstance) {
+           
+
+            const isVisible = scenePictureInstance.toggleVis();
+             console.log("gotsa scenePictureInstance visible " + isVisible);
+            if (isVisible) {
+                scenePictureInstance.updatePicture();
+                scenePictureInstance.updatePosition(position);
+            }
+            // scenePictureInstance.toggleVis();
+
+        } else {
+            scenePictureInstance = new ScenePicture(locationGroupId, locationMediaId, instanceId, position, visible, lookAtCamera)
+            scenePictures[locationGroupId + "_" + instanceId] = scenePictureInstance;
+        }
+
+    }
+
+    // const pictureItem = ReturnPictureFromGroup(locationGroup._id);
+    // console.log("pictureITem " + pictureItem.orientation);
+    // if (pictureItem) {
+    //     if (pictureItem.orientation == "Landscape") {
+    //         // landscapePanel = scene.getObjectByName('landscapePanel');
+    //         // const hitpos = lastRaycastHit.point;
+    //         //                                      hitpos.getWorldPosition(worldHitPosition);
+    //         if (!landscapePanel) {
+    //             console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
+    //             // const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4);
+    //             const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
+    //             const planeMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
+    //             landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
+    //             landscapePanel.name = "landscapePanel";
+    //             scene.add(landscapePanel);
+    //                 landscapePanel.position.set(position.x, position.y + 4,position.z );
+    //             // landscapePanel.lookAt(player);
+    //             landscapePanel.visible = true;
+    //             // landscapePanel.updateMatrixWorld();
+
+    //         } else {
+    //             console.log("showing a landscape panel " + position.x + position.y + position.z);
+    //             landscapePanel.position.set(position.x, position.y + 4, position.z );
+    //             // landscapePanel.lookAt(player);
+    //             landscapePanel.visible = true;
+    //             // landscapePanel.updateMatrixWorld();
+
+    //         }
+            
+    //     } else if (pictureItem.orientation == "Portrait") {
+
+    //         if (!landscapePanel) {
+    //             console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
+    //             // const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4);
+    //             const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
+    //             const planeMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
+    //             landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
+    //             landscapePanel.name = "landscapePanel";
+    //             scene.add(landscapePanel);
+    //                 landscapePanel.position.set(position.x, position.y + 4,position.z );
+    //             // landscapePanel.lookAt(player);
+    //             landscapePanel.visible = true;
+    //             // landscapePanel.updateMatrixWorld();
+
+    //         } else {
+    //             console.log("showing a landscape panel " + position.x + position.y + position.z);
+    //             landscapePanel.position.set(position.x, position.y + 4, position.z );
+    //             // landscapePanel.lookAt(player);
+    //             landscapePanel.visible = true;
+    //             // landscapePanel.updateMatrixWorld();
+
+    //         }
+        
+        // }
+    // }
 }

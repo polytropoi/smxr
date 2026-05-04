@@ -7,7 +7,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './three_nav.js';
 
-import { ReturnPictureFromGroup, sceneTextController, triggerAudioController } from './three_media.js';
+import { sceneTextController, triggerAudioController } from './three_media.js';
 
 import { ActionSwitch, SetPlayerRigidbody } from './three_actions.js';
 
@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { InitReticle, textContainers, ThreeDeeText, HTMLText } from './three_ui.js';
+import { InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture } from './three_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -86,7 +86,8 @@ let targetLocation = new THREE.Vector3();
 let validTarget = false;
 
 let controlObject;
-let lastPosition = new THREE.Vector3();
+let lastPlayerPosition = new THREE.Vector3();
+let worldHitPosition = new THREE.Vector3();
 
 export const popup = document.getElementById("popup");
 export const viewportPlaceholder = new THREE.Object3D();
@@ -623,10 +624,10 @@ export function UpdateControls() {
             downcaster.ray.origin.y += 10;
 
 
-            if (lastPosition === null) {   
+            if (lastPlayerPosition === null) {   
                 // firstTry = true;
-                lastPosition = new THREE.Vector3();
-                player.getWorldPosition(lastPosition);
+                lastPlayerPosition = new THREE.Vector3();
+                player.getWorldPosition(lastPlayerPosition);
                 // if (this.data.xzOrigin) this.lastPosition.y -= this.xzOrigin.object3D.position.y;
             }
     
@@ -698,7 +699,7 @@ export function UpdateControls() {
                 velocity.x = 0;
                 velocity.y = 0;
                 velocity.z = 0;
-                player.position.copy(lastPosition)
+                player.position.copy(lastPlayerPosition)
                 // const goodSpot = closestNavmeshPoint(player.position);
                 // if (goodSpot) {
                 //     player.position.set(goodSpot.x, goodSpot.y, goodSpot.z);
@@ -707,7 +708,7 @@ export function UpdateControls() {
             } else {
                 // velocity.y = 0;
                 // intersections[0].point.x = 
-                player.getWorldPosition(lastPosition);
+                player.getWorldPosition(lastPlayerPosition);
                             // Move right (positive) or left (negative)
                 player.position.addScaledVector(right, -velocity.x);
 
@@ -1036,6 +1037,7 @@ export function mouseRaycast(e) {
         // 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
         if (raycastHits[0].object.userData) {
             RaycastHit("mouse", raycastHits[0]);
+            worldHitPosition = raycastHits[0].point;
         } else {
             selectedObjects.length = 0;
             // lastRaycastHit = null;
@@ -1354,31 +1356,39 @@ export function onMouseDown(event) { //clicked on threejs object
                     }
                     if (locationGroup) {
                         if (locationGroup.type == "picture") {
-                            const pictureItem = ReturnPictureFromGroup(locationGroup._id);
-                            console.log("pictureITem " + JSON.stringify(pictureItem));
-                            if (pictureItem) {
-                                if (pictureItem.orientation == "Landscape") {
-                                    let landscapePicPanel = scene.getObjectByName('landscapePanel');
-                                    if (!landscapePicPanel) {
-                                        console.log("t4eryna make a landscape panel " + lastRaycastHit.point.x + lastRaycastHit.point.y + lastRaycastHit.point.z);
-                                        const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4); 
-                                        const planeMaterial = new THREE.MeshStandardMaterial({ color: 'hotpink' });
-                                        landscapePicPanel = new THREE.Mesh(planeGeometry, planeMaterial);
-                                        landscapePicPanel.name = "landscapePanel";
-                                        scene.add(landscapePicPanel);
-                                         landscapePicPanel.position.set(lastRaycastHit.point.x, lastRaycastHit.point.y,lastRaycastHit.point.z );
-                                        landscapePicPanel.lookAt(player);
-                                        landscapePicPanel.visible = true;
 
-                                    } else {
-                                        console.log("t4eryna position a landscape panel " + lastRaycastHit.point.x + lastRaycastHit.point.y + lastRaycastHit.point.z);
-                                        landscapePicPanel.position.set(lastRaycastHit.point.x, lastRaycastHit.point.y,lastRaycastHit.point.z );
-                                        landscapePicPanel.lookAt(player);
-                                        landscapePicPanel.visible = true;
-                                    }
+                            ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );
+                            // const pictureItem = ReturnPictureFromGroup(locationGroup._id);
+                            // console.log("pictureITem " + JSON.stringify(pictureItem));
+                            // if (pictureItem) {
+                            //     if (pictureItem.orientation == "Landscape") {
+                            //         let landscapePicPanel = scene.getObjectByName('landscapePanel');
+                            //         // const hitpos = lastRaycastHit.point;
+                            //         //                                      hitpos.getWorldPosition(worldHitPosition);
+                            //         if (!landscapePicPanel) {
+                            //             console.log("t4eryna make a landscape panel " + pointerGizmo.position.x + pointerGizmo.position.y + pointerGizmo.position.z);
+                            //             // const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4);
+                            //             const planeGeometry = new THREE.BoxGeometry(1, 1, 1); 
+                            //             const planeMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
+                            //             landscapePicPanel = new THREE.Mesh(planeGeometry, planeMaterial);
+                            //             landscapePicPanel.name = "landscapePanel";
+                            //             scene.attach(landscapePicPanel);
+                            //              landscapePicPanel.position.set(pointerGizmo.position.x, pointerGizmo.position.y,pointerGizmo.position.z );
+                            //             landscapePicPanel.lookAt(player);
+                            //             landscapePicPanel.visible = true;
+                            //             landscapePicPanel.updateMatrixWorld();
+
+                            //         } else {
+                            //             console.log("t4eryna position a landscape panel " + pointerGizmo.position.x + pointerGizmo.position.y + pointerGizmo.position.z);
+                            //             landscapePicPanel.position.set(pointerGizmo.position.x, pointerGizmo.position.y,pointerGizmo.position.z );
+                            //             landscapePicPanel.lookAt(player);
+                            //             landscapePicPanel.visible = true;
+                            //             landscapePicPanel.updateMatrixWorld();
+
+                            //         }
                                    
-                                }
-                            }
+                            //     }
+                            // }
                         }
                     }
                 }
@@ -1400,8 +1410,8 @@ export function onMouseDown(event) { //clicked on threejs object
                     }
                 
                 } else {
-                    ShowPopup(event);
-                    popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
+                    // ShowPopup(event);
+                    // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
                 }
             } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                 // console.log(event.clientX + " " + window.innerWidth);

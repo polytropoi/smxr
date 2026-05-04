@@ -2,9 +2,10 @@
 import * as THREE from 'three';
 
 import {player, camera } from './three_controls.js';
-
+import { scene } from './three_main.mjs';
 import { settings } from '../../../connect/settings.js';
 import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData} from "../../../connect/media.js";
+import { lookAtCameraObjects } from './three_ui.js';
 
 export let primaryAudioGroups;
 export let ambientAudioGroups;
@@ -13,6 +14,7 @@ export let triggerAudioGroups;
 export let sceneTextController;
 export let audioGroupsData;
 export let pictureGroupsData;
+export let landscapePanel;
 
 export function InitPictureGroups () {
     let pictureGroupsDataEl = document.getElementById('pictureGroupsData');
@@ -21,6 +23,11 @@ export function InitPictureGroups () {
       pictureGroupsData = JSON.parse(atob(thePictureGroupsData));
    }
    console.log("pictureGroupsData " + JSON.stringify(pictureGroupsData));
+    // const planeGeometry = new THREE.PlaneGeometry(4, 3, 2, 2); 
+    //                                        const planeMaterial = new THREE.MeshStandardMaterial({ color: 'blue' });
+    //                                        landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
+    //                                        landscapePanel.name = "landscapePanel";
+    //                                        landscapePanel.visible = false;
 }
 
 export function ReturnPictureFromGroup (groupID, tags, groupIndex) {
@@ -116,7 +123,7 @@ class SceneTextData {
         popTextData (data) {
             // const parsedText = JSON.stringify(data);
             this.jsonData.push(data);
-            console.log("sceneTextItems " + JSON.stringify(this.jsonData));
+            console.log("sceneTextItems " + this.jsonData.length);
         }
     
         loadTextData (data) {
@@ -420,5 +427,148 @@ class AmbientAudioControl {
         // this.ambientAudioHowl.volume(1);
     // }
     }
+    }
+}
+
+export class ScenePicture {
+    constructor(locationGroupID, locationMediaID, instanceId, position, visible, lookAtCamera){
+    // this.orientation = options.orientation;
+    // this.position = new THREE.Vector3();
+    // this.rotation = new THREE.Quaternion();
+        this.isVisible;
+        this.locationGroupID = locationGroupID;
+        this.locationMediaID = locationMediaID;
+    // export function ShowGroupPicture (locationGroup, position) {
+        this.pictureItem = ReturnPictureFromGroup(locationGroupID);
+        console.log("pictureITem " + this.pictureItem.orientation);
+
+        if (this.pictureItem) {
+            if (this.pictureItem.orientation == "Landscape") {
+                // landscapePanel = scene.getObjectByName('landscapePanel');
+                // const hitpos = lastRaycastHit.point;
+                //                                      hitpos.getWorldPosition(worldHitPosition);
+                if (!this.landscapePanel) {
+                    console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
+                    const planeGeometry = new THREE.PlaneGeometry(3, 2, 4, 4);
+                    // const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
+                    const planeMaterial = new THREE.MeshBasicMaterial({ color: 'white', side: THREE.DoubleSide });
+                    this.landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
+                    this.landscapePanel.name = "landscapePanel";
+                    scene.add(this.landscapePanel);
+                    // this.landscapePanel
+                    this.landscapePanel.position.set(position.x, position.y + 2,position.z );
+                    // this.landscapePanel.lookAt(camera);
+                    this.landscapePanel.visible = true;
+                    // landscapePanel.updateMatrixWorld();
+                    if (lookAtCamera) {
+                     lookAtCameraObjects.push(this.landscapePanel);
+                    }
+    
+                } else {
+                    console.log("showing a landscape panel " + position.x + position.y + position.z);
+                    this.landscapePanel.position.set(position.x, position.y + 2, position.z );
+                    // landscapePanel.lookAt(player);
+                    // this.landscapePanel.lookAt(camera);
+                   
+                    this.landscapePanel.visible = true;
+                    // landscapePanel.updateMatrixWorld();
+                    lookAtCameraObjects.push(this.landscapePanel);
+    
+                }
+                
+            } else if (this.pictureItem.orientation == "Portrait") {
+    
+                if (!this.portraitPanel) {
+                    console.log("creating a portrait panel " + position.x + " " + position.y + " " + position.z);
+                    const planeGeometry = new THREE.PlaneGeometry(2, 3, 4, 4);
+                    // const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
+                    const planeMaterial = new THREE.MeshBasicMaterial({ color: 'white', side: THREE.DoubleSide });
+                    this.portraitPanel = new THREE.Mesh(planeGeometry, planeMaterial);
+                    this.portraitPanel.name = "landscapePanel";
+                    scene.add(this.portraitPanel);
+                        this.portraitPanel.position.set(position.x, position.y + 2,position.z );
+                    // landscapePanel.lookAt(player);
+                    // this.portraitPanel.lookAt(camera);
+                    if (lookAtCamera) {
+                        lookAtCameraObjects.push(this.portraitPanel);
+                    }
+                    this.portraitPanel.visible = true;
+                    // landscapePanel.updateMatrixWorld();
+    
+                } else {
+                    console.log("showing a landscape panel " + position.x + position.y + position.z);
+                    this.portraitPanel.position.set(position.x, position.y + 2, position.z );
+                    // landscapePanel.lookAt(player);
+                    // this.portraitPanel.lookAt(camera);
+                    this.portraitPanel.visible = true;
+                     lookAtCameraObjects.push(this.portraitPanel);
+                    // landscapePanel.updateMatrixWorld();
+    
+                }
+            }
+        }
+    }
+    updatePosition(position) {
+
+        if (this.pictureItem.orientation == "Landscape") {
+    
+            if (this.landscapePanel) {
+                // console.log("showing a landscape panel " + position.x + position.y + position.z);
+                this.landscapePanel.position.set(position.x, position.y + 2, position.z );
+            }
+
+        } else if (this.pictureItem.orientation == "Portrait") {
+    
+            if (this.portraitPanel) {
+                // console.log("showing a landscape panel " + position.x + position.y + position.z);
+                this.portraitPanel.position.set(position.x, position.y + 2, position.z );
+                
+            }
+        }
+    }
+
+    updatePicture() {
+        
+        console.log("tryna update picture from group " + this.locationGroupID);
+
+        this.pictureItem = ReturnPictureFromGroup(this.locationGroupID);
+        console.log("pictureITem " + JSON.stringify(this.pictureItem));
+
+        if (this.pictureItem.orientation == "Landscape") {
+                      
+            if (this.landscapePanel) {
+                this.landscapePanel.visible = true;
+                const map = new THREE.TextureLoader().load( this.pictureItem.url );
+                this.landscapePanel.material.map = map;
+                this.landscapePanel.material.needsUpdate = true;
+            }
+
+        } else if (this.pictureItem.orientation == "Portrait") {
+    
+            if (this.portraitPanel) {
+                this.portraitPanel.visible = true;
+                const map = new THREE.TextureLoader().load( this.pictureItem.url );
+                this.portraitPanel.material.map = map;
+                this.portraitPanel.material.needsUpdate = true;
+                
+            }
+        }
+    }
+
+    hideAllPanels () {
+        if (this.landscapePanel) {
+            this.landscapePanel.visible = false;
+        }
+        if (this.portraitPanel) {
+            this.portraitPanel.visible = false;
+        }
+    }
+
+    toggleVis () {
+        this.isVisible = !this.isVisible;
+        if (!this.isVisible) {
+            this.hideAllPanels();
+        }
+        return this.isVisible;
     }
 }
