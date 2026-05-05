@@ -512,7 +512,7 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
         } else {
             scenePictureInstance = new ScenePicture(locationGroupId, locationMediaId, instanceId, position, visible, lookAtCamera)
             scenePictures[locationGroupId + "_" + instanceId] = scenePictureInstance;
-            scenePictureInstance.updatePicture();
+            // scenePictureInstance.updatePicture();
         }
 
     }
