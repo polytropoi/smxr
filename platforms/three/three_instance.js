@@ -13,12 +13,19 @@ import { scene } from './three_main.mjs';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import { locationData, activeObjex } from './three_locations.js';
 
-
+import { GetInstancedRigidbody } from './three_physics.js'
 // import { uniform, sin, range } from 'three/tsl';
 
 let sampler;
 export let surface;
 
+// export let physicsInstances;
+export let physicsInstancedBodies = [];
+export let physicsInstancedMeshes = [];
+
+export function InitPhysicsInstances (model, count, pattern, physicsMode, locationData) {
+    return new InstanceWithPattern(model, count, pattern, physicsMode, locationData);
+}
 
 export let instancedModels = [];
 export async function InitSurface () {
@@ -174,6 +181,220 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
     }
 }
 
+function randRange(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+export function InstanceWithPattern (model, count, pattern, physicsMode, locationData) {
+
+    let sampleGeometry, sampleMaterial;
+            let sampleGeos = [];
+            let sampleMats = [];
+            let instancedMeshes = [];
+            // let childCount = 0;
+            model.traverse(node => {
+            if (node.isMesh && node.material) {
+                // childCount++;
+
+                console.log("node material name " + node.material.name);
+                sampleGeometry = node.geometry;
+
+                sampleGeos.push(sampleGeometry);
+                sampleMaterial = node.material;
+                sampleMats.push(sampleMaterial);
+                
+                }
+            });
+            for (let i = 0; i < sampleMats.length; i++) {
+            
+            }
+
+         
+        // instancedBodies = [];
+        // console.log("child count for model " + sampleGeos.length + " ymod" + yMod);
+        for (let c = 0; c < sampleGeos.length; c++) {
+           const instancedMesh = new THREE.InstancedMesh(sampleGeos[c], sampleMats[c], count);
+            instancedMeshes.push(instancedMesh);
+            physicsInstancedMeshes = instancedMesh;
+        }
+        const dummy = new THREE.Object3D();
+        let position = new THREE.Vector3();
+        let theCount = 0;
+        for (let i = 0; i < count; i++) {            
+            const scale = 1.2;
+
+            const x = randRange(-10, 10);
+            const y = randRange(-10, 10);
+            const z = randRange(-10, 10);
+            // const rangedPosition = range(new THREE.Vector3(-scale, -scale, -scale), new THREE.Vector3(scale,scale,scale));
+            // console.log("ranged position " + JSON.stringify(rangedPosition));
+            dummy.position.set(x, y, z);
+          
+            dummy.updateMatrix(); // Update matrix based on position/rotation
+            for (let m = 0; m < instancedMeshes.length; m++) {
+                
+                instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+            }
+            const t = new THREE.Vector3(x,y,z);
+            // // this.instancedBodies = 
+            if (physicsMode == "dynamic") {
+                const rb = GetInstancedRigidbody(t, scale);
+                physicsInstancedBodies.push(rb);
+            }
+
+        }
+        for (let s = 0; s < instancedMeshes.length; s++) {
+            instancedMeshes[s].castShadow = true;
+            instancedMeshes[s].receiveShadow = true;
+            
+            if (locationData && locationData.locationTags && locationData.locationTags.includes("active")) {
+                activeObjex.push(this.instancedMeshes[s]);
+                this.instancedMeshes[s].userData.locationData = locationData;
+            }
+            // if (locationData && locationData.locationTags && locationData.locationTags.includes("random color")) {
+                let randomColor = new THREE.Color();
+                for (let i = 0; i < count; i++) {
+                // this.color = this.highlightColor.setHex( Math.random() * 0xffffff );
+                instancedMeshes[s].setColorAt( i, randomColor.setHex( Math.random() * 0xffffff ));
+                instancedMeshes[s].instanceColor.needsUpdate = true;
+                }
+                // this.iMesh.setColorAt( this.instanceId, this.highlightColor.setHex( Math.random() * 0xffffff ) );
+                // this.iMesh.instanceColor.needsUpdate = true;
+            // }
+            
+            scene.add(instancedMeshes[s]);
+            // physicsInstances = this.instancedMeshes[s];
+        }
+}
+export class InstanceWithPattern_ {
+    constructor(model, count, pattern, physicsMode, locationData) {
+
+        (async()=> { 
+        let sampleGeometry, sampleMaterial;
+            let sampleGeos = [];
+            let sampleMats = [];
+            this.instancedMeshes = [];
+            // let childCount = 0;
+            model.traverse(node => {
+            if (node.isMesh && node.material) {
+                // childCount++;
+
+                console.log("node material name " + node.material.name);
+                sampleGeometry = node.geometry;
+
+                sampleGeos.push(sampleGeometry);
+                sampleMaterial = node.material;
+                sampleMats.push(sampleMaterial);
+                
+                }
+            });
+            for (let i = 0; i < sampleMats.length; i++) {
+            }
+
+         
+        this.instancedBodies = [];
+        // console.log("child count for model " + sampleGeos.length + " ymod" + yMod);
+        for (let c = 0; c < sampleGeos.length; c++) {
+            const instancedMesh = new THREE.InstancedMesh(sampleGeos[c], sampleMats[c], count);
+            this.instancedMeshes.push(instancedMesh);
+        }
+        const dummy = new THREE.Object3D();
+        let position = new THREE.Vector3();
+        let theCount = 0;
+        for (let i = 0; i < count; i++) {            
+            const scale = 1.2;
+
+            const x = randRange(-10, 10);
+            const y = randRange(-10, 10);
+            const z = randRange(-10, 10);
+            // const rangedPosition = range(new THREE.Vector3(-scale, -scale, -scale), new THREE.Vector3(scale,scale,scale));
+            // console.log("ranged position " + JSON.stringify(rangedPosition));
+            dummy.position.set(x, y, z);
+          
+            dummy.updateMatrix(); // Update matrix based on position/rotation
+            for (let m = 0; m < this.instancedMeshes.length; m++) {
+                
+                this.instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+            }
+            const t = new THREE.Vector3(x,y,z);
+            // // this.instancedBodies = 
+            if (physicsMode == "dynamic") {
+                const rb = await GetInstancedRigidbody(t, scale);
+                this.instancedBodies.push(rb);
+            }
+
+        }
+        for (let s = 0; s < this.instancedMeshes.length; s++) {
+            this.instancedMeshes[s].castShadow = true;
+            this.instancedMeshes[s].receiveShadow = true;
+            
+            if (locationData && locationData.locationTags && locationData.locationTags.includes("active")) {
+                activeObjex.push(this.instancedMeshes[s]);
+                this.instancedMeshes[s].userData.locationData = locationData;
+            }
+            // if (locationData && locationData.locationTags && locationData.locationTags.includes("random color")) {
+                let randomColor = new THREE.Color();
+                for (let i = 0; i < count; i++) {
+                // this.color = this.highlightColor.setHex( Math.random() * 0xffffff );
+                this.instancedMeshes[s].setColorAt( i, randomColor.setHex( Math.random() * 0xffffff ));
+                this.instancedMeshes[s].instanceColor.needsUpdate = true;
+                }
+                // this.iMesh.setColorAt( this.instanceId, this.highlightColor.setHex( Math.random() * 0xffffff ) );
+                // this.iMesh.instanceColor.needsUpdate = true;
+            // }
+            
+            scene.add(this.instancedMeshes[s]);
+            // physicsInstances = this.instancedMeshes[s];
+        }
+      
+        return this;
+    })();
+    this.dummy = new THREE.Object3D();
+
+    this.position = new THREE.Vector3();
+    this.quaternion = new THREE.Quaternion();
+    this.matrix = new THREE.Matrix4();
+    }
+    async updatePhysics() {
+        // console.log("tryna update physics...");
+        
+        // const matrix = new THREE.Matrix4();
+        for (let i = 0; i < this.instancedBodies.length; i++) {
+                        await new Promise(r => setTimeout(r, 0));
+            const body = this.instancedBodies[i];
+            if (body) {
+                const pos = body.translation();
+                const rot = body.rotation();
+                
+                // Update dummy object with physics data
+                if (pos.y < -20) {
+                    body.setTranslation(pos.x, 20, pos.z);
+                } else {
+                // this.dummy.position.set(pos.x, pos.y, pos.z);
+                // this.dummy.quaternion.set(rot.x, rot.y, rot.z, rot.w);
+                // this.dummy.updateMatrix();
+                this.position.set(pos.x, pos.y, pos.z);
+                this.quaternion.set(rot.x, rot.y, rot.z, rot.w);
+                // this.dummy.updateMatrix();
+                this.matrix.compose(this.position, this.quaternion, new THREE.Vector3(1, 1, 1));
+                // this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);
+                this.instancedMeshes[0].setMatrixAt(i, this.matrix);
+                await new Promise(r => setTimeout(r, 0));
+            }
+            // Apply to instanced mesh
+            //  matrix.compose(position, quaternion, new THREE.Vector3(1, 1, 1));
+            // // this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);
+            // this.instancedMeshes[0].setMatrixAt(i, matrix);
+             await new Promise(r => setTimeout(r, 0));
+            }
+
+                // }
+        }
+    
+        this.instancedMeshes[0].instanceMatrix.needsUpdate = true; // Essential!
+    }
+}
+
 // export function Starfield(count, size, scale, animation) {
 
 //     const geometry = new THREE.PlaneGeometry(size, size);
@@ -284,12 +505,3 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
 //         scene.add( partic/les );
 
 // }
-
-class InstanceDataSource {
-    constructor(options){
-
-        
-        
-
-    }
-}

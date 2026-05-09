@@ -122,8 +122,7 @@ export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do firs
           
       }
       WaitAndInit();
-    } else {
-      if (useDefaultCollider) {
+    } else if (useDefaultCollider) {
         let colliderDesc = RAPIER.ColliderDesc.cuboid(150,.1,150);
         const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0,-6.1,0);
         const staticBody = await world.createRigidBody(rbDesc);
@@ -131,7 +130,8 @@ export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do firs
         collider.setRestitution(.5);
         collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
         WaitAndInit();
-      }
+    } else {
+      WaitAndInit();
     }
   }
 export async function createStaticCollider (model) { // may not be added to the scene if hidden?
@@ -582,6 +582,68 @@ export async function initDynamicObjex () {
   }
 
 }
+
+
+export function GetInstancedRigidbody(position, scale) {
+
+    // try {
+
+      // console.log("tryna create dynamic rigidbody from model " + model );
+      // await new Promise(r => setTimeout(r, 0));
+      let size = 2;
+      if (scale) {
+        size = scale;
+      }
+    //   const geometry = new THREE.SphereGeometry( size / 2, 32, 16 );
+    // //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
+    //   // const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
+
+    //   const material = getRainbowMaterial();
+    //     // const material = DotNoiseMaterial()
+    //     material.roughness = 0.25;
+    //     material.metalness = 0.5;
+    //     material.envMap = scene.environment;
+    //     material.envMapIntensity = 2;
+
+
+		// 	const mesh = new THREE.Mesh( geometry, material );
+      
+
+      const colliderSize = size;// * 1.25;
+      const range = 30;
+      // const density = size  * .5;
+      let x = Math.random() * range - range * 0.5;
+      let y = Math.random() * range - range * 0.5 + 10;
+      let z = Math.random() * range - range * 0.5;
+
+      // RIGID BODY
+      let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+              .setTranslation(position.x, position.y, position.z);
+              //  .setGravityScale(0.5);
+              // .setCcdEnabled(false);
+      let rigidbody = world.createRigidBody(rigidBodyDesc);
+      // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
+      console.log("rigidbody created with handle " + rigidbody.handle);
+      let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize); //.setDensity(density);
+      let collider = world.createCollider(colliderDesc, rigidbody);
+
+      collider.setRestitution(1.5);
+      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+
+      // // mesh.scale.setScalar(size);
+      // // scene.add(mesh);
+      // // mesh.name = "dynamic";
+      // let position = new THREE.Vector3();
+      // position = rigidbody.translation();
+      // mesh.position.copy(position);
+
+
+
+      return rigidbody;
+    // } catch (e) {
+    //   console.log("error instancedrigidbody body " + e);
+    // }
+  }
 
 export async function getDynamicBody(model, position, scale) {
 

@@ -29,7 +29,7 @@
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
 		InitAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders,
-		LoadKinematicAgentMeshes} from './three_physics.js';
+		LoadKinematicAgentMeshes, } from './three_physics.js';
 
 	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
 
@@ -39,7 +39,7 @@
 
 	import { lightMods, modLights, InitSceneLights } from './three_lights.js';
 
-	import { InitSurface, instancedModels, InstanceOnSurface, surface } from './three_instance.js';
+	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, InitPhysicsInstances, physicsInstancedMeshes, physicsInstancedBodies } from './three_instance.js';
 
 	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData } from './three_locations.js';
 
@@ -50,6 +50,10 @@
 	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText } from './three_media.js';
 	
 	import { LoadSceneInventory } from './three_inventory.js';
+	
+	import { InstanceNode } from 'three/webgpu';
+
+
 // import { GetUserInventory } from '../../connect/dialogs.js';
 // import { AnimatedSprite } from './tsl/tsl_fx.js';
 
@@ -75,6 +79,7 @@
 
 	export let selectedObjects = [];
 
+	let physicsInstances;
 	let doPostProcessing = false;
 	
 	
@@ -98,7 +103,10 @@
 	let speed = 0.0;
 	
 	let video, videomesh, handLandmarker, useHandLandmarks;
-	
+	let instancedWithPhysics = [];	
+	let instancedPosition = new THREE.Vector3();
+	let instancedQuaternion = new THREE.Quaternion();
+	let instancedMatrix = new THREE.Matrix4();
 	
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
 
@@ -154,6 +162,9 @@
 		if (settings && settings.sceneTags && settings.sceneTags.includes("no gravity") ) {
 			const gravity = {x:0, y:0, z:0};
 			await InitRapier(gravity); 
+		} else if (settings && settings.sceneTags && settings.sceneTags.includes("low gravity") ) {
+			const gravity = {x:0, y:-0.25, z:0}; //"earthlike"
+			await InitRapier(gravity); //gravityMode
 		} else {
 			const gravity = {x:0, y:-9.81, z:0}; //"earthlike"
 			await InitRapier(gravity); //gravityMode
@@ -176,6 +187,7 @@
 
 		await InitStaticObjex();  //creates default if none provided
 
+		// let notSurfaceInstanceModels = [];
 		if (surface) { // => scattering instances
 			await InitSurface();
 			console.log("instantiating on surface with models " + instancedModels.length);
@@ -212,6 +224,19 @@
 				InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 						
 			} 
+		} 
+		for (let i = 0; i < instancedModels.length; i++) { //loop again for physics or patterned instances..
+			if (instancedModels[i].locationData.locationTags.includes("dynamic") || instancedModels[i].locationData.locationTags.includes("physics")) {
+				// physicsInstances = InitPhysicsInstances(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
+				// physicsInstances.updatePhysics();
+				// physicsInstances = await new InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
+				// physicsInstances.updatePhysics();
+				InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
+				// instanceWithPhysicsInstance.updatePhysics();
+				// instancedWithPhysics.push(instanceWithPhysicsInstance);
+				// console.log("instancedWithPhysics length " + instancedWithPhysics.length);
+
+			}
 		}
 
 
@@ -516,7 +541,51 @@
 				dynamicBodies.forEach(b => 
 					b.update());
 
-				
+				// instancedWithPhysics.forEach(p =>
+				// 	p.updatePhysics());
+				// for (let i = 0; i < instancedWithPhysics.length; i++) {
+				// 	instancedWithPhysics[i].updatePhysics();
+				// }
+				if (physicsInstancedMeshes && physicsInstancedBodies.length) { //this is a class instance// nope
+							for (let i = 0; i < physicsInstancedBodies.length; i++) {
+											// await new Promise(r => setTimeout(r, 0));
+								// const body = physicsInstances.instancedBodies[i];
+								// if (body) {
+									const pos = physicsInstancedBodies[i].translation();
+									const rot = physicsInstancedBodies[i].rotation();
+
+									// Update dummy object with physics data
+									// if (pos.y < -20) {
+									// 	 physicsInstancedBodies[i].setTranslation(pos.x, 20, pos.z);
+									// } else {
+									// this.dummy.position.set(pos.x, pos.y, pos.z);
+									// this.dummy.quaternion.set(rot.x, rot.y, rot.z, rot.w);
+									// this.dummy.updateMatrix();
+									instancedPosition.set(pos.x, pos.y, pos.z);
+									instancedQuaternion.set(rot.x, rot.y, rot.z, rot.w);
+									// this.dummy.updateMatrix();
+									instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(1, 1, 1));
+									// this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);
+									physicsInstancedMeshes.setMatrixAt(i, instancedMatrix);
+
+									if (pos.y < -25) {
+									physicsInstancedBodies[i].setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+									physicsInstancedBodies[i].setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+									physicsInstancedBodies[i].setTranslation({ x: pos.x, y: 20.0, z: pos.z });
+          							}
+									// await new Promise(r => setTimeout(r, 0));
+								}
+								// Apply to instanced mesh
+								//  matrix.compose(position, quaternion, new THREE.Vector3(1, 1, 1));
+								// // this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);
+								// this.instancedMeshes[0].setMatrixAt(i, matrix);
+								//  await new Promise(r => setTimeout(r, 0));
+								// }
+					
+									// }
+							// }
+					// physicsInstances.instancedBodies;
+				}
 			
 				if (kinematicBodies.length) {
 					kinematicBodies.forEach(c => {
@@ -532,6 +601,7 @@
 				}
 
 
+				world.step(eventQueue); 
 				// npcKinematicBodies.forEach(k => 
 				// 	k.update());
 
