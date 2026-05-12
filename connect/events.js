@@ -101,7 +101,7 @@ function TimedEventListener () {
          // //  console.log(timekey);
          //          console.log("timedEventsListenerMode " + timedEventsListenerMode + " timekey " + timekey  );
          // if (timekey && timekey != NaN) {//not not a number
-            if (timedEventsListenerMode != null && timedEventsListenerMode == "Primary Audio") {
+         if (timedEventsListenerMode != null && timedEventsListenerMode == "Primary Audio") {
          // if (hasPrimaryAudio) {
             // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
             //    timeKeysIndex = 0;
@@ -116,7 +116,7 @@ function TimedEventListener () {
                }
                // let percentComplete = Math.floor((seek / duration) * 10);
                percentComplete = ((seek / duration) * 100).toFixed(2);
-               console.log("primaryAudio " + percentComplete);
+               // console.log("primaryAudio " + percentComplete);
                updatePrimaryTransportSlider(percentComplete);
                // var el = this.el; 
                // var seeking = true;
@@ -145,9 +145,9 @@ function TimedEventListener () {
                   
                // primaryAudioEl.components.primary_audio_control.updateStatus(true);
 
-               const primaryAudioTime = primaryAudioHowl.seek(); //why not use seek above
+               const primaryAudioTime = primaryAudioHowl.seek(); //why not use seek above //bc it might be nan?
                               percentComplete = ((primaryAudioTime / duration) * 100).toFixed(2);
-               console.log("primaryAudio " + percentComplete);
+               // console.log("primaryAudio " + percentComplete);
                updatePrimaryTransportSlider(percentComplete);
                // percentComplete = ((primaryAudioTime / duration) * 100).toFixed(2);
                // updatePrimaryTransportSlider(percentComplete);
@@ -157,91 +157,93 @@ function TimedEventListener () {
                //    timeKeysIndex = 0; 
                //    console.log("resetting timekeysindex!");
                // }
-              
-               if (timeKeysIndex < tkStarttimes.length) {
+               
+               if (timeKeysIndex < tkStarttimes.length) { //TODO 
                   timekey = parseFloat(tkStarttimes[timeKeysIndex]);
 
-                  if (primaryAudioTime != 0 && primaryAudioTime > timekey) {
+                  if (primaryAudioTime != 0 && (primaryAudioTime > timekey) && (primaryAudioTime < (timekey + 2))) { //TODO rollback index to closest one before scrub
                   //       // console.log(primaryAudioTime + "less than " + timekey);
                   //       //just waiting...
                   // } else {
 
-                  //  console.log(timekey);
-                           console.log("timedEventsListenerMode " + timedEventsListenerMode + " timekey " + timekey  );
-                  if (timekey && timekey != NaN) {//not not a number
+                     //  console.log(timekey);
+                              console.log("timedEventsListenerMode " + timedEventsListenerMode + " timekey " + timekey  );
+                     if (timekey && timekey != NaN) {//not not a number
 
-                  if (timeKeysIndex < tkStarttimes.length) {
-                     console.log("time delta " + (primaryAudioTime - timekey));
-                     // if ((primaryAudioTime - timekey) < 5) {
-                        console.log("TRYNA PLAY TIMEKEY "+ JSON.stringify(timeKeysData.timekeys[timeKeysIndex]) +" at primaryAudioTime "+ primaryAudioTime.toString() );
-                        PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
-                        timeKeysIndex++;
-                     // }
-                  } else {
-                     console.log("end");
-                     // if (!primaryTransportSlider) {
-                     //    clearInterval(listenerInterval);
-                     // }
+                     // if (timeKeysIndex < tkStarttimes.length) {
+                        console.log("time delta " + (primaryAudioTime - timekey));
+                        // if ((primaryAudioTime - timekey) < 5) {
+                           console.log("TRYNA PLAY TIMEKEY "+ JSON.stringify(timeKeysData.timekeys[timeKeysIndex]) +" at primaryAudioTime "+ primaryAudioTime.toString() );
+                           PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
+                           timeKeysIndex++;
+                        // }
+                  // } else {
+                  //    console.log("end");
+                  //    // if (!primaryTransportSlider) {
+                  //    //    clearInterval(listenerInterval);
+                  //    // }
                      
+                  // }
+                     }
                   }
-                  }
-               }
+               } else {
+                  timeKeysIndex = 0;
                }
             }
                // }
-            } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
-               if (videoEl != null && !videoEl.paused && timekey > 0) {
-               console.log(videoEl.currentTime + " timeKeysIndex " + timeKeysIndex + " type " + timeKeysData.timekeys[timeKeysIndex].keytype);
-                  // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
-                  //    timeKeysIndex = 0;
-                  //    // videoEl.currentTime = 0;
-                  // }
-                  if (videoEl.currentTime < 1) {
-                     timeKeysIndex = 0; 
-                     console.log("resetting timekeysindex!");
-                  }
-                  if (videoEl.currentTime <= timekey) {
-                     //prease stanby...
-                  } else {
-                     if (timeKeysIndex < tkStarttimes.length) {
-                        // console.log("vid event " + timeKeysData[timeKeysIndex]);
-                        PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
-                        timeKeysIndex++;
-                     } else {
-                        console.log("end");
-                        clearInterval(listenerInterval);
-                     }
-                  
-                  }
-               }
-            } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') { 
-            // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
-            //    timeKeysIndex = 0;
-            // }
-            if (youtubePlayer != null && youtubeIsPlaying && timekey > 0) {
-               if (youtubePlayer.getCurrentTime() <= .1) {
+         } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
+            if (videoEl != null && !videoEl.paused && timekey > 0) {
+            console.log(videoEl.currentTime + " timeKeysIndex " + timeKeysIndex + " type " + timeKeysData.timekeys[timeKeysIndex].keytype);
+               // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
+               //    timeKeysIndex = 0;
+               //    // videoEl.currentTime = 0;
+               // }
+               if (videoEl.currentTime < 1) {
                   timeKeysIndex = 0; 
                   console.log("resetting timekeysindex!");
                }
-            if (youtubePlayer.getCurrentTime() <= timekey) {
-               //    wait a scootch
-               //    console.log(youtubePlayer.getCurrentTime() + " vs " + timekey);
-               } else { 
-                  
-                  if(timeKeysIndex < tkStarttimes.length) {
-                        // console.log("FIRING " + youtubePlayer.time + " vs " + timekey);
-                     //    console.log("youtube event index " + timeKeysIndex + " " + JSON.stringify(timeKeysData.timekeys[timeKeysIndex]));
+               if (videoEl.currentTime <= timekey) {
+                  //prease stanby...
+               } else {
+                  if (timeKeysIndex < tkStarttimes.length) {
+                     // console.log("vid event " + timeKeysData[timeKeysIndex]);
                      PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
                      timeKeysIndex++;
-                     } else {
-                        console.log("end");
-                        clearInterval(listenerInterval);
-                     }
+                  } else {
+                     console.log("end");
+                     clearInterval(listenerInterval);
+                  }
+               
+               }
+            }
+         } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') { 
+         // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
+         //    timeKeysIndex = 0;
+         // }
+         if (youtubePlayer != null && youtubeIsPlaying && timekey > 0) {
+            if (youtubePlayer.getCurrentTime() <= .1) {
+               timeKeysIndex = 0; 
+               console.log("resetting timekeysindex!");
+            }
+         if (youtubePlayer.getCurrentTime() <= timekey) {
+            //    wait a scootch
+            //    console.log(youtubePlayer.getCurrentTime() + " vs " + timekey);
+            } else { 
+               
+               if(timeKeysIndex < tkStarttimes.length) {
+                     // console.log("FIRING " + youtubePlayer.time + " vs " + timekey);
+                  //    console.log("youtube event index " + timeKeysIndex + " " + JSON.stringify(timeKeysData.timekeys[timeKeysIndex]));
+                  PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
+                  timeKeysIndex++;
+                  } else {
+                     console.log("end");
+                     clearInterval(listenerInterval);
                   }
                }
-            } else {
-               console.log("no listener mode!?!@");
             }
+         } else {
+            console.log("no listener mode!?!@");
+         }
 
          // }
          // } else {

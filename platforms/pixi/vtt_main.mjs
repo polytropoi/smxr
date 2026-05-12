@@ -359,6 +359,7 @@ export function playerProfileLoaded (playerProfile) {
   
 }
 
+
 export async function GoWithIt() { //called from vtt.js
   await setup();
   await prePreLoader();

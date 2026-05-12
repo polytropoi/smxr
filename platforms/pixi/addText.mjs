@@ -142,6 +142,10 @@ export function addPlayerProfileText (app, userProfile, uicontainer) {
         setTimeout(() =>  {
             HideSplashTexts(textContainer);
         }, 4000);
+    } else {
+        setTimeout(() =>  {
+            textContainer.removeChild(playerText);
+        }, 4000);
     }
 }
 

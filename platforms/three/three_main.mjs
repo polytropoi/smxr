@@ -39,7 +39,7 @@
 
 	import { lightMods, modLights, InitSceneLights } from './three_lights.js';
 
-	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, InitPhysicsInstances, physicsInstancedMeshes, physicsInstancedBodies } from './three_instance.js';
+	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, physicsInstancedMeshes, physicsInstancedBodies } from './three_instance.js';
 
 	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData } from './three_locations.js';
 

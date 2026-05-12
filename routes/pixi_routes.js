@@ -379,6 +379,7 @@ pixi_router.get('/:_id', function (req, res) {
                         "\x22@pixi/ui\x22: \x22../main/js/pixi/pixi.ui.mjs\x22,"+
                         "\x22@pixi/filters\x22: \x22../main/js/pixi/pixi-filters.mjs\x22,"+
                         "\x22@pixi/layout\x22: \x22../main/js/pixi/layout.min.mjs\x22"+
+                        // "\x22WaveSurfer\x22: \x22https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js\x22"+
 
                         // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22"+
                         
@@ -506,9 +507,14 @@ pixi_router.get('/:_id', function (req, res) {
                     // } 
                     if (sceneData.sceneTags[i] == "show transport") {
                         showTransport = true;
-                        primaryTransportSlider = "<div class=\x22slidecontainer\x22> "+
+                        primaryTransportSlider = "<div class=\x22slidecontainer\x22 > "+
+                        
                         "<input type=\x22range\x22 min=\x221\x22 max=\x22100\x22 value=\x2250\x22 class=\x22slider\x22 id=\x22primaryTransportSlider\x22>"+
+                        "</div>"+ 
+                        "<div id=\x22waveform\x22 class=\x22waveform\x22>"+
+                        
                         "</div>";
+                        
                     }
                     if (sceneData.sceneTags[i] == "show micbutton") {
                        micButton = "<div id=\x22microphone_button\x22><i class=\x22fa-solid fa-microphone fa-2xl\x22></i></div>";
@@ -3348,6 +3354,7 @@ pixi_router.get('/:_id', function (req, res) {
 
                         micButton +
 
+                        
                         "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
                         "<div class=\x22footer\x22><div class=\x22previous-button-2\x22 id=\x22previous_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
                          "<div class=\x22next-button-2\x22 id=\x22next_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div></div>"+

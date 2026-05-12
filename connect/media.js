@@ -49,9 +49,46 @@ let transportTimeStatsEl = null;
 let youtubeState = "";
 let youtubeTitleEl = "";
 let youtubeData;
+
+
 // window.youtubeIsPlaying = youtubeIsPlaying;
 
 export const primaryTransportSlider = document.getElementById("primaryTransportSlider");
+
+// export let useWavesurfer = false;
+
+// if (settings && settings.sceneTags && settings.sceneTags.includes("wavesurfer")) {
+//   useWavesurfer = true;
+//   import WaveSurfer from 'https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js';
+// }
+
+// export function InitWavesurfer(url) { 
+//  console.log("tryna init wavesurfer");
+// const wavesurfer = WaveSurfer.create({
+//    container: '#waveform',
+//    waveColor: '#4F4A85',
+//    progressColor: '#383351',
+//    url: url,
+//     // Set a bar width
+//   barWidth: 3,
+//   // Optionally, specify the spacing between bars
+//   barGap: 2,
+//   // And the bar radius
+//   barRadius: 2,
+//   barHeight: .5
+//    });
+
+//   //  this.playToggle = false;
+//   //  wavesurfer.on('interaction', () => {
+//   //   this.playToggle = !this.playToggle;
+//   //   if (this.playToggle) {
+//   //     wavesurfer.play();
+//   //   } else {
+//   //     wavesurfer.stop();
+//   //   }
+//   //  });
+// }
+
 InitPrimaryTransportSlider();
 
 export function updatePrimaryTransportSlider(percentage) {
@@ -517,6 +554,11 @@ export function LoadPrimaryAudioHowl () {
               src: [settings.primary_mp3url],
               html5: true
           });
+
+          // if (settings && settings.sceneTags && settings.sceneTags.includes("wavesurfer")) {
+          //   useWavesurfer = true;
+          //   InitWavesurfer(settings.primary_mp3url);
+          // }
       // }
     primaryAudioHowl.load();
     if (timedEventsListenerMode == "Primary Audio") {

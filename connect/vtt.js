@@ -6,8 +6,7 @@ import {settings, profile} from "./settings.js";
 
 import {localData, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "./connect.js";
 
-
-
+import WaveSurfer from 'https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js';
 // import { Howl, Howler } from "howler";
 
 // import { Howl } from 'howler'
@@ -127,6 +126,48 @@ export let avatarName = "";
 
 // window.LocationRowClick = LocationRowClick;
 
+
+export let useWavesurfer = false;
+
+
+export function InitWavesurfer(url) { 
+ console.log("tryna init wavesurfer");
+const wavesurfer = WaveSurfer.create({
+   container: '#waveform',
+   waveColor: '#23f4ffb1',
+   progressColor: '#52ebae',
+   url: url,
+    // Set a bar width
+   barWidth: 2,
+   // Optionally, specify the spacing between bars
+   barGap: 1,
+   // And the bar radius
+   barRadius: 2,
+   barHeight: .5,
+   interact: false,          // <--- No interaction
+  dragToSeek: false,    
+  cursorColor: 'transparent'
+//   normalize: true
+   });
+
+//    wavesurfer.on('click', () => {
+// //   wavesurfer.play()
+//       ToggleWavesurferPlayback();   
+//    });
+
+  //  this.playToggle = false;
+  //  wavesurfer.on('interaction', () => {
+  //   this.playToggle = !this.playToggle;
+  //   if (this.playToggle) {
+  //     wavesurfer.play();
+  //   } else {
+  //     wavesurfer.stop();
+  //   }
+  //  });
+}
+
+
+// </script>
 $('#next_Button').on('click', function(e) {
                console.log("currentLocationIndex " +  currentLocationIndex  +" poiLocations"  + JSON.stringify(poiLocations));
                   if (sceneLocations != null && poiLocations.length > 0) { 
@@ -165,6 +206,14 @@ $(function() {
    }
 
    player = document.getElementById("player");
+
+
+if (settings && settings.sceneTags && settings.sceneTags.includes("wavesurfer")) {
+  useWavesurfer = true;
+   InitWavesurfer(settings.primary_mp3url);
+   console.log("tryna wavesurfer");
+}
+
    // player = document.getElementById("cameraRig");
    // let settingsEl = document.getElementById('settingsDataElement'); //volume, color, etc...
    // let theSettingsData = settingsEl.getAttribute('data-settings');
@@ -355,6 +404,19 @@ $(function() {
    }
 
 }); //end onload
+
+let wavesurferIsPlaying = false;
+export function ToggleWavesurferPlayback () {
+  if (WaveSurfer) {
+   wavesurferIsPlaying = !wavesurferIsPlaying;
+   if (wavesurferIsPlaying) {
+      WaveSurfer.play();
+   } else {
+      WaveSurfer.stop();
+   }
+  }
+}
+
 
 export async function ReturnMap () {
     await settings;
