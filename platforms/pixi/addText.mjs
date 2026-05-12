@@ -136,7 +136,7 @@ export function addPlayerProfileText (app, userProfile, uicontainer) {
     });
     playerText.x = app.screen.width/ 2;
     // playerText.y = app.screen.height - (app.screen.height * .2);
-    playerText.y = app.screen.height * .65;
+    playerText.y = app.screen.height * .5;
     textContainer.addChild(playerText);
     if (settings && settings.sceneTags && (settings.sceneTags.includes("hide greeting") || settings.sceneTags.includes("greeting hide"))) {
         setTimeout(() =>  {
