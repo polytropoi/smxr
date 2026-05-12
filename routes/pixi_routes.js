@@ -2181,9 +2181,9 @@ pixi_router.get('/:_id', function (req, res) {
             if (hasPrimaryAudio) {
                 if (primary_mp3url.length > 8) {
                     let html5 = "html5: true,";
-                    if (sceneResponse.scenePrimaryAudioVisualizer == true) {  //audio analysis won't work in html5 mode
-                        html5 = "html5: false,";
-                    } 
+                    // if (sceneResponse.scenePrimaryAudioVisualizer == true) {  //audio analysis won't work in html5 mode
+                    //     html5 = "html5: false,";
+                    // } 
                     primaryAudioScript = "<script>\n" +      
                     "let primaryAudioHowl = new Howl({" + //inject howler for non-streaming
                             "src: [\x22"+primary_oggurl+"\x22,\x22"+primary_mp3url+"\x22], "+html5+" ctx: true, volume: 0," + loopable +

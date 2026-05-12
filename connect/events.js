@@ -1,6 +1,6 @@
 
 import { sceneLocations, GoToNext, GoToPrevious, videoEl, localData } from "../../connect/connect.js";
-import { primaryAudioEl, youtubePlayer, youtubeIsPlaying, primaryAudioHowl, MediaTimeUpdate, currentAudioFileName, fancyTimeFormat} from "../../connect/media.js";
+import { primaryAudioEl, youtubePlayer, youtubeIsPlaying, primaryAudioHowl, MediaTimeUpdate, currentAudioFileName, fancyTimeFormat, updatePrimaryTransportSlider} from "../../connect/media.js";
 
 let timeKeysIndex = 0;
 let pauseLoops = false;
@@ -15,7 +15,8 @@ export let equip_inventory_object_event = new Event("equip-inventory-object-even
 export let drop_inventory_object_event = new Event("drop-inventory-object-event");
 // export let remove_inventory_object_event = new Event("remove-inventory-object-event"); 
 
- let duration, timeString, percentComplete, listenerInterval, seek;
+ let duration, timeString, listenerInterval, seek;
+ export let percentComplete;
 
 export let eventEl = document.createElement("div"); //reuse for various events above
 eventEl.id = "eventEl";
@@ -24,6 +25,7 @@ export let selectedPosition = {};
 export let timeKeysData = {};
 export let tkStarttimes = [];
 export let timedEventsListenerMode = "";
+// let currentPrimaryAudioTime = 0;
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
 
 
@@ -69,17 +71,22 @@ export function MapUpdate(phID) {
 //    }
 // });
 // }
-export function UpdatePrimaryTransport(value) {
+export function UpdatePrimaryTransportSlider(value) {
    const secs = primaryAudioHowl.duration() * value * .01;
    console.log("transport slider value " + value +" secs "+ secs);
       if (primaryAudioHowl) {
          // primaryAudioHowl.seek(value)
+   
+         // localStorage
+         // currentPrimaryAudioTime = secs;
+
+         console.log("seeking " + secs +  " in primaryAudioHowl");
          primaryAudioHowl.seek(secs);
       }
 }
 
 function TimedEventListener () { 
-//  console.log("TimedEventsListener " + timedEventsListenerMode + " isplaying " +primaryAudioHowl.playing());
+ console.log("TimedEventsListener " + timedEventsListenerMode + " isplaying " +primaryAudioHowl.playing() + " tkStarttimes " + tkStarttimes);
 
  timeKeysIndex = 0;
  let timekey = 0;
@@ -87,13 +94,14 @@ function TimedEventListener () {
 
  if (timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0) {
    
-   let listenerInterval = setInterval(function () {
+      let listenerInterval = setInterval(function () {
 
 
-      timekey = parseFloat(tkStarttimes[timeKeysIndex]);
-      //  console.log(timekey);
-      if (timekey && timekey != NaN) {//not not a number
-      if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
+         // timekey = parseFloat(tkStarttimes[timeKeysIndex]);
+         // //  console.log(timekey);
+         //          console.log("timedEventsListenerMode " + timedEventsListenerMode + " timekey " + timekey  );
+         // if (timekey && timekey != NaN) {//not not a number
+            if (timedEventsListenerMode != null && timedEventsListenerMode == "Primary Audio") {
          // if (hasPrimaryAudio) {
             // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
             //    timeKeysIndex = 0;
@@ -108,6 +116,8 @@ function TimedEventListener () {
                }
                // let percentComplete = Math.floor((seek / duration) * 10);
                percentComplete = ((seek / duration) * 100).toFixed(2);
+               console.log("primaryAudio " + percentComplete);
+               updatePrimaryTransportSlider(percentComplete);
                // var el = this.el; 
                // var seeking = true;
                // let timeString = "";
@@ -117,31 +127,48 @@ function TimedEventListener () {
                      //  console.log(seek + " of " + duration);
                       timeString = currentAudioFileName + "<br><span style='color: lightgreen'><strong> playing </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
                      MediaTimeUpdate(timeString, percentComplete);
+                     // updatePrimaryTransportSlider(percentComplete);
+                     
                       // if (mainTransportSlider != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
                      //       this.mainTransportSlider.value = this.percentComplete;                  
                      // }
                   } else {
                      timeString = currentAudioFileName + "<br><span style='color: red'><strong> stopped </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
                      MediaTimeUpdate(timeString, percentComplete);
+                     // updatePrimaryTransportSlider(percentComplete);
                   }
                } else {
                   timeString = currentAudioFileName + "<br><span style='color: red'><strong> stopped </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
-                     MediaTimeUpdate(timeString, MediaTimeUpdate);
+                     MediaTimeUpdate(timeString, percentComplete);
+                     //  updatePrimaryTransportSlider(percentComplete);
                }
                   
                // primaryAudioEl.components.primary_audio_control.updateStatus(true);
 
-               let primaryAudioTime = primaryAudioHowl.seek();
+               const primaryAudioTime = primaryAudioHowl.seek(); //why not use seek above
+                              percentComplete = ((primaryAudioTime / duration) * 100).toFixed(2);
+               console.log("primaryAudio " + percentComplete);
+               updatePrimaryTransportSlider(percentComplete);
+               // percentComplete = ((primaryAudioTime / duration) * 100).toFixed(2);
+               // updatePrimaryTransportSlider(percentComplete);
                // console.log(primaryAudioTime + " vs " + timekey);
                
-               if (primaryAudioTime != 0 && primaryAudioTime < .2) { //fudge in case
-                  timeKeysIndex = 0; 
-                  console.log("resetting timekeysindex!");
-               }
-               if (primaryAudioTime != 0 && primaryAudioTime < timekey) {
-                     // console.log(primaryAudioTime + "less than " + timekey);
-                     //just waiting...
-               } else {
+               // if (primaryAudioTime != 0 && primaryAudioTime < .001) { //fudge in case
+               //    timeKeysIndex = 0; 
+               //    console.log("resetting timekeysindex!");
+               // }
+              
+               if (timeKeysIndex < tkStarttimes.length) {
+                  timekey = parseFloat(tkStarttimes[timeKeysIndex]);
+
+                  if (primaryAudioTime != 0 && primaryAudioTime > timekey) {
+                  //       // console.log(primaryAudioTime + "less than " + timekey);
+                  //       //just waiting...
+                  // } else {
+
+                  //  console.log(timekey);
+                           console.log("timedEventsListenerMode " + timedEventsListenerMode + " timekey " + timekey  );
+                  if (timekey && timekey != NaN) {//not not a number
 
                   if (timeKeysIndex < tkStarttimes.length) {
                      console.log("time delta " + (primaryAudioTime - timekey));
@@ -152,38 +179,42 @@ function TimedEventListener () {
                      // }
                   } else {
                      console.log("end");
-                     clearInterval(listenerInterval);
+                     // if (!primaryTransportSlider) {
+                     //    clearInterval(listenerInterval);
+                     // }
                      
                   }
-               }
-            }
-            // }
-         } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
-            if (videoEl != null && !videoEl.paused && timekey > 0) {
-             console.log(videoEl.currentTime + " timeKeysIndex " + timeKeysIndex + " type " + timeKeysData.timekeys[timeKeysIndex].keytype);
-               // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
-               //    timeKeysIndex = 0;
-               //    // videoEl.currentTime = 0;
-               // }
-               if (videoEl.currentTime < 1) {
-                  timeKeysIndex = 0; 
-                  console.log("resetting timekeysindex!");
-               }
-               if (videoEl.currentTime <= timekey) {
-                  //prease stanby...
-               } else {
-                  if (timeKeysIndex < tkStarttimes.length) {
-                     // console.log("vid event " + timeKeysData[timeKeysIndex]);
-                     PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
-                     timeKeysIndex++;
-                  } else {
-                     console.log("end");
-                     clearInterval(listenerInterval);
                   }
-               
+               }
                }
             }
-         } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') { 
+               // }
+            } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
+               if (videoEl != null && !videoEl.paused && timekey > 0) {
+               console.log(videoEl.currentTime + " timeKeysIndex " + timeKeysIndex + " type " + timeKeysData.timekeys[timeKeysIndex].keytype);
+                  // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
+                  //    timeKeysIndex = 0;
+                  //    // videoEl.currentTime = 0;
+                  // }
+                  if (videoEl.currentTime < 1) {
+                     timeKeysIndex = 0; 
+                     console.log("resetting timekeysindex!");
+                  }
+                  if (videoEl.currentTime <= timekey) {
+                     //prease stanby...
+                  } else {
+                     if (timeKeysIndex < tkStarttimes.length) {
+                        // console.log("vid event " + timeKeysData[timeKeysIndex]);
+                        PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
+                        timeKeysIndex++;
+                     } else {
+                        console.log("end");
+                        clearInterval(listenerInterval);
+                     }
+                  
+                  }
+               }
+            } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') { 
             // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
             //    timeKeysIndex = 0;
             // }
@@ -208,8 +239,15 @@ function TimedEventListener () {
                      }
                   }
                }
+            } else {
+               console.log("no listener mode!?!@");
             }
-         }
+
+         // }
+         // } else {
+         //    console.log("no listener mode!?!@");
+         // }
+   
       }, 50);
    }
 }
@@ -217,12 +255,14 @@ function TimedEventListener () {
 export function PauseIntervals (pauseBool) {
    
    pauseLoops = pauseBool;
-   console.log("loops are paused " + pauseLoops);
+   console.log("loops are paused " + pauseLoops + " percentCOmpklete "  +percentComplete);
    timeString = currentAudioFileName + "<br><span style='color: red'><strong> stopped </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
    MediaTimeUpdate(timeString, percentComplete);
+   updatePrimaryTransportSlider(percentComplete);
 
 }
 export function ClearIntervals () {
+   console.log("tryna ClearIntervals");
    for (let i = 0; i < loopIntervals.length; i++) {
       console.log("clearing interval " + i);
       clearInterval(loopIntervals[i]);
@@ -365,20 +405,20 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
 }  //end loop event
 
 function PlayTimedEvent(timeKey) {
- console.log("tryna play timed event: " + JSON.stringify(timeKey));
+   console.log("tryna play timed event: " + JSON.stringify(timeKey));
 
- let duration = 1;
- if (timeKey.keyduration) {
-   duration = timeKey.keyduration * 1000;
- }
+   let duration = 1;
+   if (timeKey.keyduration) {
+      duration = timeKey.keyduration * 1000;
+   }
 
-      // console.log("tryna displatch beatz");
-   timed_event.details = timeKey;
-   eventEl.dispatchEvent(timed_event);
+         // console.log("tryna displatch beatz");
+      timed_event.details = timeKey;
+      eventEl.dispatchEvent(timed_event);
 
- let posObj = {};
- let rotObj = {};
- let tempLabel = "";
+   let posObj = {};
+   let rotObj = {};
+   let tempLabel = "";
    if (timeKey.keydata.toLowerCase().includes('loop')) {
       LoopTimedEvent(timeKey.keytype, timeKey.keyduration, timeKey.keydata, timeKey.keytags); //above
       // return null;
@@ -617,7 +657,7 @@ export function SetPrimaryAudioEventsData () {
 
    // timeKeysData = JSON.parse(localStorage.getItem(room+ "_timeKeys"));
    // let timekeysData = settings.sceneTimedEvents;
-   // console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
+   console.log("setting primary audio events data! " + JSON.stringify(timeKeysData));
    tkStarttimes = [];
    if (timeKeysData != undefined && timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0 )
       timeKeysData.timekeys.forEach(function (timekey) {
@@ -663,6 +703,7 @@ function SetYoutubeEventsData() {
 
 export function SetTimedEventsListenerMode(mode) {
    timedEventsListenerMode = mode;
+   console.log("timedEventsListnenerMode " + timedEventsListenerMode);
 }
 
 export function SetTimeKeysData (tkData) {
@@ -676,9 +717,9 @@ export function SetTimeKeysData (tkData) {
       if (timeKeysData.listenTo) {
          timedEventsListenerMode = timeKeysData.listenTo;
       }
-      if (timedEventsListenerMode == "Primary Audio") {
-         SetPrimaryAudioEventsData();
-      }
+      // if (timedEventsListenerMode == "Primary Audio") {
+      //    SetPrimaryAudioEventsData();
+      // }
    }
    // if (timedEventsListenerMode) 
    // SetEventTriggers();

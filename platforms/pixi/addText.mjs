@@ -1,6 +1,6 @@
 import { Text, TextStyle, Assets, Container } from 'pixi';
 import { fontFillColor, fontFillColorAlt, font1, stripExtension, app, viewport } from './vtt_main.mjs';
-
+import { settings } from '../../../connect/settings.js';
 // import { ReturnUserProfile } from '../connect/vtt.js';
 // Load font before use
 // await Assets.load({
@@ -138,10 +138,11 @@ export function addPlayerProfileText (app, userProfile, uicontainer) {
     // playerText.y = app.screen.height - (app.screen.height * .2);
     playerText.y = app.screen.height * .65;
     textContainer.addChild(playerText);
-
-            setTimeout(() =>  {
-              HideSplashTexts(textContainer);
-            }, 4000);
+    if (settings && settings.sceneTags && (settings.sceneTags.includes("hide greeting") || settings.sceneTags.includes("greeting hide"))) {
+        setTimeout(() =>  {
+            HideSplashTexts(textContainer);
+        }, 4000);
+    }
 }
 
 export function HideSplashTexts(textContainer) {

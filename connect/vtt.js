@@ -419,9 +419,9 @@ export function UpdateAvatarName(name) {
    usernameEl.innerText = avatarName;
 }
 
-export function SetTimedEventsListenerMode(mode) {
-   timedEventsListenerMode = mode;
-}
+// export function SetTimedEventsListenerMode(mode) {
+//    timedEventsListenerMode = mode;
+// }
 
 // $('#nextButton').on('click', function(e) {
 //    GoToNext();
@@ -547,21 +547,21 @@ export async function GetMatrixData() { //use matrix.org for... something
 export function SetTimeKeysData (tkData) {
    timeKeysData = tkData;
 }
-export function MediaTimeUpdate (timeString) {
-   // console.log("MediaTimeUpdate " + fancyTimeString);
-   // transportTimeStatsEl = document.getElementById("transportStats");
-   if (transportTimeStatsEl == null) {
-      transportTimeStatsEl = document.getElementById("transportStats");
-   } else {
-      transportTimeStatsEl.innerHTML = timeString;
-   }
-   modalTimeStatsEl = document.getElementById('modalTimeStats');
-   if (modalTimeStatsEl == null) {
-      } else {
-         modalTimeStatsEl.innerHTML = timeString;
-      }
+// export function MediaTimeUpdate (timeString) {
+//    // console.log("MediaTimeUpdate " + fancyTimeString);
+//    // transportTimeStatsEl = document.getElementById("transportStats");
+//    if (transportTimeStatsEl == null) {
+//       transportTimeStatsEl = document.getElementById("transportStats");
+//    } else {
+//       transportTimeStatsEl.innerHTML = timeString;
+//    }
+//    modalTimeStatsEl = document.getElementById('modalTimeStats');
+//    if (modalTimeStatsEl == null) {
+//       } else {
+//          modalTimeStatsEl.innerHTML = timeString;
+//       }
       
-   }
+//    }
    
 function ReturnModelName (_id) {
    if (_id.toString().includes("primitive_")) {

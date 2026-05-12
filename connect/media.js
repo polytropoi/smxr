@@ -3,7 +3,7 @@
 // const {Howl, Howler} = require('../node_modules/howler/dist/howler.js');
 
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData,  
-  ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals, InitAudioViz, UpdatePrimaryTransport } from "../../connect/events.js";
+  ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals, InitAudioViz, UpdatePrimaryTransportSlider, percentComplete } from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
 // import { InitAnalyzer, addAudioVizSelect, AudioVizMode } from "../vtt/vtt_audioViz.mjs";
 // import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
@@ -51,10 +51,10 @@ let youtubeTitleEl = "";
 let youtubeData;
 // window.youtubeIsPlaying = youtubeIsPlaying;
 
-const primaryTransportSlider = document.getElementById("primaryTransportSlider");
+export const primaryTransportSlider = document.getElementById("primaryTransportSlider");
 InitPrimaryTransportSlider();
 
-function updatePrimaryTransportSlider(percentage) {
+export function updatePrimaryTransportSlider(percentage) {
   // console.log("percentage " + percentage);
   primaryTransportSlider.value = parseFloat(percentage);
   
@@ -64,7 +64,8 @@ function updatePrimaryTransportSlider(percentage) {
 }
 function primaryTransportSliderInput () {
 
-  UpdatePrimaryTransport(primaryTransportSlider.value); //can't mod from here and there (events.js)
+  
+  UpdatePrimaryTransportSlider(primaryTransportSlider.value); //can't mod from here and there (events.js)
 
 }
 
@@ -248,11 +249,12 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
             // console.log("tryna set slider to " + percent);
             mainTransportSlider.value = percent * 100;
           }  
+
           if (youtube_player != null) {
             youtube_player.update_stats(fancyTimeString);
             youtube_player.slider_update(percent);
           }
-          MediaTimeUpdate(fancyTimeString);  //updates stats div and modal stats div
+          MediaTimeUpdate(fancyTimeString, percent);  //updates stats div and modal stats div
         }, 100); 
       } else if(event.data == YT.PlayerState.PAUSED) {
         //  alert('video paused');
@@ -272,12 +274,15 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
   }
 
   export function MediaTimeUpdate (timeString, percentage) {
-    // console.log("MediaTimeUpdate " + fancyTimeString);
+    // console.log("MediaTimeUpdate " + fancyTimeString+ " % " + percentage);
     // transportTimeStatsEl = document.getElementById("transportStats");
     if (transportTimeStatsEl == null) {
         transportTimeStatsEl = document.getElementById("transportStats");
     } else {
         transportTimeStatsEl.innerHTML = timeString;
+    }
+    if (primaryTransportSlider) {
+      primaryTransportSlider.value = percentage;
     }
     modalTimeStatsEl = document.getElementById('modalTimeStats');
     if (modalTimeStatsEl == null) {
@@ -288,12 +293,12 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
         if (percentage) {
           updatePrimaryTransportSlider(percentage);
         }
-   }
+  }
 
-   export function ReturnTimedEventsListenerMode () {
-    // console.log("timedEventsListenerMode " + timedEventsListenerMode);
-    return timedEventsListenerMode;
-   }
+  export function ReturnTimedEventsListenerMode () {
+  // console.log("timedEventsListenerMode " + timedEventsListenerMode);
+  return timedEventsListenerMode;
+  }
 
    //playpause
 export function TransportPlayButton () {
@@ -501,16 +506,18 @@ export function LoadPrimaryAudioHowl () {
     }
 
   if (!primaryAudioHowl && settings && settings.primary_mp3url) {
-      console.log("primaryAudioHowl is null!");
-      if (settings.hasPrimaryAudioStream) {
+      console.log("primaryAudioHowl is null, tryna load " + settings.primary_mp3url);
+      // if (settings.hasPrimaryAudioStream) {
+      //   primaryAudioHowl = new Howl({
+      //       src: [settings.primary_mp3url], html5: true
+      //   });
+      // } else {
+        updatePrimaryTransportSlider
         primaryAudioHowl = new Howl({
-            src: [settings.primary_mp3url], html5: true
-        });
-      } else {
-        primaryAudioHowl = new Howl({
-              src: [settings.primary_mp3url]
+              src: [settings.primary_mp3url],
+              html5: true
           });
-      }
+      // }
     primaryAudioHowl.load();
     if (timedEventsListenerMode == "Primary Audio") {
       SetPrimaryAudioEventsData();
@@ -567,7 +574,7 @@ export function SetAudioVizMode (mode) {
 export function PrimaryAudioPlayPauseToggle () { //this is for pixi / non-aframe modes
 
   // if (timedEventsListenerMode && timedEventsListenerMode == "Primary Audio") {
-  console.log("tryna toggle primary udio " + primaryAudioHowl);
+  console.log("tryna toggle primary udio " + primaryAudioHowl + " percentCOmplete " + percentComplete);
     if (primaryAudioHowl && primaryAudioHowl != undefined) {
       // primaryAudioHowl;
       if (!primaryAudioHowl.playing()) {
@@ -577,20 +584,22 @@ export function PrimaryAudioPlayPauseToggle () { //this is for pixi / non-aframe
           // const soundId = primaryAudioHowl.play();
           // const soundId = primaryAudioHowl.play('mysound'); // Play the sound and get its ID
           // primaryAudioElement = primaryAudioHowl._soundById(soundId); //for analyzer
-          if (settings && settings.sceneTags.includes("audioviz")) {
-            primaryAudioElement = primaryAudioHowl._sounds[0]._node;
-            // console.log("primaryAudioID " + soundId);
-            InitAudioViz();
-                
-          }
+              // if (settings && settings.sceneTags.includes("audioviz")) {
+              //   primaryAudioElement = primaryAudioHowl._sounds[0]._node;
+              //   // console.log("primaryAudioID " + soundId);
+              //   InitAudioViz();
+                    
+              // }
           // this.el.emit('primaryAudioToggle', {isPlaying : true}, true);
           // this.isPlaying = true;
+          updatePrimaryTransportSlider(percentComplete);
           PauseIntervals(false);
           isPlaying = true;
           return true;
       } else {    
           console.log("tryna pause");
           primaryAudioHowl.pause();
+          updatePrimaryTransportSlider(percentComplete);
           // this.el.emit('primaryAudioToggle', {isPlaying : false}, true);
           // this.isPlaying = false;
           PauseIntervals(true);

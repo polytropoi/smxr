@@ -23,9 +23,9 @@ export let surface;
 export let physicsInstancedBodies = [];
 export let physicsInstancedMeshes = [];
 
-export function InitPhysicsInstances (model, count, pattern, physicsMode, locationData) {
-    return new InstanceWithPattern(model, count, pattern, physicsMode, locationData);
-}
+// export function InitPhysicsInstances (model, count, pattern, physicsMode, locationData) {
+//     return new InstanceWithPattern(model, count, pattern, physicsMode, locationData);
+// }
 
 export let instancedModels = [];
 export async function InitSurface () {

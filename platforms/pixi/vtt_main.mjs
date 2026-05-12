@@ -256,7 +256,7 @@ async function prePreLoader () {
       console.log("timekeys Data1: " + JSON.stringify(timeKeysData));
    } else if (settings && settings.sceneTimedEvents) {
       console.log("timedEventsListenerMode " + settings.sceneTimedEvents.listenTo);
-      SetTimedEventsListenerMode(settings.sceneTimedEvents.listenTo);
+      // SetTimedEventsListenerMode(settings.sceneTimedEvents.listenTo);
    }
    if (settings && settings.primary_mp3url) {
       LoadPrimaryAudioHowl();
