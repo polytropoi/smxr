@@ -1,5 +1,5 @@
   import * as THREE from "three";
-  import { SplatMesh, NewSparkRenderer } from "sparkjsdev/spark";
+  import { SplatMesh, SparkRenderer } from "sparkjsdev/spark";
 import {scene, renderer} from "./threegl_main.mjs";
 
 export let splatObjex = [];
@@ -7,7 +7,7 @@ export let spark;
 
 export async function InitSpark () {
     await renderer;
-    spark = new NewSparkRenderer({ renderer });
+    spark = new SparkRenderer({ renderer });
     scene.add(spark);
 }
 
@@ -19,18 +19,18 @@ export async function initSplats () {
         // const splat = new SplatMesh({ url: splatURL });
         const splat = new SplatMesh({
           url: splatURL,
-          lod: false,
-          nonLod: true,
-          onLoad: (mesh) => {
-            mesh.enableLod = true;
-            mesh.updateGenerator();
-            console.log("!## Mesh loaded enabled LoD");
-          },
-          onProgress: (event) => {
-            if (event.type === "progress") {
-              console.log("Progress: ", event.loaded, event.total);
-            }
-          },
+          lod: true
+          // nonLod: true,
+          // onLoad: (mesh) => {
+          //   mesh.enableLod = true;
+          //   mesh.updateGenerator();
+          //   console.log("!## Mesh loaded enabled LoD");
+          // },
+          // onProgress: (event) => {
+          //   if (event.type === "progress") {
+          //     console.log("Progress: ", event.loaded, event.total);
+          //   }
+          // },
       });
       // splats.lodMaxSplats = 1 * 1048576 - 2048;
       // splats.foveate = 0.5;

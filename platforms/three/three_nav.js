@@ -773,7 +773,7 @@
         
         set action(name){ //hrm...
             //Make a copy of the clip if this is a remote player
-            console.log("new action " + name);
+            // console.log("new action " + name);
             if (this.hasAnims) {
                 if (name && this.actionName == name.toString().toLowerCase()) {
                     return;
