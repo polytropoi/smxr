@@ -469,9 +469,9 @@ aframe_router.get('/:_id', function (req, res) {
                           
                         "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
                        
-                        "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-                        "\x22@sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/0.1.10/spark.module.js\x22,"+
+                        "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.177.0/three.module.js\x22,"+
+                        "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.177.0/examples/jsm/\x22,"+
+                        "\x22@sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/0.1.8/spark.module.js\x22,"+
                         // "\x22@sparkjsdev/spark\x22: \x22https://cdn.jsdelivr.net/gh/sparkjsdev/spark@71c8358b5dae4bed0cc2647795fe6bb64152580d/dist/spark.module.js\x22,"+ 
                        
 

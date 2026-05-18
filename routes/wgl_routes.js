@@ -2,7 +2,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const express = require("express");
-const three_router = express.Router();
+const wgl_router = express.Router();
 const entities = require("entities");
 // const async = require('async'); ///goodbye to you my confusing friend...
 
@@ -47,7 +47,7 @@ function UppercaseFirst(s) {
         }
     };
     
-three_router.get("/test", function (req, res) {
+wgl_router.get("/test", function (req, res) {
     res.send("OK!");
 });    
 
@@ -71,7 +71,7 @@ function HexToRgbValues (c) {
 
  
 ////////// test / example of aframe response
-three_router.get('/simple_three', function (req, res) { 
+wgl_router.get('/simple_three', function (req, res) { 
 
     let response =
         "<!DOCTYPE html> <html lang=\x22en\x22>" +
@@ -94,7 +94,7 @@ three_router.get('/simple_three', function (req, res) {
 );
 
 ////////////////////PRIMARY /WEBXR ROUTE  e.g. /webxr/<short_id> ///////////////////
-three_router.get('/:_id', function (req, res) { 
+wgl_router.get('/:_id', function (req, res) { 
     
     var reqstring = entities.decodeHTML(req.params._id);
     console.log("NEW three SCENE REQUEST : " + reqstring);
@@ -372,31 +372,26 @@ three_router.get('/:_id', function (req, res) {
     let pixelsPerMeterVirtual = .01; //use for speed?
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
-
     let  importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
-         
+              
 
-                                "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
-                                "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+
+                        "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.module.js\x22,"+
+                        // "\x22sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/0.1.10/spark.module.js\x22,"+  
+                        // "\x22sparkjsdev/spark\x22: \x22../platforms/threegl/src/spark.module.js\x22,"+     //lod branch!!
 
-
-                            "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
-                            "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
-
-
-                            "\x22three-pathfinding\x22: \x22/platforms/three/src/three-pathfinding.module.js\x22,"+
-                            "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
-                             "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
-                             "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+
-                            
-                            
-
+                        "\x22sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/2.0.0/spark.module.js\x22,"+ 
+                       
+                             "\x22jsm/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181/examples/jsm/\x22,"+
+                            "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+
+                            "\x22three-pathfinding\x22: \x22https://unpkg.com/three-pathfinding@latest/dist/three-pathfinding.module.js\x22,"+
+                           "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
                             "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
-                          
+                            
+                                                      
+
                           
                             "}"+
                         "}</script>";
-    
                    
     
     (async () => {
@@ -1588,10 +1583,22 @@ three_router.get('/:_id', function (req, res) {
                     console.log("tryna find model " + m_id + " " + JSON.stringify(model));
 
                     if (model) {
-                    
-                        model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                        locationMdls.push(model);    
+                                        
+                        if (model.item_type == "splat") {
+                            model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
+                            locationMdls.push(model);   
+                        } else {
+                            model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                            locationMdls.push(model);   
+                        }
+        
                     }
+                    
+                    // if (model) {
+                    
+                    //     model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                    //     locationMdls.push(model);    
+                    // }
 
                 //     if (model != null && model.item_type && model.item_type == "glb" && model.filename) {
                 //         let modelURL = "";
@@ -3065,7 +3072,7 @@ three_router.get('/:_id', function (req, res) {
                     
                     importMap +
 
-                    "<script type=\x22module\x22 src=\x22../platforms/three/three_main.mjs\x22 ></script>" +
+                    "<script type=\x22module\x22 src=\x22../platforms/wgl/wgl_main.mjs\x22 ></script>" +
 
                     // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +
                     "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +
@@ -3202,4 +3209,4 @@ three_router.get('/:_id', function (req, res) {
 ///// END PRIMARY SERVERSIDE /webxr/ ROUTE //////////////////////
 
 
-export default three_router;
+export default wgl_router;

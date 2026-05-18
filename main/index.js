@@ -658,7 +658,7 @@
                         "<br>" + convertTimestamp(dateSplitter(arr[i].name)) +
                     "</div>" +
                 "</div>";
-            }  else if (ext == "spz" || ext == "ply" || ext == "splat" || ext == "ksplat") {
+            }  else if (ext == "spz" || ext == "sog" || ext == "rad" || ext == "ply" || ext == "splat" || ext == "ksplat") {
                 // glbIndex++;
                 const splatObj = arr[i];
                 html = html + 
@@ -12979,7 +12979,7 @@ function getAllPeople() {
                         " | <a target=\x22_blank\x22 href=\x22../landing/"+ response.data.short_id +"\x22>Landing Link</a>" +  
                         " | <a target=\x22_blank\x22 href=\x22../pixi/"+ response.data.short_id +"\x22>Pixi Link</a>" +                       
                         " | <a target=\x22_blank\x22 href=\x22../aframe/"+ response.data.short_id +"\x22>A-Frame Link</a>" +
-                         " | <a target=\x22_blank\x22 href=\x22../threegl/"+ response.data.short_id +"\x22>Three WebGL Link</a>" +
+                         " | <a target=\x22_blank\x22 href=\x22../wgl/"+ response.data.short_id +"\x22>Three WebGL Link</a>" +
                         " | <a target=\x22_blank\x22 href=\x22../three/"+ response.data.short_id +"\x22>Three WebGPU Link</a>" +
                         " | <a target=\x22_blank\x22 href=\x22../unity/"+ response.data.short_id +"\x22>Unity Link</a>" +
                         // " | <a target=\x22_blank\x22 href=\x22http://smxr.net/index.html?scene="+ response.data.short_id +"\x22>Unity Web Link</a>" +
@@ -13120,10 +13120,10 @@ function getAllPeople() {
                                     "<input type=\x22checkbox\x22 class=\x22active\x22 name=\x22sceneEnabledClients\x22 value=\x22aframeWeb\x22 id=\x22sceneEnabledClientTypes.aframeWeb\x22 autocomplete=\x22off\x22> Aframe WebXR " +
                                     "</label>" +
                                      "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22threeWeb\x22 id=\x22sceneEnabledClientTypes.threeWeb\x22 autocomplete=\x22off\x22> Three Web " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22threeWeb\x22 id=\x22sceneEnabledClientTypes.threeWeb\x22 autocomplete=\x22off\x22> Three WebGPU " +
                                     "</label>" +
                                     "<label class=\x22btn btn-light\x22>" +
-                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22sparkWeb\x22 id=\x22sceneEnabledClientTypes.sparkWeb\x22 autocomplete=\x22off\x22> Spark Web " +
+                                        "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22threeWebGL\x22 id=\x22sceneEnabledClientTypes.threeWebGL\x22 autocomplete=\x22off\x22> Three WebGL " +
                                     "</label>" +
                                      "<label class=\x22btn btn-light\x22>" +
                                         "<input type=\x22checkbox\x22 name=\x22sceneEnabledClients\x22 value=\x22babylonWeb\x22 id=\x22sceneEnabledClientTypes.babylonWeb\x22 autocomplete=\x22off\x22> Babylon Web " +
@@ -15236,8 +15236,8 @@ function getAllPeople() {
                         let selection = document.getElementById('sceneEnabledClientTypes.threeWeb');
                         $(selection).closest('.btn').button('toggle');
                     }  
-                    if (response.data.sceneEnabledClientTypes.sparkWeb) {
-                        let selection = document.getElementById('sceneEnabledClientTypes.sparkWeb');
+                    if (response.data.sceneEnabledClientTypes.threeWebGL) {
+                        let selection = document.getElementById('sceneEnabledClientTypes.threeWebGL');
                         $(selection).closest('.btn').button('toggle');
                     }                
                     if (response.data.sceneEnabledClientTypes.unityIOS) {
@@ -17107,7 +17107,7 @@ function getAllPeople() {
                         sceneEnabledClientTypes.maplibreWeb = document.getElementById('sceneEnabledClientTypes.maplibreWeb').checked;
                         sceneEnabledClientTypes.babylonWeb = document.getElementById('sceneEnabledClientTypes.babylonWeb').checked;
                         sceneEnabledClientTypes.threeWeb = document.getElementById('sceneEnabledClientTypes.threeWeb').checked;
-                        sceneEnabledClientTypes.sparkWeb = document.getElementById('sceneEnabledClientTypes.sparkWeb').checked;
+                        sceneEnabledClientTypes.threeWebGL = document.getElementById('sceneEnabledClientTypes.threeWebGL').checked;
                         sceneEnabledClientTypes.unityIOS = document.getElementById('sceneEnabledClientTypes.unityIOS').checked;
                         sceneEnabledClientTypes.unityAndroid = document.getElementById('sceneEnabledClientTypes.unityAndroid').checked;
                         sceneEnabledClientTypes.unityWindows = document.getElementById('sceneEnabledClientTypes.unityWindows').checked;

@@ -2,15 +2,14 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js';
 
-import {scene, renderer} from './three_main.mjs';
+import {scene, renderer} from './wgl_main.mjs';
 
-import {sunLight} from './three_lights.js';
+import {sunLight} from './wgl_lights.js';
 
-import {camera, controls} from './three_controls.js';
+import {camera, controls} from './wgl_controls.js';
 
-import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
+import { Sky } from 'three/addons/objects/Sky.js';
 
-import { color, fog, float, positionWorld, triNoise3D, positionView, normalWorld, uniform } from 'three/tsl';
 
 export function InitCustomFog() { //hrm...
 
@@ -66,8 +65,8 @@ export function InitEnvMap () {
 	
         // scene.environmentIntensity = 3;
 
-		// 1. Create a large sphere
-		if (settings.sceneUseSkybox) {	
+		if (settings.sceneUseSkybox) {
+			// 1. Create a large sphere
 			const sphereRadius = 300;
 			const sphereSegments = 60; // Higher for better quality
 			const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
@@ -78,17 +77,18 @@ export function InitEnvMap () {
 				side: THREE.BackSide // Crucial for skybox
 			});
 
+
 			// 4. Create the mesh and add to scene
 			const skySphere = new THREE.Mesh(geometry, material);
 			scene.add(skySphere);
 		}
-	}
+    }
 }
 export function InitSky() {
 
 	if (settings && settings.sceneUseDynamicSky) {
 				// Add Sky
-				const sky = new SkyMesh();
+				const sky = new Sky();
 				sky.scale.setScalar( 450000 );
 				scene.add( sky );
 
@@ -145,17 +145,17 @@ export function InitSky() {
 
 				// function guiChanged() {
 
-					sky.turbidity.value = effectController.turbidity;
-					sky.rayleigh.value = effectController.rayleigh;
-					sky.mieCoefficient.value = effectController.mieCoefficient;
-					sky.mieDirectionalG.value = effectController.mieDirectionalG;
+					// sky.turbidity.value = effectController.turbidity;
+					// sky.rayleigh.value = effectController.rayleigh;
+					// sky.mieCoefficient.value = effectController.mieCoefficient;
+					// sky.mieDirectionalG.value = effectController.mieDirectionalG;
 
-					const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
-					const theta = THREE.MathUtils.degToRad( effectController.azimuth );
+					// const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
+					// const theta = THREE.MathUtils.degToRad( effectController.azimuth );
 
-					sun.setFromSphericalCoords( 1, phi, theta );
+					// sun.setFromSphericalCoords( 1, phi, theta );
 
-					sky.sunPosition.value.copy( sun );
+					// sky.sunPosition.value.copy( sun );
 
 					sunLight.position.copy(sun);
 					renderer.toneMappingExposure = effectController.exposure;

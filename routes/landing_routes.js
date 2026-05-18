@@ -3152,11 +3152,11 @@ landing_router.get('/:_id', function (req, res) {
                                 // picLink = "<a href=\x22../maplibre/"+ sceneResponse.short_id + "\x22>";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.threeWeb == true) {
-                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../three/"+ sceneResponse.short_id + "\x22> Three </a>" + platformButtons;
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../three/"+ sceneResponse.short_id + "\x22> Three WebGPU </a>" + platformButtons;
                                 picLink = "<a href=\x22../three/"+ sceneResponse.short_id + "\x22>";
                             }
-                            if (sceneResponse.sceneEnabledClientTypes.sparkWeb == true) {
-                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../spark/"+ sceneResponse.short_id + "\x22> Spark </a>" + platformButtons;
+                            if (sceneResponse.sceneEnabledClientTypes.threeWebGL == true) {
+                                platformButtons = "<a class=\x22mx-auto btn btn-xl btn-primary float-right\x22 target=\x22_blank\x22 href=\x22../wgl/"+ sceneResponse.short_id + "\x22> Three WebGL2 </a>" + platformButtons;
                                 // picLink = "<a href=\x22../spark/"+ sceneResponse.short_id + "\x22>";
                             }
                             if (sceneResponse.sceneEnabledClientTypes.babylonWeb == true) {

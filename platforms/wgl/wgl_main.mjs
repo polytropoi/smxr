@@ -1,14 +1,6 @@
-	import * as THREE from 'three/webgpu';
+	import * as THREE from 'three';
 
-	import { color, objectPosition, screenUV, 
-		uniform, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time } from 'three/tsl';
-	
-	import { outline } from 'three/addons/tsl/display/OutlineNode.js';
-	// import { PostProcessing } from 'three/addons/nodes/PostProcessing.js';
-
-	import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
-
-	import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+;
 
 
 	import { LoadPrimaryAudioHowl, PlayTriggerWithTag, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
@@ -16,46 +8,38 @@
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 	import { userData } from '../../../connect/connect.js';
 
-	import { InitPathfinding, agents } from './three_nav.js';
+	import { InitPathfinding, agents } from './wgl_nav.js';
 
-	import { getRainbowMaterial } from './tsl/rainbow.js'
 
-	// import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
 
-	import { Starfield, CreateSprites, } from './three_fx.js';
-
-	import { ThreeDeeText, lookAtCameraObjects } from './three_ui.js';
+	import { ThreeDeeText, lookAtCameraObjects } from './wgl_ui.js';
 
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
 		InitAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders,
-		LoadKinematicAgentMeshes, } from './three_physics.js';
+		LoadKinematicAgentMeshes, } from './wgl_physics.js';
 
-	import { InitEnvMap, InitSky, InitFog } from './three_sky.js';
+	import { InitEnvMap, InitSky, InitFog } from './wgl_sky.js';
 
-		import { equippedRigidbody } from './three_actions.js';
+		import { equippedRigidbody } from './wgl_actions.js';
 
-	import { getVideo, getHandLandmarker } from './three_vision.js';
 
-	import { lightMods, modLights, InitSceneLights } from './three_lights.js';
+	import { lightMods, modLights, InitSceneLights } from './wgl_lights.js';
 
-	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, physicsInstancedMeshes, physicsInstancedBodies } from './three_instance.js';
+	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, physicsInstancedMeshes, physicsInstancedBodies } from './wgl_instance.js';
 
-	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData } from './three_locations.js';
+	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData } from './wgl_locations.js';
 
 	import Stats from './ui/stats.js';
 	
-	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './three_controls.js';
+	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgl_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText } from './three_media.js';
+	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText } from './wgl_media.js';
 	
-	import { LoadSceneInventory } from './three_inventory.js';
+	import { LoadSceneInventory } from './wgl_inventory.js';
 	
-	import { InstanceNode } from 'three/webgpu';
+	import { splatObjex, initSplats, InitSpark, spark } from './wgl_splats.js';
 
-
-// import { GetUserInventory } from '../../connect/dialogs.js';
-// import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene;
 
@@ -119,14 +103,14 @@
 
 		const three_canvas = document.getElementById("three_canvas");
 		scene = new THREE.Scene();
-		renderer = new THREE.WebGPURenderer({antialias:true, canvas: three_canvas});
+		renderer = new THREE.WebGLRenderer({antialias:true, canvas: three_canvas});
 		// renderer = new THREE.WebGPURenderer( { antialias: true } );
 				// renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setSize( window.innerWidth, window.innerHeight );
 				// renderer.setAnimationLoop( animate );
 				// renderer.toneMapping = THREE.LinearToneMapping;
 				// renderer.toneMappingExposure = 0.4;
-		await renderer.init(); 
+		// await renderer.init(); //webgpu only!
 		renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setPixelRatio( 2.0 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
@@ -179,6 +163,11 @@
 
 	export async function InitSystems() { 
 
+		if (splatObjex.length) {
+			await InitSpark();
+			// surface = surfaceObjex[0];
+			initSplats();
+		} 
 		if (navmesh) {
 			await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
 			// AssignModelsToAgents();
@@ -314,7 +303,7 @@
 
 
 		if (settings && settings.sceneTags) {
-			if (settings.sceneTags.includes("debug")) {
+			// if (settings.sceneTags.includes("debug")) {
 			// 
 					stats = new Stats();
 					stats.showPanel( 0,1,2,3 );
@@ -330,17 +319,9 @@
 			// statsContainer.domElement.style.left = '0px'; // Positioned at top-right
 			// statsContainer.domElement.style.bottom = '20px';
 
-			}
+			// }
 			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
-				const waterModule = await import ('./tsl/tsl_water.js');
-				if (settings.sceneWater.name == "water1") {
 				
-					// const waterModule = await import {Water} from './tsl/tsl_water.js'
-					water = new waterModule.Water1();
-				} else if (settings.sceneWater.name == "water2") {
-					water = new waterModule.Water2();
-				}
-								// water = waterModule.water;
 				console.log("water is " + water);
 			}
 
@@ -365,47 +346,47 @@
 		// GetUserInventory();
 		LoadSceneInventory(); //both scene and user inventories
 
-		const scenePass = pass( scene, camera );
-		const scenePassColor = scenePass.getTextureNode();
-		// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
-		// const selectedObjects = [ mesh ]; // Array of meshes to outline
-		const edgeStrength = uniform( 3.0 );
+		// const scenePass = pass( scene, camera );
+		// const scenePassColor = scenePass.getTextureNode();
+		// // const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+		// // const selectedObjects = [ mesh ]; // Array of meshes to outline
+		// const edgeStrength = uniform( 3.0 );
 
-		const edgeThickness = uniform( 1.0 );
-		const visibleEdgeColor = uniform( new THREE.Color( 0xffffff ) );
-		const hiddenEdgeColor = uniform( new THREE.Color( 0x4e3636 ) );
+		// const edgeThickness = uniform( 1.0 );
+		// const visibleEdgeColor = uniform( new THREE.Color( 0xffffff ) );
+		// const hiddenEdgeColor = uniform( new THREE.Color( 0x4e3636 ) );
 
-		// 4. Create the OutlineNode
-		const outlinePass = outline( scene, camera, { 
-			selectedObjects, 
-			edgeThickness,
-			// Add other properties as needed
-		} );
+		// // 4. Create the OutlineNode
+		// const outlinePass = outline( scene, camera, { 
+		// 	selectedObjects, 
+		// 	edgeThickness,
+		// 	// Add other properties as needed
+		// } );
 
-		// 5. Compose the final output
-		const { visibleEdge, hiddenEdge } = outlinePass;
-		const outlineColor = visibleEdge
-			.mul( visibleEdgeColor )
-			.add( hiddenEdge.mul( hiddenEdgeColor ) )
-			.mul( edgeStrength );
+		// // 5. Compose the final output
+		// const { visibleEdge, hiddenEdge } = outlinePass;
+		// const outlineColor = visibleEdge
+		// 	.mul( visibleEdgeColor )
+		// 	.add( hiddenEdge.mul( hiddenEdgeColor ) )
+		// 	.mul( edgeStrength );
 		
-		let hasBloom = false;
-		let hasOutline = false;
+		// let hasBloom = false;
+		// let hasOutline = false;
 
-		let emissivePass;
-		let bloomPass;
-		if (settings && settings.sceneTags && settings.sceneTags.includes("bloom")) {
-			hasBloom = true;
-			bloomPass = bloom( scenePassColor );
-			bloomPass.strength = .75;
-		} 
-		if (settings && settings.sceneTags && settings.sceneTags.includes("emissive bloom")) {//ouch
-			hasBloom = true;
-			// emissivePass = scenePass.getColorNode( 'emissive' ); //fragment error...
-			// bloomPass = bloom( emissivePass, 2.5, .5 );
-			bloomPass = bloom( scenePassColor );
-			bloomPass.strength = .75;
-		}
+		// let emissivePass;
+		// let bloomPass;
+		// if (settings && settings.sceneTags && settings.sceneTags.includes("bloom")) {
+		// 	hasBloom = true;
+		// 	bloomPass = bloom( scenePassColor );
+		// 	bloomPass.strength = .75;
+		// } 
+		// if (settings && settings.sceneTags && settings.sceneTags.includes("emissive bloom")) {//ouch
+		// 	hasBloom = true;
+		// 	// emissivePass = scenePass.getColorNode( 'emissive' ); //fragment error...
+		// 	// bloomPass = bloom( emissivePass, 2.5, .5 );
+		// 	bloomPass = bloom( scenePassColor );
+		// 	bloomPass.strength = .75;
+		// }
 		
 		// const bloomPass = bloom( emissivePass, 2.5, .5 );
 		// scenePassColor.add( bloomPass );
@@ -414,51 +395,51 @@
 			
 
 			// const scenePass = pass( scene, camera );
-			// const scenePassColor = scenePass.getTextureNode();
-			const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+			// // const scenePassColor = scenePass.getTextureNode();
+			// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
 
-			// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) );
-			const waterMask = objectPosition( camera ).y.greaterThan( waterLevel );
-			const scenePassColorBlurred = gaussianBlur( scenePassColor );
-			scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+			// // const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) );
+			// const waterMask = objectPosition( camera ).y.greaterThan( waterLevel );
+			// const scenePassColorBlurred = gaussianBlur( scenePassColor );
+			// scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
 
-			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
+			// const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
 
-			renderPipeline = new THREE.RenderPipeline( renderer );
+			// renderPipeline = new THREE.RenderPipeline( renderer );
 				
-			console.log('post processing with water level ' + waterLevel );
-			// postProcessing.outputNode = scenePassColor.add( bloomPass );
-			if (hasBloom) {
-				console.log("bloom with waater");
-				// postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( vignette ) ).add( bloomPass );
-				renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( bloomPass ));
-			} else {
-				renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ));
-			}
+			// console.log('post processing with water level ' + waterLevel );
+			// // postProcessing.outputNode = scenePassColor.add( bloomPass );
+			// if (hasBloom) {
+			// 	console.log("bloom with waater");
+			// 	// postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( vignette ) ).add( bloomPass );
+			// 	renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( bloomPass ));
+			// } else {
+			// 	renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ));
+			// }
 			// renderPipeline.outputNode = scenePassColor.add( bloomPass );
 		} else {
 			// const waterMask = objectPosition( camera ).y.greaterThan( -10 );
 
-			renderPipeline = new THREE.RenderPipeline( renderer );
-			// const scenePass = pass( scene, camera );
-			// const scenePassColor = scenePass.getTextureNode();
-			const scenePassColorBlurred = gaussianBlur( scenePassColor );
+			// renderPipeline = new THREE.RenderPipeline( renderer );
+			// // const scenePass = pass( scene, camera );
+			// // const scenePassColor = scenePass.getTextureNode();
+			// const scenePassColorBlurred = gaussianBlur( scenePassColor );
 
-			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
+			// const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
 			
-			scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 ); //just fake dof
-			// renderPipeline = new THREE.renderPipeline( renderer );
-			// renderPipeline.outputNode = scenePassColor.add( bloomPass );
-			if (hasBloom) {
-				// renderPipeline.outputNode = scenePassColorBlurred.add( bloomPass );
-				renderPipeline.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
-			} else if (hasOutline) {
-				// renderPipeline.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
-				renderPipeline.outputNode = outlineColor.add(scenePassColorBlurred);
-			} else {
-				console.log('post processing no water');
-				renderPipeline.outputNode = scenePassColorBlurred;
-			}
+			// scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 ); //just fake dof
+			// // renderPipeline = new THREE.renderPipeline( renderer );
+			// // renderPipeline.outputNode = scenePassColor.add( bloomPass );
+			// if (hasBloom) {
+			// 	// renderPipeline.outputNode = scenePassColorBlurred.add( bloomPass );
+			// 	renderPipeline.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
+			// } else if (hasOutline) {
+			// 	// renderPipeline.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
+			// 	renderPipeline.outputNode = outlineColor.add(scenePassColorBlurred);
+			// } else {
+			// 	console.log('post processing no water');
+			// 	renderPipeline.outputNode = scenePassColorBlurred;
+			// }
 	
 		}
 		LoadKinematicAgentMeshes();
@@ -484,7 +465,7 @@
 	export function togglePostProcessing () { //call after physics is done, elsewise... :(
 
 		doPostProcessing = !doPostProcessing;
-				console.log("tryna toggle post processing " + doPostProcessing);
+				console.log("tryna toggle post processing " + doPostProcessing + " but on webgl!?");
 	}
 
 
