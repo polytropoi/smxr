@@ -620,7 +620,7 @@ export function UpdateControls() {
     } else if (cameraMode == "Mouse Look") { //First person with no cursor lock, with mouse caster
         cameraWorldPosition.copy(player.position);
         if (navmesh && player) {
-            console.log("mouse mode update! " + JSON.stringify(cameraWorldPosition));
+            // console.log("mouse mode update! " + JSON.stringify(cameraWorldPosition));
             downcaster.ray.origin.copy(player.position);
             downcaster.ray.origin.y += 10;
 
