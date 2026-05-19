@@ -86,7 +86,7 @@ export function UpdatePrimaryTransportSlider(value) {
 }
 
 function TimedEventListener () { 
- console.log("TimedEventsListener " + timedEventsListenerMode + " isplaying " +primaryAudioHowl.playing() + " tkStarttimes " + tkStarttimes);
+ console.log("TimedEventsListener " + timedEventsListenerMode + " tkStarttimes " + tkStarttimes);
 
  timeKeysIndex = 0;
  let timekey = 0;
