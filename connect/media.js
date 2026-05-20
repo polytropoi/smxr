@@ -93,10 +93,11 @@ InitPrimaryTransportSlider();
 
 export function updatePrimaryTransportSlider(percentage) {
   // console.log("percentage " + percentage);
-  primaryTransportSlider.value = parseFloat(percentage);
-  
-  primaryTransportSlider.style.setProperty('--progress', `${percentage}%`);
-
+  if (primaryTransportSlider) {
+    primaryTransportSlider.value = parseFloat(percentage);
+    
+    primaryTransportSlider.style.setProperty('--progress', `${percentage}%`);
+  }
  
 }
 function primaryTransportSliderInput () {
@@ -320,6 +321,7 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
     }
     if (primaryTransportSlider) {
       primaryTransportSlider.value = percentage;
+      updatePrimaryTransportSlider(percentage);
     }
     modalTimeStatsEl = document.getElementById('modalTimeStats');
     if (modalTimeStatsEl == null) {
@@ -327,9 +329,9 @@ function onYouTubeIframeAPIReady () { //must be global, called when youtube embe
           modalTimeStatsEl.innerHTML = timeString;
         }
         
-        if (percentage) {
-          updatePrimaryTransportSlider(percentage);
-        }
+        // if (percentage) {
+        //   updatePrimaryTransportSlider(percentage);
+        // }
   }
 
   export function ReturnTimedEventsListenerMode () {

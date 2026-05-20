@@ -12980,7 +12980,7 @@ function getAllPeople() {
                         " | <a target=\x22_blank\x22 href=\x22../pixi/"+ response.data.short_id +"\x22>Pixi Link</a>" +                       
                         " | <a target=\x22_blank\x22 href=\x22../aframe/"+ response.data.short_id +"\x22>A-Frame Link</a>" +
                          " | <a target=\x22_blank\x22 href=\x22../wgl/"+ response.data.short_id +"\x22>Three WebGL Link</a>" +
-                        " | <a target=\x22_blank\x22 href=\x22../three/"+ response.data.short_id +"\x22>Three WebGPU Link</a>" +
+                        " | <a target=\x22_blank\x22 href=\x22../wgpu/"+ response.data.short_id +"\x22>Three WebGPU Link</a>" +
                         " | <a target=\x22_blank\x22 href=\x22../unity/"+ response.data.short_id +"\x22>Unity Link</a>" +
                         // " | <a target=\x22_blank\x22 href=\x22http://smxr.net/index.html?scene="+ response.data.short_id +"\x22>Unity Web Link</a>" +
                         " | <a target=\x22_blank\x22 href=\x22servicemedia://scene?"+ response.data.short_id +"\x22>App Link</a></h6>" +
@@ -17495,7 +17495,8 @@ function getAllPeople() {
             "</a> | <a href=\x22/landing/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Landing" +
             "</a> | <a href=\x22/pixi/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Pixi" +  
             "</a> | <a href=\x22/aframe/" + arr[i].short_id + "\x22 target=\x22_blank\x22>A-Frame" + 
-            "</a> | <a href=\x22/three/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Three" + 
+            "</a> | <a href=\x22/wgpu/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Three WebGPU" + 
+            "</a> | <a href=\x22/wgl/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Three WebGL" + 
             "</a> | <a href=\x22/unity/" + arr[i].short_id + "\x22 target=\x22_blank\x22>Unity</a><br>"  + arr[i].short_id + "</td>" +
             "<td>" + arr[i].sceneStickyness + "</td>" +
             "<td>" + arr[i].sceneShareWithPublic + "</td>" +

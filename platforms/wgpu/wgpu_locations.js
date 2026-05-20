@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 
-import {scene, InitSystems, showDebug } from './wgl_main.mjs';
+import {scene, InitSystems, showDebug } from './wgpu_main.mjs';
 
-import {SetPlayerLocation, viewportPlaceholder} from './wgl_controls.js';
+import {SetPlayerLocation, viewportPlaceholder} from './wgpu_controls.js';
 
-import {SceneObject, sceneObjects} from './wgl_actions.js';
+import {SceneObject, sceneObjects} from './wgpu_actions.js';
 
 import { SetSceneLocations, userData } from '../../../connect/connect.js';
 
@@ -12,13 +12,14 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
-import { instancedModels, createDefaultSurface, SetSurface } from './wgl_instance.js';
+import { instancedModels, createDefaultSurface, SetSurface } from './wgpu_instance.js';
 
-import { CreateLight } from './wgl_lights.js';
-import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgl_physics.js';
-import { agentModels, CreateNPCAgent, randomNavmeshPoint } from './wgl_nav.js';
+import { CreateLight } from './wgpu_lights.js';
+import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
+import { agentModels, CreateNPCAgent, randomNavmeshPoint } from './wgpu_nav.js';
+import { modelViewProjection } from 'three/tsl';
+// import { sceneObjects } from '../../connect/dialogs.js';
 
-import { splatObjex, spark } from './wgl_splats.js';
 export let locations = {};
 
 export let locationData;
@@ -56,20 +57,18 @@ export async function LoadModel(url) {
 }
 
 export function createDefaultNavmesh() {
-    console.log("tryna create default navmesh");
         const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
     //   planeGeometry.rotation.x = Math.PI / 2 * -1;
         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
         let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
         
-        navmeshObject.position.set(0,0,0);
+        // navmeshObject.position.set(0,0,0);
         // navmeshObject.scale.set(1,1,1);
         navmeshObject.rotation.x = Math.PI / 2;
         navmeshObject.updateMatrixWorld();
         navmesh = navmeshObject;
         
         scene.add(navmeshObject);
-        groundObjex.push(navmesh);
     }
 
 export function InitLocations() {
@@ -115,33 +114,25 @@ export function InitLocations() {
                                     
                                     console.log("gotsa location model! " +modelsData[m].modelURL);
                                     
-                                    if (modelsData[m].item_type == "splat") {
-                                        console.log("GOTSA SPLAT!");
-                                        let splat = {};
-                                        splat.url = modelsData[m].modelURL;
-                                        splat.locationData = locationData[i];
-                                        splatObjex.push(splat);
+                                    // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
+                                    let isActive = false;             
+                                    if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
+                                        isActive = true;
+                                    } 
+                                    const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
+                                    model = modelData.model;
+                                    console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
+                                    
+                                    if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
+                                    
+                                        locationData[i].isHidden = true;
+                                        // console.log("tryna hide model " + child.name);
+                                    }															
 
-                                    } else {
-                                        // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
-                                        let isActive = false;             
-                                        if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
-                                            isActive = true;
-                                        } 
-                                        const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
-                                        model = modelData.model;
-                                        console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
-                                        
-                                        if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
-                                        
-                                            locationData[i].isHidden = true;
-                                            // console.log("tryna hide model " + child.name);
-                                        }															
-
-                                
+                               
 
 
-                                        if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
+                                    if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
                                         // console.log("tryna instance model " + locationData[i].name);
                                         let instancedModel = {};
                                         const originalModel = await LoadModel(modelsData[m].modelURL)
@@ -164,7 +155,7 @@ export function InitLocations() {
                                     break; //only match one model per location!?
                                 }
                             }
-                        }
+                        // }
                         // } else 
 
                     
@@ -455,11 +446,11 @@ async function LoadLocationModel (url, locationData, isActive) {
         if (locationData.modelID.includes("sphere")) {
             // console.log("gotsa sphere primitive");
             const geometry = new THREE.SphereGeometry(1,16,16);
-            const material = new THREE.MeshBasicMaterial({color: 'red', transparent: true, opacity: .5});
+            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .5});
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("cube")) {
             const geometry = new THREE.BoxGeometry(1,1,1,16,16);
-            const material = new THREE.MeshBasicMaterial({color: 'red', transparent: true, opacity: .5});
+            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .5});
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("capsule")) {
             const geometry = new THREE.CapsuleGeometry( 1, 1, 4, 8, 1 );

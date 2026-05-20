@@ -220,26 +220,32 @@ function TimedEventListener () {
          // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
          //    timeKeysIndex = 0;
          // }
-         if (youtubePlayer != null && youtubeIsPlaying && timekey > 0) {
-            if (youtubePlayer.getCurrentTime() <= .1) {
-               timeKeysIndex = 0; 
-               console.log("resetting timekeysindex!");
+            console.log("tryna listen to youtube timedEvents " + youtubeIsPlaying + " " +  timekey);
+            if (timeKeysIndex < tkStarttimes.length) { //TODO 
+                  timekey = parseFloat(tkStarttimes[timeKeysIndex]);
             }
-         if (youtubePlayer.getCurrentTime() <= timekey) {
-            //    wait a scootch
-            //    console.log(youtubePlayer.getCurrentTime() + " vs " + timekey);
-            } else { 
-               
+            if (youtubePlayer != null && youtubeIsPlaying && timekey > 0) {
+               if (youtubePlayer.getCurrentTime() <= .1) {
+                  timeKeysIndex = 0; 
+                  console.log("resetting timekeysindex!");
+               }
+               if (youtubePlayer.getCurrentTime() <= timekey) {
+               //    wait a scootch
+               //    console.log(youtubePlayer.getCurrentTime() + " vs " + timekey);
+               } else { 
+                  
                if(timeKeysIndex < tkStarttimes.length) {
                      // console.log("FIRING " + youtubePlayer.time + " vs " + timekey);
                   //    console.log("youtube event index " + timeKeysIndex + " " + JSON.stringify(timeKeysData.timekeys[timeKeysIndex]));
-                  PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
-                  timeKeysIndex++;
+                     PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
+                     timeKeysIndex++;
                   } else {
                      console.log("end");
                      clearInterval(listenerInterval);
                   }
                }
+            } else {
+               // console.log("youtube not playing!");
             }
          } else {
             console.log("no listener mode!?!@");

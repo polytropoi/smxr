@@ -1510,28 +1510,28 @@ AFRAME.registerComponent('nav_mesh_controller', {
 				zscale = this.data.zscale;
 			}
 
-			let navmeshGeometry = new THREE.PlaneGeometry( xscale, zscale, 10, 10 );
+			const navmeshGeometry = new THREE.PlaneGeometry( 50, 50, 10, 10 );
 			// // navmeshGeometry.rotation.set(new THREE.Vector3( 0, 0, Math.PI / 2));
 			// // navmeshGeometry.rotateX(Math.PI / 2);
 			const navmeshMaterial = new THREE.MeshBasicMaterial( { color: "orange", wireframe: true } );
-			const navmesh = new THREE.Mesh( navmeshGeometry, navmeshMaterial );
-			this.el.setObject3D('mesh', navmesh);
-			this.mesh = navmesh;
+			this.mesh = new THREE.Mesh( navmeshGeometry, navmeshMaterial );
+			this.el.setObject3D('mesh', this.mesh);
+			navmesh = this.mesh;
 			// this.el.setAttribute("rotation", "90 0 0");
 			// this.mesh = this.el.getObject3D('mesh');
 			// this.mesh.rotation.z = Math.PI / 2;
 			// this.loadInit();
 			// this.el.setAttribute("gltf-model", "#plane150");
 			// this.el.setAttribute("position", "0 .1 0");
-			if (settings.debug) {
-				this.el.setAttribute("material", {color: "purple", wireframe: true});
-			} else {
+			// if (settings.debug) {
+				// this.el.setAttribute("material", {color: "purple", wireframe: true});
+			// } else {
 				// this.el.setAttribute("visible", false);
-			}
-			if (!this.initialized) {
+			// }
+			// if (!this.initialized) {
 				this.createRandomWaypoints();
 				// this.loadInit();
-			}
+			// }
 		} 
 			this.el.addEventListener('model-loaded', () => {
 				// this.isReady = true;
@@ -1709,7 +1709,7 @@ AFRAME.registerComponent('nav_mesh_controller', {
 			// let testPositions = [];
 			let goodWaypointCount = 0;
 			
-			if (this.mesh) {
+			if (this.el.getObject3D('mesh') && this.initialized) {
 			// this.mesh.updateMatrixWorld();
 			let raycaster = new THREE.Raycaster();
 			let testPosition = new THREE.Vector3();
@@ -1730,9 +1730,11 @@ AFRAME.registerComponent('nav_mesh_controller', {
 					testPosition.z = this.returnRandomNumber(-100, 100);
 				}
 				
-				
+				if (Number.isNaN(testPosition.x)) {
+					break;
+				}
 				raycaster.set(new THREE.Vector3(testPosition.x, testPosition.y, testPosition.z), new THREE.Vector3(0, -1, 0));
-				let results = raycaster.intersectObject(this.mesh, true);
+				let results = raycaster.intersectObject(this.el.getObject3D('mesh'), true);
 // console.log("gotsa navmesh intersect: " + results.length + " " +results[0].object.name + " " + goodWaypointCount );
 				if(results.length > 0) {
 					// this.znormal = Math.abs(results[0].face.normal.z);

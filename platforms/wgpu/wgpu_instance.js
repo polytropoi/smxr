@@ -6,14 +6,14 @@ import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, s
 
 import { settings } from '../../../connect/settings.js'; 
 
-import { scene } from './three_main.mjs';
+import { scene } from './wgpu_main.mjs';
 
 // import { surface } from './three_locations.js';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
-import { locationData, activeObjex } from './three_locations.js';
+import { locationData, activeObjex } from './wgpu_locations.js';
 
-import { GetInstancedRigidbody } from './three_physics.js'
+import { GetInstancedRigidbody } from './wgpu_physics.js'
 // import { uniform, sin, range } from 'three/tsl';
 
 let sampler;

@@ -176,24 +176,20 @@ app.use('/landing', landing_routes);
 import pixi_routes from './routes/pixi_routes.js';
 app.use('/pixi', pixi_routes);  
 
-import vtt_routes from './routes/vtt_routes.js';
+import vtt_routes from './routes/vtt_routes.js'; //deprecated
 app.use('/vtt', vtt_routes);  
 
-import three_routes from './routes/three_routes.js';
+import three_routes from './routes/three_routes.js'; //deprecated, removeable
 app.use('/three', three_routes); 
 
-// import three_routes from './routes/three_routes.js';
-app.use('/wgpu', three_routes); 
+import wgpu_routes from './routes/wgpu_routes.js';
+app.use('/wgpu', wgpu_routes); 
  
-// import threegl_routes from './routes/threegl_routes.js';
-// app.use('/threegl', threegl_routes); 
-
 import wgl_routes from './routes/wgl_routes.js';
 app.use('/wgl', wgl_routes); 
 
 
-// import wgl_routes from './routes/wgl_routes.js';
-app.use('/threegl', wgl_routes); 
+app.use('/threegl', wgl_routes); //deprecated
 
 /// uncomment to add these optional routes
 import unity_routes from './routes/unity_routes.js';
@@ -4516,66 +4512,71 @@ app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
 app.post('/scene_inventory_objex/', function(req, res) {
     console.log('tryna return scene_inventory_objex : ' + req.body.oIDs);
 
-    const iids = req.body.oIDs.map(item => {
-        return ObjectId.createFromHexString(item.toString());
-    });
+    if (req.body.oIDs != "none" && req.body.oIDs.length) {
+        const iids = req.body.oIDs.map(item => {
+            // if (item.toString())
+            return ObjectId.createFromHexString(item.toString());
+        });
 
-    (async () => {
-        try {
-            const query = {"_id": {$in: iids}};
-            const obj_items = await RunDataQuery("obj_items", "find", query);
-            let response = {};
-            let objex = [];
-            response.objex = objex;
-            console.log("gots scene inventory items length " + obj_items.length);
-            for (let obj_item of obj_items) {
+        (async () => {
+            try {
+                const query = {"_id": {$in: iids}};
+                const obj_items = await RunDataQuery("obj_items", "find", query);
+                let response = {};
+                let objex = [];
+                response.objex = objex;
+                console.log("gots scene inventory items length " + obj_items.length);
+                for (let obj_item of obj_items) {
 
-                if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) { //unused?
-                    const query = {_id: {$in: oids }};
-                    const pic_items = await RunDataQuery("image_items", "find", query);
-                    objectPictures = [];
-                // pic_items.forEach(function(picture_item) {               
-                    for (let i = 0; i < pic_items.length; i++) { 
-                        var imageItem = {};
-                        var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".thumb." + pic_items[i].filename, 6000);
-                        var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".half." + pic_items[i].filename, 6000);
-                        // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
-                        imageItem.urlThumb = urlThumb;
-                        imageItem.urlHalf = urlHalf;
-                        // imageItem.urlStandard = urlStandard;
-                        imageItem._id = pic_items[i]._id;
-                        imageItem.filename = pic_items[i].filename;
-                        objectPictures.push(imageItem);
-                        obj_item.objectPictures = objectPictures;
+                    if (obj_item.objectPictureIDs != null && obj_item.objectPictureIDs != undefined && obj_item.objectPictureIDs.length > 0) { //unused?
+                        const query = {_id: {$in: oids }};
+                        const pic_items = await RunDataQuery("image_items", "find", query);
+                        objectPictures = [];
+                    // pic_items.forEach(function(picture_item) {               
+                        for (let i = 0; i < pic_items.length; i++) { 
+                            var imageItem = {};
+                            var urlThumb = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".thumb." + pic_items[i].filename, 6000);
+                            var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + pic_items[i].userID + "/pictures/" + pic_items[i]._id + ".half." + pic_items[i].filename, 6000);
+                            // var urlStandard = s3.getSignedUrl('getObject', {Bucket: 'servicemedia', Key: "users/" + picture_item.userID + "/pictures/" + picture_item._id + ".standard." + picture_item.filename, Expires: 6000});
+                            imageItem.urlThumb = urlThumb;
+                            imageItem.urlHalf = urlHalf;
+                            // imageItem.urlStandard = urlStandard;
+                            imageItem._id = pic_items[i]._id;
+                            imageItem.filename = pic_items[i].filename;
+                            objectPictures.push(imageItem);
+                            obj_item.objectPictures = objectPictures;
+                        }
                     }
-                }
-                if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) { //the good stuff!
-                    const aids = obj_item.actionIDs.map(item => {
-                        return ObjectId.createFromHexString(item.toString());
-                    });
-                    const query = {"_id": {$in: aids}};
-                    const actions = await RunDataQuery("actions", "find", query);
-                    if (actions && actions.length) {
-                        obj_item.actions = actions;
+                    if (obj_item.actionIDs != undefined && obj_item.actionIDs.length > 0) { //the good stuff!
+                        const aids = obj_item.actionIDs.map(item => {
+                            return ObjectId.createFromHexString(item.toString());
+                        });
+                        const query = {"_id": {$in: aids}};
+                        const actions = await RunDataQuery("actions", "find", query);
+                        if (actions && actions.length) {
+                            obj_item.actions = actions;
+                        } 
                     } 
-                } 
-                if (obj_item.modelID) {
-                    const oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
-                    const query = {"_id": oo_id};
-                    const model = await RunDataQuery("models", "findOne", query);
-                    if (model) {
-                        let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                        obj_item.modelURL = url;
-                    } 
+                    if (obj_item.modelID) {
+                        const oo_id = ObjectId.createFromHexString(obj_item.modelID.toString());
+                        const query = {"_id": oo_id};
+                        const model = await RunDataQuery("models", "findOne", query);
+                        if (model) {
+                            let url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                            obj_item.modelURL = url;
+                        } 
+                    }
+                    response.objex.push(obj_item);
                 }
-                response.objex.push(obj_item);
+                res.send(response);
+            } catch (e) {
+                console.log("scene_objex_inventory error " +e);
+                res.send("scene_objex_inventory error " +e);
             }
-            res.send(response);
-        } catch (e) {
-            console.log("scene_objex_inventory error " +e);
-            res.send("scene_objex_inventory error " +e);
-        }
-    })();
+        })();
+    } else {
+        return;
+    }
 });
 
 
