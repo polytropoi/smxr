@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+import { MeshBasicNodeMaterial } from 'three/webgpu';
+
 import { settings } from '../../../connect/settings.js';
 
 import {scene, renderer} from './wgpu_main.mjs';
@@ -10,7 +12,9 @@ import {camera, controls} from './wgpu_controls.js';
 
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
-import { color, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep, vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, min, max, cameraPosition, saturate, oneMinus} from 'three/tsl';
+
+
+import { color, screenUV, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep, vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, cameraPosition, saturate, oneMinus} from 'three/tsl';
 
 
 export function InitCustomFog() { //hrm...
@@ -115,6 +119,15 @@ export function InitGrid () {
 	// scene.add(plane);
 
 }
+
+export function InitGround() {
+		const planeGeo = new THREE.PlaneGeometry(100, 100);
+		const planeMat = new THREE.MeshBasicMaterial({color: settings.sceneColor2});
+		// planeMat.colorNode = settings.sceneColor2;
+		const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+		planeMesh.rotateX(-Math.PI / 2);
+		scene.add(planeMesh);
+}
 export function InitFog() {
     if (settings && settings.sceneUseVolumetricFog) {
         console.log("doin some fog...");
@@ -123,9 +136,9 @@ export function InitFog() {
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
-        // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
-        scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
-		// scene.fog = new THREE.FogExp2( fogColor, 0.01 );
+        const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
+        // scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
+		scene.fog = new THREE.FogExp2( fogColor, fogDensity );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
     }
 }
@@ -238,6 +251,52 @@ export function InitSky() {
 					sunLight.position.copy(sun);
 					renderer.toneMappingExposure = effectController.exposure;
 // 
+		} else {	
+
+// 			const color1 = new THREE.Color(settings.sceneColor1)
+// 			const color2 = new THREE.Color(settings.sceneColor2);
+// // 			const colorTop = new THREE.Color(topHex);
+// // const colorBottom = new THREE.Color(bottomHex);
+
+// 			// 2. Create the NodeMaterial
+// 			// const gradientMaterial = new NodeMaterial();
+
+// 			// Bind colors and uv coordinates to the TSL shader graph
+// 			const topNode = uniform(color1);
+// 			const bottomNode = uniform(color2);
+// 			const vUv = uv();
+
+// 			// Mix the top & bottom colors based on the vertical Y axis
+// 			const gradientNode = mix(bottomNode, topNode, vUv.y);
+// gradientMaterial.colorNode = vec4(gradientMix, 1.0);
+			// 			console.log(settings.sceneColor1 + " " + settings.sceneColor2 + " color sky " + color2.getHex() + " + " + color1.getHex());
+			// const topColor = color(color1.getHex());    // Vibrant Blue
+			// const bottomColor = color(color2.getHex()); // Vibrant Red
+			// const c1 = parseInt(settings.sceneColor1.replace('#', '0x'));
+			// const c2 = parseInt(settings.sceneColor2.replace('#', '0x'));
+			// const topColor = color( new THREE.Color( c1 ));
+    		// const bottomColor = color( new THREE.Color( c2 ));
+			// // uv.y gives us the vertical 0.0 - 1.0 coordinate of the plane, which we use to mix the colors
+			// const gradientNode = mix(bottomColor, topColor, uv().y);
+
+			const topColor = color( settings.sceneColor2 );
+    		const bottomColor = color( settings.sceneColor1 );
+
+			// const topColor = color( 0x3a1c71 );
+    		// const bottomColor = color( 0xd76d77 );
+			    const gradientNode = mix( bottomColor, topColor, uv().y );
+
+			scene.backgroundNode = gradientNode;
+			// 4. Create Material & Mesh
+			// const material = new THREE.MeshBasicNodeMaterial({ colorNode: gradientNode });
+			// const geometry = new THREE.PlaneGeometry(2, 2);
+			// const backgroundMesh = new THREE.Mesh(geometry, material);
+
+			// // Lock the background to the back of the render layers
+			// backgroundMesh.material.depthWrite = false;
+			// backgroundMesh.renderOrder = -1;
+
+			// scene.add(backgroundMesh);
 		}
 
 	}
