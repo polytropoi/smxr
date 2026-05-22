@@ -10,7 +10,8 @@ import {camera, controls} from './wgpu_controls.js';
 
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
-import { color, fog, float, positionWorld, triNoise3D, positionView, normalWorld, uniform } from 'three/tsl';
+import { color, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep, vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, min, max, cameraPosition, saturate, oneMinus} from 'three/tsl';
+
 
 export function InitCustomFog() { //hrm...
 
@@ -35,6 +36,83 @@ export function InitCustomFog() { //hrm...
 
     scene.fogNode = fog( fogNoiseDistance.oneMinus().mix( groundColor, fogNoise ), groundFogArea );
     // scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
+
+}
+
+// // 2. Define the Infinite Grid Shader using TSL
+// const createGridMaterial = () => {
+//     const material = new THREE.MeshBasicNodeMaterial();
+//     material.transparent = true;
+
+//     // Grid properties via TSL nodes
+//     const gridScale = float(10.0); // Size of the grid cells
+//     const coords = positionGeometry.xz.div(gridScale);
+
+//     // Calculate line thickness and derivatives for smooth anti-aliasing
+//     const grid = abs(coords.fract().sub(0.5)).div(coords.fwidth());
+//     const line = min(grid.x, grid.y);
+
+//     // Fade out as the grid approaches the horizon
+//     const depth = positionGeometry.z.abs();
+//     const fadeFactor = smoothstep(1000, 100, depth);
+
+//     // Combine TSL nodes into the final fragment output
+//     const gridColor = vec3(0.5, 0.5, 0.5); // Line color
+//     const alpha = float(1.0).sub(smoothstep(0.0, 1.5, line)).mul(fadeFactor);
+
+//     material.colorNode = vec4(gridColor, alpha);
+//     return material;
+// };
+// function getGridNode(coords) {
+// 		const scale = 10.0;
+// 		const gridCoords = coords.mul(scale);
+		
+// 		// Calculate derivatives for anti-aliasing
+// 		const gridDerivative = dFdx(gridCoords).add(dFdy(gridCoords));
+// 		const gridWidth = gridDerivative.max(0.00001); // Avoid division by zero
+		
+// 		const gridAbs = fract(gridCoords.add(0.5)).abs().sub(0.5).div(gridWidth);
+// 		const line = gridAbs.min(oneMinus().clamp(0.0, 1.0));
+		
+// 		return line;
+// }
+export function InitGrid () {
+	// const grid = new InfiniteGridHelper(10, 100, 'red', 1000);
+	// scene.add(grid);
+	// grid.rotation.x = Math.PI / 2;
+
+	const size = 100;
+	const divisions = 100;
+	const gridHelper = new THREE.GridHelper( size, divisions, settings.sceneColor2, settings.sceneColor3 );
+	scene.add( gridHelper );
+	// 1. Setup WebGPU Renderer
+	
+
+	// // 3. Create a large plane for the grid to stretch across
+	// const geometry = new THREE.PlaneGeometry(10000, 10000);
+	// const material = new THREE.MeshBasicNodeMaterial({ transparent: true });
+
+	// // TSL Shader Logic for the Grid
+	// const gridAlpha = getGridNode(positionWorld.xz);
+	// material.colorNode = color(0x00ffff).mul(gridAlpha); 
+
+	// const gridScale = uniform(10.0);
+	// const thickness = uniform(0.02);
+	// const gridColor = uniform(new THREE.Color(0x444444));
+	// const backgroundColor = uniform(new THREE.Color(0x111111));
+	// const material = new THREE.MeshBasicNodeMaterial();
+	// material.colorNode = createInfiniteGridNode();
+
+	// // 5. Create a massive plane in the world
+	// const planeGeo = new THREE.PlaneGeometry(1000, 1000);
+	// // Rotate it to lay flat on the floor (X-Z axis)
+	// planeGeo.rotateX(-Math.PI / 2);
+	// const gridGeometry = new THREE.PlaneGeometry(10000, 10000);
+	// const gridMesh = new THREE.Mesh(gridGeometry, createGridMaterial());
+	// gridMesh.rotation.x = -Math.PI / 2; // Make it lay flat as a floor
+	// scene.add(gridMesh);
+	// const plane = new THREE.Mesh(planeGeo, material);
+	// scene.add(plane);
 
 }
 export function InitFog() {
@@ -160,9 +238,9 @@ export function InitSky() {
 					sunLight.position.copy(sun);
 					renderer.toneMappingExposure = effectController.exposure;
 // 
-				}
+		}
 
-			}
+	}
 
 				// const gui = renderer.inspector.createParameters( 'Settings' );
 

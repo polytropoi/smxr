@@ -83,7 +83,7 @@ export function CreateSprites (count, size, scale, animation) {
 
         // material
 
-        const material = new THREE.SpriteNodeMaterial( { 
+        const material = new THREE.SpriteMaterial( { 
             sizeAttenuation: true,  
             map: map, 
             transparent: true, 
@@ -105,17 +105,19 @@ export function CreateSprites (count, size, scale, animation) {
 // 2. Assign the uniform node to colorNode
 // material.colorNode = spriteColorUniform;
         // material.colorNode = new THREE.Color(settings.sceneColor2);
-        material.positionNode = instancedBufferAttribute( positionAttribute );
-        material.rotationNode = time.add( instanceIndex ).sin().mul(.1);
-        //   material.vertexNode = billboarding();
-        material.scaleNode = uniform( size );
+
+        // TODO position via script///
+            // material.positionNode = instancedBufferAttribute( positionAttribute );
+            // material.rotationNode = time.add( instanceIndex ).sin().mul(.1);
+            // //   material.vertexNode = billboarding();
+            // material.scaleNode = uniform( size );
         // sprites
 
         const particles = new THREE.Sprite( material );
         particles.count = count;
 
         return particles;
-        scene.add( partic/les );
+        scene.add( particles );
 
 }
 
@@ -137,7 +139,7 @@ export function CreateSprites (count, size, scale, animation) {
 
         // 4. Create the sprite material and object
         // const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, transparent: true });
-                const material = new THREE.SpriteNodeMaterial( { 
+                const material = new THREE.SpriteMaterial( { 
                     sizeAttenuation: true,  
                     map: spriteMap, 
                     transparent: true, 

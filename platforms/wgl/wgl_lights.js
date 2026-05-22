@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { scene, animatedSprites } from './wgl_main.mjs';
 
 
-// import { CreateSprites, CreateAnimatedSprite } from './wgl_fx.js';
+import { CreateSprites, CreateAnimatedSprite } from './wgl_fx.js';
 
 import { settings } from '../../../connect/settings.js';
 

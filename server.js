@@ -176,11 +176,11 @@ app.use('/landing', landing_routes);
 import pixi_routes from './routes/pixi_routes.js';
 app.use('/pixi', pixi_routes);  
 
-import vtt_routes from './routes/vtt_routes.js'; //deprecated
-app.use('/vtt', vtt_routes);  
+// import vtt_routes from './routes/vtt_routes.js'; //deprecated
+app.use('/vtt', pixi_routes);  
 
-import three_routes from './routes/three_routes.js'; //deprecated, removeable
-app.use('/three', three_routes); 
+// import three_routes from './routes/three_routes.js'; //deprecated, removeable
+app.use('/three', wgpu_routes); 
 
 import wgpu_routes from './routes/wgpu_routes.js';
 app.use('/wgpu', wgpu_routes); 
@@ -198,7 +198,7 @@ app.use('/unity', unity_routes);
 import stripe_routes from './routes/stripe_routes.js';
 app.use('/stripe', stripe_routes);
 
-// import oculus_routes from './routes/oculus_routes.js';
+// import oculus_routes from './routes/oculus_routes.js'; 
 // app.use('/oculus', oculus_routes)
 
 

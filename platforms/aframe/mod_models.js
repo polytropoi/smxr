@@ -166,9 +166,12 @@ AFRAME.registerComponent('mod_model', {
           
           }
         }
-        if (this.data.eventData.toLowerCase().includes("agent")) { 
+        if (this.data.eventData.toLowerCase().includes("agent") || this.data.markerType == "character") { 
           this.isNavAgent = true;
           this.navAgentController = this.el.components.nav_agent_controller;
+          if (!this.navAgentController) {
+            this.el.setAttribute("nav_agent_controller", "snapToWaypoint", false);  
+          }
     
         } 
         if (this.data.tags.includes("callout") || this.data.eventData.toLowerCase().includes("callout")) {
@@ -2084,41 +2087,41 @@ AFRAME.registerComponent('mod_model', {
           let results = raycaster.intersectObject(surface.getObject3D('mesh'), true);
   
           if(results.length > 0) {
-            let scale = this.returnRandomNumber(.5, 1.5);
-            // console.log("gotsa scatterPosition for model " + this.data.modelID+ " intersect: " + results.length + " " +results[0].object.name + "scatterCount " + scatterCount + " vs count " + count +  " scale " + this.scale);
-            testPosition.x = results[0].point.x.toFixed(2); //snap y of waypoint to navmesh y
-            testPosition.y = results[0].point.y.toFixed(2) + this.data.ypos; //snap y of waypoint to navmesh y
-            testPosition.z = results[0].point.z.toFixed(2); //snap y of waypoint to navmesh y
-            let scatteredEl = document.createElement("a-entity"); 
-            scatteredEl.setAttribute("position", testPosition);
-            scatteredEl.setAttribute("gltf-model", "#" + this.data.modelID);
-            let eventData = this.data.eventData.replace("scatter", ""); //prevent infinite recursion!
+              let scale = this.returnRandomNumber(.5, 1.5);
+              // console.log("gotsa scatterPosition for model " + this.data.modelID+ " intersect: " + results.length + " " +results[0].object.name + "scatterCount " + scatterCount + " vs count " + count +  " scale " + this.scale);
+              testPosition.x = results[0].point.x.toFixed(2); //snap y of waypoint to navmesh y
+              testPosition.y = results[0].point.y.toFixed(2) + this.data.ypos; //snap y of waypoint to navmesh y
+              testPosition.z = results[0].point.z.toFixed(2); //snap y of waypoint to navmesh y
+              let scatteredEl = document.createElement("a-entity"); 
+              scatteredEl.setAttribute("position", testPosition);
+              scatteredEl.setAttribute("gltf-model", "#" + this.data.modelID);
+              let eventData = this.data.eventData.replace("scatter", ""); //prevent infinite recursion!
 
-            scatteredEl.setAttribute("mod_model", {eventData: eventData, markerType: this.data.markerType, xscale: this.data.xscale * scale, yscale: this.data.yscale * scale, zscale: this.data.zscale * scale, ypos: this.data.ypos, tags: this.data.tags, description: this.data.description, modelID: this.data.modelID});
-            scatteredEl.setAttribute("shadow", {cast: true, receive: true});
-            scatteredEl.classList.add("envMap");
-            scatteredEl.id = this.data.modelID+ "_scattered_" + i.toString();
-            // if (this.data.markerType != "character") { //messes up navmeshing..
-              
-              scatteredEl.setAttribute("scale", {x: this.scale * scale, y: this.scale * scale, z: this.scale * scale});
-              // scatteredEl.setAttribute("scale", {x: scale, y:scale, z: scale})
+              scatteredEl.setAttribute("mod_model", {eventData: eventData, markerType: this.data.markerType, xscale: this.data.xscale * scale, yscale: this.data.yscale * scale, zscale: this.data.zscale * scale, ypos: this.data.ypos, tags: this.data.tags, description: this.data.description, modelID: this.data.modelID});
+              scatteredEl.setAttribute("shadow", {cast: true, receive: true});
+              scatteredEl.classList.add("envMap");
+              scatteredEl.id = this.data.modelID+ "_scattered_" + i.toString();
+              // if (this.data.markerType != "character") { //messes up navmeshing..
+                
+                scatteredEl.setAttribute("scale", {x: this.scale * scale, y: this.scale * scale, z: this.scale * scale});
+                // scatteredEl.setAttribute("scale", {x: scale, y:scale, z: scale})
 
-            // }
-            if ((settings && settings.useArParent) || (this.data.tags && (this.data.tags.toLowerCase().includes("ar child") || this.data.tags.toLowerCase().includes("archild")))) {
-              ar_parentEl.appendChild(scatteredEl);
-            } else {
-              this.el.sceneEl.appendChild(scatteredEl);
-            }
+              // }
+              if ((settings && settings.useArParent) || (this.data.tags && (this.data.tags.toLowerCase().includes("ar child") || this.data.tags.toLowerCase().includes("archild")))) {
+                ar_parentEl.appendChild(scatteredEl);
+              } else {
+                this.el.sceneEl.appendChild(scatteredEl);
+              }
 
-            scatterCount++;
+              scatterCount++;
 
-            if (scatterCount > count) {
-              clearInterval(interval);
-              break;
+              if (scatterCount > count) {
+                clearInterval(interval);
+                break;
               } else {
                 break;
               }
-                
+                  
             } else {
               console.log('bad testPosition ' + JSON.stringify(testPosition));
               // waypoints.splice(i, 1);

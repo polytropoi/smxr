@@ -220,7 +220,7 @@ function TimedEventListener () {
          // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
          //    timeKeysIndex = 0;
          // }
-            console.log("tryna listen to youtube timedEvents " + youtubeIsPlaying + " " +  timekey);
+            // console.log("tryna listen to youtube timedEvents " + youtubeIsPlaying + " " +  timekey);
             if (timeKeysIndex < tkStarttimes.length) { //TODO 
                   timekey = parseFloat(tkStarttimes[timeKeysIndex]);
             }

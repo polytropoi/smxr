@@ -199,7 +199,8 @@ wgpu_router.get('/:_id', function (req, res) {
     var playerPosition = "0 1.6 0";
     let playerPositions = [];
     var playerRotation = "0 0 0";
-    let aframeEnvironment = "";
+    let sceneEnvironmentSettings = {};
+    // let infiniteGridScript = "";
     let ambientLight = "";
     let htmltext = "";
     let styleIncludes = "";
@@ -350,7 +351,7 @@ wgpu_router.get('/:_id', function (req, res) {
     // let blinkScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-blink-controls.min.js\x22></script>"
     let blinkScript = "";
     let brownianScript = "";
-    let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
+    // let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
     let enviromentScript = ""; //for aframe env component
     let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
@@ -1007,105 +1008,117 @@ wgpu_router.get('/:_id', function (req, res) {
             if (!sceneResponse.sceneEnvironmentPreset && sceneResponse.sceneWebXREnvironment) {
                 sceneResponse.sceneEnvironmentPreset = sceneResponse.sceneWebXREnvironment; //the old setting is still out there!
             }
+
             if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) {
-
-                webxrEnv = sceneResponse.sceneEnvironmentPreset;
-                enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
-                let ground = "ground: hills;";
-                let dressing = "";
-                let skycolor = "";
-                let groundcolor = "";
-                let groundcolor2 = "";
-                let dressingcolor = "";
-                let horizoncolor = "";
+                sceneEnvironmentSettings.preset = sceneResponse.sceneEnvironmentPreset;
+                sceneEnvironmentSettings.useFloorPlane = sceneResponse.sceneUseFloorPlane;
+                sceneEnvironmentSettings.floorPlaneTexture = sceneResponse.sceneFloorplaneTexture;
+                // infiniteGridScript = "<script src=\x22../platforms/wgl/src/InfiniteGridHelper.js\x22></script>";
+                // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
+                //      sceneEnvironmentSettings.dressing = false;
+                // }
                 
-                let fog = "";
-                let tweakColors = "";
-                let hasColorMods = false;
-                //if any of the default colors have changed, use them
-                if (sceneResponse.sceneColor1 != "#808080" || sceneResponse.sceneColor2 != "#808080" || sceneResponse.sceneColor3 != "#808080" || sceneResponse.sceneColor1 != "#808080") {
-                    hasColorMods = true;
-                }
-                if (webxrEnv == "none") {
-                    ground = "ground: none;"
-                }
-
-                if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
-                    dressing = "dressing: none;"
-                }
-                
-                if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "none") {
-                    ground = "ground: none;"
-                    dressing = "dressing: none;"
-                } else if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "flat") {
-                    ground = "ground: flat; dressing: none;"
-                    dressing = "dressing: none;"
-                } else if  (sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.length > 3) {
-                    ground = "ground: " + sceneResponse.sceneFloorplaneTexture.toLowerCase() +"; "; //needs refactor to...?
-                }
-
-                if (sceneResponse.sceneUseDynamicShadows) {
-                    shadow = "shadow: true; shadowSize: 50;"
-                } else {
-                    shadow = " shadow: false ";
-                }
-                
-                if (sceneResponse.sceneTweakColors) {
-                    // tweakColors = "mod-colors"; //need to animate
-                    // envLighting = "lighting: none";
-                }
-                
-                if (!sceneResponse.sceneUseDynamicSky) {
-                    envLighting = "lighting: none";
-                }
-                
-                if (sceneResponse.sceneUseSceneFog) {
-                    let fogDistance = sceneResponse.sceneSkyRadius / 2 
-                    fogSettings = "fog=\x22type: exponential; density:" +sceneResponse.sceneGlobalFogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
-                    fog = "fog: " +sceneResponse.sceneGlobalFogDensity+ ";";
-                } else {
-                    fogSettings = "";
-                    fog = "";
-                }
-                
-                if (hasColorMods && sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3 && sceneResponse.sceneColorizeSky) {
-                    skycolor = "skyColor: " + sceneResponse.sceneColor1 + ";";
-                }
-                
-                if (hasColorMods && sceneResponse.sceneColor2 != null && sceneResponse.sceneColor2.length > 3 && sceneResponse.sceneColorizeSky) {  
-                    horizoncolor = "horizonColor: " + sceneResponse.sceneColor2 + ";";
-                } 
-                if (hasColorMods && sceneResponse.sceneColor3 != null && sceneResponse.sceneColor3.length > 3) { 
-                    groundcolor = "groundColor: " + sceneResponse.sceneColor3 + ";";
-                }
-                if (hasColorMods && sceneResponse.sceneColor4 != null && sceneResponse.sceneColor4.length > 3) {
-                    dressingcolor = "dressingColor: " + sceneResponse.sceneColor4 + ";";
-                    groundcolor2 = "groundColor2: " + sceneResponse.sceneColor4 + ";";
-                }
-
-                aframeEnvironment = "<div id=\x22enviroEl\x22 environment=\x22preset: "+webxrEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
-                " "+envLighting+";\x22 hide-on-enter-ar "+tweakColors+"></div>";
-
-            } else {
-                if (sceneResponse.sceneUseDynamicSky) {
-                    if (sceneResponse.sceneUseDynamicShadows) {
-                        shadow = " light=\x22castShadow: true\x22 ";
-                    }
-
-                    if (sceneResponse.sceneSunVector) {
-                        sunVector = sceneResponse.sceneSunVector;
-                    }
-                    if (sceneResponse.sceneSunIntensity) {
-                        intensity = sceneResponse.sceneSunIntensity;
-                    }
-
-                    let skyRad = parseInt(sceneResponse.sceneSkyRadius) - (parseInt(sceneResponse.sceneSkyRadius) * .2);
-                    skySettings =  "<a-sky hide-on-enter-ar id=\x22skyEl\x22 color=\x22" + sceneResponse.sceneColor1 + "\x22 radius=\x22" + skyRad + "\x22 mod_sky=\x22enabled: true; color: "+sceneResponse.sceneColor1+";\x22></a-sky>";
-                    lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22"+sceneResponse.sceneColor1+"\x22 "+
-                    "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><div id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></div></a-light>" +
-                    "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
-                }
             }
+            // if (sceneResponse.sceneEnvironmentPreset != null && sceneResponse.sceneEnvironmentPreset != "none" && sceneResponse.sceneEnvironmentPreset != "" ) { //nah, all for aframe..
+
+            
+                // webxrEnv = sceneResponse.sceneEnvironmentPreset;
+                // enviromentScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-environment-component_m3.js\x22></script>";
+                // let ground = "ground: hills;";
+                // let dressing = "";
+                // let skycolor = "";
+                // let groundcolor = "";
+                // let groundcolor2 = "";
+                // let dressingcolor = "";
+                // let horizoncolor = "";
+                
+                // let fog = "";
+                // let tweakColors = "";
+                // let hasColorMods = false;
+                // //if any of the default colors have changed, use them
+                // if (sceneResponse.sceneColor1 != "#808080" || sceneResponse.sceneColor2 != "#808080" || sceneResponse.sceneColor3 != "#808080" || sceneResponse.sceneColor1 != "#808080") {
+                //     hasColorMods = true;
+                // }
+                // if (webxrEnv == "none") {
+                //     ground = "ground: none;"
+                // }
+
+                // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
+                //     dressing = "dressing: none;"
+                // }
+                
+                // if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "none") {
+                //     ground = "ground: none;"
+                //     dressing = "dressing: none;"
+                // } else if (sceneResponse.sceneUseFloorPlane && sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.toLowerCase() == "flat") {
+                //     ground = "ground: flat; dressing: none;"
+                //     dressing = "dressing: none;"
+                // } else if  (sceneResponse.sceneFloorplaneTexture != null && sceneResponse.sceneFloorplaneTexture.length > 3) {
+                //     ground = "ground: " + sceneResponse.sceneFloorplaneTexture.toLowerCase() +"; "; //needs refactor to...?
+                // }
+
+                // if (sceneResponse.sceneUseDynamicShadows) {
+                //     shadow = "shadow: true; shadowSize: 50;"
+                // } else {
+                //     shadow = " shadow: false ";
+                // }
+                
+                // if (sceneResponse.sceneTweakColors) {
+                //     // tweakColors = "mod-colors"; //need to animate
+                //     // envLighting = "lighting: none";
+                // }
+                
+                // if (!sceneResponse.sceneUseDynamicSky) {
+                //     envLighting = "lighting: none";
+                // }
+                
+                // if (sceneResponse.sceneUseSceneFog) {
+                //     let fogDistance = sceneResponse.sceneSkyRadius / 2 
+                //     fogSettings = "fog=\x22type: exponential; density:" +sceneResponse.sceneGlobalFogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
+                //     fog = "fog: " +sceneResponse.sceneGlobalFogDensity+ ";";
+                // } else {
+                //     fogSettings = "";
+                //     fog = "";
+                // }
+                
+                // if (hasColorMods && sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3 && sceneResponse.sceneColorizeSky) {
+                //     skycolor = "skyColor: " + sceneResponse.sceneColor1 + ";";
+                // }
+                
+                // if (hasColorMods && sceneResponse.sceneColor2 != null && sceneResponse.sceneColor2.length > 3 && sceneResponse.sceneColorizeSky) {  
+                //     horizoncolor = "horizonColor: " + sceneResponse.sceneColor2 + ";";
+                // } 
+                // if (hasColorMods && sceneResponse.sceneColor3 != null && sceneResponse.sceneColor3.length > 3) { 
+                //     groundcolor = "groundColor: " + sceneResponse.sceneColor3 + ";";
+                // }
+                // if (hasColorMods && sceneResponse.sceneColor4 != null && sceneResponse.sceneColor4.length > 3) {
+                //     dressingcolor = "dressingColor: " + sceneResponse.sceneColor4 + ";";
+                //     groundcolor2 = "groundColor2: " + sceneResponse.sceneColor4 + ";";
+                // }
+
+                // aframeEnvironment = "<div id=\x22enviroEl\x22 environment=\x22preset: "+webxrEnv+"; groundYScale: 5; playArea: 1.5; "+ground+" "+groundcolor+" "+groundcolor2+" "+dressing+" "+fog+" "+shadow+" "+dressingcolor+" "+skycolor+" "+horizoncolor+
+                // " "+envLighting+";\x22 hide-on-enter-ar "+tweakColors+"></div>";
+
+            // } else {
+                // if (sceneResponse.sceneUseDynamicSky) {
+                //     if (sceneResponse.sceneUseDynamicShadows) {
+                //         shadow = " light=\x22castShadow: true\x22 ";
+                //     }
+
+                //     if (sceneResponse.sceneSunVector) {
+                //         sunVector = sceneResponse.sceneSunVector;
+                //     }
+                //     if (sceneResponse.sceneSunIntensity) {
+                //         intensity = sceneResponse.sceneSunIntensity;
+                //     }
+
+                //     let skyRad = parseInt(sceneResponse.sceneSkyRadius) - (parseInt(sceneResponse.sceneSkyRadius) * .2);
+                //     skySettings =  "<a-sky hide-on-enter-ar id=\x22skyEl\x22 color=\x22" + sceneResponse.sceneColor1 + "\x22 radius=\x22" + skyRad + "\x22 mod_sky=\x22enabled: true; color: "+sceneResponse.sceneColor1+";\x22></a-sky>";
+                //     lightEntities = "<a-light visible=\x22true\x22 show-in-ar-mode id=\x22real-light\x22 type=\x22directional\x22 "+shadow+" position=\x221 1 1\x22 color=\x22"+sceneResponse.sceneColor1+"\x22 "+
+                //     "groundColor=\x22"+sceneResponse.sceneColor2+"\x22 intensity=\x221.5\x22 target=\x22#directionaltarget\x22><div id=\x22directionaltarget\x22 position=\x22"+sunVector+"\x22></div></a-light>" +
+                //     "<a-light type='ambient' intensity=\x22.5\x22 color='" + sceneResponse.sceneColor2 + "'></a-light>";    
+                // }
+            // }
             sceneResponse.scenePostcards = sceneData.scenePostcards;
             if (sceneResponse.sceneColor1 != null && sceneResponse.sceneColor1.length > 3) {
                 //
@@ -2842,7 +2855,8 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.sceneDescription = sceneResponse.sceneDescription;
                     settings.sceneEventStart = sceneResponse.sceneEventStart;
                     settings.sceneEventEnd = sceneResponse.sceneEventEnd;
-                    settings.hideAvatars = true;
+                    settings.sceneEnvironmentSettings = sceneEnvironmentSettings;
+                    settings.hideAvatars = false;
                     settings.sceneSkyRadius = sceneResponse.sceneSkyRadius != undefined ? sceneResponse.sceneSkyRadius : 202;
                     settings.sceneFontWeb1 = sceneResponse.sceneFontWeb1;
                     settings.sceneFontWeb2 = sceneResponse.sceneFontWeb2;
@@ -3065,13 +3079,15 @@ wgpu_router.get('/:_id', function (req, res) {
                     
                     importMap +
 
-                    "<script type=\x22module\x22 src=\x22../platforms/three/three_main.mjs\x22 ></script>" +
+                    "<script type=\x22module\x22 src=\x22../platforms/wgpu/wgpu_main.mjs\x22 ></script>" +
 
                     // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +
                     "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +
                     // "<script type=\x22module\x22 src=\x22/connect/three.js\x22 defer=\x22defer\x22></script>" + //this one talks to pixi
                     // "<script type=\x22module\x22 src=\x22/connect/media.js\x22 defer=\x22defer\x22></script>" +
                     "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
+                    // gridHelperScript +
+                    
 
                         // "<div id=\x22sceneGreeting\x22 style=\x22z-index: -20;\x22>"+sceneGreeting+"</div>"+
                         // "<div id=\x22sceneQuest\x22 style=\x22z-index: -20;\x22>"+sceneQuest+"</div>"+

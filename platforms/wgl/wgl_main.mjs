@@ -19,7 +19,7 @@
 		InitAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders,
 		LoadKinematicAgentMeshes, } from './wgl_physics.js';
 
-	import { InitEnvMap, InitSky, InitFog } from './wgl_sky.js';
+	import { InitEnvMap, InitSky, InitFog, InitGrid } from './wgl_environment.js';
 
 		import { equippedRigidbody } from './wgl_actions.js';
 
@@ -300,7 +300,16 @@
 
 		clock = new THREE.Clock();
 
+		if (settings && settings.sceneEnvironmentSettings) {
+			console.log("sceneEnvironmentSettings " + JSON.stringify(settings.sceneEnvironmentSettings));
+			if (settings.sceneEnvironmentSettings.sceneFloorplaneTexture == "grid") {
+				InitGrid();
+			}
+			if (settings.sceneEnvironmentSettings.sceneUseFloorplane) {
+				InitGround();
+			}
 
+		}
 
 		if (settings && settings.sceneTags) {
 			// if (settings.sceneTags.includes("debug")) {

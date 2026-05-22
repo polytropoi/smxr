@@ -40,6 +40,8 @@ export function createDefaultSurface() {
         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
         surface = new THREE.Mesh(planeGeometry, planeMaterial);
         scene.add(surface);
+        surface.rotation.x = Math.PI / 2;
+
 }
     
 

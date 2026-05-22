@@ -350,7 +350,7 @@ three_router.get('/:_id', function (req, res) {
     // let blinkScript = "<script type=\x22module\x22 src=\x22../main/vendor/aframe/aframe-blink-controls.min.js\x22></script>"
     let blinkScript = "";
     let brownianScript = "";
-    let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
+    // let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
     let enviromentScript = ""; //for aframe env component
     let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
