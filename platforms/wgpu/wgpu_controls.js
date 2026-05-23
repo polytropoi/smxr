@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture } from './wgpu_ui.js';
+import { InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -1501,6 +1501,7 @@ export function ShowPopup (event) { //hrm move to UI
     if (showDialogPanel) {
         return;
     }
+    
     if (!event) {
         let xpos = window.innerWidth / 2;
         let ypos = window.innerHeight / 2;
@@ -1531,6 +1532,8 @@ export function ShowPopup (event) { //hrm move to UI
             display: 'block',
         });
     }
+    UpdateHIC();
+
     
 
 }

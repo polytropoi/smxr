@@ -4,9 +4,16 @@
 import * as THREE from 'three';
 import { Text } from 'three-text/three'; //not troika!
 
+			// import { installHtmlInCanvasPolyfill } from 'three-html-render/polyfill';
+			import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+			import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+			import { InteractionManager } from 'three/addons/interaction/InteractionManager.js';
+
 import { ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { viewportPlaceholder } from './wgpu_controls.js';
+
+// import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
 Text.init();
 
@@ -20,9 +27,12 @@ export let textContainers = [];
 
 export let scenePictures = {};
 
+// import { HTMLTexture } from 'three/addons/textures/HTMLTexture.js';
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
+
 
 // let htmlCanvas;
 const canvas = document.createElement('canvas');
@@ -34,6 +44,8 @@ const ctx = canvas.getContext('2d');
 
 let texture;
 let textContainer;
+let interactions;
+let hicMesh; //for html-in-canvas fu
 // export let landscapePanel;
 
 export async function HTMLText (textString, size, parent, position, distance, persist, parentScale) { //this is rendered to texture and put on a plane
@@ -573,3 +585,131 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
         // }
     // }
 }
+
+export function UpdateHIC (string) {
+    // 1. Target the HTML element
+    if (!string) {
+        string = "whoa now!";
+    }
+    console.log("tryna UpdateHIC");
+    // const element = document.getElementById('ui_canvas');
+
+    // // 2. Create the HTML Texture
+    // const texture = new THREE.HTMLTexture(element);
+
+    // // 3. Apply to a 3D Plane
+    // const geometry = new THREE.PlaneGeometry(2, 2);
+    // const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+    // const mesh = new THREE.Mesh(geometry, material);
+    // ui_canvas.innerHTML = "<h1>" + string + " : </h1>"  + string;
+    // scene.add(mesh);
+    //  const worldPosition = new THREE.Vector3();
+    // viewportPlaceholder.getWorldPosition(worldPosition);
+    // mesh.position.set(worldPosition.x, worldPosition.y, worldPosition.z);
+
+    // const element = createHTMLElement();
+
+	// 			// Register the element with the polyfill: attach to the canvas (it's
+	// 			// redirected into the polyfill's shadow host) and wait for first paint.
+	// 			const canvas = renderer.domElement;
+	// 			canvas.setAttribute('layoutsubtree', 'true');
+	// 			canvas.appendChild(element);
+	// 			await firstPaint(canvas);
+
+	// 			const snapshot = getHtmlRenderer().getCanvas(element);
+	// 			texture = new THREE.CanvasTexture(snapshot);
+	// 			texture.colorSpace = THREE.SRGBColorSpace;
+	// 			texture.anisotropy = renderer.capabilities?.getMaxAnisotropy?.() ?? 8;
+
+	// 			// Re-upload only when the DOM actually repaints.
+	// 			canvas.onpaint = () => {
+	// 				texture.needsUpdate = true;
+	// 			};
+
+	// 			const material = new THREE.MeshStandardMaterial({
+	// 				map: texture,
+	// 				roughness: 0.6,
+	// 				metalness: 0.0,
+	// 			});
+	// 			mesh = new THREE.Mesh(new RoundedBoxGeometry(0.4, 0.4, 0.4, 10, 0.04), material);
+	// 			mesh.position.copy(meshPosDesktopVR);
+	// 			scene.add(mesh);
+
+    	// HTML element
+
+				const element = document.createElement( 'div' );
+				element.id = 'draw_element';
+				element.innerHTML = `
+					Hello world!<br>I'm multi-line, <b>formatted</b>,
+					
+					<svg width="50" height="50">
+					<circle cx="25" cy="25" r="20" fill="green" />
+					<text x="25" y="30" font-size="15" text-anchor="middle" fill="#fff">
+						SVG
+					</text>
+					</svg>!
+					<br>
+					<input type="text" placeholder="Type here...">
+					<button>Click me</button>
+				`;
+
+				const geometry = new THREE.PlaneGeometry( .5,.5, 10, 10 );
+
+				const material = new THREE.MeshStandardMaterial( { roughness: 0, metalness: 0.5 } );
+				material.map = new THREE.HTMLTexture( element );
+
+                if (!hicMesh) {
+                    hicMesh = new THREE.Mesh( geometry, material );
+                    scene.add( hicMesh );
+                } else {
+                    hicMesh.material = material;
+                }
+				// Interaction
+
+				interactions = new InteractionManager();
+				interactions.connect( renderer, camera );
+				interactions.add( hicMesh );
+                interactions.update();
+
+                const worldPosition = new THREE.Vector3();
+                viewportPlaceholder.getWorldPosition(worldPosition);
+                hicMesh.position.set(worldPosition.x, worldPosition.y, worldPosition.z);
+}
+
+			// function firstPaint(canvas) {
+			// 	return new Promise((resolve) => {
+			// 		let done = false;
+			// 		const finish = () => {
+			// 			if (done) return;
+			// 			done = true;
+			// 			canvas.onpaint = null;
+			// 			resolve();
+			// 		};
+			// 		canvas.onpaint = finish;
+			// 		canvas.requestPaint();
+			// 		setTimeout(finish, 800);
+			// 	});
+			// }
+
+			// function createHTMLElement() {
+			// 	const el = document.createElement('div');
+			// 	el.id = 'draw_element';
+			// 	el.innerHTML = `
+			// 		Hello world!<br>I'm multi-line, <b>formatted</b>,
+			// 		rotated text with emoji (&#128512;), RTL text
+			// 		<span dir=rtl>من فارسی صحبت میکنم</span>,
+			// 		vertical text,
+			// 		<p style="writing-mode: vertical-rl;">
+			// 		这是垂直文本
+			// 		</p>
+			// 		an inline image (<img width="150" src="https://threejs.org/examples/textures/758px-Canestra_di_frutta_(Caravaggio).jpg" crossorigin="anonymous">), and
+			// 		<svg width="50" height="50">
+			// 			<circle cx="25" cy="25" r="20" fill="green" />
+			// 			<text x="25" y="30" font-size="15" text-anchor="middle" fill="#fff">SVG</text>
+			// 		</svg>!
+			// 		<br>
+			// 		<input type="text" placeholder="Type here...">
+			// 		<button>Click me</button>
+			// 	`;
+			// 	return el;
+			// }

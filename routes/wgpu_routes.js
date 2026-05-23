@@ -336,8 +336,8 @@ wgpu_router.get('/:_id', function (req, res) {
     let showTransport = false;
     let useNavmesh = false;
     let useSimpleNavmesh = false;
-    let useStarterKit = false;  //load the libs as from https://github.com/AdaRoseCannon/aframe-xr-boilerplate - movement controls, simple navmesh, handy work, physx etc.
-    let useSuperHands = false;  //or instead load the superhands stuff https://github.com/c-frame/aframe-super-hands-component
+    // let useStarterKit = false;  //load the libs as from https://github.com/AdaRoseCannon/aframe-xr-boilerplate - movement controls, simple navmesh, handy work, physx etc.
+    // let useSuperHands = false;  //or instead load the superhands stuff https://github.com/c-frame/aframe-super-hands-component
     let usePhysicsType = "none";
     let showDialog = true;
     let showSceneManglerButtons = false;
@@ -354,7 +354,9 @@ wgpu_router.get('/:_id', function (req, res) {
     // let aframeExtrasScript = "<script type=\x22module\x22 src=\x22https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js\x22 defer=\x22defer\x22></script>";
     let logScripts = "";
     let enviromentScript = ""; //for aframe env component
-    let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
+
+    let HIC_OriginTokenHeader = "";
+    // let troikaScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-troika-text.min.js\x22 defer=\x22defer\x22></script>";
     let particleScript = "<script type=\x22module\x22 src=\x22../main/src/component/aframe-sprite-particles-component.js\x22></script>";    
     // let aframeScript = "<script src=\x22https://aframe.io/releases/1.7.1/aframe.min.js\x22></script>";
     let threejsVersion = "173";
@@ -379,10 +381,14 @@ wgpu_router.get('/:_id', function (req, res) {
 
                                 "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
                                 "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+
+                            // "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js\x22,"+     
+                            // "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js\x22,"+
 
-
+//   "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
+//       "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
                             "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
                             "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
+                            // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/\x22,"+
 
 
                             "\x22three-pathfinding\x22: \x22/platforms/three/src/three-pathfinding.module.js\x22,"+
@@ -534,7 +540,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     }
                     if (sceneData.sceneTags[i].toLowerCase().includes("simplenav") || sceneData.sceneTags[i].toLowerCase().includes("simple navmesh")) {
                         console.log("GOTS SimpleNavmesh TAG: " + sceneData.sceneTags[i]);
-                        useSimpleNavmesh = true;
+                        useSimpleNavmesh = true; //nah...
                     } else if (sceneData.sceneTags[i].toLowerCase().includes("navmesh")) {
                         console.log("GOTS USENAVMESH TAG: " + sceneData.sceneTags[i]);
                         useNavmesh = true;
@@ -896,8 +902,9 @@ wgpu_router.get('/:_id', function (req, res) {
                     var buff = Buffer.from(JSON.stringify([])).toString("base64");
                     loadLocations = "<div id=\x22locationData\x22 data-locations='"+buff+"'><div>";
                 }
-           
-                                
+                if (sceneData.sceneTags.includes("HIC")) {
+                  HIC_OriginTokenHeader = "<meta http-equiv=\x22origin-trial\x22 content=\x22"+process.env.GOOGLE_HIC_TOKEN+"\x22></meta>";  
+                }          
 
                 if (sceneData.sceneTags.includes("transport") || showTransport) {
 
@@ -947,16 +954,16 @@ wgpu_router.get('/:_id', function (req, res) {
                 //AFRAME CAMERA
                 let blinkMod = "blink-controls=\x22cameraRig: #cameraRig\x22";
                 // sceneResponse.scenePlayer.playerHeight = 10;
-                if (useSimpleNavmesh || useNavmesh) {
-                    // blinkMod = "blink-controls=\x22cameraRig: #cameraRig; collisionEntities: #nav-mesh;\x22"; //only one navmesh for now
-                    // wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:"+
-                    // sceneResponse.scenePlayer.playerHeight+"\x22";
-                }
-                console.log("sceneResponse.sceneTags " + sceneResponse.sceneTags);
-                if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("webgpu")) {
-                    // blinkMod = "";
-                    // blinkScript = "";
-                } 
+                // if (useSimpleNavmesh || useNavmesh) {
+                //     // blinkMod = "blink-controls=\x22cameraRig: #cameraRig; collisionEntities: #nav-mesh;\x22"; //only one navmesh for now
+                //     // wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:"+
+                //     // sceneResponse.scenePlayer.playerHeight+"\x22";
+                // }
+                // console.log("sceneResponse.sceneTags " + sceneResponse.sceneTags);
+                // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("webgpu")) {
+                //     // blinkMod = "";
+                //     // blinkScript = "";
+                // } 
                 // if (useSimpleNavmesh) { //this lives in navigation.js
                 //     //simple navmesh can use 
                 //     wasd = "extended_wasd_controls=\x22flyEnabled: false; moveSpeed: "+sceneResponse.scenePlayer.playerSpeed+"; inputType: keyboard\x22 simple-navmesh-constraint=\x22navmesh:#nav-mesh;fall:50; height:"+sceneResponse.scenePlayer.playerHeight+"\x22";
@@ -3056,6 +3063,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     "<meta http-equiv=\x22Content-Language\x22 content=\x22en\x22></meta>" +
                     // googleAnalytics +
                     
+                    
                     "<link rel=\x22icon\x22 href=\x22data:,\x22></link>"+
                     "<meta charset='utf-8'/>" +
                     "<meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'/>" +
@@ -3073,6 +3081,10 @@ wgpu_router.get('/:_id', function (req, res) {
                     // "<meta name=\x22monetization\x22 content=\x22"+process.env.COIL_PAYMENT_POINTER+"\x22>" +
                     "<meta name=\x22mobile-web-app-capable\x22 content=\x22yes\x22>" +
                     "<meta name=\x22apple-mobile-web-app-capable\x22 content=\x22yes\x22>" +
+
+                    HIC_OriginTokenHeader +
+                    
+
                     "<link href=\x22/css/webxr.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
                     "<link href=\x22https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css\x22 rel=\x22stylesheet\x22 type=\x22text/css\x22>" +
                     socketScripts +
@@ -3179,7 +3191,7 @@ wgpu_router.get('/:_id', function (req, res) {
                             videoElements+
                             
                             
-                            
+                            "<canvas id=\x22ui_canvas\x22></canvas>" + 
                             
                     "</body>\n" +
                 
