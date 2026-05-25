@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 
-import { player, lastRaycastHitObject, ShowPopup, mouseDowntime } from './wgpu_controls.js';
+import { player, lastRaycastHitObject, ShowPopup, mouseDowntime, popup, hic_content, onMouseDown } from './wgpu_controls.js';
 
 import { scene } from './wgpu_main.mjs';
 
@@ -12,6 +12,7 @@ import { locationObjex } from './wgpu_locations.js';
 import { EquipObject } from './wgpu_inventory.js';
 
 import { AddDynamicBody, getPlayerBody, kinematicBodies } from './wgpu_physics.js';
+import { UpdateHIC, uiMode } from './wgpu_ui.js';
 // import { equippedRigidbody } from './three_physics.js';
 
 export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
@@ -229,7 +230,7 @@ export class SceneObject { //things that might have models and actions and fancy
                 
             } 
         } else { //not an equipped object
-                console.log("clicked on unequipped object named " + this.objectData.sceneObjectID);
+            console.log("clicked on unequipped object named " + this.objectData.sceneObjectID);
             popup.innerHTML = "";
             let header = "";
             // if (this.objectData && this.objectData.labeltext && this.objectData.labeltext.length) {
@@ -295,7 +296,18 @@ export class SceneObject { //things that might have models and actions and fancy
                 // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
                 // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
                 // "</div>";
-                ShowPopup(event);
+
+                if (uiMode == "hic") {
+                    UpdateHIC(popup.innerHTML);
+                    document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
+                     document.getElementById("popup_yesButton1").addEventListener ('pointerdown', onMouseDown );
+                     document.getElementById("popup_yesButton2").addEventListener ('pointerdown', onMouseDown );
+                    //  document.getElementById("popup_yesButton3").addEventListener ('pointerdown', onMouseDown );
+                } else {
+                    ShowPopup(event);
+                    //  UpdateHIC(popup.innerHTML);
+                }
+                
             }
         }
         
@@ -468,6 +480,7 @@ export class SceneObject { //things that might have models and actions and fancy
 
         if (this.responseText.toLowerCase().includes("max")) {
             popup.innerHTML = "<br><br><h3>Sorry, you can't have any more of those!</h3>";
+
             ShowPopup(lastEvent);
             setTimeout(() => {
                 popup.style.display = "none";

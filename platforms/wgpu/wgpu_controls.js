@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC } from './wgpu_ui.js';
+import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -89,8 +89,8 @@ let controlObject;
 let lastPlayerPosition = new THREE.Vector3();
 let worldHitPosition = new THREE.Vector3();
 
-export const popup = document.getElementById("popup");
-export const hic_content = document.getElementById("hic_content");
+export const popup = document.getElementById("popup"); //should mode these to _ui
+export const hic_content = document.getElementById("hic_content"); //alt to popup
 
 
 export const viewportPlaceholder = new THREE.Object3D();
@@ -142,6 +142,7 @@ function SetInputMode () {
 				// 	let joystick1 = new Joystick("joystickEl", 64, 8);
 				// 	console.log("controls initialized : JOYSTICK" );
 				// }
+
             const joystickContainer = document.getElementById("joystickEl");
             joystickContainer.style.visibility = "visible";
             joystick = nipplejs.create({
@@ -1160,7 +1161,8 @@ export function centerRaycast() {
 
 export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
-    // console.log(event.target.id);
+    event.stopPropagation();
+    console.log("mouseDownOn " + event.target.id);
         // console.log("showDialogPanel " + showDialogPanel);
 
     if (showDialogPanel) {
@@ -1318,7 +1320,7 @@ export function onMouseDown(event) { //clicked on threejs object
                         const randomIndex = Math.floor(Math.random() * calloutSplit.length);
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
                         ShowPopup(event);
-                        hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
+                        hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
                         UpdateHIC(hic_content.innerHTML);
                         
                     } else {
@@ -1519,6 +1521,9 @@ export function onMouseDown(event) { //clicked on threejs object
 }
 
 export function ShowPopup (event) { //hrm move to UI
+    if (uiMode != "popup") {
+        return;
+    }
     const popup = document.getElementById("popup");
     console.log("showDialogPanel " + showDialogPanel);
 
@@ -1882,3 +1887,4 @@ class Joystick
 		document.addEventListener('touchend', handleUp);
 	}
 }
+

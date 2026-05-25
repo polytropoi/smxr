@@ -1920,7 +1920,7 @@ body {
     .hic_content {
         /* display: none;  */
         /* position: absolute; Stay in place */
-        /* z-index: 100; hide below until axed for */
+        z-index: 0;
         /* left: 0;
         top: 0; */
         /* width: 600px; */
@@ -1934,7 +1934,7 @@ body {
         background-color: rgb(0, 0, 0); /* Black w/ opacity */
         text-align: center;
          font-family: helvetica, arial, sans-serif;
-				font-size: 24px;
+				font-size: 20px;
         color: #ffffff;
 				cursor: pointer;
           padding: 10px;

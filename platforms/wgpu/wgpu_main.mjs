@@ -24,7 +24,7 @@
 
 	import { Starfield, CreateSprites, } from './wgpu_fx.js';
 
-	import { ThreeDeeText, lookAtCameraObjects } from './wgpu_ui.js';
+	import { ThreeDeeText, lookAtCameraObjects, SetUIMode } from './wgpu_ui.js';
 
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
@@ -119,7 +119,8 @@
 
 		const three_canvas = document.getElementById("three_canvas");
 		scene = new THREE.Scene();
-		renderer = new THREE.WebGPURenderer({antialias:true, canvas: three_canvas});
+		// renderer = new THREE.WebGPURenderer({antialias:true, canvas: three_canvas});
+		renderer = new THREE.WebGPURenderer({antialias:true});
 		// renderer = new THREE.WebGPURenderer( { antialias: true } );
 				// renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setSize( window.innerWidth, window.innerHeight );
@@ -311,7 +312,9 @@
 
 		clock = new THREE.Clock();
 
-
+		if (settings.sceneTags.includes("hic")) {
+			SetUIMode("hic");
+		}
 
 		if (settings && settings.sceneEnvironmentSettings) {
 			console.log("sceneEnvironmentSettings " + JSON.stringify(settings.sceneEnvironmentSettings));
@@ -326,6 +329,9 @@
 		}
 
 		if (settings && settings.sceneTags) {
+			if (settings.sceneTags.includes("hic")) {
+				SetUIMode("hic");
+			}
 			if (settings.sceneTags.includes("debug")) {
 			// 
 					stats = new Stats();
@@ -714,6 +720,8 @@
 		document.addEventListener("wheel", onMouseWheel, false);
 		// document.addEventListener('mousemove', onMouseMove);
 		document.addEventListener('pointermove', onMouseMove);
+
+		
 
 	} //end init events
 

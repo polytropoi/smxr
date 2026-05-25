@@ -3155,7 +3155,7 @@ wgpu_router.get('/:_id', function (req, res) {
                             
                                 
 
-                            "<canvas id=\x22three_canvas\x22></canvas>" + //assign to custom canvas to match positions
+                            // "<canvas id=\x22three_canvas\x22></canvas>" + //assign to custom canvas to match positions
 
                             // "<div id=\x22popup\x22 class=\x22popup\x22 style=\x22position: absolute; display: none; background: white; padding: 10px; border: 1px solid black;\x22>Some text</div>"+
                             "<div id=\x22popup\x22 class=\x22popup\x22>Some text</div>"+
@@ -3191,7 +3191,7 @@ wgpu_router.get('/:_id', function (req, res) {
                             videoElements+
                             
                             
-                            "<canvas id=\x22hic_canvas\x22 layoutsubtree><div id=\x22hic_content\x22  class=\x22hic_content\x22></div></canvas>" + 
+                            "<canvas id=\x22hic_canvas\x22 layoutsubtree><div id=\x22hic_content\x22 class=\x22hic_content\x22></div></canvas>" + 
                             
                     "</body>\n" +
                 

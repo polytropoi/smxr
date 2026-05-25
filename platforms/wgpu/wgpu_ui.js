@@ -11,7 +11,7 @@ import { Text } from 'three-text/three'; //not troika!
 
 import { ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
-import { viewportPlaceholder, popup } from './wgpu_controls.js';
+import { viewportPlaceholder, popup, hic_content } from './wgpu_controls.js';
 
 // import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
@@ -20,6 +20,7 @@ Text.init();
 import {scene, renderer} from './wgpu_main.mjs';
 
 import {player, camera} from './wgpu_controls.js';
+import { activeObjex } from './wgpu_locations.js';
 
 export let lookAtCameraObjects = [];
 
@@ -27,7 +28,7 @@ export let textContainers = [];
 
 export let scenePictures = {};
 
-// import { HTMLTexture } from 'three/addons/textures/HTMLTexture.js';
+export let uiMode = "popup"; //set to "hic" if settings prescribe
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -47,6 +48,13 @@ let textContainer;
 let interactions;
 let hicMesh; //for html-in-canvas fu
 // export let landscapePanel;
+
+export function SetUIMode(mode) {
+    uiMode = mode; //from controls
+    // if (mode == "hic") {
+    //     popup = hic_content;
+    // }
+}
 
 export async function HTMLText (textString, size, parent, position, distance, persist, parentScale) { //this is rendered to texture and put on a plane
     // Setup canvas with 2D context
@@ -587,6 +595,10 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
 }
 
 export function UpdateHIC (htmlstring) {
+
+    if (uiMode != "hic") {
+        return;
+    }
     // 1. Target the HTML element
     // if (!string) {
     //     string = "whoa now!";
@@ -659,11 +671,12 @@ export function UpdateHIC (htmlstring) {
                 contentEl.innerHTML = htmlstring;
                 console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
 
-				const geometry = new THREE.PlaneGeometry( .75,.75, 10, 10 );
+				const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
 
-				const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .5 } );
+				const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
 				material.map = new THREE.HTMLTexture( canvasEl );
-
+                material.envMap = scene.environment;
+                material.envMapIntensity = 2;
                 if (!hicMesh) {
                     const ctx = canvasEl.getContext('2d');
                     const ratio = window.devicePixelRatio || 1;
@@ -681,17 +694,18 @@ export function UpdateHIC (htmlstring) {
                     hicMesh = new THREE.Mesh( geometry, material );
 
                     scene.add( hicMesh );
-                    
+                    activeObjex.push(hicMesh);
                     lookAtCameraObjects.push(hicMesh);
+                    interactions = new InteractionManager();
+                    interactions.connect( renderer, camera );
+                    interactions.add( hicMesh );
+                    interactions.update();
                 } else {
                     hicMesh.material = material;
                 }
 				// Interaction
 
-				interactions = new InteractionManager();
-				interactions.connect( renderer, camera );
-				interactions.add( hicMesh );
-                interactions.update();
+				
 
                 const worldPosition = new THREE.Vector3();
                 viewportPlaceholder.getWorldPosition(worldPosition);
