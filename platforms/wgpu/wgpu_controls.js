@@ -90,6 +90,9 @@ let lastPlayerPosition = new THREE.Vector3();
 let worldHitPosition = new THREE.Vector3();
 
 export const popup = document.getElementById("popup");
+export const hic_content = document.getElementById("hic_content");
+
+
 export const viewportPlaceholder = new THREE.Object3D();
 
     // $('#popup').on('click', '#popup_yesButton', function(e) {
@@ -1283,7 +1286,10 @@ export function onMouseDown(event) { //clicked on threejs object
                 
                 if (textData != null && textData != undefined && textData != "" && textData != "none") {
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData.text;
+                        
                     ShowPopup(event);
+                     hic_content.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData.text;
+                    UpdateHIC(hic_content.innerHTML);
                 } else if (lastRaycastHitObject.userData.objectData.labeltext && 
                     lastRaycastHitObject.userData.objectData.labeltext.length) {
                         // let textData;
@@ -1296,10 +1302,15 @@ export function onMouseDown(event) { //clicked on threejs object
                         const randomIndex = Math.floor(Math.random() * labelSplit.length);
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
                         ShowPopup(event);
+                        hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
+                        UpdateHIC(hic_content.innerHTML);
                     } else {
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + 
                         "  </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
                         ShowPopup(event);
+                           hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + 
+                        "  </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
+                        UpdateHIC(hic_content.innerHTML);
                     }
                 } else if (lastRaycastHitObject.userData.objectData.callouttext && lastRaycastHitObject.userData.objectData.callouttext.length) {
                     if (lastRaycastHitObject.userData.objectData.callouttext.includes("~")) {
@@ -1307,9 +1318,14 @@ export function onMouseDown(event) { //clicked on threejs object
                         const randomIndex = Math.floor(Math.random() * calloutSplit.length);
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
                         ShowPopup(event);
+                        hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
+                        UpdateHIC(hic_content.innerHTML);
+                        
                     } else {
                         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
                         ShowPopup(event);
+                          hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
+                        UpdateHIC(hic_content.innerHTML);
                     }
                 }
 
@@ -1403,10 +1419,16 @@ export function onMouseDown(event) { //clicked on threejs object
                         ShowPopup(event); 
                         //keyd to a specific schema, hrm... data[0] from source textObject returnd from sceneTextController above should have field names...
                         popup.innerHTML = "<h4>ATU " + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];
+                           hic_content.innerHTML =  "<h4>ATU " + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];
+                        UpdateHIC(hic_content.innerHTML);
+                        
                     } else {
 
                         ShowPopup(event);
                         popup.innerHTML = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                           hic_content.innerHTML =  "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                        UpdateHIC(hic_content.innerHTML);
+                        
                     }
                 
                 } else {
@@ -1448,6 +1470,8 @@ export function onMouseDown(event) { //clicked on threejs object
                 } else {
                     popup.style.display = "none";
                 }
+
+
             } else {
                 popup.style.display = "none";
             }
@@ -1532,7 +1556,8 @@ export function ShowPopup (event) { //hrm move to UI
             display: 'block',
         });
     }
-    UpdateHIC();
+
+    // UpdateHIC(); //wgpu only fn
 
     
 

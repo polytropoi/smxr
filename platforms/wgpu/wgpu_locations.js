@@ -57,6 +57,7 @@ export async function LoadModel(url) {
 }
 
 export function createDefaultNavmesh() {
+    if (!navmesh) {
         const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
     //   planeGeometry.rotation.x = Math.PI / 2 * -1;
         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
@@ -70,6 +71,7 @@ export function createDefaultNavmesh() {
         
         scene.add(navmeshObject);
     }
+}
 
 export function InitLocations() {
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction

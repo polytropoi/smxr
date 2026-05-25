@@ -305,8 +305,9 @@
 			if (settings.sceneEnvironmentSettings.sceneFloorplaneTexture == "grid") {
 				InitGrid();
 			}
-			if (settings.sceneEnvironmentSettings.sceneUseFloorplane) {
-				InitGround();
+			if (settings.sceneEnvironmentSettings.sceneUseFloorplane && settings.sceneEnvironmentSettings.sceneFloorplaneTexture && 
+				settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "none" && settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "") {
+				// InitGround();
 			}
 
 		}

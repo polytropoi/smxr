@@ -136,7 +136,7 @@ export function InitFog() {
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
-        const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
+        const fogDensity = 0.0025; // Adjust this value! (Default is 0.00025)
         // scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
 		scene.fog = new THREE.FogExp2( fogColor, fogDensity );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );

@@ -11,7 +11,7 @@ import { Text } from 'three-text/three'; //not troika!
 
 import { ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
-import { viewportPlaceholder } from './wgpu_controls.js';
+import { viewportPlaceholder, popup } from './wgpu_controls.js';
 
 // import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
@@ -586,13 +586,14 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
     // }
 }
 
-export function UpdateHIC (string) {
+export function UpdateHIC (htmlstring) {
     // 1. Target the HTML element
-    if (!string) {
-        string = "whoa now!";
-    }
-    console.log("tryna UpdateHIC");
-    // const element = document.getElementById('ui_canvas');
+    // if (!string) {
+    //     string = "whoa now!";
+    // }
+    // console.log("tryna UpdateHIC " + htmlstring);
+    const canvasEl = document.getElementById('hic_canvas');
+    const contentEl = document.getElementById('hic_content');
 
     // // 2. Create the HTML Texture
     // const texture = new THREE.HTMLTexture(element);
@@ -637,30 +638,51 @@ export function UpdateHIC (string) {
 
     	// HTML element
 
-				const element = document.createElement( 'div' );
-				element.id = 'draw_element';
-				element.innerHTML = `
-					Hello world!<br>I'm multi-line, <b>formatted</b>,
+				// const element = document.createElement( 'div' );
+				// element.id = 'draw_element';
+				// contentEl.innerHTML = `
+				// 	Hello world!<br>I'm multi-line, <b>formatted</b>,
 					
-					<svg width="50" height="50">
-					<circle cx="25" cy="25" r="20" fill="green" />
-					<text x="25" y="30" font-size="15" text-anchor="middle" fill="#fff">
-						SVG
-					</text>
-					</svg>!
-					<br>
-					<input type="text" placeholder="Type here...">
-					<button>Click me</button>
-				`;
+				// 	<svg width="50" height="50">
+				// 	<circle cx="25" cy="25" r="20" fill="green" />
+				// 	<text x="25" y="30" font-size="15" text-anchor="middle" fill="#fff">
+				// 		SVG
+				// 	</text>
+				// 	</svg>!
+				// 	<br>
+				// 	<input type="text" placeholder="Type here...">
+				// 	<button>Click me</button>
+				// `;   
 
-				const geometry = new THREE.PlaneGeometry( .5,.5, 10, 10 );
+                // contentEl.style.backgroundColor = "white";
 
-				const material = new THREE.MeshStandardMaterial( { roughness: 0, metalness: 0.5 } );
-				material.map = new THREE.HTMLTexture( element );
+                contentEl.innerHTML = htmlstring;
+                console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
+
+				const geometry = new THREE.PlaneGeometry( .75,.75, 10, 10 );
+
+				const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .5 } );
+				material.map = new THREE.HTMLTexture( canvasEl );
 
                 if (!hicMesh) {
+                    const ctx = canvasEl.getContext('2d');
+                    const ratio = window.devicePixelRatio || 1;
+
+                    // Set the visual size (CSS pixels)
+                    canvasEl.style.width = '768px';
+                    canvasEl.style.height = '768px';
+
+                    // Set the internal resolution (Physical pixels)
+                    canvasEl.width = 200 * ratio;
+                    canvasEl.height = 200 * ratio;
+
+                    // Scale the context to match
+                    ctx.scale(ratio, ratio);
                     hicMesh = new THREE.Mesh( geometry, material );
+
                     scene.add( hicMesh );
+                    
+                    lookAtCameraObjects.push(hicMesh);
                 } else {
                     hicMesh.material = material;
                 }
@@ -673,7 +695,8 @@ export function UpdateHIC (string) {
 
                 const worldPosition = new THREE.Vector3();
                 viewportPlaceholder.getWorldPosition(worldPosition);
-                hicMesh.position.set(worldPosition.x, worldPosition.y, worldPosition.z);
+                hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
+
 }
 
 			// function firstPaint(canvas) {

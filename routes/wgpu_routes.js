@@ -3191,7 +3191,7 @@ wgpu_router.get('/:_id', function (req, res) {
                             videoElements+
                             
                             
-                            "<canvas id=\x22ui_canvas\x22></canvas>" + 
+                            "<canvas id=\x22hic_canvas\x22 layoutsubtree><div id=\x22hic_content\x22  class=\x22hic_content\x22></div></canvas>" + 
                             
                     "</body>\n" +
                 

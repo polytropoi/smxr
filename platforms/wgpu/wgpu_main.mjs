@@ -312,16 +312,19 @@
 		clock = new THREE.Clock();
 
 
+
 		if (settings && settings.sceneEnvironmentSettings) {
 			console.log("sceneEnvironmentSettings " + JSON.stringify(settings.sceneEnvironmentSettings));
-			if (settings.sceneEnvironmentSettings.floorPlaneTexture == "grid") {
+			if (settings.sceneEnvironmentSettings.sceneFloorplaneTexture == "grid") {
 				InitGrid();
 			}
-			if (settings.sceneEnvironmentSettings.useFloorPlane) {
+			if (settings.sceneEnvironmentSettings.sceneUseFloorplane && settings.sceneEnvironmentSettings.sceneFloorplaneTexture && 
+				settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "none" && settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "") {
 				InitGround();
 			}
 
 		}
+
 		if (settings && settings.sceneTags) {
 			if (settings.sceneTags.includes("debug")) {
 			// 
