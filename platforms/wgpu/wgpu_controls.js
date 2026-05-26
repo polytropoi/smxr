@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC } from './wgpu_ui.js';
+import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC, hicMesh } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -1161,7 +1161,7 @@ export function centerRaycast() {
 
 export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
-    event.stopPropagation();
+    // event.stopPropagation();
     console.log("mouseDownOn " + event.target.id);
         // console.log("showDialogPanel " + showDialogPanel);
 
@@ -1178,17 +1178,21 @@ export function onMouseDown(event) { //clicked on threejs object
     if (event.target.id == "popup_yesButton") {
       ActionSwitch(event);
       popup.style.display = "none";
+      hicMesh.visible = false;
       return;
     } if (event.target.id == "popup_yesButton1") {
       ActionSwitch(event);
       popup.style.display = "none";
+       hicMesh.visible = false;
       return;
     } if (event.target.id == "popup_yesButton2") {
       ActionSwitch(event);
       popup.style.display = "none";
+       hicMesh.visible = false;
       return;
     } else if (event.target.id == "popup_cancelButton") {
       popup.style.display = "none";
+       hicMesh.visible = false;
       return;
     }
     // if (event.target.)

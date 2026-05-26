@@ -2593,7 +2593,7 @@ aframe_router.get('/:_id', function (req, res) {
             if (sceneResponse.scenePrimaryVolume != null) {
                 scenePrimaryVolume = sceneResponse.scenePrimaryVolume;
             }
-            if (sceneResponse.sceneAmbientVolume != null) {
+            if (sceneResponse.sceneAmbientVolume != null) { 
                 sceneAmbientVolume = sceneResponse.sceneAmbientVolume;
             }
             if (sceneResponse.sceneTriggerVolume != null) {

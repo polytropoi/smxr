@@ -11,7 +11,7 @@ import { Text } from 'three-text/three'; //not troika!
 
 import { ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
-import { viewportPlaceholder, popup, hic_content } from './wgpu_controls.js';
+import { viewportPlaceholder, popup, hic_content, onMouseDown } from './wgpu_controls.js';
 
 // import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
@@ -25,6 +25,8 @@ import { activeObjex } from './wgpu_locations.js';
 export let lookAtCameraObjects = [];
 
 export let textContainers = [];
+
+export let interactionManagers = [];
 
 export let scenePictures = {};
 
@@ -45,8 +47,8 @@ const ctx = canvas.getContext('2d');
 
 let texture;
 let textContainer;
-let interactions;
-let hicMesh; //for html-in-canvas fu
+// let interactions;
+export let hicMesh; //for html-in-canvas fu
 // export let landscapePanel;
 
 export function SetUIMode(mode) {
@@ -678,6 +680,8 @@ export function UpdateHIC (htmlstring) {
                 material.envMap = scene.environment;
                 material.envMapIntensity = 2;
                 if (!hicMesh) {
+
+
                     const ctx = canvasEl.getContext('2d');
                     const ratio = window.devicePixelRatio || 1;
 
@@ -696,11 +700,14 @@ export function UpdateHIC (htmlstring) {
                     scene.add( hicMesh );
                     activeObjex.push(hicMesh);
                     lookAtCameraObjects.push(hicMesh);
-                    interactions = new InteractionManager();
+                    const interactions = new InteractionManager();
                     interactions.connect( renderer, camera );
                     interactions.add( hicMesh );
                     interactions.update();
+                    interactionManagers.push(interactions);
+                    hicMesh.addEventListener('pointerdown', onMouseDown);
                 } else {
+                    hicMesh.visible = true;
                     hicMesh.material = material;
                 }
 				// Interaction

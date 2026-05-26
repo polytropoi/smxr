@@ -24,7 +24,7 @@
 
 	import { Starfield, CreateSprites, } from './wgpu_fx.js';
 
-	import { ThreeDeeText, lookAtCameraObjects, SetUIMode } from './wgpu_ui.js';
+	import { ThreeDeeText, lookAtCameraObjects, SetUIMode, interactionManagers } from './wgpu_ui.js';
 
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
@@ -546,6 +546,9 @@
 				agents.forEach(a =>
 					a.update(delta, time));
 			}
+			interactionManagers.forEach(i => 
+					i.update());
+					
 			if (rapierDebugRenderer && showDebug) {
 				rapierDebugRenderer.update();
 			}		

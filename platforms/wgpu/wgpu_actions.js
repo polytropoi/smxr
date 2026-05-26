@@ -442,7 +442,11 @@ export class SceneObject { //things that might have models and actions and fancy
             // console.log("tryna equip from sceneinventory : " +JSON.stringify(data);
             console.log("tryna equip from sceneinventory : " + data.sceneInventoryID);
             EquipObject(this.objectData);
-            thisObject.parent.remove(thisObject);
+            if (thisObject.parent) {
+                thisObject.parent.remove(thisObject);
+            } else {
+                scene.remove(thisObject);
+            }
         } else {
             console.log("tryna equip from scene : " + data.sceneObjectID);
              EquipObject(this.objectData);
