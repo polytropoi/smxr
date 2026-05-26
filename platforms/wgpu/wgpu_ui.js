@@ -187,12 +187,12 @@ export async function ThreeDeeText (textString, size, parent, position, distance
         
     let scaleFactor = .1;
     if (distance) {
-        if (distance > 1) {
+        // if (distance > 1) {
             scaleFactor = distance * .025;
             if (parentScale) {
                 scaleFactor = scaleFactor * parentScale;
             }
-        }
+        // }
     }
     // console.log("ui scale factor " + scaleFactor);
     scaleFactor = clamp(scaleFactor, .25, 1.5);
@@ -303,7 +303,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
            
             textmesh.name = "textmesh";
             textContainer.add(textmesh);
-             textmesh.position.set(0, 0, 0);
+             textmesh.position.set(0, 0, 5);
             parent.add(textContainer);
             textContainer.visible = false;
 

@@ -310,6 +310,7 @@ export function SetControls(cameraMode, cameraFOV) {
         pointerGizmo.up.set(0, 1, 0);
         scene.add(pointerGizmo);
         mousecaster = new THREE.Raycaster();
+
     } else if (cameraMode == "Third Person") {
 
         const blocker = document.getElementById('blocker');
@@ -790,7 +791,8 @@ function RaycastHit(type, hit) {
     }
 
     const objectData = lastRaycastHitObject.userData.objectData;
-    const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
+    // const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
+    let name = hit.object.name ? hit.object.name : lastRaycastHitObject.name;
     let showCallout = false;
     
     if (type == "mouse" &&
@@ -813,7 +815,7 @@ function RaycastHit(type, hit) {
 
             // console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
 
-            // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+            console.log(type + " hit object type " + locationData.markerType + " " + hit.object.name );//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
             // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         
@@ -828,8 +830,11 @@ function RaycastHit(type, hit) {
                 // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             } else {
                 // console.log("mediaID " + locationData.mediaID);
-                
-                ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                if (name.includes("~")) {
+                    name = name.split("~")[0];
+                }
+                ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             }
         
@@ -843,6 +848,9 @@ function RaycastHit(type, hit) {
                 rotateObjectToNormal(pointerGizmo, worldNormal);
             } else {
                 pointerGizmo.visible = false;
+            }
+            if (locationData.locationTags.includes("select")) {
+                 selectedObjects.push(hit.object);
             }
         }
     }
@@ -903,64 +911,6 @@ function RaycastHit(type, hit) {
             // logHierarchy(rootObject);
             // raycastHitAgent.traverse (
 
-            // )
-            // const agentID = raycastHitAgent.parent.parent.name;
-                        // let navAgentInstance;
-                        // if (raycastHitAgent.userData) {
-                        
-                        //     navAgentInstance = raycastHitAgent.userData.NavAgentInstance;
-                        //     if (navAgentInstance) {
-                        //         console.log("gotsa raycastHitAgent.userData ");
-                        //         navAgentInstance.agentRaycastHit();
-                        //     } else if (raycastHitAgent.parent.userData) {
-                            
-                        //         navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
-                        //         if (navAgentInstance) {
-                        //             console.log("gotsa raycastHitAgent.parent.userData.navAgentInstance");
-                        //             navAgentInstance.agentRaycastHit();
-                        //         } else if (raycastHitAgent.parent.parent.userData) {
-                                
-                        //             navAgentInstance = raycastHitAgent.parent.parent.userData.NavAgentInstance;
-                        //             if (navAgentInstance) {
-                        //                 console.log("gotsa raycastHitAgent.parent.parent.userData");
-                        //                 navAgentInstance.agentRaycastHit();
-                        //             }
-                        //         } 
-                        // }
-                            
-                        // } 
-            // if (raycastHitAgent.parent.parent.parent.userData) {
-               
-            //     navAgentInstance = raycastHitAgent.parent.parent.parent.userData.NavAgentInstance;
-            //     if (navAgentInstance) {
-            //          console.log("gotsa rraycastHitAgent.parent.parent.prent.userData");
-            //         navAgentInstance.agentRaycastHit();
-            //     }
-            // } 
-            // if (raycastHitAgent.parent.parent.parent.parent.userData) {
-            //     console.log("gotsa rraycastHitAgent.parent.parent.prent.porenbt.userData");
-            //     navAgentInstance = raycastHitAgent.parent.parent.parent.parent.userData.NavAgentInstance;
-            //     if (navAgentInstance)
-            //     navAgentInstance.agentRaycastHit();
-            // } 
-                // const navParent = raycastHitAgent.getObjectByName("navagent", true);
-                // if (navParent) { 
-
-                //     navAgentInstance = navParent.userData.navAgentInstance;
-                //     navAgentInstance.agentRaycastHit();
-                // } else {
-                //     console.log("no navagent found on character!");
-                // }
-            // }
-        
-        
-        // const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //hrm
-        // const navAgentInstance = raycastHitAgent.parent.getObjectByName("NavAgent");
-        // const navAgentInstance = navAgentInstances[agentID];
-        // if (navAgentInstance) {
-        //     console.log("gotsa navagent");
-        //     navAgentInstance.agentRaycastHit();
-        // } else {
             
     // }
     } else if (locationData && locationData.markerType == "gate" ) {
