@@ -51,7 +51,8 @@
 	
 	import { LoadSceneInventory } from './wgpu_inventory.js';
 	
-	import { InstanceNode } from 'three/webgpu';
+// 	import { InstanceNode } from 'three/webgpu';
+// import RenderObjectPipeline from 'three/src/renderers/common/RenderObjectPipeline.js';
 
 
 // import { GetUserInventory } from '../../connect/dialogs.js';
@@ -120,7 +121,7 @@
 		const three_canvas = document.getElementById("three_canvas");
 		scene = new THREE.Scene();
 		// renderer = new THREE.WebGPURenderer({antialias:true, canvas: three_canvas});
-		renderer = new THREE.WebGPURenderer({antialias:true});
+		renderer = new THREE.WebGPURenderer({antialias:true, canvas: three_canvas});
 		// renderer = new THREE.WebGPURenderer( { antialias: true } );
 				// renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setSize( window.innerWidth, window.innerHeight );
@@ -390,8 +391,8 @@
 		const edgeStrength = uniform( 3.0 );
 
 		const edgeThickness = uniform( 1.0 );
-		const visibleEdgeColor = uniform( new THREE.Color( 0xffffff ) );
-		const hiddenEdgeColor = uniform( new THREE.Color( 0x4e3636 ) );
+		const visibleEdgeColor = uniform( new THREE.Color( 0xFF0000 ) );
+		const hiddenEdgeColor = uniform( new THREE.Color( 0x000000 ) );
 
 		// 4. Create the OutlineNode
 		const outlinePass = outline( scene, camera, { 
@@ -407,11 +408,15 @@
 			.add( hiddenEdge.mul( hiddenEdgeColor ) )
 			.mul( edgeStrength );
 		
+		let hasDOF = false;
 		let hasBloom = false;
-		let hasOutline = false;
+		let hasOutline = true;
 
 		let emissivePass;
 		let bloomPass;
+		if (settings && settings.sceneCameraDepthOfField || settings.sceneTags && settings.sceneTags.includes("DOF")) {
+			hasDOF = true;
+		}
 		if (settings && settings.sceneTags && settings.sceneTags.includes("bloom")) {
 			hasBloom = true;
 			bloomPass = bloom( scenePassColor );
@@ -462,20 +467,35 @@
 			// const scenePassColor = scenePass.getTextureNode();
 			const scenePassColorBlurred = gaussianBlur( scenePassColor );
 
-			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
+			// const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
 			
-			scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 ); //just fake dof
+			// scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 ); //just fake dof
 			// renderPipeline = new THREE.renderPipeline( renderer );
 			// renderPipeline.outputNode = scenePassColor.add( bloomPass );
+			if (hasDOF) {
+				scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 );
+			} else {
+				
+			}
 			if (hasBloom) {
 				// renderPipeline.outputNode = scenePassColorBlurred.add( bloomPass );
 				renderPipeline.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
 			} else if (hasOutline) {
 				// renderPipeline.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
+				if (hasDOF) {
 				renderPipeline.outputNode = outlineColor.add(scenePassColorBlurred);
+				} else {
+					const scenePass = pass( scene, camera );
+					renderPipeline.outputNode = outlineColor.add(scenePass);
+				}
 			} else {
 				console.log('post processing no water');
+				if (hasDOF) {
 				renderPipeline.outputNode = scenePassColorBlurred;
+				} else {
+					const scenePass = pass( scene, camera );
+					renderPipeline.outputNode = scenePass;
+				}
 			}
 	
 		}
@@ -548,7 +568,7 @@
 			}
 			interactionManagers.forEach(i => 
 					i.update());
-					
+
 			if (rapierDebugRenderer && showDebug) {
 				rapierDebugRenderer.update();
 			}		

@@ -834,6 +834,15 @@ function RaycastHit(type, hit) {
                     name = name.split("~")[0];
                 }
                 ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                // if (locationData.locationTags.includes("select")) {
+                //     selectedObjects.length = 0;
+                //     selectedObjects.push(hit.object);
+                // }
+                //  hit.object.material.transparent = true; 
+                //  hit.object.material.opacity = true; 
+                //  hit.object.material.needsUpdate = true;
+                // mesh.material.transparent = true; 
+                // mesh.material.opacity = 0.5;
                 // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             }
@@ -850,6 +859,7 @@ function RaycastHit(type, hit) {
                 pointerGizmo.visible = false;
             }
             if (locationData.locationTags.includes("select")) {
+                selectedObjects.length = 0;
                  selectedObjects.push(hit.object);
             }
         }

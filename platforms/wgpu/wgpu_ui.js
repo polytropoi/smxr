@@ -215,22 +215,22 @@ export async function ThreeDeeText (textString, size, parent, position, distance
                
 
                 textContainer.visible = true;
-                textContainer.position.set(position.x - scaleFactor, position.y + (scaleFactor * 2), position.z - (scaleFactor * 4));
+                textContainer.position.set(position.x - scaleFactor, position.y + (scaleFactor * 2), position.z);
                 textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
                 // Later, update the text
                 // console.log("updating callout " + textString);
                 const updated = await Text.create({ text: textString,
-                            font: '../../fonts/web/Acme.woff',
-                            depth: 0.02,
-                            // align: 'left',
-                            size: size,
-                            // size: size,
-                            removeOverlaps: true,
-                            layout: {
-                                width: width,
-                                align: 'left'
-                            } 
+                        font: '../../fonts/web/Acme.woff',
+                        depth: 0.02,
+                        // align: 'left',
+                        size: size,
+                        // size: size,
+                        removeOverlaps: true,
+                        layout: {
+                            width: width,
+                            align: 'left'
+                        } 
                     });
                 if (textmesh) {
                     // console.log("updateing textmesh "  + textString);
