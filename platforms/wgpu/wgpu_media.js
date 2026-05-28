@@ -130,7 +130,7 @@ class SceneTextData {
         // console.log("loading sceneTextItems " + JSON.stringify(sceneTextItems));
         // this.textItems = data;
         }
-        returnTextData (mediaID, index) {
+        returnTextData (mediaID, tag) {
             console.log("tryna get mediaID " + mediaID);
             // console.log("tryna get text media for " + mediaID);
             for (let i = 0; i < this.jsonData.length; i++) {
@@ -138,19 +138,32 @@ class SceneTextData {
             if (mediaID == this.jsonData[i]._id) {
 
                 const textObject = JSON.parse(this.jsonData[i].textstring);
-                // console.log("textstring " + this.jsonData[i].textstring);
-                if (textObject.data && textObject.data.length) {    
-                    // console.log("textstring " + this.jsonData[i].textstring.data);            
-                    // const textData = JSON.parse(this.jsonData[i].textstring.data);
-                    const rindex = Math.floor(Math.random() * textObject.data.length);
 
-                    return textObject.data[rindex];
-                } else {
+                if (!tag) {
                     // console.log("textstring " + this.jsonData[i].textstring);
-                    // const textData = JSON.parse(this.jsonData[i].textstring);
-                    const rindex = Math.floor(Math.random() * textObject.length);
+                    if (textObject.data && textObject.data.length) {    
+                        // console.log("textstring " + this.jsonData[i].textstring.data);            
+                        // const textData = JSON.parse(this.jsonData[i].textstring.data);
+                        const rindex = Math.floor(Math.random() * textObject.data.length);
 
-                    return textObject[rindex];
+                        return textObject.data[rindex];
+                    } else {
+                        // console.log("textstring " + this.jsonData[i].textstring);
+                        // const textData = JSON.parse(this.jsonData[i].textstring);
+                        const rindex = Math.floor(Math.random() * textObject.length);
+
+                        return textObject[rindex];
+                    }
+                } else {
+                    for (let i = 0; i < textObject.data.length; i++) {
+                         //match the first element in child array
+                        tag = tag.split("~")[0];
+                        tag = tag.toLowerCase();
+                        console.log(textObject.data[i][0].toLowerCase() + " vs "+  tag);
+                        if (textObject.data[i][0].toLowerCase() == tag) {
+                            return textObject.data[i];
+                        }
+                    }
                 }
 
                 

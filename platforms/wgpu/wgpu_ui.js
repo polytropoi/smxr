@@ -253,20 +253,22 @@ export async function ThreeDeeText (textString, size, parent, position, distance
                 // const width = stringCount < 6 ? stringCount : 6;
 
                 // console.log("tryna set ui size " + size + " width " + width + " stringcount " + stringCount);
-                text = await Text.create({
-                    // width: 1,
-                    text: textString,
-                    font: '../../fonts/web/Acme.woff',
-                    depth: 0.02,
-                    // align: 'left',
-                    size: size,
-                    // size: size,
-                    removeOverlaps: true,
-                    layout: {
-                        width: width,
-                        align: 'left'
-                    }
-                });
+                if (textString) {
+                    text = await Text.create({
+                        // width: 1,
+                        text: textString,
+                        font: '../../fonts/web/Acme.woff',
+                        depth: 0.02,
+                        // align: 'left',
+                        size: size,
+                        // size: size,
+                        removeOverlaps: true,
+                        layout: {
+                            width: width,
+                            align: 'left'
+                        }
+                    });
+                }
 
             // console.log("gotsa text result " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
             // let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
@@ -724,7 +726,7 @@ let matSwappedObjex = {};
 export function SwapMaterials (object, material) {
     // matSwappedObjex = {};
     if (!matSwappedObjex[object.name]) {
-        console.log("tryna swap " + object.name + " with material " + material);
+        // console.log("tryna swap " + object.name + " with material " + material);
 
         const oMat = object.material;
         const nMat = object.material.clone();
@@ -743,19 +745,17 @@ export function SwapMaterials (object, material) {
 
         console.log("tryna swapmaterials " + Object.keys(matSwappedObjex));
     }
-
     // console.log(JSON.stringify(matSwappedObjex));
-
 }
 
 export function UnSwapMaterials (object) {
     // if (object) {
     //     object.material = matSwappedObjex[object];
     // } else {
-        console.log("tryna unswapmaterials " + Object.keys(matSwappedObjex));
+        // console.log("tryna unswapmaterials " + Object.keys(matSwappedObjex));
         for (const obj in matSwappedObjex) {
             if (obj != "textmesh") {
-            console.log("tryna unswap " + obj);
+            // console.log("tryna unswap " + obj);
             matSwappedObjex[obj].object.material = matSwappedObjex[obj].oMat;
             matSwappedObjex[obj].object.material.needsUpdate = true;
             // obj.object.material = obj.oMat; 

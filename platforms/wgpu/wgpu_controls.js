@@ -834,7 +834,9 @@ function RaycastHit(type, hit) {
                 if (name.includes("~")) {
                     name = name.split("~")[0];
                 }
-                ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                if (name && name != "") {
+                    ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                }
                 // if (locationData.locationTags.includes("select")) {
                 //     selectedObjects.length = 0;
                 //     selectedObjects.push(hit.object);
@@ -859,14 +861,15 @@ function RaycastHit(type, hit) {
             } else {
                 pointerGizmo.visible = false;
             }
-            if (locationData.locationTags.includes("select")) {
+            if (locationData.locationTags && locationData.locationTags.includes("select")) {
                 selectedObjects.length = 0;
                 selectedObjects.push(hit.object);
                 hit.object.traverse((child) => {
                 // console.log(child.name);
                     if (child.isMesh) {
-                        console.log("child name " + child.name);
+                       
                         if (child.name != "textmesh") {
+                             console.log("child name " + child.name);
                             SwapMaterials(child, "transparent");
                             // break;
                         } 
@@ -1140,7 +1143,7 @@ export function centerRaycast() {
 export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
     // event.stopPropagation();
-    console.log("mouseDownOn " + event.target.id);
+    console.log("mouseDownOn " + event.target.id + " vs " + lastHitObjectName);
         // console.log("showDialogPanel " + showDialogPanel);
 
     if (showDialogPanel) {
@@ -1190,7 +1193,7 @@ export function onMouseDown(event) { //clicked on threejs object
         return;
     } else if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
  
-            let navAgentInstance
+            let navAgentInstance;
             if (lastRaycastHitObject.parent.parent) {
                 navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance; 
             }
@@ -1444,18 +1447,24 @@ export function onMouseDown(event) { //clicked on threejs object
             // const popup = document.getElementById("popup");
                 let textData;
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
-                    textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                    if (lastRaycastHitObject.userData.locationData.eventData.includes("children")) {
+                        textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID, lastHitObjectName);
+                    } else { //eventData == "random"?
+                        textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                    }
                     console.log("text item " + JSON.stringify(textData));
                 }
                 
                 if (textData != null && textData != undefined && textData != "" && textData != "none" && textData.text) {
+                    
                     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
                     ShowPopup(event);
-                } else {
-                    popup.style.display = "none";
+                    UpdateHIC(popup.innerHTML);
+                } else if (textData && !textData.text) {
+                     popup.innerHTML = "<h1>" + textData[0] + " </h1>"  + textData[1];
+                    ShowPopup(event);
+                    UpdateHIC(popup.innerHTML);
                 }
-
-
             } else {
                 popup.style.display = "none";
             }

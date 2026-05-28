@@ -384,117 +384,119 @@
 		// GetUserInventory();
 		LoadSceneInventory(); //both scene and user inventories
 
-		const scenePass = pass( scene, camera );
-		const scenePassColor = scenePass.getTextureNode();
-		// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
-		// const selectedObjects = [ mesh ]; // Array of meshes to outline
-		const edgeStrength = uniform( 3.0 );
+		if (doPostProcessing) {
+			const scenePass = pass( scene, camera );
+			const scenePassColor = scenePass.getTextureNode();
+			// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+			// const selectedObjects = [ mesh ]; // Array of meshes to outline
+			const edgeStrength = uniform( 3.0 );
 
-		const edgeThickness = uniform( 1.0 );
-		const visibleEdgeColor = uniform( new THREE.Color( 0xFF0000 ) );
-		const hiddenEdgeColor = uniform( new THREE.Color( 0x000000 ) );
+			const edgeThickness = uniform( 1.0 );
+			const visibleEdgeColor = uniform( new THREE.Color( 0xFF0000 ) );
+			const hiddenEdgeColor = uniform( new THREE.Color( 0x000000 ) );
 
-		// 4. Create the OutlineNode
-		const outlinePass = outline( scene, camera, { 
-			selectedObjects, 
-			edgeThickness,
-			// Add other properties as needed
-		} );
+			// 4. Create the OutlineNode
+			const outlinePass = outline( scene, camera, { 
+				selectedObjects, 
+				edgeThickness,
+				// Add other properties as needed
+			} );
 
-		// 5. Compose the final output
-		const { visibleEdge, hiddenEdge } = outlinePass;
-		const outlineColor = visibleEdge
-			.mul( visibleEdgeColor )
-			.add( hiddenEdge.mul( hiddenEdgeColor ) )
-			.mul( edgeStrength );
-		
-		let hasDOF = false;
-		let hasBloom = false;
-		let hasOutline = true;
-
-		let emissivePass;
-		let bloomPass;
-		if (settings && settings.sceneCameraDepthOfField || settings.sceneTags && settings.sceneTags.includes("DOF")) {
-			hasDOF = true;
-		}
-		if (settings && settings.sceneTags && settings.sceneTags.includes("bloom")) {
-			hasBloom = true;
-			bloomPass = bloom( scenePassColor );
-			bloomPass.strength = .75;
-		} 
-		if (settings && settings.sceneTags && settings.sceneTags.includes("emissive bloom")) {//ouch
-			hasBloom = true;
-			// emissivePass = scenePass.getColorNode( 'emissive' ); //fragment error...
-			// bloomPass = bloom( emissivePass, 2.5, .5 );
-			bloomPass = bloom( scenePassColor );
-			bloomPass.strength = .75;
-		}
-		
-		// const bloomPass = bloom( emissivePass, 2.5, .5 );
-		// scenePassColor.add( bloomPass );
-		if (water) { // set uwfx
-			const waterLevel = parseFloat(settings.sceneWater.level);
+			// 5. Compose the final output
+			const { visibleEdge, hiddenEdge } = outlinePass;
+			const outlineColor = visibleEdge
+				.mul( visibleEdgeColor )
+				.add( hiddenEdge.mul( hiddenEdgeColor ) )
+				.mul( edgeStrength );
 			
+			let hasDOF = false;
+			let hasBloom = false;
+			let hasOutline = true;
 
-			// const scenePass = pass( scene, camera );
-			// const scenePassColor = scenePass.getTextureNode();
-			const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
-
-			// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) );
-			const waterMask = objectPosition( camera ).y.greaterThan( waterLevel );
-			const scenePassColorBlurred = gaussianBlur( scenePassColor );
-			scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
-
-			const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
-
-			renderPipeline = new THREE.RenderPipeline( renderer );
-				
-			console.log('post processing with water level ' + waterLevel );
-			// postProcessing.outputNode = scenePassColor.add( bloomPass );
-			if (hasBloom) {
-				console.log("bloom with waater");
-				// postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( vignette ) ).add( bloomPass );
-				renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( bloomPass ));
-			} else {
-				renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ));
+			let emissivePass;
+			let bloomPass;
+			if (settings && settings.sceneCameraDepthOfField || settings.sceneTags && settings.sceneTags.includes("DOF")) {
+				hasDOF = true;
 			}
-			// renderPipeline.outputNode = scenePassColor.add( bloomPass );
-		} else {
-			// const waterMask = objectPosition( camera ).y.greaterThan( -10 );
-
-			renderPipeline = new THREE.RenderPipeline( renderer );
-			// const scenePass = pass( scene, camera );
-			// const scenePassColor = scenePass.getTextureNode();
-			const scenePassColorBlurred = gaussianBlur( scenePassColor );
-
-			// const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
+			if (settings && settings.sceneTags && settings.sceneTags.includes("bloom")) {
+				hasBloom = true;
+				bloomPass = bloom( scenePassColor );
+				bloomPass.strength = .75;
+			} 
+			if (settings && settings.sceneTags && settings.sceneTags.includes("emissive bloom")) {//ouch
+				hasBloom = true;
+				// emissivePass = scenePass.getColorNode( 'emissive' ); //fragment error...
+				// bloomPass = bloom( emissivePass, 2.5, .5 );
+				bloomPass = bloom( scenePassColor );
+				bloomPass.strength = .75;
+			}
 			
-			// scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 ); //just fake dof
-			// renderPipeline = new THREE.renderPipeline( renderer );
-			// renderPipeline.outputNode = scenePassColor.add( bloomPass );
-			if (hasDOF) {
-				scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 );
-			} else {
+			// const bloomPass = bloom( emissivePass, 2.5, .5 );
+			// scenePassColor.add( bloomPass );
+			if (water) { // set uwfx
+				const waterLevel = parseFloat(settings.sceneWater.level);
 				
-			}
-			if (hasBloom) {
-				// renderPipeline.outputNode = scenePassColorBlurred.add( bloomPass );
-				renderPipeline.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
-			} else if (hasOutline) {
-				// renderPipeline.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
-				if (hasDOF) {
-				renderPipeline.outputNode = outlineColor.add(scenePassColorBlurred);
+
+				// const scenePass = pass( scene, camera );
+				// const scenePassColor = scenePass.getTextureNode();
+				const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
+
+				// const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) );
+				const waterMask = objectPosition( camera ).y.greaterThan( waterLevel );
+				const scenePassColorBlurred = gaussianBlur( scenePassColor );
+				scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
+
+				const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
+
+				renderPipeline = new THREE.RenderPipeline( renderer );
+					
+				console.log('post processing with water level ' + waterLevel );
+				// postProcessing.outputNode = scenePassColor.add( bloomPass );
+				if (hasBloom) {
+					console.log("bloom with waater");
+					// postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( vignette ) ).add( bloomPass );
+					renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( bloomPass ));
 				} else {
-					const scenePass = pass( scene, camera );
-					renderPipeline.outputNode = outlineColor.add(scenePass);
+					renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ));
 				}
+				// renderPipeline.outputNode = scenePassColor.add( bloomPass );
 			} else {
-				console.log('post processing no water');
+				// const waterMask = objectPosition( camera ).y.greaterThan( -10 );
+
+				renderPipeline = new THREE.RenderPipeline( renderer );
+				// const scenePass = pass( scene, camera );
+				// const scenePassColor = scenePass.getTextureNode();
+				const scenePassColorBlurred = gaussianBlur( scenePassColor );
+
+				// const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
+				
+				// scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 ); //just fake dof
+				// renderPipeline = new THREE.renderPipeline( renderer );
+				// renderPipeline.outputNode = scenePassColor.add( bloomPass );
 				if (hasDOF) {
-				renderPipeline.outputNode = scenePassColorBlurred;
+					scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 );
 				} else {
-					const scenePass = pass( scene, camera );
-					renderPipeline.outputNode = scenePass;
+					
+				}
+				if (hasBloom) {
+					// renderPipeline.outputNode = scenePassColorBlurred.add( bloomPass );
+					renderPipeline.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
+				} else if (hasOutline) {
+					// renderPipeline.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
+					if (hasDOF) {
+					renderPipeline.outputNode = outlineColor.add(scenePassColorBlurred);
+					} else {
+						const scenePass = pass( scene, camera );
+						renderPipeline.outputNode = outlineColor.add(scenePass);
+					}
+				} else {
+					console.log('post processing no water');
+					if (hasDOF) {
+					renderPipeline.outputNode = scenePassColorBlurred;
+					} else {
+						const scenePass = pass( scene, camera );
+						renderPipeline.outputNode = scenePass;
+					}
 				}
 			}
 	
