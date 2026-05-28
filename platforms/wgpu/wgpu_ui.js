@@ -720,40 +720,48 @@ export function UpdateHIC (htmlstring) {
 
 }
 
-			// function firstPaint(canvas) {
-			// 	return new Promise((resolve) => {
-			// 		let done = false;
-			// 		const finish = () => {
-			// 			if (done) return;
-			// 			done = true;
-			// 			canvas.onpaint = null;
-			// 			resolve();
-			// 		};
-			// 		canvas.onpaint = finish;
-			// 		canvas.requestPaint();
-			// 		setTimeout(finish, 800);
-			// 	});
-			// }
+let matSwappedObjex = {};
+export function SwapMaterials (object, material) {
+    // matSwappedObjex = {};
+    if (!matSwappedObjex[object.name]) {
+        console.log("tryna swap " + object.name + " with material " + material);
 
-			// function createHTMLElement() {
-			// 	const el = document.createElement('div');
-			// 	el.id = 'draw_element';
-			// 	el.innerHTML = `
-			// 		Hello world!<br>I'm multi-line, <b>formatted</b>,
-			// 		rotated text with emoji (&#128512;), RTL text
-			// 		<span dir=rtl>من فارسی صحبت میکنم</span>,
-			// 		vertical text,
-			// 		<p style="writing-mode: vertical-rl;">
-			// 		这是垂直文本
-			// 		</p>
-			// 		an inline image (<img width="150" src="https://threejs.org/examples/textures/758px-Canestra_di_frutta_(Caravaggio).jpg" crossorigin="anonymous">), and
-			// 		<svg width="50" height="50">
-			// 			<circle cx="25" cy="25" r="20" fill="green" />
-			// 			<text x="25" y="30" font-size="15" text-anchor="middle" fill="#fff">SVG</text>
-			// 		</svg>!
-			// 		<br>
-			// 		<input type="text" placeholder="Type here...">
-			// 		<button>Click me</button>
-			// 	`;
-			// 	return el;
-			// }
+        const oMat = object.material;
+        const nMat = object.material.clone();
+
+        if (material == "transparent") {
+            nMat.transparent = true;
+            nMat.opacity = .5;
+        } 
+        object.material = nMat;
+        object.material.needsUpdate = true;
+        let swap = {};
+        swap.oMat = oMat;
+        swap.object = object;
+
+        matSwappedObjex[object.name] = swap;
+
+        console.log("tryna swapmaterials " + Object.keys(matSwappedObjex));
+    }
+
+    // console.log(JSON.stringify(matSwappedObjex));
+
+}
+
+export function UnSwapMaterials (object) {
+    // if (object) {
+    //     object.material = matSwappedObjex[object];
+    // } else {
+        console.log("tryna unswapmaterials " + Object.keys(matSwappedObjex));
+        for (const obj in matSwappedObjex) {
+            if (obj != "textmesh") {
+            console.log("tryna unswap " + obj);
+            matSwappedObjex[obj].object.material = matSwappedObjex[obj].oMat;
+            matSwappedObjex[obj].object.material.needsUpdate = true;
+            // obj.object.material = obj.oMat; 
+            }
+        }
+        matSwappedObjex = {};
+    // }
+}
+

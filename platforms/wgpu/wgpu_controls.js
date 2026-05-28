@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC, hicMesh } from './wgpu_ui.js';
+import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC, hicMesh, SwapMaterials, UnSwapMaterials } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -753,6 +753,7 @@ function RaycastHit(type, hit) {
             for (let i = 0; i < textContainers.length; i++) {
                 textContainers[i].visible = false;
             }
+            // UnSwapMaterials();
             // lastRaycastHit = null;
             // const textContainer = lastRaycastHitObject.getObjectByName('textContainer');
             // if (textContainer) {
@@ -860,7 +861,22 @@ function RaycastHit(type, hit) {
             }
             if (locationData.locationTags.includes("select")) {
                 selectedObjects.length = 0;
-                 selectedObjects.push(hit.object);
+                selectedObjects.push(hit.object);
+                hit.object.traverse((child) => {
+                // console.log(child.name);
+                    if (child.isMesh) {
+                        console.log("child name " + child.name);
+                        if (child.name != "textmesh") {
+                            SwapMaterials(child, "transparent");
+                            // break;
+                        } 
+                        // child.material = child.material.clone();
+                        // child.material.transparent = true; 
+                        //                  child.material.opacity = .5; 
+                        //                   child.material.needsUpdate = true;
+                    // child.material.needsUpdate = true;
+                    }
+                });
             }
         }
     }
@@ -1007,6 +1023,7 @@ export function mouseRaycast(e) {
             // lastRaycastHit = null;
             lastRaycastHitObject = null;
             raycastHitAgent = null;
+            // UnSwapMaterials();
             // if (raycastHitAgent) {
                 
             //     if (raycastHitAgent.material && raycastHitAgent.material.colorNode) {
@@ -1022,6 +1039,7 @@ export function mouseRaycast(e) {
 
     } else {
         selectedObjects.length = 0;
+        UnSwapMaterials();
         for (let i = 0; i < textContainers.length; i++) {
             textContainers[i].visible = false;
         }
