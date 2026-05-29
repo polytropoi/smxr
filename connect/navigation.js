@@ -1830,22 +1830,26 @@ AFRAME.registerComponent('nav_agent_controller', {
 		this.previousState = "random";
 		this.currentSpeed = 1;
 		//////////loop to get navmesh
+		let navMeshControllerEl = document.getElementById("nav-mesh");
+		if (navMeshControllerEl) {
+			console.log("tryna get NAVMESHCONTROLLER el " );
+		}
 		let interval = setInterval( () => { //make sure navmesh and controller are ready
 		// this.el.setAttribute('nav-agent', {
 		// 	active:false
 		// });
-			let navMeshControllerEl = document.getElementById("nav-mesh");
+			
 
 			if (navMeshControllerEl) {
-				console.log("gotsa NAVMESHCONTROLLER el " );
+				
 				this.navMeshControllerEl = navMeshControllerEl;
 				this.navMeshController = navMeshControllerEl.components.nav_mesh_controller;
 				if (this.navMeshController) {
-					console.log("gotsa NAVMESHCONTROLLER " + this.navMeshController.isReady);
+					// console.log("gotsa NAVMESHCONTROLLER " + this.navMeshController.isReady);
 					// if (this.navMeshController.goodWaypoints != undefined && this.navMeshController.goodWaypoints.length > 0) {		
 					if (this.el.sceneEl.systems.nav && this.navMeshController.isReady) {		
 						this.waitAndInit();
-						console.log("gotsa NAVMESHCONTROLLER system.nav");
+						console.log("gotsa NAVMESHCONTROLLER");
 						clearInterval(interval);
 
 					}

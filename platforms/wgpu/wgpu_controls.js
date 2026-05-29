@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC, hicMesh, SwapMaterials, UnSwapMaterials } from './wgpu_ui.js';
+import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -793,7 +793,10 @@ function RaycastHit(type, hit) {
 
     const objectData = lastRaycastHitObject.userData.objectData;
     // const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
-    let name = hit.object.name ? hit.object.name : lastRaycastHitObject.name;
+    let name = locationData.name;
+    if (locationData && locationData.eventData && locationData.eventData.includes("children")) {
+        name = hit.object.name ? hit.object.name : lastRaycastHitObject.name;
+    }
     let showCallout = false;
     
     if (type == "mouse" &&
@@ -1146,6 +1149,8 @@ export function onMouseDown(event) { //clicked on threejs object
     console.log("mouseDownOn " + event.target.id + " vs " + lastHitObjectName);
         // console.log("showDialogPanel " + showDialogPanel);
 
+    let textData;
+    let htmlString;
     if (showDialogPanel) {
         return;
     }
@@ -1159,21 +1164,29 @@ export function onMouseDown(event) { //clicked on threejs object
     if (event.target.id == "popup_yesButton") {
       ActionSwitch(event);
       popup.style.display = "none";
-      hicMesh.visible = false;
+      if (hicMesh) {
+        hicMesh.visible = false;
+      }
       return;
     } if (event.target.id == "popup_yesButton1") {
       ActionSwitch(event);
       popup.style.display = "none";
-       hicMesh.visible = false;
+     if (hicMesh) {
+        hicMesh.visible = false;
+      }
       return;
     } if (event.target.id == "popup_yesButton2") {
       ActionSwitch(event);
       popup.style.display = "none";
-       hicMesh.visible = false;
+      if (hicMesh) {
+        hicMesh.visible = false;
+      }
       return;
     } else if (event.target.id == "popup_cancelButton") {
       popup.style.display = "none";
-       hicMesh.visible = false;
+      if (hicMesh) {
+        hicMesh.visible = false;
+      }
       return;
     }
     // if (event.target.)
@@ -1205,17 +1218,7 @@ export function onMouseDown(event) { //clicked on threejs object
                 navAgentInstance = lastRaycastHitObject.userData.NavAgentInstance; //hrm
                 // console.log("no no parent");
             }
-            // if (!navAgentInstance) {
-
-            //         lastRaycastHitObject.traverse(function (child) {
-            //         // console.log(child.name);
-            //         if (child.isMesh && child.userData && child.userData.NavAgentInstance) {
-                        
-            //             navAgentInstance = lastRaycastHitObject.userData.NavAgentInstance;
-            //             console.log("gotsa navAgentInstance!"); 
-            //         }
-            //     });
-            // }
+          
             if (!navAgentInstance) {
                 navAgentInstance = navAgentInstances[lastRaycastHitObject.userData.name];
             }
@@ -1223,7 +1226,7 @@ export function onMouseDown(event) { //clicked on threejs object
             if (navAgentInstance) {
                 navAgentInstance.agentClick();
  
-                let textData;
+                // let textData;
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                     console.log("text item " + textData);
@@ -1265,18 +1268,19 @@ export function onMouseDown(event) { //clicked on threejs object
                 // }
                
 
-                let textData;
+                
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                     console.log("text item " + JSON.stringify(textData));
                 }
                 
                 if (textData != null && textData != undefined && textData != "" && textData != "none") {
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData.text;
-                        
-                    ShowPopup(event);
-                     hic_content.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData.text;
-                    UpdateHIC(hic_content.innerHTML);
+                        // popup.innerHTML 
+                        htmlString = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData.text;
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                    // ShowPopup(event);
+                    //  hic_content.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData.text;
+                    // UpdateHIC(hic_content.innerHTML);
                 } else if (lastRaycastHitObject.userData.objectData.labeltext && 
                     lastRaycastHitObject.userData.objectData.labeltext.length) {
                         // let textData;
@@ -1287,32 +1291,46 @@ export function onMouseDown(event) { //clicked on threejs object
                     if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
                         const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
                         const randomIndex = Math.floor(Math.random() * labelSplit.length);
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
-                        ShowPopup(event);
-                        hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
-                        UpdateHIC(hic_content.innerHTML);
+
+                        htmlString = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                        // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
+                        // ShowPopup(event);
+                        // hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
+                        // UpdateHIC(hic_content.innerHTML);
                     } else {
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + 
+
+                        htmlString = "<h1>" + lastRaycastHitObject.userData.objectData.name + 
                         "  </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
-                        ShowPopup(event);
-                           hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + 
-                        "  </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
-                        UpdateHIC(hic_content.innerHTML);
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                        // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + 
+                        // "  </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
+                        // ShowPopup(event);
+                        //    hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + 
+                        // "  </h1>"  + lastRaycastHitObject.userData.objectData.labeltext;
+                        // UpdateHIC(hic_content.innerHTML);
                     }
                 } else if (lastRaycastHitObject.userData.objectData.callouttext && lastRaycastHitObject.userData.objectData.callouttext.length) {
                     if (lastRaycastHitObject.userData.objectData.callouttext.includes("~")) {
                         const calloutSplit = lastRaycastHitObject.userData.objectData.callouttext.split("~");
                         const randomIndex = Math.floor(Math.random() * calloutSplit.length);
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
-                        ShowPopup(event);
-                        hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
-                        UpdateHIC(hic_content.innerHTML);
+
+                         htmlString = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                        // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
+                        // ShowPopup(event);
+                        // hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
+                        // UpdateHIC(hic_content.innerHTML);
                         
                     } else {
-                        popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
-                        ShowPopup(event);
-                          hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
-                        UpdateHIC(hic_content.innerHTML);
+
+                        htmlString = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+
+                        // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
+                        // ShowPopup(event);
+                        //   hic_content.innerHTML =  "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
+                        // UpdateHIC(hic_content.innerHTML);
                     }
                 }
 
@@ -1403,18 +1421,26 @@ export function onMouseDown(event) { //clicked on threejs object
             
                 if (textData != null && textData != undefined && textData != "" && textData != "none") {
                     if (Array.isArray(textData)) { //not kv pairs as nested objects, but an array of values
-                        ShowPopup(event); 
-                        //keyd to a specific schema, hrm... data[0] from source textObject returnd from sceneTextController above should have field names...
-                        popup.innerHTML = "<h4>ATU " + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];
-                           hic_content.innerHTML =  "<h4>ATU " + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];
-                        UpdateHIC(hic_content.innerHTML);
+
+                        
+                        htmlString = "<h4>" + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];  
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+
+                        // ShowPopup(event); 
+                        // //keyd to a specific schema, hrm... data[0] from source textObject returnd from sceneTextController above should have field names...
+                        // popup.innerHTML = "<h4>" + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];
+                        //    hic_content.innerHTML =  "<h4>ATU " + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];
+                        // UpdateHIC(hic_content.innerHTML);
                         
                     } else {
 
-                        ShowPopup(event);
-                        popup.innerHTML = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
-                           hic_content.innerHTML =  "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
-                        UpdateHIC(hic_content.innerHTML);
+                        htmlString = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+
+                        // ShowPopup(event);
+                        // popup.innerHTML = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                        //    hic_content.innerHTML =  "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                        // UpdateHIC(hic_content.innerHTML);
                         
                     }
                 
@@ -1436,12 +1462,18 @@ export function onMouseDown(event) { //clicked on threejs object
                 //     top: `${ypos}px`,
                 //     display: 'block',
                 // });
-                ShowPopup(event);
-                popup.innerHTML = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
+                htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
                 "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
                 "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
                 lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Go</button>"+
                 "</div>";
+                ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                // ShowPopup(event);
+                // popup.innerHTML = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
+                // "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
+                // "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
+                // lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Go</button>"+
+                // "</div>";
 
             } else if (lastRaycastHitObject.userData.locationData.mediaID) {
             // const popup = document.getElementById("popup");
@@ -1456,14 +1488,18 @@ export function onMouseDown(event) { //clicked on threejs object
                 }
                 
                 if (textData != null && textData != undefined && textData != "" && textData != "none" && textData.text) {
-                    
-                    popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
-                    ShowPopup(event);
-                    UpdateHIC(popup.innerHTML);
+                       htmlString = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                    // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
+                    // ShowPopup(event);
+                    // UpdateHIC(popup.innerHTML);
                 } else if (textData && !textData.text) {
-                     popup.innerHTML = "<h1>" + textData[0] + " </h1>"  + textData[1];
-                    ShowPopup(event);
-                    UpdateHIC(popup.innerHTML);
+
+                        htmlString = "<h1>" + textData[0] + " </h1>"  + textData[1];
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                    //  popup.innerHTML = "<h1>" + textData[0] + " </h1>"  + textData[1];
+                    // ShowPopup(event);
+                    // UpdateHIC(popup.innerHTML);
                 }
             } else {
                 popup.style.display = "none";
@@ -1554,9 +1590,6 @@ export function ShowPopup (event) { //hrm move to UI
     }
 
     // UpdateHIC(); //wgpu only fn
-
-    
-
 }
 
 export function onMouseUp(e) {

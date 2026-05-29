@@ -90,10 +90,10 @@ function generateSuccessHTMLOutput(response) {
             buttons = buttons + "<a href=\x22/maplibre/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Maplibre</a>";
           }    
           if (shuffledArray[i].sceneEnabledClientTypes.threeWebGL == true) {
-            buttons = buttons + "<a href=\x22/wgl/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Three GL</a>";
+            buttons = buttons + "<a href=\x22/wgl/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebGL</a>";
           }  
           if (shuffledArray[i].sceneEnabledClientTypes.threeWeb == true) {
-            buttons = buttons + "<a href=\x22/wgpu/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>Three GPU</a>";
+            buttons = buttons + "<a href=\x22/wgpu/" +  shuffledArray[i].sceneKey + "\x22 target=\x22_blank\x22 type=\x22button\x22 class=\x22btn btn-sm btn-outline-secondary\x22>WebGPU</a>";
           }  
 
           if (shuffledArray[i].sceneEnabledClientTypes.babylonWeb == true) {

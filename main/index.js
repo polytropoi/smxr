@@ -4382,7 +4382,7 @@
                                     name: "javascript",
                                     json: true
                                 },
-                                lineNumbers: true,
+                                lineNumbers: true, lineWrapping: true,
                                 styleActiveLine: true,
                                 matchBrackets: true
                             });
@@ -4403,7 +4403,7 @@
                                     name: "javascript",
                                     json: true
                                 },
-                                lineNumbers: true,
+                                lineNumbers: true, lineWrapping: true,
                                 styleActiveLine: true,
                                 matchBrackets: true
                             });
@@ -4424,7 +4424,7 @@
                                     name: "javascript",
                                     json: true
                                 },
-                                lineNumbers: true,
+                                lineNumbers: true, lineWrapping: true,
                                 styleActiveLine: true,
                                 matchBrackets: true
                             });
@@ -4445,7 +4445,7 @@
                                     name: "htmlmixed",
                                     json: true
                                 },
-                                lineNumbers: true,
+                                lineNumbers: true, lineWrapping: true,
                                 styleActiveLine: true,
                                 matchBrackets: true
                             });
@@ -4464,7 +4464,7 @@
                             editor = CodeMirror.fromTextArea(textArea, {
                                 mode: 'xml',
                                 // theme: 'eclipse',
-                                lineNumbers: true,
+                                lineNumbers: true, lineWrapping: true,
                                 lineWrapping: true,
                             });
                             if (document.getElementById("textstring").value == "") {
@@ -4515,7 +4515,7 @@
                                 name: "javascript",
                                 json: true
                             },
-                            lineNumbers: true,
+                            lineNumbers: true, lineWrapping: true,
                             styleActiveLine: true,
                             matchBrackets: true
                         });
@@ -4534,7 +4534,7 @@
                                 name: "javascript",
                                 json: true
                             },
-                            lineNumbers: true,
+                            lineNumbers: true, lineWrapping: true,
                             styleActiveLine: true,
                             matchBrackets: true
                         });
@@ -4554,7 +4554,7 @@
                                 name: "javascript",
                                 json: true
                             },
-                            lineNumbers: true,
+                            lineNumbers: true, lineWrapping: true,
                             styleActiveLine: true,
                             matchBrackets: true
                         });
@@ -4572,7 +4572,7 @@
                                 name: "javascript",
                                 json: true
                             },
-                            lineNumbers: true,
+                            lineNumbers: true, lineWrapping: true,
                             styleActiveLine: true,
                             matchBrackets: true
                         });

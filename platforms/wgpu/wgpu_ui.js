@@ -13,6 +13,8 @@ import { ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
 import { viewportPlaceholder, popup, hic_content, onMouseDown } from './wgpu_controls.js';
 
+import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
+
 // import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
 Text.init();
@@ -598,127 +600,64 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
     // }
 }
 
-export function UpdateHIC (htmlstring) {
+export function UpdateHIC (htmlstring, hitpoint, hitobject, parent) {
 
     if (uiMode != "hic") {
         return;
     }
-    // 1. Target the HTML element
-    // if (!string) {
-    //     string = "whoa now!";
-    // }
-    // console.log("tryna UpdateHIC " + htmlstring);
+   
     const canvasEl = document.getElementById('hic_canvas');
     const contentEl = document.getElementById('hic_content');
 
-    // // 2. Create the HTML Texture
-    // const texture = new THREE.HTMLTexture(element);
 
-    // // 3. Apply to a 3D Plane
-    // const geometry = new THREE.PlaneGeometry(2, 2);
-    // const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-    // const mesh = new THREE.Mesh(geometry, material);
-    // ui_canvas.innerHTML = "<h1>" + string + " : </h1>"  + string;
-    // scene.add(mesh);
-    //  const worldPosition = new THREE.Vector3();
-    // viewportPlaceholder.getWorldPosition(worldPosition);
-    // mesh.position.set(worldPosition.x, worldPosition.y, worldPosition.z);
+        contentEl.innerHTML = htmlstring;
+        console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
 
-    // const element = createHTMLElement();
+        const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
 
-	// 			// Register the element with the polyfill: attach to the canvas (it's
-	// 			// redirected into the polyfill's shadow host) and wait for first paint.
-	// 			const canvas = renderer.domElement;
-	// 			canvas.setAttribute('layoutsubtree', 'true');
-	// 			canvas.appendChild(element);
-	// 			await firstPaint(canvas);
+        const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
+        material.map = new THREE.HTMLTexture( canvasEl );
+        material.envMap = scene.environment;
+        material.envMapIntensity = 2;
 
-	// 			const snapshot = getHtmlRenderer().getCanvas(element);
-	// 			texture = new THREE.CanvasTexture(snapshot);
-	// 			texture.colorSpace = THREE.SRGBColorSpace;
-	// 			texture.anisotropy = renderer.capabilities?.getMaxAnisotropy?.() ?? 8;
-
-	// 			// Re-upload only when the DOM actually repaints.
-	// 			canvas.onpaint = () => {
-	// 				texture.needsUpdate = true;
-	// 			};
-
-	// 			const material = new THREE.MeshStandardMaterial({
-	// 				map: texture,
-	// 				roughness: 0.6,
-	// 				metalness: 0.0,
-	// 			});
-	// 			mesh = new THREE.Mesh(new RoundedBoxGeometry(0.4, 0.4, 0.4, 10, 0.04), material);
-	// 			mesh.position.copy(meshPosDesktopVR);
-	// 			scene.add(mesh);
-
-    	// HTML element
-
-				// const element = document.createElement( 'div' );
-				// element.id = 'draw_element';
-				// contentEl.innerHTML = `
-				// 	Hello world!<br>I'm multi-line, <b>formatted</b>,
-					
-				// 	<svg width="50" height="50">
-				// 	<circle cx="25" cy="25" r="20" fill="green" />
-				// 	<text x="25" y="30" font-size="15" text-anchor="middle" fill="#fff">
-				// 		SVG
-				// 	</text>
-				// 	</svg>!
-				// 	<br>
-				// 	<input type="text" placeholder="Type here...">
-				// 	<button>Click me</button>
-				// `;   
-
-                // contentEl.style.backgroundColor = "white";
-
-                contentEl.innerHTML = htmlstring;
-                console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
-
-				const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
-
-				const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
-				material.map = new THREE.HTMLTexture( canvasEl );
-                material.envMap = scene.environment;
-                material.envMapIntensity = 2;
-                if (!hicMesh) {
+        if (!hicMesh) {
 
 
-                    const ctx = canvasEl.getContext('2d');
-                    const ratio = window.devicePixelRatio || 1;
+            const ctx = canvasEl.getContext('2d');
+            const ratio = window.devicePixelRatio || 1;
 
-                    // Set the visual size (CSS pixels)
-                    canvasEl.style.width = '768px';
-                    canvasEl.style.height = '768px';
+            // Set the visual size (CSS pixels)
+            canvasEl.style.width = '768px';
+            canvasEl.style.height = '768px';
 
-                    // Set the internal resolution (Physical pixels)
-                    canvasEl.width = 200 * ratio;
-                    canvasEl.height = 200 * ratio;
+            // Set the internal resolution (Physical pixels)
+            canvasEl.width = 200 * ratio;
+            canvasEl.height = 200 * ratio;
 
-                    // Scale the context to match
-                    ctx.scale(ratio, ratio);
-                    hicMesh = new THREE.Mesh( geometry, material );
+            // Scale the context to match
+            ctx.scale(ratio, ratio);
+            hicMesh = new THREE.Mesh( geometry, material );
 
-                    scene.add( hicMesh );
-                    activeObjex.push(hicMesh);
-                    lookAtCameraObjects.push(hicMesh);
-                    const interactions = new InteractionManager();
-                    interactions.connect( renderer, camera );
-                    interactions.add( hicMesh );
-                    interactions.update();
-                    interactionManagers.push(interactions);
-                    hicMesh.addEventListener('pointerdown', onMouseDown);
-                } else {
-                    hicMesh.visible = true;
-                    hicMesh.material = material;
-                }
-				// Interaction
+            scene.add( hicMesh );
+            activeObjex.push(hicMesh);
+            lookAtCameraObjects.push(hicMesh);
+            const interactions = new InteractionManager();
+            interactions.connect( renderer, camera );
+            interactions.add( hicMesh );
+            interactions.update();
+            interactionManagers.push(interactions);
+            hicMesh.addEventListener('pointerdown', onMouseDown);
+        } else {
+            hicMesh.visible = true;
+            hicMesh.material = material;
+        }
+        // Interaction
 
-				
+        
 
-                const worldPosition = new THREE.Vector3();
-                viewportPlaceholder.getWorldPosition(worldPosition);
-                hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
+        const worldPosition = new THREE.Vector3();
+        viewportPlaceholder.getWorldPosition(worldPosition);
+        hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
 
 }
 
@@ -765,3 +704,106 @@ export function UnSwapMaterials (object) {
     // }
 }
 
+export function ShowHTMLPopup(event, htmlstring, object, position) {
+
+     if (uiMode == "hic") {
+
+   
+        const canvasEl = document.getElementById('hic_canvas');
+        const contentEl = document.getElementById('hic_content');
+
+
+        contentEl.innerHTML = htmlstring;
+        console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
+
+        const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
+
+        const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
+        material.map = new THREE.HTMLTexture( canvasEl );
+        material.envMap = scene.environment;
+        material.envMapIntensity = 2;
+
+        if (!hicMesh) {
+
+
+            const ctx = canvasEl.getContext('2d');
+            const ratio = window.devicePixelRatio || 1;
+
+            // Set the visual size (CSS pixels)
+            canvasEl.style.width = '768px';
+            canvasEl.style.height = '768px';
+
+            // Set the internal resolution (Physical pixels)
+            canvasEl.width = 200 * ratio;
+            canvasEl.height = 200 * ratio;
+
+            // Scale the context to match
+            ctx.scale(ratio, ratio);
+            hicMesh = new THREE.Mesh( geometry, material );
+
+            scene.add( hicMesh );
+            activeObjex.push(hicMesh);
+            lookAtCameraObjects.push(hicMesh);
+            const interactions = new InteractionManager();
+            interactions.connect( renderer, camera );
+            interactions.add( hicMesh );
+            interactions.update();
+            interactionManagers.push(interactions);
+            hicMesh.addEventListener('pointerdown', onMouseDown);
+        } else {
+            hicMesh.visible = true;
+            hicMesh.material = material;
+        }
+        // Interaction
+
+        
+
+        const worldPosition = new THREE.Vector3();
+        viewportPlaceholder.getWorldPosition(worldPosition);
+        hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
+
+    } else if (uiMode == "popup") {
+
+         const popup = document.getElementById("popup");
+            console.log("showDialogPanel " + showDialogPanel);
+        
+            if (showDialogPanel) {
+                return;
+            }
+            
+            if (!event) {
+                let xpos = window.innerWidth / 2;
+                let ypos = window.innerHeight / 2;
+                Object.assign(popup.style, {
+                    left: `${xpos}px`,
+                    top: `${ypos}px`,
+                    display: 'block',
+                });
+            } else {
+                // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
+                let xpos = event.clientX - 150;
+                if ((window.innerWidth - event.clientX) < 150) {
+                    xpos = event.clientX - 300;
+                } else if (event.clientX < 150) {
+                    xpos = 0;
+                }
+                
+                let ypos = event.clientY - 100;
+                if (event.clientY < 100) {
+                    ypos = 0;
+                }
+                // if (event.clientY > (window.innerHeight - 300)) {
+                //     ypos = window.innerHeight - 300;
+                // }
+                 Object.assign(popup.style, {
+                    left: `${xpos}px`,
+                    top: `${ypos}px`,
+                    display: 'block',
+                });
+            }
+        
+
+    }
+
+
+}
