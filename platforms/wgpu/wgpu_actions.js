@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 
-import { player, lastRaycastHitObject, ShowPopup, mouseDowntime, popup, hic_content, onMouseDown } from './wgpu_controls.js';
+import { player, lastRaycastHitObject, mouseDowntime, popup, hic_content, onMouseDown } from './wgpu_controls.js';
 
 import { scene } from './wgpu_main.mjs';
 
@@ -12,7 +12,7 @@ import { locationObjex } from './wgpu_locations.js';
 import { EquipObject } from './wgpu_inventory.js';
 
 import { AddDynamicBody, getPlayerBody, kinematicBodies } from './wgpu_physics.js';
-import { UpdateHIC, uiMode } from './wgpu_ui.js';
+import { uiMode, ShowHTMLPopup, HideHTMLPopup } from './wgpu_ui.js';
 // import { equippedRigidbody } from './three_physics.js';
 
 export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
@@ -170,6 +170,7 @@ export class SceneObject { //things that might have models and actions and fancy
     async setEquippedRigidbody () {
         const worldPosition = new THREE.Vector3();
         this.object.getWorldPosition(worldPosition);
+        console.log("setting equippedRigidbody position " + JSON.stringify(worldPosition));
         const colliderScale = this.objectData.colliderScale ? this.objectData.colliderScale : 1;
         const yPosFudge = this.objectData.yPosFudge ? this.objectData.yPosFudge : 0; //offset the collider on y axis
         equippedRigidbody = await AddDynamicBody(this.object, worldPosition, colliderScale, yPosFudge, true, this.objectParent);        
@@ -292,19 +293,20 @@ export class SceneObject { //things that might have models and actions and fancy
                 // "</div>";
             } 
             if (hasActions) {
-                popup.innerHTML = header + cancelButton + pickupButton + equipButton + consumeButton + "</div>";
+                // popup.innerHTML = header + cancelButton + pickupButton + equipButton + consumeButton + "</div>";
+                const htmlstring  = header + cancelButton + pickupButton + equipButton + consumeButton + "</div>";
                 // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
                 // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
                 // "</div>";
-
+                ShowHTMLPopup(event, htmlstring);
                 if (uiMode == "hic") {
-                    UpdateHIC(popup.innerHTML);
+                    // UpdateHIC(popup.innerHTML);
                     document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
                      document.getElementById("popup_yesButton1").addEventListener ('pointerdown', onMouseDown );
                      document.getElementById("popup_yesButton2").addEventListener ('pointerdown', onMouseDown );
                     //  document.getElementById("popup_yesButton3").addEventListener ('pointerdown', onMouseDown );
                 } else {
-                    ShowPopup(event);
+                    // ShowPopup(event);
                     //  UpdateHIC(popup.innerHTML);
                 }
                 
@@ -356,18 +358,27 @@ export class SceneObject { //things that might have models and actions and fancy
     }
     throwObject() {
         
-        scene.add(this.object);
-        console.log(JSON.stringify(this.object.position));
+
+
         const worldPosition = new THREE.Vector3();
         this.object.getWorldPosition(worldPosition);
-        
+
+        console.log(JSON.stringify(worldPosition));
 
         //     SetEquippedRigidbody(rbody);
         // console.log("tryna throw");
         // await equippedRigidbody;
         // if (equippedRigidbody) {
-
+        // scene.attach(this.object);
+        // this.object.removeFromParent();
         equippedRigidbody.addForce(worldPosition, mouseDowntime);
+         if (this.object.parent) {
+                this.object.parent.remove(this.object);
+            } else {
+                scene.remove(this.object);
+            }
+        // this.object.
+                    // this.object.parent.remove(thisObject);
         // }
         // dynamicBodies.push(rbody);
         // rbody.AddForce();
@@ -450,6 +461,11 @@ export class SceneObject { //things that might have models and actions and fancy
         } else {
             console.log("tryna equip from scene : " + data.sceneObjectID);
              EquipObject(this.objectData);
+             if (thisObject.parent) {
+                thisObject.parent.remove(thisObject);
+            } else {
+                scene.remove(thisObject);
+            }
             // thisObject.parent.remove(thisObject);
         }
 
@@ -469,10 +485,14 @@ export class SceneObject { //things that might have models and actions and fancy
         console.log(this.responseText);
 
         if (this.responseText.toLowerCase().includes("saved")) {
-            popup.innerHTML = "<br><br><h3>Saved to inventory!</h3>";
-            ShowPopup(lastEvent);
+            
+            htmlstring = "<br><br><h3>Saved to inventory!</h3>";
+            ShowHTMLPopup(event, htmlstring);
+            // popup.innerHTML = 
+            // ShowPopup(lastEvent);
             setTimeout(() => {
                 popup.style.display = "none";
+                HideHTMLPopup();
             }, 3000);
             // this.object.visible = false;
             thisObject.parent.remove(thisObject);
@@ -483,12 +503,22 @@ export class SceneObject { //things that might have models and actions and fancy
         }
 
         if (this.responseText.toLowerCase().includes("max")) {
-            popup.innerHTML = "<br><br><h3>Sorry, you can't have any more of those!</h3>";
-
-            ShowPopup(lastEvent);
+            
+            
+            
+            const htmlstring = "<br><br><h3>Sorry, you can't have any more of those!</h3>";
+            ShowHTMLPopup(event, htmlstring);
+            // popup.innerHTML = 
+            // ShowPopup(lastEvent);
             setTimeout(() => {
                 popup.style.display = "none";
+                HideHTMLPopup();
             }, 3000);
+
+            // ShowPopup(lastEvent);
+            // setTimeout(() => {
+            //     popup.style.display = "none";
+            // }, 3000);
         }
         // this.dialogEl = document.getElementById('mod_dialog');
         // if (this.dialogEl != null) {

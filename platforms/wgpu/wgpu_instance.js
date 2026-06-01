@@ -28,6 +28,7 @@ export let physicsInstancedMeshes = [];
 // }
 
 export let instancedModels = [];
+export let instanceTags = {};
 export async function InitSurface () {
     console.log("GOTSA SURFACE");
     await surface;
@@ -51,7 +52,7 @@ export function createDefaultSurface() {
 }
     
 
-export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader, locData) {
+export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader, locData, instanceTags) {
 
     await sampler;
     console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count);
@@ -121,7 +122,24 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             const instancedMesh = new THREE.InstancedMesh(sampleGeos[c], sampleMats[c], count);
             instancedMeshes.push(instancedMesh);
         }
-                        
+         
+        if (instanceTags) {
+            let tag = "";
+            if (tagLength > 0) {
+                if (tagIndex == tagLength - 1) {
+                tagIndex = 0;
+                } else {
+                tagIndex++;
+                }
+                console.log("JSON DATA " + JSON.stringify(this.jsonData[tagIndex]));
+                // tag = this.jsonData[tagIndex].key;
+                tag = Object.keys(this.jsonData[tagIndex])[0]; // key of the key: value is the tag
+                
+                let stringkey = this.count.toString();
+                console.log(stringkey + " tryna set instanced mesh tag " + tag + " on instanceID" + this.count); 
+                this.instanceTags[stringkey] = tag;
+            }
+        }
         const waterLevel = parseFloat(settings.sceneWater.level);
         const dummy = new THREE.Object3D();
         let position = new THREE.Vector3();

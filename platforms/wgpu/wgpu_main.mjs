@@ -8,6 +8,8 @@
 
 	import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
 
+	import { dof } from 'three/addons/tsl/display/DepthOfFieldNode.js';
+
 	import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 
 
@@ -387,6 +389,20 @@
 		if (doPostProcessing) {
 			const scenePass = pass( scene, camera );
 			const scenePassColor = scenePass.getTextureNode();
+			const effectController = {
+					focusDistance: uniform( 150 ),
+					focalLength: uniform( 300 ),
+					bokehScale: uniform( 2 )
+				};
+
+				// post processing
+
+			renderPipeline = new THREE.RenderPipeline( renderer );
+
+
+			const scenePassViewZ = scenePass.getViewZNode();
+
+			const dofPass = dof( scenePassColor, scenePassViewZ, effectController.focusDistance, effectController.focalLength, effectController.bokehScale );
 			// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
 			// const selectedObjects = [ mesh ]; // Array of meshes to outline
 			const edgeStrength = uniform( 3.0 );
@@ -466,7 +482,7 @@
 				renderPipeline = new THREE.RenderPipeline( renderer );
 				// const scenePass = pass( scene, camera );
 				// const scenePassColor = scenePass.getTextureNode();
-				const scenePassColorBlurred = gaussianBlur( scenePassColor );
+				// const scenePassColorBlurred = gaussianBlur( scenePassColor );
 
 				// const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
 				
@@ -474,17 +490,19 @@
 				// renderPipeline = new THREE.renderPipeline( renderer );
 				// renderPipeline.outputNode = scenePassColor.add( bloomPass );
 				if (hasDOF) {
-					scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 );
+					// scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 );
 				} else {
 					
 				}
 				if (hasBloom) {
 					// renderPipeline.outputNode = scenePassColorBlurred.add( bloomPass );
-					renderPipeline.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
+					renderPipeline.outputNode = outlineColor.add( scenePassColor.add( bloomPass ));
 				} else if (hasOutline) {
 					// renderPipeline.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
 					if (hasDOF) {
-					renderPipeline.outputNode = outlineColor.add(scenePassColorBlurred);
+					// renderPipeline.outputNode = outlineColor.add(scenePassColorBlurred);
+					// renderPipeline.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
+					renderPipeline.outputNode = outlineColor.add(dofPass);
 					} else {
 						const scenePass = pass( scene, camera );
 						renderPipeline.outputNode = outlineColor.add(scenePass);
@@ -492,7 +510,8 @@
 				} else {
 					console.log('post processing no water');
 					if (hasDOF) {
-					renderPipeline.outputNode = scenePassColorBlurred;
+					// renderPipeline.outputNode = scenePassColorBlurred;
+					renderPipeline.outputNode = dofPass;
 					} else {
 						const scenePass = pass( scene, camera );
 						renderPipeline.outputNode = scenePass;

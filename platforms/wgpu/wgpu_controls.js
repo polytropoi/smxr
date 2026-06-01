@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, UpdateHIC, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup } from './wgpu_ui.js';
+import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -788,7 +788,7 @@ function RaycastHit(type, hit) {
         triggerAudioController.playTriggerAudioWithTags(lastRaycastHitObject.userData.locationData.locationTags, hit.distance, hit.point);
     }
     if (hit.instanceId) {
-        // console.log("INSTANCE HIT " + hit.instanceId);    
+        console.log("INSTANCE HIT " + hit.instanceId);    
     }
 
     const objectData = lastRaycastHitObject.userData.objectData;
@@ -1547,50 +1547,50 @@ export function onMouseDown(event) { //clicked on threejs object
 
 }
 
-export function ShowPopup (event) { //hrm move to UI
-    if (uiMode != "popup") {
-        return;
-    }
-    const popup = document.getElementById("popup");
-    console.log("showDialogPanel " + showDialogPanel);
+// export function ShowPopup (event) { //hrm move to UI
+//     if (uiMode != "popup") {
+//         return;
+//     }
+//     const popup = document.getElementById("popup");
+//     console.log("showDialogPanel " + showDialogPanel);
 
-    if (showDialogPanel) {
-        return;
-    }
+//     if (showDialogPanel) {
+//         return;
+//     }
     
-    if (!event) {
-        let xpos = window.innerWidth / 2;
-        let ypos = window.innerHeight / 2;
-        Object.assign(popup.style, {
-            left: `${xpos}px`,
-            top: `${ypos}px`,
-            display: 'block',
-        });
-    } else {
-        // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
-        let xpos = event.clientX - 150;
-        if ((window.innerWidth - event.clientX) < 150) {
-            xpos = event.clientX - 300;
-        } else if (event.clientX < 150) {
-            xpos = 0;
-        }
+//     if (!event) {
+//         let xpos = window.innerWidth / 2;
+//         let ypos = window.innerHeight / 2;
+//         Object.assign(popup.style, {
+//             left: `${xpos}px`,
+//             top: `${ypos}px`,
+//             display: 'block',
+//         });
+//     } else {
+//         // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
+//         let xpos = event.clientX - 150;
+//         if ((window.innerWidth - event.clientX) < 150) {
+//             xpos = event.clientX - 300;
+//         } else if (event.clientX < 150) {
+//             xpos = 0;
+//         }
         
-        let ypos = event.clientY - 100;
-        if (event.clientY < 100) {
-            ypos = 0;
-        }
-        // if (event.clientY > (window.innerHeight - 300)) {
-        //     ypos = window.innerHeight - 300;
-        // }
-         Object.assign(popup.style, {
-            left: `${xpos}px`,
-            top: `${ypos}px`,
-            display: 'block',
-        });
-    }
+//         let ypos = event.clientY - 100;
+//         if (event.clientY < 100) {
+//             ypos = 0;
+//         }
+//         // if (event.clientY > (window.innerHeight - 300)) {
+//         //     ypos = window.innerHeight - 300;
+//         // }
+//          Object.assign(popup.style, {
+//             left: `${xpos}px`,
+//             top: `${ypos}px`,
+//             display: 'block',
+//         });
+//     }
 
-    // UpdateHIC(); //wgpu only fn
-}
+//     // UpdateHIC(); //wgpu only fn
+// }
 
 export function onMouseUp(e) {
     mouseDowntime = (Date.now() / 1000) - mouseDownStarttime; 
@@ -1601,7 +1601,7 @@ export function onMouseUp(e) {
         controls.dragToLook = true;
     }
     if (lastRaycastHitObject && lastRaycastHitObject.userData && lastRaycastHitObject.userData.isEquipped) {
-        console.log("clicked on equipped object! " + lastRaycastHitObject.userData.objectData.name );
+        console.log("clicked on equipped object! " + lastRaycastHitObject.userData.objectData.name + " downtime " + mouseDowntime );
         const sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance;
         sceneObjectInstance.onClick();
         // if (lastRaycastHitObject.userData.objectData.actions) {

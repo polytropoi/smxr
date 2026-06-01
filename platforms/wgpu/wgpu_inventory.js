@@ -7,7 +7,9 @@ import { eventEl } from '../../../connect/events.js';
 
 import { ReturnObjectData, SceneObject, lastEvent} from './wgpu_actions.js';
 
-import { viewportPlaceholder, popup, ShowPopup } from './wgpu_controls.js';
+import { viewportPlaceholder, popup } from './wgpu_controls.js';
+
+import { ShowHTMLPopup, HideHTMLPopup } from './wgpu_ui.js';
 
 import { AddDynamicBody, SetEquippedRigidbody } from './wgpu_physics.js';
 
@@ -208,7 +210,7 @@ async function DropInventoryObject (objectData, action, inventoryID) {
                 } else if (this.responseText.toLowerCase().includes('no drop')) {
 
                     popup.innerHTML = "<br><br><h3>Sorry, you can't drop that here!</h3>";
-                    ShowPopup();
+                    // ShowPopup();
                     setTimeout(() => {
                         popup.style.display = "none";
                     }, 3000);

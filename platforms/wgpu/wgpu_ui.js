@@ -34,6 +34,10 @@ export let scenePictures = {};
 
 export let uiMode = "popup"; //set to "hic" if settings prescribe
 
+let canvasEl;
+let contentEl;
+
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
@@ -55,9 +59,11 @@ export let hicMesh; //for html-in-canvas fu
 
 export function SetUIMode(mode) {
     uiMode = mode; //from controls
-    // if (mode == "hic") {
-    //     popup = hic_content;
-    // }
+
+    if (mode == "hic") {
+        canvasEl = document.getElementById('hic_canvas');
+        contentEl = document.getElementById('hic_content');
+    }
 }
 
 export async function HTMLText (textString, size, parent, position, distance, persist, parentScale) { //this is rendered to texture and put on a plane
@@ -190,14 +196,15 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     let scaleFactor = .1;
     if (distance) {
         // if (distance > 1) {
-            scaleFactor = distance * .025;
+            scaleFactor = distance * .01;
             if (parentScale) {
                 scaleFactor = scaleFactor * parentScale;
             }
         // }
     }
     // console.log("ui scale factor " + scaleFactor);
-    scaleFactor = clamp(scaleFactor, .25, 1.5);
+    scaleFactor = clamp(scaleFactor, .25, .75);
+    size = clamp(size, .25, .75);
     const width = 10;
 
     // console.log("tryna show textstring " + textString);
@@ -307,7 +314,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
            
             textmesh.name = "textmesh";
             textContainer.add(textmesh);
-             textmesh.position.set(0, 0, 5);
+             textmesh.position.set(0, scaleFactor / 2, scaleFactor / 2);
             parent.add(textContainer);
             textContainer.visible = false;
 
@@ -600,66 +607,66 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
     // }
 }
 
-export function UpdateHIC (htmlstring, hitpoint, hitobject, parent) {
+// export function UpdateHIC (htmlstring, hitpoint, hitobject, parent) {
 
-    if (uiMode != "hic") {
-        return;
-    }
+//     if (uiMode != "hic") {
+//         return;
+//     }
    
-    const canvasEl = document.getElementById('hic_canvas');
-    const contentEl = document.getElementById('hic_content');
+//     const canvasEl = document.getElementById('hic_canvas');
+//     const contentEl = document.getElementById('hic_content');
 
 
-        contentEl.innerHTML = htmlstring;
-        console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
+//         contentEl.innerHTML = htmlstring;
+//         console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
 
-        const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
+//         const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
 
-        const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
-        material.map = new THREE.HTMLTexture( canvasEl );
-        material.envMap = scene.environment;
-        material.envMapIntensity = 2;
+//         const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
+//         material.map = new THREE.HTMLTexture( canvasEl );
+//         material.envMap = scene.environment;
+//         material.envMapIntensity = 2;
 
-        if (!hicMesh) {
+//         if (!hicMesh) {
 
 
-            const ctx = canvasEl.getContext('2d');
-            const ratio = window.devicePixelRatio || 1;
+//             const ctx = canvasEl.getContext('2d');
+//             const ratio = window.devicePixelRatio || 1;
 
-            // Set the visual size (CSS pixels)
-            canvasEl.style.width = '768px';
-            canvasEl.style.height = '768px';
+//             // Set the visual size (CSS pixels)
+//             canvasEl.style.width = '768px';
+//             canvasEl.style.height = '768px';
 
-            // Set the internal resolution (Physical pixels)
-            canvasEl.width = 200 * ratio;
-            canvasEl.height = 200 * ratio;
+//             // Set the internal resolution (Physical pixels)
+//             canvasEl.width = 200 * ratio;
+//             canvasEl.height = 200 * ratio;
 
-            // Scale the context to match
-            ctx.scale(ratio, ratio);
-            hicMesh = new THREE.Mesh( geometry, material );
+//             // Scale the context to match
+//             ctx.scale(ratio, ratio);
+//             hicMesh = new THREE.Mesh( geometry, material );
 
-            scene.add( hicMesh );
-            activeObjex.push(hicMesh);
-            lookAtCameraObjects.push(hicMesh);
-            const interactions = new InteractionManager();
-            interactions.connect( renderer, camera );
-            interactions.add( hicMesh );
-            interactions.update();
-            interactionManagers.push(interactions);
-            hicMesh.addEventListener('pointerdown', onMouseDown);
-        } else {
-            hicMesh.visible = true;
-            hicMesh.material = material;
-        }
-        // Interaction
+//             scene.add( hicMesh );
+//             activeObjex.push(hicMesh);
+//             lookAtCameraObjects.push(hicMesh);
+//             const interactions = new InteractionManager();
+//             interactions.connect( renderer, camera );
+//             interactions.add( hicMesh );
+//             interactions.update();
+//             interactionManagers.push(interactions);
+//             hicMesh.addEventListener('pointerdown', onMouseDown);
+//         } else {
+//             hicMesh.visible = true;
+//             hicMesh.material = material;
+//         }
+//         // Interaction
 
         
 
-        const worldPosition = new THREE.Vector3();
-        viewportPlaceholder.getWorldPosition(worldPosition);
-        hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
+//         const worldPosition = new THREE.Vector3();
+//         viewportPlaceholder.getWorldPosition(worldPosition);
+//         hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
 
-}
+// }
 
 let matSwappedObjex = {};
 export function SwapMaterials (object, material) {
@@ -704,28 +711,38 @@ export function UnSwapMaterials (object) {
     // }
 }
 
-export function ShowHTMLPopup(event, htmlstring, object, position) {
+export function ShowHTMLPopup(event, htmlstring, position, object, distance) {
 
      if (uiMode == "hic") {
 
    
-        const canvasEl = document.getElementById('hic_canvas');
-        const contentEl = document.getElementById('hic_content');
+        // const canvasEl = document.getElementById('hic_canvas');
+        // const contentEl = document.getElementById('hic_content');
 
 
-        contentEl.innerHTML = htmlstring;
-        console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
+        // contentEl.innerHTML = htmlstring;
+        // console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
 
-        const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
+        // const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
 
-        const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
-        material.map = new THREE.HTMLTexture( canvasEl );
-        material.envMap = scene.environment;
-        material.envMapIntensity = 2;
+        // const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
+        // material.map = new THREE.HTMLTexture( canvasEl );
+        // material.envMap = scene.environment;
+        // material.envMapIntensity = 2;
+        let material;
 
         if (!hicMesh) {
 
 
+            contentEl.innerHTML = htmlstring;
+            console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
+
+            const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
+
+            material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
+            material.map = new THREE.HTMLTexture( canvasEl );
+            material.envMap = scene.environment;
+            material.envMapIntensity = 2;
             const ctx = canvasEl.getContext('2d');
             const ratio = window.devicePixelRatio || 1;
 
@@ -742,7 +759,7 @@ export function ShowHTMLPopup(event, htmlstring, object, position) {
             hicMesh = new THREE.Mesh( geometry, material );
 
             scene.add( hicMesh );
-            activeObjex.push(hicMesh);
+            // activeObjex.push(hicMesh);
             lookAtCameraObjects.push(hicMesh);
             const interactions = new InteractionManager();
             interactions.connect( renderer, camera );
@@ -751,8 +768,9 @@ export function ShowHTMLPopup(event, htmlstring, object, position) {
             interactionManagers.push(interactions);
             hicMesh.addEventListener('pointerdown', onMouseDown);
         } else {
+            contentEl.innerHTML = htmlstring;
             hicMesh.visible = true;
-            hicMesh.material = material;
+            // hicMesh.material = material;
         }
         // Interaction
 
@@ -765,7 +783,9 @@ export function ShowHTMLPopup(event, htmlstring, object, position) {
     } else if (uiMode == "popup") {
 
          const popup = document.getElementById("popup");
-            console.log("showDialogPanel " + showDialogPanel);
+         popup.innerHTML = htmlstring;
+
+            console.log("showDialogPanel " + showDialogPanel + " string " + htmlstring);
         
             if (showDialogPanel) {
                 return;
@@ -806,4 +826,10 @@ export function ShowHTMLPopup(event, htmlstring, object, position) {
     }
 
 
+}
+
+export function HideHTMLPopup() {
+    if (hicMesh) {
+        hicMesh.visible = false;
+    }
 }
