@@ -225,8 +225,13 @@
 				if (instancedModels[i].locationData.locationTags.includes("wind")) {
 					shader = "wind";
 				} 
-				InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
+				if (instancedModels[i].locationData.mediaID && instancedModels[i].locationData.mediaID != "" && instancedModels[i].locationData.mediaID != "none") {
+					InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
+				} else {
+					InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 						
+				}
+				
 			} 
 		} 
 		for (let i = 0; i < instancedModels.length; i++) { //loop again for physics or patterned instances..
@@ -297,8 +302,9 @@
 		}
 		InitSceneText();
 
-		console.log("settings.sceneGroups " + JSON.stringify(settings.sceneGroups));
-		
+		if (settings.sceneGroups) {
+			console.log("settings.sceneGroups " + settings.sceneGroups.length);
+		}
 			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
 			// ThreeText(texttest);
 		
@@ -390,7 +396,7 @@
 			const scenePass = pass( scene, camera );
 			const scenePassColor = scenePass.getTextureNode();
 			const effectController = {
-					focusDistance: uniform( 150 ),
+					focusDistance: uniform( 50 ),
 					focalLength: uniform( 300 ),
 					bokehScale: uniform( 2 )
 				};

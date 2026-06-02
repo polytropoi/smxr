@@ -8,6 +8,8 @@ import { settings } from '../../../connect/settings.js';
 
 import { scene } from './wgpu_main.mjs';
 
+import { sceneTextController } from './wgpu_media.js';
+
 // import { surface } from './three_locations.js';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
@@ -55,7 +57,14 @@ export function createDefaultSurface() {
 export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader, locData, instanceTags) {
 
     await sampler;
-    console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count);
+    console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count+ " mediaID " + locData.mediaID);
+
+    let instanceTagData;
+    if (locData.mediaID) {
+        await sceneTextController.dataIsReady();
+        instanceTagData = await sceneTextController.returnAllTextDataFromMediaID(locData.mediaID);
+        console.log("instanceTagData is " + instanceTagData);
+    }
 
     if (sampler) {
 

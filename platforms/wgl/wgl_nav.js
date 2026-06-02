@@ -340,7 +340,7 @@
                 options.animations.forEach( (animation)=>{
                     // console.log("navagent animation  " + animation.name.toLowerCase());
                     self.animations[animation.name.toLowerCase()] = animation;
-                    console.log("animation name " + animation.name);
+                    // console.log("animation name " + animation.name);
                     if (animation.name.toLowerCase().includes("walk")) {
                         this.walkAnims.push(animation.name.toLowerCase());
                     } else if (animation.name.toLowerCase().includes("idle")) {

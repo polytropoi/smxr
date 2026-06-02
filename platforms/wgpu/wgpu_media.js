@@ -77,8 +77,8 @@ class SceneTextData {
     constructor(textIDs) {
         //  this.sceneTextData = document.getElementById("sceneTextData").dataset.attribute
         this.jsonData = [];
-        this.textIDs = textIDs
-       
+        this.textIDs = textIDs;
+        this.dataFetched = false;
        
         console.log("textData AHOY!" + textIDs + " length " + textIDs.length);
         // let tempArray = []; 
@@ -91,6 +91,8 @@ class SceneTextData {
             this.fetchTextData(this.textIDs);
             this.textItems = null;
         }
+
+
 
         //xhr
         fetchTextData (data) {
@@ -106,11 +108,14 @@ class SceneTextData {
             })
             .then(response => response.json())
             .then(data => {
-                console.log('textData Success:', data);
+                console.log('textData Success:', JSON.stringify(data));
 
+                
                 for (let i = 0; i < data.length; i++) { //check for text type?
                     this.popTextData(data[i]); //textstring should be a valid json, from defined template//not, just an array of objex saved in global
                 }
+                this.dataHasBeenFetched();
+
             })
             .catch(error => console.error('Error:', error));
             
@@ -123,12 +128,29 @@ class SceneTextData {
         popTextData (data) {
             // const parsedText = JSON.stringify(data);
             this.jsonData.push(data);
-            console.log("sceneTextItems " + this.jsonData.length);
+            console.log("sceneTextItems " + JSON.stringify(this.jsonData));
         }
     
         loadTextData (data) {
         // console.log("loading sceneTextItems " + JSON.stringify(sceneTextItems));
         // this.textItems = data;
+        }
+        async returnAllTextDataFromMediaID (mediaID) {
+            await this.jsonData;
+            for (let i = 0; i < this.jsonData.length; i++) {
+                console.log("mediaID " + mediaID + " vs " + this.jsonData[i]._id);
+                if (mediaID == this.jsonData[i]._id) {
+                    return this.jsonData[i];
+                }
+            }
+        }
+        dataHasBeenFetched () {
+            this.dataFetched = true;
+        }
+        async dataIsReady () {
+            await this.dataFetched == true;
+
+            return true;
         }
         returnTextData (mediaID, tag) {
             console.log("tryna get mediaID " + mediaID);

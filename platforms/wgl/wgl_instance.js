@@ -48,7 +48,7 @@ export function createDefaultSurface() {
 export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader, locData) {
 
     await sampler;
-    console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count);
+    console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count + " mediaID " + locData.mediaID);
 
     if (sampler) {
 
