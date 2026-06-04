@@ -735,7 +735,7 @@ export function ShowHTMLPopup(event, htmlstring, position, object, distance) {
 
 
             contentEl.innerHTML = htmlstring;
-            console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
+            console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
 
             const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
 
@@ -747,8 +747,8 @@ export function ShowHTMLPopup(event, htmlstring, position, object, distance) {
             const ratio = window.devicePixelRatio || 1;
 
             // Set the visual size (CSS pixels)
-            canvasEl.style.width = '768px';
-            canvasEl.style.height = '768px';
+            canvasEl.style.width = '1024px';
+            canvasEl.style.height = '1024px';
 
             // Set the internal resolution (Physical pixels)
             canvasEl.width = 200 * ratio;
@@ -762,23 +762,47 @@ export function ShowHTMLPopup(event, htmlstring, position, object, distance) {
             // activeObjex.push(hicMesh);
             lookAtCameraObjects.push(hicMesh);
             const interactions = new InteractionManager();
-            interactions.connect( renderer, camera );
+           
+            hicMesh.addEventListener('pointerdown', onMouseDown);
+            if (position) {
+                // scene.attach(hicMesh);
+                hicMesh.position.set(position.x, position.y, position.z);
+            }
+             interactions.connect( renderer, camera );
             interactions.add( hicMesh );
             interactions.update();
             interactionManagers.push(interactions);
-            hicMesh.addEventListener('pointerdown', onMouseDown);
+            hicMesh.updateMatrixWorld();
+            // const ctx = canvasEl.getContext('2d');
+            // const elementToPaint = document.getElementById('html-source');
+
+            // Paint the live DOM element into the 2D canvas
+            // canvasEl.onpaint = () => {
+            //     ctx.drawElement(contentEl);
+            // };
+            //  canvasEl.requestPaint();
+
         } else {
             contentEl.innerHTML = htmlstring;
             hicMesh.visible = true;
+            // canvasEl.requestPaint();
+            console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
+            if (position) {
+                // scene.attach(hicMesh);
+                hicMesh.position.set(position.x, position.y, position.z);
+            }
+             hicMesh.updateMatrixWorld();
+
             // hicMesh.material = material;
         }
         // Interaction
 
-        
+        if (!position) {
 
-        const worldPosition = new THREE.Vector3();
-        viewportPlaceholder.getWorldPosition(worldPosition);
-        hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
+            const worldPosition = new THREE.Vector3();
+            viewportPlaceholder.getWorldPosition(worldPosition);
+            hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
+        }
 
     } else if (uiMode == "popup") {
 

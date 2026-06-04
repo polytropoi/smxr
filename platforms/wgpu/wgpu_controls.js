@@ -7,7 +7,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './wgpu_nav.js';
 
-import { sceneTextController, triggerAudioController } from './wgpu_media.js';
+import { ReturnTaggedPictures, sceneTextController, triggerAudioController } from './wgpu_media.js';
 
 import { ActionSwitch, SetPlayerRigidbody } from './wgpu_actions.js';
 
@@ -29,6 +29,7 @@ import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText,
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
 import * as nipplejs from '../../../main/js/nipple.mjs';
+import { TagsToInstances } from './wgpu_instance.js';
 
 // import { getPlayerBody } from './three_physics.js';
 
@@ -745,7 +746,7 @@ function NavmeshConstraint () {
 }
 
 //////////////////////////. PROCESS RAYCAST HIT /////////////////
-function RaycastHit(type, hit) {
+async function RaycastHit(type, hit) {
 
     if (lastRaycastHitObject) {
         if (lastRaycastHitObject != hit.object) {
@@ -778,6 +779,7 @@ function RaycastHit(type, hit) {
     lastHitObjectName = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     lastRaycastHitPosition = hit.point;
     lastRaycastHitDistance = hit.distance;
+    let tagData;
     // console.log(JSON.stringify(lastRaycastHitObject.userData));
     const locationData = lastRaycastHitObject.userData.locationData;
     if (!locationData) {
@@ -788,7 +790,9 @@ function RaycastHit(type, hit) {
         triggerAudioController.playTriggerAudioWithTags(lastRaycastHitObject.userData.locationData.locationTags, hit.distance, hit.point);
     }
     if (hit.instanceId) {
-        console.log("INSTANCE HIT " + hit.instanceId);    
+            
+        tagData = await TagsToInstances(locationData.timestamp, hit.instanceId);
+        console.log("INSTANCE HIT " + hit.instanceId + " tagged " + JSON.stringify(tagData));
     }
 
     const objectData = lastRaycastHitObject.userData.objectData;
@@ -830,6 +834,7 @@ function RaycastHit(type, hit) {
                 const textstring = calloutsplit[randomIndex];
                 // console.log("gotsa object with textstring " + textstring);
 
+                
                 ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             } else {
@@ -838,7 +843,20 @@ function RaycastHit(type, hit) {
                     name = name.split("~")[0];
                 }
                 if (name && name != "") {
-                    ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                    if (tagData) { //e.g. on instanceMesh
+                        // console.log(Object.keys(tagData).toString());
+                        ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                        const pics = ReturnTaggedPictures(Object.keys(tagData).toString());
+                        console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
+                        const rIndex = Math.floor(Math.random() * pics.length);
+                        const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
+                        const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
+                        const htmlstring = "<div><h2>"+header+"</h2><img src=\x22"+pics[rIndex].url+"\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><h4>"+header+"</h4></div>";
+                        ShowHTMLPopup(null, htmlstring, lastRaycastHitPosition);
+                    } else {
+                        ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                    }
+                    
                 }
                 // if (locationData.locationTags.includes("select")) {
                 //     selectedObjects.length = 0;

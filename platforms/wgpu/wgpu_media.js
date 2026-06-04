@@ -6,6 +6,7 @@ import { scene } from './wgpu_main.mjs';
 import { settings } from '../../../connect/settings.js';
 import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData} from "../../../connect/media.js";
 import { lookAtCameraObjects } from './wgpu_ui.js';
+import { TagsToInstances } from './wgpu_instance.js';
 
 export let primaryAudioGroups;
 export let ambientAudioGroups;
@@ -37,6 +38,19 @@ export function ReturnPictureFromGroup (groupID, tags, groupIndex) {
             return pictureGroupsData[i].images[imageIndex];
         }
     }
+}
+export function ReturnTaggedPictures (tag) {
+      let matchedPics = [];
+      for (let i = 0; i < pictureGroupsData.length; i++) {
+        for (let j = 0; j < pictureGroupsData[i].images.length; j++) {
+          if (pictureGroupsData[i].images[j].tags.includes(tag)) { //todo check tags
+            
+            // return picGroupArray[i].images[j];
+            matchedPics.push(pictureGroupsData[i].images[j]);
+          }
+        }
+      }
+      return matchedPics;
 }
 
 export async function InitAudioGroups() {
@@ -114,7 +128,8 @@ class SceneTextData {
                 for (let i = 0; i < data.length; i++) { //check for text type?
                     this.popTextData(data[i]); //textstring should be a valid json, from defined template//not, just an array of objex saved in global
                 }
-                this.dataHasBeenFetched();
+                // this.dataHasBeenFetched();
+                // AssignTagsToInstances()
 
             })
             .catch(error => console.error('Error:', error));
@@ -137,9 +152,10 @@ class SceneTextData {
         }
         async returnAllTextDataFromMediaID (mediaID) {
             await this.jsonData;
+            // console.log(JSON.stringify(this.jsonData));
             for (let i = 0; i < this.jsonData.length; i++) {
                 console.log("mediaID " + mediaID + " vs " + this.jsonData[i]._id);
-                if (mediaID == this.jsonData[i]._id) {
+                if (mediaID.toString() == this.jsonData[i]._id.toString()) {
                     return this.jsonData[i];
                 }
             }
