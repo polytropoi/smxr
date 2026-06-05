@@ -4,10 +4,10 @@
 import * as THREE from 'three';
 import { Text } from 'three-text/three'; //not troika!
 
-			// import { installHtmlInCanvasPolyfill } from 'three-html-render/polyfill';
-			import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-			import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-			import { InteractionManager } from 'three/addons/interaction/InteractionManager.js';
+// import { installHtmlInCanvasPolyfill } from 'three-html-render/polyfill';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { InteractionManager } from 'three/addons/interaction/InteractionManager.js';
 
 import { ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
@@ -59,7 +59,6 @@ export let hicMesh; //for html-in-canvas fu
 
 export function SetUIMode(mode) {
     uiMode = mode; //from controls
-
     if (mode == "hic") {
         canvasEl = document.getElementById('hic_canvas');
         contentEl = document.getElementById('hic_content');
@@ -711,28 +710,24 @@ export function UnSwapMaterials (object) {
     // }
 }
 
-export function ShowHTMLPopup(event, htmlstring, position, object, distance) {
+export function ShowHTMLPopup(event, htmlstring, position, distance) {
 
      if (uiMode == "hic") {
 
-   
-        // const canvasEl = document.getElementById('hic_canvas');
-        // const contentEl = document.getElementById('hic_content');
-
-
-        // contentEl.innerHTML = htmlstring;
-        // console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
-
-        // const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
-
-        // const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
-        // material.map = new THREE.HTMLTexture( canvasEl );
-        // material.envMap = scene.environment;
-        // material.envMapIntensity = 2;
         let material;
+        let scaleFactor = .25;
+        if (distance) {
+            // if (distance > 1) {
+                scaleFactor = distance * .85;
+                // if (parentScale) {
+                //     scaleFactor = scaleFactor/parentScale;
+                // }
+            // }
+        }
+        // console.log("ui scale factor " + scaleFactor);
+        scaleFactor = clamp(scaleFactor, .25, 33);
 
         if (!hicMesh) {
-
 
             contentEl.innerHTML = htmlstring;
             console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
@@ -741,8 +736,8 @@ export function ShowHTMLPopup(event, htmlstring, position, object, distance) {
 
             material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
             material.map = new THREE.HTMLTexture( canvasEl );
-            material.envMap = scene.environment;
-            material.envMapIntensity = 2;
+            // material.envMap = scene.environment;
+            // material.envMapIntensity = 1;
             const ctx = canvasEl.getContext('2d');
             const ratio = window.devicePixelRatio || 1;
 
@@ -751,8 +746,8 @@ export function ShowHTMLPopup(event, htmlstring, position, object, distance) {
             canvasEl.style.height = '1024px';
 
             // Set the internal resolution (Physical pixels)
-            canvasEl.width = 200 * ratio;
-            canvasEl.height = 200 * ratio;
+            canvasEl.width = 400 * ratio;
+            canvasEl.height = 400 * ratio;
 
             // Scale the context to match
             ctx.scale(ratio, ratio);
@@ -766,32 +761,26 @@ export function ShowHTMLPopup(event, htmlstring, position, object, distance) {
             hicMesh.addEventListener('pointerdown', onMouseDown);
             if (position) {
                 // scene.attach(hicMesh);
-                hicMesh.position.set(position.x, position.y, position.z);
+                hicMesh.position.set(position.x, position.y + scaleFactor/2, position.z);
+                hicMesh.scale.setScalar(scaleFactor);
             }
-             interactions.connect( renderer, camera );
+            interactions.connect( renderer, camera );
             interactions.add( hicMesh );
             interactions.update();
             interactionManagers.push(interactions);
             hicMesh.updateMatrixWorld();
-            // const ctx = canvasEl.getContext('2d');
-            // const elementToPaint = document.getElementById('html-source');
-
-            // Paint the live DOM element into the 2D canvas
-            // canvasEl.onpaint = () => {
-            //     ctx.drawElement(contentEl);
-            // };
-            //  canvasEl.requestPaint();
 
         } else {
             contentEl.innerHTML = htmlstring;
             hicMesh.visible = true;
             // canvasEl.requestPaint();
-            console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
+            console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
             if (position) {
                 // scene.attach(hicMesh);
-                hicMesh.position.set(position.x, position.y, position.z);
+                hicMesh.position.set(position.x, position.y + scaleFactor/2, position.z);
+                hicMesh.scale.setScalar(scaleFactor);
             }
-             hicMesh.updateMatrixWorld();
+            hicMesh.updateMatrixWorld();
 
             // hicMesh.material = material;
         }
@@ -802,6 +791,7 @@ export function ShowHTMLPopup(event, htmlstring, position, object, distance) {
             const worldPosition = new THREE.Vector3();
             viewportPlaceholder.getWorldPosition(worldPosition);
             hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
+
         }
 
     } else if (uiMode == "popup") {

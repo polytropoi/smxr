@@ -849,10 +849,14 @@ async function RaycastHit(type, hit) {
                         const pics = ReturnTaggedPictures(Object.keys(tagData).toString());
                         console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
                         const rIndex = Math.floor(Math.random() * pics.length);
-                        const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
+                        // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
                         const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
-                        const htmlstring = "<div><h2>"+header+"</h2><img src=\x22"+pics[rIndex].url+"\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><h4>"+header+"</h4></div>";
-                        ShowHTMLPopup(null, htmlstring, lastRaycastHitPosition);
+                        const htmlstring = "<div><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div ><img src=\x22"+pics[rIndex].url+
+                        "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><br><br></div>";
+                        hic_content.classList.remove("hic_content");
+                        hic_content.classList.add("hic_content_2");
+
+                        ShowHTMLPopup(null, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
                     } else {
                         ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                     }
@@ -1285,8 +1289,6 @@ export function onMouseDown(event) { //clicked on threejs object
                 //     console.log(JSON.stringify(lastRaycastHitObject.userData.objectData.actions));
                 // }
                
-
-                
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                     console.log("text item " + JSON.stringify(textData));
