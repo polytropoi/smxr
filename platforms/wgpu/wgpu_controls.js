@@ -40,8 +40,10 @@ export let cameraAtZero = true;
 export let mouseDowntime = 0;
 let mouseDownStarttime = 0;
 
-let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHitPosition, lastRaycastHitDistance, lastRaycastHit, lastHitObjectName;
+let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRaycastHit, lastHitObjectName;
 export let lastRaycastHitObject;
+export let lastRaycastHitPosition = new THREE.Vector3();
+export let lastRaycastHitDistance = 1;
 
 export let dir = new THREE.Vector3;
 export let playerDirection = new THREE.Vector3();
@@ -88,7 +90,7 @@ let validTarget = false;
 
 let controlObject;
 let lastPlayerPosition = new THREE.Vector3();
-let worldHitPosition = new THREE.Vector3();
+export let worldHitPosition = new THREE.Vector3();
 
 export const popup = document.getElementById("popup"); //should mode these to _ui
 export const hic_content = document.getElementById("hic_content"); //alt to popup
@@ -777,7 +779,7 @@ async function RaycastHit(type, hit) {
     lastRaycastHit = hit;
     lastRaycastHitObject = hit.object;
     lastHitObjectName = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
-    lastRaycastHitPosition = hit.point;
+    // lastRaycastHitPosition = hit.point;
     lastRaycastHitDistance = hit.distance;
     let tagData;
     // console.log(JSON.stringify(lastRaycastHitObject.userData));
@@ -815,12 +817,13 @@ async function RaycastHit(type, hit) {
         // locationData.markerType == "placeholder"))      
         ) {
 
+        
         if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
             console.log("that's equipped!");
         } else {
 
             showCallout = true;
-
+            // lastRaycastHitPosition = hit.point;
             // console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
 
             console.log(type + " hit object type " + locationData.markerType + " " + hit.object.name );//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
@@ -851,8 +854,8 @@ async function RaycastHit(type, hit) {
                         const rIndex = Math.floor(Math.random() * pics.length);
                         // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
                         const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
-                        const htmlstring = "<div><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div ><img src=\x22"+pics[rIndex].url+
-                        "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><br><br></div>";
+                        const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
+                        "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
                         hic_content.classList.remove("hic_content");
                         hic_content.classList.add("hic_content_2");
 
@@ -1041,11 +1044,15 @@ export function mouseRaycast(e) {
     let goColor = new THREE.Color(0xff0000);
     if (raycastHits.length > 0) {
 
-        // console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
-        // 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+        console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
+        				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
         if (raycastHits[0].object.userData) {
             RaycastHit("mouse", raycastHits[0]);
-            worldHitPosition = raycastHits[0].point;
+            lastRaycastHitPosition = raycastHits[0].point;
+            
+            // raycastHits[0].point.getWorldPosition(worldHitPosition);
+            // worldHitPosition = raycastHits[0].point;
+                console.log("mouse raycast hit " + JSON.stringify(lastRaycastHitPosition));
         } else {
             selectedObjects.length = 0;
             // lastRaycastHit = null;
@@ -1444,7 +1451,7 @@ export function onMouseDown(event) { //clicked on threejs object
 
                         
                         htmlString = "<h4>" + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];  
-                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitDistance);
 
                         // ShowPopup(event); 
                         // //keyd to a specific schema, hrm... data[0] from source textObject returnd from sceneTextController above should have field names...
@@ -1455,7 +1462,7 @@ export function onMouseDown(event) { //clicked on threejs object
                     } else {
 
                         htmlString = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
-                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitDistance);
 
                         // ShowPopup(event);
                         // popup.innerHTML = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
@@ -1469,32 +1476,14 @@ export function onMouseDown(event) { //clicked on threejs object
                     // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
                 }
             } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
-                // console.log(event.clientX + " " + window.innerWidth);
-                // let xpos = event.clientX - 150;
-                // if ((window.innerWidth - event.clientX) < 150) {
-                //     xpos = event.clientX - 300;
-                // } else if (event.clientX < 150) {
-                //     xpos = 0;
-                // }
-                // let ypos = event.clientY - 100;
-                // Object.assign(popup.style, {
-                //     left: `${xpos}px`,
-                //     top: `${ypos}px`,
-                //     display: 'block',
-                // });
+               
                 htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
                 "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
                 "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
                 lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Go</button>"+
                 "</div>";
-                ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
-                // ShowPopup(event);
-                // popup.innerHTML = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
-                // "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
-                // "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
-                // lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Go</button>"+
-                // "</div>";
-
+                ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitDistance, "hic_content");
+            
             } else if (lastRaycastHitObject.userData.locationData.mediaID) {
             // const popup = document.getElementById("popup");
                 let textData;
@@ -1509,14 +1498,14 @@ export function onMouseDown(event) { //clicked on threejs object
                 
                 if (textData != null && textData != undefined && textData != "" && textData != "none" && textData.text) {
                        htmlString = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
-                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitDistance);
                     // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
                     // ShowPopup(event);
                     // UpdateHIC(popup.innerHTML);
                 } else if (textData && !textData.text) {
 
                         htmlString = "<h1>" + textData[0] + " </h1>"  + textData[1];
-                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitDistance);
                     //  popup.innerHTML = "<h1>" + textData[0] + " </h1>"  + textData[1];
                     // ShowPopup(event);
                     // UpdateHIC(popup.innerHTML);
@@ -1528,37 +1517,7 @@ export function onMouseDown(event) { //clicked on threejs object
             // const popup = document.getElementById("popup");
             popup.style.display = "none";
         }
-    // }
-
-        // let lastHitObjectName;
-        // if (lastRaycastHitObject && lastRaycastHitPosition) {
-        //     lastHitObjectName = lastRaycastHitObject.userData ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
-        //     console.log(JSON.stringify(lastRaycastHitPosition) + " named " + lastHitObjectName);
-
-        //     if (lastHitObjectName == "player") {
-        //         // controls.target.set(player.position);
-        //         // camera.lookAt(player.position);
-        //         // controls.target.set(0, 0, 0);
-        //     } else if (lastHitObjectName == "navmesh") {
-        //         // playerNavAgent.playerNavMode(true);
-        //         // const navAgentInstance = player.userData.NavAgentInstance; //can do this easier, but good to know
-        //         //     if (navAgentInstance) {
-        //         //         navAgentInstance.playerNav(true);
-        //         //         // controls
-        //         //         // player.position.set(closestNavmeshPoint(player.position.x, player.position.y, player.position.z ));
-        //         //         navAgentInstance.newPath(lastRaycastHitPosition);
-        //         //     }
-        //         // controls.target.set(lastRaycastHitPosition.x, lastRaycastHitPosition.y, lastRaycastHitPosition.z);
-        //     }
-
-        //     // controls.target.set(lastRaycastHitPosition.x, lastRaycastHitPosition.y, lastRaycastHitPosition.z);
-
-        // }
-        // // isDragging = true;
-        // previousMousePosition = {
-        //     x: event.clientX,
-        //     y: event.clientY
-        // };
+   
     if (cameraMode == "Fly") {
         controls.dragToLook = true;
     }
@@ -1566,51 +1525,6 @@ export function onMouseDown(event) { //clicked on threejs object
     // if ()
 
 }
-
-// export function ShowPopup (event) { //hrm move to UI
-//     if (uiMode != "popup") {
-//         return;
-//     }
-//     const popup = document.getElementById("popup");
-//     console.log("showDialogPanel " + showDialogPanel);
-
-//     if (showDialogPanel) {
-//         return;
-//     }
-    
-//     if (!event) {
-//         let xpos = window.innerWidth / 2;
-//         let ypos = window.innerHeight / 2;
-//         Object.assign(popup.style, {
-//             left: `${xpos}px`,
-//             top: `${ypos}px`,
-//             display: 'block',
-//         });
-//     } else {
-//         // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
-//         let xpos = event.clientX - 150;
-//         if ((window.innerWidth - event.clientX) < 150) {
-//             xpos = event.clientX - 300;
-//         } else if (event.clientX < 150) {
-//             xpos = 0;
-//         }
-        
-//         let ypos = event.clientY - 100;
-//         if (event.clientY < 100) {
-//             ypos = 0;
-//         }
-//         // if (event.clientY > (window.innerHeight - 300)) {
-//         //     ypos = window.innerHeight - 300;
-//         // }
-//          Object.assign(popup.style, {
-//             left: `${xpos}px`,
-//             top: `${ypos}px`,
-//             display: 'block',
-//         });
-//     }
-
-//     // UpdateHIC(); //wgpu only fn
-// }
 
 export function onMouseUp(e) {
     mouseDowntime = (Date.now() / 1000) - mouseDownStarttime; 

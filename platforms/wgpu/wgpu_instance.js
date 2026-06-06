@@ -58,45 +58,47 @@ export async function TagsToInstances (locID, instanceID) {
     if (taggedInstances) { //populated when instances are created (e.g. InstanceOnSurface() below), if there's an attached mediaID
         const instanceData = taggedInstances[locID];
 
-        let textData;
-        let jsonData;
-        if (!instanceData.isTagged) {
-            instanceData.iTags = [];
+        if (instanceData) {
+            let textData;
+            let jsonData;
+            if (instanceData && !instanceData.isTagged) {
+                instanceData.iTags = [];
 
-            textData = await sceneTextController.returnAllTextDataFromMediaID(instanceData.mediaID);
-           
-            let textindex = 0;
-                jsonData = JSON.parse(textData.textstring);
-            for (let i = 0; i < instanceData.count; i++) {
-                let iTag = {};
-                
-                
-                if (textindex < jsonData.length) {
-                    textindex++;
-                } else {
-                   textindex = 0;                   
+                textData = await sceneTextController.returnAllTextDataFromMediaID(instanceData.mediaID);
+            
+                let textindex = 0;
+                    jsonData = JSON.parse(textData.textstring);
+                for (let i = 0; i < instanceData.count; i++) {
+                    let iTag = {};
+                    
+                    
+                    if (textindex < jsonData.length) {
+                        textindex++;
+                    } else {
+                    textindex = 0;                   
+                    }
+                    iTag[i] = jsonData[textindex];
+
+                    // console.log(JSON.stringify(iTag));
+                    instanceData.iTags.push(iTag);
+                    // if (textData.textstring && textData.textstring.length) {
+                    //     for (let i = 0; i < textData.textstring.length; i++) {
+
+                    //     }
+                    // }
+                    instanceData.isTagged = true;
                 }
-                iTag[i] = jsonData[textindex];
-
-                // console.log(JSON.stringify(iTag));
-                instanceData.iTags.push(iTag);
-                // if (textData.textstring && textData.textstring.length) {
-                //     for (let i = 0; i < textData.textstring.length; i++) {
-
-                //     }
-                // }
-                instanceData.isTagged = true;
+                // console.log(JSON.stringify(tag));
+                const tag = Object.values(instanceData.iTags[instanceID])[0];
+                console.log(JSON.stringify(tag));
+                return tag;
+            } else {
+                // console.log(JSON.stringify(instanceData.iTags[instanceID]));
+                //  return instanceData.iTags[instanceID][0];
+                const tag = Object.values(instanceData.iTags[instanceID])[0];
+                console.log(JSON.stringify(tag));
+                return tag;
             }
-            // console.log(JSON.stringify(tag));
-            const tag = Object.values(instanceData.iTags[instanceID])[0];
-            console.log(JSON.stringify(tag));
-            return tag;
-        } else {
-            // console.log(JSON.stringify(instanceData.iTags[instanceID]));
-            //  return instanceData.iTags[instanceID][0];
-             const tag = Object.values(instanceData.iTags[instanceID])[0];
-            console.log(JSON.stringify(tag));
-            return tag;
         }
         // const textData = await sceneTextController.returnAllTextDataFromMediaID(instanceData.mediaID);
         // console.log(instanceData.mediaID + " " + JSON.stringify(textData));

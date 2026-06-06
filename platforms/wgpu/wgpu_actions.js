@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 
-import { player, lastRaycastHitObject, mouseDowntime, popup, hic_content, onMouseDown } from './wgpu_controls.js';
+import { player, lastRaycastHitObject, mouseDowntime, popup, hic_content, onMouseDown, lastRaycastHitPosition, lastRaycastHitDistance, worldHitPosition } from './wgpu_controls.js';
 
 import { scene } from './wgpu_main.mjs';
 
@@ -298,7 +298,7 @@ export class SceneObject { //things that might have models and actions and fancy
                 // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
                 // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
                 // "</div>";
-                ShowHTMLPopup(event, htmlstring);
+                ShowHTMLPopup(event, htmlstring, worldHitPosition, lastRaycastHitDistance);
                 if (uiMode == "hic") {
                     // UpdateHIC(popup.innerHTML);
                     document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );

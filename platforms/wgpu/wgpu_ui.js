@@ -384,13 +384,6 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     }
     
 
-
-    //  await new Promise(r => setTimeout(r, 3000));
-    // const updated = await text.update({ text: 'Hwlloo World' });
-    // textmesh.geometry.dispose();
-    // textmesh.geometry = updated.geometry;
-    //     console.log("gotsa text result2 " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
-    // result.text
     Cooldown();
     } 
 }
@@ -549,123 +542,8 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
 
     }
 
-    // const pictureItem = ReturnPictureFromGroup(locationGroup._id);
-    // console.log("pictureITem " + pictureItem.orientation);
-    // if (pictureItem) {
-    //     if (pictureItem.orientation == "Landscape") {
-    //         // landscapePanel = scene.getObjectByName('landscapePanel');
-    //         // const hitpos = lastRaycastHit.point;
-    //         //                                      hitpos.getWorldPosition(worldHitPosition);
-    //         if (!landscapePanel) {
-    //             console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
-    //             // const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4);
-    //             const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
-    //             const planeMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
-    //             landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
-    //             landscapePanel.name = "landscapePanel";
-    //             scene.add(landscapePanel);
-    //                 landscapePanel.position.set(position.x, position.y + 4,position.z );
-    //             // landscapePanel.lookAt(player);
-    //             landscapePanel.visible = true;
-    //             // landscapePanel.updateMatrixWorld();
-
-    //         } else {
-    //             console.log("showing a landscape panel " + position.x + position.y + position.z);
-    //             landscapePanel.position.set(position.x, position.y + 4, position.z );
-    //             // landscapePanel.lookAt(player);
-    //             landscapePanel.visible = true;
-    //             // landscapePanel.updateMatrixWorld();
-
-    //         }
-            
-    //     } else if (pictureItem.orientation == "Portrait") {
-
-    //         if (!landscapePanel) {
-    //             console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
-    //             // const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4);
-    //             const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
-    //             const planeMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
-    //             landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
-    //             landscapePanel.name = "landscapePanel";
-    //             scene.add(landscapePanel);
-    //                 landscapePanel.position.set(position.x, position.y + 4,position.z );
-    //             // landscapePanel.lookAt(player);
-    //             landscapePanel.visible = true;
-    //             // landscapePanel.updateMatrixWorld();
-
-    //         } else {
-    //             console.log("showing a landscape panel " + position.x + position.y + position.z);
-    //             landscapePanel.position.set(position.x, position.y + 4, position.z );
-    //             // landscapePanel.lookAt(player);
-    //             landscapePanel.visible = true;
-    //             // landscapePanel.updateMatrixWorld();
-
-    //         }
-        
-        // }
-    // }
 }
 
-// export function UpdateHIC (htmlstring, hitpoint, hitobject, parent) {
-
-//     if (uiMode != "hic") {
-//         return;
-//     }
-   
-//     const canvasEl = document.getElementById('hic_canvas');
-//     const contentEl = document.getElementById('hic_content');
-
-
-//         contentEl.innerHTML = htmlstring;
-//         console.log("contentEL.innerHTML is "  +contentEl.innerHTML );
-
-//         const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
-
-//         const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
-//         material.map = new THREE.HTMLTexture( canvasEl );
-//         material.envMap = scene.environment;
-//         material.envMapIntensity = 2;
-
-//         if (!hicMesh) {
-
-
-//             const ctx = canvasEl.getContext('2d');
-//             const ratio = window.devicePixelRatio || 1;
-
-//             // Set the visual size (CSS pixels)
-//             canvasEl.style.width = '768px';
-//             canvasEl.style.height = '768px';
-
-//             // Set the internal resolution (Physical pixels)
-//             canvasEl.width = 200 * ratio;
-//             canvasEl.height = 200 * ratio;
-
-//             // Scale the context to match
-//             ctx.scale(ratio, ratio);
-//             hicMesh = new THREE.Mesh( geometry, material );
-
-//             scene.add( hicMesh );
-//             activeObjex.push(hicMesh);
-//             lookAtCameraObjects.push(hicMesh);
-//             const interactions = new InteractionManager();
-//             interactions.connect( renderer, camera );
-//             interactions.add( hicMesh );
-//             interactions.update();
-//             interactionManagers.push(interactions);
-//             hicMesh.addEventListener('pointerdown', onMouseDown);
-//         } else {
-//             hicMesh.visible = true;
-//             hicMesh.material = material;
-//         }
-//         // Interaction
-
-        
-
-//         const worldPosition = new THREE.Vector3();
-//         viewportPlaceholder.getWorldPosition(worldPosition);
-//         hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
-
-// }
 
 let matSwappedObjex = {};
 export function SwapMaterials (object, material) {
@@ -710,15 +588,20 @@ export function UnSwapMaterials (object) {
     // }
 }
 
-export function ShowHTMLPopup(event, htmlstring, position, distance) {
+export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
 
      if (uiMode == "hic") {
+        if (style == "hic_content") {
+            contentEl.className = '';
+            contentEl.classList.add(style);
+        }
 
         let material;
         let scaleFactor = .25;
         if (distance) {
+            console.log("distance " + distance);
             // if (distance > 1) {
-                scaleFactor = distance * .85;
+                scaleFactor = distance * .75;
                 // if (parentScale) {
                 //     scaleFactor = scaleFactor/parentScale;
                 // }
@@ -734,7 +617,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance) {
 
             const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
 
-            material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .05, metalness: .25 } );
+            material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .5, metalness: .1 } );
             material.map = new THREE.HTMLTexture( canvasEl );
             // material.envMap = scene.environment;
             // material.envMapIntensity = 1;
@@ -759,11 +642,11 @@ export function ShowHTMLPopup(event, htmlstring, position, distance) {
             const interactions = new InteractionManager();
            
             hicMesh.addEventListener('pointerdown', onMouseDown);
-            if (position) {
+            // if (position) {
                 // scene.attach(hicMesh);
                 hicMesh.position.set(position.x, position.y + scaleFactor/2, position.z);
                 hicMesh.scale.setScalar(scaleFactor);
-            }
+            // }
             interactions.connect( renderer, camera );
             interactions.add( hicMesh );
             interactions.update();
@@ -775,11 +658,11 @@ export function ShowHTMLPopup(event, htmlstring, position, distance) {
             hicMesh.visible = true;
             // canvasEl.requestPaint();
             console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
-            if (position) {
+            // if (position) {
                 // scene.attach(hicMesh);
                 hicMesh.position.set(position.x, position.y + scaleFactor/2, position.z);
                 hicMesh.scale.setScalar(scaleFactor);
-            }
+            // }
             hicMesh.updateMatrixWorld();
 
             // hicMesh.material = material;
