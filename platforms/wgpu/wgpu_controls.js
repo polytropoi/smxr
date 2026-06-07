@@ -9,7 +9,7 @@ import { closestNavmeshPoint, navAgentInstances } from './wgpu_nav.js';
 
 import { ReturnTaggedPictures, sceneTextController, triggerAudioController } from './wgpu_media.js';
 
-import { ActionSwitch, SetPlayerRigidbody } from './wgpu_actions.js';
+import { ActionSwitch, SetPlayerRigidbody, InstancedActionClick } from './wgpu_actions.js';
 
 
 import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './wgpu_locations.js';
@@ -854,6 +854,8 @@ async function RaycastHit(type, hit) {
                         const rIndex = Math.floor(Math.random() * pics.length);
                         // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
                         const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
+                        lastRaycastHitObject.tagData = tagData;
+                        lastRaycastHitObject.header = header;
                         const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
                         "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
                         hic_content.classList.remove("hic_content");
@@ -1348,50 +1350,52 @@ export function onMouseDown(event) { //clicked on threejs object
                 // // const popup = document.getElementById("popup");
                 // console.log(lastRaycastHit.instanceId + " " + JSON.stringify(lastRaycastHitObject.userData));
                
-                if (lastRaycastHitObject.userData.locationData.objectData) {
-                    const actions = lastRaycastHitObject.userData.locationData.objectData.actions;
-                    console.log("mouse down on instance with objectData actions " + JSON.stringify(actions));
-                } //else
-                let groupData;
-                if (lastRaycastHitObject.userData.locationData.groupID) {
-                    console.log(lastRaycastHitObject.userData.locationData.name + " gotsa groupID " + lastRaycastHitObject.userData.locationData.groupID);
-                    let locationGroup;
-                    for (let i = 0; i < settings.sceneGroups.length; i++) {
-                        if (settings.sceneGroups[i]._id == lastRaycastHitObject.userData.locationData.groupID) {
-                            console.log("gotsa location groupID of type " +settings.sceneGroups[i].type);
-                            locationGroup = settings.sceneGroups[i];
+                if (lastRaycastHitObject.userData.locationData.objectData) { //instanced meshes with object references
+                    lastRaycastHitObject.userData.locationData.objectData.sceneObjectID = lastRaycastHitObject.userData.locationData.timestamp;
+                    InstancedActionClick(lastRaycastHit.instanceId, lastRaycastHitObject.userData.locationData.objectData, locationData.timestamp);
+                    
+                } else {
+                    let groupData;
+                    if (lastRaycastHitObject.userData.locationData.groupID) {
+                        console.log(lastRaycastHitObject.userData.locationData.name + " gotsa groupID " + lastRaycastHitObject.userData.locationData.groupID);
+                        let locationGroup;
+                        for (let i = 0; i < settings.sceneGroups.length; i++) {
+                            if (settings.sceneGroups[i]._id == lastRaycastHitObject.userData.locationData.groupID) {
+                                console.log("gotsa location groupID of type " +settings.sceneGroups[i].type);
+                                locationGroup = settings.sceneGroups[i];
+                            }
+                        }
+                        if (locationGroup) {
+                            if (locationGroup.type == "picture") {
+                                ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
+                            }
                         }
                     }
-                    if (locationGroup) {
-                        if (locationGroup.type == "picture") {
-                            ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
-                        }
-                    }
-                }
-                let textData;
-                if (lastRaycastHitObject.userData.locationData.mediaID) {
-                    textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
-                    console.log("text item " + JSON.stringify(textData));
-                }
-            
-                if (textData != null && textData != undefined && textData != "" && textData != "none") {
-                    if (Array.isArray(textData)) { //not kv pairs as nested objects, but an array of values
-
-                        
-                        htmlString = "<h4>" + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];  
-                        ShowHTMLPopup(event, htmlString);
-
-                        
-                    } else {
-
-                        htmlString = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
-                        ShowHTMLPopup(event, htmlString);
-                        
+                    let textData;
+                    if (lastRaycastHitObject.userData.locationData.mediaID) {
+                        textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                        console.log("text item " + JSON.stringify(textData));
                     }
                 
-                } else {
-                    // ShowPopup(event);
-                    // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
+                    if (textData != null && textData != undefined && textData != "" && textData != "none") {
+                        if (Array.isArray(textData)) { //not kv pairs as nested objects, but an array of values
+
+                            
+                            htmlString = "<h4>" + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];  
+                            ShowHTMLPopup(event, htmlString);
+
+                            
+                        } else {
+
+                            htmlString = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                            ShowHTMLPopup(event, htmlString);
+                            
+                        }
+                    
+                    } else {
+                        // ShowPopup(event);
+                        // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
+                    }
                 }
             } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                
