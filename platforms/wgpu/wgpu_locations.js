@@ -148,7 +148,7 @@ export function InitLocations() {
                                          if (locationData[i].objectID) { // add object data if present  
                                             for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
                                                 if (locationData[i].objectID == objexData[o]._id) {
-                                                    instancedModel.objectData = objectData[o];
+                                                    locationData[i].objectData = objexData[o];
                                                 }
                                             }
                                         }
@@ -159,7 +159,12 @@ export function InitLocations() {
 
                                        
                                                                             
+                                    } else { // regular meshes
+                                                                             
+                                        scene.add(model);
+                                                                            
                                     }
+
                                     break; //only match one model per location!?
                                 }
                             }

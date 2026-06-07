@@ -1346,8 +1346,12 @@ export function onMouseDown(event) { //clicked on threejs object
                 
             } else if (lastRaycastHit.instanceId) {
                 // // const popup = document.getElementById("popup");
-                console.log(lastRaycastHit.instanceId + " " + JSON.stringify(lastRaycastHitObject.userData));
+                // console.log(lastRaycastHit.instanceId + " " + JSON.stringify(lastRaycastHitObject.userData));
                
+                if (lastRaycastHitObject.userData.locationData.objectData) {
+                    const actions = lastRaycastHitObject.userData.locationData.objectData.actions;
+                    console.log("mouse down on instance with objectData actions " + JSON.stringify(actions));
+                } //else
                 let groupData;
                 if (lastRaycastHitObject.userData.locationData.groupID) {
                     console.log(lastRaycastHitObject.userData.locationData.name + " gotsa groupID " + lastRaycastHitObject.userData.locationData.groupID);
