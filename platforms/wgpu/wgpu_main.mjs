@@ -110,6 +110,7 @@
 	let instancedPosition = new THREE.Vector3();
 	let instancedQuaternion = new THREE.Quaternion();
 	let instancedMatrix = new THREE.Matrix4();
+	export let sceneIsReady = false;
 	
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
 
@@ -176,6 +177,7 @@
 		
 		await InitLocations(); //calls initSystems...
 
+		sceneIsReady = true;
 		// initSystems();
 	}
 

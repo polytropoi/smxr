@@ -145,13 +145,19 @@ export function InitLocations() {
                                         instancedModel.modelData = modelsData[m];
                                         instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
                                         // instancedModel.count = count;
+                                         if (locationData[i].objectID) { // add object data if present  
+                                            for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
+                                                if (locationData[i].objectID == objexData[o]._id) {
+                                                    instancedModel.objectData = objectData[o];
+                                                }
+                                            }
+                                        }
                                         instancedModels.push(instancedModel);
                                         console.log("instancedModels length " + instancedModels.length);
                                         model.visible = false;
                                         scene.remove(model);  //don't need the reference model
-                                    } else { // regular meshes
-                                                                             
-                                        scene.add(model);
+
+                                       
                                                                             
                                     }
                                     break; //only match one model per location!?

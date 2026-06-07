@@ -607,7 +607,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
                 // }
             // }
         }
-        // console.log("ui scale factor " + scaleFactor);
+        console.log("ui " + scaleFactor + " " + distance + " " + style);
         scaleFactor = clamp(scaleFactor, .25, 33);
 
         if (!hicMesh) {
@@ -615,7 +615,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
             contentEl.innerHTML = htmlstring;
             console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
 
-            const geometry = new THREE.PlaneGeometry( .85,.85, 10, 10 );
+            const geometry = new THREE.PlaneGeometry( 1,1, 10, 10 );
 
             material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .5, metalness: .1 } );
             material.map = new THREE.HTMLTexture( canvasEl );
@@ -629,8 +629,8 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
             canvasEl.style.height = '1024px';
 
             // Set the internal resolution (Physical pixels)
-            canvasEl.width = 400 * ratio;
-            canvasEl.height = 400 * ratio;
+            canvasEl.width = 512 * ratio;
+            canvasEl.height = 512 * ratio;
 
             // Scale the context to match
             ctx.scale(ratio, ratio);
@@ -642,11 +642,11 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
             const interactions = new InteractionManager();
            
             hicMesh.addEventListener('pointerdown', onMouseDown);
-            // if (position) {
+            if (position && distance) {
                 // scene.attach(hicMesh);
                 hicMesh.position.set(position.x, position.y + scaleFactor/2, position.z);
                 hicMesh.scale.setScalar(scaleFactor);
-            // }
+            }
             interactions.connect( renderer, camera );
             interactions.add( hicMesh );
             interactions.update();
@@ -658,11 +658,11 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
             hicMesh.visible = true;
             // canvasEl.requestPaint();
             console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
-            // if (position) {
+            if (position && distance) {
                 // scene.attach(hicMesh);
                 hicMesh.position.set(position.x, position.y + scaleFactor/2, position.z);
                 hicMesh.scale.setScalar(scaleFactor);
-            // }
+            }
             hicMesh.updateMatrixWorld();
 
             // hicMesh.material = material;
@@ -673,6 +673,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
 
             const worldPosition = new THREE.Vector3();
             viewportPlaceholder.getWorldPosition(worldPosition);
+            hicMesh.scale.setScalar(1);
             hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
 
         }

@@ -1264,56 +1264,68 @@ background-color: #000000;
       .yesButton {
           /* float: right; */
         /* width: 120px; */
-        background-color: #479149;
+        background-color: #009b05;
         color: white;
-        padding: 10px 10px;
-        margin: 10px;
+        padding: 20px;
+        margin: 20px;
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 12px;
+        font-size: 20px;
         font-weight: bold;
       }
       .equipButton {
           /* float: right; */
         /* width: 120px; */
-        background-color: #b6673f;
+        background-color: #8b2e00;
         color: white;
-        padding: 10px 10px;
-        margin: 10px;
+        padding: 20px;
+        margin: 20px;
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 12px;
+        font-size: 20px;
         font-weight: bold;
       }
         .collectButton {
           /* float: right; */
         /* width: 120px; */
-        background-color: #3b8596;
+        background-color: #005669;
         color: white;
-        padding: 10px 10px;
-        margin: 10px;
+        padding: 20px;
+        margin: 20px;
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 12px;
+        font-size: 20px;
         font-weight: bold;
       }
       .consumeButton {
           /* float: right; */
         /* width: 120px; */
-        background-color: #914770;
+        background-color: #00743e;
         color: white;
-        padding: 10px 10px;
-        margin: 10px;
+        padding: 20px;
+        margin: 20px;
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 12px;
+        font-size: 20px;
         font-weight: bold;
       }
-
+      .hicCancelButton {
+          /* float: right; */
+        /* width: 120px; */
+        background-color: #ff0000;
+        color: white;
+        padding: 20px;
+        margin: 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: bold;
+      }
       .infoButton {
         float: right;
       /* width: 120px; */
@@ -1915,24 +1927,30 @@ body {
         border: 2px solid white;
       border-radius: 1em;
       margin: .5em .5em 0 0;
+
     }
-    
+
     .hic_content {
       z-index: 0;
+      position: absolute; 
       overflow-y: auto;
       background-color: rgb(0, 0, 0); /* Fallback color */
       background-color: rgb(0, 0, 0); /* Black w/ opacity */
       text-align: center;
       font-family: helvetica, arial, sans-serif;
-      font-size: 20px;
+      font-size: 22px;
       color: #ffffff;
       cursor: pointer;
-      padding: 10px;
+      padding: 20px;
       border: 2px solid white;
       border-radius: 1em;
-      margin: 2em 2em 2em 2em;
-      justify-content: center; /* Centers horizontally */
-      align-items: center; 
+      margin: 4em 4em 4em 4em;
+      float: right;
+      width: 80%;
+      /* display: grid;
+      place-items: center;  */
+      /* height: 100vh; */
+      
     }
 
     .hic_content_2 {
