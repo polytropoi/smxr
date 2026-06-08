@@ -51,7 +51,7 @@
 	
 	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText } from './wgpu_media.js';
 	
-	import { LoadSceneInventory } from './wgpu_inventory.js';
+	import { equippedObjectOnLoad, LoadSceneInventory } from './wgpu_inventory.js';
 	
 // 	import { InstanceNode } from 'three/webgpu';
 // import RenderObjectPipeline from 'three/src/renderers/common/RenderObjectPipeline.js';
@@ -178,6 +178,15 @@
 		await InitLocations(); //calls initSystems...
 
 		sceneIsReady = true;
+		if (equippedObjectOnLoad != "") {
+			const eventDetails = {};
+			eventDetails.objectID = equippedObjectOnLoad;
+			eventDetails.onLoad = true;
+			EquipInventoryCheck(eventDetails);
+			// equip_inventory_object_event.details = eventDetails;
+			// eventEl.dispatchEvent(equip_inventory_object_event);
+
+		}
 		// initSystems();
 	}
 

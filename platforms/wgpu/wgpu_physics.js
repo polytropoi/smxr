@@ -254,7 +254,7 @@ function WaitAndInit () {
 
   export async function getPlayerBody(player) { //
 
-      // if (player) {
+      if (player) {
     
         // const mesh = player;
         let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased() //no, position based...
@@ -292,6 +292,7 @@ function WaitAndInit () {
         // player.userData.update = update;
         // kinematicBodies.push(player);
         return { rigidbody, update, enable, disable };
+      }
  
   }
 

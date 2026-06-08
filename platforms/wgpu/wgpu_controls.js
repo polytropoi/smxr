@@ -819,7 +819,8 @@ async function RaycastHit(type, hit) {
 
         
         if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
-            console.log("that's equipped!");
+            console.log("that's equipped! " + JSON.stringify(lastRaycastHitObject.userData));
+
         } else {
 
             showCallout = true;
@@ -842,7 +843,7 @@ async function RaycastHit(type, hit) {
                 // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             } else {
                 // console.log("mediaID " + locationData.mediaID);
-                if (name.includes("~")) {
+                if (name && name.includes("~")) {
                     name = name.split("~")[0];
                 }
                 if (name && name != "") {
@@ -1037,7 +1038,7 @@ export function mouseRaycast(e) {
     // if (e.clientY < 100) {
     //     return;
     // }
-    scene.updateMatrixWorld(true);
+    scene.updateMatrixWorld(true);//?
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     // console.log("mouse pos " + JSON.stringify(mouse));

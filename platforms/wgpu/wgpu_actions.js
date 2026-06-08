@@ -58,7 +58,7 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
     console.log("looking for " + objectID + " in locationObjex length : " + locationObjex.length);
     if (locationObjex.length > 0) { 
         for (let i = 0; i < locationObjex.length; i++) { //spin through the original array to match object's mongoID
-        console.log('tryna match object data for ' +objectID + " vs " + locationObjex[i].objectData._id);
+        console.log('tryna match object data for ' +objectID + " vs " + JSON.stringify(locationObjex[i]));
         if (locationObjex[i].objectData._id == objectID) {
             console.log('gotsa objectID match to return data ' + objectID);
             // hasObj = true;
@@ -252,13 +252,13 @@ export class SceneObject { //things that might have models and actions and fancy
             let consumeButton = "";
             let hasActions = false;
             let cancelButton = "";
-            // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+            cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
             if (this.hasPickupAction) {
                
                 hasActions = true;
                 pickupButton = "<button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22pickup\x22 data-data=\x22"+
                 this.objectData.sceneObjectID+"\x22 class=\x22collectButton\x22>Collect</button>";
-                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
                 
             } 
             if (this.hasEquipAction) {
@@ -266,7 +266,7 @@ export class SceneObject { //things that might have models and actions and fancy
                 hasActions = true;
                 equipButton = "<button id=\x22popup_yesButton1\x22 data-tags=\x22\x22 data-type=\x22equip\x22 data-data=\x22"+
                 this.objectData.sceneObjectID+"\x22 class=\x22equipButton\x22>Equip</button>";
-                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
                
             }
             if (this.hasConsumeAction || this.objectData.objtype == "Consumable") {
@@ -574,13 +574,13 @@ export function InstancedActionClick(instanceID, objectData) {//instanced meshes
 
         }
           
-        // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+        cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
         if (hasPickupAction) {
             
             hasActions = true;
             pickupButton = "<button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22pickup\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22collectButton\x22>Collect</button>";
-            cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
+            // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
             
         } 
         if (hasEquipAction) {
@@ -588,7 +588,7 @@ export function InstancedActionClick(instanceID, objectData) {//instanced meshes
             hasActions = true;
             equipButton = "<button id=\x22popup_yesButton1\x22 data-tags=\x22\x22 data-type=\x22equip\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22equipButton\x22>Equip</button>";
-            cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22class=\x22hicCancelButton\x22>Cancel</button>";
+            // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22class=\x22hicCancelButton\x22>Cancel</button>";
             
         }
         if (hasConsumeAction || objectData.objtype == "Consumable") {
@@ -596,7 +596,7 @@ export function InstancedActionClick(instanceID, objectData) {//instanced meshes
             consumeButton = "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22consumeButton\x22>Consume</button>";
             hasActions = true;
-            cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
+            // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
             
         } 
         if (hasActions) {

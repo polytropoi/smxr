@@ -13,6 +13,7 @@ import { ShowHTMLPopup, HideHTMLPopup } from './wgpu_ui.js';
 
 import { AddDynamicBody, SetEquippedRigidbody } from './wgpu_physics.js';
 
+import { sceneIsReady } from './wgpu_main.mjs';
 // import { room } from './three_main.mjs';
 
 import { activeObjex, LoadAndDropSingleObject, LoadModel, locationObjex } from './wgpu_locations.js';
@@ -21,7 +22,7 @@ import { userData, room } from '../../../connect/connect.js';
 // import {  } from '../../connect/dialogs.js';
 // import { GetUserInventory } from '../../connect/dialogs.js';
 
-
+export let equippedObjectOnLoad = "";
 
 export let sceneInventory = [];
 
@@ -58,10 +59,14 @@ eventEl.addEventListener('drop-inventory-object-event', DropInventoryCheck);
 
 
 
-function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js - TODO flex if from scene or scene inventory -- no, this only for userinventory
+export function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js - TODO flex if from scene or scene inventory -- no, this only for userinventory
 
+
+    if (!sceneIsReady) {
+        equippedObjectOnLoad = event.details.objectID; //need to wait for all the objex to load before tryna equip
+    } 
     const objectData = ReturnObjectData(event.details.objectID);
-    console.log("equip event for object " + JSON.stringify(objectData));
+    console.log("equip event for objectID " + event.details.objectID + " " +  JSON.stringify(objectData));
 
     if (objectData) {
         if (objectData.actions != undefined && objectData.actions.length > 0) {
@@ -71,7 +76,7 @@ function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js -
                 console.log("gots equip ACTION " + objectData.actions[i].actionName);
             //   action = objectData.actions[i];
                 // console.log(JSON.stringify(action));
-                // if (objectData.fromUserInventory) {
+                if (objectData.fromUserInventory) {
                     for (let i = 0; i < userInventory.inventoryItems.length; i++) {
                         if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
                             // inventoryObj = userInventory[i];
@@ -81,7 +86,13 @@ function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js -
                             }
                         }
                             
-                // } 
+                } else {
+                    EquipObject(objectData);
+                    if (!event.onLoad) {
+                        ShowHideDialogPanel();
+                    }
+                            break;
+                }
                 // else if (objectData.fromSceneInventory) {
                 //                 for (let i = 0; i < sceneInventory.inventoryItems.length; i++) {
                 //         if (sceneInventory.inventoryItems[i].objectID == event.details.objectID) {

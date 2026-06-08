@@ -5,9 +5,11 @@ import { room, sceneLocations, locationTimestamps, localData, userData, lastClou
    playerPosition, playerRotation } from "/connect/connect.js";
 
 import { settings, UpdateUserProfile, pixelsPerMeterActual } from "/connect/settings.js";
-import { SetTimeKeysData, MapUpdate } from "/connect/events.js";
+import { SetTimeKeysData, MapUpdate, eventEl, equip_inventory_object_event } from "/connect/events.js";
 // import { pixelsPerMeterActual } from "../vtt/vtt_main.mjs";
 export let hasLocalData = false;
+
+
 //////////////////////indexedDB functions...
 export function InitIDB() {
    let playerPosMods = [];
@@ -525,7 +527,10 @@ export function InitIDB() {
                            }
                         } else {
                            console.log("cain't find mod_objex");
-
+                           const eventDetails = {};
+                              eventDetails.objectID = pcursor.value.equipment.main.objectID;
+                              equip_inventory_object_event.details = eventDetails;
+                              eventEl.dispatchEvent(equip_inventory_object_event);
 
                         }
                      } else {

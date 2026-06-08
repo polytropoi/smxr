@@ -85,7 +85,7 @@ export function InitLocations() {
     if (objexDataEl) {
         const theObjexData = objexDataEl.getAttribute('data-objex');
         objexData = JSON.parse(atob(theObjexData));
-        // console.log("objexData " + JSON.stringify(objexData));
+        console.log("objexData " + JSON.stringify(objexData));
     }
 
     let locationDataEl = document.getElementById('locationData'); //locations have ids, types, can have models and objects assigned
@@ -199,7 +199,7 @@ export function InitLocations() {
                             if (locationData[i].objectID == objexData[o]._id) {
                                 // locationData[i].isHidden = false;
                                 
-                                // console.log("gotsa location objectID! " + objexData[o]._id +" looking for " + objexData[o].modelID);
+                                console.log("gotsa location objectID! " + objexData[o]._id +" looking for " + objexData[o].modelID);
 
                                 if (objexData[o].modelID) {
                                     for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match - model deps/urls should have been added to the response serverside
@@ -219,6 +219,16 @@ export function InitLocations() {
                                     }
                                 }
 
+                            } else {
+                                //  const locData = {};
+                                // locData.locationData = locationData[i];
+                                // locData.objectData = objexData[o]; 
+                                // locData.modelData = {};
+                                // console.log("objectData is "+ JSON.stringify(objexData[o]));
+                                // locData.modelData.modelID = locData.objectData.modelID;
+                                // locData.modelData.modelURL = locData.objectData.modelURL;
+
+                                // locationObjex.push(locData);
                             }
                         }
                     }
@@ -229,7 +239,7 @@ export function InitLocations() {
             } catch (e) {
                 console.error("ERROR LOADING GLTF! " + e);
             } finally {
-                // console.log("locations loaded! " + locations);
+                console.log("locationObjex loaded! " + locations);
                 InitSystems();
             }
         })();

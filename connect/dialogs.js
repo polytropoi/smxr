@@ -2191,7 +2191,7 @@ export function DequipInventoryItem () {
     ShowHideDialogPanel();
 }
 
-export function EquipDefaultItem (objectID, tags, eventData) {
+export function EquipDefaultItem (objectID, tags, eventData) { //aframe only atm
   console.log("tryna equip " + objectID);
   // let action = null;
   let objexEl = document.getElementById('sceneObjects');
@@ -2212,7 +2212,7 @@ export function EquipDefaultItem (objectID, tags, eventData) {
 //   }
 // }
 
-function EquipInventoryItem (objectID) {
+function EquipInventoryItem (objectID) { //aframe only 
   console.log("tryna equip " + objectID);
   let action = null;
   let objexEl = document.getElementById('sceneObjects');
@@ -2865,7 +2865,12 @@ export function ShowHideDialogPanel (htmlString) {
           } else {
             let content = document.getElementById(modalContentElID);
             let userName = document.getElementById('userName').innerHTML;
-            let greeting = document.getElementById('sceneGreeting').innerHTML;
+
+            let greeting = "Welcome!";
+            let greetingEl = document.getElementById('sceneGreeting');
+            if (greetingEl) {
+              greeting = greetingEl.innerHTML;
+            }
             console.log("GREETING: " + greeting);
             $(content).html("<span id='modalCloser' class='close-modal'>&times;</span><div><h3>" +userName + "!</h3><hr><p>" + greeting + "</p></div>");
 
