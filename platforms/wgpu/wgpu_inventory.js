@@ -89,7 +89,7 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
                 } else {
                     EquipObject(objectData);
                     if (!event.onLoad) {
-                        ShowHideDialogPanel();
+                        // ShowHideDialogPanel();
                     }
                             break;
                 }

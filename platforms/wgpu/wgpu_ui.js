@@ -57,11 +57,22 @@ let textContainer;
 export let hicMesh; //for html-in-canvas fu
 // export let landscapePanel;
 
+function isHtmlInCanvasSupported() { //if the browser flag is set to support html-in-canvas
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Check if drawElementImage is supported natively by the browser
+    return !!(ctx && typeof ctx.drawElementImage === 'function');
+}
+
 export function SetUIMode(mode) {
+    console.log("HTML-in-Canvas is supported " + isHtmlInCanvasSupported());
     uiMode = mode; //from controls
-    if (mode == "hic") {
+    if (mode == "hic" && isHtmlInCanvasSupported()) {
         canvasEl = document.getElementById('hic_canvas');
         contentEl = document.getElementById('hic_content');
+    } else {
+        uiMode == "popup";
     }
 }
 
