@@ -57,7 +57,7 @@ let textContainer;
 export let hicMesh; //for html-in-canvas fu
 // export let landscapePanel;
 
-function isHtmlInCanvasSupported() { //if the browser flag is set to support html-in-canvas
+function isHtmlInCanvasSupported() { //if the browser flag is set to support html-in-canvas see https://html-in-canvas.dev/docs/browser-support/
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     
@@ -67,12 +67,18 @@ function isHtmlInCanvasSupported() { //if the browser flag is set to support htm
 
 export function SetUIMode(mode) {
     console.log("HTML-in-Canvas is supported " + isHtmlInCanvasSupported());
-    uiMode = mode; //from controls
+    
     if (mode == "hic" && isHtmlInCanvasSupported()) {
         canvasEl = document.getElementById('hic_canvas');
         contentEl = document.getElementById('hic_content');
+        uiMode = mode; //from controls
     } else {
         uiMode == "popup";
+        if (mode == "hic" && !isHtmlInCanvasSupported()) {
+            console.log("this scene uses experimental tech html-in-canvas, to use see https://html-in-canvas.dev/docs/browser-support/");
+        }
+
+
     }
 }
 
