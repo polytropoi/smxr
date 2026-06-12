@@ -28,7 +28,7 @@
 
 	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, physicsInstancedMeshes, physicsInstancedBodies } from './wgl_instance.js';
 
-	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData } from './wgl_locations.js';
+	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData, movingMeshes } from './wgl_locations.js';
 
 	import Stats from './ui/stats.js';
 	
@@ -168,7 +168,7 @@
 			// surface = surfaceObjex[0];
 			initSplats();
 		} 
-		if (navmesh) {
+		if (navmesh && navmesh.geometry) {
 			await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
 			// AssignModelsToAgents();
 		}
@@ -621,6 +621,12 @@
 			lookAtCameraObjects.forEach(l => 
 				l.lookAt(cameraWorldPosition)
 			)
+
+			if (movingMeshes.length) {
+				movingMeshes.forEach(m => 
+					m.update(time)
+				)
+			}
 			// if (!cameraAtZero) {
 			// 	camera.lookAt(camera.parent);
 			// }

@@ -37,7 +37,7 @@ export let colliders = {}
 // export let equippedRigidbody;
 
 
-export const agentCount = 0;
+export const agentCount = 10;
 const dynamicObjectCount = 5;
 let playerWorldPosition = new THREE.Vector3();
 // export let playerRigidbody;        

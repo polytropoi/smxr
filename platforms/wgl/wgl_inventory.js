@@ -69,7 +69,7 @@ function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js -
                 console.log("gots equip ACTION " + objectData.actions[i].actionName);
             //   action = objectData.actions[i];
                 // console.log(JSON.stringify(action));
-                // if (objectData.fromUserInventory) {
+                if (objectData.fromUserInventory && userInventory) {
                     for (let i = 0; i < userInventory.inventoryItems.length; i++) {
                         if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
                             // inventoryObj = userInventory[i];
@@ -79,7 +79,7 @@ function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js -
                             }
                         }
                             
-                // } 
+                } 
                 // else if (objectData.fromSceneInventory) {
                 //                 for (let i = 0; i < sceneInventory.inventoryItems.length; i++) {
                 //         if (sceneInventory.inventoryItems[i].objectID == event.details.objectID) {

@@ -36,9 +36,12 @@ export let groundObjex = [];
 export let animationMixers = [];
 export let animationData = {};
 
+export let movingMeshes = [];
+
 // export let sceneObjects = {};
 
-export let navmesh;
+export let navmesh = null;
+export let navmeshGeometry;
 
 export let playerPosition;
 
@@ -57,18 +60,21 @@ export async function LoadModel(url) {
 
 export function createDefaultNavmesh() {
     console.log("tryna create default navmesh");
-        const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
+        const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); // 50 x 50
+        // navmeshGeometry = planeGeometry;
+        planeGeometry.rotateX(-Math.PI / 2);
     //   planeGeometry.rotation.x = Math.PI / 2 * -1;
         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
-        let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
+        let navmesh = new THREE.Mesh(planeGeometry, planeMaterial);
         
-        navmeshObject.position.set(0,0,0);
-        // navmeshObject.scale.set(1,1,1);
-        navmeshObject.rotation.x = Math.PI / 2;
-        navmeshObject.updateMatrixWorld();
-        navmesh = navmeshObject;
+    
         
-        scene.add(navmeshObject);
+        scene.add(navmesh);
+        // navmesh.position.set(0,0,0);
+        // // navmeshObject.scale.set(1,1,1);
+        // navmesh.rotation.x = Math.PI / 2;
+        // navmesh.updateMatrixWorld();
+        // navmesh = navmeshObject;
         groundObjex.push(navmesh);
     }
 
@@ -116,7 +122,7 @@ export function InitLocations() {
                                     console.log("gotsa location model! " +modelsData[m].modelURL);
                                     
                                     if (modelsData[m].item_type == "splat") {
-                                        console.log("GOTSA SPLAT!");
+                                        console.log("GOTSA SPLAT! " + modelsData[m].name);
                                         let splat = {};
                                         splat.url = modelsData[m].modelURL;
                                         splat.locationData = locationData[i];
@@ -133,38 +139,41 @@ export function InitLocations() {
                                         console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
                                         
                                         if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
-                                        
                                             locationData[i].isHidden = true;
                                             // console.log("tryna hide model " + child.name);
                                         }															
 
+                                        if (locationData[i].markerType == "brownian motion") {
+                                            const meshMover = new MeshMover(model); 
+                                            movingMeshes.push(meshMover);
+                                        }
                                 
 
 
                                         if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
-                                        // console.log("tryna instance model " + locationData[i].name);
-                                        let instancedModel = {};
-                                        const originalModel = await LoadModel(modelsData[m].modelURL)
-                                        // const countsplit = locationData[i].eventData.split("~");
-                                        // const count = countsplit[1];
-                                        instancedModel.model = originalModel.scene;
-                                        instancedModel.locationData = locationData[i];
-                                        instancedModel.modelData = modelsData[m];
-                                        instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
-                                        // instancedModel.count = count;
-                                        instancedModels.push(instancedModel);
-                                        console.log("instancedModels length " + instancedModels.length);
-                                        model.visible = false;
-                                        scene.remove(model);  //don't need the reference model
-                                    } else { // regular meshes
-                                                                             
-                                        scene.add(model);
-                                                                            
+                                            // console.log("tryna instance model " + locationData[i].name);
+                                            let instancedModel = {};
+                                            const originalModel = await LoadModel(modelsData[m].modelURL)
+                                            // const countsplit = locationData[i].eventData.split("~");
+                                            // const count = countsplit[1];
+                                            instancedModel.model = originalModel.scene;
+                                            instancedModel.locationData = locationData[i];
+                                            instancedModel.modelData = modelsData[m];
+                                            instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
+                                            // instancedModel.count = count;
+                                            instancedModels.push(instancedModel);
+                                            console.log("instancedModels length " + instancedModels.length);
+                                            model.visible = false;
+                                            scene.remove(model);  //don't need the reference model
+                                        } else { // regular meshes
+                                                                                
+                                            scene.add(model);
+                                                                                
+                                        }
+                                        break; //only match one model per location!?
                                     }
-                                    break; //only match one model per location!?
                                 }
                             }
-                        }
                         // } else 
 
                     
@@ -178,9 +187,11 @@ export function InitLocations() {
                             createDefaultSurface();
                         }
                         if (locationData[i].markerType == "player") {
-                            console.log("playerposition " + JSON.stringify(locationData[i]));
-                            playerPosition = locationData[i];
-                            SetPlayerLocation(locationData[i]);
+                            console.log("playerloc " + JSON.stringify(locationData[i]));
+                            const px = parseFloat(locationData[i].x);
+                            const py = parseFloat(locationData[i].y);
+                            const pz = parseFloat(locationData[i].z);
+                            SetPlayerLocation(px,py,pz);
                         }
                         // if (locationData[i].markerType == "light") {
                         //     CreateLight(locationData[i]);
@@ -233,6 +244,95 @@ export function InitLocations() {
     }
 }
 
+ class MeshMover{
+    constructor(mesh){
+        this.mesh = mesh;
+        this.initPosition = new THREE.Vector3();
+
+        this.mesh.getWorldPosition(this.initPosition);
+        this.random1 = Math.random();
+        this.random2 = Math.random();
+        this.random3 = Math.random();
+    }
+    update(time) {
+
+        // Creates a floating/bobbing effect
+        this.mesh.position.y = this.initPosition.y + Math.cos(time * .001) * this.random1 / 2; 
+        this.mesh.position.z = this.initPosition.z + Math.sin(time * .0001) * this.random2 * 10;
+        // Creates a circular wandering effect
+        this.mesh.position.x = this.initPosition.x + Math.sin(time * .0001) * this.random3 * 10;
+    }
+}
+
+async function InitCharacter(locationData) {
+    console.log("tryna init non-object ccharacter " + JSON.stringify(locationData.modelData));
+     const modelData = await LoadModel(locationData.modelData.modelURL);
+            
+    const model = modelData.scene;
+  
+    let count = 1;
+    model.userData.locationData = locationData;
+   
+    const animations = modelData.animations;
+    animationData[locationData.timestamp] = animations;
+    for (let z = 0; z < count; z++) {
+        console.log("tryna clone a character mesh " + z);
+        // scene.add(model);
+        // AssignModelToAgent(model);
+        // agentModels.push(model);
+        let clonedModel;
+        if (animations && animations.length) {
+            clonedModel = SkeletonUtils.clone(model); // normal clone/copy doesn't work
+        } else {
+            clonedModel = model.clone();
+        }
+        // const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Date.now();
+        // locationObjex[i].objectData.sceneObjectID = sceneObjectID;
+        clonedModel.name = locatioData.name;
+        
+        // clonedModel.userData.locationData = locationObjex[i].locationData;
+        // clonedModel.userData.objectData = locationObjex[i].objectData;
+
+        clonedModel.userData.name = locatioData.name;
+        
+        clonedModel.traverse(function (child) { 
+            if (child.isMesh) {
+                child.userData.name = locatioData.name;
+                child.userData.locationData = locationData;
+                // child.userData.objectData = locationObjex[i].objectData;
+                // child.bindMode = "detached";
+            }
+        });
+
+        const geometry = new THREE.CapsuleGeometry( .25, .5, 4, 8, 1 );
+        const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
+        const physicsColliderMesh = new THREE.Mesh( geometry, material );
+        clonedModel.add(physicsColliderMesh);
+        
+        const xscale = locationData.xscale ? parseFloat(locationData.xscale) : 1;
+        const yscale = locationData.yscale ? parseFloat(locationData.yscale) : 1;
+        const zscale = locationData.zscale ? parseFloat(locationData.zscale) : 1;
+        const random = clamp(Math.random() * 2, .75, 1.25);
+        console.log("tryna scale sceneObjectID " + sceneObjectID + "  " + xscale + " " + yscale + " " + zscale);
+        clonedModel.position.set(0,0,0);
+        
+        clonedModel.scale.set(xscale * random, yscale * random, zscale * random);
+        scene.add(clonedModel);
+        activeObjex.push(clonedModel);
+        activeObjex.push(parent);
+
+        physicsColliderMesh.layers.enable(0);
+        if (!showDebug) {
+            physicsColliderMesh.visible = false;
+        }
+        physicsColliderMesh.userData.locationData = locationData;
+        
+    
+        await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationData);
+        kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
+
+    }
+}
 // export async function LoadLocationObject (objectData) {
 //      return modelData = await LoadModel(objectData.modelData.modelURL);
             
@@ -536,7 +636,8 @@ async function LoadLocationModel (url, locationData, isActive) {
                     child.material.transparent = true;
                     child.material.opacity = 0;
                     // locationData.isHidden = true;
-                    // console.log("tryna hide model " + child.name);
+                    console.log("tryna hide model " + child.name);
+                    child.visible = false;
                 } else {
                                                                 
                     if (child.material) {
@@ -558,13 +659,16 @@ async function LoadLocationModel (url, locationData, isActive) {
                     // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {
                         navmesh = child;
                         navmesh.userData.name = "navmesh";
-                    
+                        child.material.transparent = true;
+                        child.material.opacity = 0;
                         groundObjex.push(navmesh);
                     
                 } else if (locationData.markerType == "surface" ) {
                     console.log("gotsa ssurface");
                     // if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
                     SetSurface(child);
+                    child.material.transparent = true;
+                        child.material.opacity = 0;
                         // surface = child;
                         // child.material = transmat;
                         // InitSurface();

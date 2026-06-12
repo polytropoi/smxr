@@ -77,8 +77,6 @@ export function SetUIMode(mode) {
         if (mode == "hic" && !isHtmlInCanvasSupported()) {
             console.log("this scene uses experimental tech html-in-canvas, to use see https://html-in-canvas.dev/docs/browser-support/");
         }
-
-
     }
 }
 

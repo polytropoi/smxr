@@ -106,20 +106,21 @@ export const viewportPlaceholder = new THREE.Object3D();
     //   popup.style.display = "none";
     // });
 
-export function SetPlayerLocation (locationData) {
+export function SetPlayerLocation (x,y,z) {
     // if (controls && controls.object) {
     //      console.log("tryna set first person player lcoationDarta " + JSON.stringify(locationData));
     //     controls.object.position.set(locationData.x, locationData.y, locationData.z);
     // } else {
         if (player) {
-            console.log("tryna set third person player to lcoationDarta " + JSON.stringify(locationData));
-            player.position.set(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
+            console.log("tryna set 3person playerloc " + JSON.stringify(locationData));
+            // player.position.set(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
+            player.position.set(x, y, z);
 
         } else {
-            if (controlObject) {
-                console.log("tryna set first person player lcoationDarta " + JSON.stringify(locationData));
+            if (controls) {
+                console.log("tryna set control object playerloc " + JSON.stringify(locationData));
                 // controlObject.position.set(locationData.x, locationData.y, locationData.z);
-                controls.object.position.set(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
+                controls.object.position.set(x, y, z);
                 controls.update();
             }
         }
@@ -184,6 +185,7 @@ export function SetControls(cameraMode, cameraFOV) {
             playerSpeed = parseFloat(settings.playerSpeed);
         }
     }
+        console.log("Setting Controls with cameraMode " + cameraMode);
     if (cameraMode == "Mouse Look") { //no pointer lock or controller at all!  drag to look is better imo
 
         var geometry = new THREE.CapsuleGeometry(1, 2, 4, 8, 1);
@@ -243,7 +245,7 @@ export function SetControls(cameraMode, cameraFOV) {
         camera.position.set(0, 1, 0);
         controls = new FlyControls(camera, renderer.domElement);
         controls.dragToLook = true;
-        controls.lookSpeed = 5;
+        controls.lookSpeed = 10;
         controls.movementSpeed = 3;
         controls.rollSpeed = Math.PI / 48;
         // controls.autoForward = false;
@@ -261,7 +263,7 @@ export function SetControls(cameraMode, cameraFOV) {
             instructions.style.display = "none";
         }
         camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .01, 1000);
-        camera.position.set(0, 100, 50);
+        camera.position.set(0, 10, 5);
         camera.lookAt(0, 1, 0);
         controls = new MapControls(camera, renderer.domElement);
         controls.dragToLook = true;

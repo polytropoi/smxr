@@ -76,7 +76,7 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
                 console.log("gots equip ACTION " + objectData.actions[i].actionName);
             //   action = objectData.actions[i];
                 // console.log(JSON.stringify(action));
-                if (objectData.fromUserInventory) {
+                if (objectData.fromUserInventory && userInventory) {
                     for (let i = 0; i < userInventory.inventoryItems.length; i++) {
                         if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
                             // inventoryObj = userInventory[i];

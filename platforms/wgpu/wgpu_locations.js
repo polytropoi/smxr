@@ -115,49 +115,56 @@ export function InitLocations() {
                                     locationData[i].isHidden = false;
                                     
                                     console.log("gotsa location model! " +modelsData[m].modelURL);
+                                    if (modelsData[m].item_type == "splat") {
+                                        console.log("GOTSA SPLAT - UNSUPPORTED IN THIS ROUTE! " + modelsData[m].name);
+                                        // let splat = {};
+                                        // splat.url = modelsData[m].modelURL;
+                                        // splat.locationData = locationData[i];
+                                        // splatObjex.push(splat);
                                     
+                                    } else {
                                     // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
-                                    let isActive = false;             
-                                    if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
-                                        isActive = true;
-                                    } 
-                                    const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
-                                    model = modelData.model;
-                                    console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
-                                    
-                                    if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
-                                    
-                                        locationData[i].isHidden = true;
-                                        // console.log("tryna hide model " + child.name);
-                                    }															
+                                        let isActive = false;             
+                                        if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
+                                            isActive = true;
+                                        } 
+                                        const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
+                                        model = modelData.model;
+                                        console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
+                                        
+                                        if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
+                                        
+                                            locationData[i].isHidden = true;
+                                            // console.log("tryna hide model " + child.name);
+                                        }															
 
-                               
+                                
 
 
-                                    if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
-                                        // console.log("tryna instance model " + locationData[i].name);
-                                        let instancedModel = {};
-                                        const originalModel = await LoadModel(modelsData[m].modelURL)
-                                        // const countsplit = locationData[i].eventData.split("~");
-                                        // const count = countsplit[1];
-                                        instancedModel.model = originalModel.scene;
-                                        instancedModel.locationData = locationData[i];
-                                        instancedModel.modelData = modelsData[m];
-                                        instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
-                                        // instancedModel.count = count;
-                                         if (locationData[i].objectID) { // add object data if present  
-                                            for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
-                                                if (locationData[i].objectID == objexData[o]._id) {
-                                                    locationData[i].objectData = objexData[o];
+                                        if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
+                                            // console.log("tryna instance model " + locationData[i].name);
+                                            let instancedModel = {};
+                                            const originalModel = await LoadModel(modelsData[m].modelURL)
+                                            // const countsplit = locationData[i].eventData.split("~");
+                                            // const count = countsplit[1];
+                                            instancedModel.model = originalModel.scene;
+                                            instancedModel.locationData = locationData[i];
+                                            instancedModel.modelData = modelsData[m];
+                                            instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
+                                            // instancedModel.count = count;
+                                            if (locationData[i].objectID) { // add object data if present  
+                                                for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
+                                                    if (locationData[i].objectID == objexData[o]._id) {
+                                                        locationData[i].objectData = objexData[o];
+                                                    }
                                                 }
                                             }
-                                        }
-                                        instancedModels.push(instancedModel);
-                                        console.log("instancedModels length " + instancedModels.length);
-                                        model.visible = false;
-                                        scene.remove(model);  //don't need the reference model
+                                            instancedModels.push(instancedModel);
+                                            console.log("instancedModels length " + instancedModels.length);
+                                            model.visible = false;
+                                            scene.remove(model);  //don't need the reference model
 
-                                       
+                                        
                                                                             
                                     } else { // regular meshes
                                                                              
@@ -166,6 +173,7 @@ export function InitLocations() {
                                     }
 
                                     break; //only match one model per location!?
+                                }
                                 }
                             }
                         // }

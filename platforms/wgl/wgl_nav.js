@@ -167,7 +167,7 @@
      
     // }        
 
-    export async function InitAgents () {
+    export async function InitAgents () { //test agents
         // 
         for (let i = 0; i < agentCount; i++) {
             let pos;
@@ -201,7 +201,8 @@
     export async function InitPathfinding () {
         // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh") && navmesh) {
         console.log("tryna InitPathfinding");
-        if (navmesh) {
+        // if (navmesh != null) {
+        await navmesh
             try {
                 pathfinding = await new Pathfinding();
                 await world;
@@ -229,10 +230,10 @@
                 await LoadLocationObjex(); //e.g. navagent characters
             }
 
-            // await initRapier();
-        } else {
-            // await initRapier();
-        }
+        //     // await initRapier();
+        // } else {
+        //     // await initRapier();
+        // }
 
     }
 

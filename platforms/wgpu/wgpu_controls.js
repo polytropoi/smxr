@@ -118,12 +118,13 @@ export function SetPlayerLocation (locationData) {
     //     controls.object.position.set(locationData.x, locationData.y, locationData.z);
     // } else {
         if (player) {
-            console.log("tryna set third person player to lcoationDarta " + JSON.stringify(locationData));
+            console.log("tryna set third person playerlocation " + JSON.stringify(locationData));
             player.position.set(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
+            // player.updateMatrixWorld();
 
         } else {
             if (controlObject) {
-                console.log("tryna set first person player lcoationDarta " + JSON.stringify(locationData));
+                console.log("tryna set first person playerlocation " + JSON.stringify(locationData));
                 // controlObject.position.set(locationData.x, locationData.y, locationData.z);
                 controls.object.position.set(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
                 controls.update();
@@ -191,6 +192,7 @@ export function SetControls(cameraMode, cameraFOV) {
             playerSpeed = parseFloat(settings.playerSpeed);
         }
     }
+    console.log("Setting Controls with cameraMode " + cameraMode);
     if (cameraMode == "Mouse Look") { //no pointer lock or controller at all!  drag to look is better imo
 
         var geometry = new THREE.CapsuleGeometry(1, 2, 4, 8, 1);
