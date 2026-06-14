@@ -15,7 +15,7 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { instancedModels, createDefaultSurface, SetSurface } from './wgl_instance.js';
 
 import { CreateLight } from './wgl_lights.js';
-import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgl_physics.js';
+import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies, createDefaultCollider } from './wgl_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint } from './wgl_nav.js';
 
 import { splatObjex, spark } from './wgl_splats.js';
@@ -40,7 +40,7 @@ export let movingMeshes = [];
 
 // export let sceneObjects = {};
 
-export let navmesh = null;
+export let navmesh;
 export let navmeshGeometry;
 
 export let playerPosition;
@@ -58,15 +58,17 @@ export async function LoadModel(url) {
     }
 }
 
-export function createDefaultNavmesh() {
-    console.log("tryna create default navmesh");
-        const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); // 50 x 50
+export function createDefaultNavmesh(locData) {
+    // locationData[i].xscale, locationData[i].yscale, locationData[i].zscale
+    console.log("tryna create default navmesh " + locData.xscale + " " + locData.yscale + " " +locData.zscale);
+        const planeGeometry = new THREE.PlaneGeometry(locData.xscale, locData.zscale, 10, 10); // 50 x 50
         // navmeshGeometry = planeGeometry;
         planeGeometry.rotateX(-Math.PI / 2);
+
     //   planeGeometry.rotation.x = Math.PI / 2 * -1;
         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
-        let navmesh = new THREE.Mesh(planeGeometry, planeMaterial);
-        
+        navmesh = new THREE.Mesh(planeGeometry, planeMaterial);
+        navmesh.position.set(locData.x, locData.y, locData.z)
     
         
         scene.add(navmesh);
@@ -181,10 +183,10 @@ export function InitLocations() {
                         CreateDefaultLocationMarker(locationData[i]); //use primitive or default models
                         
                         if (locationData[i].markerType == "navmesh") {
-                            createDefaultNavmesh();
+                            createDefaultNavmesh(locationData[i]);
                         }
                         if (locationData[i].markerType == "surface") {
-                            createDefaultSurface();
+                            createDefaultSurface(locationData[i].xscale, locationData[i].yscale, locationData[i].zscale);
                         }
                         if (locationData[i].markerType == "player") {
                             console.log("playerloc " + JSON.stringify(locationData[i]));
@@ -192,6 +194,21 @@ export function InitLocations() {
                             const py = parseFloat(locationData[i].y);
                             const pz = parseFloat(locationData[i].z);
                             SetPlayerLocation(px,py,pz);
+                        }
+                        if (locationData[i].markerType == "collider") {
+                            // createDefaultCollider(locationData[i]);
+                            let staticObject = {};
+                            const geo = new THREE.PlaneGeometry(locationData[i].xscale, locationData[i].zscale, 10, 10);
+                            const material = new THREE.MeshBasicMaterial( { color: 'blue', wireframe: true } );
+                            const mesh = new THREE.Mesh(geo,material);
+                            staticObject.mesh = mesh;
+                            mesh.rotation.x = -Math.PI / 2;
+                            mesh.position.set(locationData[i].x, locationData[i].z, locationData[i].z)
+                            staticObject.locationData = locationData[i];
+                            staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
+                            console.log("gotsa collider object ishidden " + staticObject.isHidden);
+                            scene.add(mesh);
+                            staticObjex.push(staticObject);
                         }
                         // if (locationData[i].markerType == "light") {
                         //     CreateLight(locationData[i]);
@@ -326,8 +343,7 @@ async function InitCharacter(locationData) {
             physicsColliderMesh.visible = false;
         }
         physicsColliderMesh.userData.locationData = locationData;
-        
-    
+
         await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationData);
         kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
 

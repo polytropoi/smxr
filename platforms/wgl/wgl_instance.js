@@ -35,12 +35,13 @@ export async function InitSurface () {
 export function SetSurface(mesh) { //if assigned to a mesh in locations
     surface = mesh;
 }
-export function createDefaultSurface() {
-        const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); // 50 x 50
+export function createDefaultSurface(xscale,yscale,zscale) {
+    console.log("tryna create default surface " + xscale + " " + yscale + " " +zscale);
+        const planeGeometry = new THREE.PlaneGeometry(xscale, zscale, 10, 10); 
         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
         surface = new THREE.Mesh(planeGeometry, planeMaterial);
         scene.add(surface);
-        surface.rotation.x = Math.PI / 2;
+        surface.rotation.x = -Math.PI / 2;
 
 }
     

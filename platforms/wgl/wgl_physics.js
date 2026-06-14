@@ -114,7 +114,7 @@ export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do firs
       
         const pos = new THREE.Vector3(staticObjex[i].locationData.x, staticObjex[i].locationData.y, staticObjex[i].locationData.z);
       
-        await createStaticCollider(staticObjex[i].mesh, pos);
+        await createStaticCollider(staticObjex[i].mesh);
           
       }
       WaitAndInit();
@@ -130,8 +130,19 @@ export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do firs
       WaitAndInit();
     }
   }
+
+  export async function createDefaultCollider(locData) {
+      let colliderDesc = RAPIER.ColliderDesc.cuboid(locData.xscale,locData.yscale,locData.zscale);
+        const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(locData.x,locData.y,locData.z);
+        const staticBody = await world.createRigidBody(rbDesc);
+        let collider = await world.createCollider(colliderDesc, staticBody);
+        collider.setRestitution(.5);
+        collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+        WaitAndInit();
+
+  }
 export async function createStaticCollider (model) { // may not be added to the scene if hidden?
-    // console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(position));
+    console.log("tryna set static collider for model " + model.name );
    
     try { 
       
@@ -152,8 +163,18 @@ export async function createStaticCollider (model) { // may not be added to the 
       // colliderDesc.contactSkin(0.5); // ???
       const pos = new THREE.Vector3();
       model.getWorldPosition(pos);
+
+      const worldQuaternion = new THREE.Quaternion();
+
+// 2. Extract the world rotation into your target
+      model.getWorldQuaternion(worldQuaternion);
+      // let q = model.rotation();
+      // let rote = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+
+      // mesh.rotation.setFromQuaternion(rote);
       // const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
-                      const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z);
+                      const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z).setRotation(worldQuaternion);
+                      // rigidBody.setRotation({ w: 1.0, x: 0.0, y: 0.0, z: 0.0 }, true); 
 
       // model.position.set(position);
       const staticBody = await world.createRigidBody(rbDesc);

@@ -67,6 +67,7 @@ export function InitFog() {
 
 export function InitEnvMap () {
     if (scene && settings && settings.skyboxURL) {
+		
         console.log("gotsa skybox url " + settings.skyboxURL);
         const envMapURL = settings.skyboxURL;
         const equirectTextureLoader = new THREE.TextureLoader();
@@ -100,84 +101,84 @@ export function InitEnvMap () {
 }
 export function InitSky() {
 
-	if (settings && settings.sceneUseDynamicSky) {
+	// if (settings && settings.sceneUseDynamicSky) {
 				// Add Sky
+				
 				const sky = new Sky();
-				sky.scale.setScalar( 450000 );
+				sky.scale.setScalar( 1000 );
 				scene.add( sky );
-
 
        
 
-				const sun = new THREE.Vector3();
+// 				const sun = new THREE.Vector3();
 
-				/// GUI
+// 				/// GUI
 
 
-				// const effectController = { //low sun twilight
-				// 	turbidity: 10,
-				// 	rayleigh: 3,
-				// 	mieCoefficient: 0.005,
-				// 	mieDirectionalG: 0.7,
-				// 	elevation: 2,
-				// 	azimuth: 180,
-				// 	exposure: renderer.toneMappingExposure
-				// };
-				console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
-				let elevation = 45;
-				let sceneClouds = "medium";
-				let cloudCoverage = .35;
-				let cloudDensity = .5;
-				let cloudElevation = .5;
-				if (settings.sceneClouds.name) {
-					sceneClouds = settings.sceneClouds.name;
-				}
-				if (settings.sceneTime.name) {
-					if (settings.sceneTime.name == "morning" || settings.sceneTime.name == "evening") {
-						elevation = 2;
-					} else if (settings.sceneTime.name == "afternoon") {
-						elevation = 45;
-					} else if (settings.sceneTime.name == "noon" || settings.sceneTime.name == "midday") {
-						elevation = 90;
-					}
+// 				// const effectController = { //low sun twilight
+// 				// 	turbidity: 10,
+// 				// 	rayleigh: 3,
+// 				// 	mieCoefficient: 0.005,
+// 				// 	mieDirectionalG: 0.7,
+// 				// 	elevation: 2,
+// 				// 	azimuth: 180,
+// 				// 	exposure: renderer.toneMappingExposure
+// 				// };
+// 				console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
+// 				let elevation = 45;
+// 				let sceneClouds = "medium";
+// 				let cloudCoverage = .35;
+// 				let cloudDensity = .5;
+// 				let cloudElevation = .5;
+// 				if (settings.sceneClouds.name) {
+// 					sceneClouds = settings.sceneClouds.name;
+// 				}
+// 				if (settings.sceneTime.name) {
+// 					if (settings.sceneTime.name == "morning" || settings.sceneTime.name == "evening") {
+// 						elevation = 2;
+// 					} else if (settings.sceneTime.name == "afternoon") {
+// 						elevation = 45;
+// 					} else if (settings.sceneTime.name == "noon" || settings.sceneTime.name == "midday") {
+// 						elevation = 90;
+// 					}
 
-				}
+// 				}
 				
-				const effectController = {
-					turbidity: 10,
-					rayleigh: 3,
-					mieCoefficient: 0.005,
-					mieDirectionalG: 0.7,
-					elevation: elevation,
-					azimuth: 180,
-					// exposure: renderer.toneMappingExposure,
-					exposure: .75,
-					cloudCoverage: cloudCoverage,
-					cloudDensity: cloudDensity,
-					cloudElevation: cloudElevation
-				};
+// 				const effectController = {
+// 					turbidity: 10,
+// 					rayleigh: 3,
+// 					mieCoefficient: 0.005,
+// 					mieDirectionalG: 0.7,
+// 					elevation: elevation,
+// 					azimuth: 180,
+// 					// exposure: renderer.toneMappingExposure,
+// 					exposure: .75,
+// 					cloudCoverage: cloudCoverage,
+// 					cloudDensity: cloudDensity,
+// 					cloudElevation: cloudElevation
+// 				};
 
-				// function guiChanged() {
+// 				// function guiChanged() {
 
-					// sky.turbidity.value = effectController.turbidity;
-					// sky.rayleigh.value = effectController.rayleigh;
-					// sky.mieCoefficient.value = effectController.mieCoefficient;
-					// sky.mieDirectionalG.value = effectController.mieDirectionalG;
+// 					// sky.turbidity.value = effectController.turbidity;
+// 					// sky.rayleigh.value = effectController.rayleigh;
+// 					// sky.mieCoefficient.value = effectController.mieCoefficient;
+// 					// sky.mieDirectionalG.value = effectController.mieDirectionalG;
 
-					// const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
-					// const theta = THREE.MathUtils.degToRad( effectController.azimuth );
+// 					// const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
+// 					// const theta = THREE.MathUtils.degToRad( effectController.azimuth );
 
-					// sun.setFromSphericalCoords( 1, phi, theta );
+// 					// sun.setFromSphericalCoords( 1, phi, theta );
 
-					// sky.sunPosition.value.copy( sun );
+// 					// sky.sunPosition.value.copy( sun );
 
-					sunLight.position.copy(sun);
-					renderer.toneMappingExposure = effectController.exposure;
-// 
-				}
+// 					sunLight.position.copy(sun);
+// 					renderer.toneMappingExposure = effectController.exposure;
+// // 
+// 				}
 
-			}
-
+			// }
+		}
 				// const gui = renderer.inspector.createParameters( 'Settings' );
 
 				// gui.add( effectController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( guiChanged );
@@ -189,7 +190,3 @@ export function InitSky() {
 				// gui.add( effectController, 'exposure', 0, 1, 0.0001 ).onChange( guiChanged );
 
 				// guiChanged();
-
-			// }
-
-        

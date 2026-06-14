@@ -174,8 +174,6 @@
 		}
 
 
-		await InitStaticObjex();  //creates default if none provided
-
 		// let notSurfaceInstanceModels = [];
 		if (surface) { // => scattering instances
 			await InitSurface();
@@ -348,6 +346,8 @@
 		}
 		
 
+
+		await InitStaticObjex();  //creates default if none provided
 		// InitEnvMap();
 		InitSceneLights();
 		InitSky();
