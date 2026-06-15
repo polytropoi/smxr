@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import {player, camera } from './wgpu_controls.js';
 import { scene } from './wgpu_main.mjs';
 import { settings } from '../../../connect/settings.js';
-import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData} from "../../../connect/media.js";
+import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData, createYouTubePlayer} from "../../../connect/media.js";
 import { lookAtCameraObjects } from './wgpu_ui.js';
 import { TagsToInstances } from './wgpu_instance.js';
 
@@ -17,6 +17,8 @@ export let audioGroupsData;
 export let pictureGroupsData;
 export let landscapePanel;
 
+
+createYouTubePlayer();
 export function InitPictureGroups () {
     let pictureGroupsDataEl = document.getElementById('pictureGroupsData');
    if (pictureGroupsDataEl) {

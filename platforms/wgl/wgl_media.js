@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import {player, camera } from './wgl_controls.js';
 import { scene } from './wgl_main.mjs';
 import { settings } from '../../../connect/settings.js';
-import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData} from "../../../connect/media.js";
+import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData, createYouTubePlayer} from "../../../connect/media.js";
 import { lookAtCameraObjects } from './wgl_ui.js';
 
 export let primaryAudioGroups;
@@ -15,6 +15,8 @@ export let sceneTextController;
 export let audioGroupsData;
 export let pictureGroupsData;
 export let landscapePanel;
+
+createYouTubePlayer();
 
 export function InitPictureGroups () {
     let pictureGroupsDataEl = document.getElementById('pictureGroupsData');

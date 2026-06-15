@@ -2459,26 +2459,49 @@ wgl_router.get('/:_id', function (req, res) {
                 hasApp = true;
             } 
             
+            // if (sceneResponse.sceneYouTubeIDs != null && sceneResponse.sceneYouTubeIDs.length > 0) {
+            //     let youtubeVolume = sceneResponse.sceneMediaAudioVolume != undefined ? sceneResponse.sceneMediaAudioVolume : 80;
+            //     for (let i = 0; i < sceneResponse.sceneYouTubeIDs.length; i++) {
+            //         youtubeContent = "<div width=\x22240\x22 id=\x22youtubeElement\x22 data-yt_id=\x22"+
+            //         sceneResponse.sceneYouTubeIDs[i]+"\x22 data-sceneTitle=\x22"+sceneResponse.sceneTitle+"\x22></div>"+
+            //         "<script>\n"+
+            //             "var tag = document.createElement('script');\n"+
+            //             "tag.src = \x22//www.youtube.com/iframe_api\x22;\n"+
+            //             "var firstScriptTag = document.getElementsByTagName('script')[0];\n"+
+            //             "firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);\n"+
+            //         "</script>";
+                    
+            //         // youtubeEntity = "<div id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
+
+            //         // "<div id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayer\x22 youtube_player=\x22yt_id: "+
+            //         // sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></div>"+
+            //         // "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 1.7 .1\x22 id=\x22youtubeTitle\x22></a-text>"+
+            //         // "<a-text width=\x223\x22 position=\x22-.95 .7 .1\x22 id=\x22youtubeState\x22></a-text>"+
+            //         // "<a-text width=\x223\x22 position=\x22-.95 .6 .1\x22 id=\x22youtubeStats\x22></a-text>"+
+            //         // "</div>";
+            //     }
+            // }
             if (sceneResponse.sceneYouTubeIDs != null && sceneResponse.sceneYouTubeIDs.length > 0) {
                 let youtubeVolume = sceneResponse.sceneMediaAudioVolume != undefined ? sceneResponse.sceneMediaAudioVolume : 80;
                 for (let i = 0; i < sceneResponse.sceneYouTubeIDs.length; i++) {
-                    youtubeContent = "<div width=\x22240\x22 id=\x22youtubeElement\x22 data-yt_id=\x22"+
-                    sceneResponse.sceneYouTubeIDs[i]+"\x22 data-sceneTitle=\x22"+sceneResponse.sceneTitle+"\x22></div>"+
-                    "<script>\n"+
-                        "var tag = document.createElement('script');\n"+
-                        "tag.src = \x22//www.youtube.com/iframe_api\x22;\n"+
-                        "var firstScriptTag = document.getElementsByTagName('script')[0];\n"+
-                        "firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);\n"+
-                    "</script>";
+                    youtubeContent = "<script>\n"+
+                                "var tag = document.createElement('script');\n"+
+                                "tag.src = \x22//www.youtube.com/iframe_api\x22;\n"+
+                                "var firstScriptTag = document.getElementsByTagName('script')[0];\n"+
+                                "firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);\n"+
+                            "</script>"+
+                            "<div width=\x22240\x22 id=\x22youtubeElement\x22 data-yt_id=\x22"+
+                    sceneResponse.sceneYouTubeIDs[i]+"\x22 data-sceneTitle=\x22"+sceneResponse.sceneTitle+"\x22></div>";
+                   
                     
-                    // youtubeEntity = "<div id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
+                    // youtubeEntity = "<a-entity id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
 
-                    // "<div id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayer\x22 youtube_player=\x22yt_id: "+
-                    // sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></div>"+
+                    // "<a-entity id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayerModel\x22 youtube_player=\x22yt_id: "+
+                    // sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></a-entity>"+
                     // "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 1.7 .1\x22 id=\x22youtubeTitle\x22></a-text>"+
                     // "<a-text width=\x223\x22 position=\x22-.95 .7 .1\x22 id=\x22youtubeState\x22></a-text>"+
                     // "<a-text width=\x223\x22 position=\x22-.95 .6 .1\x22 id=\x22youtubeStats\x22></a-text>"+
-                    // "</div>";
+                    // "</a-entity>";
                 }
             }
             if (hasPrimaryAudio || hasPrimaryAudioStream) {
@@ -3180,6 +3203,7 @@ wgl_router.get('/:_id', function (req, res) {
                             videoEl+
                             videoElements+
                             
+                           
                             
                             
                             

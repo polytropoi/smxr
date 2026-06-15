@@ -42,7 +42,7 @@ export function createDefaultSurface(xscale,yscale,zscale) {
         surface = new THREE.Mesh(planeGeometry, planeMaterial);
         scene.add(surface);
         surface.rotation.x = -Math.PI / 2;
-
+        surface.visible = false;
 }
     
 

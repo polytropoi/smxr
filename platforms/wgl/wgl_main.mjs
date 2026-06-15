@@ -301,7 +301,7 @@
 		if (settings && settings.sceneEnvironmentSettings) {
 			console.log("sceneEnvironmentSettings " + JSON.stringify(settings.sceneEnvironmentSettings));
 			if (settings.sceneEnvironmentSettings.sceneFloorplaneTexture == "grid") {
-				InitGrid();
+				// InitGrid();
 			}
 			if (settings.sceneEnvironmentSettings.sceneUseFloorplane && settings.sceneEnvironmentSettings.sceneFloorplaneTexture && 
 				settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "none" && settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "") {

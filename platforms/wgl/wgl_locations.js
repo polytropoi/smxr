@@ -72,6 +72,7 @@ export function createDefaultNavmesh(locData) {
     
         
         scene.add(navmesh);
+        navmesh.visible = false;
         // navmesh.position.set(0,0,0);
         // // navmeshObject.scale.set(1,1,1);
         // navmesh.rotation.x = Math.PI / 2;
@@ -199,15 +200,17 @@ export function InitLocations() {
                             // createDefaultCollider(locationData[i]);
                             let staticObject = {};
                             const geo = new THREE.PlaneGeometry(locationData[i].xscale, locationData[i].zscale, 10, 10);
-                            const material = new THREE.MeshBasicMaterial( { color: 'blue', wireframe: true } );
+                            const material = new THREE.MeshStandardMaterial( { color: 'blue', wireframe: true } );
                             const mesh = new THREE.Mesh(geo,material);
                             staticObject.mesh = mesh;
                             mesh.rotation.x = -Math.PI / 2;
                             mesh.position.set(locationData[i].x, locationData[i].z, locationData[i].z)
                             staticObject.locationData = locationData[i];
-                            staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
+                            // staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
+                            staticObject.isHidden = true;
                             console.log("gotsa collider object ishidden " + staticObject.isHidden);
-                            scene.add(mesh);
+                            // scene.add(mesh);
+                            // mesh.visible = false;
                             staticObjex.push(staticObject);
                         }
                         // if (locationData[i].markerType == "light") {
@@ -694,6 +697,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                 
                     let staticObject = {};
                     staticObject.mesh = child;
+                    child.visible = false;
                     staticObject.locationData = locationData;
                     staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
                     console.log("gotsa static object ishidden " + staticObject.isHidden);
@@ -803,7 +807,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         if (locationData.modelID && locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
-            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+            // model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
         }
         if (model) {
             scene.add(model.model);

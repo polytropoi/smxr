@@ -55,40 +55,6 @@ let youtubeData;
 
 export const primaryTransportSlider = document.getElementById("primaryTransportSlider");
 
-// export let useWavesurfer = false;
-
-// if (settings && settings.sceneTags && settings.sceneTags.includes("wavesurfer")) {
-//   useWavesurfer = true;
-//   import WaveSurfer from 'https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js';
-// }
-
-// export function InitWavesurfer(url) { 
-//  console.log("tryna init wavesurfer");
-// const wavesurfer = WaveSurfer.create({
-//    container: '#waveform',
-//    waveColor: '#4F4A85',
-//    progressColor: '#383351',
-//    url: url,
-//     // Set a bar width
-//   barWidth: 3,
-//   // Optionally, specify the spacing between bars
-//   barGap: 2,
-//   // And the bar radius
-//   barRadius: 2,
-//   barHeight: .5
-//    });
-
-//   //  this.playToggle = false;
-//   //  wavesurfer.on('interaction', () => {
-//   //   this.playToggle = !this.playToggle;
-//   //   if (this.playToggle) {
-//   //     wavesurfer.play();
-//   //   } else {
-//   //     wavesurfer.stop();
-//   //   }
-//   //  });
-// }
-
 InitPrimaryTransportSlider();
 
 export function updatePrimaryTransportSlider(percentage) {
@@ -119,10 +85,17 @@ function InitPrimaryTransportSlider () {
 
 
 
-
+window.onYouTubeIframeAPIReady = function() {
+  console.log("youtube is ready!");
+  onYouTubeIframeAPIReady ();
+}
 window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 
-function onYouTubeIframeAPIReady () { //must be global, called when youtube embed api is loaded
+
+
+export function onYouTubeIframeAPIReady () { //must be global, called when youtube embed api is loaded //ugh, only works w/ aframe..∂
+
+  
   let youtubeEl = document.getElementById("youtubeElement");
   let yt_id = youtubeEl.getAttribute('data-yt_id');
   console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
@@ -929,3 +902,86 @@ export function returnAudioItem (id) {
   */
 
 
+// youtubeEmbed.js
+
+let apiLoadingPromise = null;
+
+// Dynamically injects the YouTube API script and handles initialization
+function loadYouTubeAPI() {
+  if (apiLoadingPromise) return apiLoadingPromise;
+
+  apiLoadingPromise = new Promise((resolve) => {
+    // If the API is already loaded globally, resolve immediately
+    if (window.YT && window.YT.Player) {
+      resolve(window.YT);
+      return;
+    }
+
+    // Create script tag
+    const tag = document.createElement('script');
+    tag.src = "https://youtube.com";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    // Global callback triggered by YouTube when the script is fully ready
+    window.onYouTubeIframeAPIReady = () => {
+      resolve(window.YT);
+    };
+  });
+
+  return apiLoadingPromise;
+}
+
+/**
+ * Embeds a YouTube video inside a specified HTML element container.
+ * @param {string} elementId - The ID of the div to replace with the player.
+ * @param {string} videoId - The 11-character YouTube video ID.
+ * @param {Object} [options] - Optional player parameters (autoplay, controls, etc.).
+ * @returns {Promise<YT.Player>} Resolves with the created Player instance.
+ */
+export async function createYouTubePlayer() {
+  const YT = await loadYouTubeAPI();
+  
+  let youtubeEl = document.getElementById("youtubeElement");
+  let yt_id = youtubeEl.getAttribute('data-yt_id');
+  if (youtubeEl) {
+    console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
+
+    return new Promise((resolve) => {
+      youtubePlayer = new YT.Player(youtubeEl, {
+        height: '200',
+        width: '240',
+        videoId: yt_id,
+        playerVars: {
+          autoplay: 0,
+          controls: 1,
+          rel: 0
+          // ...options.playerVars
+        },
+        events: {
+          onReady: (event) => {
+            resolve(youtubePlayer); // Resolve the promise with the player object when ready
+            onPlayerReady(event);
+          },
+          onStateChange: onPlayerStateChange
+        }
+      });
+    });
+  }
+}
+
+//  let youtubeEl = document.getElementById("youtubeElement");
+//   let yt_id = youtubeEl.getAttribute('data-yt_id');
+//   console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
+//     youtubePlayer = new YT.Player('youtubeElement', {
+//       height: '200',
+//       width: '240',
+//       videoId: yt_id,
+//       // playerVars: {
+//       //   'playsinline': 1
+//       // },
+//         events: {
+//           'onReady': onPlayerReady,
+//           'onStateChange': onPlayerStateChange
+//         }
+//     });

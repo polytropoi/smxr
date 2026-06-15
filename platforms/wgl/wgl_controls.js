@@ -810,14 +810,14 @@ function RaycastHit(type, hit) {
 
             showCallout = true;
 
-            // console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
+            console.log(locationData.name + " " + type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
 
             // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
             // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         
             if (objectData && objectData.callouttext && objectData.callouttext.length) {
-                // console.log("callout text "  + objectData.callouttext);
+                console.log("callout text "  + objectData.callouttext);
                 const calloutsplit = objectData.callouttext.split("~");
                 const randomIndex = Math.floor(Math.random() * calloutsplit.length);
                 const textstring = calloutsplit[randomIndex];
@@ -826,7 +826,7 @@ function RaycastHit(type, hit) {
                 ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             } else {
-                // console.log("mediaID " + locationData.mediaID);
+                console.log("locationname " + locationData.name);
                 
                 ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
