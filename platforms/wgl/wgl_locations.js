@@ -18,7 +18,7 @@ import { CreateLight } from './wgl_lights.js';
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies, createDefaultCollider } from './wgl_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint } from './wgl_nav.js';
 
-import { splatObjex, spark } from './wgl_splats.js';
+import { splatObjex } from './wgl_splats.js';
 export let locations = {};
 
 export let locationData;

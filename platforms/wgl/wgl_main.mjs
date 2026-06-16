@@ -38,7 +38,7 @@
 	
 	import { LoadSceneInventory } from './wgl_inventory.js';
 	
-	import { splatObjex, initSplats, InitSpark, spark } from './wgl_splats.js';
+	import { splatObjex, initSplats, InitSpark } from './wgl_splats.js';
 
 
 	export let scene;
@@ -103,7 +103,7 @@
 
 		const three_canvas = document.getElementById("three_canvas");
 		scene = new THREE.Scene();
-		renderer = new THREE.WebGLRenderer({antialias:true, canvas: three_canvas});
+		renderer = new THREE.WebGLRenderer({antialias:false, canvas: three_canvas});
 		// renderer = new THREE.WebGPURenderer( { antialias: true } );
 				// renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setSize( window.innerWidth, window.innerHeight );
