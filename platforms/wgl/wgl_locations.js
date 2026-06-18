@@ -187,7 +187,7 @@ export function InitLocations() {
                             createDefaultNavmesh(locationData[i]);
                         }
                         if (locationData[i].markerType == "surface") {
-                            createDefaultSurface(locationData[i].xscale, locationData[i].yscale, locationData[i].zscale);
+                            createDefaultSurface(locationData[i]);
                         }
                         if (locationData[i].markerType == "player") {
                             console.log("playerloc " + JSON.stringify(locationData[i]));
@@ -208,7 +208,7 @@ export function InitLocations() {
                             staticObject.locationData = locationData[i];
                             // staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
                             staticObject.isHidden = true;
-                            console.log("gotsa collider object ishidden " + staticObject.isHidden);
+                            console.log("gotsa static collider object ishidden " + staticObject.isHidden);
                             // scene.add(mesh);
                             // mesh.visible = false;
                             staticObjex.push(staticObject);

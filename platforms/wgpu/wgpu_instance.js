@@ -42,17 +42,31 @@ export async function InitSurface () {
 export function SetSurface(mesh) { //if assigned to a mesh in locations
     surface = mesh;
 }
-export function createDefaultSurface() {
-    const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); // 50 x 50
-    const planeMaterial = new THREE.MeshStandardMaterial({ color: 'green' });
-    const surface = new THREE.Mesh(planeGeometry, planeMaterial);
+// export function createDefaultSurface() {
+//     const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); // 50 x 50
+//     const planeMaterial = new THREE.MeshStandardMaterial({ color: 'green' });
+//     const surface = new THREE.Mesh(planeGeometry, planeMaterial);
+//     scene.add(surface);
+//     surface.visible = false;
+//     surface.position.set(0,0,0);
+//     surface.rotation.x = Math.PI / 2;
+//     surface.updateMatrixWorld();
+//     SetSurface(surface);
+// }
+
+export function createDefaultSurface(locData) {
+    console.log("tryna create default surface " + locData.xscale + " " + locData.yscale + " " +locData.zscale);
+    const planeGeometry = new THREE.PlaneGeometry(locData.xscale, locData.zscale, 10, 10); 
+    const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
+    surface = new THREE.Mesh(planeGeometry, planeMaterial);
     scene.add(surface);
-    surface.visible = false;
-    surface.position.set(0,0,0);
-    surface.rotation.x = Math.PI / 2;
-    surface.updateMatrixWorld();
+    surface.rotation.x = -Math.PI / 2;
+    if (locData.locationTags && locData.locationTags.includes("hide")) {
+        surface.visible = false;
+    }
     SetSurface(surface);
 }
+    
     
 export async function TagsToInstances (locID, instanceID) {
     if (taggedInstances) { //populated when instances are created (e.g. InstanceOnSurface() below), if there's an attached mediaID
@@ -101,27 +115,6 @@ export async function TagsToInstances (locID, instanceID) {
                 return tag;
             }
         }
-        // const textData = await sceneTextController.returnAllTextDataFromMediaID(instanceData.mediaID);
-        // console.log(instanceData.mediaID + " " + JSON.stringify(textData));
-
-        
-        // if (instanceTags) {
-        //     let tag = "";
-        //     if (tagLength > 0) {
-        //         if (tagIndex == tagLength - 1) {
-        //         tagIndex = 0;
-        //         } else {
-        //         tagIndex++;
-        //         }
-        //         console.log("JSON DATA " + JSON.stringify(this.jsonData[tagIndex]));
-        //         // tag = this.jsonData[tagIndex].key;
-        //         tag = Object.keys(this.jsonData[tagIndex])[0]; // key of the key: value is the tag
-                
-        //         let stringkey = this.count.toString();
-        //         console.log(stringkey + " tryna set instanced mesh tag " + tag + " on instanceID" + this.count); 
-        //         this.instanceTags[stringkey] = tag;
-        //     }
-        // }
     }
 }
 

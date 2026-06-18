@@ -131,7 +131,7 @@ export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do firs
     }
   }
 
-  export async function createDefaultCollider(locData) {
+export async function createDefaultCollider(locData) {
       let colliderDesc = RAPIER.ColliderDesc.cuboid(locData.xscale,locData.yscale,locData.zscale);
         const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(locData.x,locData.y,locData.z);
         const staticBody = await world.createRigidBody(rbDesc);
@@ -140,7 +140,7 @@ export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do firs
         collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
         WaitAndInit();
 
-  }
+}
 export async function createStaticCollider (model) { // may not be added to the scene if hidden?
     console.log("tryna set static collider for model " + model.name );
    

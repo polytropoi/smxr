@@ -7,7 +7,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './wgl_nav.js';
 
-import { sceneTextController, triggerAudioController } from './wgl_media.js';
+import { sceneTextController, triggerAudioController, ReturnTaggedPictures } from './wgl_media.js';
 
 import { ActionSwitch, SetPlayerRigidbody } from './wgl_actions.js';
 
@@ -29,6 +29,7 @@ import { InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture }
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
 import * as nipplejs from '../../../main/js/nipple.mjs';
+import { TagsToInstances } from './wgl_instance.js';
 
 // import { getPlayerBody } from './wgl_physics.js';
 
@@ -91,6 +92,7 @@ let worldHitPosition = new THREE.Vector3();
 
 export const popup = document.getElementById("popup");
 export const viewportPlaceholder = new THREE.Object3D();
+// export const hic_content = document.getElementById("hic_content"); //alt to popup
 
     // $('#popup').on('click', '#popup_yesButton', function(e) {
     //   console.log("popup yes button click on target " + e.target);
@@ -743,7 +745,7 @@ function NavmeshConstraint () {
 }
 
 //////////////////////////. PROCESS RAYCAST HIT /////////////////
-function RaycastHit(type, hit) {
+async function RaycastHit(type, hit, event) {
 
     if (lastRaycastHitObject) {
         if (lastRaycastHitObject != hit.object) {
@@ -775,6 +777,8 @@ function RaycastHit(type, hit) {
     lastHitObjectName = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     lastRaycastHitPosition = hit.point;
     lastRaycastHitDistance = hit.distance;
+
+    let tagData;
     // console.log(JSON.stringify(lastRaycastHitObject.userData));
     const locationData = lastRaycastHitObject.userData.locationData;
     if (!locationData) {
@@ -785,11 +789,18 @@ function RaycastHit(type, hit) {
         triggerAudioController.playTriggerAudioWithTags(lastRaycastHitObject.userData.locationData.locationTags, hit.distance, hit.point);
     }
     if (hit.instanceId) {
-        // console.log("INSTANCE HIT " + hit.instanceId);    
+            
+        tagData = await TagsToInstances(locationData.timestamp, hit.instanceId);
+        console.log("INSTANCE HIT " + hit.instanceId + " tagged " + JSON.stringify(tagData));
     }
 
     const objectData = lastRaycastHitObject.userData.objectData;
-    const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
+    // const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
+
+    let name = locationData.name;
+    if (locationData && locationData.eventData && locationData.eventData.includes("children")) {
+        name = hit.object.name ? hit.object.name : lastRaycastHitObject.name;
+    }
     let showCallout = false;
     
     if (type == "mouse" &&
@@ -828,7 +839,31 @@ function RaycastHit(type, hit) {
             } else {
                 console.log("locationname " + locationData.name);
                 
-                ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                if (name && name.includes("~")) {
+                    name = name.split("~")[0];
+                }
+                if (name && name != "") {
+                    if (tagData) { //e.g. on instanceMesh
+                        // console.log(Object.keys(tagData).toString());
+                        ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                        const pics = ReturnTaggedPictures(Object.keys(tagData).toString());
+                        console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
+                        const rIndex = Math.floor(Math.random() * pics.length);
+                        // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
+                        const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
+                        lastRaycastHitObject.tagData = tagData;
+                        lastRaycastHitObject.header = header;
+                        const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
+                        "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
+                        // hic_content.classList.remove("hic_content");
+                        // hic_content.classList.add("hic_content_2");
+                        popup.innerHTML = htmlstring;
+                        ShowPopup(event);                    
+                    } else {
+                        ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                    }
+                }
+                // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             }
         
@@ -1039,7 +1074,7 @@ export function mouseRaycast(e) {
         // console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
         // 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
         if (raycastHits[0].object.userData) {
-            RaycastHit("mouse", raycastHits[0]);
+            RaycastHit("mouse", raycastHits[0], e);
             worldHitPosition = raycastHits[0].point;
         } else {
             selectedObjects.length = 0;

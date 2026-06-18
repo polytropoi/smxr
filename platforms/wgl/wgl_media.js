@@ -40,7 +40,19 @@ export function ReturnPictureFromGroup (groupID, tags, groupIndex) {
         }
     }
 }
-
+export function ReturnTaggedPictures (tag) {
+      let matchedPics = [];
+      for (let i = 0; i < pictureGroupsData.length; i++) {
+        for (let j = 0; j < pictureGroupsData[i].images.length; j++) {
+          if (pictureGroupsData[i].images[j].tags.includes(tag)) { //todo check tags
+            
+            // return picGroupArray[i].images[j];
+            matchedPics.push(pictureGroupsData[i].images[j]);
+          }
+        }
+      }
+      return matchedPics;
+}
 export async function InitAudioGroups() {
     if (settings && settings.audioGroups) {
         primaryAudioGroups = settings.audioGroups.primaryAudioGroups;
@@ -131,6 +143,16 @@ class SceneTextData {
         loadTextData (data) {
         // console.log("loading sceneTextItems " + JSON.stringify(sceneTextItems));
         // this.textItems = data;
+        }
+         async returnAllTextDataFromMediaID (mediaID) {
+            await this.jsonData;
+            // console.log(JSON.stringify(this.jsonData));
+            for (let i = 0; i < this.jsonData.length; i++) {
+                console.log("mediaID " + mediaID + " vs " + this.jsonData[i]._id);
+                if (mediaID.toString() == this.jsonData[i]._id.toString()) {
+                    return this.jsonData[i];
+                }
+            }
         }
         returnTextData (mediaID, index) {
             console.log("tryna get mediaID " + mediaID);

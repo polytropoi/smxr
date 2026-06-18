@@ -1911,7 +1911,7 @@ body {
         /* left: 0;
         top: 0; */
         /* width: 600px; */
-        width: 350px;
+        width: 500px;
         /* height: 400px; */
         /* max-height: 1024px; */
         overflow-y: auto;
@@ -1921,7 +1921,7 @@ body {
         background-color: rgba(0, 0, 0, .5); /* Black w/ opacity */
         text-align: center;
          font-family: helvetica, arial, sans-serif;
-				font-size: 14px;
+				font-size: 20px;
         color: #FFF;
 				cursor: pointer;
           padding: 10px;

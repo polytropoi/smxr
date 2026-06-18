@@ -807,26 +807,42 @@
         let jsonObj = objectString;
         // let jsonObj = JSON.parse(objectString);
         console.log(jsonObj.name + " " + jsonObj.url);
-        let camera = "<a-entity id='cameraRig' position='0 6 6'>"+  
-        "<a-entity camera touch-controls wasd-controls='fly: true;' look-controls position='0 0 0'></a-entity>"+
-        "</a-entity>";
-        let aframeScene = "<div style='width: 100%; height: 1000px;'>"+jsonObj.name+"<a-scene disable-magicwindow device-orientation-permission-ui=\x22enabled: false\x22 embedded environment='preset: default;'>" +
-            // "<a-entity camera look-controls orbit-controls='target: 0 1 -5; minDistance: 0.5; maxDistance: 100; initialPosition: 0 0 0'></a-entity>"+
-            camera +
-            "<a-assets>" +
-                "<a-asset-item id='splat' src='"+ jsonObj.url +"' response-type='arraybuffer'></a-asset-item>" +
+
+        const baseUrl = "http://localhost:3000/test/splat/preview.html";
+
+        // The URL you want to pass as a parameter
+        const targetUrl = jsonObj.url;
+
+        // Initialize URL object
+        const urlObj = new URL(baseUrl);
+
+        // Set the target URL using searchParams (handles encoding automatically)
+        urlObj.searchParams.set("splatUrl", targetUrl);
+
+        console.log(urlObj.toString());
+
+        window.open(urlObj.toString(), '_blank');
+
+        // let camera = "<a-entity id='cameraRig' position='0 6 6'>"+  
+        // "<a-entity camera touch-controls wasd-controls='fly: true;' look-controls position='0 0 0'></a-entity>"+
+        // "</a-entity>";
+        // let aframeScene = "<div style='width: 100%; height: 1000px;'>"+jsonObj.name+"<a-scene disable-magicwindow device-orientation-permission-ui=\x22enabled: false\x22 embedded environment='preset: default;'>" +
+        //     // "<a-entity camera look-controls orbit-controls='target: 0 1 -5; minDistance: 0.5; maxDistance: 100; initialPosition: 0 0 0'></a-entity>"+
+        //     camera +
+        //     "<a-assets>" +
+        //         "<a-asset-item id='splat' src='"+ jsonObj.url +"' response-type='arraybuffer'></a-asset-item>" +
                
-            "</a-assets>" + 
-            "<a-entity position='0 4 0' gltf-model='#glb' skybox-env-map shadow='receive: true'></a-entity>" +
-            "<a-light type='ambient'></a-light>"+
-            "<a-light type='directional' 'castShadow=true' position='1 11 1'></a-light>"+
-            // "<a-light type='ambient'></a-light>"+
-            "</a-scene></div>";
+        //     "</a-assets>" + 
+        //     "<a-entity position='0 4 0' gltf-model='#glb' skybox-env-map shadow='receive: true'></a-entity>" +
+        //     "<a-light type='ambient'></a-light>"+
+        //     "<a-light type='directional' 'castShadow=true' position='1 11 1'></a-light>"+
+        //     // "<a-light type='ambient'></a-light>"+
+        //     "</a-scene></div>";
 
-            console.log(aframeScene);
+        //     console.log(aframeScene);
 
-        $("#topPage").show();
-        $("#topPage").html(aframeScene);
+        // $("#topPage").show();
+        // $("#topPage").html(aframeScene);
     }
     function previewModel(objectString) { //need to parse this one because why?
         console.log(objectString);
@@ -5845,6 +5861,7 @@
             let preview = {};
             preview.name = response.data.filename;
             preview.url = response.data.url;
+            preview.item_type = response.data.item_type;
             let cid =  (response.data.cid != undefined && response.data.cid != 'undefined') ? response.data.cid  : ""; 
             let ipfsLink = "";
             if (cid != "") {
@@ -6031,7 +6048,11 @@
                     $(document).on('click','.previewModel', function(e) {
                         e.preventDefault();  
                         console.log("gotsa click on preview buttooon" + JSON.stringify(preview));
-                        previewGLTF(preview);
+                        if (preview.item_type == "splat") {
+                            previewSplat(preview);
+                        } else {
+                            previewGLTF(preview);
+                        }
                     }); 
                     $(document).on('click', '#ipfsUP', function (e) {
                         e.preventDefault(); 

@@ -37,7 +37,7 @@ export let colliders = {}
 // export let equippedRigidbody;
 
 
-export const agentCount = 0;
+export const agentCount = 20;
 const dynamicObjectCount = 5;
 let playerWorldPosition = new THREE.Vector3();
 // export let playerRigidbody;        
@@ -156,8 +156,11 @@ export async function createStaticCollider (model) { // may not be added to the 
       // colliderDesc.contactSkin(0.5); // ???
       const pos = new THREE.Vector3();
       model.getWorldPosition(pos);
+
+      const worldQuaternion = new THREE.Quaternion();
+      model.getWorldQuaternion(worldQuaternion);
       // const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
-                      const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z);
+                     const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z).setRotation(worldQuaternion);
 
       // model.position.set(position);
       const staticBody = await world.createRigidBody(rbDesc);

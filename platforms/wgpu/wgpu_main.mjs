@@ -43,7 +43,7 @@
 
 	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, physicsInstancedMeshes, physicsInstancedBodies } from './wgpu_instance.js';
 
-	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData } from './wgpu_locations.js';
+	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData, movingMeshes } from './wgpu_locations.js';
 
 	import Stats from './ui/stats.js';
 	
@@ -679,6 +679,11 @@
 					equippedRigidbody.update();
 				}
 
+				if (movingMeshes.length) {
+					movingMeshes.forEach(m => 
+						m.update(time)
+					)
+				}
 
 				world.step(eventQueue); 
 				// npcKinematicBodies.forEach(k => 

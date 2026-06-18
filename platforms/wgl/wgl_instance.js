@@ -13,6 +13,9 @@ import { locationData, activeObjex } from './wgl_locations.js';
 import { GetInstancedRigidbody } from './wgl_physics.js'
 
 
+import { sceneTextController } from './wgl_media.js';
+
+
 let sampler;
 export let surface;
 
@@ -25,6 +28,9 @@ export let physicsInstancedMeshes = [];
 // }
 
 export let instancedModels = [];
+export let instanceTags = {};
+let taggedInstances = {};
+
 export async function InitSurface () {
     console.log("GOTSA SURFACE");
     await surface;
@@ -35,16 +41,71 @@ export async function InitSurface () {
 export function SetSurface(mesh) { //if assigned to a mesh in locations
     surface = mesh;
 }
-export function createDefaultSurface(xscale,yscale,zscale) {
-    console.log("tryna create default surface " + xscale + " " + yscale + " " +zscale);
+export function createDefaultSurface(locData) {
+    console.log("tryna create default surface " + locData.xscale + " " + locData.yscale + " " +locData.zscale);
         const planeGeometry = new THREE.PlaneGeometry(xscale, zscale, 10, 10); 
         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
         surface = new THREE.Mesh(planeGeometry, planeMaterial);
         scene.add(surface);
         surface.rotation.x = -Math.PI / 2;
-        surface.visible = false;
+         if (locData.locationTags && locData.locationTags.includes("hide")) {
+                surface.visible = false;
+            }
+        // surface.visible = false;
+        // SetSurface(surface);
 }
     
+
+export async function TagsToInstances (locID, instanceID) {
+    if (taggedInstances) { //populated when instances are created (e.g. InstanceOnSurface() below), if there's an attached mediaID
+        const instanceData = taggedInstances[locID];
+
+        if (instanceData) {
+            let textData;
+            let jsonData;
+            if (instanceData && !instanceData.isTagged) {
+                instanceData.iTags = [];
+
+                textData = await sceneTextController.returnAllTextDataFromMediaID(instanceData.mediaID);
+                if (textData) {
+                    let textindex = 0;
+                        jsonData = JSON.parse(textData.textstring);
+                    for (let i = 0; i < instanceData.count; i++) {
+                        let iTag = {};
+                        
+                        
+                        if (textindex < jsonData.length) {
+                            textindex++;
+                        } else {
+                        textindex = 0;                   
+                        }
+                        iTag[i] = jsonData[textindex];
+
+                        // console.log(JSON.stringify(iTag));
+                        instanceData.iTags.push(iTag);
+                        // if (textData.textstring && textData.textstring.length) {
+                        //     for (let i = 0; i < textData.textstring.length; i++) {
+
+                        //     }
+                        // }
+                        instanceData.isTagged = true;
+                    }
+                    // console.log(JSON.stringify(tag));
+                    const tag = Object.values(instanceData.iTags[instanceID])[0];
+                    console.log(JSON.stringify(tag));
+                    return tag;
+                }
+            } else {
+                // console.log(JSON.stringify(instanceData.iTags[instanceID]));
+                //  return instanceData.iTags[instanceID][0];
+                const tag = Object.values(instanceData.iTags[instanceID])[0];
+                console.log(JSON.stringify(tag));
+                return tag;
+            }
+        }
+    }
+}
+
 
 export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader, locData) {
 
@@ -164,6 +225,17 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 }
                 // this.iMesh.setColorAt( this.instanceId, this.highlightColor.setHex( Math.random() * 0xffffff ) );
                 // this.iMesh.instanceColor.needsUpdate = true;
+            }
+            if (locData.mediaID) {
+                const tm = {};
+                tm.mediaID = locData.mediaID;
+                tm.timestamp = locData.timestamp;
+                tm.count = count;
+                taggedInstances[locData.timestamp] = tm;
+                // AssignTagsToInstances(locData.mediaID, count, instancedMeshes[s]);
+                // await sceneTextController.dataIsReady();
+                // instanceTagData = await sceneTextController.returnAllTextDataFromMediaID(locData.mediaID);
+                // console.log("instanceTagData is " + instanceTagData);
             }
             
             scene.add(instancedMeshes[s]);

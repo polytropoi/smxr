@@ -3203,7 +3203,7 @@ wgl_router.get('/:_id', function (req, res) {
                             videoEl+
                             videoElements+
                             
-                           
+                            // "<canvas id=\x22hic_canvas\x22 layoutsubtree class=\x22hic_canvas\x22><div id=\x22hic_content\x22 class=\x22hic_content\x22></div></canvas>" + //nope,placeholder
                             
                             
                             

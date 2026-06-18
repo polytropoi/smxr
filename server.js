@@ -2179,7 +2179,11 @@ app.get('/get_model/:_id', requiredAuthentication, function (req, res) {
           res.send("no model found!!");
         } else {
           try {         
-            model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+            if (model.item_type == "splat") {
+                model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
+            } else {
+                model.url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+            }
             res.send (model);  
           } catch (e) {
               res.send(e);
@@ -2494,10 +2498,11 @@ app.post('/process_staging_files', requiredAuthentication, function (req, res) {
                         if (contentType == "picture") {
                             group.type = "picture";
                             group.name = "pictures " + ts;
-                        } else if (contentType == "model") {
+                        } else if (contentType == "model" || contentType == "splat") { //hrm....
                             group.type = "models";
                             group.name = "models " + ts;
-                        } else if (contentType == "audio") {
+                        }
+                         else if (contentType == "audio") {
                             group.type = "audio";
                             group.name = "audio " + ts;
                         } else if (contentType == "video") {

@@ -27,6 +27,7 @@ export let modelsData;
 export let objexData;
 export let locationObjex = []; //includes location, objex, and model data
 
+export let movingMeshes = [];
 export let activeObjex = []; //raycastable
 
 export let staticObjex = []; //physics
@@ -56,21 +57,64 @@ export async function LoadModel(url) {
     }
 }
 
-export function createDefaultNavmesh() {
-    if (!navmesh) {
-        const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
-    //   planeGeometry.rotation.x = Math.PI / 2 * -1;
-        const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
-        let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
+// export function createDefaultNavmesh() {
+//     if (!navmesh) {
+//         const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
+//     //   planeGeometry.rotation.x = Math.PI / 2 * -1;
+//         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+//         let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
         
-        // navmeshObject.position.set(0,0,0);
-        // navmeshObject.scale.set(1,1,1);
-        navmeshObject.rotation.x = Math.PI / 2;
-        navmeshObject.updateMatrixWorld();
-        navmesh = navmeshObject;
+//         // navmeshObject.position.set(0,0,0);
+//         // navmeshObject.scale.set(1,1,1);
+//         navmeshObject.rotation.x = Math.PI / 2;
+//         navmeshObject.updateMatrixWorld();
+//         navmesh = navmeshObject;
         
-        scene.add(navmeshObject);
+//         scene.add(navmeshObject);
+//     }
+// }
+
+ class MeshMover{
+    constructor(mesh){
+        this.mesh = mesh;
+        this.initPosition = new THREE.Vector3();
+
+        this.mesh.getWorldPosition(this.initPosition);
+        this.random1 = Math.random();
+        this.random2 = Math.random();
+        this.random3 = Math.random();
     }
+    update(time) {
+
+        // Creates a floating/bobbing effect
+        this.mesh.position.y = this.initPosition.y + Math.cos(time * .001) * this.random1 / 2; 
+        this.mesh.position.z = this.initPosition.z + Math.sin(time * .0001) * this.random2 * 10;
+        // Creates a circular wandering effect
+        this.mesh.position.x = this.initPosition.x + Math.sin(time * .0001) * this.random3 * 10;
+    }
+}
+
+export function createDefaultNavmesh(locData) {
+    // locationData[i].xscale, locationData[i].yscale, locationData[i].zscale
+       console.log("tryna create default navmesh " + locData.xscale + " " + locData.yscale + " " +locData.zscale);
+           const planeGeometry = new THREE.PlaneGeometry(locData.xscale, locData.zscale, 10, 10); // 50 x 50
+           // navmeshGeometry = planeGeometry;
+           planeGeometry.rotateX(-Math.PI / 2);
+   
+       //   planeGeometry.rotation.x = Math.PI / 2 * -1;
+           const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+           navmesh = new THREE.Mesh(planeGeometry, planeMaterial);
+           navmesh.position.set(locData.x, locData.y, locData.z)
+       
+           
+           scene.add(navmesh);
+           navmesh.visible = false;
+           // navmesh.position.set(0,0,0);
+           // // navmeshObject.scale.set(1,1,1);
+           // navmesh.rotation.x = Math.PI / 2;
+           // navmesh.updateMatrixWorld();
+           // navmesh = navmeshObject;
+           groundObjex.push(navmesh);
 }
 
 export function InitLocations() {
@@ -138,9 +182,11 @@ export function InitLocations() {
                                             // console.log("tryna hide model " + child.name);
                                         }															
 
+                                        if (locationData[i].markerType == "brownian motion") {
+                                            const meshMover = new MeshMover(model); 
+                                            movingMeshes.push(meshMover);
+                                        }
                                 
-
-
                                         if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
                                             // console.log("tryna instance model " + locationData[i].name);
                                             let instancedModel = {};
@@ -184,16 +230,34 @@ export function InitLocations() {
                         CreateDefaultLocationMarker(locationData[i]); //use primitive or default models
                         
                         if (locationData[i].markerType == "navmesh") {
-                            createDefaultNavmesh();
+                            createDefaultNavmesh(locationData[i]);
                         }
                         if (locationData[i].markerType == "surface") {
-                            createDefaultSurface();
+                            createDefaultSurface(locationData[i]);
                         }
                         if (locationData[i].markerType == "player") {
                             console.log("playerposition " + JSON.stringify(locationData[i]));
                             playerPosition = locationData[i];
                             SetPlayerLocation(locationData[i]);
                         }
+                        if (locationData[i].markerType == "collider") {
+                            // createDefaultCollider(locationData[i]);
+                            let staticObject = {};
+                            const geo = new THREE.PlaneGeometry(locationData[i].xscale, locationData[i].zscale, 10, 10);
+                            const material = new THREE.MeshStandardMaterial( { color: 'blue', wireframe: true } );
+                            const mesh = new THREE.Mesh(geo,material);
+                            staticObject.mesh = mesh;
+                            mesh.rotation.x = -Math.PI / 2;
+                            mesh.position.set(locationData[i].x, locationData[i].z, locationData[i].z)
+                            staticObject.locationData = locationData[i];
+                            // staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
+                            staticObject.isHidden = true;
+                            console.log("gotsa static collider object ishidden " + staticObject.isHidden);
+                            // scene.add(mesh);
+                            // mesh.visible = false;
+                            staticObjex.push(staticObject);
+                        }
+
                         // if (locationData[i].markerType == "light") {
                         //     CreateLight(locationData[i]);
                         // }
