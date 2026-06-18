@@ -43,7 +43,7 @@ export function SetSurface(mesh) { //if assigned to a mesh in locations
 }
 export function createDefaultSurface(locData) {
     console.log("tryna create default surface " + locData.xscale + " " + locData.yscale + " " +locData.zscale);
-        const planeGeometry = new THREE.PlaneGeometry(xscale, zscale, 10, 10); 
+        const planeGeometry = new THREE.PlaneGeometry(locData.xscale, locData.zscale, 10, 10); 
         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
         surface = new THREE.Mesh(planeGeometry, planeMaterial);
         scene.add(surface);
