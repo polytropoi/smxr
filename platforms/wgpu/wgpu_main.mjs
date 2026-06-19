@@ -138,8 +138,7 @@
 		
 		renderer.toneMapping = THREE.ACESFilmicToneMapping;
 		renderer.toneMappingExposure = 1;
-		// renderer.shadowMap.enabled = true;
-		// renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+		
 			renderer.setAnimationLoop( animate );
 		document.body.appendChild( renderer.domElement );
 
@@ -152,6 +151,10 @@
 		}
 		if (settings.sceneTags.includes("debug")) {
 			showDebug = true;
+		}
+		if (settings.sceneTags.includes("shadows")) {
+			renderer.shadowMap.enabled = true;
+			renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
 		}
 		
 		// cameraMode = "Mouse Look";
@@ -341,8 +344,10 @@
 			if (settings.sceneEnvironmentSettings.sceneFloorplaneTexture == "grid") {
 				InitGrid();
 			}
-			if (settings.sceneEnvironmentSettings.sceneUseFloorplane && settings.sceneEnvironmentSettings.sceneFloorplaneTexture && 
-				settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "none" && settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "") {
+			if (settings.sceneEnvironmentSettings.useFloorPlane && settings.sceneEnvironmentSettings.floorPlaneTexture && 
+				settings.sceneEnvironmentSettings.floorPlaneTexture != "none" && settings.sceneEnvironmentSettings.floorPlaneTexture != "") {
+				
+				// if ()
 				InitGround();
 			}
 

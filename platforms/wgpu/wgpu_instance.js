@@ -195,6 +195,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         console.log("child count for model " + sampleGeos.length + " ymod" + yMod);
         for (let c = 0; c < sampleGeos.length; c++) {
             const instancedMesh = new THREE.InstancedMesh(sampleGeos[c], sampleMats[c], count);
+            instancedMesh.castShadow = true;
             instancedMeshes.push(instancedMesh);
             
         }

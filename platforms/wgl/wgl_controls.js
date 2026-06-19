@@ -854,10 +854,11 @@ async function RaycastHit(type, hit, event) {
                         lastRaycastHitObject.tagData = tagData;
                         lastRaycastHitObject.header = header;
                         const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
-                        "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
-                        // hic_content.classList.remove("hic_content");
-                        // hic_content.classList.add("hic_content_2");
+                        "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22popup_content_pill\x22> <h1>"+header+"</h1></div></div>";
+                        popup.classList.remove("popup");
+                        popup.classList.add("popup2");
                         popup.innerHTML = htmlstring;
+
                         ShowPopup(event);                    
                     } else {
                         ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
@@ -1467,7 +1468,7 @@ export function onMouseDown(event) { //clicked on threejs object
                 // });
                 ShowPopup(event);
                 popup.innerHTML = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
-                "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
+                "<br><br><div><button id=\x22hicCancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
                 "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
                 lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Go</button>"+
                 "</div>";
@@ -1556,7 +1557,7 @@ export function ShowPopup (event) { //hrm move to UI
             xpos = 0;
         }
         
-        let ypos = event.clientY - 100;
+        let ypos = event.clientY - 150;
         if (event.clientY < 100) {
             ypos = 0;
         }

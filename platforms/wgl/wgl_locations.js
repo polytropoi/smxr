@@ -628,8 +628,8 @@ async function LoadLocationModel (url, locationData, isActive) {
 
         model.userData.timestamp = locationData.timestamp;
         
-        // model.castShadow = true;
-        // model.receiveShadow = true;
+        model.castShadow = true;
+        model.receiveShadow = true;
         // if (locationData.locationTags.includes("active")) {
             // activeObjex.push(model);
         // } 
@@ -765,6 +765,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         }
         if (model) {
             scene.add(model.model);
+            model.model.castShadow = true;
             // model.material.color = "orange";
             console.log("adding poi! " + model);
         }
@@ -779,6 +780,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         }
         if (model) {
             scene.add(model.model);
+            model.model.castShadow = true;
             // model.material.color = "orange";
             console.log("adding placeholder! " + model);
         }
@@ -797,6 +799,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             scene.add(model.model);
             const triggerBody = await getTriggerBody(model.model, locationData);
             staticBodies.push(triggerBody);
+            model.model.castShadow = true;
             // model.material.color = "orange";
             console.log("adding trigger! " + model);
         }
@@ -811,6 +814,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         }
         if (model) {
             scene.add(model.model);
+            model.model.castShadow = true;
             // model.material.color = "orange";
             console.log("adding collider! " + model);
         }
@@ -826,6 +830,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         }
         if (model) {
             scene.add(model.model);
+            model.model.castShadow = true;
             // model.material.color = "orange";
             console.log("adding a gate! " + model);
         }
@@ -842,6 +847,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             CreateLight(locationData);
             if (model)
             scene.add(model.model);
+        model.model.castShadow = true;
             // model.material.color = "orange";
             console.log("adding a light! " + model);
         // }

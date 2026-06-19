@@ -422,8 +422,8 @@ export function SplashText (textString) {
 
 // Root container – add it to the scene; call root.update in your loop
 export function InitReticle () {
-    console.log("tryna init reticle");
-    const material = new THREE.LineBasicMaterial({ color: 0xAAFFAA }); // Green color
+console.log("tryna init reticle");
+const material = new THREE.LineBasicMaterial({ color: 0xAAFFAA }); // Green color
 const x = 0.01, y = 0.01; // Adjust size as needed
 
 const geometry = new THREE.BufferGeometry();
@@ -443,6 +443,7 @@ geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 const reticle = new THREE.LineSegments(geometry, material); 
 
 return reticle;
+
 }
 
 export function UpdateText (string) { //uikit, no workie (use vite, they say...)

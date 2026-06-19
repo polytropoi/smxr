@@ -11,6 +11,8 @@
     import { uniform, sin, mul, add, time } from 'three/tsl';
 
     import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './wgpu_physics.js';
+
+    import { settings } from '../../../connect/settings.js';
 	import { HTMLText, ThreeDeeText } from './wgpu_ui.js';
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;
@@ -171,8 +173,9 @@
      
     // }        
 
-    export async function InitAgents () {
+    export async function InitAgents () { //testing only..
         // 
+        if (settings && settings.sceneTags && settings.sceneTags.includes("test")) {
         for (let i = 0; i < agentCount; i++) {
             let pos;
             let goodPosition = false;
@@ -196,6 +199,7 @@
             await CreateAgent(agentIndex, pos); //cook the navagent first
             
             console.log("creating kinematic body for agent " + agentIndex);
+        }
             // kinematicBodies.push(rbody);
         }
 
@@ -816,7 +820,7 @@
             }
         }
         snapToGround () {
-            if (Math.random() > .75) {
+            if (Math.random() > .95) {
                 let raypos;
                 raypos = this.raycastedPosition(); //expensive, so throttle...
                 if (raypos && raypos.y) {

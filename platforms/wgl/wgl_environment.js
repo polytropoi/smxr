@@ -50,6 +50,17 @@ export function InitGrid () {
 
 // }
 
+export function InitGround() {
+	console.log("tryna InitGround");
+		const planeGeo = new THREE.PlaneGeometry(100, 100);
+		const planeMat = new THREE.MeshStandardMaterial({color: settings.sceneColor3});
+		// planeMat.colorNode = settings.sceneColor2;
+		const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+		planeMesh.receiveShadow = true; 
+		planeMesh.rotateX(-Math.PI / 2);
+		scene.add(planeMesh);
+}
+
 export function InitFog() {
     if (settings && settings.sceneUseVolumetricFog) {
         console.log("doin some fog...");

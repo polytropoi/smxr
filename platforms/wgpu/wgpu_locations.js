@@ -337,6 +337,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
             const model = modelData.scene;
             model.userData.locationData = locationObjex[i].locationData;
             model.userData.objectData = locationObjex[i].objectData;
+            model.castShadow = true;
+            model.receiveShadow = true;
             const animations = modelData.animations;
             let count = 1;
             if (locationObjex[i].locationData.eventData && locationObjex[i].locationData.eventData.includes("scatter")) { //scatter, not instancing, but cloning multiples
@@ -364,7 +366,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     clonedModel.name = sceneObjectID;
                     
                     // const pos = randomNavmeshPoint();
-                    
+                    clonedModel.castShadow = true;
+                    clonedModel.receiveShadow = true;
                     
                     clonedModel.userData.locationData = locationObjex[i].locationData;
                     clonedModel.userData.objectData = locationObjex[i].objectData;
@@ -445,6 +448,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         clonedObject.position.set(x,y,z);
                         scene.add(clonedObject);
                         clonedObject.visible = true;
+                         clonedObject.castShadow = true;
+                        clonedObject.receiveShadow = true;
                         activeObjex.push(clonedObject);
                         clonedObject.traverse(function (child) { 
                         if (child.isMesh) {
@@ -466,6 +471,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     model.scale.set(locationObjex[i].locationData.xscale,locationObjex[i].locationData.yscale,locationObjex[i].locationData.zscale);
                     model.position.set(locationObjex[i].locationData.x,locationObjex[i].locationData.y,locationObjex[i].locationData.z);
                     scene.add(model);
+                     model.castShadow = true;
+                        model.receiveShadow = true;
                     model.visible = true;
                     activeObjex.push(model);
                     model.traverse(function (child) { 
@@ -595,8 +602,8 @@ async function LoadLocationModel (url, locationData, isActive) {
 
         model.userData.timestamp = locationData.timestamp;
         
-        // model.castShadow = true;
-        // model.receiveShadow = true;
+        model.castShadow = true;
+        model.receiveShadow = true;
         // if (locationData.locationTags.includes("active")) {
             // activeObjex.push(model);
         // } 

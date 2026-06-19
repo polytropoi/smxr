@@ -2333,6 +2333,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
                     settings.useSceneFog = sceneResponse.sceneUseSceneFog;
                     settings.sceneUseVolumetricFog = sceneResponse.sceneUseVolumetricFog;
+                    settings.fogDensity = sceneResponse.sceneGlobalFogDensity;
                     settings.useSynth = hasSynth;
                     settings.mappicURL = mappicURL;
                     settings.backgroundVideoURL = backgroundVideoURL;

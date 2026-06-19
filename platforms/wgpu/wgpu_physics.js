@@ -37,8 +37,9 @@ export let colliders = {}
 // export let equippedRigidbody;
 
 
-export const agentCount = 20;
-const dynamicObjectCount = 5;
+export let agentCount = 10; //test wireframe capsules
+export let dynamicObjectCount = 5; //test dynamic rb spheres
+
 let playerWorldPosition = new THREE.Vector3();
 // export let playerRigidbody;        
 
@@ -563,7 +564,7 @@ async function getAtomicBody(atomCenter, particleType, particleSize) {
 }
 
 
-export async function initDynamicObjex () {
+export async function initDynamicObjex () { //only test objex
 
   try {
      if (settings && settings.sceneTags && settings.sceneTags.includes("test")) {
@@ -673,7 +674,8 @@ export async function getDynamicBody(model, position, scale) {
 
 			const mesh = new THREE.Mesh( geometry, material );
       
-
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
       const colliderSize = size;// * 1.25;
       const range = 30;
       // const density = size  * .5;

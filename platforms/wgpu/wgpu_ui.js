@@ -632,7 +632,8 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
 
             const geometry = new THREE.PlaneGeometry( 1,1, 10, 10 );
 
-            material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .5, metalness: .1 } );
+            // material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .5, metalness: .1 } );
+            material = new THREE.MeshBasicMaterial( { transparent: true} );
             material.map = new THREE.HTMLTexture( canvasEl );
             // material.envMap = scene.environment;
             // material.envMapIntensity = 1;

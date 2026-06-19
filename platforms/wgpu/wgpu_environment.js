@@ -121,12 +121,17 @@ export function InitGrid () {
 }
 
 export function InitGround() {
-		const planeGeo = new THREE.PlaneGeometry(100, 100);
-		const planeMat = new THREE.MeshBasicMaterial({color: settings.sceneColor2});
-		// planeMat.colorNode = settings.sceneColor2;
-		const planeMesh = new THREE.Mesh(planeGeo, planeMat);
-		planeMesh.rotateX(-Math.PI / 2);
-		scene.add(planeMesh);
+
+	let xscale = 100;
+	let yscale = 100;
+	let zscale = 100;
+	const planeGeo = new THREE.PlaneGeometry(100, 100);
+	const planeMat = new THREE.MeshStandardMaterial({color: settings.sceneColor3});
+	// planeMat.colorNode = settings.sceneColor2;
+	const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+	planeMesh.receiveShadow = true; 
+	planeMesh.rotateX(-Math.PI / 2);
+	scene.add(planeMesh);
 }
 export function InitFog() {
     if (settings && settings.sceneUseVolumetricFog) {
@@ -136,7 +141,7 @@ export function InitFog() {
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
-        const fogDensity = 0.0025; // Adjust this value! (Default is 0.00025)
+        const fogDensity = settings.fogDensity * .1; // Adjust this value! (Default is 0.00025)
         // scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
 		scene.fog = new THREE.FogExp2( fogColor, fogDensity );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );

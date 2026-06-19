@@ -294,6 +294,8 @@ export class SceneObject { //things that might have models and actions and fancy
             } 
             if (hasActions) {
                 popup.innerHTML = header + cancelButton + pickupButton + equipButton + consumeButton + "</div>";
+                // popup.classList.remove("popup");
+                // popup.classList.add("popup2");
                 // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
                 // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
                 // "</div>";

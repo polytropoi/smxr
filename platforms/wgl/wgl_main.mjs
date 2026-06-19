@@ -19,7 +19,7 @@
 		InitAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders,
 		LoadKinematicAgentMeshes, } from './wgl_physics.js';
 
-	import { InitEnvMap, InitSky, InitFog, InitGrid } from './wgl_environment.js';
+	import { InitEnvMap, InitSky, InitFog, InitGrid, InitGround } from './wgl_environment.js';
 
 		import { equippedRigidbody } from './wgl_actions.js';
 
@@ -301,11 +301,11 @@
 		if (settings && settings.sceneEnvironmentSettings) {
 			console.log("sceneEnvironmentSettings " + JSON.stringify(settings.sceneEnvironmentSettings));
 			if (settings.sceneEnvironmentSettings.sceneFloorplaneTexture == "grid") {
-				// InitGrid();
+				InitGrid();
 			}
-			if (settings.sceneEnvironmentSettings.sceneUseFloorplane && settings.sceneEnvironmentSettings.sceneFloorplaneTexture && 
-				settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "none" && settings.sceneEnvironmentSettings.sceneFloorplaneTexture != "") {
-				// InitGround();
+			if (settings.sceneEnvironmentSettings.useFloorPlane && settings.sceneEnvironmentSettings.floorPlaneTexture && 
+				settings.sceneEnvironmentSettings.floorPlaneTexture != "none" && settings.sceneEnvironmentSettings.floorPlaneTexture != "") {
+				InitGround();
 			}
 
 		}
