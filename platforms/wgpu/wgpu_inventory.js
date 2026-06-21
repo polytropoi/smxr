@@ -5,7 +5,7 @@ import { userInventory, ShowHideDialogPanel, GetUserInventoryAsync, uniqueItemsÂ
 
 import { eventEl } from '../../../connect/events.js';
 
-import { ReturnObjectData, SceneObject, lastEvent} from './wgpu_actions.js';
+import { ReturnObjectData, SceneObject, lastEvent, sceneObjects} from './wgpu_actions.js';
 
 import { viewportPlaceholder, popup } from './wgpu_controls.js';
 
@@ -115,38 +115,40 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
 
 export async function EquipObject (objectData) { 
 
-        // console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
+    // console.log("tryna equip  " + objectID  + " equipped " + this.data.equipped + " tags " + tags + " eventData " + eventData);  
+    
+    // let objectData = ReturnObjectData(objectID);
+    if (objectData) {        
+        objectData.isEquipped = true;
+        objectData.sceneObjectID = Date.now(); 
+        console.log("tryna equip object " + objectData.modelURL);  
+
+        const equippedModelData = await LoadModel(objectData.modelURL);
+        const equippedModel = equippedModelData.scene;
+        // scene.add(equippedModel);
+        viewportPlaceholder.add(equippedModel);
+
+        equippedModel.traverse(function (child) {
+            if (child.isMesh) {
+                child.userData.name = objectData.name;
+                child.userData.locationData = {};
+                child.userData.isEquipped = true;
+                child.userData.objectData = objectData;
+                // child.bindMode = "detached";
+            }
+        });
+        // const worldPosition = new THREE.Vector3();
+        // equippedModel.getWorldPosition(worldPosition);
+        activeObjex.push(equippedModel);
+        const equippedSceneObject = new SceneObject(equippedModel, objectData, true, viewportPlaceholder);
+        sceneObjects[objectData.sceneObjectID.toString()] = equippedSceneObject;
         
-        // let objectData = ReturnObjectData(objectID);
-        if (objectData) {        
-            objectData.isEquipped = true;
-            console.log("tryna equip object " + objectData.modelURL);  
-
-            const equippedModelData = await LoadModel(objectData.modelURL);
-            const equippedModel = equippedModelData.scene;
-            // scene.add(equippedModel);
-            viewportPlaceholder.add(equippedModel);
-
-            equippedModel.traverse(function (child) {
-                if (child.isMesh) {
-                    child.userData.name = objectData.name;
-                    child.userData.locationData = {};
-                    child.userData.isEquipped = true;
-                    child.userData.objectData = objectData;
-                    // child.bindMode = "detached";
-                }
-            });
-            // const worldPosition = new THREE.Vector3();
-            // equippedModel.getWorldPosition(worldPosition);
-            activeObjex.push(equippedModel);
-            const equippedSceneObject = new SceneObject(equippedModel, objectData, true, viewportPlaceholder);
-           
-       
-        } else {
-          
-            FetchSceneInventoryObject(objectID, true, tags, eventData);
-        }
+    
+    } else {
+        
+        FetchSceneInventoryObject(objectID, true, tags, eventData);
     }
+}
 
 function RemoveFromSceneInventory (sceneObjectID) {
 

@@ -15,7 +15,7 @@ import { AddDynamicBody, getPlayerBody, kinematicBodies } from './wgpu_physics.j
 import { uiMode, ShowHTMLPopup, HideHTMLPopup } from './wgpu_ui.js';
 // import { equippedRigidbody } from './three_physics.js';
 
-export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
+export let sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
 
 export let equippedRigidbody;
 export let playerRigidbody;
@@ -72,15 +72,18 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
     // }
     return objek;
 }
+// export let sceneObjectIndex = 0;
 
 export class SceneObject { //things that might have models and actions and fancy params, e.g. characters, magic swords, etc
     constructor(object, objectData, isEquipped, objectParent) {
+
+        
 
         this.object = object;
         this.objectData = objectData;
         this.sceneObjectID = objectData.sceneObjectID;
         this.sceneInventoryID = objectData.sceneInventoryID;
-        this.object.userData.sceneObjectInstance = this;
+        // this.object.userData.sceneObjectIndex = sceneObjectIndex;
         // console.log("new sceneObject " + this.objectData.sceneObjectID);
 
         this.isEquipped = false;
@@ -165,6 +168,8 @@ export class SceneObject { //things that might have models and actions and fancy
             this.isEquipped = true;
             this.setEquippedRigidbody();
         }
+        // sceneObjectInstanceIndex++;
+        // return sceneObjectInstanceIndex;
     }
 }
     async setEquippedRigidbody () {
@@ -181,7 +186,7 @@ export class SceneObject { //things that might have models and actions and fancy
 
     }
     onDown () {
-
+        console.log("sceneObject onDown()");
     }
        
     onClick (event) {
@@ -349,7 +354,7 @@ export class SceneObject { //things that might have models and actions and fancy
         const worldPosition = new THREE.Vector3();
         this.object.getWorldPosition(worldPosition);
 
-        console.log(JSON.stringify(worldPosition));
+        console.log("tryna throw from " + JSON.stringify(worldPosition));
 
         //     SetEquippedRigidbody(rbody);
         // console.log("tryna throw");
@@ -431,7 +436,7 @@ export class SceneObject { //things that might have models and actions and fancy
     }
 
     equipObject (data, thisObject) { //transfer from scene or scene inventory...to what?
-        console.log("tryna equip from scene or scene inventory");
+        // console.log("tryna equip from scene or scene inventory");
         // let event = {};
         // event.details.object
         // EquipInventoryCheck(data.objectID);

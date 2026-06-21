@@ -341,6 +341,9 @@ export async function LoadLocationObjex() { // wait to load these, might need na
             model.receiveShadow = true;
             const animations = modelData.animations;
             let count = 1;
+            const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Date.now();
+            model.userData.sceneObjectID = sceneObjectID;
+
             if (locationObjex[i].locationData.eventData && locationObjex[i].locationData.eventData.includes("scatter")) { //scatter, not instancing, but cloning multiples
                 if (locationObjex[i].locationData.eventData.includes("~")) {
                     count = parseFloat(locationObjex[i].locationData.eventData.split("~")[1]);
@@ -361,7 +364,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     } else {
                         clonedModel = model.clone();
                     }
-                    const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Date.now();
+                    
                     locationObjex[i].objectData.sceneObjectID = sceneObjectID;
                     clonedModel.name = sceneObjectID;
                     
@@ -372,7 +375,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     clonedModel.userData.locationData = locationObjex[i].locationData;
                     clonedModel.userData.objectData = locationObjex[i].objectData;
 
-                    clonedModel.userData.name = sceneObjectID;
+                    // clonedModel.userData.name = sceneObjectID;
+                    clonedModel.userData.sceneObjectID = sceneObjectID;
                     // activeObjex.push(clonedModel);
                     
                     
@@ -383,6 +387,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             child.userData.name = sceneObjectID;
                             child.userData.locationData = locationObjex[i].locationData;
                             child.userData.objectData = locationObjex[i].objectData;
+
+                            child.userData.sceneObjectID = sceneObjectID;
                             // child.bindMode = "detached";
                         }
                     });
@@ -414,6 +420,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     }
                     physicsColliderMesh.userData.locationData = locationObjex[i].locationData;
                     physicsColliderMesh.userData.objectData = locationObjex[i].objectData;
+                    physicsColliderMesh.userData.sceneObjectID = sceneObjectID;
                     // parent.name = "navagent";
                     // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
                     const sceneObject = new SceneObject(clonedModel, locationObjex[i].objectData, false, null);
@@ -437,7 +444,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         //     }
                         // } else {
                         const clonedObject = model.clone();
-                        const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Math.floor(Date.now()/1000);
+                        const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + zm.toString() + "_" + Math.floor(Date.now()/1000);
                         locationObjex[i].objectData.sceneObjectID = sceneObjectID;
 
                         const randomPoint = randomNavmeshPoint();
@@ -451,15 +458,19 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                          clonedObject.castShadow = true;
                         clonedObject.receiveShadow = true;
                         activeObjex.push(clonedObject);
+                        clonedObject.userData.sceneObjectID = sceneObjectID;
                         clonedObject.traverse(function (child) { 
                         if (child.isMesh) {
                             child.userData.locationData = locationObjex[i].locationData;
                             child.userData.objectData = locationObjex[i].objectData;
+                              child.userData.objectData.sceneObjectID = sceneObjectID.toString();
+                            child.userData.sceneObjectID = sceneObjectID.toString();
                             }
                         });
-
+                        console.log("tryna place an object " + zm + " sceneObjectID " + sceneObjectID);
                         const sceneObject = new SceneObject(clonedObject, locationObjex[i].objectData, false, null);
-                        sceneObjects[sceneObjectID] = sceneObject;
+                        sceneObjects[sceneObjectID.toString()] = sceneObject;
+                        
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
                         // sceneObjects.push(sceneObject);
                     }
@@ -474,15 +485,19 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                      model.castShadow = true;
                         model.receiveShadow = true;
                     model.visible = true;
+                    model.userData.sceneObjectID = sceneObjectID;
                     activeObjex.push(model);
                     model.traverse(function (child) { 
                     if (child.isMesh) {
                         child.userData.locationData = locationObjex[i].locationData;
                         child.userData.objectData = locationObjex[i].objectData;
+                        child.userData.objectData.sceneObjectID = sceneObjectID;
+                        child.userData.sceneObjectID = sceneObjectID;
+                        
                         }
                     });
                     const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null);
-                    sceneObjects[sceneObjectID] = sceneObject;
+                    sceneObjects[sceneObjectID.toString()] = sceneObject;
                     // sceneObjectsArray.push(locationObjex[i].data)
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
                         // sceneObjects.push(sceneObject);
