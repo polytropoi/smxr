@@ -430,7 +430,7 @@ export class SceneObject { //things that might have models and actions and fancy
         // let event = {};
         // event.details.object
         // EquipInventoryCheck(data.objectID);
-        if (data.fromSceneInventory) {
+        if (data.fromSceneInventory && thisObject.parent) {
             // console.log("tryna equip from sceneinventory : " +JSON.stringify(data);
             console.log("tryna equip from sceneinventory : " + data.sceneInventoryID);
             EquipObject(this.objectData);

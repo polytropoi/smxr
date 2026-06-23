@@ -18,17 +18,19 @@ export let waterAmbientLight;
 
 export function InitSceneLights () {
             sunLight = new THREE.DirectionalLight( settings.sceneColor1, 4 );
-            sunLight.castShadow = false;
+            sunLight.castShadow = true;
+         
             sunLight.shadow.camera.near = .5;
             sunLight.shadow.camera.far = 50;
-            sunLight.shadow.camera.right = 2;
-            sunLight.shadow.camera.left = - 2;
-            sunLight.shadow.camera.top = 1;
-            sunLight.shadow.camera.bottom = - 2;
+            
+            sunLight.shadow.camera.left = -50;
+            sunLight.shadow.camera.right = 50;
+            sunLight.shadow.camera.top = 50;
+            sunLight.shadow.camera.bottom = -50;
             sunLight.shadow.mapSize.width = 2048;
             sunLight.shadow.mapSize.height = 2048;
-            sunLight.shadow.bias = - 0.001;
-            sunLight.position.set( 1, 3, 1 );
+            sunLight.shadow.bias = - 0.01;
+            sunLight.position.set( 50, 50, 50 );
     
             waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, .5 );
             skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, settings.sceneColor3, 1.5 );

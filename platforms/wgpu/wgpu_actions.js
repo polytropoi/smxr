@@ -231,13 +231,14 @@ export class SceneObject { //things that might have models and actions and fancy
                 // this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(this.hitpoint, this.distance, ["shoot"], .5);//tagmangler needs an array, add vol mod 
                 // }
                 // this.el.object3D.visible = false;
-                this.el.classList.remove("activeObjexRay");
+                // this.el.classList.remove("activeObjexRay");
             
-                this.shootObject(this.data.objectData._id);
+                this.shootObject(this.objectData._id);
+                
                 // this.restoreEquipped;
                 setTimeout(() => {
                 // this.el.object3D.visible = true;
-                this.el.classList.add("activeObjexRay");
+                // this.el.classList.add("activeObjexRay");
                 }, 1000);
                 // this.applyForce();
                 
@@ -298,10 +299,21 @@ export class SceneObject { //things that might have models and actions and fancy
                 ShowHTMLPopup(event, htmlstring);
                 if (uiMode == "hic") {
                     // UpdateHIC(popup.innerHTML);
-                    document.getElementById("popup_cancelButton").addEventListener ('pointerdown', onMouseDown );
-                    document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
-                     document.getElementById("popup_yesButton1").addEventListener ('pointerdown', onMouseDown );
-                     document.getElementById("popup_yesButton2").addEventListener ('pointerdown', onMouseDown );
+                    document.getElementById("popup_cancelButton").addEventListener ('pointerdown', onMouseDown );   
+                    // document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
+                    if (document.getElementById("popup_yesButton")) {
+                        document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
+                    }
+                    if (document.getElementById("popup_yesButton1")) {
+                        document.getElementById("popup_yesButton1").addEventListener ('pointerdown', onMouseDown );
+                    }
+                    if (document.getElementById("popup_yesButton2")) {
+                        document.getElementById("popup_yesButton2").addEventListener ('pointerdown', onMouseDown );
+                    }
+                     
+
+                     
+                     
                     //  document.getElementById("popup_yesButton3").addEventListener ('pointerdown', onMouseDown );
                 } else {
                     // ShowPopup(event);
@@ -361,7 +373,7 @@ export class SceneObject { //things that might have models and actions and fancy
         const worldPosition = new THREE.Vector3();
         this.object.getWorldPosition(worldPosition);
 
-        console.log("tryna throw " + this.object.name + " from " + JSON.stringify(worldPosition) + " this.object.parent " + this.object.parent.name);
+        console.log("tryna throw " + this.object.name + " from " + JSON.stringify(worldPosition) + " this.object.parent " + this.object.parent);
 
         //     SetEquippedRigidbody(rbody);
         // console.log("tryna throw");
@@ -370,11 +382,11 @@ export class SceneObject { //things that might have models and actions and fancy
         // scene.attach(this.object);
         // this.object.removeFromParent();
         equippedRigidbody.addForce(worldPosition, mouseDowntime);
-         if (this.object.parent) {
-                this.object.parent.remove(this.object);
-            } else {
-                scene.remove(this.object);
-            }
+        //  if (this.object.parent) {
+        //         this.object.parent.remove(this.object);
+        //     } else {
+        //         scene.remove(this.object);
+        //     }
         // this.object.
                     // this.object.parent.remove(thisObject);
         // }

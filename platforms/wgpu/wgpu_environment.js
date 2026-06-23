@@ -239,8 +239,7 @@ export function InitSky() {
 					cloudElevation: cloudElevation
 				};
 
-				// function guiChanged() {
-
+		
 					sky.turbidity.value = effectController.turbidity;
 					sky.rayleigh.value = effectController.rayleigh;
 					sky.mieCoefficient.value = effectController.mieCoefficient;

@@ -123,6 +123,10 @@
 		document.body.appendChild( renderer.domElement );
 
 		// cameraMode = settings.sceneCameraMode;
+		if (settings.sceneTags.includes("shadows")) {
+			renderer.shadowMap.enabled = true;
+			renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+		}
 		if (settings.sceneCameraFOV) {
 			cameraFOV = settings.sceneCameraFOV;
 		}

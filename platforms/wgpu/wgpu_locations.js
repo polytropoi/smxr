@@ -389,6 +389,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             child.userData.objectData = locationObjex[i].objectData;
 
                             child.userData.sceneObjectID = sceneObjectID;
+                               child.castShadow = true;
+                            child.receiveShadow = true;
                             // child.bindMode = "detached";
                         }
                     });
@@ -467,6 +469,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             child.userData.objectData = locationObjex[i].objectData;
                               child.userData.objectData.sceneObjectID = sceneObjectID.toString();
                             child.userData.sceneObjectID = sceneObjectID.toString();
+                            child.castShadow = true;
+                            child.receiveShadow = true;
                             }
                         });
                         console.log("tryna place an object " + zm + " sceneObjectID " + sceneObjectID);

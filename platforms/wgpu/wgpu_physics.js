@@ -745,6 +745,8 @@ export async function AddDynamicBody(mesh, meshposition, scale, yFudge, isEquipp
       }
 
       const colliderSize = size;// * 1.25;
+
+      
       // const range = 30;
   
 

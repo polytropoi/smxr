@@ -92,21 +92,6 @@ let worldHitPosition = new THREE.Vector3();
 
 export const popup = document.getElementById("popup");
 export const viewportPlaceholder = new THREE.Object3D();
-// export const hic_content = document.getElementById("hic_content"); //alt to popup
-
-    // $('#popup').on('click', '#popup_yesButton', function(e) {
-    //   console.log("popup yes button click on target " + e.target);
-    //   if (e.target.dataset.eventdata) {
-    //     console.log("tryna goto " + e.target.dataset.eventdata );
-    //     EnterSceneGate(e.target.dataset.eventdata);
-    //   }
-
-      
-    // });
-    // $('#popup').on('click', '#popup_cancelButton', function(e) {
-    //   console.log("popup cancel button click on target " + e.target);
-    //   popup.style.display = "none";
-    // });
 
 export function SetPlayerLocation (x,y,z) {
     // if (controls && controls.object) {
@@ -133,46 +118,29 @@ export function SetPlayerLocation (x,y,z) {
 
 function SetInputMode () {
 
+    const joystickContainer = document.getElementById("joystickEl");
+    joystickContainer.style.visibility = "visible";
+    joystick = nipplejs.create({
+        zone: document.getElementById('joystickEl'),
+        mode: 'dynamic',
+        position: { left: '50%', bottom: '50px' },
+        color: 'red'
+    });
 
-        // joystickEl.
-        // if (navigator.maxTouchPoints > 0) {  //i.e. a touch device
-		// 			useJoystick = true;
-				// const joystickEl = document.getElementById("joystickEl");
-                // if (joystickEl) {
-				// 	let joystick1 = new Joystick("joystickEl", 64, 8);
-				// 	console.log("controls initialized : JOYSTICK" );
-				// }
-            const joystickContainer = document.getElementById("joystickEl");
-            joystickContainer.style.visibility = "visible";
-            joystick = nipplejs.create({
-                zone: document.getElementById('joystickEl'),
-                mode: 'dynamic',
-                position: { left: '50%', bottom: '50px' },
-                color: 'red'
-            });
+    moveX = 0;
+    moveZ = 0;
 
-            moveX = 0;
-            moveZ = 0;
+    joystick.on('move', (evt) => {
+        // nippleJS y-axis is inverted relative to Three.js world space
+        moveX = evt.data.vector.x;
+        moveZ = -evt.data.vector.y; 
+        // console.log(moveX + " " + moveZ);
+    });
 
-            joystick.on('move', (evt) => {
-                // nippleJS y-axis is inverted relative to Three.js world space
-                moveX = evt.data.vector.x;
-                moveZ = -evt.data.vector.y; 
-                // console.log(moveX + " " + moveZ);
-            });
-
-            joystick.on('end', () => {
-                moveX = 0;
-                moveZ = 0;
-            });
-        // }
-			// } else {
-			// 	// let jsContainer = document.getElementById('joystickContainer');
-			// // 	// if (this.jsContainer != null) {
-			// // 	// 	this.jsContainer.style.display = 'none';
-			// // 	// }
-			// // 	console.log("controls initialized : KEYBOID" );
-			// }
+    joystick.on('end', () => {
+        moveX = 0;
+        moveZ = 0;
+    });
 
 }
 
