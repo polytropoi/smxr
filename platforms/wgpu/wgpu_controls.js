@@ -70,6 +70,7 @@ let canJump = false;
 
 let playerSpeed = 5;
 let playerHeight = 1.6;
+let playerRigidbodySet = false;
 let prevTime = performance.now();
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
@@ -130,8 +131,13 @@ export function SetPlayerLocation (locationData) {
                 controls.update();
             }
         }
+        if (cameraMode == "First Person" || cameraMode == "Third Person" || cameraMode == "Mouse Look") {
+            if (!playerRigidbodySet) {
+                SetPlayerRigidbody();
+                playerRigidbodySet = true;
+            }
+        }
 
-        SetPlayerRigidbody();
     // }
 }
 
@@ -1250,21 +1256,27 @@ export function onMouseDown(event) { //clicked on threejs object
     } else if (lastRaycastHitObject && lastRaycastHitObject.userData) {
             // let sceneObjID = lastRaycastHitObject.userData.sceneObjectID;
 
-            let navAgentInstance;
-            if (lastRaycastHitObject.parent.parent) {
-                navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance; 
-            }
-            if (!navAgentInstance) {
-                navAgentInstance = lastRaycastHitObject.parent.userData.NavAgentInstance; //hrm
+            let navAgentInstance = null;
+            // if (lastRaycastHitObject.parent.parent) {
+            //     navAgentInstance = lastRaycastHitObject.parent.parent.userData.NavAgentInstance; 
+            //     console.log("found navagent on parent.parent");
+            // }
+            // if (!navAgentInstance) {
+            //     navAgentInstance = lastRaycastHitObject.parent.userData.NavAgentInstance; //hrm
+            //     console.log("found navagent on parent");
 
-            }
-            if (!navAgentInstance) {
-                navAgentInstance = lastRaycastHitObject.userData.NavAgentInstance; //hrm
-                // console.log("no no parent");
-            }
-          
-            if (!navAgentInstance) {
-                navAgentInstance = navAgentInstances[lastRaycastHitObject.userData.name];
+            // }
+            // if (!navAgentInstance) {
+            //     navAgentInstance = lastRaycastHitObject.userData.NavAgentInstance; //hrm
+            //     console.log("found navagent on lastRaycastHitObject");
+            //     // console.log("no no parent");
+            // }
+            let sOID = lastRaycastHitObject.userData.sceneObjectID;
+            if (lastRaycastHitObject.userData.sceneObjectID) {
+                // navAgentInstance = navAgentInstances[lastRaycastHitObject.userData.name];
+                navAgentInstance = navAgentInstances[sOID];
+                if (navAgentInstance)
+                console.log("found navagent on in navAgentInstances by sceneObjectID " + sOID);
             }
             // console.log("navAgentInstance" + lastRaycastHitObject.userData.name);
             if (navAgentInstance) {
@@ -1276,17 +1288,39 @@ export function onMouseDown(event) { //clicked on threejs object
                     console.log("text item " + textData);
                 }
 
-                if (lastRaycastHitObject.userData) {
-                    console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID);
-                }
+                // if (lastRaycastHitObject.userData) {
+                //     console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID);
+                // }
                 // console.log("sceneObjects " )
 
-                const sOID = lastRaycastHitObject.userData.sceneObjectID;
-                // if (lastRaycastHitObject.userData && lastRaycastHitObject.userData.sceneObjectID || lastRaycastHitObject.userData.objectData.sceneObjectID) {
-                if (sOID) {
-                    console.log("mouseDownOn " + event.target.id + " vs " + sOID);
+                // let sOID = lastRaycastHitObject.userData.sceneObjectID;
+                // if (!sOID) {
+                //     sOID = lastRaycastHitObject.parent.userData.sceneObjectID;
+                // }
+                // // if (lastRaycastHitObject.userData && lastRaycastHitObject.userData.sceneObjectID || lastRaycastHitObject.userData.objectData.sceneObjectID) {
+                // if (sOID) {
+                    console.log("mouseDownOn sceneObjectID : " + sOID);
                     sceneObjects[sOID].onClick(event);
+                // }
+                                // let textData;
+                if (lastRaycastHitObject.userData.locationData.mediaID) {
+                    textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                    console.log("text item " + textData);
                 }
+                
+                
+                //like above, need to sniff the parent
+                // let sceneObjectInstance;
+                // if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
+                //     sceneObjectInstance = lastRaycastHitObject.parent.parent.userData.sceneObjectInstance;
+                // }//hrm
+                // if (!sceneObjectInstance) {
+                //     sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance; //hrm
+                // }
+                // if (sceneObjectInstance) {
+                //    sceneObjectInstance.onClick(event);
+                // }
+               
                 // sceneObjects[lastRaycastHitObject.userData.sceneObjectID].onClick(event);
                 //like above, need to sniff the parent
                 // let sceneObjInstance;
@@ -1345,8 +1379,8 @@ export function onMouseDown(event) { //clicked on threejs object
                     }
                 }
                 
-                const sOID = lastRaycastHitObject.userData.sceneObjectID ?? lastRaycastHitObject.userData.objectData.sceneObjectID;
-                // if (lastRaycastHitObject.userData && lastRaycastHitObject.userData.sceneObjectID || lastRaycastHitObject.userData.objectData.sceneObjectID) {
+                // const sOID = lastRaycastHitObject.userData.sceneObjectID ?? lastRaycastHitObject.userData.objectData.sceneObjectID;
+                // // if (lastRaycastHitObject.userData && lastRaycastHitObject.userData.sceneObjectID || lastRaycastHitObject.userData.objectData.sceneObjectID) {
                 if (sOID) {
                     console.log("mouseDownOn " + event.target.id + " vs " + sOID);
                     sceneObjects[sOID].onClick(event);
@@ -1431,44 +1465,46 @@ export function onMouseDown(event) { //clicked on threejs object
                         // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
                     }
                 }
-            } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
+            } else if (lastRaycastHitObject.userData.locationData) {
+                if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                
-                htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
-                "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
-                "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
-                lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Enter</button>"+
-                "</div>";
-                ShowHTMLPopup(event, htmlString, null, null, "hic_content");
-            
-            } else if (lastRaycastHitObject.userData.locationData.mediaID) {
-            // const popup = document.getElementById("popup");
-                let textData;
-                if (lastRaycastHitObject.userData.locationData.mediaID) {
-                    if (lastRaycastHitObject.userData.locationData.eventData.includes("children")) {
-                        textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID, lastHitObjectName);
-                    } else { //eventData == "random"?
-                        textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
-                    }
-                    console.log("text item " + JSON.stringify(textData));
-                }
+                    htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
+                    "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
+                    "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
+                    lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Enter</button>"+
+                    "</div>";
+                    ShowHTMLPopup(event, htmlString, null, null, "hic_content");
                 
-                if (textData != null && textData != undefined && textData != "" && textData != "none" && textData.text) {
-                       htmlString = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
-                        ShowHTMLPopup(event, htmlString);
-                    // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
-                    // ShowPopup(event);
-                    // UpdateHIC(popup.innerHTML);
-                } else if (textData && !textData.text) {
+                } else if (lastRaycastHitObject.userData.locationData.mediaID) {
+                // const popup = document.getElementById("popup");
+                    let textData;
+                    if (lastRaycastHitObject.userData.locationData.mediaID) {
+                        if (lastRaycastHitObject.userData.locationData.eventData.includes("children")) {
+                            textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID, lastHitObjectName);
+                        } else { //eventData == "random"?
+                            textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                        }
+                        console.log("text item " + JSON.stringify(textData));
+                    }
+                    
+                    if (textData != null && textData != undefined && textData != "" && textData != "none" && textData.text) {
+                        htmlString = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
+                            ShowHTMLPopup(event, htmlString);
+                        // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " </h1>"  + textData.text;
+                        // ShowPopup(event);
+                        // UpdateHIC(popup.innerHTML);
+                    } else if (textData && !textData.text) {
 
-                        htmlString = "<h1>" + textData[0] + " </h1>"  + textData[1];
-                        ShowHTMLPopup(event, htmlString);
-                    //  popup.innerHTML = "<h1>" + textData[0] + " </h1>"  + textData[1];
-                    // ShowPopup(event);
-                    // UpdateHIC(popup.innerHTML);
+                            htmlString = "<h1>" + textData[0] + " </h1>"  + textData[1];
+                            ShowHTMLPopup(event, htmlString);
+                        //  popup.innerHTML = "<h1>" + textData[0] + " </h1>"  + textData[1];
+                        // ShowPopup(event);
+                        // UpdateHIC(popup.innerHTML);
+                    }
+                } else {
+                    // popup.style.display = "none";
+                    // HideHTMLPopup();
                 }
-            } else {
-                // popup.style.display = "none";
-                // HideHTMLPopup();
             }
         } else {
             // const popup = document.getElementById("popup");

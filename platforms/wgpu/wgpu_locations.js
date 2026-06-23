@@ -129,7 +129,7 @@ export function InitLocations() {
     if (objexDataEl) {
         const theObjexData = objexDataEl.getAttribute('data-objex');
         objexData = JSON.parse(atob(theObjexData));
-        console.log("objexData " + JSON.stringify(objexData));
+        console.log("objexData array length" + objexData.length);
     }
 
     let locationDataEl = document.getElementById('locationData'); //locations have ids, types, can have models and objects assigned
@@ -341,7 +341,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
             model.receiveShadow = true;
             const animations = modelData.animations;
             let count = 1;
-            const sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Date.now();
+            let sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Date.now();
             model.userData.sceneObjectID = sceneObjectID;
 
             if (locationObjex[i].locationData.eventData && locationObjex[i].locationData.eventData.includes("scatter")) { //scatter, not instancing, but cloning multiples
@@ -364,7 +364,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     } else {
                         clonedModel = model.clone();
                     }
-                    
+                    sceneObjectID = locationObjex[i].locationData.timestamp + "_" + z.toString() + "_" + Date.now();
                     locationObjex[i].objectData.sceneObjectID = sceneObjectID;
                     clonedModel.name = sceneObjectID;
                     
@@ -421,16 +421,18 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     physicsColliderMesh.userData.locationData = locationObjex[i].locationData;
                     physicsColliderMesh.userData.objectData = locationObjex[i].objectData;
                     physicsColliderMesh.userData.sceneObjectID = sceneObjectID;
+                    locationObjex[i].objectData.isNavAgent = true;
                     // parent.name = "navagent";
                     // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
-                    const sceneObject = new SceneObject(clonedModel, locationObjex[i].objectData, false, null);
+                    const sceneObject = new SceneObject(clonedModel, locationObjex[i].objectData, false, null, true);
                     // const sceneObjectInstance = {sceneObjectID : sceneObject};
                     // sceneObjects.push(sceneObjectInstance);
                     sceneObjects[sceneObjectID] = sceneObject;
+                    locationObjex[i].objectData.sceneObjectID  = sceneObjectID;
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
                         // sceneObjects.push(sceneObject);
                     // sceneObjectInstance.
-                    await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData, locationObjex[i].objectData, sceneObject);
+                    await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData, locationObjex[i].objectData, sceneObjectID);
                     kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
 
                     // const body = await getModelKinematicBody(physicsColliderMesh, locationObjex[i].locationData, locationObjex[i].objectData); //pass the index too
@@ -468,7 +470,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             }
                         });
                         console.log("tryna place an object " + zm + " sceneObjectID " + sceneObjectID);
-                        const sceneObject = new SceneObject(clonedObject, locationObjex[i].objectData, false, null);
+                        const sceneObject = new SceneObject(clonedObject, locationObjex[i].objectData, false, null, false);
                         sceneObjects[sceneObjectID.toString()] = sceneObject;
                         
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
@@ -496,7 +498,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         
                         }
                     });
-                    const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null);
+                    const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null, false);
                     sceneObjects[sceneObjectID.toString()] = sceneObject;
                     // sceneObjectsArray.push(locationObjex[i].data)
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
@@ -526,6 +528,7 @@ export async function LoadAndDropSingleObject (oData, locationData) { //eg drop
     if (matchedObject) {
         // console.log("matched inventory to location object " + JSON.stringify(matchedObject));
         matchedObject.sceneObjectID = sceneObjectID;
+        // matchedObject.userData.sceneObjectID = sceneObjectID;
         const modelData = await LoadModel(matchedObject.modelURL);        
         const model = modelData.scene;
         model.userData.locationData = locationData;
@@ -540,13 +543,14 @@ export async function LoadAndDropSingleObject (oData, locationData) { //eg drop
         if (child.isMesh) {
             child.userData.locationData = locationData;
             child.userData.objectData = matchedObject;
+            child.userData.sceneObjectID = sceneObjectID;
             }
         });
 
         // const worldPosition = new THREE.Vector3();
         // viewportPlaceholder.getWorldPosition(worldPosition);
         model.position.set(locationData.x, locationData.y, locationData.z);
-        const sceneObject = new SceneObject(model, matchedObject, false, null);
+        const sceneObject = new SceneObject(model, matchedObject, false, null, false);
         sceneObjects[sceneObjectID] = sceneObject;
     }
     } catch (e) {

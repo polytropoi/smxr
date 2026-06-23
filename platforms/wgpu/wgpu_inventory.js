@@ -140,7 +140,7 @@ export async function EquipObject (objectData) {
         // const worldPosition = new THREE.Vector3();
         // equippedModel.getWorldPosition(worldPosition);
         activeObjex.push(equippedModel);
-        const equippedSceneObject = new SceneObject(equippedModel, objectData, true, viewportPlaceholder);
+        const equippedSceneObject = new SceneObject(equippedModel, objectData, true, viewportPlaceholder, false);
         sceneObjects[objectData.sceneObjectID.toString()] = equippedSceneObject;
         
     

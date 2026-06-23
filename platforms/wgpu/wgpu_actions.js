@@ -75,7 +75,7 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
 // export let sceneObjectIndex = 0;
 
 export class SceneObject { //things that might have models and actions and fancy params, e.g. characters, magic swords, etc
-    constructor(object, objectData, isEquipped, objectParent) {
+    constructor(object, objectData, isEquipped, objectParent, isNavAgent) {
 
         
 
@@ -83,12 +83,20 @@ export class SceneObject { //things that might have models and actions and fancy
         this.objectData = objectData;
         this.sceneObjectID = objectData.sceneObjectID;
         this.sceneInventoryID = objectData.sceneInventoryID;
+                // this.object.userData.sceneObjectInstance = this;
         // this.object.userData.sceneObjectIndex = sceneObjectIndex;
         // console.log("new sceneObject " + this.objectData.sceneObjectID);
 
-        this.isEquipped = false;
+        this.isEquipped = isEquipped;
         this.fromSceneInventory = objectData.fromSceneInventory;
 
+        this.isNavAgent = isNavAgent;
+
+        if (isEquipped) {
+            this.objectParent = objectParent;
+            // this.isEquipped = true;
+            this.setEquippedRigidbody();
+        }
         // this.loadAction;
         // this.hasSelectAction = false;
         // this.selectAction;
@@ -163,11 +171,7 @@ export class SceneObject { //things that might have models and actions and fancy
             }
         }
 
-        if (isEquipped) {
-            this.objectParent = objectParent;
-            this.isEquipped = true;
-            this.setEquippedRigidbody();
-        }
+
         // sceneObjectInstanceIndex++;
         // return sceneObjectInstanceIndex;
     }
@@ -212,6 +216,9 @@ export class SceneObject { //things that might have models and actions and fancy
                     }
                     this.throwObject(this.objectData._id, mouseDowntime, "5");
 
+                } else {
+                    this.object.visible = false;
+                    this.dropObject(this.objectData._id); //just drop for now...throw/shoot/swing next! --< ?
                 }
                 // if (this.triggerAudioController != null) {
                 //     // this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(this.hitpoint, this.distance, ["throw"], .5);//tagmangler needs an array
@@ -354,7 +361,7 @@ export class SceneObject { //things that might have models and actions and fancy
         const worldPosition = new THREE.Vector3();
         this.object.getWorldPosition(worldPosition);
 
-        console.log("tryna throw from " + JSON.stringify(worldPosition));
+        console.log("tryna throw " + this.object.name + " from " + JSON.stringify(worldPosition) + " this.object.parent " + this.object.parent.name);
 
         //     SetEquippedRigidbody(rbody);
         // console.log("tryna throw");

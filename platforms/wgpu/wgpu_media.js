@@ -25,7 +25,7 @@ export function InitPictureGroups () {
       let thePictureGroupsData = pictureGroupsDataEl.getAttribute('data-picture-groups');
       pictureGroupsData = JSON.parse(atob(thePictureGroupsData));
    }
-   console.log("pictureGroupsData " + JSON.stringify(pictureGroupsData));
+   console.log("pictureGroupsData " + pictureGroupsData.length);
     // const planeGeometry = new THREE.PlaneGeometry(4, 3, 2, 2); 
     //                                        const planeMaterial = new THREE.MeshStandardMaterial({ color: 'blue' });
     //                                        landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -124,7 +124,7 @@ class SceneTextData {
             })
             .then(response => response.json())
             .then(data => {
-                console.log('textData Success:', JSON.stringify(data));
+                console.log('textData Success:', data.length);
 
                 
                 for (let i = 0; i < data.length; i++) { //check for text type?
@@ -145,7 +145,7 @@ class SceneTextData {
         popTextData (data) {
             // const parsedText = JSON.stringify(data);
             this.jsonData.push(data);
-            console.log("sceneTextItems " + JSON.stringify(this.jsonData));
+            console.log("sceneTextItems " + this.jsonData.length);
         }
     
         loadTextData (data) {

@@ -201,15 +201,15 @@ function WaitAndInit () {
     } catch (e) {
       console.log("error looping kinematic bodies " + e );
     } finally {      
-      if (player) {
-      //  const body = await getKinematicBody(player, -1); //pass the index too
+      // if (player) {
+      // //  const body = await getKinematicBody(player, -1); //pass the index too
 
-        
-        // playerRigidbody = await getPlayerBody(player); 
-        // kinematicBodies.push(playerRigidbody);
-        // playerRigidbody = body
-      // getPlayerBody(player);
-      }
+      //   console.log("makin a kinematic player body!");
+      //   // playerRigidbody = await getPlayerBody(player); 
+      //   // kinematicBodies.push(playerRigidbody);
+      //   // playerRigidbody = body
+      // // getPlayerBody(player);
+      // }
       if (npcKinematicBodies.length) {
         console.log("adding npcKinematicBodies " + npcKinematicBodies.length);
         // for (let k = 0; k < npcKinematicBodies.length; k++) {

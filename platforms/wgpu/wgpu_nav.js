@@ -107,7 +107,7 @@
         // return playerNavAgent;
     }
 
-    export async function CreateNPCAgent (parent, model, animations, index, locationData, objectData) { //hrm, not yet...
+    export async function CreateNPCAgent (parent, model, animations, index, locationData, objectData, sceneObjectID) { //hrm, not yet...
         
 
         await new Promise(r => setTimeout(r, 0));
@@ -121,6 +121,7 @@
             agentSpeed = objectData.speedFactor;
             console.log("agentSpeed is " + agentSpeed );
         }
+
         const options = {
             object: model,
             // model: parent,
@@ -142,7 +143,7 @@
         console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID );
 
 
-        navAgentInstances[model.userData.name] = npc;
+        navAgentInstances[sceneObjectID] = npc;
 
         // return npc;
         // return playerNavAgent;
