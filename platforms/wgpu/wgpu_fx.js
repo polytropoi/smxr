@@ -23,48 +23,6 @@ export function Starfield(count, size, scale, animation) {
     // material.vertexNode = billboarding();
     scene.add(mesh);
 
-    // material.positionNode = positionLocal.add(positionRange).Fn(({object: mesh}) => {
-    //     // 
-    //     const objectCenter = getMatrix().element(3).xyz;
-    //     const toCamera = cameraPosition.sub(objectCenter).toVar();
-    //     // set toCamera.y = 0 to only allow rotation around the y-axis (i.e. make it "cylindrical")
-    //     toCamera.assign(vec3(toCamera.x, 0, toCamera.z).normalize());
-    //     const up = vec3(0, 1, 0).toVar();
-    //     const right = up.cross(toCamera).normalize();
-    //     up.assign(toCamera.cross(right).normalize());
-    //     const rotationMatrix = mat3(right, up, toCamera);
-    //     return rotationMatrix.mul(positionGeometry);
-
-    //     function getMatrix() {
-    //         if (mesh.isInstancedMesh) {
-    //             // Can I use tsl.instance() to make this code cleaner?
-    //             // I tried using tsl.instance().instanceMatrixNode but it's always null.
-    //             // Leaving this line here but commented out.
-    //             // tsl.instance(mesh.count, mesh.instanceMatrix).toStack();
-    //             const attribute = mesh.instanceMatrix;
-    //             const matrices = attribute.array;
-    //             if (mesh.count <= 1000) {
-    //                 const bufferNode = buffer(matrices, 'mat4', Math.max(mesh.count, 1));
-    //                 return bufferNode.element(instanceIndex);
-    //             } else {
-    //                 const buffer = new three.InstancedInterleavedBuffer(matrices, 16, 1);
-    //                 let bufferFn = instancedBufferAttribute;
-    //                 if (attribute.usage === three.DynamicDrawUsage) {
-    //                     bufferFn = instancedDynamicBufferAttribute;
-    //                 }
-    //                 // F.Signature -> bufferAttribute( array, type, stride, offset )
-    //                 const b0 = bufferFn(buffer, 'vec4', 16, 0);
-    //                 const b1 = bufferFn(buffer, 'vec4', 16, 4);
-    //                 const b2 = bufferFn(buffer, 'vec4', 16, 8);
-    //                 const b3 = bufferFn(buffer, 'vec4', 16, 12);
-    //                 return mat4(b0, b1, b2, b3);
-    //             }
-    //         }
-    //         return modelWorldMatrix;
-    //     }
-    // })();
-
-        // material.positionNode = positionLocal.add(positionRange);
 }
 
 export function CreateSprites (count, size, scale, animation) {
@@ -102,11 +60,10 @@ export function CreateSprites (count, size, scale, animation) {
         const color = new THREE.Color(settings.sceneColor2Alt);
         material.color = color;
 
-// 1. Create a uniform node for the color
-// const spriteColorUniform = uniform(new THREE.Color(0xff0000)); // Start with red
+        // const spriteColorUniform = uniform(new THREE.Color(0xff0000)); // Start with red
 
-// 2. Assign the uniform node to colorNode
-// material.colorNode = spriteColorUniform;
+ 
+        // material.colorNode = spriteColorUniform;
         // material.colorNode = new THREE.Color(settings.sceneColor2);
         material.positionNode = instancedBufferAttribute( positionAttribute );
         material.rotationNode = time.add( instanceIndex ).sin().mul(.1);

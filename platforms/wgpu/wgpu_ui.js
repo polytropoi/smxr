@@ -572,6 +572,7 @@ export function SwapMaterials (object, material) {
         if (material == "transparent") {
             nMat.transparent = true;
             nMat.opacity = .5;
+            nMat.color = new THREE.Color("white");
         } 
         object.material = nMat;
         object.material.needsUpdate = true;
@@ -714,21 +715,32 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
                     display: 'block',
                 });
             } else {
-                // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
-                let xpos = event.clientX - 150;
-                if ((window.innerWidth - event.clientX) < 150) {
-                    xpos = event.clientX - 300;
-                } else if (event.clientX < 150) {
-                    xpos = 0;
-                }
+                // // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
+                // let xpos = event.clientX - 150;
+                // if ((window.innerWidth - event.clientX) < 150) {
+                //     xpos = event.clientX - 300;
+                // } else if (event.clientX < 150) {
+                //     xpos = 0;
+                // }
                 
-                let ypos = event.clientY - 100;
-                if (event.clientY < 100) {
-                    ypos = 0;
-                }
+                // let ypos = event.clientY - 100;
+                // if (event.clientY < 100) {
+                //     ypos = 0;
+                // }
                 // if (event.clientY > (window.innerHeight - 300)) {
                 //     ypos = window.innerHeight - 300;
                 // }
+                let xpos = event.clientX - 256;
+                if ((window.innerWidth - event.clientX) < 256) {
+                    xpos = event.clientX - 512;
+                } else if (event.clientX < 256) {
+                    xpos = 0;
+                }
+                
+                let ypos = event.clientY - 256;
+                if (event.clientY < 200) {
+                    ypos = 0;
+                }
                  Object.assign(popup.style, {
                     left: `${xpos}px`,
                     top: `${ypos}px`,

@@ -258,12 +258,7 @@ export function InitLocations() {
                             staticObjex.push(staticObject);
                         }
 
-                        // if (locationData[i].markerType == "light") {
-                        //     CreateLight(locationData[i]);
-                        // }
-                        // if (locationData[i].markerType == "gate") {
-                        //     // CreateSceneGate(locationData[i]);
-                        // }                        
+                        
                     }
                     if (locationData[i].objectID) { // objects can have (rigged) models, and actions, which can summon other objects with models and actions.  should be object type only?
                         
@@ -568,6 +563,9 @@ async function LoadLocationModel (url, locationData, isActive) {
     let animations;
     if (!url) { //i.e. it's a primitive, not gltf
         // console.log("no model url " + locationData.modelID);
+        const xscale = locationData.xscale * .1;
+        const yscale = locationData.yscale * .1;
+        const zscale = locationData.zscale * .1;
         if (locationData.modelID.includes("sphere")) {
             // console.log("gotsa sphere primitive");
             const geometry = new THREE.SphereGeometry(1,16,16);
@@ -582,11 +580,11 @@ async function LoadLocationModel (url, locationData, isActive) {
             const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
             model = new THREE.Mesh( geometry, material );
         } else if (locationData.modelID.includes("cylinder")) {
-            const geometry = new THREE.PlaneGeometry( 1, 1, 20, 24 );
+            const geometry = new THREE.CylinderGeometry( xscale, yscale, xscale, 20, 24 );
             const material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
             model = new THREE.Mesh( geometry, material );
         } else if (locationData.modelID.includes("plane")) {
-            const geometry = new THREE.PlaneGeometry( 1, 1 );
+            const geometry = new THREE.PlaneGeometry( xscale, yscale );
             const material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
             model = new THREE.Mesh( geometry, material );
         } else if (locationData.modelID.includes("torus")) {
@@ -602,7 +600,7 @@ async function LoadLocationModel (url, locationData, isActive) {
 
     if (model) {
    
-        console.log("gotsa model !" + JSON.stringify(locationData) + " " + isActive);
+        console.log("gotsa location model !" + JSON.stringify(locationData) + " " + isActive);
         model.position.set(parseFloat(locationData.x),parseFloat(locationData.y),parseFloat(locationData.z));
         const xscale = locationData.xscale ? locationData.xscale : 1;
         const yscale = locationData.yscale ? locationData.yscale : 1;
@@ -666,7 +664,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                     // activeObjex.push(navmesh);
                 
                 }
-                if (isActive || locationData.markerType == "navmesh" || locationData.locationTags.includes("active")) {
+                if ((isActive || locationData.locationTags.includes("active")) && locationData.markerType != "trigger") {
                     activeObjex.push(child);
                 }
             
@@ -835,7 +833,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             if (model)
             scene.add(model.model);
             // model.material.color = "orange";
-            console.log("adding a light! " + model);
+            console.log("adding a light! ");
         // }
         break;
     }

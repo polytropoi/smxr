@@ -89,34 +89,7 @@ export function InitGrid () {
 	const divisions = 100;
 	const gridHelper = new THREE.GridHelper( size, divisions, settings.sceneColor2, settings.sceneColor3 );
 	scene.add( gridHelper );
-	// 1. Setup WebGPU Renderer
-	
 
-	// // 3. Create a large plane for the grid to stretch across
-	// const geometry = new THREE.PlaneGeometry(10000, 10000);
-	// const material = new THREE.MeshBasicNodeMaterial({ transparent: true });
-
-	// // TSL Shader Logic for the Grid
-	// const gridAlpha = getGridNode(positionWorld.xz);
-	// material.colorNode = color(0x00ffff).mul(gridAlpha); 
-
-	// const gridScale = uniform(10.0);
-	// const thickness = uniform(0.02);
-	// const gridColor = uniform(new THREE.Color(0x444444));
-	// const backgroundColor = uniform(new THREE.Color(0x111111));
-	// const material = new THREE.MeshBasicNodeMaterial();
-	// material.colorNode = createInfiniteGridNode();
-
-	// // 5. Create a massive plane in the world
-	// const planeGeo = new THREE.PlaneGeometry(1000, 1000);
-	// // Rotate it to lay flat on the floor (X-Z axis)
-	// planeGeo.rotateX(-Math.PI / 2);
-	// const gridGeometry = new THREE.PlaneGeometry(10000, 10000);
-	// const gridMesh = new THREE.Mesh(gridGeometry, createGridMaterial());
-	// gridMesh.rotation.x = -Math.PI / 2; // Make it lay flat as a floor
-	// scene.add(gridMesh);
-	// const plane = new THREE.Mesh(planeGeo, material);
-	// scene.add(plane);
 
 }
 
@@ -183,77 +156,63 @@ export function InitEnvMap () {
 export function InitSky() {
 
 	if (settings && settings.sceneUseDynamicSky) {
-				// Add Sky
-				const sky = new SkyMesh();
-				sky.scale.setScalar( 450000 );
-				scene.add( sky );
+		// Add Sky
+		const sky = new SkyMesh();
+		sky.scale.setScalar( 450000 );
+		scene.add( sky );
 
+		const sun = new THREE.Vector3();
 
-       
+	
+		console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
+		let elevation = 45;
+		let sceneClouds = "medium";
+		let cloudCoverage = .35;
+		let cloudDensity = .5;
+		let cloudElevation = .5;
+		if (settings.sceneClouds.name) {
+			sceneClouds = settings.sceneClouds.name;
+		}
+		if (settings.sceneTime.name) {
+			if (settings.sceneTime.name == "morning" || settings.sceneTime.name == "evening") {
+				elevation = 2;
+			} else if (settings.sceneTime.name == "afternoon") {
+				elevation = 45;
+			} else if (settings.sceneTime.name == "noon" || settings.sceneTime.name == "midday") {
+				elevation = 90;
+			}
 
-				const sun = new THREE.Vector3();
-
-				/// GUI
-
-
-				// const effectController = { //low sun twilight
-				// 	turbidity: 10,
-				// 	rayleigh: 3,
-				// 	mieCoefficient: 0.005,
-				// 	mieDirectionalG: 0.7,
-				// 	elevation: 2,
-				// 	azimuth: 180,
-				// 	exposure: renderer.toneMappingExposure
-				// };
-				console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
-				let elevation = 45;
-				let sceneClouds = "medium";
-				let cloudCoverage = .35;
-				let cloudDensity = .5;
-				let cloudElevation = .5;
-				if (settings.sceneClouds.name) {
-					sceneClouds = settings.sceneClouds.name;
-				}
-				if (settings.sceneTime.name) {
-					if (settings.sceneTime.name == "morning" || settings.sceneTime.name == "evening") {
-						elevation = 2;
-					} else if (settings.sceneTime.name == "afternoon") {
-						elevation = 45;
-					} else if (settings.sceneTime.name == "noon" || settings.sceneTime.name == "midday") {
-						elevation = 90;
-					}
-
-				}
-				
-				const effectController = {
-					turbidity: 10,
-					rayleigh: 3,
-					mieCoefficient: 0.005,
-					mieDirectionalG: 0.7,
-					elevation: elevation,
-					azimuth: 180,
-					// exposure: renderer.toneMappingExposure,
-					exposure: .75,
-					cloudCoverage: cloudCoverage,
-					cloudDensity: cloudDensity,
-					cloudElevation: cloudElevation
-				};
-
+		}
 		
-					sky.turbidity.value = effectController.turbidity;
-					sky.rayleigh.value = effectController.rayleigh;
-					sky.mieCoefficient.value = effectController.mieCoefficient;
-					sky.mieDirectionalG.value = effectController.mieDirectionalG;
+		const effectController = {
+			turbidity: 10,
+			rayleigh: 3,
+			mieCoefficient: 0.005,
+			mieDirectionalG: 0.7,
+			elevation: elevation,
+			azimuth: 180,
+			// exposure: renderer.toneMappingExposure,
+			exposure: .75,
+			cloudCoverage: cloudCoverage,
+			cloudDensity: cloudDensity,
+			cloudElevation: cloudElevation
+		};
 
-					const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
-					const theta = THREE.MathUtils.degToRad( effectController.azimuth );
 
-					sun.setFromSphericalCoords( 1, phi, theta );
+			sky.turbidity.value = effectController.turbidity;
+			sky.rayleigh.value = effectController.rayleigh;
+			sky.mieCoefficient.value = effectController.mieCoefficient;
+			sky.mieDirectionalG.value = effectController.mieDirectionalG;
 
-					sky.sunPosition.value.copy( sun );
+			const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
+			const theta = THREE.MathUtils.degToRad( effectController.azimuth );
 
-					sunLight.position.copy(sun);
-					renderer.toneMappingExposure = effectController.exposure;
+			sun.setFromSphericalCoords( 1, phi, theta );
+
+			sky.sunPosition.value.copy( sun );
+
+			sunLight.position.copy(sun);
+			renderer.toneMappingExposure = effectController.exposure;
 // 
 		} else {	
 
@@ -288,7 +247,7 @@ export function InitSky() {
 
 			// const topColor = color( 0x3a1c71 );
     		// const bottomColor = color( 0xd76d77 );
-			    const gradientNode = mix( bottomColor, topColor, uv().y );
+			const gradientNode = mix( bottomColor, topColor, uv().y );
 
 			scene.backgroundNode = gradientNode;
 			// 4. Create Material & Mesh

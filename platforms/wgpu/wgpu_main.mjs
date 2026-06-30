@@ -53,12 +53,7 @@
 	
 	import { equippedObjectOnLoad, LoadSceneInventory } from './wgpu_inventory.js';
 	
-// 	import { InstanceNode } from 'three/webgpu';
-// import RenderObjectPipeline from 'three/src/renderers/common/RenderObjectPipeline.js';
 
-
-// import { GetUserInventory } from '../../connect/dialogs.js';
-// import { AnimatedSprite } from './tsl/tsl_fx.js';
 
 	export let scene;
 
@@ -250,14 +245,9 @@
 		} 
 		for (let i = 0; i < instancedModels.length; i++) { //loop again for physics or patterned instances..
 			if (instancedModels[i].locationData.locationTags.includes("dynamic") || instancedModels[i].locationData.locationTags.includes("physics")) {
-				// physicsInstances = InitPhysicsInstances(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
-				// physicsInstances.updatePhysics();
-				// physicsInstances = await new InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
-				// physicsInstances.updatePhysics();
-				InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
-				// instanceWithPhysicsInstance.updatePhysics();
-				// instancedWithPhysics.push(instanceWithPhysicsInstance);
-				// console.log("instancedWithPhysics length " + instancedWithPhysics.length);
+			
+				// InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
+				
 
 			}
 		}

@@ -670,7 +670,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                     // activeObjex.push(navmesh);
                 
                 }
-                if (isActive || locationData.markerType == "navmesh" || locationData.locationTags.includes("active")) {
+                if ((isActive || locationData.locationTags.includes("active")) && locationData.markerType != "trigger") {
                     activeObjex.push(child);
                 }
             
@@ -845,11 +845,11 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         }
         // if (model) {
             CreateLight(locationData);
-            if (model)
-            scene.add(model.model);
-        model.model.castShadow = true;
+        //     if (model) {
+        //     scene.add(model.model);
+        // model.model.castShadow = true;
             // model.material.color = "orange";
-            console.log("adding a light! " + model);
+            console.log("adding a light! ");
         // }
         break;
     }

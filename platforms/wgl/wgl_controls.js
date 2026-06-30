@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture } from './wgl_ui.js';
+import { InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, ShowPopup } from './wgl_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -1436,7 +1436,7 @@ export function onMouseDown(event) { //clicked on threejs object
                 // });
                 ShowPopup(event);
                 popup.innerHTML = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
-                "<br><br><div><button id=\x22hicCancelButton\x22 class=\x22cancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
+                "<br><br><div><button id=\x22hicCancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
                 "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
                 lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Go</button>"+
                 "</div>";
@@ -1501,46 +1501,6 @@ export function onMouseDown(event) { //clicked on threejs object
 
 }
 
-export function ShowPopup (event) { //hrm move to UI
-    const popup = document.getElementById("popup");
-    console.log("showDialogPanel " + showDialogPanel);
-
-    if (showDialogPanel) {
-        return;
-    }
-    if (!event) {
-        let xpos = window.innerWidth / 2;
-        let ypos = window.innerHeight / 2;
-        Object.assign(popup.style, {
-            left: `${xpos}px`,
-            top: `${ypos}px`,
-            display: 'block',
-        });
-    } else {
-        // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
-        let xpos = event.clientX - 150;
-        if ((window.innerWidth - event.clientX) < 150) {
-            xpos = event.clientX - 300;
-        } else if (event.clientX < 150) {
-            xpos = 0;
-        }
-        
-        let ypos = event.clientY - 150;
-        if (event.clientY < 100) {
-            ypos = 0;
-        }
-        // if (event.clientY > (window.innerHeight - 300)) {
-        //     ypos = window.innerHeight - 300;
-        // }
-         Object.assign(popup.style, {
-            left: `${xpos}px`,
-            top: `${ypos}px`,
-            display: 'block',
-        });
-    }
-    
-
-}
 
 export function onMouseUp(e) {
     mouseDowntime = (Date.now() / 1000) - mouseDownStarttime; 

@@ -7,7 +7,9 @@ import { eventEl } from '../../../connect/events.js';
 
 import { ReturnObjectData, SceneObject, lastEvent} from './wgl_actions.js';
 
-import { viewportPlaceholder, popup, ShowPopup } from './wgl_controls.js';
+import { viewportPlaceholder, popup } from './wgl_controls.js';
+
+import { ShowPopup } from './wgl_ui.js';
 
 import { AddDynamicBody, SetEquippedRigidbody } from './wgl_physics.js';
 

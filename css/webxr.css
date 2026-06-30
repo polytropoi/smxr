@@ -1973,9 +1973,9 @@ body {
       width: 90%;
       background-color: rgb(255, 255, 255); /* Fallback color */
       background-color: rgb(255, 255, 255); /* Black w/ opacity */
-      color: #000000;
-justify-content: center; /* Centers horizontally */
-  align-items: center; 
+      color: #000000; 
+      justify-content: center; /* Centers horizontally */
+      align-items: center; 
       border: 2px solid white;
       border-radius: 1em;
       /* margin: 2em 2em 2em 2em; */
@@ -2017,12 +2017,12 @@ justify-content: center; /* Centers horizontally */
       /* -webkit-text-stroke: 1px;
        */
        color: #000000;
-    /* text-shadow: #ffffff 0px 0px 10px;
-    -webkit-font-smoothing: antialiased; */
-    display: flex;
-  justify-content: center; /* Centers horizontally */
-  align-items: center; 
-       margin: 4em 4em 4em 4em;
+      /* text-shadow: #ffffff 0px 0px 10px;
+      -webkit-font-smoothing: antialiased; */
+      display: flex;
+      justify-content: center; /* Centers horizontally */
+      align-items: center; 
+      margin: 4em 4em 4em 4em;
     }
 
     .hic_content_pill {

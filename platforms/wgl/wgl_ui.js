@@ -14,6 +14,8 @@ import {scene, renderer} from './wgl_main.mjs';
 
 import {player, camera} from './wgl_controls.js';
 
+import {showDialogPanel} from '../../../connect/dialogs.js';
+
 export let lookAtCameraObjects = [];
 
 export let textContainers = [];
@@ -36,13 +38,8 @@ let texture;
 let textContainer;
 // export let landscapePanel;
 
-export async function HTMLText (textString, size, parent, position, distance, persist, parentScale) { //this is rendered to texture and put on a plane
-    // Setup canvas with 2D context
-
-    // let textContainer = scene.getObjectByName('htmlCanvasContainer');
-    // let canvas = document.getElementById("htmlcanvas");
-
-
+export async function HTMLText (textString, size, parent, position, distance, persist, parentScale) { //this is oldschool rendered to texture and put on a plane, NOT the HTML-In-Canvas way (see wgpu route)
+  
      let scaleFactor = .1;
     if (distance) {
         if (distance > 1) {
@@ -54,33 +51,8 @@ export async function HTMLText (textString, size, parent, position, distance, pe
     }
     // console.log("ui scale factor " + scaleFactor);
     scaleFactor = clamp(scaleFactor, .5, 3);
-    if (textContainer) {
-        // textContainer.attach(scene);
-        // textContainer.position.set(position.x, position.y, position.z);
-        // console.log("htmlCanvasContainer found");
-        // canvas = document.createElement('canvas');
-        // canvas.width = 512;
-        // canvas.height = 256;
-        // canvas.id = "htmlcanvas";
-        // ctx = canvas.getContext('2d');
-        // ctx.beginPath();
-        // ctx.fillStyle = '#3b3b3b';
-        // ctx.roundRect(0, 0, canvas.width, canvas.height, 60); // 20px radius on all corners
-        // ctx.stroke(); 
-        // // ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // ctx.fillStyle = '#ffffff';
-        // ctx.font = '48px Arial';
-        // ctx.fillText(textString, 50, 130);
-
-        // Create texture, material, and mesh
-        // const texture = new THREE.CanvasTexture(canvas);
-        // texture.colorSpace = THREE.SRGBColorSpace;
-        // textContainer = new THREE.Mesh(
-        //     new THREE.PlaneGeometry(4, 2),
-        //     new THREE.MeshBasicMaterial({ map: texture })
-        // );
-        // textContainer.name = "htmlCanvasContainer";
-        // textContainer.add(textmesh);
+    if (textContainer) { //already created
+      
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         //  ctx.beginPath();
             // ctx.fillStyle = '#3b3b3b';
@@ -98,24 +70,10 @@ export async function HTMLText (textString, size, parent, position, distance, pe
         texture.needsUpdate = true;
         
         textContainer.scale.set(scaleFactor * 2,scaleFactor * 2,scaleFactor * 2);
-
-            // if (position) {
-            //     parent.worldToLocal(position);
-                
-            //     console.log("position is " + JSON.stringify(position));
-            //     // container.position.set(0,4,0);
-            //     // container.position.copy(position);
-            //     // textmesh.position.set(0,0,0);
-            //     textContainer.position.copy(position);
-            // } else {
-            //     textContainer.position.set(0,0,0);
-                
-            //     textmesh.position.set(0,0,0);
-            // }
+       
         
+    } else { //create a new one
         
-    } else {
-        // 3. Use the texture in a material
         texture = new THREE.CanvasTexture(canvas);
         // You can set other properties like format, filters, etc. here if needed
         texture.colorSpace = THREE.SRGBColorSpace;
@@ -128,12 +86,7 @@ export async function HTMLText (textString, size, parent, position, distance, pe
             parent.attach(textContainer);
             textContainer.position.set(0,2,-3);
            
-            // ctx.beginPath();
-            // ctx.fillStyle = '#3b3b3b';
-            // ctx.roundRect(0, 0, canvas.width, canvas.height, 20); // 20px radius on all corners
-            // ctx.stroke(); 
-            //  ctx.fillStyle = 'rgba(0,0,0,0)';
-            // ctx.fillRect(0, 0, canvas.width, canvas.height);
+           
             ctx.fillStyle = '#ffffff';
             ctx.font = '48px Arial';
             ctx.fillText(textString, 50, 130);
@@ -141,24 +94,12 @@ export async function HTMLText (textString, size, parent, position, distance, pe
              lookAtCameraObjects.push(textContainer);
         }
     }
-    // else {
-    //     console.log("has text container");
-    //     if (canvas) {
-    //         console.log("has canvas");
-    //         let ctx = canvas.getContext('2d');
-    //         parent.attach(textContainer);
-    //         textContainer.position.set(0,2,-2);
-            
-    //         textContainer.scale.set(scaleFactor,scaleFactor,scaleFactor);
-    //         ctx.fillText(textString, 50, 130);
-    //     } 
-    // }
-    //     // parent.add(mesh);
+ 
 }
 
 let cooldown = false;
 
-export async function ThreeDeeText (textString, size, parent, position, distance, persist, parentScale) { //
+export async function ThreeDeeText (textString, size, parent, position, distance, persist, parentScale) { // use geometry for text (callouts)
 
     if (!cooldown) {
         cooldown = true;
@@ -292,46 +233,11 @@ export async function ThreeDeeText (textString, size, parent, position, distance
         console.log("init textContainer for " + textString);
             
     } 
-    // if (!size) {
-    //     size = 100;
-    // }
-
-   
-
+  
 
     if (parent) { // callout or header, no bg?
         
 
-        // let material = new THREE.MeshStandardMaterial({ color: 'white', emissive: 'white', emissiveIntensity: .5 });
-        // material.roughness = 0.1;
-        // material.metalness = 0.3;
-        // material.envMap = scene.environment;
-        // material.envMapIntensity = 2;
-        // const textmesh = new THREE.Mesh(text.geometry, material);
-        // container.add(textmesh);
-        // parent.add(container);
-        // textmesh.position.set(0, 0, 0);
-        
-        // // const camPos = camera.position.clone();
-        // console.log("textContainer position is " + JSON.stringify(position));
-        // parent.updateMatrixWorld(true);
-       
-        // // const targetWorldPosition = new THREE.Vector3();
-
-        // if (position) {
-        //     parent.worldToLocal(position);
-            
-        //     console.log("position is " + JSON.stringify(position));
-        //     // container.position.set(0,4,0);
-        //     // container.position.copy(position);
-        //     // textmesh.position.set(0,0,0);
-        //     container.position.copy(position);
-        // } else {
-        //     container.position.set(0,0,0);
-            
-        //     textmesh.position.set(0,0,0);
-        // }
-        // container.scale.set(0,0,0); //scale up on second hit above
     } else {
 
         let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
@@ -352,13 +258,6 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     }
     
 
-
-    //  await new Promise(r => setTimeout(r, 3000));
-    // const updated = await text.update({ text: 'Hwlloo World' });
-    // textmesh.geometry.dispose();
-    // textmesh.geometry = updated.geometry;
-    //     console.log("gotsa text result2 " + text.measureTextWidth(textString) + " bounds " + JSON.stringify(text.planeBounds));
-    // result.text
     Cooldown();
     } 
 }
@@ -369,10 +268,6 @@ function Cooldown () {
     cooldown = false;
     // }, 100);
 }
-// import { Container, Text } from "@pmndrs/uikit";
-
-
-// import ThreeMeshUI from 'three-mesh-ui';
 
 
 
@@ -392,57 +287,28 @@ export function SplashText (textString) {
 }
 
 
-// export function TestText (textString) {
-// 	const container = new ThreeMeshUI.Block({
-// 		width: 1.2,
-// 		height: 0.5,
-// 		padding: 0.05,
-// 		justifyContent: 'center',
-// 		alignContent: 'left',
-// 		fontFamily: 'https://unpkg.com/three-mesh-ui/examples/assets/Roboto-msdf.json',
-// 		fontTexture: 'https://unpkg.com/three-mesh-ui/examples/assets/Roboto-msdf.png'
-// 	});
-
-// 	container.position.set( 0, 0, 0 );
-// 	container.rotation.x = -0.3;
-// //
-
-// const text = new ThreeMeshUI.Text({
-//  content: "Some text to be displayed"
-// });
-
-// container.add( text );
-
-// // scene is a THREE.Scene (see three.js)
-// scene.add( container );
-
-// // This is typically done in the render loop :
-// ThreeMeshUI.update();
-// }
-
-// Root container – add it to the scene; call root.update in your loop
 export function InitReticle () {
-console.log("tryna init reticle");
-const material = new THREE.LineBasicMaterial({ color: 0xAAFFAA }); // Green color
-const x = 0.01, y = 0.01; // Adjust size as needed
+    console.log("tryna init reticle");
+    const material = new THREE.LineBasicMaterial({ color: 0xAAFFAA }); // Green color
+    const x = 0.01, y = 0.01; // Adjust size as needed
 
-const geometry = new THREE.BufferGeometry();
-const vertices = new Float32Array([
-    // Vertical line
-    0, y, 0,
-    0, -y, 0,
-    // Center point (optional)
-    // 0, 0, 0,
-    // Horizontal line
-    x, 0, 0,
-    -x, 0, 0
-]);
-geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    const geometry = new THREE.BufferGeometry();
+    const vertices = new Float32Array([
+        // Vertical line
+        0, y, 0,
+        0, -y, 0,
+        // Center point (optional)
+        // 0, 0, 0,
+        // Horizontal line
+        x, 0, 0,
+        -x, 0, 0
+    ]);
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 
-// Use THREE.LineSegments for disconnected lines
-const reticle = new THREE.LineSegments(geometry, material); 
+    // Use THREE.LineSegments for disconnected lines
+    const reticle = new THREE.LineSegments(geometry, material); 
 
-return reticle;
+    return reticle;
 
 }
 
@@ -492,7 +358,7 @@ export function UpdateText (string) { //uikit, no workie (use vite, they say...)
     }
 }
 
-export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, position, visible, lookAtCamera) {
+export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, position, visible, lookAtCamera) { //simple pics on a plane
 
     let scenePictureInstance;
 
@@ -518,59 +384,45 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
 
     }
 
-    // const pictureItem = ReturnPictureFromGroup(locationGroup._id);
-    // console.log("pictureITem " + pictureItem.orientation);
-    // if (pictureItem) {
-    //     if (pictureItem.orientation == "Landscape") {
-    //         // landscapePanel = scene.getObjectByName('landscapePanel');
-    //         // const hitpos = lastRaycastHit.point;
-    //         //                                      hitpos.getWorldPosition(worldHitPosition);
-    //         if (!landscapePanel) {
-    //             console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
-    //             // const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4);
-    //             const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
-    //             const planeMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
-    //             landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
-    //             landscapePanel.name = "landscapePanel";
-    //             scene.add(landscapePanel);
-    //                 landscapePanel.position.set(position.x, position.y + 4,position.z );
-    //             // landscapePanel.lookAt(player);
-    //             landscapePanel.visible = true;
-    //             // landscapePanel.updateMatrixWorld();
+}
 
-    //         } else {
-    //             console.log("showing a landscape panel " + position.x + position.y + position.z);
-    //             landscapePanel.position.set(position.x, position.y + 4, position.z );
-    //             // landscapePanel.lookAt(player);
-    //             landscapePanel.visible = true;
-    //             // landscapePanel.updateMatrixWorld();
+export function ShowPopup (event) { //hrm move to UI
+    const popup = document.getElementById("popup");
+    console.log("showDialogPanel " + showDialogPanel);
 
-    //         }
-            
-    //     } else if (pictureItem.orientation == "Portrait") {
-
-    //         if (!landscapePanel) {
-    //             console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
-    //             // const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4);
-    //             const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
-    //             const planeMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
-    //             landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
-    //             landscapePanel.name = "landscapePanel";
-    //             scene.add(landscapePanel);
-    //                 landscapePanel.position.set(position.x, position.y + 4,position.z );
-    //             // landscapePanel.lookAt(player);
-    //             landscapePanel.visible = true;
-    //             // landscapePanel.updateMatrixWorld();
-
-    //         } else {
-    //             console.log("showing a landscape panel " + position.x + position.y + position.z);
-    //             landscapePanel.position.set(position.x, position.y + 4, position.z );
-    //             // landscapePanel.lookAt(player);
-    //             landscapePanel.visible = true;
-    //             // landscapePanel.updateMatrixWorld();
-
-    //         }
+    if (showDialogPanel) {
+        return;
+    }
+    if (!event) {
+        let xpos = window.innerWidth / 2;
+        let ypos = window.innerHeight / 2;
+        Object.assign(popup.style, {
+            left: `${xpos}px`,
+            top: `${ypos}px`,
+            display: 'block',
+        });
+    } else {
+        // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
+        let xpos = event.clientX - 256;
+        if ((window.innerWidth - event.clientX) < 256) {
+            xpos = event.clientX - 512;
+        } else if (event.clientX < 256) {
+            xpos = 0;
+        }
         
+        let ypos = event.clientY - 256;
+        if (event.clientY < 200) {
+            ypos = 0;
+        }
+        // if (event.clientY > (window.innerHeight - 300)) {
+        //     ypos = window.innerHeight - 300;
         // }
-    // }
+         Object.assign(popup.style, {
+            left: `${xpos}px`,
+            top: `${ypos}px`,
+            display: 'block',
+        });
+    }
+    
+
 }

@@ -296,7 +296,7 @@ export class SceneObject { //things that might have models and actions and fancy
                 // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
                 // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
                 // "</div>";
-                ShowHTMLPopup(event, htmlstring);
+                ShowHTMLPopup(event, htmlstring, null, null, "hic_content");
                 if (uiMode == "hic") {
                     // UpdateHIC(popup.innerHTML);
                     document.getElementById("popup_cancelButton").addEventListener ('pointerdown', onMouseDown );   
@@ -318,8 +318,11 @@ export class SceneObject { //things that might have models and actions and fancy
                 } else {
                     // ShowPopup(event);
                     //  UpdateHIC(popup.innerHTML);
+                    
                 }
                 
+            } else {
+                console.log("no clickable actions on this object" + this.objectData.sceneObjectID);
             }
         }
         
@@ -497,7 +500,7 @@ export class SceneObject { //things that might have models and actions and fancy
         if (this.responseText.toLowerCase().includes("saved")) {
             
             htmlstring = "<br><br><h3>Saved to inventory!</h3>";
-            ShowHTMLPopup(event, htmlstring);
+            ShowHTMLPopup(event, htmlstring, null, null, "hic_content");
             // popup.innerHTML = 
             // ShowPopup(lastEvent);
             setTimeout(() => {
@@ -517,7 +520,7 @@ export class SceneObject { //things that might have models and actions and fancy
             
             
             const htmlstring = "<br><br><h3>Sorry, you can't have any more of those!</h3>";
-            ShowHTMLPopup(event, htmlstring);
+            ShowHTMLPopup(event, htmlstring, null, null, "hic_content");
             // popup.innerHTML = 
             // ShowPopup(lastEvent);
             setTimeout(() => {

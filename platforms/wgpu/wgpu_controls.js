@@ -814,7 +814,10 @@ async function RaycastHit(type, hit) {
 
             console.log(type + " hit object type " + locationData.markerType + " " + hit.object.name );//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
-            // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+
+            if (locationData.markerType == "trigger") { //hrm, triggers are for geo intersections
+                return;
+            }
         
             if (objectData && objectData.callouttext && objectData.callouttext.length) {
                 // console.log("callout text "  + objectData.callouttext);
@@ -876,7 +879,7 @@ async function RaycastHit(type, hit) {
                        
                         if (child.name != "textmesh") {
                              console.log("child name " + child.name);
-                            SwapMaterials(child, "transparent");
+                            // SwapMaterials(child, "transparent");
                             // break;
                         } 
                         // child.material = child.material.clone();
@@ -1076,9 +1079,9 @@ export function centerRaycast() {
 
 export function onMouseDown(event) { // on threejs object
     // playerReadyToNav = true;
-    event.stopPropagation();
+    event.stopPropagation();// duh!
     if (lastRaycastHitObject && lastRaycastHitObject.userData) {
-    console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID + " vs parent " + + lastRaycastHitObject.parent.userData.sceneObjectID);
+    console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID + " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
     }
         // console.log("showDialogPanel " + showDialogPanel);
 
@@ -1136,8 +1139,9 @@ export function onMouseDown(event) { // on threejs object
         // }
         return;
     } else if (lastRaycastHitObject && lastRaycastHitObject.userData) {
-            // let sceneObjID = lastRaycastHitObject.userData.sceneObjectID;
 
+            // let sceneObjID = lastRaycastHitObject.userData.sceneObjectID;
+        console.log("clicked on active object! " + lastRaycastHitObject.userData.name);
             let navAgentInstance = null;
 
             let sOID = lastRaycastHitObject.userData.sceneObjectID;
@@ -1166,6 +1170,7 @@ export function onMouseDown(event) { // on threejs object
                 }
                 
             } else if (lastRaycastHitObject.userData.objectData) {
+
                 
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
@@ -1175,7 +1180,7 @@ export function onMouseDown(event) { // on threejs object
                 if (textData != null && textData != undefined && textData != "" && textData != "none") {
                         // popup.innerHTML 
                         htmlString = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + textData.text;
-                        ShowHTMLPopup(event, htmlString);
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
                    
                 } else if (lastRaycastHitObject.userData.objectData.labeltext && 
                     lastRaycastHitObject.userData.objectData.labeltext.length) {
@@ -1184,7 +1189,7 @@ export function onMouseDown(event) { // on threejs object
                         const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
                         const randomIndex = Math.floor(Math.random() * labelSplit.length);
                         htmlString = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + labelSplit[randomIndex];
-                        ShowHTMLPopup(event, htmlString);
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
                        
                     } else {
 
@@ -1199,12 +1204,12 @@ export function onMouseDown(event) { // on threejs object
                         const randomIndex = Math.floor(Math.random() * calloutSplit.length);
 
                          htmlString = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + calloutSplit[randomIndex];
-                        ShowHTMLPopup(event, htmlString);
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
                                                
                     } else {
 
                         htmlString = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.callouttext;
-                        ShowHTMLPopup(event, htmlString);
+                        ShowHTMLPopup(event, htmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
 
                     }
                 }

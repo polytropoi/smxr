@@ -2,7 +2,8 @@
 
 import * as THREE from 'three';
 
-import { player, lastRaycastHitObject, ShowPopup, mouseDowntime } from './wgl_controls.js';
+import { player, lastRaycastHitObject, mouseDowntime } from './wgl_controls.js';
+import { ShowPopup } from './wgl_ui.js';
 
 import { scene } from './wgl_main.mjs';
 
@@ -252,19 +253,14 @@ export class SceneObject { //things that might have models and actions and fancy
             let consumeButton = "";
             let hasActions = false;
             let cancelButton = "";
-            // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+
             if (this.hasPickupAction) {
-                // popup.innerHTML += "<h1>"+this.objectData.name+" </h1> <div>"+this.objectData.description+"</div>" +
-                // popup.innerHTML +=
+             
                 hasActions = true;
                 pickupButton = "<button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22pickup\x22 data-data=\x22"+
                 this.objectData.sceneObjectID+"\x22 class=\x22collectButton\x22>Collect</button>";
 
-                // popup.innerHTML += "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>"+
-                // "<button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22pickup\x22 data-data=\x22"+
-                // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Collect</button>"+
-                // "</div>";
-                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
+                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
                 
             } 
             if (this.hasEquipAction) {
@@ -274,11 +270,8 @@ export class SceneObject { //things that might have models and actions and fancy
                 equipButton = "<button id=\x22popup_yesButton1\x22 data-tags=\x22\x22 data-type=\x22equip\x22 data-data=\x22"+
                 this.objectData.sceneObjectID+"\x22 class=\x22equipButton\x22>Equip</button>";
 
-                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
-                // popup.innerHTML += "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>"+
-                // "<button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22equip\x22 data-data=\x22"+
-                // this.objectData._id+"\x22 class=\x22yesButton\x22>Equip</button>"+
-                // "</div>";
+                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
+                
             }
             if (this.hasConsumeAction || this.objectData.objtype == "Consumable") {
                 // popup.innerHTML += "<h1>"+this.objectData.name+" </h1> <div>"+this.objectData.description+"</div>" +
@@ -286,19 +279,12 @@ export class SceneObject { //things that might have models and actions and fancy
                 consumeButton = "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
                 this.objectData.sceneObjectID+"\x22 class=\x22consumeButton\x22>Consume</button>";
                 hasActions = true;
-                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>";
-                // popup.innerHTML += "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22cancelButton\x22>Cancel</button>"+
-                // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
-                // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
-                // "</div>";
+                cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
+             
             } 
             if (hasActions) {
                 popup.innerHTML = header + cancelButton + pickupButton + equipButton + consumeButton + "</div>";
-                // popup.classList.remove("popup");
-                // popup.classList.add("popup2");
-                // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
-                // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
-                // "</div>";
+                
                 ShowPopup(event);
             }
         }

@@ -1,16 +1,11 @@
 	import * as THREE from 'three';
 
-;
-
-
 	import { LoadPrimaryAudioHowl, PlayTriggerWithTag, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 	import { settings } from '../../../connect/settings.js';
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 	import { userData } from '../../../connect/connect.js';
 
 	import { InitPathfinding, agents } from './wgl_nav.js';
-
-
 
 	import { ThreeDeeText, lookAtCameraObjects } from './wgl_ui.js';
 
@@ -43,13 +38,6 @@
 
 	export let scene;
 
-
-	// let raycastHitAgent;
-	// let isDragging = false;
-	// let previousMousePosition = {
-	// 	x: 0,
-	// 	y: 0
-	// };
 	let stats, pivot;
 	// let mixer, objects;
 	export let water;// waterLayer0, waterLayer1;
@@ -218,15 +206,9 @@
 		} 
 		for (let i = 0; i < instancedModels.length; i++) { //loop again for physics or patterned instances..
 			if (instancedModels[i].locationData.locationTags.includes("dynamic") || instancedModels[i].locationData.locationTags.includes("physics")) {
-				// physicsInstances = InitPhysicsInstances(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
-				// physicsInstances.updatePhysics();
-				// physicsInstances = await new InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
-				// physicsInstances.updatePhysics();
-				InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
-				// instanceWithPhysicsInstance.updatePhysics();
-				// instancedWithPhysics.push(instanceWithPhysicsInstance);
-				// console.log("instancedWithPhysics length " + instancedWithPhysics.length);
-
+				
+				// InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
+				
 			}
 		}
 
@@ -286,20 +268,7 @@
 
 		console.log("settings.sceneGroups " + JSON.stringify(settings.sceneGroups));
 		
-			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
-			// ThreeText(texttest);
 		
-
-
-
-		// console.log("settings " + JSON.stringify(settings));
-
-		// scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
-
-
-		
-
-
 		clock = new THREE.Clock();
 
 		if (settings && settings.sceneEnvironmentSettings) {
@@ -315,23 +284,19 @@
 		}
 
 		if (settings && settings.sceneTags) {
-			// if (settings.sceneTags.includes("debug")) {
-			// 
-					stats = new Stats();
-					stats.showPanel( 0,1,2,3 );
-					// const statsContainer = document.createElement('div');
-					// statsContainer.id = 'stats-container';
-					// document.body.appendChild(statsContainer);
-					document.body.appendChild( stats.dom );
-					stats.dom.style.position = 'absolute';
-					stats.dom.style.bottom = '20px';
-					stats.dom.style.right = 'auto';
-			// document.body.appendChild(stats.domElement);
-			// stats.domElement.style.right = 'auto';
-			// statsContainer.domElement.style.left = '0px'; // Positioned at top-right
-			// statsContainer.domElement.style.bottom = '20px';
-
-			// }
+			if (settings.sceneTags.includes("debug")) {
+				// 
+				stats = new Stats();
+				stats.showPanel( 0,1,2,3 );
+				// const statsContainer = document.createElement('div');
+				// statsContainer.id = 'stats-container';
+				// document.body.appendChild(statsContainer);
+				document.body.appendChild( stats.dom );
+				stats.dom.style.position = 'absolute';
+				stats.dom.style.bottom = '20px';
+				stats.dom.style.right = 'auto';
+			}
+		
 			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
 				
 				console.log("water is " + water);
@@ -360,120 +325,18 @@
 		// GetUserInventory();
 		LoadSceneInventory(); //both scene and user inventories
 
-		// const scenePass = pass( scene, camera );
-		// const scenePassColor = scenePass.getTextureNode();
-		// // const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
-		// // const selectedObjects = [ mesh ]; // Array of meshes to outline
-		// const edgeStrength = uniform( 3.0 );
-
-		// const edgeThickness = uniform( 1.0 );
-		// const visibleEdgeColor = uniform( new THREE.Color( 0xffffff ) );
-		// const hiddenEdgeColor = uniform( new THREE.Color( 0x4e3636 ) );
-
-		// // 4. Create the OutlineNode
-		// const outlinePass = outline( scene, camera, { 
-		// 	selectedObjects, 
-		// 	edgeThickness,
-		// 	// Add other properties as needed
-		// } );
-
-		// // 5. Compose the final output
-		// const { visibleEdge, hiddenEdge } = outlinePass;
-		// const outlineColor = visibleEdge
-		// 	.mul( visibleEdgeColor )
-		// 	.add( hiddenEdge.mul( hiddenEdgeColor ) )
-		// 	.mul( edgeStrength );
-		
-		// let hasBloom = false;
-		// let hasOutline = false;
-
-		// let emissivePass;
-		// let bloomPass;
-		// if (settings && settings.sceneTags && settings.sceneTags.includes("bloom")) {
-		// 	hasBloom = true;
-		// 	bloomPass = bloom( scenePassColor );
-		// 	bloomPass.strength = .75;
-		// } 
-		// if (settings && settings.sceneTags && settings.sceneTags.includes("emissive bloom")) {//ouch
-		// 	hasBloom = true;
-		// 	// emissivePass = scenePass.getColorNode( 'emissive' ); //fragment error...
-		// 	// bloomPass = bloom( emissivePass, 2.5, .5 );
-		// 	bloomPass = bloom( scenePassColor );
-		// 	bloomPass.strength = .75;
-		// }
-		
-		// const bloomPass = bloom( emissivePass, 2.5, .5 );
-		// scenePassColor.add( bloomPass );
 		if (water) { // set uwfx
 			const waterLevel = parseFloat(settings.sceneWater.level);
 			
 
-			// const scenePass = pass( scene, camera );
-			// // const scenePassColor = scenePass.getTextureNode();
-			// const scenePassDepth = scenePass.getLinearDepthNode().remapClamp( .3, .5 );
-
-			// // const waterMask = objectPosition( camera ).y.greaterThan( screenUV.y.sub( .5 ).mul( camera.near ) );
-			// const waterMask = objectPosition( camera ).y.greaterThan( waterLevel );
-			// const scenePassColorBlurred = gaussianBlur( scenePassColor );
-			// scenePassColorBlurred.directionNode = waterMask.select( scenePassDepth, scenePass.getLinearDepthNode().mul( 5 ) ).toInspector( 'Post-Processing / Blur Strength [ Depth ]', ( node ) => node.toFloat() );
-
-			// const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus().toInspector( 'Post-Processing / Vignette' );
-
-			// renderPipeline = new THREE.RenderPipeline( renderer );
-				
-			// console.log('post processing with water level ' + waterLevel );
-			// // postProcessing.outputNode = scenePassColor.add( bloomPass );
-			// if (hasBloom) {
-			// 	console.log("bloom with waater");
-			// 	// postProcessing.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( vignette ) ).add( bloomPass );
-			// 	renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ).mul( bloomPass ));
-			// } else {
-			// 	renderPipeline.outputNode = waterMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ));
-			// }
-			// renderPipeline.outputNode = scenePassColor.add( bloomPass );
 		} else {
-			// const waterMask = objectPosition( camera ).y.greaterThan( -10 );
-
-			// renderPipeline = new THREE.RenderPipeline( renderer );
-			// // const scenePass = pass( scene, camera );
-			// // const scenePassColor = scenePass.getTextureNode();
-			// const scenePassColorBlurred = gaussianBlur( scenePassColor );
-
-			// const vignette = screenUV.distance( .5 ).mul( 1.35 ).clamp().oneMinus();
 			
-			// scenePassColorBlurred.directionNode = scenePass.getLinearDepthNode().mul( 3 ); //just fake dof
-			// // renderPipeline = new THREE.renderPipeline( renderer );
-			// // renderPipeline.outputNode = scenePassColor.add( bloomPass );
-			// if (hasBloom) {
-			// 	// renderPipeline.outputNode = scenePassColorBlurred.add( bloomPass );
-			// 	renderPipeline.outputNode = outlineColor.add( scenePassColorBlurred.add( bloomPass ));
-			// } else if (hasOutline) {
-			// 	// renderPipeline.outputNode = distanceMask.select( scenePassColorBlurred, scenePassColorBlurred.mul( color( settings.sceneColor2 ) ) );
-			// 	renderPipeline.outputNode = outlineColor.add(scenePassColorBlurred);
-			// } else {
-			// 	console.log('post processing no water');
-			// 	renderPipeline.outputNode = scenePassColorBlurred;
-			// }
 	
 		}
 		LoadKinematicAgentMeshes();
 
 	} //end init systems
 
-	// export function createDefaultNavmesh() {
-	// 	const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
-	// //   planeGeometry.rotation.x = Math.PI / 2 * -1;
-	// 	const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
-	// 	let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
-		
-	// 	// navmeshObject.position.set(0,0,0);
-	// 	// navmeshObject.scale.set(1,1,1);
-	// 	navmeshObject.rotation.x = Math.PI / 2;
-	// 	navmeshObject.updateMatrixWorld();
-	// 	navmesh = navmeshObject;
-		
-	// 	scene.add(navmeshObject);
-	// }
 
 
 	export function togglePostProcessing () { //call after physics is done, elsewise... :(
