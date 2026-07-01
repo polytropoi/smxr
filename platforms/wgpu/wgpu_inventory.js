@@ -126,8 +126,12 @@ export async function EquipObject (objectData) {
         const equippedModelData = await LoadModel(objectData.modelURL);
         const equippedModel = equippedModelData.scene;
         // scene.add(equippedModel);
+        viewportPlaceholder.clear();
         viewportPlaceholder.add(equippedModel);
 
+        if (objectData.objScale) {
+            equippedModel.scale.setScalar(objectData.objScale);
+        }
         equippedModel.traverse(function (child) {
             if (child.isMesh) {
                 child.userData.name = objectData.name;

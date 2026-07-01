@@ -116,6 +116,9 @@ export async function EquipObject (objectData) {
             // scene.add(equippedModel);
             viewportPlaceholder.add(equippedModel);
 
+            if (objectData.objScale) {
+                equippedModel.scale.setScalar(objectData.objScale);
+            }
             equippedModel.traverse(function (child) {
                 if (child.isMesh) {
                     child.userData.name = objectData.name;

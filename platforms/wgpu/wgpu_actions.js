@@ -376,15 +376,17 @@ export class SceneObject { //things that might have models and actions and fancy
         const worldPosition = new THREE.Vector3();
         this.object.getWorldPosition(worldPosition);
 
-        console.log("tryna throw " + this.object.name + " from " + JSON.stringify(worldPosition) + " this.object.parent " + this.object.parent);
+        console.log("tryna throw " + this.object.name + " from " + JSON.stringify(worldPosition) + " this.object.parent " + this.object.parent + " " + JSON.stringify(lastRaycastHitObject.userData));
 
         //     SetEquippedRigidbody(rbody);
         // console.log("tryna throw");
         // await equippedRigidbody;
-        // if (equippedRigidbody) {
+        if (equippedRigidbody) {
         // scene.attach(this.object);
         // this.object.removeFromParent();
-        equippedRigidbody.addForce(worldPosition, mouseDowntime);
+            equippedRigidbody.addForce(worldPosition, mouseDowntime);
+            this.object.userData.isEquipped = false;
+        }
         //  if (this.object.parent) {
         //         this.object.parent.remove(this.object);
         //     } else {
