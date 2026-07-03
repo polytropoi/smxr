@@ -5,6 +5,8 @@ import { userInventory, ShowHideDialogPanel, GetUserInventoryAsync, uniqueItemsÂ
 
 import { eventEl } from '../../../connect/events.js';
 
+import { UpdateLocalPlayerState, UpdateLocalEquipment } from "../../../connect/indexedDb.js";
+
 import { ReturnObjectData, SceneObject, lastEvent} from './wgl_actions.js';
 
 import { viewportPlaceholder, popup } from './wgl_controls.js';
@@ -98,7 +100,11 @@ function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js -
         } 
     }
     } else {
-        console.log("cain't equip that!");
+        // console.log("cain't equip that!");
+        console.log("cain't equip that! " + event.details.objectID);
+        if (event.details.objectID) {
+            FetchSceneInventoryObject(event.details.objectID, true, "", event);
+        }
     }
 }
 
@@ -114,6 +120,7 @@ export async function EquipObject (objectData) {
             const equippedModelData = await LoadModel(objectData.modelURL);
             const equippedModel = equippedModelData.scene;
             // scene.add(equippedModel);
+            viewportPlaceholder.clear();
             viewportPlaceholder.add(equippedModel);
 
             if (objectData.objScale) {
@@ -133,6 +140,11 @@ export async function EquipObject (objectData) {
             activeObjex.push(equippedModel);
             const equippedSceneObject = new SceneObject(equippedModel, objectData, true, viewportPlaceholder);
            
+                    // const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name, "tags": tags, "eventData": eventData}; //saved to profile.equipment.main
+            const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name }; //saved to profile.equipment.main    
+            UpdateLocalEquipment(updoc);
+
+            return equippedSceneObject;
        
         } else {
           
@@ -256,9 +268,11 @@ async function DropInventoryObject (objectData, action, inventoryID) {
         let response = JSON.parse(this.responseText);
         // console.log("gotsome objex: " + response.objex.length);
         if (response.objex.length > 0) {
+
             // objexEl.components.mod_objex.addFetchedObject(response.objex[0]); //add to scene object collection, so don't have to fetch again
             if (equip) {
             //   objexEl.components.mod_objex.equipInventoryObject(oID, tags, eventData)
+                EquipObject(response.objex[0]);
             } 
         }
        

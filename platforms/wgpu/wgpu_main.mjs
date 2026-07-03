@@ -43,7 +43,7 @@
 
 	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, physicsInstancedMeshes, physicsInstancedBodies } from './wgpu_instance.js';
 
-	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData, movingMeshes } from './wgpu_locations.js';
+	import { InitLocations, LoadLocationObjex, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData, movingMeshes } from './wgpu_locations.js';
 
 	import Stats from './ui/stats.js';
 	
@@ -175,8 +175,10 @@
 		
 		await InitLocations(); //calls initSystems...
 
+
 		sceneIsReady = true;
 		if (equippedObjectOnLoad != "") {
+
 			const eventDetails = {};
 			eventDetails.objectID = equippedObjectOnLoad;
 			eventDetails.onLoad = true;
@@ -192,10 +194,10 @@
 
 	export async function InitSystems() { 
 
-		if (navmesh) {
-			await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
-			// AssignModelsToAgents();
-		}
+		// if (navmesh) {
+		// 	await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
+		// 	// AssignModelsToAgents();
+		// }
 
 
 		await InitStaticObjex();  //creates default if none provided

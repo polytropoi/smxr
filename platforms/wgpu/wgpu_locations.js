@@ -16,7 +16,7 @@ import { instancedModels, createDefaultSurface, SetSurface } from './wgpu_instan
 
 import { CreateLight } from './wgpu_lights.js';
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
-import { agentModels, CreateNPCAgent, randomNavmeshPoint } from './wgpu_nav.js';
+import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from './wgpu_nav.js';
 import { modelViewProjection } from 'three/tsl';
 // import { sceneObjects } from '../../connect/dialogs.js';
 
@@ -117,7 +117,7 @@ export function createDefaultNavmesh(locData) {
            groundObjex.push(navmesh);
 }
 
-export function InitLocations() {
+export async function InitLocations() {
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction
     if (modelsDataEl) {
         const theModelsData = modelsDataEl.getAttribute('data-models');
@@ -168,24 +168,24 @@ export function InitLocations() {
                                     
                                     } else {
                                     // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
-                                        let isActive = false;             
-                                        if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
-                                            isActive = true;
-                                        } 
-                                        const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
-                                        model = modelData.model;
-                                        console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
+                                        // let isActive = false;             
+                                        // if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
+                                        //     isActive = true;
+                                        // } 
+                                        // const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
+                                        // model = modelData.model;
+                                        // console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
                                         
-                                        if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
+                                        // if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
                                         
-                                            locationData[i].isHidden = true;
-                                            // console.log("tryna hide model " + child.name);
-                                        }															
+                                        //     locationData[i].isHidden = true;
+                                        //     // console.log("tryna hide model " + child.name);
+                                        // }															
 
-                                        if (locationData[i].markerType == "brownian motion") {
-                                            const meshMover = new MeshMover(model); 
-                                            movingMeshes.push(meshMover);
-                                        }
+                                        // if (locationData[i].markerType == "brownian motion") {
+                                        //     const meshMover = new MeshMover(model); 
+                                        //     movingMeshes.push(meshMover);
+                                        // }
                                 
                                         if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
                                             // console.log("tryna instance model " + locationData[i].name);
@@ -207,19 +207,36 @@ export function InitLocations() {
                                             }
                                             instancedModels.push(instancedModel);
                                             console.log("instancedModels length " + instancedModels.length);
-                                            model.visible = false;
-                                            scene.remove(model);  //don't need the reference model
+                                            // originalModel.scene.visible = false;
+                                            scene.remove(originalModel.scene);  //don't need the reference model
 
-                                        
-                                                                            
-                                    } else { // regular meshes
-                                                                             
-                                        scene.add(model);
-                                                                            
+                                            
+                                                                                
+                                        } else { // regular meshes
+                                                                                 let isActive = false;             
+                                            if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
+                                            isActive = true;
+                                            } 
+                                            const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
+                                            model = modelData.model;
+                                            console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
+                                            
+                                            if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
+                                            
+                                                locationData[i].isHidden = true;
+                                                // console.log("tryna hide model " + child.name);
+                                            }															
+
+                                            if (locationData[i].markerType == "brownian motion") {
+                                                const meshMover = new MeshMover(model); 
+                                                movingMeshes.push(meshMover);
+                                            }
+                                            scene.add(model);
+                                                                                
+                                        }
+
+                                        break; //only match one model per location!?
                                     }
-
-                                    break; //only match one model per location!?
-                                }
                                 }
                             }
                         // }
@@ -307,6 +324,12 @@ export function InitLocations() {
                 console.error("ERROR LOADING GLTF! " + e);
             } finally {
                 console.log("locationObjex loaded! " + locations);
+                if (navmesh) {
+                    await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
+                    // AssignModelsToAgents();
+                }
+                
+                await LoadLocationObjex(); 
                 InitSystems();
             }
         })();

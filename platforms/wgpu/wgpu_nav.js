@@ -235,7 +235,7 @@
                 // await new Promise(r => setTimeout(r, 4000)); //slow the fxk down
                 // AssignModelsToAgents();
 
-                await LoadLocationObjex(); //e.g. navagent characters
+                // await LoadLocationObjex(); //e.g. navagent characters
             }
 
             // await initRapier();

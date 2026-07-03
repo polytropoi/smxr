@@ -186,6 +186,10 @@ export class SceneObject { //things that might have models and actions and fancy
         // playerRigidbody.disable();
         // SetEquippedRigidbody(rbody);
     }
+    dequip () {
+        this.isEquipped = false;
+        
+    }
     onOver () {
 
     }
@@ -385,7 +389,11 @@ export class SceneObject { //things that might have models and actions and fancy
         // scene.attach(this.object);
         // this.object.removeFromParent();
             equippedRigidbody.addForce(worldPosition, mouseDowntime);
-            this.object.userData.isEquipped = false;
+            lastRaycastHitObject.userData.isEquipped = false;
+            console.log(JSON.stringify(lastRaycastHitObject.userData));
+            this.dequip();
+            // sceneObjects(this.sceneObjectID).dequip();
+            // this.isEquipped = false;
         }
         //  if (this.object.parent) {
         //         this.object.parent.remove(this.object);
@@ -467,20 +475,22 @@ export class SceneObject { //things that might have models and actions and fancy
         if (data.fromSceneInventory) {
             // console.log("tryna equip from sceneinventory : " +JSON.stringify(data);
             console.log("tryna equip from sceneinventory : " + data.sceneInventoryID);
-            EquipObject(this.objectData);
+            
             if (thisObject.parent) {
                 thisObject.parent.remove(thisObject);
             } else {
                 scene.remove(thisObject);
             }
+            this.object = EquipObject(this.objectData);
         } else {
             console.log("tryna equip from scene : " + data.sceneObjectID);
-             EquipObject(this.objectData);
+            //  EquipObject(this.objectData);
              if (thisObject.parent) {
                 thisObject.parent.remove(thisObject);
             } else {
                 scene.remove(thisObject);
             }
+            this.object = EquipObject(this.objectData);
             // thisObject.parent.remove(thisObject);
         }
 

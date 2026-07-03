@@ -13,6 +13,7 @@ let audio_viz = new Event("audio-viz"); //calling all audio actives
 let ready_event = new Event("ready-event"); //settings and data ready, init the things
 export let equip_inventory_object_event = new Event("equip-inventory-object-event");  //to reuse the dialogs.js stuff
 export let drop_inventory_object_event = new Event("drop-inventory-object-event");
+export let dequip_event = new Event("dequip-event");
 // export let remove_inventory_object_event = new Event("remove-inventory-object-event"); 
 
  let duration, timeString, listenerInterval, seek;

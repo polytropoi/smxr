@@ -511,7 +511,7 @@ export function InitIDB() {
                      if (pcursor.value.equipment.main.equipped) {
                         console.log("player is equipped!");
                         
-                        const modObjexEl = document.getElementById("sceneObjects");
+                        const modObjexEl = document.getElementById("sceneObjects"); //aframe
                         if (modObjexEl) {
                            if (modObjexEl.components.mod_objex) {
                               modObjexEl.components.mod_objex.equipInventoryObject(pcursor.value.equipment.main.objectID, pcursor.value.equipment.main.tags, pcursor.value.equipment.main.eventData);

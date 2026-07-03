@@ -3,6 +3,8 @@ import * as THREE from 'three';
 
 import { userInventory, ShowHideDialogPanel, GetUserInventoryAsync, uniqueItems } from '../../../connect/dialogs.js';
 
+import { UpdateLocalPlayerState, UpdateLocalEquipment } from "../../../connect/indexedDb.js";
+
 import { eventEl } from '../../../connect/events.js';
 
 import { ReturnObjectData, SceneObject, lastEvent, sceneObjects} from './wgpu_actions.js';
@@ -52,11 +54,17 @@ export async function LoadSceneInventory () { //  user inventory loaded in dialo
     }
 }
 
+eventEl.addEventListener('dequip-event', Dequip);
 eventEl.addEventListener('equip-inventory-object-event', EquipInventoryCheck);
 eventEl.addEventListener('drop-inventory-object-event', DropInventoryCheck);
 // eventEl.addEventListener('remove-inventory-object-event', RemoveInventoryCheck);
 
 
+function Dequip (event) {
+    if (event.details.dequip == "all") {
+        viewportPlaceholder.clear();
+    }
+}
 
 
 export function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js - TODO flex if from scene or scene inventory -- no, this only for userinventory
@@ -105,11 +113,14 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
                 // } else {
                 //     EquipInventoryObject(objectData);
                 // }
-            }
-        } 
-    }
+                }
+            } 
+        }
     } else {
-        console.log("cain't equip that!");
+        console.log("cain't equip that! " + event.details.objectID);
+        if (event.details.objectID) {
+            FetchSceneInventoryObject(event.details.objectID, true, "", event);
+        }
     }
 }
 
@@ -119,7 +130,7 @@ export async function EquipObject (objectData) {
     
     // let objectData = ReturnObjectData(objectID);
     if (objectData) {        
-        objectData.isEquipped = true;
+        // objectData.isEquipped = true;
         objectData.sceneObjectID = Date.now(); 
         console.log("tryna equip object " + objectData.modelURL);  
 
@@ -146,11 +157,16 @@ export async function EquipObject (objectData) {
         activeObjex.push(equippedModel);
         const equippedSceneObject = new SceneObject(equippedModel, objectData, true, viewportPlaceholder, false);
         sceneObjects[objectData.sceneObjectID.toString()] = equippedSceneObject;
-        
+
     
+        // const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name, "tags": tags, "eventData": eventData}; //saved to profile.equipment.main
+        const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name }; //saved to profile.equipment.main    
+        UpdateLocalEquipment(updoc);
+
+        return equippedSceneObject;
     } else {
         
-        FetchSceneInventoryObject(objectID, true, tags, eventData);
+        FetchSceneInventoryObject(objectData._id, true, "", eventData);
     }
 }
 
@@ -266,13 +282,15 @@ async function DropInventoryObject (objectData, action, inventoryID) {
       xhr.send(JSON.stringify(data));
       xhr.onload = function () {
         // do something to response
-        // console.log("fetched obj resp: " +this.responseText);
+        console.log("fetched obj resp: " +this.responseText);
         let response = JSON.parse(this.responseText);
         // console.log("gotsome objex: " + response.objex.length);
         if (response.objex.length > 0) {
+
             // objexEl.components.mod_objex.addFetchedObject(response.objex[0]); //add to scene object collection, so don't have to fetch again
             if (equip) {
             //   objexEl.components.mod_objex.equipInventoryObject(oID, tags, eventData)
+                EquipObject(response.objex[0]);
             } 
         }
        
