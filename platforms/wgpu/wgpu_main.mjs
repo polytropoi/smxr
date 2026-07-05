@@ -445,8 +445,9 @@
 
 			let emissivePass;
 			let bloomPass;
-			if (settings && settings.sceneCameraDepthOfField || settings.sceneTags && settings.sceneTags.includes("DOF")) {
+			if ((settings && settings.sceneCameraDepthOfField) || (settings.sceneTags && settings.sceneTags.includes("DOF"))) {
 				hasDOF = true;
+				console.log("hasDOF is " + hasDOF);
 			}
 			if (settings && settings.sceneTags && settings.sceneTags.includes("bloom")) {
 				hasBloom = true;

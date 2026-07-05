@@ -686,8 +686,8 @@ async function LoadLocationModel (url, locationData, isActive) {
                     console.log("gotsa ssurface");
                     // if (settings && settings.sceneTags && settings.sceneTags.includes("instancing")) {
                     SetSurface(child);
-                    child.material.transparent = true;
-                        child.material.opacity = 0;
+                    // child.material.transparent = true;
+                    //     child.material.opacity = 0;
                         // surface = child;
                         // child.material = transmat;
                         // InitSurface();

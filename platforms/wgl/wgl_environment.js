@@ -45,7 +45,11 @@ export function InitFog() {
 			radius = settings.sceneSkyRadius;
 		}
         // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
-        scene.fog = new THREE.Fog(fogColor, 10, radius);
+        // scene.fog = new THREE.Fog(fogColor, 10, radius);
+
+				const fogDensity = settings.fogDensity * .1; // Adjust this value! (Default is 0.00025)
+				// scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
+				scene.fog = new THREE.FogExp2( fogColor, fogDensity );
 		// scene.fog = new THREE.FogExp2( fogColor, 0.01 );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
     }
