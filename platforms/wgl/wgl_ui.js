@@ -386,7 +386,7 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
 
 }
 
-export function ShowPopup (event) { //hrm move to UI
+export function ShowPopup (event, htmlstring) { //hrm move to UI
     const popup = document.getElementById("popup");
     console.log("showDialogPanel " + showDialogPanel);
 
@@ -394,13 +394,14 @@ export function ShowPopup (event) { //hrm move to UI
         return;
     }
     if (!event) {
-        let xpos = window.innerWidth / 2;
-        let ypos = window.innerHeight / 2;
+        let xpos = (window.innerWidth / 2) - 256;
+        let ypos = (window.innerHeight / 2) - 256;
         Object.assign(popup.style, {
             left: `${xpos}px`,
             top: `${ypos}px`,
             display: 'block',
         });
+        popup.innerHTML = htmlstring;
     } else {
         // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
         let xpos = event.clientX - 256;
@@ -426,3 +427,4 @@ export function ShowPopup (event) { //hrm move to UI
     
 
 }
+

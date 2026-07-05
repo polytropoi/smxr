@@ -17,7 +17,7 @@ export let skyAmbientLight;
 export let waterAmbientLight;
 
 export function InitSceneLights () {
-            sunLight = new THREE.DirectionalLight( settings.sceneColor1, 4 );
+            sunLight = new THREE.DirectionalLight( settings.sceneColor1, 2 );
             sunLight.castShadow = true;
             // sunLight.shadow.mapSize.width = 4096;
             // sunLight.shadow.mapSize.height = 4096;

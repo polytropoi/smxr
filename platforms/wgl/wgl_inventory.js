@@ -156,7 +156,7 @@ function RemoveFromSceneInventory (sceneObjectID) {
 
 }
 
-function DropInventoryCheck(event) { //equip button in modal, from dialogs.js
+function DropInventoryCheck(event) { //drop button in modal, from dialogs.js
 
 
     const objectData = ReturnObjectData(event.details.objectID); //um, check inventory not locationObjex...

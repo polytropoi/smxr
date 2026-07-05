@@ -55,6 +55,7 @@ export function InitFog() {
     }
 }
 
+
 export function InitEnvMap () {
     if (scene && settings && settings.skyboxURL) {
 		

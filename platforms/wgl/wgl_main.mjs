@@ -7,7 +7,7 @@
 
 	import { InitPathfinding, agents } from './wgl_nav.js';
 
-	import { ThreeDeeText, lookAtCameraObjects } from './wgl_ui.js';
+	import { ShowPopup, ThreeDeeText, lookAtCameraObjects } from './wgl_ui.js';
 
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
@@ -92,6 +92,9 @@
 		const three_canvas = document.getElementById("three_canvas");
 		scene = new THREE.Scene();
 		renderer = new THREE.WebGLRenderer({antialias:false, canvas: three_canvas});
+
+		const loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Loading....<h4>";
+								ShowPopup(null, loadingString);
 		// renderer = new THREE.WebGPURenderer( { antialias: true } );
 				// renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setSize( window.innerWidth, window.innerHeight );
@@ -145,6 +148,8 @@
 			const gravity = {x:0, y:-9.81, z:0}; //"earthlike"
 			await InitRapier(gravity); //gravityMode
 		}
+		
+
 		
 		await InitLocations(); //calls initSystems...
 
