@@ -479,6 +479,25 @@ export function InitTriggerSlider () {
    }
 }
 
+export function InitMediaVolumeSlider () {
+   // let modal = document.getElementById('modalContent');
+ let mediaAudioSlider = document.getElementById("mediaAudioVolumeSlider");
+   if (triggerAudioSlider != null) {
+      // let storedTriggerVolume = localStorage.getItem(room+"_triggerVolume");
+      // if (storedTriggerVolume != null) {
+      //    triggerAudioSlider.value = storedTriggerVolume;
+      // }
+      UpdateMediaAudioVolume(mediaAudioSlider.value);
+      mediaAudioSlider.oninput = function() {
+         volumeMedia = this.value;
+         UpdateMediaAudioVolume(this.value);
+         // localStorage.setItem(room+"_triggerVolume", this.value);
+      } 
+   }
+}
+
+
+
 export function UpdatePrimaryAudioVolume(newVolume) {
    var primaryAudio = document.getElementById("primaryAudio");
    if (primaryAudio != null) {
@@ -504,6 +523,16 @@ export function UpdateTriggerAudioVolume(newVolume) {
       }
    }
 }
+export function UpdateMediaAudioVolume(newVolume) {
+   var triggerAudioEl = document.getElementById("triggerAudio");
+  //  if (triggerAudioEl) {
+  //     var triggerAudioController = triggerAudioEl.components.trigger_audio_control;
+  //     if (triggerAudioController != null) {
+  //        triggerAudioController.modVolume(newVolume);
+  //     }
+  //  }
+}
+
 export async function PrimaryAudioIsPlaying () {
   await primaryAudioHowl
   // if (primaryAudioHowl && primaryAudioHowl != undefined) {

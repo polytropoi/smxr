@@ -99,7 +99,7 @@ export async function TagsToInstances (locID, instanceID) {
                 // console.log(JSON.stringify(instanceData.iTags[instanceID]));
                 //  return instanceData.iTags[instanceID][0];
                 const tag = Object.values(instanceData.iTags[instanceID])[0];
-                console.log(JSON.stringify(tag));
+                // console.log(JSON.stringify(tag));
                 return tag;
             }
         }

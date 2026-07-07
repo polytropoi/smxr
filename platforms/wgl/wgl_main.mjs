@@ -27,13 +27,15 @@
 
 	import Stats from './ui/stats.js';
 	
-	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgl_controls.js';
+	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, cameraIsReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgl_controls.js';
 	
 	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText } from './wgl_media.js';
 	
 	import { LoadSceneInventory } from './wgl_inventory.js';
 	
 	import { splatObjex, initSplats, InitSpark } from './wgl_splats.js';
+import { PlayPauseMedia } from '../../connect/dialogs.js';
+
 
 
 	export let scene;
@@ -80,11 +82,22 @@
 	let instancedQuaternion = new THREE.Quaternion();
 	let instancedMatrix = new THREE.Matrix4();
 	
+
+	let loadingString = "";
+	export let sceneIsReady = false;
+
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
 
+	export function StartButton() {
+		
+		sceneIsReady = true;
+		console.log("sceneIsReady "+ sceneIsReady);
+		PlayPauseMedia();
+		popup.style.display = "none";
+	}
 
 
-
+	
 	////////////// SCENE INIT FUNCTION 
 
 	async function Start() {
@@ -92,9 +105,9 @@
 		const three_canvas = document.getElementById("three_canvas");
 		scene = new THREE.Scene();
 		renderer = new THREE.WebGLRenderer({antialias:false, canvas: three_canvas});
-
-		const loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Loading....<h4>";
-								ShowPopup(null, loadingString);
+		
+		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Loading....<h4>";
+		ShowPopup(null, loadingString);
 		// renderer = new THREE.WebGPURenderer( { antialias: true } );
 				// renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setSize( window.innerWidth, window.innerHeight );
@@ -110,9 +123,10 @@
 		renderer.toneMappingExposure = 1;
 		// renderer.shadowMap.enabled = true;
 		// renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
-			renderer.setAnimationLoop( animate );
+
 		document.body.appendChild( renderer.domElement );
 
+		renderer.setAnimationLoop( animate );
 		// cameraMode = settings.sceneCameraMode;
 		if (settings.sceneTags.includes("shadows")) {
 			renderer.shadowMap.enabled = true;
@@ -133,24 +147,34 @@
 			cameraMode = "Mouse Look";
 		}
 
+		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Controls....<h4>";
+		ShowPopup(null, loadingString);
 		SetControls(cameraMode, cameraFOV);
 		
 			
-		InitEnvMap();
+
+
 
 		if (settings && settings.sceneTags && settings.sceneTags.includes("no gravity") ) {
+					loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Physics....<h4>";
+		ShowPopup(null, loadingString);
 			const gravity = {x:0, y:0, z:0};
 			await InitRapier(gravity); 
 		} else if (settings && settings.sceneTags && settings.sceneTags.includes("low gravity") ) {
+			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Physics....<h4>";
+		ShowPopup(null, loadingString);
 			const gravity = {x:0, y:-0.25, z:0}; //"earthlike"
 			await InitRapier(gravity); //gravityMode
 		} else {
+			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Physics....<h4>";
+		ShowPopup(null, loadingString);
 			const gravity = {x:0, y:-9.81, z:0}; //"earthlike"
 			await InitRapier(gravity); //gravityMode
 		}
 		
 
-		
+		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Locations....<h4>";
+		ShowPopup(null, loadingString);
 		await InitLocations(); //calls initSystems...
 
 		// initSystems();
@@ -161,11 +185,15 @@
 	export async function InitSystems() { 
 
 		if (splatObjex.length) {
+			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Spark Lib....<h4>";
+			ShowPopup(null, loadingString);
 			await InitSpark();
 			// surface = surfaceObjex[0];
 			initSplats();
 		} 
 		if (navmesh && navmesh.geometry) {
+			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Navmesh....<h4>";
+			ShowPopup(null, loadingString);
 			await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
 			// AssignModelsToAgents();
 		}
@@ -173,6 +201,8 @@
 
 		// let notSurfaceInstanceModels = [];
 		if (surface) { // => scattering instances
+			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Surfaces....<h4>";
+			ShowPopup(null, loadingString);
 			await InitSurface();
 			console.log("instantiating on surface with models " + instancedModels.length);
 			for (let i = 0; i < instancedModels.length; i++) {
@@ -222,6 +252,9 @@
 
 			// Video Mesh
 			// init video and MediaPipe
+
+			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Webcam....<h4>";
+			ShowPopup(null, loadingString);
 			video = await getVideo();
 
 			
@@ -319,16 +352,23 @@
 			
 		}
 		
-
+		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Scene Objects....<h4>";
+		ShowPopup(null, loadingString);
 
 		await InitStaticObjex();  //creates default if none provided
+
+		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Environment....<h4>";
+		ShowPopup(null, loadingString);
 		// InitEnvMap();
+		InitEnvMap();
 		InitSceneLights();
 		InitSky();
 		InitFog();
 
 		// GetUserInventory();
-		LoadSceneInventory(); //both scene and user inventories
+		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Inventories....<h4>";
+		ShowPopup(null, loadingString);
+		await LoadSceneInventory(); //both scene and user inventories
 
 		if (water) { // set uwfx
 			const waterLevel = parseFloat(settings.sceneWater.level);
@@ -338,8 +378,24 @@
 			
 	
 		}
-		LoadKinematicAgentMeshes();
+		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Agents....<h4>";
+		ShowPopup(null, loadingString);
+		await LoadKinematicAgentMeshes();
 
+		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><button style=\x22width:100px;\x22 id=\x22popup_yesButton\x22 data-type=\x22start\x22 class=\x22yesButton\x22><h3>Play<h3></button>";
+		// loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Ready!<h4>";
+		ShowPopup(null, loadingString);
+
+
+		// const startButton = document.getElementById('startButton');
+		// startButton.addEventListener('click', () => {
+		// 		console.log("startButtonClick!");
+		// 	startButton.style.display = 'none';
+		// 	// Start the animation loop
+		// 	StartButton(); 
+		// });
+
+		sceneIsReady = true;
 	} //end init systems
 
 
@@ -370,7 +426,7 @@
 	function animate() {
 		const time = performance.now();
 		// scene.updateMatrixWorld(true);
-	if (clock && isReady) {
+		if (clock && cameraIsReady) {
 				
 
 			UpdateControls();
@@ -410,34 +466,34 @@
 				// 	instancedWithPhysics[i].updatePhysics();
 				// }
 				if (physicsInstancedMeshes && physicsInstancedBodies.length) { //this is a class instance// nope
-							for (let i = 0; i < physicsInstancedBodies.length; i++) {
-											// await new Promise(r => setTimeout(r, 0));
-								// const body = physicsInstances.instancedBodies[i];
-								// if (body) {
-									const pos = physicsInstancedBodies[i].translation();
-									const rot = physicsInstancedBodies[i].rotation();
-
-									// Update dummy object with physics data
-									// if (pos.y < -20) {
-									// 	 physicsInstancedBodies[i].setTranslation(pos.x, 20, pos.z);
-									// } else {
-									// this.dummy.position.set(pos.x, pos.y, pos.z);
-									// this.dummy.quaternion.set(rot.x, rot.y, rot.z, rot.w);
-									// this.dummy.updateMatrix();
-									instancedPosition.set(pos.x, pos.y, pos.z);
-									instancedQuaternion.set(rot.x, rot.y, rot.z, rot.w);
-									// this.dummy.updateMatrix();
-									instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(1, 1, 1));
-									// this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);
-									physicsInstancedMeshes.setMatrixAt(i, instancedMatrix);
-
-									if (pos.y < -25) {
-									physicsInstancedBodies[i].setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-									physicsInstancedBodies[i].setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-									physicsInstancedBodies[i].setTranslation({ x: pos.x, y: 20.0, z: pos.z });
-          							}
+					for (let i = 0; i < physicsInstancedBodies.length; i++) {
 									// await new Promise(r => setTimeout(r, 0));
-								}
+						// const body = physicsInstances.instancedBodies[i];
+						// if (body) {
+							const pos = physicsInstancedBodies[i].translation();
+							const rot = physicsInstancedBodies[i].rotation();
+
+							// Update dummy object with physics data
+							// if (pos.y < -20) {
+							// 	 physicsInstancedBodies[i].setTranslation(pos.x, 20, pos.z);
+							// } else {
+							// this.dummy.position.set(pos.x, pos.y, pos.z);
+							// this.dummy.quaternion.set(rot.x, rot.y, rot.z, rot.w);
+							// this.dummy.updateMatrix();
+							instancedPosition.set(pos.x, pos.y, pos.z);
+							instancedQuaternion.set(rot.x, rot.y, rot.z, rot.w);
+							// this.dummy.updateMatrix();
+							instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(1, 1, 1));
+							// this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);
+							physicsInstancedMeshes.setMatrixAt(i, instancedMatrix);
+
+							if (pos.y < -25) {
+							physicsInstancedBodies[i].setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+							physicsInstancedBodies[i].setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+							physicsInstancedBodies[i].setTranslation({ x: pos.x, y: 20.0, z: pos.z });
+							}
+							// await new Promise(r => setTimeout(r, 0));
+						}
 								// Apply to instanced mesh
 								//  matrix.compose(position, quaternion, new THREE.Vector3(1, 1, 1));
 								// // this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);

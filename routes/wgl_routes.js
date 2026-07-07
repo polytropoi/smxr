@@ -2504,21 +2504,22 @@ wgl_router.get('/:_id', function (req, res) {
                     // "</a-entity>";
                 }
             }
+
             if (hasPrimaryAudio || hasPrimaryAudioStream) {
                 // primaryAudioSliderChunk = "<a href=\x22#\x22 style=\x22float: right;\x22 onclick=PlayPausePrimaryAudio() id=\x22primaryAudioPlayPause\x22 class=\x22btn tooltip\x22 type=\x22button\x22>"+
                 // "Play/Pause Primary Audio<span class=\x22tooltiptext\x22>"+primaryAudioTitle+"</span></a></span><br>"+
-                primaryAudioSliderChunk = "<span id=\x22primaryAudioVolume\x22>Primary Volume</span><div class=\x22slidecontainer\x22>"+
+                primaryAudioSliderChunk = "<span id=\x22primaryAudioVolume\x22>Primary Volume</span><div class=\x22slidecontainer_dialog\x22>"+
                 // "<a href=\x22#\x22 class=\x22btn\x22 type=\x22button\x22>Play</a>"+
-                "<input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+scenePrimaryVolume+"\x22 class=\x22slider\x22 id=\x22primaryAudioVolumeSlider\x22>" +
+                "<input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+scenePrimaryVolume+"\x22 class=\x22slider_dialog\x22 id=\x22primaryAudioVolumeSlider\x22>" +
                 "</div>";
             }
             if (hasAmbientAudio) {
-                ambientAudioSliderChunk = "<span id=\x22ambientAudioVolume\x22>Ambient Volume</span><div class=\x22slidecontainer\x22><input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+
-                sceneAmbientVolume+"\x22 class=\x22slider\x22 id=\x22ambientAudioVolumeSlider\x22></div>";
+                ambientAudioSliderChunk = "<span id=\x22ambientAudioVolume\x22>Ambient Volume</span><div class=\x22slidecontainer_dialog\x22><input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+
+                sceneAmbientVolume+"\x22 class=\x22slider_dialog\x22 id=\x22ambientAudioVolumeSlider\x22></div>";
             }
             if (hasTriggerAudio) {
-                triggerAudioSliderChunk = "<span id=\x22triggerAudioVolume\x22>Trigger Volume</span><div class=\x22slidecontainer\x22><input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+
-                sceneTriggerVolume+"\x22 class=\x22slider\x22 id=\x22triggerAudioVolumeSlider\x22></div>";
+                triggerAudioSliderChunk = "<span id=\x22triggerAudioVolume\x22>Trigger Volume</span><div class=\x22slidecontainer_dialog\x22><input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+
+                sceneTriggerVolume+"\x22 class=\x22slider_dialog\x22 id=\x22triggerAudioVolumeSlider\x22></div>";
             }
             const landingLink = "../landing/"+short_id;
             const webxrLink = "../webxr/"+short_id;
@@ -2904,7 +2905,8 @@ wgl_router.get('/:_id', function (req, res) {
                     settings.sceneTime = sceneTime;
                     settings.volumePrimary = sceneResponse.scenePrimaryVolume;
                     settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
-                    settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
+                    settings.volumeTrigger = sceneResponse.sceneTriggerVolume;
+                    settings.volumeMedia = sceneResponse.sceneMediaAudioVolume;
                     settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
                     settings.skyboxIDs = skyboxIDs;
                     settings.skyboxID = skyboxID;
@@ -3174,7 +3176,7 @@ wgl_router.get('/:_id', function (req, res) {
                             // "<div id=\x22popup\x22 class=\x22popup\x22 style=\x22position: absolute; display: none; background: white; padding: 10px; border: 1px solid black;\x22>Some text</div>"+
                             "<div id=\x22popup\x22 class=\x22popup\x22>Popup text</div>"+
 
-                            // "<div id=\x22alert\x22 class=\x22alert\x22>Alert text</div>"+
+                            // "<div id=\x22start\x22 class=\x22popup\x22>Start text</div>"+
 
                             canvasOverlay +
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +

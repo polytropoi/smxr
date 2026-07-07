@@ -14,7 +14,7 @@ import { ActionSwitch, SetPlayerRigidbody } from './wgl_actions.js';
 
 import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './wgl_locations.js';
 
-import { scene, cameraMode, renderer, clock, selectedObjects } from './wgl_main.mjs';
+import { scene, sceneIsReady, cameraMode, renderer, clock, selectedObjects } from './wgl_main.mjs';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
@@ -34,7 +34,7 @@ import { TagsToInstances } from './wgl_instance.js';
 // import { getPlayerBody } from './wgl_physics.js';
 
 export let camera, controls, player;
-export let isReady = false;
+export let cameraIsReady = false;
 export let followDistance = 8;
 export let cameraAtZero = true;
 export let mouseDowntime = 0;
@@ -174,7 +174,7 @@ export function SetControls(cameraMode, cameraFOV) {
         // centercaster = new THREE.Raycaster();
         mousecaster = new THREE.Raycaster();
         
-        isReady = true;
+        cameraIsReady = true;
 
         const pointerGeo = new THREE.CapsuleGeometry(.05, .2, 8, 8);
         const pointerMat = new THREE.MeshBasicMaterial({ color: 'blue', transparent: true, opacity: .5 });
@@ -188,7 +188,7 @@ export function SetControls(cameraMode, cameraFOV) {
         camera.position.z = 5;
 
 
-        isReady = true;
+        cameraIsReady = true;
     } else if (cameraMode == "Fly") {
         // const blocker = document.getElementById( 'blocker' );
         // const instructions = document.getElementById( 'instructions' );
@@ -224,7 +224,7 @@ export function SetControls(cameraMode, cameraFOV) {
 
 
         centercaster = new THREE.Raycaster();
-        isReady = true;
+        cameraIsReady = true;
     } else if (cameraMode == "Map") {
         const blocker = document.getElementById('blocker');
         const instructions = document.getElementById('instructions');
@@ -241,7 +241,7 @@ export function SetControls(cameraMode, cameraFOV) {
         controls.rollSpeed = Math.PI / 24;
         controls.autoForward = false;
         console.log("tryna set map controls");
-        isReady = true;
+        cameraIsReady = true;
         const pointerGeo = new THREE.CapsuleGeometry(.2, 2, 4, 4);
         const pointerMat = new THREE.MeshBasicMaterial({ color: 'blue' });
         pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
@@ -261,7 +261,7 @@ export function SetControls(cameraMode, cameraFOV) {
         // controls.autoRotateSpeed = 1;
         controls.target.set(0, .2, 0);
         controls.update();
-        isReady = true;
+        cameraIsReady = true;
 
 
         const blocker = document.getElementById('blocker');
@@ -342,7 +342,7 @@ export function SetControls(cameraMode, cameraFOV) {
         pointerGizmo.up.set(0, 1, 0);
         scene.add(pointerGizmo);
 
-        isReady = true;
+        cameraIsReady = true;
     } else if (cameraMode == "First Person") { //default first person
         // camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
         camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 0.1, 500);
@@ -392,7 +392,7 @@ export function SetControls(cameraMode, cameraFOV) {
         scene.add(controlObject);
         
         // controls.update();
-        isReady = true;
+        cameraIsReady = true;
 
         const pointerGeo = new THREE.CapsuleGeometry(.2, 2, 4, 4);
         const pointerMat = new THREE.MeshBasicMaterial({ color: 'blue' });
@@ -823,7 +823,8 @@ async function RaycastHit(type, hit, event) {
                         lastRaycastHitObject.header = header;
                         const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
                         "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22popup_content_pill\x22> <h1>"+header+"</h1></div></div>";
-                        popup.classList.remove("popup");
+                        // popup.classList.remove("popup");
+                        popup.className = '';
                         popup.classList.add("popup2");
                         popup.innerHTML = htmlstring;
 
@@ -1092,7 +1093,7 @@ export function mouseRaycast(e) {
 
 export function playerRaycast() {
 
-    if (playcaster) {
+    if (playcaster && cameraIsReady && sceneIsReady) {
         var raycastHits = playcaster.intersectObjects(activeObjex, true);
         let selectColor = new THREE.Color(0xff3333);
         let stopColor = new THREE.Color(0x26de57);
@@ -1126,7 +1127,7 @@ export function playerRaycast() {
 }
 
 export function centerRaycast() {
-    if (scene && camera && centercaster && isReady) {
+    if (scene && camera && centercaster && cameraIsReady && sceneIsReady) {
 
         centercaster.setFromCamera(new THREE.Vector2(0, 0), camera);
         const raycastHits = centercaster.intersectObjects(activeObjex, true);
@@ -1166,6 +1167,11 @@ export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
     // console.log(event.target.id);
         // console.log("showDialogPanel " + showDialogPanel);
+    console.log("mouse down on " + event.target.id);
+
+    if (!sceneIsReady || !cameraIsReady) {
+        return;
+    }
 
     if (showDialogPanel) {
         return;
@@ -1177,6 +1183,11 @@ export function onMouseDown(event) { //clicked on threejs object
     mouseDownStarttime = Date.now() / 1000;    
    
 
+    if (event.target.id == "startButton") {
+      ActionSwitch(event);
+      popup.style.display = "none";
+      return;
+    } 
     if (event.target.id == "popup_yesButton") {
       ActionSwitch(event);
       popup.style.display = "none";
@@ -1503,6 +1514,10 @@ export function onMouseDown(event) { //clicked on threejs object
 
 
 export function onMouseUp(e) {
+
+    if (!sceneIsReady || !cameraIsReady) {
+        return;
+    }
     mouseDowntime = (Date.now() / 1000) - mouseDownStarttime; 
     
     mouseIsDown = false;
@@ -1524,11 +1539,15 @@ export function onMouseUp(e) {
 
 
 export function onMouseMove(event) {
+
+    if (!sceneIsReady || !cameraIsReady) {
+        return;
+    }
     if (!showDialogPanel) {
 
     
-    // console.log("mouse move " +scene + mouse + camera + mousecaster + isReady);
-    if (scene && mouse && camera && mousecaster && isReady) {
+    // console.log("mouse move " +scene + mouse + camera + mousecaster + sceneIsReady);
+    if (scene && mouse && camera && mousecaster && cameraIsReady && sceneIsReady) {
         mouseRaycast(event);
     }
     // if (mouseIsDown && cameraMode == "Mouse Look" && scene && mouse && camera && (!joystick || ((moveX == 0) && (moveZ == 0))) ) {

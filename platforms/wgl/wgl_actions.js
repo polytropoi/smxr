@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { player, lastRaycastHitObject, mouseDowntime } from './wgl_controls.js';
 import { ShowPopup } from './wgl_ui.js';
 
-import { scene } from './wgl_main.mjs';
+import { scene, StartButton } from './wgl_main.mjs';
 
 import { settings } from '../../../connect/settings.js';
 import { userData, room } from '../../../connect/connect.js';
@@ -22,6 +22,7 @@ export let playerRigidbody;
 export let lastEvent;
 // export const sceneObjectsArray = []; //array with all the object data
 
+
 export function ActionSwitch (event) { //input from simple html popups
     console.log("ActionSwitch event " + JSON.stringify(event));
     const type = event.target.dataset.type; //e.g. markerType
@@ -32,6 +33,8 @@ export function ActionSwitch (event) { //input from simple html popups
     console.log(type + " " + data + " " + tags);
 
     switch (type) {
+        case "start":
+            StartButton();
         case "gate":
             EnterSceneGate(data);
         break;
@@ -45,8 +48,15 @@ export function ActionSwitch (event) { //input from simple html popups
             // console.log("tryna pickup " + data +" from json "+ JSON.stringify(sceneObject));
             sceneObjects[data].confirmed("pickup");
         break;
+        case "consume":
+            // console.log("tryna pickup " + data +" from json "+ JSON.stringify(sceneObject));
+            sceneObjects[data].confirmed("pickup");
+        break;
     }
 }
+
+
+
 
 export async function SetPlayerRigidbody() {
     playerRigidbody = await getPlayerBody(player); 
