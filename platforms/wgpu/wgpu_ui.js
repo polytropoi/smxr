@@ -11,7 +11,7 @@ import { InteractionManager } from 'three/addons/interaction/InteractionManager.
 
 import { ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
-import { viewportPlaceholder, popup, hic_content, onMouseDown } from './wgpu_controls.js';
+import { viewportPlaceholder, hic_content, onMouseDown } from './wgpu_controls.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -36,6 +36,10 @@ export let uiMode = "popup"; //set to "hic" if settings prescribe
 
 let canvasEl;
 let contentEl;
+
+
+export const popup = document.getElementById("popup"); //empty
+export const startPop = document.getElementById("startPop"); //prepopped
 
 
 function clamp(value, min, max) {
@@ -602,6 +606,32 @@ export function UnSwapMaterials (object) {
         }
         matSwappedObjex = {};
     // }
+}
+
+
+export function StartPopup (header, body, showStartButton) {
+
+    if (startPop) {
+        let xpos = (window.innerWidth / 2) - 256;
+        let ypos = (window.innerHeight / 2) - 256;
+        Object.assign(startPop.style, {
+            left: `${xpos}px`,
+            top: `${ypos}px`,
+            // visibility = 'visible'
+            display: 'block',
+        });
+
+        startPop.visibility = "visible";
+// parentEl.querySelector('#child-id');
+        startPop.querySelector("#startPopHeader").innerHTML = header;
+        startPop.querySelector("#startPopBody").innerHTML = body;
+        if (showStartButton == true) {
+            startPop.querySelector("#startButton").style.display = "";
+        } else {
+            startPop.querySelector("#startButton").style.display = "none";
+            // startPop.querySelector("#startButton").style.align = "center";
+        }
+    }
 }
 
 export function ShowHTMLPopup(event, htmlstring, position, distance, style) {

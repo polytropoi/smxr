@@ -9,9 +9,9 @@ import { eventEl } from '../../../connect/events.js';
 
 import { ReturnObjectData, SceneObject, lastEvent, sceneObjects} from './wgpu_actions.js';
 
-import { viewportPlaceholder, popup } from './wgpu_controls.js';
+import { viewportPlaceholder } from './wgpu_controls.js';
 
-import { ShowHTMLPopup, HideHTMLPopup } from './wgpu_ui.js';
+import { ShowHTMLPopup, HideHTMLPopup, popup } from './wgpu_ui.js';
 
 import { AddDynamicBody, SetEquippedRigidbody } from './wgpu_physics.js';
 

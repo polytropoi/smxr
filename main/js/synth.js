@@ -776,6 +776,7 @@ AFRAME.registerComponent("generate_synth_triggers", {
   },
   init: function () {},
 });
+
 AFRAME.registerComponent("mod_keys", {
   schema: {
     width: {

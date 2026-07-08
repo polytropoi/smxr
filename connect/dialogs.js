@@ -16,6 +16,7 @@ import { room, lerp, sceneLocations, localData, ReturnLocationTable,
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "./indexedDb.js";
 
 
+
 export let showDialogPanel = false;
 let dialogInitialized = false;
 
@@ -40,6 +41,9 @@ let sceneColor4 = '#808080';
 // let sceneColor3Alt = '#000000';
 // let sceneColor4Alt = '#000000';
 let sceneEnvironmentPreset;
+
+const popup = document.getElementById("popup");
+const startPop = document.getElementById("startPop");
 
 window.PlayPauseMedia = PlayPauseMedia;
 window.PlayerToLocation = PlayerToLocation;
@@ -1796,6 +1800,7 @@ export function PlayPauseMedia () {
         }
 
     } else if (timedEventsListenerMode.toLowerCase() == "youtube") {
+      
       if (youtubePlayer != null) {
         if (!youtubeIsPlaying) {
           console.log("tryna play youtube");
@@ -2342,7 +2347,13 @@ function GreetingModal() {
 export function SceneManglerModal(mode, autoHide) {
 
     // ClearInputs();
-
+    if (popup) {
+      popup.style.display = "none";
+    }
+    if (startPop) {
+      startPop.style.display = "none";
+    }
+ 
     console.log("opening SceneManglerModal with location " + selectedLocationTimestamp);
         
     if (localData.settings.sceneColor1) {

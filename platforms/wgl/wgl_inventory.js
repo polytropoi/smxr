@@ -9,9 +9,9 @@ import { UpdateLocalPlayerState, UpdateLocalEquipment } from "../../../connect/i
 
 import { ReturnObjectData, SceneObject, lastEvent} from './wgl_actions.js';
 
-import { viewportPlaceholder, popup } from './wgl_controls.js';
+import { viewportPlaceholder } from './wgl_controls.js';
 
-import { ShowPopup } from './wgl_ui.js';
+import { ShowPopup, popup } from './wgl_ui.js';
 
 import { AddDynamicBody, SetEquippedRigidbody } from './wgl_physics.js';
 

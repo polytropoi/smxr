@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup, HideHTMLPopup } from './wgpu_ui.js';
+import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup, HideHTMLPopup, startPop } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -93,7 +93,7 @@ let controlObject;
 let lastPlayerPosition = new THREE.Vector3();
 export let worldHitPosition = new THREE.Vector3();
 
-export const popup = document.getElementById("popup"); //should mode these to _ui
+const popup = document.getElementById("popup"); //should mode these to _ui
 export const hic_content = document.getElementById("hic_content"); //alt to popup
 
 
@@ -1080,6 +1080,8 @@ export function centerRaycast() {
 export function onMouseDown(event) { // on threejs object
     // playerReadyToNav = true;
     event.stopPropagation();// duh!
+
+        console.log("mouse down on " + event.target.id);
     if (lastRaycastHitObject && lastRaycastHitObject.userData) {
     console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID + " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
     }
@@ -1096,10 +1098,16 @@ export function onMouseDown(event) { // on threejs object
 
     mouseDownStarttime = Date.now() / 1000;    
    
-
+    if (event.target.id == "startButton") {
+        ActionSwitch(event);
+        popup.style.display = "none";
+        startPop.style.display = "none";
+        return;
+    } 
     if (event.target.id == "popup_yesButton") {
       ActionSwitch(event);
       popup.style.display = "none";
+    startPop.style.display = "none";
       if (hicMesh) {
         hicMesh.visible = false;
       }
@@ -1107,6 +1115,7 @@ export function onMouseDown(event) { // on threejs object
     } if (event.target.id == "popup_yesButton1") {
       ActionSwitch(event);
       popup.style.display = "none";
+              startPop.style.display = "none";
      if (hicMesh) {
         hicMesh.visible = false;
       }
@@ -1114,12 +1123,14 @@ export function onMouseDown(event) { // on threejs object
     } if (event.target.id == "popup_yesButton2") {
       ActionSwitch(event);
       popup.style.display = "none";
+              startPop.style.display = "none";
       if (hicMesh) {
         hicMesh.visible = false;
       }
       return;
     } else if (event.target.id == "popup_cancelButton") {
       popup.style.display = "none";
+        startPop.style.display = "none";
       if (hicMesh) {
         hicMesh.visible = false;
       }
@@ -1308,13 +1319,15 @@ export function onMouseDown(event) { // on threejs object
                         // UpdateHIC(popup.innerHTML);
                     }
                 } else {
-                    // popup.style.display = "none";
+                    popup.style.display = "none";
+                    startPop.style.display = "none";
                     // HideHTMLPopup();
                 }
             }
         } else {
             // const popup = document.getElementById("popup");
-            // popup.style.display = "none";
+            popup.style.display = "none";
+            startPop.style.display = "none";
             // HideHTMLPopup();
         }
    

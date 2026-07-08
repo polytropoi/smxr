@@ -2325,7 +2325,8 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.sceneTime = sceneTime;
                     settings.volumePrimary = sceneResponse.scenePrimaryVolume;
                     settings.volumeAmbient = sceneResponse.sceneAmbientVolume;
-                    settings.volumeTrigger = sceneResponse.sceneTriggerVolume; 
+                    settings.volumeTrigger = sceneResponse.sceneTriggerVolume;
+                    settings.volumeMedia = sceneResponse.sceneMediaAudioVolume;
                     settings.sceneTimedEvents = sceneResponse.sceneTimedEvents; //could be big!?
                     settings.skyboxIDs = skyboxIDs;
                     settings.skyboxID = skyboxID;
@@ -2601,6 +2602,11 @@ wgpu_router.get('/:_id', function (req, res) {
 
                             // "<div id=\x22popup\x22 class=\x22popup\x22 style=\x22position: absolute; display: none; background: white; padding: 10px; border: 1px solid black;\x22>Some text</div>"+
                             "<div id=\x22popup\x22 class=\x22popup\x22>Some text</div>"+
+
+
+                            "<div id=\x22startPop\x22 class=\x22popup\x22><div id=\x22startPopHeader\x22><h1> Start Header </h1></div><br><div id=\x22startPopBody\x22><h4> Start Body </h4></div><br>" +
+                            "<button style=\x22width:100px;\x22 id=\x22startButton\x22 data-type=\x22start\x22 class=\x22yesButton\x22><h3>Play<h3></button>" +
+                            "</div>"+
 
                             canvasOverlay +
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +

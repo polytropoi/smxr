@@ -26,7 +26,7 @@
 
 	import { Starfield, CreateSprites, } from './wgpu_fx.js';
 
-	import { ThreeDeeText, lookAtCameraObjects, SetUIMode, interactionManagers } from './wgpu_ui.js';
+	import { ThreeDeeText, lookAtCameraObjects, SetUIMode, interactionManagers, StartPopup, startPop } from './wgpu_ui.js';
 
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
@@ -73,19 +73,12 @@
 	let postProcessing;
 	let renderPipeline;
 	export let showDebug = false;
-	// export let controls;
 
 	export let selectedObjects = [];
 
 	let physicsInstances;
 	let doPostProcessing = false;
 	
-	
-	// export let activeObjex = []; //raycastable
-
-	// export let staticObjex = []; //physics
-	// export let dynamicObjex = []; //""
-
 	let navmeshObjex = [];
 	let surfaceObjex = [];
 
@@ -105,11 +98,20 @@
 	let instancedPosition = new THREE.Vector3();
 	let instancedQuaternion = new THREE.Quaternion();
 	let instancedMatrix = new THREE.Matrix4();
+
+	let loadingHeader = "";
 	export let sceneIsReady = false;
 	
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
 
-
+	export function StartButton() {
+		console.log("start button function called!");
+		sceneIsReady = true;
+		console.log("sceneIsReady "+ sceneIsReady);
+		PlayPauseMedia();
+		popup.style.display = "none";
+		startPop.style.display = "none";
+	}
 
 
 	////////////// SCENE INIT FUNCTION 
@@ -126,6 +128,9 @@
 				// renderer.setAnimationLoop( animate );
 				// renderer.toneMapping = THREE.LinearToneMapping;
 				// renderer.toneMappingExposure = 0.4;
+
+		loadingHeader = "<h2>" +settings.sceneTitle+ "</h2>";
+		StartPopup(loadingHeader, 'Loading....', false);
 		await renderer.init(); 
 		renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setPixelRatio( 2.0 );
@@ -157,11 +162,14 @@
 			cameraMode = "Mouse Look";
 		}
 
+		StartPopup(loadingHeader, 'Loading Controls....', false);
 		SetControls(cameraMode, cameraFOV);
 		
 			
 		InitEnvMap();
 
+
+		StartPopup(loadingHeader, 'Loading Physics....', false);
 		if (settings && settings.sceneTags && settings.sceneTags.includes("no gravity") ) {
 			const gravity = {x:0, y:0, z:0};
 			await InitRapier(gravity); 
@@ -173,6 +181,7 @@
 			await InitRapier(gravity); //gravityMode
 		}
 		
+		StartPopup(loadingHeader, 'Loading Locations....', false);
 		await InitLocations(); //calls initSystems...
 
 
@@ -199,11 +208,14 @@
 		// 	// AssignModelsToAgents();
 		// }
 
+		StartPopup(loadingHeader, 'Loading Static Objects....', false);
+
 
 		await InitStaticObjex();  //creates default if none provided
 
 		// let notSurfaceInstanceModels = [];
 		if (surface) { // => scattering instances
+			StartPopup(loadingHeader, 'Loading Instances....', false);
 			await InitSurface();
 			console.log("instantiating on surface with models " + instancedModels.length);
 			for (let i = 0; i < instancedModels.length; i++) {
@@ -259,6 +271,7 @@
 
 			// Video Mesh
 			// init video and MediaPipe
+			StartPopup(loadingHeader, 'Loading Webcam....', false);
 			video = await getVideo();
 
 			
@@ -298,6 +311,7 @@
 			// CreatePlayerAgent(player, player.position.clone());
 		}
 		//  await new Promise(r => setTimeout(r, 000)); //fudge
+		StartPopup(loadingHeader, 'Loading Events....', false);
 		InitEvents();
 
 		// if (settings.audioGroups && settings.audioGroups.length) {
@@ -330,7 +344,7 @@
 		if (settings.sceneTags.includes("hic")) {
 			SetUIMode("hic");
 		}
-
+		StartPopup(loadingHeader, 'Loading Environment....', false);
 		if (settings && settings.sceneEnvironmentSettings) {
 			console.log("sceneEnvironmentSettings " + JSON.stringify(settings.sceneEnvironmentSettings));
 			if (settings.sceneEnvironmentSettings.sceneFloorplaneTexture == "grid") {
@@ -398,7 +412,8 @@
 		InitFog();
 
 		// GetUserInventory();
-		LoadSceneInventory(); //both scene and user inventories
+		StartPopup(loadingHeader, 'Loading Inventories....', false);
+		await LoadSceneInventory(); //both scene and user inventories
 
 		if (doPostProcessing) {
 			const scenePass = pass( scene, camera );
@@ -535,7 +550,19 @@
 			}
 	
 		}
-		LoadKinematicAgentMeshes();
+		StartPopup(loadingHeader, 'Loading Agents....', false);
+		await LoadKinematicAgentMeshes();
+		StartPopup(loadingHeader, 'Ready!', true);
+				
+		const startButton = startPop.querySelector("#startButton");
+		if (startButton) {
+			console.log("startButton found!");
+			// const startButton = document.getElementById('popup_yesButton');
+			startButton.addEventListener('pointerdown', StartButton);
+				
+		} else {
+			console.log("startButton not found!");
+		}
 
 	} //end init systems
 

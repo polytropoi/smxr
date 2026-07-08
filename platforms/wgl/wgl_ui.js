@@ -22,6 +22,9 @@ export let textContainers = [];
 
 export let scenePictures = {};
 
+export const popup = document.getElementById("popup"); //empty
+export const startPop = document.getElementById("startPop"); //prepopped
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
@@ -386,8 +389,33 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
 
 }
 
+export function StartPopup (header, body, showStartButton) {
+
+    if (startPop) {
+        let xpos = (window.innerWidth / 2) - 256;
+        let ypos = (window.innerHeight / 2) - 256;
+        Object.assign(startPop.style, {
+            left: `${xpos}px`,
+            top: `${ypos}px`,
+            // visibility = 'visible'
+            display: 'block',
+        });
+
+        startPop.visibility = "visible";
+// parentEl.querySelector('#child-id');
+        startPop.querySelector("#startPopHeader").innerHTML = header;
+        startPop.querySelector("#startPopBody").innerHTML = body;
+        if (showStartButton == true) {
+            startPop.querySelector("#startButton").style.display = "";
+        } else {
+            startPop.querySelector("#startButton").style.display = "none";
+            // startPop.querySelector("#startButton").style.align = "center";
+        }
+    }
+}
+
 export function ShowPopup (event, htmlstring) { //hrm move to UI
-    const popup = document.getElementById("popup");
+
     console.log("showDialogPanel " + showDialogPanel);
 
     if (showDialogPanel) {
@@ -401,7 +429,10 @@ export function ShowPopup (event, htmlstring) { //hrm move to UI
             top: `${ypos}px`,
             display: 'block',
         });
-        popup.innerHTML = htmlstring;
+        if (htmlstring) {
+            popup.innerHTML = htmlstring;
+        }
+        
     } else {
         // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
         let xpos = event.clientX - 256;

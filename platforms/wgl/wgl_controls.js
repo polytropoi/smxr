@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, ShowPopup } from './wgl_ui.js';
+import { InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, ShowPopup, startPop } from './wgl_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -90,7 +90,7 @@ let controlObject;
 let lastPlayerPosition = new THREE.Vector3();
 let worldHitPosition = new THREE.Vector3();
 
-export const popup = document.getElementById("popup");
+const popup = document.getElementById("popup");
 export const viewportPlaceholder = new THREE.Object3D();
 
 export function SetPlayerLocation (x,y,z) {
@@ -1167,6 +1167,7 @@ export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
     // console.log(event.target.id);
         // console.log("showDialogPanel " + showDialogPanel);
+            event.stopPropagation();// duh!
     console.log("mouse down on " + event.target.id);
 
     if (!sceneIsReady || !cameraIsReady) {
@@ -1184,24 +1185,29 @@ export function onMouseDown(event) { //clicked on threejs object
    
 
     if (event.target.id == "startButton") {
-      ActionSwitch(event);
-      popup.style.display = "none";
-      return;
+        ActionSwitch(event);
+        popup.style.display = "none";
+        startPop.style.display = "none";
+        return;
     } 
     if (event.target.id == "popup_yesButton") {
       ActionSwitch(event);
       popup.style.display = "none";
+        startPop.style.display = "none";
       return;
     } if (event.target.id == "popup_yesButton1") {
       ActionSwitch(event);
       popup.style.display = "none";
+        startPop.style.display = "none";
       return;
     } if (event.target.id == "popup_yesButton2") {
       ActionSwitch(event);
       popup.style.display = "none";
+        startPop.style.display = "none";
       return;
     } else if (event.target.id == "popup_cancelButton") {
       popup.style.display = "none";
+        startPop.style.display = "none";
       return;
     }
     // if (event.target.)
@@ -1465,13 +1471,16 @@ export function onMouseDown(event) { //clicked on threejs object
                     ShowPopup(event);
                 } else {
                     popup.style.display = "none";
+                      startPop.style.display = "none";
                 }
             } else {
                 popup.style.display = "none";
+                  startPop.style.display = "none";
             }
         } else {
             // const popup = document.getElementById("popup");
             popup.style.display = "none";
+              startPop.style.display = "none";
         }
     // }
 

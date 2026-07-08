@@ -107,8 +107,8 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
       //   'playsinline': 1
       // },
         events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange
+          'onReady': onYoutubePlayerReady,
+          'onStateChange': onYoutubePlayerStateChange
         }
     });
     // youtubePlayer.h.attributes.sandbox.value = "allow-presentation";
@@ -140,7 +140,7 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
       }
     }
   }
-  function onPlayerReady(event) {
+  function onYoutubePlayerReady(event) { //youtube player ready
     
     console.log("youtubePlayer is re4ady!");
 
@@ -164,6 +164,16 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
     //     youtube_player.player_status_update("ready");
     // }
     youtubeData = youtubePlayer.getVideoData();
+
+    if (settings && settings.volumeMedia) {
+
+        var normalizedVolume = ((settings.volumeMedia - -80) * 100) / (20 - -80);
+        console.log("media volume " + normalizedVolume);
+        
+        youtubePlayer.setVolume(normalizedVolume);
+    }
+    
+
     if (youtubeData && youtubeTitleEl) {
       console.log("gots youtubedata for " + JSON.stringify(youtubeData));
       // let titlestring = youtubeData.author + "\n" + youtubeData.title;
@@ -182,7 +192,13 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
         }
       }, 1000); 
     } else {
-      youtube_player.player_status_update("ready");
+      if (settings.volumeMedia) {
+        console.log("tryna set youtube player volume to " + settings.volumeMedia);
+        // youtube_player.setVolume(settings.volumeMedia);
+          var normalizedVolume = ((settings.volumeMedia - -80) * 100) / (20 - -80) * .01;
+        // youtubePlayer.setVolume(normalizedVolume);
+      }
+        youtube_player.player_status_update("ready");
     }  
   }
 
@@ -225,7 +241,7 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
   //   }
   // }
 
-  function onPlayerStateChange(event) { //youtube player events
+  function onYoutubePlayerStateChange(event) { //youtube player events
 
     // // let interval = null;
     // currentTime = event.target.getCurrentTime();
@@ -524,7 +540,7 @@ export function UpdateTriggerAudioVolume(newVolume) {
    }
 }
 export function UpdateMediaAudioVolume(newVolume) {
-   var triggerAudioEl = document.getElementById("triggerAudio");
+  //  var triggerAudioEl = document.getElementById("triggerAudio");
   //  if (triggerAudioEl) {
   //     var triggerAudioController = triggerAudioEl.components.trigger_audio_control;
   //     if (triggerAudioController != null) {
@@ -990,9 +1006,9 @@ export async function createYouTubePlayer() {
         events: {
           onReady: (event) => {
             resolve(youtubePlayer); // Resolve the promise with the player object when ready
-            onPlayerReady(event);
+            onYoutubePlayerReady(event);
           },
-          onStateChange: onPlayerStateChange
+          onStateChange: onYoutubePlayerStateChange
         }
       });
     });

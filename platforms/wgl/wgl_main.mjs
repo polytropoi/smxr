@@ -7,7 +7,7 @@
 
 	import { InitPathfinding, agents } from './wgl_nav.js';
 
-	import { ShowPopup, ThreeDeeText, lookAtCameraObjects } from './wgl_ui.js';
+	import { ShowPopup, popup, StartPopup, ThreeDeeText, lookAtCameraObjects } from './wgl_ui.js';
 
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
@@ -84,6 +84,8 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 	
 
 	let loadingString = "";
+
+	let loadingHeader = "";
 	export let sceneIsReady = false;
 
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
@@ -106,8 +108,12 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 		scene = new THREE.Scene();
 		renderer = new THREE.WebGLRenderer({antialias:false, canvas: three_canvas});
 		
-		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Loading....<h4>";
-		ShowPopup(null, loadingString);
+
+		// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Loading....<h4>";
+		// ShowPopup(null, loadingString);
+
+		loadingHeader = "<h2>" +settings.sceneTitle+ "</h2>";
+		StartPopup(loadingHeader, 'Loading....', false);
 		// renderer = new THREE.WebGPURenderer( { antialias: true } );
 				// renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setSize( window.innerWidth, window.innerHeight );
@@ -147,34 +153,36 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 			cameraMode = "Mouse Look";
 		}
 
-		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Controls....<h4>";
-		ShowPopup(null, loadingString);
+		// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Controls....<h4>";
+		// ShowPopup(null, loadingString);
+		StartPopup(loadingHeader, 'Loading Controls...', false);
 		SetControls(cameraMode, cameraFOV);
 		
 			
 
 
-
+		StartPopup(loadingHeader, 'Loading Physics...', false);
 		if (settings && settings.sceneTags && settings.sceneTags.includes("no gravity") ) {
-					loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Physics....<h4>";
-		ShowPopup(null, loadingString);
+					// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Physics....<h4>";
+						
 			const gravity = {x:0, y:0, z:0};
 			await InitRapier(gravity); 
 		} else if (settings && settings.sceneTags && settings.sceneTags.includes("low gravity") ) {
-			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Physics....<h4>";
-		ShowPopup(null, loadingString);
+		// 	loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Physics....<h4>";
+		// ShowPopup(null, loadingString);
 			const gravity = {x:0, y:-0.25, z:0}; //"earthlike"
 			await InitRapier(gravity); //gravityMode
 		} else {
-			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Physics....<h4>";
-		ShowPopup(null, loadingString);
+		// 	loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Physics....<h4>";
+		// ShowPopup(null, loadingString);
 			const gravity = {x:0, y:-9.81, z:0}; //"earthlike"
 			await InitRapier(gravity); //gravityMode
 		}
 		
 
-		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Locations....<h4>";
-		ShowPopup(null, loadingString);
+		// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Locations....<h4>";
+		// ShowPopup(null, loadingString);
+		StartPopup(loadingHeader, 'Loading Locations...', false);
 		await InitLocations(); //calls initSystems...
 
 		// initSystems();
@@ -185,15 +193,17 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 	export async function InitSystems() { 
 
 		if (splatObjex.length) {
-			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Spark Lib....<h4>";
-			ShowPopup(null, loadingString);
+			// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Spark Lib....<h4>";
+			// ShowPopup(null, loadingString);
+					StartPopup(loadingHeader, 'Loading SparkJS...', false);
 			await InitSpark();
 			// surface = surfaceObjex[0];
 			initSplats();
 		} 
 		if (navmesh && navmesh.geometry) {
-			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Navmesh....<h4>";
-			ShowPopup(null, loadingString);
+			// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Navmesh....<h4>";
+			// ShowPopup(null, loadingString);
+					StartPopup(loadingHeader, 'Loading Navmesh...', false);
 			await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
 			// AssignModelsToAgents();
 		}
@@ -201,8 +211,9 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 
 		// let notSurfaceInstanceModels = [];
 		if (surface) { // => scattering instances
-			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Surfaces....<h4>";
-			ShowPopup(null, loadingString);
+			// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Surfaces....<h4>";
+			// ShowPopup(null, loadingString);
+			StartPopup(loadingHeader, 'Loading Instances...', false);
 			await InitSurface();
 			console.log("instantiating on surface with models " + instancedModels.length);
 			for (let i = 0; i < instancedModels.length; i++) {
@@ -253,8 +264,9 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 			// Video Mesh
 			// init video and MediaPipe
 
-			loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Webcam....<h4>";
-			ShowPopup(null, loadingString);
+			// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Webcam....<h4>";
+			// ShowPopup(null, loadingString);
+					StartPopup(loadingHeader, 'Loading Webcam...', false);
 			video = await getVideo();
 
 			
@@ -352,13 +364,16 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 			
 		}
 		
-		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Scene Objects....<h4>";
-		ShowPopup(null, loadingString);
+		// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Scene Objects....<h4>";
+		// ShowPopup(null, loadingString);
+		StartPopup(loadingHeader, 'Loading SceneObjects...', false);
 
 		await InitStaticObjex();  //creates default if none provided
 
-		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Environment....<h4>";
-		ShowPopup(null, loadingString);
+		// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Environment....<h4>";
+		// ShowPopup(null, loadingString);
+
+		StartPopup(loadingHeader, 'Loading Environment...', false);
 		// InitEnvMap();
 		InitEnvMap();
 		InitSceneLights();
@@ -366,8 +381,10 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 		InitFog();
 
 		// GetUserInventory();
-		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Inventories....<h4>";
-		ShowPopup(null, loadingString);
+		// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Inventories....<h4>";
+		// ShowPopup(null, loadingString);
+
+		StartPopup(loadingHeader, 'Loading Inventories...', false);
 		await LoadSceneInventory(); //both scene and user inventories
 
 		if (water) { // set uwfx
@@ -378,22 +395,25 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 			
 	
 		}
-		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Agents....<h4>";
-		ShowPopup(null, loadingString);
+		// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Agents....<h4>";
+		// ShowPopup(null, loadingString);
+
+		StartPopup(loadingHeader, 'Loading Agents...', false);
 		await LoadKinematicAgentMeshes();
 
-		loadingString = "<h1>" + settings.sceneTitle + "</h1><br><button style=\x22width:100px;\x22 id=\x22popup_yesButton\x22 data-type=\x22start\x22 class=\x22yesButton\x22><h3>Play<h3></button>";
-		// loadingString = "<h1>" + settings.sceneTitle + "</h1><br><h4>Ready!<h4>";
-		ShowPopup(null, loadingString);
 
+		StartPopup(loadingHeader, 'Ready!', true);
+		
+		const startButton = startPop.querySelector("#startButton");
+		if (startButton) {
+			console.log("startButton found!");
+			// const startButton = document.getElementById('popup_yesButton');
+			startButton.addEventListener('pointerdown', StartButton);
+				
+		} else {
+			console.log("startButton not found!");
+		}
 
-		// const startButton = document.getElementById('startButton');
-		// startButton.addEventListener('click', () => {
-		// 		console.log("startButtonClick!");
-		// 	startButton.style.display = 'none';
-		// 	// Start the animation loop
-		// 	StartButton(); 
-		// });
 
 		sceneIsReady = true;
 	} //end init systems

@@ -121,6 +121,7 @@ wgl_router.get('/:_id', function (req, res) {
     let scenePrimaryVolume = .8;
     let sceneAmbientVolume = .8;
     let sceneTriggerVolume = .8;
+    let sceneMediaVolume = .8;  
     let objectAudioGroups = []; //audio groups attached to objex, not scene (i.e. primary, ambient, trigger)
     // let ambienturl = "";
     var primary_mp3url = "";
@@ -308,6 +309,7 @@ wgl_router.get('/:_id', function (req, res) {
     let hasPrimaryAudio = false;
     let hasPrimaryAudioStream = false;
     let hasAmbientAudio = false;
+    let hasMediaAudio = false;
     let ambientOggUrl = "";
     let ambientMp3Url = "";
     let triggerOggUrl = "";
@@ -2173,6 +2175,9 @@ wgl_router.get('/:_id', function (req, res) {
             if (sceneResponse.sceneTriggerVolume != null) {
                 sceneTriggerVolume = sceneResponse.sceneTriggerVolume;
             }
+            if (sceneResponse.sceneMediaVolume != null) {
+                sceneMediaVolume = sceneResponse.sceneMediaVolume;
+            }
             if (hasSynth) {
                 synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script src=\x22../main/js/synth.js\x22></script>";
             }
@@ -2439,6 +2444,7 @@ wgl_router.get('/:_id', function (req, res) {
             let primaryAudioSliderChunk = "";
             let ambientAudioSliderChunk = "";
             let triggerAudioSliderChunk = "";
+            let mediaAudioSliderChunk = "";
             let keynote = "<span class=\x22smallfont\x22>Keynote: "+sceneResponse.sceneKeynote+ "</span><hr>";
             let desc = "<span class=\x22smallfont\x22>Description: "+sceneResponse.sceneDescription+ "</span><hr>";
             let hasApp = false;
@@ -2459,30 +2465,10 @@ wgl_router.get('/:_id', function (req, res) {
                 hasApp = true;
             } 
             
-            // if (sceneResponse.sceneYouTubeIDs != null && sceneResponse.sceneYouTubeIDs.length > 0) {
-            //     let youtubeVolume = sceneResponse.sceneMediaAudioVolume != undefined ? sceneResponse.sceneMediaAudioVolume : 80;
-            //     for (let i = 0; i < sceneResponse.sceneYouTubeIDs.length; i++) {
-            //         youtubeContent = "<div width=\x22240\x22 id=\x22youtubeElement\x22 data-yt_id=\x22"+
-            //         sceneResponse.sceneYouTubeIDs[i]+"\x22 data-sceneTitle=\x22"+sceneResponse.sceneTitle+"\x22></div>"+
-            //         "<script>\n"+
-            //             "var tag = document.createElement('script');\n"+
-            //             "tag.src = \x22//www.youtube.com/iframe_api\x22;\n"+
-            //             "var firstScriptTag = document.getElementsByTagName('script')[0];\n"+
-            //             "firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);\n"+
-            //         "</script>";
-                    
-            //         // youtubeEntity = "<div id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
 
-            //         // "<div id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayer\x22 youtube_player=\x22yt_id: "+
-            //         // sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></div>"+
-            //         // "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 1.7 .1\x22 id=\x22youtubeTitle\x22></a-text>"+
-            //         // "<a-text width=\x223\x22 position=\x22-.95 .7 .1\x22 id=\x22youtubeState\x22></a-text>"+
-            //         // "<a-text width=\x223\x22 position=\x22-.95 .6 .1\x22 id=\x22youtubeStats\x22></a-text>"+
-            //         // "</div>";
-            //     }
-            // }
             if (sceneResponse.sceneYouTubeIDs != null && sceneResponse.sceneYouTubeIDs.length > 0) {
                 let youtubeVolume = sceneResponse.sceneMediaAudioVolume != undefined ? sceneResponse.sceneMediaAudioVolume : 80;
+                hasMediaAudio = true;
                 for (let i = 0; i < sceneResponse.sceneYouTubeIDs.length; i++) {
                     youtubeContent = "<script>\n"+
                                 "var tag = document.createElement('script');\n"+
@@ -2494,14 +2480,6 @@ wgl_router.get('/:_id', function (req, res) {
                     sceneResponse.sceneYouTubeIDs[i]+"\x22 data-sceneTitle=\x22"+sceneResponse.sceneTitle+"\x22></div>";
                    
                     
-                    // youtubeEntity = "<a-entity id=\x22youtubeParent\x22 look-at=\x22#player\x22 position=\x22-6 2 -6\x22>"+
-
-                    // "<a-entity id=\x22youtubePlayer\x22 position=\x220 -1 1\x22 gltf-model=\x22#youtubeplayerModel\x22 youtube_player=\x22yt_id: "+
-                    // sceneResponse.sceneYouTubeIDs[i]+"; volume: "+youtubeVolume+"\x22></a-entity>"+
-                    // "<a-text wrapCount=\x2270\x22 value=\x22"+sceneResponse.sceneTitle+"\x22 width=\x222\x22 position=\x22-.95 1.7 .1\x22 id=\x22youtubeTitle\x22></a-text>"+
-                    // "<a-text width=\x223\x22 position=\x22-.95 .7 .1\x22 id=\x22youtubeState\x22></a-text>"+
-                    // "<a-text width=\x223\x22 position=\x22-.95 .6 .1\x22 id=\x22youtubeStats\x22></a-text>"+
-                    // "</a-entity>";
                 }
             }
 
@@ -2517,9 +2495,9 @@ wgl_router.get('/:_id', function (req, res) {
                 ambientAudioSliderChunk = "<span id=\x22ambientAudioVolume\x22>Ambient Volume</span><div class=\x22slidecontainer_dialog\x22><input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+
                 sceneAmbientVolume+"\x22 class=\x22slider_dialog\x22 id=\x22ambientAudioVolumeSlider\x22></div>";
             }
-            if (hasTriggerAudio) {
-                triggerAudioSliderChunk = "<span id=\x22triggerAudioVolume\x22>Trigger Volume</span><div class=\x22slidecontainer_dialog\x22><input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+
-                sceneTriggerVolume+"\x22 class=\x22slider_dialog\x22 id=\x22triggerAudioVolumeSlider\x22></div>";
+            if (hasMediaAudio) { //e.g. yotube
+                mediaAudioSliderChunk = "<span id=\x22triggerAudioVolume\x22>Trigger Volume</span><div class=\x22slidecontainer_dialog\x22><input type=\x22range\x22 min=\x22-80\x22 max=\x2220\x22 value=\x22"+
+                sceneMediaVolume+"\x22 class=\x22slider_dialog\x22 id=\x22triggerAudioVolumeSlider\x22></div>";
             }
             const landingLink = "../landing/"+short_id;
             const webxrLink = "../webxr/"+short_id;
@@ -2544,7 +2522,7 @@ wgl_router.get('/:_id', function (req, res) {
             screenOverlay = "<div class=\x22screen-overlay\x22>" +
             "<button id=\x22screenOverlayCloseButton\x22 type=\x22button\x22 class=\x22screen-overlay-close-button\x22>Close View</button><br>"+
             "</div>";
-            audioSliders = "<div id=\x22audioSliders\x22 style=\x22visibility: hidden\x22>"+primaryAudioSliderChunk + ambientAudioSliderChunk + triggerAudioSliderChunk+"</div>";
+            audioSliders = "<div id=\x22audioSliders\x22 style=\x22visibility: hidden\x22>"+primaryAudioSliderChunk + ambientAudioSliderChunk + triggerAudioSliderChunk+ + mediaAudioSliderChunk+"</div>";
             mapOverlay = "<div class=\x22map-overlay\x22 id=\x22mapElement\x22>" +
             "<button id=\x22mapOverlayCloseButton\x22 type=\x22button\x22 class=\x22screen-overlay-close-button\x22>Close Map</button><br>"+
             "</div>";
@@ -3176,7 +3154,9 @@ wgl_router.get('/:_id', function (req, res) {
                             // "<div id=\x22popup\x22 class=\x22popup\x22 style=\x22position: absolute; display: none; background: white; padding: 10px; border: 1px solid black;\x22>Some text</div>"+
                             "<div id=\x22popup\x22 class=\x22popup\x22>Popup text</div>"+
 
-                            // "<div id=\x22start\x22 class=\x22popup\x22>Start text</div>"+
+                            "<div id=\x22startPop\x22 class=\x22popup\x22><div id=\x22startPopHeader\x22><h1> Start Header </h1></div><br><div id=\x22startPopBody\x22><h4> Start Body </h4></div><br>" +
+                            "<button style=\x22width:100px;\x22 id=\x22startButton\x22 data-type=\x22start\x22 class=\x22yesButton\x22><h3>Play<h3></button>" +
+                            "</div>"+
 
                             canvasOverlay +
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +

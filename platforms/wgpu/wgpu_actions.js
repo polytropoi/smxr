@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 
-import { player, lastRaycastHitObject, mouseDowntime, popup, hic_content, onMouseDown, lastRaycastHitPosition, lastRaycastHitDistance, worldHitPosition } from './wgpu_controls.js';
+import { player, lastRaycastHitObject, mouseDowntime, hic_content, onMouseDown, lastRaycastHitPosition, lastRaycastHitDistance, worldHitPosition } from './wgpu_controls.js';
 
 import { scene } from './wgpu_main.mjs';
 
@@ -12,7 +12,7 @@ import { locationObjex } from './wgpu_locations.js';
 import { EquipObject } from './wgpu_inventory.js';
 
 import { AddDynamicBody, getPlayerBody, kinematicBodies } from './wgpu_physics.js';
-import { uiMode, ShowHTMLPopup, HideHTMLPopup } from './wgpu_ui.js';
+import { uiMode, ShowHTMLPopup, HideHTMLPopup, popup } from './wgpu_ui.js';
 // import { equippedRigidbody } from './three_physics.js';
 
 export let sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance

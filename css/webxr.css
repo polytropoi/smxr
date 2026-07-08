@@ -775,6 +775,12 @@ background-color: #000000;
   }
   
   
+  .center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   /* .slider {
     -webkit-appearance: none;
     width: 100%;
