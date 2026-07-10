@@ -42,6 +42,7 @@ export function ReturnPictureFromGroup (groupID, tags, groupIndex) {
 }
 export function ReturnTaggedPictures (tag) {
       let matchedPics = [];
+    if (pictureGroupsData) {
       for (let i = 0; i < pictureGroupsData.length; i++) {
         for (let j = 0; j < pictureGroupsData[i].images.length; j++) {
           if (pictureGroupsData[i].images[j].tags.includes(tag)) { //todo check tags
@@ -52,6 +53,9 @@ export function ReturnTaggedPictures (tag) {
         }
       }
       return matchedPics;
+    } else {
+        return null;
+    }
 }
 export async function InitAudioGroups() {
     if (settings && settings.audioGroups) {

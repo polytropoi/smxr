@@ -153,6 +153,10 @@ export function InitEnvMap () {
 		}
 	}
 }
+
+export function InitWater () {
+	
+}
 export function InitSky() {
 
 	if (settings && settings.sceneUseDynamicSky) {

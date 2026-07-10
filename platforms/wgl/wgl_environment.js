@@ -99,11 +99,26 @@ export function InitSky() {
 		scene.add(sky);
 
 		// 2. Configure shader parameters
-		const uniforms = sky.material.uniforms;
-		uniforms['turbidity'].value = 10;
-		uniforms['rayleigh'].value = 2;
-		uniforms['mieCoefficient'].value = 0.005;
-		uniforms['mieDirectionalG'].value = 0.8;
+		// const uniforms = sky.material.uniforms;
+		// uniforms['turbidity'].value = 4;
+		// uniforms['rayleigh'].value = 2;
+		// uniforms['mieCoefficient'].value = 0.005;
+		// uniforms['mieDirectionalG'].value = 0.8;
+
+
+		const effectController = {
+					turbidity: 10,
+					rayleigh: 3,
+					mieCoefficient: 0.005,
+					mieDirectionalG: 0.7,
+					elevation: 2,
+					azimuth: 180,
+					exposure: renderer.toneMappingExposure,
+					cloudCoverage: 0.4,
+					cloudDensity: 0.4,
+					cloudElevation: 0.5,
+					showSunDisc: true
+				};
 
 		let elevation = 5;
 		// if (settings.sceneClouds.name) {
@@ -119,14 +134,35 @@ export function InitSky() {
 			}
 
 		}
-		// 3. Set Sun position
-		const phi = THREE.MathUtils.degToRad(elevation); // Elevation
-		const theta = THREE.MathUtils.degToRad(180); // Azimuth
-		const sunPosition = new THREE.Vector3();
-		sunPosition.setFromSphericalCoords(1, phi, theta);
+		let sun = new THREE.Vector3();
+		const uniforms = sky.material.uniforms;
+					uniforms[ 'turbidity' ].value = effectController.turbidity;
+					uniforms[ 'rayleigh' ].value = effectController.rayleigh;
+					uniforms[ 'mieCoefficient' ].value = effectController.mieCoefficient;
+					uniforms[ 'mieDirectionalG' ].value = effectController.mieDirectionalG;
+					// uniforms[ 'cloudCoverage' ].value = effectController.cloudCoverage;
+					// uniforms[ 'cloudDensity' ].value = effectController.cloudDensity;
+					// uniforms[ 'cloudElevation' ].value = effectController.cloudElevation;
+					// uniforms[ 'showSunDisc' ].value = effectController.showSunDisc;
 
-		uniforms['sunPosition'].value.copy(sunPosition);
-		sunLight.position.copy(sunPosition);
+					const phi = THREE.MathUtils.degToRad( 90 - elevation );
+					const theta = THREE.MathUtils.degToRad( effectController.azimuth );
+
+					sun.setFromSphericalCoords( 1, phi, theta );
+
+					uniforms[ 'sunPosition' ].value.copy( sun );
+
+					renderer.toneMappingExposure = effectController.exposure;
+		// 3. Set Sun position
+		// const phi = THREE.MathUtils.degToRad(elevation); // Elevation
+		// const theta = THREE.MathUtils.degToRad(180); // Azimuth
+		// const sunPosition = new THREE.Vector3();
+		// sunPosition.setFromSphericalCoords(1, phi, theta);
+
+		// uniforms['sunPosition'].value.copy(sunPosition);
+		sunLight.position.copy(sun);
+		const color = new THREE.Color(settings.sceneColor2);
+		scene.background = color;
 			
 	} else {
 		const color = new THREE.Color(settings.sceneColor2);

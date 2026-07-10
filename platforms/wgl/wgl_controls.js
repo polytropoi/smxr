@@ -815,20 +815,22 @@ async function RaycastHit(type, hit, event) {
                         // console.log(Object.keys(tagData).toString());
                         ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                         const pics = ReturnTaggedPictures(Object.keys(tagData).toString());
-                        console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
-                        const rIndex = Math.floor(Math.random() * pics.length);
-                        // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
-                        const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
-                        lastRaycastHitObject.tagData = tagData;
-                        lastRaycastHitObject.header = header;
-                        const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
-                        "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22popup_content_pill\x22> <h1>"+header+"</h1></div></div>";
-                        // popup.classList.remove("popup");
-                        popup.className = '';
-                        popup.classList.add("popup2");
-                        popup.innerHTML = htmlstring;
+                        if (pics) {
+                            console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
+                            const rIndex = Math.floor(Math.random() * pics.length);
+                            // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
+                            const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
+                            lastRaycastHitObject.tagData = tagData;
+                            lastRaycastHitObject.header = header;
+                            const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
+                            "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22popup_content_pill\x22> <h1>"+header+"</h1></div></div>";
+                            // popup.classList.remove("popup");
+                            popup.className = '';
+                            popup.classList.add("popup2");
+                            popup.innerHTML = htmlstring;
 
-                        ShowPopup(event);                    
+                            ShowPopup(event);                    
+                        }
                     } else {
                         ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                     }
@@ -1537,7 +1539,9 @@ export function onMouseUp(e) {
     if (lastRaycastHitObject && lastRaycastHitObject.userData && lastRaycastHitObject.userData.isEquipped) {
         console.log("clicked on equipped object! " + lastRaycastHitObject.userData.objectData.name );
         const sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance;
-        sceneObjectInstance.onClick();
+        if (sceneObjectInstance) {
+            sceneObjectInstance.onClick();
+        }
         // if (lastRaycastHitObject.userData.objectData.actions) {
             
         // }

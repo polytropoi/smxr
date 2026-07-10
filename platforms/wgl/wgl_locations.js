@@ -370,6 +370,9 @@ export async function LoadLocationObjex() { // wait to load these, might need na
             const model = modelData.scene;
             model.userData.locationData = locationObjex[i].locationData;
             model.userData.objectData = locationObjex[i].objectData;
+
+            model.castShadow = true;
+            model.receiveShadow = true;
             const animations = modelData.animations;
             let count = 1;
             if (locationObjex[i].locationData.eventData && locationObjex[i].locationData.eventData.includes("scatter")) { //scatter, not instancing, but cloning multiples
@@ -405,7 +408,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     clonedModel.userData.name = sceneObjectID;
                     // activeObjex.push(clonedModel);
                     
-                    
+                    clonedModel.castShadow = true;
+                    clonedModel.receiveShadow = true;
                     // npcKinematicBodies.push(body);
 
                     clonedModel.traverse(function (child) { 
@@ -413,6 +417,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             child.userData.name = sceneObjectID;
                             child.userData.locationData = locationObjex[i].locationData;
                             child.userData.objectData = locationObjex[i].objectData;
+                            child.castShadow = true;
+                            child.receiveShadow = true;
                             // child.bindMode = "detached";
                         }
                     });
@@ -476,6 +482,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         const z = randomPoint.z;
                         clonedObject.scale.set(1,1,1);
                         clonedObject.position.set(x,y,z);
+                        clonedObject.castShadow = true;
+                        clonedObject.receiveShadow = true;
                         scene.add(clonedObject);
                         clonedObject.visible = true;
                         activeObjex.push(clonedObject);
@@ -483,6 +491,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         if (child.isMesh) {
                             child.userData.locationData = locationObjex[i].locationData;
                             child.userData.objectData = locationObjex[i].objectData;
+                            child.castShadow = true;
+                            child.receiveShadow = true;
                             }
                         });
 
@@ -501,10 +511,14 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     scene.add(model);
                     model.visible = true;
                     activeObjex.push(model);
+                    model.castShadow = true;
+                        model.receiveShadow = true;
                     model.traverse(function (child) { 
                     if (child.isMesh) {
                         child.userData.locationData = locationObjex[i].locationData;
                         child.userData.objectData = locationObjex[i].objectData;
+                         child.castShadow = true;
+                            child.receiveShadow = true;
                         }
                     });
                     const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null);
@@ -697,7 +711,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                 
                     let staticObject = {};
                     staticObject.mesh = child;
-                    child.visible = false;
+                    // child.visible = false;
                     staticObject.locationData = locationData;
                     staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
                     console.log("gotsa static object ishidden " + staticObject.isHidden);
