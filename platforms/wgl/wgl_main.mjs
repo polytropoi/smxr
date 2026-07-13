@@ -16,7 +16,7 @@
 
 	import { InitEnvMap, InitSky, InitFog, InitGrid, InitGround } from './wgl_environment.js';
 
-		import { equippedRigidbody } from './wgl_actions.js';
+	import { equippedRigidbody } from './wgl_actions.js';
 
 
 	import { lightMods, modLights, InitSceneLights } from './wgl_lights.js';
@@ -33,7 +33,7 @@
 	
 	import { LoadSceneInventory } from './wgl_inventory.js';
 	
-	import { splatObjex, initSplats, InitSpark } from './wgl_splats.js';
+	import { splatsLoaded, splatObjex, initSplats, InitSpark } from './wgl_splats.js';
 import { PlayPauseMedia } from '../../connect/dialogs.js';
 
 
@@ -85,7 +85,7 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 
 	let loadingString = "";
 
-	let loadingHeader = "";
+	export let loadingHeader = "";
 	export let sceneIsReady = false;
 
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
@@ -402,16 +402,19 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 		await LoadKinematicAgentMeshes();
 
 
-		StartPopup(loadingHeader, 'Ready!', true);
-		
-		const startButton = startPop.querySelector("#startButton");
-		if (startButton) {
-			console.log("startButton found!");
-			// const startButton = document.getElementById('popup_yesButton');
-			startButton.addEventListener('pointerdown', StartButton);
-				
+		if (splatObjex.length) {
+			StartPopup(loadingHeader, 'Loading Gaussian Splats', false);
 		} else {
-			console.log("startButton not found!");
+			StartPopup(loadingHeader, 'Ready!', true);	
+			const startButton = startPop.querySelector("#startButton");
+			if (startButton) {
+				console.log("startButton found!");
+				// const startButton = document.getElementById('popup_yesButton');
+				startButton.addEventListener('pointerdown', StartButton);
+					
+			} else {
+				console.log("startButton not found!");
+			}
 		}
 
 
