@@ -192,18 +192,11 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 
 	export async function InitSystems() { 
 
-		if (splatObjex.length) {
-			// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Spark Lib....<h4>";
-			// ShowPopup(null, loadingString);
-					StartPopup(loadingHeader, 'Loading SparkJS...', false);
-			await InitSpark();
-			// surface = surfaceObjex[0];
-			initSplats();
-		} 
+
 		if (navmesh && navmesh.geometry) {
 			// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Navmesh....<h4>";
 			// ShowPopup(null, loadingString);
-					StartPopup(loadingHeader, 'Loading Navmesh...', false);
+			StartPopup(loadingHeader, 'Loading Navmesh...', false);
 			await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
 			// AssignModelsToAgents();
 		}
@@ -403,7 +396,16 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 
 
 		if (splatObjex.length) {
-			StartPopup(loadingHeader, 'Loading Gaussian Splats', false);
+			// if (splatObjex.length) {
+				// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Spark Lib....<h4>";
+				// ShowPopup(null, loadingString);
+				StartPopup(loadingHeader, 'Loading SparkJS...', false);
+				await InitSpark();
+				// surface = surfaceObjex[0];
+				StartPopup(loadingHeader, 'Loading Gaussian Splats', false);
+				initSplats();
+			// } 
+
 		} else {
 			StartPopup(loadingHeader, 'Ready!', true);	
 			const startButton = startPop.querySelector("#startButton");

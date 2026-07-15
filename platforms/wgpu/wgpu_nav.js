@@ -231,7 +231,9 @@
                 agentsAreReady = true;
                 console.log( "navmesh done, initAgents()");
             //    WaitAndInitAgents();
-                await InitAgents();
+                if (settings && settings.sceneTags && settings.sceneTags.includes("test agents")) {
+                    await InitAgents();
+                }
                 // await new Promise(r => setTimeout(r, 4000)); //slow the fxk down
                 // AssignModelsToAgents();
 

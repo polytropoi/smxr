@@ -682,7 +682,7 @@ export function SetPrimaryAudioEventsData () {
 }
 
 export function SetVideoEventsData (type) { 
-   console.log("tryna SetVideoEventsData");
+   console.log("tryna SetVideoEventsData " + type);
    tkStarttimes = []; //either audio or video, not both
 
    
@@ -695,14 +695,14 @@ export function SetVideoEventsData (type) {
    });
    
 
-   if (tkStarttimes.length > 0) {
-      let teMode = "Primary Video";
-         if (!timedEventsListenerMode) {
-            teMode = timedEventsListenerMode;
-         }
-      console.log("tryna run video events listenr with timedEventsListenerMode : " + teMode);
+   // if (tkStarttimes.length > 0) {
+   //    let teMode = "Primary Video";
+   //       if (!timedEventsListenerMode) {
+   //          teMode = timedEventsListenerMode;
+   //       }
+      console.log("tryna run video events listenr with timedEventsListenerMode : " + type);
       TimedEventListener();
-      }
+      // }
    }
 }
 function SetYoutubeEventsData() {
@@ -713,18 +713,23 @@ function SetYoutubeEventsData() {
 export function SetTimedEventsListenerMode(mode) {
    timedEventsListenerMode = mode;
    console.log("timedEventsListnenerMode " + timedEventsListenerMode);
+
+
 }
 
 export function SetTimeKeysData (tkData) {
    if (tkData && tkData.timekeys && tkData.timekeys.length) {
       timeKeysData = tkData;
-      console.log("SetTimeKeysData !" + timeKeysData.listenTo);
+      console.log("SetTimeKeysData for " + timeKeysData.listenTo);
       // 
       
       localData.timedEvents = timeKeysData;
 
       if (timeKeysData.listenTo) {
          timedEventsListenerMode = timeKeysData.listenTo;
+         if (timedEventsListenerMode.toLowerCase() == "youtube" || timedEventsListenerMode.toLowerCase() == "primary video") {
+            SetVideoEventsData("youtube");
+         }
       }
       // if (timedEventsListenerMode == "Primary Audio") {
       //    SetPrimaryAudioEventsData();

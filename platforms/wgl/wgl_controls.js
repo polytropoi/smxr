@@ -257,8 +257,11 @@ export function SetControls(cameraMode, cameraFOV) {
         controls.maxDistance = 300;
         controls.maxPolarAngle = Math.PI * 0.5;
 
-        // controls.autoRotate = true;
-        // controls.autoRotateSpeed = 1;
+        if (settings && settings.sceneTags && settings.sceneTags.includes("rotate")) { // or sceneCameraPath?
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = .2;
+        }
+
         controls.target.set(0, .2, 0);
         controls.update();
         cameraIsReady = true;
@@ -432,6 +435,8 @@ export function UpdateControls() {
     } else if (settings && controls && cameraMode == "Orbit") { //easy peasy
         controls.update();
         cameraWorldPosition.copy(camera.position);
+
+
     } else if (settings && player && cameraMode == "Third Person") { // kinda combines follow cam and orbit control
         speed = 0.0;
 
@@ -1685,7 +1690,7 @@ export const onKeyDown = function (event) {
 
         case 'KeyO':
 
-            toggleOrbitControl();
+            // toggleOrbitControl();
             break;
     }
 };

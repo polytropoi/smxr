@@ -12,6 +12,7 @@
 
   SplatEditSdfType,
   SplatEditRgbaBlendMode } from "sparkjsdev/spark";
+import { activeObjex } from "./wgl_locations.js";
 
 export let splatsLoaded = false;
 export let splatObjex = [];
@@ -108,6 +109,8 @@ export async function initSplats (options) {
         
         splat.scale.set(xscale, yscale * modFlip, zscale);
         scene.add(splat);
+        splat.userData.name = "SPLAT";
+        activeObjex.push(splat);
         // await new Promise(r => setTimeout(r, 100));
 
 

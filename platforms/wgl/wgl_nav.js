@@ -9,6 +9,9 @@
     import { Pathfinding, PathfindingHelper } from 'three-pathfinding';
 
 
+  import { settings } from '../../../connect/settings.js';
+
+
     import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './wgl_physics.js';
 	import { HTMLText, ThreeDeeText } from './wgl_ui.js';
     const ZONE = 'myNavmeshZone'; 
@@ -223,7 +226,11 @@
                 agentsAreReady = true;
                 console.log( "navmesh done, initAgents()");
             //    WaitAndInitAgents();
-                await InitAgents();
+
+                if (settings && settings.sceneTags && settings.sceneTags.includes("test agents")) {
+                    await InitAgents();
+                }
+                
                 // await new Promise(r => setTimeout(r, 4000)); //slow the fxk down
                 // AssignModelsToAgents();
 

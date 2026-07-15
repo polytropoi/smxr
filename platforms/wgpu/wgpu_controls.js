@@ -804,7 +804,7 @@ async function RaycastHit(type, hit) {
 
         
         if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
-            console.log("that's equipped! " + JSON.stringify(lastRaycastHitObject.userData));
+            console.log("that's equipped! " + lastRaycastHitObject.userData.name);
 
         } else {
 
@@ -1496,7 +1496,7 @@ export const onKeyDown = function (event) {
 
         case 'KeyO':
 
-            toggleOrbitControl();
+            // toggleOrbitControl();
             break;
     }
 };
