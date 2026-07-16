@@ -1485,9 +1485,10 @@ aframe_router.get('/:_id', function (req, res) {
                 }
                 
                 if (sceneResponse.sceneUseSceneFog) {
-                    let fogDistance = sceneResponse.sceneSkyRadius / 2 
-                    fogSettings = "fog=\x22type: exponential; density:" +sceneResponse.sceneGlobalFogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
-                    fog = "fog: " +sceneResponse.sceneGlobalFogDensity+ ";";
+                    let fogDistance = sceneResponse.sceneSkyRadius * 2;
+                    const fogDensity = sceneResponse.sceneGlobalFogDensity / 4;
+                    fogSettings = "fog=\x22type: exponential; density:" +fogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
+                    fog = "fog: " +fogDensity+ ";";
                 } else {
                     fogSettings = "";
                     fog = "";

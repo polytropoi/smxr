@@ -380,7 +380,7 @@ wgpu_router.get('/:_id', function (req, res) {
          
 
                                 "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
-                                "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+
+                                "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
                             // "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js\x22,"+     
                             // "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js\x22,"+
 

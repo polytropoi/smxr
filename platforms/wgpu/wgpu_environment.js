@@ -98,7 +98,7 @@ export function InitGround() {
 	let xscale = 100;
 	let yscale = 100;
 	let zscale = 100;
-	const planeGeo = new THREE.PlaneGeometry(100, 100);
+	const planeGeo = new THREE.CircleGeometry(100, 100);
 	const planeMat = new THREE.MeshStandardMaterial({color: settings.sceneColor3});
 	// planeMat.colorNode = settings.sceneColor2;
 	const planeMesh = new THREE.Mesh(planeGeo, planeMat);
@@ -114,7 +114,7 @@ export function InitFog() {
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
-        const fogDensity = settings.fogDensity * .1; // Adjust this value! (Default is 0.00025)
+        const fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
         // scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
 		scene.fog = new THREE.FogExp2( fogColor, fogDensity );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
@@ -220,66 +220,42 @@ export function InitSky() {
 // 
 		} else {	
 
-// 			const color1 = new THREE.Color(settings.sceneColor1)
-// 			const color2 = new THREE.Color(settings.sceneColor2);
-// // 			const colorTop = new THREE.Color(topHex);
-// // const colorBottom = new THREE.Color(bottomHex);
 
-// 			// 2. Create the NodeMaterial
-// 			// const gradientMaterial = new NodeMaterial();
+			if (settings && settings.sceneTags && settings.sceneTags.includes("sky sphere")) {
+				// Define your gradient colors
+				const skyColor = color(new THREE.Color(settings.sceneColor1));      // Top of the sky
+				const horizonColor = color(new THREE.Color(settings.sceneColor2));  // Horizon/bottom of sky
 
-// 			// Bind colors and uv coordinates to the TSL shader graph
-// 			const topNode = uniform(color1);
-// 			const bottomNode = uniform(color2);
-// 			const vUv = uv();
+				// Compute the gradient factor based on the Y-axis position
+				// We normalize position to be between 0 (bottom) and 1 (top)
+				const verticalGradient = positionWorld.y.normalize();
 
-// 			// Mix the top & bottom colors based on the vertical Y axis
-// 			const gradientNode = mix(bottomNode, topNode, vUv.y);
-// gradientMaterial.colorNode = vec4(gradientMix, 1.0);
-			// 			console.log(settings.sceneColor1 + " " + settings.sceneColor2 + " color sky " + color2.getHex() + " + " + color1.getHex());
-			// const topColor = color(color1.getHex());    // Vibrant Blue
-			// const bottomColor = color(color2.getHex()); // Vibrant Red
-			// const c1 = parseInt(settings.sceneColor1.replace('#', '0x'));
-			// const c2 = parseInt(settings.sceneColor2.replace('#', '0x'));
-			// const topColor = color( new THREE.Color( c1 ));
-    		// const bottomColor = color( new THREE.Color( c2 ));
-			// // uv.y gives us the vertical 0.0 - 1.0 coordinate of the plane, which we use to mix the colors
-			// const gradientNode = mix(bottomColor, topColor, uv().y);
+				// Mix the colors using TSL
+				const finalSkyColor = mix(horizonColor, skyColor, verticalGradient);
 
-			const topColor = color( settings.sceneColor2 );
-    		const bottomColor = color( settings.sceneColor1 );
+				// Create the Node Material
+				const skyMaterial = new THREE.MeshBasicNodeMaterial();
+				skyMaterial.colorNode = finalSkyColor;
+				skyMaterial.side = THREE.BackSide; 
+				const skyGeometry = new THREE.SphereGeometry(300, 32, 15);
+				const skyMesh = new THREE.Mesh(skyGeometry, skyMaterial);
 
-			// const topColor = color( 0x3a1c71 );
-    		// const bottomColor = color( 0xd76d77 );
-			const gradientNode = mix( bottomColor, topColor, uv().y );
+				// Add to your scene
+				scene.add(skyMesh);
 
-			scene.backgroundNode = gradientNode;
-			// 4. Create Material & Mesh
-			// const material = new THREE.MeshBasicNodeMaterial({ colorNode: gradientNode });
-			// const geometry = new THREE.PlaneGeometry(2, 2);
-			// const backgroundMesh = new THREE.Mesh(geometry, material);
+			} else {
+				const topColor = color( settings.sceneColor2 );
+				const bottomColor = color( settings.sceneColor1 );
 
-			// // Lock the background to the back of the render layers
-			// backgroundMesh.material.depthWrite = false;
-			// backgroundMesh.renderOrder = -1;
+				// const topColor = color( 0x3a1c71 );
+				// const bottomColor = color( 0xd76d77 );
+				const gradientNode = mix( bottomColor, topColor, uv().y );
 
-			// scene.add(backgroundMesh);
+				scene.backgroundNode = gradientNode;
+			}
+			
 		}
 
 	}
-
-				// const gui = renderer.inspector.createParameters( 'Settings' );
-
-				// gui.add( effectController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( guiChanged );
-				// gui.add( effectController, 'rayleigh', 0.0, 4, 0.001 ).onChange( guiChanged );
-				// gui.add( effectController, 'mieCoefficient', 0.0, 0.1, 0.001 ).onChange( guiChanged );
-				// gui.add( effectController, 'mieDirectionalG', 0.0, 1, 0.001 ).onChange( guiChanged );
-				// gui.add( effectController, 'elevation', 0, 90, 0.1 ).onChange( guiChanged );
-				// gui.add( effectController, 'azimuth', - 180, 180, 0.1 ).onChange( guiChanged );
-				// gui.add( effectController, 'exposure', 0, 1, 0.0001 ).onChange( guiChanged );
-
-				// guiChanged();
-
-			// }
 
         

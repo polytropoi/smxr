@@ -27,7 +27,7 @@ export function InitGrid () {
 
 export function InitGround() {
 	console.log("tryna InitGround");
-		const planeGeo = new THREE.PlaneGeometry(100, 100);
+		const planeGeo = new THREE.CircleGeometry(100, 100);
 		const planeMat = new THREE.MeshStandardMaterial({color: settings.sceneColor3});
 		// planeMat.colorNode = settings.sceneColor2;
 		const planeMesh = new THREE.Mesh(planeGeo, planeMat);
@@ -39,7 +39,7 @@ export function InitGround() {
 export function InitFog() {
     if (settings && settings.sceneUseVolumetricFog) {
         console.log("doin some fog...");
-        const fogColor = settings.sceneColor1; // Sky blue
+        const fogColor = settings.sceneColor2; // Sky blue
 		let radius = 400;
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
@@ -47,7 +47,7 @@ export function InitFog() {
         // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
         // scene.fog = new THREE.Fog(fogColor, 10, radius);
 
-				const fogDensity = settings.fogDensity * .1; // Adjust this value! (Default is 0.00025)
+				const fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
 				// scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
 				scene.fog = new THREE.FogExp2( fogColor, fogDensity );
 		// scene.fog = new THREE.FogExp2( fogColor, 0.01 );
@@ -165,8 +165,93 @@ export function InitSky() {
 		scene.background = color;
 			
 	} else {
-		const color = new THREE.Color(settings.sceneColor2);
-		scene.background = color;
+		const color2 = new THREE.Color(settings.sceneColor2);
+
+		const color1 = new THREE.Color(settings.sceneColor1);
+
+		// // scene.background = topColor;
+ 		// console.log("tryna set background gradient " + settings.sceneColor1 + " " + settings.sceneColor2);
+
+		// const skyGeometry = new THREE.SphereGeometry(150, 32, 32);
+
+		// // Use a custom ShaderMaterial to blend colors
+		// const skyMaterial = new THREE.ShaderMaterial({
+		// vertexShader: `
+		// 	varying vec3 vUv;
+		// 	void main() {
+		// 	vUv = position;
+		// 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+		// 	}
+		// `,
+		// fragmentShader: `
+		// 	uniform vec3 topColor;
+		// 	uniform vec3 bottomColor;
+		// 	uniform float offset;
+		// 	uniform float exponent;
+		// 	varying vec3 vUv;
+		// 	void main() {
+		// 	// Calculate normalized height ratio
+		// 	float h = normalize(vUv).y + offset;
+		// 	// Clamp values and apply power for exponential transition
+		// 	gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+		// 	}
+		// `,
+		// uniforms: {
+		// 	topColor: { value: color1 }, // Top color
+		// 	bottomColor: { value: color2 }, // Bottom color
+		// 	offset: { value: 33 },
+		// 	exponent: { value: 0.6 }
+		// },
+		// side: THREE.BackSide // Render the inside of the sphere!
+		// // });
+
+		// const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+		// scene.add(sky);
+
+		const vertexShader = `
+			varying vec3 vWorldPosition;
+			void main() {
+				vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+				vWorldPosition = worldPosition.xyz;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			}
+			`;
+
+		const fragmentShader = `
+			uniform vec3 topColor;
+			uniform vec3 bottomColor;
+			uniform float offset;
+			uniform float exponent;
+			varying vec3 vWorldPosition;
+
+			void main() {
+				// Normalize the Y-world position to a 0.0 - 1.0 scale
+				float h = normalize(vWorldPosition + offset).y;
+				// Keep the value between 0.0 and 1.0, then apply exponent for sharper/softer blend
+				float gradientFactor = max(pow(max(h, 0.0), exponent), 0.0);
+				
+				// Mix the bottom and top colors
+				gl_FragColor = vec4(mix(bottomColor, topColor, gradientFactor), 1.0);
+			}
+		`;
+
+				// 2. Create the Sky Material
+		const skyMaterial = new THREE.ShaderMaterial({
+		vertexShader: vertexShader,
+		fragmentShader: fragmentShader,
+		uniforms: {
+			topColor: { value: new THREE.Color(settings.sceneColor2) }, // Sky color
+			bottomColor: { value: new THREE.Color(settings.sceneColor1) }, // Horizon color
+			offset: { value: 0 }, // Controls gradient center
+			exponent: { value: 1.2 } // Controls gradient transition sharpness
+		},
+		side: THREE.BackSide // Renders on the inside of the sphere
+		});
+
+		// 3. Create the Sky Sphere
+		const skyGeometry = new THREE.SphereGeometry(300, 32, 15);
+		const skySphere = new THREE.Mesh(skyGeometry, skyMaterial);
+		scene.add(skySphere);
 	}
 }
 			

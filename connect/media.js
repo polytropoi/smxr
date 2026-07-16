@@ -569,7 +569,7 @@ export function LoadPrimaryAudioHowl () {
       //       src: [settings.primary_mp3url], html5: true
       //   });
       // } else {
-        updatePrimaryTransportSlider
+        // updatePrimaryTransportSlider
         primaryAudioHowl = new Howl({
               src: [settings.primary_mp3url],
               html5: true
@@ -636,7 +636,7 @@ export function SetAudioVizMode (mode) {
 export function PrimaryAudioPlayPauseToggle () { //this is for pixi / non-aframe modes
 
   // if (timedEventsListenerMode && timedEventsListenerMode == "Primary Audio") {
-  console.log("tryna toggle primary udio " + primaryAudioHowl + " percentCOmplete " + percentComplete);
+  console.log("tryna toggle primaryaudio " + primaryAudioHowl + " percentCOmplete " + percentComplete);
     if (primaryAudioHowl && primaryAudioHowl != undefined) {
       // primaryAudioHowl;
       if (!primaryAudioHowl.playing()) {

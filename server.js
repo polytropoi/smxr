@@ -4515,9 +4515,9 @@ app.get('/uservid/:p_id', requiredAuthentication, function(req, res) {
 });
 
 app.post('/scene_inventory_objex/', function(req, res) {
-    console.log('tryna return scene_inventory_objex : ' + req.body.oIDs);
+    console.log('tryna return scene_inventory_objex : ' + JSON.stringify(req.body.oIDs));
 
-    if (req.body.oIDs != "none" && req.body.oIDs.length) {
+    if (req.body.oIDs && req.body.oIDs != "" && req.body.oIDs != "none" && req.body.oIDs.length && req.body.oIDs[0] != null) {
         const iids = req.body.oIDs.map(item => {
             // if (item.toString())
             return ObjectId.createFromHexString(item.toString());

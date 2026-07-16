@@ -177,3 +177,5 @@ export function CreateSprites (count, size, scale, animation) {
         return {sprite, update};
         // scene.add(sprite);
     }
+
+    

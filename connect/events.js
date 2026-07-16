@@ -1,7 +1,8 @@
 
 import { sceneLocations, GoToNext, GoToPrevious, videoEl, localData } from "../../connect/connect.js";
 import { primaryAudioEl, youtubePlayer, youtubeIsPlaying, primaryAudioHowl, MediaTimeUpdate, currentAudioFileName, fancyTimeFormat, updatePrimaryTransportSlider} from "../../connect/media.js";
-
+import { LoadPrimaryAudioHowl } from "./media.js";
+import { settings } from "./settings.js";
 let timeKeysIndex = 0;
 let pauseLoops = false;
 let loopIntervals = [];
@@ -711,8 +712,18 @@ function SetYoutubeEventsData() {
 
 
 export function SetTimedEventsListenerMode(mode) {
+   if (mode) {
    timedEventsListenerMode = mode;
    console.log("timedEventsListnenerMode " + timedEventsListenerMode);
+   } else {
+      if (settings && settings.primary_mp3url) {
+        
+         timedEventsListenerMode = "primary audio";
+         LoadPrimaryAudioHowl();
+      }
+   }
+   
+
 
 
 }
