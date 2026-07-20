@@ -6,6 +6,8 @@ import { settings } from '../../../connect/settings.js';
 
 import { sequenceInt } from '../../../connect/events.js';
 
+import {GoToNext} from '../../../connect/connect.js';
+
 import {scene, renderer} from './wgpu_main.mjs';
 
 import {sunLight} from './wgpu_lights.js';
@@ -16,14 +18,22 @@ import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
 
 
-import { color, screenUV, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep, vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, cameraPosition, saturate, oneMinus} from 'three/tsl';
+import { color, screenUV, sin, time, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep, 
+	vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, cameraPosition, saturate, oneMinus, texture, equirectUV, positionLocal} from 'three/tsl';
+
+	// import { texture, positionLocal, NodeMaterial } from 'three/nodes';
+
+import { MeshStandardNodeMaterial } from 'three';
+
 import { equirectPictures } from './wgpu_media.js';
+import { SetSequenceInt } from '../../connect/events.js';
 
 
 
 let skySphere;
 let skyboxMaterial;
 let textureEquirect;
+let tslTexture;
 const equirectTextureLoader = new THREE.TextureLoader();
 
 
@@ -133,19 +143,39 @@ export function InitFog() {
 
 export async function UpdateEnvMap () {
 	if (equirectPictures.length) {
+		if (sequenceInt >= equirectPictures.length) {
+			SetSequenceInt(0);
+		}
 		console.log(JSON.stringify(equirectPictures[sequenceInt]));
 		let skyboxURL = equirectPictures[sequenceInt].url;
 
 
-			 textureEquirect = await equirectTextureLoader.loadAsync( skyboxURL );
-			textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
-			// textureEquirect.colorSpace = THREE.SRGBColorSpace;
-			// // scene.background = textureEquirect;
-			// scene.environment = textureEquirect;
-			// textureEquirect.needsUpdate = true;
+		const animatedColor = vec3(
+			time.sin(),
+			time.add(2.0).sin(),
+			time.add(4.0).sin()
+		);
+		textureEquirect = await equirectTextureLoader.loadAsync( skyboxURL );
+		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+		tslTexture = texture(textureEquirect);
 
-			skySphere.material.map = textureEquirect;
-			skySphere.material.needsUpdate = true;
+		const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
+		// textureEquirect.colorSpace = THREE.SRGBColorSpace;
+		// // scene.background = textureEquirect;
+		scene.environmentNode = skyboxColorNode;
+			scene.environment = textureEquirect;
+		// textureEquirect.needsUpdate = true;
+
+		// skySphere.material.map = textureEquirect;
+		// skySphere.material.needsUpdate = true;
+
+
+		skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
+		skyboxMaterial.envNode = skyboxColorNode;
+		
+		// skyboxMaterial.side = THREE.BackSide;    
+		scene.environmentNode = skyboxColorNode;
+		scene.environment = textureEquirect;
 		// if (skySphere && skyboxMaterial) {
 		
 		// 	// 3. Create material, mapping it to the inside
@@ -159,7 +189,7 @@ export async function UpdateEnvMap () {
 		// }
 	}
 }
-export function InitEnvMap () {
+export async function InitEnvMap () {
 
 	let skybox = settings.skyboxURL;
 	
@@ -168,28 +198,89 @@ export function InitEnvMap () {
         const envMapURL = settings.skyboxURL;
         // const equirectTextureLoader = new THREE.TextureLoader();
 
-        textureEquirect = equirectTextureLoader.load( envMapURL );
+        textureEquirect = await equirectTextureLoader.loadAsync( envMapURL );
         textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
         textureEquirect.colorSpace = THREE.SRGBColorSpace;
         // scene.background = textureEquirect;
+        // scene.environment = textureEquirect;
+		        // Set up scene environment (for reflections) and background
         scene.environment = textureEquirect;
+        // scene.background = textureEquirect;
 		let radius = 300;
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
         // scene.environmentIntensity = 3;
-
+		const animatedColor = vec3(
+			time.sin(),
+			time.add(2.0).sin(),
+			time.add(4.0).sin()
+		);
 		// 1. Create a large sphere
 		if (settings.sceneUseSkybox) {	
+			// const tex = texture(textureEquirect)
 			const sphereRadius = radius;
 			const sphereSegments = 60; // Higher for better quality
 			const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
 
 			// 3. Create material, mapping it to the inside
-			skyboxMaterial = new THREE.MeshBasicMaterial({
-				map: textureEquirect,
-				side: THREE.BackSide // Crucial for skybox
-			});
+			// skyboxMaterial = new THREE.MeshBasicMaterial({
+			// 	map: textureEquirect,
+			// 	side: THREE.BackSide // Crucial for skybox
+			// });
+
+
+			// const colorA = new THREE.Color(settings.sceneColor1); // Red
+			// const colorB = new THREE.Color(settings.sceneColor2); // Green
+
+			// // 3. Create an oscillating factor using time
+			// // sin(time) outputs values from -1 to 1. .add(1).div(2) normalizes this to 0 to 1.
+			// const timeFactor = sin(time).add(1).div(2);
+
+			// // 4. Interpolate between colorA and colorB over time
+			// const animatedColor = mix(colorA, colorB, timeFactor);
+
+			tslTexture = texture(textureEquirect);
+				
+				// const pulse = sin(time.mul(2.0)).mul(0.5).add(0.5); // Maps sin wave from 0 to 1
+
+				// // 4. Modify the color Node
+				// // Multiply the texture RGB values by our pulsing time effect
+				// const animatedColorNode = tex.rgb.mul(vec3(pulse, 1.0, 1.0));
+
+			// 5. Create the material using MeshBasicNodeMaterial (or MeshStandardNodeMaterial)
+			// const material = new THREE.MeshBasicNodeMaterial();
+			// material.colorNode = animatedColorNode;
+
+			// const animatedColor = vec3(
+			// 	sin(time), 
+			// 	sin(time.add(2)), // Offset the sine wave for different channels
+			// 	sin(time.add(4))
+			// ).add(1).mul(0.5);
+
+			// // 3. Multiply your base texture by the animated color
+			// const finalColorNode = tex.mul(animatedColor);
+
+			// 2. Create the TSL texture node
+			// const textureNode = texture(envTexture);
+
+			// 3. Define the TSL mapping
+			// equirectUV is a built-in node helper that unwraps a spherical 360 texture
+			// const uvNode = equirectUV(positionLocal.normalize());
+
+			// 4. Build the NodeMaterial
+			skyboxMaterial = new THREE.NodeMaterial();
+			const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
+			skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
+			skyboxMaterial.envNode = skyboxColorNode;
+			
+			skyboxMaterial.side = THREE.BackSide;    
+			scene.environmentNode = skyboxColorNode;
+			scene.environment = textureEquirect;
+						// skyboxMaterial = new THREE.MeshBasicNodeMaterial();
+			// skyboxMaterial.colorNode = tex.mul(animatedColor);
+						// const material = new THREE.MeshBasicNodeMaterial();
+			// skyboxMaterial.colorNode = tex;
 
 			// 4. Create the mesh and add to scene
 			skySphere = new THREE.Mesh(geometry, skyboxMaterial);

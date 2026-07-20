@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 
-// import {SetPlayer} from '../../../connect/connect.js';
+
 import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './wgpu_nav.js';
@@ -30,6 +30,7 @@ import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
 import * as nipplejs from '../../../main/js/nipple.mjs';
 import { TagsToInstances } from './wgpu_instance.js';
+import { GoToNext } from '../../connect/connect.js';
 
 // import { getPlayerBody } from './three_physics.js';
 
@@ -1086,6 +1087,10 @@ export function onMouseDown(event) { // on threejs object
         console.log("mouse down on " + event.target.id);
     if (lastRaycastHitObject && lastRaycastHitObject.userData) {
     console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID + " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+    } else {
+        if (settings && settings.sceneTags && settings.sceneTags.includes("next")) {
+            GoToNext();
+        }
     }
         // console.log("showDialogPanel " + showDialogPanel);
 

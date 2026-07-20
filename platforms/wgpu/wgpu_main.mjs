@@ -260,7 +260,7 @@
 		for (let i = 0; i < instancedModels.length; i++) { //loop again for physics or patterned instances..
 			if (instancedModels[i].locationData.locationTags.includes("dynamic") || instancedModels[i].locationData.locationTags.includes("physics")) {
 			
-				// InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
+				InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
 				
 
 			}
@@ -672,10 +672,14 @@
 									// this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);
 									physicsInstancedMeshes.setMatrixAt(i, instancedMatrix);
 
-									if (pos.y < -25) {
-									physicsInstancedBodies[i].setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+									if (pos.y < -25 || pos.x > 50 || pos.x < -50 || pos.z > 50 || pos.z < -50) {
+										let range = 20;
+									let x = Math.random() * range - range * 0.5;
+									let y = Math.random() * range - range * 0.5 + 10;
+									let z = Math.random() * range - range * 0.5;
+									physicsInstancedBodies[i].setLinvel({ x: Math.random(), y: 0.0, z: Math.random() }, true);
 									physicsInstancedBodies[i].setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-									physicsInstancedBodies[i].setTranslation({ x: pos.x, y: 20.0, z: pos.z });
+									physicsInstancedBodies[i].setTranslation({ x: x, y: y, z: z });
           							}
 									// await new Promise(r => setTimeout(r, 0));
 								}

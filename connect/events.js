@@ -36,9 +36,12 @@ export let timedEventsListenerMode = "";
 
 
 
+export function SetSequenceInt (int) { //called elsewhere to limit loop depending on what is using it (skyboxes, poi locations, etc.)
+   sequenceInt = int;
+}
 export function SequenceEvent(type) {
-   if (type == "next") 
-   {
+
+   if (type == "next") {
       sequenceInt++;
    }
    sequence_event.details = type;

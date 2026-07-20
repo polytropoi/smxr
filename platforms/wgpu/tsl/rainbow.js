@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { vec2, float, fract, sin, dot, uv, floor, Fn, max, min, positionLocal, sub, time, vec3, vec4, mix, cos, step, mod, abs } from 'three/tsl';
 
-
+import { scene } from '../wgpu_main.mjs';
 
 const whiteNoise = Fn( ( [ p ] ) => {
     return fract( sin( dot( p, vec2( 12.9898, 78.233 ) ) ).mul( 43758.5453 ) );
@@ -170,7 +170,9 @@ mat.transparent = true;
 mat.roughnessNode = .1;
 mat.fragmentNode = fragNode();
 mat.emissionNode = fragNode();
-// mat.envMap = scene.environment;
+mat.envNode = scene.environment;
+
+// mat.envMap = scene.environmentNode;
 // mat.colorNode = float( perlinNoise( uv() )); 
 
 

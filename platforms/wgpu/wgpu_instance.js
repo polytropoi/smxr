@@ -280,7 +280,8 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
             model.traverse(node => {
             if (node.isMesh && node.material) {
                 // childCount++;
-
+                node.material.roughness = .1;
+                node.material.envMap = scene.environment;
                 console.log("node material name " + node.material.name);
                 sampleGeometry = node.geometry;
 
@@ -309,7 +310,7 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
             const scale = 1.2;
 
             const x = randRange(-10, 10);
-            const y = randRange(-10, 10);
+            const y = randRange(10, 30);
             const z = randRange(-10, 10);
             // const rangedPosition = range(new THREE.Vector3(-scale, -scale, -scale), new THREE.Vector3(scale,scale,scale));
             // console.log("ranged position " + JSON.stringify(rangedPosition));
@@ -340,7 +341,8 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
                 let randomColor = new THREE.Color();
                 for (let i = 0; i < count; i++) {
                 // this.color = this.highlightColor.setHex( Math.random() * 0xffffff );
-                instancedMeshes[s].setColorAt( i, randomColor.setHex( Math.random() * 0xffffff ));
+                randomColor.setHex( Math.random() * 0xffffff );
+                instancedMeshes[s].setColorAt( i, randomColor);
                 instancedMeshes[s].instanceColor.needsUpdate = true;
                 }
                 // this.iMesh.setColorAt( this.instanceId, this.highlightColor.setHex( Math.random() * 0xffffff ) );

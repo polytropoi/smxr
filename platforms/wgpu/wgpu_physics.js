@@ -38,7 +38,7 @@ export let colliders = {}
 
 
 export let agentCount = 10; //test wireframe capsules
-export let dynamicObjectCount = 5; //test dynamic rb spheres
+export let dynamicObjectCount = 0; //test dynamic rb spheres
 
 let playerWorldPosition = new THREE.Vector3();
 // export let playerRigidbody;        
@@ -634,8 +634,8 @@ export function GetInstancedRigidbody(position, scale) {
       let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize); //.setDensity(density);
       let collider = world.createCollider(colliderDesc, rigidbody);
 
-      collider.setRestitution(1.5);
-      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      collider.setRestitution(2.5);
+      // collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
       // // mesh.scale.setScalar(size);
       // // scene.add(mesh);
@@ -668,10 +668,8 @@ export async function getDynamicBody(model, position, scale) {
 
 		const material = getRainbowMaterial();
       // const material = DotNoiseMaterial()
-      material.roughness = 0.25;
-      material.metalness = 0.5;
-      material.envMap = scene.environment;
-      material.envMapIntensity = 2;
+
+      // material.envMapIntensity = 2;
 
 
 			const mesh = new THREE.Mesh( geometry, material );
