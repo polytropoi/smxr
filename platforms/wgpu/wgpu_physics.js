@@ -124,6 +124,7 @@ export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do firs
       }
       WaitAndInit();
     } else if (useDefaultCollider) {
+      
         let colliderDesc = RAPIER.ColliderDesc.cuboid(150,.1,150);
         const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0,-6.1,0);
         const staticBody = await world.createRigidBody(rbDesc);
@@ -136,8 +137,8 @@ export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do firs
     }
   }
 export async function createStaticCollider (model) { // may not be added to the scene if hidden?
-    // console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(position));
-   
+
+   console.log("tryna set static collider for model " + model.name);
     try { 
       
       const geometry = model.geometry; //sent as child mesh
@@ -158,6 +159,7 @@ export async function createStaticCollider (model) { // may not be added to the 
       const pos = new THREE.Vector3();
       model.getWorldPosition(pos);
 
+          console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(pos));
       const worldQuaternion = new THREE.Quaternion();
       model.getWorldQuaternion(worldQuaternion);
       // const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));

@@ -4,7 +4,7 @@ import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLo
 
 
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "./dialogs.js";
-import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition, MapUpdate } from "../connect/events.js";
+import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition, MapUpdate, SequenceEvent, eventEl, sequence_event } from "../connect/events.js";
 
 
 import { settings, profile, pixelsPerMeterActual } from "../connect/settings.js";
@@ -1435,7 +1435,10 @@ export function GoToNext() {
       if (skyboxEl != null) {
          skyboxEl.components.skybox_dynamic.nextSkybox();
       } else {
-         console.log("no skyboxEl!");
+
+         console.log("no skyboxEl, non-aframe sequence event next");
+         SequenceEvent("next");
+
       }
       // let tunnels = document.getElementsByTagName("mod_tunnel");
       let tunnels = document.querySelectorAll("[mod_tunnel]")

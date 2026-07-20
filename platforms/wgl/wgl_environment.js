@@ -249,7 +249,7 @@ export function InitSky() {
 		});
 
 		// 3. Create the Sky Sphere
-		const skyGeometry = new THREE.SphereGeometry(300, 32, 15);
+		const skyGeometry = new THREE.SphereGeometry(500, 32, 15);
 		const skySphere = new THREE.Mesh(skyGeometry, skyMaterial);
 		scene.add(skySphere);
 	}

@@ -15,6 +15,10 @@ let ready_event = new Event("ready-event"); //settings and data ready, init the 
 export let equip_inventory_object_event = new Event("equip-inventory-object-event");  //to reuse the dialogs.js stuff
 export let drop_inventory_object_event = new Event("drop-inventory-object-event");
 export let dequip_event = new Event("dequip-event");
+export let sequence_event = new Event("sequence-event");
+
+export let sequenceInt = -1;
+
 // export let remove_inventory_object_event = new Event("remove-inventory-object-event"); 
 
  let duration, timeString, listenerInterval, seek;
@@ -32,6 +36,14 @@ export let timedEventsListenerMode = "";
 
 
 
+export function SequenceEvent(type) {
+   if (type == "next") 
+   {
+      sequenceInt++;
+   }
+   sequence_event.details = type;
+   eventEl.dispatchEvent(sequence_event);
+}
 
 export function SettingsLoaded() {
    console.log("settings loaded READY EVENT");

@@ -4,6 +4,8 @@ import { MeshBasicNodeMaterial } from 'three/webgpu';
 
 import { settings } from '../../../connect/settings.js';
 
+import { sequenceInt } from '../../../connect/events.js';
+
 import {scene, renderer} from './wgpu_main.mjs';
 
 import {sunLight} from './wgpu_lights.js';
@@ -15,6 +17,14 @@ import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
 
 import { color, screenUV, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep, vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, cameraPosition, saturate, oneMinus} from 'three/tsl';
+import { equirectPictures } from './wgpu_media.js';
+
+
+
+let skySphere;
+let skyboxMaterial;
+let textureEquirect;
+const equirectTextureLoader = new THREE.TextureLoader();
 
 
 export function InitCustomFog() { //hrm...
@@ -121,34 +131,68 @@ export function InitFog() {
     }
 }
 
+export async function UpdateEnvMap () {
+	if (equirectPictures.length) {
+		console.log(JSON.stringify(equirectPictures[sequenceInt]));
+		let skyboxURL = equirectPictures[sequenceInt].url;
+
+
+			 textureEquirect = await equirectTextureLoader.loadAsync( skyboxURL );
+			textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+			// textureEquirect.colorSpace = THREE.SRGBColorSpace;
+			// // scene.background = textureEquirect;
+			// scene.environment = textureEquirect;
+			// textureEquirect.needsUpdate = true;
+
+			skySphere.material.map = textureEquirect;
+			skySphere.material.needsUpdate = true;
+		// if (skySphere && skyboxMaterial) {
+		
+		// 	// 3. Create material, mapping it to the inside
+		// 	const material = new THREE.MeshBasicMaterial({
+		// 		map: textureEquirect,
+		// 		side: THREE.BackSide // Crucial for skybox
+		// 	});
+		// 	skySphere.material = material;
+		// 	// skyboxMaterial.map = textureEquirect;
+		// 	material.needsUpdate = true;
+		// }
+	}
+}
 export function InitEnvMap () {
-    if (scene && settings && settings.skyboxURL) {
+
+	let skybox = settings.skyboxURL;
+	
+    if (skybox) {
         console.log("gotsa skybox url " + settings.skyboxURL);
         const envMapURL = settings.skyboxURL;
-        const equirectTextureLoader = new THREE.TextureLoader();
+        // const equirectTextureLoader = new THREE.TextureLoader();
 
-        const textureEquirect = equirectTextureLoader.load( envMapURL );
+        textureEquirect = equirectTextureLoader.load( envMapURL );
         textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
         textureEquirect.colorSpace = THREE.SRGBColorSpace;
         // scene.background = textureEquirect;
         scene.environment = textureEquirect;
-	
+		let radius = 300;
+		if (settings.sceneSkyRadius) {
+			radius = settings.sceneSkyRadius;
+		}
         // scene.environmentIntensity = 3;
 
 		// 1. Create a large sphere
 		if (settings.sceneUseSkybox) {	
-			const sphereRadius = 300;
+			const sphereRadius = radius;
 			const sphereSegments = 60; // Higher for better quality
 			const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
 
 			// 3. Create material, mapping it to the inside
-			const material = new THREE.MeshBasicMaterial({
+			skyboxMaterial = new THREE.MeshBasicMaterial({
 				map: textureEquirect,
 				side: THREE.BackSide // Crucial for skybox
 			});
 
 			// 4. Create the mesh and add to scene
-			const skySphere = new THREE.Mesh(geometry, material);
+			skySphere = new THREE.Mesh(geometry, skyboxMaterial);
 			scene.add(skySphere);
 		}
 	}
@@ -222,6 +266,10 @@ export function InitSky() {
 
 
 			if (settings && settings.sceneTags && settings.sceneTags.includes("sky sphere")) {
+				let radius = 295;
+				if (settings.sceneSkyRadius) {
+					radius = settings.sceneSkyRadius - 5;
+				}
 				// Define your gradient colors
 				const skyColor = color(new THREE.Color(settings.sceneColor1));      // Top of the sky
 				const horizonColor = color(new THREE.Color(settings.sceneColor2));  // Horizon/bottom of sky
@@ -234,10 +282,11 @@ export function InitSky() {
 				const finalSkyColor = mix(horizonColor, skyColor, verticalGradient);
 
 				// Create the Node Material
+
 				const skyMaterial = new THREE.MeshBasicNodeMaterial();
 				skyMaterial.colorNode = finalSkyColor;
 				skyMaterial.side = THREE.BackSide; 
-				const skyGeometry = new THREE.SphereGeometry(300, 32, 15);
+				const skyGeometry = new THREE.SphereGeometry(radius, 32, 15);
 				const skyMesh = new THREE.Mesh(skyGeometry, skyMaterial);
 
 				// Add to your scene
