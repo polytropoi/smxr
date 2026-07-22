@@ -1771,6 +1771,7 @@ export function PlayPauseMedia () {
           PrimaryAudioPlayPauseToggle();
         } else {
           LoadPrimaryAudioHowl();
+          PrimaryAudioPlayPauseToggle();
         }
       }
       

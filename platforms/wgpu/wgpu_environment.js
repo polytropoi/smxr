@@ -159,7 +159,11 @@ export async function UpdateEnvMap () {
 		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
 		tslTexture = texture(textureEquirect);
 
-		const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
+		// const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
+		let skyboxColorNode = tslTexture;
+		if (settings && settings.sceneTweakColors) {
+			skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
+		} 
 		// textureEquirect.colorSpace = THREE.SRGBColorSpace;
 		// // scene.background = textureEquirect;
 		scene.environmentNode = skyboxColorNode;
@@ -201,9 +205,7 @@ export async function InitEnvMap () {
         textureEquirect = await equirectTextureLoader.loadAsync( envMapURL );
         textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
         textureEquirect.colorSpace = THREE.SRGBColorSpace;
-        // scene.background = textureEquirect;
-        // scene.environment = textureEquirect;
-		        // Set up scene environment (for reflections) and background
+      
         scene.environment = textureEquirect;
         // scene.background = textureEquirect;
 		let radius = 300;
@@ -223,66 +225,20 @@ export async function InitEnvMap () {
 			const sphereSegments = 60; // Higher for better quality
 			const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
 
-			// 3. Create material, mapping it to the inside
-			// skyboxMaterial = new THREE.MeshBasicMaterial({
-			// 	map: textureEquirect,
-			// 	side: THREE.BackSide // Crucial for skybox
-			// });
-
-
-			// const colorA = new THREE.Color(settings.sceneColor1); // Red
-			// const colorB = new THREE.Color(settings.sceneColor2); // Green
-
-			// // 3. Create an oscillating factor using time
-			// // sin(time) outputs values from -1 to 1. .add(1).div(2) normalizes this to 0 to 1.
-			// const timeFactor = sin(time).add(1).div(2);
-
-			// // 4. Interpolate between colorA and colorB over time
-			// const animatedColor = mix(colorA, colorB, timeFactor);
-
 			tslTexture = texture(textureEquirect);
 				
-				// const pulse = sin(time.mul(2.0)).mul(0.5).add(0.5); // Maps sin wave from 0 to 1
-
-				// // 4. Modify the color Node
-				// // Multiply the texture RGB values by our pulsing time effect
-				// const animatedColorNode = tex.rgb.mul(vec3(pulse, 1.0, 1.0));
-
-			// 5. Create the material using MeshBasicNodeMaterial (or MeshStandardNodeMaterial)
-			// const material = new THREE.MeshBasicNodeMaterial();
-			// material.colorNode = animatedColorNode;
-
-			// const animatedColor = vec3(
-			// 	sin(time), 
-			// 	sin(time.add(2)), // Offset the sine wave for different channels
-			// 	sin(time.add(4))
-			// ).add(1).mul(0.5);
-
-			// // 3. Multiply your base texture by the animated color
-			// const finalColorNode = tex.mul(animatedColor);
-
-			// 2. Create the TSL texture node
-			// const textureNode = texture(envTexture);
-
-			// 3. Define the TSL mapping
-			// equirectUV is a built-in node helper that unwraps a spherical 360 texture
-			// const uvNode = equirectUV(positionLocal.normalize());
-
-			// 4. Build the NodeMaterial
 			skyboxMaterial = new THREE.NodeMaterial();
-			const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
+			let skyboxColorNode = tslTexture;
+			if (settings && settings.sceneTweakColors) {
+				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
+			} 
 			skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
 			skyboxMaterial.envNode = skyboxColorNode;
 			
 			skyboxMaterial.side = THREE.BackSide;    
 			scene.environmentNode = skyboxColorNode;
 			scene.environment = textureEquirect;
-						// skyboxMaterial = new THREE.MeshBasicNodeMaterial();
-			// skyboxMaterial.colorNode = tex.mul(animatedColor);
-						// const material = new THREE.MeshBasicNodeMaterial();
-			// skyboxMaterial.colorNode = tex;
-
-			// 4. Create the mesh and add to scene
+		
 			skySphere = new THREE.Mesh(geometry, skyboxMaterial);
 			scene.add(skySphere);
 		}

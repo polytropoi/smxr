@@ -2321,6 +2321,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.sceneColor2Alt = sceneResponse.sceneColor2Alt;
                     settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
                     settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
+                    settings.sceneTweakColors = sceneResponse.sceneTweakColors;
                     settings.sceneClouds = sceneClouds;
                     settings.sceneTime = sceneTime;
                     settings.volumePrimary = sceneResponse.scenePrimaryVolume;
