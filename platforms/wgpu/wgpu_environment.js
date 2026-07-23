@@ -160,14 +160,14 @@ export async function UpdateEnvMap () {
 		tslTexture = texture(textureEquirect);
 
 		// const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
-		let skyboxColorNode = tslTexture;
+		let skyboxColorNode = tslTexture.mul(1);
 		if (settings && settings.sceneTweakColors) {
 			skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
 		} 
 		// textureEquirect.colorSpace = THREE.SRGBColorSpace;
 		// // scene.background = textureEquirect;
-		scene.environmentNode = skyboxColorNode;
-			scene.environment = textureEquirect;
+		// scene.environmentNode = skyboxColorNode;
+		// 	scene.environment = textureEquirect;
 		// textureEquirect.needsUpdate = true;
 
 		// skySphere.material.map = textureEquirect;
@@ -228,7 +228,7 @@ export async function InitEnvMap () {
 			tslTexture = texture(textureEquirect);
 				
 			skyboxMaterial = new THREE.NodeMaterial();
-			let skyboxColorNode = tslTexture;
+			let skyboxColorNode = tslTexture.mul(1);
 			if (settings && settings.sceneTweakColors) {
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
 			} 

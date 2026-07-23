@@ -31,6 +31,8 @@ export let selectedPosition = {};
 export let timeKeysData = {};
 export let tkStarttimes = [];
 export let timedEventsListenerMode = "";
+let isListening = false;
+let lastTimedEvent = "";
 // let currentPrimaryAudioTime = 0;
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
 
@@ -105,102 +107,74 @@ export function UpdatePrimaryTransportSlider(value) {
 function TimedEventListener () { 
  console.log("TimedEventsListener " + timedEventsListenerMode + " tkStarttimes " + tkStarttimes);
 
- timeKeysIndex = 0;
- let timekey = 0;
-
+   if (isListening) {
+      return;
+   }
+   isListening = true;
+   timeKeysIndex = 0;
+   let timekey = 0;
+   // let lastTimeKey = -1;
+   let lastTimeKeysIndex = -1;
 
  if (timeKeysData != null && timeKeysData.timekeys != undefined && timeKeysData.timekeys.length > 0) {
    
       let listenerInterval = setInterval(function () {
 
 
-         // timekey = parseFloat(tkStarttimes[timeKeysIndex]);
-         // //  console.log(timekey);
-         //          console.log("timedEventsListenerMode " + timedEventsListenerMode + " timekey " + timekey  );
-         // if (timekey && timekey != NaN) {//not not a number
          if (timedEventsListenerMode != null && timedEventsListenerMode == "Primary Audio") {
-         // if (hasPrimaryAudio) {
-            // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
-            //    timeKeysIndex = 0;
-            // }
-
+         
             if (primaryAudioHowl && primaryAudioHowl != undefined && primaryAudioHowl != null && primaryAudioHowl.playing()) {
                   var seek = primaryAudioHowl.playing() ? primaryAudioHowl.seek() : 0;
                seek = Number(seek).toFixed(1);
-               // this.currentTime = seek;
+               
                if (!duration) {
                   duration = primaryAudioHowl.duration().toFixed(2);
                }
-               // let percentComplete = Math.floor((seek / duration) * 10);
+               
                percentComplete = ((seek / duration) * 100).toFixed(2);
-               // console.log("primaryAudio " + percentComplete);
                updatePrimaryTransportSlider(percentComplete);
-               // var el = this.el; 
-               // var seeking = true;
-               // let timeString = "";
+              
                if (!isNaN(seek) && seek != 0) {
                   // console.log(seek + " of " + duration);
                   if (primaryAudioHowl.playing()) {
                      //  console.log(seek + " of " + duration);
                       timeString = currentAudioFileName + "<br><span style='color: lightgreen'><strong> playing </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
                      MediaTimeUpdate(timeString, percentComplete);
-                     // updatePrimaryTransportSlider(percentComplete);
-                     
-                      // if (mainTransportSlider != null && timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
-                     //       this.mainTransportSlider.value = this.percentComplete;                  
-                     // }
+                    
                   } else {
                      timeString = currentAudioFileName + "<br><span style='color: red'><strong> stopped </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
                      MediaTimeUpdate(timeString, percentComplete);
-                     // updatePrimaryTransportSlider(percentComplete);
+                     
                   }
                } else {
                   timeString = currentAudioFileName + "<br><span style='color: red'><strong> stopped </strong></span>" + fancyTimeFormat(seek) + " / " + fancyTimeFormat(duration) + " - " + percentComplete + "%";
                      MediaTimeUpdate(timeString, percentComplete);
-                     //  updatePrimaryTransportSlider(percentComplete);
+                    
                }
-                  
-               // primaryAudioEl.components.primary_audio_control.updateStatus(true);
+            
 
                const primaryAudioTime = primaryAudioHowl.seek(); //why not use seek above //bc it might be nan?
-                              percentComplete = ((primaryAudioTime / duration) * 100).toFixed(2);
-               // console.log("primaryAudio " + percentComplete);
-               updatePrimaryTransportSlider(percentComplete);
-               // percentComplete = ((primaryAudioTime / duration) * 100).toFixed(2);
-               // updatePrimaryTransportSlider(percentComplete);
-               // console.log(primaryAudioTime + " vs " + timekey);
+               if (primaryAudioTime == 0) {
+                  return;
+               }
+                  percentComplete = ((primaryAudioTime / duration) * 100).toFixed(2);
+                  // console.log("primaryAudio " + percentComplete);
+                  updatePrimaryTransportSlider(percentComplete);
                
-               // if (primaryAudioTime != 0 && primaryAudioTime < .001) { //fudge in case
-               //    timeKeysIndex = 0; 
-               //    console.log("resetting timekeysindex!");
-               // }
-               
-               if (timeKeysIndex < tkStarttimes.length) { //TODO 
+               if (timeKeysIndex < tkStarttimes.length  && timeKeysIndex > lastTimeKeysIndex) { //TODO 
                   timekey = parseFloat(tkStarttimes[timeKeysIndex]);
-
-                  if (primaryAudioTime != 0 && (primaryAudioTime > timekey) && (primaryAudioTime < (timekey + 2))) { //TODO rollback index to closest one before scrub
-                  //       // console.log(primaryAudioTime + "less than " + timekey);
-                  //       //just waiting...
-                  // } else {
-
-                     //  console.log(timekey);
-                              console.log("timedEventsListenerMode " + timedEventsListenerMode + " timekey " + timekey  );
+                
+                  if (primaryAudioTime > timekey && timekey < primaryAudioTime + .1) { //hrm...
+                     // lastTimeKey = timekey;
+                   lastTimeKeysIndex = timeKeysIndex;
+                              
                      if (timekey && timekey != NaN) {//not not a number
 
-                     // if (timeKeysIndex < tkStarttimes.length) {
-                        console.log("time delta " + (primaryAudioTime - timekey));
-                        // if ((primaryAudioTime - timekey) < 5) {
                            console.log("TRYNA PLAY TIMEKEY "+ JSON.stringify(timeKeysData.timekeys[timeKeysIndex]) +" at primaryAudioTime "+ primaryAudioTime.toString() );
                            PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
+                           
                            timeKeysIndex++;
-                        // }
-                  // } else {
-                  //    console.log("end");
-                  //    // if (!primaryTransportSlider) {
-                  //    //    clearInterval(listenerInterval);
-                  //    // }
-                     
-                  // }
+                
                      }
                   }
                } else {
@@ -211,10 +185,7 @@ function TimedEventListener () {
          } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary video') {
             if (videoEl != null && !videoEl.paused && timekey > 0) {
             console.log(videoEl.currentTime + " timeKeysIndex " + timeKeysIndex + " type " + timeKeysData.timekeys[timeKeysIndex].keytype);
-               // if (timeKeysData.timekeys[timeKeysIndex].keytype == "Reset Timekeys") {
-               //    timeKeysIndex = 0;
-               //    // videoEl.currentTime = 0;
-               // }
+               
                if (videoEl.currentTime < 1) {
                   timeKeysIndex = 0; 
                   console.log("resetting timekeysindex!");
@@ -430,6 +401,11 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
 }  //end loop event
 
 function PlayTimedEvent(timeKey) {
+   
+   if (lastTimedEvent.toString() == timeKey.toString()) {
+      return;
+   }
+   lastTimedEvent = timeKey;
    console.log("tryna play timed event: " + JSON.stringify(timeKey));
 
    let duration = 1;

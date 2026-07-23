@@ -1088,8 +1088,10 @@ export function onMouseDown(event) { // on threejs object
     if (lastRaycastHitObject && lastRaycastHitObject.userData) {
     console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID + " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
     } else {
-        if (settings && settings.sceneTags && settings.sceneTags.includes("next")) {
-            GoToNext();
+        if (event.clientY > (window.innerHeight * .8)) {
+            if (settings && settings.sceneTags && settings.sceneTags.includes("next")) {
+                GoToNext();
+            }
         }
     }
         // console.log("showDialogPanel " + showDialogPanel);
