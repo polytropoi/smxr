@@ -2,6 +2,8 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js';
 
+import { sequenceInt } from '../../../connect/events.js';
+
 import {scene, renderer} from './wgl_main.mjs';
 
 import {sunLight} from './wgl_lights.js';
@@ -11,6 +13,14 @@ import {camera, controls} from './wgl_controls.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 // import { InfiniteGridHelper } from '../wgl/src/InfiniteGridHelper.js';
 
+import { equirectPictures } from './wgl_media.js';
+import { SetSequenceInt } from '../../connect/events.js';
+
+
+let skySphere;
+let skyboxMaterial;
+let textureEquirect;
+const equirectTextureLoader = new THREE.TextureLoader();
 
 export function InitGrid () {
 	// const grid = new InfiniteGridHelper(10, 100, 'red', 1000);
@@ -56,6 +66,33 @@ export function InitFog() {
 }
 
 
+export async function UpdateEnvMap () {
+	if (equirectPictures.length) {
+		if (sequenceInt >= equirectPictures.length) {
+			SetSequenceInt(0);
+		}
+		console.log(JSON.stringify(equirectPictures[sequenceInt]));
+		let skyboxURL = equirectPictures[sequenceInt].url;
+
+		textureEquirect = await equirectTextureLoader.loadAsync( skyboxURL );
+		textureEquirect.colorSpace = THREE.SRGBColorSpace;
+		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+	
+
+		if (settings && settings.sceneTweakColors) {
+			//...l.
+		} 
+				
+		// skyboxMaterial.envMap = textureEquirect;
+		skyboxMaterial.map = textureEquirect;
+
+		
+		scene.environment = textureEquirect;
+
+	}
+}
+
+
 export function InitEnvMap () {
     if (scene && settings && settings.skyboxURL) {
 		
@@ -78,14 +115,14 @@ export function InitEnvMap () {
 			const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
 
 			// 3. Create material, mapping it to the inside
-			const material = new THREE.MeshBasicMaterial({
+			skyboxMaterial = new THREE.MeshBasicMaterial({
 				map: textureEquirect,
 				side: THREE.BackSide // Crucial for skybox
 			});
 
 
 			// 4. Create the mesh and add to scene
-			const skySphere = new THREE.Mesh(geometry, material);
+			const skySphere = new THREE.Mesh(geometry, skyboxMaterial);
 			scene.add(skySphere);
 		}
     }

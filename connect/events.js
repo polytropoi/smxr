@@ -157,16 +157,16 @@ function TimedEventListener () {
                if (primaryAudioTime == 0) {
                   return;
                }
-                  percentComplete = ((primaryAudioTime / duration) * 100).toFixed(2);
-                  // console.log("primaryAudio " + percentComplete);
-                  updatePrimaryTransportSlider(percentComplete);
+               percentComplete = ((primaryAudioTime / duration) * 100).toFixed(2);
+               // console.log("primaryAudio " + percentComplete);
+               updatePrimaryTransportSlider(percentComplete);
                
-               if (timeKeysIndex < tkStarttimes.length  && timeKeysIndex > lastTimeKeysIndex) { //TODO 
+               if (timeKeysIndex < tkStarttimes.length  && timeKeysIndex > lastTimeKeysIndex) { 
                   timekey = parseFloat(tkStarttimes[timeKeysIndex]);
                 
                   if (primaryAudioTime > timekey && timekey < primaryAudioTime + .1) { //hrm...
                      // lastTimeKey = timekey;
-                   lastTimeKeysIndex = timeKeysIndex;
+                   lastTimeKeysIndex = timeKeysIndex; //um, if scrubbed, look up closest one? 
                               
                      if (timekey && timekey != NaN) {//not not a number
 

@@ -31,6 +31,7 @@ import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 import * as nipplejs from '../../../main/js/nipple.mjs';
 import { TagsToInstances } from './wgl_instance.js';
 
+import { GoToNext } from '../../connect/connect.js';
 // import { getPlayerBody } from './wgl_physics.js';
 
 export let camera, controls, player;
@@ -1174,9 +1175,18 @@ export function onMouseDown(event) { //clicked on threejs object
     // playerReadyToNav = true;
     // console.log(event.target.id);
         // console.log("showDialogPanel " + showDialogPanel);
-            event.stopPropagation();// duh!
-    console.log("mouse down on " + event.target.id);
+    event.stopPropagation();// duh!
 
+    if (lastRaycastHitObject && lastRaycastHitObject.userData) {
+    console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID + " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+    } else {
+        if (event.clientY > (window.innerHeight * .8)) {
+            if (settings && settings.sceneTags && settings.sceneTags.includes("next")) {
+                GoToNext();
+            }
+        }
+    }
+    
     if (!sceneIsReady || !cameraIsReady) {
         return;
     }

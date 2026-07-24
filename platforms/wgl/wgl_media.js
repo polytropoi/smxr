@@ -4,8 +4,11 @@ import * as THREE from 'three';
 import {player, camera } from './wgl_controls.js';
 import { scene } from './wgl_main.mjs';
 import { settings } from '../../../connect/settings.js';
+import { eventEl } from '../../../connect/events.js';
 import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData, createYouTubePlayer} from "../../../connect/media.js";
 import { lookAtCameraObjects } from './wgl_ui.js';
+import { UpdateEnvMap } from './wgl_environment.js';
+
 
 export let primaryAudioGroups;
 export let ambientAudioGroups;
@@ -16,7 +19,21 @@ export let audioGroupsData;
 export let pictureGroupsData;
 export let landscapePanel;
 
+
+
+export let equirectPictures = [];
 createYouTubePlayer();
+
+function SequenceEvent (event) {
+    console.log("sequenceEvent " + JSON.stringify(event.details));
+    const type = event.details;
+    switch (type) {
+        case "next":
+            console.log("next event case!");
+            UpdateEnvMap();
+        break;
+    }
+}
 
 export function InitPictureGroups () {
     let pictureGroupsDataEl = document.getElementById('pictureGroupsData');
@@ -30,6 +47,18 @@ export function InitPictureGroups () {
     //                                        landscapePanel = new THREE.Mesh(planeGeometry, planeMaterial);
     //                                        landscapePanel.name = "landscapePanel";
     //                                        landscapePanel.visible = false;
+
+
+        for (let i = 0; i < pictureGroupsData.length; i++) {
+            for (let p = 0; p < pictureGroupsData[i].images.length; p++) {
+               
+                if (pictureGroupsData[i].images[p].orientation == "Equirectangular") {
+                     console.log("adding equirect: " +JSON.stringify(pictureGroupsData[i].images[p]));
+                    equirectPictures.push(pictureGroupsData[i].images[p]);
+                }
+            }
+        }
+        eventEl.addEventListener('sequence-event', SequenceEvent); 
 }
 
 export function ReturnPictureFromGroup (groupID, tags, groupIndex) {

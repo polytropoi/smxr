@@ -157,6 +157,7 @@ export async function UpdateEnvMap () {
 		);
 		textureEquirect = await equirectTextureLoader.loadAsync( skyboxURL );
 		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+		textureEquirect.colorSpace = THREE.SRGBColorSpace;
 		tslTexture = texture(textureEquirect);
 
 		// const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
