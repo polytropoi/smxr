@@ -12,12 +12,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
-import { instancedModels, createDefaultSurface, SetSurface } from './wgpu_instance.js';
+import { instancedModels, createDefaultSurface, SetSurface, InstanceOnSurface } from './wgpu_instance.js';
 
 import { CreateLight } from './wgpu_lights.js';
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from './wgpu_nav.js';
-import { modelViewProjection } from 'three/tsl';
+import { instance, modelViewProjection } from 'three/tsl';
 // import { sceneObjects } from '../../connect/dialogs.js';
 
 export let locations = {};
@@ -148,12 +148,7 @@ export async function InitLocations() {
                     
                     if (locationData.markerType != "none" && locationData[i].modelID && !locationData[i].modelID.includes("primitive") && locationData[i].modelID != "none") {
                         let model;
-                        // if (locationData[i].modelID.includes("primitive")) {
-                        //     console.log("gotsa primitive " + locationData[i].model);
-                            
-                        //     model = await LoadLocationModel(null, locationData[i]);
-                        //     scene.add(model);
-                        // } else { //it's a gltf
+                        
                             for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match
                                 if (locationData[i].modelID == modelsData[m]._id) {
                                     locationData[i].isHidden = false;
@@ -161,32 +156,9 @@ export async function InitLocations() {
                                     console.log("gotsa location model! " +modelsData[m].modelURL);
                                     if (modelsData[m].item_type == "splat") {
                                         console.log("GOTSA SPLAT - UNSUPPORTED IN THIS ROUTE! " + modelsData[m].name);
-                                        // let splat = {};
-                                        // splat.url = modelsData[m].modelURL;
-                                        // splat.locationData = locationData[i];
-                                        // splatObjex.push(splat);
-                                    
+                                                                            
                                     } else {
-                                    // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
-                                        // let isActive = false;             
-                                        // if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
-                                        //     isActive = true;
-                                        // } 
-                                        // const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
-                                        // model = modelData.model;
-                                        // console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
-                                        
-                                        // if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
-                                        
-                                        //     locationData[i].isHidden = true;
-                                        //     // console.log("tryna hide model " + child.name);
-                                        // }															
-
-                                        // if (locationData[i].markerType == "brownian motion") {
-                                        //     const meshMover = new MeshMover(model); 
-                                        //     movingMeshes.push(meshMover);
-                                        // }
-                                
+                                                                    
                                         if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
                                             // console.log("tryna instance model " + locationData[i].name);
                                             let instancedModel = {};
@@ -213,7 +185,7 @@ export async function InitLocations() {
                                             
                                                                                 
                                         } else { // regular meshes
-                                                                                 let isActive = false;             
+                                            let isActive = false;             
                                             if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
                                             isActive = true;
                                             } 
@@ -586,13 +558,15 @@ async function LoadLocationModel (url, locationData, isActive) {
     let animations;
     if (!url) { //i.e. it's a primitive, not gltf
         // console.log("no model url " + locationData.modelID);
-        const xscale = locationData.xscale * .1;
-        const yscale = locationData.yscale * .1;
-        const zscale = locationData.zscale * .1;
+        
+        const xscale = locationData.xscale ? locationData.xscale * .1 : 1;
+        const yscale = locationData.yscale ? locationData.yscale * .1 : 1;
+        const zscale = locationData.zscale ? locationData.zscale * .1 : 1;
+
         if (locationData.modelID.includes("sphere")) {
             // console.log("gotsa sphere primitive");
             const geometry = new THREE.SphereGeometry(1,16,16);
-            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .5});
+            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .75});
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("cube")) {
             const geometry = new THREE.BoxGeometry(1,1,1,16,16);
@@ -612,6 +586,78 @@ async function LoadLocationModel (url, locationData, isActive) {
             model = new THREE.Mesh( geometry, material );
         } else if (locationData.modelID.includes("torus")) {
         
+        }
+
+        if (model) {
+
+            model.position.set(parseFloat(locationData.x),parseFloat(locationData.y),parseFloat(locationData.z));
+            const xscale = locationData.xscale ? locationData.xscale : 1;
+            const yscale = locationData.yscale ? locationData.yscale : 1;
+            const zscale = locationData.zscale ? locationData.zscale : 1;
+
+            const eulerx = locationData.eulerx ? locationData.eulerx : 0;
+            const eulery = locationData.eulery ? locationData.eulery : 0;
+            const eulerz = locationData.eulerz ? locationData.eulerz : 0;
+
+            model.rotation.x = eulerx;
+            model.rotation.y = eulery;
+            model.rotation.z = eulerz;
+
+            model.scale.set(xscale,yscale,zscale);
+
+            if (locationData.eventData.includes("instance")) {
+                let instancedModel = {};
+
+                instancedModel.model = model;
+                instancedModel.locationData = locationData;
+                instancedModel.modelData = null;
+                instancedModel.scale = yscale;
+                // instancedModel.count = count;
+                // if (locationData[i].objectID) { // add object data if present  
+                //     for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
+                //         if (locationData[i].objectID == objexData[o]._id) {
+                //             locationData[i].objectData = objexData[o];
+                //         }
+                //     }
+                // }
+                instancedModels.push(instancedModel);
+                console.log("instancedModels length " + instancedModels.length);
+            }
+            // if (locationData.eventData.includes("instance")) {
+            //     console.log("gotsa primitive instance!");
+            //     let count, scale, yMod, shader;
+            //     if (locationData.eventData.includes("~")) {
+            //         let countSplit = locationData.eventData.split("~");
+            //         count = countSplit[1];
+            //     } else {
+            //         if (locationData.eventData.includes("grass")) {
+            //             count = 100;
+            //         }
+            //         if (locationData.eventData.includes("rocks")) {
+            //             count = 100;
+            //         }
+            //     }	
+
+            //     if (locationData.yscale) {
+            //         scale = locationData.yscale;
+            //     } else {
+            //         scale = 1;
+            //     }
+
+            //     if (locationData.y != 0) {
+            //         yMod = locationData.y;
+            //     }
+                
+            //     if (locationData.locationTags.includes("wind")) {
+            //         shader = "wind";
+            //     } 
+            //     // if (locationData.mediaID && locationData.mediaID != "" && locationData.mediaID != "none") {
+            //     //     InstanceOnSurface(model, count, scale, yMod, shader, locationData);
+            //     // } else {
+            //         InstanceOnSurface(model, count, scale, yMod, shader, locationData);
+                        
+            //     // }
+            // }
         }
     } else { 
         console.log("tryna fetch model " + url)
@@ -768,6 +814,18 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
     console.log("tryna load default or primitive " + locationData.modelID + " for " + locationData.markerType);
     let model;
     switch (locationData.markerType) {
+
+        case "model":
+            
+        if (locationData.modelID &&locationData.modelID.includes("primitive")) {
+            model = await LoadLocationModel(null, locationData, true);
+        } 
+        if (model) {
+            scene.add(model.model);
+            // model.material.color = "orange";
+            console.log("adding poi! " + model);
+        }
+        break;
 
         case "poi":
             

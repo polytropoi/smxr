@@ -127,6 +127,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
     let instanceTagData;
    
 
+
     if (sampler) {
 
         count = count * 2; //bc weighted in aframe, etc
@@ -134,6 +135,8 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         // let scaleFactor = data.yscale;
 
         console.log("gotsa SURFACE for " + model.name + " count " + count);
+
+        
 
         let sampleGeometry, sampleMaterial;
             let sampleGeos = [];

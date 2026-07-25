@@ -218,6 +218,7 @@
 			StartPopup(loadingHeader, 'Loading Instances....', false);
 			await InitSurface();
 			console.log("instantiating on surface with models " + instancedModels.length);
+			
 			for (let i = 0; i < instancedModels.length; i++) {
 				let count = 33;
 				let scale = 1;
@@ -345,6 +346,7 @@
 			SetUIMode("hic");
 		}
 		StartPopup(loadingHeader, 'Loading Environment....', false);
+
 		if (settings && settings.sceneEnvironmentSettings) {
 			console.log("sceneEnvironmentSettings " + JSON.stringify(settings.sceneEnvironmentSettings));
 			if (settings.sceneEnvironmentSettings.sceneFloorplaneTexture == "grid") {

@@ -5418,6 +5418,7 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
             const groupquery = { "_id": g_id};
             const scene = await RunDataQuery("scenes", "findOne", scenequery);
             const group = await RunDataQuery("groups", "findOne", groupquery);
+            var sceneAudioGroups = scene.sceneAudioGroups || new Array();
             if (req.body.grouptype.toLowerCase().includes('picture')) {
                     var scenePictureGroups = scene.scenePictureGroups || new Array();
                     console.log("tryna add pic group to scene: " + s_id);
@@ -5428,108 +5429,111 @@ app.post('/add_scene_group/', requiredAuthentication, function (req, res) {
                         const updoc = { $set: {scenePictureGroups: scenePictureGroups}};
                         const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
                         console.log("updateed scene with picture group " + JSON.stringify(updated));
-                    }
+                    }   
 
-                } else  if (req.body.grouptype == 'audio') {
-                    var sceneAudioGroups = scene.sceneAudioGroups || new Array();
-                    console.log("tryna add audio group to scene: " + s_id);
-                    if (sceneAudioGroups.indexOf(req.body.group_id) > -1) {
-                        console.log("redundant group id");
-                    } else {
-                        sceneAudioGroups.push(req.body.group_id);
-                        const updoc = { $set: {sceneAudioGroups: sceneAudioGroups}};
-                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
-                        console.log("updateed scene with audio group " + JSON.stringify(updated));
-                       
-                    }
-                } else  if (req.body.grouptype == 'paudio') {
-                        let scenePrimaryAudioGroups = scene.scenePrimaryAudioGroups || new Array();
-                        console.log("tryna add primary audio group to scene: " + s_id);
-                        if (scenePrimaryAudioGroups.indexOf(req.body.group_id) > -1) {
-                            console.log("redundant group id");
-                        } else {
-                        scenePrimaryAudioGroups.push(req.body.group_id);
-                        const updoc = { $set: {scenePrimaryAudioGroups: scenePrimaryAudioGroups}};
-                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
-                        console.log("updateed scene with audio group " + JSON.stringify(updated));
-
-                        }
-                } else  if (req.body.grouptype == 'aaudio') {
-                    let sceneAmbientAudioGroups = scene.sceneAmbientAudioGroups || new Array();
-                    console.log("tryna add ambient audio group to scene: " + s_id);
-                    if (sceneAmbientAudioGroups.indexOf(req.body.group_id) > -1) {
-                        console.log("redundant group id");
-                    } else {
-                        sceneAmbientAudioGroups.push(req.body.group_id);
-                        const updoc = { $set: {sceneAmbientAudioGroups: sceneAmbientAudioGroups}};
-                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
-                        console.log("updateed scene with audio group " + JSON.stringify(updated));
-
-                    }
-                } else  if (req.body.grouptype == 'taudio') {
-                    let sceneTriggerAudioGroups = scene.sceneTriggerAudioGroups || new Array();
-                    console.log("tryna add trigger audio group to scene: " + s_id);
-                    if (sceneTriggerAudioGroups.indexOf(req.body.group_id) > -1) {
-                        console.log("redundant group id");
-                    } else {
-                        sceneTriggerAudioGroups.push(req.body.group_id);
-                        const updoc = { $set: {sceneTriggerAudioGroups: sceneTriggerAudioGroups}};
-                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
-                        console.log("updateed scene with audio group " + JSON.stringify(updated));
-
-                    }            
-                } else if (req.body.grouptype == 'text') {
-                    var sceneTextGroups = scene.sceneTextGroups || new Array();
-                    console.log("tryna add video group to scene: " + s_id);
-                    if (sceneTextGroups.indexOf(req.body.group_id) > -1) {
-                        console.log("redundant group id");
-                    } else {
-                        sceneTextGroups.push(req.body.group_id);
-                        const updoc = { $set: {sceneTextGroups: sceneTextGroups}};
-                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
-                        console.log("updateed scene with audio group " + JSON.stringify(updated));
-
-                    }
-
-                } else if (req.body.grouptype == 'object') {
-                    var sceneObjectGroups = scene.sceneObjectGroups || new Array();
-                    console.log("tryna add object group to scene: " + s_id);
-                    if (sceneObjectGroups.indexOf(req.body.group_id) > -1) {
-                        console.log("redundant group id");
-                    } else {
-                        sceneObjectGroups.push(req.body.group_id);
-                        const updoc = { $set: {sceneObjectGroups: sceneObjectGroups}};
-                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
-                        console.log("updateed scene with audio group " + JSON.stringify(updated));
-
-                    }
-
-                } else if (req.body.grouptype == 'video') {
-                    var sceneVideoGroups = scene.sceneVideoGroups || new Array();
-                    console.log("tryna add location group to scene: " + s_id);
-                    if (sceneVideoGroups.indexOf(req.body.group_id) > -1) {
-                        console.log("redundant group id");
-                    } else {
-                        sceneVideoGroups.push(req.body.group_id);
-                        const updoc = { $set: {sceneVideoGroups: sceneVideoGroups}};
-                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
-                        console.log("updateed scene with audio group " + JSON.stringify(updated));
- 
-                    }
-                } else if (req.body.grouptype == 'location') {
-                    var sceneLocationGroups = scene.sceneLocationGroups || new Array();
-                    console.log("tryna add location group to scene: " + s_id);
-                    if (sceneLocationGroups.indexOf(req.body.group_id) > -1) {
-                        console.log("redundant group id");
-                    } else {
-                        sceneLocationGroups.push(req.body.group_id);
-                        const updoc = { $set: {sceneLocationGroups: sceneLocationGroups}};
-                        const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
-                        console.log("updateed scene with audio group " + JSON.stringify(updated));
-
-                    }
+            } else  if (req.body.grouptype == 'audio') {
+                
+                console.log("tryna add audio group to scene: " + s_id);
+                if (sceneAudioGroups.indexOf(req.body.group_id) > -1) {
+                    console.log("redundant group id");
+                } else {
+                    sceneAudioGroups.push(req.body.group_id);
+                    const updoc = { $set: {sceneAudioGroups: sceneAudioGroups}};
+                    const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                    console.log("updateed scene with audio group " + JSON.stringify(updated));
+                    
                 }
-                res.send("updated scene with group");
+            } else  if (req.body.grouptype == 'paudio') {
+                    let scenePrimaryAudioGroups = scene.scenePrimaryAudioGroups || new Array();
+                    console.log("tryna add primary audio group to scene: " + s_id);
+                    if (scenePrimaryAudioGroups.indexOf(req.body.group_id) > -1) {
+                        console.log("redundant group id");
+                    } else {
+                    scenePrimaryAudioGroups.push(req.body.group_id);
+                    sceneAudioGroups.push(req.body.group_id);
+                    const updoc = { $set: {scenePrimaryAudioGroups: scenePrimaryAudioGroups}};
+                    const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                    console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                    }
+            } else  if (req.body.grouptype == 'aaudio') {
+                let sceneAmbientAudioGroups = scene.sceneAmbientAudioGroups || new Array();
+                console.log("tryna add ambient audio group to scene: " + s_id);
+                if (sceneAmbientAudioGroups.indexOf(req.body.group_id) > -1) {
+                    console.log("redundant group id");
+                } else {
+                    sceneAmbientAudioGroups.push(req.body.group_id);
+                    sceneAudioGroups.push(req.body.group_id);
+                    const updoc = { $set: {sceneAmbientAudioGroups: sceneAmbientAudioGroups}};
+                    const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                    console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                }
+            } else  if (req.body.grouptype == 'taudio') {
+                sceneAudioGroups.push(req.body.group_id);
+                let sceneTriggerAudioGroups = scene.sceneTriggerAudioGroups || new Array();
+                console.log("tryna add trigger audio group to scene: " + s_id);
+                if (sceneTriggerAudioGroups.indexOf(req.body.group_id) > -1) {
+                    console.log("redundant group id");
+                } else {
+                    sceneTriggerAudioGroups.push(req.body.group_id);
+                    const updoc = { $set: {sceneTriggerAudioGroups: sceneTriggerAudioGroups}};
+                    const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                    console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                }            
+            } else if (req.body.grouptype == 'text') {
+                var sceneTextGroups = scene.sceneTextGroups || new Array();
+                console.log("tryna add video group to scene: " + s_id);
+                if (sceneTextGroups.indexOf(req.body.group_id) > -1) {
+                    console.log("redundant group id");
+                } else {
+                    sceneTextGroups.push(req.body.group_id);
+                    const updoc = { $set: {sceneTextGroups: sceneTextGroups}};
+                    const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                    console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                }
+
+            } else if (req.body.grouptype == 'object') {
+                var sceneObjectGroups = scene.sceneObjectGroups || new Array();
+                console.log("tryna add object group to scene: " + s_id);
+                if (sceneObjectGroups.indexOf(req.body.group_id) > -1) {
+                    console.log("redundant group id");
+                } else {
+                    sceneObjectGroups.push(req.body.group_id);
+                    const updoc = { $set: {sceneObjectGroups: sceneObjectGroups}};
+                    const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                    console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                }
+
+            } else if (req.body.grouptype == 'video') {
+                var sceneVideoGroups = scene.sceneVideoGroups || new Array();
+                console.log("tryna add location group to scene: " + s_id);
+                if (sceneVideoGroups.indexOf(req.body.group_id) > -1) {
+                    console.log("redundant group id");
+                } else {
+                    sceneVideoGroups.push(req.body.group_id);
+                    const updoc = { $set: {sceneVideoGroups: sceneVideoGroups}};
+                    const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                    console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                }
+            } else if (req.body.grouptype == 'location') {
+                var sceneLocationGroups = scene.sceneLocationGroups || new Array();
+                console.log("tryna add location group to scene: " + s_id);
+                if (sceneLocationGroups.indexOf(req.body.group_id) > -1) {
+                    console.log("redundant group id");
+                } else {
+                    sceneLocationGroups.push(req.body.group_id);
+                    const updoc = { $set: {sceneLocationGroups: sceneLocationGroups}};
+                    const updated = await RunDataQuery("scenes", "updateOne", scenequery, updoc )
+                    console.log("updateed scene with audio group " + JSON.stringify(updated));
+
+                }
+            }
+            res.send("updated scene with group");
         } catch (e) {
             console.log('error adding group to scene ' +e);
             res.send('error adding group to scene ' +e);
@@ -6767,6 +6771,19 @@ app.get('/uscene/:user_id/:scene_id',  requiredAuthentication, uscene, function 
             };
             if (sceneResponse.sceneAudioGroups != null) {
                 allgroups.push(...sceneResponse.sceneAudioGroups);
+                // console.log("GOTSA SCENEAUDIOGROUP!!!!!!" + sceneResponse.sceneAudioGroups);
+            };
+            if (sceneResponse.sceneAmbientAudioGroups != null) {
+                allgroups.push(...sceneResponse.sceneAmbientAudioGroups);
+                // console.log("GOTSA SCENEAUDIOGROUP!!!!!!" + sceneResponse.sceneAmbientAudioGroups);
+            };
+            if (sceneResponse.sceneTriggerAudioGroups != null) {
+                allgroups.push(...sceneResponse.sceneTriggerAudioGroups);
+                // console.log("GOTSA SCENEAUDIOGROUP!!!!!!" + sceneResponse.sceneTriggerAudioGroups);
+            };
+            if (sceneResponse.scenePrimaryAudioGroups != null) {
+                allgroups.push(...sceneResponse.scenePrimaryAudioGroups);
+                // console.log("GOTSA SCENEAUDIOGROUP!!!!!!" + sceneResponse.scenePrimaryAudioGroups);
             };
             if (sceneResponse.sceneLocationGroups != null) {
                 allgroups.push(...sceneResponse.sceneLocationGroups);

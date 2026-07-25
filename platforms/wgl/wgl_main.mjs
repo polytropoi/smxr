@@ -93,9 +93,10 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 	export function StartButton() {
 		
 		sceneIsReady = true;
-		console.log("sceneIsReady "+ sceneIsReady);
+		console.log("sceneIsReady " + sceneIsReady);
 		PlayPauseMedia();
 		popup.style.display = "none";
+		
 	}
 
 

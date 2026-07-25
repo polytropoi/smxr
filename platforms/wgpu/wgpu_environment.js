@@ -115,6 +115,7 @@ export function InitGrid () {
 
 export function InitGround() {
 
+	console.log("TRYNA InitGround (default)");
 	let xscale = 100;
 	let yscale = 100;
 	let zscale = 100;
