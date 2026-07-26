@@ -565,11 +565,11 @@ async function LoadLocationModel (url, locationData, isActive) {
 
         if (locationData.modelID.includes("sphere")) {
             // console.log("gotsa sphere primitive");
-            const geometry = new THREE.SphereGeometry(1,16,16);
+            const geometry = new THREE.SphereGeometry(yscale,16,16);
             const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .75});
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("cube")) {
-            const geometry = new THREE.BoxGeometry(1,1,1,16,16);
+            const geometry = new THREE.BoxGeometry(xscale, yscale, xscale, 16,16);
             const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .5});
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("capsule")) {
@@ -821,9 +821,9 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             model = await LoadLocationModel(null, locationData, true);
         } 
         if (model) {
-            scene.add(model.model);
-            // model.material.color = "orange";
-            console.log("adding poi! " + model);
+            // scene.add(model.model);
+            // // model.material.color = "orange";
+            // console.log("adding poi! " + model);
         }
         break;
 

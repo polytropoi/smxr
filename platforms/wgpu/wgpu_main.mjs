@@ -215,10 +215,11 @@
 
 		// let notSurfaceInstanceModels = [];
 		if (surface) { // => scattering instances
+			console.log("init surface!");
 			StartPopup(loadingHeader, 'Loading Instances....', false);
 			await InitSurface();
 			console.log("instantiating on surface with models " + instancedModels.length);
-			
+
 			for (let i = 0; i < instancedModels.length; i++) {
 				let count = 33;
 				let scale = 1;

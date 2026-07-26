@@ -20,6 +20,7 @@ import { GetInstancedRigidbody } from './wgpu_physics.js'
 
 let sampler;
 export let surface;
+let surfaceType = "model";
 
 // export let physicsInstances;
 export let physicsInstancedBodies = [];
@@ -32,6 +33,8 @@ export let physicsInstancedMeshes = [];
 export let instancedModels = [];
 export let instanceTags = {};
 let taggedInstances = {};
+
+
 export async function InitSurface () {
     console.log("GOTSA SURFACE");
     await surface;
@@ -56,15 +59,26 @@ export function SetSurface(mesh) { //if assigned to a mesh in locations
 
 export function createDefaultSurface(locData) {
     console.log("tryna create default surface " + locData.xscale + " " + locData.yscale + " " +locData.zscale);
-    const planeGeometry = new THREE.PlaneGeometry(locData.xscale, locData.zscale, 10, 10); 
-    const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
-    surface = new THREE.Mesh(planeGeometry, planeMaterial);
-    scene.add(surface);
-    surface.rotation.x = -Math.PI / 2;
-    if (locData.locationTags && locData.locationTags.includes("hide")) {
-        surface.visible = false;
-    }
-    SetSurface(surface);
+    const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); 
+    const planeMaterial = new THREE.MeshBasicMaterial({ wireframe: true, color: 'red' });
+    const surfaceObject = new THREE.Mesh(planeGeometry, planeMaterial);
+    
+    scene.add(surfaceObject);
+                surfaceObject.position.set(0,0,0);
+            surfaceObject.rotateX(-Math.PI / 2);
+    // surface.rotation.x = -Math.PI / 2;
+    surfaceObject.traverse(function (child) {
+        if (child.isMesh){
+            surface = child;
+
+
+            if (locData.locationTags && locData.locationTags.includes("hide")) {
+                // surface.visible = false;
+            }
+        }
+    });
+    surfaceType = "primitive";
+    // SetSurface(surface);
 }
     
     
@@ -205,32 +219,40 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         let theCount = 0;
         for (let i = 0; i < count; i++) {            
             await sampler.sample(position);
-            
-            if (position.y < waterLevel)  {
-                // await sampler.sample(position);
-                position.y = -100;
-                // continue;
-            }
-            // position.y = position.y + yMod;
-                // console.log("mesh position " + position.y);
-                const ypos = parseFloat(position.y) + parseFloat(yMod);
+            console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
+           
                 // console.log("mesh y position " + position.y + " mod " + ypos);
-            dummy.position.set(position.x, ypos, position.z);
+                if (surfaceType == "primitive") {
+                    dummy.position.set(position.x, position.z, position.y);
+                } else {
+                    if (position.y < waterLevel)  {
+                        position.y = -100;       
+                    }
+                    const ypos = parseFloat(position.y) + parseFloat(yMod);
+                    dummy.position.set(position.x, ypos, position.z);
+                }
+            
             // console.log("instance positon " + JSON.stringify(position));
             // Optional: Add some random rotation
             dummy.rotation.y = Math.random() * Math.PI * 2;
             const scale = Math.random() * scaleFactor * .75;
             dummy.scale.set(scale, scale, scale);
+
+
             dummy.updateMatrix(); // Update matrix based on position/rotation
             for (let m = 0; m < instancedMeshes.length; m++) {
                 
-                // console.log("instance count " + i);
-                if (position.y > waterLevel)  {
-                    instancedMeshes[m].setMatrixAt(i, dummy.matrix);
-                    instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                if (surfaceType != "primitive") {
+                    // console.log("instance count " + i);
+                    if (position.y > waterLevel)  {
+                        instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                        instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                    } else {
+                        // dummy.scale.setScalar(0);
+                        dummy.scale.set(0,0,0);
+                        instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                    }
                 } else {
-                    // dummy.scale.setScalar(0);
-                    dummy.scale.set(0,0,0);
                     instancedMeshes[m].setMatrixAt(i, dummy.matrix);
                 }
             }
