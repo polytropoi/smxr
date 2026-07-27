@@ -563,14 +563,18 @@ async function LoadLocationModel (url, locationData, isActive) {
         const yscale = locationData.yscale ? locationData.yscale * .1 : 1;
         const zscale = locationData.zscale ? locationData.zscale * .1 : 1;
 
+        let transparentMat = true;
+        if (locationData.eventData && locationData.eventData.includes("instance")) {
+            transparentMat = false;
+        } 
         if (locationData.modelID.includes("sphere")) {
             // console.log("gotsa sphere primitive");
             const geometry = new THREE.SphereGeometry(yscale,16,16);
-            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .75});
+            const material = new THREE.MeshBasicNodeMaterial({color: 0x00ff00, transparent: transparentMat, opacity: .75});
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("cube")) {
             const geometry = new THREE.BoxGeometry(xscale, yscale, xscale, 16,16);
-            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: true, opacity: .5});
+            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: transparentMat, opacity: .5});
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("capsule")) {
             const geometry = new THREE.CapsuleGeometry( 1, 1, 4, 8, 1 );
@@ -612,6 +616,8 @@ async function LoadLocationModel (url, locationData, isActive) {
                 instancedModel.locationData = locationData;
                 instancedModel.modelData = null;
                 instancedModel.scale = yscale;
+                instancedModel.castShadow = true;
+                instancedModel.receiveShadow = true;
                 // instancedModel.count = count;
                 // if (locationData[i].objectID) { // add object data if present  
                 //     for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
@@ -819,6 +825,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             
         if (locationData.modelID &&locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
+            model.castShadow = true;
         } 
         if (model) {
             // scene.add(model.model);

@@ -2419,6 +2419,15 @@ wgl_router.get('/:_id', function (req, res) {
             if (sceneResponse.sceneAudioGroups != null) {
                 allgroups.push(...sceneResponse.sceneAudioGroups);
             };
+            if (sceneResponse.scenePrimaryAudioGroups != null) {
+                allgroups.push(...sceneResponse.scenePrimaryAudioGroups);
+            };
+            if (sceneResponse.sceneTriggerAudioGroups != null) {
+                allgroups.push(...sceneResponse.sceneTriggerAudioGroups);
+            };
+            if (sceneResponse.sceneAmbientAudioGroups != null) {
+                allgroups.push(...sceneResponse.sceneAmbientAudioGroups);
+            };
             if (sceneResponse.sceneLocationGroups != null) {
                 allgroups.push(...sceneResponse.sceneLocationGroups);
             };

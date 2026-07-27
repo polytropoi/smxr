@@ -9,7 +9,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { InteractionManager } from 'three/addons/interaction/InteractionManager.js';
 
-import { ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
+import { audioGroupsData, ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
 import { viewportPlaceholder, hic_content, onMouseDown } from './wgpu_controls.js';
 
@@ -552,17 +552,45 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
                 scenePictureInstance.updatePosition(position);
             }
             // scenePictureInstance.toggleVis();
-
         } else {
+
             scenePictureInstance = new ScenePicture(locationGroupId, locationMediaId, instanceId, position, visible, lookAtCamera)
             scenePictures[locationGroupId + "_" + instanceId] = scenePictureInstance;
             // scenePictureInstance.updatePicture();
         }
-
     }
-
 }
 
+
+
+export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, position, visible, lookAtCamera) {
+
+    let sceneAudioInstance;
+
+    if (instanceId) {
+        console.log("looking for audioItem from locationGroup "+ JSON.stringify(locationGroup));
+        if (instanceId < locationGroup.items.length) {
+            const audioID = locationGroup.items[instanceId];
+            console.log("audioID is " + audioID);
+            let audioItem;
+            for (let i = 0; i < audioGroupsData.audioItems.length; i++) {
+                if (audioGroupsData.audioItems[i]._id == audioID) {
+                    audioItem = audioGroupsData.audioItems[i];
+                    console.log("gotsa audio item " + JSON.stringify(audioItem));
+                    const audioEl = "<audio controls><source src=\x22"+audioItem.URLmp3+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
+                    const htmlString = "<h1>" + audioItem.title + " : </h1>"  + audioEl;
+                    ShowHTMLPopup(event, htmlString, position, null, null);
+                }
+            }
+            
+            // console.log("looking for audioItem from locationGroup "+ JSON.stringify(audioGroupsData));
+            
+
+        } else {
+            
+        }
+    }
+}
 
 let matSwappedObjex = {};
 export function SwapMaterials (object, material) {
@@ -652,6 +680,9 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
                 //     scaleFactor = scaleFactor/parentScale;
                 // }
             // }
+        } else {
+            distance = 10;
+             scaleFactor = distance * .75;
         }
         console.log("ui " + scaleFactor + " " + distance + " " + style);
         scaleFactor = clamp(scaleFactor, .25, 33);

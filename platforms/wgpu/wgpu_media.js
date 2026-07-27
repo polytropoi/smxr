@@ -64,6 +64,17 @@ export function ReturnPictureFromGroup (groupID, tags, groupIndex) {
         }
     }
 }
+
+export function ReturnAudioFromGroup (groupID, tags, groupIndex) {
+    for (let i = 0; i < audioGroupsData.length; i++) {
+        if (audioGroupsData[i]._id == groupID) {
+            const audioIndex = Math.floor(Math.random() * audioGroupsData[i].items.length);
+            return pictureGroupsData[i].items[audioIndex];
+        }
+    }
+}
+
+
 export function ReturnTaggedPictures (tag) {
     if (pictureGroupsData) {
       let matchedPics = [];

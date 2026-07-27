@@ -59,24 +59,25 @@ export function SetSurface(mesh) { //if assigned to a mesh in locations
 
 export function createDefaultSurface(locData) {
     console.log("tryna create default surface " + locData.xscale + " " + locData.yscale + " " +locData.zscale);
-    const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); 
+    const planeGeometry = new THREE.PlaneGeometry(locData.xscale, locData.zscale, 10, 10); //
     const planeMaterial = new THREE.MeshBasicMaterial({ wireframe: true, color: 'red' });
     const surfaceObject = new THREE.Mesh(planeGeometry, planeMaterial);
     
     scene.add(surfaceObject);
-                surfaceObject.position.set(0,0,0);
-            surfaceObject.rotateX(-Math.PI / 2);
+    surfaceObject.position.set(locData.x,locData.y,locData.z);
+    surfaceObject.rotateX(-Math.PI / 2);
     // surface.rotation.x = -Math.PI / 2;
-    surfaceObject.traverse(function (child) {
-        if (child.isMesh){
-            surface = child;
+    // surfaceObject.traverse(function (child) {
+    //     if (child.isMesh){
+    //         surface = child;
 
 
             if (locData.locationTags && locData.locationTags.includes("hide")) {
-                // surface.visible = false;
+                surfaceObject.visible = false;
             }
-        }
-    });
+    //     }
+    // });
+    surface = surfaceObject;
     surfaceType = "primitive";
     // SetSurface(surface);
 }
@@ -139,7 +140,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
 
     
     let instanceTagData;
-   
+    let usedPositions = [];
 
 
     if (sampler) {
@@ -176,16 +177,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
 
             console.log("SampleGEo " + i + " name " + sampleGeos[i].name);
             if (sampleGeos[i].name.includes("leaves") || sampleMats[i].name.includes("leaves") ||  sampleMats[i].name.includes("green") || shader == "wind" || shader == "grass") { //hrm, how to only wave the leaves
-                // sampleMats[i].positionNode = Fn(() => { // :)
-                // const pos = positionLocal;      // Original vertex position
-                // const norm = normalLocal;        // Vertex normal direction
-                
-                // // Calculate displacement amount (changes over time and position)
-                // const displacement = sin(time.mul(.75).add(pos.x.mul(0.25))).mul(0.05);
-                
-                // // Move vertex along its normal
-                // return pos.add(norm.mul(displacement));
-                // })();
+              
                 const windStrength = 0.01;
                 const speed = 2.0;
 
@@ -213,17 +205,28 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         }
          
     
-        const waterLevel = parseFloat(settings.sceneWater.level);
+        const waterLevel = (settings && settings.sceneWater && settings.sceneWater.level) ? parseFloat(settings.sceneWater.level) : 0;
         const dummy = new THREE.Object3D();
+        const minDistance = 5;
         let position = new THREE.Vector3();
         let theCount = 0;
         for (let i = 0; i < count; i++) {            
             await sampler.sample(position);
+
+            // const isClose = usedPositions.some(v => position.distanceTo(v) < minDistance);
+
+            // if (isClose) {
+            //     // continue;
+
+            // }
+
+            // usedPositions.push(position);
+
             console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
            
                 // console.log("mesh y position " + position.y + " mod " + ypos);
                 if (surfaceType == "primitive") {
-                    dummy.position.set(position.x, position.z, position.y);
+                    dummy.position.set(position.x, position.z + locData.y, position.y); //fsr the primitive plane returns x,y values with z as zero //bc its 2d! need to test for other geos
                 } else {
                     if (position.y < waterLevel)  {
                         position.y = -100;       
@@ -234,9 +237,13 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             
             // console.log("instance positon " + JSON.stringify(position));
             // Optional: Add some random rotation
+
             dummy.rotation.y = Math.random() * Math.PI * 2;
-            const scale = Math.random() * scaleFactor * .75;
-            dummy.scale.set(scale, scale, scale);
+            
+            if (locData.locationTags && !locData.locationTags.includes("no scale")) {
+                const scale = Math.random() * scaleFactor * .75;
+                dummy.scale.set(scale, scale, scale);
+            }
 
 
             dummy.updateMatrix(); // Update matrix based on position/rotation
@@ -266,10 +273,19 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 instancedMeshes[s].userData.locationData = locData;
             }
             if (locData.locationTags && locData.locationTags.includes("random color")) {
-                let randomColor = new THREE.Color();
+                
                 for (let i = 0; i < count; i++) {
+                    let randomColor = new THREE.Color();
                 // this.color = this.highlightColor.setHex( Math.random() * 0xffffff );
-                instancedMeshes[s].setColorAt( i, randomColor.setHex( Math.random() * 0xffffff ));
+                // const r = Math.random();
+                // const g = Math.random();
+                // const b = Math.random();
+
+                // randomColor.setRGB(r, g, b);
+                 const hue = i / count;
+                randomColor.setHSL(hue, 1.0, 0.5);
+                // instancedMeshes[s].setColorAt( i, randomColor.setHex( Math.random() * 0xffffff ));
+                instancedMeshes[s].setColorAt( i, randomColor);
                 instancedMeshes[s].instanceColor.needsUpdate = true;
                 }
                 

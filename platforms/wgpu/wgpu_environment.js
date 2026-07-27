@@ -63,43 +63,6 @@ export function InitCustomFog() { //hrm...
 
 }
 
-// // 2. Define the Infinite Grid Shader using TSL
-// const createGridMaterial = () => {
-//     const material = new THREE.MeshBasicNodeMaterial();
-//     material.transparent = true;
-
-//     // Grid properties via TSL nodes
-//     const gridScale = float(10.0); // Size of the grid cells
-//     const coords = positionGeometry.xz.div(gridScale);
-
-//     // Calculate line thickness and derivatives for smooth anti-aliasing
-//     const grid = abs(coords.fract().sub(0.5)).div(coords.fwidth());
-//     const line = min(grid.x, grid.y);
-
-//     // Fade out as the grid approaches the horizon
-//     const depth = positionGeometry.z.abs();
-//     const fadeFactor = smoothstep(1000, 100, depth);
-
-//     // Combine TSL nodes into the final fragment output
-//     const gridColor = vec3(0.5, 0.5, 0.5); // Line color
-//     const alpha = float(1.0).sub(smoothstep(0.0, 1.5, line)).mul(fadeFactor);
-
-//     material.colorNode = vec4(gridColor, alpha);
-//     return material;
-// };
-// function getGridNode(coords) {
-// 		const scale = 10.0;
-// 		const gridCoords = coords.mul(scale);
-		
-// 		// Calculate derivatives for anti-aliasing
-// 		const gridDerivative = dFdx(gridCoords).add(dFdy(gridCoords));
-// 		const gridWidth = gridDerivative.max(0.00001); // Avoid division by zero
-		
-// 		const gridAbs = fract(gridCoords.add(0.5)).abs().sub(0.5).div(gridWidth);
-// 		const line = gridAbs.min(oneMinus().clamp(0.0, 1.0));
-		
-// 		return line;
-// }
 export function InitGrid () {
 	// const grid = new InfiniteGridHelper(10, 100, 'red', 1000);
 	// scene.add(grid);
@@ -220,7 +183,19 @@ export async function InitEnvMap () {
 			time.add(2.0).sin(),
 			time.add(4.0).sin()
 		);
-		// 1. Create a large sphere
+		if (sunLight) {
+			if (settings && settings.sceneTweakColors) {
+			const regularColor = new THREE.Color();
+			regularColor.setRGB(animatedColor.x, animatedColor.y, animatedColor.z);
+			
+			// sunLight.color.set(regularColor);
+			}
+			
+			// const fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
+			// // scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
+			// scene.fog = new THREE.FogExp2( regularColor, fogDensity );
+		}
+		
 		if (settings.sceneUseSkybox) {	
 			// const tex = texture(textureEquirect)
 			const sphereRadius = radius;

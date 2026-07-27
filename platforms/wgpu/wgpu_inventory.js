@@ -282,11 +282,11 @@ async function DropInventoryObject (objectData, action, inventoryID) {
       xhr.send(JSON.stringify(data));
       xhr.onload = function () {
         // do something to response
-        console.log("fetched obj resp: " +this.responseText);
+        
         let response = JSON.parse(this.responseText);
         // console.log("gotsome objex: " + response.objex.length);
         if (response.objex.length > 0) {
-
+            console.log("fetched scene inventory objex : " +response.objex.length);
             // objexEl.components.mod_objex.addFetchedObject(response.objex[0]); //add to scene object collection, so don't have to fetch again
             if (equip) {
             //   objexEl.components.mod_objex.equipInventoryObject(oID, tags, eventData)

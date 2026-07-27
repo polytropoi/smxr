@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup, HideHTMLPopup, startPop } from './wgpu_ui.js';
+import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, ShowGroupAudio, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup, HideHTMLPopup, startPop } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -1242,7 +1242,7 @@ export function onMouseDown(event) { // on threejs object
                 
             } else if (lastRaycastHit.instanceId) {
                 // // const popup = document.getElementById("popup");
-                // console.log(lastRaycastHit.instanceId + " " + JSON.stringify(lastRaycastHitObject.userData));
+                console.log(lastRaycastHit.instanceId + " " + JSON.stringify(lastRaycastHitObject.userData));
                
                 if (lastRaycastHitObject.userData.locationData.objectData) { //instanced meshes with object references
                     lastRaycastHitObject.userData.locationData.objectData.sceneObjectID = lastRaycastHitObject.userData.locationData.timestamp;
@@ -1250,7 +1250,7 @@ export function onMouseDown(event) { // on threejs object
                     
                 } else {
                     let groupData;
-                    if (lastRaycastHitObject.userData.locationData.groupID) {
+                    if (lastRaycastHitObject.userData.locationData.groupID && settings.sceneGroups) {
                         console.log(lastRaycastHitObject.userData.locationData.name + " gotsa groupID " + lastRaycastHitObject.userData.locationData.groupID);
                         let locationGroup;
                         for (let i = 0; i < settings.sceneGroups.length; i++) {
@@ -1262,6 +1262,9 @@ export function onMouseDown(event) { // on threejs object
                         if (locationGroup) {
                             if (locationGroup.type == "picture") {
                                 ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
+                            }
+                            if (locationGroup.type == "audio") {
+                                ShowGroupAudio(locationGroup, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
                             }
                         }
                     }
