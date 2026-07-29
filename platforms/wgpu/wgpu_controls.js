@@ -1264,7 +1264,7 @@ export function onMouseDown(event) { // on threejs object
                                 ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
                             }
                             if (locationGroup.type == "audio") {
-                                ShowGroupAudio(locationGroup, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
+                                ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
                             }
                         }
                     }

@@ -579,7 +579,7 @@ export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, posi
                     console.log("gotsa audio item " + JSON.stringify(audioItem));
                     const audioEl = "<audio controls><source src=\x22"+audioItem.URLmp3+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
                     const htmlString = "<h1>" + audioItem.title + " : </h1>"  + audioEl;
-                    ShowHTMLPopup(event, htmlString, position, null, null);
+                    ShowHTMLPopup(event, htmlString, position, null, null, 0);
                 }
             }
             
@@ -662,13 +662,14 @@ export function StartPopup (header, body, showStartButton) {
     }
 }
 
-export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
+export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod) {
 
      if (uiMode == "hic") {
         if (style == "hic_content") {
             contentEl.className = '';
             contentEl.classList.add(style);
         }
+
 
         let material;
         let scaleFactor = .25;
@@ -682,7 +683,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
             // }
         } else {
             distance = 10;
-             scaleFactor = distance * .75;
+            scaleFactor = distance * .75;
         }
         console.log("ui " + scaleFactor + " " + distance + " " + style);
         scaleFactor = clamp(scaleFactor, .25, 33);
@@ -722,7 +723,13 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
             hicMesh.addEventListener('pointerdown', onMouseDown);
             if (position && distance) {
                 // scene.attach(hicMesh);
-                hicMesh.position.set(position.x, position.y + scaleFactor/2, position.z);
+                let ymodification = position.y + scaleFactor/2;
+                if (yMod != null) {
+                    ymodification = yMod;
+
+                }
+                 console.log(yMod + " vs ymod is " + ymodification);
+                hicMesh.position.set(position.x, ymodification, position.z);
                 hicMesh.scale.setScalar(scaleFactor);
             }
             interactions.connect( renderer, camera );
@@ -737,8 +744,13 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style) {
             // canvasEl.requestPaint();
             console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
             if (position && distance) {
-                // scene.attach(hicMesh);
-                hicMesh.position.set(position.x, position.y + scaleFactor/2, position.z);
+                let ymodification = position.y + scaleFactor/2;
+                if (yMod != null) {
+                    ymodification = yMod;
+
+                }
+                console.log("ymod is " + ymod);
+                hicMesh.position.set(position.x, ymodification, position.z);
                 hicMesh.scale.setScalar(scaleFactor);
             }
             hicMesh.updateMatrixWorld();

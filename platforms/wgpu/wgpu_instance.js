@@ -158,6 +158,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             let sampleMats = [];
             let instancedMeshes = [];
             // let childCount = 0;
+            
             model.traverse(node => {
             if (node.isMesh && node.material) {
                 // childCount++;
@@ -176,8 +177,8 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let i = 0; i < sampleMats.length; i++) {
 
             console.log("SampleGEo " + i + " name " + sampleGeos[i].name);
-            if (sampleGeos[i].name.includes("leaves") || sampleMats[i].name.includes("leaves") ||  sampleMats[i].name.includes("green") || shader == "wind" || shader == "grass") { //hrm, how to only wave the leaves
-              
+            if (sampleGeos[i].name.includes("leaves") || sampleMats[i].name.includes("leaves") ||  sampleMats[i].name.includes("green") || shader == "wind" || shader == "grass") { 
+            
                 const windStrength = 0.01;
                 const speed = 2.0;
 
@@ -265,6 +266,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             }
 
         }
+        let randomColor = new THREE.Color();
         for (let s = 0; s < instancedMeshes.length; s++) {
           
             
@@ -275,7 +277,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             if (locData.locationTags && locData.locationTags.includes("random color")) {
                 
                 for (let i = 0; i < count; i++) {
-                    let randomColor = new THREE.Color();
+                    
                 // this.color = this.highlightColor.setHex( Math.random() * 0xffffff );
                 // const r = Math.random();
                 // const g = Math.random();
@@ -284,9 +286,10 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 // randomColor.setRGB(r, g, b);
                  const hue = i / count;
                 randomColor.setHSL(hue, 1.0, 0.5);
+                // randomColor.setHex(Math.random() * 0xffffff);
                 // instancedMeshes[s].setColorAt( i, randomColor.setHex( Math.random() * 0xffffff ));
                 instancedMeshes[s].setColorAt( i, randomColor);
-                instancedMeshes[s].instanceColor.needsUpdate = true;
+                
                 }
                 
             }
@@ -299,6 +302,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
              
             }
             
+            instancedMeshes[s].instanceColor.needsUpdate = true;
             scene.add(instancedMeshes[s]);
         }
     
