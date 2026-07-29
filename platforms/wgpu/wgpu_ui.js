@@ -749,7 +749,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
                     ymodification = yMod;
 
                 }
-                console.log("ymod is " + ymod);
+                console.log("ymod is " + ymodification);
                 hicMesh.position.set(position.x, ymodification, position.z);
                 hicMesh.scale.setScalar(scaleFactor);
             }

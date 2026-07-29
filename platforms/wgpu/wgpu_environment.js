@@ -35,6 +35,7 @@ let skyboxMaterial;
 let textureEquirect;
 let tslTexture;
 const equirectTextureLoader = new THREE.TextureLoader();
+let regularColor = new THREE.Color();
 
 
 export function InitCustomFog() { //hrm...
@@ -114,20 +115,38 @@ export async function UpdateEnvMap () {
 		let skyboxURL = equirectPictures[sequenceInt].url;
 
 
+		// const animatedColor = vec3(
+		// 	time.sin(),
+		// 	time.add(2.0).sin(),
+		// 	time.add(4.0).sin()
+		// );
+		const speed = time.mul(2.0);
+		const r = sin(speed);
+		const g = sin(speed.add(2.0));
+		const b = sin(speed.add(4.0));
 		const animatedColor = vec3(
-			time.sin(),
-			time.add(2.0).sin(),
-			time.add(4.0).sin()
+			r,
+			g,
+			b
 		);
 		textureEquirect = await equirectTextureLoader.loadAsync( skyboxURL );
 		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
 		textureEquirect.colorSpace = THREE.SRGBColorSpace;
 		tslTexture = texture(textureEquirect);
-
+		
 		// const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
 		let skyboxColorNode = tslTexture.mul(1);
 		if (settings && settings.sceneTweakColors) {
 			skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
+			// const regularColor = new THREE.Color();
+			regularColor.setRGB(r,g,b);
+						sunLight.color.set(regularColor);
+
+			// scene.fog.color.set(regularColor);
+			// renderer.setClearColor(regularColor);
+			sunLight.color.set(regularColor);
+
+			// scene.fog.color.set(regularColor);
 		} 
 		// textureEquirect.colorSpace = THREE.SRGBColorSpace;
 		// // scene.background = textureEquirect;
@@ -178,17 +197,34 @@ export async function InitEnvMap () {
 			radius = settings.sceneSkyRadius;
 		}
         // scene.environmentIntensity = 3;
+		// const animatedColor = vec3(
+		// 	time.sin(),
+		// 	time.add(2.0).sin(),
+		// 	time.add(4.0).sin()
+		// );
+		const speed = time.mul(2.0);
+		const r = sin(speed);
+		const g = sin(speed.add(2.0));
+		const b = sin(speed.add(4.0));
 		const animatedColor = vec3(
-			time.sin(),
-			time.add(2.0).sin(),
-			time.add(4.0).sin()
+			r,
+			g,
+			b
 		);
+		// const regularColor = new THREE.Color();
+		// regularColor.setRGB(r,g,b);
 		if (sunLight) {
 			if (settings && settings.sceneTweakColors) {
-			const regularColor = new THREE.Color();
-			regularColor.setRGB(animatedColor.x, animatedColor.y, animatedColor.z);
+			// const regularColor = new THREE.Color();
+			// regularColor.setRGB(animatedColor.x, animatedColor.y, animatedColor.z);
+			// const regularColor = new THREE.Color();
 			
-			// sunLight.color.set(regularColor);
+			// const regularColor = new THREE.Color();
+			regularColor.setRGB(r,g,b);
+			sunLight.color.set(regularColor);
+
+			// scene.fog.color.set(regularColor);
+			// renderer.setClearColor(regularColor);
 			}
 			
 			// const fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)

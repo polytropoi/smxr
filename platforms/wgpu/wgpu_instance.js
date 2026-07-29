@@ -291,7 +291,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 instancedMeshes[s].setColorAt( i, randomColor);
                 
                 }
-                
+                instancedMeshes[s].instanceColor.needsUpdate = true;
             }
             if (locData.mediaID) {
                 const tm = {};
@@ -302,7 +302,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
              
             }
             
-            instancedMeshes[s].instanceColor.needsUpdate = true;
+            
             scene.add(instancedMeshes[s]);
         }
     
