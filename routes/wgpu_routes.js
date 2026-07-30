@@ -386,8 +386,8 @@ wgpu_router.get('/:_id', function (req, res) {
                             "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
                         
 
-                            "\x22three-pathfinding\x22: \x22/platforms/three/src/three-pathfinding.module.js\x22,"+
-                            "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
+                            "\x22three-pathfinding\x22: \x22/platforms/wgpu/src/three-pathfinding.module.js\x22,"+
+                            "\x22tsl-textures\x22: \x22/platforms/wgpu/tsl/tsl-textures.js\x22,"+
                              "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
                              "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
 

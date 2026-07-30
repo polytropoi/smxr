@@ -1,5 +1,6 @@
 
 import * as THREE from 'three';
+// import * as Tone from 'tone';
 
 import {player, camera } from './wgpu_controls.js';
 import { scene } from './wgpu_main.mjs';
@@ -11,7 +12,7 @@ import { TagsToInstances } from './wgpu_instance.js';
 
 import { UpdateEnvMap } from './wgpu_environment.js';
 
-import * as Tone from 'tone';
+
 
 export let primaryAudioGroups;
 export let ambientAudioGroups;
@@ -25,6 +26,7 @@ export let landscapePanel;
 export let equirectPictures = [];
 createYouTubePlayer();
 eventEl.addEventListener('sequence-event', SequenceEvent); 
+
 export function SequenceEvent (event) {
     console.log("sequenceEvent " + JSON.stringify(event.details));
     const type = event.details;
@@ -35,10 +37,10 @@ export function SequenceEvent (event) {
         break;
     }
 
-    const synth = new Tone.Synth().toDestination();
+    // const synth = new Tone.Synth().toDestination();
 
 //play a middle 'C' for the duration of an 8th note
-synth.triggerAttackRelease("C4", "8n");
+// synth.triggerAttackRelease("C4", "8n");
 }
 
 export function InitPictureGroups () {
