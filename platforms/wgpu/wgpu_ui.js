@@ -577,8 +577,8 @@ export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, posi
                 if (audioGroupsData.audioItems[i]._id == audioID) {
                     audioItem = audioGroupsData.audioItems[i];
                     console.log("gotsa audio item " + JSON.stringify(audioItem));
-                    const audioEl = "<audio controls><source src=\x22"+audioItem.URLmp3+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
-                    const htmlString = "<h1>" + audioItem.title + " : </h1>"  + audioEl;
+                    const audioEl = "<audio controls autoplay><source src=\x22"+audioItem.URLmp3+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
+                    const htmlString = "<h1>" + audioItem.title + " </h1>"  + audioEl;
                     ShowHTMLPopup(event, htmlString, position, null, null, 0);
                 }
             }

@@ -20,7 +20,8 @@ import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
 import {
 	color, screenUV, sin, time, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep,
-	vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, mul, cameraPosition, saturate, oneMinus, texture, equirectUV, positionLocal
+	vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, mul, cameraPosition, saturate, oneMinus, 
+	Fn, texture, equirectUV, positionLocal, rangeFogFactor
 } from 'three/tsl';
 
 // import { texture, positionLocal, NodeMaterial } from 'three/nodes';
@@ -49,18 +50,37 @@ const b = sin(speed.add(4.0));
 // const rn = Math.random();
 // const gn = Math.random();
 // const bn = Math.random();
-const animatedColor = vec3(
+let animatedColor = vec3(
 	r,
 	g,
 	b
+);
+
+const speed2 = time.mul(.25);
+const r2 = sin(speed2);
+const g2 = sin(speed2.add(2.0));
+const b2 = sin(speed2.add(4.0));
+// const rn = Math.random();
+// const gn = Math.random();
+// const bn = Math.random();
+let animatedColor2 = vec3(
+	r2,
+	g2,
+	b2
 );
 // const timeUniform = uniform(0);
 
 export function InitCustomFog() { //hrm...
 
-	const skyColor = color(settings.sceneColor1);
-	const groundColor = color(settings.sceneColor2);
+	// const skyColor = color(settings.sceneColor1);
 
+	let skyColor = color(settings.sceneColor1);
+	let groundColor = color(settings.sceneColor2);
+	if (settings && settings.sceneTweakColors) {
+		let skyColor = color(animatedColor);
+		// let groundColor = color(settings.sceneColor2);	
+		let groundColor = color(animatedColor2);
+	} 
 	const fogNoiseDistance = positionView.z.negate().smoothstep(0, camera.far - 300);
 
 	const distance = fogNoiseDistance.mul(20).max(4);
@@ -75,19 +95,18 @@ export function InitCustomFog() { //hrm...
 
 	const fogNoise = fogNoiseA.add(fogNoiseB).mul(groundColor);
 
-	// apply custom fog
-	// const fogColor = 
-
 	if (settings && settings.sceneTweakColors) {
 			// const fogNoise = fogNoiseA.add(fogNoiseB).mul(animatedColor);
-		const fogNoise = fogNoiseA.add(fogNoiseB).mul(groundColor);
+			// groundColor
+		const fogNoise = fogNoiseA.add(fogNoiseB).mul(animatedColor.div(2));
 		scene.fogNode = fog(fogNoiseDistance.oneMinus().mix(groundColor, fogNoise), groundFogArea);
 	} else {
 		const fogNoise = fogNoiseA.add(fogNoiseB).mul(groundColor);
 		scene.fogNode = fog(fogNoiseDistance.oneMinus().mix(groundColor, fogNoise), groundFogArea);
 	}
 		
-	scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
+
+	// scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
 
 }
 
@@ -119,17 +138,24 @@ export function InitGround() {
 	scene.add(planeMesh);
 }
 export function InitFog() {
-	if (settings && !settings.sceneUseFog) {
+	if (settings && settings.sceneUseFog) {
 		console.log("doin some fog...");
-		const fogColor = settings.sceneColor1; // Sky blue
+		const fogColor = settings.sceneColor2; // Sky blue
 		let radius = 400;
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
 		const fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
 		// scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
-		scene.fog = new THREE.FogExp2(fogColor, fogDensity);
-		// scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
+		// scene.fog = new THREE.FogExp2(animatedColor, fogDensity);
+		// scene.fogNode = fog(color(animatedColor), rangeFogFactor(30, 300));
+		if (settings && settings.sceneTweakColors) {
+ 			scene.fogNode = fog(color(animatedColor), rangeFogFactor(100, 300));
+			//  scene.fog = new THREE.FogExp2(fogColor, fogDensity);
+		} else {
+			scene.fog = new THREE.FogExp2(fogColor, fogDensity);
+		}
+		
 	} 
 	if (settings && settings.sceneUseVolumetricFog){
 		InitCustomFog();
@@ -181,6 +207,17 @@ export function UpdateSkyColors(time) {
 		// }
 	}
 }
+
+export const wavyDistortion = Fn( ( { imageTex, frequency, amplitude } ) => {
+  // Multiply time by frequency and add vertical UV to create motion down the plane
+  const wave = sin( uv().y.mul( frequency ).add( time ) ).mul( amplitude );
+  
+  // Distort the horizontal axis (X) using the wave value
+  const distortedUV = vec2( uv().x.add( wave ), uv().y );
+  
+  return texture( imageTex, distortedUV );
+} );
+
 export async function UpdateEnvMap() {
 
 	// let skyboxColorNode;
@@ -216,6 +253,7 @@ export async function UpdateEnvMap() {
 			textureEquirect = await equirectTextureLoader.loadAsync(skyboxURL);
 			textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
 			textureEquirect.colorSpace = THREE.SRGBColorSpace;
+			// const textureEqMod = wavyDistortion(textureEquirect, 33, 33);
 			tslTexture = texture(textureEquirect);
 
 
@@ -338,6 +376,8 @@ export async function InitEnvMap() {
 		// if (sunLight) {
 		if (settings && settings.sceneTweakColors) {
 
+						
+
 			// const hue = (performance.now() * 0.1) % 1;
 
 			// 	regularColor.setHSL(hue, 1.0, 0.5);
@@ -358,6 +398,9 @@ export async function InitEnvMap() {
 			const sphereSegments = 60; // Higher for better quality
 			const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
 
+			// tslTexture = texture(textureEquirect);
+
+			// const textureEqMod = wavyDistortion(textureEquirect, 33, 33);
 			tslTexture = texture(textureEquirect);
 
 			skyboxMaterial = new THREE.NodeMaterial();
@@ -367,6 +410,7 @@ export async function InitEnvMap() {
 
 			if (settings && settings.sceneTweakColors) {
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
+				sunLight.colorNode = animatedColor;
 			} 
 
 			skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
@@ -481,9 +525,13 @@ export function InitSky() {
 		// 	scene.add(skyMesh);
 
 		// } else {
-			const topColor = color(settings.sceneColor2);
-			const bottomColor = color(settings.sceneColor1);
+			let topColor = color(settings.sceneColor2);
+			let bottomColor = color(settings.sceneColor1);
 
+			if (settings && settings.sceneTweakColors) {
+				topColor = animatedColor;
+				bottomColor = animatedColor2;
+			}
 			// const topColor = color( 0x3a1c71 );
 			// const bottomColor = color( 0xd76d77 );
 			const gradientNode = mix(bottomColor, topColor, uv().y.mul(2));

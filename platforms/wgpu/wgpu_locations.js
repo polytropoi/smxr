@@ -570,7 +570,7 @@ async function LoadLocationModel (url, locationData, isActive) {
         if (locationData.modelID.includes("sphere")) {
             // console.log("gotsa sphere primitive");
             const geometry = new THREE.SphereGeometry(yscale,16,16);
-            const material = new THREE.MeshStandardMaterial({color: 0x00ff00, roughness: .25});
+            const material = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: .25});
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("cube")) {
             const geometry = new THREE.BoxGeometry(xscale, yscale, xscale, 16,16);

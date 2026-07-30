@@ -161,8 +161,8 @@ server.listen(process.env.PORT || 3000, function() {
 import aframe_routes from './routes/aframe_routes.js';
 app.use('/aframe', aframe_routes); 
 
-import webxr_routes from './routes/webxr_routes.js';
-app.use('/webxr', webxr_routes); 
+// import webxr_routes from './routes/webxr_routes.js';
+app.use('/webxr', aframe_routes); 
 
 import mapbox_routes from './routes/mapbox_routes.js';
 app.use('/mapbox', mapbox_routes); 
@@ -187,7 +187,6 @@ app.use('/wgpu', wgpu_routes);
  
 import wgl_routes from './routes/wgl_routes.js';
 app.use('/wgl', wgl_routes); 
-
 
 app.use('/threegl', wgl_routes); //deprecated
 

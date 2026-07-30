@@ -2327,6 +2327,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
                     settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
                     settings.sceneTweakColors = sceneResponse.sceneTweakColors;
+
                     settings.sceneClouds = sceneClouds;
                     settings.sceneTime = sceneTime;
                     settings.volumePrimary = sceneResponse.scenePrimaryVolume;
@@ -2338,7 +2339,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.skyboxID = skyboxID;
                     settings.skyboxURL = skyboxUrl;
                     settings.sceneWater = (sceneResponse.sceneWater != undefined && sceneResponse.sceneWater.level != undefined) ? sceneResponse.sceneWater : 0;
-                    settings.useSceneFog = sceneResponse.sceneUseSceneFog;
+                    settings.sceneUseFog = sceneResponse.sceneUseSceneFog;
                     settings.sceneUseVolumetricFog = sceneResponse.sceneUseVolumetricFog;
                     settings.fogDensity = sceneResponse.sceneGlobalFogDensity;
                     settings.useSynth = hasSynth;
