@@ -266,7 +266,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             }
 
         }
-        let randomColor = new THREE.Color();
+       
         for (let s = 0; s < instancedMeshes.length; s++) {
           
             
@@ -278,14 +278,15 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 
                 for (let i = 0; i < count; i++) {
                     
-                // this.color = this.highlightColor.setHex( Math.random() * 0xffffff );
-                // const r = Math.random();
-                // const g = Math.random();
-                // const b = Math.random();
+                 let randomColor = new THREE.Color();
+                randomColor.setHex( Math.random() * 0xffffff );
+                const r = Math.random();
+                const g = Math.random();
+                const b = Math.random();
 
                 // randomColor.setRGB(r, g, b);
-                 const hue = i / count;
-                randomColor.setHSL(hue, 1.0, 0.5);
+                //  const hue = i / count;
+                // randomColor.setHSL(hue, 1.0, 0.5);
                 // randomColor.setHex(Math.random() * 0xffffff);
                 // instancedMeshes[s].setColorAt( i, randomColor.setHex( Math.random() * 0xffffff ));
                 instancedMeshes[s].setColorAt( i, randomColor);

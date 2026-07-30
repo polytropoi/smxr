@@ -1084,10 +1084,11 @@ export function onMouseDown(event) { // on threejs object
     // playerReadyToNav = true;
     event.stopPropagation();// duh!
 
-        console.log("mouse down on " + event.target.id);
+    console.log("mouse down on " + event.target.id);
     if (lastRaycastHitObject && lastRaycastHitObject.userData) {
     console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID + " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
     } else {
+        console.log(event.clientY + " " + (window.innerHeight * .8));
         if (event.clientY > (window.innerHeight * .8)) {
             if (settings && settings.sceneTags && settings.sceneTags.includes("next")) {
                 GoToNext();

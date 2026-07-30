@@ -379,25 +379,21 @@ wgpu_router.get('/:_id', function (req, res) {
     let  importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
          
 
-                                "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
-                                "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
-                            // "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js\x22,"+     
-                            // "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js\x22,"+
-
-//   "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
-//       "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+                            "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
+                            "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
+                        
                             "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
                             "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
-                            // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/\x22,"+
-
+                        
 
                             "\x22three-pathfinding\x22: \x22/platforms/three/src/three-pathfinding.module.js\x22,"+
                             "\x22tsl-textures\x22: \x22/platforms/three/tsl/tsl-textures.js\x22,"+
                              "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
-                             "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+
-                            
-                            
+                             "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
 
+                            "\x22tone\x22: \x22../main/vendor/tonejs/tonejs_15.1.22.js\x22,"+
+                          
+                            
                             "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
                           
                           
@@ -2371,7 +2367,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
                     settings.playerHeight = sceneResponse.scenePlayer.playerHeight;
                     settings.sceneUseSkybox = sceneResponse.sceneUseSkybox;
-
+                    settings.sceneGroundLevel = sceneResponse.sceneGroundLevel;
                     settings.sceneGroups = sceneResponse.sceneGroups;
                     // settings.playerStartPosition = playerPosition;
 

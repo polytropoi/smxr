@@ -6,22 +6,24 @@ import { settings } from '../../../connect/settings.js';
 
 import { sequenceInt } from '../../../connect/events.js';
 
-import {GoToNext} from '../../../connect/connect.js';
+import { GoToNext } from '../../../connect/connect.js';
 
-import {scene, renderer} from './wgpu_main.mjs';
+import { scene, renderer } from './wgpu_main.mjs';
 
-import {sunLight} from './wgpu_lights.js';
+import { sunLight } from './wgpu_lights.js';
 
-import {camera, controls} from './wgpu_controls.js';
+import { camera, controls } from './wgpu_controls.js';
 
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
 
 
-import { color, screenUV, sin, time, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep, 
-	vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, cameraPosition, saturate, oneMinus, texture, equirectUV, positionLocal} from 'three/tsl';
+import {
+	color, screenUV, sin, time, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep,
+	vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, mul, cameraPosition, saturate, oneMinus, texture, equirectUV, positionLocal
+} from 'three/tsl';
 
-	// import { texture, positionLocal, NodeMaterial } from 'three/nodes';
+// import { texture, positionLocal, NodeMaterial } from 'three/nodes';
 
 import { MeshStandardNodeMaterial } from 'three';
 
@@ -37,42 +39,67 @@ let tslTexture;
 const equirectTextureLoader = new THREE.TextureLoader();
 let regularColor = new THREE.Color();
 
+let skyboxColorNode;
+
+// const speed = time.mul(2.0);
+const speed = time.mul(.5);
+const r = sin(speed);
+const g = sin(speed.add(2.0));
+const b = sin(speed.add(4.0));
+// const rn = Math.random();
+// const gn = Math.random();
+// const bn = Math.random();
+const animatedColor = vec3(
+	r,
+	g,
+	b
+);
+// const timeUniform = uniform(0);
 
 export function InitCustomFog() { //hrm...
 
-	const skyColor = color( 0xf0f5f5 );
-    const groundColor = color( 0xd0dee7 );
+	const skyColor = color(settings.sceneColor1);
+	const groundColor = color(settings.sceneColor2);
 
-    const fogNoiseDistance = positionView.z.negate().smoothstep( 0, camera.far - 300 );
+	const fogNoiseDistance = positionView.z.negate().smoothstep(0, camera.far - 300);
 
-    const distance = fogNoiseDistance.mul( 20 ).max( 4 );
-    const alpha = .98;
-    const groundFogArea = float( distance ).sub( positionWorld.y ).div( distance ).pow( 3 ).saturate().mul( alpha );
+	const distance = fogNoiseDistance.mul(20).max(4);
+	const alpha = .98;
+	const groundFogArea = float(distance).sub(positionWorld.y).div(distance).pow(3).saturate().mul(alpha);
 
-    // a alternative way to create a TimerNode
-    const timer = uniform( 0 ).onFrameUpdate( ( frame ) => frame.time );
+	// a alternative way to create a TimerNode
+	const timer = uniform(0).onFrameUpdate((frame) => frame.time);
 
-    const fogNoiseA = triNoise3D( positionWorld.mul( .005 ), 0.2, timer );
-    const fogNoiseB = triNoise3D( positionWorld.mul( .01 ), 0.2, timer.mul( 1.2 ) );
+	const fogNoiseA = triNoise3D(positionWorld.mul(.005), 0.2, timer);
+	const fogNoiseB = triNoise3D(positionWorld.mul(.01), 0.2, timer.mul(1.2));
 
-    const fogNoise = fogNoiseA.add( fogNoiseB ).mul( groundColor );
+	const fogNoise = fogNoiseA.add(fogNoiseB).mul(groundColor);
 
-    // apply custom fog
+	// apply custom fog
+	// const fogColor = 
 
-    scene.fogNode = fog( fogNoiseDistance.oneMinus().mix( groundColor, fogNoise ), groundFogArea );
-    // scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
+	if (settings && settings.sceneTweakColors) {
+			// const fogNoise = fogNoiseA.add(fogNoiseB).mul(animatedColor);
+		const fogNoise = fogNoiseA.add(fogNoiseB).mul(groundColor);
+		scene.fogNode = fog(fogNoiseDistance.oneMinus().mix(groundColor, fogNoise), groundFogArea);
+	} else {
+		const fogNoise = fogNoiseA.add(fogNoiseB).mul(groundColor);
+		scene.fogNode = fog(fogNoiseDistance.oneMinus().mix(groundColor, fogNoise), groundFogArea);
+	}
+		
+	scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
 
 }
 
-export function InitGrid () {
+export function InitGrid() {
 	// const grid = new InfiniteGridHelper(10, 100, 'red', 1000);
 	// scene.add(grid);
 	// grid.rotation.x = Math.PI / 2;
 
 	const size = 100;
 	const divisions = 100;
-	const gridHelper = new THREE.GridHelper( size, divisions, settings.sceneColor2, settings.sceneColor3 );
-	scene.add( gridHelper );
+	const gridHelper = new THREE.GridHelper(size, divisions, settings.sceneColor2, settings.sceneColor3);
+	scene.add(gridHelper);
 
 
 }
@@ -84,194 +111,293 @@ export function InitGround() {
 	let yscale = 100;
 	let zscale = 100;
 	const planeGeo = new THREE.CircleGeometry(100, 100);
-	const planeMat = new THREE.MeshStandardMaterial({color: settings.sceneColor3});
+	const planeMat = new THREE.MeshStandardMaterial({ color: settings.sceneColor3 });
 	// planeMat.colorNode = settings.sceneColor2;
 	const planeMesh = new THREE.Mesh(planeGeo, planeMat);
-	planeMesh.receiveShadow = true; 
+	planeMesh.receiveShadow = true;
 	planeMesh.rotateX(-Math.PI / 2);
 	scene.add(planeMesh);
 }
 export function InitFog() {
-    if (settings && settings.sceneUseVolumetricFog) {
-        console.log("doin some fog...");
-        const fogColor = settings.sceneColor1; // Sky blue
+	if (settings && !settings.sceneUseFog) {
+		console.log("doin some fog...");
+		const fogColor = settings.sceneColor1; // Sky blue
 		let radius = 400;
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
-        const fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
-        // scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
-		scene.fog = new THREE.FogExp2( fogColor, fogDensity );
-        // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
-    }
+		const fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
+		// scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
+		scene.fog = new THREE.FogExp2(fogColor, fogDensity);
+		// scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
+	} 
+	if (settings && settings.sceneUseVolumetricFog){
+		InitCustomFog();
+	}
 }
 
-export async function UpdateEnvMap () {
+export function UpdateSkyColors(time) {
+	if (settings && settings.sceneTweakColors) {
+
+		// const sineCycle = time.mul(2.0).sin().mul(0.5).add(0.5);
+
+		// // 3. Interpolate or multiply base colors using the sine node
+		// const randomColor1 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+
+		// const dynamicColor1 = color(randomColor).mul(sineCycle);
+
+		// // const randomColor2 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+
+		// // const dynamicColor2 = color(randomColor).mul(sineCycle);
+
+		// // 4. Assign the node to the light's colorNode property
+		sunLight.colorNode = animatedColor;
+
+		// scene.fog.colorNode = animatedColor;
+
+
+		// 		const topColor = color( settings.sceneColor2 );
+		// const bottomColor = color( settings.sceneColor1 );
+
+		// const topColor = color( 0x3a1c71 );
+		// const bottomColor = color( 0xd76d77 );
+		// const gradientNode = mix( dynamicColor1, dynamicColor2, uv().y );
+
+		// scene.backgroundNode = gradientNode;
+		// if (sunLight) {
+
+		// 	const hue = (performance.now() * 0.1) % 1;
+		// 	console.log("hue is " + hue);
+		// 	regularColor.setHSL(hue, 1.0, 0.5);
+
+		// 	//
+
+		// 	sunLight.color.set(regularColor);
+
+		// 	// scene.fog.color.set(regularColor);
+		// }
+		// if (scene.fog) {
+		// 	scene.fog.color.set(regularColor);
+		// }
+	}
+}
+export async function UpdateEnvMap() {
+
+	// let skyboxColorNode;
+	// const speed = time.mul(2.0);
+	// const r = sin(speed);
+	// const g = sin(speed.add(2.0));
+	// const b = sin(speed.add(4.0));
+	// // const rn = Math.random();
+	// // const gn = Math.random();
+	// // const bn = Math.random();
+	// const animatedColor = vec3(
+	// 	r,
+	// 	g,
+	// 	b
+	// );
 	if (equirectPictures.length) {
 		if (sequenceInt >= equirectPictures.length) {
 			SetSequenceInt(0);
 		}
-		console.log(JSON.stringify(equirectPictures[sequenceInt]));
+
+		console.log("skybox # " + sequenceInt + " " + JSON.stringify(equirectPictures[sequenceInt]));
 		let skyboxURL = equirectPictures[sequenceInt].url;
 
 
-		// const animatedColor = vec3(
-		// 	time.sin(),
-		// 	time.add(2.0).sin(),
-		// 	time.add(4.0).sin()
-		// );
-		const speed = time.mul(2.0);
-		const r = sin(speed);
-		const g = sin(speed.add(2.0));
-		const b = sin(speed.add(4.0));
-		const animatedColor = vec3(
-			r,
-			g,
-			b
-		);
-		textureEquirect = await equirectTextureLoader.loadAsync( skyboxURL );
-		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
-		textureEquirect.colorSpace = THREE.SRGBColorSpace;
-		tslTexture = texture(textureEquirect);
-		
-		// const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
-		let skyboxColorNode = tslTexture.mul(1);
-		if (settings && settings.sceneTweakColors) {
-			skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
-			// const regularColor = new THREE.Color();
-			regularColor.setRGB(r,g,b);
-						sunLight.color.set(regularColor);
 
-			// scene.fog.color.set(regularColor);
-			// renderer.setClearColor(regularColor);
-			sunLight.color.set(regularColor);
+		if (settings && settings.sceneUseSkybox && skyboxURL && skyboxMaterial) {
+			// const animatedColor = vec3(
+			// 	time.sin(),
+			// 	time.add(2.0).sin(),
+			// 	time.add(4.0).sin()
+			// );
 
-			// scene.fog.color.set(regularColor);
-		} 
-		// textureEquirect.colorSpace = THREE.SRGBColorSpace;
-		// // scene.background = textureEquirect;
-		// scene.environmentNode = skyboxColorNode;
-		// 	scene.environment = textureEquirect;
-		// textureEquirect.needsUpdate = true;
-
-		// skySphere.material.map = textureEquirect;
-		// skySphere.material.needsUpdate = true;
+			textureEquirect = await equirectTextureLoader.loadAsync(skyboxURL);
+			textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+			textureEquirect.colorSpace = THREE.SRGBColorSpace;
+			tslTexture = texture(textureEquirect);
 
 
+			if (settings.sceneTweakColors) {
+				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
+				skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
+				skyboxMaterial.envNode = skyboxColorNode;
+
+				scene.environmentNode = skyboxColorNode;
+				// scene.environment = textureEquirect;
+			} else {
+				// const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
+				skyboxColorNode = tslTexture.mul(1);
+				skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
+				skyboxMaterial.envNode = skyboxColorNode;
+
+				scene.environmentNode = skyboxColorNode;
+				// scene.environment = textureEquirect;
+			}
+		}
+	}
+	if (settings && settings.sceneTweakColors) {
+
+		skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.75));
 		skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
 		skyboxMaterial.envNode = skyboxColorNode;
-		
-		// skyboxMaterial.side = THREE.BackSide;    
+
 		scene.environmentNode = skyboxColorNode;
-		scene.environment = textureEquirect;
-		// if (skySphere && skyboxMaterial) {
+		// UpdateSkyColors();
+		// if (sunLight) {
+
+		const hue = (performance.now() * 0.1) % 1;
+		console.log("hue is " + hue);
+		regularColor.setHSL(hue, 1.0, 0.5);
+
 		
-		// 	// 3. Create material, mapping it to the inside
-		// 	const material = new THREE.MeshBasicMaterial({
-		// 		map: textureEquirect,
-		// 		side: THREE.BackSide // Crucial for skybox
-		// 	});
-		// 	skySphere.material = material;
-		// 	// skyboxMaterial.map = textureEquirect;
-		// 	material.needsUpdate = true;
+		if (sunLight) {
+			sunLight.colorNode = animatedColor;
+		}
+		if (scene.fog) {
+			scene.fog.color.set(regularColor);
+		}
+			
 		// }
 	}
+
+
+	// textureEquirect.colorSpace = THREE.SRGBColorSpace;
+	// // scene.background = textureEquirect;
+	// scene.environmentNode = skyboxColorNode;
+	// 	scene.environment = textureEquirect;
+	// textureEquirect.needsUpdate = true;
+
+	// skySphere.material.map = textureEquirect;
+	// skySphere.material.needsUpdate = true;
+
+	// if (settings.sceneUseSkybox) {
+
+	// 	skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
+	// 	skyboxMaterial.envNode = skyboxColorNode;
+
+	// 	// skyboxMaterial.side = THREE.BackSide;    
+	// 	// scene.environmentNode = skyboxColorNode;
+	// } else {
+
+	// }
+	// scene.environment = textureEquirect;
+	// if (skySphere && skyboxMaterial) {
+
+	// 	// 3. Create material, mapping it to the inside
+	// 	const material = new THREE.MeshBasicMaterial({
+	// 		map: textureEquirect,
+	// 		side: THREE.BackSide // Crucial for skybox
+	// 	});
+	// 	skySphere.material = material;
+	// 	// skyboxMaterial.map = textureEquirect;
+	// 	material.needsUpdate = true;
+	// }
+	// }
 }
-export async function InitEnvMap () {
+export async function InitEnvMap() {
 
 	let skybox = settings.skyboxURL;
-	
-    if (skybox) {
-        console.log("gotsa skybox url " + settings.skyboxURL);
-        const envMapURL = settings.skyboxURL;
-        // const equirectTextureLoader = new THREE.TextureLoader();
 
-        textureEquirect = await equirectTextureLoader.loadAsync( envMapURL );
-        textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
-        textureEquirect.colorSpace = THREE.SRGBColorSpace;
-      
-        scene.environment = textureEquirect;
-        // scene.background = textureEquirect;
+	if (skybox) {
+		console.log("gotsa skybox url " + settings.skyboxURL);
+		const envMapURL = settings.skyboxURL;
+		// const equirectTextureLoader = new THREE.TextureLoader();
+
+		textureEquirect = await equirectTextureLoader.loadAsync(envMapURL);
+		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+		textureEquirect.colorSpace = THREE.SRGBColorSpace;
+
+		scene.environment = textureEquirect;
+		// scene.background = textureEquirect;
 		let radius = 300;
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
-        // scene.environmentIntensity = 3;
+		// scene.environmentIntensity = 3;
 		// const animatedColor = vec3(
 		// 	time.sin(),
 		// 	time.add(2.0).sin(),
 		// 	time.add(4.0).sin()
 		// );
-		const speed = time.mul(2.0);
-		const r = sin(speed);
-		const g = sin(speed.add(2.0));
-		const b = sin(speed.add(4.0));
-		const animatedColor = vec3(
-			r,
-			g,
-			b
-		);
+		// const speed = time.mul(2.0);
+		// const r = sin(speed);
+		// const g = sin(speed.add(2.0));
+		// const b = sin(speed.add(4.0));
+		// // const rn = r.toVar();
+		// // const gn = g.toVar();
+		// // const bn = b.toVar();
+		// const animatedColor = vec3(
+		// 	r,
+		// 	g,
+		// 	b
+		// );
 		// const regularColor = new THREE.Color();
 		// regularColor.setRGB(r,g,b);
-		if (sunLight) {
-			if (settings && settings.sceneTweakColors) {
-			// const regularColor = new THREE.Color();
-			// regularColor.setRGB(animatedColor.x, animatedColor.y, animatedColor.z);
-			// const regularColor = new THREE.Color();
-			
-			// const regularColor = new THREE.Color();
-			regularColor.setRGB(r,g,b);
-			sunLight.color.set(regularColor);
+		// if (sunLight) {
+		if (settings && settings.sceneTweakColors) {
 
-			// scene.fog.color.set(regularColor);
-			// renderer.setClearColor(regularColor);
-			}
-			
-			// const fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
-			// // scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
-			// scene.fog = new THREE.FogExp2( regularColor, fogDensity );
+			// const hue = (performance.now() * 0.1) % 1;
+
+			// 	regularColor.setHSL(hue, 1.0, 0.5);
+			// sunLight.color = regularColor;
+
+			// 	if (scene.fog) {
+			// 		scene.fog.color.set(regularColor);
+			// 	}
+			// }
+			// UpdateSkyColors();
+
+
 		}
-		
-		if (settings.sceneUseSkybox) {	
+
+		if (settings.sceneUseSkybox) {
 			// const tex = texture(textureEquirect)
 			const sphereRadius = radius;
 			const sphereSegments = 60; // Higher for better quality
 			const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
 
 			tslTexture = texture(textureEquirect);
-				
+
 			skyboxMaterial = new THREE.NodeMaterial();
+			skyboxMaterial.side = THREE.BackSide;
+
 			let skyboxColorNode = tslTexture.mul(1);
+
 			if (settings && settings.sceneTweakColors) {
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
 			} 
+
 			skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
 			skyboxMaterial.envNode = skyboxColorNode;
-			
-			skyboxMaterial.side = THREE.BackSide;    
+
+
 			scene.environmentNode = skyboxColorNode;
-			scene.environment = textureEquirect;
-		
+			// scene.environment = textureEquirect;
+
 			skySphere = new THREE.Mesh(geometry, skyboxMaterial);
 			scene.add(skySphere);
+
+			skySphere.position.set(0, settings.sceneGroundLevel * -1, 0);
 		}
 	}
 }
 
-export function InitWater () {
-	
+export function InitWater() {
+
 }
 export function InitSky() {
 
 	if (settings && settings.sceneUseDynamicSky) {
 		// Add Sky
 		const sky = new SkyMesh();
-		sky.scale.setScalar( 450000 );
-		scene.add( sky );
+		sky.scale.setScalar(450000);
+		scene.add(sky);
 
 		const sun = new THREE.Vector3();
 
-	
+
 		console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
 		let elevation = 45;
 		let sceneClouds = "medium";
@@ -291,7 +417,7 @@ export function InitSky() {
 			}
 
 		}
-		
+
 		const effectController = {
 			turbidity: 10,
 			rayleigh: 3,
@@ -307,64 +433,68 @@ export function InitSky() {
 		};
 
 
-			sky.turbidity.value = effectController.turbidity;
-			sky.rayleigh.value = effectController.rayleigh;
-			sky.mieCoefficient.value = effectController.mieCoefficient;
-			sky.mieDirectionalG.value = effectController.mieDirectionalG;
+		sky.turbidity.value = effectController.turbidity;
+		sky.rayleigh.value = effectController.rayleigh;
+		sky.mieCoefficient.value = effectController.mieCoefficient;
+		sky.mieDirectionalG.value = effectController.mieDirectionalG;
 
-			const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
-			const theta = THREE.MathUtils.degToRad( effectController.azimuth );
+		const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
+		const theta = THREE.MathUtils.degToRad(effectController.azimuth);
 
-			sun.setFromSphericalCoords( 1, phi, theta );
+		sun.setFromSphericalCoords(1, phi, theta);
 
-			sky.sunPosition.value.copy( sun );
+		sky.sunPosition.value.copy(sun);
 
-			sunLight.position.copy(sun);
-			renderer.toneMappingExposure = effectController.exposure;
-// 
-		} else {	
+		sunLight.position.copy(sun);
+		renderer.toneMappingExposure = effectController.exposure;
+		// 
+	} else {
 
 
-			if (settings && settings.sceneTags && settings.sceneTags.includes("sky sphere")) {
-				let radius = 295;
-				if (settings.sceneSkyRadius) {
-					radius = settings.sceneSkyRadius - 5;
-				}
-				// Define your gradient colors
-				const skyColor = color(new THREE.Color(settings.sceneColor1));      // Top of the sky
-				const horizonColor = color(new THREE.Color(settings.sceneColor2));  // Horizon/bottom of sky
+		// if (settings && settings.sceneTags && !settings.sceneUseSkybox) {
+		// 	let radius = 295;
+		// 	if (settings.sceneSkyRadius) {
+		// 		radius = settings.sceneSkyRadius - 5;
+		// 	}
+		// 	// Define your gradient colors
+		// 	const skyColor = color(settings.sceneColor2);
+		// 	const horizonColor = color(settings.sceneColor1);
+		// 	// const skyColor = color(new THREE.Color(settings.sceneColor1));      // Top of the sky
+		// 	// const horizonColor = color(new THREE.Color(settings.sceneColor2));  // Horizon/bottom of sky
 
-				// Compute the gradient factor based on the Y-axis position
-				// We normalize position to be between 0 (bottom) and 1 (top)
-				const verticalGradient = positionWorld.y.normalize();
+		// 	// Compute the gradient factor based on the Y-axis position
+		// 	// We normalize position to be between 0 (bottom) and 1 (top)
+		// 	const verticalGradient = positionWorld.y.normalize();
 
-				// Mix the colors using TSL
-				const finalSkyColor = mix(horizonColor, skyColor, verticalGradient);
+		// 	// Mix the colors using TSL
+		// 	const finalSkyColor = mix(horizonColor, skyColor, verticalGradient);
 
-				// Create the Node Material
+		// 	// Create the Node Material
 
-				const skyMaterial = new THREE.MeshBasicNodeMaterial();
-				skyMaterial.colorNode = finalSkyColor;
-				skyMaterial.side = THREE.BackSide; 
-				const skyGeometry = new THREE.SphereGeometry(radius, 32, 15);
-				const skyMesh = new THREE.Mesh(skyGeometry, skyMaterial);
+		// 	const skyMaterial = new THREE.MeshBasicNodeMaterial();
+		// 	skyMaterial.colorNode = finalSkyColor;
+		// 	skyMaterial.side = THREE.BackSide;
+		// 	const skyGeometry = new THREE.SphereGeometry(radius, 32, 15);
+		// 	const skyMesh = new THREE.Mesh(skyGeometry, skyMaterial);
 
-				// Add to your scene
-				scene.add(skyMesh);
+		// 	// Add to your scene
+		// 	scene.add(skyMesh);
 
-			} else {
-				const topColor = color( settings.sceneColor2 );
-				const bottomColor = color( settings.sceneColor1 );
+		// } else {
+			const topColor = color(settings.sceneColor2);
+			const bottomColor = color(settings.sceneColor1);
 
-				// const topColor = color( 0x3a1c71 );
-				// const bottomColor = color( 0xd76d77 );
-				const gradientNode = mix( bottomColor, topColor, uv().y );
+			// const topColor = color( 0x3a1c71 );
+			// const bottomColor = color( 0xd76d77 );
+			const gradientNode = mix(bottomColor, topColor, uv().y.mul(2));
 
-				scene.backgroundNode = gradientNode;
+			if (sunLight) {
+				sunLight.colorNode = topColor;
 			}
-			
+			scene.backgroundNode = gradientNode;
 		}
 
-	}
+	// }
 
-        
+}
+

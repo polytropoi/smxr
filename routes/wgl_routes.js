@@ -2928,7 +2928,7 @@ wgl_router.get('/:_id', function (req, res) {
                     settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
                     settings.playerHeight = sceneResponse.scenePlayer.playerHeight;
                     settings.sceneUseSkybox = sceneResponse.sceneUseSkybox;
-
+                    settings.sceneGroundLevel = sceneResponse.sceneGroundLevel;
                     settings.sceneGroups = sceneResponse.sceneGroups;
                     // settings.playerStartPosition = playerPosition;
 

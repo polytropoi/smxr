@@ -5,6 +5,8 @@
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, SetVideoEventsData,  
   ResetTimedEvents, SetPrimaryAudioEventsData, ClearIntervals, InitAudioViz, UpdatePrimaryTransportSlider, percentComplete } from "../../connect/events.js";
 import { settings } from "../../connect/settings.js";
+
+import * as Tone from 'tone';
 // import { InitAnalyzer, addAudioVizSelect, AudioVizMode } from "../vtt/vtt_audioViz.mjs";
 // import { ResetTimedEvents, SetPrimaryAudioEventsData } from "./events.js";
 // import { Howl, Howler } from '../node_modules/howler/dist/howler.js';

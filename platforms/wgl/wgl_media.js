@@ -24,6 +24,8 @@ export let landscapePanel;
 export let equirectPictures = [];
 createYouTubePlayer();
 
+eventEl.addEventListener('sequence-event', SequenceEvent);
+
 function SequenceEvent (event) {
     console.log("sequenceEvent " + JSON.stringify(event.details));
     const type = event.details;
@@ -58,7 +60,7 @@ export function InitPictureGroups () {
                 }
             }
         }
-        eventEl.addEventListener('sequence-event', SequenceEvent); 
+        
 }
 
 export function ReturnPictureFromGroup (groupID, tags, groupIndex) {

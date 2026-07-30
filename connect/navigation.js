@@ -1,4 +1,6 @@
+//for AFRAME only, THREEJS routes use three-pathfinding
 /// move to platforms/aframe and rename! 
+
 
 import AFRAME from 'aframe'; 
 import * as THREE from 'three';

@@ -22,8 +22,8 @@ export let landscapePanel;
 
 export let equirectPictures = [];
 createYouTubePlayer();
-
-function SequenceEvent (event) {
+eventEl.addEventListener('sequence-event', SequenceEvent); 
+export function SequenceEvent (event) {
     console.log("sequenceEvent " + JSON.stringify(event.details));
     const type = event.details;
     switch (type) {
@@ -32,6 +32,11 @@ function SequenceEvent (event) {
             UpdateEnvMap();
         break;
     }
+
+    const synth = new Tone.Synth().toDestination();
+
+//play a middle 'C' for the duration of an 8th note
+synth.triggerAttackRelease("C4", "8n");
 }
 
 export function InitPictureGroups () {
@@ -52,7 +57,7 @@ export function InitPictureGroups () {
             }
         }
     }
-    eventEl.addEventListener('sequence-event', SequenceEvent); 
+
    
 }
 
