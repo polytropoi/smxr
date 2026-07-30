@@ -19,8 +19,6 @@ export let audioGroupsData;
 export let pictureGroupsData;
 export let landscapePanel;
 
-
-
 export let equirectPictures = [];
 createYouTubePlayer();
 

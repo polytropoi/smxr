@@ -11,6 +11,8 @@ import { TagsToInstances } from './wgpu_instance.js';
 
 import { UpdateEnvMap } from './wgpu_environment.js';
 
+import * as Tone from 'tone';
+
 export let primaryAudioGroups;
 export let ambientAudioGroups;
 export let triggerAudioGroups;
