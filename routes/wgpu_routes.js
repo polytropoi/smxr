@@ -2061,8 +2061,9 @@ wgpu_router.get('/:_id', function (req, res) {
                                 scenePictureItems.push(image);
                             }
                             picGroup.images = images;
-                            requestedPictureGroups.push(picGroup);
+                            
                         }
+                        requestedPictureGroups.push(picGroup);
                             // if (picturegroupLocation != "") {
                             //     pictureGroupsEntity = "<div scale=\x22.75 .75 .75\x22 id=\x22picGroupParent\x22 look-at=\x22#player\x22 position=\x22"+picturegroupLocation+"\x22>"+ 
                             //     "<div position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22pictureGroupsControl\x22 class=\x22envMap activeObjexRay\x22 "+skyboxEnvMap+" toggle-picture-group gltf-model=\x22#camera_icon\x22></div>"+

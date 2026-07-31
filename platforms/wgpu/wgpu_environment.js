@@ -226,7 +226,7 @@ export async function UpdateEnvMap() {
 			SetSequenceInt(0); //kept in events.js
 		}
 
-		console.log("skybox # " + sequenceInt + " " + JSON.stringify(equirectPictures[sequenceInt]));
+		console.log("skybox # " + sequenceInt + " of " + equirectPictures.length);// JSON.stringify(equirectPictures[sequenceInt]));
 		let skyboxURL = equirectPictures[sequenceInt].url;
 
 		if (settings && settings.sceneUseSkybox && skyboxURL && skyboxMaterial) {
@@ -396,7 +396,10 @@ export async function InitEnvMap() {
 
 			if (settings && settings.sceneTweakColors) {
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
-				sunLight.colorNode = animatedColor;
+				if (sunLight) {
+					sunLight.colorNode = animatedColor;
+				}
+				
 			} 
 
 			skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node

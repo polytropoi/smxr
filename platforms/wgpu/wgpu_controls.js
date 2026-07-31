@@ -24,7 +24,7 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
-import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, ShowGroupAudio, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup, HideHTMLPopup, startPop } from './wgpu_ui.js';
+import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, ShowGroupAudio, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup, HideHTMLPopup, startPop, ReturnAudioInstance } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -782,10 +782,65 @@ async function RaycastHit(type, hit) {
         // console.log("hit with locationTags " + lastRaycastHitObject.userData.locationData.locationTags);
         triggerAudioController.playTriggerAudioWithTags(lastRaycastHitObject.userData.locationData.locationTags, hit.distance, hit.point);
     }
-    if (hit.instanceId) {
+
+    let locationGroup;
+    
+    if (hit.instanceId) { //if it's an element of an instancedMesh
             
         tagData = await TagsToInstances(locationData.timestamp, hit.instanceId);
         console.log("INSTANCE HIT " + hit.instanceId + " tagged " + JSON.stringify(tagData));
+
+        if (!tagData) {
+            let groupData;
+            if (lastRaycastHitObject.userData.locationData.groupID && settings.sceneGroups) {
+                console.log(lastRaycastHitObject.userData.locationData.name + " gotsa groupID " + lastRaycastHitObject.userData.locationData.groupID);
+               
+                for (let i = 0; i < settings.sceneGroups.length; i++) {
+                    if (settings.sceneGroups[i]._id == lastRaycastHitObject.userData.locationData.groupID) {
+                        console.log("gotsa location groupID of type " +settings.sceneGroups[i].type);
+                        locationGroup = settings.sceneGroups[i];
+                    }
+                }
+                if (locationGroup) {
+                    if (locationGroup.type == "picture") {
+                        // ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );         
+                        console.log("gotsa picture for instanceID" + hit.instanceId);
+
+                    }
+                    if (locationGroup.type == "audio") {
+                        // ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );          
+                         
+                         const audioData = ReturnAudioInstance(locationGroup, hit.instanceId);
+                         console.log("gotsa audio for instanceID" + hit.instanceId + " " + audioData.title  );    
+                         if (audioData) {
+                            tagData = audioData.title;
+                         }           
+                    }
+                }
+            }
+            let textData;
+            if (lastRaycastHitObject.userData.locationData.mediaID) {
+                textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                console.log("text item " + JSON.stringify(textData));
+            }
+        
+            if (textData != null && textData != undefined && textData != "" && textData != "none") {
+                if (Array.isArray(textData)) { //not kv pairs as nested objects, but an array of values
+                    
+                    // htmlString = "<h4>" + textData[0] +": "+ textData[2] +"</h4>" + textData[3] + "<br><br>" + textData[4] + "<br><br>" + textData[5];  
+                    // ShowHTMLPopup(event, htmlString);
+                    
+                } else {
+
+                    // htmlString = "<h2>" + lastRaycastHitObject.userData.locationData.name +" :</h2>"  + "<h4>'" + textData.text + "'</h4>";
+                    // ShowHTMLPopup(event, htmlString);
+                    
+                }
+            
+            } 
+        }
+
+
     }
 
     const objectData = lastRaycastHitObject.userData.objectData;
@@ -838,26 +893,30 @@ async function RaycastHit(type, hit) {
                 if (name && name != "") {
                     if (tagData) { //e.g. on instanceMesh
                         // console.log(Object.keys(tagData).toString());
-                        ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-                        const pics = ReturnTaggedPictures(Object.keys(tagData).toString()); 
-                            if (pics) {
-                            console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
-                            const rIndex = Math.floor(Math.random() * pics.length);
-                            // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
-                            const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
-                            lastRaycastHitObject.tagData = tagData;
-                            lastRaycastHitObject.header = header;
-                            const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
-                            "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
-                            hic_content.classList.remove("hic_content");
-                            hic_content.classList.add("hic_content_2");
+                        if (locationGroup.type == "audio") {
+                            ThreeDeeText(tagData,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                        } else if (locationGroup.type == "picture") {
+                            ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                            const pics = ReturnTaggedPictures(Object.keys(tagData).toString()); 
+                                if (pics) {
+                                console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
+                                const rIndex = Math.floor(Math.random() * pics.length);
+                                // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
+                                const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
+                                lastRaycastHitObject.tagData = tagData;
+                                lastRaycastHitObject.header = header;
+                                const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
+                                "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
+                                hic_content.classList.remove("hic_content");
+                                hic_content.classList.add("hic_content_2");
 
-                            ShowHTMLPopup(null, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
+                                ShowHTMLPopup(null, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
+                            }
+                        } else {
+                            ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                         }
-                    } else {
-                        ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                        
                     }
-                    
                 }
               
             }
@@ -1290,10 +1349,7 @@ export function onMouseDown(event) { // on threejs object
                             
                         }
                     
-                    } else {
-                        // ShowPopup(event);
-                        // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
-                    }
+                    } 
                 }
             } else if (lastRaycastHitObject.userData.locationData) {
                 if (lastRaycastHitObject.userData.locationData.markerType == "gate") {

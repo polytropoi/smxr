@@ -21,9 +21,12 @@ export let triggerAudioGroups;
 export let sceneTextController;
 export let audioGroupsData;
 export let pictureGroupsData;
+export let scenePicturesData;
 export let landscapePanel;
 
 export let equirectPictures = [];
+export let tileablePictures = [];
+
 createYouTubePlayer();
 eventEl.addEventListener('sequence-event', SequenceEvent); 
 
@@ -44,12 +47,12 @@ export function SequenceEvent (event) {
 }
 
 export function InitPictureGroups () {
-    let pictureGroupsDataEl = document.getElementById('pictureGroupsData');
+    const pictureGroupsDataEl = document.getElementById('pictureGroupsData');
    if (pictureGroupsDataEl) {
-      let thePictureGroupsData = pictureGroupsDataEl.getAttribute('data-picture-groups');
+      const thePictureGroupsData = pictureGroupsDataEl.getAttribute('data-picture-groups');
       pictureGroupsData = JSON.parse(atob(thePictureGroupsData));
    }
-   console.log("pictureGroupsData " + pictureGroupsData.length);
+//    console.log("pictureGroupsData length " + pictureGroupsData.length + " " + JSON.stringify(pictureGroupsData));
 
 
     for (let i = 0; i < pictureGroupsData.length; i++) {
@@ -58,10 +61,26 @@ export function InitPictureGroups () {
             if (pictureGroupsData[i].images[p].orientation == "Equirectangular") {
                  console.log("adding equirect: " +JSON.stringify(pictureGroupsData[i].images[p]));
                 equirectPictures.push(pictureGroupsData[i].images[p]);
+            } else if (pictureGroupsData[i].images[p].orientation == "Tileable") {
+                 console.log("adding equirect: " +JSON.stringify(pictureGroupsData[i].images[p]));
+                tileablePictures.push(pictureGroupsData[i].images[p]);
             }
+            
         }
     }
-
+    // const scenePicturesDataEl = document.getElementById('scenePicturesData');
+    // if (scenePicturesDataEl) {
+    // let theScenePicturesData = scenePicturesDataEl.getAttribute('data-scene-pictures');
+    //   scenePicturesData = JSON.parse(atob(theScenePicturesData));
+    //   console.log("scenePicturesData length " + scenePicturesData.length + " " + JSON.stringify(scenePicturesData));
+    //   for (let s = 0; s < scenePicturesData.length; s++) {
+    //     // if 
+    //         if (scenePicturesData[s].orientation == "Tileable") {
+    //              console.log("adding equirect: " +JSON.stringify(scenePicturesData[s]));
+    //             tileablePictures.push(scenePicturesData[s]);
+    //         }
+    //     }
+    // }
    
 }
 

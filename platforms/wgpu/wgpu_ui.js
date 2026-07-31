@@ -562,6 +562,25 @@ export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, 
 }
 
 
+export function ReturnAudioInstance (locationGroup, instanceId) {
+    let sceneAudioInstance;
+
+    if (instanceId) {
+        console.log("looking for audioItem from locationGroup "+ JSON.stringify(locationGroup));
+        if (instanceId < locationGroup.items.length) {
+            const audioID = locationGroup.items[instanceId];
+            console.log("audioID is " + audioID);
+            
+            for (let i = 0; i < audioGroupsData.audioItems.length; i++) {
+                if (audioGroupsData.audioItems[i]._id == audioID) {
+                    console.log(JSON.stringify(audioGroupsData.audioItems[i]));
+                    return audioGroupsData.audioItems[i];
+                    
+                }
+            }
+        } 
+    }
+}
 
 export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, position, visible, lookAtCamera) {
 
