@@ -77,9 +77,9 @@ export function InitCustomFog() { //hrm...
 	let skyColor = color(settings.sceneColor1);
 	let groundColor = color(settings.sceneColor2);
 	if (settings && settings.sceneTweakColors) {
-		let skyColor = color(animatedColor);
+		skyColor = color(animatedColor);
 		// let groundColor = color(settings.sceneColor2);	
-		let groundColor = color(animatedColor2);
+		groundColor = color(animatedColor2);
 	} 
 	const fogNoiseDistance = positionView.z.negate().smoothstep(0, camera.far - 300);
 
@@ -88,7 +88,7 @@ export function InitCustomFog() { //hrm...
 	const groundFogArea = float(distance).sub(positionWorld.y).div(distance).pow(3).saturate().mul(alpha);
 
 	// a alternative way to create a TimerNode
-	const timer = uniform(0).onFrameUpdate((frame) => frame.time);
+	const timer = uniform(0).onFrameUpdate((frame) => frame.time); //nice
 
 	const fogNoiseA = triNoise3D(positionWorld.mul(.005), 0.2, timer);
 	const fogNoiseB = triNoise3D(positionWorld.mul(.01), 0.2, timer.mul(1.2));
@@ -220,28 +220,14 @@ export const wavyDistortion = Fn( ( { imageTex, frequency, amplitude } ) => {
 
 export async function UpdateEnvMap() {
 
-	// let skyboxColorNode;
-	// const speed = time.mul(2.0);
-	// const r = sin(speed);
-	// const g = sin(speed.add(2.0));
-	// const b = sin(speed.add(4.0));
-	// // const rn = Math.random();
-	// // const gn = Math.random();
-	// // const bn = Math.random();
-	// const animatedColor = vec3(
-	// 	r,
-	// 	g,
-	// 	b
-	// );
+	
 	if (equirectPictures.length) {
 		if (sequenceInt >= equirectPictures.length) {
-			SetSequenceInt(0);
+			SetSequenceInt(0); //kept in events.js
 		}
 
 		console.log("skybox # " + sequenceInt + " " + JSON.stringify(equirectPictures[sequenceInt]));
 		let skyboxURL = equirectPictures[sequenceInt].url;
-
-
 
 		if (settings && settings.sceneUseSkybox && skyboxURL && skyboxMaterial) {
 			// const animatedColor = vec3(
@@ -260,15 +246,15 @@ export async function UpdateEnvMap() {
 			if (settings.sceneTweakColors) {
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
 				skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
-				skyboxMaterial.envNode = skyboxColorNode;
+				// skyboxMaterial.envNode = skyboxColorNode; //to the skybox itself..?
 
-				scene.environmentNode = skyboxColorNode;
+				scene.environmentNode = skyboxColorNode; //to everything
 				// scene.environment = textureEquirect;
 			} else {
 				// const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
 				skyboxColorNode = tslTexture.mul(1);
 				skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
-				skyboxMaterial.envNode = skyboxColorNode;
+				// skyboxMaterial.envNode = skyboxColorNode;
 
 				scene.environmentNode = skyboxColorNode;
 				// scene.environment = textureEquirect;
