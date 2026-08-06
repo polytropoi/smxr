@@ -811,7 +811,7 @@ async function RaycastHit(type, hit, event) {
                 ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             } else {
-                console.log("locationname " + locationData.name);
+                console.log("locationname " + name);
                 
                 if (name && name.includes("~")) {
                     name = name.split("~")[0];
@@ -1281,22 +1281,6 @@ export function onMouseDown(event) { //clicked on threejs object
                 }
                 
                 
-                // if (textData != null && textData != undefined && textData != "" && textData != "none") {
-                //     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
-                //     ShowPopup(event);
-                // } else if (lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.objectData.labeltext && lastRaycastHitObject.userData.objectData.labeltext.length) {
-                //     if (lastRaycastHitObject.userData.objectData.labeltext.includes("~")) {
-                //         const labelSplit = lastRaycastHitObject.userData.objectData.labeltext.split("~");
-                //         const randomIndex = Math.floor(Math.random() * labelSplit.length);
-                //         popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + labelSplit[randomIndex];
-                //          ShowPopup(event);
-                //     } else {
-                //         if (lastRaycastHitObject.userData.objectData) {
-                //             popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + " : </h1>"  + lastRaycastHitObject.userData.objectData.description;
-                //             ShowPopup(event);
-                //         }
-                //     }
-                // }
                 //like above, need to sniff the parent
                 let sceneObjectInstance;
                 if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
@@ -1399,37 +1383,7 @@ export function onMouseDown(event) { //clicked on threejs object
                         if (locationGroup.type == "picture") {
 
                             ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );
-                            // const pictureItem = ReturnPictureFromGroup(locationGroup._id);
-                            // console.log("pictureITem " + JSON.stringify(pictureItem));
-                            // if (pictureItem) {
-                            //     if (pictureItem.orientation == "Landscape") {
-                            //         let landscapePicPanel = scene.getObjectByName('landscapePanel');
-                            //         // const hitpos = lastRaycastHit.point;
-                            //         //                                      hitpos.getWorldPosition(worldHitPosition);
-                            //         if (!landscapePicPanel) {
-                            //             console.log("t4eryna make a landscape panel " + pointerGizmo.position.x + pointerGizmo.position.y + pointerGizmo.position.z);
-                            //             // const planeGeometry = new THREE.PlaneGeometry(10, 6, 4, 4);
-                            //             const planeGeometry = new THREE.BoxGeometry(1, 1, 1); 
-                            //             const planeMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
-                            //             landscapePicPanel = new THREE.Mesh(planeGeometry, planeMaterial);
-                            //             landscapePicPanel.name = "landscapePanel";
-                            //             scene.attach(landscapePicPanel);
-                            //              landscapePicPanel.position.set(pointerGizmo.position.x, pointerGizmo.position.y,pointerGizmo.position.z );
-                            //             landscapePicPanel.lookAt(player);
-                            //             landscapePicPanel.visible = true;
-                            //             landscapePicPanel.updateMatrixWorld();
-
-                            //         } else {
-                            //             console.log("t4eryna position a landscape panel " + pointerGizmo.position.x + pointerGizmo.position.y + pointerGizmo.position.z);
-                            //             landscapePicPanel.position.set(pointerGizmo.position.x, pointerGizmo.position.y,pointerGizmo.position.z );
-                            //             landscapePicPanel.lookAt(player);
-                            //             landscapePicPanel.visible = true;
-                            //             landscapePicPanel.updateMatrixWorld();
-
-                            //         }
-                                   
-                            //     }
-                            // }
+                            
                         }
                     }
                 }
@@ -1455,19 +1409,7 @@ export function onMouseDown(event) { //clicked on threejs object
                     // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
                 }
             } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
-                // console.log(event.clientX + " " + window.innerWidth);
-                // let xpos = event.clientX - 150;
-                // if ((window.innerWidth - event.clientX) < 150) {
-                //     xpos = event.clientX - 300;
-                // } else if (event.clientX < 150) {
-                //     xpos = 0;
-                // }
-                // let ypos = event.clientY - 100;
-                // Object.assign(popup.style, {
-                //     left: `${xpos}px`,
-                //     top: `${ypos}px`,
-                //     display: 'block',
-                // });
+                
                 ShowPopup(event);
                 popup.innerHTML = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
                 "<br><br><div><button id=\x22hicCancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+

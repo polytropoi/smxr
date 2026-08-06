@@ -407,7 +407,7 @@ export async function InitEnvMap() {
 
 
 			scene.environmentNode = skyboxColorNode;
-			// scene.environment = textureEquirect;
+			// scene.environment = skyboxColorNode;
 
 			skySphere = new THREE.Mesh(geometry, skyboxMaterial);
 			scene.add(skySphere);

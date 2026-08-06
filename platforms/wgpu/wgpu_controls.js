@@ -787,10 +787,12 @@ async function RaycastHit(type, hit) {
     
     if (hit.instanceId) { //if it's an element of an instancedMesh
             
+                console.log("INSTANCE HIT " + hit.instanceId );
         tagData = await TagsToInstances(locationData.timestamp, hit.instanceId);
-        console.log("INSTANCE HIT " + hit.instanceId + " tagged " + JSON.stringify(tagData));
+
 
         if (!tagData) {
+            console.log("no tagData on instance " + hit.instanceId);
             let groupData;
             if (lastRaycastHitObject.userData.locationData.groupID && settings.sceneGroups) {
                 console.log(lastRaycastHitObject.userData.locationData.name + " gotsa groupID " + lastRaycastHitObject.userData.locationData.groupID);
@@ -838,6 +840,8 @@ async function RaycastHit(type, hit) {
                 }
             
             } 
+        } else {
+            console.log("tagData is "+ JSON.stringify(tagData));
         }
 
 
@@ -886,38 +890,76 @@ async function RaycastHit(type, hit) {
                 ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             } else {
-                // console.log("mediaID " + locationData.mediaID);
+
+                console.log("locationname " + name);
+                
                 if (name && name.includes("~")) {
                     name = name.split("~")[0];
                 }
                 if (name && name != "") {
                     if (tagData) { //e.g. on instanceMesh
                         // console.log(Object.keys(tagData).toString());
-                        if (locationGroup.type == "audio") {
-                            ThreeDeeText(tagData,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-                        } else if (locationGroup.type == "picture") {
-                            ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-                            const pics = ReturnTaggedPictures(Object.keys(tagData).toString()); 
-                                if (pics) {
-                                console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
-                                const rIndex = Math.floor(Math.random() * pics.length);
-                                // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
-                                const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
-                                lastRaycastHitObject.tagData = tagData;
-                                lastRaycastHitObject.header = header;
-                                const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
-                                "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
-                                hic_content.classList.remove("hic_content");
-                                hic_content.classList.add("hic_content_2");
-
-                                ShowHTMLPopup(null, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
-                            }
-                        } else {
-                            ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-                        }
                         
+                        const pics = ReturnTaggedPictures(Object.keys(tagData).toString());
+                        if (!pics.length) {
+                            
+                            ThreeDeeText(tagData,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                        } else {
+                            ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                        // }
+                        
+                        // if (pics) {
+                            console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
+                            const rIndex = Math.floor(Math.random() * pics.length);
+                            // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
+                            const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
+                            lastRaycastHitObject.tagData = tagData;
+                            lastRaycastHitObject.header = header;
+                                           
+                            const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
+                            "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
+                            hic_content.classList.remove("hic_content");
+                            hic_content.classList.add("hic_content_2");
+
+                            ShowHTMLPopup(null, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
+                        }
+                    } else {
+                        ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                     }
                 }
+                // // console.log("mediaID " + locationData.mediaID);
+                // if (name && name.includes("~")) {
+                //     name = name.split("~")[0];
+                // }
+                // if (name && name != "") {
+                //     if (tagData) { //e.g. on instanceMesh
+                //         // console.log(Object.keys(tagData).toString());
+                //         if (locationGroup.type == "audio") {
+                //             ThreeDeeText(tagData,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                //         } else 
+                //             if (locationGroup.type == "picture") {
+                //             ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                //             const pics = ReturnTaggedPictures(Object.keys(tagData).toString()); 
+                //                 if (pics) {
+                //                 console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
+                //                 const rIndex = Math.floor(Math.random() * pics.length);
+                //                 // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
+                //                 const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
+                //                 lastRaycastHitObject.tagData = tagData;
+                //                 lastRaycastHitObject.header = header;
+                //                 const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
+                //                 "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
+                //                 hic_content.classList.remove("hic_content");
+                //                 hic_content.classList.add("hic_content_2");
+
+                //                 ShowHTMLPopup(null, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
+                //             }
+                //         } else {
+                //             ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                //         }
+                        
+                //     }
+                // }
               
             }
         
