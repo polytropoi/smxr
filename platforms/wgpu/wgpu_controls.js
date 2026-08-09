@@ -816,6 +816,11 @@ async function RaycastHit(type, hit) {
                          console.log("gotsa audio for instanceID" + hit.instanceId + " " + audioData.title  );    
                          if (audioData) {
                             tagData = audioData.title;
+                            if (lastRaycastHitObject.userData.locationData.locationTags && lastRaycastHitObject.userData.locationData.locationTags.includes("select")) {
+
+                                ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, lastRaycastHitDistance, true, true );                          
+                                
+                            }
                          }           
                     }
                 }
@@ -1187,7 +1192,7 @@ export function onMouseDown(event) { // on threejs object
 
     console.log("mouse down on " + event.target.id);
     if (lastRaycastHitObject && lastRaycastHitObject.userData) {
-    console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID + " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+    console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
     } else {
         console.log(event.clientY + " " + (window.innerHeight * .8));
         if (event.clientY > (window.innerHeight * .8)) {

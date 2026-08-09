@@ -582,7 +582,7 @@ export function ReturnAudioInstance (locationGroup, instanceId) {
     }
 }
 
-export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, position, visible, lookAtCamera) {
+export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, position, distance, visible, lookAtCamera) {
 
     let sceneAudioInstance;
 
@@ -590,15 +590,18 @@ export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, posi
         console.log("looking for audioItem from locationGroup "+ JSON.stringify(locationGroup));
         if (instanceId < locationGroup.items.length) {
             const audioID = locationGroup.items[instanceId];
-            console.log("audioID is " + audioID);
+            console.log("audioID is " + audioID + " distance " + distance);
             let audioItem;
+            // distance = distance * 4;
             for (let i = 0; i < audioGroupsData.audioItems.length; i++) {
                 if (audioGroupsData.audioItems[i]._id == audioID) {
                     audioItem = audioGroupsData.audioItems[i];
+                    const ymod = distance / 10;
                     console.log("gotsa audio item " + JSON.stringify(audioItem));
-                    const audioEl = "<audio controls autoplay><source src=\x22"+audioItem.URLmp3+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
+                    //custom-native-player
+                    const audioEl = "<audio controls class=\x22\x22><source src=\x22"+audioItem.URLmp3+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
                     const htmlString = "<h1>" + audioItem.title + " </h1>"  + audioEl;
-                    ShowHTMLPopup(event, htmlString, position, null, null, 0);
+                    ShowHTMLPopup(event, htmlString, position, distance, null, ymod);
                 }
             }
             

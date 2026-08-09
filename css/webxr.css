@@ -2059,3 +2059,15 @@ justify-content: center; /* Centers horizontally */
     justify-content: center; /* Centers horizontally */
   align-items: center; 
   }
+
+  .custom-native-player {
+  width: 100%;
+  height: 300px;
+  border-radius: 30px;
+  background-color: #1a1a1a;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  outline: none;
+  
+  /* Filter trick to invert/adjust default colors on modern browsers */
+  filter: sepia(10%) saturate(80%) hue-rotate(180deg) invert(90%);
+}
