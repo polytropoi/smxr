@@ -44,12 +44,21 @@ export let isPlaying = false;
 
 export let currentAudioFileName = "";
 
+// export let audioElements = {}; //trad <audio> els, not howls or tones, as key/value (id/e)
+
+
 let modalTimeStatsEl = null; //stats for timekeys modal
 let transportTimeStatsEl = null;
 
 let youtubeState = "";
 let youtubeTitleEl = "";
 let youtubeData;
+
+
+
+export function AudioIsPlaying(audioElement) { //traditional audio elements, not howls or tones
+    return !audioElement.paused && !audioElement.ended && audioElement.currentTime > 0;
+}
 
 
 // window.youtubeIsPlaying = youtubeIsPlaying;
@@ -538,7 +547,7 @@ export function UpdateTriggerAudioVolume(newVolume) {
       if (triggerAudioController != null) {
          triggerAudioController.modVolume(newVolume);
       }
-   }
+    }
 }
 export function UpdateMediaAudioVolume(newVolume) {
   //  var triggerAudioEl = document.getElementById("triggerAudio");

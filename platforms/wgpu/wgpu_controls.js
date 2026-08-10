@@ -803,7 +803,7 @@ async function RaycastHit(type, hit) {
                         locationGroup = settings.sceneGroups[i];
                     }
                 }
-                if (locationGroup) {
+                if (locationGroup) { //not a group of locations, but a group assigned to a location 
                     if (locationGroup.type == "picture") {
                         // ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );         
                         console.log("gotsa picture for instanceID" + hit.instanceId);
@@ -813,12 +813,13 @@ async function RaycastHit(type, hit) {
                         // ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );          
                          
                          const audioData = ReturnAudioInstance(locationGroup, hit.instanceId);
-                         console.log("gotsa audio for instanceID" + hit.instanceId + " " + audioData.title  );    
+                            console.log("tryna get audio for instanceID" + hit.instanceId);    
                          if (audioData) {
+                            console.log("gots audio for instanceID" + hit.instanceId + " " + audioData.title  );   
                             tagData = audioData.title;
                             if (lastRaycastHitObject.userData.locationData.locationTags && lastRaycastHitObject.userData.locationData.locationTags.includes("select")) {
-
-                                ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, lastRaycastHitDistance, true, true );                          
+                                
+                                ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, lastRaycastHitDistance, lastRaycastHitObject.userData.locationData, "select");                          
                                 
                             }
                          }           
@@ -979,7 +980,7 @@ async function RaycastHit(type, hit) {
             } else {
                 pointerGizmo.visible = false;
             }
-            if (locationData.locationTags && locationData.locationTags.includes("select")) {
+            if (locationData.locationTags && locationData.locationTags.includes("select") && !hit.instanceId) {
                 selectedObjects.length = 0;
                 selectedObjects.push(hit.object);
                 hit.object.traverse((child) => {
@@ -1221,36 +1222,36 @@ export function onMouseDown(event) { // on threejs object
         return;
     } 
     if (event.target.id == "popup_yesButton") {
-      ActionSwitch(event);
-      popup.style.display = "none";
-    startPop.style.display = "none";
-      if (hicMesh) {
-        hicMesh.visible = false;
-      }
-      return;
-    } if (event.target.id == "popup_yesButton1") {
-      ActionSwitch(event);
-      popup.style.display = "none";
-              startPop.style.display = "none";
-     if (hicMesh) {
-        hicMesh.visible = false;
-      }
-      return;
-    } if (event.target.id == "popup_yesButton2") {
-      ActionSwitch(event);
-      popup.style.display = "none";
-              startPop.style.display = "none";
-      if (hicMesh) {
-        hicMesh.visible = false;
-      }
-      return;
-    } else if (event.target.id == "popup_cancelButton") {
-      popup.style.display = "none";
+        ActionSwitch(event);
+        popup.style.display = "none";
         startPop.style.display = "none";
-      if (hicMesh) {
-        hicMesh.visible = false;
-      }
-      return;
+        if (hicMesh) {
+            hicMesh.visible = false;
+        }
+        return;
+    } if (event.target.id == "popup_yesButton1") {
+        ActionSwitch(event);
+        popup.style.display = "none";
+                startPop.style.display = "none";
+        if (hicMesh) {
+            hicMesh.visible = false;
+        }
+        return;
+    } if (event.target.id == "popup_yesButton2") {
+        ActionSwitch(event);
+        popup.style.display = "none";
+                startPop.style.display = "none";
+        if (hicMesh) {
+            hicMesh.visible = false;
+        }
+        return;
+    } else if (event.target.id == "popup_cancelButton") {
+        popup.style.display = "none";
+            startPop.style.display = "none";
+        if (hicMesh) {
+            hicMesh.visible = false;
+        }
+        return;
     }
  
     mouseIsDown = true;
@@ -1371,7 +1372,7 @@ export function onMouseDown(event) { // on threejs object
                                 ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
                             }
                             if (locationGroup.type == "audio") {
-                                ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
+                                ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, lastRaycastHit.distance, lastRaycastHitObject.userData.locationData, "click");                          
                             }
                         }
                     }

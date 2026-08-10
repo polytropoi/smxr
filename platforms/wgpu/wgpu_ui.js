@@ -15,6 +15,9 @@ import { viewportPlaceholder, hic_content, onMouseDown } from './wgpu_controls.j
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
+
+import {AudioIsPlaying} from '../../../connect/media.js';
+
 // import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
 Text.init();
@@ -24,6 +27,8 @@ import {scene, renderer} from './wgpu_main.mjs';
 import {player, camera} from './wgpu_controls.js';
 import { activeObjex } from './wgpu_locations.js';
 
+import { instance } from 'three/tsl';
+
 export let lookAtCameraObjects = [];
 
 export let textContainers = [];
@@ -31,6 +36,7 @@ export let textContainers = [];
 export let interactionManagers = [];
 
 export let scenePictures = {};
+
 
 export let uiMode = "popup"; //set to "hic" if settings prescribe
 
@@ -576,41 +582,123 @@ export function ReturnAudioInstance (locationGroup, instanceId) {
                     console.log(JSON.stringify(audioGroupsData.audioItems[i]));
                     return audioGroupsData.audioItems[i];
                     
+                } else {
+
                 }
             }
-        } 
+        } else {
+            return "?";
+            // const randomIndex = Math.floor(Math.random() * locationGroup.items.length);
+            //  const audioID = locationGroup.items[randomIndex];
+            //  console.log("audioID is " + audioID);
+            //     for (let i = 0; i < audioGroupsData.audioItems.length; i++) {
+            //         if (audioGroupsData.audioItems[i]._id == audioID) {
+            //             console.log(JSON.stringify(audioGroupsData.audioItems[i]));
+            //             return audioGroupsData.audioItems[i];
+            //         }
+            //     }
+        }
+    } else {
+        return null;
     }
 }
 
-export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, position, distance, visible, lookAtCamera) {
+
+
+export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, position, distance, locationData, eventType) {
 
     let sceneAudioInstance;
 
+
+    console.log(instanceId + "instanceID - ShowAudioGroup eventType" + eventType);
+
+    const instanceElID = "i_" + instanceId;
+    // const instanceAudioEl = document.getElementById(instanceElID);
+
+    // if (!instanceAudioEl) {
     if (instanceId) {
         console.log("looking for audioItem from locationGroup "+ JSON.stringify(locationGroup));
+        let audioID;
         if (instanceId < locationGroup.items.length) {
-            const audioID = locationGroup.items[instanceId];
+            audioID = locationGroup.items[instanceId];
+        } else {
+            const randomIndex = Math.floor(Math.random() * locationGroup.items.length);
+            audioID = locationGroup.items[randomIndex];
+        }
             console.log("audioID is " + audioID + " distance " + distance);
             let audioItem;
             // distance = distance * 4;
+            let ymod = 1;
+            if (distance) {
+                ymod = distance / 10;
+            }
+            
+
             for (let i = 0; i < audioGroupsData.audioItems.length; i++) {
                 if (audioGroupsData.audioItems[i]._id == audioID) {
                     audioItem = audioGroupsData.audioItems[i];
-                    const ymod = distance / 10;
+                    let autoplay = "";
+                
+                    if (eventType == "click") {
+                        // console.log(JSON.stringify(locationData) + " EVENT TYPE IS " + eventString);    
+                        autoplay = "autoplay"
+                    }
+                    
                     console.log("gotsa audio item " + JSON.stringify(audioItem));
                     //custom-native-player
-                    const audioEl = "<audio controls class=\x22\x22><source src=\x22"+audioItem.URLmp3+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+"\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
+                    const audioEl = "<audio controls "+autoplay+" class=\x22\x22 id=\x22"+instanceElID+"\x22><source src=\x22"+audioItem.URLmp3+
+                    "\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+
+                    "\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
+                      
                     const htmlString = "<h1>" + audioItem.title + " </h1>"  + audioEl;
-                    ShowHTMLPopup(event, htmlString, position, distance, null, ymod);
+
+                    ShowHTMLPopup(event, htmlString, position, distance, null, ymod); //either popup or HIC
                 }
             }
             
             // console.log("looking for audioItem from locationGroup "+ JSON.stringify(audioGroupsData));
             
 
-        } else {
+        // } 
+        // else {
+        //     const randomIndex = Math.floor(Math.random() * locationGroup.items.length);
+        //      const audioID = locationGroup.items[randomIndex];
+        //                  let ymod = 1;
+        //     if (distance) {
+        //         ymod = distance / 10;
+        //     }
             
-        }
+
+        //     for (let i = 0; i < audioGroupsData.audioItems.length; i++) {
+        //         if (audioGroupsData.audioItems[i]._id == audioID) {
+        //             audioItem = audioGroupsData.audioItems[i];
+        //             let autoplay = "";
+                
+        //             if (eventType == "click") {
+        //                 // console.log(JSON.stringify(locationData) + " EVENT TYPE IS " + eventString);    
+        //                 autoplay = "autoplay"
+        //             }
+                    
+        //             console.log("gotsa audio item " + JSON.stringify(audioItem));
+        //             //custom-native-player
+        //             const audioEl = "<audio controls "+autoplay+" class=\x22\x22 id=\x22"+instanceElID+"\x22><source src=\x22"+audioItem.URLmp3+
+        //             "\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+
+        //             "\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
+                      
+        //             const htmlString = "<h1>" + audioItem.title + " </h1>"  + audioEl;
+
+        //             ShowHTMLPopup(event, htmlString, position, distance, null, ymod); //either popup or HIC
+        //         }
+        //     }
+        // }
+    } else {
+        // const ymod = distance / 10;
+        // ShowHTMLPopup(event, null, position, distance, null, ymod, instanceAudioEl); 
+        // if (AudioIsPlaying(instanceAudioEl)) {
+        //     instanceAudioEl.pause();
+        // } else {
+        //     instanceAudioEl.play();
+        // }
     }
 }
 
@@ -709,6 +797,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
         }
         console.log("ui " + scaleFactor + " " + distance + " " + style);
         scaleFactor = clamp(scaleFactor, .25, 33);
+
 
         if (!hicMesh) {
 
