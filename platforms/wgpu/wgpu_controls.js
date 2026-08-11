@@ -805,7 +805,7 @@ async function RaycastHit(type, hit) {
                 }
                 if (locationGroup) { //not a group of locations, but a group assigned to a location 
                     if (locationGroup.type == "picture") {
-                        // ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );         
+                        ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );         
                         console.log("gotsa picture for instanceID" + hit.instanceId);
 
                     }
@@ -813,12 +813,12 @@ async function RaycastHit(type, hit) {
                         // ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );          
                          
                          const audioData = ReturnAudioInstance(locationGroup, hit.instanceId);
-                            console.log("tryna get audio for instanceID" + hit.instanceId);    
+                        console.log("tryna get audio for instanceID" + hit.instanceId);    
                          if (audioData) {
                             console.log("gots audio for instanceID" + hit.instanceId + " " + audioData.title  );   
                             tagData = audioData.title;
                             if (lastRaycastHitObject.userData.locationData.locationTags && lastRaycastHitObject.userData.locationData.locationTags.includes("select")) {
-                                
+
                                 ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, lastRaycastHitDistance, lastRaycastHitObject.userData.locationData, "select");                          
                                 
                             }

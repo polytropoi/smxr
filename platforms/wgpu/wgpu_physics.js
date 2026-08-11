@@ -38,7 +38,7 @@ export let colliders = {}
 
 
 export let agentCount = 10; //test wireframe capsules
-export let dynamicObjectCount = 0; //test dynamic rb spheres
+export let dynamicObjectCount = 10; //test dynamic rb spheres
 
 let playerWorldPosition = new THREE.Vector3();
 // export let playerRigidbody;        
@@ -539,12 +539,12 @@ async function getAtomicBody(atomCenter, particleType, particleSize) {
   function update() {
     // if (enabled) {
     if (rigidbody.isMoving) {
-    rigidbody.resetForces(true);
-    let { x, y, z } = rigidbody.translation(true);
-    mesh.position.set(x, y, z);
-    let pos = new THREE.Vector3(x, y, z);
-    distance = pos.clone().distanceTo(atomCenter.position.clone());
-    // if (distance > 1) {
+      rigidbody.resetForces(true);
+      let { x, y, z } = rigidbody.translation(true);
+      mesh.position.set(x, y, z);
+      let pos = new THREE.Vector3(x, y, z);
+      distance = pos.clone().distanceTo(atomCenter.position.clone());
+      // if (distance > 1) {
       let dir = pos.clone().sub(atomCenter.position.clone()).normalize();
 
       let q = rigidbody.rotation();

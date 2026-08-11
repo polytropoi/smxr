@@ -381,6 +381,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             child.userData.sceneObjectID = sceneObjectID;
                                child.castShadow = true;
                             child.receiveShadow = true;
+                            child.envMapIntensity = 2;
                             // child.bindMode = "detached";
                         }
                     });
@@ -461,6 +462,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             child.userData.sceneObjectID = sceneObjectID.toString();
                             child.castShadow = true;
                             child.receiveShadow = true;
+                            child.envMapIntensity = 2;
                             }
                         });
                         console.log("tryna place an object " + zm + " sceneObjectID " + sceneObjectID);
@@ -731,8 +733,8 @@ async function LoadLocationModel (url, locationData, isActive) {
                     if (child.material) {
                         // console.log("setting scene.environment envmap " + scene.environment );
                         // child.material.roughness = 0.5;
-                        child.material.envMap = scene.environment;
-                        child.envMapIntensity = 5;
+                        // child.material.envMap = scene.environment;
+                        child.envMapIntensity = 2;
                         child.castShadow = true;	
                         child.receiveShadow = true;
                     }

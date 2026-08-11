@@ -559,7 +559,10 @@ export class ScenePicture {
             // console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
             const landscapeGeometry = new THREE.PlaneGeometry(6, 4, 4, 4);
             // const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
-            const planeMaterial = new THREE.MeshBasicMaterial({ color: 'white', side: THREE.DoubleSide });
+            const planeMaterial = new THREE.MeshStandardMaterial({ color: 'white', side: THREE.FrontSide, metalness: 0, roughness: 1, transparent: true });
+            // planeMaterial.envMap = null;
+            
+            planeMaterial.envMapIntensity = 0;
             this.landscapePanel = new THREE.Mesh(landscapeGeometry, planeMaterial);
             this.landscapePanel.name = "landscapePanel";
             scene.add(this.landscapePanel);
@@ -577,7 +580,7 @@ export class ScenePicture {
             // const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
             // const planeMaterial = new THREE.MeshBasicMaterial({ color: 'white', side: THREE.DoubleSide });
             this.portraitPanel = new THREE.Mesh(portraitGeometry, planeMaterial);
-            this.portraitPanel.name = "landscapePanel";
+            this.portraitPanel.name = "portraitPanel";
             scene.add(this.portraitPanel);
             this.portraitPanel.position.set(position.x, position.y + 4,position.z );
             // landscapePanel.lookAt(player);
@@ -592,15 +595,23 @@ export class ScenePicture {
             // const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
             // const planeMaterial = new THREE.MeshBasicMaterial({ color: 'white', side: THREE.DoubleSide });
             this.squarePanel = new THREE.Mesh(squareGeometry, planeMaterial);
-            this.squarePanel.name = "landscapePanel";
+            this.squarePanel.name = "squarePanel";
             scene.add(this.squarePanel);
             this.squarePanel.position.set(position.x, position.y + 4,position.z );
+            this.squarePanel.visible = false;
+
+            const circleGeometry = new THREE.CircleGeometry(6,32);
+               this.circlePanel = new THREE.Mesh(squareGeometry, planeMaterial);
+            this.circlePanel.name = "circlePanel";
+            scene.add(this.circlePanel);
+            this.circlePanel.position.set(position.x, position.y + 4,position.z );
+            this.circlePanel.visible = false;
             // landscapePanel.lookAt(player);
             // this.portraitPanel.lookAt(camera);
             if (lookAtCamera) {
                 lookAtCameraObjects.push(this.squarePanel);
             }
-            this.squarePanel.visible = false;
+
 
             this.updatePicture();
 
@@ -628,6 +639,13 @@ export class ScenePicture {
                 this.squarePanel.position.set(position.x, position.y + 2, position.z );
                 
             }
+        } else {
+    
+            if (this.circlePanel) {
+                // console.log("showing a landscape panel " + position.x + position.y + position.z);
+                this.circlePanel.position.set(position.x, position.y + 2, position.z );
+                
+            }
         }
     }
 
@@ -644,7 +662,9 @@ export class ScenePicture {
             if (this.landscapePanel) {
                 this.landscapePanel.visible = true;
                 const map = new THREE.TextureLoader().load( this.pictureItem.url );
+                map.colorSpace = THREE.LinearSRGBColorSpace;
                 this.landscapePanel.material.map = map;
+
                 map.offset.set(0, .15);
                 map.repeat.set(1, .7);
                 this.landscapePanel.material.needsUpdate = true;
@@ -656,24 +676,40 @@ export class ScenePicture {
                 this.portraitPanel.visible = true;
                 const map = new THREE.TextureLoader().load( this.pictureItem.url );
                 this.portraitPanel.material.map = map;
+                map.colorSpace = THREE.LinearSRGBColorSpace;
                 map.offset.set(.15, 0);
                 map.repeat.set(.7, 1);
                 this.portraitPanel.material.needsUpdate = true;
                 
             }
-        } else if (this.pictureItem.orientation == "Square") {
-    
+        // } else if (this.pictureItem.orientation == "Square") {
+        } else {
             if (this.squarePanel) {
                 this.squarePanel.visible = true;
                 const map = new THREE.TextureLoader().load( this.pictureItem.url );
+                map.colorSpace = THREE.LinearSRGBColorSpace;
                 this.squarePanel.material.map = map;
-                // map.offset.set(.15, 0);
-                // map.repeat.set(.7, 1);
+
+                // map.offset.set(0, 0);
+                // map.repeat.set(0, 1);
                 this.squarePanel.material.needsUpdate = true;
                 
             }
         }
+        
+        // else {
+        //     if (this.circlePanel) {
+        //         this.circlePanel.visible = true;
+        //         const map = new THREE.TextureLoader().load( this.pictureItem.url );
+        //         this.circlePanel.material.map = map;
+        //         // map.offset.set(.15, 0);
+        //         // map.repeat.set(.7, 1);
+        //         this.circlePanel.material.needsUpdate = true;
+                
+        //     }
+        // }
     }
+
 
     hideAllPanels () {
         if (this.landscapePanel) {

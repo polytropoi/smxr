@@ -16,12 +16,12 @@ import { camera, controls } from './wgpu_controls.js';
 
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
-
+// import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 import {
 	color, screenUV, sin, time, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep,
 	vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, mul, cameraPosition, saturate, oneMinus, 
-	Fn, texture, equirectUV, positionLocal, rangeFogFactor
+	Fn, texture, equirectUV, positionLocal, rangeFogFactor, pmremTexture
 } from 'three/tsl';
 
 // import { texture, positionLocal, NodeMaterial } from 'three/nodes';
@@ -36,12 +36,15 @@ import { SetSequenceInt } from '../../connect/events.js';
 let skySphere;
 let skyboxMaterial;
 let textureEquirect;
+let textureEquirectPmrem;  //processed for lighting like hdr
 let tslTexture;
+let tslTextureEnv;
 const equirectTextureLoader = new THREE.TextureLoader();
 let regularColor = new THREE.Color();
 
 
 let skyboxColorNode;
+let skyboxEnvNode;
 
 // const speed = time.mul(2.0);
 
@@ -280,44 +283,60 @@ export async function UpdateEnvMap() {
 		let skyboxURL = equirectPictures[sequenceInt].url;
 
 		if (settings && settings.sceneUseSkybox && skyboxURL && skyboxMaterial) {
-			// const animatedColor = vec3(
-			// 	time.sin(),
-			// 	time.add(2.0).sin(),
-			// 	time.add(4.0).sin()
-			// );
 
+			// const pmremGenerator = new THREE.PMREMGenerator(renderer);
+		
 			textureEquirect = await equirectTextureLoader.loadAsync(skyboxURL);
 			textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
-			textureEquirect.colorSpace = THREE.SRGBColorSpace;
+			textureEquirect.colorSpace = THREE.LinearSRGBColorSpace;
+			// textureEquirectPmrem = pmremGenerator.fromEquirectangular(textureEquirect).texture;
+				
+
+
+			scene.environment = textureEquirect;
+			
 			// const textureEqMod = wavyDistortion(textureEquirect, 33, 33);
 			tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
-
+			// tslTextureEnv = texture(textureEquirectPmrem, equirectUV( positionLocal.normalize()));
 
 			if (settings.sceneTweakColors) {
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
+				// skyboxEnvNode =  pmremTexture(tslTextureEnv.mul(animatedColor.add(1).mul(0.5)));
+				// skyboxEnvNode =  tslTextureEnv.mul(animatedColor.add(1).mul(0.5));
 				skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
 				// skyboxMaterial.envNode = skyboxColorNode; //to the skybox itself..?
 
 				scene.environmentNode = skyboxColorNode; //to everything
+				scene.backgroundNode = skyboxColorNode;
+				scene.environment = textureEquirect;
+				scene.background = textureEquirect;
+				// skyboxMaterial.envNode = skyboxColorNode;
 				// scene.environment = textureEquirect;
 			} else {
 				// const skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
 				skyboxColorNode = tslTexture.mul(1);
+				// skyboxEnvNode = tslTextureEnv.mul(1);
+				// skyboxEnvNode = pmremTexture(tslTextureEnv);
 				skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
 				// skyboxMaterial.envNode = skyboxColorNode;
-
-				scene.environmentNode = skyboxColorNode;
-				// scene.environment = textureEquirect;
+				scene.environmentNode = skyboxColorNode; //to everything
+				scene.backgroundNode = skyboxColorNode;
+				scene.environment = textureEquirect;
+				scene.background = textureEquirect;
 			}
+			// textureEquirectPmrem.dispose();
+			// pmremGenerator.dispose();
 		}
 	}
 	if (settings && settings.sceneTweakColors) {
 
 		skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.75));
 		skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
-		skyboxMaterial.envNode = skyboxColorNode;
+		// skyboxMaterial.envNode = skyboxNode;
 
 		scene.environmentNode = skyboxColorNode;
+		scene.environment = textureEquirect;
+				// scene.environment = textureEquirectPmrem;
 		// UpdateSkyColors();
 		// if (sunLight) {
 
@@ -377,57 +396,30 @@ export async function InitEnvMap() {
 	if (skybox) {
 		console.log("gotsa skybox url " + settings.skyboxURL);
 		const envMapURL = settings.skyboxURL;
+
+
 		// const equirectTextureLoader = new THREE.TextureLoader();
 
+		// const pmremGenerator = new THREE.PMREMGenerator(renderer);
 		textureEquirect = await equirectTextureLoader.loadAsync(envMapURL);
-		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
-		textureEquirect.colorSpace = THREE.SRGBColorSpace;
 
+		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+		textureEquirect.colorSpace = THREE.LinearSRGBColorSpace;
 		scene.environment = textureEquirect;
+		// textureEquirectPmrem = pmremGenerator.fromEquirectangular(textureEquirect).texture;
+				
+ 		// pmremGenerator.compileEquirectangularShader();
+
+		// scene.environment = textureEquirectPmrem;
+		
+
 		// scene.background = textureEquirect;
 		let radius = 300;
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
 		// scene.environmentIntensity = 3;
-		// const animatedColor = vec3(
-		// 	time.sin(),
-		// 	time.add(2.0).sin(),
-		// 	time.add(4.0).sin()
-		// );
-		// const speed = time.mul(2.0);
-		// const r = sin(speed);
-		// const g = sin(speed.add(2.0));
-		// const b = sin(speed.add(4.0));
-		// // const rn = r.toVar();
-		// // const gn = g.toVar();
-		// // const bn = b.toVar();
-		// const animatedColor = vec3(
-		// 	r,
-		// 	g,
-		// 	b
-		// );
-		// const regularColor = new THREE.Color();
-		// regularColor.setRGB(r,g,b);
-		// if (sunLight) {
-		if (settings && settings.sceneTweakColors) {
-
-						
-
-			// const hue = (performance.now() * 0.1) % 1;
-
-			// 	regularColor.setHSL(hue, 1.0, 0.5);
-			// sunLight.color = regularColor;
-
-			// 	if (scene.fog) {
-			// 		scene.fog.color.set(regularColor);
-			// 	}
-			// }
-			// UpdateSkyColors();
-
-
-		}
-
+		
 		if (settings.sceneUseSkybox) {
 			// const tex = texture(textureEquirect)
 			const sphereRadius = radius;
@@ -437,36 +429,51 @@ export async function InitEnvMap() {
 			// tslTexture = texture(textureEquirect);
 
 			// const textureEqMod = wavyDistortion(textureEquirect, 33, 33);
-			let tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+			tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+			// tslTextureEnv = texture(textureEquirectPmrem, equirectUV( positionLocal.normalize()));
 
 			skyboxMaterial = new THREE.NodeMaterial();
 			skyboxMaterial.side = THREE.BackSide;
 
 			let skyboxColorNode = tslTexture.mul(1);
+			// let skyboxEnvNode = pmremTexture(tslTextureEnv);
 
 			if (settings && (settings.sceneTweakColors || settings.sceneRandomColors)) {
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
+				// skyboxEnvNode = tslTextureEnv.mul(animatedColor.add(1).mul(0.5)); 
 				if (sunLight) {
 					sunLight.colorNode = animatedColor;
 				}
 
 				
 				scene.environmentNode = skyboxColorNode;
+				scene.backgroundNode = skyboxColorNode;
+
 			} else {	
-				// scene.environmentNode = skyboxColorNode;
+				scene.environmentNode = skyboxColorNode;
+
+				scene.backgroundNode = skyboxColorNode;
+
 			}
 
+				scene.environment = textureEquirect;
+				scene.background = textureEquirect;
 			// Assign the sampled texture to the color node
 			// skyboxMaterial.envNode = skyboxColorNode;
 
 			skyboxMaterial.colorNode = skyboxColorNode; 
 			// 
-			scene.environment = textureEquirect;
+			// scene.environment = textureEquirectPmrem;
 
 			skySphere = new THREE.Mesh(geometry, skyboxMaterial);
 			scene.add(skySphere);
 
 			skySphere.position.set(0, settings.sceneGroundLevel * -1, 0);
+			skyboxMaterial.needsUpdate = true;
+
+			// textureEquirectPmrem.dispose();
+			// pmremGenerator.dispose();
+
 		}
 	}
 }

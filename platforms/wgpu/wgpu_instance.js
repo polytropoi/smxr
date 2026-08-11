@@ -168,6 +168,9 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
 
                 sampleGeos.push(sampleGeometry);
                 sampleMaterial = node.material;
+                sampleMaterial.envMap = scene.environment;
+                sampleMaterial.envMapIntensity = 2;
+                sampleMaterial.environmentNode = scene.environmentNode;
                 sampleMats.push(sampleMaterial);
                 
             }

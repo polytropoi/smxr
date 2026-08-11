@@ -613,10 +613,10 @@ export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, posi
     console.log(instanceId + "instanceID - ShowAudioGroup eventType" + eventType);
 
     const instanceElID = "i_" + instanceId;
-    // const instanceAudioEl = document.getElementById(instanceElID);
+    const instanceAudioEl = document.getElementById(instanceElID);
 
-    // if (!instanceAudioEl) {
-    if (instanceId) {
+    if (!instanceAudioEl) {
+    // if (instanceId) {
         console.log("looking for audioItem from locationGroup "+ JSON.stringify(locationGroup));
         let audioID;
         if (instanceId < locationGroup.items.length) {
@@ -694,11 +694,12 @@ export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, posi
     } else {
         // const ymod = distance / 10;
         // ShowHTMLPopup(event, null, position, distance, null, ymod, instanceAudioEl); 
-        // if (AudioIsPlaying(instanceAudioEl)) {
-        //     instanceAudioEl.pause();
-        // } else {
-        //     instanceAudioEl.play();
-        // }
+        console.log("found an instanceEl for "+ instanceElID);
+        if (AudioIsPlaying(instanceAudioEl)) {
+            instanceAudioEl.pause();
+        } else {
+            instanceAudioEl.play();
+        }
     }
 }
 
