@@ -21,7 +21,7 @@
 
 	import { lightMods, modLights, InitSceneLights } from './wgl_lights.js';
 
-	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, physicsInstancedMeshes, physicsInstancedBodies } from './wgl_instance.js';
+	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, physicsInstancedMeshes, physicsInstancedBodies, instancedShaderMaterials } from './wgl_instance.js';
 
 	import { InitLocations, navmesh, groundObjex, locations, animationMixers, staticObjex, activeObjex, dynamicObjex, locationData, movingMeshes } from './wgl_locations.js';
 
@@ -34,7 +34,8 @@
 	import { LoadSceneInventory } from './wgl_inventory.js';
 	
 	import { splatsLoaded, splatObjex, initSplats, InitSpark } from './wgl_splats.js';
-import { PlayPauseMedia } from '../../connect/dialogs.js';
+	
+	import { PlayPauseMedia } from '../../connect/dialogs.js';
 
 
 
@@ -565,6 +566,15 @@ import { PlayPauseMedia } from '../../connect/dialogs.js';
 						
 					}
 				});
+
+				if (instancedShaderMaterials.length) {
+					for (let i = 0; i < instancedShaderMaterials.length; i++) {
+						if (instancedShaderMaterials[i].userData && instancedShaderMaterials[i].userData.shader) {
+							console.log(clock.getElapsedTime());
+    						instancedShaderMaterials[i].userData.shader.uniforms.uTime.value = clock.getElapsedTime();
+  						}
+					}
+				}
 			}
 
 			if (lightMods.length) {

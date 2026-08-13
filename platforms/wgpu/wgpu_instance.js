@@ -66,20 +66,13 @@ export function createDefaultSurface(locData) {
     scene.add(surfaceObject);
     surfaceObject.position.set(locData.x,locData.y,locData.z);
     surfaceObject.rotateX(-Math.PI / 2);
-    // surface.rotation.x = -Math.PI / 2;
-    // surfaceObject.traverse(function (child) {
-    //     if (child.isMesh){
-    //         surface = child;
 
-
-            if (locData.locationTags && locData.locationTags.includes("hide")) {
-                surfaceObject.visible = false;
-            }
-    //     }
-    // });
+    if (locData.locationTags && locData.locationTags.includes("hide")) {
+        surfaceObject.visible = false;
+    }
     surface = surfaceObject;
     surfaceType = "primitive";
-    // SetSurface(surface);
+    
 }
     
     
@@ -217,31 +210,19 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let i = 0; i < count; i++) {            
             await sampler.sample(position);
 
-            // const isClose = usedPositions.some(v => position.distanceTo(v) < minDistance);
-
-            // if (isClose) {
-            //     // continue;
-
-            // }
-
-            // usedPositions.push(position);
-
             console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
            
-                // console.log("mesh y position " + position.y + " mod " + ypos);
-                if (surfaceType == "primitive") {
-                    dummy.position.set(position.x, position.z + locData.y, position.y); //fsr the primitive plane returns x,y values with z as zero //bc its 2d! need to test for other geos
-                } else {
-                    if (position.y < waterLevel)  {
-                        position.y = -100;       
-                    }
-                    const ypos = parseFloat(position.y) + parseFloat(yMod);
-                    dummy.position.set(position.x, ypos, position.z);
+            if (surfaceType == "primitive") {
+                dummy.position.set(position.x, position.z + locData.y, position.y); //fsr the primitive plane returns x,y values with z as zero //bc its 2d! need to test for other geos
+            } else {
+                if (position.y < waterLevel)  {
+                    position.y = -100;       
                 }
-            
-            // console.log("instance positon " + JSON.stringify(position));
-            // Optional: Add some random rotation
-
+                const ypos = parseFloat(position.y) + parseFloat(yMod);
+                dummy.position.set(position.x, ypos, position.z);
+            }
+        
+        
             dummy.rotation.y = Math.random() * Math.PI * 2;
             
             if (locData.locationTags && !locData.locationTags.includes("no scale")) {
@@ -383,8 +364,8 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
             instancedMeshes[s].receiveShadow = true;
             
             if (locationData && locationData.locationTags && locationData.locationTags.includes("active")) {
-                activeObjex.push(this.instancedMeshes[s]);
-                this.instancedMeshes[s].userData.locationData = locationData;
+                activeObjex.push(instancedMeshes[s]);
+                instancedMeshes[s].userData.locationData = locationData;
             }
             // if (locationData && locationData.locationTags && locationData.locationTags.includes("random color")) {
                 let randomColor = new THREE.Color();

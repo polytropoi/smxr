@@ -66,13 +66,16 @@ export function createDefaultNavmesh(locData) {
         planeGeometry.rotateX(-Math.PI / 2);
 
     //   planeGeometry.rotation.x = Math.PI / 2 * -1;
-        const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
+        const planeMaterial = new THREE.MeshBasicMaterial({ wireframe: true, color: 'hotpink' });
         navmesh = new THREE.Mesh(planeGeometry, planeMaterial);
         navmesh.position.set(locData.x, locData.y, locData.z)
     
         
         scene.add(navmesh);
-        navmesh.visible = false;
+        if (locData.locationTags && locData.locationTags.includes("hide")) {
+            navmesh.visible = false;
+        }
+        
         // navmesh.position.set(0,0,0);
         // // navmeshObject.scale.set(1,1,1);
         // navmesh.rotation.x = Math.PI / 2;

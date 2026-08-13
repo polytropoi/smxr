@@ -18,7 +18,9 @@ import { sceneTextController } from './wgl_media.js';
 
 let sampler;
 export let surface;
+let surfaceType = "model";
 
+export let instancedShaderMaterials = [];
 // export let physicsInstances;
 export let physicsInstancedBodies = [];
 export let physicsInstancedMeshes = [];
@@ -41,18 +43,36 @@ export async function InitSurface () {
 export function SetSurface(mesh) { //if assigned to a mesh in locations
     surface = mesh;
 }
+// export function createDefaultSurface(locData) {
+//     console.log("tryna create default surface " + locData.xscale + " " + locData.yscale + " " +locData.zscale);
+//         const planeGeometry = new THREE.PlaneGeometry(locData.xscale, locData.zscale, 10, 10); 
+//         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
+//         surface = new THREE.Mesh(planeGeometry, planeMaterial);
+//         scene.add(surface);
+//         surface.rotation.x = -Math.PI / 2;
+//          if (locData.locationTags && locData.locationTags.includes("hide")) {
+//                 surface.visible = false;
+//             }
+//         // surface.visible = false;
+//         // SetSurface(surface);
+// }
+    
 export function createDefaultSurface(locData) {
     console.log("tryna create default surface " + locData.xscale + " " + locData.yscale + " " +locData.zscale);
-        const planeGeometry = new THREE.PlaneGeometry(locData.xscale, locData.zscale, 10, 10); 
-        const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'green' });
-        surface = new THREE.Mesh(planeGeometry, planeMaterial);
-        scene.add(surface);
-        surface.rotation.x = -Math.PI / 2;
-         if (locData.locationTags && locData.locationTags.includes("hide")) {
-                surface.visible = false;
-            }
-        // surface.visible = false;
-        // SetSurface(surface);
+    const planeGeometry = new THREE.PlaneGeometry(locData.xscale, locData.zscale, 10, 10); //
+    const planeMaterial = new THREE.MeshBasicMaterial({ wireframe: true, color: 'red' });
+    const surfaceObject = new THREE.Mesh(planeGeometry, planeMaterial);
+    
+    scene.add(surfaceObject);
+    surfaceObject.position.set(locData.x,locData.y,locData.z);
+    surfaceObject.rotateX(-Math.PI / 2);
+
+    if (locData.locationTags && locData.locationTags.includes("hide")) {
+        surfaceObject.visible = false;
+    }
+    surface = surfaceObject;
+    surfaceType = "primitive";
+    
 }
     
 
@@ -130,11 +150,58 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 // childCount++;
 
                 console.log("node material name " + node.material.name);
+
+                
                 sampleGeometry = node.geometry;
 
                 sampleGeos.push(sampleGeometry);
                 sampleMaterial = node.material;
-                sampleMats.push(sampleMaterial);
+                sampleMaterial.envMap = scene.environment;
+                sampleMaterial.envMapIntensity = 2;
+
+
+                if (locData.locationTags && locData.locationTags.includes("rise")) {
+
+
+                    const speeds = new Float32Array(count);
+                    for (let i = 0; i < count; i++) {
+                    speeds[i] = 0.5 + Math.random() * 2.0; // Random speed between 0.5 and 2.5
+                    }
+                    sampleGeometry.setAttribute('aSpeed', new THREE.InstancedBufferAttribute(speeds, 1));
+
+                    // 2. Inject shader logic via onBeforeCompile
+                    sampleMaterial.onBeforeCompile = (shader) => {
+                    shader.uniforms.uTime = { value: 0 };
+                    sampleMaterial.userData.shader = shader;
+
+                    // Inject attribute declaration and uniform into vertex shader
+                    shader.vertexShader = `
+                        attribute float aSpeed;
+                        uniform float uTime;
+                        ${shader.vertexShader}
+                    `;
+
+                    // Inject movement logic right before model transformation
+                    shader.vertexShader = shader.vertexShader.replace(
+                        '#include <begin_vertex>',
+                        `
+                        #include <begin_vertex>
+                        // Move up along Y axis, looping via mod (e.g., reset every 10 units)
+                        float displacement = mod(uTime * aSpeed, 20.0);
+                        transformed.y += displacement;
+                        `
+                    );
+                    };
+                          sampleMaterial.customProgramCacheKey = () => 'gltf-custom-rise-material';
+                    sampleMaterial.needsUpdate = true;
+                    instancedShaderMaterials.push(sampleMaterial);
+                     sampleMats.push(sampleMaterial);
+                } else { //if fall, etc..
+                    sampleMaterial.envMap = scene.environment;
+                    sampleMaterial.envMapIntensity = 2;
+                    sampleMats.push(sampleMaterial);
+                }
+               
                 
             }
         });
@@ -179,31 +246,70 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let i = 0; i < count; i++) {            
             await sampler.sample(position);
             
-            if (position.y < waterLevel)  {
-                // await sampler.sample(position);
-                position.y = -100;
-                // continue;
-            }
-            // position.y = position.y + yMod;
-                // console.log("mesh position " + position.y);
+                // if (position.y < waterLevel)  {
+                //     // await sampler.sample(position);
+                //     position.y = -100;
+                //     // continue;
+                // }
+                // // position.y = position.y + yMod;
+                //     // console.log("mesh position " + position.y);
+                //     const ypos = parseFloat(position.y) + parseFloat(yMod);
+                //     // console.log("mesh y position " + position.y + " mod " + ypos);
+                // dummy.position.set(position.x, ypos, position.z);
+                // // console.log("instance positon " + JSON.stringify(position));
+                // // Optional: Add some random rotation
+                // dummy.rotation.y = Math.random() * Math.PI * 2;
+                // const scale = Math.random() * scaleFactor * .75;
+                // dummy.scale.set(scale, scale, scale);
+                // dummy.updateMatrix(); // Update matrix based on position/rotation
+                
+                // for (let m = 0; m < instancedMeshes.length; m++) {
+                    
+                //     // console.log("instance count " + i);
+                //     if (position.y > waterLevel)  {
+                //         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                //         instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                //     } else {
+                //         // dummy.scale.setScalar(0);
+                //         dummy.scale.set(0,0,0);
+                //         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                //     }
+                // }
+            console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
+           
+            if (surfaceType == "primitive") {
+                dummy.position.set(position.x, position.z + locData.y, position.y); //fsr the primitive plane returns x,y values with z as zero //bc its 2d! need to test for other geos
+            } else {
+                if (position.y < waterLevel)  {
+                    position.y = -100;       
+                }
                 const ypos = parseFloat(position.y) + parseFloat(yMod);
-                // console.log("mesh y position " + position.y + " mod " + ypos);
-            dummy.position.set(position.x, ypos, position.z);
-            // console.log("instance positon " + JSON.stringify(position));
-            // Optional: Add some random rotation
+                dummy.position.set(position.x, ypos, position.z);
+            }
+        
+        
             dummy.rotation.y = Math.random() * Math.PI * 2;
-            const scale = Math.random() * scaleFactor * .75;
-            dummy.scale.set(scale, scale, scale);
+            
+            if (locData.locationTags && !locData.locationTags.includes("no scale")) {
+                const scale = Math.random() * scaleFactor * .75;
+                dummy.scale.set(scale, scale, scale);
+            }
+
+
             dummy.updateMatrix(); // Update matrix based on position/rotation
             for (let m = 0; m < instancedMeshes.length; m++) {
                 
-                // console.log("instance count " + i);
-                if (position.y > waterLevel)  {
-                    instancedMeshes[m].setMatrixAt(i, dummy.matrix);
-                    instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                if (surfaceType != "primitive") {
+                    // console.log("instance count " + i);
+                    if (position.y > waterLevel)  {
+                        instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                        instancedMeshes[m].instanceMatrix.needsUpdate = true;
+                    } else {
+                        // dummy.scale.setScalar(0);
+                        dummy.scale.set(0,0,0);
+                        instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                    }
                 } else {
-                    // dummy.scale.setScalar(0);
-                    dummy.scale.set(0,0,0);
                     instancedMeshes[m].setMatrixAt(i, dummy.matrix);
                 }
             }
@@ -227,6 +333,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 // this.iMesh.setColorAt( this.instanceId, this.highlightColor.setHex( Math.random() * 0xffffff ) );
                 // this.iMesh.instanceColor.needsUpdate = true;
             }
+           
             if (locData.mediaID) {
                 const tm = {};
                 tm.mediaID = locData.mediaID;
