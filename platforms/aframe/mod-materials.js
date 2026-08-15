@@ -603,87 +603,78 @@ AFRAME.registerComponent('mod-materials', {
               color: "white",
             });
           }
-          // var texture = new THREE.VideoTexture( this.video );
-          // this.vidtexture = texture;
-        //   this.videoControl();
+        
+          console.log("aframe videoControl init");
 
-        //   // setTimeout(this.videoControl(), 1000);
-        // // });
-        // }, 
-        // videoControl: function () {
-          console.log("videoControl init");
-          // playVideo(this.video);
-          //apple needs a click
-            // if (!this.isInitialized) {
-              if (!timedEventsListenerMode || timedEventsListenerMode == "") {
-                  SetTimedEventsListenerMode("Primary Video")
-              }
+          if (!timedEventsListenerMode || timedEventsListenerMode == "") {
+              SetTimedEventsListenerMode("Primary Video")
+          }
 
-              this.vidtexture = new THREE.VideoTexture( this.video );
-              this.vidtexture.flipY = this.data.flipY; 
-              this.vidtexture.colorSpace = THREE.SRGBColorSpace;
-              // this.vidtexture.minFilter = THREE.LinearMipmapNearestFilter;
-              // this.vidtexture.magFilter = THREE.LinearMipmapNearestFilter;
-              // this.playmaterial = new THREE.MeshStandardMaterial( { map: this.vidtexture, side: THREE.DoubleSide, shader: THREE.FlatShading } ); 
-              if (this.data.isSkybox) {
-                this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, side: THREE.BackSide, shader: THREE.FlatShading } ); 
-              } else {
-                this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, shader: THREE.FlatShading } ); 
-              }
-              
+          this.vidtexture = new THREE.VideoTexture( this.video );
+          this.vidtexture.flipY = this.data.flipY; 
+          this.vidtexture.colorSpace = THREE.SRGBColorSpace;
+          // this.vidtexture.minFilter = THREE.LinearMipmapNearestFilter;
+          // this.vidtexture.magFilter = THREE.LinearMipmapNearestFilter;
+          // this.playmaterial = new THREE.MeshStandardMaterial( { map: this.vidtexture, side: THREE.DoubleSide, shader: THREE.FlatShading } ); 
+          if (this.data.isSkybox) {
+            this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, side: THREE.BackSide, shader: THREE.FlatShading } ); 
+          } else {
+            this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, shader: THREE.FlatShading } ); 
+          }
+          
 
-              console.log("tryna bind vid material to mesh");
+          console.log("tryna bind vid material to mesh");
 
-              // this.playmaterial.generateMipmaps = true;   
-              this.playmaterial.map.needsUpdate = true;   
-              this.playmaterial.needsUpdate = true;
+          // this.playmaterial.generateMipmaps = true;   
+          this.playmaterial.map.needsUpdate = true;   
+          this.playmaterial.needsUpdate = true;
 
 
-              if (this.screenMesh != null) {
-                this.screenMesh.material = this.playmaterial;
-                this.isInitialized = true;
-              }
+          if (this.screenMesh != null) {
+            this.screenMesh.material = this.playmaterial;
+            this.isInitialized = true;
+          }
 
-              if (this.pauseButtonMesh != null) {
-                this.pauseButtonMesh.visible = false;
-              }
+          if (this.pauseButtonMesh != null) {
+            this.pauseButtonMesh.visible = false;
+          }
 
-              if (this.pauseButtonMesh != null) {
-                this.playButtonMesh.visible = false;
-              }
+          if (this.pauseButtonMesh != null) {
+            this.playButtonMesh.visible = false;
+          }
 
-              
-              this.redmat = new THREE.MeshStandardMaterial({
-                color: "red"    
-                
-              });
-              this.greenmat = new THREE.MeshStandardMaterial({
-                color: "lightgreen"    
-                
-              });
-              this.yellowmat = new THREE.MeshStandardMaterial({
-                color: "yellow"    
-                
-              });
-              this.bluemat = new THREE.MeshStandardMaterial({
-                color: "blue"    
-                
-              });
-              this.player_status_update("loading");
-              this.video.addEventListener( 'canplay', this.player_status_update("ready"), false); //next step when kinda loaded
-          // let thiz = this; //? localscope, but not updated like this
-          // thiz.duration = this.duration;
+          
+          this.redmat = new THREE.MeshStandardMaterial({
+            color: "red"    
+            
+          });
+          this.greenmat = new THREE.MeshStandardMaterial({
+            color: "lightgreen"    
+            
+          });
+          this.yellowmat = new THREE.MeshStandardMaterial({
+            color: "yellow"    
+            
+          });
+          this.bluemat = new THREE.MeshStandardMaterial({
+            color: "blue"    
+            
+          });
+          this.player_status_update("loading");
+          this.video.addEventListener( 'canplay', this.player_status_update("ready"), false); //next step when kinda loaded
+      
           this.raycaster = null;
           this.intersection = null;
           this.hitpoint = null;
 
-        this.el.addEventListener('raycaster-intersected', (e) => {  
-          // if (this.video != undefined) {
-            this.raycaster = e.detail.el;
-            this.intersection = this.raycaster.components.raycaster.getIntersection(this.el);
-            this.hitpoint = this.intersection.point;
-            this.mouseOverObject = this.intersection.object.name;      
-            console.log('ray hit' + this.intersection.point + this.intersection.object.name + " " + this.data.isSkybox);
+          this.el.addEventListener('raycaster-intersected', (e) => {  
+        // if (this.video != undefined) {
+          this.raycaster = e.detail.el;
+          this.intersection = this.raycaster.components.raycaster.getIntersection(this.el);
+          this.hitpoint = this.intersection.point;
+          this.mouseOverObject = this.intersection.object.name;      
+          console.log('ray hit' + this.intersection.point + this.intersection.object.name + " " + this.data.isSkybox);
+
           if (this.data.isSkybox) {
             this.mouseOverObject = this.el.getObject3D("mesh");
           } else if (!this.intersection.object.name.includes("hvid") &&
@@ -696,8 +687,8 @@ AFRAME.registerComponent('mod-materials', {
               !this.intersection.object.name.includes("handle") &&
               !this.intersection.object.name.includes("play") &&
               !this.intersection.object.name.includes("pause")) {
-                this.raycaster = null;
-                this.mouseOverObject = null;
+              this.raycaster = null;
+              this.mouseOverObject = null;
 
               } else {
                   this.mouseOverObject = this.intersection.object.name;      

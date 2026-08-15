@@ -727,25 +727,15 @@ async function RaycastHit(type, hit, event) {
             for (let i = 0; i < textContainers.length; i++) {
                 textContainers[i].visible = false;
             }
-            // lastRaycastHit = null;
-            // const textContainer = lastRaycastHitObject.getObjectByName('textContainer');
-            // if (textContainer) {
-            //     textContainer.visible = false;
-            // }
+            
         } else {
-            // if (lastRaycastHitObject) {
-                return;
-            // }
-
+            return;
         }
     } else {
         lastRaycastHit = hit;
         lastRaycastHitObject = hit.object;
-        // return;
     }
 
-  
-    
     lastRaycastHit = hit;
     lastRaycastHitObject = hit.object;
     lastHitObjectName = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
@@ -795,7 +785,7 @@ async function RaycastHit(type, hit, event) {
 
             showCallout = true;
 
-            console.log(locationData.name + " " + type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
+            console.log(locationData.name + " " + type + " rayhit object name: " + lastRaycastHitObject.userData.name + " markertype: " +  locationData.markerType + " description:  " + hit.object.name + " distance: " + hit.distance + " scale: " + locationData.yscale);
 
             // console.log(type + " hit object type " + locationData.markerType);//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
@@ -811,7 +801,7 @@ async function RaycastHit(type, hit, event) {
                 ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             } else {
-                console.log("locationname " + name);
+                // console.log("locationname " + name);
                 
                 if (name && name.includes("~")) {
                     name = name.split("~")[0];
@@ -841,6 +831,8 @@ async function RaycastHit(type, hit, event) {
                         ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                     }
                 }
+
+
                 // ThreeDeeText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 // HTMLText(locationData.name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             }
@@ -898,109 +890,13 @@ async function RaycastHit(type, hit, event) {
             console.log("gotsa character rayhit " + locationData.name);
             raycastHitAgent = hit.object;
             selectedObjects.push(hit.object);
-            // if (raycastHitAgent && raycastHitAgent.material && raycastHitAgent.material.colorNode) {
-            //     // console.log("intersected material found!");
-            //     raycastHitAgent.material.materialColor = goColor;
-            // } else if (raycastHitAgent && raycastHitAgent.material) {
-            //     raycastHitAgent.material.color = goColor;
-
-            // }
-            // console.log("character object name : " + raycastHitAgent.name + " " + JSON.stringify(raycastHitAgent.userData));
-            // hit.object.parent.parent.traverse(function (child) {
-            //     console.log("child type " + child.type); 
-            // });
-
-            // console.log("hit character object name : " + raycastHitAgent.parent.parent.parent.name + " locID " + locationData.timestamp);
-            // const rootObject = getRoot(raycastHitAgent)
-            // logHierarchy(rootObject);
-            // raycastHitAgent.traverse (
-
-            // )
-            // const agentID = raycastHitAgent.parent.parent.name;
-                        // let navAgentInstance;
-                        // if (raycastHitAgent.userData) {
-                        
-                        //     navAgentInstance = raycastHitAgent.userData.NavAgentInstance;
-                        //     if (navAgentInstance) {
-                        //         console.log("gotsa raycastHitAgent.userData ");
-                        //         navAgentInstance.agentRaycastHit();
-                        //     } else if (raycastHitAgent.parent.userData) {
-                            
-                        //         navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance;
-                        //         if (navAgentInstance) {
-                        //             console.log("gotsa raycastHitAgent.parent.userData.navAgentInstance");
-                        //             navAgentInstance.agentRaycastHit();
-                        //         } else if (raycastHitAgent.parent.parent.userData) {
-                                
-                        //             navAgentInstance = raycastHitAgent.parent.parent.userData.NavAgentInstance;
-                        //             if (navAgentInstance) {
-                        //                 console.log("gotsa raycastHitAgent.parent.parent.userData");
-                        //                 navAgentInstance.agentRaycastHit();
-                        //             }
-                        //         } 
-                        // }
-                            
-                        // } 
-            // if (raycastHitAgent.parent.parent.parent.userData) {
-               
-            //     navAgentInstance = raycastHitAgent.parent.parent.parent.userData.NavAgentInstance;
-            //     if (navAgentInstance) {
-            //          console.log("gotsa rraycastHitAgent.parent.parent.prent.userData");
-            //         navAgentInstance.agentRaycastHit();
-            //     }
-            // } 
-            // if (raycastHitAgent.parent.parent.parent.parent.userData) {
-            //     console.log("gotsa rraycastHitAgent.parent.parent.prent.porenbt.userData");
-            //     navAgentInstance = raycastHitAgent.parent.parent.parent.parent.userData.NavAgentInstance;
-            //     if (navAgentInstance)
-            //     navAgentInstance.agentRaycastHit();
-            // } 
-                // const navParent = raycastHitAgent.getObjectByName("navagent", true);
-                // if (navParent) { 
-
-                //     navAgentInstance = navParent.userData.navAgentInstance;
-                //     navAgentInstance.agentRaycastHit();
-                // } else {
-                //     console.log("no navagent found on character!");
-                // }
-            // }
-        
-        
-        // const navAgentInstance = raycastHitAgent.parent.userData.NavAgentInstance; //hrm
-        // const navAgentInstance = raycastHitAgent.parent.getObjectByName("NavAgent");
-        // const navAgentInstance = navAgentInstances[agentID];
-        // if (navAgentInstance) {
-        //     console.log("gotsa navagent");
-        //     navAgentInstance.agentRaycastHit();
-        // } else {
-            
-    // }
+           
+    } else if (locationData && locationData.markerType == "video" ) {
+        console.log("gotsa video raycastHit!");
     } else if (locationData && locationData.markerType == "gate" ) {
-        
+        console.log("gotsa gate raycastHit!");
     } else {
-        // if (lastRaycastHit.instanceId) {
-
-        // }
-        // if (lastRaycastHitObject && lastRaycastHitObject != hit.object) {
-        //    
-        // } else { 
-            // 
-            // if ( type != "player") {
-            //         validTarget = true;
-            //     if (cameraMode == "Third Person" && type == "mouse") {
-            //         selectedObjects.length = 0;
-            //         selectedObjects.push(hit.object);
-            //     } else if ((cameraMode == "First Person" || cameraMode == "Fly") && type == "center") {
-            //         selectedObjects.length = 0;
-            //         selectedObjects.push(hit.object);
-            //     } else if ((cameraMode == "Orbit" || cameraMode == "Map") && type == "mouse") {
-            //         selectedObjects.length = 0;
-            //         selectedObjects.push(hit.object);
-            //     }
-            //     // console.log("seelected objex " + selectedObjects.length + " name " + name + " type hit " + type);
-            // }
-        // }
-
+       
 
     }
 
@@ -1178,7 +1074,7 @@ export function onMouseDown(event) { //clicked on threejs object
     event.stopPropagation();// duh!
 
     if (lastRaycastHitObject && lastRaycastHitObject.userData) {
-    console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID + " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+    console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID );
     } else {
         if (event.clientY > (window.innerHeight * .8)) {
             if (settings && settings.sceneTags && settings.sceneTags.includes("next")) {
@@ -1243,6 +1139,7 @@ export function onMouseDown(event) { //clicked on threejs object
         // }
         return;
     } else if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
+
  
             let navAgentInstance
             if (lastRaycastHitObject.parent.parent) {
@@ -1408,6 +1305,14 @@ export function onMouseDown(event) { //clicked on threejs object
                     // ShowPopup(event);
                     // popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.locationData.name + " # " + lastRaycastHit.instanceId +" :</h1>"  + lastRaycastHitObject.userData.locationData.description;
                 }
+            } else if (lastRaycastHitObject.userData.locationData.markerType == "video") {
+                
+                console.log("clicked on video thing: " + lastRaycastHitObject.userData.name);
+                if (lastRaycastHitObject.userData.sceneVideoInstance) {
+                    lastRaycastHitObject.userData.sceneVideoInstance.videoPlayerTogglePlayPause();
+                }
+                
+
             } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                 
                 ShowPopup(event);

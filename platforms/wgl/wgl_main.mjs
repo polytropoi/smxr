@@ -29,7 +29,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, cameraIsReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgl_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText } from './wgl_media.js';
+	import { InitAudioGroups, InitPictureGroups, InitVideoGroups, ambientAudioController, InitSceneText } from './wgl_media.js';
 	
 	import { LoadSceneInventory } from './wgl_inventory.js';
 	
@@ -309,6 +309,9 @@
 		if (settings.pictureGroups && settings.pictureGroups.length) {
 			InitPictureGroups();
 		}
+		// if (settings.videoGroups && settings.videoGroups.length) {
+			InitVideoGroups();
+		// }
 		InitSceneText();
 
 		console.log("settings.sceneGroups " + JSON.stringify(settings.sceneGroups));

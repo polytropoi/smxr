@@ -163,7 +163,7 @@ export function InitConnect() {
    let vidz = document.getElementsByTagName("video");
    if (vidz != null && vidz.length > 0) { //either video or audio, not both...?
       videoEl = vidz[0];
-      console.log("videoEl " + videoEl.id);
+      console.log("videoEl " + videoEl.id + " src " + videoEl.src);
    }
    // this.statsDiv = document.getElementById("transportStats");
    // document.getElementsByTagName('a-sky')[0].setAttribute('radius', 400); //nope!?!   

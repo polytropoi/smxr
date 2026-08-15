@@ -4,10 +4,12 @@ import * as THREE from 'three';
 import {player, camera } from './wgl_controls.js';
 import { scene } from './wgl_main.mjs';
 import { settings } from '../../../connect/settings.js';
+import { videoEl } from '../../../connect/connect.js';
 import { eventEl } from '../../../connect/events.js';
 import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData, createYouTubePlayer} from "../../../connect/media.js";
 import { lookAtCameraObjects } from './wgl_ui.js';
 import { UpdateEnvMap } from './wgl_environment.js';
+import { pauseVideo, playVideo } from '../../connect/media.js';
 
 
 export let primaryAudioGroups;
@@ -16,10 +18,14 @@ export let triggerAudioGroups;
 
 export let sceneTextController;
 export let audioGroupsData;
+
+export let videoGroupsData;
 export let pictureGroupsData;
 export let landscapePanel;
 
 export let equirectPictures = [];
+
+export let sceneVideoPlayer;
 createYouTubePlayer();
 
 eventEl.addEventListener('sequence-event', SequenceEvent);
@@ -61,6 +67,29 @@ export function InitPictureGroups () {
         
 }
 
+export function InitVideoGroups () {
+    let videoGroupsDataEl = document.getElementById("videoGroupsData");
+    
+    if (videoGroupsDataEl) {
+        console.log("tryna get videogroupsdata...");
+        let theVideoGroupsData = videoGroupsDataEl.getAttribute('data-video-groups');
+        videoGroupsData = JSON.parse(atob(theVideoGroupsData));
+        console.log("videoGroupsData " + JSON.stringify(videoGroupsData));
+    } else {
+         console.log("cain't find videogroupsdata elelement");
+    }
+
+
+}
+
+export function InitVideo(locData) {
+    if (videoEl) {
+  
+            const sceneVideo = new SceneVideo(videoEl.id, locData);
+        // }
+      
+    }
+}
 export function ReturnPictureFromGroup (groupID, tags, groupIndex) {
     for (let i = 0; i < pictureGroupsData.length; i++) {
         if (pictureGroupsData[i]._id == groupID) {
@@ -118,6 +147,247 @@ export function InitSceneText () {
         }
     }
    
+}
+
+class SceneVideo { // see aframe/mod-materials.js/vid_materials_embed
+    constructor (id, locData) {
+        this.video = videoEl;
+    
+        this.streamIndex = 0;
+        
+        const vID = id.split("_")[1];
+        this.id = vID;
+
+        // primaryVideo = video;
+        let m3u8 = '/hls/'+this.id;
+
+        console.log("hls sceneVideo is " + this.video.id + " m3u8 " + m3u8);
+
+        //settings.sceneVideoStreams is set serverside for external streams, e.g. from mux.com
+        if (settings != undefined && settings.sceneVideoStreams != null && settings.sceneVideoStreams.length > 0) {
+            console.log("settings.sceneVideoStreams length is " + settings.sceneVideoStreams.length);
+            m3u8 = settings.sceneVideoStreams[Math.floor((Math.random()*settings.sceneVideoStreams.length))];
+            this.data.videoTitle = settings.sceneTitle;
+        }
+        if (Hls != undefined && Hls.isSupported()) {
+            
+            var hls = new Hls();
+            hls.attachMedia(this.video);
+            
+            hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                console.log('video and hls.js are now bound together !');
+                hls.loadSource(m3u8);
+                hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                console.log(
+                    'hls manifest loaded, found ' + data.levels.length + ' quality level'
+                );
+                });
+            });
+            // }
+        } else {
+            console.log("hls.js not supported (ios?), goiing native!");
+            this.video.src = m3u8;
+        }
+
+        this.mesh = scene.getObjectByName("videoModel");
+        this.mesh.userData.name = "videoPlayerModel_" + vID;
+        this.mesh.userData.locationData = locData;
+
+        this.mesh.userData.sceneVideoInstance = this;
+        this.screenMesh = null; 
+        this.ffwdMesh = null; 
+        this.rewindMesh = null; 
+        this.isInitialized = false;
+        let playButtonMesh = null;
+        let pauseButtonMesh = null;
+        this.playButtonMesh = null;
+        this.pauseButtonMesh = null;
+        this.play_button = null;  
+        this.play_icon = null;
+        this.pausematerial = null;
+        this.playmaterial = null;
+        this.slider_end = null;
+        this.slider_begin = null;
+        this.slider_handle = null;
+        this.texture = null;
+        this.durationtimeformat = 0;
+        this.percent = 0;
+
+        this.meshArray = [];
+    
+        if (!this.isSkybox) {
+          this.mesh.traverse(node => {
+            // if (node instanceof THREE.Mesh) 
+            // console.log(node.name);
+              if ((node.name.toLowerCase().includes("screen") || node.name.toLowerCase().includes("hvid")) && node.material) {
+                this.screenMesh = node; 
+
+                console.log("gotsa screen mesh");
+                // this.meshArray.push(this.screenMesh);
+                    this.screenMesh.userData.name = "screen_videoPlayerModel_" + vID;
+                    this.screenMesh.userData.locationData = locData;
+                    this.screenMesh.userData.sceneVideoInstance = this;
+
+              } 
+         
+              if (node.name.toLowerCase().includes("fastforward")) {
+                this.ffwdMesh = node; 
+                  this.ffwdMesh.userData.name = "ffwd_videoPlayerModel_" + vID;
+                    this.ffwdMesh.userData.locationData = locData;
+                    this.ffwdMesh.userData.sceneVideoInstance = this;
+              }
+            //   if (node.name.toLowerCase().includes("frame")) {
+            //     this.ffwdMesh = node; 
+            //     this.meshArray.push(this.ffwdMesh);
+            //   }
+            //   if (node.name.toLowerCase().includes("background")) {
+            //     this.ffwdMesh = node; 
+            //     this.meshArray.push(this.ffwdMesh);
+            //   }
+              if (node.name.toLowerCase().includes("rewind")) {
+                this.rewindMesh = node; 
+                this.rewindMesh.userData.name = "rewind_videoPlayerModel_" + vID;
+                this.rewindMesh.userData.locationData = locData;
+                this.rewindMesh.userData.sceneVideoInstance = this;
+              }
+                if (node.name.toLowerCase().includes("next")) {
+                this.nextMesh = node; 
+                this.nextMesh.userData.name = "next_videoPlayerModel_" + vID;
+                this.nextMesh.userData.locationData = locData;
+                this.nextMesh.userData.sceneVideoInstance = this;
+              }
+            if (node.name.toLowerCase().includes("previous")) {
+                this.previousMesh = node; 
+                this.previousMesh.userData.name = "previous_videoPlayerModel_" + vID;
+                this.previousMesh.userData.locationData = locData;
+                this.previousMesh.userData.sceneVideoInstance = this;
+              }
+             
+              if (node.name.toLowerCase().includes("play")) {
+                this.playButtonMesh = node; 
+                this.playButtonMesh.userData.name = "play_videoPlayerModel_" + vID;
+                this.playButtonMesh.userData.locationData = locData;
+                this.playButtonMesh.userData.sceneVideoInstance = this;
+              }
+              if (node.name.toLowerCase().includes("play_button")) {
+                 this.playButtonMesh = node; 
+                this.playButtonMesh.userData.name = "play_videoPlayerModel_" + vID;
+                this.playButtonMesh.userData.locationData = locData;
+                this.playButtonMesh.userData.sceneVideoInstance = this;
+              }
+              
+             
+              if (node.name.toLowerCase().includes("pause")) {
+                this.pauseButtonMesh = node; 
+
+                this.pauseButtonMesh.userData.name = "play_videoPlayerModel_" + vID;
+                this.pauseButtonMesh.userData.locationData = locData;
+                this.pauseButtonMesh.userData.sceneVideoInstance = this;
+              }
+              if (node.name.toLowerCase().includes("slider_end")) {
+                this.slider_end = node; 
+                this.slider_end.userData.name = "sliderend_videoPlayerModel_" + vID;
+                this.slider_end.userData.locationData = locData;
+                this.slider_end.userData.sceneVideoInstance = this;
+              }
+              if (node.name.toLowerCase().includes("slider_begin")) {
+                this.slider_begin = node; 
+                 this.slider_begin.userData.name = "sliderbegin_videoPlayerModel_" + vID;
+                this.slider_begin.userData.locationData = locData;
+                this.slider_begin.userData.sceneVideoInstance = this;
+              }
+              if (node.name.toLowerCase().includes("slider_handle")) {
+                this.slider_handle = node; 
+                  this.slider_handle.userData.name = "sliderhandle_videoPlayerModel_" + vID;
+                this.slider_handle.userData.locationData = locData;
+                this.slider_handle.userData.sceneVideoInstance = this;
+              }
+              // if (this.pauseButtonMesh)
+            // }
+          }); 
+
+        } else { //if 360
+          // playVideo(this.video);          
+          this.mesh = this.el.getObject3D('mesh');
+          this.screenMesh = this.mesh;
+          this.meshArray.push(this.screenMesh);
+          console.log("this.screenmesdh" + this.screenMesh);
+
+        }
+
+        this.vidtexture = new THREE.VideoTexture( this.video );
+        this.vidtexture.flipY = false; 
+        this.vidtexture.colorSpace = THREE.SRGBColorSpace;
+        // this.vidtexture.minFilter = THREE.LinearMipmapNearestFilter;
+        // this.vidtexture.magFilter = THREE.LinearMipmapNearestFilter;
+        // this.playmaterial = new THREE.MeshStandardMaterial( { map: this.vidtexture, side: THREE.DoubleSide, shader: THREE.FlatShading } ); 
+        if (this.isSkybox) {
+            this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, side: THREE.BackSide, shader: THREE.FlatShading } ); 
+        } else {
+            this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, shader: THREE.FlatShading } ); 
+        }
+          
+
+        console.log("tryna bind vid material to mesh");
+
+        // this.playmaterial.generateMipmaps = true;   
+        this.playmaterial.map.needsUpdate = true;   
+        this.playmaterial.needsUpdate = true;
+
+
+        if (this.screenMesh != null) {
+        this.screenMesh.material = this.playmaterial;
+        this.isInitialized = true;
+        console.log("video paused " + this.video.paused + "video readyState " + this.video.readyState);
+
+        }
+
+        this.video.addEventListener( 'canplay', this.player_status_update("ready"), false);
+    }
+
+    player_status_update (state) {
+        this.playerState = state;
+        
+        if (this.play_button != null) {
+            if (state == "loading") {
+            //   this.play_button.material = this.yellowmat;
+                // if (this.transportPlayButton != null) {
+                //     this.transportPlayButton.style.color = 'yellow';
+                    
+                // }
+                // this.screen.material = this.loadingMaterial;
+            
+            } else if (state == "ready") {
+                this.play_button.material = this.bluemat;
+                playVideo(this.video);
+                console.log("video paused " + this.video.paused + "video readyState " + this.video.readyState);
+                //   if (this.transportPlayButton != null) {
+                //     this.transportPlayButton.style.color = 'blue';
+                // }
+                // this.screen.material = this.readyMaterial;
+            } else if (state == "playing") {
+                this.play_button.material = this.greenmat;
+                //   if (this.transportPlayButton != null) {
+                //     this.transportPlayButton.style.color = 'lightgreen';
+                // }
+                // this.screen.material = this.playingMaterial;
+            } else if (state == "paused") {
+                this.play_button.material = this.redmat;
+                //   if (this.transportPlayButton != null) {
+                //     this.transportPlayButton.style.color = 'red';
+                // }
+                // this.screen.material = this.pausedMaterial;
+            }
+            // }
+        }
+    }
+    videoPlayerTogglePlayPause () {
+        if (this.video.paused) {
+            playVideo(this.video);
+        } else {
+            pauseVideo(this.video);
+        }
+    }
 }
 
 class SceneTextData {

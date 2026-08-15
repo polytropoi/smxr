@@ -447,6 +447,40 @@ export function PreviousButton () {
 }
 
 
+export async function playVideo(video) {
+  if (video == null) {
+    video = primaryVideo;
+  }
+  console.log("tryna await video...");
+  try {
+    await video.play();
+    console.log("video should be playing...anytimenow");
+    
+  } catch(err) {
+    console.log("video error: " + err);
+  }
+}
+
+export function pauseVideo(video) {
+  if (video == null) {
+    video = primaryVideo;
+  }
+  if (!video.paused) {
+  var playPromise = video.play();
+  if (playPromise !== undefined) {
+        playPromise.then(_ => {
+        
+          video.pause();
+          // mainDiv.dispatchEvent('primaryVideoToggle', {isPlaying : false}, true);
+        })
+        .catch(error => {
+
+          console.log("error " +error)
+        });
+      }
+    }
+}
+
 
 function PlayPausePrimaryAudio() {
    

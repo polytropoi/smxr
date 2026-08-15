@@ -19,6 +19,7 @@ import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, n
 import { agentModels, CreateNPCAgent, randomNavmeshPoint } from './wgl_nav.js';
 
 import { splatObjex } from './wgl_splats.js';
+import { InitVideo } from './wgl_media.js';
 export let locations = {};
 
 export let locationData;
@@ -106,164 +107,169 @@ export function InitLocations() {
         locationData = JSON.parse(atob(theLocationData));
         SetSceneLocations(locationData);
         // console.log("locationData " + JSON.stringify(locationData));
-        
-        (async () => {
-            try { 
-                for (let i = 0; i < locationData.length; i++) {
+    
+    (async () => {
+        try { 
+            for (let i = 0; i < locationData.length; i++) {
 
-                    locations[locationData[i].timestamp] = locationData[i]; //cook an object instead of array for faster lookups by timestamp
-                    
-                    if (locationData.markerType != "none" && locationData[i].modelID && !locationData[i].modelID.includes("primitive") && locationData[i].modelID != "none") {
-                        let model;
-                        // if (locationData[i].modelID.includes("primitive")) {
-                        //     console.log("gotsa primitive " + locationData[i].model);
-                            
-                        //     model = await LoadLocationModel(null, locationData[i]);
-                        //     scene.add(model);
-                        // } else { //it's a gltf
-                            for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match
-                                if (locationData[i].modelID == modelsData[m]._id) {
-                                    locationData[i].isHidden = false;
-                                    
-                                    console.log("gotsa location model! " +modelsData[m].modelURL);
-                                    
-                                    if (modelsData[m].item_type == "splat") {
-                                        console.log("GOTSA SPLAT! " + modelsData[m].name);
-                                        let splat = {};
-                                        splat.url = modelsData[m].modelURL;
-                                        splat.locationData = locationData[i];
-                                        splatObjex.push(splat);
-
-                                    } else {
-                                        // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
-                                        let isActive = false;             
-                                        if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
-                                            isActive = true;
-                                        } 
-                                        const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
-                                        model = modelData.model;
-                                        console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
-                                        
-                                        if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
-                                            locationData[i].isHidden = true;
-                                            // console.log("tryna hide model " + child.name);
-                                        }															
-
-                                        if (locationData[i].markerType == "brownian motion") {
-                                            const meshMover = new MeshMover(model); 
-                                            movingMeshes.push(meshMover);
-                                        }
-                                
-
-
-                                        if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
-                                            // console.log("tryna instance model " + locationData[i].name);
-                                            let instancedModel = {};
-                                            const originalModel = await LoadModel(modelsData[m].modelURL)
-                                            // const countsplit = locationData[i].eventData.split("~");
-                                            // const count = countsplit[1];
-                                            instancedModel.model = originalModel.scene;
-                                            instancedModel.locationData = locationData[i];
-                                            instancedModel.modelData = modelsData[m];
-                                            instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
-                                            // instancedModel.count = count;
-                                            instancedModels.push(instancedModel);
-                                            console.log("instancedModels length " + instancedModels.length);
-                                            model.visible = false;
-                                            scene.remove(model);  //don't need the reference model
-                                        } else { // regular meshes
-                                                                                
-                                            scene.add(model);
-                                                                                
-                                        }
-                                        break; //only match one model per location!?
-                                    }
-                                }
-                            }
-                        // } else 
-
-                    
-                    } else {
-                        CreateDefaultLocationMarker(locationData[i]); //use primitive or default models
-                        
-                        if (locationData[i].markerType == "navmesh") {
-                            createDefaultNavmesh(locationData[i]);
-                        }
-                        if (locationData[i].markerType == "surface") {
-                            createDefaultSurface(locationData[i]);
-                        }
-                        if (locationData[i].markerType == "player") {
-                            console.log("playerloc " + JSON.stringify(locationData[i]));
-                            const px = parseFloat(locationData[i].x);
-                            const py = parseFloat(locationData[i].y);
-                            const pz = parseFloat(locationData[i].z);
-                            SetPlayerLocation(px,py,pz);
-                        }
-                        if (locationData[i].markerType == "collider") {
-                            // createDefaultCollider(locationData[i]);
-                            let staticObject = {};
-                            const geo = new THREE.PlaneGeometry(locationData[i].xscale, locationData[i].zscale, 10, 10);
-                            const material = new THREE.MeshStandardMaterial( { color: 'blue', wireframe: true } );
-                            const mesh = new THREE.Mesh(geo,material);
-                            staticObject.mesh = mesh;
-                            mesh.rotation.x = -Math.PI / 2;
-                            mesh.position.set(locationData[i].x, locationData[i].z, locationData[i].z)
-                            staticObject.locationData = locationData[i];
-                            // staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
-                            staticObject.isHidden = true;
-                            console.log("gotsa static collider object ishidden " + staticObject.isHidden);
-                            // scene.add(mesh);
-                            // mesh.visible = false;
-                            staticObjex.push(staticObject);
-                        }
-                        // if (locationData[i].markerType == "light") {
-                        //     CreateLight(locationData[i]);
-                        // }
-                        // if (locationData[i].markerType == "gate") {
-                        //     // CreateSceneGate(locationData[i]);
-                        // }                        
-                    }
-                    if (locationData[i].objectID) { // objects can have (rigged) models, and actions, which can summon other objects with models and actions.  should be object type only?
-                        
-                        for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
-                            if (locationData[i].objectID == objexData[o]._id) {
-                                // locationData[i].isHidden = false;
-                                
-                                // console.log("gotsa location objectID! " + objexData[o]._id +" looking for " + objexData[o].modelID);
-
-                                if (objexData[o].modelID) {
-                                    for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match - model deps/urls should have been added to the response serverside
-                                        // console.log(modelsData[m]._id + " vs " + objexData[o].modelID );
-                                        if (modelsData[m]._id == objexData[o].modelID) {
-                                            console.log("gotsa location object modelID " + modelsData[m].modelURL);
-                                            const locData = {};
-                                            locData.locationData = locationData[i];
-                                            locData.modelData = modelsData[m];
-                                            locData.objectData = objexData[o]; //add the object data to the thing
-                                            // const model = await LoadLocationModel(modelsData[m].modelURL, locData, true);
-
-                                            locationObjex.push(locData);
-                                            
-                                           
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                    // console.log("locationData " + i + " of "  + locationData.length);
-                }
-                // console.log("looking for Surface with models " + instancedModels.length);
+                locations[locationData[i].timestamp] = locationData[i]; //cook an object instead of array for faster lookups by timestamp
                 
-            } catch (e) {
-                console.error("ERROR LOADING GLTF! " + e);
-            } finally {
-                // console.log("locations loaded! " + locations);
-                InitSystems();
+                if (locationData.markerType != "none" && locationData[i].modelID && !locationData[i].modelID.includes("primitive") && locationData[i].modelID != "none") {
+                    let model;
+                    // if (locationData[i].modelID.includes("primitive")) {
+                    //     console.log("gotsa primitive " + locationData[i].model);
+                        
+                    //     model = await LoadLocationModel(null, locationData[i]);
+                    //     scene.add(model);
+                    // } else { //it's a gltf
+                        for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match
+                            if (locationData[i].modelID == modelsData[m]._id) {
+                                locationData[i].isHidden = false;
+                                
+                                console.log("gotsa location model! " +modelsData[m].modelURL);
+                                
+                                if (modelsData[m].item_type == "splat") {
+                                    console.log("GOTSA SPLAT! " + modelsData[m].name);
+                                    let splat = {};
+                                    splat.url = modelsData[m].modelURL;
+                                    splat.locationData = locationData[i];
+                                    splatObjex.push(splat);
+
+                                } else {
+                                    // const model = await loadModel(modelsData[m].modelURL); //loaded but not added to scene - wait for navmesh, surfaces, physics etc.
+                                    let isActive = false;             
+                                    if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
+                                        isActive = true;
+                                    } 
+                                    const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
+                                    model = modelData.model;
+                                    console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
+                                    
+                                    if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
+                                        locationData[i].isHidden = true;
+                                        // console.log("tryna hide model " + child.name);
+                                    }															
+
+                                    if (locationData[i].markerType == "brownian motion") {
+                                        const meshMover = new MeshMover(model); 
+                                        movingMeshes.push(meshMover);
+                                    }
+                            
+
+
+                                    if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
+                                        // console.log("tryna instance model " + locationData[i].name);
+                                        let instancedModel = {};
+                                        const originalModel = await LoadModel(modelsData[m].modelURL)
+                                        // const countsplit = locationData[i].eventData.split("~");
+                                        // const count = countsplit[1];
+                                        instancedModel.model = originalModel.scene;
+                                        instancedModel.locationData = locationData[i];
+                                        instancedModel.modelData = modelsData[m];
+                                        instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
+                                        // instancedModel.count = count;
+                                        instancedModels.push(instancedModel);
+                                        console.log("instancedModels length " + instancedModels.length);
+                                        model.visible = false;
+                                        scene.remove(model);  //don't need the reference model
+                                    } else { // regular meshes
+                                                                            
+                                        scene.add(model);
+                                        if (locationData[i].markerType == "video") {
+                                            model.name = "videoModel";
+                                            activeObjex.push(model);
+                                            InitVideo(locationData[i]);
+                                        }   
+                                    }
+                                    
+                                    break; //only match one model per location!?
+                                }
+                            }
+                        }
+                    // } else 
+
+                
+                } else {
+                    CreateDefaultLocationMarker(locationData[i]); //use primitive or default models
+                    
+                    if (locationData[i].markerType == "navmesh") {
+                        createDefaultNavmesh(locationData[i]);
+                    }
+                    if (locationData[i].markerType == "surface") {
+                        createDefaultSurface(locationData[i]);
+                    }
+                    if (locationData[i].markerType == "player") {
+                        console.log("playerloc " + JSON.stringify(locationData[i]));
+                        const px = parseFloat(locationData[i].x);
+                        const py = parseFloat(locationData[i].y);
+                        const pz = parseFloat(locationData[i].z);
+                        SetPlayerLocation(px,py,pz);
+                    }
+                    if (locationData[i].markerType == "collider") {
+                        // createDefaultCollider(locationData[i]);
+                        let staticObject = {};
+                        const geo = new THREE.PlaneGeometry(locationData[i].xscale, locationData[i].zscale, 10, 10);
+                        const material = new THREE.MeshStandardMaterial( { color: 'blue', wireframe: true } );
+                        const mesh = new THREE.Mesh(geo,material);
+                        staticObject.mesh = mesh;
+                        mesh.rotation.x = -Math.PI / 2;
+                        mesh.position.set(locationData[i].x, locationData[i].z, locationData[i].z)
+                        staticObject.locationData = locationData[i];
+                        // staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
+                        staticObject.isHidden = true;
+                        console.log("gotsa static collider object ishidden " + staticObject.isHidden);
+                        // scene.add(mesh);
+                        // mesh.visible = false;
+                        staticObjex.push(staticObject);
+                    }
+                    // if (locationData[i].markerType == "light") {
+                    //     CreateLight(locationData[i]);
+                    // }
+                    // if (locationData[i].markerType == "gate") {
+                    //     // CreateSceneGate(locationData[i]);
+                    // }                        
+                }
+                if (locationData[i].objectID) { // objects can have (rigged) models, and actions, which can summon other objects with models and actions.  should be object type only?
+                    
+                    for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
+                        if (locationData[i].objectID == objexData[o]._id) {
+                            // locationData[i].isHidden = false;
+                            
+                            // console.log("gotsa location objectID! " + objexData[o]._id +" looking for " + objexData[o].modelID);
+
+                            if (objexData[o].modelID) {
+                                for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match - model deps/urls should have been added to the response serverside
+                                    // console.log(modelsData[m]._id + " vs " + objexData[o].modelID );
+                                    if (modelsData[m]._id == objexData[o].modelID) {
+                                        console.log("gotsa location object modelID " + modelsData[m].modelURL);
+                                        const locData = {};
+                                        locData.locationData = locationData[i];
+                                        locData.modelData = modelsData[m];
+                                        locData.objectData = objexData[o]; //add the object data to the thing
+                                        // const model = await LoadLocationModel(modelsData[m].modelURL, locData, true);
+
+                                        locationObjex.push(locData);
+                                        
+                                        
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+                // console.log("locationData " + i + " of "  + locationData.length);
             }
-        })();
-        
+            // console.log("looking for Surface with models " + instancedModels.length);
+            
+        } catch (e) {
+            console.error("ERROR LOADING GLTF! " + e);
+        } finally {
+            // console.log("locations loaded! " + locations);
+            InitSystems();
+        }
+    })();
+    
     }
 }
 
@@ -582,7 +588,8 @@ export async function LoadAndDropSingleObject (oData, locationData) { //eg drop
     }
 }
 
-async function LoadLocationModel (url, locationData, isActive) {
+//main geo loading method, see loadlocationobjex for "objex"
+async function LoadLocationModel (url, locationData, isActive) { 
 
     let model;
     let animations;
@@ -758,8 +765,10 @@ async function LoadLocationModel (url, locationData, isActive) {
                 // child.add(mesh);
                 // mesh.visible = true;
             } 
+            
 
         });
+        
         // scene.add(model);
         return {"model" : model, "animations" : animations};
     } else {
@@ -869,6 +878,17 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             console.log("adding a light! ");
         // }
         break;
+
+        // case "video": 
+
+        // if (locationData.modelID && locationData.modelID.includes("primitive")) {
+        //     model = await LoadLocationModel(null, locationData, true);
+        // } else {
+        //     // locationData.modelID = "primitive_cube";
+        //     model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/gate2.glb', locationData, true);
+        // }
+       
+        // break;
     }
 }
 

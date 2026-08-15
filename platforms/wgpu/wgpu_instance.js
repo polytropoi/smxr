@@ -2,7 +2,8 @@ import * as THREE from 'three';
 
 
 
-import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute, instancedArray, texture } from 'three/tsl';
+import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, vec3, vec4, uniform, sin, add, buffer, 
+    instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute, instancedArray, texture } from 'three/tsl';
 
 import { settings } from '../../../connect/settings.js'; 
 
@@ -164,6 +165,14 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 sampleMaterial.envMap = scene.environment;
                 sampleMaterial.envMapIntensity = 2;
                 sampleMaterial.environmentNode = scene.environmentNode;
+                // Create a staggered rising offset based on instance index and time
+                if (locData.locationTags && locData.locationTags.includes("rise")) {
+
+                    const riseOffset = sin(add(time.mul(.1), instanceIndex.toFloat().mul(0.2))).mul(5.0);
+
+                    // Apply to the material's position node (rising along the Y axis)
+                    sampleMaterial.positionNode = add(positionLocal, vec3(0.0, riseOffset, 0.0));
+                }
                 sampleMats.push(sampleMaterial);
                 
             }
