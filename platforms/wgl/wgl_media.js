@@ -26,6 +26,8 @@ export let landscapePanel;
 export let equirectPictures = [];
 
 export let sceneVideoPlayer;
+export let mediaPlayersToUpdate = [];
+
 createYouTubePlayer();
 
 eventEl.addEventListener('sequence-event', SequenceEvent);
@@ -86,6 +88,7 @@ export function InitVideo(locData) {
     if (videoEl) {
   
             const sceneVideo = new SceneVideo(videoEl.id, locData);
+            mediaPlayersToUpdate.push(sceneVideo);
         // }
       
     }
@@ -137,6 +140,7 @@ export async function InitAmbientAudio () {
     }
     triggerAudioController = new TriggerAudioControl();
 }
+
 export function InitSceneText () {
 
     let textEl = document.getElementById("sceneTextData");
@@ -146,13 +150,12 @@ export function InitSceneText () {
             sceneTextController = new SceneTextData(textIDs);
         }
     }
-   
 }
 
-class SceneVideo { // see aframe/mod-materials.js/vid_materials_embed
+class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed component
     constructor (id, locData) {
         this.video = videoEl;
-    
+        this.video.muted = false;
         this.streamIndex = 0;
         
         const vID = id.split("_")[1];
@@ -232,7 +235,7 @@ class SceneVideo { // see aframe/mod-materials.js/vid_materials_embed
          
               if (node.name.toLowerCase().includes("fastforward")) {
                 this.ffwdMesh = node; 
-                  this.ffwdMesh.userData.name = "ffwd_videoPlayerModel_" + vID;
+                  this.ffwdMesh.userData.name = "fwd_videoPlayerModel_" + vID;
                     this.ffwdMesh.userData.locationData = locData;
                     this.ffwdMesh.userData.sceneVideoInstance = this;
               }
@@ -301,6 +304,12 @@ class SceneVideo { // see aframe/mod-materials.js/vid_materials_embed
                   this.slider_handle.userData.name = "sliderhandle_videoPlayerModel_" + vID;
                 this.slider_handle.userData.locationData = locData;
                 this.slider_handle.userData.sceneVideoInstance = this;
+              }
+              if (node.name.toLowerCase().includes("slider_background")) {
+                this.slider_background = node; 
+                this.slider_background.userData.name = "sliderhandle_videoPlayerModel_" + vID;
+                this.slider_background.userData.locationData = locData;
+                this.slider_background.userData.sceneVideoInstance = this;
               }
               // if (this.pauseButtonMesh)
             // }
@@ -386,6 +395,96 @@ class SceneVideo { // see aframe/mod-materials.js/vid_materials_embed
             playVideo(this.video);
         } else {
             pauseVideo(this.video);
+        }
+    }
+    videoRewind () {
+        console.log("tryna rewind!");
+        if ((this.video.currentTime - 10) > 0) {
+            this.video.currentTime = this.video.currentTime - 10;
+        }
+    }
+    videoForward () {
+        if (this.video.currentTime + 10 < this.video.duration) {
+            this.video.currentTime = this.video.currentTime + 10;
+        }
+    }
+    videoNext () {
+
+    }
+    videoPrevious () {
+
+    }
+    videoSliderRead () {
+
+    }
+    videoSliderHandle(hitpoint) {
+        this.hitpoint = hitpoint;
+        let nStart = new THREE.Vector3();
+        let nEnd = new THREE.Vector3();
+        this.slider_begin.getWorldPosition( nStart );
+        this.slider_end.getWorldPosition( nEnd );
+        console.log("background hit at " + JSON.stringify(this.hitpoint) );
+        let range = nEnd.x.toFixed(2) - nStart.x.toFixed(2);
+        let correctedStartValue = 0;
+        correctedStartValue = this.hitpoint.x.toFixed(2) - nEnd.x.toFixed(2);
+        let percentage = 0;
+        percentage = (((correctedStartValue * 100) / range) + 100).toFixed(2); 
+        let time = (percentage * (this.video.duration / 100)).toFixed(2);
+
+        let touchPosition = (((this.hitpoint.y.toFixed(2) - this.slider_begin.position.y.toFixed(2)) * 100) / (this.slider_end.position.y.toFixed(2) - this.slider_begin.position.y.toFixed(2)));
+        console.log("bg touch % " + percentage +  " touchPosition " + + JSON.stringify(this.hitpoint) + " vs start " +  JSON.stringify(nStart) + " vs end " +  JSON.stringify(nEnd));
+        // this.slider_handle.position.x = intersects[i].point.x; 
+        // this.slider_handle.position.z =  nStart.z;
+        // this.slider_handle.position.z =  nStart.y; 
+        this.slider_handle.position.lerpVectors(this.slider_begin.position, this.slider_end.position, percentage * .01);
+        this.video.currentTime = time;
+    }
+    videoSliderBackground () {
+        let nStart = new THREE.Vector3();
+        let nEnd = new THREE.Vector3();
+        this.slider_begin.getWorldPosition( nStart );
+        this.slider_end.getWorldPosition( nEnd );
+        console.log("background hit at " + JSON.stringify(this.hitpoint) );
+        let range = nEnd.x.toFixed(2) - nStart.x.toFixed(2);
+        let correctedStartValue = 0;
+        correctedStartValue = this.hitpoint.x.toFixed(2) - nEnd.x.toFixed(2);
+        let percentage = 0;
+        percentage = (((correctedStartValue * 100) / range) + 100).toFixed(2); 
+        let time = (percentage * (this.video.duration / 100)).toFixed(2);
+
+        let touchPosition = (((intersects[i].point.y.toFixed(2) - this.slider_begin.position.y.toFixed(2)) * 100) / (this.slider_end.position.y.toFixed(2) - this.slider_begin.position.y.toFixed(2)));
+        console.log("bg touch % " + percentage +  " touchPosition " + + JSON.stringify(this.hitpoint) + " vs start " +  JSON.stringify(nStart) + " vs end " +  JSON.stringify(nEnd));
+        // this.slider_handle.position.x = intersects[i].point.x; 
+        // this.slider_handle.position.z =  nStart.z;
+        // this.slider_handle.position.z =  nStart.y; 
+        this.slider_handle.position.lerpVectors(this.slider_begin.position, this.slider_end.position, percentage * .01);
+        this.video.currentTime = time;
+                    
+    }
+    update () {
+        if (this.video != null && this.video != undefined) {
+            if (this.durationtimeformat = null) {
+                this.durationtimeformat = fancyTimeFormat(this.video.duration)
+            }
+            if (!this.video.paused && this.slider_handle != null) {
+                this.playmaterial.map.needsUpdate = true;  
+                let currentTime = this.video.currentTime.toFixed(2);
+                this.percent = this.video.currentTime / this.video.duration;
+                // console.log(this.percent);
+                this.slider_handle.position.lerpVectors(this.slider_begin.position, this.slider_end.position, this.percent);
+                
+                    // this.fancyTimeString = fancyTimeFormat(this.video.currentTime)  + " / "+ fancyTimeFormat(this.video.duration)  + " : " + (this.percent * 100).toFixed(2) +" %\n"+currentTime;
+                    // this.videoStatus.setAttribute('text', {
+                    // // width: 4, 
+                    // align: "left",
+                    // value: this.fancyTimeString,
+                    // font: "/fonts/etc/Exo2Bold.fnt",
+                    // anchor: "center",
+                    // wrapCount: 100,
+                    // color: "white", 
+                    // });
+                    // MediaTimeUpdate(this.fancyTimeString);
+            }
         }
     }
 }

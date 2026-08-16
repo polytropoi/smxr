@@ -783,7 +783,10 @@ async function RaycastHit(type, hit, event) {
             console.log("that's equipped!");
         } else {
 
-            showCallout = true;
+            if (locationData.locationTags && !locationData.locationTags.includes("no callout") && (locationData.markerType != "video")) {
+                showCallout = true;
+            }
+            
 
             console.log(locationData.name + " " + type + " rayhit object name: " + lastRaycastHitObject.userData.name + " markertype: " +  locationData.markerType + " description:  " + hit.object.name + " distance: " + hit.distance + " scale: " + locationData.yscale);
 
@@ -798,7 +801,10 @@ async function RaycastHit(type, hit, event) {
                 const textstring = calloutsplit[randomIndex];
                 // console.log("gotsa object with textstring " + textstring);
 
-                ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                if (showCallout) {
+                    ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                }
+                
                 // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
             } else {
                 // console.log("locationname " + name);
@@ -806,7 +812,7 @@ async function RaycastHit(type, hit, event) {
                 if (name && name.includes("~")) {
                     name = name.split("~")[0];
                 }
-                if (name && name != "") {
+                if (name && name != "" && showCallout) {
                     if (tagData) { //e.g. on instanceMesh
                         // console.log(Object.keys(tagData).toString());
                         ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
@@ -1253,18 +1259,9 @@ export function onMouseDown(event) { //clicked on threejs object
                     } else {
                         sceneObjectInstance.onClick();
                     }
-                
-               
-
-                
+                                
             } else if (lastRaycastHit.instanceId) {
-                // // const popup = document.getElementById("popup");
-                // console.log(lastRaycastHit.instanceId);
-                //   Object.assign(popup.style, {
-                //     left: `${event.clientX - 150}px`,
-                //     top: `${event.clientY - 100}px`,
-                //     display: 'block',
-                // });
+               
                 let groupData;
                 if (lastRaycastHitObject.userData.locationData.groupID) {
                     console.log(lastRaycastHitObject.userData.locationData.name + " gotsa groupID " + lastRaycastHitObject.userData.locationData.groupID);
@@ -1309,7 +1306,23 @@ export function onMouseDown(event) { //clicked on threejs object
                 
                 console.log("clicked on video thing: " + lastRaycastHitObject.userData.name);
                 if (lastRaycastHitObject.userData.sceneVideoInstance) {
-                    lastRaycastHitObject.userData.sceneVideoInstance.videoPlayerTogglePlayPause();
+                    if (lastRaycastHitObject.userData.name.includes("play")) {
+                        lastRaycastHitObject.userData.sceneVideoInstance.videoPlayerTogglePlayPause();
+                    } else if (lastRaycastHitObject.userData.name.includes("screen")) {
+                        lastRaycastHitObject.userData.sceneVideoInstance.videoPlayerTogglePlayPause();
+                    } else if (lastRaycastHitObject.userData.name.includes("next")) {
+                        lastRaycastHitObject.userData.sceneVideoInstance.videoNext();
+                    } else if (lastRaycastHitObject.userData.name.includes("previous")) {
+                        lastRaycastHitObject.userData.sceneVideoInstance.videoPrevious();
+                    } else if (lastRaycastHitObject.userData.name.includes("rewind")) {
+                        lastRaycastHitObject.userData.sceneVideoInstance.videoRewind();
+                    } else if (lastRaycastHitObject.userData.name.includes("fwd")) {
+                        lastRaycastHitObject.userData.sceneVideoInstance.videoForward();
+                    } else if (lastRaycastHitObject.userData.name.includes("sliderhandle")) {
+                        lastRaycastHitObject.userData.sceneVideoInstance.videoSliderHandle(lastRaycastHit.point);
+                    } else if (lastRaycastHitObject.userData.name.includes("sliderbackground")) {
+                        lastRaycastHitObject.userData.sceneVideoInstance.videoSliderBackground();
+                    }
                 }
                 
 

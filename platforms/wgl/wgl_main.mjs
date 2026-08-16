@@ -29,7 +29,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, cameraIsReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgl_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, InitVideoGroups, ambientAudioController, InitSceneText } from './wgl_media.js';
+	import { InitAudioGroups, InitPictureGroups, InitVideoGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate } from './wgl_media.js';
 	
 	import { LoadSceneInventory } from './wgl_inventory.js';
 	
@@ -594,21 +594,14 @@
 					m.update(time)
 				)
 			}
-			// if (!cameraAtZero) {
-			// 	camera.lookAt(camera.parent);
-			// }
+			if (mediaPlayersToUpdate.length) {
+					mediaPlayersToUpdate.forEach(m => 
+					m.update(time)
+				)
+			}
+			
+			renderer.render(scene, camera);
 
-			// if (playerNavAgent && playerReadyToNav) {
-			// 	playerNavAgent.update();
-			// }
-
-			// if (doPostProcessing) {
-			// 	if (renderPipeline) {
-			// 		renderPipeline.render();
-			// 	}
-			// } else {
-				renderer.render(scene, camera);
-			// }
 
 			if (video && videomesh) {
 				if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {

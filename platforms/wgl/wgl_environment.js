@@ -57,7 +57,12 @@ export function InitFog() {
         // const fogDensity = 0.01; // Adjust this value! (Default is 0.00025)
         // scene.fog = new THREE.Fog(fogColor, 10, radius);
 
-				const fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
+				let fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
+
+				if (fogDensity > .1) { //if set for volume fog (in webgpu mode), could be almost 1
+					fogDensity = .01;
+				}
+				
 				// scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
 				scene.fog = new THREE.FogExp2( fogColor, fogDensity );
 		// scene.fog = new THREE.FogExp2( fogColor, 0.01 );
