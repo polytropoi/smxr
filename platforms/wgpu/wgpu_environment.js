@@ -464,9 +464,28 @@ export async function InitEnvMap() {
 
 			// skyboxColorNode = tslTexture.mul(1);
 			// let skyboxEnvNode = pmremTexture(tslTextureEnv);
+			if (settings.sceneTags.includes("distort")) {
+				const uvNode = uv();
+				const distortion = sin(uvNode.y.mul(30).add(time)) .mul(.002);
+				const distortion2 = sin(uvNode.x.mul(15).add(time)).mul(.001);
+				const distortedUV = vec2(uvNode.x.add(distortion), uvNode.y.add(distortion2));
+				tslTexture = texture(textureEquirect, distortedUV);
 
-			if (settings && (settings.sceneTweakColors || settings.sceneRandomColors)) {
+
+
+			} else if (settings.sceneTags.includes("noise")) {
+				const noiseCoord = vec3(uv().mul(33.0), time.mul(0.1));
+				const noiseValue = mx_noise_float(noiseCoord);
+
+				// 4. Sample the texture with modified/distorted UVs and tint with noise
+				tslTexture = texture(textureEquirect, uv().add(noiseValue.mul(0.05)));
+				// skyboxColorNode = baseTexture.mul(noiseValue);
+			} else {
+				// tslTexture = texture(textureEquirect);
 				tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+			}
+			if (settings && (settings.sceneTweakColors || settings.sceneRandomColors)) {
+				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
 				// skyboxEnvNode = tslTextureEnv.mul(animatedColor.add(1).mul(0.5)); 
 				// if (sunLight) {
@@ -493,14 +512,22 @@ export async function InitEnvMap() {
 				skyboxMaterial.colorNode = skyboxColorNode; 
 
 			} else if (settings.sceneColorizeSky) {
-			
+				console.log("tryna colorize sky to " + settings.sceneColor2);
+				const skyColor = color(settings.sceneColor2);
+				skyboxColorNode = tslTexture.mul(skyColor.mul(3));
+				scene.environmentNode = skyboxColorNode;
+
+				scene.backgroundNode = skyboxColorNode;
+				scene.environment = textureEquirect;
+				scene.background = textureEquirect;
+				skyboxMaterial.colorNode = skyboxColorNode; 
 			} else {	
 				scene.environmentNode = skyboxColorNode;
 
 				scene.backgroundNode = skyboxColorNode;
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
-					skyboxMaterial.colorNode = skyboxColorNode; 
+				skyboxMaterial.colorNode = skyboxColorNode; 
 
 
 			}

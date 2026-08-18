@@ -2328,7 +2328,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.sceneColor3Alt = sceneResponse.sceneColor3Alt;
                     settings.sceneColor4Alt = sceneResponse.sceneColor4Alt;
                     settings.sceneTweakColors = sceneResponse.sceneTweakColors;
-
+                    settings.sceneColorizeSky = sceneResponse.sceneColorizeSky;
                     settings.sceneClouds = sceneClouds;
                     settings.sceneTime = sceneTime;
                     settings.volumePrimary = sceneResponse.scenePrimaryVolume;
@@ -2369,6 +2369,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.playerSpeed = sceneResponse.scenePlayer.playerSpeed;
                     settings.playerHeight = sceneResponse.scenePlayer.playerHeight;
                     settings.sceneUseSkybox = sceneResponse.sceneUseSkybox;
+
                     settings.sceneGroundLevel = sceneResponse.sceneGroundLevel;
                     settings.sceneGroups = sceneResponse.sceneGroups;
                     // settings.playerStartPosition = playerPosition;
