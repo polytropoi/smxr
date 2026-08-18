@@ -663,10 +663,14 @@ export async function getDynamicBody(model, position, scale) {
         size = scale;
       }
       const geometry = new THREE.SphereGeometry( size / 2, 32, 16 );
-    //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
+    // const material = new THREE.MeshStandardNodeMaterial();
       // const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
-
-		const material = getRainbowMaterial();
+    // const material = new THREE.MeshStandard
+      
+		// material = getRainbowMaterial();
+    const material = getRainbowMaterial();
+    material.envNode = scene.environmentNode;
+    material.envMapIntensity = 3;
       // const material = DotNoiseMaterial()
 
       // material.envMapIntensity = 2;

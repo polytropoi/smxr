@@ -132,48 +132,51 @@ export function getRainbowMaterial() {
 		return l.sub( a.mul( max( -1, min( min( k.sub( 3 ), sub( 9, k ) ), 1 ) ) ) );
 	});
 	const random = Math.random();
+
 	const hsl = Fn( ([ h, s, l, a ]) => {
 		h = h.fract().add( 1 ).fract();
 		s = s.clamp( 0, 1 );
 		l = l.clamp( 0, 1 );
 		// a = Math.random();
 		var r = hslHelper( h, s, l, 0 );
-		var g = hslHelper( h, s, l, 8 );
-		var b = hslHelper( h, s, l, 4 );
+		var g = hslHelper( h, s, l, Math.random() * 10);
+		var b = hslHelper( h, s, l, Math.random() * 5 );
 		return vec4( r, g, b, a );
 	});
 
 
 	function fragNode () {
 
-	const noiseValue = simplexNoise2D( uv() );
-	const t = time.mul(Math.random() * .05).fract();
-	//   const p = positionLocal.x.add(0.3).sub(t);
-	const p = positionLocal.x.add(noiseValue.mul(4)).mul(t);
+        const noiseValue = simplexNoise2D( uv() );
+        const t = time.mul(Math.random() * .05).fract();
+        //   const p = positionLocal.x.add(0.3).sub(t);
+        const p = positionLocal.x.add(noiseValue.mul(4)).mul(t);
 
-	//   const hue = p.mul(random * 10).add(noiseValue.mul(t))
-	//   const hue = p.mul(10).mul(noiseValue.mul(4)).sub(t);
-	// const hue = floor(p.mul(6)).mul(Math.random()).sub(noiseValue);
+        //   const hue = p.mul(random * 10).add(noiseValue.mul(t))
+        //   const hue = p.mul(10).mul(noiseValue.mul(4)).sub(t);
+        // const hue = floor(p.mul(6)).mul(Math.random()).sub(noiseValue);
 
-	const hue = floor(p.mul(10)).mul(Math.random()).sub(noiseValue);
-	const sat = hue.mod(1).oneMinus().mul(0.5);
-	//   const alpha = 
-	  const col = hsl(hue, 1, sat, 1);
-  return col;
-}
+        const hue = floor(p.mul(10)).mul(Math.random()).sub(noiseValue);
+        const sat = hue.mod(1).oneMinus().mul(0.5);
+        //   const alpha = 
+        const col = hsl(hue, 1, sat, .5);
+        return col;
+    }
 
 
-// const mat = new THREE.NodeMaterial();
+    // const mat = new THREE.NodeMaterial();
 
-const mat = new THREE.NodeMaterial();
-mat.transparent = true;
-mat.roughnessNode = .1;
-mat.fragmentNode = fragNode();
-mat.emissionNode = fragNode();
-mat.envNode = scene.environment;
+    const mat = new THREE.NodeMaterial();
+    mat.transparent = true;
+    mat.roughnessNode = .5;
+    // mat.fragmentNode = fragNode();
+    mat.colorNode = fragNode();
+    // mat.emissionNode = fragNode();
+    mat.envMap = scene.environmentNode;
+    mat.envMapIntensity = 3;
 
-// mat.envMap = scene.environmentNode;
-// mat.colorNode = float( perlinNoise( uv() )); 
+    // mat.envMap = scene.environmentNode;
+    // mat.colorNode = float( perlinNoise( uv() )); 
 
 
   return mat;

@@ -219,7 +219,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let i = 0; i < count; i++) {            
             await sampler.sample(position);
 
-            console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
+            // console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
            
             if (surfaceType == "primitive") {
                 dummy.position.set(position.x, position.z + locData.y, position.y); //fsr the primitive plane returns x,y values with z as zero //bc its 2d! need to test for other geos

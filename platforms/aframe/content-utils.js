@@ -3594,6 +3594,9 @@ AFRAME.registerComponent('enviro_mods', { //tweak properties of environment comp
       fogDensity = settings.sceneFogDensity;
 
     }
+    if (fogDensity > .1) {
+      fogDensity = .001; 
+    }
     if (!settings.sceneUseFog || fogDensity == 0) {
       this.el.sceneEl.removeAttribute("fog");
       

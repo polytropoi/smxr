@@ -1485,9 +1485,13 @@ aframe_router.get('/:_id', function (req, res) {
                 }
                 
                 if (sceneResponse.sceneUseSceneFog) {
-                    let fogDistance = sceneResponse.sceneSkyRadius * 2;
-                    const fogDensity = sceneResponse.sceneGlobalFogDensity / 4;
-                    fogSettings = "fog=\x22type: exponential; density:" +fogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
+                    // let fogDistance = sceneResponse.sceneSkyRadius * 2;
+                    
+                    let fogDensity = sceneResponse.sceneGlobalFogDensity / 4;
+                    if (fogDensity > .01) {
+                        fogDensity = .0001;
+                    }
+                    // fogSettings = "fog=\x22type: exponential; density:" +fogDensity+ "; near: 1; far: "+fogDistance+"; color: " +sceneResponse.sceneColor2 + "\x22";
                     fog = "fog: " +fogDensity+ ";";
                 } else {
                     fogSettings = "";
@@ -1544,14 +1548,14 @@ aframe_router.get('/:_id', function (req, res) {
 
             }
 
-            if (sceneResponse.sceneUseSceneFog) {
+            // if (sceneResponse.sceneUseSceneFog) {
 
-                let fogDensity = sceneResponse.sceneGlobalFogDensity != null ? sceneResponse.sceneGlobalFogDensity : '.01';
-                let skyRadius = parseInt(sceneResponse.sceneSkyRadius - 100);
-                fogSettings = "fog=\x22type: exponential; density:"+fogDensity+"; near: 1; far: "+skyRadius+"; color: " +sceneResponse.sceneColor1 + "\x22";
-            } else {
-                fogSettings = "";
-            }
+            //     let fogDensity = sceneResponse.sceneGlobalFogDensity != null ? sceneResponse.sceneGlobalFogDensity : '.01';
+            //     let skyRadius = parseInt(sceneResponse.sceneSkyRadius - 100);
+            //     fogSettings = "fog=\x22type: exponential; density:"+fogDensity+"; near: 1; far: "+skyRadius+"; color: " +sceneResponse.sceneColor1 + "\x22";
+            // } else {
+            //     fogSettings = "";
+            // }
             
             if (sceneResponse.sceneSkyParticles != undefined && sceneResponse.sceneSkyParticles != null && sceneResponse.sceneSkyParticles != "None") { 
                 if (sceneResponse.sceneSkyParticles.toLowerCase() == "dust") {
