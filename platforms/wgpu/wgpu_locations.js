@@ -15,6 +15,9 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { instancedModels, createDefaultSurface, SetSurface, InstanceOnSurface } from './wgpu_instance.js';
 
 import { CreateLight } from './wgpu_lights.js';
+
+import { InitVideo } from './wgpu_media.js';
+
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from './wgpu_nav.js';
 import { instance, modelViewProjection } from 'three/tsl';
@@ -204,7 +207,11 @@ export async function InitLocations() {
                                                 movingMeshes.push(meshMover);
                                             }
                                             scene.add(model);
-                                                                                
+                                            if (locationData[i].markerType == "video") {
+                                                model.name = "videoModel";
+                                                activeObjex.push(model);
+                                                InitVideo(locationData[i]);
+                                            }                                      
                                         }
 
                                         break; //only match one model per location!?

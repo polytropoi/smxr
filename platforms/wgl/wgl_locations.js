@@ -85,6 +85,7 @@ export function createDefaultNavmesh(locData) {
         groundObjex.push(navmesh);
     }
 
+///////////////////// main loaders
 export function InitLocations() {
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction
     if (modelsDataEl) {

@@ -874,7 +874,10 @@ async function RaycastHit(type, hit) {
 
         } else {
 
-            showCallout = true;
+            if (locationData.locationTags && !locationData.locationTags.includes("no callout") && (locationData.markerType != "video")) {
+                showCallout = true;
+            }
+            // showCallout = true;
             // lastRaycastHitPosition = hit.point;
             // console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
 
@@ -892,9 +895,11 @@ async function RaycastHit(type, hit) {
                 const textstring = calloutsplit[randomIndex];
                 // console.log("gotsa object with textstring " + textstring);
 
-                
-                ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-                // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                if (showCallout) {
+                    ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                    // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                }
+
             } else {
 
                 console.log("locationname " + name);
@@ -902,7 +907,7 @@ async function RaycastHit(type, hit) {
                 if (name && name.includes("~")) {
                     name = name.split("~")[0];
                 }
-                if (name && name != "") {
+                if (name && name != "" && showCallout) {
                     if (tagData) { //e.g. on instanceMesh
                         // console.log(Object.keys(tagData).toString());
                         
@@ -1400,7 +1405,31 @@ export function onMouseDown(event) { // on threejs object
                     } 
                 }
             } else if (lastRaycastHitObject.userData.locationData) {
-                if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
+
+                if (lastRaycastHitObject.userData.locationData.markerType == "video") {
+                                
+                    console.log("clicked on video thing: " + lastRaycastHitObject.userData.name);
+                    if (lastRaycastHitObject.userData.sceneVideoInstance) {
+                        if (lastRaycastHitObject.userData.name.includes("play")) {
+                            lastRaycastHitObject.userData.sceneVideoInstance.videoPlayerTogglePlayPause();
+                        } else if (lastRaycastHitObject.userData.name.includes("screen")) {
+                            lastRaycastHitObject.userData.sceneVideoInstance.videoPlayerTogglePlayPause();
+                        } else if (lastRaycastHitObject.userData.name.includes("next")) {
+                            lastRaycastHitObject.userData.sceneVideoInstance.videoNext();
+                        } else if (lastRaycastHitObject.userData.name.includes("previous")) {
+                            lastRaycastHitObject.userData.sceneVideoInstance.videoPrevious();
+                        } else if (lastRaycastHitObject.userData.name.includes("rewind")) {
+                            lastRaycastHitObject.userData.sceneVideoInstance.videoRewind();
+                        } else if (lastRaycastHitObject.userData.name.includes("fwd")) {
+                            lastRaycastHitObject.userData.sceneVideoInstance.videoForward();
+                        } else if (lastRaycastHitObject.userData.name.includes("sliderhandle")) {
+                            lastRaycastHitObject.userData.sceneVideoInstance.videoSliderHandle(lastRaycastHit.point);
+                        } else if (lastRaycastHitObject.userData.name.includes("sliderbackground")) {
+                            lastRaycastHitObject.userData.sceneVideoInstance.videoSliderBackground();
+                        }
+                    }
+                
+                } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                
                     htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
                     "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+

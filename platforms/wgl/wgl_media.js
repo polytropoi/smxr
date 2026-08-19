@@ -80,8 +80,6 @@ export function InitVideoGroups () {
     } else {
          console.log("cain't find videogroupsdata elelement");
     }
-
-
 }
 
 export function InitVideo(locData) {
@@ -337,7 +335,7 @@ class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed
         }
           
 
-        console.log("tryna bind vid material to mesh");
+        console.log("tryna bind video material to mesh");
 
         // this.playmaterial.generateMipmaps = true;   
         this.playmaterial.map.needsUpdate = true;   

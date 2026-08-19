@@ -49,7 +49,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgpu_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText } from './wgpu_media.js';
+	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups } from './wgpu_media.js';
 	
 	import { equippedObjectOnLoad, LoadSceneInventory } from './wgpu_inventory.js';
 	
@@ -324,6 +324,7 @@
 		}
 		InitSceneText();
 
+		InitVideoGroups();
 		if (settings.sceneGroups) {
 			console.log("settings.sceneGroups " + settings.sceneGroups.length);
 		}
@@ -753,6 +754,12 @@
 			// if (playerNavAgent && playerReadyToNav) {
 			// 	playerNavAgent.update();
 			// }
+
+			if (mediaPlayersToUpdate.length) {
+					mediaPlayersToUpdate.forEach(m => 
+					m.update(time)
+				)
+			}
 
 			if (doPostProcessing) {
 				if (renderPipeline) {

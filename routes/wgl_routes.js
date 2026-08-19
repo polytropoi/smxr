@@ -2403,9 +2403,9 @@ wgl_router.get('/:_id', function (req, res) {
                 if (sceneResponse.sceneWebType == "Video Landing") {
                     videoGroupsEntity = "<div id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></div>"; 
                 } else {
-                    videoGroupsEntity = "<div video_groups_data id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></div>"; 
+                    videoGroupsEntity = "<div video_groups_data id=\x22videoGroupsData\x22 data-video-groups='"+buff+"'></div><script src=\x22../main/js/hls.min.js\x22></script>"; 
                 }
-                hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>"; //v 1.0.6 client hls player ref
+                // hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>"; //v 1.0.6 client hls player ref
                
             }
             ////////////// all sceneGroups 
@@ -3189,7 +3189,7 @@ wgl_router.get('/:_id', function (req, res) {
 
                             "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>"+
                             "<script type=\x22module\x22 src=\x22../connect/indexedDb.js\x22></script>" +
-                            hlsScript +
+                            // hlsScript +
 
                             primaryAudioScript +
                             primaryAudioEntity +
