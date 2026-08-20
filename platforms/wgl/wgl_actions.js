@@ -34,7 +34,7 @@ export function ActionSwitch (event) { //input from simple html popups
 
     switch (type) {
         case "start":
-            StartButton();
+            // StartButton();
         case "gate":
             EnterSceneGate(data);
         break;

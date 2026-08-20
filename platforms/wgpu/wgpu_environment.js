@@ -56,7 +56,7 @@ const b = sin(speed.add(4.0));
 // const rn = Math.random();
 // const gn = Math.random();
 // const bn = Math.random();
-const animatedColor = vec3(
+export const animatedColor = vec3(
 	r,
 	g,
 	b
@@ -215,51 +215,51 @@ let groundColor = color(settings.sceneColor2);
 	}
 }
 
-export function UpdateSkyColors(time) {
-	if (settings && settings.sceneTweakColors) {
+// export function UpdateSkyColors(time) {
+// 	if (settings && settings.sceneTweakColors) {
 
-		// const sineCycle = time.mul(2.0).sin().mul(0.5).add(0.5);
+// 		// const sineCycle = time.mul(2.0).sin().mul(0.5).add(0.5);
 
-		// // 3. Interpolate or multiply base colors using the sine node
-		// const randomColor1 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+// 		// // 3. Interpolate or multiply base colors using the sine node
+// 		// const randomColor1 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
 
-		// const dynamicColor1 = color(randomColor).mul(sineCycle);
+// 		// const dynamicColor1 = color(randomColor).mul(sineCycle);
 
-		// // const randomColor2 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+// 		// // const randomColor2 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
 
-		// // const dynamicColor2 = color(randomColor).mul(sineCycle);
+// 		// // const dynamicColor2 = color(randomColor).mul(sineCycle);
 
-		// // 4. Assign the node to the light's colorNode property
-		sunLight.colorNode = animatedColor;
+// 		// // 4. Assign the node to the light's colorNode property
+// 		sunLight.colorNode = animatedColor;
 
-		// scene.fog.colorNode = animatedColor;
+// 		// scene.fog.colorNode = animatedColor;
 
 
-		// 		const topColor = color( settings.sceneColor2 );
-		// const bottomColor = color( settings.sceneColor1 );
+// 		// 		const topColor = color( settings.sceneColor2 );
+// 		// const bottomColor = color( settings.sceneColor1 );
 
-		// const topColor = color( 0x3a1c71 );
-		// const bottomColor = color( 0xd76d77 );
-		// const gradientNode = mix( dynamicColor1, dynamicColor2, uv().y );
+// 		// const topColor = color( 0x3a1c71 );
+// 		// const bottomColor = color( 0xd76d77 );
+// 		// const gradientNode = mix( dynamicColor1, dynamicColor2, uv().y );
 
-		// scene.backgroundNode = gradientNode;
-		// if (sunLight) {
+// 		// scene.backgroundNode = gradientNode;
+// 		// if (sunLight) {
 
-		// 	const hue = (performance.now() * 0.1) % 1;
-		// 	console.log("hue is " + hue);
-		// 	regularColor.setHSL(hue, 1.0, 0.5);
+// 		// 	const hue = (performance.now() * 0.1) % 1;
+// 		// 	console.log("hue is " + hue);
+// 		// 	regularColor.setHSL(hue, 1.0, 0.5);
 
-		// 	//
+// 		// 	//
 
-		// 	sunLight.color.set(regularColor);
+// 		// 	sunLight.color.set(regularColor);
 
-		// 	// scene.fog.color.set(regularColor);
-		// }
-		// if (scene.fog) {
-		// 	scene.fog.color.set(regularColor);
-		// }
-	}
-}
+// 		// 	// scene.fog.color.set(regularColor);
+// 		// }
+// 		// if (scene.fog) {
+// 		// 	scene.fog.color.set(regularColor);
+// 		// }
+// 	}
+// }
 
 export const wavyDistortion = Fn( ( { imageTex, frequency, amplitude } ) => {
   // Multiply time by frequency and add vertical UV to create motion down the plane
@@ -270,6 +270,7 @@ export const wavyDistortion = Fn( ( { imageTex, frequency, amplitude } ) => {
   
   return texture( imageTex, distortedUV );
 } );
+
 
 export async function UpdateEnvMap() {
 
@@ -297,7 +298,8 @@ export async function UpdateEnvMap() {
 			
 			// const textureEqMod = wavyDistortion(textureEquirect, 33, 33);
 			// const modifiedUV = uv().add(vec3(sin(time.mul(2.0)).mul(0.02), 0.0, 0.0).xy);
-			// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+			tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+					// tslTexture = texture(textureEquirect, equirectUV());
 			if (settings.sceneTags.includes("distort")) {
 				const uvNode = uv();
 				const distortion = sin(uvNode.y.mul(30).add(time)) .mul(.002);
@@ -316,7 +318,9 @@ export async function UpdateEnvMap() {
 				// skyboxColorNode = baseTexture.mul(noiseValue);
 			} else {
 				// tslTexture = texture(textureEquirect);
-				tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+				// tslTexture = texture(textureEquirect, uv());
+						// tslTexture = texture(textureEquirect, equirectUV());
 			}
 			// tslTextureEnv = texture(textureEquirectPmrem, equirectUV( positionLocal.normalize()));
 
@@ -341,6 +345,8 @@ export async function UpdateEnvMap() {
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 			}
+
+			skyboxMaterial.needsUpdate = true;
 			// textureEquirectPmrem.dispose();
 			// pmremGenerator.dispose();
 		}
@@ -424,9 +430,10 @@ export async function InitEnvMap() {
 		textureEquirect.colorSpace = THREE.SRGBColorSpace;
 
 
-		tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+		// tslTexture = texture(textureEquirect, uv());
+		// tslTexture = texture(textureEquirect, equirectUV());
 
-		// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+		tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
 		let skyboxColorNode = tslTexture.mul(1);
 
 		scene.environmentNode = skyboxColorNode;
@@ -482,7 +489,9 @@ export async function InitEnvMap() {
 				// skyboxColorNode = baseTexture.mul(noiseValue);
 			} else {
 				// tslTexture = texture(textureEquirect);
-				tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+				// tslTexture = texture(textureEquirect, uv());
+						// tslTexture = texture(textureEquirect, equirectUV());
 			}
 			if (settings && (settings.sceneTweakColors || settings.sceneRandomColors)) {
 				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));

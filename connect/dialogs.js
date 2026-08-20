@@ -1,7 +1,7 @@
 import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
           InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, 
           RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime, 
-          LoadPrimaryAudioHowl} from "./media.js";
+          LoadPrimaryAudioHowl, playVideo, pauseVideo} from "./media.js";
 import { dequip_event, equip_inventory_object_event, drop_inventory_object_event, timedEventsListenerMode, timeKeysData, tkStarttimes, 
         PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz } from "./events.js";
 import { settings, profile } from "./settings.js";
@@ -11,7 +11,7 @@ import { room, lerp, sceneLocations, localData, ReturnLocationTable,
   GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
   Disconnect,
   SaveTimekeysToLocal,
-  CreateLocationAlt
+  CreateLocationAlt, videoEl
   } from "./connect.js";
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "./indexedDb.js";
 
@@ -1754,6 +1754,9 @@ let isPlaying = false;
 
 export function PlayPauseMedia () {
 
+  if (!timedEventsListenerMode && settings && settings.sceneTimedEvents.listenTo) {
+        SetTimedEventsListenerMode(settings.sceneTimedEvents.listenTo);
+  }
   console.log("PlayPauseMedia listening to " + timedEventsListenerMode + " primaryAudioHowl " + primaryAudioHowl);
   if (timedEventsListenerMode != null) {
     if (timedEventsListenerMode.toLowerCase() == "primary audio") {
@@ -1776,10 +1779,20 @@ export function PlayPauseMedia () {
       }
       
     } else if (timedEventsListenerMode.toLowerCase() == "primary video") {
-      var videoControllerEl = document.getElementById('primary_video_0');  
+
+      if (videoEl) { //regular video player in wgl/wgpu
+         if (videoEl.paused) {
+            console.log("tryna play vid");
+            playVideo(videoEl);
+          } else {
+              console.log("tryna pause vid");
+              pauseVideo(videoEl);
+          }
+      } else { //aframe etc...
+        var videoControllerEl = document.getElementById('primary_video_0');  
         if (!videoControllerEl) {
           videoControllerEl = document.getElementById('primary_video'); //i.e. it's an equirect..
-        }
+        } 
         if (videoControllerEl != null) {
           console.log("gotsa video embedVideo");
           let videoController = videoControllerEl.components.vid_materials_embed;
@@ -1799,6 +1812,7 @@ export function PlayPauseMedia () {
             }
           }
         }
+      }
 
     } else if (timedEventsListenerMode.toLowerCase() == "youtube") {
       

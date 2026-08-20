@@ -11,6 +11,10 @@ import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData, createYouT
 import { lookAtCameraObjects } from './wgpu_ui.js';
 import { TagsToInstances } from './wgpu_instance.js';
 
+import { animatedColor } from './wgpu_environment.js';
+import { texture, uv } from 'three/tsl';
+
+
 import { UpdateEnvMap } from './wgpu_environment.js';
 import { pauseVideo, playVideo } from '../../connect/media.js';
 
@@ -355,7 +359,7 @@ class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed
           console.log("this.screenmesdh" + this.screenMesh);
 
         }
-        this.video.play().catch(err => console.error("Playback blocked:", err));
+        // this.video.play().catch(err => console.error("Playback blocked:", err));
 
         this.vidtexture = new THREE.VideoTexture( this.video );
         this.vidtexture.flipY = false; 
@@ -365,8 +369,23 @@ class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed
         // this.playmaterial = new THREE.MeshStandardMaterial( { map: this.vidtexture, side: THREE.DoubleSide, shader: THREE.FlatShading } ); 
         if (this.isSkybox) {
             this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, side: THREE.BackSide, shader: THREE.FlatShading } ); 
+            // this.playmaterial  = new THREE.MeshBasicNodeMaterial();
+            // const tslVidTexture = texture(this.vidtexture, uv());
+            // colorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
+            // this.playmaterial.colorNode = 
+
+            //  this.playmaterial  = new THREE.MeshBasicNodeMaterial();
+            // this.playmaterial.colorNode = texture(this.vidtexture, uv());
+
         } else {
-            this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, shader: THREE.FlatShading } ); 
+            // this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, shader: THREE.FlatShading } ); 
+              this.playmaterial  = new THREE.MeshBasicNodeMaterial();
+                const tslVidTexture = texture(this.vidtexture, uv());
+                if (locData.locationTags && locData.locationTags.includes("tweak")) {
+                    this.playmaterial.colorNode = tslVidTexture.mul(animatedColor.add(1).mul(0.5)); 
+                } else {
+                    this.playmaterial.colorNode = tslVidTexture;
+                }
         }
           
 

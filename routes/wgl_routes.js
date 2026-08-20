@@ -2391,7 +2391,7 @@ wgl_router.get('/:_id', function (req, res) {
                         for (let i = 0; i < requestedVideoGroups[v].videos.length; i++ ) {  //TODO spin first and second level array
                             //crossorigin=\x22use-credentials\x22
                             
-                            videoElements = videoElements + "<video hidden autoplay muted loop=\x22true\x22 webkit-playsinline playsinline crossOrigin=\x22anonymous\x22 webkit-playsinline playsinline id=\x22video_"+requestedVideoGroups[v].videos[i]._id+"\x22>"+
+                            videoElements = videoElements + "<video hidden muted loop=\x22true\x22 webkit-playsinline playsinline crossOrigin=\x22anonymous\x22 webkit-playsinline playsinline id=\x22video_"+requestedVideoGroups[v].videos[i]._id+"\x22>"+
                             "<source src=" +requestedVideoGroups[v].videos[i].url+ " type=\x22video/mp4\x22/></video>";
                             // console.log("Video elements " + JSON.stringify(videoElements));
                             

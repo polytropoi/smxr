@@ -50,7 +50,7 @@ export function InitFog() {
     if (settings && settings.sceneUseVolumetricFog) {
         console.log("doin some fog...");
         const fogColor = settings.sceneColor2; // Sky blue
-		let radius = 400;
+		let radius = 100;
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;
 		}
@@ -59,11 +59,11 @@ export function InitFog() {
 
 				let fogDensity = settings.fogDensity * .5; // Adjust this value! (Default is 0.00025)
 
-				if (fogDensity > .1) { //if set for volume fog (in webgpu mode), could be almost 1
-					fogDensity = .01;
+				if (fogDensity > .01) { //if set for volume fog (in webgpu mode), could be almost 1
+					fogDensity = .001;
 				}
 				
-				// scene.fog = new THREE.Fog(fogColor, 10, radius * 2);
+				// scene.fog = new THREE.Fog(fogColor, 10, radius * 1.75);
 				scene.fog = new THREE.FogExp2( fogColor, fogDensity );
 		// scene.fog = new THREE.FogExp2( fogColor, 0.01 );
         // scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );

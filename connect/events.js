@@ -30,7 +30,7 @@ eventEl.id = "eventEl";
 export let selectedPosition = {};
 export let timeKeysData = {};
 export let tkStarttimes = [];
-export let timedEventsListenerMode = "";
+export let timedEventsListenerMode;
 let isListening = false;
 let lastTimedEvent = "";
 // let currentPrimaryAudioTime = 0;
@@ -105,8 +105,14 @@ export function UpdatePrimaryTransportSlider(value) {
 }
 
 function TimedEventListener () { 
- console.log("TimedEventsListener " + timedEventsListenerMode + " tkStarttimes " + tkStarttimes);
 
+   if (timedEventsListenerMode == "" && timeKeysData && timeKeysData.listenTo) {
+         timedEventsListenerMode = timeKeysData.listenTo;
+   }
+   
+   console.log("TimedEventsListener " + timedEventsListenerMode + " tkStarttimes " + tkStarttimes);
+
+   
    if (isListening) {
       return;
    }

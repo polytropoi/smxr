@@ -157,6 +157,14 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
     if (!timedEventsListenerMode || timedEventsListenerMode == "") {
         SetTimedEventsListenerMode("Youtube");
     }
+    var iframe = event.target.getIframe();
+    if (iframe) {
+      // Safely append compute-pressure to the allow attribute
+      var currentAllow = iframe.getAttribute('allow') || ''; //to prevent error
+      if (!currentAllow.includes('compute-pressure')) {
+        iframe.setAttribute('allow', currentAllow + (currentAllow ? '; ' : '') + 'compute-pressure');
+      }
+    }
     // document.getElementById('youtubeElement').style.borderColor = '#FF6D00';
     // youtube_player.player_status_update("ready");
     // youtube_player.set_duration(event.target.getDuration());
