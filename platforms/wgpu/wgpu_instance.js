@@ -288,7 +288,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 
                 for (let i = 0; i < count; i++) {
                     
-                //  let randomColor = new THREE.Color();
+                 let randomColor = new THREE.Color();
                 instancedMeshes[s].instanceMatrix.needsUpdate = true;
                 // randomColor.setHex( Math.random() * 0xffffff );
                 // const r = Math.random();

@@ -752,9 +752,11 @@ async function LoadLocationModel (url, locationData, isActive) {
                         // child.material.roughness = 0.5;
                         // child.material.envMap = scene.environment;
                         // child.material = convertGltfToNodeMaterial(child.material);
+                        child.material.envMap = scene.environment;
+                        // child.material 
                         // child.material.transparent = true;
                        
-                        child.envMapIntensity = 2;
+                        child.envMapIntensity = 1;
                         child.castShadow = true;	
                         child.receiveShadow = true;
                     }

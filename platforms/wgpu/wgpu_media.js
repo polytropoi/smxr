@@ -1049,9 +1049,12 @@ export class ScenePicture {
             const landscapeGeometry = new THREE.PlaneGeometry(6, 4, 4, 4);
             // const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
             const planeMaterial = new THREE.MeshStandardMaterial({ color: 'white', side: THREE.FrontSide, metalness: 0, roughness: 1, transparent: true });
+            // const planeMaterial = new THREE.NodeMaterial();
+
+
             // planeMaterial.envMap = null;
             
-            planeMaterial.envMapIntensity = 0;
+            planeMaterial.envMap = null;
             this.landscapePanel = new THREE.Mesh(landscapeGeometry, planeMaterial);
             this.landscapePanel.name = "landscapePanel";
             scene.add(this.landscapePanel);
