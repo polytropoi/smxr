@@ -96,10 +96,10 @@ export function InitPictureGroups () {
         for (let p = 0; p < pictureGroupsData[i].images.length; p++) {
            
             if (pictureGroupsData[i].images[p].orientation == "Equirectangular") {
-                 console.log("adding equirect: " +JSON.stringify(pictureGroupsData[i].images[p]));
+                 console.log("adding equirect: " + pictureGroupsData[i].images[p].title);
                 equirectPictures.push(pictureGroupsData[i].images[p]);
             } else if (pictureGroupsData[i].images[p].orientation == "Tileable") {
-                 console.log("adding equirect: " +JSON.stringify(pictureGroupsData[i].images[p]));
+                 console.log("adding equirect: " + pictureGroupsData[i].images[p].title);
                 tileablePictures.push(pictureGroupsData[i].images[p]);
             }
             

@@ -654,7 +654,7 @@ export function GetInstancedRigidbody(position, scale) {
               // .setCcdEnabled(false);
       let rigidbody = world.createRigidBody(rigidBodyDesc);
       // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
-      console.log("rigidbody created with handle " + rigidbody.handle);
+      // console.log("rigidbody created with handle " + rigidbody.handle);
       let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize); //.setDensity(density);
       let collider = world.createCollider(colliderDesc, rigidbody);
 
@@ -718,7 +718,7 @@ export async function getDynamicBody(model, position, scale) {
               // .setCcdEnabled(false);
       let rigidbody = await world.createRigidBody(rigidBodyDesc);
       // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
-      console.log("rigidbody created with handle " + rigidbody.handle);
+      // console.log("rigidbody created with handle " + rigidbody.handle);
       let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize); //.setDensity(density);
       let collider = await world.createCollider(colliderDesc, rigidbody);
 

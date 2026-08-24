@@ -11002,6 +11002,7 @@ function getAllPeople() {
                                 "<option>Unity</option>" +
                                 "<option>.OBJ</option>" +
                                 "<option>.GLB</option>" +
+                                "<option>Primitive Plane</option>" +
                                 "<option>Primitive Cube</option>" +
                                 "<option>Primative Sphere</option>" +
                                 "<option>Primative Capsule</option>" +
@@ -12565,6 +12566,7 @@ function getAllPeople() {
                                 "<select class=\x22form-control modelSelector\x22 id=\x22modelSelect_"+locationID+"\x22>" +
                                 "<option value=\x22none\x22 selected>none</option>" +
                                 // "<option value=\x22none\x22>none</option>" +
+                                "<option value=\x22primitive_plane\x22>plane</option>" +
                                 "<option value=\x22primitive_cube\x22>cube</option>" +
                                 "<option value=\x22primitive_sphere\x22>sphere</option>" +
                                 "<option value=\x22primitive_cylinder\x22>cylinder</option>" +
@@ -15463,6 +15465,7 @@ function getAllPeople() {
                                     const y = document.getElementById("modelSelect_" + sceneLocations[h].timestamp);
                                     let modelMatch = false;
                                     if (sceneLocations[h].modelID && (sceneLocations[h].modelID != "none" || sceneLocations[h].modelID != "") 
+                                        && sceneLocations[h].modelID != "primitive_plane"
                                         && sceneLocations[h].modelID != "primitive_cube"
                                         && sceneLocations[h].modelID != "primitive_sphere"
                                         && sceneLocations[h].modelID != "primitive_cylinder") {

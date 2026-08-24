@@ -242,18 +242,18 @@ export async function UpdateEnvMap() {
 
 			// const pmremGenerator = new THREE.PMREMGenerator(renderer);
 		
-			textureEquirect = await equirectTextureLoader.loadAsync(skyboxURL);
+			const textureEquirect = await equirectTextureLoader.loadAsync(skyboxURL);
 			textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
 			textureEquirect.colorSpace = THREE.SRGBColorSpace;
 			// textureEquirectPmrem = pmremGenerator.fromEquirectangular(textureEquirect).texture;
 				
 
-
+			let skyboxColorNode;
 			// scene.environment = textureEquirect;
 			
 			// const textureEqMod = wavyDistortion(textureEquirect, 33, 33);
 			// const modifiedUV = uv().add(vec3(sin(time.mul(2.0)).mul(0.02), 0.0, 0.0).xy);
-			tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+			let tslTexture; 
 					// tslTexture = texture(textureEquirect, equirectUV());
 			if (settings.sceneTags.includes("distort")) {
 				const uvNode = uv();
@@ -276,7 +276,10 @@ export async function UpdateEnvMap() {
 				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
 				// tslTexture = texture(textureEquirect, uv());
 						// tslTexture = texture(textureEquirect, equirectUV());
+				tslTexture = texture(textureEquirect, equirectUV( positionWorld.normalize()));
 			}
+			
+		
 			// tslTextureEnv = texture(textureEquirectPmrem, equirectUV( positionLocal.normalize()));
 
 			if (settings.sceneTweakColors) {
@@ -427,7 +430,7 @@ export async function InitEnvMap() {
 		// tslTexture = texture(textureEquirect, uv());
 		// tslTexture = texture(textureEquirect, equirectUV());
 
-		tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize() ));
+		tslTexture = texture(textureEquirect, equirectUV( positionWorld.normalize() ));
 		let skyboxColorNode = tslTexture.mul(1);
 
 		scene.environmentNode = skyboxColorNode;

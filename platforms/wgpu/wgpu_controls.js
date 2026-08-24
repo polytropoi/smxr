@@ -24,17 +24,26 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 
 import { MapControls } from 'three/addons/controls/MapControls.js';
 
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
+
 import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, ShowGroupAudio, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup, HideHTMLPopup, startPop, ReturnAudioInstance } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
+
+
+// let  = new TransformControls(camera, renderer.domElement);
+// control.attach(objectToTransform);
+
 import * as nipplejs from '../../../main/js/nipple.mjs';
 import { TagsToInstances } from './wgpu_instance.js';
-import { GoToNext } from '../../connect/connect.js';
+import { GoToNext, localData } from '../../connect/connect.js';
+import { SaveLocalData } from '../../connect/indexedDb.js';
 
 // import { getPlayerBody } from './three_physics.js';
 
-export let camera, controls, player;
+export let camera, controls, player, transformControl, transformObject;
+export let allowMods = false;
 export let isReady = false;
 export let followDistance = 8;
 export let cameraAtZero = true;
@@ -92,6 +101,7 @@ let validTarget = false;
 
 let controlObject;
 let lastPlayerPosition = new THREE.Vector3();
+
 export let worldHitPosition = new THREE.Vector3();
 
 const popup = document.getElementById("popup"); //should mode these to _ui
@@ -99,20 +109,6 @@ export const hic_content = document.getElementById("hic_content"); //alt to popu
 
 
 export const viewportPlaceholder = new THREE.Object3D();
-
-    // $('#popup').on('click', '#popup_yesButton', function(e) {
-    //   console.log("popup yes button click on target " + e.target);
-    //   if (e.target.dataset.eventdata) {
-    //     console.log("tryna goto " + e.target.dataset.eventdata );
-    //     EnterSceneGate(e.target.dataset.eventdata);
-    //   }
-
-      
-    // });
-    // $('#popup').on('click', '#popup_cancelButton', function(e) {
-    //   console.log("popup cancel button click on target " + e.target);
-    //   popup.style.display = "none";
-    // });
 
 export function SetPlayerLocation (locationData) {
     // if (controls && controls.object) {
@@ -170,6 +166,51 @@ function SetInputMode () {
       
 }
 
+function InitTransformControls () {
+    let objWorldPosition = new THREE.Vector3();
+    transformControl = new TransformControls(camera, renderer.domElement);
+    scene.add(transformControl.getHelper());
+
+    transformControl.addEventListener('objectChange', () => {
+        // const obj = transformControl.object;
+        // obj.getWorldPosition(objWorldPosition);
+        // console.log(obj.userData.locationData.name + ' New position: ' + JSON.stringify(obj.position) + " vs " + JSON.stringify(objWorldPosition) );
+        // obj.userData.locationData.x = objWorldPosition.x;
+        // obj.userData.locationData.y = objWorldPosition.y;
+        // obj.userData.locationData.z = objWorldPosition.z;
+
+
+        // console.log(localData)
+
+
+    });
+
+    transformControl.addEventListener('dragging-changed', (event) => {
+        console.log("drageve3nt: " + event.value );
+        // console.log(JSON.stringify(localData));
+        if (!event.value) { //drag is done
+            const obj = transformControl.object;
+            obj.getWorldPosition(objWorldPosition);
+            console.log(obj.userData.locationData.name + ' New position: ' + JSON.stringify(obj.position) + " vs " + JSON.stringify(objWorldPosition) );
+            obj.userData.locationData.x = objWorldPosition.x;
+            obj.userData.locationData.y = objWorldPosition.y;
+            obj.userData.locationData.z = objWorldPosition.z;
+            for (let i = 0; i < localData.locations.length; i++) {
+                if (localData.locations[i].timestamp == obj.userData.locationData.timestamp) {
+                    console.log("GOTSA MATCH ON THE TRANSFORM OBJECT! " + JSON.stringify(obj.userData.locationData));
+                }
+            }
+        }
+
+    });
+
+    // 4. Listen to 'change' to re-render the scene
+    transformControl.addEventListener('change', () => {
+        // renderer.render(scene, camera);
+            console.log("transformControl change");
+    });
+}
+
 export function SetControls(cameraMode, cameraFOV) {
 
     SetInputMode();
@@ -207,6 +248,14 @@ export function SetControls(cameraMode, cameraFOV) {
         pointerGizmo = new THREE.Mesh(pointerGeo, pointerMat);
         pointerGizmo.up.set(0, 1, 0);
         scene.add(pointerGizmo);
+
+       
+        if (settings.sceneTags.includes("allow mods")) {
+            allowMods = true;
+            InitTransformControls();
+        }
+
+
 
     } else if (cameraMode == "Fixed") {
 
@@ -426,7 +475,10 @@ export function SetControls(cameraMode, cameraFOV) {
         pointerGizmo.up.set(0, 1, 0);
         scene.add(pointerGizmo);
 
-
+        if (allowMods) {
+            transformControl = new TransformControls(camera, renderer.domElement);
+            scene.add(transformControl.getHelper());
+        }
 
     } else {
         console.log("no valid camera Mode!");
@@ -1197,7 +1249,7 @@ export function onMouseDown(event) { // on threejs object
     event.stopPropagation();// duh!
 
     console.log("mouse down on " + event.target.id);
-    if (lastRaycastHitObject && lastRaycastHitObject.userData) {
+    if (lastRaycastHitObject && lastRaycastHitObject.userData.name) {
     console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
     } else {
         console.log(event.clientY + " " + (window.innerHeight * .8));
@@ -1274,7 +1326,12 @@ export function onMouseDown(event) { // on threejs object
     } else if (lastRaycastHitObject && lastRaycastHitObject.userData) {
 
             // let sceneObjID = lastRaycastHitObject.userData.sceneObjectID;
-        console.log("clicked on active object! " + lastRaycastHitObject.userData.name);
+        console.log("clicked on active object! " + lastRaycastHitObject.userData.locationData.name);
+
+        if (allowMods) {
+            transformControl.attach(lastRaycastHitObject);
+        }
+        
             let navAgentInstance = null;
 
             let sOID = lastRaycastHitObject.userData.sceneObjectID;
@@ -1696,6 +1753,7 @@ function rotateObjectToNormal(object, targetNormal) {
     // Apply the quaternion to the object
     object.setRotationFromQuaternion(quaternion);
 }
+
 
 
 

@@ -6,7 +6,7 @@ import {SetPlayerLocation, viewportPlaceholder} from './wgpu_controls.js';
 
 import {SceneObject, sceneObjects} from './wgpu_actions.js';
 
-import { SetSceneLocations, userData } from '../../../connect/connect.js';
+import { SetSceneLocations, userData, localData } from '../../../connect/connect.js';
 
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -23,9 +23,11 @@ import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from
 import { instance, modelViewProjection, color, float, range } from 'three/tsl';
 // import { sceneObjects } from '../../connect/dialogs.js';
 
+// export let localData = {};
+
 export let locations = {};
 
-export let locationData;
+export let locationData; //this should be an array, read from data-attributes
 export let modelsData;
 export let objexData;
 export let locationObjex = []; //includes location, objex, and model data
@@ -141,6 +143,11 @@ export async function InitLocations() {
 
         locationData = JSON.parse(atob(theLocationData));
         SetSceneLocations(locationData);
+        
+        // if (settings.sceneTags.includes("allow mods")) {
+        //     localData.locations = locationData;
+        // }
+        
         // console.log("locationData " + JSON.stringify(locationData));
         
         (async () => {
@@ -627,6 +634,7 @@ async function LoadLocationModel (url, locationData, isActive) {
 
             model.scale.set(xscale,yscale,zscale);
 
+            model.name = locationData.timestamp;
             if (locationData.eventData.includes("instance")) {
                 let instancedModel = {};
 
@@ -712,6 +720,7 @@ async function LoadLocationModel (url, locationData, isActive) {
 
             // model.scale.set(20,20,20);
         
+        model.name = locationData.timestamp;
         // model.layers.set(1);
         model.userData.locationData = locationData;
 

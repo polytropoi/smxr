@@ -1089,6 +1089,7 @@ export function onMouseDown(event) { //clicked on threejs object
         }
     }
     
+    
     if (!sceneIsReady || !cameraIsReady) {
         return;
     }

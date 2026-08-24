@@ -796,9 +796,9 @@ export function InitIDB() {
       if (localData.settings && localData.settings.sceneTags) {
          for (let i = 0; i < localData.settings.sceneTags.length; i++) {
             localData.settings.sceneTags[i] = localData.settings.sceneTags[i].trim();
-            console.log("localData.settings.sceneTag + " +localData.settings.sceneTags[i]);
+            console.log("localData.settings.sceneTag + " +localData.settings.sceneTags[i]); 
          }
-         document.getElementById("sceneTagsField").value = localData.settings.sceneTags;
+         document.getElementById("sceneTagsField").value = localData.settings.sceneTags; //in dialog panel
       }
 
        scene.settings = localData.settings;

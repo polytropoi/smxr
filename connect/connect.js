@@ -962,8 +962,9 @@ export function SaveTimekeysToLocal () {
 }
 
 
-export function SaveModToLocal(locationKey) { //locationKey is now just timestamp of the location item and element id, unique enough
-   let name = document.getElementById('locationName').value;
+export function SaveModToLocal(locationKey) { //in dialog mode, locationKey is now just timestamp of the location item and element id, unique enough
+
+   let name = document.getElementById('locationName').value; //?
    console.log("tryna save mod to local with key " + locationKey + " named " +name);
    
    SetHasLocalData(true);

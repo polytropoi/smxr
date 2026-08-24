@@ -7,7 +7,7 @@ export let pixelsPerMeterActual = 10; //pull from scene.settings instead...
 // export let mapHeight = 0;
 // export let selectedPosition = {};
 
-import { InitConnect, SetPlayerToLastPosition, InitSocket } from "../connect/connect.js";
+import { InitConnect, SetPlayerToLastPosition, InitSocket, localData } from "../connect/connect.js";
 import { SettingsLoaded } from "./events.js";
 
 $(function() { 
@@ -19,6 +19,10 @@ $(function() {
     console.log("settings : " + JSON.stringify(settings));
     InitConnect();
     SettingsLoaded();
+
+   if (settings.sceneTags.includes("allow mods")) {
+         localData.settings = settings;
+   }
 
 });
 
