@@ -16,11 +16,11 @@ import { instancedModels, createDefaultSurface, SetSurface, InstanceOnSurface } 
 
 import { CreateLight } from './wgpu_lights.js';
 
-import { InitVideo } from './wgpu_media.js';
+import { convertGltfToNodeMaterial, InitLocationModelVideo } from './wgpu_media.js';
 
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from './wgpu_nav.js';
-import { instance, modelViewProjection } from 'three/tsl';
+import { instance, modelViewProjection, color, float, range } from 'three/tsl';
 // import { sceneObjects } from '../../connect/dialogs.js';
 
 export let locations = {};
@@ -208,9 +208,10 @@ export async function InitLocations() {
                                             }
                                             scene.add(model);
                                             if (locationData[i].markerType == "video") {
-                                                model.name = "videoModel";
+                                                model.name = "videoLocationModel_" + locationData[i].timestamp;
+                                                // console.log("tryna set player " + model.name);
                                                 activeObjex.push(model);
-                                                InitVideo(locationData[i]);
+                                                InitLocationModelVideo(model, locationData[i]);
                                             }                                      
                                         }
 
@@ -242,14 +243,15 @@ export async function InitLocations() {
                             const geo = new THREE.PlaneGeometry(locationData[i].xscale, locationData[i].zscale, 10, 10);
                             const material = new THREE.MeshStandardMaterial( { color: 'blue', wireframe: true } );
                             const mesh = new THREE.Mesh(geo,material);
+                             scene.add(mesh);
                             staticObject.mesh = mesh;
                             mesh.rotation.x = -Math.PI / 2;
-                            mesh.position.set(locationData[i].x, locationData[i].z, locationData[i].z)
+                            mesh.position.set(locationData[i].x, locationData[i].z, locationData[i].z);
                             staticObject.locationData = locationData[i];
                             // staticObject.isHidden = locationData.locationTags && locationData.locationTags.includes("hide");
                             staticObject.isHidden = true;
                             console.log("gotsa static collider object ishidden " + staticObject.isHidden);
-                            // scene.add(mesh);
+                            //
                             // mesh.visible = false;
                             staticObjex.push(staticObject);
                         }
@@ -574,16 +576,23 @@ async function LoadLocationModel (url, locationData, isActive) {
 
         let transparentMat = true;
         if (locationData.eventData && locationData.eventData.includes("instance")) {
-            transparentMat = false;
+            // transparentMat = false;
         } 
         if (locationData.modelID.includes("sphere")) {
             // console.log("gotsa sphere primitive");
             const geometry = new THREE.SphereGeometry(yscale,16,16);
-            const material = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: .25});
+            // const material = new THREE.NodeMaterial();
+            const material = new THREE.MeshStandardNodeMaterial({
+                metalness: 1.0,
+                roughness: 0.1
+            });
+            // material.colorNode = range(new THREE.Color(0x000000), new THREE.Color(0xffffff));
+            // material.colorNode = color(0xffffff);
+            // material.roughnessNode = float(0.2); 
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("cube")) {
             const geometry = new THREE.BoxGeometry(xscale, yscale, xscale, 16,16);
-            const material = new THREE.MeshBasicNodeMaterial({color: 'red', transparent: transparentMat, opacity: .5});
+            const material = new THREE.NodeMaterial({color: 'red', transparent: transparentMat, opacity: .5});
             model = new THREE.Mesh(geometry, material);
         } else if (locationData.modelID.includes("capsule")) {
             const geometry = new THREE.CapsuleGeometry( 1, 1, 4, 8, 1 );
@@ -627,6 +636,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                 instancedModel.scale = yscale;
                 instancedModel.castShadow = true;
                 instancedModel.receiveShadow = true;
+                // instancedModel.material = convertGltfToNodeMaterial(instancedModel.material);
                 // instancedModel.count = count;
                 // if (locationData[i].objectID) { // add object data if present  
                 //     for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
@@ -741,6 +751,9 @@ async function LoadLocationModel (url, locationData, isActive) {
                         // console.log("setting scene.environment envmap " + scene.environment );
                         // child.material.roughness = 0.5;
                         // child.material.envMap = scene.environment;
+                        // child.material = convertGltfToNodeMaterial(child.material);
+                        // child.material.transparent = true;
+                       
                         child.envMapIntensity = 2;
                         child.castShadow = true;	
                         child.receiveShadow = true;

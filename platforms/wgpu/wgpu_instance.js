@@ -2,14 +2,14 @@ import * as THREE from 'three';
 
 
 
-import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, vec3, vec4, uniform, sin, add, buffer, 
-    instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute, instancedArray, texture } from 'three/tsl';
+import { billboarding, floor, float, Fn, max, min, positionLocal, range, normalLocal, sub, time, vec3, vec4, uniform, sin, add, buffer, 
+    instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute, instancedArray, texture, attribute } from 'three/tsl';
 
 import { settings } from '../../../connect/settings.js'; 
 
 import { scene } from './wgpu_main.mjs';
 
-import { sceneTextController } from './wgpu_media.js';
+import { sceneTextController, convertGltfToNodeMaterial } from './wgpu_media.js';
 
 // import { surface } from './three_locations.js';
 
@@ -163,9 +163,26 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 sampleGeos.push(sampleGeometry);
                 sampleMaterial = node.material;
                 sampleMaterial.envMap = scene.environment;
-                sampleMaterial.envMapIntensity = 2;
-                sampleMaterial.environmentNode = scene.environmentNode;
-                // Create a staggered rising offset based on instance index and time
+                // sampleMaterial.envMapIntensity = 2;
+                // sampleMaterial.environmentNode = scene.environmentNode;
+
+
+                    // sampleMaterial = convertGltfToNodeMaterial(node.material);
+                    // sampleMaterial.transparent = true;
+                    // if (locData.locationTags && locData.locationTags.includes("random color")) {
+                    //     // Create a staggered rising offset based on instance index and time
+                    //     sampleMaterial.colorNode = range(new THREE.Color(0x000000), new THREE.Color(0xffffff)).add(.1).mul(.5);
+                    // // sampleMaterial.colorNode = color(0xffffff);
+                    //     sampleMaterial.roughnessNode = float(.1);
+                    //     sampleMaterial.metalnessNode = float(.5);
+                        
+                    //     sampleMaterial.opacity = .75;
+                    //     // sampleMaterial.depthWrite = false;
+                    // }
+                    // sampleMaterial.depthWrite = false;
+                    // sampleMaterial.envMap = scene.environment;
+                    // sampleMaterial.envNode = scene.environmentNode;
+
                 if (locData.locationTags && locData.locationTags.includes("rise")) {
 
                     const riseOffset = sin(add(time.mul(.1), instanceIndex.toFloat().mul(0.2))).mul(5.0);
@@ -271,21 +288,29 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 
                 for (let i = 0; i < count; i++) {
                     
-                 let randomColor = new THREE.Color();
-                randomColor.setHex( Math.random() * 0xffffff );
-                const r = Math.random();
-                const g = Math.random();
-                const b = Math.random();
+                //  let randomColor = new THREE.Color();
+                instancedMeshes[s].instanceMatrix.needsUpdate = true;
+                // randomColor.setHex( Math.random() * 0xffffff );
+                // const r = Math.random();
+                // const g = Math.random();
+                // const b = Math.random();
 
                 // randomColor.setRGB(r, g, b);
                 //  const hue = i / count;
                 // randomColor.setHSL(hue, 1.0, 0.5);
                 // randomColor.setHex(Math.random() * 0xffffff);
                 // instancedMeshes[s].setColorAt( i, randomColor.setHex( Math.random() * 0xffffff ));
+                // instancedMeshes[s].setColorAt( i, randomColor);
+                
+                randomColor.setHex( Math.random() * 0xffffff );
                 instancedMeshes[s].setColorAt( i, randomColor);
+                instancedMeshes[s].instanceColor.needsUpdate = true;
+                instancedMeshes[s].material.needsUpdate = true;
+                instancedMeshes[s].material.envMap = scene.environment;
+                instancedMeshes[s].material.envNode = scene.environmentNode;
                 
                 }
-                instancedMeshes[s].instanceColor.needsUpdate = true;
+                // instancedMeshes[s].instanceColor.needsUpdate = true;
             }
             if (locData.mediaID) {
                 const tm = {};
@@ -319,13 +344,17 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
             model.traverse(node => {
             if (node.isMesh && node.material) {
                 // childCount++;
-                node.material.roughness = .1;
-                node.material.envMap = scene.environment;
-                console.log("node material name " + node.material.name);
+                // node.material.roughness = .1;
+                // node.material.envMap = scene.environment;
+                //  node.material.envMapIntensity = 2;
+                // node.material.environmentNode = scene.environmentNode;
+                // console.log("node material name " + node.material.name);
+                
+
                 sampleGeometry = node.geometry;
 
                 sampleGeos.push(sampleGeometry);
-                sampleMaterial = node.material;
+                sampleMaterial = convertGltfToNodeMaterial(node.material);
                 sampleMats.push(sampleMaterial);
                 
                 }
@@ -392,7 +421,8 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
             // physicsInstances = this.instancedMeshes[s];
         }
 }
-export class InstanceWithPattern_ {
+
+export class InstanceWithPattern_ { //um...nope
     constructor(model, count, pattern, physicsMode, locationData) {
 
         (async()=> { 

@@ -29,7 +29,7 @@ export let atomicBodies = [];
 export let staticBodies = [];
 export let kinematicBodies = [];
 export let npcKinematicBodies = [];
-export let useDefaultCollider = false;
+export let useDefaultCollider = true;
 export let handColliderGroup;
 export let colliders = {}
 
@@ -113,51 +113,75 @@ export function SetEquippedRigidbody(rbody) {
 export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do first
     
   if (staticObjex.length) {
-      for (let i = 0; i < staticObjex.length; i++) {
-    
-        console.log("tryna init staticObjex " + staticObjex[i].locationData.name + " hide " + staticObjex[i].isHidden);
-      
-        const pos = new THREE.Vector3(staticObjex[i].locationData.x, staticObjex[i].locationData.y, staticObjex[i].locationData.z);
-      
-        await createStaticCollider(staticObjex[i].mesh, pos);
-          
+    for (let i = 0; i < staticObjex.length; i++) {
+  
+      console.log("tryna init staticObjex " + staticObjex[i].locationData.name + " hide " + staticObjex[i].isHidden + " meshname " +  staticObjex[i].mesh.name);
+      let staticMesh = staticObjex[i].mesh;
+      if (!staticObjex[i].mesh) {
+            const geo = new THREE.PlaneGeometry(locationData[i].xscale, locationData[i].zscale, 10, 10);
+              const material = new THREE.MeshStandardMaterial( { color: 'blue', wireframe: true } );
+              const mesh = new THREE.Mesh(geo,material);
+                scene.add(mesh);
+              staticObject.mesh = mesh;
+              mesh.rotation.x = -Math.PI / 2;
+              mesh.position.set(staticObjex[i].locationData.x, staticObjex[i].locationData.z, staticObjex[i].locationData.z);
+              staticMesh = mesh;
+              staticMesh.name = "staticMesh";
+             
       }
-      WaitAndInit();
-    } else if (useDefaultCollider) {
-      
-        let colliderDesc = RAPIER.ColliderDesc.cuboid(150,.1,150);
-        const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0,-6.1,0);
-        const staticBody = await world.createRigidBody(rbDesc);
-        let collider = await world.createCollider(colliderDesc, staticBody);
-        collider.setRestitution(.5);
-        collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-        WaitAndInit();
-    } else {
-      WaitAndInit();
+      if (staticObjex[i].locationData.locationTags && staticObjex[i].locationData.locationTags.includes("hide")) {
+          staticMesh.visible = false;
+      }
+      const pos = new THREE.Vector3(parseFloat(staticObjex[i].locationData.x), parseFloat(staticObjex[i].locationData.y), parseFloat(staticObjex[i].locationData.z));
+    
+      await createStaticCollider(staticMesh, pos);
+        
     }
+    WaitAndInit();
+  } else if (useDefaultCollider) {
+      let colliderDesc = RAPIER.ColliderDesc.cuboid(150,.1,150);
+      const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0,-6.1,0);
+      const staticBody = await world.createRigidBody(rbDesc);
+      let collider = await world.createCollider(colliderDesc, staticBody);
+      collider.setRestitution(.5);
+      collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      WaitAndInit();
+  } else {
+    WaitAndInit();
   }
+}
 export async function createStaticCollider (model) { // may not be added to the scene if hidden?
 
    console.log("tryna set static collider for model " + model.name);
     try { 
+
+      let geometry, colliderDesc;
+      // if (!model) {
+      //   colliderDesc = RAPIER.ColliderDesc.cuboid(150,.1,150);
+      // } else {
       
-      const geometry = model.geometry; //sent as child mesh
-      // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
+        geometry = model.geometry;
+        
+  //sent as child mesh
+        
+        // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
 
-      const vertices = geometry.attributes.position.array;
-      // for (let i = 0; i < vertices.length; i++) {
-      //   vertices[i] *= fixedGeometry.scale.x; // Example for uniform scale
-      // }
-      const indices = geometry.index.array;
+        const vertices = geometry.attributes.position.array;
+        // for (let i = 0; i < vertices.length; i++) {
+        //   vertices[i] *= fixedGeometry.scale.x; // Example for uniform scale
+        // }
+        const indices = geometry.index.array;
 
-      // 3. Create ColliderDesc (Example: Trimesh for complex shape)
-      let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+        // 3. Create ColliderDesc (Example: Trimesh for complex shape)
+        colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+      
       
       // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
           
       // colliderDesc.contactSkin(0.5); // ???
       const pos = new THREE.Vector3();
       model.getWorldPosition(pos);
+
 
           console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(pos));
       const worldQuaternion = new THREE.Quaternion();

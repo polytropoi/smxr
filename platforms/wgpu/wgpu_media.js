@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 // import * as Tone from 'tone';
 
-import {player, camera } from './wgpu_controls.js';
+import { player, camera } from './wgpu_controls.js';
 import { scene } from './wgpu_main.mjs';
 import { settings } from '../../../connect/settings.js';
 import { videoEl } from '../../../connect/connect.js';
@@ -12,12 +12,11 @@ import { lookAtCameraObjects } from './wgpu_ui.js';
 import { TagsToInstances } from './wgpu_instance.js';
 
 import { animatedColor } from './wgpu_environment.js';
-import { texture, uv } from 'three/tsl';
+import { texture, color, float, uv, equirectUV, positionLocal, vec3, vec2, sin, mul, add, time, mx_noise_float } from 'three/tsl';
 
 
 import { UpdateEnvMap } from './wgpu_environment.js';
 import { pauseVideo, playVideo } from '../../connect/media.js';
-
 
 
 export let primaryAudioGroups;
@@ -54,6 +53,34 @@ export function SequenceEvent (event) {
 
 //play a middle 'C' for the duration of an 8th note
 // synth.triggerAttackRelease("C4", "8n");
+}
+
+
+export function convertGltfToNodeMaterial(stdMaterial) {
+    // if (stdMaterial.isNodeMaterial) {
+    //     return stdMaterial
+    // } else {
+        const nodeMat = new THREE.NodeMaterial();
+        
+        // Copy basic properties
+        nodeMat.color = stdMaterial.color;
+        nodeMat.roughness = stdMaterial.roughness;
+        // nodeMat.roughness = .5;
+        nodeMat.metalness = stdMaterial.metalness;
+        
+        // Map textures via TSL if they exist
+        if (stdMaterial.map) nodeMat.colorNode = texture(stdMaterial.map);
+        if (stdMaterial.roughnessMap) nodeMat.roughnessNode = texture(stdMaterial.roughnessMap);
+        if (stdMaterial.metalnessMap) nodeMat.metalnessNode = texture(stdMaterial.metalnessMap);
+        if (stdMaterial.normalMap) nodeMat.normalNode = texture(stdMaterial.normalMap);
+        if (stdMaterial.emissiveMap) nodeMat.emissiveNode = texture(stdMaterial.emissiveMap);
+
+        nodeMat.transparent = stdMaterial.transparent;
+        nodeMat.opacity = stdMaterial.opacity;
+        nodeMat.envNode = scene.environmentNode;  
+        // nodeMat.en
+        return nodeMat;
+    // }
 }
 
 export function InitPictureGroups () {
@@ -107,10 +134,18 @@ export function InitVideoGroups () {
     }
 }
 
-export function InitVideo(locData) {
+export function InitEquirectVideo(id, model) { //e.g. video skyboxen
+    const locData = {};
+    locData.isEquirect = true;
+    console.log("tryna set equirect video " + id);
+    const sceneVideo = new SceneVideo(id, model, locData);
+    return sceneVideo;
+}
+
+export function InitLocationModelVideo(model, locData) { //attached to model
     console.log("tryna InitVideo");
     if (videoEl) {  
-        const sceneVideo = new SceneVideo(videoEl.id, locData);
+        const sceneVideo = new SceneVideo(videoEl.id, model, locData);
         mediaPlayersToUpdate.push(sceneVideo);
     } else {
         console.log("no video el!");
@@ -188,19 +223,21 @@ export function InitSceneText () {
    
 }
 
-class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed component
-    constructor (id, locData) {
+class SceneVideo { // converted from platforms/aframe/mod-materials.js vid_materials_embed component
+    constructor (id, model, locData) {
         this.video = videoEl;
         this.video.muted = false;
         this.streamIndex = 0;
         this.video.playsInline = true;
-        const vID = id.split("_")[1];
+        const vID = id.split("_")[1]; //element id should be "video_" + id
         this.id = vID;
 
-        // primaryVideo = video;
-        let m3u8 = '/hls/'+this.id;
+        this.isEquirect = locData.isEquirect;
 
-        console.log("hls sceneVideo is " + this.video.id + " m3u8 " + m3u8);
+        // primaryVideo = video;
+        let m3u8 = '/hls/'+this.id; //um, needs auth
+
+        console.log("hls sceneVideo is " + this.video.id + " m3u8 " + m3u8 + " isEquirect " + this.isEquirect);
 
         //settings.sceneVideoStreams is set serverside for external streams, e.g. from mux.com
         if (settings != undefined && settings.sceneVideoStreams != null && settings.sceneVideoStreams.length > 0) {
@@ -228,11 +265,14 @@ class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed
             this.video.src = m3u8;
         }
 
-        this.mesh = scene.getObjectByName("videoModel");
-        this.mesh.userData.name = "videoPlayerModel_" + vID;
-        this.mesh.userData.locationData = locData;
 
-        this.mesh.userData.sceneVideoInstance = this;
+        // this.meshName = "videoPlayerModel_" + this.id;
+        // this.mesh = scene.getObjectByName(this.meshName);
+        // this.mesh.userData.name = this.meshName;
+        // this.mesh.userData.locationData = locData;
+
+        // this.mesh.userData.sceneVideoInstance = this;
+
         this.screenMesh = null; 
         this.ffwdMesh = null; 
         this.rewindMesh = null; 
@@ -245,6 +285,9 @@ class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed
         this.play_icon = null;
         this.pausematerial = null;
         this.playmaterial = null;
+        
+        this.vidtexture = new THREE.VideoTexture( this.video );
+
         this.slider_end = null;
         this.slider_begin = null;
         this.slider_handle = null;
@@ -252,10 +295,21 @@ class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed
         this.durationtimeformat = 0;
         this.percent = 0;
 
+
         this.meshArray = [];
-    
-        if (!this.isSkybox) {
-          this.mesh.traverse(node => {
+        this.flipY = false;
+        this.mesh = model;
+        if (!this.isEquirect && this.mesh) {
+            // this.meshName = "videoLocationModel_" + this.id;
+            // console.log("tryna get player " + this.meshName)
+            // this.mesh = scene.getObjectByName(this.meshName);
+
+            this.mesh.userData.name = this.meshName;
+            this.mesh.userData.locationData = locData;
+
+            this.mesh.userData.sceneVideoInstance = this; //to call the update(s) from main anim loop
+
+            this.mesh.traverse(node => {
             // if (node instanceof THREE.Mesh) 
             // console.log(node.name);
               if ((node.name.toLowerCase().includes("screen") || node.name.toLowerCase().includes("hvid")) && node.material) {
@@ -352,30 +406,72 @@ class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed
           }); 
 
         } else { //if 360
-          // playVideo(this.video);          
-          this.mesh = this.el.getObject3D('mesh');
+          playVideo(this.video);          
+        //   this.mesh = this.el.getObject3D('mesh');
           this.screenMesh = this.mesh;
           this.meshArray.push(this.screenMesh);
           console.log("this.screenmesdh" + this.screenMesh);
+          this.flipY = true;
 
         }
         // this.video.play().catch(err => console.error("Playback blocked:", err));
 
-        this.vidtexture = new THREE.VideoTexture( this.video );
-        this.vidtexture.flipY = false; 
+        // this.vidtexture = new THREE.VideoTexture( this.video );
+        this.vidtexture.flipY = this.flipY; 
         this.vidtexture.colorSpace = THREE.SRGBColorSpace;
+       
         // this.vidtexture.minFilter = THREE.LinearMipmapNearestFilter;
         // this.vidtexture.magFilter = THREE.LinearMipmapNearestFilter;
         // this.playmaterial = new THREE.MeshStandardMaterial( { map: this.vidtexture, side: THREE.DoubleSide, shader: THREE.FlatShading } ); 
-        if (this.isSkybox) {
-            this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, side: THREE.BackSide, shader: THREE.FlatShading } ); 
-            // this.playmaterial  = new THREE.MeshBasicNodeMaterial();
-            // const tslVidTexture = texture(this.vidtexture, uv());
-            // colorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
-            // this.playmaterial.colorNode = 
-
+        if (this.isEquirect) {
+            // this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, side: THREE.BackSide, shader: THREE.FlatShading } ); 
             //  this.playmaterial  = new THREE.MeshBasicNodeMaterial();
-            // this.playmaterial.colorNode = texture(this.vidtexture, uv());
+            this.vidtexture.mapping = THREE.EquirectangularReflectionMapping;
+            this.playmaterial = model.material;
+            let tslVidTexture = texture(this.vidtexture,  equirectUV( positionLocal.normalize()));
+
+            if (settings.sceneTags.includes("noise")) {
+				const noiseCoord = vec3(uv().mul(33.0), time.mul(0.1));
+				const noiseValue = mx_noise_float(noiseCoord);
+
+				tslVidTexture = texture(this.vidtexture, uv().add(noiseValue.mul(0.05)));
+				
+			} else if (settings.sceneTags.includes("distort")) {
+				const uvNode = uv();
+				const distortion = sin(uvNode.y.mul(30).add(time)) .mul(.005);
+				const distortion2 = sin(uvNode.x.mul(15).add(time)).mul(.01);
+				const distortedUV = vec2(uvNode.x.add(distortion), uvNode.y.add(distortion2));
+				tslVidTexture = texture(this.vidtexture, distortedUV);
+
+
+
+			}
+                // tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+            // this.colorNode = tslVidTexture.mul(1);
+            // if (locData.locationTags && locData.locationTags.includes("tweak")) {
+                this.colorNode = tslVidTexture.mul(animatedColor.add(1).mul(0.5)); 
+            // } 
+                // else {
+                    // this.playmaterial.colorNode = tslVidTexture.mul(1);
+                // }
+
+            this.playmaterial.colorNode = this.colorNode;
+                		// const textureEquirect = sceneEquirectVideo.returnVideoTexture();
+                // textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+                // textureEquirect.colorSpace = THREE.SRGBColorSpace;
+
+
+                // // tslTexture = texture(textureEquirect, uv());
+                // // tslTexture = texture(textureEquirect, equirectUV());
+
+                // const tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+                // let videoSkyboxColorNode = tslTexture.mul(3);
+                // videoSkyboxMaterial.colorNode = videoSkyboxColorNode;
+                scene.environmentNode = this.colorNode;
+                scene.environment = this.vidtexture;
+                scene.backgroundNode = this.colorNode;
+                                
+                                scene.background = this.vidtexture;
 
         } else {
             // this.playmaterial = new THREE.MeshBasicMaterial( { map: this.vidtexture, shader: THREE.FlatShading } ); 
@@ -405,6 +501,12 @@ class SceneVideo { // converted from aframe/mod-materials.js vid_materials_embed
 
         this.video.addEventListener( 'canplay', this.player_status_update("ready"), false);
     }
+    // returnVideoTexture () {
+    //     // if (this.vidtexture) {
+    //     console.log("tryna return videoTexture " + this.vidtexture);
+    //         return this.vidtexture;
+    //     // }
+    // }
 
     player_status_update (state) {
         this.playerState = state;
@@ -986,20 +1088,20 @@ export class ScenePicture {
             scene.add(this.squarePanel);
             this.squarePanel.position.set(position.x, position.y + 4,position.z );
             this.squarePanel.visible = false;
-
-            const circleGeometry = new THREE.CircleGeometry(6,32);
-               this.circlePanel = new THREE.Mesh(squareGeometry, planeMaterial);
-            this.circlePanel.name = "circlePanel";
-            scene.add(this.circlePanel);
-            this.circlePanel.position.set(position.x, position.y + 4,position.z );
-            this.circlePanel.visible = false;
-            // landscapePanel.lookAt(player);
-            // this.portraitPanel.lookAt(camera);
             if (lookAtCamera) {
                 lookAtCameraObjects.push(this.squarePanel);
             }
 
-
+            const circleGeometry = new THREE.CircleGeometry(6,32);
+               this.circlePanel = new THREE.Mesh(circleGeometry, planeMaterial);
+            this.circlePanel.name = "circlePanel";
+            scene.add(this.circlePanel);
+            this.circlePanel.position.set(position.x, position.y + 4,position.z );
+            this.circlePanel.visible = false;
+            if (lookAtCamera) {
+                lookAtCameraObjects.push(this.circlePanel);
+            }
+            
             this.updatePicture();
 
     }

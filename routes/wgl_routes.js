@@ -2327,30 +2327,30 @@ wgl_router.get('/:_id', function (req, res) {
                 }
 
                 // }
-                // if (ori.toLowerCase() == "equirectangular") {
-                //     if (video_items[0].tags.includes("hls")) {
-                //         let vProps = {};
-                //         vProps.id = video_items[0]._id;
+                if (ori.toLowerCase() == "equirectangular") {
+                    if (video_items[0].tags.includes("hls")) {
+                        let vProps = {};
+                        vProps.id = video_items[0]._id;
 
-                //         vProps.videoTitle = video_items[0].title;
+                        vProps.videoTitle = video_items[0].title;
                     
-                //         videoEntity = "<a-sphere id=\x22primary_video\x22 shadow=\x22receive: false\x22 class=\x22activeObjexGrab activeObjexRay\x22 scale=\x22-50 -50 50\x22 vid_materials_embed=\x22id:"+vProps.id+"; isSkybox: true;\x22 play-on-vrdisplayactivate-or-enter-vr crossOrigin=\x22anonymous\x22 rotation=\x220 180 0\x22 material=\x22shader: flat;\x22></a-sphere>";
-                //         hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>";
-                //     } else {
-                //         videosphereAsset = "<video id=\x22videosphere\x22 autoplay loop crossOrigin=\x22anonymous\x22 src=\x22" + vidUrl + "\x22></video>";
-                //         videoEntity = "<a-videosphere play-on-window-click play-on-vrdisplayactivate-or-enter-vr crossOrigin=\x22anonymous\x22 src=\x22#videosphere\x22 rotation=\x220 180 0\x22 material=\x22shader: flat;\x22></a-videosphere>";
-                //     }
+                        videoEntity = "<a-sphere id=\x22primary_video\x22 shadow=\x22receive: false\x22 class=\x22activeObjexGrab activeObjexRay\x22 scale=\x22-50 -50 50\x22 vid_materials_embed=\x22id:"+vProps.id+"; isSkybox: true;\x22 play-on-vrdisplayactivate-or-enter-vr crossOrigin=\x22anonymous\x22 rotation=\x220 180 0\x22 material=\x22shader: flat;\x22></a-sphere>";
+                        hlsScript = "<script src=\x22../main/js/hls.min.js\x22></script>";
+                    } else {
+                        videosphereAsset = "<video id=\x22videosphere\x22 autoplay loop crossOrigin=\x22anonymous\x22 src=\x22" + vidUrl + "\x22></video>";
+                        videoEntity = "<a-videosphere play-on-window-click play-on-vrdisplayactivate-or-enter-vr crossOrigin=\x22anonymous\x22 src=\x22#videosphere\x22 rotation=\x220 180 0\x22 material=\x22shader: flat;\x22></a-videosphere>";
+                    }
                 
-                // } else {
-                //     //hrm, now most vids are hls, don't really need this.../// yes but TODO need to set a single vid as hls here...
-                //     // if (preloadVideo) { //ugh
-                //     //     videoAsset = "<video id=\x22video1\x22 crossOrigin=\x22anonymous\x22>"+vidSrc+"</video>";
-                //     // } else {// still ugh
-                //     //     videoAsset = "<video autoplay muted loop=\x22true\x22 webkit-playsinline playsinline id=\x22video1\x22 crossOrigin=\x22anonymous\x22></video>"; 
-                //     // }
-                //     // videoEntity = "<div "+videoParent+" class=\x22activeObjexGrab activeObjexRay\x22 vid_materials=\x22url: "+vidUrl+"\x22 gltf-model=\x22#movieplayer2.glb\x22 position=\x22"+videoLocation+"\x22 rotation=\x22"+videoRotation+"\x22 width='10' height='6'><a-text id=\x22videoText\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x22-.5 -1 1\x22 wrapCount=\x2240\x22 value=\x22Click to Play Video\x22></a-text>" +
-                //     // "</div>";
-                // }
+                } else {
+                    //hrm, now most vids are hls, don't really need this.../// yes but TODO need to set a single vid as hls here...
+                    // if (preloadVideo) { //ugh
+                    //     videoAsset = "<video id=\x22video1\x22 crossOrigin=\x22anonymous\x22>"+vidSrc+"</video>";
+                    // } else {// still ugh
+                    //     videoAsset = "<video autoplay muted loop=\x22true\x22 webkit-playsinline playsinline id=\x22video1\x22 crossOrigin=\x22anonymous\x22></video>"; 
+                    // }
+                    // videoEntity = "<div "+videoParent+" class=\x22activeObjexGrab activeObjexRay\x22 vid_materials=\x22url: "+vidUrl+"\x22 gltf-model=\x22#movieplayer2.glb\x22 position=\x22"+videoLocation+"\x22 rotation=\x22"+videoRotation+"\x22 width='10' height='6'><a-text id=\x22videoText\x22 align=\x22center\x22 rotation=\x220 0 0\x22 position=\x22-.5 -1 1\x22 wrapCount=\x2240\x22 value=\x22Click to Play Video\x22></a-text>" +
+                    // "</div>";
+                }
 
                 // videoAsset = "<video id=\x22video1\x22 crossOrigin=\x22anonymous\x22>"+vidSrc+"</video>";
             }

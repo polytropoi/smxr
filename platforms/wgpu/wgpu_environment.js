@@ -28,13 +28,13 @@ import {
 
 import { MeshStandardNodeMaterial } from 'three';
 
-import { equirectPictures } from './wgpu_media.js';
+import { equirectPictures, InitEquirectVideo } from './wgpu_media.js';
 import { SetSequenceInt } from '../../connect/events.js';
 
 
 
-let skySphere;
-let skyboxMaterial;
+let skySphere, videoSkySphere;
+let skyboxMaterial, videoSkyboxMaterial;
 let textureEquirect;
 let textureEquirectPmrem;  //processed for lighting like hdr
 let tslTexture;
@@ -215,51 +215,6 @@ let groundColor = color(settings.sceneColor2);
 	}
 }
 
-// export function UpdateSkyColors(time) {
-// 	if (settings && settings.sceneTweakColors) {
-
-// 		// const sineCycle = time.mul(2.0).sin().mul(0.5).add(0.5);
-
-// 		// // 3. Interpolate or multiply base colors using the sine node
-// 		// const randomColor1 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-
-// 		// const dynamicColor1 = color(randomColor).mul(sineCycle);
-
-// 		// // const randomColor2 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-
-// 		// // const dynamicColor2 = color(randomColor).mul(sineCycle);
-
-// 		// // 4. Assign the node to the light's colorNode property
-// 		sunLight.colorNode = animatedColor;
-
-// 		// scene.fog.colorNode = animatedColor;
-
-
-// 		// 		const topColor = color( settings.sceneColor2 );
-// 		// const bottomColor = color( settings.sceneColor1 );
-
-// 		// const topColor = color( 0x3a1c71 );
-// 		// const bottomColor = color( 0xd76d77 );
-// 		// const gradientNode = mix( dynamicColor1, dynamicColor2, uv().y );
-
-// 		// scene.backgroundNode = gradientNode;
-// 		// if (sunLight) {
-
-// 		// 	const hue = (performance.now() * 0.1) % 1;
-// 		// 	console.log("hue is " + hue);
-// 		// 	regularColor.setHSL(hue, 1.0, 0.5);
-
-// 		// 	//
-
-// 		// 	sunLight.color.set(regularColor);
-
-// 		// 	// scene.fog.color.set(regularColor);
-// 		// }
-// 		// if (scene.fog) {
-// 		// 	scene.fog.color.set(regularColor);
-// 		// }
-// 	}
-// }
 
 export const wavyDistortion = Fn( ( { imageTex, frequency, amplitude } ) => {
   // Multiply time by frequency and add vertical UV to create motion down the plane
@@ -416,6 +371,45 @@ export async function InitEnvMap() {
 
 	let skybox = settings.skyboxURL;
 
+	let radius = 300;
+	if (settings.sceneSkyRadius) {
+		radius = settings.sceneSkyRadius;
+	}
+	const equirectVideos = settings.equirectVideos;
+
+	if (equirectVideos && equirectVideos.length) {
+
+
+		const videoSkyboxMaterial = new THREE.MeshBasicNodeMaterial();
+		videoSkyboxMaterial.side = THREE.BackSide;
+		const sphereRadius = radius - 10;
+		const sphereSegments = 60; // Higher for better quality
+		const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
+		const videoSkySphere = new THREE.Mesh(geometry, videoSkyboxMaterial);
+	
+
+		videoSkySphere.position.set(0, settings.sceneGroundLevel * -1, 0);
+		// videoSkyboxMaterial.needsUpdate = true;
+		scene.add(videoSkySphere);
+		const vidElID =  "video_" + equirectVideos[0].id
+		const sceneEquirectVideo = InitEquirectVideo(vidElID, videoSkySphere);
+
+		// const textureEquirect = sceneEquirectVideo.returnVideoTexture();
+		// textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+		// textureEquirect.colorSpace = THREE.SRGBColorSpace;
+
+
+		// // tslTexture = texture(textureEquirect, uv());
+		// // tslTexture = texture(textureEquirect, equirectUV());
+
+		// const tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+		// let videoSkyboxColorNode = tslTexture.mul(3);
+		// videoSkyboxMaterial.colorNode = videoSkyboxColorNode;
+		// scene.environmentNode = skyboxColorNode;
+		// scene.environment = textureEquirect;
+
+	}
+
 	if (skybox) {
 		console.log("gotsa skybox url " + settings.skyboxURL);
 		const envMapURL = settings.skyboxURL;
@@ -433,28 +427,15 @@ export async function InitEnvMap() {
 		// tslTexture = texture(textureEquirect, uv());
 		// tslTexture = texture(textureEquirect, equirectUV());
 
-		tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+		tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize() ));
 		let skyboxColorNode = tslTexture.mul(1);
 
 		scene.environmentNode = skyboxColorNode;
 		scene.environment = textureEquirect;
-		// textureEquirectPmrem = pmremGenerator.fromEquirectangular(textureEquirect).texture;
-				
- 		// pmremGenerator.compileEquirectangularShader();
-
-		// scene.environment = textureEquirectPmrem;
-		
-
-		// scene.background = textureEquirect;
-
+		// scene.environmentIntensity = 2.5; 
 		skyboxMaterial = new THREE.NodeMaterial();
 		skyboxMaterial.side = THREE.BackSide;
 
-		let radius = 300;
-		if (settings.sceneSkyRadius) {
-			radius = settings.sceneSkyRadius;
-		}
-		// scene.environmentIntensity = 3;
 		
 		if (settings.sceneUseSkybox) {
 			// const tex = texture(textureEquirect)
@@ -462,15 +443,6 @@ export async function InitEnvMap() {
 			const sphereSegments = 60; // Higher for better quality
 			const geometry = new THREE.SphereGeometry(sphereRadius, sphereSegments, sphereSegments);
 
-
-			// const textureEqMod = wavyDistortion(textureEquirect, 33, 33);
-			
-			// tslTextureEnv = texture(textureEquirectPmrem, equirectUV( positionLocal.normalize()));
-
-
-
-			// skyboxColorNode = tslTexture.mul(1);
-			// let skyboxEnvNode = pmremTexture(tslTextureEnv);
 			if (settings.sceneTags.includes("distort")) {
 				const uvNode = uv();
 				const distortion = sin(uvNode.y.mul(30).add(time)) .mul(.002);
@@ -484,81 +456,50 @@ export async function InitEnvMap() {
 				const noiseCoord = vec3(uv().mul(33.0), time.mul(0.1));
 				const noiseValue = mx_noise_float(noiseCoord);
 
-				// 4. Sample the texture with modified/distorted UVs and tint with noise
 				tslTexture = texture(textureEquirect, uv().add(noiseValue.mul(0.05)));
-				// skyboxColorNode = baseTexture.mul(noiseValue);
-			} else {
-				// tslTexture = texture(textureEquirect);
-				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
-				// tslTexture = texture(textureEquirect, uv());
-						// tslTexture = texture(textureEquirect, equirectUV());
+				
 			}
 			if (settings && (settings.sceneTweakColors || settings.sceneRandomColors)) {
-				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
+				
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
-				// skyboxEnvNode = tslTextureEnv.mul(animatedColor.add(1).mul(0.5)); 
-				// if (sunLight) {
-				// 	sunLight.colorNode = animatedColor;
-				// }
-
+				
 				const hue = (performance.now() * 0.1) % 1;
 				console.log("hue is " + hue);
 				regularColor.setHSL(hue, 1.0, 0.5);
-
 				
 				if (sunLight) {
 					sunLight.colorNode = animatedColor;
 				}
 				if (scene.fog) {
 					scene.fog.color.set(regularColor);
-				}
-				
+				}				
 				scene.environmentNode = skyboxColorNode;
 				scene.backgroundNode = skyboxColorNode;
-				
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 
-
 			} else if (settings.sceneColorizeSky) {
 				console.log("tryna colorize sky to " + settings.sceneColor2);
 				const skyColor = color(settings.sceneColor2);
 				skyboxColorNode = tslTexture.mul(skyColor.mul(3));
 				scene.environmentNode = skyboxColorNode;
-
 				scene.backgroundNode = skyboxColorNode;
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 
 			} else {	
 				scene.environmentNode = skyboxColorNode;
-
 				scene.backgroundNode = skyboxColorNode;
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 
 
-
 			}
 
-				// scene.environment = textureEquirect;
-				// scene.background = textureEquirect;
-			// Assign the sampled texture to the color node
-			// skyboxMaterial.envNode = skyboxColorNode;
-
-		
-			// 
-			// scene.environment = textureEquirectPmrem;
-
-			skySphere = new THREE.Mesh(geometry, skyboxMaterial);
-		
-
+			skySphere = new THREE.Mesh(geometry, skyboxMaterial);	
 			skySphere.position.set(0, settings.sceneGroundLevel * -1, 0);
 			skyboxMaterial.needsUpdate = true;
 			scene.add(skySphere);
-
-			// textureEquirectPmrem.dispose();
-			// pmremGenerator.dispose();
 
 		}
 	}
