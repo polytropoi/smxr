@@ -95,6 +95,7 @@ let pointerGizmo;
 let reticle;
 let mouseIsDown = false;
 const mouse = new THREE.Vector2();
+let keyIsDown = "";
 
 let targetLocation = new THREE.Vector3();
 let validTarget = false;
@@ -198,6 +199,11 @@ function InitTransformControls () {
             for (let i = 0; i < localData.locations.length; i++) {
                 if (localData.locations[i].timestamp == obj.userData.locationData.timestamp) {
                     console.log("GOTSA MATCH ON THE TRANSFORM OBJECT! " + JSON.stringify(obj.userData.locationData));
+                    localData.locations[i].x = objWorldPosition.x;
+                    localData.locations[i].y = objWorldPosition.y;
+                    localData.locations[i].z = objWorldPosition.z;
+                    localData.locations[i].hasLocalData = true;
+                    SaveLocalData();
                 }
             }
         }
@@ -933,7 +939,7 @@ async function RaycastHit(type, hit) {
             // lastRaycastHitPosition = hit.point;
             // console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
 
-            console.log(type + " hit object type " + locationData.markerType + " " + hit.object.name );//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+            console.log(name + " hit object type " + locationData.markerType + " " + hit.object.name );//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
 
             if (locationData.markerType == "trigger") { //hrm, triggers are for geo intersections
@@ -954,7 +960,7 @@ async function RaycastHit(type, hit) {
 
             } else {
 
-                console.log("locationname " + name);
+                // console.log("locationname " + name);
                 
                 if (name && name.includes("~")) {
                     name = name.split("~")[0];
@@ -1328,8 +1334,10 @@ export function onMouseDown(event) { // on threejs object
             // let sceneObjID = lastRaycastHitObject.userData.sceneObjectID;
         console.log("clicked on active object! " + lastRaycastHitObject.userData.locationData.name);
 
-        if (allowMods) {
+        if (allowMods && keyIsDown == "KeyT") {
+            
             transformControl.attach(lastRaycastHitObject);
+            return;
         }
         
             let navAgentInstance = null;
@@ -1668,6 +1676,7 @@ export function onMouseWheel(e) {
 
 export const onKeyDown = function (event) {
     console.log("keydown " + event.code);
+    keyIsDown = event.code;
     switch (event.code) {
 
         case 'ArrowUp':
@@ -1699,11 +1708,16 @@ export const onKeyDown = function (event) {
 
             // toggleOrbitControl();
             break;
+        case 'Escape':
+            if (transformControl) {
+                transformControl.detach();
+            }
     }
 };
 
 export const onKeyUp = function (event) {
     // console.log("keyup " + event.code);	
+    keyIsDown = "";
     switch (event.code) {
 
         case 'ArrowUp':

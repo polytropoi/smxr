@@ -21,9 +21,12 @@ import { convertGltfToNodeMaterial, InitLocationModelVideo } from './wgpu_media.
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from './wgpu_nav.js';
 import { instance, modelViewProjection, color, float, range } from 'three/tsl';
+import { UpdateModdedLocations, mods } from '../../connect/settings.js';
+import { eventEl } from '../../connect/events.js';
 // import { sceneObjects } from '../../connect/dialogs.js';
 
 // export let localData = {};
+
 
 export let locations = {};
 
@@ -123,6 +126,7 @@ export function createDefaultNavmesh(locData) {
 }
 
 export async function InitLocations() {
+    eventEl.addEventListener('data-event', LoadLocalMods);
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction
     if (modelsDataEl) {
         const theModelsData = modelsDataEl.getAttribute('data-models');
@@ -143,7 +147,7 @@ export async function InitLocations() {
 
         locationData = JSON.parse(atob(theLocationData));
         SetSceneLocations(locationData);
-        
+
         // if (settings.sceneTags.includes("allow mods")) {
         //     localData.locations = locationData;
         // }
@@ -213,6 +217,7 @@ export async function InitLocations() {
                                                 const meshMover = new MeshMover(model); 
                                                 movingMeshes.push(meshMover);
                                             }
+                                            model.name = locationData[i].timestamp;
                                             scene.add(model);
                                             if (locationData[i].markerType == "video") {
                                                 model.name = "videoLocationModel_" + locationData[i].timestamp;
@@ -319,12 +324,49 @@ export async function InitLocations() {
                 
                 await LoadLocationObjex(); 
                 InitSystems();
+                
             }
         })();
         
     }
 }
 
+function getObjectsByPartialName(parent, partialName) {
+  const results = [];
+  
+  parent.traverse((child) => {
+        if (typeof child.name === 'string' && child.name.includes('your_partial_name')) {
+        results.push(child);
+    }
+    // if (child.name && child.name.includes(partialName)) {
+      
+    // }
+  });
+  
+  return results;
+}
+
+function LoadLocalMods(event) {
+    if (mods && mods.locations && mods.locations.length) {
+        console.log("looking for location localMods + " + mods.locations.length);
+        for (let i = 0; i < mods.locations.length; i++) {
+            let foundObject = scene.getObjectByName(mods.locations[i].timestamp);
+            if (!foundObject) {
+                const foundObjex = getObjectsByPartialName(scene, mods.locations[i].timestamp);
+                console.log("found " + foundObjex.length + " objex with timestamp " + mods.locations[i].timestamp);
+                foundObject = foundObjex[0];
+            }
+
+            if (foundObject) {
+                // Object was found, you can modify it here
+                // foundObject.material.color.set(0xff0000);
+                foundObject.position.set(mods.locations[i].x, mods.locations[i].y, mods.locations[i].z );
+            } else {
+                console.log("Object not found");
+            }
+        }
+    }
+}
 // export async function LoadLocationObject (objectData) {
 //      return modelData = await LoadModel(objectData.modelData.modelURL);
             
@@ -383,6 +425,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
 
                     // clonedModel.userData.name = sceneObjectID;
                     clonedModel.userData.sceneObjectID = sceneObjectID;
+
                     // activeObjex.push(clonedModel);
                     
                     
@@ -464,6 +507,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         const z = randomPoint.z;
                         clonedObject.scale.set(1,1,1);
                         clonedObject.position.set(x,y,z);
+                        clonedObject.name = locationObjex[i].locationData.timestamp;
                         scene.add(clonedObject);
                         clonedObject.visible = true;
                          clonedObject.castShadow = true;
@@ -500,6 +544,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         model.receiveShadow = true;
                     model.visible = true;
                     model.userData.sceneObjectID = sceneObjectID;
+                    model.name = locationObjex[i].locationData.timestamp;
                     activeObjex.push(model);
                     model.traverse(function (child) { 
                     if (child.isMesh) {
@@ -507,7 +552,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         child.userData.objectData = locationObjex[i].objectData;
                         child.userData.objectData.sceneObjectID = sceneObjectID;
                         child.userData.sceneObjectID = sceneObjectID;
-                        
+                        // child.name = locationObjex[i].locationData.timestamp;
                         }
                     });
                     const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null, false);

@@ -1922,8 +1922,8 @@ function ReturnCurrentPlayerLocation() {
 
 
 
-export function InitLocalColors() {
-  console.log("tryna InitLocalColors " + JSON.stringify(localData.settings));
+export function InitLocalColors() { //um, aframe only...
+  // console.log("tryna InitLocalColors " + JSON.stringify(localData.settings));
   let enviroEl = document.getElementById('enviroEl');
 
   if (enviroEl != null && settings.allowMods && localData.settings.sceneColor1) {

@@ -4,8 +4,8 @@ import { room, sceneLocations, locationTimestamps, localData, userData, lastClou
    sceneEl, PlayerToLocation, getExtension, poiLocations, curveLocations, avatarName, UpdateAvatarName, GoToPosRot, 
    playerPosition, playerRotation } from "/connect/connect.js";
 
-import { settings, UpdateUserProfile, pixelsPerMeterActual } from "/connect/settings.js";
-import { SetTimeKeysData, MapUpdate, eventEl, equip_inventory_object_event } from "/connect/events.js";
+import { settings, UpdateUserProfile, pixelsPerMeterActual, UpdateModdedLocations } from "/connect/settings.js";
+import { SetTimeKeysData, MapUpdate, eventEl, equip_inventory_object_event, LocalDataLoaded } from "/connect/events.js";
 // import { pixelsPerMeterActual } from "../vtt/vtt_main.mjs";
 export let hasLocalData = false;
 
@@ -106,12 +106,16 @@ export function InitIDB() {
                      // if (cursor.value.locations[i].markerType == "poi" || cursor.value.locations[i].markerType == "placeholder") {
                      //    poiLocations.push(cursor.value.locations[i]);
                      // }
-                     console.log( "cursor " + cursor.value.locations[i].isLocal + " " + cursor.value.locations[i].hasLocalData + " " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
+                     console.log( "cursor location " + i + " isLocal " + cursor.value.locations[i].isLocal + " hasLocalData " + cursor.value.locations[i].hasLocalData + " name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
 
                      if ((cursor.value.locations[i].isLocal != undefined && cursor.value.locations[i].isLocal) || cursor.value.locations[i].hasLocalData) { //only update ones with local changes
                      console.log(cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
                      // console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal " + " modelID " + cursor.value.locations[i].modelID);
-                     let cloudEl = document.getElementById(cursor.value.locations[i].timestamp);
+
+                     if (settings.sceneType != "aframe") { //e.g. three
+                        UpdateModdedLocations(cursor.value.locations[i]);
+                     } else {
+                        let cloudEl = document.getElementById(cursor.value.locations[i].timestamp);
                         
                         if (cloudEl) { //prexisting elements (cloud_marker, mod_model, mod_object) already rendered onload
                            if (sceneEl) {
@@ -258,6 +262,7 @@ export function InitIDB() {
                            }
                         }
                      }
+                  }
                      
                   } //end locations loop
                }
@@ -267,7 +272,7 @@ export function InitIDB() {
                      localData.settings[key] = cursor.value.settings[key]; //TODO apply each one?
                      
                      settings[key] = cursor.value.settings[key];
-                     console.log("localdata settings key " + key);
+                     // console.log("localdata settings key " + key);
                      if (key == "sceneEnvironmentPreset") {
                         let value = cursor.value.settings[key];
                         settings.sceneEnvironmentPreset = value;
@@ -796,9 +801,12 @@ export function InitIDB() {
       if (localData.settings && localData.settings.sceneTags) {
          for (let i = 0; i < localData.settings.sceneTags.length; i++) {
             localData.settings.sceneTags[i] = localData.settings.sceneTags[i].trim();
-            console.log("localData.settings.sceneTag + " +localData.settings.sceneTags[i]); 
+            // console.log("localData.settings.sceneTag + " +localData.settings.sceneTags[i]); 
          }
-         document.getElementById("sceneTagsField").value = localData.settings.sceneTags; //in dialog panel
+         const sceneTagsField = document.getElementById("sceneTagsField");
+         if (sceneTagsField) {
+           sceneTagsField.value = localData.settings.sceneTags; //in dialog panel   
+         }
       }
 
        scene.settings = localData.settings;

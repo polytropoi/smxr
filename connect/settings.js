@@ -6,9 +6,10 @@ export let pixelsPerMeterActual = 10; //pull from scene.settings instead...
 // export let mapWidth = 0;
 // export let mapHeight = 0;
 // export let selectedPosition = {};
+export let mods = {locations: []};
 
 import { InitConnect, SetPlayerToLastPosition, InitSocket, localData } from "../connect/connect.js";
-import { SettingsLoaded } from "./events.js";
+import { SettingsLoaded, LocalDataLoaded } from "./events.js";
 
 $(function() { 
 
@@ -35,7 +36,14 @@ export function UpdateUserProfile (userProfile) { //called from indexedDB.js
          InitSocket(); //hrm
          
       }
-   } 
+   }
+   LocalDataLoaded();
+}
+
+
+export function UpdateModdedLocations (location) { //called from indexeddb
+   mods.locations.push(location);
+   console.log("updated modded locations " + JSON.stringify(mods));
 }
 
 // export function UpdateMapDimensions(x, y) {
