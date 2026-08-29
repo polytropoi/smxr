@@ -16,6 +16,8 @@ import { sceneTextController, convertGltfToNodeMaterial } from './wgpu_media.js'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import { locationData, activeObjex } from './wgpu_locations.js';
 
+import { CreateNPCAgent } from './wgpu_nav.js';
+
 import { GetInstancedRigidbody } from './wgpu_physics.js'
 // import { uniform, sin, range } from 'three/tsl';
 
@@ -85,21 +87,24 @@ export async function TagsToInstances (locID, instanceID) {
             let textData;
             let jsonData;
             if (instanceData && !instanceData.isTagged) {
-                instanceData.iTags = [];
 
-                textData = await sceneTextController.returnAllTextDataFromMediaID(instanceData.mediaID);
-                if (textData) {
-                    let textindex = 0;
-                        jsonData = JSON.parse(textData.textstring);
-                    for (let i = 0; i < instanceData.count; i++) {
-                        let iTag = {};
-                        
-                        
-                        if (textindex < jsonData.length) {
-                            textindex++;
-                        } else {
-                        textindex = 0;                   
-                        }
+                if (sceneTextController) {
+                    instanceData.iTags = [];
+                
+                    textData = await sceneTextController.returnAllTextDataFromMediaID(instanceData.mediaID);
+                    if (textData) {
+                        let textindex = 0;
+                            jsonData = JSON.parse(textData.textstring);
+                        for (let i = 0; i < instanceData.count; i++) {
+                            let iTag = {};
+                            
+                            
+                            if (textindex < jsonData.length) {
+                                textindex++;
+                            } else {
+                            textindex = 0;                   
+                            }
+
                         iTag[i] = jsonData[textindex];
 
                         // console.log(JSON.stringify(iTag));
@@ -115,6 +120,7 @@ export async function TagsToInstances (locID, instanceID) {
                     const tag = Object.values(instanceData.iTags[instanceID])[0];
                     console.log(JSON.stringify(tag));
                     return tag;
+                    }
                 }
             } else {
                 // console.log(JSON.stringify(instanceData.iTags[instanceID]));
@@ -132,10 +138,8 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
     await sampler;
     console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count+ " mediaID " + locData.mediaID);
 
-    
     let instanceTagData;
     let usedPositions = [];
-
 
     if (sampler) {
 
@@ -144,8 +148,6 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         // let scaleFactor = data.yscale;
 
         console.log("gotsa SURFACE for " + model.name + " count " + count);
-
-        
 
         let sampleGeometry, sampleMaterial;
             let sampleGeos = [];
@@ -166,22 +168,21 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 // sampleMaterial.envMapIntensity = 2;
                 // sampleMaterial.environmentNode = scene.environmentNode;
 
-
-                    // sampleMaterial = convertGltfToNodeMaterial(node.material);
-                    // sampleMaterial.transparent = true;
-                    // if (locData.locationTags && locData.locationTags.includes("random color")) {
-                    //     // Create a staggered rising offset based on instance index and time
-                    //     sampleMaterial.colorNode = range(new THREE.Color(0x000000), new THREE.Color(0xffffff)).add(.1).mul(.5);
-                    // // sampleMaterial.colorNode = color(0xffffff);
-                    //     sampleMaterial.roughnessNode = float(.1);
-                    //     sampleMaterial.metalnessNode = float(.5);
-                        
-                    //     sampleMaterial.opacity = .75;
-                    //     // sampleMaterial.depthWrite = false;
-                    // }
-                    // sampleMaterial.depthWrite = false;
-                    // sampleMaterial.envMap = scene.environment;
-                    // sampleMaterial.envNode = scene.environmentNode;
+                // sampleMaterial = convertGltfToNodeMaterial(node.material);
+                // sampleMaterial.transparent = true;
+                // if (locData.locationTags && locData.locationTags.includes("random color")) {
+                //     // Create a staggered rising offset based on instance index and time
+                //     sampleMaterial.colorNode = range(new THREE.Color(0x000000), new THREE.Color(0xffffff)).add(.1).mul(.5);
+                // // sampleMaterial.colorNode = color(0xffffff);
+                //     sampleMaterial.roughnessNode = float(.1);
+                //     sampleMaterial.metalnessNode = float(.5);
+                    
+                //     sampleMaterial.opacity = .75;
+                //     // sampleMaterial.depthWrite = false;
+                // }
+                // sampleMaterial.depthWrite = false;
+                // sampleMaterial.envMap = scene.environment;
+                // sampleMaterial.envNode = scene.environmentNode;
 
                 if (locData.locationTags && locData.locationTags.includes("rise")) {
 
@@ -219,7 +220,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             }
         }
 
-        console.log("child count for model " + sampleGeos.length + " ymod" + yMod);
+        console.log("child count for " + model.name + " : " + sampleGeos.length + " ymod" + yMod);
         for (let c = 0; c < sampleGeos.length; c++) {
             const instancedMesh = new THREE.InstancedMesh(sampleGeos[c], sampleMats[c], count);
             instancedMesh.castShadow = true;
@@ -256,7 +257,14 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 dummy.scale.set(scale, scale, scale);
             }
 
-
+            if (locData.markerType == "character") {
+                const placeholder = new THREE.Object3D();
+                const sceneObjectID = locData.timestamp + "_" + i;
+                const animations = [];
+                const z = 1;
+                await CreateNPCAgent(null, null, animations, z.toString(), locData, locData.objectData, sceneObjectID);
+                // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
+            }
             dummy.updateMatrix(); // Update matrix based on position/rotation
             for (let m = 0; m < instancedMeshes.length; m++) {
                 
@@ -320,6 +328,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 taggedInstances[locData.timestamp] = tm;
              
             }
+            
             
             
             scene.add(instancedMeshes[s]);

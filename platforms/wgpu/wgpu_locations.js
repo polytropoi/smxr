@@ -23,6 +23,8 @@ import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from
 import { instance, modelViewProjection, color, float, range } from 'three/tsl';
 import { UpdateModdedLocations, mods } from '../../connect/settings.js';
 import { eventEl } from '../../connect/events.js';
+
+import { lookAtCameraObjects } from './wgpu_ui.js';
 // import { sceneObjects } from '../../connect/dialogs.js';
 
 // export let localData = {};

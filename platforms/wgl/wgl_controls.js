@@ -1284,8 +1284,10 @@ export function onMouseDown(event) { //clicked on threejs object
                 }
                 let textData;
                 if (lastRaycastHitObject.userData.locationData.mediaID) {
-                    textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
-                    console.log("text item " + JSON.stringify(textData));
+                    if (sceneTextController) {
+                        textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                        console.log("text item " + JSON.stringify(textData));
+                    }
                 }
             
                 if (textData != null && textData != undefined && textData != "" && textData != "none") {

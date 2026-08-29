@@ -107,8 +107,15 @@
         // return playerNavAgent;
     }
 
+
     export async function CreateNPCAgent (parent, model, animations, index, locationData, objectData, sceneObjectID) { //hrm, not yet...
-        
+
+        if (!model) {
+            const geo = new THREE.CapsuleGeometry(.5,1,10,10);
+            const mat = new THREE.MeshBasicMaterial({wireframe: true, color: 'red'});
+            model = new THREE.Mesh(geo, mat);
+            scene.add(model);
+        }
 
         await new Promise(r => setTimeout(r, 0));
         const name = locationData.name;
@@ -140,7 +147,7 @@
         // ThreeDeeText(name, 1, model, null, null, false, null);
         // HTMLText(name, 1, model, null, null, false, null);
                 const agentID = locationData.timestamp + "_" + index;
-        console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID );
+        console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID + " vs sceneObjectID " + sceneObjectID);
 
 
         navAgentInstances[sceneObjectID] = npc;

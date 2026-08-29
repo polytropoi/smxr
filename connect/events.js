@@ -17,6 +17,7 @@ export let drop_inventory_object_event = new Event("drop-inventory-object-event"
 export let dequip_event = new Event("dequip-event");
 export let sequence_event = new Event("sequence-event");
 export let data_event = new Event("data-event");
+export let location_event = new Event("location_event");
 
 export let sequenceInt = -1;
 

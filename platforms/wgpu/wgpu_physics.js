@@ -614,31 +614,13 @@ export async function initDynamicObjex () { //only test objex
 
 }
 
-
+// export function GetInstancedKinematicRigidbody
 export function GetInstancedRigidbody(position, scale) {
 
-    // try {
-
-      // console.log("tryna create dynamic rigidbody from model " + model );
-      // await new Promise(r => setTimeout(r, 0));
       let size = 2;
       if (scale) {
         size = scale;
       }
-    //   const geometry = new THREE.SphereGeometry( size / 2, 32, 16 );
-    // //  const material = new THREE.MeshStandardNodeMaterial({ transparent: true, opacity: .75, color: 'blue' });
-    //   // const material = new THREE.MeshStandardMaterial({transparent: true, opacity: .75, color: 'blue' });
-
-    //   const material = getRainbowMaterial();
-    //     // const material = DotNoiseMaterial()
-    //     material.roughness = 0.25;
-    //     material.metalness = 0.5;
-    //     material.envMap = scene.environment;
-    //     material.envMapIntensity = 2;
-
-
-		// 	const mesh = new THREE.Mesh( geometry, material );
-      
 
       const colliderSize = size;// * 1.25;
       const range = 30;

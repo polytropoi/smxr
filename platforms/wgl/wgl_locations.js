@@ -17,9 +17,12 @@ import { instancedModels, createDefaultSurface, SetSurface } from './wgl_instanc
 import { CreateLight } from './wgl_lights.js';
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies, createDefaultCollider } from './wgl_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint } from './wgl_nav.js';
+import { UpdateModdedLocations, mods } from '../../connect/settings.js';
+import { eventEl } from '../../connect/events.js';
 
 import { splatObjex } from './wgl_splats.js';
 import { InitVideo } from './wgl_media.js';
+import { lookAtCameraObjects } from './wgl_ui.js';
 export let locations = {};
 
 export let locationData;
@@ -85,6 +88,45 @@ export function createDefaultNavmesh(locData) {
         groundObjex.push(navmesh);
     }
 
+
+
+function getObjectsByPartialName(parent, partialName) {
+  const results = [];
+  
+  parent.traverse((child) => {
+        if (typeof child.name === 'string' && child.name.includes('your_partial_name')) {
+        results.push(child);
+    }
+    // if (child.name && child.name.includes(partialName)) {
+      
+    // }
+  });
+  
+  return results;
+}
+
+function LoadLocalMods(event) {
+    if (mods && mods.locations && mods.locations.length) {
+        console.log("looking for location localMods + " + mods.locations.length);
+        for (let i = 0; i < mods.locations.length; i++) {
+            let foundObject = scene.getObjectByName(mods.locations[i].timestamp);
+            if (!foundObject) {
+                const foundObjex = getObjectsByPartialName(scene, mods.locations[i].timestamp);
+                console.log("found " + foundObjex.length + " objex with timestamp " + mods.locations[i].timestamp);
+                foundObject = foundObjex[0];
+            }
+
+            if (foundObject) {
+                // Object was found, you can modify it here
+                // foundObject.material.color.set(0xff0000);
+                foundObject.position.set(mods.locations[i].x, mods.locations[i].y, mods.locations[i].z );
+            } else {
+                console.log("Object not found");
+            }
+        }
+    }
+}
+    
 ///////////////////// main loaders
 export function InitLocations() {
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction
@@ -152,8 +194,9 @@ export function InitLocations() {
                                     }															
 
                                     if (locationData[i].markerType == "brownian motion") {
-                                        const meshMover = new MeshMover(model); 
-                                        movingMeshes.push(meshMover);
+                                        lookAtCameraObjects.push(model);
+                                            const meshMover = new MeshMover(model); 
+                                            movingMeshes.push(meshMover);
                                     }
                             
 
@@ -283,7 +326,9 @@ export function InitLocations() {
         this.random1 = Math.random();
         this.random2 = Math.random();
         this.random3 = Math.random();
+        
     }
+    
     update(time) {
 
         // Creates a floating/bobbing effect
@@ -291,6 +336,7 @@ export function InitLocations() {
         this.mesh.position.z = this.initPosition.z + Math.sin(time * .0001) * this.random2 * 10;
         // Creates a circular wandering effect
         this.mesh.position.x = this.initPosition.x + Math.sin(time * .0001) * this.random3 * 10;
+
     }
 }
 
