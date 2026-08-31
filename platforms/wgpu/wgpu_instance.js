@@ -29,6 +29,8 @@ let surfaceType = "model";
 export let physicsInstancedBodies = [];
 export let physicsInstancedMeshes = [];
 
+export let instancedAgentMeshes = {};
+
 // export function InitPhysicsInstances (model, count, pattern, physicsMode, locationData) {
 //     return new InstanceWithPattern(model, count, pattern, physicsMode, locationData);
 // }
@@ -153,6 +155,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             let sampleGeos = [];
             let sampleMats = [];
             let instancedMeshes = [];
+            let instancedMesh;
             // let childCount = 0;
             
             model.traverse(node => {
@@ -261,8 +264,9 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 const placeholder = new THREE.Object3D();
                 const sceneObjectID = locData.timestamp + "_" + i;
                 const animations = [];
-                const z = 1;
-                await CreateNPCAgent(null, null, animations, z.toString(), locData, locData.objectData, sceneObjectID);
+                // const z = 1;
+                await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID);
+               
                 // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
             }
             dummy.updateMatrix(); // Update matrix based on position/rotation
@@ -328,6 +332,10 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 taggedInstances[locData.timestamp] = tm;
              
             }
+            if (locData.markerType == "character") {
+                instancedAgentMeshes[locData.timestamp] = instancedMeshes[s];
+            }
+            // console.log("instancedAgentMeshes " + JSON.stringify(instancedAgentMeshes));
             
             
             

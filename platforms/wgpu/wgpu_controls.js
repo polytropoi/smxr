@@ -1349,7 +1349,14 @@ export function onMouseDown(event) { // on threejs object
                 // navAgentInstance = navAgentInstances[lastRaycastHitObject.userData.name];
                 navAgentInstance = navAgentInstances[sOID]; //uses same ref as sceneObjects
                 if (navAgentInstance)
-                console.log("found navagent on in navAgentInstances by sceneObjectID " + sOID);
+                console.log("found navagent in navAgentInstances by sceneObjectID " + sOID);
+            } else if (lastRaycastHit.instanceId && lastRaycastHitObject.userData.locationData.markerType == "character") {
+
+                let sOID = lastRaycastHitObject.userData.locationData.timestamp + "_" + lastRaycastHit.instanceId;
+                 navAgentInstance = navAgentInstances[sOID]; //uses same ref as sceneObjects
+                if (navAgentInstance)
+                console.log("found instanced navagent in navAgentInstances by sceneObjectID " + sOID);
+            
             }
             // console.log("navAgentInstance" + lastRaycastHitObject.userData.name);
             if (navAgentInstance) {
@@ -1450,8 +1457,10 @@ export function onMouseDown(event) { // on threejs object
                     }
                     let textData;
                     if (lastRaycastHitObject.userData.locationData.mediaID) {
-                        textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
-                        console.log("text item " + JSON.stringify(textData));
+                        if (sceneTextController) {
+                            textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                            console.log("text item " + JSON.stringify(textData));
+                        }
                     }
                 
                     if (textData != null && textData != undefined && textData != "" && textData != "none") {

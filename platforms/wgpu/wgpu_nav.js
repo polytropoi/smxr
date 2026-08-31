@@ -27,6 +27,8 @@
     export let playerNavAgent;
 
     import { returnMaterial } from './tsl/tsl_materials.js'
+import { instancedAgentMeshes } from './wgpu_instance.js';
+
 
     let agentInitLocations = [];
     let arrowHelper;
@@ -108,13 +110,17 @@
     }
 
 
-    export async function CreateNPCAgent (parent, model, animations, index, locationData, objectData, sceneObjectID) { //hrm, not yet...
+    export async function CreateNPCAgent (isInstanced, model, animations, index, locationData, objectData, sceneObjectID) { //hrm, not yet...
 
         if (!model) {
-            const geo = new THREE.CapsuleGeometry(.5,1,10,10);
+
+            const geo = new THREE.CapsuleGeometry(.5,1,4,4);
             const mat = new THREE.MeshBasicMaterial({wireframe: true, color: 'red'});
             model = new THREE.Mesh(geo, mat);
             scene.add(model);
+            if (settings && settings.sceneTags && !settings.sceneTags.includes("debug")) {
+                model.visible = false;
+            }
         }
 
         await new Promise(r => setTimeout(r, 0));
@@ -131,7 +137,8 @@
 
         const options = {
             object: model,
-            // model: parent,
+            isInstanced: isInstanced,
+            sceneObjectID: sceneObjectID,
             nodeRadius: 0.1,
             speed: agentSpeed,
             readyToNav: true,
@@ -152,8 +159,6 @@
 
         navAgentInstances[sceneObjectID] = npc;
 
-        // return npc;
-        // return playerNavAgent;
     }
    
     // export function AssignModelsToAgents() { //nope
@@ -294,11 +299,13 @@
             this.assetsPath = options.assetsPath;
             this.name = options.name || 'Player';
             
+            this.isInstanced = options.isInstanced;
             this.animations = {};	
             
             this.worldPosition = new THREE.Vector3();
 
             // scene.add(options.object);
+            this.sceneObjectID = options.sceneObjectID;
             
             this.object = options.object; //parent to simple geo
             // this.model = options.model; //actual mesh
@@ -841,9 +848,11 @@
         
         update(dt, currentTime){ //move it!
             const speed = this.speed;
-            const player = this.object; //um, not necessarily...
+            const agent = this.object; //um, not necessarily...
 
-
+            let instancedPosition = new THREE.Vector3();
+            let instancedQuaternion = new THREE.Quaternion();
+            let instancedMatrix = new THREE.Matrix4();
             // console.log(currentTime + " " + lastTime + " " + throttleInterval);
             if (this.hasAnims) {
                 if (this.mixer) this.mixer.update(dt);
@@ -880,28 +889,41 @@
                                 // }
                             // }
 
-                    const vel = this.targetPosition.clone().sub(player.position);
+                    const vel = this.targetPosition.clone().sub(agent.position);
                     let pathLegComplete = (vel.lengthSq()<0.01);
   
                     if (!pathLegComplete) {
 
                         //Get the distance to the target before moving
-                        const prevDistanceSq = player.position.distanceToSquared(this.targetPosition);
+                        const prevDistanceSq = agent.position.distanceToSquared(this.targetPosition);
                        
                     
                         vel.normalize();
      
                         if (this.quaternion) {
-                            player.quaternion.slerp(this.quaternion, 0.1);
+                            agent.quaternion.slerp(this.quaternion, 0.1);
                         }
 
-                        player.position.add(vel.multiplyScalar(dt * speed));
+                        agent.position.add(vel.multiplyScalar(dt * speed));
                                                     
                         //Get distance after moving, if greater then we've overshot and this leg is complete
-                        const newDistanceSq = player.position.distanceToSquared(this.targetPosition);
+                        const newDistanceSq = agent.position.distanceToSquared(this.targetPosition);
                         //  console.log(newDistanceSq + " vs " + prevDistanceSq );
                         pathLegComplete = (newDistanceSq > prevDistanceSq);
                         this.snapToGround();
+
+                        if (this.isInstanced) {
+                            const timestamp = this.sceneObjectID.split("_")[0];
+                            const instanceIndex = this.sceneObjectID.split("_")[1];
+                            const instancedMesh = instancedAgentMeshes[timestamp];
+                            if (instancedMesh) {
+                            // console.log("tryna move agent with instanceIndex " + instanceIndex);
+                                instancedPosition.set(agent.position.x, agent.position.y, agent.position.z);
+                                instancedQuaternion.set(agent.quaternion.x, agent.quaternion.y, agent.quaternion.z, agent.quaternion.w);
+                                instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(1, 1, 1));
+                                instancedAgentMeshes[timestamp].setMatrixAt(instanceIndex, instancedMatrix);
+                            }
+                        }
 
                     } 
                     

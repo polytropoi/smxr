@@ -649,55 +649,36 @@
 				dynamicBodies.forEach(b => 
 					b.update());
 
-				// instancedWithPhysics.forEach(p =>
-				// 	p.updatePhysics());
-				// for (let i = 0; i < instancedWithPhysics.length; i++) {
-				// 	instancedWithPhysics[i].updatePhysics();
-				// }
 				if (physicsInstancedMeshes && physicsInstancedBodies.length) { //this is a class instance// nope
-							for (let i = 0; i < physicsInstancedBodies.length; i++) {
-											// await new Promise(r => setTimeout(r, 0));
-								// const body = physicsInstances.instancedBodies[i];
-								// if (body) {
-									const pos = physicsInstancedBodies[i].translation();
-									const rot = physicsInstancedBodies[i].rotation();
+					for (let i = 0; i < physicsInstancedBodies.length; i++) {
+								
+						const pos = physicsInstancedBodies[i].translation();
+						const rot = physicsInstancedBodies[i].rotation();
 
-									// Update dummy object with physics data
-									// if (pos.y < -20) {
-									// 	 physicsInstancedBodies[i].setTranslation(pos.x, 20, pos.z);
-									// } else {
-									// this.dummy.position.set(pos.x, pos.y, pos.z);
-									// this.dummy.quaternion.set(rot.x, rot.y, rot.z, rot.w);
-									// this.dummy.updateMatrix();
-									instancedPosition.set(pos.x, pos.y, pos.z);
-									instancedQuaternion.set(rot.x, rot.y, rot.z, rot.w);
-									// this.dummy.updateMatrix();
-									instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(1, 1, 1));
-									// this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);
-									physicsInstancedMeshes.setMatrixAt(i, instancedMatrix);
+						instancedPosition.set(pos.x, pos.y, pos.z);
+						instancedQuaternion.set(rot.x, rot.y, rot.z, rot.w);
+						instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(1, 1, 1));
+						physicsInstancedMeshes.setMatrixAt(i, instancedMatrix);
 
-									if (pos.y < -25 || pos.x > 50 || pos.x < -50 || pos.z > 50 || pos.z < -50) {
-										let range = 20;
-									let x = Math.random() * range - range * 0.5;
-									let y = Math.random() * range - range * 0.5 + 10;
-									let z = Math.random() * range - range * 0.5;
-									physicsInstancedBodies[i].setLinvel({ x: Math.random(), y: 0.0, z: Math.random() }, true);
-									physicsInstancedBodies[i].setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
-									physicsInstancedBodies[i].setTranslation({ x: x, y: y, z: z });
-          							}
-									// await new Promise(r => setTimeout(r, 0));
-								}
-								// Apply to instanced mesh
-								//  matrix.compose(position, quaternion, new THREE.Vector3(1, 1, 1));
-								// // this.instancedMeshes[0].setMatrixAt(i, this.dummy.matrix);
-								// this.instancedMeshes[0].setMatrixAt(i, matrix);
-								//  await new Promise(r => setTimeout(r, 0));
-								// }
-					
-									// }
-							// }
-					// physicsInstances.instancedBodies;
+						if (pos.y < -25 || pos.x > 50 || pos.x < -50 || pos.z > 50 || pos.z < -50) {
+							let range = 20;
+						let x = Math.random() * range - range * 0.5;
+						let y = Math.random() * range - range * 0.5 + 10;
+						let z = Math.random() * range - range * 0.5;
+						physicsInstancedBodies[i].setLinvel({ x: Math.random(), y: 0.0, z: Math.random() }, true);
+						physicsInstancedBodies[i].setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+						physicsInstancedBodies[i].setTranslation({ x: x, y: y, z: z });
+						}
+						// await new Promise(r => setTimeout(r, 0));
+					}
+								
 				}
+
+				// if (instancedAgents)  {
+					
+				// }
+
+
 			
 				if (kinematicBodies.length) {
 					kinematicBodies.forEach(c => {
