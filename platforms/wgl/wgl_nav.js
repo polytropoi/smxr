@@ -11,6 +11,8 @@
 
   import { settings } from '../../../connect/settings.js';
 
+  import { instancedAgentMeshes } from './wgl_instance.js';
+
 
     import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './wgl_physics.js';
 	import { HTMLText, ThreeDeeText } from './wgl_ui.js';
@@ -104,9 +106,19 @@
         // return playerNavAgent;
     }
 
-    export async function CreateNPCAgent (parent, model, animations, index, locationData, objectData) { //hrm, not yet...
-        
 
+    export async function CreateNPCAgent (isInstanced, model, animations, index, locationData, objectData, sceneObjectID) { //hrm, not yet...
+
+        if (!model) {
+
+            const geo = new THREE.CapsuleGeometry(.5,1,4,4);
+            const mat = new THREE.MeshBasicMaterial({wireframe: true, color: 'red'});
+            model = new THREE.Mesh(geo, mat);
+            scene.add(model);
+            if (settings && settings.sceneTags && !settings.sceneTags.includes("debug")) {
+                // model.visible = false;
+            }
+        }
         await new Promise(r => setTimeout(r, 0));
         const name = locationData.name;
         const pos = randomNavmeshPoint();
@@ -120,7 +132,8 @@
         }
         const options = {
             object: model,
-            // model: parent,
+            isInstanced: isInstanced,
+            sceneObjectID: sceneObjectID,
             nodeRadius: 0.1,
             speed: agentSpeed,
             readyToNav: true,
@@ -136,10 +149,9 @@
         // ThreeDeeText(name, 1, model, null, null, false, null);
         // HTMLText(name, 1, model, null, null, false, null);
                 const agentID = locationData.timestamp + "_" + index;
-        console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID );
+        console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID + " vs sceneObjectID " + sceneObjectID);
 
-
-        navAgentInstances[model.userData.name] = npc;
+        navAgentInstances[sceneObjectID] = npc;
 
         // return npc;
         // return playerNavAgent;
@@ -284,11 +296,13 @@
             this.assetsPath = options.assetsPath;
             this.name = options.name || 'Player';
             
+            this.isInstanced = options.isInstanced;
             this.animations = {};	
             
             this.worldPosition = new THREE.Vector3();
 
             // scene.add(options.object);
+            this.sceneObjectID = options.sceneObjectID;
             
             this.object = options.object; //parent to simple geo
             // this.model = options.model; //actual mesh
@@ -833,7 +847,9 @@
             const speed = this.speed;
             const player = this.object; //um, not necessarily...
 
-
+            let instancedPosition = new THREE.Vector3();
+            let instancedQuaternion = new THREE.Quaternion();
+            let instancedMatrix = new THREE.Matrix4()
             // console.log(currentTime + " " + lastTime + " " + throttleInterval);
             if (this.hasAnims) {
                 if (this.mixer) this.mixer.update(dt);
@@ -892,6 +908,19 @@
                         //  console.log(newDistanceSq + " vs " + prevDistanceSq );
                         pathLegComplete = (newDistanceSq > prevDistanceSq);
                         this.snapToGround();
+
+                                if (this.isInstanced) {
+                                    const timestamp = this.sceneObjectID.split("_")[0];
+                                    const instanceIndex = this.sceneObjectID.split("_")[1];
+                                    const instancedMesh = instancedAgentMeshes[timestamp];
+                                    if (instancedMesh) {
+                                    // console.log("tryna move agent with instanceIndex " + instanceIndex);
+                                        instancedPosition.set(player.position.x, player.position.y, player.position.z);
+                                        instancedQuaternion.set(player.quaternion.x, player.quaternion.y, player.quaternion.z, player.quaternion.w);
+                                        instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(1, 1, 1));
+                                        instancedAgentMeshes[timestamp].setMatrixAt(instanceIndex, instancedMatrix);
+                                    }
+                                }
 
                     } 
                     

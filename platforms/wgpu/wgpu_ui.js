@@ -7,7 +7,10 @@ import { Text } from 'three-text/three'; //not troika!
 // import { installHtmlInCanvasPolyfill } from 'three-html-render/polyfill';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+// @ts-ignore
 import { InteractionManager } from 'three/addons/interaction/InteractionManager.js';
+
+// import { InteractionManager } from 'three.interactive';
 
 import { audioGroupsData, ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
@@ -34,6 +37,8 @@ export let lookAtCameraObjects = [];
 export let textContainers = [];
 
 export let interactionManagers = [];
+
+export let interactionManager;
 
 export let scenePictures = {};
 
@@ -76,12 +81,13 @@ function isHtmlInCanvasSupported() { //if the browser flag is set to support htm
 }
 
 export function SetUIMode(mode) {
-    console.log("HTML-in-Canvas is supported " + isHtmlInCanvasSupported());
+    console.log("hic is supported " + isHtmlInCanvasSupported());
     
     if (mode == "hic" && isHtmlInCanvasSupported()) {
         canvasEl = document.getElementById('hic_canvas');
         contentEl = document.getElementById('hic_content');
         uiMode = mode; //from controls
+        console.log("found hic els: " + canvasEl + " " + contentEl)
     } else {
         uiMode == "popup";
         if (mode == "hic" && !isHtmlInCanvasSupported()) {
@@ -650,7 +656,7 @@ export function ShowGroupAudio (locationGroup, locationMediaId, instanceId, posi
                     "\x22 crossorigin=\x22anonymous\x22 type=\x22audio/mpeg\x22><source src=\x22"+audioItem.URLogg+
                     "\x22 crossorigin=\x22anonymous\x22 type=\x22audio/ogg\x22>Your browser does not support the audio element.</audio>";
                       
-                    const htmlString = "<h1>" + audioItem.title + " </h1>"  + audioEl;
+                    const htmlString = "<h4>" + audioItem.title + " </h4>"  + audioEl;
 
                     ShowHTMLPopup(event, htmlString, position, distance, null, ymod); //either popup or HIC
                 }
@@ -776,10 +782,12 @@ export function StartPopup (header, body, showStartButton) {
 export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod) {
 
      if (uiMode == "hic") {
+        // style = "hic_content";
         if (style == "hic_content") {
             contentEl.className = '';
             contentEl.classList.add(style);
         }
+
 
 
         let material;
@@ -803,13 +811,24 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
         if (!hicMesh) {
 
             contentEl.innerHTML = htmlstring;
-            console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
+
+
+            if (!position) {
+
+                position = new THREE.Vector3();
+                viewportPlaceholder.getWorldPosition(position);
+               
+
+            }
+            console.log("hicMesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
 
             const geometry = new THREE.PlaneGeometry( 1,1, 10, 10 );
 
             // material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .5, metalness: .1 } );
-            material = new THREE.MeshBasicMaterial( { transparent: true} );
-            material.map = new THREE.HTMLTexture( canvasEl );
+            material = new THREE.MeshBasicMaterial({ transparent: true});
+            // const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: 0, metalness: 0.5, side: THREE.DoubleSide } );
+            material.map = new THREE.HTMLTexture( contentEl );
+            // material.map.needsUpdate = true;
             // material.envMap = scene.environment;
             // material.envMapIntensity = 1;
             const ctx = canvasEl.getContext('2d');
@@ -827,11 +846,23 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
             ctx.scale(ratio, ratio);
             hicMesh = new THREE.Mesh( geometry, material );
 
+            
             scene.add( hicMesh );
+
+             hicMesh.scale.setScalar(1);
+            hicMesh.position.set(position.x, position.y +.5, position.z);
             // activeObjex.push(hicMesh);
             lookAtCameraObjects.push(hicMesh);
-            const interactions = new InteractionManager();
+
            
+            interactionManager = new InteractionManager();
+            interactionManager.connect( renderer, camera );
+            interactionManager.add( hicMesh );
+            interactionManager.update();
+            // interactionManagers.push(interactions);
+            // hicMesh.updateMatrixWorld();
+            hicMesh.visible = true;
+            
             hicMesh.addEventListener('pointerdown', onMouseDown);
             if (position && distance) {
                 // scene.attach(hicMesh);
@@ -840,21 +871,23 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
                     ymodification = yMod;
 
                 }
-                 console.log(yMod + " vs ymod is " + ymodification);
-                hicMesh.position.set(position.x, ymodification, position.z);
-                hicMesh.scale.setScalar(scaleFactor);
+                 console.log(yMod + " vs ymod is " + ymodification + " distance " + distance);
+                hicMesh.position.set(position.x, position.y, position.z);
+                // hicMesh.scale.setScalar(scaleFactor);
+                hicMesh.scale.setScalar(1);
             }
-            interactions.connect( renderer, camera );
-            interactions.add( hicMesh );
-            interactions.update();
-            interactionManagers.push(interactions);
-            hicMesh.updateMatrixWorld();
-
         } else {
             contentEl.innerHTML = htmlstring;
             hicMesh.visible = true;
+            if (!position) {
+                position = new THREE.Vector3();
+                viewportPlaceholder.getWorldPosition(position);
+                hicMesh.scale.setScalar(1);
+                hicMesh.position.set(position.x, position.y +.5, position.z);
+
+            }
             // canvasEl.requestPaint();
-            console.log("contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
+            console.log("reused hicmesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
             if (position && distance) {
                 let ymodification = position.y + scaleFactor/2;
                 if (yMod != null) {
@@ -862,30 +895,24 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
 
                 }
                 console.log("ymod is " + ymodification);
-                hicMesh.position.set(position.x, ymodification, position.z);
+                hicMesh.position.set(position.x, position.y, position.z);
                 hicMesh.scale.setScalar(scaleFactor);
             }
             hicMesh.updateMatrixWorld();
-
+            hicMesh.visible = true;
             // hicMesh.material = material;
         }
         // Interaction
 
-        if (!position) {
 
-            const worldPosition = new THREE.Vector3();
-            viewportPlaceholder.getWorldPosition(worldPosition);
-            hicMesh.scale.setScalar(1);
-            hicMesh.position.set(worldPosition.x, worldPosition.y +.5, worldPosition.z);
 
-        }
-
+    // } else if (uiMode == "popup") {
     } else if (uiMode == "popup") {
 
          const popup = document.getElementById("popup");
          popup.innerHTML = htmlstring;
 
-            console.log("showDialogPanel " + showDialogPanel + " string " + htmlstring);
+        console.log("showDialogPanel " + showDialogPanel + " string " + htmlstring);
         
             if (showDialogPanel) {
                 return;
@@ -941,6 +968,6 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
 
 export function HideHTMLPopup() {
     if (hicMesh) {
-        hicMesh.visible = false;
+        // hicMesh.visible = false;
     }
 }

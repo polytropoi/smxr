@@ -261,7 +261,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             }
 
             if (locData.markerType == "character") {
-                const placeholder = new THREE.Object3D();
+                // const placeholder = new THREE.Object3D();
                 const sceneObjectID = locData.timestamp + "_" + i;
                 const animations = [];
                 // const z = 1;

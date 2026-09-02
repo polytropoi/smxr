@@ -26,7 +26,7 @@
 
 	import { Starfield, CreateSprites, } from './wgpu_fx.js';
 
-	import { ThreeDeeText, lookAtCameraObjects, SetUIMode, interactionManagers, StartPopup, startPop } from './wgpu_ui.js';
+	import { ThreeDeeText, lookAtCameraObjects, SetUIMode, interactionManager, StartPopup, startPop } from './wgpu_ui.js';
 
 	import { world, InitRapier, physicsIsReady, dynamicBodies, rapierDebugRenderer, 
 		eventQueue, kinematicBodies, npcKinematicBodies, worldIsReady, InitStaticObjex, 
@@ -345,7 +345,8 @@
 		clock = new THREE.Clock();
 
 		if (settings.sceneTags.includes("hic")) {
-			SetUIMode("hic");
+			SetUIMode("hic");// no workie now wtf!
+			// SetUIMode("popup");
 		}
 		StartPopup(loadingHeader, 'Loading Environment....', false);
 
@@ -364,9 +365,9 @@
 		}
 
 		if (settings && settings.sceneTags) {
-			if (settings.sceneTags.includes("hic")) {
-				SetUIMode("hic");
-			}
+			// if (settings.sceneTags.includes("hic")) {
+			// 	SetUIMode("hic");
+			// }
 			if (settings.sceneTags.includes("debug")) {
 			// 
 					stats = new Stats();
@@ -633,8 +634,14 @@
 				agents.forEach(a =>
 					a.update(delta, time));
 			}
-			interactionManagers.forEach(i => 
-					i.update());
+			// if (interactionManagers.length) {
+			// interactionManagers.forEach(i => 
+			// 		i.update());
+			// }
+			if (interactionManager) {
+				// console.log("tryna udpate interactionmanager");
+				interactionManager.update();
+			}
 
 			if (rapierDebugRenderer && showDebug) {
 				rapierDebugRenderer.update();

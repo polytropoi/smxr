@@ -1334,7 +1334,7 @@ export function onMouseDown(event) { // on threejs object
     } else if (lastRaycastHitObject && lastRaycastHitObject.userData) {
 
             // let sceneObjID = lastRaycastHitObject.userData.sceneObjectID;
-        console.log("clicked on active object! " + lastRaycastHitObject.userData.locationData.name);
+        console.log("clicked on active object! " + lastRaycastHitObject.userData.name);
 
         if (allowMods && keyIsDown == "KeyT") {
             

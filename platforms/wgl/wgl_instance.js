@@ -15,6 +15,10 @@ import { GetInstancedRigidbody } from './wgl_physics.js'
 
 import { sceneTextController } from './wgl_media.js';
 
+import { CreateNPCAgent } from './wgl_nav.js';
+
+
+export let instancedAgentMeshes = {};
 
 let sampler;
 export let surface;
@@ -248,36 +252,8 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let i = 0; i < count; i++) {            
             await sampler.sample(position);
             
-                // if (position.y < waterLevel)  {
-                //     // await sampler.sample(position);
-                //     position.y = -100;
-                //     // continue;
-                // }
-                // // position.y = position.y + yMod;
-                //     // console.log("mesh position " + position.y);
-                //     const ypos = parseFloat(position.y) + parseFloat(yMod);
-                //     // console.log("mesh y position " + position.y + " mod " + ypos);
-                // dummy.position.set(position.x, ypos, position.z);
-                // // console.log("instance positon " + JSON.stringify(position));
-                // // Optional: Add some random rotation
-                // dummy.rotation.y = Math.random() * Math.PI * 2;
-                // const scale = Math.random() * scaleFactor * .75;
-                // dummy.scale.set(scale, scale, scale);
-                // dummy.updateMatrix(); // Update matrix based on position/rotation
-                
-                // for (let m = 0; m < instancedMeshes.length; m++) {
-                    
-                //     // console.log("instance count " + i);
-                //     if (position.y > waterLevel)  {
-                //         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
-                //         instancedMeshes[m].instanceMatrix.needsUpdate = true;
-                //     } else {
-                //         // dummy.scale.setScalar(0);
-                //         dummy.scale.set(0,0,0);
-                //         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
-                //     }
-                // }
-            console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
+               
+            // console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
            
             if (surfaceType == "primitive") {
                 dummy.position.set(position.x, position.z + locData.y, position.y); //fsr the primitive plane returns x,y values with z as zero //bc its 2d! need to test for other geos
@@ -296,7 +272,16 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 const scale = Math.random() * scaleFactor * .75;
                 dummy.scale.set(scale, scale, scale);
             }
-
+            
+            if (locData.markerType == "character") {
+                // const placeholder = new THREE.Object3D();
+                const sceneObjectID = locData.timestamp + "_" + i;
+                const animations = [];
+                // const z = 1;
+                // await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID);
+               
+                // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
+            }
 
             dummy.updateMatrix(); // Update matrix based on position/rotation
             for (let m = 0; m < instancedMeshes.length; m++) {
@@ -346,6 +331,9 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 // await sceneTextController.dataIsReady();
                 // instanceTagData = await sceneTextController.returnAllTextDataFromMediaID(locData.mediaID);
                 // console.log("instanceTagData is " + instanceTagData);
+            }
+            if (locData.markerType == "character") {
+                instancedAgentMeshes[locData.timestamp] = instancedMeshes[s];
             }
             
             scene.add(instancedMeshes[s]);

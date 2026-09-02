@@ -114,7 +114,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
 
         if (!model) {
 
-            const geo = new THREE.CapsuleGeometry(.5,1,4,4);
+            const geo = new THREE.CapsuleGeometry(.5,1,4,4,4);
             const mat = new THREE.MeshBasicMaterial({wireframe: true, color: 'red'});
             model = new THREE.Mesh(geo, mat);
             scene.add(model);
@@ -288,6 +288,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             // randomNode 
             return randomNode;
         } else {
+            // console.log("random navmesh position fail, no pathfinding!");
             return null;
         }
     } 
