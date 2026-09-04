@@ -328,6 +328,7 @@ function WaitAndInit () {
 
 
   export async function LoadKinematicAgentMeshes () {
+    console.log("loading kinematicAgentMeshes..." + kinematicAgentMeshes.length);
     for (let i = 0; i < kinematicAgentMeshes.length; i++) {
       // await new Promise(r => setTimeout(r, 300));
       const body = await getModelKinematicBody(kinematicAgentMeshes[i], kinematicAgentMeshes[i].userData.locationData, kinematicAgentMeshes[i].userData.objectData); //pass the index too
@@ -355,6 +356,10 @@ function WaitAndInit () {
       // mesh.visible = false;
       mesh.userData.locationData = locData;
       mesh.userData.objectData = objData;
+      let isInstanced = false;
+      if (mesh.userData.locationData.eventData.includes("instance")) {
+        isInstanced = true;
+      }
       // activeObjex.push(mesh);
       let size = 2;
       let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased();//no, position based...
@@ -373,7 +378,13 @@ function WaitAndInit () {
       if (mesh && rigidbody) {
         
         //  rigidbody.resetForces(true); 
+        if (!isInstanced) {
+          // console.log("updating parented rigidbody");
           rigidbody.setTranslation({ x: mesh.parent.position.x, y: mesh.parent.position.y + 1, z: mesh.parent.position.z });
+        } else {
+          // console.log("updating parentless rigidbody");
+          rigidbody.setTranslation({ x: mesh.position.x, y: mesh.position.y + 1, z: mesh.position.z });
+        }
         // mesh.getWorldPosition(worldposition);
         // rigidbody.setTranslation(worldposition.x, worldposition.y, worldposition.z);
         // console.log("worldposition " + JSON.stringify(worldposition));

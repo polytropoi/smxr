@@ -2,7 +2,7 @@
 
     import {scene} from './wgpu_main.mjs';
 
-    import { navmesh, LoadLocationObjex } from './wgpu_locations.js';
+    import { navmesh, kinematicAgentMeshes } from './wgpu_locations.js';
 
     import { player } from './wgpu_controls.js';
     
@@ -11,6 +11,7 @@
     import { uniform, sin, mul, add, time } from 'three/tsl';
 
     import { getKinematicBody, world, getKinematicAgentBodies, agentCount } from './wgpu_physics.js';
+
 
     import { settings } from '../../../connect/settings.js';
 	import { HTMLText, ThreeDeeText } from './wgpu_ui.js';
@@ -28,6 +29,7 @@
 
     import { returnMaterial } from './tsl/tsl_materials.js'
 import { instancedAgentMeshes } from './wgpu_instance.js';
+
 
 
     let agentInitLocations = [];
@@ -114,9 +116,14 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
 
         if (!model) {
 
+            if (!scale) {
+                scale = 1;
+            } 
+            const colliderScale = scale * .5;
             const geo = new THREE.CapsuleGeometry(.5,1,4,4,4);
             const mat = new THREE.MeshBasicMaterial({wireframe: true, color: 'red'});
             model = new THREE.Mesh(geo, mat);
+            model.scale.set(colliderScale, colliderScale, colliderScale);
             scene.add(model);
             if (settings && settings.sceneTags && !settings.sceneTags.includes("debug")) {
                 model.visible = false;
@@ -128,6 +135,13 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
         const pos = randomNavmeshPoint();
         model.position.set(pos.x, pos.y, pos.z);
     
+        model.userData.locationData = locationData;
+        model.userData.objectData = objectData;
+        if (isInstanced) {
+            // model
+            console.log("adding kinematicAgentMesh...");
+            kinematicAgentMeshes.push(model);
+        }
         let agentSpeed = 1;
         // console.log("NPC objectData " + JSON.stringify(objectData))
         if (objectData && objectData.speedFactor) {
