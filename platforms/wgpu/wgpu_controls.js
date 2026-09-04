@@ -1363,18 +1363,19 @@ export function onMouseDown(event) { // on threejs object
                 navAgentInstance.agentClick();
  
                 // let textData;
-                if (lastRaycastHitObject.userData.locationData && lastRaycastHitObject.userData.locationData.mediaID) {
+                if (sceneTextController && lastRaycastHitObject.userData.locationData && lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                     console.log("text item " + textData);
                 }
+                if (sceneObjects[sOID]) {
                     console.log("mouseDownOn sceneObjectID : " + sOID);
                     sceneObjects[sOID].onClick(event);
-                // }
-                                // let textData;
-                if (lastRaycastHitObject.userData.locationData.mediaID) {
-                    textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
-                    console.log("text item " + textData);
                 }
+                                // let textData;
+                // if (lastRaycastHitObject.userData.locationData.mediaID) {
+                //     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                //     console.log("text item " + textData);
+                // }
                 
             } else if (lastRaycastHitObject.userData.objectData) {
 

@@ -11,7 +11,6 @@ import { sceneTextController, triggerAudioController, ReturnTaggedPictures } fro
 
 import { ActionSwitch, SetPlayerRigidbody } from './wgl_actions.js';
 
-
 import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './wgl_locations.js';
 
 import { scene, sceneIsReady, cameraMode, renderer, clock, selectedObjects } from './wgl_main.mjs';
@@ -163,7 +162,7 @@ export function SetControls(cameraMode, cameraFOV) {
         var material = new THREE.MeshBasicMaterial({ 'visible': false });
 
         player = new THREE.Mesh(geometry, material);
-        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .1, 500);
+        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .1, 1000);
         
         camera.position.set(0, 0, 0);
         scene.add(player);

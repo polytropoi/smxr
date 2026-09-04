@@ -252,9 +252,6 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let i = 0; i < count; i++) {            
             await sampler.sample(position);
             
-               
-            // console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
-           
             if (surfaceType == "primitive") {
                 dummy.position.set(position.x, position.z + locData.y, position.y); //fsr the primitive plane returns x,y values with z as zero //bc its 2d! need to test for other geos
             } else {
@@ -264,13 +261,17 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 const ypos = parseFloat(position.y) + parseFloat(yMod);
                 dummy.position.set(position.x, ypos, position.z);
             }
-        
-        
             dummy.rotation.y = Math.random() * Math.PI * 2;
             
-            if (locData.locationTags && !locData.locationTags.includes("no scale")) {
-                const scale = Math.random() * scaleFactor * .75;
+            if (locData.locationTags && locData.locationTags.includes("no scale")) {
+                // const scale = Math.random() * scaleFactor * .75;
+                dummy.scale.set(1, 1, 1);
+
+            } else {
+                const scale = Math.random() * scaleFactor + 4;
+                // const scale = 2;
                 dummy.scale.set(scale, scale, scale);
+                console.log("scaleFactor " + scaleFactor + " dummys cale is " +scale);
             }
             
             if (locData.markerType == "character") {
@@ -278,8 +279,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 const sceneObjectID = locData.timestamp + "_" + i;
                 const animations = [];
                 // const z = 1;
-                // await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID);
-               
+                await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID);
                 // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
             }
 
@@ -289,6 +289,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 if (surfaceType != "primitive") {
                     // console.log("instance count " + i);
                     if (position.y > waterLevel)  {
+                        console.log("above water instance count " + i);
                         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
                         instancedMeshes[m].instanceMatrix.needsUpdate = true;
                     } else {
@@ -297,7 +298,9 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
                     }
                 } else {
+                     console.log("primitive surface instance count " + i);
                     instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                    instancedMeshes[m].instanceMatrix.needsUpdate = true;
                 }
             }
 
@@ -454,7 +457,6 @@ export class InstanceWithPattern_ {
             for (let i = 0; i < sampleMats.length; i++) {
             }
 
-         
         this.instancedBodies = [];
         // console.log("child count for model " + sampleGeos.length + " ymod" + yMod);
         for (let c = 0; c < sampleGeos.length; c++) {

@@ -110,7 +110,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
     }
 
 
-    export async function CreateNPCAgent (isInstanced, model, animations, index, locationData, objectData, sceneObjectID) { //hrm, not yet...
+    export async function CreateNPCAgent (isInstanced, model, animations, index, locationData, objectData, sceneObjectID, scale) { //hrm, not yet...
 
         if (!model) {
 
@@ -138,6 +138,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
         const options = {
             object: model,
             isInstanced: isInstanced,
+            scale: scale, //instances may ranomize scale
             sceneObjectID: sceneObjectID,
             nodeRadius: 0.1,
             speed: agentSpeed,
@@ -327,6 +328,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             this.npc = options.npc;
             this.isPaused = false;
             this.targetPosition = null;
+            this.scale = options.scale ? options.scale : 1;
             if (this.npc) this.dead = false;
             
             this.speed = options.speed;
@@ -919,9 +921,10 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                             const instancedMesh = instancedAgentMeshes[timestamp];
                             if (instancedMesh) {
                             // console.log("tryna move agent with instanceIndex " + instanceIndex);
+                                
                                 instancedPosition.set(agent.position.x, agent.position.y, agent.position.z);
                                 instancedQuaternion.set(agent.quaternion.x, agent.quaternion.y, agent.quaternion.z, agent.quaternion.w);
-                                instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(1, 1, 1));
+                                instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(this.scale, this.scale, this.scale));
                                 instancedAgentMeshes[timestamp].setMatrixAt(instanceIndex, instancedMatrix);
                             }
                         }

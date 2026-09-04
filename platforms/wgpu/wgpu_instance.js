@@ -237,6 +237,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         const minDistance = 5;
         let position = new THREE.Vector3();
         let theCount = 0;
+        let scale = 1;
         for (let i = 0; i < count; i++) {            
             await sampler.sample(position);
 
@@ -255,17 +256,24 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         
             dummy.rotation.y = Math.random() * Math.PI * 2;
             
-            if (locData.locationTags && !locData.locationTags.includes("no scale")) {
-                const scale = Math.random() * scaleFactor * .75;
+            if (locData.locationTags && locData.locationTags.includes("no scale")) {
+                // const scale = Math.random() * scaleFactor * .75;
+                dummy.scale.set(1, 1, 1);
+
+            } else {
+                scale = Math.random() * scaleFactor + 4;
+                // const scale = 2;
                 dummy.scale.set(scale, scale, scale);
+                console.log("scaleFactor " + scaleFactor + " dummys cale is " +scale);
             }
+            
 
             if (locData.markerType == "character") {
                 // const placeholder = new THREE.Object3D();
                 const sceneObjectID = locData.timestamp + "_" + i;
                 const animations = [];
                 // const z = 1;
-                await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID);
+                await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID, scale);
                
                 // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
             }
@@ -281,9 +289,11 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                         // dummy.scale.setScalar(0);
                         dummy.scale.set(0,0,0);
                         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                         instancedMeshes[m].instanceMatrix.needsUpdate = true;
                     }
                 } else {
                     instancedMeshes[m].setMatrixAt(i, dummy.matrix);
+                     instancedMeshes[m].instanceMatrix.needsUpdate = true;
                 }
             }
 
