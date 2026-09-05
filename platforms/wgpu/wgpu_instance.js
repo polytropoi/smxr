@@ -371,17 +371,21 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
             model.traverse(node => {
             if (node.isMesh && node.material) {
                 // childCount++;
-                // node.material.roughness = .1;
-                // node.material.envMap = scene.environment;
-                //  node.material.envMapIntensity = 2;
-                // node.material.environmentNode = scene.environmentNode;
+                sampleMaterial = node.material;
+                sampleMaterial.roughness = .1;
+                 sampleMaterial.metalness = .6;
+                sampleMaterial.envMap = scene.environment;
+                  sampleMaterial.envMapIntensity = 2;
+                // node.material.environmentNode = sc
+                // ene.environmentNode;
                 // console.log("node material name " + node.material.name);
                 
 
                 sampleGeometry = node.geometry;
 
                 sampleGeos.push(sampleGeometry);
-                sampleMaterial = convertGltfToNodeMaterial(node.material);
+                // sampleMaterial = convertGltfToNodeMaterial(node.material);
+                sampleMaterial.envNode = scene.environmentNode;
                 sampleMats.push(sampleMaterial);
                 
                 }

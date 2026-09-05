@@ -64,12 +64,14 @@ export function convertGltfToNodeMaterial(stdMaterial) {
         
         // Copy basic properties
         nodeMat.color = stdMaterial.color;
-        nodeMat.roughness = stdMaterial.roughness;
-        // nodeMat.roughness = .5;
+        // nodeMat.roughness = stdMaterial.roughness;
+        nodeMat.roughness = .2;
         nodeMat.metalness = stdMaterial.metalness;
         
         // Map textures via TSL if they exist
-        if (stdMaterial.map) nodeMat.colorNode = texture(stdMaterial.map);
+        if (stdMaterial.map) {
+            nodeMat.colorNode = texture(stdMaterial.map);
+        }
         if (stdMaterial.roughnessMap) nodeMat.roughnessNode = texture(stdMaterial.roughnessMap);
         if (stdMaterial.metalnessMap) nodeMat.metalnessNode = texture(stdMaterial.metalnessMap);
         if (stdMaterial.normalMap) nodeMat.normalNode = texture(stdMaterial.normalMap);

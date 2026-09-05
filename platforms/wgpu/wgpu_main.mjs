@@ -253,9 +253,10 @@
 				// if (instancedModels[i].locationData.mediaID && instancedModels[i].locationData.mediaID != "" && instancedModels[i].locationData.mediaID != "none") {
 				// 	InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 				// } else {
-				InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
+				if (!instancedModels[i].locationData.locationTags.includes("dynamic")) { //hrm, need to assign positions in InstanceWithPattern below...
+					InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 						
-				// }
+				}
 				
 			} 
 		} 
