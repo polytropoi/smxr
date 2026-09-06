@@ -268,7 +268,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 dummy.scale.set(1, 1, 1);
 
             } else {
-                const scale = Math.random() * scaleFactor + 4;
+                const scale = Math.random() * scaleFactor;
                 // const scale = 2;
                 dummy.scale.set(scale, scale, scale);
                 console.log("scaleFactor " + scaleFactor + " dummys cale is " +scale);

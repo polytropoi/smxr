@@ -911,6 +911,8 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
 
          const popup = document.getElementById("popup");
          popup.innerHTML = htmlstring;
+        //  popup.className = '';
+        // popup.classList.add("popup2");
 
         console.log("showDialogPanel " + showDialogPanel + " string " + htmlstring);
         
@@ -927,21 +929,9 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
                     display: 'block',
                 });
             } else {
-                // // console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
-                // let xpos = event.clientX - 150;
-                // if ((window.innerWidth - event.clientX) < 150) {
-                //     xpos = event.clientX - 300;
-                // } else if (event.clientX < 150) {
-                //     xpos = 0;
-                // }
-                
-                // let ypos = event.clientY - 100;
-                // if (event.clientY < 100) {
-                //     ypos = 0;
-                // }
-                // if (event.clientY > (window.innerHeight - 300)) {
-                //     ypos = window.innerHeight - 300;
-                // }
+
+                console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
+              
                 let xpos = event.clientX - 256;
                 if ((window.innerWidth - event.clientX) < 256) {
                     xpos = event.clientX - 512;
@@ -949,8 +939,8 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
                     xpos = 0;
                 }
                 
-                let ypos = event.clientY - 256;
-                if (event.clientY < 200) {
+                let ypos = event.clientY - 512;
+                if (event.clientY < 400) {
                     ypos = 0;
                 }
                  Object.assign(popup.style, {

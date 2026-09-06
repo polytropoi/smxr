@@ -797,7 +797,7 @@ function NavmeshConstraint () {
 }
 
 //////////////////////////. PROCESS RAYCAST HIT /////////////////
-async function RaycastHit(type, hit) {
+async function RaycastHit(type, hit, event) {
 
     if (lastRaycastHitObject) {
         if (lastRaycastHitObject != hit.object) {
@@ -992,7 +992,7 @@ async function RaycastHit(type, hit) {
                             hic_content.classList.remove("hic_content");
                             hic_content.classList.add("hic_content_2");
 
-                            ShowHTMLPopup(null, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
+                            ShowHTMLPopup(event, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
                         }
                     } else {
                         ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
@@ -1149,7 +1149,7 @@ export function mouseRaycast(e) {
         // console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
         // 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
         if (raycastHits[0].object.userData) {
-            RaycastHit("mouse", raycastHits[0]);
+            RaycastHit("mouse", raycastHits[0], e);
             lastRaycastHitPosition = raycastHits[0].point;
             
             // raycastHits[0].point.getWorldPosition(worldHitPosition);

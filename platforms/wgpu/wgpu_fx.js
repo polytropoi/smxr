@@ -5,7 +5,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { scene } from './wgpu_main.mjs';
 
-import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
+import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, add, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
 
 
 let currentFrame = 0;
@@ -15,13 +15,56 @@ let sprite;
 
 export function Starfield(count, size, scale, animation) {
 
-    const geometry = new THREE.PlaneGeometry(size, size);
-    const material = new THREE.MeshBasicNodeMaterial({color: 0xff0066});
-    const mesh = new THREE.InstancedMesh(geometry, material, count);
-    const positionRange = range(new THREE.Vector3(-scale, -scale, -scale), new THREE.Vector3(scale,scale,scale));
-    material.positionNode = positionLocal.add(positionRange);
-    // material.vertexNode = billboarding();
-    scene.add(mesh);
+    // const geometry = new THREE.PlaneGeometry(size, size);
+    // const material = new THREE.MeshBasicNodeMaterial({color: 0xff0066});
+    // const mesh = new THREE.InstancedMesh(geometry, material, count);
+    // const positionRange = range(new THREE.Vector3(-scale, -scale, -scale), new THREE.Vector3(scale,scale,scale));
+
+    // //  if (locData.locationTags && locData.loca    tionTags.includes("rise")) {
+
+    //     const offset = sin(add(time.mul(.01), instanceIndex.toFloat().mul(0.2))).mul(50.0);
+
+    //     // Apply to the material's position node (rising along the Y axis)
+    //     // sampleMaterial.positionNode = add(positionLocal, vec3(0.0, 0.0, riseOffset));
+    //     // }
+    //     material.positionNode = positionLocal.add(positionRange, vec3(offset, offset, offset));
+    //     // material.vertexNode = billboarding();
+    //     scene.add(mesh);
+
+            // const count = 10000;
+
+        const positions = [];
+
+        for ( let i = 0; i < count; i ++ ) {
+
+            positions.push( 200 * Math.random() - 100, 200 * Math.random() - 100, 200 * Math.random() - 100 );
+
+        }
+
+        const positionAttribute = new THREE.InstancedBufferAttribute( new Float32Array( positions ), 3 );
+
+        // texture
+
+        const spriteEl = document.getElementById("explosion1");
+        const map = new THREE.TextureLoader().load( "https://servicemedia.s3.amazonaws.com/assets/pics/camlock_button_128.png");
+        map.colorSpace = THREE.SRGBColorSpace;
+
+        // material
+
+        const spritematerial = new THREE.SpriteNodeMaterial( { sizeAttenuation: true, map, alphaMap: map, alphaTest: 0.5 } );
+        spritematerial.color.setHSL( 1.0, 0.3, 0.7, THREE.SRGBColorSpace );
+        spritematerial.positionNode = instancedBufferAttribute( positionAttribute );
+        spritematerial.rotationNode = time.add( instanceIndex ).sin();
+        spritematerial.scaleNode = uniform( 15 );
+
+        					spritematerial.needsUpdate = true;
+					// spritematerial.scaleNode.value = material.sizeAttenuation ? 15 : 0.03;
+        // sprites
+
+        const particles = new THREE.Sprite( spritematerial );
+        particles.count = count;
+
+        scene.add( particles );
 
 }
 
