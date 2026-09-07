@@ -24,7 +24,7 @@
 
 	// import { InitSurface, InstanceOnSurface, instancedModels } from './three_instance.js';
 
-	import { Starfield, CreateSprites, } from './wgpu_fx.js';
+	import { InstancedSprites, CreateSprites, } from './wgpu_fx.js';
 
 	import { ThreeDeeText, lookAtCameraObjects, SetUIMode, interactionManager, StartPopup, startPop } from './wgpu_ui.js';
 
@@ -406,7 +406,7 @@
 				LoadPrimaryAudioHowl();
 			}
 			if (settings.sceneTags.includes("stars")) {
-				Starfield(1000, 2, 100, null);
+				InstancedSprites(1000, 2, 100, null);
 			}
 			
 		}

@@ -5,7 +5,8 @@ import { settings } from '../../../connect/settings.js';
 
 import { scene } from './wgpu_main.mjs';
 
-import { billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, add, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
+import { spritesheetUV, uv, texture, billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, add, vec2, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
+
 
 
 let currentFrame = 0;
@@ -13,7 +14,7 @@ let currentFrame = 0;
 let lastFrameTime = 0;
 let sprite;
 
-export function Starfield(count, size, scale, animation) {
+export function InstancedSprites(count, size, scale, animation, type) {
 
     // const geometry = new THREE.PlaneGeometry(size, size);
     // const material = new THREE.MeshBasicNodeMaterial({color: 0xff0066});
@@ -33,6 +34,12 @@ export function Starfield(count, size, scale, animation) {
 
             // const count = 10000;
 
+        if (!type) {
+            type = "explosion";
+        }
+        if (!scale) {
+            scale = 10;
+        }
         const positions = [];
 
         for ( let i = 0; i < count; i ++ ) {
@@ -44,18 +51,115 @@ export function Starfield(count, size, scale, animation) {
         const positionAttribute = new THREE.InstancedBufferAttribute( new Float32Array( positions ), 3 );
 
         // texture
+        let map, animationSpeed, columns, rows;
 
-        const spriteEl = document.getElementById("explosion1");
-        const map = new THREE.TextureLoader().load( "https://servicemedia.s3.amazonaws.com/assets/pics/camlock_button_128.png");
-        map.colorSpace = THREE.SRGBColorSpace;
+        if (type == "explosion") {
+            const spriteEl = document.getElementById("explosion1");
+            map = new THREE.TextureLoader().load( spriteEl.src);
+            map.colorSpace = THREE.SRGBColorSpace;
+            columns = 8;
+            rows = 8;
+            animationSpeed = 10.0; // Frames per second
+            scale = 16;
+        } else if (type == "smoke") {
+              const spriteEl = document.getElementById("smoke1");
+            map = new THREE.TextureLoader().load( spriteEl.src);
+            map.colorSpace = THREE.SRGBColorSpace;
+            columns = 6;
+            rows = 5;
+            animationSpeed = 12.0; // Frames per second
+        } else if (type == "fire") {
+              const spriteEl = document.getElementById("fireanim1");
+            map = new THREE.TextureLoader().load( spriteEl.src);
+            // map.colorSpace = THREE.SRGBColorSpace;
+            columns = 6;
+            rows = 6;
+            animationSpeed = 10.0; // Frames per second
+        } else if (type == "candle") {
+              const spriteEl = document.getElementById("candle1");
+            map = new THREE.TextureLoader().load( spriteEl.src);
+            // map.colorSpace = THREE.SRGBColorSpace;
+            columns = 8;
+            rows = 8;
+            animationSpeed = 10.0; // Frames per second
+            scale = 4;
+        } else if (type == "clouds") {
+              const spriteEl = document.getElementById("plasma");
+            map = new THREE.TextureLoader().load( spriteEl.src);
+            // map.colorSpace = THREE.SRGBColorSpace;
+            columns = 8;
+            rows = 8;
+            animationSpeed = 10.0; // Frames per second
+            scale = 4;
+        } else if (type == "plasma") {
+              const spriteEl = document.getElementById("plasma");
+            map = new THREE.TextureLoader().load( "https://s3.us-east-1.amazonaws.com/servicemedia.net/media/pictures/spritesheets/plasma_bubble.png");
+            // map.colorSpace = THREE.SRGBColorSpace;
+            columns = 12;
+            rows = 7;
+            animationSpeed = 10.0; // Frames per second
+            scale = 4;
+        }
+        
+
+        
+        /////////////////
+        const totalFrames = columns * rows;
+        const timeOffsets = new Float32Array(count);
+
+        for (let i = 0; i < count; i++) {
+            // Give each sprite a completely random starting point in time
+            timeOffsets[i] = Math.random() * 100.0; 
+        }
+
+        // Convert data arrays into WebGPU-compatible TSL instanced attributes
+        const timeOffsetAttribute = instancedBufferAttribute(new THREE.InstancedBufferAttribute(timeOffsets, 1));
+
+        // --- 3. CUSTOM TSL SPRITESHEET FUNCTION ---
+        const spriteSheetUV = Fn(() => {
+            // Unique timeline for this specific instance
+            const localTime = time.add(timeOffsetAttribute); 
+            
+            // Determine current frame index
+            const currentFrame = floor(localTime.mul(animationSpeed)).mod(totalFrames);
+            
+            // Calculate 2D column and row index
+            const col = currentFrame.mod(columns);
+            const row = floor(currentFrame.div(columns));
+            
+            // Scale standard UV coordinates to match one single tile size
+            const tileSize = vec2(1.0 / columns, 1.0 / rows);
+            const baseUV = uv().mul(tileSize);
+            
+            // Offset UV coordinate to point to the correct tile
+            // In WebGPU/TSL, flip row calculation if textures read inverted
+            const uvOffset = vec2(col.mul(tileSize.x), row.mul(tileSize.y));
+            
+            return baseUV.add(uvOffset);
+        });
+
+        //////////
+
+        // 3. Create the TSL node for calculating UVs
+        // spritesheetUV( countNode, uvNode, frameNode )
+        const animatedUV = spritesheetUV( //sweet
+            vec2(columns, rows), 
+            uv(), 
+            time.mul(animationSpeed)
+        );
 
         // material
 
-        const spritematerial = new THREE.SpriteNodeMaterial( { sizeAttenuation: true, map, alphaMap: map, alphaTest: 0.5 } );
-        spritematerial.color.setHSL( 1.0, 0.3, 0.7, THREE.SRGBColorSpace );
+        // map.minFilter = THREE.NearestFilter; // Sharp pixel art
+        // map.magFilter = THREE.NearestFilter;
+        map.wrapS = THREE.RepeatWrapping;
+        map.wrapT = THREE.RepeatWrapping;
+        const spritematerial = new THREE.SpriteNodeMaterial( { sizeAttenuation: true, alphaTest: 0.5 } );
+        spritematerial.colorNode = texture(map, spriteSheetUV());
+        // spritematerial.color.setHSL( 1.0, 0.3, 0.7, THREE.SRGBColorSpace );
         spritematerial.positionNode = instancedBufferAttribute( positionAttribute );
         spritematerial.rotationNode = time.add( instanceIndex ).sin();
-        spritematerial.scaleNode = uniform( 15 );
+        spritematerial.scaleNode = uniform( scale );
 
         					spritematerial.needsUpdate = true;
 					// spritematerial.scaleNode.value = material.sizeAttenuation ? 15 : 0.03;
@@ -63,6 +167,7 @@ export function Starfield(count, size, scale, animation) {
 
         const particles = new THREE.Sprite( spritematerial );
         particles.count = count;
+        particles.frustumCulled = false;
 
         scene.add( particles );
 
