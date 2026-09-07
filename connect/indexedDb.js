@@ -112,7 +112,7 @@ export function InitIDB() {
                      console.log(cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
                      // console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal " + " modelID " + cursor.value.locations[i].modelID);
 
-                     if (settings.sceneType != "aframe") { //e.g. three
+                     if (settings.sceneType != "aframe" && settings.sceneType != "pixi") { //e.g. three
                         UpdateModdedLocations(cursor.value.locations[i]);
                      } else {
                         let cloudEl = document.getElementById(cursor.value.locations[i].timestamp);

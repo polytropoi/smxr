@@ -442,7 +442,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             child.userData.sceneObjectID = sceneObjectID;
                                child.castShadow = true;
                             child.receiveShadow = true;
-                            child.envMapIntensity = 2;
+                            // child.envMapIntensity = 1;
                             // child.bindMode = "detached";
                         }
                     });
@@ -524,7 +524,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             child.userData.sceneObjectID = sceneObjectID.toString();
                             child.castShadow = true;
                             child.receiveShadow = true;
-                            child.envMapIntensity = 2;
+                            // child.envMapIntensity = 2;
                             }
                         });
                         console.log("tryna place an object " + zm + " sceneObjectID " + sceneObjectID);

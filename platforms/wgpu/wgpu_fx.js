@@ -6,6 +6,7 @@ import { settings } from '../../../connect/settings.js';
 import { scene } from './wgpu_main.mjs';
 
 import { spritesheetUV, uv, texture, billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, add, vec2, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
+import { activeObjex } from './wgpu_locations.js';
 
 
 
@@ -158,6 +159,11 @@ export function InstancedSprites(count, size, scale, animation, type) {
         spritematerial.colorNode = texture(map, spriteSheetUV());
         // spritematerial.color.setHSL( 1.0, 0.3, 0.7, THREE.SRGBColorSpace );
         spritematerial.positionNode = instancedBufferAttribute( positionAttribute );
+
+                            // const riseOffset = sin(add(time.mul(.1), instanceIndex.toFloat().mul(0.2))).mul(5.0);
+
+                    // Apply to the material's position node (rising along the Y axis)
+                    // spritematerial.positionNode = add(positionLocal, vec3(0.0, riseOffset, 0.0));
         spritematerial.rotationNode = time.add( instanceIndex ).sin();
         spritematerial.scaleNode = uniform( scale );
 
@@ -167,9 +173,12 @@ export function InstancedSprites(count, size, scale, animation, type) {
 
         const particles = new THREE.Sprite( spritematerial );
         particles.count = count;
+        particles.userData = {}
         particles.frustumCulled = false;
 
+
         scene.add( particles );
+        activeObjex.push(particles);
 
 }
 

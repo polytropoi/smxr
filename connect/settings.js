@@ -43,7 +43,7 @@ export function UpdateUserProfile (userProfile) { //called from indexedDB.js
 
 export function UpdateModdedLocations (location) { //called from indexeddb
    mods.locations.push(location);
-   console.log("updated modded locations " + JSON.stringify(mods));
+   console.log("updated modded locations " + mods.locations.length);
 }
 
 // export function UpdateMapDimensions(x, y) {

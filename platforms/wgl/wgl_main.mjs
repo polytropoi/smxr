@@ -36,6 +36,8 @@
 	import { splatsLoaded, splatObjex, initSplats, InitSpark } from './wgl_splats.js';
 	
 	import { PlayPauseMedia } from '../../connect/dialogs.js';
+	
+	import { InstancedSprites } from '../wgl/wgl_fx.js';
 
 
 
@@ -356,9 +358,9 @@
 			if (settings.hasPrimaryAudio) {
 				LoadPrimaryAudioHowl();
 			}
-			if (settings.sceneTags.includes("stars")) {
-				Starfield(1000, 2, 100, null);
-			}
+			// if (settings.sceneTags.includes("stars")) {
+			// 	InstancedSprites(1000, 2, 100, null);
+			// }
 			
 		}
 		

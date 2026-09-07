@@ -4,6 +4,7 @@ import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 import { selectedPosition, eventEl } from '../../../connect/events.js';
 import { SetSelectedLocationTimestamp, SceneManglerModal, keydown } from '../../../connect/dialogs.js';
 import { localData, CreateLocationAlt } from '../../../connect/connect.js';
+import { mods } from '../../../connect/settings.js';
 
 // import { dragTarget, onDragStart, onDragMove, onDragEnd } from './addElements.mjs';
 import { app, viewport, hasBgMap } from './vtt_main.mjs';
@@ -13,6 +14,7 @@ import { SaveLocalData } from '../../../connect/indexedDb.js';
   let dragTarget = null;
 //   let viewport;
   eventEl.addEventListener('map-update', onMapLocationUpdate);
+
 
  
 function onMapLocationUpdate(event) { //dialog savemod button or other event that updates a map token
@@ -81,21 +83,26 @@ export function LoadLocations(app, viewport, spritesContainer) {
     if (!hasBgMap) {
         return;
     }
-    const localMarkers = document.querySelectorAll('.local_marker');
+    // const localMarkers = document.querySelectorAll('.local_marker');
     const cloudMarkers = document.querySelectorAll('.cloud_marker');
+
+
+    const localMarkers = mods.locations;
     spritesContainer.addChild(locationTokenContainer);
     
     // console.log("localMarkers found " + localMarkers.length + " viewport is " + viewport.worldWidth + " " + viewport.worldHeight);
     for (let i = 0; i < localMarkers.length; i++) {
-        console.log("localMarker " + localMarkers[i].id + " data " + localMarkers[i].dataset.eldata);
-        const elData = JSON.parse(localMarkers[i].dataset.eldata); //this one is not b64 encoded
+        // console.log("localMarker " + localMarkers[i].id + " data " + localMarkers[i].dataset.eldata);
+        // const elData = JSON.parse(localMarkers[i].dataset.eldata); //this one is not b64 encoded
+           const elData = localMarkers[i];
+           console.log(JSON.stringify("elData : " + JSON.stringify(elData)) );
          const scaleFactor = .6;
             const width = 100 * scaleFactor;
             const height = 50 * scaleFactor;
             const strokeWidth = 3 * scaleFactor;
-            const zIndex = parseFloat(elData.ypos); //use Y axis from 3D as elevation/sorting/zindex for 2D 
-            let xpos = parseFloat(elData.xpos); //these values are multiplied by pixelsPerMeterActual
-            let ypos = parseFloat(elData.zpos); // use the Z axis for Y position in 2D, you must
+            const zIndex = parseFloat(elData.y); //use Y axis from 3D as elevation/sorting/zindex for 2D 
+            let xpos = parseFloat(elData.x); //these values are multiplied by pixelsPerMeterActual
+            let ypos = parseFloat(elData.z); // use the Z axis for Y position in 2D, you must
 
         const fontsize = Math.max(18, window.innerWidth / 50);  
         const text = new Text({

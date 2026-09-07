@@ -511,7 +511,7 @@ export class SceneObject { //things that might have models and actions and fancy
 
         if (this.responseText.toLowerCase().includes("saved")) {
             
-            htmlstring = "<br><br><h3>Saved to inventory!</h3>";
+            const htmlstring = "<br><br><h3>Saved to inventory!</h3>";
             ShowHTMLPopup(event, htmlstring, null, null, "hic_content");
             // popup.innerHTML = 
             // ShowPopup(lastEvent);

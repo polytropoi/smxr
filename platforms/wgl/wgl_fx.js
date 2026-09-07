@@ -10,7 +10,7 @@ let currentFrame = 0;
 let lastFrameTime = 0;
 let sprite;
 
-export function Starfield(count, size, scale, animation) {
+export function InstancedSprites(count, size, scale, animation) {
 
     const geometry = new THREE.PlaneGeometry(size, size);
     const material = new THREE.MeshBasicNodeMaterial({color: 0xff0066});

@@ -158,7 +158,7 @@
 		}
 		
 		// cameraMode = "Mouse Look";
-		if (cameraMode == "First Person") {
+		if (cameraMode == "First Person") { //hrm
 			cameraMode = "Mouse Look";
 		}
 
