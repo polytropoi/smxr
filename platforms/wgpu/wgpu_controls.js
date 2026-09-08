@@ -1350,7 +1350,7 @@ export function onMouseDown(event) { // on threejs object
                 navAgentInstance = navAgentInstances[sOID]; //uses same ref as sceneObjects
                 if (navAgentInstance)
                 console.log("found navagent in navAgentInstances by sceneObjectID " + sOID);
-            } else if (lastRaycastHit.instanceId && lastRaycastHitObject.userData.locationData.markerType == "character") {
+            } else if (lastRaycastHit.instanceId && lastRaycastHitObject.userData.locationData && lastRaycastHitObject.userData.locationData.markerType == "character") {
 
                 let sOID = lastRaycastHitObject.userData.locationData.timestamp + "_" + lastRaycastHit.instanceId;
                  navAgentInstance = navAgentInstances[sOID]; //uses same ref as sceneObjects
@@ -1432,13 +1432,13 @@ export function onMouseDown(event) { // on threejs object
                 // // const popup = document.getElementById("popup");
                 console.log(lastRaycastHit.instanceId + " " + JSON.stringify(lastRaycastHitObject.userData));
                
-                if (lastRaycastHitObject.userData.locationData.objectData) { //instanced meshes with object references
+                if (lastRaycastHitObject.userData.locationData && lastRaycastHitObject.userData.locationData.objectData) { //instanced meshes with object references
                     lastRaycastHitObject.userData.locationData.objectData.sceneObjectID = lastRaycastHitObject.userData.locationData.timestamp;
                     InstancedActionClick(lastRaycastHit.instanceId, lastRaycastHitObject.userData.locationData.objectData, locationData.timestamp);
                     
                 } else {
                     let groupData;
-                    if (lastRaycastHitObject.userData.locationData.groupID && settings.sceneGroups) {
+                    if (lastRaycastHitObject.userData.locationData && lastRaycastHitObject.userData.locationData.groupID && settings.sceneGroups) {
                         console.log(lastRaycastHitObject.userData.locationData.name + " gotsa groupID " + lastRaycastHitObject.userData.locationData.groupID);
                         let locationGroup;
                         for (let i = 0; i < settings.sceneGroups.length; i++) {
@@ -1457,7 +1457,7 @@ export function onMouseDown(event) { // on threejs object
                         }
                     }
                     let textData;
-                    if (lastRaycastHitObject.userData.locationData.mediaID) {
+                    if (lastRaycastHitObject.userData.locationData && lastRaycastHitObject.userData.locationData.mediaID) {
                         if (sceneTextController) {
                             textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                             console.log("text item " + JSON.stringify(textData));

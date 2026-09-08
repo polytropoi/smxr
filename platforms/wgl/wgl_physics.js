@@ -12,6 +12,7 @@ import { player, camera } from './wgl_controls.js';
 import { playerRigidbody } from './wgl_actions.js';
 import { agentModels, agentParents, CreateAgent, randomNavmeshPoint } from './wgl_nav.js';
 import { settings } from '../../../connect/settings.js';
+import { instanceIndex } from 'three/tsl';
 // import {scene, world} from './wgl_main.mjs'
 
 function getGeometry(size) {
@@ -245,7 +246,7 @@ function WaitAndInit () {
         let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
                 .setTranslation(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
         let rigidbody = await world.createRigidBody(rigidBodyDesc);
-        colliders[rigidbody.handle] = locationData.timestamp;
+        colliders[rigidbody.handle] = "trigger_" + locationData.timestamp;
         // let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
         let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize);
         let collider = await world.createCollider(colliderDesc, rigidbody);
@@ -346,7 +347,7 @@ function WaitAndInit () {
       let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased();//no, position based...
               // .setTranslation(worldposition.x, worldposition.y, worldposition.z)
       let rigidbody = await world.createRigidBody(rigidBodyDesc);
-      colliders[rigidbody.handle] = "agent_";
+      colliders[rigidbody.handle] = "agent_" + locData.name;
       let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
       let collider = await world.createCollider(kinematicCollider, rigidbody);
       collider.setRestitution(1.5);
@@ -601,7 +602,7 @@ export async function initDynamicObjex () {
 }
 
 
-export function GetInstancedRigidbody(position, scale) {
+export function GetInstancedRigidbody(position, scale, instanceIndex, locData) {
 
     // try {
 
@@ -624,7 +625,10 @@ export function GetInstancedRigidbody(position, scale) {
 
 
 		// 	const mesh = new THREE.Mesh( geometry, material );
-      
+    if (!instanceIndex) {
+      instanceIndex = 1;
+    }
+     
 
       const colliderSize = size;// * 1.25;
       const range = 30;
@@ -643,7 +647,7 @@ export function GetInstancedRigidbody(position, scale) {
       console.log("rigidbody created with handle " + rigidbody.handle);
       let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize); //.setDensity(density);
       let collider = world.createCollider(colliderDesc, rigidbody);
-
+      colliders[rigidbody.handle] = "instance_" + instanceIndex;
       collider.setRestitution(1.5);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
@@ -776,6 +780,7 @@ export async function AddDynamicBody(mesh, meshposition, scale, yFudge, isEquipp
       let rigidbody = await world.createRigidBody(rigidBodyDesc);
       // let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize).setDensity(density);
       console.log("rigidbody created with handle " + rigidbody.handle);
+      colliders[rigidbody.handle] = "dynamic_test";
       let colliderDesc = RAPIER.ColliderDesc.cuboid(colliderSize, colliderSize, colliderSize)
          .setDensity(2);
       let collider = await world.createCollider(colliderDesc, rigidbody);

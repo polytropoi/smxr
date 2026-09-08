@@ -273,6 +273,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 const sceneObjectID = locData.timestamp + "_" + i;
                 const animations = [];
                 // const z = 1;
+                
                 await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID, scale);
                
                 // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
@@ -348,7 +349,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             // console.log("instancedAgentMeshes " + JSON.stringify(instancedAgentMeshes));
             
             
-            
+            activeObjex.push(instancedMeshes[s]);
             scene.add(instancedMeshes[s]);
         }
     

@@ -596,7 +596,7 @@
 
 
 	function CollisionStart(h1, h2) {
-		console.log("Collision started between colliders " + colliders[h1] + " and " + colliders[h2]);
+		// console.log("Collision started between colliders " + colliders[h1] + " and " + colliders[h2]);
 		if (colliders[h1]) {
 			if (!colliders[h2].includes("agent")) {
 				console.log("player hit trigger " + JSON.stringify(locations[colliders[h2]]));
@@ -607,7 +607,7 @@
 		PlayTriggerWithTag('hit');
 	}
 	function CollisionEnd(h1, h2) {
-		console.log("Collision stopped between colliders " + colliders[h1] + " and " + colliders[h2]);
+		// console.log("Collision stopped between colliders " + colliders[h1] + " and " + colliders[h2]);
 	}
 
 ////////////// MAIN LOOP FOR ALL THE THINGS ////////////////

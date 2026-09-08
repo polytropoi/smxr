@@ -505,15 +505,15 @@ pixi_router.get('/:_id', function (req, res) {
                     // if (sceneData.sceneTags[i].toLowerCase().includes("grid effects" )) {
                     //     meshUtilsScript = meshUtilsScript + "<script src=\x22../main/src/shaders/grid_shaders.js\x22></script><script src=\x22../main/src/component/grid_effects.js\x22></script>"; //imports MeshSurfaceScatter
                     // } 
-                    if (sceneData.sceneTags[i] == "show transport") {
+                    if (sceneData.sceneTags[i] == "show big transport") {
                         showTransport = true;
-                        // primaryTransportSlider = "<div class=\x22slidecontainer\x22 > "+
+                        primaryTransportSlider = "<div visibility=\x22hidden\x22 class=\x22slidecontainer\x22 > "+
                         
-                        // "<input type=\x22range\x22 min=\x221\x22 max=\x22100\x22 value=\x2250\x22 class=\x22slider\x22 id=\x22primaryTransportSlider\x22>"+
-                        // "</div>"+ 
-                        // "<div id=\x22waveform\x22 class=\x22waveform\x22>"+
+                        "<input type=\x22range\x22 min=\x221\x22 max=\x22100\x22 value=\x2250\x22 class=\x22slider\x22 id=\x22primaryTransportSlider\x22>"+
+                        "</div>"+ 
+                        "<div id=\x22waveform\x22 class=\x22waveform\x22>"+
                         
-                        // "</div>";
+                        "</div>";
                         
                     }
                     if (sceneData.sceneTags[i] == "show micbutton") {
