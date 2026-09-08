@@ -1,10 +1,10 @@
     import * as THREE from 'three';
 
-    import {scene} from './wgpu_main.mjs';
+    import {scene, clock} from './wgpu_main.mjs';
 
     import { navmesh, kinematicAgentMeshes } from './wgpu_locations.js';
 
-    import { player } from './wgpu_controls.js';
+    import { player, camera } from './wgpu_controls.js';
     
     import { Pathfinding, PathfindingHelper } from 'three-pathfinding';
 
@@ -26,6 +26,8 @@
     export let agentsAreReady = false;
 
     export let playerNavAgent;
+
+    // let targetQuaternion;
 
     import { returnMaterial } from './tsl/tsl_materials.js'
 import { instancedAgentMeshes } from './wgpu_instance.js';
@@ -324,6 +326,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             this.sceneObjectID = options.sceneObjectID;
             
             this.object = options.object; //parent to simple geo
+            let theAgent = options.object;
             // this.model = options.model; //actual mesh
             // this.object.position.y = options.yOffset;
             this.pathLines = new THREE.Object3D();
@@ -342,6 +345,10 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             this.npc = options.npc;
             this.isPaused = false;
             this.targetPosition = null;
+            this.targetQuaternion = null;
+            this.originQuaternion = null;
+            this.cameraWorldPosition = new THREE.Vector3();
+            this.upVector = new THREE.Vector3(0, 1, 0);
             this.scale = options.scale ? options.scale : 1;
             if (this.npc) this.dead = false;
             
@@ -366,6 +373,13 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             this.firstPlay = true;
             
             this.playerNavMode = false;
+
+
+            const clock = new THREE.Clock();
+            this.duration = .1; // animation duration in seconds
+            this.elapsedTime = 0;
+            this.isSplerping = false;
+
             if (options.anims){ 
                 //Use this option to crop a single animation into multiple clips
                 this.mixer = new THREE.AnimationMixer(options.object);
@@ -585,17 +599,23 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
         agentPause () {
            
             // this.calculatedPath = null;
-            // this.targetPosition = null;
+            // // this.targetPosition = null;
+            // this.object.updateWorldMatrix(true, false);
+            // this.object.getWorldQuaternion(this.originQuaternion);
             this.readyToNav = !this.readyToNav;
+            // this.isSlerping = !this.isSlerping;
             if (!this.readyToNav && this.hasAnims) {
                     // this.action = 'idle';
+                    
                      const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
                     this.action = this.idleAnims[randomIndex];
                     console.log("setting idle action");
+                    // this.isSlerping = true;
             } else {
+                
                 if (this.hasAnims) {
-                    // this.action = 'walk';
-
+                        // this.action = 'walk';
+                    
                     if (this.walkAnims.length) {
                         const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
                         this.action = this.walkAnims[randomIndex];
@@ -700,11 +720,85 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             //     const closestNode = this.pathfinder.getClosestNode(this.object.position, this.ZONE, this.navMeshGroup, true);
 
             //     if (closestNode) {
-            console.log("clicked an agent hasAnims " + this.hasAnims);
+            let npc = this.object;
+            console.log("clicked an agent hasAnims " + this.hasAnims + " isInstanced " + this.isInstanced);
             // this.isSelected = !this.isSelected;
             //         this.readyToNav = this.isSelected;    
             this.agentPause();
-            this.object.lookAt(player.position);
+
+            if (this.isInstanced) {
+                const tempMatrix = new THREE.Matrix4();
+                const dummy = new THREE.Object3D(); 
+                const rotationMatrix = new THREE.Matrix4();
+                const upVector = new THREE.Vector3(0, 1, 0);
+
+                // rotationMatrix.lookAt(this.object.position, camera.position, upVector);
+
+                // 3. Extract the quaternion from that matrix
+
+
+
+                const timestamp = this.sceneObjectID.split("_")[0];
+                const instanceIndex = this.sceneObjectID.split("_")[1];
+                const instancedMesh = instancedAgentMeshes[timestamp];
+                if (instancedMesh) {
+                // console.log("tryna move agent with instanceIndex " + instanceIndex);
+                    
+                    // instancedPosition.set(agent.position.x, agent.position.y, agent.position.z);
+                    // instancedQuaternion.set(targetQuaternion.x, targetQuaternion.y, targetQuaternion.z, targetQuaternion.w);
+                    // instancedMatrix.compose(this.object.position, targetQuaternion, new THREE.Vector3(this.scale, this.scale, this.scale));
+                    // instancedAgentMeshes[timestamp].setFromRotationMatrix(instanceIndex, rotationMatrix);
+                // }
+                // 2. Get the current 4x4 matrix of the specific instance
+                    
+                    // this.targetQuaternion
+                    
+                            // instancedMesh.getMatrixAt(instanceIndex, tempMatrix);
+
+                            // // 3. Break the matrix down into position, quaternion (rotation), and scale
+                            // tempMatrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+
+                            // rotationMatrix.lookAt(dummy.position, camera.position, upVector);
+
+                            // this.targetQuaternion.setFromRotationMatrix(rotationMatrix);
+
+                            // // 4. Update the rotation on your dummy helper object
+                            // dummy.quaternion.copy(targetQuaternion); // Spin it slightly on the Y axis
+                            
+                            // // 5. Rebuild the local matrix for the dummy object
+                            // dummy.updateMatrix();
+
+                            // // 6. Pass the new matrix back to the InstancedMesh
+                            // instancedMesh.setMatrixAt(instanceIndex, dummy.matrix);
+
+                            // // 7. Tell Three.js to upload the new matrix data to the GPU
+                            // instancedMesh.instanceMatrix.needsUpdate = true;
+
+                   // 2. Create a rotation matrix looking at the target
+  
+                }
+            } else {
+                
+                    // this.isSplerping = true;
+                    // this.rotationMatrix = new THREE.Matrix4();
+
+                    // camera.parent.updateMatrixWorld(true);
+                    // camera.parent.getWorldPosition(this.cameraWorldPosition);
+                    // this.rotationMatrix.lookAt(this.object.position, this.cameraWorldPosition, this.upVector);
+
+                    // // 3. Extract the quaternion from that matrix
+                    // this.targetQuaternion = new THREE.Quaternion();
+                    // // const inverseQuaternion = quaternion.clone().invert();
+                    // this.targetQuaternion.setFromRotationMatrix(this.rotationMatrix).invert();       
+                    // this.isSplerping = true;
+                    // this.elapsedTime = 0;
+                    camera.updateMatrixWorld(true);
+                    camera.getWorldPosition(this.cameraWorldPosition);
+                this.object.lookAt(this.cameraWorldPosition);
+                this.object.rotation.x = 0;
+                this.object.rotation.z = 0;
+            }
+          
                     // if (this.readyToNav) {
                     //         this.object.traverse((child) => {
                     //         if (child.isMesh) {
@@ -862,6 +956,32 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                 }
             }
         }
+        slerpToTargetRotation () { //hrm...
+            if (this.isSplerping && this.targetQuaternion) {
+                if (this.isInstanced) {
+                    // this.object.quaternion.slerp(this.targetQuaternion, 0.05);
+                } else {
+                    
+                this.delta = clock.getDelta();
+                    this.elapsedTime += this.delta;
+
+                    // Calculate progress factor 't' between 0 and 1
+                    let t = this.elapsedTime / this.duration;
+                    
+                    // Apply slerp from start to target on the cube's quaternion
+                    console.log("tryna slerp");
+                    if (t > 1) { 
+                        t = 1; 
+                        this.isSlerping = false; 
+                        // this.targetQuaternion = null;
+                    }; // clamp to 1
+                   
+                    this.object.quaternion.slerpQuaternions(this.originQuaternion, this.targetQuaternion, t);
+
+                    // this.object.quaternion.slerp(this.targetQuaternion, 0.05);
+                }
+            }
+        }
         
         update(dt, currentTime){ //move it!
             const speed = this.speed;
@@ -874,6 +994,9 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             if (this.hasAnims) {
                 if (this.mixer) this.mixer.update(dt);
             }
+            // if (this.isSlerping) {
+            //     this.slerpToTargetRotation();
+            // }
             
             if (this.readyToNav) {
                 if (this.calculatedPath && this.calculatedPath.length) {
@@ -895,16 +1018,16 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     this.targetPosition = this.calculatedPath[0];
 
                     // if (currentTime - lastTime > throttleInterval) { 
-                                // console.log("throttled update!");
-                                // lastTime = currentTime;
-                                // raypos = this.raycastedPosition(); //expensive, so throttle...
-                                // if (raypos && raypos.y) {
-                                //     // if ((raypos.y - player.position.y) > .3) {
-                                //     // console.log("tryna snap to raypos.y " + raypos.y);
-                                //     targetPosition.y = raypos.y;
-                                //     // }
-                                // }
-                            // }
+                        // console.log("throttled update!");
+                        // lastTime = currentTime;
+                        // raypos = this.raycastedPosition(); //expensive, so throttle...
+                        // if (raypos && raypos.y) {
+                        //     // if ((raypos.y - player.position.y) > .3) {
+                        //     // console.log("tryna snap to raypos.y " + raypos.y);
+                        //     targetPosition.y = raypos.y;
+                        //     // }
+                        // }
+                    // }
 
                     const vel = this.targetPosition.clone().sub(agent.position);
                     let pathLegComplete = (vel.lengthSq()<0.01);
@@ -917,9 +1040,16 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     
                         vel.normalize();
      
-                        if (this.quaternion) {
-                            agent.quaternion.slerp(this.quaternion, 0.1);
-                        }
+                        // if (this.isSlerping) {
+                        //     if (this.targetQuaternion) {
+                        //         agent.quaternion.slerp(this.targetQuaternion, 3);
+                            
+                        //     }
+                        // } else {
+                            if (this.quaternion) {
+                                agent.quaternion.slerp(this.quaternion, .1);
+                            }
+                        // }
 
                         agent.position.add(vel.multiplyScalar(dt * speed));
                                                     
@@ -942,6 +1072,9 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                                 instancedAgentMeshes[timestamp].setMatrixAt(instanceIndex, instancedMatrix);
                             }
                         }
+                        // if (this.targetQuaternion) {
+                       
+                        // }
 
                     } 
                     
@@ -973,10 +1106,11 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                            
                         }
                     } 
+                    
                     //this.action = 'idle';
                     //  const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
                     // this.action = this.idleAnims[randomIndex];
-                } else{
+                } else {
                     // if (this.npc && !agentClick) this.newPath(randomNavmeshPoint());
                     this.snapToGround();
                     this.newPath(randomNavmeshPoint());
@@ -988,6 +1122,18 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     // }
                 }
             } else {
+                // if (this.isSlerping) {
+                //     if (this.targetQuaternion) {
+                //         agent.quaternion.slerp(this.targetQuaternion, 3);
+                    
+                //     }
+                // }
+                camera.updateMatrixWorld(true);
+                camera.getWorldPosition(this.cameraWorldPosition);
+                this.object.lookAt(this.cameraWorldPosition);
+                this.object.lookAt(player.position);
+                this.object.rotation.x = 0;
+                this.object.rotation.z = 0;
                 this.targetPosition = null;
                 this.calculatedPath = [];
                //? 

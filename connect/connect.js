@@ -331,10 +331,12 @@ export function InitConnect() {
       navigator.mediaDevices.getUserMedia({audio: false, video: true})
       .then(stream => {
         let $video = document.querySelector('video');
-        $video.srcObject = stream
-        $video.onloadedmetadata = () => {
-          $video.play()
-        }
+        if ($video) {
+         $video.srcObject = stream
+         $video.onloadedmetadata = () => {
+            $video.play()
+         }
+         }
       })
    }
 

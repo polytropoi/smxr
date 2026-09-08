@@ -830,6 +830,8 @@ async function RaycastHit(type, hit, event) {
     lastHitObjectName = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     // lastRaycastHitPosition = hit.point;
     lastRaycastHitDistance = hit.distance;
+
+    console.log("raycast hit " + type + " " + lastHitObjectName );
     let tagData;
     // console.log(JSON.stringify(lastRaycastHitObject.userData));
     const locationData = lastRaycastHitObject.userData.locationData;
@@ -995,6 +997,9 @@ async function RaycastHit(type, hit, event) {
                             ShowHTMLPopup(event, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
                         }
                     } else {
+                        if (hit.instanceId) {
+                            name = name + " # " + hit.instanceId;
+                        }
                         ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                     }
                 }

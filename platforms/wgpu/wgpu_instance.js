@@ -273,7 +273,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 const sceneObjectID = locData.timestamp + "_" + i;
                 const animations = [];
                 // const z = 1;
-                
+
                 await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID, scale);
                
                 // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
@@ -306,6 +306,8 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             if (locData.locationTags && locData.locationTags.includes("active")) {
                 activeObjex.push(instancedMeshes[s]);
                 instancedMeshes[s].userData.locationData = locData;
+                instancedMeshes[s].userData.name = locData.name;
+                
             }
             if (locData.locationTags && locData.locationTags.includes("random color")) {
                 
@@ -335,6 +337,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 }
                 // instancedMeshes[s].instanceColor.needsUpdate = true;
             }
+
             if (locData.mediaID) {
                 const tm = {};
                 tm.mediaID = locData.mediaID;
