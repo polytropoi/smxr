@@ -25,6 +25,8 @@ import { UpdateModdedLocations, mods } from '../../connect/settings.js';
 import { eventEl } from '../../connect/events.js';
 
 import { lookAtCameraObjects } from './wgpu_ui.js';
+
+import { splatObjex } from './wgpu_splats.js';
 // import { sceneObjects } from '../../connect/dialogs.js';
 
 // export let localData = {};
@@ -172,7 +174,14 @@ export async function InitLocations() {
                                     
                                     console.log("gotsa location model! " +modelsData[m].modelURL);
                                     if (modelsData[m].item_type == "splat") {
-                                        console.log("GOTSA SPLAT - UNSUPPORTED IN THIS ROUTE! " + modelsData[m].name);
+                                        // console.log("GOTSA SPLAT - UNSUPPORTED IN THIS ROUTE! " + modelsData[m].name);
+                                       
+                                        console.log("GOTSA SPLAT! " + modelsData[m].name);
+                                        let splat = {};
+                                        splat.url = modelsData[m].modelURL;
+                                        splat.locationData = locationData[i];
+                                        splatObjex.push(splat);
+                                        
                                                                             
                                     } else {
                                                                     
@@ -219,6 +228,10 @@ export async function InitLocations() {
                                             if (locationData[i].markerType == "brownian motion") {
                                                 const meshMover = new MeshMover(model); 
                                                 movingMeshes.push(meshMover);
+                                            }
+
+                                            if (locationData[i].locationTags && locationData[i].locationTags.includes("lookat") ) {
+                                                lookAtCameraObjects.push(model);
                                             }
                                             model.name = locationData[i].timestamp;
                                             scene.add(model);

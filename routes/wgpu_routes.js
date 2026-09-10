@@ -1517,10 +1517,21 @@ wgpu_router.get('/:_id', function (req, res) {
                     let model = await RunDataQuery("models", "findOne", locmdlquery);
                     console.log("tryna find model " + m_id + " " + JSON.stringify(model));
 
-                    if (model) {
+                    // if (model) {
                     
-                        model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
-                        locationMdls.push(model);    
+                    //     model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                    //     locationMdls.push(model);    
+                    // }
+                    if (model) {
+                                        
+                        if (model.item_type == "splat") {
+                            model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
+                            locationMdls.push(model);   
+                        } else {
+                            model.modelURL = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                            locationMdls.push(model);   
+                        }
+        
                     }
 
          

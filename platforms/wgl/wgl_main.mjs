@@ -334,7 +334,7 @@
 		}
 
 		if (settings && settings.sceneTags) {
-			if (settings.sceneTags.includes("debug")) {
+			if (settings.sceneTags.includes("debug") || settings.sceneTags.includes("stats")) {
 				// 
 				stats = new Stats();
 				stats.showPanel( 0,1,2,3 );

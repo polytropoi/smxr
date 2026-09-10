@@ -264,7 +264,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 scale = (Math.random() * scaleFactor);
                 // const scale = 2;
                 dummy.scale.set(scale, scale, scale);
-                console.log("scaleFactor " + scaleFactor + " dummys cale is " +scale);
+                // console.log("scaleFactor " + scaleFactor + " dummys cale is " +scale);
             }
             
 
@@ -307,7 +307,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 activeObjex.push(instancedMeshes[s]);
                 instancedMeshes[s].userData.locationData = locData;
                 instancedMeshes[s].userData.name = locData.name;
-                
+
             }
             if (locData.locationTags && locData.locationTags.includes("random color")) {
                 

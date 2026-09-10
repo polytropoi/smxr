@@ -52,8 +52,7 @@
 	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, GetAvailableScenesData } from './wgpu_media.js';
 	
 	import { equippedObjectOnLoad, LoadSceneInventory } from './wgpu_inventory.js';
-	
-
+	import { splatObjex, InitSplats } from './wgpu_splats.js';
 
 	export let scene;
 
@@ -99,7 +98,7 @@
 	let instancedQuaternion = new THREE.Quaternion();
 	let instancedMatrix = new THREE.Matrix4();
 
-	let loadingHeader = "";
+	export let loadingHeader = "";
 	export let sceneIsReady = false;
 	
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
@@ -369,7 +368,7 @@
 			// if (settings.sceneTags.includes("hic")) {
 			// 	SetUIMode("hic");
 			// }
-			if (settings.sceneTags.includes("debug")) {
+			if (settings.sceneTags.includes("debug") || settings.sceneTags.includes("stats")) {
 			// 
 					stats = new Stats();
 					stats.showPanel( 0,1,2,3 );
@@ -558,17 +557,44 @@
 		}
 		StartPopup(loadingHeader, 'Loading Agents....', false);
 		await LoadKinematicAgentMeshes();
-		StartPopup(loadingHeader, 'Ready!', true);
+		// StartPopup(loadingHeader, 'Ready!', true);
 				
-		const startButton = startPop.querySelector("#startButton");
-		if (startButton) {
-			console.log("startButton found!");
-			// const startButton = document.getElementById('popup_yesButton');
-			startButton.addEventListener('pointerdown', StartButton);
+		// const startButton = startPop.querySelector("#startButton");
+		// if (startButton) {
+		// 	console.log("startButton found!");
+		// 	// const startButton = document.getElementById('popup_yesButton');
+		// 	startButton.addEventListener('pointerdown', StartButton);
 				
+		// } else {
+		// 	console.log("startButton not found!");
+		// }
+
+
+
+		if (splatObjex.length) {
+			// if (splatObjex.length) {
+				// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Spark Lib....<h4>";
+				// ShowPopup(null, loadingString);
+				StartPopup(loadingHeader, 'Loading SparkJS...', false);
+				// await InitSpark();
+				// surface = surfaceObjex[0];
+				StartPopup(loadingHeader, 'Loading Gaussian Splats', false);
+				InitSplats();
+			// } 
+
 		} else {
-			console.log("startButton not found!");
+			StartPopup(loadingHeader, 'Ready!', true);	
+			const startButton = startPop.querySelector("#startButton");
+			if (startButton) {
+				console.log("startButton found!");
+				// const startButton = document.getElementById('popup_yesButton');
+				startButton.addEventListener('pointerdown', StartButton);
+					
+			} else {
+				console.log("startButton not found!");
+			}
 		}
+
 		// GetAvailableScenesData();
 
 	} //end init systems

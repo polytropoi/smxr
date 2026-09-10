@@ -194,12 +194,18 @@ export function InitLocations() {
                                     }															
 
                                     if (locationData[i].markerType == "brownian motion") {
-                                        lookAtCameraObjects.push(model);
+                                        
                                             const meshMover = new MeshMover(model); 
                                             movingMeshes.push(meshMover);
                                     }
-                            
 
+                                    if (locationData[i].locationTags && locationData[i].locationTags.includes("lookat") ) {
+                                        lookAtCameraObjects.push(model);
+                                    }
+                            
+                                    if (locationData[i].locationTags && locationData[i].locationTags.includes("lookat") ) {
+                                        lookAtCameraObjects.push(model);
+                                    }
 
                                     if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
                                         // console.log("tryna instance model " + locationData[i].name);
@@ -229,6 +235,7 @@ export function InitLocations() {
                                     break; //only match one model per location!?
                                 }
                             }
+                           
                         }
                     // } else 
 
