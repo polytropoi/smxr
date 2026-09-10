@@ -285,7 +285,7 @@ wgpu_router.get('/:_id', function (req, res) {
     let loadUSDZ = "";
     let loadAvailableScenes = "";
     let availableScenesResponse = {};
-    let availableScenesEntity = "";
+    let availableScenesData = "";
     let pictureGroupsEntity = "";
     let pictureGroupsData = "";
     let scenePicturesData = "";
@@ -1248,54 +1248,131 @@ wgpu_router.get('/:_id', function (req, res) {
                 }
             }
 
+
+            // deprecated...?
             ///////////////////// location "placeholders" used for "cloud markers" /////////////////////////////////
-            if (locationPlaceholders.length > 0) { //nah, just do on client
-                for (let i = 0; i < locationPlaceholders.length; i++) {
-                    //use the "cloud_marker" component for certain markertypes () TODO rename it to mod_location // nope
-                    let scale = 1;
-                    let rot = 0;
-                    if (locationPlaceholders[i].markerObjScale && locationPlaceholders[i].markerObjScale != 0 && locationPlaceholders[i].markerObjScale != "") { //deprecated, using non-u scaling now..
-                        scale = locationPlaceholders[i].markerObjScale; 
-                    }
-                    const xscale = locationPlaceholders[i].xscale != null ? locationPlaceholders[i].xscale : scale;
-                    const yscale = locationPlaceholders[i].yscale != null ? locationPlaceholders[i].yscale : scale;
-                    const zscale = locationPlaceholders[i].zscale != null ? locationPlaceholders[i].zscale : scale;   
-                    const xrot = locationPlaceholders[i].eulerx != null ? locationPlaceholders[i].eulerx : rot;
-                    const yrot = locationPlaceholders[i].eulery != null ? locationPlaceholders[i].eulery : rot;
-                    const zrot = locationPlaceholders[i].eulerz != null ? locationPlaceholders[i].eulerz : rot;
 
-                    // if (useArParent || (locationPlaceholders[i].tags && (locationPlaceholders[i].tags.includes("ar child") ||  locationPlaceholders[i].tags.includes("archild")))) { //used for hit test
+            // if (locationPlaceholders.length > 0) { //nah, just do on client
+            //     for (let i = 0; i < locationPlaceholders.length; i++) {
+            //         //use the "cloud_marker" component for certain markertypes () TODO rename it to mod_location // nope
+            //         let scale = 1;
+            //         let rot = 0;
+            //         if (locationPlaceholders[i].markerObjScale && locationPlaceholders[i].markerObjScale != 0 && locationPlaceholders[i].markerObjScale != "") { //deprecated, using non-u scaling now..
+            //             scale = locationPlaceholders[i].markerObjScale; 
+            //         }
+            //         const xscale = locationPlaceholders[i].xscale != null ? locationPlaceholders[i].xscale : scale;
+            //         const yscale = locationPlaceholders[i].yscale != null ? locationPlaceholders[i].yscale : scale;
+            //         const zscale = locationPlaceholders[i].zscale != null ? locationPlaceholders[i].zscale : scale;   
+            //         const xrot = locationPlaceholders[i].eulerx != null ? locationPlaceholders[i].eulerx : rot;
+            //         const yrot = locationPlaceholders[i].eulery != null ? locationPlaceholders[i].eulery : rot;
+            //         const zrot = locationPlaceholders[i].eulerz != null ? locationPlaceholders[i].eulerz : rot;
+
+            //         // if (useArParent || (locationPlaceholders[i].tags && (locationPlaceholders[i].tags.includes("ar child") ||  locationPlaceholders[i].tags.includes("archild")))) { //used for hit test
                             
-                    //     arChildElements = arChildElements + "<div data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
-                    //     "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+locationPlaceholders[i].x+"; ypos: "+locationPlaceholders[i].y+"; zpos: "+locationPlaceholders[i].z+";" +
-                    //     "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
-                    //     "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
-                    //     "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
-                    //     locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
-                    //     locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
-                    //     skyboxEnvMap+ " position=\x22"+locationPlaceholders[i].x+" "+locationPlaceholders[i].y+ " " +locationPlaceholders[i].z+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></div>";
-                    // } else {
-                        // placeholderEntities = placeholderEntities + "<div data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
-                        // "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+locationPlaceholders[i].x+"; ypos: "+locationPlaceholders[i].y+"; zpos: "+locationPlaceholders[i].z+";" +
-                        // "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
-                        // "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
-                        // "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
-                        // locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
-                        // locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
-                        // skyboxEnvMap+ " position=\x22"+locationPlaceholders[i].x+" "+locationPlaceholders[i].y+ " " +locationPlaceholders[i].z+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></div>";
-                    // }
-                    var buff = Buffer.from(JSON.stringify(locationPlaceholders[i])).toString("base64");
-                    cloudMarkerElements = cloudMarkerElements + "<div id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22cloud_marker\x22 data-eldata="+buff+"></div>";
-                    // let localEl = document.createElement("div");
-                    //           document.body.appendChild(localEl);
-                    //           localEl.classList.add("local_marker");
-                    //           localEl.id = data.timestamp;
-                    //           localEl.setAttribute("data-eldata", JSON.stringify(data));
+            //         //     arChildElements = arChildElements + "<div data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
+            //         //     "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+locationPlaceholders[i].x+"; ypos: "+locationPlaceholders[i].y+"; zpos: "+locationPlaceholders[i].z+";" +
+            //         //     "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
+            //         //     "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
+            //         //     "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
+            //         //     locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
+            //         //     locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
+            //         //     skyboxEnvMap+ " position=\x22"+locationPlaceholders[i].x+" "+locationPlaceholders[i].y+ " " +locationPlaceholders[i].z+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></div>";
+            //         // } else {
+            //             // placeholderEntities = placeholderEntities + "<div data-isvisible=\x22yes\x22 id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22activeObjexGrab activeObjexRay envMap "+
+            //             // "placeholders\x22 cloud_marker=\x22phID: "+locationPlaceholders[i].phID+"; xpos: "+locationPlaceholders[i].x+"; ypos: "+locationPlaceholders[i].y+"; zpos: "+locationPlaceholders[i].z+";" +
+            //             // "xrot: "+xrot+"; yrot: "+yrot+"; zrot: "+zrot+"; targetElements: "+locationPlaceholders[i].targetElements+"; " +
+            //             // "mediaID: "+locationPlaceholders[i].mediaID+"; mediaName: "+locationPlaceholders[i].mediaName+"; "+
+            //             // "xscale: "+xscale+"; yscale: "+yscale+"; zscale: "+zscale+"; objectID: "+locationPlaceholders[i].objectID+"; modelID: "+locationPlaceholders[i].modelID+"; model: "+
+            //             // locationPlaceholders[i].model+"; markerType: "+locationPlaceholders[i].markerType+";  tags: "+locationPlaceholders[i].locationTags+"; isNew: false; name: "+
+            //             // locationPlaceholders[i].name+"; description: "+locationPlaceholders[i].description+";eventData: "+locationPlaceholders[i].eventData+"; timestamp: "+locationPlaceholders[i].timestamp+";\x22 "+
+            //             // skyboxEnvMap+ " position=\x22"+locationPlaceholders[i].x+" "+locationPlaceholders[i].y+ " " +locationPlaceholders[i].z+"\x22 rotation=\x22"+locationPlaceholders[i].eulerx+" "+locationPlaceholders[i].eulery+ " " +locationPlaceholders[i].eulerz+"\x22></div>";
+            //         // }
+            //         var buff = Buffer.from(JSON.stringify(locationPlaceholders[i])).toString("base64");
+            //         cloudMarkerElements = cloudMarkerElements + "<div id=\x22"+locationPlaceholders[i].timestamp+"\x22 class=\x22cloud_marker\x22 data-eldata="+buff+"></div>";
+            //         // let localEl = document.createElement("div");
+            //         //           document.body.appendChild(localEl);
+            //         //           localEl.classList.add("local_marker");
+            //         //           localEl.id = data.timestamp;
+            //         //           localEl.setAttribute("data-eldata", JSON.stringify(data));
                 
-                }
+            //     }
+            // }
 
 
+        ///////////////// available scenes ///////////////////// 
+
+
+        const query = {$and: [{"sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
+        const available_scenes = await RunDataQuery("scenes", "find", query);
+        let scenes = [];
+        if (available_scenes.length) { 
+            let count = 3;
+            if (available_scenes.length > 4) {
+                count = available_scenes.length > 12 ? 12 : available_scenes.length / 2;
             }
+            for (let i = 0; i < count; i++) { //just get a few for random gates, too many now...
+                const index = Math.floor(Math.random() * available_scenes.length);
+                console.log("setting available scene "+ index +" of "+ available_scenes.length);
+                scenes.push(available_scenes[index]);
+            }
+        }
+        let availableScenes = [];
+        availableScenesResponse.availableScenes = availableScenes;
+        // async.each(scenes, function (scene, cb) {
+
+        console.log("availableScenes response " + scenes.length);
+        for (let scene of scenes) {
+            let availableScene = {};
+            if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
+                var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
+                var i_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                const imgquery = {"_id": i_id};
+                let picture_item = await RunDataQuery("image_items", "findOne", imgquery);
+                if (picture_item && picture_item.filename) {
+
+                
+                    var item_string_filename = picture_item.filename;
+                    item_string_filename = item_string_filename.replace(/\"/g, "");
+                    var item_string_filename_ext = getExtension(item_string_filename);
+                    var expiration = new Date();
+                    expiration.setMinutes(expiration.getMinutes() + 30);
+                    var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+
+                    var halfName = 'half.' + baseName + item_string_filename_ext;
+                    var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+
+                    var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); //just send back thumbnail urls for list
+                    var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000); //just send back thumbnail urls for list
+                    
+                    availableScene = {
+                        sceneTitle: scene.sceneTitle,
+                        sceneKey: scene.short_id,
+                        sceneType: scene.sceneType,
+                        sceneLastUpdate: scene.sceneLastUpdate,
+                        sceneDescription: scene.sceneDescription,
+                        sceneKeynote: scene.sceneKeynote,
+                        sceneAndroidOK: scene.sceneAndroidOK,
+                        sceneIosOK: scene.sceneIosOK,
+                        sceneWindowsOK: scene.sceneWindowsOK,
+                        sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+                        sceneOwner: scene.userName ? "" : scene.userName,
+                        scenePostcardQuarter: urlQuarter,
+                        scenePostcardHalf: urlHalf
+                    };
+                    availableScenesResponse.availableScenes.push(availableScene);
+                } else {
+                    console.log("available_domain_scene picture not found! " + i_id );    
+                }
+            }
+        }
+        console.log("availableScenes : " +JSON.stringify(availableScenes));
+        if (availableScenes != null && availableScenes != undefined && availableScenes.length > 0) { //need it for random gates, etc...
+            const buff = Buffer.from(JSON.stringify(availableScenesResponse)).toString("base64");
+
+            availableScenesData = "<div id=\x22availableScenesData\x22 data-availablescenes='"+buff+"'></div>";
+            
+        }
+
             //////// items in scene inventory //////////////
             const invquery = {"sceneID": sceneData._id};
             const inventoryitems = await RunDataQuery("inventory_items", "find", invquery);
@@ -2639,10 +2716,11 @@ wgpu_router.get('/:_id', function (req, res) {
                             loadLocations +
                             locationModelsEl +
                             sceneTimedEventsData +
+                            availableScenesData +
                             objectData +
                             inventoryData +
                             
-                        // cloudMarkerElements+ //? 
+                        // cloudMarkerElements+ //? no need...
 
                             "<script type=\x22module\x22 src=\x22../connect/dialogs.js\x22></script>"+
                             "<script type=\x22module\x22 src=\x22../connect/indexedDb.js\x22></script>" +

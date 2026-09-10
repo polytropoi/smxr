@@ -285,7 +285,7 @@ wgl_router.get('/:_id', function (req, res) {
     let loadUSDZ = "";
     let loadAvailableScenes = "";
     let availableScenesResponse = {};
-    let availableScenesEntity = "";
+    let availableScenesData = "";
     let pictureGroupsEntity = "";
     let pictureGroupsData = "";
     let scenePicturesData = "";
@@ -1322,81 +1322,70 @@ wgl_router.get('/:_id', function (req, res) {
             ///////////////// available scenes ///////////////////// 
 
 
-            // const query = {$and: [{"sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
-            // const available_scenes = await RunDataQuery("scenes", "find", query);
-            // let scenes = [];
-            // if (available_scenes.length) {       
-            //     for (let i = 0; i < 3; i++) { //just get a few for random gates, too many now...
-            //         const index = Math.floor(Math.random() * available_scenes.length);
-            //         console.log("setting available scene "+ index +" of "+ available_scenes.length);
-            //         scenes.push(available_scenes[index]);
-            //     }
-            // }
-            // let availableScenes = [];
-            // availableScenesResponse.availableScenes = availableScenes;
-            // // async.each(scenes, function (scene, cb) {
+            const query = {$and: [{"sceneDomain": sceneResponse.sceneDomain}, {sceneShareWithPublic: true }]};
+            const available_scenes = await RunDataQuery("scenes", "find", query);
+            let scenes = [];
+            if (available_scenes.length) {       
+                for (let i = 0; i < 3; i++) { //just get a few for random gates, too many now...
+                    const index = Math.floor(Math.random() * available_scenes.length);
+                    console.log("setting available scene "+ index +" of "+ available_scenes.length);
+                    scenes.push(available_scenes[index]);
+                }
+            }
+            let availableScenes = [];
+            availableScenesResponse.availableScenes = availableScenes;
+            // async.each(scenes, function (scene, cb) {
 
-            // console.log("availableScenes response " + scenes.length);
-            // for (let scene of scenes) {
-            //     let availableScene = {};
-            //     if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
-            //         var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
-            //         var i_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
-            //         const imgquery = {"_id": i_id};
-            //         let picture_item = await RunDataQuery("image_items", "findOne", imgquery);
-            //         if (picture_item && picture_item.filename) {
+            console.log("availableScenes response " + scenes.length);
+            for (let scene of scenes) {
+                let availableScene = {};
+                if (scene.scenePostcards != null && scene.scenePostcards.length > 0) { //cain't show without no postcard
+                    var postcardIndex = Math.floor(Math.random()*scene.scenePostcards.length);
+                    var i_id = ObjectId.createFromHexString(scene.scenePostcards[postcardIndex]); //TODO randomize? or ensure latest?  or use assigned default?
+                    const imgquery = {"_id": i_id};
+                    let picture_item = await RunDataQuery("image_items", "findOne", imgquery);
+                    if (picture_item && picture_item.filename) {
 
                     
-            //             var item_string_filename = picture_item.filename;
-            //             item_string_filename = item_string_filename.replace(/\"/g, "");
-            //             var item_string_filename_ext = getExtension(item_string_filename);
-            //             var expiration = new Date();
-            //             expiration.setMinutes(expiration.getMinutes() + 30);
-            //             var baseName = path.basename(item_string_filename, (item_string_filename_ext));
+                        var item_string_filename = picture_item.filename;
+                        item_string_filename = item_string_filename.replace(/\"/g, "");
+                        var item_string_filename_ext = getExtension(item_string_filename);
+                        var expiration = new Date();
+                        expiration.setMinutes(expiration.getMinutes() + 30);
+                        var baseName = path.basename(item_string_filename, (item_string_filename_ext));
 
-            //             var halfName = 'half.' + baseName + item_string_filename_ext;
-            //             var quarterName = 'quarter.' + baseName + item_string_filename_ext;
+                        var halfName = 'half.' + baseName + item_string_filename_ext;
+                        var quarterName = 'quarter.' + baseName + item_string_filename_ext;
 
-            //             var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); //just send back thumbnail urls for list
-            //             var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000); //just send back thumbnail urls for list
+                        var urlHalf = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + halfName, 6000); //just send back thumbnail urls for list
+                        var urlQuarter = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, "users/" + picture_item.userID + "/pictures/" + picture_item._id + "." + quarterName, 6000); //just send back thumbnail urls for list
                         
-            //             availableScene = {
-            //                 sceneTitle: scene.sceneTitle,
-            //                 sceneKey: scene.short_id,
-            //                 sceneType: scene.sceneType,
-            //                 sceneLastUpdate: scene.sceneLastUpdate,
-            //                 sceneDescription: scene.sceneDescription,
-            //                 sceneKeynote: scene.sceneKeynote,
-            //                 sceneAndroidOK: scene.sceneAndroidOK,
-            //                 sceneIosOK: scene.sceneIosOK,
-            //                 sceneWindowsOK: scene.sceneWindowsOK,
-            //                 sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
-            //                 sceneOwner: scene.userName ? "" : scene.userName,
-            //                 scenePostcardQuarter: urlQuarter,
-            //                 scenePostcardHalf: urlHalf
-            //             };
-            //             availableScenesResponse.availableScenes.push(availableScene);
-            //         }
-            //     }
-            // }
-            // console.log("availableScenes : " +JSON.stringify(availableScenes));
-            // if (availableScenes != null && availableScenes != undefined && availableScenes.length > 0) { //need it for random gates, etc...
-            //     const buff = Buffer.from(JSON.stringify(availableScenesResponse)).toString("base64");
-            //     availableScenesEntity = "<div scale=\x22.75 .75 .75\x22 look-at=\x22#player\x22 position=\x22"+scenesKeyLocation+"\x22>"+ 
-            //     "<div available_scenes_control position=\x220 -2.5 0\x22 scale=\x22.75  .75 .75\x22 id=\x22availableScenesControl\x22 data-availablescenes='"+buff+"' class=\x22envMap activeObjexRay\x22 toggle-available-scenes "+skyboxEnvMap+" gltf-model=\x22#key\x22></div>"+
-            //     "<div id=\x22availableScenesPanel\x22 visible='false' position=\x220 -1 0\x22>"+
-            //     "<div id=\x22availableScenesHeaderText\x22 geometry=\x22primitive: plane; width: 3.25; height: 1\x22 position=\x220 1.75 0\x22 material=\x22color: grey; transparent: true; opacity: 0.0\x22" +
-            //     "text=\x22value:; wrap-count: 35;\x22></div>" +
+                        availableScene = {
+                            sceneTitle: scene.sceneTitle,
+                            sceneKey: scene.short_id,
+                            sceneType: scene.sceneType,
+                            sceneLastUpdate: scene.sceneLastUpdate,
+                            sceneDescription: scene.sceneDescription,
+                            sceneKeynote: scene.sceneKeynote,
+                            sceneAndroidOK: scene.sceneAndroidOK,
+                            sceneIosOK: scene.sceneIosOK,
+                            sceneWindowsOK: scene.sceneWindowsOK,
+                            sceneStatus: scene.sceneShareWithPublic ? "public" : "private",
+                            sceneOwner: scene.userName ? "" : scene.userName,
+                            scenePostcardQuarter: urlQuarter,
+                            scenePostcardHalf: urlHalf
+                        };
+                        availableScenesResponse.availableScenes.push(availableScene);
+                    }
+                }
+            }
+            console.log("availableScenes : " +JSON.stringify(availableScenes));
+            if (availableScenes != null && availableScenes != undefined && availableScenes.length > 0) { //need it for random gates, etc...
+                const buff = Buffer.from(JSON.stringify(availableScenesResponse)).toString("base64");
 
-            //     "<div id=\x22availableScenePic\x22 class=\x22envMap activeObjexRay\x22 visible=\x22true\x22 position=\x220 3 -.1\x22 gltf-model=\x22#widelandscape_panel\x22 scale=\x22.5 .5 .5\x22 material=\x22shader: flat; alphaTest: 0.5;\x22"+
-            //     "rotation='0 0 0'></div>"+
-            //     "<div gltf-model=\x22#square_panel\x22 scale=\x222.25 2.25 2.25\x22 position=\x220 2.1 -.25\x22></div>" +
-            //     "<div visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesNextButton\x22 gltf-model=\x22#next_button\x22 scale=\x22.5 .5 .5\x22 position=\x221.5 -.75 0\x22></div>" +
-            //     "<div visible='true' class=\x22envMap activeObjexRay\x22 id=\x22availableScenesPreviousButton\x22 gltf-model=\x22#previous_button\x22 scale=\x22.5 .5 .5\x22 position=\x22-1.5 -.75 0\x22></div>" +
-            //     "</div></div>";
-            //     console.log('processed availablescenes ' + availableScenes.length);
-            //     modelAssets = modelAssets + "<div id=\x22widelandscape_panel\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/panel5b.glb\x22></div>\n";  
-            // }
+                availableScenesData = "<div id=\x22availableScenesData\x22 data-availablescenes='"+buff+"'></div>";
+              
+            }
             //////////////////////// weblinks /////////////////////////
             // if (sceneResponse.sceneWebLinks != null && sceneResponse.sceneWebLinks.length > 0) {
             //     let index = 0;
@@ -3182,6 +3171,7 @@ wgl_router.get('/:_id', function (req, res) {
                             loadLocations +
                             locationModelsEl +
                             sceneTimedEventsData +
+                            availableScenesData +
                             objectData +
                             inventoryData +
                             

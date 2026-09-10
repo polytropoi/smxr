@@ -29,7 +29,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, cameraIsReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgl_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, InitVideoGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate } from './wgl_media.js';
+	import { InitAudioGroups, InitPictureGroups, InitVideoGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, GetAvailableScenesData } from './wgl_media.js';
 	
 	import { LoadSceneInventory } from './wgl_inventory.js';
 	
@@ -426,8 +426,9 @@
 			}
 		}
 
-
+		// GetAvailableScenesData();
 		sceneIsReady = true;
+
 	} //end init systems
 
 

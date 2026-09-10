@@ -12,7 +12,7 @@ import { player, camera } from './wgl_controls.js';
 import { playerRigidbody } from './wgl_actions.js';
 import { agentModels, agentParents, CreateAgent, randomNavmeshPoint } from './wgl_nav.js';
 import { settings } from '../../../connect/settings.js';
-import { instanceIndex } from 'three/tsl';
+// import { instanceIndex } from 'three/tsl';
 // import {scene, world} from './wgl_main.mjs'
 
 function getGeometry(size) {

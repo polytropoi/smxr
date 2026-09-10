@@ -7,7 +7,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './wgl_nav.js';
 
-import { sceneTextController, triggerAudioController, ReturnTaggedPictures } from './wgl_media.js';
+import { sceneTextController, triggerAudioController, ReturnTaggedPictures, availableScenesData } from './wgl_media.js';
 
 import { ActionSwitch, SetPlayerRigidbody } from './wgl_actions.js';
 
@@ -1100,6 +1100,10 @@ export function onMouseDown(event) { //clicked on threejs object
         return;
     }
 
+    let textData;
+    let htmlString;
+    
+
     mouseDownStarttime = Date.now() / 1000;    
    
 
@@ -1330,17 +1334,33 @@ export function onMouseDown(event) { //clicked on threejs object
 
             } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                 
+                    console.log("gatehit");
+                    if (!lastRaycastHitObject.userData.locationData.eventData) {
+                        const randomIndex = Math.floor(Math.random() * availableScenesData.availableScenes.length);
+                        const randomScene = availableScenesData.availableScenes[randomIndex];
+                        console.log("randomScene is " + JSON.stringify(randomScene));
+                        htmlString = "<h3> Scene Gate :</h3>"  + randomScene.sceneTitle +
+                        "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
+                        lastRaycastHitObject.userData.locationData.locationTags+
+                        "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
+                        randomScene.sceneKey+"\x22 class=\x22yesButton\x22>Enter</button>"+
+                        "</div>";
+                    } else {
+                        htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
+                        "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
+                        lastRaycastHitObject.userData.locationData.locationTags+
+                        "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
+                        lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Enter</button>"+
+                        "</div>";
+                    }
+
                 ShowPopup(event);
-                popup.innerHTML = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
-                "<br><br><div><button id=\x22hicCancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
-                "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
-                lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Go</button>"+
-                "</div>";
+                popup.innerHTML = htmlString;
 
             } else if (lastRaycastHitObject.userData.locationData.mediaID) {
             // const popup = document.getElementById("popup");
                 let textData;
-                if (lastRaycastHitObject.userData.locationData.mediaID) {
+                if (sceneTextController && lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                     console.log("text item " + JSON.stringify(textData));
                 }

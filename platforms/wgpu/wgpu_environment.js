@@ -286,8 +286,8 @@ export async function UpdateEnvMap() {
 				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5));
 				skyboxMaterial.colorNode = skyboxColorNode; 
-				scene.environmentNode = skyboxColorNode; //to everything
-				scene.backgroundNode = skyboxColorNode;
+				// scene.environmentNode = skyboxColorNode; //to everything
+				// scene.backgroundNode = skyboxColorNode;
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 				// skyboxMaterial.envNode = skyboxColorNode;
@@ -298,8 +298,8 @@ export async function UpdateEnvMap() {
 				
 				skyboxMaterial.colorNode = skyboxColorNode; // Assign the sampled texture to the color node
 				
-				scene.environmentNode = skyboxColorNode; //to everything
-				scene.backgroundNode = skyboxColorNode;
+				// scene.environmentNode = skyboxColorNode; //to everything
+				// scene.backgroundNode = skyboxColorNode;
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 			}
@@ -433,7 +433,7 @@ export async function InitEnvMap() {
 		tslTexture = texture(textureEquirect, equirectUV( positionWorld.normalize() ));
 		let skyboxColorNode = tslTexture.mul(1);
 
-		scene.environmentNode = skyboxColorNode;
+		// scene.environmentNode = skyboxColorNode;
 		scene.environment = textureEquirect;
 		// scene.environmentIntensity = 2.5; 
 		skyboxMaterial = new THREE.NodeMaterial();
@@ -491,8 +491,8 @@ export async function InitEnvMap() {
 				scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 
 			} else {	
-				scene.environmentNode = skyboxColorNode;
-				scene.backgroundNode = skyboxColorNode;
+				// scene.environmentNode = skyboxColorNode;
+				// scene.backgroundNode = skyboxColorNode;
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 

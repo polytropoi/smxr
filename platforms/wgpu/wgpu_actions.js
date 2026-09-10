@@ -239,12 +239,12 @@ export class SceneObject { //things that might have models and actions and fancy
             
                 this.shootObject(this.objectData._id);
                 
-                // this.restoreEquipped;
-                setTimeout(() => {
-                // this.el.object3D.visible = true;
-                // this.el.classList.add("activeObjexRay");
-                }, 1000);
-                // this.applyForce();
+                // // this.restoreEquipped;
+                // setTimeout(() => {
+                // // this.el.object3D.visible = true;
+                // // this.el.classList.add("activeObjexRay");
+                // }, 1000);
+                // // this.applyForce();
                 
             } 
         } else { //not an equipped object
@@ -405,6 +405,17 @@ export class SceneObject { //things that might have models and actions and fancy
         // }
         // dynamicBodies.push(rbody);
         // rbody.AddForce();
+    }
+
+    shootObject() {
+            
+            scene.add(this.object);
+            console.log(JSON.stringify(this.object.position));
+            const worldPosition = new THREE.Vector3();
+            this.object.getWorldPosition(worldPosition);
+            
+            equippedRigidbody.addForce(worldPosition, mouseDowntime);
+            
     }
     removeFromInventory (data, waitTime) { //i.e. destroy, consume
 

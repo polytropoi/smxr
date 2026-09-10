@@ -16,7 +16,7 @@ import { instancedModels, createDefaultSurface, SetSurface, InstanceOnSurface } 
 
 import { CreateLight } from './wgpu_lights.js';
 
-import { convertGltfToNodeMaterial, InitLocationModelVideo } from './wgpu_media.js';
+import { convertGltfToNodeMaterial, GetAvailableScenesData, InitLocationModelVideo } from './wgpu_media.js';
 
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from './wgpu_nav.js';
@@ -83,6 +83,7 @@ export async function LoadModel(url) {
 //         scene.add(navmeshObject);
 //     }
 // }
+
 
  class MeshMover{
     constructor(mesh){
@@ -203,7 +204,7 @@ export async function InitLocations() {
                                         } else { // regular meshes
                                             let isActive = false;             
                                             if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
-                                            isActive = true;
+                                                isActive = true;
                                             } 
                                             const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
                                             model = modelData.model;
@@ -984,6 +985,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         }
         if (model) {
             scene.add(model.model);
+            GetAvailableScenesData();
             // model.material.color = "orange";
             console.log("adding a gate! " + model);
         }

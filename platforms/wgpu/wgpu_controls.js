@@ -7,7 +7,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './wgpu_nav.js';
 
-import { ReturnTaggedPictures, sceneTextController, triggerAudioController } from './wgpu_media.js';
+import { availableScenesData, ReturnTaggedPictures, sceneTextController, triggerAudioController } from './wgpu_media.js';
 
 import { ActionSwitch, SetPlayerRigidbody, InstancedActionClick, sceneObjects } from './wgpu_actions.js';
 
@@ -1261,12 +1261,13 @@ export function onMouseDown(event) { // on threejs object
     // playerReadyToNav = true;
     event.stopPropagation();// duh!
 
-    console.log("mouse down on " + event.target.id);
-    if (lastRaycastHitObject && lastRaycastHitObject.userData.name) {
-    console.log("mouseDownOn " + event.target.id + " vs " + lastRaycastHitObject.userData.sceneObjectID); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+    // console.log("mouse down on " + event.target.id);
+    if (lastRaycastHitObject && lastRaycastHitObject.userData) {
+        console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " name " + lastHitObjectName); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
     } else {
-        console.log(event.clientY + " " + (window.innerHeight * .8));
+      
         if (event.clientY > (window.innerHeight * .8)) {
+              console.log("yClick " + event.clientY + " vs max " + (window.innerHeight * .8));
             if (settings && settings.sceneTags && settings.sceneTags.includes("next")) {
                 GoToNext();
             }
@@ -1339,7 +1340,7 @@ export function onMouseDown(event) { // on threejs object
     } else if (lastRaycastHitObject && lastRaycastHitObject.userData) {
 
             // let sceneObjID = lastRaycastHitObject.userData.sceneObjectID;
-        console.log("clicked on active object! " + lastRaycastHitObject.userData.name);
+        console.log("clicked on active object! " + lastHitObjectName);
 
         if (allowMods && keyIsDown == "KeyT") {
             
@@ -1513,11 +1514,25 @@ export function onMouseDown(event) { // on threejs object
                 
                 } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                
-                    htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
-                    "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+lastRaycastHitObject.userData.locationData.locationTags+
-                    "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
-                    lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Enter</button>"+
-                    "</div>";
+                    console.log("gatehit");
+                    if (!lastRaycastHitObject.userData.locationData.eventData) {
+                        const randomIndex = Math.floor(Math.random() * availableScenesData.availableScenes.length);
+                        const randomScene = availableScenesData.availableScenes[randomIndex];
+                        console.log("randomScene is " + JSON.stringify(randomScene));
+                        htmlString = "<h3> Scene Gate :</h3>"  + randomScene.sceneTitle +
+                        "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
+                        lastRaycastHitObject.userData.locationData.locationTags+
+                        "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
+                        randomScene.sceneKey+"\x22 class=\x22yesButton\x22>Enter</button>"+
+                        "</div>";
+                    } else {
+                        htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
+                        "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
+                        lastRaycastHitObject.userData.locationData.locationTags+
+                        "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
+                        lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Enter</button>"+
+                        "</div>";
+                    }
                     ShowHTMLPopup(event, htmlString, null, null, "hic_content");
                 
                 } else if (lastRaycastHitObject.userData.locationData.mediaID) {

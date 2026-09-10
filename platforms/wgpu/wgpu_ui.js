@@ -939,9 +939,11 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
                     xpos = 0;
                 }
                 
-                let ypos = event.clientY - 512;
-                if (event.clientY < 400) {
+                let ypos = event.clientY - 300;
+                if (event.clientY < 300) {
                     ypos = 0;
+                } else if (event.clientY > (window.innerHeight - 256)) {
+                    ypos = window.innerHeight - 512;
                 }
                  Object.assign(popup.style, {
                     left: `${xpos}px`,

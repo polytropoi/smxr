@@ -49,7 +49,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgpu_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups } from './wgpu_media.js';
+	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, GetAvailableScenesData } from './wgpu_media.js';
 	
 	import { equippedObjectOnLoad, LoadSceneInventory } from './wgpu_inventory.js';
 	
@@ -569,6 +569,7 @@
 		} else {
 			console.log("startButton not found!");
 		}
+		// GetAvailableScenesData();
 
 	} //end init systems
 

@@ -230,14 +230,14 @@ export class SceneObject { //things that might have models and actions and fancy
                 // this.triggerAudioController.components.trigger_audio_control.playAudioAtPosition(this.hitpoint, this.distance, ["shoot"], .5);//tagmangler needs an array, add vol mod 
                 // }
                 // this.el.object3D.visible = false;
-                this.el.classList.remove("activeObjexRay");
+                // this.el.classList.remove("activeObjexRay");
             
-                this.shootObject(this.data.objectData._id);
+                this.shootObject(this.objectData._id);
                 // this.restoreEquipped;
-                setTimeout(() => {
-                // this.el.object3D.visible = true;
-                this.el.classList.add("activeObjexRay");
-                }, 1000);
+                // setTimeout(() => {
+                // // this.el.object3D.visible = true;
+                // this.el.classList.add("activeObjexRay");
+                // }, 1000);
                 // this.applyForce();
                 
             } 
@@ -341,6 +341,16 @@ export class SceneObject { //things that might have models and actions and fancy
             
             this.equipObject(data, this.object);
         }
+    }
+    shootObject() {
+        
+        scene.add(this.object);
+        console.log(JSON.stringify(this.object.position));
+        const worldPosition = new THREE.Vector3();
+        this.object.getWorldPosition(worldPosition);
+        
+        equippedRigidbody.addForce(worldPosition, mouseDowntime);
+        
     }
     throwObject() {
         
@@ -545,7 +555,8 @@ function EnterSceneGate (eventData) {
                     const data = await response.json();
                     if (data.short_id) {
                         // let url = "/webxr/" + data.short_id;
-                        window.location.href = "/three/" + data.short_id;
+                        window.location.href = "/three/" + data.short_id; //this maps to wgpu route - how to select another platform...?  look it up in available scenes?  
+
                         // that.dialogEl.components.mod_dialog.showPanel("Go to " + data.sceneTitle +" ?", "href~"+ url, "gatePass", 5000 );
                     } else {
                         console.log("no scenes found with tags " + eventData);

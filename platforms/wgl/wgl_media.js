@@ -21,6 +21,7 @@ export let audioGroupsData;
 
 export let videoGroupsData;
 export let pictureGroupsData;
+export let availableScenesData;
 export let landscapePanel;
 
 export let equirectPictures = [];
@@ -42,6 +43,16 @@ function SequenceEvent (event) {
         break;
     }
 }
+
+export function GetAvailableScenesData () {
+    const availableScenesDataEl = document.getElementById('availableScenesData');
+    if (availableScenesDataEl) {
+        const theAvailableScenesData = availableScenesDataEl.getAttribute('data-availablescenes');
+        availableScenesData = JSON.parse(atob(theAvailableScenesData));
+        console.log("availablescenesdata " + JSON.stringify(availableScenesData));
+    }
+}
+
 
 export function InitPictureGroups () {
     let pictureGroupsDataEl = document.getElementById('pictureGroupsData');
