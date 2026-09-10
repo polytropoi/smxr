@@ -131,7 +131,9 @@ export let useWavesurfer = false;
 
 
 export function InitWavesurfer(url) { 
+const container = document.getElementById('waveform');
  console.log("tryna init wavesurfer");
+ if (container) {
 const wavesurfer = WaveSurfer.create({
    container: '#waveform',
    waveColor: '#23f4ffb1',
@@ -149,6 +151,7 @@ const wavesurfer = WaveSurfer.create({
   cursorColor: 'transparent'
 //   normalize: true
    });
+}
 
 //    wavesurfer.on('click', () => {
 // //   wavesurfer.play()
