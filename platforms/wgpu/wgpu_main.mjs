@@ -589,6 +589,11 @@
 				console.log("startButton found!");
 				// const startButton = document.getElementById('popup_yesButton');
 				startButton.addEventListener('pointerdown', StartButton);
+				// await new Promise(r => setTimeout(, 000)); //fudge
+				setTimeout(() => {
+					console.log("Hello! 3 seconds have passed.");
+							startPop.style.display = "none";
+				}, 3000); 
 					
 			} else {
 				console.log("startButton not found!");

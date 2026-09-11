@@ -6,7 +6,7 @@ import { GaussianSplat } from 'three/addons/objects/GaussianSplat.js';
   // import { SplatMesh, SparkRenderer } from "sparkjsdev/spark";
 import {scene, renderer, StartButton, loadingHeader} from "./wgpu_main.mjs";
 
-import {StartPopup} from "./wgpu_ui.js";
+import {StartPopup, startPop} from "./wgpu_ui.js";
 
 import { settings } from '../../../connect/settings.js';
 
@@ -47,7 +47,7 @@ export async function InitSplats () {
                                 splat.scale.set(xscale, yscale, zscale);
                 scene.add(splat);
                 splat.userData.name = "SPLAT";
-                activeObjex.push(splat);
+                // activeObjex.push(splat);
         // scene.add( splat );
 
 
@@ -58,7 +58,10 @@ export async function InitSplats () {
         console.log("startButton found!");
         // const startButton = document.getElementById('popup_yesButton');
         startButton.addEventListener('pointerdown', StartButton);
-            
+            setTimeout(() => {
+                                console.log("Hello! 3 seconds have passed.");
+                                        startPop.style.display = "none";
+                            }, 3000); 
         } else {
         console.log("startButton not found!");
         }

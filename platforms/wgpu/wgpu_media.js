@@ -812,7 +812,7 @@ class TriggerAudioControl {
         }
     }
     playTriggerAudioWithTags (tagstring, distance, pos) {
-        if (tagstring) {
+        if (tagstring && distance && pos) {
             let tags = tagstring.toString().split(',');
             for (let i = 0; i < tags.length; i++) {
                 // console.log("looking fo rtag " + tags[i].trim());
@@ -870,8 +870,9 @@ class TriggerAudioControl {
                     // }
                     
                     // console.log("tryna play trigger at volume " + volume + " distance " + distance + " id " + this.id); //calling id here is needed
-                        this.triggerAudioHowl.pos(pos.x / 100, pos.y / 100, pos.z / 100, this.id);  //HOLY SHIT howler needs small values for position, * .01
-                    
+                        if (pos) {
+                            this.triggerAudioHowl.pos(pos.x / 100, pos.y / 100, pos.z / 100, this.id);  //HOLY SHIT howler needs small values for position, * .01
+                        }
                         this.triggerAudioHowl.play();
                     }
                 }

@@ -1262,8 +1262,8 @@ export function onMouseDown(event) { // on threejs object
     event.stopPropagation();// duh!
 
     // console.log("mouse down on " + event.target.id);
-    if (lastRaycastHitObject && lastRaycastHitObject.userData) {
-        console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " name " + lastHitObjectName); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+    if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
+        console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " locationData " + JSON.stringify(locationData)); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
     } else {
       
         if (event.clientY > (window.innerHeight * .8)) {
@@ -1272,6 +1272,12 @@ export function onMouseDown(event) { // on threejs object
                 GoToNext();
             }
         }
+        popup.style.display = "none";
+        startPop.style.display = "none";
+        lastRaycastHitObject = null;
+        lastHitObjectName = null;
+        // sOID = null;
+        // return;
     }
         // console.log("showDialogPanel " + showDialogPanel);
 
@@ -1337,7 +1343,7 @@ export function onMouseDown(event) { // on threejs object
             
         // }
         return;
-    } else if (lastRaycastHitObject && lastRaycastHitObject.userData) {
+    } else if (lastRaycastHitObject && lastRaycastHitObject.userData && lastRaycastHitObject.userData.locationData) {
 
             // let sceneObjID = lastRaycastHitObject.userData.sceneObjectID;
         console.log("clicked on active object! " + lastHitObjectName);
@@ -1427,8 +1433,25 @@ export function onMouseDown(event) { // on threejs object
 
                     }
                 }
+                //  let sceneObjectInstance = lastRaycastHitObject.userData.sceneObjectInstance; 
+                //                     if (!sceneObjectInstance) {
+                //                         if (lastRaycastHitObject.parent.parent && lastRaycastHitObject.parent.parent.userData) {
+                //                             sceneObjectInstance = lastRaycastHitObject.parent.parent.userData.sceneObjectInstance;
+                //                         }//hrm
+                //                         if (!sceneObjectInstance) {
+                //                             sceneObjectInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance; //hrm
+                //                         }
+                //                         if (sceneObjectInstance) {
+                //                             sceneObjectInstance.onClick(event);
+                //                         } else {
+                //                             console.log("caint find sceneObjectInstance!");
+                //                         }
                 
-                if (sOID) {
+                //                     } else {
+                //                         sceneObjectInstance.onClick();
+                //                     }
+
+                if (sOID && sceneObjects[sOID]) {
                     console.log("mouseDownOn " + event.target.id + " vs " + sOID);
                     sceneObjects[sOID].onClick(event);
                 }
@@ -1564,6 +1587,8 @@ export function onMouseDown(event) { // on threejs object
                 } else {
                     popup.style.display = "none";
                     startPop.style.display = "none";
+                    lastRaycastHitObject = null;
+                    lastHitObjectName = null;
                     // HideHTMLPopup();
                 }
             }
@@ -1571,9 +1596,13 @@ export function onMouseDown(event) { // on threejs object
             // const popup = document.getElementById("popup");
             popup.style.display = "none";
             startPop.style.display = "none";
+            lastRaycastHitObject = null;
+            lastHitObjectName = null;
+            
             // HideHTMLPopup();
         }
    
+
     if (cameraMode == "Fly") {
         controls.dragToLook = true;
     }

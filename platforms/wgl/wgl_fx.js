@@ -116,9 +116,9 @@ export function CreateSprites (count, size, scale, animation) {
         const particles = new THREE.Sprite( material );
         particles.count = count;
 
-        return particles;
-        scene.add( particles );
 
+        scene.add( particles );
+        return particles;
 }
 
 

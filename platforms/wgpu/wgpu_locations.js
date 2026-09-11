@@ -538,6 +538,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             child.userData.sceneObjectID = sceneObjectID.toString();
                             child.castShadow = true;
                             child.receiveShadow = true;
+                            // activeObjex.push(child);
                             // child.envMapIntensity = 2;
                             }
                         });
@@ -568,6 +569,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         child.userData.objectData = locationObjex[i].objectData;
                         child.userData.objectData.sceneObjectID = sceneObjectID;
                         child.userData.sceneObjectID = sceneObjectID;
+                        //  activeObjex.push(child);
                         // child.name = locationObjex[i].locationData.timestamp;
                         }
                     });

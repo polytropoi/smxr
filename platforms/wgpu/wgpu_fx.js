@@ -231,8 +231,9 @@ export function CreateSprites (count, size, scale, animation) {
         const particles = new THREE.Sprite( material );
         particles.count = count;
 
+        scene.add( particles );
         return particles;
-        scene.add( partic/les );
+
 
 }
 
@@ -294,55 +295,55 @@ export function CreateSprites (count, size, scale, animation) {
     }
 
 
-    class BirdGeometry extends THREE.BufferGeometry {
+    // class BirdGeometry extends THREE.BufferGeometry {
 
-            constructor() {
+    //         constructor() {
 
-                super();
+    //             super();
 
-                const points = 3 * 3;
+    //             const points = 3 * 3;
 
-                const vertices = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
+    //             const vertices = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
 
-                this.setAttribute( 'position', vertices );
+    //             this.setAttribute( 'position', vertices );
 
-                let v = 0;
+    //             let v = 0;
 
-                function verts_push() {
+    //             function verts_push() {
 
-                    for ( let i = 0; i < arguments.length; i ++ ) {
+    //                 for ( let i = 0; i < arguments.length; i ++ ) {
 
-                        vertices.array[ v ++ ] = arguments[ i ];
+    //                     vertices.array[ v ++ ] = arguments[ i ];
 
-                    }
+    //                 }
 
-                }
+    //             }
 
-                const wingsSpan = 20;
+    //             const wingsSpan = 20;
 
-                // Body
-                verts_push(
-                    0, 0, - 20,
-                    0, - 8, 10,
-                    0, 0, 30
-                );
+    //             // Body
+    //             verts_push(
+    //                 0, 0, - 20,
+    //                 0, - 8, 10,
+    //                 0, 0, 30
+    //             );
 
-                // Left Wing
-                verts_push(
-                    0, 0, - 15,
-                    - wingsSpan, 0, 5,
-                    0, 0, 15
-                );
+    //             // Left Wing
+    //             verts_push(
+    //                 0, 0, - 15,
+    //                 - wingsSpan, 0, 5,
+    //                 0, 0, 15
+    //             );
 
-                // Right Wing
-                verts_push(
-                    0, 0, 15,
-                    wingsSpan, 0, 5,
-                    0, 0, - 15
-                );
+    //             // Right Wing
+    //             verts_push(
+    //                 0, 0, 15,
+    //                 wingsSpan, 0, 5,
+    //                 0, 0, - 15
+    //             );
 
-                this.scale( 0.2, 0.2, 0.2 );
+    //             this.scale( 0.2, 0.2, 0.2 );
 
-            }
+    //         }
 
-        }
+    //     }

@@ -15,7 +15,7 @@ import { AddDynamicBody, getPlayerBody, kinematicBodies } from './wgpu_physics.j
 import { uiMode, ShowHTMLPopup, HideHTMLPopup, popup } from './wgpu_ui.js';
 // import { equippedRigidbody } from './three_physics.js';
 
-export let sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
+export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
 
 export let equippedRigidbody;
 export let playerRigidbody;
