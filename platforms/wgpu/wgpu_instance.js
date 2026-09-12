@@ -347,6 +347,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
              
             }
             if (locData.markerType == "character") {
+                instancedMeshes[s].instanceMatrix.needsUpdate = true;
                 instancedAgentMeshes[locData.timestamp] = instancedMeshes[s];
             }
             // console.log("instancedAgentMeshes " + JSON.stringify(instancedAgentMeshes));

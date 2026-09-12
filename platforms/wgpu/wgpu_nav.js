@@ -1069,7 +1069,9 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                                 instancedPosition.set(agent.position.x, agent.position.y, agent.position.z);
                                 instancedQuaternion.set(agent.quaternion.x, agent.quaternion.y, agent.quaternion.z, agent.quaternion.w);
                                 instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(this.scale, this.scale, this.scale));
+                                // console.log("instancedMatrix position " + instancedPosition + " scale " + this.scale );
                                 instancedAgentMeshes[timestamp].setMatrixAt(instanceIndex, instancedMatrix);
+                                 instancedAgentMeshes[timestamp].instanceMatrix.needsUpdate = true;
                             }
                         }
                         // if (this.targetQuaternion) {
@@ -1122,12 +1124,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     // }
                 }
             } else {
-                // if (this.isSlerping) {
-                //     if (this.targetQuaternion) {
-                //         agent.quaternion.slerp(this.targetQuaternion, 3);
-                    
-                //     }
-                // }
+                
                 camera.updateMatrixWorld(true);
                 camera.getWorldPosition(this.cameraWorldPosition);
                 this.object.lookAt(this.cameraWorldPosition);

@@ -404,7 +404,7 @@
 			if (settings.hasPrimaryAudio) {
 				LoadPrimaryAudioHowl();
 			}
-			if (settings.sceneTags.includes("stars")) {
+			if (settings.sceneTags.includes("stars")) { //um..
 				InstancedSprites(1000, 2, 100, null);
 			}
 			
@@ -655,10 +655,10 @@
 			if (stats) {
 				stats.update();
 			}
-			if (animatedSprites.length) {
-				animatedSprites.forEach(a =>
-					a.update(time));
-			}
+			// if (animatedSprites.length) { //nope, uses TSL now!
+			// 	animatedSprites.forEach(a =>
+			// 		a.update(time));
+			// }
 			if (animationMixers.length) {
 				animationMixers.forEach(m => 
 					m.update(delta));
@@ -671,8 +671,8 @@
 			// interactionManagers.forEach(i => 
 			// 		i.update());
 			// }
-			if (interactionManager) {
-				// console.log("tryna udpate interactionmanager");
+			if (interactionManager) { //hic fu needs to bake...
+				// console.log("tryna udpate interactionmanager"); 
 				interactionManager.update();
 			}
 

@@ -5,7 +5,8 @@ import { settings } from '../../../connect/settings.js';
 
 import { scene } from './wgpu_main.mjs';
 
-import { spritesheetUV, uv, texture, billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, add, vec2, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
+import { spritesheetUV, uv, texture, color, billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, add, vec2, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
+
 import { activeObjex } from './wgpu_locations.js';
 
 
@@ -143,7 +144,7 @@ export function InstancedSprites(count, size, scale, animation, type) {
 
         // 3. Create the TSL node for calculating UVs
         // spritesheetUV( countNode, uvNode, frameNode )
-        const animatedUV = spritesheetUV( //sweet
+        const animatedUV = spritesheetUV( //sweet // this one uses custom spriteSheetUV method to vary start times
             vec2(columns, rows), 
             uv(), 
             time.mul(animationSpeed)
@@ -157,6 +158,7 @@ export function InstancedSprites(count, size, scale, animation, type) {
         map.wrapT = THREE.RepeatWrapping;
         const spritematerial = new THREE.SpriteNodeMaterial( { sizeAttenuation: true, alphaTest: 0.5 } );
         spritematerial.colorNode = texture(map, spriteSheetUV());
+
         // spritematerial.color.setHSL( 1.0, 0.3, 0.7, THREE.SRGBColorSpace );
         spritematerial.positionNode = instancedBufferAttribute( positionAttribute );
 
@@ -237,113 +239,85 @@ export function CreateSprites (count, size, scale, animation) {
 
 }
 
+    //nah, use TSL version below, no need for update method
+    // export function CreateAnimatedSprite_(name, scale, speed, rows, cols) {
 
+    //     const frameDuration = speed; // milliseconds per frame
+        
+    //     const totalFrames = rows * cols;
+    //     const textureLoader = new THREE.TextureLoader();
+    //     const url = document.getElementById(name).src;
+    //     const spriteMap = textureLoader.load(url, (texture) => {
+    //         // Configure texture for sprite sheet animation
+    //         texture.wrapS = THREE.RepeatWrapping;
+    //         texture.wrapT = THREE.RepeatWrapping;
+    //         // Set the repeat to show only one frame initially (1/cols, 1/rows)
+    //         texture.repeat.set(1 / cols, 1 / rows);
+    //     });
+
+    //     // 4. Create the sprite material and object
+    //     // const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, transparent: true });
+    //             const material = new THREE.SpriteNodeMaterial( { 
+    //                 sizeAttenuation: true,  
+    //                 map: spriteMap, 
+    //                 transparent: true, 
+    //                 // alphaToCoverage: true, 
+    //                 // alphaMap: spriteMap, 
+    //                 // alphaTest: 0.01, 
+    //                 // depthWrite: false, 
+    //                 // depthTest: false
+    //                 } );
+    //     sprite = new THREE.Sprite(material);
+    //     sprite.scale.set(scale, scale, 1); // Scale the sprite up
+
+        
+    //     function update (timestamp) {
+    //         // timestamp = performance.now()
+    //         // timestamp = time();
+    //         // 5. Animation logic
+    //         if (timestamp - lastFrameTime > frameDuration) {
+    //             // Calculate current frame index and position in the texture atlas
+    //             const frameX = currentFrame % cols;
+    //             const frameY = Math.floor(currentFrame / cols);
+
+    //             // Update the texture offset (top-left corner of the frame)
+    //             // Y offset is inverted in Three.js textures
+    //             sprite.material.map.offset.x = frameX / cols;
+    //             sprite.material.map.offset.y = (rows - 1 - frameY) / rows;
+
+    //             currentFrame = (currentFrame + 1) % totalFrames;
+    //             lastFrameTime = timestamp;
+    //         }
+    //     }
+
+    //     sprite.userData.update = update();
+    //     // scene.add(sprite);
+    //     return {sprite, update};
+    //     // scene.add(sprite);
+    // }
+
+
+    
     export function CreateAnimatedSprite(name, scale, speed, rows, cols) {
 
-        const frameDuration = speed; // milliseconds per frame
-        
-        const totalFrames = rows * cols;
-        const textureLoader = new THREE.TextureLoader();
+        const material = new THREE.SpriteNodeMaterial({transparent: true, sizeAttenuation: true, alphaTest: 0.1 });
+
+        const loader = new THREE.TextureLoader();
         const url = document.getElementById(name).src;
-        const spriteMap = textureLoader.load(url, (texture) => {
-            // Configure texture for sprite sheet animation
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            // Set the repeat to show only one frame initially (1/cols, 1/rows)
-            texture.repeat.set(1 / cols, 1 / rows);
-        });
+        const spriteTexture = loader.load(url);
 
-        // 4. Create the sprite material and object
-        // const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, transparent: true });
-                const material = new THREE.SpriteNodeMaterial( { 
-                    sizeAttenuation: true,  
-                    map: spriteMap, 
-                    transparent: true, 
-                    // alphaToCoverage: true, 
-                    // alphaMap: spriteMap, 
-                    // alphaTest: 0.01, 
-                    // depthWrite: false, 
-                    // depthTest: false
-                    } );
-        sprite = new THREE.Sprite(material);
-        sprite.scale.set(scale, scale, 1); // Scale the sprite up
+        const spriteGrid = vec2(cols, rows); 
 
-        
-        function update (timestamp) {
-            // timestamp = performance.now()
-            // timestamp = time();
-            // 5. Animation logic
-            if (timestamp - lastFrameTime > frameDuration) {
-                // Calculate current frame index and position in the texture atlas
-                const frameX = currentFrame % cols;
-                const frameY = Math.floor(currentFrame / cols);
+        const currentFrame = time.mul(speed); 
 
-                // Update the texture offset (top-left corner of the frame)
-                // Y offset is inverted in Three.js textures
-                sprite.material.map.offset.x = frameX / cols;
-                sprite.material.map.offset.y = (rows - 1 - frameY) / rows;
-
-                currentFrame = (currentFrame + 1) % totalFrames;
-                lastFrameTime = timestamp;
-            }
-        }
-
-        sprite.userData.update = update();
-        // scene.add(sprite);
-        return {sprite, update};
-        // scene.add(sprite);
+        const animatedUV = spritesheetUV(spriteGrid, uv(), currentFrame); //nice
+        const tintColor = color(settings.sceneColor1Alt);
+        material.colorNode = texture(spriteTexture, animatedUV).mul(tintColor);
+        // material.alpha = texture(spriteTexture.a, animatedUV);
+       
+        const sprite = new THREE.Sprite( material );
+        sprite.scale.set(scale, scale, 1);
+        return sprite;
     }
-
-
-    // class BirdGeometry extends THREE.BufferGeometry {
-
-    //         constructor() {
-
-    //             super();
-
-    //             const points = 3 * 3;
-
-    //             const vertices = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
-
-    //             this.setAttribute( 'position', vertices );
-
-    //             let v = 0;
-
-    //             function verts_push() {
-
-    //                 for ( let i = 0; i < arguments.length; i ++ ) {
-
-    //                     vertices.array[ v ++ ] = arguments[ i ];
-
-    //                 }
-
-    //             }
-
-    //             const wingsSpan = 20;
-
-    //             // Body
-    //             verts_push(
-    //                 0, 0, - 20,
-    //                 0, - 8, 10,
-    //                 0, 0, 30
-    //             );
-
-    //             // Left Wing
-    //             verts_push(
-    //                 0, 0, - 15,
-    //                 - wingsSpan, 0, 5,
-    //                 0, 0, 15
-    //             );
-
-    //             // Right Wing
-    //             verts_push(
-    //                 0, 0, 15,
-    //                 wingsSpan, 0, 5,
-    //                 0, 0, - 15
-    //             );
-
-    //             this.scale( 0.2, 0.2, 0.2 );
-
-    //         }
-
-    //     }
+    
+        
