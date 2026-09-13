@@ -39,7 +39,7 @@
 
 	import { getVideo, getHandLandmarker } from './wgpu_vision.js';
 
-	import { lightMods, modLights, InitSceneLights } from './wgpu_lights.js';
+	import { lightMods, modLights, InitSceneLights, clusteredLighting, InitClusteredLights } from './wgpu_lights.js';
 
 	import { InitSurface, instancedModels, InstanceOnSurface, surface, InstanceWithPattern, physicsInstancedMeshes, physicsInstancedBodies } from './wgpu_instance.js';
 
@@ -131,6 +131,8 @@
 		loadingHeader = "<h2>" +settings.sceneTitle+ "</h2>";
 		StartPopup(loadingHeader, 'Loading....', false);
 		await renderer.init(); 
+		
+
 		renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setPixelRatio( 2.0 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
@@ -142,6 +144,10 @@
 		document.body.appendChild( renderer.domElement );
 
 		// cameraMode = settings.sceneCameraMode;
+		if (settings.sceneTags.includes("clustered lights")) {
+			
+			renderer.lighting = InitClusteredLights();
+		}
 		if (settings.sceneCameraFOV) {
 			cameraFOV = settings.sceneCameraFOV;
 		}
