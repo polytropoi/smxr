@@ -51,7 +51,7 @@
 	
 	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, GetAvailableScenesData } from './wgpu_media.js';
 	
-	import { equippedObjectOnLoad, LoadSceneInventory } from './wgpu_inventory.js';
+	import { equippedObjectOnLoad, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 	import { splatObjex, InitSplats } from './wgpu_splats.js';
 
 	export let scene;
@@ -146,7 +146,7 @@
 		// cameraMode = settings.sceneCameraMode;
 		if (settings.sceneTags.includes("clustered lights")) {
 			
-			renderer.lighting = InitClusteredLights();
+			renderer.lighting = InitClusteredLights(); //oooh yeah
 		}
 		if (settings.sceneCameraFOV) {
 			cameraFOV = settings.sceneCameraFOV;
@@ -196,6 +196,7 @@
 			const eventDetails = {};
 			eventDetails.objectID = equippedObjectOnLoad;
 			eventDetails.onLoad = true;
+			console.log('gots something to equip on load ' + eventDetails.objectID);
 			EquipInventoryCheck(eventDetails);
 			// equip_inventory_object_event.details = eventDetails;
 			// eventEl.dispatchEvent(equip_inventory_object_event);

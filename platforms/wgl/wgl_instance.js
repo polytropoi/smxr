@@ -308,6 +308,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         for (let s = 0; s < instancedMeshes.length; s++) {
             instancedMeshes[s].castShadow = true;
             instancedMeshes[s].receiveShadow = true;
+            instancedMeshes[s].frustumCulled = false;
             
             if (locData.locationTags && locData.locationTags.includes("active")) {
                 activeObjex.push(instancedMeshes[s]);
@@ -412,6 +413,7 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
         for (let s = 0; s < instancedMeshes.length; s++) {
             instancedMeshes[s].castShadow = true;
             instancedMeshes[s].receiveShadow = true;
+            instancedMeshes[s].frustumCulled = false;
             
             if (locationData && locationData.locationTags && locationData.locationTags.includes("active")) {
                 activeObjex.push(this.instancedMeshes[s]);

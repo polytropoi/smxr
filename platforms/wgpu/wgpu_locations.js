@@ -20,7 +20,7 @@ import { convertGltfToNodeMaterial, GetAvailableScenesData, InitLocationModelVid
 
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from './wgpu_nav.js';
-import { instance, modelViewProjection, color, float, range } from 'three/tsl';
+import { instance, modelViewProjection, color, float, range, modelScale } from 'three/tsl';
 import { UpdateModdedLocations, mods } from '../../connect/settings.js';
 import { eventEl } from '../../connect/events.js';
 
@@ -212,9 +212,13 @@ export async function InitLocations() {
                                                                                 
                                         } else { // regular meshes
                                             let isActive = false;             
-                                            if (locationData[i].markerType == "gate" || (locationData.locationTags && locationData.locationTags.includes("active"))) {
+
+                                            if (locationData.locationTags && locationData.locationTags.includes("active")) {
                                                 isActive = true;
                                             } 
+                                            if (locationData[i].markerType == "gate") {
+                                                GetAvailableScenesData();
+                                            }
                                             const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
                                             model = modelData.model;
                                             console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
@@ -394,6 +398,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
     if (locationObjex.length) {
         for (let i = 0; i < locationObjex.length; i++) {
 
+            console.log("gotsa location object " + JSON.stringify(locationObjex[i]));
 
             // const modelData = await LoadLocationModel(locationObjex[i].modelData.modelURL, locationObjex[i].locationData);
             const modelData = await LoadModel(locationObjex[i].modelData.modelURL);
@@ -551,12 +556,16 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     }
                 } else {
                     // const clonedObject = model.clone();
-
+                    console.log(locationObjex[i].locationData.xscale + " scale loading single object " + locationObjex[i].objectData.name +  " " + locationObjex[i].locationData.x + " " + locationObjex[i].locationData.y + " " +locationObjex[i].locationData.z);
                     const sceneObjectID = locationObjex[i].locationData.timestamp;
                     locationObjex[i].objectData.sceneObjectID = sceneObjectID;
-                    model.scale.set(locationObjex[i].locationData.xscale,locationObjex[i].locationData.yscale,locationObjex[i].locationData.zscale);
+                    let modelscale = 1;
+                    if (locationObjex[i].locationData.yscale) {
+                        modelscale = locationObjex[i].locationData.yscale;
+                    }
+                    model.scale.set(modelscale,modelscale,modelscale);
                     model.position.set(locationObjex[i].locationData.x,locationObjex[i].locationData.y,locationObjex[i].locationData.z);
-                    scene.add(model);
+                   
                      model.castShadow = true;
                         model.receiveShadow = true;
                     model.visible = true;
@@ -575,6 +584,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     });
                     const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null, false);
                     sceneObjects[sceneObjectID.toString()] = sceneObject;
+                     scene.add(model);
                     // sceneObjectsArray.push(locationObjex[i].data)
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
                         // sceneObjects.push(sceneObject);

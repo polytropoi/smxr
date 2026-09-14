@@ -1071,7 +1071,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                                 instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(this.scale, this.scale, this.scale));
                                 // console.log("instancedMatrix position " + instancedPosition + " scale " + this.scale );
                                 instancedAgentMeshes[timestamp].setMatrixAt(instanceIndex, instancedMatrix);
-                                 instancedAgentMeshes[timestamp].instanceMatrix.needsUpdate = true;
+                                instancedAgentMeshes[timestamp].instanceMatrix.needsUpdate = true;
                             }
                         }
                         // if (this.targetQuaternion) {

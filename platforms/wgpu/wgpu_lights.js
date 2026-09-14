@@ -26,7 +26,7 @@ export function InitClusteredLights () {
     return clusteredLighting;
 }
 export function InitSceneLights () {
-            sunLight = new THREE.DirectionalLight( settings.sceneColor1, 2 );
+            sunLight = new THREE.DirectionalLight( settings.sceneColor1, 1 );
             sunLight.castShadow = true;
             // sunLight.shadow.mapSize.width = 4096;
             // sunLight.shadow.mapSize.height = 4096;
@@ -46,7 +46,7 @@ export function InitSceneLights () {
             sunLight.position.set( 50, 50, 50 );
     
             waterAmbientLight = new THREE.HemisphereLight( settings.sceneColor3, settings.sceneColor4, .5 );
-            skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, settings.sceneColor3, 1.5 );
+            skyAmbientLight = new THREE.HemisphereLight( settings.sceneColor2, settings.sceneColor3, .5 );
     
             scene.add( sunLight );
             scene.add( skyAmbientLight );

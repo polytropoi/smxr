@@ -93,6 +93,7 @@ export class SceneObject { //things that might have models and actions and fancy
         this.isNavAgent = isNavAgent;
 
         if (isEquipped) {
+            
             this.objectParent = objectParent;
             // this.isEquipped = true;
             this.setEquippedRigidbody();
@@ -114,7 +115,7 @@ export class SceneObject { //things that might have models and actions and fancy
             if (this.objectData.actions[a].actionType.toLowerCase() == "onload") {
                 // this.hasSelectAction = true;
                 this.loadAction = this.objectData.actions[a];
-                console.log("object has loadAction! " + this.objectData.name);
+                console.log("object has loadAction! " + this.objectData.name + " isEquipped " + isEquipped + " "  + JSON.stringify(this.loadAction));
             }
             if (this.objectData.actions[a].actionType.toLowerCase() == "select") {
                 this.hasSelectAction = true;
@@ -199,7 +200,7 @@ export class SceneObject { //things that might have models and actions and fancy
        
     onClick (event) {
         lastEvent = event;
-        console.log("clicked sceneObject with actions " + JSON.stringify(this.objectData.actions));
+        console.log("clicked sceneObject " + this.objectData.name + " with actions " + JSON.stringify(this.objectData.actions));
            
         // if (textData != null && textData != undefined && textData != "" && textData != "none") {
         //     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
