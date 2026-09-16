@@ -62,7 +62,7 @@ export function create_Light(locationData) {
     lightMods.push(light);
 }
 
-export function CreateLight(locationData) {
+export function CreateLight(locationData, parent) {
 
     if (!locationData.yscale) {
         locationData.yscale = 1;
@@ -72,13 +72,21 @@ export function CreateLight(locationData) {
         const modValue = locationData.yscale; 
         // if (modvalue > )
         const light = new THREE.PointLight( settings.sceneColor1Alt, parseFloat(locationData.yscale) * 8, parseFloat(locationData.yscale) * 16);
-        light.position.set(locationData.x, locationData.y, locationData.z);
-        scene.add(light);
         
+        
+        scene.add(light);
+        if (parent) {
+            parent.attach(light);    
+        }
+        light.position.set(locationData.x, locationData.y, locationData.z);
+
         const animatedSprite = CreateAnimatedSprite("fireanim1", locationData.yscale, 50, 6, 6);
         scene.add(animatedSprite);
+        
+        if (parent) {
+            parent.attach(animatedSprite);    
+        }
         animatedSprite.position.set(locationData.x, locationData.y, locationData.z);
-
         if (!clusteredLighting) {
             const flickerIntensity = uniform(1.0);
 

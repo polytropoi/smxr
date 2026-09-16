@@ -69,6 +69,7 @@ export async function LoadModel(url) {
     }
 }
 
+let localDataReady = false;
 // export function createDefaultNavmesh() {
 //     if (!navmesh) {
 //         const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
@@ -131,7 +132,7 @@ export function createDefaultNavmesh(locData) {
 }
 
 export async function InitLocations() {
-    eventEl.addEventListener('data-event', LoadLocalMods);
+    eventEl.addEventListener('data-event', LocalDataReady);
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction
     if (modelsDataEl) {
         const theModelsData = modelsDataEl.getAttribute('data-models');
@@ -344,6 +345,7 @@ export async function InitLocations() {
                 
                 await LoadLocationObjex(); 
                 InitSystems();
+                LoadLocalMods();
                 
             }
         })();
@@ -366,23 +368,32 @@ function getObjectsByPartialName(parent, partialName) {
   return results;
 }
 
-function LoadLocalMods(event) {
-    if (mods && mods.locations && mods.locations.length) {
+function LocalDataReady () {
+    console.log("localData is ready");
+    localDataReady = true;
+}
+
+export function LoadLocalMods(event) {
+    if (localDataReady && mods && mods.locations && mods.locations.length) {
         console.log("looking for location localMods + " + mods.locations.length);
         for (let i = 0; i < mods.locations.length; i++) {
+            console.log("Looking for localmod for object3D named " + mods.locations[i].timestamp + JSON.stringify(mods));
             let foundObject = scene.getObjectByName(mods.locations[i].timestamp);
             if (!foundObject) {
                 const foundObjex = getObjectsByPartialName(scene, mods.locations[i].timestamp);
-                console.log("found " + foundObjex.length + " objex with timestamp " + mods.locations[i].timestamp);
+                console.log("localMod found " + foundObjex.length + " objex with timestamp " + mods.locations[i].timestamp);
                 foundObject = foundObjex[0];
             }
 
             if (foundObject) {
                 // Object was found, you can modify it here
                 // foundObject.material.color.set(0xff0000);
+                console.log("localmod object found, tryna set position " + mods.locations[i].x + " " +  mods.locations[i].y + " " +  mods.locations[i].z )
                 foundObject.position.set(mods.locations[i].x, mods.locations[i].y, mods.locations[i].z );
+                foundObject.rotation.set(mods.locations[i].eulerx, mods.locations[i].eulery, mods.locations[i].eulerz );
+                foundObject.scale.set(mods.locations[i].xscale, mods.locations[i].yscale, mods.locations[i].zscale );
             } else {
-                console.log("Object not found");
+                console.log("localmod Object not found");
             }
         }
     }
@@ -535,6 +546,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         clonedObject.receiveShadow = true;
                         activeObjex.push(clonedObject);
                         clonedObject.userData.sceneObjectID = sceneObjectID;
+                        clonedObject.userData.locationData = locationObjex[i].locationData;
                         clonedObject.traverse(function (child) { 
                         if (child.isMesh) {
                             child.userData.locationData = locationObjex[i].locationData;
@@ -570,6 +582,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         model.receiveShadow = true;
                     model.visible = true;
                     model.userData.sceneObjectID = sceneObjectID;
+                    model.userData.locationData = locationObjex[i].locationData;
                     model.name = locationObjex[i].locationData.timestamp;
                     activeObjex.push(model);
                     model.traverse(function (child) { 

@@ -564,20 +564,7 @@
 		}
 		StartPopup(loadingHeader, 'Loading Agents....', false);
 		await LoadKinematicAgentMeshes();
-		// StartPopup(loadingHeader, 'Ready!', true);
-				
-		// const startButton = startPop.querySelector("#startButton");
-		// if (startButton) {
-		// 	console.log("startButton found!");
-		// 	// const startButton = document.getElementById('popup_yesButton');
-		// 	startButton.addEventListener('pointerdown', StartButton);
-				
-		// } else {
-		// 	console.log("startButton not found!");
-		// }
-
-
-
+		
 		if (splatObjex.length) {
 			// if (splatObjex.length) {
 				// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Spark Lib....<h4>";
@@ -607,26 +594,9 @@
 			}
 		}
 
-		// GetAvailableScenesData();
-
 	} //end init systems
 
-	// export function createDefaultNavmesh() {
-	// 	const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
-	// //   planeGeometry.rotation.x = Math.PI / 2 * -1;
-	// 	const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
-	// 	let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
-		
-	// 	// navmeshObject.position.set(0,0,0);
-	// 	// navmeshObject.scale.set(1,1,1);
-	// 	navmeshObject.rotation.x = Math.PI / 2;
-	// 	navmeshObject.updateMatrixWorld();
-	// 	navmesh = navmeshObject;
-		
-	// 	scene.add(navmeshObject);
-	// }
-
-
+	
 	export function togglePostProcessing () { //call after physics is done, elsewise... :(
 
 		doPostProcessing = !doPostProcessing;
@@ -635,10 +605,30 @@
 
 
 	function CollisionStart(h1, h2) {
-		// console.log("Collision started between colliders " + colliders[h1] + " and " + colliders[h2]);
+		
+
 		if (colliders[h1]) {
-			if (!colliders[h2].includes("agent")) {
-				console.log("player hit trigger " + JSON.stringify(locations[colliders[h2]]));
+			if (colliders[h2].includes("agent")) {
+			console.log("Collision started between colliders " + h1 + " and " + h2);
+				// console.log("agent " + JSON.stringify(locations[colliders[h2]]));
+
+			    world.narrowPhase.contactPair(h1, h2, (manifold, flipped) => {
+      
+					// Get the collision normal vector in world space
+					const worldNormal = manifold.normal(); // {x, y, z}
+					
+					// Get the total number of contact points inside this manifold
+					const numPoints = manifold.numPoints(); 
+
+					for (let i = 0; i < numPoints; i++) {
+						// Retrieve individual contact point locations in world-space coordinates
+						const contactPoint = manifold.solverContactPoint(i); // {x, y, z}
+						const penetrationDepth = manifold.contactDist(i);
+
+						console.log(`Collision Point ${i}:`, contactPoint);
+						console.log(`Penetration Depth:`, penetrationDepth);
+					}
+        		});
 				// PlayTriggerWithTag('hit');
 			}
 			
@@ -755,9 +745,62 @@
 				// Pass eventQueue to collect events
 
 				// Handle collision events
+				// eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
+				// 	console.log(`Sensor ${handle1} intersection with ${handle2}: ${intersecting}`);
+				// });
 				eventQueue.drainCollisionEvents((handle1, handle2, started) => {
 					if (started) {
-						CollisionStart(handle1, handle2);
+						console.log("collision " + handle1 + " " + handle2);
+						world.narrowPhase.contactPair(handle1, handle2, (manifold, flipped) => {
+							// 3. Get the number of contact points
+							let numContacts = manifold.numContacts();
+							if (numContacts > 0) {
+								// Get the first contact point data
+								let contactPoint = manifold.contactPoint(0);
+								
+								// The position is given in world-space coordinates
+								console.log("Collision World Position:", contactPoint.point);
+							}
+						});
+						// CollisionStart(handle1, handle2);
+							// console.log("collision " + handle1 + " " + handle2);
+							// const collider1 = world.getCollider(handle1);
+							// const collider2 = world.getCollider(handle2);
+
+							// // 2. Query the world for the detailed contact manifold data
+							// world.contactPair(collider1, collider2, (manifold, flipped) => {
+
+							// 	console.log("contact points " + manifold.numPoints());
+							// for (let i = 0; i < manifold.numPoints(); i++) {
+							// const point = manifold.point(i);
+
+							// // Rapier returns contact points in LOCAL space by default.
+							// // We multiply them by the collider's world transform to get Three.js positions.
+							// const localPoint = point.localP1; // or localP2 depending on 'flipped'
+							
+							// // Convert to a Three.js Vector3 to use in your visual scene
+							// const worldPosition = new THREE.Vector3(localPoint.x, localPoint.y, localPoint.z);
+							// worldPosition.applyMatrix4(getColliderWorldMatrix(collider1));
+
+							// console.log("Collision world position:", worldPosition);
+						// }
+						//  world.contactPair(handle1, handle2, (manifold, flipped) => {
+							
+							// Get the collision normal vector in world space
+								// const worldNormal = manifold.normal(); // {x, y, z}
+								
+								// // Get the total number of contact points inside this manifold
+								// const numPoints = manifold.numPoints(); 
+
+								// for (let i = 0; i < numPoints; i++) {
+								// 	// Retrieve individual contact point locations in world-space coordinates
+								// 	const contactPoint = manifold.solverContactPoint(i); // {x, y, z}
+								// 	const penetrationDepth = manifold.contactDist(i);
+
+								// 	console.log(`Collision Point ${i}:`, contactPoint);
+								// 	console.log(`Penetration Depth:`, penetrationDepth);
+								// }
+						// });
 						
 						// You can add logic here, e.g., change color of the collided objects
 					} else {
@@ -834,6 +877,17 @@
 		// water.material.uniforms['time'].value += 1 / 60;
 	}
 
+	function getColliderWorldMatrix(collider) {
+		const pos = collider.translation();
+		const rot = collider.rotation();
+		
+		const matrix = new THREE.Matrix4();
+		const position = new THREE.Vector3(pos.x, pos.y, pos.z);
+		const quaternion = new THREE.Quaternion(rot.x, rot.y, rot.z, rot.w);
+		
+		matrix.compose(position, quaternion, new THREE.Vector3(1, 1, 1));
+		return matrix;
+	}
 
 
 ////////// global events	

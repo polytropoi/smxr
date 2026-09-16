@@ -351,7 +351,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 instancedAgentMeshes[locData.timestamp] = instancedMeshes[s];
             }
             // console.log("instancedAgentMeshes " + JSON.stringify(instancedAgentMeshes));
-            
+            instancedMeshes[s].frustumCulled = false;
             
             // activeObjex.push(instancedMeshes[s]);
             scene.add(instancedMeshes[s]);
@@ -452,7 +452,7 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
                 // this.iMesh.setColorAt( this.instanceId, this.highlightColor.setHex( Math.random() * 0xffffff ) );
                 // this.iMesh.instanceColor.needsUpdate = true;
             // }
-            
+            instancedMeshes[s].frustumCulled = false;
             scene.add(instancedMeshes[s]);
             // physicsInstances = this.instancedMeshes[s];
         }

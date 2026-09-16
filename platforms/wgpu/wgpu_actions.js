@@ -10,6 +10,7 @@ import { settings } from '../../../connect/settings.js';
 import { userData, room } from '../../../connect/connect.js';
 import { locationObjex } from './wgpu_locations.js';
 import { EquipObject } from './wgpu_inventory.js';
+import { CreateLight } from './wgpu_lights.js';
 
 import { AddDynamicBody, getPlayerBody, kinematicBodies } from './wgpu_physics.js';
 import { uiMode, ShowHTMLPopup, HideHTMLPopup, popup } from './wgpu_ui.js';
@@ -78,7 +79,6 @@ export class SceneObject { //things that might have models and actions and fancy
     constructor(object, objectData, isEquipped, objectParent, isNavAgent) {
 
         
-
         this.object = object;
         this.objectData = objectData;
         this.sceneObjectID = objectData.sceneObjectID;
@@ -101,6 +101,16 @@ export class SceneObject { //things that might have models and actions and fancy
         // this.loadAction;
         // this.hasSelectAction = false;
         // this.selectAction;
+        if (this.objectData.light) {
+            let locationData = {};
+            locationData.locationTags = ["fire"];
+            locationData.yscale = 1;
+            locationData.x = 0;
+            locationData.y = .75;
+            locationData.z = 0;
+
+            CreateLight(locationData, object);
+        }
 
         if (this.objectData.actions != undefined && this.objectData.actions.length > 0) {
       
@@ -115,7 +125,7 @@ export class SceneObject { //things that might have models and actions and fancy
             if (this.objectData.actions[a].actionType.toLowerCase() == "onload") {
                 // this.hasSelectAction = true;
                 this.loadAction = this.objectData.actions[a];
-                console.log("object has loadAction! " + this.objectData.name + " isEquipped " + isEquipped + " "  + JSON.stringify(this.loadAction));
+                console.log("object has loadAction! " + JSON.stringify(this.objectData) + " isEquipped " + isEquipped + " "  + JSON.stringify(this.loadAction));
             }
             if (this.objectData.actions[a].actionType.toLowerCase() == "select") {
                 this.hasSelectAction = true;
@@ -498,8 +508,10 @@ export class SceneObject { //things that might have models and actions and fancy
             console.log("tryna equip from scene : " + data.sceneObjectID);
             //  EquipObject(this.objectData);
              if (thisObject.parent) {
+                console.log("equipobject removing from parent");
                 thisObject.parent.remove(thisObject);
             } else {
+                console.log("equipobject removing from scene");
                 scene.remove(thisObject);
             }
             this.object = EquipObject(this.objectData);

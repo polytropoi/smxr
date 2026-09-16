@@ -11,7 +11,6 @@ import { availableScenesData, ReturnTaggedPictures, sceneTextController, trigger
 
 import { ActionSwitch, SetPlayerRigidbody, InstancedActionClick, sceneObjects } from './wgpu_actions.js';
 
-
 import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './wgpu_locations.js';
 
 import { scene, cameraMode, renderer, clock, selectedObjects, sceneIsReady } from './wgpu_main.mjs';
@@ -169,10 +168,13 @@ function SetInputMode () {
 
 function InitTransformControls () {
     let objWorldPosition = new THREE.Vector3();
+    let objWorldQuaternion = new THREE.Quaternion();
+    let objWorldRotationEuler = new THREE.Euler();
+    let objWorldScale = new THREE.Vector3();
     transformControl = new TransformControls(camera, renderer.domElement);
     scene.add(transformControl.getHelper());
 
-    transformControl.addEventListener('objectChange', () => {
+    transformControl.addEventListener('objectChange', (event) => {
         // const obj = transformControl.object;
         // obj.getWorldPosition(objWorldPosition);
         // console.log(obj.userData.locationData.name + ' New position: ' + JSON.stringify(obj.position) + " vs " + JSON.stringify(objWorldPosition) );
@@ -181,29 +183,58 @@ function InitTransformControls () {
         // obj.userData.locationData.z = objWorldPosition.z;
 
 
-        // console.log(localData)
+        // console.log(event.value);
 
 
     });
 
     transformControl.addEventListener('dragging-changed', (event) => {
-        console.log("drageve3nt: " + event.value );
+        console.log("dragevent: " + event.value + " obj " + transformControl.object.name);
         // console.log(JSON.stringify(localData));
         if (!event.value) { //drag is done
-            const obj = transformControl.object;
+
+            
+            let obj = transformControl.object;
             obj.getWorldPosition(objWorldPosition);
-            console.log(obj.userData.locationData.name + ' New position: ' + JSON.stringify(obj.position) + " vs " + JSON.stringify(objWorldPosition) );
+            obj.getWorldQuaternion(objWorldQuaternion); 
+            obj.getWorldScale(objWorldScale);
+            objWorldRotationEuler.setFromQuaternion(objWorldQuaternion);
+
+            if (obj.parent) {
+                obj = obj.parent;
+            } 
+            // obj.getWorldPosition(objWorldPosition);
+            console.log(JSON.stringify(obj.userData) + ' New position: ' + JSON.stringify(obj.position) + " vs " + JSON.stringify(objWorldPosition) + " rotation " + JSON.stringify(objWorldRotationEuler) );
             obj.userData.locationData.x = objWorldPosition.x;
             obj.userData.locationData.y = objWorldPosition.y;
             obj.userData.locationData.z = objWorldPosition.z;
+
+            obj.userData.locationData.xrot = objWorldRotationEuler.x;
+            obj.userData.locationData.yrot = objWorldRotationEuler.y;
+            obj.userData.locationData.zrot = objWorldRotationEuler.z;
+
+
+            obj.userData.locationData.xscale = objWorldScale.x;
+            obj.userData.locationData.yscale = objWorldScale.y;
+            obj.userData.locationData.zscale = objWorldScale.z;
+
+            
             for (let i = 0; i < localData.locations.length; i++) {
                 if (localData.locations[i].timestamp == obj.userData.locationData.timestamp) {
                     console.log("GOTSA MATCH ON THE TRANSFORM OBJECT! " + JSON.stringify(obj.userData.locationData));
                     localData.locations[i].x = objWorldPosition.x;
                     localData.locations[i].y = objWorldPosition.y;
                     localData.locations[i].z = objWorldPosition.z;
+
+                    localData.locations[i].eulerx = objWorldRotationEuler.x;
+                    localData.locations[i].eulery = objWorldRotationEuler.y;
+                    localData.locations[i].eulerz = objWorldRotationEuler.z;
+
+                    localData.locations[i].xscale = objWorldScale.x;
+                    localData.locations[i].yscale = objWorldScale.y;
+                    localData.locations[i].zscale = objWorldScale.z;
                     localData.locations[i].hasLocalData = true;
-                    SaveLocalData();
+                    SaveLocalData();  //indexeddb.js
                 }
             }
         }
@@ -211,9 +242,9 @@ function InitTransformControls () {
     });
 
     // 4. Listen to 'change' to re-render the scene
-    transformControl.addEventListener('change', () => {
+    transformControl.addEventListener('change', (event) => {
         // renderer.render(scene, camera);
-            console.log("transformControl change");
+            console.log("transformControl change " + transformControl.object.name);
     });
 }
 
@@ -1350,7 +1381,12 @@ export function onMouseDown(event) { // on threejs object
 
         if (allowMods && keyIsDown == "KeyT") {
             
-            transformControl.attach(lastRaycastHitObject);
+            if (lastRaycastHitObject.parent) {
+                transformControl.attach(lastRaycastHitObject.parent);
+            } else {
+                transformControl.attach(lastRaycastHitObject);
+            }
+  
             return;
         }
         
@@ -1773,6 +1809,24 @@ export const onKeyDown = function (event) {
             if (transformControl) {
                 transformControl.detach();
             }
+        break;
+        case 'KeyG': // Translate
+            if (transformControl) {
+                transformControl.setMode('translate');
+            }
+            
+        break;
+        case 'KeyR': // Rotate
+            if (transformControl) {
+                transformControl.setMode('rotate');
+            }
+        break;
+        case 'KeyZ': // Scale
+            if (transformControl) {
+                transformControl.setMode('scale');
+            }
+        break;   
+
     }
 };
 
