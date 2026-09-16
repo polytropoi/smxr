@@ -68,10 +68,10 @@ export class Water2 {
 export class Water1 { //uses watermesh
     constructor() {
         console.log("making water 2 at level " + settings.sceneWater.level);
-        // const waterGeometry = new THREE.PlaneGeometry( 500, 500 );
-        const waterGeometry = new THREE.CircleGeometry( 300, 64 )
+        const waterGeometry = new THREE.PlaneGeometry( 500, 500 );
+        // const waterGeometry = new THREE.CircleGeometry( 250, 64 )
         const loader = new THREE.TextureLoader();
-        const waterNormals = loader.load( '../../platforms/wgpu/assets/waternormals.jpg' );
+        const waterNormals = loader.load( '../../main/images/waternormals.jpg' );
         waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
 
         const water = new WaterMesh(
@@ -81,9 +81,10 @@ export class Water1 { //uses watermesh
                 // size: 30,
                 waterNormals: waterNormals,
                 sunDirection: new THREE.Vector3(),
-                sunColor: settings.sceneColor1,
-                waterColor: settings.sceneColor2,
-                
+                // sunColor: settings.sceneColor1,
+                // waterColor: settings.sceneColor2,
+                sunColor: 0xffffff,
+                waterColor: 0x001e0f,
                 distortionScale: 2
             }
         );

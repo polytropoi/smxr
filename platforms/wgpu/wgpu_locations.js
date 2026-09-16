@@ -217,6 +217,7 @@ export async function InitLocations() {
                                             if (locationData.locationTags && locationData.locationTags.includes("active")) {
                                                 isActive = true;
                                             } 
+                                            
                                             if (locationData[i].markerType == "gate") {
                                                 GetAvailableScenesData();
                                             }
@@ -227,6 +228,7 @@ export async function InitLocations() {
                                             if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
                                             
                                                 locationData[i].isHidden = true;
+                                                model.visible = false;
                                                 // console.log("tryna hide model " + child.name);
                                             }															
 
@@ -508,7 +510,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     locationObjex[i].objectData.isNavAgent = true;
                     // parent.name = "navagent";
                     // await CreateNPCAgent(parent, clonedModel, animations, z.toString(), locationObjex[i].locationData);
-                    const sceneObject = new SceneObject(clonedModel, locationObjex[i].objectData, false, null, true);
+                    const sceneObject = new SceneObject(clonedModel, locationObjex[i].objectData, locationObjex[i].locationData, false, null, true);
                     // const sceneObjectInstance = {sceneObjectID : sceneObject};
                     // sceneObjects.push(sceneObjectInstance);
                     sceneObjects[sceneObjectID] = sceneObject;
@@ -560,7 +562,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                             }
                         });
                         console.log("tryna place an object " + zm + " sceneObjectID " + sceneObjectID);
-                        const sceneObject = new SceneObject(clonedObject, locationObjex[i].objectData, false, null, false);
+                        const sceneObject = new SceneObject(clonedObject, locationObjex[i].objectData, locationObjex[i].locationData, false, null, false);
                         sceneObjects[sceneObjectID.toString()] = sceneObject;
                         
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
@@ -595,7 +597,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         // child.name = locationObjex[i].locationData.timestamp;
                         }
                     });
-                    const sceneObject = new SceneObject(model, locationObjex[i].objectData, false, null, false);
+                    const sceneObject = new SceneObject(model, locationObjex[i].objectData, locationObjex[i].locationData, false, null, false);
                     sceneObjects[sceneObjectID.toString()] = sceneObject;
                      scene.add(model);
                     // sceneObjectsArray.push(locationObjex[i].data)
@@ -648,7 +650,7 @@ export async function LoadAndDropSingleObject (oData, locationData) { //eg drop
         // const worldPosition = new THREE.Vector3();
         // viewportPlaceholder.getWorldPosition(worldPosition);
         model.position.set(locationData.x, locationData.y, locationData.z);
-        const sceneObject = new SceneObject(model, matchedObject, false, null, false);
+        const sceneObject = new SceneObject(model, matchedObject, locationData, false, null, false);
         sceneObjects[sceneObjectID] = sceneObject;
     }
     } catch (e) {

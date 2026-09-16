@@ -10869,6 +10869,8 @@ function getAllPeople() {
                                 "<select class=\x22form-control\x22 id=\x22lightSelect\x22>" +
                                 "<option value=\x22\x22 disabled selected>Select:</option>" +
                                 "<option>None</option>" +
+                                "<option>Simple Point</option>" +
+                                "<option>Simple Spot</option>" +
                                 "<option>Fire</option>" +
                                 "<option>Candle</option>" +
                                 "<option>Rings</option>" +

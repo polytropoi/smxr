@@ -76,7 +76,7 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
 // export let sceneObjectIndex = 0;
 
 export class SceneObject { //things that might have models and actions and fancy params, e.g. characters, magic swords, etc
-    constructor(object, objectData, isEquipped, objectParent, isNavAgent) {
+    constructor(object, objectData, locationData, isEquipped, objectParent, isNavAgent) {
 
         
         this.object = object;
@@ -102,12 +102,14 @@ export class SceneObject { //things that might have models and actions and fancy
         // this.hasSelectAction = false;
         // this.selectAction;
         if (this.objectData.light) {
+            console.log("this.objectData.light " + this.objectData.light)
             let locationData = {};
-            locationData.locationTags = ["fire"];
+            locationData.locationTags = [this.objectData.light.toLowerCase()];
             locationData.yscale = 1;
             locationData.x = 0;
             locationData.y = .75;
             locationData.z = 0;
+            locationData.color = this.objectData.color1;
 
             CreateLight(locationData, object);
         }

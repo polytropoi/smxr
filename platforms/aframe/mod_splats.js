@@ -27,6 +27,7 @@ AFRAME.registerComponent('mod_splat', {
     },
     init() {
 
+        // this.data.flipY = false;
         let modFlip = this.data.flipY ? -1 : 1;
         console.log("TRYNA LOAD A SPLAT!" + JSON.stringify(this.data));
         this.splat = new SplatMesh({ url: this.data.url });

@@ -64,6 +64,7 @@ export function create_Light(locationData) {
 
 export function CreateLight(locationData, parent) {
 
+    console.log("tryna create light with color data " + locationData.color);
     if (!locationData.yscale) {
         locationData.yscale = 1;
     }
@@ -71,6 +72,10 @@ export function CreateLight(locationData, parent) {
         console.log("tryna create fire size " + locationData.yscale);
         const modValue = locationData.yscale; 
         // if (modvalue > )
+        let color1 = settings.sceneColor1Alt;
+        if (locationData.color) {
+            color1 = locationData.color;
+        }
         const light = new THREE.PointLight( settings.sceneColor1Alt, parseFloat(locationData.yscale) * 8, parseFloat(locationData.yscale) * 16);
         
         
@@ -157,10 +162,31 @@ export function CreateLight(locationData, parent) {
         }
 
 
-    } else {
-        const light = new THREE.PointLight( settings.sceneColor1Alt, parseFloat(locationData.yscale) * 8, parseFloat(locationData.yscale) * 8);
+    } else if (locationData.locationTags.includes("point")) {
+        let color1 = settings.sceneColor1Alt;
+        if (locationData.color) {
+            color1 = locationData.color;
+        }
+        const light = new THREE.PointLight( color1, parseFloat(locationData.yscale) * 8, parseFloat(locationData.yscale) * 8);
+                scene.add(light);
+         if (parent) {
+            parent.attach(light);    
+        }
         light.position.set(locationData.x, locationData.y, locationData.z);
-        scene.add(light);
+
+    } else {
+         let color1 = settings.sceneColor1Alt;
+        if (locationData.color) {
+            color1 = locationData.color;
+        }
+        
+        const light = new THREE.PointLight( color1, parseFloat(locationData.yscale) * 8, parseFloat(locationData.yscale) * 8);
+                scene.add(light);
+         if (parent) {
+            parent.attach(light);    
+        }
+        light.position.set(locationData.x, locationData.y, locationData.z);
+
     }
 }
 export function modLights () {
