@@ -21,7 +21,7 @@ import { UpdateModdedLocations, mods } from '../../connect/settings.js';
 import { eventEl } from '../../connect/events.js';
 
 import { splatObjex } from './wgl_splats.js';
-import { InitVideo } from './wgl_media.js';
+import { InitVideo, GetAvailableScenesData } from './wgl_media.js';
 import { lookAtCameraObjects } from './wgl_ui.js';
 export let locations = {};
 
@@ -223,13 +223,16 @@ export function InitLocations() {
                                         model.visible = false;
                                         scene.remove(model);  //don't need the reference model
                                     } else { // regular meshes
-                                                                            
+                                        
                                         scene.add(model);
                                         if (locationData[i].markerType == "video") {
                                             model.name = "videoModel";
                                             activeObjex.push(model);
                                             InitVideo(locationData[i]);
                                         }   
+                                        if (locationData[i].markerType == "gate") {
+                                            GetAvailableScenesData();
+                                        }
                                     }
                                     
                                     break; //only match one model per location!?

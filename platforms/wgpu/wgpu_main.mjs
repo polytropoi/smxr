@@ -49,10 +49,11 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgpu_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, GetAvailableScenesData } from './wgpu_media.js';
+	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData } from './wgpu_media.js';
 	
 	import { equippedObjectOnLoad, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 	import { splatObjex, InitSplats } from './wgpu_splats.js';
+	import { InitSuperSonic, SynthHit, superSonicLoaded } from './wgpu_synths.js';
 
 	export let scene;
 
@@ -287,7 +288,7 @@
 			
 			const texture = new THREE.VideoTexture(video);
 			texture.colorSpace = THREE.SRGBColorSpace;
-			const geometry = new THREE.PlaneGeometry(1	, 1);
+			const geometry = new THREE.PlaneGeometry(1, 1);
 			const material = new THREE.MeshBasicMaterial({
 			map: texture,
 			depthWrite: false,
@@ -296,11 +297,25 @@
 			videomesh = new THREE.Mesh(geometry, material);
 			videomesh.rotation.y = Math.PI;
 			scene.add(videomesh);
+
+				// const distance = 10; // How far the video is from the camera
+				// videomesh.position.z = -distance;
+
+				// // Calculate the visible height and width at that distance using trigonometry
+				// const fovInRadians = (camera.fov * Math.PI) / 180;
+				// const visibleHeight = 2 * Math.tan(fovInRadians / 2) * distance;
+				// const visibleWidth = visibleHeight * camera.aspect;
+
+				// // Scale the plane to match the visible areas
+				// console.log("tryna set videomesh scale " + visibleWidth + " "  + visibleHeight)
+				// videomesh.scale.set(visibleWidth, visibleHeight, 1);
+			// resizeVideoMesh();
+			
 		}
 		if (settings.sceneTags.includes("hand")) {
-				handLandmarker = await getHandLandmarker();
-				useHandLandmarks = true;
-				initHandColliderGroup();
+			handLandmarker = await getHandLandmarker();
+			useHandLandmarks = true;
+			initHandColliderGroup();
 		}
 		
 		if (settings && settings.sceneTags.includes("post processing")) {
@@ -593,9 +608,21 @@
 				console.log("startButton not found!");
 			}
 		}
-
+		InitSuperSonic();
 	} //end init systems
 
+	function resizeVideoMesh() {
+		  const distance = 10; // How far the plane is from the camera
+		videomesh.position.set(0, 0, -distance);
+
+		// Calculate visible height and width at this distance
+		const vFovInRadians = (camera.fov * Math.PI) / 180;
+		const visibleHeight = 2 * Math.tan(vFovInRadians / 2) * distance;
+		const visibleWidth = visibleHeight * camera.aspect;
+
+		// Scale the mesh to match the visible dimensions
+		videomesh.scale.set(visibleWidth, visibleHeight, 1);
+	}
 	
 	export function togglePostProcessing () { //call after physics is done, elsewise... :(
 
@@ -631,6 +658,15 @@
         		});
 				// PlayTriggerWithTag('hit');
 			}
+			// world.contactPairsWith(collider, (otherCollider) => {
+			// 	// This closure is called on each collider object potentially
+			// 	// in contact with `collider`.
+			// });
+			eventQueue.drainContactForceEvents(event => {
+				let handle1 = event.collider1(); // Handle of the first collider involved in the event.
+				let handle2 = event.collider2(); // Handle of the second collider involved in the event.
+				/* Handle the contact force event. */
+			});
 			
 		}
 		PlayTriggerWithTag('hit');
@@ -748,20 +784,88 @@
 				// eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
 				// 	console.log(`Sensor ${handle1} intersection with ${handle2}: ${intersecting}`);
 				// });
-				eventQueue.drainCollisionEvents((handle1, handle2, started) => {
-					if (started) {
-						console.log("collision " + handle1 + " " + handle2);
-						world.narrowPhase.contactPair(handle1, handle2, (manifold, flipped) => {
-							// 3. Get the number of contact points
-							let numContacts = manifold.numContacts();
-							if (numContacts > 0) {
-								// Get the first contact point data
-								let contactPoint = manifold.contactPoint(0);
-								
-								// The position is given in world-space coordinates
-								console.log("Collision World Position:", contactPoint.point);
-							}
-						});
+  				eventQueue.drainContactForceEvents((event) => {
+					if (scene) {
+					// if (event.started) {
+					let handle1 = event.collider1(); // Handle of the first collider involved in the event.
+					let handle2 = event.collider2(); // Handle of the second collider involved in the event.
+
+					let totalForce = event.totalForceMagnitude();
+
+					 let collider1 = world.getCollider(handle1);
+					let collider2 = world.getCollider(handle2);
+					
+					// Retrieve parent rigid bodies if needed
+					let body1 = collider1.parent();
+					let body2 = collider2.parent();
+
+					// 2. Create an empty vector to hold the result
+					const midpoint = new THREE.Vector3();
+					// const playerWorldPosition = new Vector
+					
+					// 3. Add them together and divide by 2
+					midpoint.addVectors(body1.translation(), body2.translation()).divideScalar(2);
+					const distance = player.position.distanceTo(midpoint);
+					// console.log(midpoint);
+					// console.log("collision " + handle1 + " " + handle2 + " " + JSON.stringify(body1.translation()) + " " + JSON.stringify(body2.translation()));
+					// if (totalForce > 100)  {
+		
+						// if (superSonicLoaded) {
+						if (colliders[handle1].includes("atom") && colliders[handle2].includes("atom")) {
+							console.log("atom hit");
+						} else {
+							console.log("collision " + colliders[handle1] + " " + colliders[handle2] + " " + JSON.stringify(midpoint) + " force " + totalForce + " distance " + distance);
+							SynthHit(midpoint, totalForce, distance);
+						}
+							
+						// }
+						
+					// }
+					
+					// console.log(`Collider ${handle1} hit Collider ${handle2} with a force of ${totalForce}!`);
+
+					// Example: Play a sound proportional to the impact force
+					// if (totalForce > 20) {
+					// 	// playLoudCrashSound();
+						
+					// } else {
+					// 	// playSoftThudSound();
+					// }
+					/* Handle the contact force event. */
+					// });
+					// eventQueue.drainCollisionEvents((handle1, handle2, started) => {
+					// if (started) {
+						
+
+					// 	 let collider1 = world.getCollider(handle1);
+					// 	let collider2 = world.getCollider(handle2);
+						
+					// 	// Retrieve parent rigid bodies if needed
+					// 	let body1 = collider1.parent();
+					// 	let body2 = collider2.parent();
+
+					// 	// 2. Create an empty vector to hold the result
+					// 	const midpoint = new THREE.Vector3();
+
+					// 	// 3. Add them together and divide by 2
+					// 	midpoint.addVectors(body1.translation(), body2.translation()).divideScalar(2);
+
+					// 	// console.log(midpoint);
+					// 	// console.log("collision " + handle1 + " " + handle2 + " " + JSON.stringify(body1.translation()) + " " + JSON.stringify(body2.translation()));
+					// 	console.log("collision " + handle1 + " " + handle2 + " " + JSON.stringify(midpoint));
+					// 	// console.log()
+					// 	world.narrowPhase.contactPair(handle1, handle2, (manifold, flipped) => {
+					// 	// 3. Get the number of contact points
+					// 	let numContacts = manifold.numContacts();
+					// 	if (numContacts > 0) {
+					// 		// Get the first contact point data
+					// 		let contactPoint = manifold.contactPoint(0);
+							
+					// 		// The position is given in world-space coordinates
+					// 		console.log("Collision World Position:", contactPoint.point);
+					// 	}
+					// });
+						
 						// CollisionStart(handle1, handle2);
 							// console.log("collision " + handle1 + " " + handle2);
 							// const collider1 = world.getCollider(handle1);
@@ -803,8 +907,8 @@
 						// });
 						
 						// You can add logic here, e.g., change color of the collided objects
-					} else {
-						CollisionEnd(handle1, handle2);
+					// } else {
+					// 	CollisionEnd(handle1, handle2);
 						
 					}
 				});
@@ -853,6 +957,7 @@
 								y: -landmark.y * videomesh.scale.y + videomesh.scale.y * 0.5,
 								z: landmark.z,
 							};
+							// console.log("handlandmark " + JSON.stringify(pos));
 							const mesh = handColliderGroup.children[j];
 							mesh.userData.update(pos);
 							});
@@ -865,8 +970,8 @@
 						}
 					}
 				}
-				videomesh.scale.x = video.videoWidth * 0.016;
-  				videomesh.scale.y = video.videoHeight * 0.016;
+				videomesh.scale.x = video.videoWidth * 0.012;
+  				videomesh.scale.y = video.videoHeight * 0.012;
 			}
 			
 			// if (ambientAudioController) {

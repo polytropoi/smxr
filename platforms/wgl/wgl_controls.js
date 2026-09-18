@@ -1335,7 +1335,7 @@ export function onMouseDown(event) { //clicked on threejs object
             } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                 
                     console.log("gatehit");
-                    if (!lastRaycastHitObject.userData.locationData.eventData) {
+                    if (!lastRaycastHitObject.userData.locationData.eventData && availableScenesData && availableScenesData.availableScenes && availableScenesData.availableScenes.length) {
                         const randomIndex = Math.floor(Math.random() * availableScenesData.availableScenes.length);
                         const randomScene = availableScenesData.availableScenes[randomIndex];
                         console.log("randomScene is " + JSON.stringify(randomScene));

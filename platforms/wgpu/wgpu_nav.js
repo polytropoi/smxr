@@ -309,6 +309,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             return null;
         }
     } 
+    const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
 
     class NavAgent{
         constructor(options){
@@ -947,12 +948,14 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                 this.object.position.y = raypos.y;
             }
         }
+        
         snapToGround () {
             if (Math.random() > .95) {
                 let raypos;
                 raypos = this.raycastedPosition(); //expensive, so throttle...
                 if (raypos && raypos.y) {
                     this.object.position.y = raypos.y;
+                    lerp(this.object.position.y, raypos.y, 0.1); 
                 }
             }
         }

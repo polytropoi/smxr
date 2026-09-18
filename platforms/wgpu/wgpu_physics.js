@@ -145,6 +145,7 @@ export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do firs
       let collider = await world.createCollider(colliderDesc, staticBody);
       collider.setRestitution(.5);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      
       WaitAndInit();
   } else {
     WaitAndInit();
@@ -266,6 +267,7 @@ function WaitAndInit () {
         // collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
         collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
         collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
+
         let worldposition = new THREE.Vector3();
         // triggerObject.getWorldPosition(worldposition);
 
@@ -295,8 +297,10 @@ function WaitAndInit () {
         let collider = await world.createCollider(kinematicCollider, rigidbody);
         collider.setRestitution(1.5);
         collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-        collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+        collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS, RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
         collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
+                // collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        collider.setContactForceEventThreshold(1.0);
 
         player.getWorldPosition(playerWorldPosition);
 
@@ -365,12 +369,14 @@ function WaitAndInit () {
       let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased();//no, position based...
               // .setTranslation(worldposition.x, worldposition.y, worldposition.z)
       let rigidbody = await world.createRigidBody(rigidBodyDesc);
-      colliders[rigidbody.handle] = "agent_";
+      colliders[rigidbody.handle] = "agent_" + Date.now();
       let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
       let collider = await world.createCollider(kinematicCollider, rigidbody);
       collider.setRestitution(1.5);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-      collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+      collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS, RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+                      // collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        collider.setContactForceEventThreshold(1.0);
       
 
     function update () {
@@ -445,7 +451,8 @@ function WaitAndInit () {
       collider.setRestitution(1.5);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
       collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
-      
+                            collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        collider.setContactForceEventThreshold(1.0);
       activeObjex.push(mesh);
 
     function update () {
@@ -522,10 +529,16 @@ async function getAtomicBody(atomCenter, particleType, particleSize) {
   let rigidbody = await world.createRigidBody(rigidBodyDesc);
   // rigid.setGravityScale(16.0, true);
   let points = geometry.attributes.position.array;
-  let colliderDesc = await RAPIER.ColliderDesc.convexHull(points).setDensity(density);
-  const collider = world.createCollider(colliderDesc, rigidbody);
+
+  // let colliderDesc = await RAPIER.ColliderDesc.convexHull(points).setDensity(density);
+          let colliderDesc = RAPIER.ColliderDesc.ball(size);
   
-      // collider.setRestitution(1.5);
+  let collider = world.createCollider(colliderDesc, rigidbody);
+
+        colliders[rigidbody.handle] = "atom_" + Date.now();
+                        collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        // collider.setContactForceEventThreshold(1.0);
+      collider.setRestitution(2);
       // collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
 
@@ -587,7 +600,7 @@ async function getAtomicBody(atomCenter, particleType, particleSize) {
       mesh.rotation.setFromQuaternion(rote);
 
       
-      rigidbody.addForce(dir.multiplyScalar(distance * -.1), false);
+      rigidbody.addForce(dir.multiplyScalar(distance * -1), false);
       
     }
     // }
@@ -653,6 +666,9 @@ export function GetInstancedRigidbody(position, scale, instanceIndex, locData) {
       colliders[rigidbody.handle] = "instance_" + instanceIndex;
       // collider.userData.locData = locData; //nope
       collider.setRestitution(2.5);
+            collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+      collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        collider.setContactForceEventThreshold(1.0);
       // collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
 
       // // mesh.scale.setScalar(size);
@@ -718,7 +734,8 @@ export async function getDynamicBody(model, position, scale) {
       colliders[rigidbody.handle] = "dynamic_test2";
       collider.setRestitution(1.5);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-
+        collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        collider.setContactForceEventThreshold(1.0);
       mesh.scale.setScalar(size);
       scene.add(mesh);
       // mesh.name = "dynamic";
@@ -796,7 +813,8 @@ export async function AddDynamicBody(mesh, meshposition, scale, yFudge, isEquipp
       collider.setTranslation(0, yFudge, 0);
       collider.setRestitution(.25);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Max);
-
+                      collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        collider.setContactForceEventThreshold(1.0);
       let direction = new THREE.Vector3();
       // mesh.scale.setScalar(size);
       // scene.add(mesh);
@@ -924,8 +942,12 @@ export async function AddDynamicBody(mesh, meshposition, scale, yFudge, isEquipp
     let mouseRigid = world.createRigidBody(bodyDesc);
     let dynamicCollider = RAPIER.ColliderDesc.ball(mouseSize * 10.0);
     world.createCollider(dynamicCollider, mouseRigid);
-      dynamicCollider.setRestitution(5);
-      dynamicCollider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      dynamicCollider.setRestitution(2);
+      // dynamicCollider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+      dynamicCollider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+      colliders[mouseRigid.handle] = "hand_" + Date.now();
+        // dynamicCollider.setContactForceEventThreshold(1.0);
+
     function update(pos) {
       // console.log("collider update " + JSON.stringify(pos));
       mouseRigid.setTranslation({ x: pos.x, y: pos.y, z: 0.2 });
@@ -936,16 +958,17 @@ export async function AddDynamicBody(mesh, meshposition, scale, yFudge, isEquipp
         // kinematicBodies.push();
     return mouseMesh;
   }
+
   export function initHandColliderGroup () {
 
-  // hand-tracking colliders
-  handColliderGroup = new THREE.Group();
-  scene.add(handColliderGroup);
-  const numBalls = 21;
-  for (let i = 0; i < numBalls; i++) {
-    const mesh = getCollider();
-    handColliderGroup.add(mesh);  
+    // hand-tracking colliders
+    handColliderGroup = new THREE.Group();
+    scene.add(handColliderGroup);
+    const numBalls = 21;
+    for (let i = 0; i < numBalls; i++) {
+      const mesh = getCollider();
+      handColliderGroup.add(mesh);  
 
-  }
+    }
   
-}
+  }

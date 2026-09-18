@@ -428,7 +428,7 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
             const t = new THREE.Vector3(x,y,z);
             // // this.instancedBodies = 
             if (physicsMode == "dynamic") {
-                const rb = GetInstancedRigidbody(t, scale);
+                const rb = GetInstancedRigidbody(t, scale, i);
                 physicsInstancedBodies.push(rb);
             }
 

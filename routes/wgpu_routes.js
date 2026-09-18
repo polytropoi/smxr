@@ -1704,7 +1704,7 @@ wgpu_router.get('/:_id', function (req, res) {
             }
             if (hasSynth) {
                 // synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script src=\x22../main/js/synth.js\x22></script>";//nope, that one is aframe
-                synthScripts = "<script type=\x22module\x22 src=\x22/connect/synths.js\x22></script>"; //supersonic, tone, etc...
+                synthScripts = "<script type=\x22module\x22 src=\x22../../platforms/wgpu/synths.js\x22></script>"; //supersonic, tone, etc...
             }
             if (hasPrimaryAudio) {
                 if (primary_mp3url.length > 8) {
@@ -2471,7 +2471,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     // settings.playerStartPosition = playerPosition;
 
                     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("synth")) {
-                       synthScripts = "<script type=\x22module\x22 src=\x22/connect/synths.js\x22></script>";
+                       synthScripts = "<script type=\x22module\x22 src=\x22../../platforms/wgpu/wgpu_synths.js\x22></script>";
                     }
 
                     if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes("show avatars")) {
