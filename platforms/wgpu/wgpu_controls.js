@@ -862,7 +862,7 @@ async function RaycastHit(type, hit, event) {
     // lastRaycastHitPosition = hit.point;
     lastRaycastHitDistance = hit.distance;
 
-    console.log("raycast hit " + type + " " + lastHitObjectName );
+    console.log("raycast hit " + type + " " + lastHitObjectName + " " + event.target);
     let tagData;
     // console.log(JSON.stringify(lastRaycastHitObject.userData));
     const locationData = lastRaycastHitObject.userData.locationData;

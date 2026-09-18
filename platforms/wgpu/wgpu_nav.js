@@ -150,7 +150,11 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             agentSpeed = objectData.speedFactor;
             console.log("agentSpeed is " + agentSpeed );
         }
-
+    
+        let snapToGround = false;
+        if (locationData && locationData.locationTags && locationData.locationTags.includes("snap")) {
+            snapToGround = true;
+        }
         const options = {
             object: model,
             isInstanced: isInstanced,
@@ -162,7 +166,8 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             // app: this,
             name: name,
             npc: true,
-            animations: animations
+            animations: animations,
+            snapToGround: snapToGround
             // yOffset: locationData.y
         };
 
@@ -351,6 +356,8 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             this.cameraWorldPosition = new THREE.Vector3();
             this.upVector = new THREE.Vector3(0, 1, 0);
             this.scale = options.scale ? options.scale : 1;
+            this.useSnapping = options.snapToGround;
+
             if (this.npc) this.dead = false;
             
             this.speed = options.speed;
@@ -427,13 +434,14 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             this.object.userData.NavAgentInstance = this; // add this kinda class object instance to the userdata, to enable fetching instance from e.g. raycast
             this.downcaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 50);
 
-             const raypos = this.raycastedPosition(); //expensive, so throttle...
-            if (raypos && raypos.y) {
-                // if ((raypos.y - player.position.y) > .3) {
-                console.log("tryna snap to raypos.y " + raypos.y);
-                this.object.position.y = raypos.y;
-                // }
-            }
+            //  const raypos = this.raycastedPosition(); //expensive, so throttle...
+            // if (raypos && raypos.y) {
+            //     // if ((raypos.y - player.position.y) > .3) {
+            //     console.log("tryna snap to raypos.y " + raypos.y);
+            //     this.object.position.y = raypos.y;
+            //     // }
+            // }
+            this.snapToGround();
         }
         raycastedPosition() {
             //    let raycaster = new THREE.Raycaster();
@@ -498,7 +506,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
 
             const player = this.object;
 
-
+            
             // if (this.name == "player") {
             //     console.log("tryna get player path to " + JSON.stringify(pt));
             // }
@@ -524,8 +532,8 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             
             // this.calculatedPath = this.pathfinder.findPath(startPos, endPos, this.ZONE, this.navMeshGroup);
             
-
-            if (this.calculatedPath && this.calculatedPath.length && this.readyToNav) {
+            console.log("calculated path is "+ this.calculatedPath);
+            if (this.calculatedPath && this.calculatedPath.length) {
 
                 // this.isPaused = false;
                 const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
@@ -541,7 +549,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                 	// this.showPathLines();
                 // }
             } else {
-                if (this.name == "player") {
+                if (this.name == "player") {    
                     console.log("cain't find path to " + JSON.stringify(pt));
                 }
                 // this.action = 'idle';
@@ -605,12 +613,13 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             // this.object.getWorldQuaternion(this.originQuaternion);
             this.readyToNav = !this.readyToNav;
             // this.isSlerping = !this.isSlerping;
-            if (!this.readyToNav && this.hasAnims) {
+            if (!this.readyToNav) {
                     // this.action = 'idle';
-                    
-                     const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
-                    this.action = this.idleAnims[randomIndex];
-                    console.log("setting idle action");
+                if (this.hasAnims) {
+                const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
+                this.action = this.idleAnims[randomIndex];
+                console.log("setting idle action");
+                }
                     // this.isSlerping = true;
             } else {
                 
@@ -739,10 +748,10 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
 
 
 
-                const timestamp = this.sceneObjectID.split("_")[0];
-                const instanceIndex = this.sceneObjectID.split("_")[1];
-                const instancedMesh = instancedAgentMeshes[timestamp];
-                if (instancedMesh) {
+                // const timestamp = this.sceneObjectID.split("_")[0];
+                // const instanceIndex = this.sceneObjectID.split("_")[1];
+                // const instancedMesh = instancedAgentMeshes[timestamp];
+                // if (instancedMesh) {
                 // console.log("tryna move agent with instanceIndex " + instanceIndex);
                     
                     // instancedPosition.set(agent.position.x, agent.position.y, agent.position.z);
@@ -777,7 +786,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
 
                    // 2. Create a rotation matrix looking at the target
   
-                }
+                // }
             } else {
                 
                     // this.isSplerping = true;
@@ -795,9 +804,9 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     // this.elapsedTime = 0;
                     camera.updateMatrixWorld(true);
                     camera.getWorldPosition(this.cameraWorldPosition);
-                this.object.lookAt(this.cameraWorldPosition);
-                this.object.rotation.x = 0;
-                this.object.rotation.z = 0;
+                    this.object.lookAt(this.cameraWorldPosition);
+                    this.object.rotation.x = 0;
+                    this.object.rotation.z = 0;
             }
           
                     // if (this.readyToNav) {
@@ -858,7 +867,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             
         }
         
-        setTargetDirection(){
+        setTargetDirection() {
             const player = this.object;
             const pt = this.calculatedPath[0].clone();
             pt.y = player.position.y;
@@ -868,7 +877,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             player.quaternion.copy(quaternion);
         }
         
-        showPathLines(){
+        showPathLines() {
             if (this.pathLines) scene.remove(this.pathLines);
 
             const material = new THREE.LineBasicMaterial({
@@ -919,17 +928,17 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     const action = this.mixer.clipAction( clip );
                     action.loop = clip.loop;
                     // if (this.firstPlay) {
-                        // this.firstPlay = false;
-                        const duration = action.getClip().duration; // Duration in seconds
-                        const randomTime = Math.random() * duration; 
-                        action.time = randomTime;
+                    // this.firstPlay = false;
+                    const duration = action.getClip().duration; // Duration in seconds
+                    const randomTime = Math.random() * duration; 
+                    action.time = randomTime;
                     // } else {
                     //     action.time = 0;
                     // }
                     // console.log(this.name + " tryna play animation " + name );
                     
                     
-                   
+
                     this.mixer.stopAllAction();
                     this.actionName = name.toLowerCase();
                     this.actionTime = Date.now();
@@ -949,13 +958,18 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             }
         }
         
-        snapToGround () {
-            if (Math.random() > .95) {
+        snapToGround (uselerp) {
+            if (Math.random() > .5) {
                 let raypos;
                 raypos = this.raycastedPosition(); //expensive, so throttle...
                 if (raypos && raypos.y) {
-                    this.object.position.y = raypos.y;
-                    lerp(this.object.position.y, raypos.y, 0.1); 
+                    // this.object.position.y = raypos.y;
+                    // console.log("tryna snap "+ this.name);
+                    if (uselerp) {
+                        this.object.position.y = lerp(this.object.position.y, raypos.y, 0.3); 
+                    } else {
+                        this.object.position.y = raypos.y;
+                    }
                 }
             }
         }
@@ -1033,7 +1047,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     // }
 
                     const vel = this.targetPosition.clone().sub(agent.position);
-                    let pathLegComplete = (vel.lengthSq()<0.01);
+                    let pathLegComplete = (vel.lengthSq()<0.1);
   
                     if (!pathLegComplete) {
 
@@ -1060,7 +1074,10 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                         const newDistanceSq = agent.position.distanceToSquared(this.targetPosition);
                         //  console.log(newDistanceSq + " vs " + prevDistanceSq );
                         pathLegComplete = (newDistanceSq > prevDistanceSq);
-                        this.snapToGround();
+                        // console.log(newDistanceSq + " vs " + prevDistanceSq);
+                        if (!pathLegComplete && this.useSnapping) {
+                            this.snapToGround(true);
+                        }
 
                         if (this.isInstanced) {
                             const timestamp = this.sceneObjectID.split("_")[0];
@@ -1084,6 +1101,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     } 
                     
                     if (pathLegComplete){
+                        console.log("pathLegComplete!");
                         // Remove node from the path we calculated
                         // console.log("pathLegComplete paths " + this.calculatedPath.length);
                         //  raypos = this.raycastedPosition(); //expensive, so throttle...
@@ -1095,6 +1113,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                         this.calculatedPath.shift();
                         if (this.calculatedPath.length==0){
                             
+                            this.snapToGround(true);
                             this.newPath(randomNavmeshPoint());
                             //  raypos = this.raycastedPosition(); //expensive, so throttle...
                             //     if (raypos && raypos.y) {
@@ -1102,11 +1121,11 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                             //         player.position.y = raypos.y;
                                    
                             //     }
-                                this.snapToGround();
+                                // this.snapToGround(false);
                         }else{
                             
                             this.setTargetDirection(); 
-                            this.snapToGround();
+                            this.snapToGround(false);
 
                            
                         }
@@ -1116,8 +1135,9 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     //  const randomIndex = Math.floor(Math.random() * this.idleAnims.length);
                     // this.action = this.idleAnims[randomIndex];
                 } else {
-                    // if (this.npc && !agentClick) this.newPath(randomNavmeshPoint());
-                    this.snapToGround();
+                    // if (this.npc && !agentClick) 
+                    // this.newPath(randomNavmeshPoint());
+                    this.snapToGround(false);
                     this.newPath(randomNavmeshPoint());
                     // raypos = this.raycastedPosition(); //expensive, so throttle...
                     // if (raypos && raypos.y) {

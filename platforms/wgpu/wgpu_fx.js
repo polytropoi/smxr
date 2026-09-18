@@ -180,7 +180,7 @@ export function InstancedSprites(count, size, scale, animation, type) {
 
 
         scene.add( particles );
-        activeObjex.push(particles);
+        // activeObjex.push(particles);
 
 }
 
