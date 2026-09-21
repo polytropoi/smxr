@@ -6,7 +6,11 @@ export let superSonicLoaded = false;
 let supersonic;
 // let synthDef1 = 'sonic-pi-prophet';
 let synthDef1 = 'sonic-pi-mod_pulse';
+
+let synthDef2 = 'sonic-pi-prophet';
 let synth1;
+
+let nodeCount = 0;
 const CDN = "https://unpkg.com/";   // or "https://cdn.jsdelivr.net/npm/"
 
 const spatialSynth = {
@@ -43,7 +47,35 @@ export async function InitSuperSonic () {
 
   await supersonic.init();
   await supersonic.loadSynthDef(synthDef1);
+    await supersonic.loadSynthDef(synthDef2);
   superSonicLoaded = true;
+
+  // setInterval(() => {
+  //   const tree = supersonic.getTree();
+  //   nodeCount = tree.nodeCount;
+    // console.log(tree.nodeCount);
+// {
+//   version: 42,        // Increments on every change
+//   nodeCount: 5,       // Total nodes
+//   droppedCount: 0,    // Overflow (capacity exceeded)
+//   root: { ... }       // Hierarchical TreeNode (always id 0)
+// }
+    // const metrics = supersonic.getMetrics();
+
+    // console.log(metrics.numNodes);
+    // // Check for problems
+    // if (metrics.scsynthMessagesDropped > 0) {
+    //   console.warn('Messages being dropped!');
+    // }
+
+    // // Monitor buffer usage
+    // if (metrics.inBufferUsed?.percentage > 80) {
+    //   console.warn('Input buffer getting full:', metrics.inBufferUsed.percentage + '%');
+    // }
+
+    // Track throughput
+    // console.log(`Processed: ${metrics.scsynthMessagesProcessed}, Sent: ${metrics.oscOutMessagesSent}`);
+  // }, 100);
     supersonic.send("/s_new", synthDef1, -1, 0, 0, "note", 28, "amp", 0.5,  "attack", 2, "release", 8, "cutoff", 70);
 
     // supersonic.send("/s_new", "sonic-pi-prophet", -1, 0, 0, "note", 32, "amp", 0.4, "attack", 2, "release", 12, "cutoff", 50);
@@ -54,45 +86,73 @@ export async function InitSuperSonic () {
 
 
 export function LoopSuperSonic () {
-     const notes = [60, 63, 65, 67, 70, 67, 65, 63]; // A simple note pattern (MIDI values)
-      let currentIndex = 0;
-      const loopSpeedMs = 10000; // Play a note every 250ms (120 BPM sixteenth notes)
+    const notes = [60, 63, 65, 67, 70, 67, 65, 63]; // A simple note pattern (MIDI values)
+    let currentIndex = 0;
+    const loopSpeedMs = 10000; // Play a note every 250ms (120 BPM sixteenth notes)
 
-    
-        setInterval(() => {
-            const currentNote = notes[currentIndex];
-            
-            supersonic.send("/s_new", "sonic-pi-prophet", -1, 0, 0, "note", 28, "amp", 0.5,  "attack", 2, "release", 8, "cutoff", 70);
+    setInterval(() => {
+        const currentNote = notes[currentIndex];
+        
+        supersonic.send("/s_new", "sonic-pi-prophet", -1, 0, 0, "note", 28, "amp", 0.5,  "attack", 2, "release", 8, "cutoff", 70);
 
-            supersonic.send("/s_new", "sonic-pi-prophet", -1, 0, 0, "note", 32, "amp", 0.4, "attack", 2, "release", 12, "cutoff", 50);
+        supersonic.send("/s_new", "sonic-pi-prophet", -1, 0, 0, "note", 32, "amp", 0.4, "attack", 2, "release", 12, "cutoff", 50);
 
-            supersonic.send("/s_new", "sonic-pi-prophet", -1, 0, 0, "note", 42, "amp", 0.3, "attack", 2, "release", 10, "cutoff", 80);
-            
-            // Move to the next note in the array, or wrap around to the beginning
-            currentIndex = (currentIndex + 1) % notes.length;
-        }, loopSpeedMs);
+        supersonic.send("/s_new", "sonic-pi-prophet", -1, 0, 0, "note", 42, "amp", 0.3, "attack", 2, "release", 10, "cutoff", 80);
+        
+        // Move to the next note in the array, or wrap around to the beginning
+        currentIndex = (currentIndex + 1) % notes.length;
+    }, loopSpeedMs);
 }
 
      // 4. Define our loop parameters
  
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
+function getRandomInt(min, max) {
+  const minCeiled = Math.ceil(min);
+  const maxFloored = Math.floor(max);
+  // The maximum is exclusive and the minimum is inclusive
+  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+}
 
+function getPercentageOf(percent, total) {
+  return (percent / 100) * total;
+}
 export async function SynthHit(position, volFactor, distance) {
 
     // await supersonic.loadSynthDef(synthDef1);
-  const notes = [32, 34, 38, 42, 44, 48, 52, 60];
-  const noteIndex = Math.floor(Math.random() * notes.length);
-  volFactor = .05 + (volFactor * .001) - (distance * .001);
-    console.log(notes[noteIndex] + " tryna play note with volFactor " + volFactor + " loaded " + superSonicLoaded);
-  volFactor = clamp(volFactor, .05, .3);
 
-    console.log(notes[noteIndex] + " tryna play note with volFactor " + volFactor + " loaded " + superSonicLoaded);
-    // await supersonic.loadSynthDef(synthDef1);
     if (supersonic && superSonicLoaded) {
-      supersonic.send("/s_new", synthDef1, -1, 0, 0, "note", notes[noteIndex], "amp", volFactor, "attack", .1, "release", .5, "cutoff", 80);
-    }
+
+       
+                const tree = supersonic.getTree();
+    const nodeCount = tree.nodeCount;
+    console.log(nodeCount);
+      if (nodeCount < 10) {
+          //   console.log('Count:', metrics.scsynthProcessCount);
+
+
+          // const notes = [32, 34, 38, 42, 44, 48, 52, 60];
+
+          // const noteIndex = Math.floor(Math.random() * notes.length);
+          if (!volFactor) {
+            volFactor = Math.random();
+          }
+          const note = getRandomInt(42, 96);
+          volFactor = (volFactor * .001);
+          volFactor = volFactor * (getPercentageOf(distance, 200) * .01)
+          // - (distance * .001);
           
+          volFactor = clamp(volFactor, .01, .3);
+          // console.log("tryna play note with volFactor " + volFactor + " loaded " + superSonicLoaded);
+          // console.log(notes[noteIndex] + " tryna play note with volFactor " + volFactor + " loaded " + superSonicLoaded);
+          // await supersonic.loadSynthDef(synthDef1);
+
+          supersonic.send("/s_new", synthDef2, -1, 0, 0, "note", note, "amp", volFactor, "attack", .1, "release", 1, "cutoff", 80);
+      }
+        // console.log("Processed:" + metrics.scsynthMessagesProcessed);
+      // }
+    }
 }
 let sonic = null;
 let isPlaying = false;

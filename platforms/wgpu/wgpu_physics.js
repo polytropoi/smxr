@@ -10,7 +10,7 @@ import { scene, togglePostProcessing, water, cameraMode, showDebug } from './wgp
 import { staticObjex, activeObjex, kinematicAgentMeshes } from './wgpu_locations.js';
 import { player, camera } from './wgpu_controls.js';
 import { playerRigidbody } from './wgpu_actions.js';
-import { agentModels, agentParents, CreateAgent, randomNavmeshPoint } from './wgpu_nav.js';
+import { agentModels, agentParents, CreateTestAgent, randomNavmeshPoint } from './wgpu_nav.js';
 import { settings } from '../../../connect/settings.js';
 // import {scene, world} from './three_main.mjs'
 
@@ -297,10 +297,14 @@ function WaitAndInit () {
         let collider = await world.createCollider(kinematicCollider, rigidbody);
         collider.setRestitution(1.5);
         collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-        collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS, RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+                // collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+
         collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
                 // collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
         collider.setContactForceEventThreshold(1.0);
+
+        colliders[collider.handle] = "player_" + Date.now();
 
         player.getWorldPosition(playerWorldPosition);
 

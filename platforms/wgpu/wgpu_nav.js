@@ -48,7 +48,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
 
 
 
-    export async function CreateAgent (agentIndex, pos) {
+    export async function CreateTestAgent (agentIndex, pos) {
 
         await new Promise(r => setTimeout(r, 0));
         const agentParent = new THREE.Object3D(); //empty
@@ -176,7 +176,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
         // ThreeDeeText(name, 1, model, null, null, false, null);
         // HTMLText(name, 1, model, null, null, false, null);
                 const agentID = locationData.timestamp + "_" + index;
-        console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID + " vs sceneObjectID " + sceneObjectID);
+        console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID + " vs sceneObjectID " + sceneObjectID + " scale " + scale);
 
 
         navAgentInstances[sceneObjectID] = npc;
@@ -208,7 +208,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
      
     // }        
 
-    export async function InitAgents () { //testing only..
+    export async function InitTestAgents () { //testing only..
         // 
         if (settings && settings.sceneTags && settings.sceneTags.includes("test")) {
         for (let i = 0; i < agentCount; i++) {
@@ -231,7 +231,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
 
 
             const agentIndex = i;
-            await CreateAgent(agentIndex, pos); //cook the navagent first
+            await CreateTestAgent(agentIndex, pos); //cook the navagent first
             
             console.log("creating kinematic body for agent " + agentIndex);
         }
@@ -266,7 +266,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                 console.log( "navmesh done, initAgents()");
             //    WaitAndInitAgents();
                 if (settings && settings.sceneTags && settings.sceneTags.includes("test agents")) {
-                    await InitAgents();
+                    await InitTestAgents();
                 }
                 // await new Promise(r => setTimeout(r, 4000)); //slow the fxk down
                 // AssignModelsToAgents();
@@ -532,7 +532,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             
             // this.calculatedPath = this.pathfinder.findPath(startPos, endPos, this.ZONE, this.navMeshGroup);
             
-            console.log("calculated path is "+ this.calculatedPath);
+            // console.log("calculated path is "+ this.calculatedPath);
             if (this.calculatedPath && this.calculatedPath.length) {
 
                 // this.isPaused = false;
@@ -1101,7 +1101,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     } 
                     
                     if (pathLegComplete){
-                        console.log("pathLegComplete!");
+                        // console.log("pathLegComplete!");
                         // Remove node from the path we calculated
                         // console.log("pathLegComplete paths " + this.calculatedPath.length);
                         //  raypos = this.raycastedPosition(); //expensive, so throttle...

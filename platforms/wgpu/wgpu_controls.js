@@ -39,6 +39,7 @@ import { TagsToInstances } from './wgpu_instance.js';
 import { GoToNext, localData } from '../../connect/connect.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
 
+
 // import { getPlayerBody } from './three_physics.js';
 
 export let camera, controls, player, transformControl, transformObject;
@@ -879,6 +880,7 @@ async function RaycastHit(type, hit, event) {
     if (hit.instanceId) { //if it's an element of an instancedMesh
             
                 console.log("INSTANCE HIT " + hit.instanceId );
+                selectedObjects.length = 0;
         tagData = await TagsToInstances(locationData.timestamp, hit.instanceId);
 
 
@@ -1100,6 +1102,10 @@ async function RaycastHit(type, hit, event) {
                     // child.material.needsUpdate = true;
                     }
                 });
+            } else {
+                if (hit.instanceId) {
+                    selectedObjects.length = 0;
+                }
             }
         }
     }
@@ -1574,25 +1580,29 @@ export function onMouseDown(event) { // on threejs object
                 } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                
                     console.log("gatehit");
-                    if (!lastRaycastHitObject.userData.locationData.eventData) {
-                        const randomIndex = Math.floor(Math.random() * availableScenesData.availableScenes.length);
-                        const randomScene = availableScenesData.availableScenes[randomIndex];
-                        console.log("randomScene is " + JSON.stringify(randomScene));
-                        htmlString = "<h3> Scene Gate :</h3>"  + randomScene.sceneTitle +
-                        "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
-                        lastRaycastHitObject.userData.locationData.locationTags+
-                        "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
-                        randomScene.sceneKey+"\x22 class=\x22yesButton\x22>Enter</button>"+
-                        "</div>";
+                    if (lastRaycastHit.distance < 10) {
+                        if (!lastRaycastHitObject.userData.locationData.eventData) {
+                            const randomIndex = Math.floor(Math.random() * availableScenesData.availableScenes.length);
+                            const randomScene = availableScenesData.availableScenes[randomIndex];
+                            console.log("randomScene is " + JSON.stringify(randomScene));
+                            htmlString = "<h3> Scene Gate :</h3>"  + randomScene.sceneTitle +
+                            "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
+                            lastRaycastHitObject.userData.locationData.locationTags+
+                            "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
+                            randomScene.sceneKey+"\x22 class=\x22yesButton\x22>Enter</button>"+
+                            "</div>";
+                        } else {
+                            htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
+                            "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
+                            lastRaycastHitObject.userData.locationData.locationTags+
+                            "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
+                            lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Enter</button>"+
+                            "</div>";
+                        }
+                        ShowHTMLPopup(event, htmlString, null, null, "hic_content");
                     } else {
-                        htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
-                        "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
-                        lastRaycastHitObject.userData.locationData.locationTags+
-                        "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
-                        lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Enter</button>"+
-                        "</div>";
+                        console.log("raycast hit distance too far " + lastRaycastHit.distance);
                     }
-                    ShowHTMLPopup(event, htmlString, null, null, "hic_content");
                 
                 } else if (lastRaycastHitObject.userData.locationData.mediaID) {
                 // const popup = document.getElementById("popup");

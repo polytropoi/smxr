@@ -87,6 +87,7 @@ export function CreateLight(locationData, parent) {
 
         const animatedSprite = CreateAnimatedSprite("fireanim1", locationData.yscale, 50, 6, 6);
         scene.add(animatedSprite);
+        animatedSprite.raycast = () => {}; //mmkay...
         
         if (parent) {
             parent.attach(animatedSprite);    
@@ -142,7 +143,7 @@ export function CreateLight(locationData, parent) {
         const animatedSprite = CreateAnimatedSprite("candle1", locationData.yscale, 25, 8, 8);
         scene.add(animatedSprite);
         animatedSprite.position.set(locationData.x, locationData.y, locationData.z);
-
+        animatedSprite.raycast = () => {};
         if (!clusteredLighting) {
             const flickerIntensity = uniform(1.0);
 

@@ -517,13 +517,13 @@ export function InitSky() {
 		// Add Sky
 		const sky = new SkyMesh();
 		sky.scale.setScalar(450000);
-		scene.add(sky);
+
 
 		const sun = new THREE.Vector3();
 
 
 		console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
-		let elevation = 45;
+		let elevation = 65;
 		let sceneClouds = "medium";
 		let cloudCoverage = .35;
 		let cloudDensity = .5;
@@ -550,7 +550,7 @@ export function InitSky() {
 			elevation: elevation,
 			azimuth: 180,
 			// exposure: renderer.toneMappingExposure,
-			exposure: .75,
+			exposure: .05,
 			cloudCoverage: cloudCoverage,
 			cloudDensity: cloudDensity,
 			cloudElevation: cloudElevation
@@ -567,10 +567,13 @@ export function InitSky() {
 
 		sun.setFromSphericalCoords(1, phi, theta);
 
+		scene.add(sky);
 		sky.sunPosition.value.copy(sun);
 
+		
+
 		sunLight.position.copy(sun);
-		renderer.toneMappingExposure = effectController.exposure;
+		// renderer.toneMappingExposure = effectController.exposure;
 		// 
 	} else {
 
