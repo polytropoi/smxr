@@ -152,7 +152,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
         }
     
         let snapToGround = false;
-        if (locationData && locationData.locationTags && locationData.locationTags.includes("snap")) {
+        if (locationData && locationData.locationTags && locationData.locationTags.includes("snap") || settings && settings.sceneTags && settings.sceneTags.includes("snap")) {
             snapToGround = true;
         }
         const options = {

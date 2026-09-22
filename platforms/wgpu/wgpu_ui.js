@@ -223,7 +223,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
     if (!cooldown) {
         cooldown = true;
         
-    let scaleFactor = .1;
+    let scaleFactor = 1;
     if (distance) {
         // if (distance > 1) {
             scaleFactor = distance * .01;
@@ -232,7 +232,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             }
         // }
     }
-    // console.log("ui scale factor " + scaleFactor);
+    console.log("ui scale factor " + scaleFactor);
     scaleFactor = clamp(scaleFactor, .25, .75);
     size = clamp(size, .25, .75);
     const width = 10;
@@ -822,34 +822,41 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
             }
             console.log("hicMesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
 
-            const geometry = new THREE.PlaneGeometry( 1,1, 10, 10 );
+            const geometry = new THREE.PlaneGeometry( 1,1,10,10);
 
             // material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .5, metalness: .1 } );
             material = new THREE.MeshBasicMaterial({ transparent: true});
             // const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: 0, metalness: 0.5, side: THREE.DoubleSide } );
             material.map = new THREE.HTMLTexture( contentEl );
+            // material.map.minFilter = THREE.NearestFilter;
+            // material.map.magFilter = THREE.NearestFilter;
+
+            // If applicable to your map setup, increase anisotropy 
+            // (though HTMLTexture relies on real-time browser paints)
+            // material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
             // material.map.needsUpdate = true;
             // material.envMap = scene.environment;
             // material.envMapIntensity = 1;
-            const ctx = canvasEl.getContext('2d');
-            const ratio = window.devicePixelRatio || 1;
+                        // const ctx = canvasEl.getContext('2d');
+                        const ratio = window.devicePixelRatio || 1;
 
-            // Set the visual size (CSS pixels)
-            canvasEl.style.width = '1024px';
-            canvasEl.style.height = '1024px';
+                        // // Set the visual size (CSS pixels)
+                        contentEl.style.width = '1024px';
+                        contentEl.style.height = '1024px';
 
-            // Set the internal resolution (Physical pixels)
-            canvasEl.width = 512 * ratio;
-            canvasEl.height = 512 * ratio;
+                        // Set the internal resolution (Physical pixels)
+                        contentEl.width = 512 * ratio;
+                        contentEl.height = 512 * ratio;
 
-            // Scale the context to match
-            ctx.scale(ratio, ratio);
+                        // Scale the context to match
+                        // ctx.scale(ratio, ratio);
             hicMesh = new THREE.Mesh( geometry, material );
 
             
             scene.add( hicMesh );
 
-             hicMesh.scale.setScalar(1);
+             hicMesh.scale.setScalar(scaleFactor * .75);
             hicMesh.position.set(position.x, position.y +.5, position.z);
             // activeObjex.push(hicMesh);
             lookAtCameraObjects.push(hicMesh);
@@ -872,9 +879,9 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
 
                 }
                  console.log(yMod + " vs ymod is " + ymodification + " distance " + distance);
-                hicMesh.position.set(position.x, position.y, position.z);
+                hicMesh.position.set(position.x, ymodification, position.z);
                 // hicMesh.scale.setScalar(scaleFactor);
-                hicMesh.scale.setScalar(1);
+                hicMesh.scale.setScalar(scaleFactor * .75);
             }
         } else {
             contentEl.innerHTML = htmlstring;
@@ -882,7 +889,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
             if (!position) {
                 position = new THREE.Vector3();
                 viewportPlaceholder.getWorldPosition(position);
-                hicMesh.scale.setScalar(1);
+                hicMesh.scale.setScalar(scaleFactor * .75);
                 hicMesh.position.set(position.x, position.y +.5, position.z);
 
             }
@@ -895,8 +902,8 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
 
                 }
                 console.log("ymod is " + ymodification);
-                hicMesh.position.set(position.x, position.y, position.z);
-                hicMesh.scale.setScalar(scaleFactor);
+                hicMesh.position.set(position.x, ymodification, position.z);
+                hicMesh.scale.setScalar(scaleFactor * .75);
             }
             hicMesh.updateMatrixWorld();
             hicMesh.visible = true;

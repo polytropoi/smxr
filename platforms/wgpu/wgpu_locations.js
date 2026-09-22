@@ -166,7 +166,7 @@ export async function InitLocations() {
 
                     locations[locationData[i].timestamp] = locationData[i]; //cook an object instead of array for faster lookups by timestamp
                     
-                    if (locationData.markerType != "none" && locationData[i].modelID && !locationData[i].modelID.includes("primitive") && locationData[i].modelID != "none") {
+                    if (locationData[i].markerType != "none" && locationData[i].modelID && !locationData[i].modelID.includes("primitive") && locationData[i].modelID != "none") {
                         let model;
                         
                             for (let m = 0; m < modelsData.length; m++) { //spin through imported models to match
@@ -214,17 +214,19 @@ export async function InitLocations() {
                                         } else { // regular meshes
                                             let isActive = false;             
 
-                                            if (locationData.locationTags && locationData.locationTags.includes("active")) {
+                                            if (locationData[i].locationTags && locationData[i].locationTags.includes("active")) {
                                                 isActive = true;
                                             } 
                                             
                                             if (locationData[i].markerType == "gate") {
                                                 GetAvailableScenesData();
+                                                isActive = true;
                                             }
                                             const modelData = await LoadLocationModel(modelsData[m].modelURL, locationData[i], isActive);
                                             model = modelData.model;
                                             console.log("model loaded " + modelsData[m]._id + " tryna set pos at " + locationData[i].x + " " + locationData[i].y + " " + locationData[i].z);
-                                            
+                                            model.userData = {};
+                                            model.userData.locationData = locationData[i];
                                             if (locationData[i].locationTags && locationData[i].locationTags.includes("hide") ) {
                                             
                                                 locationData[i].isHidden = true;

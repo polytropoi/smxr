@@ -122,6 +122,9 @@ window.LocationRowClick = LocationRowClick;
 // }
 
 // $(function() { 
+
+
+
 export function InitConnect() {
    // InitIDB();
       // LoadPrimaryAudioHowl();
@@ -487,6 +490,7 @@ export function InitConnect() {
       }); 
    }
     
+
 
 
 } //end onload
@@ -2995,23 +2999,9 @@ export function AvatarClicked(sid) {
    SceneManglerModal('Messages');
 }
 
-// function UpdatePlayerPosition(sid, px, py, pz) { //nevermind
-//    var keys = Object.keys(roomUsers);
-//    for(var i=0; i<keys.length; i++){
-//       var key = keys[i];
-//       console.log(key, roomUsers[key]);
-//       if (keys[i] === sid) {
-//          console.log(roomUsers[key] + " is moving!");
-         
-//       }
-//    }
-// }
 
 InitContentBox();
-// window.onload = init;
-// if (document.querySelector(".avatarName")) {
-//    avatarName = document.querySelector(".avatarName").id;
-// }
+
 
 var context;    // Audio context
 var buf;        // Audio buffer
@@ -3091,8 +3081,6 @@ function ShowARButton (usdzURL) { //for iOS only
 
 // }
 
-// function 
-// function 
 function playByteArray(byteArray) {
 
    var arrayBuffer = new ArrayBuffer(byteArray.length);
@@ -3130,7 +3118,7 @@ function UpdateContentBox() { //nm for now
    // }
 }
 
-export function InitCurves() {
+export function InitCurves() { //only for aframe
    console.log("tryna InitCurves() " + JSON.stringify(settings.sceneTags));
    let curvePointEls = document.querySelectorAll(".curvepoint");
    if (curvePointEls.length) {
@@ -3219,3 +3207,6 @@ function ShowHideContentBox () {
    coll[0].click();
 
 }
+
+
+

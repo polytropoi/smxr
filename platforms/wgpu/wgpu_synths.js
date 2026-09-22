@@ -8,9 +8,16 @@ let supersonic;
 let synthDef1 = 'sonic-pi-mod_pulse';
 
 let synthDef2 = 'sonic-pi-prophet';
+let synthDefs = ['sonic-pi-mod_pulse','sonic-pi-prophet','sonic-pi-blade','sonic-pi-fm','sonic-pi-bass_foundation','sonic-pi-organ_tonewheel','sonic-pi-gabberkick','sonic-pi-rhodey' ]
 let synth1;
 
 let nodeCount = 0;
+let nodeID;
+
+let sonic = null;
+let isPlaying = false;
+let timerId = null;
+
 const CDN = "https://unpkg.com/";   // or "https://cdn.jsdelivr.net/npm/"
 
 const spatialSynth = {
@@ -46,8 +53,11 @@ export async function InitSuperSonic () {
   });
 
   await supersonic.init();
-  await supersonic.loadSynthDef(synthDef1);
-    await supersonic.loadSynthDef(synthDef2);
+  for (let i = 0; i < synthDefs.length; i++) {
+      await supersonic.loadSynthDef(synthDefs[i]);
+  }
+  // await supersonic.loadSynthDef(synthDef1);
+  //   await supersonic.loadSynthDef(synthDef2);
   superSonicLoaded = true;
 
   // setInterval(() => {
@@ -76,7 +86,8 @@ export async function InitSuperSonic () {
     // Track throughput
     // console.log(`Processed: ${metrics.scsynthMessagesProcessed}, Sent: ${metrics.oscOutMessagesSent}`);
   // }, 100);
-    supersonic.send("/s_new", synthDef1, -1, 0, 0, "note", 28, "amp", 0.5,  "attack", 2, "release", 8, "cutoff", 70);
+    const synthIndex = Math.floor(Math.random() * synthDefs.length);
+    supersonic.send("/s_new", synthDefs[synthIndex], -1, 0, 0, "note", 28, "amp", 0.5,  "attack", 1, "release", 5, "cutoff", 70);
 
     // supersonic.send("/s_new", "sonic-pi-prophet", -1, 0, 0, "note", 32, "amp", 0.4, "attack", 2, "release", 12, "cutoff", 50);
 
@@ -125,9 +136,9 @@ export async function SynthHit(position, volFactor, distance) {
     if (supersonic && superSonicLoaded) {
 
        
-                const tree = supersonic.getTree();
-    const nodeCount = tree.nodeCount;
-    console.log(nodeCount);
+        const tree = supersonic.getTree();
+        const nodeCount = tree.nodeCount;
+        console.log(nodeCount);
       if (nodeCount < 10) {
           //   console.log('Count:', metrics.scsynthProcessCount);
 
@@ -138,25 +149,67 @@ export async function SynthHit(position, volFactor, distance) {
           if (!volFactor) {
             volFactor = Math.random();
           }
-          const note = getRandomInt(42, 96);
+          const note = getRandomInt(22, 76);
           volFactor = (volFactor * .001);
-          volFactor = volFactor * (getPercentageOf(distance, 200) * .01)
+          volFactor = volFactor * (getPercentageOf(distance, 100) * .01)
           // - (distance * .001);
           
-          volFactor = clamp(volFactor, .01, .3);
+          volFactor = clamp(volFactor, .1, .5);
           // console.log("tryna play note with volFactor " + volFactor + " loaded " + superSonicLoaded);
           // console.log(notes[noteIndex] + " tryna play note with volFactor " + volFactor + " loaded " + superSonicLoaded);
           // await supersonic.loadSynthDef(synthDef1);
+          const synthIndex = Math.floor(Math.random() * synthDefs.length);
+          const cutoffValue = getRandomInt(30,80);
+          
 
-          supersonic.send("/s_new", synthDef2, -1, 0, 0, "note", note, "amp", volFactor, "attack", .1, "release", 1, "cutoff", 80);
+
+          supersonic.send("/s_new", synthDefs[synthIndex], -1, 0, 0, "note", note, "amp", volFactor, "attack", .2, "release", 1, "cutoff", cutoffValue);
       }
         // console.log("Processed:" + metrics.scsynthMessagesProcessed);
       // }
     }
 }
-let sonic = null;
-let isPlaying = false;
-let timerId = null;
+
+
+function applyPitchBend(targetFreq) {
+    // '/n_set' targets a specific running node and updates its arguments instantly
+
+    supersonic.sendOSC("/n_set", [nodeId, "freq", targetFreq]);
+}
+
+
+export async function SynthMod () {
+    if (supersonic && superSonicLoaded) {
+
+       
+      const tree = supersonic.getTree();
+      const nodeCount = tree.nodeCount;
+      console.log(nodeCount);
+
+      nodeID = supersonic.nextNodeId(); //
+
+      if (!volFactor) {
+            volFactor = Math.random();
+          }
+          const note = getRandomInt(22, 76);
+          volFactor = (volFactor * .001);
+          volFactor = volFactor * (getPercentageOf(distance, 100) * .01)
+          // - (distance * .001);
+          
+          volFactor = clamp(volFactor, .1, .5);
+          // console.log("tryna play note with volFactor " + volFactor + " loaded " + superSonicLoaded);
+          // console.log(notes[noteIndex] + " tryna play note with volFactor " + volFactor + " loaded " + superSonicLoaded);
+          // await supersonic.loadSynthDef(synthDef1);
+          const synthIndex = Math.floor(Math.random() * synthDefs.length);
+          const cutoffValue = getRandomInt(30,80);
+          
+
+
+          supersonic.send("/s_new", synthDefs[synthIndex], nodeID, 0, 0, "note", note, "amp", volFactor, "attack", .2, "release", 1, "cutoff", cutoffValue);
+  }
+}
+
+
 
 // --- Initialize SuperSonic ---
 async function initAudio() {

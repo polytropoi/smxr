@@ -38,6 +38,7 @@ import * as nipplejs from '../../../main/js/nipple.mjs';
 import { TagsToInstances } from './wgpu_instance.js';
 import { GoToNext, localData } from '../../connect/connect.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
+import { SynthHit } from './wgpu_synths.js';
 
 
 // import { getPlayerBody } from './three_physics.js';
@@ -138,7 +139,13 @@ export function SetPlayerLocation (locationData) {
 
     // }
 }
+const isMobile = window.matchMedia("(any-hover: none)").matches || navigator.maxTouchPoints > 0;
 
+if (isMobile) {
+    console.log("User is on a mobile device or tablet.");
+    requestMotionPermission();
+    // document.getElementById('start-btn').addEventListener('click', requestMotionPermission);
+}
 function SetInputMode () {
 
     const joystickContainer = document.getElementById("joystickEl");
@@ -196,14 +203,15 @@ function InitTransformControls () {
 
             
             let obj = transformControl.object;
+            if (obj.parent && !obj.parent.isScene) {
+                obj = obj.parent;
+            } 
             obj.getWorldPosition(objWorldPosition);
             obj.getWorldQuaternion(objWorldQuaternion); 
             obj.getWorldScale(objWorldScale);
             objWorldRotationEuler.setFromQuaternion(objWorldQuaternion);
 
-            if (obj.parent) {
-                obj = obj.parent;
-            } 
+
             // obj.getWorldPosition(objWorldPosition);
             console.log(JSON.stringify(obj.userData) + ' New position: ' + JSON.stringify(obj.position) + " vs " + JSON.stringify(objWorldPosition) + " rotation " + JSON.stringify(objWorldRotationEuler) );
             obj.userData.locationData.x = objWorldPosition.x;
@@ -243,10 +251,10 @@ function InitTransformControls () {
     });
 
     // 4. Listen to 'change' to re-render the scene
-    transformControl.addEventListener('change', (event) => {
-        // renderer.render(scene, camera);
-            console.log("transformControl change " + transformControl.object.name);
-    });
+    // transformControl.addEventListener('change', (event) => {
+    //     // renderer.render(scene, camera);
+    //         console.log("transformControl change " + transformControl.object.name);
+    // });
 }
 
 export function SetControls(cameraMode, cameraFOV) {
@@ -951,7 +959,7 @@ async function RaycastHit(type, hit, event) {
     const objectData = lastRaycastHitObject.userData.objectData;
     // const name = lastRaycastHitObject.userData.name ? lastRaycastHitObject.userData.name : lastRaycastHitObject.name;
     let name = locationData.name;
-    if (locationData && locationData.eventData && locationData.eventData.includes("children")) {
+    if (locationData && locationData.eventData && locationData.eventData.includes("children") || locationData.locationTags && locationData.locationTags.includes("select") ) {
         name = hit.object.name ? hit.object.name : lastRaycastHitObject.name;
     }
     let showCallout = false;
@@ -966,7 +974,7 @@ async function RaycastHit(type, hit, event) {
         
         if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
             console.log("that's equipped! " + lastRaycastHitObject.userData.name);
-
+            SynthHit(null, 1, 1);
         } else {
 
             if (locationData.locationTags && !locationData.locationTags.includes("no callout") && (locationData.markerType != "video")) {
@@ -994,6 +1002,7 @@ async function RaycastHit(type, hit, event) {
                     ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                     // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 }
+                SynthHit(hit.position, 1, 1);
 
             } else {
 
@@ -1001,6 +1010,9 @@ async function RaycastHit(type, hit, event) {
                 
                 if (name && name.includes("~")) {
                     name = name.split("~")[0];
+                }
+                if (name && name.includes("tag")) {
+                    name = name.split("_")[1];
                 }
                 if (name && name != "" && showCallout) {
                     if (tagData) { //e.g. on instanceMesh
@@ -1011,6 +1023,8 @@ async function RaycastHit(type, hit, event) {
                             
                             ThreeDeeText(tagData,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                         } else {
+                            SynthHit(null, 10, 1);
+
                             ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                         // }
                         
@@ -1028,12 +1042,14 @@ async function RaycastHit(type, hit, event) {
                             hic_content.classList.add("hic_content_2");
 
                             ShowHTMLPopup(event, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
+                            
                         }
                     } else {
                         if (hit.instanceId) {
                             name = name + " # " + hit.instanceId;
                         }
-                        ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                        ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale *10);
+                        SynthHit(hit.position, 1, 1);
                     }
                 }
                 // // console.log("mediaID " + locationData.mediaID);
@@ -1092,16 +1108,18 @@ async function RaycastHit(type, hit, event) {
                        
                         if (child.name != "textmesh") {
                              console.log("child name " + child.name);
-                            // SwapMaterials(child, "transparent");
-                            // break;
+                             if (child.name.includes("tag")) {
+
+                                name = child.name.split("_")[1];
+                                console.log("select callout name " + name);
+                                  ThreeDeeText(name,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale); 
+                             }
+                           
                         } 
-                        // child.material = child.material.clone();
-                        // child.material.transparent = true; 
-                        //                  child.material.opacity = .5; 
-                        //                   child.material.needsUpdate = true;
-                    // child.material.needsUpdate = true;
+                        
                     }
                 });
+                SynthHit(hit.position, 1, 1);
             } else {
                 if (hit.instanceId) {
                     selectedObjects.length = 0;
@@ -1298,6 +1316,10 @@ export function onMouseDown(event) { // on threejs object
     // playerReadyToNav = true;
     event.stopPropagation();// duh!
 
+    if (transformControl && transformControl.object) {
+        return;
+    }
+    
     // console.log("mouse down on " + event.target.id);
     if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
         console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " locationData " + JSON.stringify(locationData)); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
@@ -1579,8 +1601,8 @@ export function onMouseDown(event) { // on threejs object
                 
                 } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                
-                    console.log("gatehit");
-                    if (lastRaycastHit.distance < 10) {
+                    console.log("clicked on gate !");
+                    if (lastRaycastHit.distance < 20) {
                         if (!lastRaycastHitObject.userData.locationData.eventData) {
                             const randomIndex = Math.floor(Math.random() * availableScenesData.availableScenes.length);
                             const randomScene = availableScenesData.availableScenes[randomIndex];
@@ -1836,6 +1858,11 @@ export const onKeyDown = function (event) {
                 transformControl.setMode('scale');
             }
         break;   
+        case 'KeyS': // Scale
+            if (transformControl) {
+                transformControl.setMode('scale');
+            }
+        break;   
 
     }
 };
@@ -2006,3 +2033,34 @@ class Joystick
 	}
 }
 
+// 1. Request permission (Mandatory for iOS 13+)
+async function requestMotionPermission() {
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    try {
+      const response = await DeviceMotionEvent.requestPermission();
+      if (response === 'granted') {
+        window.addEventListener('devicemotion', handleMotion);
+      } else {
+        alert('Permission to access accelerometer was denied.');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  } else {
+    // Non-iOS 13+ devices (Android usually grants this by default or uses the Permissions API)
+    window.addEventListener('devicemotion', handleMotion);
+  }
+}
+
+// 2. Handle the data stream
+function handleMotion(event) {
+  // Acceleration including gravity
+  const accWithGravity = event.accelerationIncludingGravity;
+  console.log(`X: ${accWithGravity.x}, Y: ${accWithGravity.y}, Z: ${accWithGravity.z}`);
+
+  // Acceleration excluding gravity (if hardware supported)
+  const accNoGravity = event.acceleration;
+  if (accNoGravity) {
+    console.log(`Pure Motion X: ${accNoGravity.x}`);
+  }
+}
