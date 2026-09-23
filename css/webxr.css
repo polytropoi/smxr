@@ -1938,6 +1938,33 @@ body {
 
     }
 
+    .popup_nobg {
+        display: none; 
+        position: absolute; /* Stay in place */
+        z-index: 100; /* hide below until axed for */
+        /* left: 0;
+        top: 0; */
+        /* width: 600px; */
+        width: 500px;
+        /* height: 400px; */
+        /* max-height: 1024px; */
+        overflow-y: auto;
+        /* overflow: auto; Enable scroll if needed */
+        /* opacity: 0; */
+
+        text-align: center;
+         font-family: helvetica, arial, sans-serif;
+				font-size: 20px;
+        color: #FFF;
+				cursor: pointer;
+          padding: 10px;
+
+        /* border: 2px solid white; */
+      border-radius: 1em;
+      margin: .5em .5em 0 0;
+
+    }
+
     .popup2 {
         display: none; 
         position: absolute; /* Stay in place */
@@ -1991,8 +2018,8 @@ body {
       z-index: 0;
       position: absolute; 
       overflow-y: auto;
-      background-color: rgb(0, 0, 0); /* Fallback color */
-      background-color: rgb(0, 0, 0); /* Black w/ opacity */
+      background-color: rgba(0, 0, 0, 0.76); /* Fallback color */
+      background-color: rgba(0, 0, 0, 0.685); /* Black w/ opacity */
       text-align: center;
       font-family: helvetica, arial, sans-serif;
       font-size: 16px;
@@ -2012,6 +2039,31 @@ body {
       /* height: 100vh; */
       
     }
+      .hic_content_trans {
+      z-index: 0;
+      position: absolute; 
+      overflow-y: auto;
+     
+      text-align: center;
+      font-family: helvetica, arial, sans-serif;
+      font-size: 16px;
+      color: #ffffff;
+      cursor: pointer;
+      padding: 10px;
+      /* border: 2px solid white;
+      border-radius: 1em; */
+      
+      margin: 2em 2em 2em 2em;
+      float: right;
+      /* width: 75%; */
+        width: fit-content;
+      height: auto;
+            /* height: 90%; */
+      /* display: grid;
+      place-items: center;  */
+      /* height: 100vh; */
+      
+    }
 
     .hic_content_2 {
       z-index: 0;
@@ -2021,17 +2073,27 @@ body {
       font-size: 20px;
       /* color: #000000; */
       cursor: pointer;
+
+       background-color: rgba(0, 0, 0, 0.775); /* Fallback color */
+      background-color: rgba(0, 0, 0, 0.777);
       /* padding: 5px; */
       /* -webkit-text-fill-color: transparent; */
       /* -webkit-text-stroke: 1px;
        */
-       color: #000000;
+             padding: 10px;
+       color: #ffffff;
+             border: 2px solid white;
+      border-radius: 1em;
       /* text-shadow: #ffffff 0px 0px 10px;
       -webkit-font-smoothing: antialiased; */
       display: flex;
       justify-content: center; /* Centers horizontally */
       align-items: center; 
-      margin: 4em 4em 4em 4em;
+      margin: 10em 10em 10em 10em;
+              width: 512px;
+      height: auto;
+          /* width: 400;
+      height: 300; */
     }
 
     .hic_content_pill {

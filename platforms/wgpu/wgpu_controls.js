@@ -1038,10 +1038,15 @@ async function RaycastHit(type, hit, event) {
                                            
                             const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
                             "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
-                            hic_content.classList.remove("hic_content");
-                            hic_content.classList.add("hic_content_2");
+                          
 
-                            ShowHTMLPopup(event, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance);
+                            let style = "popup";
+                            if (uiMode != "popup") {
+                                style = "hic_content";
+                                // hic_content.classList.remove("hic_content");
+                                hic_content.classList.add("hic_content_trans");
+                            }
+                            ShowHTMLPopup(event, htmlstring, lastRaycastHitPosition, lastRaycastHitDistance, style );
                             
                         }
                     } else {
@@ -1602,17 +1607,17 @@ export function onMouseDown(event) { // on threejs object
                 } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                
                     console.log("clicked on gate !");
-                    if (lastRaycastHit.distance < 20) {
+                    if (lastRaycastHit.distance < 40) {
                         if (!lastRaycastHitObject.userData.locationData.eventData) {
                             const randomIndex = Math.floor(Math.random() * availableScenesData.availableScenes.length);
                             const randomScene = availableScenesData.availableScenes[randomIndex];
                             console.log("randomScene is " + JSON.stringify(randomScene));
-                            htmlString = "<h3> Scene Gate :</h3>"  + randomScene.sceneTitle +
+                            htmlString = "<div> <h3> Scene Gate :</h3>"  + randomScene.sceneTitle +
                             "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
                             lastRaycastHitObject.userData.locationData.locationTags+
                             "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
                             randomScene.sceneKey+"\x22 class=\x22yesButton\x22>Enter</button>"+
-                            "</div>";
+                            "</div></div>";
                         } else {
                             htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
                             "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+

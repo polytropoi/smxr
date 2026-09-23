@@ -666,11 +666,15 @@ export function InstancedActionClick(instanceID, objectData) {//instanced meshes
         } 
         if (hasActions) {
             // popup.innerHTML = header + cancelButton + pickupButton + equipButton + consumeButton + "</div>";
-            const htmlstring  = lastRaycastHitObject.header + cancelButton + pickupButton + equipButton + consumeButton + "</div>";
+            
+            let htmlstring = lastRaycastHitObject.header + cancelButton + pickupButton + equipButton + consumeButton + "</div>";
+            if (uiMode == "hic") {
+                htmlstring  = "<div class=\x22hic_content_2\x22> "+ lastRaycastHitObject.header + "<br><br><div>" + cancelButton + pickupButton + equipButton + consumeButton + "</div></div>";
+            }
             // "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
             // this.objectData.sceneObjectID+"\x22 class=\x22yesButton\x22>Consume</button>"+
             // "</div>";
-            ShowHTMLPopup(event, htmlstring, null, null, "hic_content");
+            ShowHTMLPopup(event, htmlstring, null, null, null, -1);
             if (uiMode == "hic") {
                 // UpdateHIC(popup.innerHTML);
                 const cancelButtonEl = document.getElementById("popup_cancelButton")
