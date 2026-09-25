@@ -5573,7 +5573,7 @@ app.post('/scenedata/', function (req, res) {
 
 }); 
 
-app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, res) { //update "mods" coming from webxr client, not admin pages
+app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, res) { //update "mods" coming from web client, not admin pages
     if (req.params.s_id == req.body.shortID) {
         console.log("userData for sceneMods : " +JSON.stringify(req.body.userData));
         if (req.body.userData._id == req.session.user._id || req.body.userData.sceneOwner == "indaehoose") {    
@@ -5583,255 +5583,264 @@ app.post('/add_scene_mods/:s_id', requiredAuthentication, admin, function (req, 
                     // console.log("TRYNA ADD SCENE MODS mods " + JSON.stringify(req.body));
                     const query = {"short_id": req.params.s_id};
                     const scene = await RunDataQuery("scenes", "findOne", query);
-                    if (!scene.sceneTags.includes("no mods")) { 
+                    if (!scene.sceneTags.includes("no mods") && scene.sceneTags.includes("allow mods")) { 
                         let scenequery = {};
                         let newFiles = []; 
                         let updatedSceneLocations = [];
 
-                            for (let file in req.body.localFiles) {
+                        for (let file in req.body.localFiles) {
                             // for (let key in localData.localFiles) {
-                                    // let ext = localData.localFiles[key].name.split('.');
-                                console.log("file : " + JSON.stringify(req.body.localFiles[file].name));
-                                let timestamp = Math.round(Date.now() / 1000);
-                                console.log("gotsa uploaded localfile " + req.body.localFiles[file].name);
-                                let buffer = Buffer.from(req.body.localFiles[file].data, 'base64');
-                                //models and images only atm...
-                                if (getExtension(req.body.localFiles[file].name) == ".glb") { //should sniff the thing instead, but...
-                                    let awskey = 'users/' + req.session.user._id.toString() + '/gltf/' + timestamp + '_' + req.body.localFiles[file].name;
-                                    let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
-                                        Key: awskey, 
-                                    // ContentEncoding: 'base64',
-                                        ContentType: 'application/octet-stream',
-                                        Body: buffer};
-                                    const status = await PutObject(params.Bucket, params.Key, params.Body);
-                                    console.log("uploaded file " + awskey + " " + JSON.stringify(status));
-                                    const newmodel = { //add to models collection
-                                        userID : req.session.user._id.toString(),
-                                        username : req.session.user.userName,
-                                        name : timestamp + "_" + req.body.localFiles[file].name,
-                                        filename : timestamp + "_" + req.body.localFiles[file].name,
-                                        item_type : 'glb',
-                                        tags: [],
-                                        item_status: "private",
-                                        otimestamp : timestamp,
-                                        ofilesize : req.body.localFiles[file].size };
-                                    const saved = await RunDataQuery("models", "insertOne", newmodel);
-                                    console.log("glb saved with id " + saved.insertedId); //.insertedId == ObjectId of new record
-                                    let newfile = {};
-                                    newfile.name = req.body.localFiles[file].name.replace("local_","");
-                                    newfile._id = saved.insertedId;
-                                    newFiles.push(newfile);
-                                    var s_id = scene._id;   
-                                    var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
-                                    sceneModels.push(saved.insertedId);
-                                    const query = { "_id": s_id };
-                                    const updoc = { $set: {"sceneModels": sceneModels}};
-                                    console.log("updoc " + JSON.stringify(updoc));
-                                    const updated = await RunDataQuery("scenes","updateOne", query, updoc);
-                                    console.log("updated sceneModels with " + JSON.stringify(updoc) + " " + JSON.stringify(updated));
-                                
-                                } else if (getExtension(req.body.localFiles[file].name) == ".zip" || getExtension(req.body.localFiles[file].name) == ".ply" || getExtension(req.body.localFiles[file].name) == ".spz" ||
-                                             getExtension(req.body.localFiles[file].name) == ".rad" ||   getExtension(req.body.localFiles[file].name) == ".sog" || getExtension(req.body.localFiles[file].name) == ".splat" || getExtension(req.body.localFiles[file].name) == ".ksplat"  ) { //should sniff the thing instead, but...
-                                    let awskey = 'users/' + req.session.user._id.toString() + '/splat/' + timestamp + '_' + req.body.localFiles[file].name;
-                                    let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
-                                        Key: awskey, 
-                                    // ContentEncoding: 'base64',
-                                        ContentType: 'application/octet-stream',
-                                        Body: buffer};
-                                    const status = await PutObject(params.Bucket, params.Key, params.Body);
-                                    console.log("uploaded file " + awskey + " " + JSON.stringify(status));
-                                    const newmodel = { //add to models collection
-                                        userID : req.session.user._id.toString(),
-                                        username : req.session.user.userName,
-                                        name : timestamp + "_" + req.body.localFiles[file].name,
-                                        filename : timestamp + "_" + req.body.localFiles[file].name,
-                                        item_type : 'splat',
-                                        tags: [],
-                                        item_status: "private",
-                                        otimestamp : timestamp,
-                                        ofilesize : req.body.localFiles[file].size };
-                                    const saved = await RunDataQuery("models", "insertOne", newmodel);
-                                    console.log("glb saved with id " + saved.insertedId); //.insertedId == ObjectId of new record
-                                    let newfile = {};
-                                    newfile.name = req.body.localFiles[file].name.replace("local_","");
-                                    newfile._id = saved.insertedId;
-                                    newFiles.push(newfile);
-                                    var s_id = scene._id;   
-                                    var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
-                                    sceneModels.push(saved.insertedId);
-                                    const query = { "_id": s_id };
-                                    const updoc = { $set: {"sceneModels": sceneModels}};
-                                    console.log("updoc " + JSON.stringify(updoc));
-                                    const updated = await RunDataQuery("scenes","updateOne", query, updoc);
-                                    console.log("updated sceneModels with " + JSON.stringify(updoc) + " " + JSON.stringify(updated));
-                                
-                                } else if (getExtension(req.body.localFiles[file].name) == ".jpg" || getExtension(req.body.localFiles[file].name) == ".png") { 
-                                    let hasAlpha = false;
-                                    if (getExtension(req.body.localFiles[file].name) == ".png") {
-                                        hasAlpha = true;
-                                    }
-                                    const newimage = { 
-                                        type : "fromLocalFile",
-                                        userID : req.session.user._id.toString(),
-                                        userName : req.session.user.userName,
-                                        title : timestamp + "_" + req.body.localFiles[file].name,
-                                        filename : timestamp + "_" + req.body.localFiles[file].name,
-                                        item_type : 'picture',
-                                        tags: [],
-                                        item_status: "private",
-                                        hasAlphaChannel: hasAlpha,
-                                        otimestamp : timestamp,
-                                        ofilesize : req.body.localFiles[file].size };
-                                    const saved = await RunDataQuery("image_items", "insertOne", newimage);
-                                    console.log("image saved with id " + saved.insertedId);
-                                    let newfile = {};
-                                    newfile.name = req.body.localFiles[file].name;
-                                    newfile.name.replace("local_","");
-                                    newfile._id = saved.insertedId;
-                                    newFiles.push(newfile);
-                                    let awskey = 'users/' + req.session.user._id.toString() + '/pictures/originals/' + saved.insertedId + '.original.' + req.body.localFiles[file].name;
-                                    let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
-                                        Key: awskey, 
-                                        // ContentEncoding: 'base64',
-                                        ContentType: 'application/octet-stream',
-                                        Body: buffer};
-                                    const status = await PutObject(params.Bucket, params.Key, params.Body);
-                                    console.log("put a pic: " + JSON.stringify(status));
-                                    console.log('uploaded ' + req.body.localFiles[file].name);
-                                    var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
-                                    const options = {
-                                        headers: {'X-Access-Token': token}
-                                    };
-                                    const response = await fetch(process.env.GS_HOST + "/resize_uploaded_picture/"+saved.insertedId, options);
-                                    console.log("grabAndSqueezepic response: " + response.status);
-                                    var s_id = scene._id;   
-                                    var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
-                                    scenePictures.push(saved.insertedId);
-                                    const updoc = { $set: {"scenePictures": scenePictures}};
-                                    const query = { "_id": s_id };
-                                    const imageupdated = await RunDataQuery("scenes","updateOne", query, updoc);
-                                    console.log("image mod updated.." + imageupdated);
-                                    // db_old.scenes.update({ "_id": s_id }, ); //add pictureID to scene
+                            // let ext = localData.localFiles[key].name.split('.');
+                            console.log("file : " + JSON.stringify(req.body.localFiles[file].name));
+                            let timestamp = Math.round(Date.now() / 1000);
+                            console.log("gotsa uploaded localfile " + req.body.localFiles[file].name);
+                            let buffer = Buffer.from(req.body.localFiles[file].data, 'base64');
+                            //models and images only atm...
+                            if (getExtension(req.body.localFiles[file].name) == ".glb") { //should sniff the thing instead, but...
+                                let awskey = 'users/' + req.session.user._id.toString() + '/gltf/' + timestamp + '_' + req.body.localFiles[file].name;
+                                let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
+                                    Key: awskey, 
+                                // ContentEncoding: 'base64',
+                                    ContentType: 'application/octet-stream',
+                                    Body: buffer};
+                                const status = await PutObject(params.Bucket, params.Key, params.Body);
+                                console.log("uploaded file " + awskey + " " + JSON.stringify(status));
+                                const newmodel = { //add to models collection
+                                    userID : req.session.user._id.toString(),
+                                    username : req.session.user.userName,
+                                    name : timestamp + "_" + req.body.localFiles[file].name,
+                                    filename : timestamp + "_" + req.body.localFiles[file].name,
+                                    item_type : 'glb',
+                                    tags: [],
+                                    item_status: "private",
+                                    otimestamp : timestamp,
+                                    ofilesize : req.body.localFiles[file].size };
+                                const saved = await RunDataQuery("models", "insertOne", newmodel);
+                                console.log("glb saved with id " + saved.insertedId); //.insertedId == ObjectId of new record
+                                let newfile = {};
+                                newfile.name = req.body.localFiles[file].name.replace("local_","");
+                                newfile._id = saved.insertedId;
+                                newFiles.push(newfile);
+                                var s_id = scene._id;   
+                                var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
+                                sceneModels.push(saved.insertedId);
+                                const query = { "_id": s_id };
+                                const updoc = { $set: {"sceneModels": sceneModels}};
+                                console.log("updoc " + JSON.stringify(updoc));
+                                const updated = await RunDataQuery("scenes","updateOne", query, updoc);
+                                console.log("updated sceneModels with " + JSON.stringify(updoc) + " " + JSON.stringify(updated));
+                            
+                            } else if (getExtension(req.body.localFiles[file].name) == ".zip" || getExtension(req.body.localFiles[file].name) == ".ply" || getExtension(req.body.localFiles[file].name) == ".spz" ||
+                                            getExtension(req.body.localFiles[file].name) == ".rad" ||   getExtension(req.body.localFiles[file].name) == ".sog" || getExtension(req.body.localFiles[file].name) == ".splat" || getExtension(req.body.localFiles[file].name) == ".ksplat"  ) { //should sniff the thing instead, but...
+                                let awskey = 'users/' + req.session.user._id.toString() + '/splat/' + timestamp + '_' + req.body.localFiles[file].name;
+                                let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
+                                    Key: awskey, 
+                                // ContentEncoding: 'base64',
+                                    ContentType: 'application/octet-stream',
+                                    Body: buffer};
+                                const status = await PutObject(params.Bucket, params.Key, params.Body);
+                                console.log("uploaded file " + awskey + " " + JSON.stringify(status));
+                                const newmodel = { //add to models collection
+                                    userID : req.session.user._id.toString(),
+                                    username : req.session.user.userName,
+                                    name : timestamp + "_" + req.body.localFiles[file].name,
+                                    filename : timestamp + "_" + req.body.localFiles[file].name,
+                                    item_type : 'splat',
+                                    tags: [],
+                                    item_status: "private",
+                                    otimestamp : timestamp,
+                                    ofilesize : req.body.localFiles[file].size };
+                                const saved = await RunDataQuery("models", "insertOne", newmodel);
+                                console.log("glb saved with id " + saved.insertedId); //.insertedId == ObjectId of new record
+                                let newfile = {};
+                                newfile.name = req.body.localFiles[file].name.replace("local_","");
+                                newfile._id = saved.insertedId;
+                                newFiles.push(newfile);
+                                var s_id = scene._id;   
+                                var sceneModels = (scene.sceneModels != undefined && scene.sceneModels != null && scene.sceneModels.length > 0) ? scene.sceneModels : new Array();
+                                sceneModels.push(saved.insertedId);
+                                const query = { "_id": s_id };
+                                const updoc = { $set: {"sceneModels": sceneModels}};
+                                console.log("updoc " + JSON.stringify(updoc));
+                                const updated = await RunDataQuery("scenes","updateOne", query, updoc);
+                                console.log("updated sceneModels with " + JSON.stringify(updoc) + " " + JSON.stringify(updated));
+                            
+                            } else if (getExtension(req.body.localFiles[file].name) == ".jpg" || getExtension(req.body.localFiles[file].name) == ".png") { 
+                                let hasAlpha = false;
+                                if (getExtension(req.body.localFiles[file].name) == ".png") {
+                                    hasAlpha = true;
                                 }
-                            } //end new files
+                                const newimage = { 
+                                    type : "fromLocalFile",
+                                    userID : req.session.user._id.toString(),
+                                    userName : req.session.user.userName,
+                                    title : timestamp + "_" + req.body.localFiles[file].name,
+                                    filename : timestamp + "_" + req.body.localFiles[file].name,
+                                    item_type : 'picture',
+                                    tags: [],
+                                    item_status: "private",
+                                    hasAlphaChannel: hasAlpha,
+                                    otimestamp : timestamp,
+                                    ofilesize : req.body.localFiles[file].size };
+                                const saved = await RunDataQuery("image_items", "insertOne", newimage);
+                                console.log("image saved with id " + saved.insertedId);
+                                let newfile = {};
+                                newfile.name = req.body.localFiles[file].name;
+                                newfile.name.replace("local_","");
+                                newfile._id = saved.insertedId;
+                                newFiles.push(newfile);
+                                let awskey = 'users/' + req.session.user._id.toString() + '/pictures/originals/' + saved.insertedId + '.original.' + req.body.localFiles[file].name;
+                                let params = { Bucket: process.env.ROOT_BUCKET_NAME, 
+                                    Key: awskey, 
+                                    // ContentEncoding: 'base64',
+                                    ContentType: 'application/octet-stream',
+                                    Body: buffer};
+                                const status = await PutObject(params.Bucket, params.Key, params.Body);
+                                console.log("put a pic: " + JSON.stringify(status));
+                                console.log('uploaded ' + req.body.localFiles[file].name);
+                                var token=jwt.sign({userId:req.session.user._id},process.env.JWT_SECRET);
+                                const options = {
+                                    headers: {'X-Access-Token': token}
+                                };
+                                const response = await fetch(process.env.GS_HOST + "/resize_uploaded_picture/"+saved.insertedId, options);
+                                console.log("grabAndSqueezepic response: " + response.status);
+                                var s_id = scene._id;   
+                                var scenePictures = (scene.scenePictures != undefined && scene.scenePictures != null && scene.scenePictures.length > 0) ? scene.scenePictures : new Array();
+                                scenePictures.push(saved.insertedId);
+                                const updoc = { $set: {"scenePictures": scenePictures}};
+                                const query = { "_id": s_id };
+                                const imageupdated = await RunDataQuery("scenes","updateOne", query, updoc);
+                                console.log("image mod updated.." + imageupdated);
+                                // db_old.scenes.update({ "_id": s_id }, ); //add pictureID to scene
+                            }
+                        } //end new files loop
 
-                            if (req.body.colorMods != null) {
-                                let sceneColor1 = req.body.colorMods.sceneColor1 != null ? req.body.colorMods.sceneColor1 : "";
-                                let sceneColor2 = req.body.colorMods.sceneColor2 != null ? req.body.colorMods.sceneColor2 : "";
-                                let sceneColor3 = req.body.colorMods.sceneColor3 != null ? req.body.colorMods.sceneColor3 : "";
-                                let sceneColor4 = req.body.colorMods.sceneColor4 != null ? req.body.colorMods.sceneColor4 : "";
-                                if (sceneColor1 != "") {
-                                    scenequery.sceneColor1 = sceneColor1;
-                                    console.log("query is " + scenequery.sceneColor1);
-                                }
-                                if (sceneColor2 != "") {
-                                    scenequery.sceneColor2 = sceneColor2;
-                                }
-                                if (sceneColor3 != "") {
-                                    scenequery.sceneColor3 = sceneColor3;
-                                }
-                                if (sceneColor4 != "") {
-                                    scenequery.sceneColor4 = sceneColor4;
-                                }
+                        if (req.body.colorMods != null) {
+                            let sceneColor1 = req.body.colorMods.sceneColor1 != null ? req.body.colorMods.sceneColor1 : "";
+                            let sceneColor2 = req.body.colorMods.sceneColor2 != null ? req.body.colorMods.sceneColor2 : "";
+                            let sceneColor3 = req.body.colorMods.sceneColor3 != null ? req.body.colorMods.sceneColor3 : "";
+                            let sceneColor4 = req.body.colorMods.sceneColor4 != null ? req.body.colorMods.sceneColor4 : "";
+                            if (sceneColor1 != "") {
+                                scenequery.sceneColor1 = sceneColor1;
+                                console.log("query is " + scenequery.sceneColor1);
                             }
-                            if (req.body.volumeMods != null) {
-                                scenequery.scenePrimaryVolume = req.body.volumeMods.volumePrimary != null ? req.body.volumeMods.volumePrimary : 0;
-                                scenequery.sceneAmbientVolume = req.body.volumeMods.volumeAmbient != null ? req.body.volumeMods.volumeAmbient : 0;
-                                scenequery.sceneTriggerVolume = req.body.volumeMods.volumeTrigger != null ? req.body.volumeMods.volumeTrigger : 0;
+                            if (sceneColor2 != "") {
+                                scenequery.sceneColor2 = sceneColor2;
                             }
-                            if (req.body.sceneEnvironmentPreset != null) {
-                                console.log("enviro preset " + req.body.sceneEnvironmentPreset);
-                                scenequery.sceneEnvironmentPreset = req.body.sceneEnvironmentPreset;
+                            if (sceneColor3 != "") {
+                                scenequery.sceneColor3 = sceneColor3;
                             }
-                            if (req.body.sceneTags != null) {
-                                scenequery.sceneTags = req.body.sceneTags;
-                                console.log("sceneTags mods " + scenequery.sceneTags);
+                            if (sceneColor4 != "") {
+                                scenequery.sceneColor4 = sceneColor4;
                             }
-                            if (req.body.sceneTimedEvents != null) {
-                                scenequery.sceneTimedEvents = req.body.sceneTimedEvents;
-                                console.log("sceneTimedEvents mods " + JSON.stringify(scenequery.sceneTimedEvents));
-                            }
-                            if (req.body.locationMods != null) {
-                                console.log("REQ.BODY.LOCATIONMODS " + JSON.stringify(req.body.locationMods));
-                                for (let l = 0; l < req.body.locationMods.length; l++) {
-                                    let isMatch = false;
-                                    // let name = req.body.locationMods[i].name;
+                        }
+                        if (req.body.volumeMods != null) {
+                            scenequery.scenePrimaryVolume = req.body.volumeMods.volumePrimary != null ? req.body.volumeMods.volumePrimary : 0;
+                            scenequery.sceneAmbientVolume = req.body.volumeMods.volumeAmbient != null ? req.body.volumeMods.volumeAmbient : 0;
+                            scenequery.sceneTriggerVolume = req.body.volumeMods.volumeTrigger != null ? req.body.volumeMods.volumeTrigger : 0;
+                        }
+                        if (req.body.sceneEnvironmentPreset != null) {
+                            console.log("enviro preset " + req.body.sceneEnvironmentPreset);
+                            scenequery.sceneEnvironmentPreset = req.body.sceneEnvironmentPreset;
+                        }
+                        if (req.body.sceneTags != null) {
+                            scenequery.sceneTags = req.body.sceneTags;
+                            console.log("sceneTags mods " + scenequery.sceneTags);
+                        }
+                        if (req.body.sceneTimedEvents != null) {
+                            scenequery.sceneTimedEvents = req.body.sceneTimedEvents;
+                            console.log("sceneTimedEvents mods " + JSON.stringify(scenequery.sceneTimedEvents));
+                        }
+                        if (req.body.locationMods != null) {
+                            console.log("REQ.BODY.LOCATIONMODS " + JSON.stringify(req.body.locationMods));
+                            for (let l = 0; l < req.body.locationMods.length; l++) {
+                                let isMatch = false;
+                                // let name = req.body.locationMods[i].name;
+
+                                // if (req.body.locationMods[l].isNew || req.body.locationMods[l].isLocal || req.body.locationMods[l].hasLocalData) {
                                     delete req.body.locationMods[l].isNew; //going to the cloud don't need these
                                     delete req.body.locationMods[l].isLocal;
+                                    delete req.body.locationMods[l].hasLocalData;
+                                // } else {
+                                //     continue; //skip the onse not modded
+                                // }
+                                if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
+                                    let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
+                                    req.body.locationMods[l].name = name;
+                                }
+                                // console.log("has newfile? " + req.body.locationMods[l].modelID + " Vs " + JSON.stringify(newFiles));
+                                if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length) {
+                                    for (let i = 0; i < newFiles.length; i++) {
+                                        if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length && (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_", ""))) { //reassign modelID w/ new DB _id
+                                            console.log("gotsa new model file match! " + newFiles[i].name);
+                                            req.body.locationMods[l].modelID = newFiles[i]._id;
+                                            req.body.locationMods[l].model = newFiles[i].name;
+
+                                        }
+                                    }
+                                }
+                                if (req.body.locationMods[l].mediaID && req.body.locationMods[l].mediaID.length) {
+                                    for (let i = 0; i < newFiles.length; i++) {
+                                        if (newFiles[i].name == req.body.locationMods[l].mediaID.replace("local_", "")) { //reassign modelID w/ new DB _id
+                                            console.log("gotsa new media file match! " + newFiles[i].name);
+                                            req.body.locationMods[l].mediaID = newFiles[i]._id;
+                                            req.body.locationMods[l].mediaName = newFiles[i].name;
+
+                                        }
+                                    }
+                                }
+
+                                let matchedID = 0;
+                                ////////////////////////////////////////////////////////// TODO sceneLocations as kv pairs?
+                                for (let i = 0; i < scene.sceneLocations.length; i++) { //spin through actual locations and either match and update or add a new one //
+
+                                    let tsVar = null;
+                                
+                                    if (req.body.locationMods[l].timestamp == scene.sceneLocations[i].timestamp) {
+                                        
+                                        console.log("tryna update a EXISTING LOCATION " + req.body.locationMods[l].timestamp);
+                                        
+                                        if (Number.isInteger(scene.sceneLocations[i].timestamp)) { // shit happens
+                                            tsVar = parseInt(req.body.locationMods[l].timestamp);
+                                        } else {
+                                            tsVar = req.body.locationMods[l].timestamp.toString();
+                                        }
+                                        if ((scene.sceneLocations[i].tags && scene.sceneLocations[i].tags.includes("no mods"))) {
+                                            console.log("mods not allowed for " + scene.sceneLocations[i].timestamp)
+                                        } else {
+                                            delete req.body.locationMods[l].isLocal;
+                                            delete req.body.locationMods[l].hasLocalData;
+                                            updatedSceneLocations.push(req.body.locationMods[l]);
+                                            matchedID = req.body.locationMods[l].timestamp; //if no match add the new one below
+                                        }
+                                    } 
+                                }
+
+                                if (matchedID != req.body.locationMods[l].timestamp) {
+                                    console.log("gotsa NEW LOCATION FROM CLIENT!" + req.body.locationMods[l].timestamp)
+                                    
                                     if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
                                         let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
                                         req.body.locationMods[l].name = name;
+                                        unmatchedIsModded = true;
                                     }
-                                    // console.log("has newfile? " + req.body.locationMods[l].modelID + " Vs " + JSON.stringify(newFiles));
-                                    if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length) {
+                                    // console.log("new loc new files? " + req.body.locationMods[l].modelID + " V " + JSON.stringify(newFiles));
+                                    if (newFiles.includes(req.body.locationMods[l].modelID)) {
                                         for (let i = 0; i < newFiles.length; i++) {
-                                            if (req.body.locationMods[l].modelID && req.body.locationMods[l].modelID.length && (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_", ""))) { //reassign modelID w/ new DB _id
-                                                console.log("gotsa new model file match! " + newFiles[i].name);
+                                            if (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_","")) { //reassign modelID w/ new DB _id
+                                                console.log("gotsa match new loc new model!");
                                                 req.body.locationMods[l].modelID = newFiles[i]._id;
-                                                req.body.locationMods[l].model = newFiles[i].name;
-
+                                                
                                             }
                                         }
                                     }
-                                    if (req.body.locationMods[l].mediaID && req.body.locationMods[l].mediaID.length) {
-                                        for (let i = 0; i < newFiles.length; i++) {
-                                            if (newFiles[i].name == req.body.locationMods[l].mediaID.replace("local_", "")) { //reassign modelID w/ new DB _id
-                                                console.log("gotsa new media file match! " + newFiles[i].name);
-                                                req.body.locationMods[l].mediaID = newFiles[i]._id;
-                                                req.body.locationMods[l].mediaName = newFiles[i].name;
-
-                                            }
-                                        }
-                                    }
-
-                                    let matchedID = 0;
-                                    
-                                    for (let i = 0; i < scene.sceneLocations.length; i++) { //spin through actual locations and either match and update or add a new one
-                                        let tsVar = null;
-                                    
-                                        if (req.body.locationMods[l].timestamp == scene.sceneLocations[i].timestamp) {
-                                            console.log("tryna update a EXISTING LOCATION " + req.body.locationMods[l].timestamp);
-                                           
-                                            if (Number.isInteger(scene.sceneLocations[i].timestamp)) { // shit happens
-                                                tsVar = parseInt(req.body.locationMods[l].timestamp);
-                                            } else {
-                                                tsVar = req.body.locationMods[l].timestamp.toString();
-                                            }
-                                            if ((scene.sceneLocations[i].tags && scene.sceneLocations[i].tags.includes("no mods"))) {
-                                                console.log("mods not allowed for " + scene.sceneLocations[i].timestamp)
-                                            } else {
-                                                delete req.body.locationMods[l].isLocal;
-                                                updatedSceneLocations.push(req.body.locationMods[l]);
-                                                matchedID = req.body.locationMods[l].timestamp; //if no match add the new one below
-                                            }
-                                        } 
-                                    }
-
-                                    if (matchedID != req.body.locationMods[l].timestamp) {
-                                        console.log("gotsa NEW LOCATION FROM CLIENT!" + req.body.locationMods[l].timestamp)
-                                        
-                                        if (req.body.locationMods[l].name && req.body.locationMods[l].name.toLowerCase().includes("local ")) {
-                                            let name = req.body.locationMods[l].name.toLowerCase().replace("local ", "");
-                                            req.body.locationMods[l].name = name;
-                                            unmatchedIsModded = true;
-                                        }
-                                        // console.log("new loc new files? " + req.body.locationMods[l].modelID + " V " + JSON.stringify(newFiles));
-                                        if (newFiles.includes(req.body.locationMods[l].modelID)) {
-                                            for (let i = 0; i < newFiles.length; i++) {
-                                                if (newFiles[i].name == req.body.locationMods[l].modelID.replace("local_","")) { //reassign modelID w/ new DB _id
-                                                    console.log("gotsa match new loc new model!");
-                                                    req.body.locationMods[l].modelID = newFiles[i]._id;
-                                                    
-                                                }
-                                            }
-                                        }
-                                        updatedSceneLocations.push(req.body.locationMods[l]);
-                                    }
+                                    updatedSceneLocations.push(req.body.locationMods[l]);
                                 }
-                                        
                             }
+                                    
+                        }
 
-                            scenequery.sceneLocations = updatedSceneLocations; //?
+                        scenequery.sceneLocations = updatedSceneLocations; //? // need to only update modded ones, but...
                         const finalquery = {'short_id': req.params.s_id};
                         const updoc = { $set: scenequery };
                         const finalupdated = await RunDataQuery("scenes", "updateOne", finalquery, updoc);

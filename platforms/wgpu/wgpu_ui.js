@@ -812,11 +812,11 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
                 // }
             // }
         } else {
-            distance = .1;
-            scaleFactor = 3;
+            distance = 1;
+            scaleFactor = 5;
         }
         console.log("ui " + scaleFactor + " " + distance + " " + style);
-        scaleFactor = clamp(scaleFactor, .25, 33);
+        scaleFactor = clamp(scaleFactor, .5, 33);
 
 
         if (!hicMesh) {

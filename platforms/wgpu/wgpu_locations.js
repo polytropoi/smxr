@@ -22,7 +22,7 @@ import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, n
 import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from './wgpu_nav.js';
 import { instance, modelViewProjection, color, float, range, modelScale } from 'three/tsl';
 import { UpdateModdedLocations, mods } from '../../connect/settings.js';
-import { eventEl } from '../../connect/events.js';
+import { eventEl, location_event } from '../../connect/events.js';
 
 import { lookAtCameraObjects } from './wgpu_ui.js';
 
@@ -131,8 +131,89 @@ export function createDefaultNavmesh(locData) {
            groundObjex.push(navmesh);
 }
 
+export async function LocationEvent (event) {
+    console.log("location event! " + JSON.stringify(event.details));
+    if (event.details.eventType == "new") {
+        const newPosition = new THREE.Vector3();
+        viewportPlaceholder.getWorldPosition(newPosition);
+        let markertype = "placeholder";
+        
+        let modelID = "none";
+        let mediaID = "none";
+        if (event.details.filename && event.details.filetype) {
+            markertype = event.details.filetype;
+            if (event.details.type == "model") {
+                modelID = event.details.filename;
+            } else if (event.details.type == "picture") {
+                mediaID = event.details.filename;
+            }
+        }
+        // if (type) {
+        //    markertype = type;
+        // }
+        
+        console.log("tryna create new location type " + markertype);
+        // let newPosition = {}; 
+        // if (!position) { //if added from dialog instead of with picker
+        //     // // let viewportHolder = document.getElementById('viewportPlaceholder');
+        //     // newPosition.x = selectedPosition.x;
+        //     // newPosition.y = 0;
+        //     // newPosition.z = selectedPosition.y; 
+        //     // // viewportHolder.object3D.getWorldPosition( newPosition );
+
+            
+        // } else {
+        //     newPosition = position;
+        // }  
+    
+        console.log("new position for placeholder " + JSON.stringify(newPosition));
+    
+
+        // var sceneEl = document.querySelectorAll('a-scene')[0];
+        
+        // phEl.setAttribute('skybox-env-map', '');
+        // timestamp = timestamp;
+        // timestamp = parseInt(timestamp);
+        let locItem = {};
+        locItem.x = newPosition.x.toString();
+        locItem.eulerx = 0; //maybe get look vector?
+        locItem.y = newPosition.y.toString();
+        locItem.eulery = 0;
+        locItem.z = newPosition.z.toString();
+        locItem.eulerz = 0;
+        locItem.type = "Worldspace";
+        locItem.label = 'local ' + markertype;
+        locItem.name =  'local ' + markertype;
+        locItem.description = '';
+        locItem.markerType = markertype;
+        locItem.eventData = '';
+        locItem.isNew = true;
+        locItem.timestamp = Date.now();
+        locItem.xscale = 1;
+        locItem.yscale = 1;
+        locItem.zscale = 1;
+        locItem.locationTags = '';
+        locItem.phID = locItem.timestamp;
+        locItem.modelID = modelID;
+        locItem.mediaID = mediaID;
+        locItem.isLocal = true;
+        // if (!localData) {
+        //     localData = {};
+        // }
+        // if (!localData.locations) {
+        //     localData.locations = [];
+        //     localData.locations.push(locItem);
+        // } else {
+        //     localData.locations.push(locItem);
+        // }
+        console.log("new location item " + JSON.stringify(locItem));
+        // SaveLocalData();
+    }
+}
+
 export async function InitLocations() {
     eventEl.addEventListener('data-event', LocalDataReady);
+
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction
     if (modelsDataEl) {
         const theModelsData = modelsDataEl.getAttribute('data-models');
@@ -350,6 +431,7 @@ export async function InitLocations() {
                 await LoadLocationObjex(); 
                 InitSystems();
                 LoadLocalMods();
+                eventEl.addEventListener('location-event', LocationEvent);
                 
             }
         })();

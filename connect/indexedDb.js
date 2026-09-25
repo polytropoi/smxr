@@ -106,14 +106,16 @@ export function InitIDB() {
                      // if (cursor.value.locations[i].markerType == "poi" || cursor.value.locations[i].markerType == "placeholder") {
                      //    poiLocations.push(cursor.value.locations[i]);
                      // }
-                     console.log( "cursor location " + i + " isLocal " + cursor.value.locations[i].isLocal + " hasLocalData " + cursor.value.locations[i].hasLocalData + " name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
+
+                     // console.log( "cursor location " + i + " isLocal " + cursor.value.locations[i].isLocal + " hasLocalData " + cursor.value.locations[i].hasLocalData + " name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
 
                      if ((cursor.value.locations[i].isLocal != undefined && cursor.value.locations[i].isLocal) || cursor.value.locations[i].hasLocalData) { //only update ones with local changes
-                     console.log(cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
+                     console.log("localData at cursor location " + i + " name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal!" + " pos " + cursor.value.locations[i].x + cursor.value.locations[i].y + cursor.value.locations[i].z );
                      // console.log("IDB cloudmarker name " + cursor.value.locations[i].name + " markerType " + cursor.value.locations[i].markerType + " isLocal " + " modelID " + cursor.value.locations[i].modelID);
 
                      if (settings.sceneType != "aframe" && settings.sceneType != "pixi") { //e.g. three
                         UpdateModdedLocations(cursor.value.locations[i]);
+                        hasLocalData = true;
                      } else {
                         let cloudEl = document.getElementById(cursor.value.locations[i].timestamp);
                         

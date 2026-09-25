@@ -17,7 +17,7 @@ export let drop_inventory_object_event = new Event("drop-inventory-object-event"
 export let dequip_event = new Event("dequip-event");
 export let sequence_event = new Event("sequence-event");
 export let data_event = new Event("data-event");
-export let location_event = new Event("location_event");
+export let location_event = new Event("location-event");
 
 export let sequenceInt = -1;
 
@@ -61,6 +61,16 @@ export function LocalDataLoaded() {
    console.log("local data loaded from indexedDb!");
    data_event.details = "idbloaded";
    eventEl.dispatchEvent(data_event);
+}
+
+export function SendLocationEvent(eventType, filename, filetype, position) {
+   location_event.details = {};
+   location_event.details.eventType = eventType;
+   location_event.details.filename = filename;
+   location_event.details.filetype = filetype;
+   location_event.details.position = position;
+
+   eventEl.dispatchEvent(location_event);
 }
 
 export function SetSelectedPosition(tilename, xpos, ypos) { //bit for aframe

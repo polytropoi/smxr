@@ -3,12 +3,12 @@ import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, Tran
           RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime, 
           LoadPrimaryAudioHowl, playVideo, pauseVideo} from "./media.js";
 import { dequip_event, equip_inventory_object_event, drop_inventory_object_event, timedEventsListenerMode, timeKeysData, tkStarttimes, 
-        PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz } from "./events.js";
+        PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz, SendLocationEvent } from "./events.js";
 import { settings, profile } from "./settings.js";
 import { eventEl } from "./events.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
   userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
-  GoToNext, GoToPrevious, CreateLocation, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
+  GoToNext, GoToPrevious, CreateLocationAframe, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
   Disconnect,
   SaveTimekeysToLocal,
   CreateLocationAlt, videoEl
@@ -403,7 +403,7 @@ window.addEventListener( 'keydown',  ( event ) => {
 
   $('#modalContent').on('click', '#createLocationButton', function(e) {
     if (settings && settings.sceneType.toLowerCase() == "aframe" || settings && settings.sceneType.toLowerCase() == "default") {
-      CreateLocation(); //aframe
+      CreateLocationAframe(); //aframe
     } else {
       CreateLocationAlt(); //not aframe
     }
@@ -950,7 +950,7 @@ function TabMangler(evt, tagName) {
 
 export function CreateNewLocation () {
       if (settings && settings.sceneType.toLowerCase() == "aframe" || settings && settings.sceneType.toLowerCase() == "default") {
-      CreateLocation(); //aframe
+      CreateLocationAframe(); //aframe
     } else {
       CreateLocationAlt(); //not aframe
     }
@@ -3459,7 +3459,11 @@ var PlayDialogLoop = function(arr) {
             addToSceneButton.innerText = 'Add to Scene';
             addToSceneButton.addEventListener('click', () => {
               // addToScene(localData.localFiles[file].name);
-              CreateLocation("local_" + localData.localFiles[file].name, 'model');
+              if (settings.sceneType && settings.sceneType.toLowerCase() == 'aframe') {
+                CreateLocationAframe("local_" + localData.localFiles[file].name, 'model');  //hrm, aframe only...
+              } else {
+                SendLocationEvent("new", "local_" + localData.localFiles[file].name, 'model');
+              }
             });
             
 
@@ -3523,7 +3527,7 @@ var PlayDialogLoop = function(arr) {
             addToSceneButton.classList.add('btn', 'btn-danger');
             addToSceneButton.innerText = 'Add to Scene';
             addToSceneButton.addEventListener('click', () => {
-              CreateLocation("local_" + localData.localFiles[file].name, 'picture');
+              CreateLocationAframe("local_" + localData.localFiles[file].name, 'picture');
             });
             
             cardBody.appendChild(title);

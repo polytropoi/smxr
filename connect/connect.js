@@ -4,10 +4,11 @@ import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLo
 
 
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "./dialogs.js";
-import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition, MapUpdate, SequenceEvent, eventEl, sequence_event } from "../connect/events.js";
+import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition, MapUpdate, SequenceEvent } from "../connect/events.js";
 
 
-import { settings, profile, pixelsPerMeterActual } from "../connect/settings.js";
+import { settings, profile, mods } from "../connect/settings.js";
+
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
@@ -727,6 +728,8 @@ export function SaveModsToCloud() { //Save button on location modal, writes loca
       mods.userData = userData;
 
       mods.localFiles = localData.localFiles; 
+
+
       for (let key in mods.localFiles) {
          if (localData.localFiles[key].data) {
             mods.localFiles[key].data = arrayBufferToBase64(localData.localFiles[key].data); //might need to async...
@@ -1517,13 +1520,22 @@ export function GoToPrevious() {
       }
    }
 }
+export function ModsToLocalData(mods) {
+   localData = mods;
+}
 
 export function ReturnLocationTable () { //just show em all now!
 
    let tablerows = "";
    // console.log("localData.locations " + JSON.stringify(localData.locations) );
+   if (mods && mods.locations) {
+      // for (let i = 0; i < localData.locations.length; i++) {
+      //    localData.locations[i]
+      // }
+   }
+   console.log("localData: " +JSON.stringify(localData));
    if (!localData.locations.length) {
-     
+      console.log("no localData found");
       for (let i = 0; i < sceneLocations.locations.length; i++) {
          let markerString = "";
          if (sceneLocations.locations[i].isLocal != null && sceneLocations.locations[i].isLocal === true) {
@@ -1536,6 +1548,7 @@ export function ReturnLocationTable () { //just show em all now!
          "<td>"+sceneLocations.locations[i].x+","+sceneLocations.locations[i].y+","+sceneLocations.locations[i].z+"</td><td>"+sceneLocations.locations[i].model+"</td><td>"+ markerString+"</td></tr>";
       }
    } else {
+
       for (let i = 0; i < localData.locations.length; i++) {
          localData.locations[i].x = parseFloat(localData.locations[i].x).toFixed(2).toString();
          localData.locations[i].y = parseFloat(localData.locations[i].y).toFixed(2).toString();
@@ -1544,7 +1557,7 @@ export function ReturnLocationTable () { //just show em all now!
          // localData.locations[i].z = localData.locations[i].z.toFixed(2);
          let namelabel = (localData.locations[i].name != 'undefined' && localData.locations[i].name != undefined && localData.locations[i].name != null) ? localData.locations[i].name : localData.locations[i].label; 
          let namestring = "<span style=\x22color: white; \x22>"+namelabel+"</span>";
-         if (localData.locations[i].isLocal != null && localData.locations[i].isLocal === true) {
+         if (localData.locations[i].isLocal != null && localData.locations[i].isLocal === true || localData.locations[i].hasLocalData) {
             namestring = "<span style=\x22color: skyblue; \x22>"+namelabel+"</span>";
             // hasLocalData = true;
          }  
@@ -1624,7 +1637,7 @@ function LocationRowClick(data) {
    // ShowLocationModal(isCloud, data);
 }
 
-export function CreateLocationAlt (filename, type, position, timestamp) { //for not-aframe views, args null by default
+export function CreateLocationAlt (filename, type, position, timestamp) { //for pixi routes, args null by default
 
    console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
    // let timestamp = null;
@@ -1720,7 +1733,7 @@ export function CreateLocationAlt (filename, type, position, timestamp) { //for 
 }
 
 
-export function CreateLocation (filename, type, position) { //AFRAME New Location button, also addToScene button for localfiles
+export function CreateLocationAframe (filename, type, position) { //AFRAME New Location button, also addToScene button for localfiles
    console.log("trynsa createlocation with file " + filename + " type " + type + " position " + JSON.stringify(position));
 
    if (settings.hasBgMap) {
