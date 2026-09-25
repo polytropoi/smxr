@@ -869,7 +869,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
             
             scene.add( hicMesh );
 
-             hicMesh.scale.setScalar(scaleFactor * .75);
+             hicMesh.scale.setScalar(scaleFactor);
             hicMesh.position.set(position.x, position.y + .5, position.z);
             // activeObjex.push(hicMesh);
             lookAtCameraObjects.push(hicMesh);
@@ -891,22 +891,25 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
                     ymodification = yMod;
 
                 }
-                 console.log(yMod + " vs ymod is " + ymodification + " distance " + distance);
+                console.log(yMod + " vs ymod is " + ymodification + " distance " + distance);
                 hicMesh.position.set(position.x, ymodification, position.z);
                 // hicMesh.scale.setScalar(scaleFactor);
-                hicMesh.scale.setScalar(scaleFactor * .75);
+                hicMesh.scale.setScalar(scaleFactor);
+            } else {
+                console.log("NO POSITION!");
+                const worldPosition = new THREE.Vector3();
+                viewportPlaceholder.getWorldPosition(worldPosition);
+                hicMesh.scale.setScalar(1);
+                hicMesh.position.set(worldPosition.x, worldPosition.y + .5, worldPosition.z);
+
             }
         } else {
             contentEl.innerHTML = htmlstring;
             hicMesh.visible = true;
-            if (!position && !distance) {
-                 console.log("NO POSITION!");
-                position = new THREE.Vector3();
-                viewportPlaceholder.getWorldPosition(position);
-                hicMesh.scale.setScalar(scaleFactor);
-                hicMesh.position.set(position.x, position.y - 4, position.z);
+            // if (!position && !distance) {
+              
 
-            } 
+            // } 
             // canvasEl.requestPaint();
             console.log("reused hicmesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
             if (position && distance) {
@@ -917,10 +920,13 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
                 } 
                 console.log("ymod is " + ymodification);
                 hicMesh.position.set(position.x, ymodification, position.z);
-                hicMesh.scale.setScalar(scaleFactor * .75);
+                hicMesh.scale.setScalar(scaleFactor);
             } else {
-                const ymodification = hicMesh.position.y - 3;
-                hicMesh.position.set(hicMesh.position.x, ymodification, hicMesh.position.z);
+                console.log("NO POSITION!");
+                const worldPosition = new THREE.Vector3();
+                viewportPlaceholder.getWorldPosition(worldPosition);
+                hicMesh.scale.setScalar(1);
+                hicMesh.position.set(worldPosition.x, worldPosition.y + .5, worldPosition.z);
                 // hicMesh.scale.setScalar(scaleFactor);
             }
             hicMesh.updateMatrixWorld();

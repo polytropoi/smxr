@@ -190,8 +190,15 @@ function InitTransformControls () {
         // obj.userData.locationData.y = objWorldPosition.y;
         // obj.userData.locationData.z = objWorldPosition.z;
 
-
+        let obj = event.target.object;
         // console.log(event.value);
+            if (obj.parent && !obj.parent.isScene) {
+                console.log("gotsa parent " + obj.parent.name);
+                // obj = obj.parent;
+            } 
+        //  const position = obj.position;
+                    obj.getWorldPosition(objWorldPosition);
+    console.log(`Current Position -> X: ${objWorldPosition.x}, Y: ${objWorldPosition.y}, Z: ${objWorldPosition.z}`);
 
 
     });
@@ -201,19 +208,23 @@ function InitTransformControls () {
         // console.log(JSON.stringify(localData));
         if (!event.value) { //drag is done
 
-            
+             const position = event.target.object.position;
+            console.log(`Current Position -> X: ${position.x}, Y: ${position.y}, Z: ${position.z}`);
             let obj = transformControl.object;
             if (obj.parent && !obj.parent.isScene) {
                 obj = obj.parent;
             } 
-            obj.getWorldPosition(objWorldPosition);
+            // obj.getWorldPosition(objWorldPosition);
             obj.getWorldQuaternion(objWorldQuaternion); 
             obj.getWorldScale(objWorldScale);
             objWorldRotationEuler.setFromQuaternion(objWorldQuaternion);
 
 
+            if (!objWorldPosition) {
+                objWorldPosition = obj.position;
+            }
             // obj.getWorldPosition(objWorldPosition);
-            console.log(JSON.stringify(obj.userData) + ' New position: ' + JSON.stringify(obj.position) + " vs " + JSON.stringify(objWorldPosition) + " rotation " + JSON.stringify(objWorldRotationEuler) );
+            console.log(obj.userData.locationData.name + ' old position: ' + JSON.stringify(obj.position) + " vs " + JSON.stringify(objWorldPosition) + " rotation " + JSON.stringify(objWorldRotationEuler) );
             obj.userData.locationData.x = objWorldPosition.x;
             obj.userData.locationData.y = objWorldPosition.y;
             obj.userData.locationData.z = objWorldPosition.z;
@@ -229,8 +240,9 @@ function InitTransformControls () {
 
             
             for (let i = 0; i < localData.locations.length; i++) {
+                console.log(localData.locations[i].timestamp + "vs" + obj.userData.locationData.timestamp);
                 if (localData.locations[i].timestamp == obj.userData.locationData.timestamp) {
-                    console.log("GOTSA MATCH ON THE TRANSFORM OBJECT! " + JSON.stringify(obj.userData.locationData));
+                    console.log("GOTSA MATCH ON THE TRANSFORM OBJECT! " + JSON.stringify(obj.userData.locationData) +" to "+ JSON.stringify(objWorldPosition));
                     localData.locations[i].x = objWorldPosition.x;
                     localData.locations[i].y = objWorldPosition.y;
                     localData.locations[i].z = objWorldPosition.z;
@@ -991,18 +1003,26 @@ async function RaycastHit(type, hit, event) {
                 return;
             }
         
-            if (objectData && objectData.callouttext && objectData.callouttext.length) {
-                // console.log("callout text "  + objectData.callouttext);
-                const calloutsplit = objectData.callouttext.split("~");
-                const randomIndex = Math.floor(Math.random() * calloutsplit.length);
-                const textstring = calloutsplit[randomIndex];
-                // console.log("gotsa object with textstring " + textstring);
+            if (objectData) { 
+                if (objectData.callouttext && objectData.callouttext.length) {
+                    // console.log("callout text "  + objectData.callouttext);
+                    const calloutsplit = objectData.callouttext.split("~");
+                    const randomIndex = Math.floor(Math.random() * calloutsplit.length);
+                    const textstring = calloutsplit[randomIndex];
+                    // console.log("gotsa object with textstring " + textstring);
 
-                if (showCallout) {
-                    ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-                    // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                    if (showCallout) {
+                        ThreeDeeText(textstring,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                        // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                    }
+
+                    SynthHit(hit.position, 1, 1);
+                } else {
+                    if (showCallout) {
+                        ThreeDeeText(objectData.name,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                        // HTMLText(textstring,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                    }
                 }
-                SynthHit(hit.position, 1, 1);
 
             } else {
 
@@ -1325,9 +1345,22 @@ export function onMouseDown(event) { // on threejs object
         return;
     }
     
-    // console.log("mouse down on " + event.target.id);
+
+        // console.log("mouse down on " + event.target.id);
     if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
-        console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " locationData " + JSON.stringify(locationData)); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+        if (allowMods && keyIsDown == "KeyT") {
+            if (!lastRaycastHitObject.userData.isEquipped) {
+                if (lastRaycastHitObject.parent) {
+                    transformControl.attach(lastRaycastHitObject.parent);
+                } else {
+                    transformControl.attach(lastRaycastHitObject);
+                }
+
+                return;
+            }
+        } else {
+            console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " locationData " + JSON.stringify(locationData)); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+        }
     } else {
       
         if (event.clientY > (window.innerHeight * .8)) {
@@ -1412,16 +1445,16 @@ export function onMouseDown(event) { // on threejs object
             // let sceneObjID = lastRaycastHitObject.userData.sceneObjectID;
         console.log("clicked on active object! " + lastHitObjectName);
 
-        if (allowMods && keyIsDown == "KeyT") {
+        // if (allowMods && keyIsDown == "KeyT") {
             
-            if (lastRaycastHitObject.parent) {
-                transformControl.attach(lastRaycastHitObject.parent);
-            } else {
-                transformControl.attach(lastRaycastHitObject);
-            }
+        //     if (lastRaycastHitObject.parent) {
+        //         transformControl.attach(lastRaycastHitObject.parent);
+        //     } else {
+        //         transformControl.attach(lastRaycastHitObject);
+        //     }
   
-            return;
-        }
+        //     return;
+        // }
         
             let navAgentInstance = null;
 
@@ -1608,23 +1641,28 @@ export function onMouseDown(event) { // on threejs object
                
                     console.log("clicked on gate !");
                     if (lastRaycastHit.distance < 40) {
+                        let style = "";
+                            if (uiMode == "hic") {
+                                style = "class=\x22hic_content_2\x22";
+                            }
                         if (!lastRaycastHitObject.userData.locationData.eventData) {
                             const randomIndex = Math.floor(Math.random() * availableScenesData.availableScenes.length);
                             const randomScene = availableScenesData.availableScenes[randomIndex];
                             console.log("randomScene is " + JSON.stringify(randomScene));
-                            htmlString = "<div> <h3> Scene Gate :</h3>"  + randomScene.sceneTitle +
+                            
+                            htmlString = "<div " +style+ "> <h3> Scene Gate :</h3>"  + randomScene.sceneTitle +
                             "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
                             lastRaycastHitObject.userData.locationData.locationTags+
                             "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
                             randomScene.sceneKey+"\x22 class=\x22yesButton\x22>Enter</button>"+
                             "</div></div>";
                         } else {
-                            htmlString = "<h1> Scene Gate :</h1>"  + lastRaycastHitObject.userData.locationData.description +
+                            htmlString = "<div " +style+ "><h3> Scene Gate :</h3>"  + lastRaycastHitObject.userData.locationData.description +
                             "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
                             lastRaycastHitObject.userData.locationData.locationTags+
                             "\x22 data-type=\x22"+lastRaycastHitObject.userData.locationData.markerType+"\x22 data-data=\x22"+
                             lastRaycastHitObject.userData.locationData.eventData+"\x22 class=\x22yesButton\x22>Enter</button>"+
-                            "</div>";
+                            "</div></div>";
                         }
                         ShowHTMLPopup(event, htmlString, null, null, "hic_content");
                     } else {
