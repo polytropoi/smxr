@@ -153,32 +153,11 @@ export async function LocationEvent (event) {
         if (event.details.position) {
             newPosition = event.details.position; //from the X keydown picker
         }
-        // if (type) {
-        //    markertype = type;
-        // }
         
         console.log("tryna create new location type " + markertype);
-        // let newPosition = {}; 
-        // if (!position) { //if added from dialog instead of with picker
-        //     // // let viewportHolder = document.getElementById('viewportPlaceholder');
-        //     // newPosition.x = selectedPosition.x;
-        //     // newPosition.y = 0;
-        //     // newPosition.z = selectedPosition.y; 
-        //     // // viewportHolder.object3D.getWorldPosition( newPosition );
-
             
-        // } else {
-        //     newPosition = position;
-        // }  
-    
         console.log("new position for placeholder " + JSON.stringify(newPosition));
-    
 
-        // var sceneEl = document.querySelectorAll('a-scene')[0];
-        
-        // phEl.setAttribute('skybox-env-map', '');
-        // timestamp = timestamp;
-        // timestamp = parseInt(timestamp);
         let locItem = {};
         locItem.x = newPosition.x.toString();
         locItem.eulerx = 0; //maybe get look vector?
@@ -202,17 +181,15 @@ export async function LocationEvent (event) {
         locItem.modelID = modelID;
         locItem.mediaID = mediaID;
         locItem.isLocal = true;
-        // if (!localData) {
-        //     localData = {};
-        // }
-        // if (!localData.locations) {
-        //     localData.locations = [];
-        //     localData.locations.push(locItem);
-        // } else {
-            localData.locations.push(locItem);
-        // }
+       
+        localData.locations.push(locItem);
+       
         console.log("new location item " + JSON.stringify(locItem));
         SaveLocalData();
+    } else if (event.details.eventType == "snap") {
+        console.log("tryna snap to "+ event.details.filename);
+    } else if (event.details.eventType == "goto") {
+        console.log("tryna goto "+ event.details.filename);
     }
 }
 

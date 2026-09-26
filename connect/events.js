@@ -43,8 +43,8 @@ let lastTimedEvent = "";
 export function SetSequenceInt (int) { //called elsewhere to limit loop depending on what is using it (skyboxes, poi locations, etc.)
    sequenceInt = int;
 }
-export function SequenceEvent(type) {
 
+export function SequenceEvent(type) {
    if (type == "next") {
       sequenceInt++;
    }

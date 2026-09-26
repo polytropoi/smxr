@@ -253,11 +253,13 @@ function WaitAndInit () {
       // if (player) {
     
         // const mesh = player;
+        console.log("tryna set trigger body for "+ locationData.name);
         await new Promise(r => setTimeout(r, 1000));
         const colliderSize = locationData.xscale;
         // let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
         let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
-                .setTranslation(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
+            .setTranslation(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
+
         let rigidbody = await world.createRigidBody(rigidBodyDesc);
         colliders[rigidbody.handle] = "trigger_" + locationData.timestamp;
         // let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
@@ -265,9 +267,14 @@ function WaitAndInit () {
         let collider = await world.createCollider(colliderDesc, rigidbody);
         // collider.setRestitution(1.5);
         // collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-        collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
-        collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
+        // collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+                collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+                // collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
 
+        collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.KINEMATIC_FIXED);
+        // collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
+        
+        // collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
         let worldposition = new THREE.Vector3();
         // triggerObject.getWorldPosition(worldposition);
 
@@ -287,22 +294,22 @@ function WaitAndInit () {
   export async function getPlayerBody(player) { //
 
       if (player) {
-    
+            console.log("tryna set player body!");
         // const mesh = player;
         let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased() //no, position based...
                 .setTranslation(player.position.x, player.position.y, player.position.z);
         let rigidbody = await world.createRigidBody(rigidBodyDesc);
-        colliders[rigidbody.handle] = "player";
+        // colliders[rigidbody.handle] = "player";
         let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
         let collider = await world.createCollider(kinematicCollider, rigidbody);
         collider.setRestitution(1.5);
         collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
         collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
-                // collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+                collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
 
-        collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
+        // collider.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
                 // collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
-        collider.setContactForceEventThreshold(1.0);
+        // collider.setContactForceEventThreshold(1.0);
 
         colliders[collider.handle] = "player_" + Date.now();
 
@@ -378,8 +385,8 @@ function WaitAndInit () {
       let collider = await world.createCollider(kinematicCollider, rigidbody);
       collider.setRestitution(1.5);
       collider.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-      collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS, RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
-                      // collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+      // collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS, RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        collider.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
         collider.setContactForceEventThreshold(1.0);
       
 

@@ -1758,7 +1758,7 @@ export function onMouseUp(e) {
         console.log("clicked on equipped object! " + lastRaycastHitObject.userData.objectData.name + " downtime " + mouseDowntime );
         // const sceneObjInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance;
         // sceneObjInstance.onClick();
-          const sceneObjID = lastRaycastHitObject.userData.objectData.sceneObjectID;
+        const sceneObjID = lastRaycastHitObject.userData.objectData.sceneObjectID;
         if (sceneObjID) {
             sceneObjects[sceneObjID].onClick();
         }
@@ -1768,7 +1768,7 @@ export function onMouseUp(e) {
         // return;
     }
 
-    console.log(pickedPosition + " " + allowMods + " " + keyIsDown);
+    // console.log(pickedPosition + " " + allowMods + " " + keyIsDown);
 
     if (pickedPosition && allowMods && keyIsDown == "KeyX") {
         console.log("mouseUp with picker!");

@@ -1294,7 +1294,7 @@ export function SnapLocation(locationKey) { //snap selected object to player loc
    viewportHolder.object3D.getWorldPosition( cameraPosition );
 
    console.log("tryna snaplocation : " +locationKey + " to " + JSON.stringify(cameraPosition));
-   if (snapEl != null) {
+   if (snapEl != null) { //i.e. not aframe...
       // let scale = snapEl.getAttribute("scale");
       // snapEl.setAttribute("scale", 1);
       let snapx = cameraPosition.x.toFixed(2);
@@ -1307,9 +1307,12 @@ export function SnapLocation(locationKey) { //snap selected object to player loc
          // 
          snapEl.setAttribute('position', {"x": snapx, "y": snapy, "z": snapz});
          SaveModToLocal(locationKey);
-      } else {
-         console.log("couldnot find snapEl " + locationKey);
-      } 
+
+
+   } else {
+      console.log("couldnot find snapEl " + locationKey);
+      SendLocationEvent("snap", locationKey, "location", null); //calling all things on events.js
+   } 
 }
 
 export function GoToPosRot (pos, rot) {

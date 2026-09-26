@@ -784,6 +784,22 @@
 				// eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
 				// 	console.log(`Sensor ${handle1} intersection with ${handle2}: ${intersecting}`);
 				// });
+				eventQueue.drainCollisionEvents((handle1, handle2, started) => {
+					// handle1 and handle2 are the collider handles involved
+					// 'started' is true if they just intersected, false if they stopped intersecting
+					
+					if (started) {
+						// console.log(`Collider ${handle1} entered Sensor/Collider ${handle2}`);
+
+							// let collider1 = world.getCollider(handle1);
+							// let collider2 = world.getCollider(handle2);
+							console.log(colliders[handle1] +" hit "+ colliders[handle2]);
+					} else {
+						// console.log(`Collider ${handle1} left Sensor/Collider ${handle2}`);
+						console.log(colliders[handle1] +" unhit "+ colliders[handle2]);
+					}
+				});
+
   				eventQueue.drainContactForceEvents((event) => {
 					if (scene) {
 					// if (event.started) {
