@@ -23,6 +23,7 @@ import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from
 import { instance, modelViewProjection, color, float, range, modelScale } from 'three/tsl';
 import { UpdateModdedLocations, mods } from '../../connect/settings.js';
 import { eventEl, location_event } from '../../connect/events.js';
+import { SaveLocalData } from '../../connect/indexedDb.js';
 
 import { lookAtCameraObjects } from './wgpu_ui.js';
 
@@ -134,7 +135,7 @@ export function createDefaultNavmesh(locData) {
 export async function LocationEvent (event) {
     console.log("location event! " + JSON.stringify(event.details));
     if (event.details.eventType == "new") {
-        const newPosition = new THREE.Vector3();
+        let newPosition = new THREE.Vector3();
         viewportPlaceholder.getWorldPosition(newPosition);
         let markertype = "placeholder";
         
@@ -147,6 +148,10 @@ export async function LocationEvent (event) {
             } else if (event.details.type == "picture") {
                 mediaID = event.details.filename;
             }
+        }
+
+        if (event.details.position) {
+            newPosition = event.details.position; //from the X keydown picker
         }
         // if (type) {
         //    markertype = type;
@@ -204,10 +209,10 @@ export async function LocationEvent (event) {
         //     localData.locations = [];
         //     localData.locations.push(locItem);
         // } else {
-        //     localData.locations.push(locItem);
+            localData.locations.push(locItem);
         // }
         console.log("new location item " + JSON.stringify(locItem));
-        // SaveLocalData();
+        SaveLocalData();
     }
 }
 
@@ -479,7 +484,8 @@ export function LoadLocalMods(event) {
                 foundObject.rotation.set(mods.locations[i].eulerx, mods.locations[i].eulery, mods.locations[i].eulerz );
                 foundObject.scale.set(mods.locations[i].xscale, mods.locations[i].yscale, mods.locations[i].zscale );
             } else {
-                console.log("localmod Object not found");
+                console.log("localmod Object not found, must be new localdata");
+                CreateDefaultLocationMarker(mods.locations[i]); //prims only
             }
         }
     }

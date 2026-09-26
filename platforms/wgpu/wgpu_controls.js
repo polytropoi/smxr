@@ -11,7 +11,7 @@ import { availableScenesData, ReturnTaggedPictures, sceneTextController, trigger
 
 import { ActionSwitch, SetPlayerRigidbody, InstancedActionClick, sceneObjects } from './wgpu_actions.js';
 
-import { activeObjex, groundObjex, navmesh, EnterSceneGate } from './wgpu_locations.js';
+import { activeObjex, groundObjex, navmesh, LocationEvent } from './wgpu_locations.js';
 
 import { scene, cameraMode, renderer, clock, selectedObjects, sceneIsReady } from './wgpu_main.mjs';
 
@@ -39,6 +39,7 @@ import { TagsToInstances } from './wgpu_instance.js';
 import { GoToNext, localData } from '../../connect/connect.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
 import { SynthHit } from './wgpu_synths.js';
+import { CreateNewLocation, keydown } from '../../connect/dialogs.js';
 
 
 // import { getPlayerBody } from './three_physics.js';
@@ -55,6 +56,8 @@ let mousecaster, centercaster, playcaster, downcaster, goal, arrowHelper, lastRa
 export let lastRaycastHitObject;
 export let lastRaycastHitPosition = new THREE.Vector3();
 export let lastRaycastHitDistance = 1;
+export let lastPickedPosition;
+export let pickedPosition;
 
 export let dir = new THREE.Vector3;
 export let playerDirection = new THREE.Vector3();
@@ -1224,43 +1227,63 @@ export function mouseRaycast(e) {
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     // console.log("mouse pos " + JSON.stringify(mouse));
     mousecaster.setFromCamera(mouse, camera);
+    if (allowMods && keyIsDown == "KeyX") {
+        var locationPickerRaycastHits = mousecaster.intersectObjects(scene.children, true);
+        if (locationPickerRaycastHits.length) {
+        const hit = locationPickerRaycastHits[0];
 
-    var raycastHits = mousecaster.intersectObjects(activeObjex, true);
-    let selectColor = new THREE.Color(0xff3333);
-    let stopColor = new THREE.Color(0x26de57);
-    let goColor = new THREE.Color(0xff0000);
-    if (raycastHits.length > 0) {
+            pickedPosition = hit.point
+            pointerGizmo.position.set(hit.point.x, hit.point.y, hit.point.z);
+            pointerGizmo.visible = true;
+            console.log("locationPicker hit " + JSON.stringify(pickedPosition));
+            if (hit.face) {
+                const localNormal = hit.face.normal;
+                const worldNormal = localNormal.clone().transformDirection(hit.object.matrixWorld);
+                // console.log("hit worldnormal " + JSON.stringify(worldNormal));
+               
+                // pointerGizmo.lookAt(worldNormal);
+                rotateObjectToNormal(pointerGizmo, worldNormal);
+            }
+        }
+    } else {
+        pickedPosition = null;
+        var raycastHits = mousecaster.intersectObjects(activeObjex, true);
+        let selectColor = new THREE.Color(0xff3333);
+        let stopColor = new THREE.Color(0x26de57);
+        let goColor = new THREE.Color(0xff0000);
+        if (raycastHits.length > 0) {
 
-        // console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
-        // 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
-        if (raycastHits[0].object.userData) {
-            RaycastHit("mouse", raycastHits[0], e);
-            lastRaycastHitPosition = raycastHits[0].point;
+            // console.log("raycast hit layer " + JSON.stringify(raycastHits[0].object.layers) + " distance " + raycastHits[0].distance +  
+            // 				" id " + raycastHits[0].object.id + " name " + raycastHits[0].object.name +  " instanceId " + raycastHits[0].instanceId + " locationData " + JSON.stringify(raycastHits[0].object.userData));
+            if (raycastHits[0].object.userData) {
+                RaycastHit("mouse", raycastHits[0], e);
+                lastRaycastHitPosition = raycastHits[0].point;
+                
+                // raycastHits[0].point.getWorldPosition(worldHitPosition);
+                // worldHitPosition = raycastHits[0].point;
+                    // console.log("mouse raycast hit " + JSON.stringify(lastRaycastHitPosition));
+            } else {
+                selectedObjects.length = 0;
+                // lastRaycastHit = null;
+                lastRaycastHitObject = null;
+                raycastHitAgent = null;
             
-            // raycastHits[0].point.getWorldPosition(worldHitPosition);
-            // worldHitPosition = raycastHits[0].point;
-                // console.log("mouse raycast hit " + JSON.stringify(lastRaycastHitPosition));
+            }
+
         } else {
             selectedObjects.length = 0;
-            // lastRaycastHit = null;
-            lastRaycastHitObject = null;
-            raycastHitAgent = null;
-           
+            UnSwapMaterials();
+            for (let i = 0; i < textContainers.length; i++) {
+                textContainers[i].visible = false;
+            }
+            if (lastRaycastHitObject) {
+                lastRaycastHit = null;
+                lastRaycastHitObject = null;
+                raycastHitAgent = null;
+            }
+            pointerGizmo.visible = false;
+                    
         }
-
-    } else {
-        selectedObjects.length = 0;
-        UnSwapMaterials();
-        for (let i = 0; i < textContainers.length; i++) {
-            textContainers[i].visible = false;
-        }
-        if (lastRaycastHitObject) {
-            lastRaycastHit = null;
-            lastRaycastHitObject = null;
-            raycastHitAgent = null;
-        }
-        pointerGizmo.visible = false;
-                
     }
 }
 
@@ -1730,6 +1753,7 @@ export function onMouseUp(e) {
     if (cameraMode == "Fly") {
         controls.dragToLook = true;
     }
+    
     if (lastRaycastHitObject && lastRaycastHitObject.userData && lastRaycastHitObject.userData.objectData && lastRaycastHitObject.userData.isEquipped) {
         console.log("clicked on equipped object! " + lastRaycastHitObject.userData.objectData.name + " downtime " + mouseDowntime );
         // const sceneObjInstance = lastRaycastHitObject.parent.userData.sceneObjectInstance;
@@ -1742,6 +1766,17 @@ export function onMouseUp(e) {
             
         // }
         // return;
+    }
+
+    console.log(pickedPosition + " " + allowMods + " " + keyIsDown);
+
+    if (pickedPosition && allowMods && keyIsDown == "KeyX") {
+        console.log("mouseUp with picker!");
+        const fakeevent = {};
+        fakeevent.details = {};
+        fakeevent.details.eventType = "new";
+        fakeevent.details.position = pickedPosition;
+        LocationEvent(fakeevent);  //cook a fake event to reuse method that calls via event from dialogs.js
     }
 
 }
