@@ -1,6 +1,11 @@
 
 
 import { SuperSonic } from "https://unpkg.com/supersonic-scsynth@0.81.0/dist/supersonic.js";
+import * as THREE from 'three/webgpu';
+
+
+import { scene } from './wgpu_main.mjs';
+import { activeObjex } from './wgpu_locations.js';
 
 export let superSonicLoaded = false;
 let supersonic;
@@ -280,4 +285,72 @@ async function start() {
   
   // Start the ticking interval clock
   timerId = setInterval(scheduler, scheduleInterval);
+}
+
+export function CreateSynthKeys() {
+
+  let tonics = ["A","A#","Ab","B","B#","Bb","C","C#","D","D#","Db","E","E#","Eb","F","F#","Fb","G","G#","Gb"];
+  let types = ["major", "minor", "minor7"];
+
+  const count = types.length * tonics.length;
+  const geo = new THREE.BoxGeometry(.5,.5,1,1);
+  const mat = new THREE.MeshBasicMaterial();
+  // const mesh = new THREE.Mesh(geo, mat);
+  const instancedMesh = new THREE.InstancedMesh(geo, mat, count);
+  scene.add(instancedMesh);
+  instancedMesh.userData = {};
+  instancedMesh.userData.locationData = {};
+    instancedMesh.userData.locationData.name = "synthKeys";
+  activeObjex.push(instancedMesh);
+  
+// 4. Set initial transformation matrix for each instance
+  const dummy = new THREE.Object3D();
+  let k = 0;
+  
+  for (let i = 0; i < tonics.length; i++) {
+    
+    for (let n = 0; n < types.length; n++) {
+
+    dummy.position.set(i + 1, n, -5);
+    // const clone = mesh.clone();
+    dummy.updateMatrix();
+    
+    // Apply matrix to the instanced mesh index
+    instancedMesh.setMatrixAt(k, dummy.matrix);
+
+    k++;
+
+          // clone.userData.keytonic = tonics[i];
+          // clone.userData.keytype = types[n];
+
+    // clone.position.set(i, n, 5);
+
+  // for (let i = 0; i < numChildren; i++) {
+    // Calculate the angle for this child
+    // const angle = (i / numChildren) * Math.PI * 2;
+
+    // // Compute X and Z coordinates using trigonometry
+    // const x = Math.cos(angle) * radius;
+    // const z = Math.sin(angle) * radius;
+
+    // // Create a simple mesh (e.g., a small cube)
+    // const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+    // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    // const childMesh = new THREE.Mesh(geometry, material);
+
+    // // Set position relative to the group's center
+    // childMesh.position.set(x, 0, z);
+
+    // // Optional: Rotate the child to face outward from the center
+    // childMesh.rotation.y = -angle;
+
+    // // Add the child to the parent group
+    // parentGroup.add(childMesh);
+
+  // }
+    }
+
+
+  }
+    instancedMesh.instanceMatrix.needsUpdate = true;
 }

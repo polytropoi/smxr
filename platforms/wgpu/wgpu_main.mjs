@@ -53,7 +53,7 @@
 	
 	import { equippedObjectOnLoad, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 	import { splatObjex, InitSplats } from './wgpu_splats.js';
-	import { InitSuperSonic, SynthHit, superSonicLoaded } from './wgpu_synths.js';
+	import { CreateSynthKeys, InitSuperSonic, SynthHit, superSonicLoaded } from './wgpu_synths.js';
 
 	export let scene;
 
@@ -369,6 +369,9 @@
 		if (settings.sceneTags.includes("hic")) {
 			SetUIMode("hic");// no workie now wtf!
 			// SetUIMode("popup");
+		}
+		if (settings.sceneTags.includes("synth keys")) {
+			CreateSynthKeys();
 		}
 		StartPopup(loadingHeader, 'Loading Environment....', false);
 
