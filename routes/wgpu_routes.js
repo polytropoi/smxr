@@ -391,7 +391,11 @@ wgpu_router.get('/:_id', function (req, res) {
                              "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
                              "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
 
-                            "\x22tone\x22: \x22../main/vendor/tonejs/tonejs_15.1.22.js\x22,"+
+                            // "\x22@tonaljs/tonal\x22: \x22../node_modules/tonal/dist/index.js\x22,"+
+
+                            "\x22tonal\x22: \x22https://esm.sh/tonal\x22,"+
+
+                            // "tonal": "https://esm.sh"
                           
                             
                             "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
@@ -1704,6 +1708,7 @@ wgpu_router.get('/:_id', function (req, res) {
             }
             if (hasSynth) {
                 // synthScripts = "<script src=\x22../main/src/synth/Tone.js\x22></script><script src=\x22../main/js/synth.js\x22></script>";//nope, that one is aframe
+                // <script type=\x22module\x22 src=\x22../../node_modules/tonal/dist/index.mjs\x22></script>
                 synthScripts = "<script type=\x22module\x22 src=\x22../../platforms/wgpu/synths.js\x22></script>"; //supersonic, tone, etc...
             }
             if (hasPrimaryAudio) {

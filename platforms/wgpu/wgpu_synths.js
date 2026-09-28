@@ -1,8 +1,11 @@
 
-
+import * as Tonal from 'tonal';
 import { SuperSonic } from "https://unpkg.com/supersonic-scsynth@0.81.0/dist/supersonic.js";
 import * as THREE from 'three/webgpu';
+// import {Tonal} from "../../node_modules/tonal/dist/index.mjs";/
+// import { Note, Scale } from "tonal";
 
+// import * as Tonal from '@tonaljs/tonal';
 
 import { scene } from './wgpu_main.mjs';
 import { activeObjex } from './wgpu_locations.js';
@@ -22,6 +25,8 @@ let nodeID;
 let sonic = null;
 let isPlaying = false;
 let timerId = null;
+
+export let synthKeys = {};
 
 const CDN = "https://unpkg.com/";   // or "https://cdn.jsdelivr.net/npm/"
 
@@ -134,7 +139,7 @@ function getRandomInt(min, max) {
 function getPercentageOf(percent, total) {
   return (percent / 100) * total;
 }
-export async function SynthHit(position, volFactor, distance) {
+export async function SynthHit(position, volFactor, distance, note, chord) {
 
     // await supersonic.loadSynthDef(synthDef1);
 
@@ -151,6 +156,7 @@ export async function SynthHit(position, volFactor, distance) {
           // const notes = [32, 34, 38, 42, 44, 48, 52, 60];
 
           // const noteIndex = Math.floor(Math.random() * notes.length);
+        if (!note && !chord) {
           if (!volFactor) {
             volFactor = Math.random();
           }
@@ -169,6 +175,17 @@ export async function SynthHit(position, volFactor, distance) {
 
 
           supersonic.send("/s_new", synthDefs[synthIndex], -1, 0, 0, "note", note, "amp", volFactor, "attack", .2, "release", 1, "cutoff", cutoffValue);
+        } else if (chord) {
+            console.log("tryna play chord " + chord);
+            volFactor = .5;
+              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[0], "amp", volFactor, "attack", .2, "release", 1, "cutoff", 80);
+
+              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[1], "amp", volFactor, "attack", .2, "release", 1, "cutoff", 80);
+
+              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[2], "amp", volFactor, "attack", .2, "release", 1, "cutoff", 80);
+
+              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[3], "amp", volFactor, "attack", .2, "release", 1, "cutoff", 80);
+        }
       }
         // console.log("Processed:" + metrics.scsynthMessagesProcessed);
       // }
@@ -176,7 +193,7 @@ export async function SynthHit(position, volFactor, distance) {
 }
 
 
-function applyPitchBend(targetFreq) {
+function applyPitchBend(nodeId, targetFreq) {
     // '/n_set' targets a specific running node and updates its arguments instantly
 
     supersonic.sendOSC("/n_set", [nodeId, "freq", targetFreq]);
@@ -287,70 +304,126 @@ async function start() {
   timerId = setInterval(scheduler, scheduleInterval);
 }
 
-export function CreateSynthKeys() {
 
-  let tonics = ["A","A#","Ab","B","B#","Bb","C","C#","D","D#","Db","E","E#","Eb","F","F#","Fb","G","G#","Gb"];
-  let types = ["major", "minor", "minor7"];
+export class SynthKeys { //things that might have models and actions and fancy params, e.g. characters, magic swords, etc
+  constructor(options) {
+    let tonics = ["A","A#","Ab","B","B#","Bb","C","C#","D","D#","Db","E","E#","Eb","F","F#","Fb","G","G#","Gb"];
+    let types = ["minor", "minor7", "major"];
 
-  const count = types.length * tonics.length;
-  const geo = new THREE.BoxGeometry(.5,.5,1,1);
-  const mat = new THREE.MeshBasicMaterial();
-  // const mesh = new THREE.Mesh(geo, mat);
-  const instancedMesh = new THREE.InstancedMesh(geo, mat, count);
-  scene.add(instancedMesh);
-  instancedMesh.userData = {};
-  instancedMesh.userData.locationData = {};
-    instancedMesh.userData.locationData.name = "synthKeys";
-  activeObjex.push(instancedMesh);
-  
-// 4. Set initial transformation matrix for each instance
-  const dummy = new THREE.Object3D();
-  let k = 0;
-  
-  for (let i = 0; i < tonics.length; i++) {
+    const count = types.length * tonics.length;
+    const geo = new THREE.BoxGeometry(.5,.5,1,1);
+    const mat = new THREE.MeshBasicMaterial();
+    // const mesh = new THREE.Mesh(geo, mat);
+    const instancedMesh = new THREE.InstancedMesh(geo, mat, count);
+    scene.add(instancedMesh);
+    instancedMesh.userData = {};
+    instancedMesh.userData.locationData = {};
+      instancedMesh.userData.locationData.name = "synthKeys";
+      instancedMesh.userData.locationData.markerType = "synth keys";
+    activeObjex.push(instancedMesh);
     
-    for (let n = 0; n < types.length; n++) {
+    synthKeys[0] = this;
+  // 4. Set initial transformation matrix for each instance
+    const dummy = new THREE.Object3D();
+    this.keymap = [];
+    let k = 1;
 
-    dummy.position.set(i + 1, n, -5);
-    // const clone = mesh.clone();
-    dummy.updateMatrix();
+    this.keyData = {};
+    for (let i = 0; i < tonics.length; i++) {
+      
+      for (let n = 0; n < types.length; n++) {
+
+      dummy.position.set(i + 1, n, -5);
+      // const clone = mesh.clone();
+      dummy.updateMatrix();
+      
+      // Apply matrix to the instanced mesh index
+      instancedMesh.setMatrixAt(k, dummy.matrix);
+
+      k++;
+      let key = {}
+
+      key.keytonic = tonics[i];
+      key.keytype = types[n];
+      this.keyData[k] = key;
+
+            // clone.userData.keytonic = tonics[i];
+            // clone.userData.keytype = types[n];
+
+      // clone.position.set(i, n, 5);
+
+    // for (let i = 0; i < numChildren; i++) {
+      // Calculate the angle for this child
+      // const angle = (i / numChildren) * Math.PI * 2;
+
+      // // Compute X and Z coordinates using trigonometry
+      // const x = Math.cos(angle) * radius;
+      // const z = Math.sin(angle) * radius;
+
+      // // Create a simple mesh (e.g., a small cube)
+      // const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+      // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      // const childMesh = new THREE.Mesh(geometry, material);
+
+      // // Set position relative to the group's center
+      // childMesh.position.set(x, 0, z);
+
+      // // Optional: Rotate the child to face outward from the center
+      // childMesh.rotation.y = -angle;
+
+      // // Add the child to the parent group
+      // parentGroup.add(childMesh);
+
+    // }
+      }
     
-    // Apply matrix to the instanced mesh index
-    instancedMesh.setMatrixAt(k, dummy.matrix);
-
-    k++;
-
-          // clone.userData.keytonic = tonics[i];
-          // clone.userData.keytype = types[n];
-
-    // clone.position.set(i, n, 5);
-
-  // for (let i = 0; i < numChildren; i++) {
-    // Calculate the angle for this child
-    // const angle = (i / numChildren) * Math.PI * 2;
-
-    // // Compute X and Z coordinates using trigonometry
-    // const x = Math.cos(angle) * radius;
-    // const z = Math.sin(angle) * radius;
-
-    // // Create a simple mesh (e.g., a small cube)
-    // const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-    // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    // const childMesh = new THREE.Mesh(geometry, material);
-
-    // // Set position relative to the group's center
-    // childMesh.position.set(x, 0, z);
-
-    // // Optional: Rotate the child to face outward from the center
-    // childMesh.rotation.y = -angle;
-
-    // // Add the child to the parent group
-    // parentGroup.add(childMesh);
-
-  // }
     }
+      instancedMesh.instanceMatrix.needsUpdate = true;
+  } 
+  
+  keySelect (keyID) {
 
 
+    console.log("data for key " + keyID + " : "  + JSON.stringify(this.keyData[keyID]))
+
+    const keyData = this.keyData[keyID];
+    if (keyData) {
+      const octave = 3;
+      let theKey;
+          console.log("data for key " + keyID + " : "  + JSON.stringify(keyData))
+
+      if (keyData.keytype == "major") {
+        theKey = Tonal.Key.majorKey(keyData.keytonic);
+      } else {
+        theKey = Tonal.Key.minorKey(keyData.keytonic);
+      }
+      if (keyData.keytype == "major") {
+        console.log("majorkey " + JSON.stringify(theKey));
+        var chordIndex = Math.floor(Math.random() * theKey.chords.length);
+        let chord = theKey.chords[chordIndex];
+        console.log(keyData.keytonic + " " + keyData.keytype + " random chord: " + chord);
+
+        let noteMods = Tonal.Chord.notes(chord, keyData.keytonic + octave);
+        const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
+        console.log("notes " + noteMods + " midi " + midiNotes);
+        SynthHit(null,null,null,null,midiNotes);
+      } else {
+        console.log("minorkey " + JSON.stringify(theKey));
+        var chordIndex = Math.floor(Math.random() * theKey.natural.chords.length);
+        let chord = theKey.natural.chords[chordIndex];
+              console.log(keyData.keytonic + " " + keyData.keytype + " random chord: " + chord);
+
+        let noteMods = Tonal.Chord.notes(chord, keyData.keytonic + octave);
+        
+        const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
+        console.log("notes " + noteMods + " midi " + midiNotes);
+        SynthHit(null,null,null,null,midiNotes);
+        // this.pSynthOnOff(noteMods);
+        // this.polySynth.triggerAttackRelease(noteMods, "2n");
+        // this.lastNotes = noteMods;
+        // this.mainText.setAttribute("text", { value: "playing "+ noteMods + " \nfrom " + keyTonic + keyType});
+      }
+    }
   }
-    instancedMesh.instanceMatrix.needsUpdate = true;
+   
 }

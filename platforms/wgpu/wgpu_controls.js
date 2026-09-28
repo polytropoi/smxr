@@ -38,7 +38,7 @@ import * as nipplejs from '../../../main/js/nipple.mjs';
 import { TagsToInstances } from './wgpu_instance.js';
 import { GoToNext, localData } from '../../connect/connect.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
-import { SynthHit } from './wgpu_synths.js';
+import { SynthHit, synthKeys } from './wgpu_synths.js';
 import { CreateNewLocation, keydown } from '../../connect/dialogs.js';
 
 
@@ -907,6 +907,11 @@ async function RaycastHit(type, hit, event) {
         tagData = await TagsToInstances(locationData.timestamp, hit.instanceId);
 
 
+        if (locationData.markerType == "synth keys") {
+            if (synthKeys) {
+                synthKeys[0].keySelect(hit.instanceId);
+            }
+        }
         if (!tagData) {
             console.log("no tagData on instance " + hit.instanceId);
             let groupData;

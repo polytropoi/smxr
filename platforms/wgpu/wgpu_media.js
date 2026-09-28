@@ -1,7 +1,7 @@
 
 import * as THREE from 'three';
 // import * as Tone from 'tone';
-
+// import { Note, Scale } from "tonal";
 import { player, camera } from './wgpu_controls.js';
 import { scene } from './wgpu_main.mjs';
 import { settings } from '../../../connect/settings.js';
@@ -54,6 +54,12 @@ export function SequenceEvent (event) {
 
 //play a middle 'C' for the duration of an 8th note
 // synth.triggerAttackRelease("C4", "8n");
+}
+
+export function InitTonal () {
+   const theNote =  Note.midi("A4");
+   
+   console.log("theNote is "+ theNote)
 }
 
 

@@ -12,6 +12,10 @@ import { settings } from "../../connect/settings.js";
 // import {Howl} from '../main/vendor/howler/src/howler.js';
 
 // import {Howl} from 'howler';
+// import { Note, Scale } from "tonal";
+
+// import * as Tonal from 'tonal';
+
 let vidz = null;
 let videoEl = null;
 let fLevels = null;

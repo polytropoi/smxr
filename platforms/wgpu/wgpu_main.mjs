@@ -53,7 +53,7 @@
 	
 	import { equippedObjectOnLoad, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 	import { splatObjex, InitSplats } from './wgpu_splats.js';
-	import { CreateSynthKeys, InitSuperSonic, SynthHit, superSonicLoaded } from './wgpu_synths.js';
+	import { InitSuperSonic, SynthHit, synthKeys, SynthKeys, superSonicLoaded } from './wgpu_synths.js';
 
 	export let scene;
 
@@ -371,7 +371,8 @@
 			// SetUIMode("popup");
 		}
 		if (settings.sceneTags.includes("synth keys")) {
-			CreateSynthKeys();
+			// CreateSynthKeys();
+			const synth1 = new SynthKeys();
 		}
 		StartPopup(loadingHeader, 'Loading Environment....', false);
 
