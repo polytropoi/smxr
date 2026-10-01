@@ -2,7 +2,9 @@
 // import {Text} from 'troika-three-text' 
 
 import * as THREE from 'three';
-import { Text } from 'three-text/three'; //not troika!
+import { Text } from 'three-text/three'; //not troika! https://github.com/countertype/three-text
+Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
+Text.init();
 
 // import { installHtmlInCanvasPolyfill } from 'three-html-render/polyfill';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
@@ -14,7 +16,7 @@ import { InteractionManager } from 'three/addons/interaction/InteractionManager.
 
 import { audioGroupsData, ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
 
-import { viewportPlaceholder, hic_content, onMouseDown } from './wgpu_controls.js';
+import { viewportPlaceholder, hic_content, onMouseDown, lastRaycastHitPosition } from './wgpu_controls.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -22,8 +24,7 @@ import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 import {AudioIsPlaying} from '../../../connect/media.js';
 
 // import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
-Text.init();
+
 
 import {scene, renderer} from './wgpu_main.mjs';
 
@@ -232,7 +233,7 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             }
         // }
     }
-    console.log("ui scale factor " + scaleFactor);
+    console.log(textString + " w/ ui scale factor " + scaleFactor);
     scaleFactor = clamp(scaleFactor, .25, .75);
     size = clamp(size, .25, .75);
     const width = 10;
@@ -246,43 +247,43 @@ export async function ThreeDeeText (textString, size, parent, position, distance
         if (textContainer && Text) {
             // if (textmesh) {
             // console.log("gotsa textContainer for text string " + textString);
-                // textmesh.geometry.dispose();
-                parent.updateMatrixWorld(true);
-                parent.worldToLocal(position);
-                // // console.log("ui scale " + scaleFactor);
-                textmesh = textContainer.getObjectByName('textmesh');
-               
+            // textmesh.geometry.dispose();
+            parent.updateMatrixWorld(true);
+            parent.worldToLocal(position);
+            // // console.log("ui scale " + scaleFactor);
+            textmesh = textContainer.getObjectByName('textmesh');
+            
 
-                // let playerPos = new THREE.Vector3();
-                // let midPoint = new THREE.Vector3();
-                // player.getWorldPosition(playerPos);
-                // midPoint = position.clone().lerp(playerPos, 0.1);
-                // console.log(JSON.stringify(position) + " " + JSON.stringify(midPoint) + " " + JSON.stringify(playerPos));
-                textContainer.visible = true;
-                textContainer.position.set(position.x - size, position.y + (scaleFactor * 2), position.z);
-                // textContainer.position.set(midPoint.x, midPoint.y, midPoint.z);
-                textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            // let playerPos = new THREE.Vector3();
+            // let midPoint = new THREE.Vector3();
+            // player.getWorldPosition(playerPos);
+            // midPoint = position.clone().lerp(playerPos, 0.1);
+            // console.log(JSON.stringify(position) + " " + JSON.stringify(midPoint) + " " + JSON.stringify(playerPos));
+            textContainer.visible = true;
+            textContainer.position.set(position.x - size, position.y + (scaleFactor * 2), position.z);
+            // textContainer.position.set(midPoint.x, midPoint.y, midPoint.z);
+            textContainer.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-                // Later, update the text
-                // console.log("updating callout " + textString);
-                const updated = await Text.create({ text: textString,
-                        font: '../../fonts/web/Acme.woff',
-                        depth: 0.02,
-                        // align: 'left',
-                        size: size,
-                        // size: size,
-                        removeOverlaps: true,
-                        layout: {
-                            width: width,
-                            align: 'left'
-                        } 
-                    });
-                if (textmesh) {
-                    // console.log("updateing textmesh "  + textString);
-                    textmesh.geometry.dispose();
-                    textmesh.geometry = updated.geometry;
-                }
-            } else { 
+            // Later, update the text
+            // console.log("updating callout " + textString);
+            const updated = await Text.create({ text: textString,
+                    font: '../../fonts/web/Acme.woff',
+                    depth: 0.02,
+                    // align: 'left',
+                    size: size,
+                    // size: size,
+                    removeOverlaps: true,
+                    layout: {
+                        width: width,
+                        align: 'left'
+                    } 
+                });
+            if (textmesh) {
+                // console.log("updateing textmesh "  + textString);
+                textmesh.geometry.dispose();
+                textmesh.geometry = updated.geometry;
+            }
+        } else { 
                 //     }
                 //     // textContainer.position.set(position.x, position.y, position.z);
                 //     // textmesh.position.set(0, -scaleFactor, -(scaleFactor * 4));
@@ -358,7 +359,40 @@ export async function ThreeDeeText (textString, size, parent, position, distance
             // }
         }
     } else {
-        console.log("init textContainer for " + textString);
+        console.log("init textContainer for " + textString.toString() + " position " + JSON.stringify(position) + " " + JSON.stringify(lastRaycastHitPosition));
+        // if (textString) {
+        //     text = await Text.create({
+        //         // width: 1,
+        //         text: textString,
+        //         font: '../../fonts/web/Acme.woff',
+        //         depth: 0.02,
+        //         // align: 'left',
+        //         size: 1,
+        //         // size: size,
+        //         removeOverlaps: true,
+        //         layout: {
+        //             width: width,
+        //             align: 'left'
+        //         }
+        //     });
+        // }
+         if (Text && textString) {
+            text = await Text.create({
+                // width: 1,
+                text: textString.toString(),
+                font: '../../fonts/web/Acme.woff',
+                depth: 0.02,
+                // align: 'left',
+                size: 1,
+                // size: size,
+                removeOverlaps: true,
+                layout: {
+                    width: width,
+                    align: 'left'
+                }
+            });
+            text.position.set(position.x, position.y, position.z);
+        }
             
     } 
     // if (!size) {
@@ -402,22 +436,40 @@ export async function ThreeDeeText (textString, size, parent, position, distance
         // }
         // container.scale.set(0,0,0); //scale up on second hit above
     } else {
-
+        // if (Text && textString) {
+        //     text = await Text.create({
+        //         // width: 1,
+        //         text: textString,
+        //         font: '../../fonts/web/Acme.woff',
+        //         depth: 0.02,
+        //         // align: 'left',
+        //         size: 1,
+        //         // size: size,
+        //         removeOverlaps: true,
+        //         layout: {
+        //             width: width,
+        //             align: 'left'
+        //         }
+        //     });
+        // }
         let material = new THREE.MeshPhysicalMaterial({ color: 'black', transparent: true, opacity: .95 });
         material.roughness = 0.1;
         material.metalness = 0.3;
         material.envMap = scene.environment;
         material.envMapIntensity = 2;
-        const textmesh = new THREE.Mesh(text.geometry, material);
-        const bggeo = new RoundedBoxGeometry(7,yscale,.2, 7, 90); //add background panel
-        const bgmat = new THREE.MeshPhysicalMaterial({ color: 'white', transparent: true, opacity: .5 });
-        const bgmesh = new THREE.Mesh(bggeo, bgmat);
+        if (text) {
+            const textmesh = new THREE.Mesh(text.geometry, material);
+            textmesh.position.set(position.x, position.y, position.z);
+            // const bggeo = new RoundedBoxGeometry(7,2,.2, 7, 90); //add background panel
+            // const bgmat = new THREE.MeshPhysicalMaterial({ color: 'white', transparent: true, opacity: .5 });
+            // const bgmesh = new THREE.Mesh(bggeo, bgmat);
 
-        container.add(textmesh, bgmesh);
-        scene.add(container);
-        const camPos = camera.position.clone();
-        container.position.set(camPos.x, camPos.y, camPos.z - 20);
-        textmesh.position.set(-3,yscale / 5,.25);
+            // container.add(textmesh, bgmesh);
+            // scene.add(container);
+            // const camPos = camera.position.clone();
+            // container.position.set(camPos.x, camPos.y, camPos.z - 20);
+            // textmesh.position.set(-3,yscale / 5,.25);
+        }
     }
     
 

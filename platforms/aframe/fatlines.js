@@ -137,38 +137,38 @@ this.objectToCurve.visible = false;
 },
 // from https://github.com/Mamboleoo/InfiniteTubes/blob/master/js/demo6.js
 updateLine: function() {
-// console.log("tyrha updateCurve");
-// this.splineVerts = this.splineMesh.geometry.attributes.position.array;
-// this.splineVerts_o = this.splineMesh_o.geometry.attributes.position.array;
-// this.vert = null;
-// this.splineMesh.geometry.attributes.position.needsUpdate = true;
-if (!this.isReady) {return;}
+    // console.log("tyrha updateCurve");
+    // this.splineVerts = this.splineMesh.geometry.attributes.position.array;
+    // this.splineVerts_o = this.splineMesh_o.geometry.attributes.position.array;
+    // this.vert = null;
+    // this.splineMesh.geometry.attributes.position.needsUpdate = true;
+    if (!this.isReady) {return;}
 
 
 
-this.fraction += 0.1;
-if ( this.fraction > 1) {
+    this.fraction += 0.1;
+    if ( this.fraction > 1) {
 
-// if (this.data.showLine) {
-this.fraction = 0;
-
-
+    // if (this.data.showLine) {
+    this.fraction = 0;
 
 
-}
 
-this.spline.needsUpdate = true;
-this.objectToCurve.position.copy( this.spline.getPoint( this.fraction ) );         
-this.tangent = this.spline.getTangent( this.fraction );
-this.axis.crossVectors( this.normal, this.tangent ).normalize( );  
-this.objectToCurve.quaternion.setFromAxisAngle( this.axis, Math.PI / 2 );
-// this.c_points = this.spline.getPoints( 50 );
-// this.c_geometry.setFromPoints(this.c_points);
-// this.c_geometry.attributes.position.needsUpdate = true;
-// this.curveLine.computeLineDistances();
-// // this.curveLine.scale.set( 1, 1, 1 );
-// this.curveLine.geometry.attributes.position.needsUpdate = true;
-// this.curveLine.needsUpdate = true;
+
+    }
+
+    this.spline.needsUpdate = true;
+    this.objectToCurve.position.copy( this.spline.getPoint( this.fraction ) );         
+    this.tangent = this.spline.getTangent( this.fraction );
+    this.axis.crossVectors( this.normal, this.tangent ).normalize( );  
+    this.objectToCurve.quaternion.setFromAxisAngle( this.axis, Math.PI / 2 );
+    // this.c_points = this.spline.getPoints( 50 );
+    // this.c_geometry.setFromPoints(this.c_points);
+    // this.c_geometry.attributes.position.needsUpdate = true;
+    // this.curveLine.computeLineDistances();
+    // // this.curveLine.scale.set( 1, 1, 1 );
+    // this.curveLine.geometry.attributes.position.needsUpdate = true;
+    // this.curveLine.needsUpdate = true;
 },
 remove: function () {
 console.log("tryna remove handline..");

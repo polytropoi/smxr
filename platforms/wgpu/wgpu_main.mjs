@@ -372,7 +372,8 @@
 		}
 		if (settings.sceneTags.includes("synth keys")) {
 			// CreateSynthKeys();
-			const synth1 = new SynthKeys();
+			let options = {"mode": "circle of fifths"};
+			const synth1 = new SynthKeys(options);
 		}
 		StartPopup(loadingHeader, 'Loading Environment....', false);
 

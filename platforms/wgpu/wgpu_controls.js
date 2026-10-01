@@ -900,7 +900,7 @@ async function RaycastHit(type, hit, event) {
 
     let locationGroup;
     
-    if (hit.instanceId) { //if it's an element of an instancedMesh
+    if (hit.instanceId !== undefined) { //if it's an element of an instancedMesh
             
                 console.log("INSTANCE HIT " + hit.instanceId );
                 selectedObjects.length = 0;

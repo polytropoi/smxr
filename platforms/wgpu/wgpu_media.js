@@ -995,7 +995,9 @@ class AmbientAudioControl {
         this.soundPositionChild = new THREE.Mesh(geometry, material);
         this.soundPositionParent.add(this.soundPositionChild);
         this.soundPositionParent.visible = false;
-        player.add(this.soundPositionParent);
+        if (player) {
+            player.add(this.soundPositionParent);
+        }
         this.soundPositionParent.position.set(0,0,0);
         this.soundPositionChild.position.set(0,0,2);
         this.count = 0;
