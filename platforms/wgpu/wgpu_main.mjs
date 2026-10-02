@@ -53,7 +53,7 @@
 	
 	import { equippedObjectOnLoad, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 	import { splatObjex, InitSplats } from './wgpu_splats.js';
-	import { InitSuperSonic, SynthHit, synthKeys, SynthKeys, superSonicLoaded } from './wgpu_synths.js';
+	import { InitSuperSonic, SynthHit, synthKeys, SynthKeys, superSonicLoaded, synthTransport } from './wgpu_synths.js';
 
 	export let scene;
 
@@ -951,6 +951,10 @@
 			// 	playerNavAgent.update();
 			// }
 
+			if (synthTransport) {
+				
+				synthTransport.fixedTimeLoop(time);
+			}
 			if (mediaPlayersToUpdate.length) {
 					mediaPlayersToUpdate.forEach(m => 
 					m.update(time)

@@ -38,7 +38,7 @@ import * as nipplejs from '../../../main/js/nipple.mjs';
 import { TagsToInstances } from './wgpu_instance.js';
 import { GoToNext, localData } from '../../connect/connect.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
-import { SynthHit, synthKeys } from './wgpu_synths.js';
+import { SynthHit, synthKeys, synthTransport } from './wgpu_synths.js';
 import { CreateNewLocation, keydown } from '../../connect/dialogs.js';
 
 
@@ -1914,6 +1914,9 @@ export const onKeyDown = function (event) {
         case 'Space':
             if (canJump === true) velocity.y += 350;
             canJump = false;
+            if (synthKeys && synthTransport) {
+                synthTransport.toggleTransportPlay();
+            }
             break;
 
         case 'KeyO':

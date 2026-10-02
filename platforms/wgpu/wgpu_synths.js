@@ -40,7 +40,10 @@ let selectedKey;
 
 const uiMaterial = new THREE.MeshBasicMaterial({color: 'white'});
 
+const normalize = (value, min, max) => (value - min) / (max - min);
+
 export let synthKeys = {};
+
 
 export const SYNTHDEF_NAMES = [
   "fft_brickwall",
@@ -326,13 +329,13 @@ export async function SynthHit(position, volFactor, distance, note, chord) {
         } else if (chord) {
             console.log("tryna play chord " + chord);
             volFactor = .5;
-              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[0], "amp", volFactor, "attack", .2, "release", 1, "sustain", 1, "cutoff", 80);
+              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[0], "amp", volFactor, "attack", .2, "release", .5, "sustain", .5, "cutoff", 80);
 
-              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[1], "amp", volFactor, "attack", .2, "release", 1, "sustain", 1, "cutoff", 80);
+              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[1], "amp", volFactor, "attack", .2, "release", .5, "sustain", .5, "cutoff", 80);
 
-              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[2], "amp", volFactor, "attack", .2, "release", 1, "sustain", 1, "cutoff", 80);
+              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[2], "amp", volFactor, "attack", .2, "release", .5, "sustain", .5, "cutoff", 80);
 
-              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[3], "amp", volFactor, "attack", .2, "release", 1, "sustain", 1, "cutoff", 80);
+              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[3], "amp", volFactor, "attack", .2, "release", .5, "sustain", .5, "cutoff", 80);
               
         }
       }
@@ -481,6 +484,8 @@ async function SetText (textString, x,y,z) {
 
 export class SynthKeys { 
   constructor(options) {
+
+
     let tonics = ["A","A#","Ab","B","B#","Bb","C","C#","D","D#","Db","E","E#","Eb","F","F#","Fb","G","G#","Gb"];
     let types = ["major", "minor", "minor7"];
 
@@ -616,7 +621,7 @@ export class SynthKeys {
     
     }
       iMesh.instanceMatrix.needsUpdate = true;
-      const transportFatline = new TransportFatline();
+      synthTransport = new FatlineTransport();
   } 
   
   keySelect (keyID, fromTransport) {
@@ -645,9 +650,9 @@ export class SynthKeys {
         let noteMods = Tonal.Chord.notes(chord, keyData.keytonic + octave);
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        if (fromTransport) {
+        // if (fromTransport) {
           SynthHit(null,null,null,null,midiNotes);
-        }
+        // }
       } else {
         console.log("minorkey " + JSON.stringify(theKey));
         var chordIndex = Math.floor(Math.random() * theKey.natural.chords.length);
@@ -658,9 +663,9 @@ export class SynthKeys {
         
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        if (fromTransport) {
+        // if (fromTransport) {
           SynthHit(null,null,null,null,midiNotes);
-        }
+        // }
         ThreeDeeText(noteMods.toString(), 1, lastRaycastHitObject, lastRaycastHitPosition,null,null,null);
         // this.pSynthOnOff(noteMods);
         // this.polySynth.triggerAttackRelease(noteMods, "2n");
@@ -682,7 +687,7 @@ export class SynthKeys {
 
 
 
-export class TransportFatline { 
+export class FatlineTransport { 
   constructor(options) {
     // // schema: {
     // init: {default: false},
@@ -704,10 +709,12 @@ export class TransportFatline {
     // this.taqs = options.tags;
     // this.originID = options.originID;
 
-    const FIXED_DELTA_TIME = 10000 / 60; //1/60th second
+    this.bpm = 60;
+    this.fixedDeltaTime = 2000; //1/60th second
 
-    let lastTimestamp = 0;
-    let accumulator = 0;
+    this.lastTimestamp = 0;
+    this.accumulator = 0;
+
     this.interval = "";
     this.intervalTime = 0;
     this.fraction = 0;
@@ -721,7 +728,7 @@ export class TransportFatline {
         const colors = [];
 
 
-        this.LoopTransport(false, 60);
+        // this.LoopTransport(false, 60);
         this.isPlaying = true;
     
     const cgeometry = new THREE.SphereGeometry( .25, 16, 8 );
@@ -733,7 +740,7 @@ export class TransportFatline {
     let n = 100;
     let maxRadius = 8;
 
-    synthTransport = this;
+    // synthTransport = this;
     for (let i = 0; i < n; i++) {
 
       // Size of each slice is '360 / n' degrees or in radians '2 * Math.PI / n'...
@@ -832,32 +839,74 @@ export class TransportFatline {
       }
     }
 
-    fixedTimeLoop (time) {
+    toggleTransportPlay () {
+      this.transportIsPlaying = !this.transportIsPlaying;
+    }
+    fixedTimeLoop (currentTimestamp) {
        
+      // console.log("currenttime " + currentTimestamp);
 
-      // Initialize lastTimestamp on the very first frame
-      if (!lastTimestamp) {
-        lastTimestamp = currentTimestamp;
+      if (this.transportIsPlaying) {
+        // // Initialize lastTimestamp on the very first frame
+        if (!this.lastTimestamp) {
+          this.lastTimestamp = currentTimestamp;
+        }
+
+        // // 2. Calculate how much real time passed since the last frame
+        let frameTime = currentTimestamp - this.lastTimestamp;
+        // this.lastTimestamp = currentTimestamp;
+
+        // Panic threshold: Prevent "spiral of death" if the tab loses focus or lags severely
+        // if (frameTime > 250) {
+        //   frameTime = 250; 
+        // }
+
+        // // 3. Add the elapsed time to our accumulator pool
+        this.accumulator += frameTime;
+
+        // 4. Consume time from the accumulator in fixed chunks
+        if (this.accumulator >= this.fixedDeltaTime) {
+          // console.log("this.fixedDeltaTime " + this.fixedDeltaTime);
+          // if (selectedKey) {
+          //   if (synthKeys) {  
+          //       synthKeys[0].keySelect(selectedKey, true);
+          //   }
+          // }
+
+          this.accumulator -= this.fixedDeltaTime;
+          // console.log("BEAT");
+        } 
+
+        //   const fraction = (elapsed % LOOP_DURATION) / LOOP_DURATION;
+        //   const fraction = this.fixedDeltaTime / this.accumulator;
+        //   const fractionNormalized = normalize(fraction, 1, this.fixedDeltaTime);
+        //   console.log("fraction : " + fraction);
+        // }
+
+          // if (!startTime) this.lastTimestamp = currentTimestamp;
+
+  // Calculate total time elapsed since the loop started
+        // const elapsed = currentTimestamp - this.lastTimestamp;
+
+        // Calculate the normalized fraction (0.0 to 1.0) of the current loop
+        const fraction = (frameTime % this.fixedDeltaTime) / this.fixedDeltaTime;
+        // console.log(fraction.toFixed(4)); 
+        if (fraction > .95) {
+        //   // console.log("new loop!");
+           
+        // }
+         if (selectedKey) {
+            if (synthKeys) {  
+                synthKeys[0].keySelect(selectedKey, true);
+            }
+          }
+        }
+        this.updateLinePosition(fraction);
+      } else {
+        // this.accumulator = 0;
+        // this.lastTimestamp = 0;
       }
-
-      // 2. Calculate how much real time passed since the last frame
-      let frameTime = currentTimestamp - lastTimestamp;
-      lastTimestamp = currentTimestamp;
-
-      // Panic threshold: Prevent "spiral of death" if the tab loses focus or lags severely
-      if (frameTime > 250) {
-        frameTime = 250; 
-      }
-
-      // 3. Add the elapsed time to our accumulator pool
-      accumulator += frameTime;
-
-      // 4. Consume time from the accumulator in fixed chunks
-      while (accumulator >= FIXED_DELTA_TIME) {
-        updateLine(FIXED_DELTA_TIME); // Your logic runs with a strict, identical step
-        accumulator -= FIXED_DELTA_TIME;
-      }
-
+      // }
     }
 
     setTimeParameters (interval, intervalTime) {
@@ -873,10 +922,10 @@ export class TransportFatline {
       this.transportIsPlaying = false;
       }
     }
-    updateLinePosition () {
+    updateLinePosition (fraction) {
 
     // console.log(this.intervalTime + " fraction " + this.fraction);
-    this.objectToCurve.position.copy( this.spline.getPoint( this.fraction ) );         
+    this.objectToCurve.position.copy( this.spline.getPoint( fraction ) );         
     // this.tangent = this.spline.getTangent( this.fraction );
     // this.axis.crossVectors( this.normal, this.tangent ).normalize( );  
     // this.objectToCurve.quaternion.setFromAxisAngle( this.axis, Math.PI / 2 );
