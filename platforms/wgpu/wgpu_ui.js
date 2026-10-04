@@ -71,6 +71,7 @@ let texture;
 let textContainer;
 // let interactions;
 export let hicMesh; //for html-in-canvas fu
+export let synthTransportHicMesh;
 // export let landscapePanel;
 
 function isHtmlInCanvasSupported() { //if the browser flag is set to support html-in-canvas see https://html-in-canvas.dev/docs/browser-support/
@@ -840,99 +841,64 @@ export function StartPopup (header, body, showStartButton) {
 export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod) {
 
      if (uiMode == "hic") {
-        // style = "hic_content";
-        // if (style == "hic_content") {
         if (style) {
             // console.log("tryna set style " + style);
             // contentEl.className = '';
             // contentEl.classList.add(style);
         }
-        // } else {
-            // /contentEl.className = "";
-        // }
-
-
-
+        
         let material;
         let scaleFactor = .25;
         if (distance) {
             console.log("distance " + distance);
-            // if (distance > 1) {
-                scaleFactor = distance * .75;
-                // if (parentScale) {
-                //     scaleFactor = scaleFactor/parentScale;
-                // }
-            // }
+            scaleFactor = distance * .75;
         } else {
             distance = 1;
             scaleFactor = 5;
         }
         console.log("ui " + scaleFactor + " " + distance + " " + style);
         scaleFactor = clamp(scaleFactor, .5, 33);
-
-
         if (!hicMesh) {
-
             contentEl.innerHTML = htmlstring;
-
-
             let yFudge = .5;
             if (!position) {
-
                 position = new THREE.Vector3();
                 viewportPlaceholder.getWorldPosition(position);
                 yFudge = 0;
-               
-
             }
             console.log("hicMesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
 
             const geometry = new THREE.PlaneGeometry( 1,1,10,10);
 
-            // material = new THREE.MeshStandardMaterial( { transparent: true, roughness: .5, metalness: .1 } );
             material = new THREE.MeshBasicMaterial({ transparent: true});
-            // const material = new THREE.MeshStandardMaterial( { transparent: true, roughness: 0, metalness: 0.5, side: THREE.DoubleSide } );
+
             material.map = new THREE.HTMLTexture( contentEl );
-            // material.map.minFilter = THREE.NearestFilter;
-            // material.map.magFilter = THREE.NearestFilter;
+          
+            const ratio = window.devicePixelRatio || 1;
 
-            // If applicable to your map setup, increase anisotropy 
-            // (though HTMLTexture relies on real-time browser paints)
-            // material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            // // Set the visual size (CSS pixels)
+            contentEl.style.width = '1024px';
+            contentEl.style.height = '1024px';
 
-            // material.map.needsUpdate = true;
-            // material.envMap = scene.environment;
-            // material.envMapIntensity = 1;
-                        // const ctx = canvasEl.getContext('2d');
-                        const ratio = window.devicePixelRatio || 1;
+            contentEl.width = 512 * ratio;
+            contentEl.height = 512 * ratio;
 
-                        // // Set the visual size (CSS pixels)
-                        contentEl.style.width = '1024px';
-                        contentEl.style.height = '1024px';
-
-                        // Set the internal resolution (Physical pixels)
-                        contentEl.width = 512 * ratio;
-                        contentEl.height = 512 * ratio;
-
-                        // Scale the context to match
-                        // ctx.scale(ratio, ratio);
             hicMesh = new THREE.Mesh( geometry, material );
-
             
             scene.add( hicMesh );
 
-             hicMesh.scale.setScalar(scaleFactor);
+            hicMesh.scale.setScalar(scaleFactor);
             hicMesh.position.set(position.x, position.y + .5, position.z);
-            // activeObjex.push(hicMesh);
             lookAtCameraObjects.push(hicMesh);
 
-           
-            interactionManager = new InteractionManager();
-            interactionManager.connect( renderer, camera );
+            if (!interactionManager) {
+                interactionManager = new InteractionManager();
+                interactionManager.connect( renderer, camera );
+            }
+            
             interactionManager.add( hicMesh );
             interactionManager.update();
-            // interactionManagers.push(interactions);
-            // hicMesh.updateMatrixWorld();
+
             hicMesh.visible = true;
               console.log(yFudge + " yFudge hicMesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
             hicMesh.addEventListener('pointerdown', onMouseDown);
@@ -958,11 +924,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
         } else {
             contentEl.innerHTML = htmlstring;
             hicMesh.visible = true;
-            // if (!position && !distance) {
-              
-
-            // } 
-            // canvasEl.requestPaint();
+          
             console.log("reused hicmesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
             if (position && distance) {
                 let ymodification = position.y + scaleFactor/2;
@@ -985,70 +947,238 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
             hicMesh.visible = true;
             // hicMesh.material = material;
         }
-        // Interaction
 
-
-
-    // } else if (uiMode == "popup") {
     } else if (uiMode == "popup") {
 
-         const popup = document.getElementById("popup");
-         popup.innerHTML = htmlstring;
-        //  popup.className = '';
-        // popup.classList.add("popup2");
-
+        const popup = document.getElementById("popup");
+        popup.innerHTML = htmlstring;
+    
         console.log("showDialogPanel " + showDialogPanel + " string " + htmlstring);
         
-            if (showDialogPanel) {
-                return;
-            }
+        if (showDialogPanel) {
+            return;
+        }
 
-        // if (style) {
-        //     console.log("tryna set style " + style);
-        //     contentEl.className = '';
-            popup.classList.add("popup");
-        // }
+        popup.classList.add("popup");
+        if (!event) {
+            let xpos = window.innerWidth / 2;
+            let ypos = window.innerHeight / 2;
+            Object.assign(popup.style, {
+                left: `${xpos}px`,
+                top: `${ypos}px`,
+                display: 'block',
+            });
+        } else {
+            console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
             
-            if (!event) {
-                let xpos = window.innerWidth / 2;
-                let ypos = window.innerHeight / 2;
-                Object.assign(popup.style, {
-                    left: `${xpos}px`,
-                    top: `${ypos}px`,
-                    display: 'block',
-                });
-            } else {
-
-                console.log("tryna show popup at " + event.clientX + " " + window.innerWidth);
-              
-                let xpos = event.clientX - 256;
-                if ((window.innerWidth - event.clientX) < 256) {
-                    xpos = event.clientX - 512;
-                } else if (event.clientX < 256) {
-                    xpos = 0;
-                }
-                
-                let ypos = event.clientY - 300;
-                if (event.clientY < 300) {
-                    ypos = 0;
-                } else if (event.clientY > (window.innerHeight - 256)) {
-                    ypos = window.innerHeight - 512;
-                }
-                 Object.assign(popup.style, {
-                    left: `${xpos}px`,
-                    top: `${ypos}px`,
-                    display: 'block',
-                });
+            let xpos = event.clientX - 256;
+            if ((window.innerWidth - event.clientX) < 256) {
+                xpos = event.clientX - 512;
+            } else if (event.clientX < 256) {
+                xpos = 0;
             }
-        
-
+            
+            let ypos = event.clientY - 300;
+            if (event.clientY < 300) {
+                ypos = 0;
+            } else if (event.clientY > (window.innerHeight - 256)) {
+                ypos = window.innerHeight - 512;
+            }
+                Object.assign(popup.style, {
+                left: `${xpos}px`,
+                top: `${ypos}px`,
+                display: 'block',
+            });
+        }
     }
-
-
 }
 
 export function HideHTMLPopup() {
     if (hicMesh) {
         // hicMesh.visible = false;
+    }
+}
+
+
+export function SynthTransportUI(parent, synthTransport) {
+
+      const htmlstring =  "<div><div class=\x22number-control\x22>" +
+        
+            // "<span>BPM: </span><button type=\x22button\x22 id=\x22bpmUpButton\x22 onclick=\x22this.parentNode.querySelector('input').stepDown()\x22>-</button>" +
+            
+            "<span>BPM: </span><input type=\x22number\x22 id=\x22bpmInput\x22 value=\x22"+synthTransport.bpm+"\x22 min=\x221\x22 max=\x22200\x22 step=\x221\x22>" +
+            
+            // "<button type=\x22button\x22 id=\x22bpmUpButton\x22 onclick=\x22this.parentNode.querySelector('input').stepUp()\x22>+</button>"+
+        "</div></div>";
+
+     if (uiMode == "hic") {
+        if (style) {
+            // console.log("tryna set style " + style);
+            // contentEl.className = '';
+            // contentEl.classList.add(style);
+        }
+        
+        let material;
+        // let scaleFactor = .25;
+        // if (distance) {
+        //     console.log("distance " + distance);
+        //     scaleFactor = distance * .75;
+        // } else {
+        //     distance = 1;
+        //     scaleFactor = 5;
+        // }
+
+        console.log("ui " + scaleFactor + " " + distance + " " + style);
+        scaleFactor = clamp(scaleFactor, .5, 33);
+        if (!synthTransportHicMesh) {
+
+            const contentEl = document.createElement('div');
+            document.body.appendChild(contentEl);
+            contentEl.innerHTML = htmlstring;
+            let yFudge = .5;
+            if (!position) {
+                position = new THREE.Vector3();
+                viewportPlaceholder.getWorldPosition(position);
+                yFudge = 0;
+            }
+            console.log("hicMesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
+
+            const geometry = new THREE.PlaneGeometry( 1,1,10,10);
+
+            material = new THREE.MeshBasicMaterial({ transparent: true});
+
+            material.map = new THREE.HTMLTexture( contentEl );
+          
+            const ratio = window.devicePixelRatio || 1;
+
+            // // Set the visual size (CSS pixels)
+            contentEl.style.width = '1024px';
+            contentEl.style.height = '1024px';
+
+            contentEl.width = 512 * ratio;
+            contentEl.height = 512 * ratio;
+
+            synthTransportHicMesh = new THREE.Mesh( geometry, material );
+            
+            parent.add( synthTransportHicMesh );
+
+            hicMesh.scale.setScalar(scaleFactor);
+            hicMesh.position.set(position.x, position.y + .5, position.z);
+            lookAtCameraObjects.push(synthTransportHicMesh);
+
+            if (!interactionManager) {
+                interactionManager = new InteractionManager();
+                interactionManager.connect( renderer, camera );
+            }
+            
+            interactionManager.add( synthTransportHicMesh );
+            interactionManager.update();
+
+            synthTransportHicMesh.visible = true;
+              console.log(yFudge + " yFudge hicMesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
+            // hicMesh.addEventListener('pointerdown', onMouseDown);
+            // if (position && distance) {
+            //     // scene.attach(hicMesh);
+            //     let ymodification = position.y + scaleFactor/2;
+            //     if (yMod != null) {
+            //         ymodification = yMod;
+
+            //     }
+            //     console.log(yMod + " vs ymod is " + ymodification + " distance " + distance);
+            //     hicMesh.position.set(position.x, ymodification, position.z);
+            //     // hicMesh.scale.setScalar(scaleFactor);
+            //     hicMesh.scale.setScalar(scaleFactor);
+            // } else {
+            //     console.log("NO POSITION!");
+            //     const worldPosition = new THREE.Vector3();
+            //     viewportPlaceholder.getWorldPosition(worldPosition);
+            //     hicMesh.scale.setScalar(1);
+            //     hicMesh.position.set(worldPosition.x, worldPosition.y + .5, worldPosition.z);
+
+            // }
+        } else {
+            contentEl.innerHTML = htmlstring;
+            synthTransportHicMesh.visible = true;
+          
+            console.log("reused hicmesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
+            if (position && distance) {
+                let ymodification = position.y + scaleFactor/2;
+                if (yMod != null) {
+                    ymodification = yMod;
+
+                } 
+                console.log("ymod is " + ymodification);
+                synthTransportHicMesh.position.set(position.x, ymodification, position.z);
+                synthTransportHicMesh.scale.setScalar(scaleFactor);
+            } else {
+                console.log("NO POSITION!");
+                const worldPosition = new THREE.Vector3();
+                viewportPlaceholder.getWorldPosition(worldPosition);
+                synthTransportHicMesh.scale.setScalar(1);
+                synthTransportHicMesh.position.set(worldPosition.x, worldPosition.y + .5, worldPosition.z);
+                // hicMesh.scale.setScalar(scaleFactor);
+            }
+            synthTransportHicMesh.updateMatrixWorld();
+            synthTransportHicMesh.visible = true;
+            // hicMesh.material = material;
+        }
+
+    } else if (uiMode == "popup") {
+
+        let synthUIpopup = document.getElementById("synthTransportUI");
+
+        if (!synthUIpopup) {
+        synthUIpopup = document.createElement('div');
+        document.body.appendChild(synthUIpopup);
+        synthUIpopup.id = "synthTransportUI";
+
+
+        }
+
+        synthUIpopup.innerHTML = htmlstring;
+    
+        console.log("synthUIpopup string " + htmlstring);
+            const bpmInput = document.getElementById('bpmInput');
+
+            bpmInput.addEventListener('change', (event) => {
+                // event.target.value grabs the current text inside the input
+                console.log('Value changed to:', event.target.value);
+                synthTransport.bpm = event.target.value;
+            });
+        if (showDialogPanel) {
+            return;
+        }
+
+        synthUIpopup.classList.add("popup");
+        if (!event) {
+            let xpos = window.innerWidth / 2;
+            let ypos = window.innerHeight / 2;
+            Object.assign(synthUIpopup.style, {
+                left: `${xpos}px`,
+                top: `${ypos}px`,
+                display: 'block',
+            });
+        } else {
+            console.log("tryna show synthUIpopup at " + event.clientX + " " + window.innerWidth);
+            
+            let xpos = event.clientX - 256;
+            if ((window.innerWidth - event.clientX) < 256) {
+                xpos = event.clientX - 512;
+            } else if (event.clientX < 256) {
+                xpos = 0;
+            }
+            
+            let ypos = event.clientY - 300;
+            if (event.clientY < 300) {
+                ypos = 0;
+            } else if (event.clientY > (window.innerHeight - 256)) {
+                ypos = window.innerHeight - 512;
+            }
+                Object.assign(synthUIpopup.style, {
+                left: `${xpos}px`,
+                top: `${ypos}px`,
+                display: 'block',
+            });
+        }
     }
 }

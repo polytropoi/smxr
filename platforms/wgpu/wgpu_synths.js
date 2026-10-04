@@ -16,20 +16,20 @@ Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
 Text.init();
 import { scene } from './wgpu_main.mjs';
 import { activeObjex } from './wgpu_locations.js';
-import { lookAtCameraObjects, ThreeDeeText, ShowHTMLPopup } from './wgpu_ui.js';
+import { lookAtCameraObjects, ThreeDeeText, ShowHTMLPopup, SynthTransportUI } from './wgpu_ui.js';
 import { lastRaycastHitPosition, lastRaycastHitObject } from './wgpu_controls.js';
 import { instancedMesh } from 'three/tsl';
 
 export let superSonicLoaded = false;
 
-export let synthTransport;
+export let synthTransports = [];
 
 // --- Timing Configuration ---
-let startTime = 0;
-const bpm = 120;
-const beatDuration = (60 / bpm) * 1000; // 0.5 seconds per beat
-const lookAheadTime = 0.1;     // How far ahead to schedule (100ms)
-const scheduleInterval = 35;   // How often to run the scheduler loop (35ms)
+// let startTime = 0;
+// const bpm = 120;
+// const beatDuration = (60 / bpm) * 1000; // 0.5 seconds per beat
+// const lookAheadTime = 0.1;     // How far ahead to schedule (100ms)
+// const scheduleInterval = 35;   // How often to run the scheduler loop (35ms)
 
 let nextNoteTime = 0.0;        // When the next note should play (relative to AudioContext)
 let beatCount = 0;
@@ -320,7 +320,7 @@ function getRandomInt(min, max) {
 function getPercentageOf(percent, total) {
   return (percent / 100) * total;
 }
-export async function SynthHit(position, volFactor, distance, note, chord) {
+export async function SynthHit(position, volFactor, distance, note, chord, bpm) {
 
     // await supersonic.loadSynthDef(synthDef1);
 
@@ -357,8 +357,9 @@ export async function SynthHit(position, volFactor, distance, note, chord) {
 
           supersonic.send("/s_new", synthDefs[synthIndex], -1, 0, 0, "note", note, "amp", volFactor, "attack", .2, "release", 1, "cutoff", cutoffValue);
         } else if (chord) {
-            console.log("tryna play chord " + chord);
+            console.log("tryna play chord " + chord + " bpm " + bpm);
             volFactor = .5;
+            // bpm = 100;
             const bpmFactor = (60/bpm); 
 
               supersonic.send("/s_new", synthDefs[3], -1, 0, 0, "note", chord[0], "amp", volFactor, "attack", .2, "release", bpmFactor, "sustain", bpmFactor, "cutoff", 80);
@@ -550,6 +551,8 @@ export class SynthKeys {
     // const mesh = new THREE.Mesh(geo, mat);
     const iMesh = new THREE.InstancedMesh(geo, mat, count);
     scene.add(iMesh);
+
+
     iMesh.userData = {};
     iMesh.userData.locationData = {};
     iMesh.userData.locationData.name = "synthKeys";
@@ -568,6 +571,8 @@ export class SynthKeys {
 
     this.keyData = {};
     let radius = 12;
+
+    this.initBPM = (settings && settings.bpm) ? settings.bpm : 80;
     if (options.mode = "circle of fifths") {
       // for (let m = 0; m < majorKeys.length; m++) {
       //   radius = 6;
@@ -668,7 +673,10 @@ export class SynthKeys {
     
     }
       iMesh.instanceMatrix.needsUpdate = true;
-      synthTransport = new FatlineTransport();
+      const transportOptions = {};
+      transportOptions.bpm = this.initBPM;
+     this.synthTransport = new FatlineTransport(transportOptions);
+     synthTransports.push(this.synthTransport);
   } 
   
   keySelect (keyID, fromTransport) {
@@ -698,8 +706,8 @@ export class SynthKeys {
         let noteMods = Tonal.Chord.notes(chord, keyData.keytonic + octave);
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        if (fromTransport || (!fromTransport && synthTransport && !synthTransport.transportIsPlaying)) {
-          SynthHit(null,null,null,null,midiNotes);
+        if (fromTransport || (!fromTransport && this.synthTransport && !this.synthTransport.transportIsPlaying)) {
+          SynthHit(null,null,null,null,midiNotes, this.synthTransport.bpm);
         }
       } else {
         console.log("minorkey " + JSON.stringify(theKey));
@@ -711,8 +719,8 @@ export class SynthKeys {
         
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        if (fromTransport || (!fromTransport && synthTransport && !synthTransport.transportIsPlaying)) {
-          SynthHit(null,null,null,null,midiNotes);
+        if (fromTransport || (!fromTransport && this.synthTransport && !this.synthTransport.transportIsPlaying)) {
+          SynthHit(null,null,null,null,midiNotes, this.synthTransport.bpm);
         }
         ThreeDeeText(noteMods.toString(), 1, lastRaycastHitObject, lastRaycastHitPosition,null,null,null);
         // this.pSynthOnOff(noteMods);
@@ -758,7 +766,9 @@ export class FatlineTransport {
     // this.originID = options.originID;
 
     // this.bpm = 60;
-    this.fixedDeltaTime = (60/bpm) * 1000; // 1 sec = 60 bpm
+    let startTime = 0;
+    this.bpm = options.bpm != null ? options.bpm : 100;
+    this.fixedDeltaTime = (60/this.bpm) * 1000; // 1 sec = 60 bpm
 
     this.lastTimestamp = 0;
     this.accumulator = 0;
@@ -859,7 +869,9 @@ export class FatlineTransport {
     
     parentObject.add( line );
 
-    const bpmText = SetText(bpm + "\nBPM", 0,1,0, parentObject);
+    const bpmText = SetText(this.bpm + "\nBPM", 0,1,0, parentObject);
+
+    this.parentObject = parentObject;
 
     
   }
@@ -876,7 +888,7 @@ export class FatlineTransport {
       if (!this.transportIsPlaying) {
       // const bpm = 120;
         this.transportIsPlaying = true;
-        const beatDurationMs = (60 / bpm) * 1000; // Time per beat (500ms at 120 BPM)
+        const beatDurationMs = (60 / this.bpm) * 1000; // Time per beat (500ms at 120 BPM)
 
         // 4. Start the JavaScript interval loop
         this.loopInterval = setInterval(() => {
@@ -906,35 +918,43 @@ export class FatlineTransport {
     toggleTransportPlay () {
       this.transportIsPlaying = !this.transportIsPlaying;
       // ShowHTMLPopup(null,ReturnSynthUI(), null, null, null);
+      SynthTransportUI(this.parentObject, this);
+    }
+    updateBPM (direction) {
+      if (direction == "up") {
+        bpm++
+      } else {
+        bpm--;
+      }
     }
     fixedTimeLoop (currentTimestamp) {
        
       // console.log("currenttime " + currentTimestamp);
 
 
+
       if (this.transportIsPlaying) {
+        this.fixedDeltaTime = (60/this.bpm) * 1000;
         // // Initialize lastTimestamp on the very first frame
         if (!this.lastTimestamp) { //i.e. == 0
           this.lastTimestamp = currentTimestamp;
         }
   
   
-      if (!startTime) startTime = currentTimestamp; //same as above, but using this.lastTimestamp no workie for both... ?
-      const elapsed = currentTimestamp - startTime;
+        if (!this.startTime) this.startTime = currentTimestamp; //same as above, but using this.lastTimestamp no workie for both... ?
+        const elapsed = currentTimestamp - this.startTime;
 
-        // // 2. Calculate how much real time passed since the last frame
-      let frameTime = currentTimestamp - this.lastTimestamp;
-      this.lastTimestamp = currentTimestamp;
+          // // 2. Calculate how much real time passed since the last frame
+        let frameTime = currentTimestamp - this.lastTimestamp;
+        this.lastTimestamp = currentTimestamp;
 
-      // Panic threshold: Prevent "spiral of death" if the tab loses focus or lags severely
-      if (frameTime > 25000) {
-        frameTime = 25000; 
-      }
-
-        // // 3. Add the elapsed time to our accumulator pool
+        // Panic threshold: Prevent "spiral of death" if the tab loses focus or lags severely
+        if (frameTime > 25000) {
+          frameTime = 25000; 
+        }
         this.accumulator += frameTime;
         // console.log("this.lastTimestamp "+ this.lastTimestamp + " - " + " currentTimestamp " + currentTimestamp + " frameTime " + frameTime);
-        // 4. Consume time from the accumulator in fixed chunks
+
         if (this.accumulator >= (this.fixedDeltaTime * 2)) {
           console.log(this.accumulator + "thiss.accumulator is greater than" + this.fixedDeltaTime);
           if (selectedKey) {

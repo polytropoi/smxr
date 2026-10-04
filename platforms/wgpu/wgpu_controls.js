@@ -38,7 +38,7 @@ import * as nipplejs from '../../../main/js/nipple.mjs';
 import { TagsToInstances } from './wgpu_instance.js';
 import { GoToNext, localData } from '../../connect/connect.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
-import { SynthHit, synthKeys, synthTransport } from './wgpu_synths.js';
+import { SynthHit, synthKeys, synthTransports } from './wgpu_synths.js';
 import { CreateNewLocation, keydown } from '../../connect/dialogs.js';
 
 
@@ -1666,8 +1666,8 @@ export function onMouseDown(event) { // on threejs object
                     }
                 
                 } else if (lastRaycastHitObject.userData.locationData.markerType == "Synth Transport UI") {
-                    if (synthTransport) {
-                        synthTransport.toggleTransportPlay();
+                    if (synthTransports.length) {
+                        synthTransports[0].toggleTransportPlay();
                     }
                 } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                
@@ -1918,8 +1918,8 @@ export const onKeyDown = function (event) {
         case 'Space':
             if (canJump === true) velocity.y += 350;
             canJump = false;
-            if (synthKeys && synthTransport) {
-                synthTransport.toggleTransportPlay();
+            if (synthKeys && synthTransports && synthTransports.length) {
+                synthTransports[0].toggleTransportPlay();
             }
             break;
 
