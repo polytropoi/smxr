@@ -1665,6 +1665,10 @@ export function onMouseDown(event) { // on threejs object
                         }
                     }
                 
+                } else if (lastRaycastHitObject.userData.locationData.markerType == "Synth Transport UI") {
+                    if (synthTransport) {
+                        synthTransport.toggleTransportPlay();
+                    }
                 } else if (lastRaycastHitObject.userData.locationData.markerType == "gate") {
                
                     console.log("clicked on gate !");

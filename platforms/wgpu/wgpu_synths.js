@@ -1,4 +1,5 @@
 
+import { settings } from '../../../connect/settings.js';
 import * as Tonal from 'tonal';
 import { SuperSonic } from "https://unpkg.com/supersonic-scsynth@0.81.0/dist/supersonic.js";
 import * as THREE from 'three/webgpu';
@@ -15,19 +16,48 @@ Text.setHarfBuzzPath('/fonts/hb.wasm'); //!
 Text.init();
 import { scene } from './wgpu_main.mjs';
 import { activeObjex } from './wgpu_locations.js';
-import { lookAtCameraObjects, ThreeDeeText } from './wgpu_ui.js';
+import { lookAtCameraObjects, ThreeDeeText, ShowHTMLPopup } from './wgpu_ui.js';
 import { lastRaycastHitPosition, lastRaycastHitObject } from './wgpu_controls.js';
 import { instancedMesh } from 'three/tsl';
 
 export let superSonicLoaded = false;
 
 export let synthTransport;
+
+// --- Timing Configuration ---
+let startTime = 0;
+const bpm = 120;
+const beatDuration = (60 / bpm) * 1000; // 0.5 seconds per beat
+const lookAheadTime = 0.1;     // How far ahead to schedule (100ms)
+const scheduleInterval = 35;   // How often to run the scheduler loop (35ms)
+
+let nextNoteTime = 0.0;        // When the next note should play (relative to AudioContext)
+let beatCount = 0;
+
+
 let supersonic;
 // let synthDef1 = 'sonic-pi-prophet';
 let synthDef1 = 'sonic-pi-mod_pulse';
 
 let synthDef2 = 'sonic-pi-prophet';
-let synthDefs = ['sonic-pi-mod_pulse','sonic-pi-prophet','sonic-pi-blade','sonic-pi-fm','sonic-pi-bass_foundation','sonic-pi-organ_tonewheel','sonic-pi-gabberkick','sonic-pi-rhodey', 'sonic-pi-piano' ]
+let synthDefs = ['sonic-pi-mod_pulse','sonic-pi-prophet','sonic-pi-bass_foundation','sonic-pi-organ_tonewheel' ]
+let synthDefsDrums = [  "sonic-pi-sc808_bassdrum",
+  "sonic-pi-sc808_clap",
+  "sonic-pi-sc808_claves",
+  "sonic-pi-sc808_closed_hihat",
+  "sonic-pi-sc808_congahi",
+  "sonic-pi-sc808_congalo",
+  "sonic-pi-sc808_congamid",
+  "sonic-pi-sc808_cowbell",
+  "sonic-pi-sc808_cymbal",
+  "sonic-pi-sc808_maracas",
+  "sonic-pi-sc808_open_hihat",
+  "sonic-pi-sc808_rimshot",
+  "sonic-pi-sc808_snare",
+  "sonic-pi-sc808_tomhi",
+  "sonic-pi-sc808_tomlo",
+  "sonic-pi-sc808_tommid"];
+
 let synth1;
 
 let nodeCount = 0;
@@ -329,13 +359,15 @@ export async function SynthHit(position, volFactor, distance, note, chord) {
         } else if (chord) {
             console.log("tryna play chord " + chord);
             volFactor = .5;
-              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[0], "amp", volFactor, "attack", .2, "release", .5, "sustain", .5, "cutoff", 80);
+            const bpmFactor = (60/bpm); 
 
-              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[1], "amp", volFactor, "attack", .2, "release", .5, "sustain", .5, "cutoff", 80);
+              supersonic.send("/s_new", synthDefs[3], -1, 0, 0, "note", chord[0], "amp", volFactor, "attack", .2, "release", bpmFactor, "sustain", bpmFactor, "cutoff", 80);
 
-              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[2], "amp", volFactor, "attack", .2, "release", .5, "sustain", .5, "cutoff", 80);
+              supersonic.send("/s_new", synthDefs[3], -1, 0, 0, "note", chord[1], "amp", volFactor, "attack", .2, "release", bpmFactor, "sustain", bpmFactor, "cutoff", 80);
 
-              supersonic.send("/s_new", synthDefs[5], -1, 0, 0, "note", chord[3], "amp", volFactor, "attack", .2, "release", .5, "sustain", .5, "cutoff", 80);
+              supersonic.send("/s_new", synthDefs[3], -1, 0, 0, "note", chord[2], "amp", volFactor, "attack", .2, "release", bpmFactor, "sustain", bpmFactor, "cutoff", 80);
+
+              supersonic.send("/s_new", synthDefs[3], -1, 0, 0, "note", chord[3], "amp", volFactor, "attack", .2, "release", bpmFactor, "sustain", bpmFactor, "cutoff", 80);
               
         }
       }
@@ -403,14 +435,6 @@ async function initAudio() {
 
 
 
-// --- Timing Configuration ---
-const bpm = 120;
-const beatDuration = 60 / bpm; // 0.5 seconds per beat
-const lookAheadTime = 0.1;     // How far ahead to schedule (100ms)
-const scheduleInterval = 35;   // How often to run the scheduler loop (35ms)
-
-let nextNoteTime = 0.0;        // When the next note should play (relative to AudioContext)
-let beatCount = 0;
 
 
 // --- The Look-Ahead Scheduler Loop ---
@@ -456,30 +480,53 @@ async function start() {
   timerId = setInterval(scheduler, scheduleInterval);
 }
 
-async function SetText (textString, x,y,z) {
-     // static async create(url) {
-      const text = await Text.create({
-                        // width: 1,
-                        text: textString,
-                        font: '../../fonts/web/Acme.woff',
-                        depth: 0.02,
-                        // align: 'left',
-                        size: .25,
-                        // size: size,
-                        removeOverlaps: true,
-                        layout: {
-                            width: 1,
-                            align: 'center'
-                        }
-                    });
+function ReturnSynthUI (type, key) {
+  const htmlstring =  "<div class=\x22number-control\x22>" +
+        
+        "<button type=\x22button\x22 onclick=\x22this.parentNode.querySelector('input').stepDown()\x22>-</button>" +
+        
+        "<input type=\x22number\x22 id=\x22integerField\x22 value=\x220\x22 min=\x221\x22 max=\x22200\x22 step=\x221\x22 readonly>" +
+        
+        "<button type=\x22button\x22 onclick=\x22this.parentNode.querySelector('input').stepUp()\x22>+</button>"+
+    "</div>";
+    return htmlstring;
+}
 
-                    const textmesh = new THREE.Mesh(text.geometry, uiMaterial);
-                               
-                    textmesh.name = "textmesh";
-                    textmesh.position.set(x, y, z);
-                    scene.add(textmesh);
-                    lookAtCameraObjects.push(textmesh);
-                    // textmesh.lookAt(camera)
+async function SetText (textString, x,y,z, parent) {
+     // static async create(url) {
+    const text = await Text.create({
+        // width: 1,
+        text: textString,
+        font: '../../fonts/web/Acme.woff',
+        depth: 0.02,
+        // align: 'left',
+        size: .25,
+        // size: size,
+        removeOverlaps: true,
+        layout: {
+            width: 1,
+            align: 'center'
+        }
+    });
+
+    const textmesh = new THREE.Mesh(text.geometry, uiMaterial);
+    
+    if (!parent) {
+    textmesh.name = "textmesh";
+    textmesh.position.set(x, y, z);
+    scene.add(textmesh);
+    lookAtCameraObjects.push(textmesh);
+
+    return textmesh;
+   } else {
+    parent.add(textmesh);
+    textmesh.position.set(.25,1,0);
+    textmesh.userData = {};
+    textmesh.userData.name = "BPM text";
+    lookAtCameraObjects.push(textmesh);
+  }
+
+    // textmesh.lookAt(camera)
 }
 
 export class SynthKeys { 
@@ -629,6 +676,7 @@ export class SynthKeys {
 
     console.log("INSTANCE data for key " + keyID + " : "  + JSON.stringify(this.keyData[keyID]))
       selectedKey = keyID;
+      const iMesh = this.iMesh;
     const keyData = this.keyData[keyID];
     if (keyData) {
       const octave = 3;
@@ -650,9 +698,9 @@ export class SynthKeys {
         let noteMods = Tonal.Chord.notes(chord, keyData.keytonic + octave);
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        // if (fromTransport) {
+        if (fromTransport || (!fromTransport && synthTransport && !synthTransport.transportIsPlaying)) {
           SynthHit(null,null,null,null,midiNotes);
-        // }
+        }
       } else {
         console.log("minorkey " + JSON.stringify(theKey));
         var chordIndex = Math.floor(Math.random() * theKey.natural.chords.length);
@@ -663,9 +711,9 @@ export class SynthKeys {
         
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        // if (fromTransport) {
+        if (fromTransport || (!fromTransport && synthTransport && !synthTransport.transportIsPlaying)) {
           SynthHit(null,null,null,null,midiNotes);
-        // }
+        }
         ThreeDeeText(noteMods.toString(), 1, lastRaycastHitObject, lastRaycastHitPosition,null,null,null);
         // this.pSynthOnOff(noteMods);
         // this.polySynth.triggerAttackRelease(noteMods, "2n");
@@ -673,13 +721,13 @@ export class SynthKeys {
         // this.mainText.setAttribute("text", { value: "playing "+ noteMods + " \nfrom " + keyTonic + keyType});
       }
       const color = new THREE.Color();
-      color.setHex(0xffffff); // Set to red
+      color.setHex(settings.sceneColorAlt1); // Set to red
 
       // Update color at a specific index (e.g., index 0)
-      this.iMesh.setColorAt(keyID, color);
+      iMesh.setColorAt(keyID, color);
 
       // Tell Three.js to update the color attribute on the GPU
-      this.iMesh.instanceColor.needsUpdate = true;
+      iMesh.instanceColor.needsUpdate = true;
     }
   }
    
@@ -709,8 +757,8 @@ export class FatlineTransport {
     // this.taqs = options.tags;
     // this.originID = options.originID;
 
-    this.bpm = 60;
-    this.fixedDeltaTime = 2000; //1/60th second
+    // this.bpm = 60;
+    this.fixedDeltaTime = (60/bpm) * 1000; // 1 sec = 60 bpm
 
     this.lastTimestamp = 0;
     this.accumulator = 0;
@@ -724,6 +772,8 @@ export class FatlineTransport {
     this.loopInterval = null;;
 
     this.isPlaying = false;
+
+
     const positions = [];
         const colors = [];
 
@@ -734,6 +784,17 @@ export class FatlineTransport {
     const cgeometry = new THREE.SphereGeometry( .25, 16, 8 );
     const cmaterial = new THREE.MeshBasicMaterial( { color: 0x00ff2a, wireframe: false, transparent: true, opacity: .5 } );
     this.objectToCurve = new THREE.Mesh( cgeometry, cmaterial );
+
+    this.uiToggle = new THREE.Mesh(cgeometry, cmaterial);
+    this.uiToggle.scale.setScalar(2);
+    this.uiToggle.userData = {};
+    this.uiToggle.userData.name = "transportUIToggle";
+    this.uiToggle.userData.locationData = {};
+    this.uiToggle.userData.locationData.markerType = "Synth Transport UI";
+    this.uiToggle.userData.transportInstance = this;
+    activeObjex.push(this.uiToggle);
+    parentObject.add(this.uiToggle);
+
     parentObject.add(this.objectToCurve);
         // const points = GeometryUtils.hilbert3D( new THREE.Vector3( 0, 0, 0 ), 20.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 );
     let points = [];
@@ -797,9 +858,12 @@ export class FatlineTransport {
     line.scale.set( 1,1,1);
     
     parentObject.add( line );
-    
 
-    }
+    const bpmText = SetText(bpm + "\nBPM", 0,1,0, parentObject);
+
+    
+  }
+
 
     LoopTransport (pause, bpm) {
       
@@ -841,65 +905,54 @@ export class FatlineTransport {
 
     toggleTransportPlay () {
       this.transportIsPlaying = !this.transportIsPlaying;
+      // ShowHTMLPopup(null,ReturnSynthUI(), null, null, null);
     }
     fixedTimeLoop (currentTimestamp) {
        
       // console.log("currenttime " + currentTimestamp);
 
+
       if (this.transportIsPlaying) {
         // // Initialize lastTimestamp on the very first frame
-        if (!this.lastTimestamp) {
+        if (!this.lastTimestamp) { //i.e. == 0
           this.lastTimestamp = currentTimestamp;
         }
+  
+  
+      if (!startTime) startTime = currentTimestamp; //same as above, but using this.lastTimestamp no workie for both... ?
+      const elapsed = currentTimestamp - startTime;
 
         // // 2. Calculate how much real time passed since the last frame
-        let frameTime = currentTimestamp - this.lastTimestamp;
-        // this.lastTimestamp = currentTimestamp;
+      let frameTime = currentTimestamp - this.lastTimestamp;
+      this.lastTimestamp = currentTimestamp;
 
-        // Panic threshold: Prevent "spiral of death" if the tab loses focus or lags severely
-        // if (frameTime > 250) {
-        //   frameTime = 250; 
-        // }
+      // Panic threshold: Prevent "spiral of death" if the tab loses focus or lags severely
+      if (frameTime > 25000) {
+        frameTime = 25000; 
+      }
 
         // // 3. Add the elapsed time to our accumulator pool
         this.accumulator += frameTime;
-
+        // console.log("this.lastTimestamp "+ this.lastTimestamp + " - " + " currentTimestamp " + currentTimestamp + " frameTime " + frameTime);
         // 4. Consume time from the accumulator in fixed chunks
-        if (this.accumulator >= this.fixedDeltaTime) {
-          // console.log("this.fixedDeltaTime " + this.fixedDeltaTime);
-          // if (selectedKey) {
-          //   if (synthKeys) {  
-          //       synthKeys[0].keySelect(selectedKey, true);
-          //   }
-          // }
-
-          this.accumulator -= this.fixedDeltaTime;
-          // console.log("BEAT");
-        } 
-
-        //   const fraction = (elapsed % LOOP_DURATION) / LOOP_DURATION;
-        //   const fraction = this.fixedDeltaTime / this.accumulator;
-        //   const fractionNormalized = normalize(fraction, 1, this.fixedDeltaTime);
-        //   console.log("fraction : " + fraction);
-        // }
-
-          // if (!startTime) this.lastTimestamp = currentTimestamp;
-
-  // Calculate total time elapsed since the loop started
-        // const elapsed = currentTimestamp - this.lastTimestamp;
-
-        // Calculate the normalized fraction (0.0 to 1.0) of the current loop
-        const fraction = (frameTime % this.fixedDeltaTime) / this.fixedDeltaTime;
-        // console.log(fraction.toFixed(4)); 
-        if (fraction > .95) {
-        //   // console.log("new loop!");
-           
-        // }
-         if (selectedKey) {
+        if (this.accumulator >= (this.fixedDeltaTime * 2)) {
+          console.log(this.accumulator + "thiss.accumulator is greater than" + this.fixedDeltaTime);
+          if (selectedKey) {
             if (synthKeys) {  
                 synthKeys[0].keySelect(selectedKey, true);
             }
           }
+
+          // this.accumulator -= this.fixedDeltaTime;
+          this.accumulator = 0;
+          console.log("BEAT");
+        } 
+
+        // Calculate the normalized fraction (0.0 to 1.0) of the current loop
+        const fraction = (elapsed % this.fixedDeltaTime) / this.fixedDeltaTime;
+        // console.log(fraction.toFixed(4)); 
+        if (fraction > .99) {
+          console.log("fraction BEAT"); //sometimes still doubles if triggering events...
         }
         this.updateLinePosition(fraction);
       } else {
