@@ -3527,7 +3527,13 @@ var PlayDialogLoop = function(arr) {
             addToSceneButton.classList.add('btn', 'btn-danger');
             addToSceneButton.innerText = 'Add to Scene';
             addToSceneButton.addEventListener('click', () => {
-              CreateLocationAframe("local_" + localData.localFiles[file].name, 'picture');
+              // CreateLocationAframe("local_" + localData.localFiles[file].name, 'picture');
+              if (settings.sceneType && settings.sceneType.toLowerCase() == 'aframe') {
+                CreateLocationAframe("local_" + localData.localFiles[file].name, 'picture');  //hrm, aframe only...
+              } else {
+                SendLocationEvent("new", "local_" + localData.localFiles[file].name, 'picture');
+              }
+
             });
             
             cardBody.appendChild(title);

@@ -19,6 +19,7 @@ import { activeObjex } from './wgpu_locations.js';
 import { lookAtCameraObjects, ThreeDeeText, ShowHTMLPopup, SynthTransportUI } from './wgpu_ui.js';
 import { lastRaycastHitPosition, lastRaycastHitObject } from './wgpu_controls.js';
 import { instancedMesh } from 'three/tsl';
+import { world } from './wgpu_physics.js';
 
 export let superSonicLoaded = false;
 
@@ -547,30 +548,32 @@ export class SynthKeys {
     } 
 
     const geo = new THREE.SphereGeometry(.35,16,10);
-    const mat = new THREE.MeshStandardMaterial({transparent: true, color: 'blue', roughness: .1, opacity: .5});
+    const mat = new THREE.MeshBasicMaterial({transparent: true, opacity: .95});
     // const mesh = new THREE.Mesh(geo, mat);
-    const iMesh = new THREE.InstancedMesh(geo, mat, count);
-    scene.add(iMesh);
+    this.iMesh = new THREE.InstancedMesh(geo, mat, count);
+    scene.add(this.iMesh);
 
 
-    iMesh.userData = {};
-    iMesh.userData.locationData = {};
-    iMesh.userData.locationData.name = "synthKeys";
-    iMesh.userData.locationData.markerType = "synth keys";
-    activeObjex.push(iMesh);
+    this.iMesh.userData = {};
+    this.iMesh.userData.locationData = {};
+    this.iMesh.userData.locationData.name = "synthKeys";
+    this.iMesh.userData.locationData.markerType = "synth keys";
+    activeObjex.push(this.iMesh);
     
     synthKeys[0] = this; //for now...
 
-    this.iMesh = iMesh;
+    // this.this.iMesh = this.iMesh;
     const dummy = new THREE.Object3D();
     this.keymap = [];
     let k = -1;
     let m = -1;
     let n = -1;
 
+    this.iColor = new THREE.Color(settings.sceneColor1Alt);
 
     this.keyData = {};
     let radius = 12;
+    this.lastSelectedIndex = 0;
 
     this.initBPM = (settings && settings.bpm) ? settings.bpm : 80;
     if (options.mode = "circle of fifths") {
@@ -581,7 +584,7 @@ export class SynthKeys {
       //   const z = Math.sin(angle) * radius;
       //   dummy.position.set(x, 1, z);
       //   dummy.updateMatrix();
-      //   iMesh.setMatrixAt(k, dummy.matrix);
+      //   this.iMesh.setMatrixAt(k, dummy.matrix);
       //   let key = {}
       //   key.keytonic = majorKeys[m];
       //   key.keytype = "major";
@@ -600,7 +603,7 @@ export class SynthKeys {
         const z = Math.sin(angle) * radius;
         dummy.position.set(x, 1, z);
         dummy.updateMatrix();
-        iMesh.setMatrixAt(k, dummy.matrix);
+        this.iMesh.setMatrixAt(k, dummy.matrix);
         let key = {}
         key.keytonic = majorKeys[m];
         key.keytype = "major";
@@ -612,6 +615,9 @@ export class SynthKeys {
         // }
         console.log("major key id of " + k);
 
+          // this.iColor.setHex(Math.random() * 0xffffff);
+          this.iMesh.setColorAt(k, this.iColor);
+
       }
       for (const iKey2 in minorKeys) {
           k++;
@@ -622,7 +628,7 @@ export class SynthKeys {
         const z = Math.sin(angle) * radius;
         dummy.position.set(x, 1, z);
         dummy.updateMatrix();
-        iMesh.setMatrixAt(k, dummy.matrix);
+        this.iMesh.setMatrixAt(k, dummy.matrix);
         let key = {}
         key.keytonic = minorKeys[n];
         key.keytype = "minor";
@@ -631,6 +637,8 @@ export class SynthKeys {
         SetText(minorKeys[n] + " " + "minor", x, 1.35, z);
         // if (k == 12) {
           console.log("minor key id of " + k);
+          //  this.iColor.setHex(Math.random() * 0xffffff);
+          this.iMesh.setColorAt(k, this.iColor);
         // }
         // k++;
       }
@@ -641,7 +649,7 @@ export class SynthKeys {
       //   const z = Math.sin(angle) * radius;
       //   dummy.position.set(x, 1, z);
       //   dummy.updateMatrix();
-      //   iMesh.setMatrixAt(k, dummy.matrix);
+      //   this.iMesh.setMatrixAt(k, dummy.matrix);
       //   let key = {}
       //   key.keytonic = minorKeys[n];
       //   key.keytype = "minor";
@@ -659,20 +667,23 @@ export class SynthKeys {
         const z = Math.sin(angle) * radius;
         dummy.position.set(x, n + 1, z);
         dummy.updateMatrix();
-        iMesh.setMatrixAt(k, dummy.matrix);
+        this.iMesh.setMatrixAt(k, dummy.matrix);
         let key = {}
         key.keytonic = tonics[i];
         key.keytype = types[n];
         key.position = new THREE.Vector3(x, n + 1, z);
         this.keyData[k] = key;
         SetText(tonics[i] + " " + types[n], x, n + 1.35, z);
+         this.iColor.setHex(Math.random() * 0xffffff);
+          this.iMesh.setColorAt(k, this.iColor);
         k++;
 
         }
       }
     
     }
-      iMesh.instanceMatrix.needsUpdate = true;
+      this.iMesh.instanceMatrix.needsUpdate = true;
+      this.iMesh.instanceColor.needsUpdate = true;
       const transportOptions = {};
       transportOptions.bpm = this.initBPM;
      this.synthTransport = new FatlineTransport(transportOptions);
@@ -684,9 +695,24 @@ export class SynthKeys {
 
     console.log("INSTANCE data for key " + keyID + " : "  + JSON.stringify(this.keyData[keyID]))
       selectedKey = keyID;
-      const iMesh = this.iMesh;
+      // const this.iMesh = this.this.iMesh;
     const keyData = this.keyData[keyID];
+          const color = new THREE.Color(0xffffff);
+      // color.setHex(0x00ff00); // Set to red
+      console.log("tryna set color to " + color);
+      // Update color at a specific index (e.g., index 0)
+      this.iMesh.setColorAt(keyID, color);
+       this.iColor.setHex(Math.random() * 0xffffff);
+          this.iMesh.setColorAt(this.lastSelectedIndex, this.iColor);
+          this.lastSelectedIndex = keyID;
+
+      
+      // Tell Three.js to update the color attribute on the GPU
+      this.iMesh.instanceColor.needsUpdate = true;
+
     if (keyData) {
+      const keyInfoEl = document.getElementById("nowPlaying");
+
       const octave = 3;
       let theKey;
           // console.log("data for key " + keyID + " : "  + JSON.stringify(keyData))
@@ -702,11 +728,11 @@ export class SynthKeys {
         var chordIndex = Math.floor(Math.random() * theKey.chords.length);
         let chord = theKey.chords[chordIndex];
         console.log(keyData.keytonic + " " + keyData.keytype + " random chord: " + chord);
-
+        keyInfoEl.innerHTML = "Key: " + keyData.keytonic + " " + keyData.keytype + " Chord: " + chord;
         let noteMods = Tonal.Chord.notes(chord, keyData.keytonic + octave);
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        if (fromTransport || (!fromTransport && this.synthTransport && !this.synthTransport.transportIsPlaying)) {
+        if (fromTransport || (!fromTransport && this.synthTransport)) {
           SynthHit(null,null,null,null,midiNotes, this.synthTransport.bpm);
         }
       } else {
@@ -716,10 +742,10 @@ export class SynthKeys {
         console.log(keyData.keytonic + " " + keyData.keytype + " random chord: " + chord);
 
         let noteMods = Tonal.Chord.notes(chord, keyData.keytonic + octave);
-        
+        keyInfoEl.innerHTML = "Key: " + keyData.keytonic + " " + keyData.keytype + " Chord: " + chord;
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        if (fromTransport || (!fromTransport && this.synthTransport && !this.synthTransport.transportIsPlaying)) {
+        if (fromTransport || (!fromTransport && this.synthTransport)) {
           SynthHit(null,null,null,null,midiNotes, this.synthTransport.bpm);
         }
         ThreeDeeText(noteMods.toString(), 1, lastRaycastHitObject, lastRaycastHitPosition,null,null,null);
@@ -728,14 +754,7 @@ export class SynthKeys {
         // this.lastNotes = noteMods;
         // this.mainText.setAttribute("text", { value: "playing "+ noteMods + " \nfrom " + keyTonic + keyType});
       }
-      const color = new THREE.Color();
-      color.setHex(settings.sceneColorAlt1); // Set to red
 
-      // Update color at a specific index (e.g., index 0)
-      iMesh.setColorAt(keyID, color);
-
-      // Tell Three.js to update the color attribute on the GPU
-      iMesh.instanceColor.needsUpdate = true;
     }
   }
    
@@ -795,6 +814,8 @@ export class FatlineTransport {
     const cmaterial = new THREE.MeshBasicMaterial( { color: 0x00ff2a, wireframe: false, transparent: true, opacity: .5 } );
     this.objectToCurve = new THREE.Mesh( cgeometry, cmaterial );
 
+    const worldPosition = new THREE.Vector3();
+
     this.uiToggle = new THREE.Mesh(cgeometry, cmaterial);
     this.uiToggle.scale.setScalar(2);
     this.uiToggle.userData = {};
@@ -806,6 +827,7 @@ export class FatlineTransport {
     parentObject.add(this.uiToggle);
 
     parentObject.add(this.objectToCurve);
+    parentObject.getWorldPosition(worldPosition);
         // const points = GeometryUtils.hilbert3D( new THREE.Vector3( 0, 0, 0 ), 20.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 );
     let points = [];
     let n = 100;
@@ -873,6 +895,8 @@ export class FatlineTransport {
 
     this.parentObject = parentObject;
 
+    SynthTransportUI(parentObject, this, worldPosition);
+
     
   }
 
@@ -918,7 +942,7 @@ export class FatlineTransport {
     toggleTransportPlay () {
       this.transportIsPlaying = !this.transportIsPlaying;
       // ShowHTMLPopup(null,ReturnSynthUI(), null, null, null);
-      SynthTransportUI(this.parentObject, this);
+
     }
     updateBPM (direction) {
       if (direction == "up") {

@@ -1000,26 +1000,31 @@ export function HideHTMLPopup() {
 }
 
 
-export function SynthTransportUI(parent, synthTransport) {
+export function SynthTransportUI(parent, synthTransport, position, distance, scale) {
 
-      const htmlstring =  "<div><div class=\x22number-control\x22>" +
+   
+
+         
+
+     if (uiMode == "hic") {
+           const htmlstring =  "<div>" +
         
             // "<span>BPM: </span><button type=\x22button\x22 id=\x22bpmUpButton\x22 onclick=\x22this.parentNode.querySelector('input').stepDown()\x22>-</button>" +
-            
-            "<span>BPM: </span><input type=\x22number\x22 id=\x22bpmInput\x22 value=\x22"+synthTransport.bpm+"\x22 min=\x221\x22 max=\x22200\x22 step=\x221\x22>" +
+            "<div class=\x22hic_content_2\x22><table><tr><td><div id=\x22nowPlaying\x22 class=\x22uiText\x22> No Key Selected </div></td></tr>" + 
+            "<tr><td> BPM: <input class=\x22uiText\x22 type=\x22number\x22 id=\x22bpmInput\x22 value=\x22"+synthTransport.bpm+"\x22 min=\x221\x22 max=\x22200\x22 step=\x221\x22></td></tr></table>" +
+            // "<div class=\x22hic_content_2\x22><div id=\x22nowPlaying\x22 class=\x22uiText\x22> No Key Selected </div>" +
+            // "<br><br><span> BPM: <input class=\x22uiText\x22 type=\x22number\x22 id=\x22bpmInput\x22 value=\x22"+synthTransport.bpm+"\x22 min=\x221\x22 max=\x22200\x22 step=\x221\x22></span>" +
             
             // "<button type=\x22button\x22 id=\x22bpmUpButton\x22 onclick=\x22this.parentNode.querySelector('input').stepUp()\x22>+</button>"+
         "</div></div>";
-
-     if (uiMode == "hic") {
-        if (style) {
-            // console.log("tryna set style " + style);
-            // contentEl.className = '';
-            // contentEl.classList.add(style);
-        }
+        // if (style) {
+        //     // console.log("tryna set style " + style);
+        //     // contentEl.className = '';
+        //     // contentEl.classList.add(style);
+        // }
         
         let material;
-        // let scaleFactor = .25;
+        let scaleFactor = 50;
         // if (distance) {
         //     console.log("distance " + distance);
         //     scaleFactor = distance * .75;
@@ -1028,19 +1033,22 @@ export function SynthTransportUI(parent, synthTransport) {
         //     scaleFactor = 5;
         // }
 
-        console.log("ui " + scaleFactor + " " + distance + " " + style);
-        scaleFactor = clamp(scaleFactor, .5, 33);
+        // console.log("ui " + scaleFactor + " " + distance + " " + style);
+        // scaleFactor = clamp(scaleFactor, .5, 33);
         if (!synthTransportHicMesh) {
 
             const contentEl = document.createElement('div');
-            document.body.appendChild(contentEl);
+            // contentEl.classList.add("hic_content_2");
+            const threeCanvas = document.getElementById("three_canvas");
+            threeCanvas.appendChild(contentEl);
             contentEl.innerHTML = htmlstring;
+
             let yFudge = .5;
-            if (!position) {
-                position = new THREE.Vector3();
-                viewportPlaceholder.getWorldPosition(position);
-                yFudge = 0;
-            }
+            // if (!position) {
+            //     position = new THREE.Vector3();
+            //     viewportPlaceholder.getWorldPosition(position);
+            //     yFudge = 0;
+            // }
             console.log("hicMesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
 
             const geometry = new THREE.PlaneGeometry( 1,1,10,10);
@@ -1060,10 +1068,13 @@ export function SynthTransportUI(parent, synthTransport) {
 
             synthTransportHicMesh = new THREE.Mesh( geometry, material );
             
+                        synthTransportHicMesh.visible = false;
             parent.add( synthTransportHicMesh );
 
-            hicMesh.scale.setScalar(scaleFactor);
-            hicMesh.position.set(position.x, position.y + .5, position.z);
+            // synthTransportHicMesh.position.set(position.x,position.y,position.z);
+                    synthTransportHicMesh.position.set(0,0,0);
+
+            synthTransportHicMesh.scale.setScalar(16);
             lookAtCameraObjects.push(synthTransportHicMesh);
 
             if (!interactionManager) {
@@ -1101,23 +1112,23 @@ export function SynthTransportUI(parent, synthTransport) {
             synthTransportHicMesh.visible = true;
           
             console.log("reused hicmesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) + " scalefactor " + scaleFactor);
-            if (position && distance) {
-                let ymodification = position.y + scaleFactor/2;
-                if (yMod != null) {
-                    ymodification = yMod;
+            // if (position && distance) {
+            //     let ymodification = position.y + scaleFactor/2;
+            //     if (yMod != null) {
+            //         ymodification = yMod;
 
-                } 
-                console.log("ymod is " + ymodification);
-                synthTransportHicMesh.position.set(position.x, ymodification, position.z);
-                synthTransportHicMesh.scale.setScalar(scaleFactor);
-            } else {
-                console.log("NO POSITION!");
-                const worldPosition = new THREE.Vector3();
-                viewportPlaceholder.getWorldPosition(worldPosition);
-                synthTransportHicMesh.scale.setScalar(1);
-                synthTransportHicMesh.position.set(worldPosition.x, worldPosition.y + .5, worldPosition.z);
-                // hicMesh.scale.setScalar(scaleFactor);
-            }
+            //     } 
+            //     console.log("ymod is " + ymodification);
+            //     synthTransportHicMesh.position.set(position.x, ymodification, position.z);
+            //     synthTransportHicMesh.scale.setScalar(scaleFactor);
+            // } else {
+            //     console.log("NO POSITION!");
+            //     const worldPosition = new THREE.Vector3();
+            //     viewportPlaceholder.getWorldPosition(worldPosition);
+            //     synthTransportHicMesh.scale.setScalar(1);
+            //     synthTransportHicMesh.position.set(worldPosition.x, worldPosition.y + .5, worldPosition.z);
+            //     // hicMesh.scale.setScalar(scaleFactor);
+            // }
             synthTransportHicMesh.updateMatrixWorld();
             synthTransportHicMesh.visible = true;
             // hicMesh.material = material;
@@ -1125,34 +1136,39 @@ export function SynthTransportUI(parent, synthTransport) {
 
     } else if (uiMode == "popup") {
 
+           const htmlstring =  "<div class=\x22\x22>" +
+        
+            // "<span>BPM: </span><button type=\x22button\x22 id=\x22bpmUpButton\x22 onclick=\x22this.parentNode.querySelector('input').stepDown()\x22>-</button>" +
+            // "<div class=\x22hic_content_2\x22><table><tr><td><div id=\x22nowPlaying\x22 class=\x22uiText\x22> No Key Selected </div></td></tr>" + 
+            // "<tr><td> BPM: <input class=\x22uiText\x22 type=\x22number\x22 id=\x22bpmInput\x22 value=\x22"+synthTransport.bpm+"\x22 min=\x221\x22 max=\x22200\x22 step=\x221\x22></td></tr></table>" +
+            "<div id=\x22nowPlaying\x22 class=\x22uiText\x22> No Key Selected </div>" +
+            "<span> BPM: <input class=\x22uiText\x22 type=\x22number\x22 id=\x22bpmInput\x22 value=\x22"+synthTransport.bpm+"\x22 min=\x221\x22 max=\x22200\x22 step=\x221\x22></span>" +
+            
+            // "<button type=\x22button\x22 id=\x22bpmUpButton\x22 onclick=\x22this.parentNode.querySelector('input').stepUp()\x22>+</button>"+
+        "</div>";
+
         let synthUIpopup = document.getElementById("synthTransportUI");
 
         if (!synthUIpopup) {
         synthUIpopup = document.createElement('div');
         document.body.appendChild(synthUIpopup);
         synthUIpopup.id = "synthTransportUI";
-
+        synthUIpopup.classList.add("popup");
 
         }
 
         synthUIpopup.innerHTML = htmlstring;
     
         console.log("synthUIpopup string " + htmlstring);
-            const bpmInput = document.getElementById('bpmInput');
-
-            bpmInput.addEventListener('change', (event) => {
-                // event.target.value grabs the current text inside the input
-                console.log('Value changed to:', event.target.value);
-                synthTransport.bpm = event.target.value;
-            });
+          
         if (showDialogPanel) {
             return;
         }
 
-        synthUIpopup.classList.add("popup");
+
         if (!event) {
-            let xpos = window.innerWidth / 2;
-            let ypos = window.innerHeight / 2;
+            let xpos = window.innerWidth / 2 - 256;
+            let ypos = window.innerHeight / 2 - 350;
             Object.assign(synthUIpopup.style, {
                 left: `${xpos}px`,
                 top: `${ypos}px`,
@@ -1181,4 +1197,11 @@ export function SynthTransportUI(parent, synthTransport) {
             });
         }
     }
+     const bpmInput = document.getElementById('bpmInput');
+
+            bpmInput.addEventListener('change', (event) => {
+                // event.target.value grabs the current text inside the input
+                console.log('Value changed to:', event.target.value);
+                synthTransport.bpm = event.target.value;
+            });
 }
