@@ -12,16 +12,21 @@ import { scene, renderer } from './wgpu_main.mjs';
 
 import { sunLight } from './wgpu_lights.js';
 
+import { SetGeneratedNavmesh } from './wgpu_locations.js';
+
 import { camera, controls } from './wgpu_controls.js';
 
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
+
+import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 
 // import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 import {
 	color, screenUV, mx_noise_float, sin, time, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep,
 	vec2, vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, mul, cameraPosition, saturate, oneMinus, 
-	Fn, texture, equirectUV, positionLocal, rangeFogFactor, pmremTexture
+	Fn, texture, equirectUV, positionLocal, rangeFogFactor, pmremTexture, normalLocal, length
+	
 } from 'three/tsl';
 
 // import { texture, positionLocal, NodeMaterial } from 'three/nodes';
@@ -148,40 +153,230 @@ export function InitGrid() {
 
 }
 
-export function InitGround() {
+export function InitGround(options) {
 
-	console.log("TRYNA InitGround (default)");
-	let xscale = 100;
-	let yscale = 100;
-	let zscale = 100;
-	let radius = 100;
-	const planeGeo = new THREE.CircleGeometry(radius, radius);
+	let groundGeometry;
+	// if (!options) {
+	// 	groundGeometry = new THREE.PlaneGeometry(500,500,128,128);
+	// } else {
+		if (options.type == "circle") {
+			console.log("TRYNA InitGround (default)");
 
-	const posAttribute = planeGeo.attributes.position;
-	const uvAttribute = planeGeo.attributes.uv;
+			let xscale = 100;
+			let yscale = 100;
+			let zscale = 100;
+			let radius = 100;
+			groundGeometry = new THREE.CircleGeometry(radius, radius);
 
-	for (let i = 0; i < posAttribute.count; i++) {
-	const x = posAttribute.getX(i);
-	const y = posAttribute.getY(i);
+			const posAttribute = groundGeometry.attributes.position;
+			const uvAttribute = groundGeometry.attributes.uv;
 
-	// Map from [-radius, radius] to [0, 1] projection space
-	const u = (x / radius + 1) / 2;
-	const v = (y / radius + 1) / 2;
+			for (let i = 0; i < posAttribute.count; i++) {
+			const x = posAttribute.getX(i);
+			const y = posAttribute.getY(i);
 
-	uvAttribute.setXY(i, u, v);
-	}
-	uvAttribute.needsUpdate = true;
-	
-	const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
+			// Map from [-radius, radius] to [0, 1] projection space
+			const u = (x / radius + 1) / 2;
+			const v = (y / radius + 1) / 2;
+
+			uvAttribute.setXY(i, u, v);
+			}
+			uvAttribute.needsUpdate = true;
+		} else {
+			groundGeometry = new THREE.PlaneGeometry(500,500,128,128);
+		}
+		
+	// }
+	// const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
+	// // planeMat.colorNode = settings.sceneColor2;
+	// if (textureEquirect) {
+	// 	planeMat.envMap = textureEquirect;
+	// }
+
+	if (options && options.type == "tsl noise") {
+		const planeMat = new THREE.MeshStandardNodeMaterial({
+		// color: 0x00ffcc
+		// roughness: .2,
+		// wireframe: true
+		});
+		const noiseScale = .05;
+		let noiseInput = mul(positionLocal, noiseScale);
+		let speed = 1;
+		let animatedTime = 1;
+		if (options && options.animate) { 
+		  	speed = .05;
+  			animatedTime = time.mul(speed);
+			noiseInput = mul(positionLocal, noiseScale).mul(animatedTime);
+		}
+
+
+		const noiseVal = mx_noise_float(noiseInput);
+
+		// Scale the noise to control the displacement height
+		const displacementAmount = 5;
+		const displacement = mul(noiseVal, displacementAmount);
+
+		// 4. Offset the vertex positions along their normals
+		const pos = positionLocal.toVar();
+		const distFromCenter = length(pos.xz);
+		const flatRadius = float(10.0);
+		const fadeWidth = float(20.0);
+		// const mask = smoothstep(flatRadius, flatRadius.add(fadeWidth), distFromCenter);
+
+		const displacedPosition = positionLocal.add(mul(normalLocal, displacement));
+
+		// 5. Assign the result to the material's positionNode
+
+		const uvCoord = uv();
+
+		// Calculate distance from the center of the UV map (0.5, 0.5)
+		const centerDist = length(uvCoord.sub(.5));
+
+		// Create a mask: 0 at the center, ramping up to 1 near the edges
+		// smoothstep(edge0, edge1, x) -> adjust radius as needed
+		const mask = smoothstep(0.01, 0.25, centerDist);
+
+		const finalDisplacement = displacedPosition.mul(mask);
+		planeMat.positionNode = displacedPosition;
+
+
+
+				// 3. Color by Elevation Node
+		// Define your terrain colors (Low elevation vs High elevation)
+		const lowColor = vec3( 0.1, 0.5, 0.2 );  // Green valleys
+		const highColor = vec3( 0.8, 0.4, 0.1 ); // Brown/Orange peaks
+
+		// Mix the colors based on the elevation factor
+		// (mx_noise_float typically outputs a -1 to 1 range, so we normalize to 0-1)
+		const colorFactor = noiseVal.add( 1.0 ).mul( 0.5 ); 
+		const elevationColor = lowColor.mix( highColor, colorFactor );
+		planeMat.colorNode = elevationColor;
+		let planeMesh = new THREE.Mesh(groundGeometry, planeMat);
+
+		// SetGeneratedNavmesh(planeMesh); //uh, no
+		
+		planeMesh.receiveShadow = true;
+		planeMesh.rotateX(-Math.PI / 2);
+		
+		scene.add(planeMesh);
+	} else if (options && options.type == "simple noise") {
+		const geometry = new THREE.PlaneGeometry(512, 512, 256, 256); 
+
+		// Generate our noise texture
+		const noiseTexture = generateNoiseTexture();
+
+		// Create a material that supports displacement mapping
+		const material = new THREE.MeshStandardMaterial({
+			color: 0x33aa55,
+			wireframe: false, // Set to true if you want to see the vertex shifts clearly
+			roughness: 0.8,
+			
+			// Pass the noise map here
+			displacementMap: noiseTexture, 
+			// Adjust how high/low the peaks and valleys go
+			displacementScale: 2,       
+			// Adjusts the base zero-point offset of the map
+			displacementBias: 0.0          
+		});
+
+		// Combine into a mesh and add to your scene
+		const terrainMesh = new THREE.Mesh(geometry, material);
+		terrainMesh.rotation.x = -Math.PI / 2; // Lay flat like ground
+		scene.add(terrainMesh);
+	} else if (options && options.type == "perlin noise") {
+				// 1. Setup Geometry and Data
+		const size = 1024; // Resolution of the grid/texture
+		const width = 512, height = 512;
+		const geometry = new THREE.PlaneGeometry(width, height, size - 1, size - 1);
+		const perlin = new ImprovedNoise();
+
+		// Create arrays for the texture and displacement
+		const data = new Uint8Array(size * size);
+		const positions = geometry.attributes.position;
+
+		// 2. Generate Perlin Noise and Apply to Mesh
+		for (let i = 0; i < positions.count; i++) {
+			// Get UV coordinates or vertex position to sample noise
+			const u = geometry.attributes.uv.getX(i);
+			const v = geometry.attributes.uv.getY(i);
+
+			// Sample Perlin Noise (returns values between -1 and 1)
+			// Scale u and v to adjust the frequency of the noise
+			const noiseValue = perlin.noise(u * 25, v * 25, 0); 
+			
+			// Scale and map the noise value for height displacement (Z axis for PlaneGeometry)
+			const elevation = noiseValue * 2.5; 
+			positions.setZ(i, elevation);
+
+			// Save mapping to texture data (convert -1 to 1 range into 0 to 255)
+			const pixelValue = Math.floor((noiseValue + 1) * 127.5);
+			data[i] = pixelValue;
+		}
+
+		// Crucial: Tell Three.js that the vertices positions updated
+		geometry.computeVertexNormals();
+		geometry.attributes.position.needsUpdate = true;
+
+		// 3. Create the Perlin Noise Visual Texture
+		// Use RedFormat since it's a grayscale heightmap
+		const texture = new THREE.DataTexture(data, size, size, THREE.RedFormat);
+		texture.needsUpdate = true;
+
+		// 4. Create Material and Mesh
+		const material = new THREE.MeshStandardNodeMaterial({
+			map: texture, // Uses the generated Perlin noise texture visually
+			wireframe: false,
+			// side: THREE.DoubleSide
+		});
+
+		const mesh = new THREE.Mesh(geometry, material);
+		mesh.rotation.x = -Math.PI / 2; // Lay flat like terrain
+		scene.add(mesh);
+		// SetGeneratedNavmesh(mesh); //?
+	} else {
+			const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
 	// planeMat.colorNode = settings.sceneColor2;
-	if (textureEquirect) {
-		planeMat.envMap = textureEquirect;
+		let planeMesh = new THREE.Mesh(groundGeometry, planeMat);
+				planeMesh.rotateX(-Math.PI / 2)
+		scene.add(planeMesh);
 	}
+}
 
-	const planeMesh = new THREE.Mesh(planeGeo, planeMat);
-	planeMesh.receiveShadow = true;
-	planeMesh.rotateX(-Math.PI / 2);
-	scene.add(planeMesh);
+function generateNoiseTexture(width = 1024, height = 1024) {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    // Create a pixel buffer
+    const imgData = ctx.createImageData(width, height);
+    const data = imgData.data;
+
+    // Simple pseudo-random/perlin-like noise distribution
+    for (let i = 0; i < data.length; i += 4) {
+        // Generate a random grayscale value between 0 and 255
+        // (Tip: For smoother terrain, look into Simplex or Perlin noise algorithms)
+        const value = Math.floor(Math.random() * 255); 
+        
+        data[i]     = value; // Red
+        data[i + 1] = value; // Green
+        data[i + 2] = value; // Blue
+        data[i + 3] = 255;   // Alpha (fully opaque)
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+
+    // Convert the canvas into a Three.js CanvasTexture
+    const texture = new THREE.CanvasTexture(canvas);
+    
+    // Displacement maps represent non-color data
+    texture.colorSpace = THREE.NoColorSpace; 
+    
+    // Optional: Use linear filtering to smooth out rough pixel edges
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+
+    return texture;
 }
 
 export function InitFog() {

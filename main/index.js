@@ -5018,19 +5018,19 @@
                     //     "<p>" + ouser + "</p>" +
                     // "</div>" +
                     "<div class=\x22col form-group col-md-2\x22>" + 
-                        "<label for=\x22sceneTitle\x22>Last Update</label>" + 
+                        "<label for=\x22updatePictureForm\x22>Last Update</label>" + 
                         "<p>" + convertTimestamp(date) + "</p>" +
                     "</div>" +
                     "<div class=\x22col form-group col-md-2\x22>" + 
-                        "<label for=\x22sceneTitle\x22>By User</label>" + 
+                        "<label for=\x22updatePictureForm\x22>By User</label>" + 
                         "<p>" + user + "</p>" +
                     "</div>" +
                     "<div class=\x22col form-group col-md-3\x22>" + 
-                        "<label for=\x22sceneTitle\x22>Filename</label>" + 
+                        "<label for=\x22updatePictureForm\x22>Filename</label>" + 
                         "<p>" + response.data.filename + "</p>" +
                     "</div>" +
                     "<div class=\x22col form-group col-md-2\x22>" + 
-                        "<label for=\x22sceneTitle\x22>Image Dimensions</label>" + 
+                        "<label for=\x22updatePictureForm\x22>Image Dimensions / PPM</label>" + 
                         "<p id=\x22image_dimensions\x22>" + width + " x " + height + "</p>" +
                         "<p id=\x22pixels per meter\x22>" + pixelsPerMeterActual + "</p>" +
                     "</div>" +
@@ -5180,6 +5180,7 @@
             "<div id=\x22progress\x22 class=\x22float-right\x22></div></br></br>" +
             "<button type=\x22button\x22 class=\x22btn btn-sm btn-danger float-left\x22 onclick=\x22deleteItem('picture','" + item_id + "')\x22>Delete Picture</button>" +
             "<button type=\x22button\x22 class=\x22btn btn-sm btn-light float-right\x22 id=\x22createImageTargetButton\x22>Generate Image Target</button>" +
+            "<button type=\x22button\x22 class=\x22btn btn-sm btn-light float-right\x22 id=\x22resizeImageButton\x22>Generate Thumbnails</button>" +
             "<div id=\x22cubemapLinks\x22></div>" +
             "<button type=\x22button\x22 class=\x22btn btn-sm btn-info float-right\x22 style=\x22display:none;\x22 id=\x22createCubemapButton\x22>Generate CubeMap</button>" +
             "</div>" +
@@ -5270,6 +5271,9 @@
         } 
         $(function() { 
             
+            $(document).on('click', "#resizeImageButton", function (e) {
+                
+            });
             $(document).on('click', '#createImageTargetButton', function (e) {
                 e.preventDefault(); 
                 compiler = new MINDAR.IMAGE.Compiler(); //really better to declare here?
@@ -14504,11 +14508,14 @@ function getAllPeople() {
                                     "<select class=\x22form-control\x22 id=\x22sceneFloorplaneTexture\x22 >" +
                                     "<option value=\x22\x22 disabled selected>Select:</option>" +
                                     "<option>none</option>" +
+                                    "<option>circle</option>" +
                                     "<option>flat</option>" +
                                     "<option>hills</option>" +
                                     "<option>canyon</option>" +
                                     "<option>spikes</option>" +
-                                    "<option>noise</option>" +
+                                    "<option>tsl noise</option>" +
+                                    "<option>simple noise</option>" +
+                                    "<option>perlin noise</option>" +
                                     // hills, canyon, spikes, spikes
                                     // "<option>Grid</option>" +
                                     // "<option>Concrete</option>" +

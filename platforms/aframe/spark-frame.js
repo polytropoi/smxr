@@ -20,6 +20,7 @@
       init: function () {
         const splat = new SplatMesh({ url: this.data.src });
         splat.quaternion.set(1, 0, 0, 0);
+        // splat.position.set()
         this.el.setObject3D('mesh', splat);
       }
     });

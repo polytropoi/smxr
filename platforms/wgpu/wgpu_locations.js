@@ -70,6 +70,13 @@ export async function LoadModel(url) {
     }
 }
 
+export function SetGeneratedNavmesh(mesh) {
+
+    navmesh = mesh;
+    InitPathfinding();
+}
+
+
 let localDataReady = false;
 // export function createDefaultNavmesh() {
 //     if (!navmesh) {

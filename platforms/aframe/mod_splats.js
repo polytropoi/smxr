@@ -35,7 +35,7 @@ AFRAME.registerComponent('mod_splat', {
         // this.splat.quaternion.set(1, 0, 0, 0);
         this.el.sceneEl.object3D.add(this.splat);
         // const euler = new THREE.Euler(this.data.xrot, this.data.yrot, this.data.yrot, 'XYZ');
-        this.splat.position.set(this.data.xpos, this.data.ypos, this.data.zpos);
+        this.splat.position.set(this.data.xpos, this.data.ypos - 1, this.data.zpos);
         this.splat.rotation.set(this.data.xrot, this.data.yrot, this.data.zrot, 'XYZ');
         
         this.splat.scale.set(this.data.xscale, this.data.yscale * modFlip, this.data.zscale);

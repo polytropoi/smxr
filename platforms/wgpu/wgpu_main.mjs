@@ -386,7 +386,20 @@
 				settings.sceneEnvironmentSettings.floorPlaneTexture != "none" && settings.sceneEnvironmentSettings.floorPlaneTexture != "") {
 				
 				// if ()
-				InitGround();
+				let options = {};
+				if (settings.sceneEnvironmentSettings.floorPlaneTexture == "tsl noise") {
+					options.type = "tsl noise"
+				} else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "flat") {
+					options.type = "flat"
+				}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "circle") {
+					options.type = "circle"
+				}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "simple noise") {
+					options.type = "simple noise"
+				}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "perlin noise") {
+					options.type = "perlin noise"
+				} 
+				
+				InitGround(options);
 			}
 
 		}

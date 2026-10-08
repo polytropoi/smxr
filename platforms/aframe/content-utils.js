@@ -12,7 +12,7 @@ import 'troika-text';
 import {  PauseIntervals, SetVideoEventsData, SetTimeKeysData, SetTimedEventsListenerMode } from "../../connect/events.js";
 import { keydown, DequipAndDropItem, EquipDefaultItem } from "../../connect/dialogs.js";
 // import {  } from "../../js/navigation.js";
-import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocation, 
+import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocationAframe, 
       userData, avatarName, sceneLocations, poiLocations, cloudMarkers, 
       curveLocations, AvatarClicked, playerPosition, playerRotation } from "../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../connect/indexedDb.js";
@@ -3753,7 +3753,7 @@ AFRAME.registerComponent('location_picker', { //TODO toggle on if needed, off by
           // this.pickerEl.object3D.getWorldPosition(this.locationPicked);
           this.pickerEl.object3D.visible = false;
           if (this.locationPicked) {
-            CreateLocation(null, "placeholder", this.locationPicked);
+            CreateLocationAframe(null, "placeholder", this.locationPicked);
           }
           
           this.reset();
