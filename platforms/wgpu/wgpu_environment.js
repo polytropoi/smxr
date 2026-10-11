@@ -12,6 +12,8 @@ import { scene, renderer } from './wgpu_main.mjs';
 
 import { sunLight } from './wgpu_lights.js';
 
+import { SetGeneratedSurface } from './wgpu_instance.js';
+
 import { SetGeneratedNavmesh } from './wgpu_locations.js';
 
 import { camera, controls } from './wgpu_controls.js';
@@ -19,6 +21,9 @@ import { camera, controls } from './wgpu_controls.js';
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
+
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
 
 // import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
@@ -35,6 +40,7 @@ import { MeshStandardNodeMaterial } from 'three';
 
 import { equirectPictures, InitEquirectVideo } from './wgpu_media.js';
 import { SetSequenceInt } from '../../connect/events.js';
+import { createStaticCollider } from './wgpu_physics.js';
 
 
 
@@ -149,50 +155,74 @@ export function InitGrid() {
 	const divisions = 100;
 	const gridHelper = new THREE.GridHelper(size, divisions, settings.sceneColor2, settings.sceneColor3);
 	scene.add(gridHelper);
+}
+export function InitHeightmap(options) {
 
+	// 1. Load your grayscale heightmap
+	const textureLoader = new THREE.TextureLoader();
+	const heightmapTexture = textureLoader.load(options.heightmapUrl);
 
+	// 2. Define your displacement scale
+	const maxElevation = 50.0; 
+
+	// 3. Setup the TSL logic
+	// Sample the height from the red channel (standard for heightmaps)
+	const heightSample = texture(heightmapTexture, uv()).x;
+
+	// Apply displacement node to the geometry's local positions
+	const displacedPosition = positionLocal.add(THREE.vec3(0, heightSample.mul(maxElevation), 0));
+
+	// Determine color based on the relative height (0.0 to 1.0)
+	const lowestColor = color('#1a4d1a');  // Deep valley green
+	const highestColor = color('#ffffff'); // Snowy mountain white
+
+	// Linearly interpolate color based on heightmap value
+	const terrainColorNode = mix(lowestColor, highestColor, heightSample);
+
+	// 4. Construct the Material
+	const terrainMaterial = new THREE.MeshStandardNodeMaterial({
+		positionNode: displacedPosition, // Vertices moved on the GPU
+		colorNode: terrainColorNode       // Dynamic fragment coloring
+	});
+
+	// 5. Apply to a highly subdivided Plane
+	const geometry = new THREE.PlaneGeometry(200, 200, 256, 256);
+	geometry.rotateX(-Math.PI / 2); // Orient flat on the XZ plane
+
+	const terrainMesh = new THREE.Mesh(geometry, terrainMaterial);
+	scene.add(terrainMesh);
 }
 
 export function InitGround(options) {
 
 	let groundGeometry;
-	// if (!options) {
-	// 	groundGeometry = new THREE.PlaneGeometry(500,500,128,128);
-	// } else {
-		if (options.type == "circle") {
-			console.log("TRYNA InitGround (default)");
-
-			let xscale = 100;
-			let yscale = 100;
-			let zscale = 100;
-			let radius = 100;
-			groundGeometry = new THREE.CircleGeometry(radius, radius);
-
-			const posAttribute = groundGeometry.attributes.position;
-			const uvAttribute = groundGeometry.attributes.uv;
-
-			for (let i = 0; i < posAttribute.count; i++) {
-			const x = posAttribute.getX(i);
-			const y = posAttribute.getY(i);
-
-			// Map from [-radius, radius] to [0, 1] projection space
-			const u = (x / radius + 1) / 2;
-			const v = (y / radius + 1) / 2;
-
-			uvAttribute.setXY(i, u, v);
-			}
-			uvAttribute.needsUpdate = true;
-		} else {
-			groundGeometry = new THREE.PlaneGeometry(500,500,128,128);
-		}
+	
+	if (options.type == "circle") {
 		
-	// }
-	// const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
-	// // planeMat.colorNode = settings.sceneColor2;
-	// if (textureEquirect) {
-	// 	planeMat.envMap = textureEquirect;
-	// }
+		let xscale = 100;
+		let yscale = 100;
+		let zscale = 100;
+		let radius = 100;
+		groundGeometry = new THREE.CircleGeometry(radius, radius);
 
+		const posAttribute = groundGeometry.attributes.position;
+		const uvAttribute = groundGeometry.attributes.uv;
+
+		for (let i = 0; i < posAttribute.count; i++) {
+		const x = posAttribute.getX(i);
+		const y = posAttribute.getY(i);
+
+		// Map from [-radius, radius] to [0, 1] projection space
+		const u = (x / radius + 1) / 2;
+		const v = (y / radius + 1) / 2;
+
+		uvAttribute.setXY(i, u, v);
+		}
+		uvAttribute.needsUpdate = true;
+	} else {
+		groundGeometry = new THREE.PlaneGeometry(500,500,128,128);
+	}
+		
 	if (options && options.type == "tsl noise") {
 		const planeMat = new THREE.MeshStandardNodeMaterial({
 		// color: 0x00ffcc
@@ -283,10 +313,10 @@ export function InitGround(options) {
 		const terrainMesh = new THREE.Mesh(geometry, material);
 		terrainMesh.rotation.x = -Math.PI / 2; // Lay flat like ground
 		scene.add(terrainMesh);
-	} else if (options && options.type == "perlin noise") {
+	} else if (options && options.type == "perlin noise1") {
 				// 1. Setup Geometry and Data
-		const size = 1024; // Resolution of the grid/texture
-		const width = 512, height = 512;
+		const size = 128; // Resolution of the grid/texture
+		const width = 1024, height = 1024;
 		const geometry = new THREE.PlaneGeometry(width, height, size - 1, size - 1);
 		const perlin = new ImprovedNoise();
 
@@ -302,10 +332,10 @@ export function InitGround(options) {
 
 			// Sample Perlin Noise (returns values between -1 and 1)
 			// Scale u and v to adjust the frequency of the noise
-			const noiseValue = perlin.noise(u * 25, v * 25, 0); 
+			const noiseValue = perlin.noise(u * 15, v * 15, 0); 
 			
 			// Scale and map the noise value for height displacement (Z axis for PlaneGeometry)
-			const elevation = noiseValue * 2.5; 
+			const elevation = noiseValue * 15; 
 			positions.setZ(i, elevation);
 
 			// Save mapping to texture data (convert -1 to 1 range into 0 to 255)
@@ -314,8 +344,11 @@ export function InitGround(options) {
 		}
 
 		// Crucial: Tell Three.js that the vertices positions updated
-		geometry.computeVertexNormals();
-		geometry.attributes.position.needsUpdate = true;
+		const merged = BufferGeometryUtils.mergeVertices(geometry);
+		merged.computeVertexNormals();
+		merged.attributes.position.needsUpdate = true;		
+		// geometry.computeVertexNormals();
+		// geometry.attributes.position.needsUpdate = true;
 
 		// 3. Create the Perlin Noise Visual Texture
 		// Use RedFormat since it's a grayscale heightmap
@@ -323,23 +356,130 @@ export function InitGround(options) {
 		texture.needsUpdate = true;
 
 		// 4. Create Material and Mesh
-		const material = new THREE.MeshStandardNodeMaterial({
-			map: texture, // Uses the generated Perlin noise texture visually
-			wireframe: false,
-			// side: THREE.DoubleSide
-		});
 
-		const mesh = new THREE.Mesh(geometry, material);
-		mesh.rotation.x = -Math.PI / 2; // Lay flat like terrain
+
+		// const material = new THREE.MeshStandardNodeMaterial({
+		// 	map: texture, // Uses the generated Perlin noise texture visually
+		// 	wireframe: false,
+		// 	// side: THREE.DoubleSide
+		// });
+		const bottomColor = color(settings.sceneColor3); // e.g., deep water / low elevation
+		const topColor = color(settings.sceneColor2);    // e.g., snow / high elevation
+		const elevationFactor = positionWorld.y; 
+
+		const material = new THREE.MeshStandardNodeMaterial();
+		material.colorNode = mix(bottomColor, topColor, elevationFactor);
+
+		const mesh = new THREE.Mesh(merged, material);
+		 // Lay flat like terrain
 		scene.add(mesh);
+
+		mesh.rotation.x = -Math.PI / 2;
+		// SetGeneratedNavmesh(mesh);
+		SetGeneratedSurface(mesh);
+		createStaticCollider(mesh);
 		// SetGeneratedNavmesh(mesh); //?
+	}  else if (options && options.type == "perlin noise") {
+	
+		// Setup Plane Geometry
+		const width = 1024;
+		const height = 1024;
+		const segments = 256; 
+		const geometry = new THREE.PlaneGeometry(width, height, segments, segments);
+
+		// Rotate to make it horizontal (flat terrain)
+		geometry.rotateX(-Math.PI / 2);
+
+		// Access the position attribute
+		const positionAttr = geometry.attributes.position;
+		const perlin = new ImprovedNoise();
+		const peakHeight = 5; // Maximum height of hills
+
+		for (let i = 0; i < positionAttr.count; i++) {
+			// Get X and Z coordinates of the vertex
+			const x = positionAttr.getX(i);
+			const z = positionAttr.getZ(i);
+
+			// Calculate noise value based on coordinates (scale inputs for smooth hills)
+			const y = perlin.noise(x * 0.05, 0, z * 0.05) * peakHeight;
+
+			// Update the Y (height) coordinate
+			positionAttr.setY(i, y);
+		}
+
+		// Required updates for Three.js to render correctly
+		geometry.computeVertexNormals();
+		positionAttr.needsUpdate = true;
+
+		const moddedGeo = createNavGeometry(geometry);
+		// const material = new THREE.MeshStandardMaterial({ color: 0x55aa55, wireframe: false });
+
+		const bottomColor = color(settings.sceneColor3); // e.g., deep water / low elevation
+		const topColor = color(settings.sceneColor2);    // e.g., snow / high elevation
+		const elevationFactor = positionWorld.y; 
+
+		const material = new THREE.MeshStandardNodeMaterial();
+		material.colorNode = mix(bottomColor, topColor, elevationFactor);
+
+		const navmaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
+		const terrainMesh = new THREE.Mesh(geometry, material);
+		const navMesh = new THREE.Mesh(moddedGeo, navmaterial);
+
+		scene.add(terrainMesh);
+				SetGeneratedNavmesh(terrainMesh);
+
+		const surfaceMesh = terrainMesh.clone();
+		const colliderMesh = terrainMesh.clone();
+		surfaceMesh.material = navmaterial;
+		surfaceMesh.rotation.x = -Math.PI / 2;
+		SetGeneratedSurface(surfaceMesh);
+		createStaticCollider(colliderMesh);
+	
 	} else {
-			const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
+		const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
 	// planeMat.colorNode = settings.sceneColor2;
 		let planeMesh = new THREE.Mesh(groundGeometry, planeMat);
-				planeMesh.rotateX(-Math.PI / 2)
+		planeMesh.rotateX(-Math.PI / 2);
 		scene.add(planeMesh);
 	}
+}
+
+function createNavGeometry(terrainGeometry, maxSlope = 0.7) {
+    const posAttr = terrainGeometry.attributes.position;
+    const indexAttr = terrainGeometry.index;
+    
+    const navVertices = [];
+    const tempV1 = new THREE.Vector3();
+    const tempV2 = new THREE.Vector3();
+    const tempV3 = new THREE.Vector3();
+    const faceNormal = new THREE.Vector3();
+    const up = new THREE.Vector3(0, 1, 0);
+
+    // Process every triangle face
+    for (let i = 0; i < indexAttr.count; i += 3) {
+        const idx1 = indexAttr.getX(i);
+        const idx2 = indexAttr.getX(i + 1);
+        const idx3 = indexAttr.getX(i + 2);
+
+        tempV1.fromBufferAttribute(posAttr, idx1);
+        tempV2.fromBufferAttribute(posAttr, idx2);
+        tempV3.fromBufferAttribute(posAttr, idx3);
+
+        // Calculate face slope normal
+        THREE.Triangle.getNormal(tempV1, tempV2, tempV3, faceNormal);
+        const slope = faceNormal.dot(up);
+
+        // Only include the triangle if it is flat enough to walk on
+        if (slope >= maxSlope) {
+            navVertices.push(tempV1.x, tempV1.y, tempV1.z);
+            navVertices.push(tempV2.x, tempV2.y, tempV2.z);
+            navVertices.push(tempV3.x, tempV3.y, tempV3.z);
+        }
+    }
+
+    const navGeo = new THREE.BufferGeometry();
+    navGeo.setAttribute('position', new THREE.Float32BufferAttribute(navVertices, 3));
+    return navGeo;
 }
 
 function generateNoiseTexture(width = 1024, height = 1024) {

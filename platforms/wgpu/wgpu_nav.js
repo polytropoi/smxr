@@ -17,7 +17,7 @@
 	import { HTMLText, ThreeDeeText } from './wgpu_ui.js';
     const ZONE = 'myNavmeshZone'; 
     const groupID = 0;
-    let pathfinding, helper;
+    export let pathfinding, helper;
 
     export let agents = [];
     export let navAgentInstances = {};
@@ -118,6 +118,13 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
 
         if (!model) {
 
+            if (!pathfinding) {
+                console.log("no pathfinding, waiting to create NPCs...");
+                // await new Promise(r => setTimeout(r, 3000));
+                return;
+            } else {
+                await new Promise(r => setTimeout(r, 0));
+            }
             if (!scale) {
                 scale = 1;
             } 
@@ -132,9 +139,15 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             }
         }
 
-        await new Promise(r => setTimeout(r, 0));
+
+     
+        
         const name = locationData.name;
+        
         const pos = randomNavmeshPoint();
+        if (!pos) {
+            return;
+        }
         model.position.set(pos.x, pos.y, pos.z);
     
         model.userData.locationData = locationData;
@@ -310,7 +323,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             // randomNode 
             return randomNode;
         } else {
-            // console.log("random navmesh position fail, no pathfinding!");
+            console.log("random navmesh position fail, no pathfinding!");
             return null;
         }
     } 

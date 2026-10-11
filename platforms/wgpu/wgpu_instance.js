@@ -14,9 +14,9 @@ import { sceneTextController, convertGltfToNodeMaterial } from './wgpu_media.js'
 // import { surface } from './three_locations.js';
 
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
-import { locationData, activeObjex } from './wgpu_locations.js';
+import { locationData, activeObjex, navmesh } from './wgpu_locations.js';
 
-import { CreateNPCAgent } from './wgpu_nav.js';
+import { CreateNPCAgent, pathfinding } from './wgpu_nav.js';
 
 import { GetInstancedRigidbody } from './wgpu_physics.js'
 // import { uniform, sin, range } from 'three/tsl';
@@ -41,14 +41,35 @@ let taggedInstances = {};
 
 
 export async function InitSurface () {
-    console.log("GOTSA SURFACE");
+   
     await surface;
     sampler = new MeshSurfaceSampler(surface);
     sampler.build(); 
+     console.log("GOTSA SURFACE");
 }
 
 export function SetSurface(mesh) { //if assigned to a mesh in locations
     surface = mesh;
+        
+}
+export function SetGeneratedSurface(mesh) { //if assigned to a mesh in locations
+//     const theSurface = mesh.clone();
+    
+//     theSurface.material = theSurface.material.clone(); 
+
+// // (Optional) Disconnect the geometry if you plan to modify vertices
+//     scene.add(theSurface);
+//     theSurface.geometry = theSurface.geometry.clone(); 
+//     theSurface.position.set(0,0,0);
+    // theSurface.rotation.x = -Math.PI / 2;
+
+
+    // surface = theSurface;
+        surface = mesh;
+        // surfaceType = "primitive";
+    
+    InitSurface();
+    InitInstanceModels();
 }
 // export function createDefaultSurface() {
 //     const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); // 50 x 50
@@ -80,6 +101,47 @@ export function createDefaultSurface(locData) {
     
 }
     
+export function InitInstanceModels () {
+    for (let i = 0; i < instancedModels.length; i++) {
+        let count = 33;
+        let scale = 1;
+        let yMod = 0;
+        let shader = "";
+        if (instancedModels[i].locationData.eventData.includes("~")) {
+            let countSplit = instancedModels[i].locationData.eventData.split("~");
+            count = countSplit[1];
+        } else {
+            if (instancedModels[i].locationData.eventData.includes("grass")) {
+                count = 100;
+            }
+            if (instancedModels[i].locationData.eventData.includes("rocks")) {
+                count = 100;
+            }
+        }	
+
+        if (instancedModels[i].locationData.yscale) {
+            scale = instancedModels[i].locationData.yscale;
+        } else {
+            scale = 1;
+        }
+
+        if (instancedModels[i].locationData.y != 0) {
+            yMod = instancedModels[i].locationData.y;
+        }
+        
+        if (instancedModels[i].locationData.locationTags.includes("wind")) {
+            shader = "wind";
+        } 
+        // if (instancedModels[i].locationData.mediaID && instancedModels[i].locationData.mediaID != "" && instancedModels[i].locationData.mediaID != "none") {
+        // 	InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
+        // } else {
+        if (!instancedModels[i].locationData.locationTags.includes("dynamic")) { //hrm, need to assign positions in InstanceWithPattern below...
+            InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
+                
+        }
+        
+    } 
+}
     
 export async function TagsToInstances (locID, instanceID) {
     if (taggedInstances) { //populated when instances are created (e.g. InstanceOnSurface() below), if there's an attached mediaID
@@ -273,7 +335,8 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 const sceneObjectID = locData.timestamp + "_" + i;
                 const animations = [];
                 // const z = 1;
-
+                await navmesh != null;
+                await pathfinding != null;
                 await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID, scale);
                
                 // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown

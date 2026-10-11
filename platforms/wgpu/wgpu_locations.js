@@ -4,6 +4,8 @@ import {scene, InitSystems, showDebug } from './wgpu_main.mjs';
 
 import {SetPlayerLocation, viewportPlaceholder} from './wgpu_controls.js';
 
+import { settings } from '../../../connect/settings.js'; 
+
 import {SceneObject, sceneObjects} from './wgpu_actions.js';
 
 import { SetSceneLocations, userData, localData } from '../../../connect/connect.js';
@@ -19,7 +21,7 @@ import { CreateLight } from './wgpu_lights.js';
 import { convertGltfToNodeMaterial, GetAvailableScenesData, InitLocationModelVideo } from './wgpu_media.js';
 
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
-import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding } from './wgpu_nav.js';
+import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding, pathfinding } from './wgpu_nav.js';
 import { instance, modelViewProjection, color, float, range, modelScale } from 'three/tsl';
 import { UpdateModdedLocations, mods } from '../../connect/settings.js';
 import { eventEl, location_event } from '../../connect/events.js';
@@ -72,7 +74,31 @@ export async function LoadModel(url) {
 
 export function SetGeneratedNavmesh(mesh) {
 
-    navmesh = mesh;
+//     const theNavmesh = mesh.clone();
+
+//     console.log("tryna SetGeneratedNavmesh");
+//     theNavmesh.material = theNavmesh.material.clone(); 
+//     theNavmesh.material.wireframe = true;
+//     theNavmesh.material.color = 'red';
+
+//     //  theNavmesh.rotateX(-Math.PI / 2);
+//     theNavmesh.position.set(0,.2,0);
+           
+//            const navMeshGeometry = theNavmesh.geometry;
+// // Ensure geometry.attributes.position exists and is populated
+// const posAttribute = navMeshGeometry.attributes.position;   
+//            scene.add(theNavmesh);
+//         //   
+        navmesh = mesh;
+
+        groundObjex.push(mesh);
+
+        // if (settings.sceneTags.includes("debug")) {
+        //     navmesh.visible = true;
+        // } else {
+        //     navmesh.visible = false;
+        // }
+
     InitPathfinding();
 }
 
@@ -592,6 +618,9 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                         // const sceneObjectInstance = {sceneObjectID : sceneObject};
                         // sceneObjects.push(sceneObject);
                     // sceneObjectInstance.
+                    await navmesh != null;
+                    await pathfinding != null;
+
                     await CreateNPCAgent(null, clonedModel, animations, z.toString(), locationObjex[i].locationData, locationObjex[i].objectData, sceneObjectID);
                     kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
 

@@ -988,7 +988,6 @@ async function RaycastHit(type, hit, event) {
         locationData && 
         locationData.markerType != "navmesh" &&
         name != "navmesh"
-  
         ) {
 
         
