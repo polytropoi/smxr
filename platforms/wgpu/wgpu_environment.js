@@ -12,6 +12,8 @@ import { scene, renderer } from './wgpu_main.mjs';
 
 import { sunLight } from './wgpu_lights.js';
 
+import { tileablePictures } from './wgpu_media.js';
+
 import { SetGeneratedSurface } from './wgpu_instance.js';
 
 import { SetGeneratedNavmesh } from './wgpu_locations.js';
@@ -156,53 +158,86 @@ export function InitGrid() {
 	const gridHelper = new THREE.GridHelper(size, divisions, settings.sceneColor2, settings.sceneColor3);
 	scene.add(gridHelper);
 }
-export function InitHeightmap(options) {
+export function InitHeightmap(url) {
 
 	// 1. Load your grayscale heightmap
+	console.log("tryna load heightmap " + url + " wtexture " + JSON.stringify(tileablePictures[0]));
 	const textureLoader = new THREE.TextureLoader();
-	const heightmapTexture = textureLoader.load(options.heightmapUrl);
+	const heightMap = textureLoader.load(url);
 
-	// 2. Define your displacement scale
-	const maxElevation = 50.0; 
+	
+	const scale = 100;
+	const geometry = new THREE.PlaneGeometry(1000, 1000, 256, 256);
+// 3. Create the material using the heightmap as a displacementMap
+		const material = new THREE.MeshStandardMaterial({
+			color: 0x555555,
+			wireframe: false,
+			displacementMap: heightMap,
+			displacementScale: scale // Controls the height of the peaks
+		});
 
-	// 3. Setup the TSL logic
-	// Sample the height from the red channel (standard for heightmaps)
-	const heightSample = texture(heightmapTexture, uv()).x;
+		// 4. Combine into a mesh and add to the scene
+		const terrain = new THREE.Mesh(geometry, material);
+		terrain.position.set(0, scale * -1, 0);
+		terrain.rotation.x = -Math.PI / 2; // Rotate flat if needed
+		scene.add(terrain);
 
-	// Apply displacement node to the geometry's local positions
-	const displacedPosition = positionLocal.add(THREE.vec3(0, heightSample.mul(maxElevation), 0));
 
-	// Determine color based on the relative height (0.0 to 1.0)
-	const lowestColor = color('#1a4d1a');  // Deep valley green
-	const highestColor = color('#ffffff'); // Snowy mountain white
+	// const textureLoader = new THREE.TextureLoader();
+	// const heightmapTexture = textureLoader.load(url);
 
-	// Linearly interpolate color based on heightmap value
-	const terrainColorNode = mix(lowestColor, highestColor, heightSample);
+	// // 2. Define your displacement scale
+	// const maxElevation = 50.0; 
 
-	// 4. Construct the Material
-	const terrainMaterial = new THREE.MeshStandardNodeMaterial({
-		positionNode: displacedPosition, // Vertices moved on the GPU
-		colorNode: terrainColorNode       // Dynamic fragment coloring
-	});
+	// // 3. Setup the TSL logic
+	// // Sample the height from the red channel (standard for heightmaps)
+	// const heightSample = texture(heightmapTexture, uv()).x;
 
-	// 5. Apply to a highly subdivided Plane
-	const geometry = new THREE.PlaneGeometry(200, 200, 256, 256);
-	geometry.rotateX(-Math.PI / 2); // Orient flat on the XZ plane
+	// // Apply displacement node to the geometry's local positions
+	// const displacedPosition = positionLocal.add(THREE.vec3(0, heightSample.mul(maxElevation), 0));
 
-	const terrainMesh = new THREE.Mesh(geometry, terrainMaterial);
-	scene.add(terrainMesh);
+	// // Determine color based on the relative height (0.0 to 1.0)
+	// const lowestColor = color('#1a4d1a');  // Deep valley green
+	// const highestColor = color('#ffffff'); // Snowy mountain white
+
+	// // Linearly interpolate color based on heightmap value
+	// const terrainColorNode = mix(lowestColor, highestColor, heightSample);
+
+	// // 4. Construct the Material
+	// const terrainMaterial = new THREE.MeshStandardNodeMaterial({
+	// 	positionNode: displacedPosition, // Vertices moved on the GPU
+	// 	colorNode: terrainColorNode       // Dynamic fragment coloring
+	// });
+
+	// // 5. Apply to a highly subdivided Plane
+	// const geometry = new THREE.PlaneGeometry(200, 200, 256, 256);
+	// geometry.rotateX(-Math.PI / 2); // Orient flat on the XZ plane
+
+	// const terrainMesh = new THREE.Mesh(geometry, terrainMaterial);
+	// scene.add(terrainMesh);
+	// console.log("LOADED heightmap");
+
+	
 }
 
 export function InitGround(options) {
 
 	let groundGeometry;
+	let x = 512;
+	let y = 512;
+	let radius = 100;
 	
+	if (settings.sceneSkyRadius) {
+		x = settings.sceneSkyRadius - (settings.sceneSkyRadius * .1);
+		y = settings.sceneSkyRadius - (settings.sceneSkyRadius * .1);
+		radius = settings.sceneSkyRadius / 2;
+	}
 	if (options.type == "circle") {
 		
 		let xscale = 100;
 		let yscale = 100;
 		let zscale = 100;
-		let radius = 100;
+		radius = 100;
 		groundGeometry = new THREE.CircleGeometry(radius, radius);
 
 		const posAttribute = groundGeometry.attributes.position;
@@ -220,7 +255,8 @@ export function InitGround(options) {
 		}
 		uvAttribute.needsUpdate = true;
 	} else {
-		groundGeometry = new THREE.PlaneGeometry(500,500,128,128);
+		// groundSize = settings.sceneSkyRadius * 2
+		groundGeometry = new THREE.PlaneGeometry(x,y,128,128);
 	}
 		
 	if (options && options.type == "tsl noise") {
@@ -382,9 +418,9 @@ export function InitGround(options) {
 	}  else if (options && options.type == "perlin noise") {
 	
 		// Setup Plane Geometry
-		const width = 1024;
-		const height = 1024;
-		const segments = 256; 
+		const width = x;
+		const height = y;
+		const segments = 128; 
 		const geometry = new THREE.PlaneGeometry(width, height, segments, segments);
 
 		// Rotate to make it horizontal (flat terrain)
@@ -426,7 +462,7 @@ export function InitGround(options) {
 		const navMesh = new THREE.Mesh(moddedGeo, navmaterial);
 
 		scene.add(terrainMesh);
-				SetGeneratedNavmesh(terrainMesh);
+		SetGeneratedNavmesh(terrainMesh);
 
 		const surfaceMesh = terrainMesh.clone();
 		const colliderMesh = terrainMesh.clone();
@@ -522,8 +558,8 @@ function generateNoiseTexture(width = 1024, height = 1024) {
 export function InitFog() {
 	if (settings && settings.sceneUseFog) {
 
-let skyColor = color(settings.sceneColor1);
-let groundColor = color(settings.sceneColor2);
+	let skyColor = color(settings.sceneColor1);
+	let groundColor = color(settings.sceneColor2);
 		console.log("doin some fog...");
 		const fogColor = settings.sceneColor2; // Sky blue
 		let radius = 400;
@@ -596,6 +632,7 @@ export async function UpdateEnvMap() {
 				const distortion2 = sin(uvNode.x.mul(15).add(time)).mul(.001);
 				const distortedUV = vec2(uvNode.x.add(distortion), uvNode.y.add(distortion2));
 				tslTexture = texture(textureEquirect, distortedUV);
+				// tslTexture.mapping = THREE.EquirectangularReflectionMapping;
 
 
 
@@ -605,13 +642,17 @@ export async function UpdateEnvMap() {
 
 				// 4. Sample the texture with modified/distorted UVs and tint with noise
 				tslTexture = texture(textureEquirect, uv().add(noiseValue.mul(0.05)));
+
+				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize().add(noiseValue.mul(0.05))));
 				// skyboxColorNode = baseTexture.mul(noiseValue);
+				// tslTexture = texture(textureEquirect);
 			} else {
 				// tslTexture = texture(textureEquirect);
 				// tslTexture = texture(textureEquirect, equirectUV( positionLocal.normalize()));
 				// tslTexture = texture(textureEquirect, uv());
 						// tslTexture = texture(textureEquirect, equirectUV());
-				tslTexture = texture(textureEquirect, equirectUV( positionWorld.normalize()));
+				// tslTexture = texture(textureEquirect, equirectUV( positionWorld.normalize()));
+				tslTexture = texture(textureEquirect);
 			}
 			
 		
@@ -795,8 +836,13 @@ export async function InitEnvMap() {
 				const noiseValue = mx_noise_float(noiseCoord);
 
 				tslTexture = texture(textureEquirect, uv().add(noiseValue.mul(0.05)));
+				// tslTexture = texture(textureEquirect);
 				
+			} else {
+				tslTexture = texture(textureEquirect);
 			}
+
+
 			if (settings && (settings.sceneTweakColors || settings.sceneRandomColors)) {
 				
 				skyboxColorNode = tslTexture.mul(animatedColor.add(1).mul(0.5)); 
@@ -822,12 +868,12 @@ export async function InitEnvMap() {
 				skyboxColorNode = tslTexture.mul(skyColor.mul(3));
 				scene.environmentNode = skyboxColorNode;
 				scene.backgroundNode = skyboxColorNode;
-				scene.environment = textureEquirect;
-				scene.background = textureEquirect;
+				// scene.environment = textureEquirect;
+				// scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 
 			} else {	
-				// scene.environmentNode = skyboxColorNode;
-				// scene.backgroundNode = skyboxColorNode;
+				scene.environmentNode = skyboxColorNode;
+				scene.backgroundNode = skyboxColorNode;
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 

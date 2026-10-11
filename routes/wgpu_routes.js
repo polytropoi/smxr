@@ -1190,21 +1190,27 @@ wgpu_router.get('/:_id', function (req, res) {
                 groundPlane = "<a-plane rotation='-90 0 0' visible=\x22false\x22 position='0 0 0' width='100' height='100' mod_physics=\x22type: static; model: collider;\x22 color=\x22" + sceneResponse.sceneColor2+ "\x22></a-plane>"; //deprecated for environment component
             }
             if (sceneResponse.sceneWater != null) {
-                if (sceneResponse.sceneWater.name == "water2") {
-                    ocean = "<a-plane position=\x220  "+sceneResponse.sceneWater.level+" 0\x22 width=\x22300\x22 height=\x22300\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22100\x22 segments-width=\x22100\x22 "+skyboxEnvMap+" material=\x22color: "+sceneResponse.sceneColor3+"; shader:makewaves; uMap: #water; repeat: 500 500;\x22></a-plane>";
-                    imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2c.jpeg\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneWater.name == "water1") {
-                    ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2264\x22 segments-width=\x2264\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water2; repeat: 500 500; transparent: true\x22></a-plane>";
-                    imageAssets = imageAssets + "<img id=\x22water2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneWater.name == "water3") {
-                    ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2216\x22 segments-width=\x2216\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water; repeat: 50 50; transparent: false\x22></a-plane>";
-                    imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/watertile3.png\x22 crossorigin=\x22anonymous\x22>";
-                } else if (sceneResponse.sceneWater.name == "water4") {
-                    ocean = "<a-ocean></a-ocean>";
-                }
+                // if (sceneResponse.sceneWater.name == "water2") {
+                //     ocean = "<a-plane position=\x220  "+sceneResponse.sceneWater.level+" 0\x22 width=\x22300\x22 height=\x22300\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22100\x22 segments-width=\x22100\x22 "+skyboxEnvMap+" material=\x22color: "+sceneResponse.sceneColor3+"; shader:makewaves; uMap: #water; repeat: 500 500;\x22></a-plane>";
+                //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2c.jpeg\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneWater.name == "water1") {
+                //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2264\x22 segments-width=\x2264\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water2; repeat: 500 500; transparent: true\x22></a-plane>";
+                //     imageAssets = imageAssets + "<img id=\x22water2\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/water2.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneWater.name == "water3") {
+                //     ocean = "<a-plane position=\x220 "+sceneResponse.sceneWater.level+" 0\x22 width=\x22256\x22 height=\x22256\x22 rotation=\x22-90 180 -90\x22 segments-height=\x2216\x22 segments-width=\x2216\x22 "+skyboxEnvMap+" material=\x22shader:makewaves_small; color: "+sceneResponse.sceneColor4+";uMap: #water; repeat: 50 50; transparent: false\x22></a-plane>";
+                //     imageAssets = imageAssets + "<img id=\x22water\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/watertile3.png\x22 crossorigin=\x22anonymous\x22>";
+                // } else if (sceneResponse.sceneWater.name == "water4") {
+                //     ocean = "<a-ocean></a-ocean>";
+                // }
             }
             if (sceneResponse.sceneUseHeightmap != null && sceneResponse.sceneUseHeightmap) {
-                terrain = "<a-plane class=\x22surface activeObjexRay\x22 position=\x220 -20 0\x22 width=\x22512\x22 height=\x22512\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22512\x22 segments-width=\x22512\x22 terrain-mangler></a-plane>";
+                // terrain = "<a-plane class=\x22surface activeObjexRay\x22 position=\x220 -20 0\x22 width=\x22512\x22 height=\x22512\x22 rotation=\x22-90 180 -90\x22 segments-height=\x22512\x22 segments-width=\x22512\x22 terrain-mangler></a-plane>";
+                sceneEnvironmentSettings.sceneUseHeightmap = sceneResponse.sceneUseHeightmap;
+
+                sceneEnvironmentSettings.sceneHeightmap = sceneResponse.sceneHeightmap;
+                sceneEnvironmentSettings.sceneHeightmap.url = "https://realitymangler.com/assets/heightmaps/" + sceneResponse.sceneHeightmap.name + ".jpg";
+
+
             }
             
             if (sceneResponse.sceneNextScene != null && sceneResponse.sceneNextScene != "") {

@@ -33,7 +33,7 @@
 		InitAtoms, atomicBodies, getPlayerBody, initHandColliderGroup, handColliderGroup, colliders,
 		LoadKinematicAgentMeshes, } from './wgpu_physics.js';
 
-	import { InitEnvMap, InitSky, InitFog, InitGrid, InitGround } from './wgpu_environment.js';
+	import { InitEnvMap, InitSky, InitFog, InitGrid, InitGround, InitHeightmap } from './wgpu_environment.js';
 
 		import { equippedRigidbody } from './wgpu_actions.js';
 
@@ -382,7 +382,30 @@
 			if (settings.sceneEnvironmentSettings.sceneFloorplaneTexture == "grid") {
 				InitGrid();
 			}
-			if (settings.sceneEnvironmentSettings.useFloorPlane && settings.sceneEnvironmentSettings.floorPlaneTexture && 
+			// if (settings.sceneEnvironmentSettings.useFloorPlane && settings.sceneEnvironmentSettings.floorPlaneTexture && 
+			// 	settings.sceneEnvironmentSettings.floorPlaneTexture != "none" && settings.sceneEnvironmentSettings.floorPlaneTexture != "") {
+				
+			// 	// if ()
+			// 	let options = {};
+			// 	if (settings.sceneEnvironmentSettings.floorPlaneTexture == "tsl noise") {
+			// 		options.type = "tsl noise"
+			// 	} else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "flat") {
+			// 		options.type = "flat"
+			// 	}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "circle") {
+			// 		options.type = "circle"
+			// 	}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "simple noise") {
+			// 		options.type = "simple noise"
+			// 	}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "perlin noise") {
+			// 		options.type = "perlin noise"
+			// 	} 
+				
+			// 	InitGround(options);
+			// }
+			if (settings.sceneEnvironmentSettings.sceneUseHeightmap && settings.sceneEnvironmentSettings.sceneHeightmap) {
+				console.log("heightmap " + settings.sceneEnvironmentSettings.sceneHeightmap.name + " " + settings.sceneEnvironmentSettings.sceneHeightmap.url);
+				InitHeightmap(settings.sceneEnvironmentSettings.sceneHeightmap.url);
+			} else {
+				if (settings.sceneEnvironmentSettings.useFloorPlane && settings.sceneEnvironmentSettings.floorPlaneTexture && 
 				settings.sceneEnvironmentSettings.floorPlaneTexture != "none" && settings.sceneEnvironmentSettings.floorPlaneTexture != "") {
 				
 				// if ()
@@ -401,7 +424,7 @@
 				
 				InitGround(options);
 			}
-
+			}
 		}
 
 		if (settings && settings.sceneTags) {

@@ -157,40 +157,24 @@ export async function createStaticCollider (model) { // may not be added to the 
     try { 
 
       let geometry, colliderDesc;
-      // if (!model) {
-      //   colliderDesc = RAPIER.ColliderDesc.cuboid(150,.1,150);
-      // } else {
-      
-        geometry = model.geometry;
-        
-  //sent as child mesh
-        
-        // const fixedGeometry = BufferGeometryUtils.mergeVertices(geometry);
 
-        const vertices = geometry.attributes.position.array;
-        // for (let i = 0; i < vertices.length; i++) {
-        //   vertices[i] *= fixedGeometry.scale.x; // Example for uniform scale
-        // }
-        const indices = geometry.index.array;
+      geometry = model.geometry;
+           
+      const vertices = geometry.attributes.position.array;
+     
+      const indices = geometry.index.array;
 
-        // 3. Create ColliderDesc (Example: Trimesh for complex shape)
-        colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+      colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
       
-      
-      // let colliderDesc = RAPIER.ColliderDesc.convexHull(vertices);
-          
-      // colliderDesc.contactSkin(0.5); // ???
       const pos = new THREE.Vector3();
       model.getWorldPosition(pos);
 
-
-          console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(pos));
+      console.log("tryna set static collider for model " + model.name +' at position ' + JSON.stringify(pos));
       const worldQuaternion = new THREE.Quaternion();
       model.getWorldQuaternion(worldQuaternion);
-      // const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(parseFloat(position.x),parseFloat(position.y),parseFloat(position.z));
-                     const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z).setRotation(worldQuaternion);
+      
+      const rbDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(pos.x, pos.y, pos.z).setRotation(worldQuaternion);
 
-      // model.position.set(position);
       const staticBody = await world.createRigidBody(rbDesc);
       let collider = await world.createCollider(colliderDesc, staticBody);
       collider.setRestitution(.5);

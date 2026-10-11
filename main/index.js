@@ -12274,8 +12274,11 @@ function getAllPeople() {
             sceneVideoStreamUrls = [].concat(sceneVideoStreamUrls);
 
             let heightmapName = "";
+            let heightmapURL = "";
             if (response.data.sceneHeightmap != null && response.data.sceneHeightmap.name != undefined) {
                 heightmapName = response.data.sceneHeightmap.name;
+                // heightmapURL = "https://realitymangler.com/assets/heightmaps/" + heightmapName;
+            
             }
             console.log("enabled client types: " + JSON.stringify(response.data.sceneEnabledClientTypes));
             if (response.data.scenePictureGroups != null) {
@@ -17054,6 +17057,7 @@ function getAllPeople() {
                         let sceneFloorplaneTexture = document.getElementById("sceneFloorplaneTexture").value;
                         let sceneHeightmap = {};
                         sceneHeightmap.name = document.getElementById("sceneHeightmapSelect").value;
+                        
                         let sceneWaterName = document.getElementById("sceneWater").value; 
                         let sceneWaterLevel = document.getElementById("sceneWaterLevel").value;
                         let sceneGroundLevel = document.getElementById("sceneGroundLevel").value;
@@ -17292,6 +17296,7 @@ function getAllPeople() {
                             // sceneUseStaticObj: sceneUseStaticObj,
                             sceneUseFloorPlane: sceneUseFloorPlane,
                             sceneFloorplaneTexture: sceneFloorplaneTexture,
+                            
                             // sceneRenderFloorPlane: sceneRenderFloorPlane,
 
                             sceneScatterMeshes: sceneScatterMeshes,
