@@ -142,6 +142,14 @@ export function InitPictureGroups () {
     // }
    
 }
+export function InitScenePictures () {
+     const scenePicturesDataEl = document.getElementById('scenePicturesData');
+   if (scenePicturesDataEl) {
+      const theScenePicturesData = scenePicturesDataEl.getAttribute('data-scene-pictures');
+      scenePicturesData = JSON.parse(atob(theScenePicturesData));
+      console.log("scenePicturesData "+ JSON.stringify(scenePicturesData));
+   }
+}
 
 export function InitVideoGroups () {
     let videoGroupsDataEl = document.getElementById("videoGroupsData");

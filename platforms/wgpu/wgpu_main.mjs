@@ -49,7 +49,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgpu_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData } from './wgpu_media.js';
+	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData, InitScenePictures } from './wgpu_media.js';
 	
 	import { equippedObjectOnLoad, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 	import { splatObjex, InitSplats } from './wgpu_splats.js';
@@ -345,7 +345,7 @@
 			InitPictureGroups();
 		}
 		InitSceneText();
-
+		InitScenePictures();
 		InitVideoGroups();
 		if (settings.sceneGroups) {
 			console.log("settings.sceneGroups " + settings.sceneGroups.length);
