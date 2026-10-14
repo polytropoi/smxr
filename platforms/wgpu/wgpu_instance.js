@@ -42,6 +42,7 @@ let taggedInstances = {};
 
 export async function InitSurface () {
    
+
     await surface;
     sampler = new MeshSurfaceSampler(surface);
     sampler.build(); 
@@ -52,24 +53,29 @@ export function SetSurface(mesh) { //if assigned to a mesh in locations
     surface = mesh;
         
 }
-export function SetGeneratedSurface(mesh) { //if assigned to a mesh in locations
-//     const theSurface = mesh.clone();
-    
-//     theSurface.material = theSurface.material.clone(); 
+export function SetGeneratedSurface(mesh, type) { //if assigned to a mesh in locations
+        // const theSurface = mesh.geometry.clone();
+        
+    //     theSurface.material = theSurface.material.clone(); 
 
-// // (Optional) Disconnect the geometry if you plan to modify vertices
-//     scene.add(theSurface);
-//     theSurface.geometry = theSurface.geometry.clone(); 
-//     theSurface.position.set(0,0,0);
-    // theSurface.rotation.x = -Math.PI / 2;
+    // // (Optional) Disconnect the geometry if you plan to modify vertices
+    //     scene.add(theSurface);
+    //     theSurface.geometry = theSurface.geometry.clone(); 
+    //     theSurface.position.set(0,0,0);
+    
 
 
     // surface = theSurface;
         surface = mesh;
+        // scene.add(surface);
         // surfaceType = "primitive";
-    
+
+
+    surfaceType = type;
+        // await new Promise(r => setTimeout(r, 5000));
     InitSurface();
     InitInstanceModels();
+
 }
 // export function createDefaultSurface() {
 //     const planeGeometry = new THREE.PlaneGeometry(50, 50, 10, 10); // 50 x 50
@@ -101,7 +107,9 @@ export function createDefaultSurface(locData) {
     
 }
     
-export function InitInstanceModels () {
+export async function InitInstanceModels () {
+
+    // await new Promise(r => setTimeout(r, 100));
     for (let i = 0; i < instancedModels.length; i++) {
         let count = 33;
         let scale = 1;
@@ -136,9 +144,13 @@ export function InitInstanceModels () {
         // 	InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
         // } else {
         if (!instancedModels[i].locationData.locationTags.includes("dynamic")) { //hrm, need to assign positions in InstanceWithPattern below...
+            console.log("InitInstanceModels scale " + scale);
             InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
                 
         }
+        instancedModels[i].model.visible = false;
+        instancedModels[i].model.position.set(0,-100,0);
+        await new Promise(r => setTimeout(r, 1000));
         
     } 
 }
@@ -200,7 +212,7 @@ export async function TagsToInstances (locID, instanceID) {
 export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader, locData, instanceTags) { //hrm, should be a class?
 
     await sampler;
-    console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count+ " mediaID " + locData.mediaID);
+    console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count+ " mediaID " + locData.mediaID + " yMod " + yMod);
 
     let instanceTagData;
     let usedPositions = [];
@@ -209,7 +221,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
 
         count = count * 2; //bc weighted in aframe, etc
 
-        // let scaleFactor = data.yscale;
+        scaleFactor = locData.yscale;
 
         console.log("gotsa SURFACE for " + model.name + " count " + count);
 
@@ -261,6 +273,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             }
         });
 
+        // model.visible = false;
         
         for (let i = 0; i < sampleMats.length; i++) {
 
@@ -300,35 +313,53 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         let position = new THREE.Vector3();
         let theCount = 0;
         let scale = 1;
-        for (let i = 0; i < count; i++) {            
-            await sampler.sample(position);
-
-            // console.log("mesh position " + JSON.stringify(position) + " surfaceTYpe " + surfaceType);
+        const center = new THREE.Vector3(0,0,0);
+        // await new Promise(r => setTimeout(r, 1000));
+        for (let i = 0; i < count; i++) {        
+            // if (i == 16) {
+            //     continue;
+            // }     
+             
+            sampler.sample(position);
+            //   sampler.sample(position);
+            // await new Promise(r => setTimeout(r, 1000));
+            const distance = position.distanceTo(center); 
+            const skyFactor = settings.sceneSkyRadius * .01;
+            console.log("mesh position " + JSON.stringify(position) + " distance " + distance + " skyFactor " + skyFactor + " surfaceTYpe " + surfaceType +  " yMod " + locData.y);
            
+
+
+
             if (surfaceType == "primitive") {
+                // locData.y = -1;
+
+                // dummy.position.set(position.x, position.y, position.z);
                 dummy.position.set(position.x, position.z + locData.y, position.y); //fsr the primitive plane returns x,y values with z as zero //bc its 2d! need to test for other geos
             } else {
                 if (position.y < waterLevel)  {
                     position.y = -100;       
                 }
-                const ypos = parseFloat(position.y) + parseFloat(yMod);
+                const ypos = (parseFloat(position.y) + parseFloat(locData.y));
                 dummy.position.set(position.x, ypos, position.z);
             }
         
-        
-            dummy.rotation.y = Math.random() * Math.PI * 2;
-            
             if (locData.locationTags && locData.locationTags.includes("no scale")) {
                 // const scale = Math.random() * scaleFactor * .75;
                 dummy.scale.set(1, 1, 1);
 
             } else {
-                scale = (Math.random() * scaleFactor);
+                const iScale = ((Math.random()) * scaleFactor);
                 // const scale = 2;
-                dummy.scale.set(scale, scale, scale);
-                // console.log("scaleFactor " + scaleFactor + " dummys cale is " +scale);
+                // const iScale = scaleFactor;
+                dummy.scale.set(iScale, iScale, iScale);
+                console.log("scaleFactor " + scaleFactor + " dummys cale is " +iScale);
             }
-            
+            dummy.rotation.y = Math.random() * Math.PI * 2;
+          
+            if (distance < skyFactor) {
+                console.log("too close to center distance " + distance +  " vs " + skyFactor);
+                dummy.position.set(position.x, -100, position.z);
+            }
 
             if (locData.markerType == "character") {
                 // const placeholder = new THREE.Object3D();
@@ -377,7 +408,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 for (let i = 0; i < count; i++) {
                     
                  let randomColor = new THREE.Color();
-                instancedMeshes[s].instanceMatrix.needsUpdate = true;
+                
                 // randomColor.setHex( Math.random() * 0xffffff );
                 // const r = Math.random();
                 // const g = Math.random();
@@ -415,7 +446,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             }
             // console.log("instancedAgentMeshes " + JSON.stringify(instancedAgentMeshes));
             instancedMeshes[s].frustumCulled = false;
-            
+            instancedMeshes[s].instanceMatrix.needsUpdate = true;
             // activeObjex.push(instancedMeshes[s]);
             scene.add(instancedMeshes[s]);
         }

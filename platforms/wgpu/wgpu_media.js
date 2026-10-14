@@ -142,13 +142,23 @@ export function InitPictureGroups () {
     // }
    
 }
-export function InitScenePictures () {
+
+export function InitScenePictures () { //these are directly imported into the scene, not in a group
      const scenePicturesDataEl = document.getElementById('scenePicturesData');
    if (scenePicturesDataEl) {
-      const theScenePicturesData = scenePicturesDataEl.getAttribute('data-scene-pictures');
-      scenePicturesData = JSON.parse(atob(theScenePicturesData));
-      console.log("scenePicturesData "+ JSON.stringify(scenePicturesData));
-   }
+        const theScenePicturesData = scenePicturesDataEl.getAttribute('data-scene-pictures');
+        scenePicturesData = JSON.parse(atob(theScenePicturesData));
+        console.log("scenePicturesData "+ JSON.stringify(scenePicturesData));
+          for (let i = 0; i < scenePicturesData.length; i++) {           
+            if (scenePicturesData[i].orientation == "Equirectangular") {
+                 console.log("adding equirect: " + scenePicturesData[i].title);
+                equirectPictures.push(scenePicturesData[i]);
+            } else if (scenePicturesData[i].orientation == "Tileable") {
+                 console.log("adding tileable: " + scenePicturesData[i].title);
+                tileablePictures.push(scenePicturesData[i]);
+            }
+        }
+    }
 }
 
 export function InitVideoGroups () {

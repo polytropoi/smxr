@@ -245,7 +245,8 @@ function WaitAndInit () {
             .setTranslation(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
 
         let rigidbody = await world.createRigidBody(rigidBodyDesc);
-        colliders[rigidbody.handle] = "trigger_" + locationData.timestamp;
+
+        colliders[rigidbody.handle] = locationData.markerType + "_" + locationData.timestamp;
         // let kinematicCollider = RAPIER.ColliderDesc.capsule(1, 2);
         let colliderDesc = RAPIER.ColliderDesc.ball(colliderSize);
         let collider = await world.createCollider(colliderDesc, rigidbody);

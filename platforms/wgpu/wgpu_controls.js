@@ -290,7 +290,7 @@ export function SetControls(cameraMode, cameraFOV) {
         var material = new THREE.MeshBasicMaterial({ 'visible': false });
 
         player = new THREE.Mesh(geometry, material);
-        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .1, 1000);
+        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .1, 10000);
         
         camera.position.set(0, 0, 0);
         scene.add(player);
@@ -320,7 +320,7 @@ export function SetControls(cameraMode, cameraFOV) {
 
     } else if (cameraMode == "Fixed") {
 
-        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 1, 1000);
+        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 1, 10000);
         camera.position.z = 5;
 
 
@@ -332,7 +332,7 @@ export function SetControls(cameraMode, cameraFOV) {
         //     blocker.style.display = "none";
         //     instructions.style.display = "none";
         // }
-        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 1, 1000);
+        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 1, 10000);
         scene.add(camera);
 
         // camera.lookAt( 0, 1, 0 );
@@ -367,7 +367,7 @@ export function SetControls(cameraMode, cameraFOV) {
             blocker.style.display = "none";
             instructions.style.display = "none";
         }
-        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .01, 1000);
+        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, .01, 10000);
         camera.position.set(0, 100, 50);
         camera.lookAt(0, 1, 0);
         controls = new MapControls(camera, renderer.domElement);
@@ -384,7 +384,7 @@ export function SetControls(cameraMode, cameraFOV) {
         scene.add(pointerGizmo);
         mousecaster = new THREE.Raycaster();
     } else if (cameraMode == "Orbit") {
-        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 0.1, 500);
+        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 0.1, 10000);
         camera.position.set(0, 5, 15);
         camera.lookAt(0, 1, 0);
         controls = new OrbitControls(camera, renderer.domElement);
@@ -423,7 +423,7 @@ export function SetControls(cameraMode, cameraFOV) {
             blocker.style.display = "none";
             instructions.style.display = "none";
         }
-        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 0.1, 500);
+        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 0.1, 10000);
         // camera.position.set( 0, followDistance, -followDistance );
         camera.position.set(0, 10, -followDistance);
         // camera.lookAt( 0, 1, 0 );
@@ -481,7 +481,7 @@ export function SetControls(cameraMode, cameraFOV) {
         isReady = true;
     } else if (cameraMode == "First Person") { //default first person
         // camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 500 );
-        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera = new THREE.PerspectiveCamera(cameraFOV, window.innerWidth / window.innerHeight, 0.1, 10000);
         camera.position.set(0, 10, 0);
 
         controls = new PointerLockControls(camera, document.body); //use regular fp controls if has navmesh

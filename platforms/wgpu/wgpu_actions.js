@@ -8,7 +8,7 @@ import { scene } from './wgpu_main.mjs';
 
 import { settings } from '../../../connect/settings.js';
 import { userData, room } from '../../../connect/connect.js';
-import { locationObjex } from './wgpu_locations.js';
+import { locationObjex, locations } from './wgpu_locations.js';
 import { EquipObject } from './wgpu_inventory.js';
 import { CreateLight } from './wgpu_lights.js';
 
@@ -59,7 +59,7 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
     console.log("looking for " + objectID + " in locationObjex length : " + locationObjex.length);
     if (locationObjex.length > 0) { 
         for (let i = 0; i < locationObjex.length; i++) { //spin through the original array to match object's mongoID
-        console.log('tryna match object data for ' +objectID + " vs " + JSON.stringify(locationObjex[i]));
+        console.log('tryna match object data for ' +objectID + " vs " + locationObjex[i].objectData._id);
         if (locationObjex[i].objectData._id == objectID) {
             console.log('gotsa objectID match to return data ' + objectID);
             // hasObj = true;
@@ -74,6 +74,21 @@ export function ReturnObjectData (objectID) { //not the instance ID, but origina
     return objek;
 }
 // export let sceneObjectIndex = 0;
+
+export function TriggerHit (hit1, hit2) {
+    console.log("trigger hit " + hit1 + " " + hit2);
+    if (hit1.includes("gate")) {
+        const hitsplit = hit1.split("_")[1]; //handle should be type_locationid (.timestamp)
+        console.log("gatehit 1 " + hitsplit + " " + JSON.stringify(locations[hitsplit]));
+        
+
+    }
+    if (hit2.includes("gate")) {
+       const hitsplit = hit2.split("_")[1]; //handle should be type_locationid (.timestamp)
+        console.log("gatehit 2 " + hitsplit + " " + JSON.stringify(locations[hitsplit]));
+
+    }
+}
 
 export class SceneObject { //things that might have models and actions and fancy params, e.g. characters, magic swords, etc
     constructor(object, objectData, locationData, isEquipped, objectParent, isNavAgent) {

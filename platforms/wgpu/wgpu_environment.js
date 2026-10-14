@@ -158,31 +158,98 @@ export function InitGrid() {
 	const gridHelper = new THREE.GridHelper(size, divisions, settings.sceneColor2, settings.sceneColor3);
 	scene.add(gridHelper);
 }
-export function InitHeightmap(url) {
+
+
+export async function InitHeightmap(url) {
 
 	// 1. Load your grayscale heightmap
 	console.log("tryna load heightmap " + url + " wtexture " + JSON.stringify(tileablePictures[0]));
 	const textureLoader = new THREE.TextureLoader();
-	const heightMap = textureLoader.load(url);
+	const heightMap = await textureLoader.loadAsync(url);
 
-	
+	const textureMap = await textureLoader.loadAsync(tileablePictures[0].url);
+
+		// 1. Set wrapping behavior to repeat
+	textureMap.wrapS = THREE.RepeatWrapping; // Horizontal (U)
+	textureMap.wrapT = THREE.RepeatWrapping; // Vertical (V)
+
+	// 2. Set how many times the texture repeats across the surface
+	textureMap.repeat.set(32, 32); // Repeats 4 times in X and 4 times in Y
+
+	// 3. Optional: Set filtering for sharp or smooth rendering
+	textureMap.magFilter = THREE.LinearFilter;
+	textureMap.minFilter = THREE.LinearMipmapLinearFilter;
 	const scale = 100;
+
+
 	const geometry = new THREE.PlaneGeometry(1000, 1000, 256, 256);
-// 3. Create the material using the heightmap as a displacementMap
-		const material = new THREE.MeshStandardMaterial({
-			color: 0x555555,
-			wireframe: false,
-			displacementMap: heightMap,
-			displacementScale: scale // Controls the height of the peaks
-		});
+// // 3. Create the material using the heightmap as a displacementMap
+// 		const material = new THREE.MeshStandardMaterial({
+// 			color: 0x555555,
+// 			wireframe: false,
+// 			displacementMap: heightMap,
+// 			displacementScale: scale, // Controls the height of the peaks
+// 			map: textureMap
+// 		});
+
+  	const terrainGeometry = await applyDisplacementMapToGeometry(geometry, heightMap, scale, 0);
+
+		// terrainGeometry.computeVertexNormals();
+		// terrainGeometry.computeBoundsTree ? geometry.computeBoundsTree() : geometry.computeBoundingBox();
 
 		// 4. Combine into a mesh and add to the scene
-		const terrain = new THREE.Mesh(geometry, material);
-		terrain.position.set(0, scale * -1, 0);
-		terrain.rotation.x = -Math.PI / 2; // Rotate flat if needed
-		scene.add(terrain);
+		
+		// const material = new THREE.MeshStandardMaterial({ color: 0x888888 });
+		// 
 
+		const bottomColor = color(settings.sceneColor3); // e.g., deep water / low elevation
+		const topColor = color(settings.sceneColor2);    // e.g., snow / high elevation
+		const elevationFactor = positionWorld.y; 
 
+		const material = new THREE.MeshStandardNodeMaterial();
+		material.colorNode = mix(bottomColor, topColor, elevationFactor);
+			
+		const terrainMesh = new THREE.Mesh(terrainGeometry, material);
+
+		scene.add(terrainMesh);
+// SetGeneratedSurface(terrainGeometry.clone());
+	
+		terrainMesh.position.set(0, (scale/2) * -1, 0); //instead of using displacement bias
+		// terrain.position.set(0, 0, 0);
+		terrainMesh.rotation.x = -Math.PI / 2; // Rotate flat if needed
+		const navmaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
+		SetGeneratedNavmesh(terrainMesh);
+
+		const surfaceGeo = terrainMesh.geometry.clone();
+		
+		
+
+		// const rotationAttribute = surfaceMesh.geometry.getAttribute('rotation');
+
+		const surfaceMesh = new THREE.Mesh(terrainGeometry, navmaterial);
+		// const positionAttribute = surfaceMesh.geometry.getAttribute('position');
+		// surfaceMesh.position.set(0, (scale/2) * -1, 0);
+		surfaceMesh.position.set(0, (scale/2) * -1, 0);
+		surfaceMesh.rotation.x = -Math.PI / 2;
+
+		// surfaceMesh.material = navmaterial;
+
+		// Tell Three.js to send the updated buffer to the GPU
+				
+		// positionAttribute.needsUpdate = true;
+		// scene.add(surfaceMesh);
+		// surfaceMesh.computeVertexNormals();
+		// rotationAttribute.needsUpdate = true;
+		// surfaceMesh.geometry = terrainMesh.geometry.clone();
+
+		const colliderMesh = terrainMesh.clone();
+
+		// surfaceMesh.rotation.x = -Math.PI / 2;
+		
+		createStaticCollider(colliderMesh);
+		// await SetGeneratedSurface(surfaceMesh);
+
+	
 	// const textureLoader = new THREE.TextureLoader();
 	// const heightmapTexture = textureLoader.load(url);
 
@@ -217,11 +284,62 @@ export function InitHeightmap(url) {
 	// scene.add(terrainMesh);
 	// console.log("LOADED heightmap");
 
-	
 }
 
-export function InitGround(options) {
+// Helper function to bake a displacement map into a BufferGeometry
+async function applyDisplacementMapToGeometry(geometry, displacementMapTexture, scale = 1, bias = 0) {
+  // Ensure the texture image is loaded
+  const image = displacementMapTexture.image;
+  if (!image) {
+    throw new Error('Displacement map image not loaded yet.');
+  }
 
+  // Draw texture onto an offscreen canvas to read pixel data
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width || image.naturalWidth;
+  canvas.height = image.height || image.naturalHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(image, 0, 0);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imgData.data;
+
+  const posAttr = geometry.attributes.position;
+  const normAttr = geometry.attributes.normal;
+  const uvAttr = geometry.attributes.uv;
+
+  const position = new THREE.Vector3();
+  const normal = new THREE.Vector3();
+  const uv = new THREE.Vector2();
+
+  for (let i = 0; i < posAttr.count; i++) {
+    position.fromBufferAttribute(posAttr, i);
+    normal.fromBufferAttribute(normAttr, i).normalize();
+    uv.fromBufferAttribute(uvAttr, i);
+
+    // Map UV (0 to 1) to canvas pixel coordinates
+    const x = Math.min(Math.floor(uv.x * canvas.width), canvas.width - 1);
+    const y = Math.min(Math.floor((1 - uv.y) * canvas.height), canvas.height - 1); // Flip Y if needed
+
+    const idx = (y * canvas.width + x) * 4;
+    // Assuming grayscale or using red channel for displacement (0 to 255 -> 0 to 1)
+    const displacementValue = (data[idx] / 255); 
+    const finalDisplacement = displacementValue * scale + bias;
+
+    // Displace vertex along normal
+    position.addScaledVector(normal, finalDisplacement);
+    posAttr.setXYZ(i, position.x, position.y, position.z);
+  }
+
+  posAttr.needsUpdate = true;
+  geometry.computeVertexNormals();
+//   geometry.computeBoundsTree ? geometry.computeBoundsTree() : geometry.computeBoundingBox();
+
+  return geometry;
+}
+
+export async function InitGround(options) {
+
+	console.log("tryna InitGround with options " + JSON.stringify(options));
 	let groundGeometry;
 	let x = 512;
 	let y = 512;
@@ -234,11 +352,11 @@ export function InitGround(options) {
 	}
 	if (options.type == "circle") {
 		
-		let xscale = 100;
-		let yscale = 100;
-		let zscale = 100;
-		radius = 100;
-		groundGeometry = new THREE.CircleGeometry(radius, radius);
+		// let xscale = 100;
+		// let yscale = 100;
+		// let zscale = 100;
+		// radius = 1024;
+		groundGeometry = new THREE.CircleGeometry(radius, radius/10);
 
 		const posAttribute = groundGeometry.attributes.position;
 		const uvAttribute = groundGeometry.attributes.uv;
@@ -256,7 +374,7 @@ export function InitGround(options) {
 		uvAttribute.needsUpdate = true;
 	} else {
 		// groundSize = settings.sceneSkyRadius * 2
-		groundGeometry = new THREE.PlaneGeometry(x,y,128,128);
+		groundGeometry = new THREE.PlaneGeometry(x,y,256,256);
 	}
 		
 	if (options && options.type == "tsl noise") {
@@ -418,9 +536,24 @@ export function InitGround(options) {
 	}  else if (options && options.type == "perlin noise") {
 	
 		// Setup Plane Geometry
+		const textureLoader = new THREE.TextureLoader();
+		const textureMap = await textureLoader.loadAsync(tileablePictures[0].url);
+
+		if (textureMap) {
+			// 1. Set wrapping behavior to repeat
+			textureMap.wrapS = THREE.RepeatWrapping; // Horizontal (U)
+			textureMap.wrapT = THREE.RepeatWrapping; // Vertical (V)
+
+			// 2. Set how many times the texture repeats across the surface
+			textureMap.repeat.set(32, 32); // Repeats 4 times in X and 4 times in Y
+
+			// 3. Optional: Set filtering for sharp or smooth rendering
+			textureMap.magFilter = THREE.LinearFilter;
+			textureMap.minFilter = THREE.LinearMipmapLinearFilter;
+		}
 		const width = x;
 		const height = y;
-		const segments = 128; 
+		const segments = 256; 
 		const geometry = new THREE.PlaneGeometry(width, height, segments, segments);
 
 		// Rotate to make it horizontal (flat terrain)
@@ -455,7 +588,11 @@ export function InitGround(options) {
 		const elevationFactor = positionWorld.y; 
 
 		const material = new THREE.MeshStandardNodeMaterial();
-		material.colorNode = mix(bottomColor, topColor, elevationFactor);
+		const colorMix = mix(bottomColor, topColor, elevationFactor);
+		material.roughnessNode = .9;
+		material.envMapIntensity = 2;
+		material.colorNode = texture(textureMap).mul(colorMix);
+
 
 		const navmaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
 		const terrainMesh = new THREE.Mesh(geometry, material);
@@ -468,15 +605,51 @@ export function InitGround(options) {
 		const colliderMesh = terrainMesh.clone();
 		surfaceMesh.material = navmaterial;
 		surfaceMesh.rotation.x = -Math.PI / 2;
-		SetGeneratedSurface(surfaceMesh);
+		SetGeneratedSurface(surfaceMesh, "buffer");
 		createStaticCollider(colliderMesh);
+		console.log("generated perlin ground!");
 	
 	} else {
-		const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
+		const textureLoader = new THREE.TextureLoader();
+		const textureMap = await textureLoader.loadAsync(tileablePictures[0].url);
+
+		if (textureMap) {
+			// 1. Set wrapping behavior to repeat
+			textureMap.wrapS = THREE.RepeatWrapping; // Horizontal (U)
+			textureMap.wrapT = THREE.RepeatWrapping; // Vertical (V)
+
+			// 2. Set how many times the texture repeats across the surface
+			textureMap.repeat.set(32, 32); // Repeats 4 times in X and 4 times in Y
+
+			// 3. Optional: Set filtering for sharp or smooth rendering
+			textureMap.magFilter = THREE.LinearFilter;
+			textureMap.minFilter = THREE.LinearMipmapLinearFilter;
+		}
+		// const bottomColor = color(settings.sceneColor3); // e.g., deep water / low elevation
+		const tint = color(settings.sceneColor2);    // e.g., snow / high elevation
+		// const elevationFactor = positionWorld.y; 
+
+		const navmaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
+		const material = new THREE.MeshStandardNodeMaterial();
+		// const colorMix = mix(bottomColor, topColor, elevationFactor);
+		material.roughnessNode = .9;
+		material.envMapIntensity = 2;
+		material.colorNode = texture(textureMap).mul(tint);
+		// const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
 	// planeMat.colorNode = settings.sceneColor2;
-		let planeMesh = new THREE.Mesh(groundGeometry, planeMat);
+		let planeMesh = new THREE.Mesh(groundGeometry, material);
 		planeMesh.rotateX(-Math.PI / 2);
+	
 		scene.add(planeMesh);
+		SetGeneratedNavmesh(planeMesh);
+
+		const surfaceMesh = planeMesh.clone();
+		const colliderMesh = planeMesh.clone();
+		surfaceMesh.material = navmaterial;
+		surfaceMesh.rotation.x = -Math.PI / 2;
+		SetGeneratedSurface(surfaceMesh, "primitive");
+		createStaticCollider(colliderMesh);
+		console.log("generated flat ground!");
 	}
 }
 
@@ -571,12 +744,12 @@ export function InitFog() {
 		// scene.fog = new THREE.FogExp2(animatedColor, fogDensity);
 		// scene.fogNode = fog(color(animatedColor), rangeFogFactor(30, 300));
 		if (settings && settings.sceneTweakColors) {
- 			scene.fogNode = fog(color(animatedColor), rangeFogFactor(100, 300));
-			scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
-			//  scene.fog = new THREE.FogExp2(fogColor, fogDensity);
+ 			// scene.fogNode = fog(color(animatedColor), rangeFogFactor(100, 1000));
+			// scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
+			 scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 		} else {
-			scene.fogNode = fog(color(groundColor), rangeFogFactor(100, 300));
-			scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
+			// scene.fogNode = fog(color(groundColor), rangeFogFactor(100, 1000));
+			// scene.backgroundNode = normalWorld.y.max( 0 ).mix( groundColor, skyColor );
 			scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 		}
 		
@@ -616,6 +789,8 @@ export async function UpdateEnvMap() {
 			const textureEquirect = await equirectTextureLoader.loadAsync(skyboxURL);
 			textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
 			textureEquirect.colorSpace = THREE.SRGBColorSpace;
+			textureEquirect.wrapS = THREE.RepeatWrapping; 
+    		textureEquirect.wrapT = THREE.ClampToEdgeWrapping; 
 			// textureEquirectPmrem = pmremGenerator.fromEquirectangular(textureEquirect).texture;
 				
 
@@ -800,17 +975,19 @@ export async function InitEnvMap() {
 		textureEquirect = await equirectTextureLoader.loadAsync(envMapURL);
 
 		textureEquirect.mapping = THREE.EquirectangularReflectionMapping;
+		textureEquirect.wrapS = THREE.RepeatWrapping; 
+    	textureEquirect.wrapT = THREE.ClampToEdgeWrapping; 
 		textureEquirect.colorSpace = THREE.SRGBColorSpace;
 
 
 		// tslTexture = texture(textureEquirect, uv());
 		// tslTexture = texture(textureEquirect, equirectUV());
 
-		tslTexture = texture(textureEquirect, equirectUV( positionWorld.normalize() ));
-		let skyboxColorNode = tslTexture.mul(1);
+		// tslTexture = texture(textureEquirect, equirectUV( positionWorld.normalize() ));
+		// let skyboxColorNode;
 
 		// scene.environmentNode = skyboxColorNode;
-		scene.environment = textureEquirect;
+		// scene.environment = textureEquirect;
 		// scene.environmentIntensity = 2.5; 
 		skyboxMaterial = new THREE.NodeMaterial();
 		skyboxMaterial.side = THREE.BackSide;
@@ -839,8 +1016,14 @@ export async function InitEnvMap() {
 				// tslTexture = texture(textureEquirect);
 				
 			} else {
-				tslTexture = texture(textureEquirect);
+				// tslTexture = texture(textureEquirect, equirectUV());
+				
+				// tslTexture = texture(textureEquirect, equirectUV());
+				// tslTexture = texture(textureEquirect);
+				tslTexture = texture(textureEquirect, equirectUV( positionWorld.normalize() ));
 			}
+			let skyboxColorNode = tslTexture.mul(1);
+			const envNode = pmremTexture(tslTexture);
 
 
 			if (settings && (settings.sceneTweakColors || settings.sceneRandomColors)) {
@@ -857,8 +1040,10 @@ export async function InitEnvMap() {
 				if (scene.fog) {
 					scene.fog.color.set(regularColor);
 				}				
-				scene.environmentNode = skyboxColorNode;
-				scene.backgroundNode = skyboxColorNode;
+				// scene.environmentNode = skyboxColorNode;
+				// scene.backgroundNode = skyboxColorNode;
+				scene.environmentNode = envNode;
+				scene.backgroundNode = envNode;
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 
@@ -866,14 +1051,18 @@ export async function InitEnvMap() {
 				console.log("tryna colorize sky to " + settings.sceneColor2);
 				const skyColor = color(settings.sceneColor2);
 				skyboxColorNode = tslTexture.mul(skyColor.mul(3));
-				scene.environmentNode = skyboxColorNode;
-				scene.backgroundNode = skyboxColorNode;
-				// scene.environment = textureEquirect;
-				// scene.background = textureEquirect;
+				// scene.environmentNode = skyboxColorNode;
+				// scene.backgroundNode = skyboxColorNode;
+				scene.environmentNode = envNode;
+				scene.backgroundNode = envNode;
+				scene.environment = textureEquirect;
+				scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 
 			} else {	
-				scene.environmentNode = skyboxColorNode;
-				scene.backgroundNode = skyboxColorNode;
+				// scene.environmentNode = skyboxColorNode;
+				// scene.backgroundNode = skyboxColorNode;
+				scene.environmentNode = envNode;
+				scene.backgroundNode = envNode;
 				scene.environment = textureEquirect;
 				scene.background = textureEquirect;
 				skyboxMaterial.colorNode = skyboxColorNode; 
@@ -906,7 +1095,7 @@ export function InitSky() {
 		console.log("sky params " + JSON.stringify(settings.sceneTime) + " " + JSON.stringify(settings.sceneClouds));
 		let elevation = 65;
 		let sceneClouds = "medium";
-		let cloudCoverage = .35;
+		let cloudCoverage = .75;
 		let cloudDensity = .5;
 		let cloudElevation = .5;
 		if (settings.sceneClouds.name) {
@@ -923,9 +1112,23 @@ export function InitSky() {
 
 		}
 
+		// const effectController = {
+		// 	turbidity: 10,
+		// 	rayleigh: 3,
+		// 	mieCoefficient: 0.005,
+		// 	mieDirectionalG: 0.7,
+		// 	elevation: elevation,
+		// 	azimuth: 180,
+		// 	// exposure: renderer.toneMappingExposure,
+		// 	exposure: .05,
+		// 	cloudCoverage: cloudCoverage,
+		// 	cloudDensity: cloudDensity,
+		// 	cloudElevation: cloudElevation
+		// };
+
 		const effectController = {
-			turbidity: 10,
-			rayleigh: 3,
+			turbidity: 5,
+			rayleigh: 1,
 			mieCoefficient: 0.005,
 			mieDirectionalG: 0.7,
 			elevation: elevation,

@@ -285,13 +285,15 @@ export async function InitLocations() {
                                         if (locationData[i].eventData && locationData[i].eventData.includes("instance") ) { // use instancing to make a bunch and scatter
                                             // console.log("tryna instance model " + locationData[i].name);
                                             let instancedModel = {};
-                                            const originalModel = await LoadModel(modelsData[m].modelURL)
+                                            const originalModel = await LoadModel(modelsData[m].modelURL);
+
                                             // const countsplit = locationData[i].eventData.split("~");
                                             // const count = countsplit[1];
                                             instancedModel.model = originalModel.scene;
                                             instancedModel.locationData = locationData[i];
                                             instancedModel.modelData = modelsData[m];
-                                            instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
+                                            // instancedModel.position.set(0,-100,0);
+                                            // instancedModel.scale = locationData[i].yscale ? locationData[i].yscale : 1;
                                             // instancedModel.count = count;
                                             if (locationData[i].objectID) { // add object data if present  
                                                 for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
@@ -301,8 +303,9 @@ export async function InitLocations() {
                                                 }
                                             }
                                             instancedModels.push(instancedModel);
+
                                             console.log("instancedModels length " + instancedModels.length);
-                                            // originalModel.scene.visible = false;
+                                            originalModel.scene.visible = false;
                                             scene.remove(originalModel.scene);  //don't need the reference model
 
                                             
@@ -511,6 +514,10 @@ export async function LoadLocationObjex() { // wait to load these, might need na
     if (locationObjex.length) {
         for (let i = 0; i < locationObjex.length; i++) {
 
+
+            if (locationObjex[i].locationData.markerType == "none") {
+                continue;
+            }
             console.log("gotsa location object " + JSON.stringify(locationObjex[i]));
 
             // const modelData = await LoadLocationModel(locationObjex[i].modelData.modelURL, locationObjex[i].locationData);
@@ -593,7 +600,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
                     const zscale = locationObjex[i].locationData.zscale ? parseFloat(locationObjex[i].locationData.zscale) : 1;
                     const random = clamp(Math.random() * 2, .75, 1.25);
                     console.log("tryna scale sceneObjectID " + sceneObjectID + "  " + xscale + " " + yscale + " " + zscale);
-                    clonedModel.position.set(0,0,0);
+                    clonedModel.position.set(0,-50,0);
                     
                     clonedModel.scale.set(xscale * random, yscale * random, zscale * random);
                     scene.add(clonedModel);
@@ -630,6 +637,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
             
             } else {
                 if (count != 1) {
+                    await pathfinding;
                     for (let zm = 0; zm < count; zm++) {
                         // console.log("tryna place an object " + zm + " " + locationObjex[i].locationData.name + " " + locationObjex[i].modelData.modelURL);
                         //     }
@@ -1130,6 +1138,10 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             scene.add(model.model);
             GetAvailableScenesData();
             // model.material.color = "orange";
+            const triggerBody = await getTriggerBody(model.model, locationData);
+            staticBodies.push(triggerBody);
+            // model.material.color = "orange";
+            // console.log("adding trigger! " + model);
             console.log("adding a gate! " + model);
         }
         break;

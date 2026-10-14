@@ -35,7 +35,7 @@
 
 	import { InitEnvMap, InitSky, InitFog, InitGrid, InitGround, InitHeightmap } from './wgpu_environment.js';
 
-		import { equippedRigidbody } from './wgpu_actions.js';
+		import { equippedRigidbody, TriggerHit } from './wgpu_actions.js';
 
 	import { getVideo, getHandLandmarker } from './wgpu_vision.js';
 
@@ -261,6 +261,7 @@
 				// 	InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 				// } else {
 				if (!instancedModels[i].locationData.locationTags.includes("dynamic")) { //hrm, need to assign positions in InstanceWithPattern below...
+					console.log("InitSystems instancedModels scale " + scale);
 					InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 						
 				}
@@ -407,23 +408,22 @@
 			} else {
 				if (settings.sceneEnvironmentSettings.useFloorPlane && settings.sceneEnvironmentSettings.floorPlaneTexture && 
 				settings.sceneEnvironmentSettings.floorPlaneTexture != "none" && settings.sceneEnvironmentSettings.floorPlaneTexture != "") {
-				
-				// if ()
-				let options = {};
-				if (settings.sceneEnvironmentSettings.floorPlaneTexture == "tsl noise") {
-					options.type = "tsl noise"
-				} else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "flat") {
-					options.type = "flat"
-				}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "circle") {
-					options.type = "circle"
-				}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "simple noise") {
-					options.type = "simple noise"
-				}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "perlin noise") {
-					options.type = "perlin noise"
-				} 
-				
-				InitGround(options);
-			}
+
+					let options = {};
+					if (settings.sceneEnvironmentSettings.floorPlaneTexture == "tsl noise") {
+						options.type = "tsl noise"
+					} else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "flat") {
+						options.type = "flat"
+					}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "circle") {
+						options.type = "circle"
+					}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "simple noise") {
+						options.type = "simple noise"
+					}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "perlin noise") {
+						options.type = "perlin noise"
+					} 
+					
+					InitGround(options);
+				}
 			}
 		}
 
@@ -825,7 +825,7 @@
 				// eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
 				// 	console.log(`Sensor ${handle1} intersection with ${handle2}: ${intersecting}`);
 				// });
-				eventQueue.drainCollisionEvents((handle1, handle2, started) => {
+				eventQueue.drainCollisionEvents((handle1, handle2, started) => { //for triggers and static hits
 					// handle1 and handle2 are the collider handles involved
 					// 'started' is true if they just intersected, false if they stopped intersecting
 					
@@ -835,13 +835,16 @@
 							// let collider1 = world.getCollider(handle1);
 							// let collider2 = world.getCollider(handle2);
 							console.log(colliders[handle1] +" hit "+ colliders[handle2]);
+							if (colliders[handle1].includes("player") || colliders[handle2].includes("player")) {
+								TriggerHit(colliders[handle1], colliders[handle2]);
+							}
 					} else {
 						// console.log(`Collider ${handle1} left Sensor/Collider ${handle2}`);
 						console.log(colliders[handle1] +" unhit "+ colliders[handle2]);
 					}
 				});
 
-  				eventQueue.drainContactForceEvents((event) => {
+  				eventQueue.drainContactForceEvents((event) => { //for dynamic hits
 					if (scene) {
 					// if (event.started) {
 					let handle1 = event.collider1(); // Handle of the first collider involved in the event.
