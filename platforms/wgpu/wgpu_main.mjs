@@ -160,7 +160,7 @@
 		}
 		if (settings.sceneTags.includes("shadows")) {
 			renderer.shadowMap.enabled = true;
-			renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+			renderer.shadowMap.type = THREE.PCFShadowMap; 
 		}
 		
 		// cameraMode = "Mouse Look";
@@ -271,7 +271,11 @@
 		for (let i = 0; i < instancedModels.length; i++) { //loop again for physics or patterned instances..
 			if (instancedModels[i].locationData.locationTags.includes("dynamic") || instancedModels[i].locationData.locationTags.includes("physics")) {
 			
-				InstanceWithPattern(instancedModels[i].model, 50, 'sphere', 'dynamic', instancedModels[i].locationData);
+				let pCount = instancedModels[i].locationData.eventData.split("~")[1];
+				if (!pCount) {
+					pCount = 10;
+				}
+				InstanceWithPattern(instancedModels[i].model, pCount, 'sphere', 'dynamic', instancedModels[i].locationData);
 				
 
 			}
@@ -874,7 +878,7 @@
 						if (colliders[handle1].includes("atom") && colliders[handle2].includes("atom")) {
 							console.log("atom hit");
 						} else {
-							console.log("collision " + colliders[handle1] + " " + colliders[handle2] + " " + JSON.stringify(midpoint) + " force " + totalForce + " distance " + distance);
+							// console.log("collision " + colliders[handle1] + " " + colliders[handle2] + " " + JSON.stringify(midpoint) + " force " + totalForce + " distance " + distance);
 							SynthHit(midpoint, totalForce, distance);
 						}
 							

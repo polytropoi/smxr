@@ -330,7 +330,7 @@ export async function SynthHit(position, volFactor, distance, note, chord, bpm) 
        
         const tree = supersonic.getTree();
         const nodeCount = tree.nodeCount;
-        console.log(nodeCount);
+        // console.log(nodeCount);
       if (nodeCount < 13) {
           //   console.log('Count:', metrics.scsynthProcessCount);
 

@@ -269,7 +269,7 @@ function WaitAndInit () {
         //     // rigidbody.setTranslation(worldposition);
         //   }
         // }
-        console.log("created rigidbody for player!");
+        console.log("created triggerbody for " + locationData.name);
         // player.userData.update = update;
         // kinematicBodies.push(player);
         return { rigidbody };

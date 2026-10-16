@@ -374,7 +374,7 @@ export async function InitGround(options) {
 		uvAttribute.needsUpdate = true;
 	} else {
 		// groundSize = settings.sceneSkyRadius * 2
-		groundGeometry = new THREE.PlaneGeometry(x,y,256,256);
+		groundGeometry = new THREE.PlaneGeometry(Math.floor(x),Math.floor(y),128,128);
 	}
 		
 	if (options && options.type == "tsl noise") {
@@ -536,24 +536,27 @@ export async function InitGround(options) {
 	}  else if (options && options.type == "perlin noise") {
 	
 		// Setup Plane Geometry
-		const textureLoader = new THREE.TextureLoader();
-		const textureMap = await textureLoader.loadAsync(tileablePictures[0].url);
+		let textureMap
+		if (tileablePictures.length) {
+			const textureLoader = new THREE.TextureLoader();
+			textureMap = await textureLoader.loadAsync(tileablePictures[0].url);
 
-		if (textureMap) {
+			if (textureMap) {
 			// 1. Set wrapping behavior to repeat
-			textureMap.wrapS = THREE.RepeatWrapping; // Horizontal (U)
-			textureMap.wrapT = THREE.RepeatWrapping; // Vertical (V)
+				textureMap.wrapS = THREE.RepeatWrapping; // Horizontal (U)
+				textureMap.wrapT = THREE.RepeatWrapping; // Vertical (V)
 
-			// 2. Set how many times the texture repeats across the surface
-			textureMap.repeat.set(32, 32); // Repeats 4 times in X and 4 times in Y
+				// 2. Set how many times the texture repeats across the surface
+				textureMap.repeat.set(32, 32); // Repeats 4 times in X and 4 times in Y
 
-			// 3. Optional: Set filtering for sharp or smooth rendering
-			textureMap.magFilter = THREE.LinearFilter;
-			textureMap.minFilter = THREE.LinearMipmapLinearFilter;
+				// 3. Optional: Set filtering for sharp or smooth rendering
+				textureMap.magFilter = THREE.LinearFilter;
+				textureMap.minFilter = THREE.LinearMipmapLinearFilter;
+			}
 		}
 		const width = x;
 		const height = y;
-		const segments = 256; 
+		const segments = 128; 
 		const geometry = new THREE.PlaneGeometry(width, height, segments, segments);
 
 		// Rotate to make it horizontal (flat terrain)
@@ -591,18 +594,24 @@ export async function InitGround(options) {
 		const colorMix = mix(bottomColor, topColor, elevationFactor);
 		material.roughnessNode = .9;
 		material.envMapIntensity = 2;
-		material.colorNode = texture(textureMap).mul(colorMix);
-
+		if (textureMap) {
+			material.colorNode = texture(textureMap).mul(colorMix);
+		} else {
+			material.colorNode = colorMix;
+		}
 
 		const navmaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
 		const terrainMesh = new THREE.Mesh(geometry, material);
-		const navMesh = new THREE.Mesh(moddedGeo, navmaterial);
+		// const navMesh = new THREE.Mesh(moddedGeo, navmaterial);
 
 		scene.add(terrainMesh);
-		SetGeneratedNavmesh(terrainMesh);
+
 
 		const surfaceMesh = terrainMesh.clone();
 		const colliderMesh = terrainMesh.clone();
+		const navigationMesh = terrainMesh.clone();
+
+		SetGeneratedNavmesh(navigationMesh);
 		surfaceMesh.material = navmaterial;
 		surfaceMesh.rotation.x = -Math.PI / 2;
 		SetGeneratedSurface(surfaceMesh, "buffer");
@@ -610,20 +619,23 @@ export async function InitGround(options) {
 		console.log("generated perlin ground!");
 	
 	} else {
-		const textureLoader = new THREE.TextureLoader();
-		const textureMap = await textureLoader.loadAsync(tileablePictures[0].url);
+		let textureMap;
+		if (tileablePictures.length) {
+			const textureLoader = new THREE.TextureLoader();
+			textureMap = await textureLoader.loadAsync(tileablePictures[0].url);
 
-		if (textureMap) {
-			// 1. Set wrapping behavior to repeat
-			textureMap.wrapS = THREE.RepeatWrapping; // Horizontal (U)
-			textureMap.wrapT = THREE.RepeatWrapping; // Vertical (V)
+			if (textureMap) {
+				// 1. Set wrapping behavior to repeat
+				textureMap.wrapS = THREE.RepeatWrapping; // Horizontal (U)
+				textureMap.wrapT = THREE.RepeatWrapping; // Vertical (V)
 
-			// 2. Set how many times the texture repeats across the surface
-			textureMap.repeat.set(32, 32); // Repeats 4 times in X and 4 times in Y
+				// 2. Set how many times the texture repeats across the surface
+				textureMap.repeat.set(32, 32); // Repeats 4 times in X and 4 times in Y
 
-			// 3. Optional: Set filtering for sharp or smooth rendering
-			textureMap.magFilter = THREE.LinearFilter;
-			textureMap.minFilter = THREE.LinearMipmapLinearFilter;
+				// 3. Optional: Set filtering for sharp or smooth rendering
+				textureMap.magFilter = THREE.LinearFilter;
+				textureMap.minFilter = THREE.LinearMipmapLinearFilter;
+			}
 		}
 		// const bottomColor = color(settings.sceneColor3); // e.g., deep water / low elevation
 		const tint = color(settings.sceneColor2);    // e.g., snow / high elevation
@@ -634,17 +646,25 @@ export async function InitGround(options) {
 		// const colorMix = mix(bottomColor, topColor, elevationFactor);
 		material.roughnessNode = .9;
 		material.envMapIntensity = 2;
-		material.colorNode = texture(textureMap).mul(tint);
+
+		if (textureMap) {
+			material.colorNode = texture(textureMap).mul(tint);
+		} else {
+			material.colorNode = tint;
+		}
+		
 		// const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
 	// planeMat.colorNode = settings.sceneColor2;
 		let planeMesh = new THREE.Mesh(groundGeometry, material);
 		planeMesh.rotateX(-Math.PI / 2);
 	
 		scene.add(planeMesh);
-		SetGeneratedNavmesh(planeMesh);
+
 
 		const surfaceMesh = planeMesh.clone();
 		const colliderMesh = planeMesh.clone();
+		const navigationMesh = planeMesh.clone();
+		SetGeneratedNavmesh(navigationMesh);
 		surfaceMesh.material = navmaterial;
 		surfaceMesh.rotation.x = -Math.PI / 2;
 		SetGeneratedSurface(surfaceMesh, "primitive");

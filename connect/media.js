@@ -109,6 +109,7 @@ window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 
 export function onYouTubeIframeAPIReady () { //must be global, called when youtube embed api is loaded //ugh, only works w/ aframe..∂
 
+  if (settings && settings.sceneTags.includes("youtube")) {
   
   let youtubeEl = document.getElementById("youtubeElement");
   let yt_id = youtubeEl.getAttribute('data-yt_id');
@@ -136,6 +137,7 @@ export function onYouTubeIframeAPIReady () { //must be global, called when youtu
     // }
     // https://stackoverflow.com/questions/55724586/youtube-iframe-without-allow-presentation
     // youtubePlayer.h.attributes.sandbox.value = "allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation";
+  }
   }
 
   export function InitAFrameYouTubePlayer () {  
@@ -1041,35 +1043,37 @@ function loadYouTubeAPI() {
  * @returns {Promise<YT.Player>} Resolves with the created Player instance.
  */
 export async function createYouTubePlayer() {
-  const YT = await loadYouTubeAPI();
-  
-  let youtubeEl = document.getElementById("youtubeElement");
-  let yt_id = youtubeEl.getAttribute('data-yt_id');
-  if (youtubeEl) {
-    console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
+  if (settings && settings.sceneTags && settings.sceneTags.includes("youtube")) {
+    const YT = await loadYouTubeAPI();
+    
+    let youtubeEl = document.getElementById("youtubeElement");
+    let yt_id = youtubeEl.getAttribute('data-yt_id');
+    if (youtubeEl) {
+      console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
 
-    return new Promise((resolve) => {
-      youtubePlayer = new YT.Player(youtubeEl, {
-        height: '200',
-        width: '240',
-        videoId: yt_id,
-        playerVars: {
-          autoplay: 0,
-          controls: 1,
-          rel: 0
-          // ...options.playerVars
-        },
-        events: {
-          onReady: (event) => {
-            resolve(youtubePlayer); // Resolve the promise with the player object when ready
-            onYoutubePlayerReady(event);
+      return new Promise((resolve) => {
+        youtubePlayer = new YT.Player(youtubeEl, {
+          height: '200',
+          width: '240',
+          videoId: yt_id,
+          playerVars: {
+            autoplay: 0,
+            controls: 1,
+            rel: 0
+            // ...options.playerVars
           },
-          onStateChange: onYoutubePlayerStateChange
-        }
+          events: {
+            onReady: (event) => {
+              resolve(youtubePlayer); // Resolve the promise with the player object when ready
+              onYoutubePlayerReady(event);
+            },
+            onStateChange: onYoutubePlayerStateChange
+          }
+        });
       });
-    });
+    }
   }
-}
+  }
 
 //  let youtubeEl = document.getElementById("youtubeElement");
 //   let yt_id = youtubeEl.getAttribute('data-yt_id');

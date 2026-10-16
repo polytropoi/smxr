@@ -150,7 +150,7 @@ export async function InitInstanceModels () {
         }
         instancedModels[i].model.visible = false;
         instancedModels[i].model.position.set(0,-100,0);
-        await new Promise(r => setTimeout(r, 1000));
+        // await new Promise(r => setTimeout(r, 1000));
         
     } 
 }
@@ -219,8 +219,10 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
 
     if (sampler) {
 
-        count = count * 2; //bc weighted in aframe, etc
-
+        // count = count * 2; //bc weighted in aframe, etc
+        if (!count) {
+            count = 10;
+        }
         scaleFactor = locData.yscale;
 
         console.log("gotsa SURFACE for " + model.name + " count " + count);

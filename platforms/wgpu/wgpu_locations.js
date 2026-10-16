@@ -394,7 +394,7 @@ export async function InitLocations() {
 
                         
                     }
-                    if (locationData[i].objectID) { // objects can have (rigged) models, and actions, which can summon other objects with models and actions.  should be object type only?
+                    if ((locationData[i].markerType == "object" || locationData[i].markerType == "character") && locationData[i].objectID) { // objects can have (rigged) models, and actions, which can summon other objects with models and actions.  should be object type only?
                         
                         for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
                             if (locationData[i].objectID == objexData[o]._id) {
@@ -446,10 +446,11 @@ export async function InitLocations() {
                     // AssignModelsToAgents();
                 }
                 
-                await LoadLocationObjex(); 
-                InitSystems();
+
+                await InitSystems();
                 LoadLocalMods();
                 eventEl.addEventListener('location-event', LocationEvent);
+                await LoadLocationObjex(); 
                 
             }
         })();
@@ -514,6 +515,10 @@ export async function LoadLocationObjex() { // wait to load these, might need na
     if (locationObjex.length) {
         for (let i = 0; i < locationObjex.length; i++) {
 
+
+            if (!locationObjex[i].locationData) {
+                continue;
+            }
 
             if (locationObjex[i].locationData.markerType == "none") {
                 continue;
