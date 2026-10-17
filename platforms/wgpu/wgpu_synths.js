@@ -732,7 +732,7 @@ export class SynthKeys {
         let noteMods = Tonal.Chord.notes(chord, keyData.keytonic + octave);
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        if (fromTransport || (!fromTransport && this.synthTransport)) {
+        if (fromTransport || (!fromTransport && this.synthTransport && !this.transportIsPlaying)) {
           SynthHit(null,null,null,null,midiNotes, this.synthTransport.bpm);
         }
       } else {
@@ -745,7 +745,7 @@ export class SynthKeys {
         keyInfoEl.innerHTML = "Key: " + keyData.keytonic + " " + keyData.keytype + " Chord: " + chord;
         const midiNotes = noteMods.map(n => Tonal.Note.midi(n));
         console.log("notes " + noteMods + " midi " + midiNotes);
-        if (fromTransport || (!fromTransport && this.synthTransport)) {
+        if (fromTransport || (!fromTransport && this.synthTransport && !this.transportIsPlaying)) {
           SynthHit(null,null,null,null,midiNotes, this.synthTransport.bpm);
         }
         ThreeDeeText(noteMods.toString(), 1, lastRaycastHitObject, lastRaycastHitPosition,null,null,null);

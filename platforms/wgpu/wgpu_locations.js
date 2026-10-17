@@ -89,15 +89,21 @@ export function SetGeneratedNavmesh(mesh) {
 // const posAttribute = navMeshGeometry.attributes.position;   
 //            scene.add(theNavmesh);
 //         //   
+        // if (mesh.geometry) {
+            mesh.updateMatrixWorld(); 
+        // }
+               
         navmesh = mesh;
 
+
+        // scene.add(navmesh);
         groundObjex.push(mesh);
 
-        // if (settings.sceneTags.includes("debug")) {
-        //     navmesh.visible = true;
-        // } else {
-        //     navmesh.visible = false;
-        // }
+        if (settings.sceneTags.includes("debug")) {
+            navmesh.visible = true;
+        } else {
+            navmesh.visible = false;
+        }
 
     InitPathfinding();
 }

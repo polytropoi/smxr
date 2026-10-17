@@ -260,7 +260,7 @@
 				// if (instancedModels[i].locationData.mediaID && instancedModels[i].locationData.mediaID != "" && instancedModels[i].locationData.mediaID != "none") {
 				// 	InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 				// } else {
-				if (!instancedModels[i].locationData.locationTags.includes("dynamic")) { //hrm, need to assign positions in InstanceWithPattern below...
+				if (!instancedModels[i].locationData.locationTags.includes("dynamic") || instancedModels[i].locationData.locationTags.includes("pattern")) { //hrm, need to assign positions in InstanceWithPattern below...
 					console.log("InitSystems instancedModels scale " + scale);
 					InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 						
@@ -269,7 +269,7 @@
 			} 
 		} 
 		for (let i = 0; i < instancedModels.length; i++) { //loop again for physics or patterned instances..
-			if (instancedModels[i].locationData.locationTags.includes("dynamic") || instancedModels[i].locationData.locationTags.includes("physics")) {
+			if (instancedModels[i].locationData.locationTags.includes("dynamic") || instancedModels[i].locationData.locationTags.includes("physics") || instancedModels[i].locationData.locationTags.includes("pattern")) {
 			
 				let pCount = instancedModels[i].locationData.eventData.split("~")[1];
 				if (!pCount) {
@@ -878,7 +878,7 @@
 						if (colliders[handle1].includes("atom") && colliders[handle2].includes("atom")) {
 							console.log("atom hit");
 						} else {
-							// console.log("collision " + colliders[handle1] + " " + colliders[handle2] + " " + JSON.stringify(midpoint) + " force " + totalForce + " distance " + distance);
+							console.log("collision " + colliders[handle1] + " " + colliders[handle2] + " " + JSON.stringify(midpoint) + " force " + totalForce + " distance " + distance);
 							SynthHit(midpoint, totalForce, distance);
 						}
 							

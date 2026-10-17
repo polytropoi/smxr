@@ -121,9 +121,9 @@ export function SetPlayerLocation (locationData) {
     //     controls.object.position.set(locationData.x, locationData.y, locationData.z);
     // } else {
         if (player) {
-            console.log("tryna set third person playerlocation " + JSON.stringify(locationData));
+            console.log("tryna set mouselook person playerlocation " + JSON.stringify(locationData));
             player.position.set(parseFloat(locationData.x), parseFloat(locationData.y), parseFloat(locationData.z));
-            // player.updateMatrixWorld();
+            player.updateMatrixWorld();
 
         } else {
             if (controlObject) {

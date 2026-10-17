@@ -503,12 +503,14 @@ export function InstanceWithPattern (model, count, pattern, physicsMode, locatio
             instancedMeshes.push(instancedMesh);
             physicsInstancedMeshes = instancedMesh;
         }
+
         const dummy = new THREE.Object3D();
         let position = new THREE.Vector3();
         let theCount = 0;
-        for (let i = 0; i < count; i++) {            
-            const scale = 1.2;
 
+        for (let i = 0; i < count; i++) {            
+
+            const scale = 1.2;
             const x = randRange(-10, 10);
             const y = randRange(10, 30);
             const z = randRange(-10, 10);

@@ -30,7 +30,7 @@
     // let targetQuaternion;
 
     import { returnMaterial } from './tsl/tsl_materials.js'
-import { instancedAgentMeshes } from './wgpu_instance.js';
+    import { instancedAgentMeshes } from './wgpu_instance.js';
 
 
 
@@ -255,10 +255,14 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
     }
 
     export async function InitPathfinding () {
-        // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh") && navmesh) {
+        // if (settings && settings.sceneTags && settings
+        // .sceneTags.includes("navmesh") && navmesh) {
+        await navmesh;
         console.log("tryna InitPathfinding");
         if (navmesh) {
             try {
+
+                 
                 pathfinding = await new Pathfinding();
                 await world;
                 helper = new PathfindingHelper();
@@ -517,11 +521,11 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
         
         newPath(pt) {
 
-            const player = this.object;
+            // const player = this.object;
 
             
             // if (this.name == "player") {
-            //     console.log("tryna get player path to " + JSON.stringify(pt));
+                console.log("tryna get path to " + JSON.stringify(pt));
             // }
             
             if (this.pathfinder===undefined) {
@@ -540,8 +544,12 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             // Calculate a path to the target and store it
             // const startPos = closestNavmeshPoint(player.position); 
             // const endPos = closestNavmeshPoint(pt);
+           
+            
+            this.navMeshGroup = this.pathfinder.getGroup(this.ZONE, this.object.position);	
+            // .getClosestNodeGroup()?
 
-            this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
+            this.calculatedPath = this.pathfinder.findPath(this.object.position, pt, this.ZONE, this.navMeshGroup);
             
             // this.calculatedPath = this.pathfinder.findPath(startPos, endPos, this.ZONE, this.navMeshGroup);
             
@@ -562,6 +570,11 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                 	// this.showPathLines();
                 // }
             } else {
+
+                const closestNode = pathfinding.getClosestNode(this.object.position, ZONE, this.navMeshGroup);
+                const snappedStart = closestNode.centroid; 
+
+                this.object.position.set(snappedStart.x, snappedStart.y, snappedStart.z);
                 if (this.name == "player") {    
                     console.log("cain't find path to " + JSON.stringify(pt));
                 }
@@ -572,7 +585,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                 // this.isPaused = true;
                 }
 
-                this.calculatedPath = this.pathfinder.findPath(player.position, pt, this.ZONE, this.navMeshGroup);
+                this.calculatedPath = this.pathfinder.findPath(this.object.position, pt, ZONE, this.navMeshGroup);
 
                 // //if we get stuck in bad navmesh spot
                 // const closestNode = this.pathfinder.getClosestNode(player.position, this.ZONE, this.navMeshGroup, true);
@@ -643,7 +656,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                         const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
                         this.action = this.walkAnims[randomIndex];
                     } else {
-                        // this.action = this.animations[0].name.toLowerCase();
+                        this.action = this.animations[0].name.toLowerCase();
                     }
                 } else {
                     // this.action = this.animations[0].name.toLowerCase();
@@ -967,6 +980,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
             }
             const raypos = this.raycastedPosition(); //expensive, so throttle...
             if (raypos && raypos.y) {
+                console.log("raypos Y " + raypos.y);
                 this.object.position.y = raypos.y;
             }
         }
@@ -977,14 +991,21 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                 raypos = this.raycastedPosition(); //expensive, so throttle...
                 if (raypos && raypos.y) {
                     // this.object.position.y = raypos.y;
-                    // console.log("tryna snap "+ this.name);
+                    //  console.log("tryna snap "+ this.name + " lerp " + uselerp);
+                    
                     if (uselerp) {
                         this.object.position.y = lerp(this.object.position.y, raypos.y, 0.3); 
                     } else {
-                        this.object.position.y = raypos.y;
+                        // this.object.position.y = raypos.y;
+                        const closestNode = pathfinding.getClosestNode(this.object.position, ZONE, this.navMeshGroup);
+                        const snappedStart = closestNode.centroid; 
+
+                        this.object.position.set(snappedStart.x, snappedStart.y, snappedStart.z);
                     }
                 }
             }
+
+               
         }
         slerpToTargetRotation () { //hrm...
             if (this.isSplerping && this.targetQuaternion) {
@@ -1015,7 +1036,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
         
         update(dt, currentTime){ //move it!
             const speed = this.speed;
-            const agent = this.object; //um, not necessarily...
+            // const agent = this.object; //um, not necessarily...
 
             let instancedPosition = new THREE.Vector3();
             let instancedQuaternion = new THREE.Quaternion();
@@ -1047,6 +1068,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                     }
                     this.targetPosition = this.calculatedPath[0];
 
+
                     // if (currentTime - lastTime > throttleInterval) { 
                         // console.log("throttled update!");
                         // lastTime = currentTime;
@@ -1059,36 +1081,39 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                         // }
                     // }
 
-                    const vel = this.targetPosition.clone().sub(agent.position);
+                    const vel = this.targetPosition.clone().sub(this.object.position);
                     let pathLegComplete = (vel.lengthSq()<0.1);
   
                     if (!pathLegComplete) {
 
                         //Get the distance to the target before moving
-                        const prevDistanceSq = agent.position.distanceToSquared(this.targetPosition);
+                        const prevDistanceSq = this.object.position.distanceToSquared(this.targetPosition);
                        
                     
                         vel.normalize();
      
                         // if (this.isSlerping) {
                         //     if (this.targetQuaternion) {
-                        //         agent.quaternion.slerp(this.targetQuaternion, 3);
+                        //         this.object.quaternion.slerp(this.targetQuaternion, 3);
                             
                         //     }
                         // } else {
                             if (this.quaternion) {
-                                agent.quaternion.slerp(this.quaternion, .1);
+                                this.object.quaternion.slerp(this.quaternion, .1);
                             }
                         // }
 
-                        agent.position.add(vel.multiplyScalar(dt * speed));
+                        this.object.position.add(vel.multiplyScalar(dt * speed));
                                                     
                         //Get distance after moving, if greater then we've overshot and this leg is complete
-                        const newDistanceSq = agent.position.distanceToSquared(this.targetPosition);
-                        //  console.log(newDistanceSq + " vs " + prevDistanceSq );
+                        const newDistanceSq = this.object.position.distanceToSquared(this.targetPosition);
+
+                        // console.log("distance to target new/old " + newDistanceSq + " vs " + prevDistanceSq + " vel " + JSON.stringify(vel) + " speed " + speed + " dt " + dt);
+                        
                         pathLegComplete = (newDistanceSq > prevDistanceSq);
                         // console.log(newDistanceSq + " vs " + prevDistanceSq);
                         if (!pathLegComplete && this.useSnapping) {
+                            
                             this.snapToGround(true);
                         }
 
@@ -1099,8 +1124,8 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                             if (instancedMesh) {
                             // console.log("tryna move agent with instanceIndex " + instanceIndex);
                                 
-                                instancedPosition.set(agent.position.x, agent.position.y, agent.position.z);
-                                instancedQuaternion.set(agent.quaternion.x, agent.quaternion.y, agent.quaternion.z, agent.quaternion.w);
+                                instancedPosition.set(this.object.position.x, this.object.position.y, this.object.position.z);
+                                instancedQuaternion.set(this.object.quaternion.x, this.object.quaternion.y, this.object.quaternion.z, this.object.quaternion.w);
                                 instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(this.scale, this.scale, this.scale));
                                 // console.log("instancedMatrix position " + instancedPosition + " scale " + this.scale );
                                 instancedAgentMeshes[timestamp].setMatrixAt(instanceIndex, instancedMatrix);
@@ -1111,9 +1136,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                        
                         // }
 
-                    } 
-                    
-                    if (pathLegComplete){
+                    } else if (pathLegComplete){
                         // console.log("pathLegComplete!");
                         // Remove node from the path we calculated
                         // console.log("pathLegComplete paths " + this.calculatedPath.length);
@@ -1126,7 +1149,7 @@ import { instancedAgentMeshes } from './wgpu_instance.js';
                         this.calculatedPath.shift();
                         if (this.calculatedPath.length==0){
                             
-                            this.snapToGround(true);
+                            this.snapToGround(false);
                             this.newPath(randomNavmeshPoint());
                             //  raypos = this.raycastedPosition(); //expensive, so throttle...
                             //     if (raypos && raypos.y) {

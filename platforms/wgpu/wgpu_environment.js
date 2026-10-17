@@ -46,6 +46,7 @@ import { createStaticCollider } from './wgpu_physics.js';
 
 
 
+
 let skySphere, videoSkySphere;
 let skyboxMaterial, videoSkyboxMaterial;
 let textureEquirect;
@@ -566,6 +567,7 @@ export async function InitGround(options) {
 		const positionAttr = geometry.attributes.position;
 		const perlin = new ImprovedNoise();
 		const peakHeight = 5; // Maximum height of hills
+		const noiseScale = 100;
 
 		for (let i = 0; i < positionAttr.count; i++) {
 			// Get X and Z coordinates of the vertex
@@ -573,11 +575,21 @@ export async function InitGround(options) {
 			const z = positionAttr.getZ(i);
 
 			// Calculate noise value based on coordinates (scale inputs for smooth hills)
-			const y = perlin.noise(x * 0.05, 0, z * 0.05) * peakHeight;
+			const y = perlin.noise(x * .05, 0, z * .05) * peakHeight;
 
 			// Update the Y (height) coordinate
 			positionAttr.setY(i, y);
 		}
+		// for (let i = 0; i < positionAttr.count; i++) {
+		// 	const x = positionAttr.getX(i);
+		// 	const y = positionAttr.getY(i);
+
+		// 	// Dividing coordinates stretches the noise map, making features larger
+		// 	const z = perlin.noise(x / noiseScale, y / noiseScale, 0) * peakHeight;
+			
+		// 	positionAttr.setZ(i, z);
+		// }
+
 
 		// Required updates for Three.js to render correctly
 		geometry.computeVertexNormals();
@@ -618,7 +630,7 @@ export async function InitGround(options) {
 		createStaticCollider(colliderMesh);
 		console.log("generated perlin ground!");
 	
-	} else {
+	} else { //e.g. flat or circle
 		let textureMap;
 		if (tileablePictures.length) {
 			const textureLoader = new THREE.TextureLoader();
@@ -656,15 +668,24 @@ export async function InitGround(options) {
 		// const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
 	// planeMat.colorNode = settings.sceneColor2;
 		let planeMesh = new THREE.Mesh(groundGeometry, material);
+		let navigationMesh = new THREE.Mesh(groundGeometry, navmaterial);
+
+
 		planeMesh.rotateX(-Math.PI / 2);
-	
+		planeMesh.position.set(0,0,0);
+
+		navigationMesh.rotateX(-Math.PI / 2);
+		navigationMesh.position.set(0,0,0);
+
 		scene.add(planeMesh);
+		scene.add(navigationMesh);
+		SetGeneratedNavmesh(navigationMesh);
 
 
 		const surfaceMesh = planeMesh.clone();
 		const colliderMesh = planeMesh.clone();
-		const navigationMesh = planeMesh.clone();
-		SetGeneratedNavmesh(navigationMesh);
+		// const navigationMesh = planeMesh.clone();
+
 		surfaceMesh.material = navmaterial;
 		surfaceMesh.rotation.x = -Math.PI / 2;
 		SetGeneratedSurface(surfaceMesh, "primitive");

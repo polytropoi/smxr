@@ -2548,17 +2548,17 @@ wgpu_router.get('/:_id', function (req, res) {
                             "</div>" +
                         "</div>";
                     let bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+";\x22"
-                    if (tilepicUrl != "") {
-                        bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
-                    }
+                    // if (tilepicUrl != "") {
+                    //     bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
+                    // }
                     let sceneAccess = "Access Open to Public"
                     // if (sceneResponse.sceneShareWithSubscribers) {
                     //     sceneAccess ="<span>Access Requires Subscription</span><br>";
                     // }
                     // bgcolor=\x22"+sceneResponse.sceneColor1+"\x22>\n
-                    if (tilepicUrl != "") {
-                        bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
-                    }
+                    // if (tilepicUrl != "") {
+                    //     bgstyle = "style=\x22height:100%; width:100%; overflow:auto; background-color: "+sceneResponse.sceneColor1+"; background-image: url("+tilepicUrl+"); background-repeat: repeat;\x22";
+                    // }
                     let sceneOwner = "";
                     let sceneEditButton = "";
                     if (sceneOwner != "" || (!isGuest && req.session.user && req.session.user.authLevel.includes("domain_admin"))) { //hrm..
