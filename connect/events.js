@@ -1,6 +1,6 @@
 
 import { sceneLocations, GoToNext, GoToPrevious, videoEl, localData } from "../../connect/connect.js";
-import { primaryAudioEl, youtubePlayer, youtubeIsPlaying, primaryAudioHowl, MediaTimeUpdate, currentAudioFileName, fancyTimeFormat, updatePrimaryTransportSlider} from "../../connect/media.js";
+import { primaryAudioEl, youtubeIsPlaying, primaryAudioHowl, MediaTimeUpdate, currentAudioFileName, fancyTimeFormat, updatePrimaryTransportSlider} from "../../connect/media.js";
 import { LoadPrimaryAudioHowl } from "./media.js";
 import { settings } from "./settings.js";
 let timeKeysIndex = 0;
@@ -236,18 +236,18 @@ function TimedEventListener () {
             if (timeKeysIndex < tkStarttimes.length) { //TODO 
                   timekey = parseFloat(tkStarttimes[timeKeysIndex]);
             }
-            if (youtubePlayer != null && youtubeIsPlaying && timekey > 0) {
-               if (youtubePlayer.getCurrentTime() <= .1) {
+            if (window.youtubePlayer != null && youtubeIsPlaying && timekey > 0) {
+               if (window.youtubePlayer.getCurrentTime() <= .1) {
                   timeKeysIndex = 0; 
                   console.log("resetting timekeysindex!");
                }
-               if (youtubePlayer.getCurrentTime() <= timekey) {
+               if (window.youtubePlayer.getCurrentTime() <= timekey) {
                //    wait a scootch
-               //    console.log(youtubePlayer.getCurrentTime() + " vs " + timekey);
+               //    console.log(window.youtubePlayer.getCurrentTime() + " vs " + timekey);
                } else { 
                   
                if(timeKeysIndex < tkStarttimes.length) {
-                     // console.log("FIRING " + youtubePlayer.time + " vs " + timekey);
+                     // console.log("FIRING " + window.youtubePlayer.time + " vs " + timekey);
                   //    console.log("youtube event index " + timeKeysIndex + " " + JSON.stringify(timeKeysData.timekeys[timeKeysIndex]));
                      PlayTimedEvent(timeKeysData.timekeys[timeKeysIndex]);
                      timeKeysIndex++;

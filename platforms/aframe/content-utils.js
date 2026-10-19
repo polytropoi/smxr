@@ -17,7 +17,7 @@ import { videoEl, room, roomUsers, lerp, allowCameraLock, CreateLocationAframe,
       curveLocations, AvatarClicked, playerPosition, playerRotation } from "../../connect/connect.js";
 import { DeleteLocalSceneData, InitIDB } from "../../connect/indexedDb.js";
 import { pixelsPerMeterActual, settings } from "../../connect/settings.js";
-import { InitAFrameYouTubePlayer, youtubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat, LoadPrimaryAudioHowl } from '../../connect/media.js';
+import { InitAFrameYouTubePlayer, primaryAudioMangler, youtubeIsPlaying, MediaTimeUpdate, PrimaryAudioInit, fancyTimeFormat, LoadPrimaryAudioHowl } from '../../connect/media.js';
 
 var ua = window.navigator.userAgent;
 var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
@@ -4889,11 +4889,11 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
       if (this.mainTransportSlider != null && this.duration != null) {
           this.mainTransportSlider.oninput = function() {
           console.log(this.value);
-          if (youtubePlayer != null) {
+          if (window.youtubePlayer != null) {
             // let duration = youtubePlayer.duration;
             let percent = this.value * .01;
-            console.log("seeking " + youtubePlayer.getDuration() + " " + percent);
-            youtubePlayer.seekTo((youtubePlayer.getDuration() * percent).toFixed(2));
+            console.log("seeking " + window.youtubePlayer.getDuration() + " " + percent);
+            window.youtubePlayer.seekTo((window.youtubePlayer.getDuration() * percent).toFixed(2));
           } else {
               // this.primaryAudioHowl = primaryAudioHowl;
           }       
@@ -4907,10 +4907,10 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
     this.hitpoint = null;
     
 
-    // if (youtubePlayer != null) {
+    // if (window.youtubePlayer != null) {
     //   let vol = ((this.data.volume - -80) * 100) / (20 - -80); //vol is stored as -80 to +20
     //   console.log("youtube volume is " + vol);
-    //   youtubePlayer.setVolume(vol);
+    //   window.youtubePlayer.setVolume(vol);
     // }
     this.el.addEventListener('raycaster-intersected', e => {  
         this.raycaster = e.detail.el;
@@ -4960,14 +4960,14 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
         // if (primaryAudioMangler != null) {
         //     primaryAudioMangler.playPauseToggle();
         // }
-        if (!youtubeIsPlaying && youtubePlayer) {
+        if (!youtubeIsPlaying && window.youtubePlayer) {
           console.log("tryna play youtube");
-          youtubePlayer.playVideo();
+          window.youtubePlayer.playVideo();
           PauseIntervals(false);
           // this.el.emit('youtubeToggle', {isPlaying : false}, true);
         } else {
           console.log("tryna pauze youtube");
-          youtubePlayer.pauseVideo();
+          window.youtubePlayer.pauseVideo();
           PauseIntervals(true);
           // this.el.emit('youtubeToggle', {isPlaying : true}, true);
         }
@@ -4988,11 +4988,11 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
           // this.slider_handle.position.z =  nStart.y; 
           thiz.slider_handle.position.lerpVectors(thiz.slider_begin.position, thiz.slider_end.position, percentage * .01);
           //   this.video.currentTime = time;
-          if (youtubePlayer != null) {
-            console.log(youtubePlayer.getDuration());
-            thiz.time = youtubePlayer.getDuration() * percentage * .01;
+          if (window.youtubePlayer != null) {
+            console.log(window.youtubePlayer.getDuration());
+            thiz.time = window.youtubePlayer.getDuration() * percentage * .01;
             console.log(thiz.time.toFixed(2));
-            youtubePlayer.seekTo(thiz.time, true);
+            window.youtubePlayer.seekTo(thiz.time, true);
           }
           if (primaryAudioMangler != null) {
             primaryAudioMangler.slider_update(percentage);
@@ -5003,24 +5003,24 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
           
           } else if (thiz.mouseOverObject.includes("fastforward")) {
             console.log("ffwd");
-            if (youtubePlayer != null) {
-              youtubeTime = youtubePlayer.getCurrentTime();
-              youtubeDuration = youtubePlayer.getDuration();
+            if (window.youtubePlayer != null) {
+              youtubeTime = window.youtubePlayer.getCurrentTime();
+              youtubeDuration = window.youtubePlayer.getDuration();
               if (youtubeTime < youtubeDuration - 10) {
-                youtubePlayer.seekTo(youtubeTime + 10);
+                window.youtubePlayer.seekTo(youtubeTime + 10);
               } else {
-                youtubePlayer.seekTo(0);
+                window.youtubePlayer.seekTo(0);
               }
             }
           } else if (thiz.mouseOverObject.includes("rewind")) {
             console.log("rewind");
-            if (youtubePlayer != null) {
-              youtubeTime = youtubePlayer.getCurrentTime();
-              youtubeDuration = youtubePlayer.getDuration();
+            if (window.youtubePlayer != null) {
+              youtubeTime = window.youtubePlayer.getCurrentTime();
+              youtubeDuration = window.youtubePlayer.getDuration();
               if (youtubeTime > 10) {
-                youtubePlayer.seekTo(youtubeTime - 10);
+                window.youtubePlayer.seekTo(youtubeTime - 10);
               } else {
-                youtubePlayer.seekTo(youtubeDuration - 10);
+                window.youtubePlayer.seekTo(youtubeDuration - 10);
               }
             }
           }
@@ -5034,7 +5034,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
     console.log("this.duration is " + this.data.duration);
   },
   // set_player: function (player) {
-  //   this.youtubePlayer = player;
+  //   this.window.youtubePlayer = player;
   // },
   slider_update: function (percentage) {
       // if (primaryAudioMangler != null) {
@@ -5058,7 +5058,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
     }
     let vol = ((this.data.volume - -80) * 100) / (20 - -80); //vol is stored as -80 to +20
     console.log("youtube volume is " + vol);
-    youtubePlayer.setVolume(vol);
+    window.youtubePlayer.setVolume(vol);
     if (this.play_button != null) {
       if (state == "loading") {
         this.play_button.material = this.yellowmat;
@@ -5103,23 +5103,23 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
     MediaTimeUpdate(timestring);
   },
   randomTime: function() {
-    let duration = youtubePlayer.getDuration();
+    let duration = window.youtubePlayer.getDuration();
     let randomTimeValue = Math.random() * (duration - .1) + .1;
     
-    youtubePlayer.seekTo(randomTimeValue, true);
+    window.youtubePlayer.seekTo(randomTimeValue, true);
   },
   goToTime: function(time) {
-    youtubePlayer.seekTo(time, true);
+    window.youtubePlayer.seekTo(time, true);
   },
   tick: function() {
       if (!this.raycaster) {
          return;
       }
-      if (!youtubePlayer) {
+      if (!window.youtubePlayer) {
         return;
       }
       // if (youtubeIsPlaying) {
-      //   // console.log(youtubePlayer.getCurrentTime());
+      //   // console.log(window.youtubePlayer.getCurrentTime());
       // }
       const inter_section = this.raycaster.components.raycaster.getIntersection(this.el, true);
       if (inter_section) {
@@ -5130,8 +5130,8 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
       // if (this.playerState == "playing") {
         // MediaTimeUpdate(fancyTimeString);
       // }
-      // youtubeTime = youtubePlayer.getCurrentTime();
-      // youtubeDuration = youtubePlayer.getDuration();
+      // youtubeTime = window.youtubePlayer.getCurrentTime();
+      // youtubeDuration = window.youtubePlayer.getDuration();
    }
 
 });
@@ -5140,7 +5140,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 // let mainTransportSlider = null;
 // let transportPlayButton = null;
 // let youtube_player = null; //3d version
-// // export let youtubePlayer; //spawned by embed api
+// // export let window.youtubePlayer; //spawned by embed api
 // // export let youtubeIsPlaying = false;
 // let youtubeState = "";
 // let youtubeTitleEl = "";
@@ -5152,7 +5152,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 //   let youtubeEl = document.getElementById("youtubeElement");
 //   let yt_id = youtubeEl.getAttribute('data-yt_id');
 //   console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
-//     youtubePlayer = new YT.Player('youtubeElement', {
+//     window.youtubePlayer = new YT.Player('youtubeElement', {
 //       height: '200',
 //       width: '240',
 //       videoId: yt_id,
@@ -5164,18 +5164,18 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 //           'onStateChange': onPlayerStateChange
 //         }
 //     });
-//     // youtubePlayer.h.attributes.sandbox.value = "allow-presentation";
+//     // window.youtubePlayer.h.attributes.sandbox.value = "allow-presentation";
    
 
-//     youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+//     youtube_player = document.getElementById("window.youtubePlayer").components.youtube_player;
 //     youtubeTitleEl = document.getElementById("youtubeTitle");
 //     // https://stackoverflow.com/questions/55724586/youtube-iframe-without-allow-presentation
-//     // youtubePlayer.h.attributes.sandbox.value = "allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation";
+//     // window.youtubePlayer.h.attributes.sandbox.value = "allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation";
 //   }
 
 //   function onPlayerReady(event) {
     
-//     console.log("youtubePlayer is re4ady!");
+//     console.log("window.youtubePlayer is re4ady!");
 //     // if (timedEventsListenerMode == null) {
 //     //   timedEventsListenerMode = "Youtube";
 //     // }
@@ -5193,12 +5193,12 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 //     // event.target.playVideo(); //TODO detect and toggle
 //     // let sniffer = setInterval()
 //     // if (youtube_player == null) {
-//       // youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+//       // youtube_player = document.getElementById("window.youtubePlayer").components.youtube_player;
 //     // }
 //     // if (youtube_player != null) {
 //     //     youtube_player.player_status_update("ready");
 //     // }
-//     youtubeData = youtubePlayer.getVideoData();
+//     youtubeData = window.youtubePlayer.getVideoData();
 //     if (youtubeData && youtubeTitleEl) {
 //       console.log("gots youtubedata for " + JSON.stringify(youtubeData));
 //       // let titlestring = youtubeData.author + "\n" + youtubeData.title;
@@ -5210,7 +5210,7 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 //     if (youtube_player == null || youtube_player == undefined) {
 //           let interval = setInterval(() => {
 //             // console.log("youtube_player is null " + youtube_player == null);
-//             youtube_player = document.getElementById("youtubePlayer").components.youtube_player;
+//             youtube_player = document.getElementById("window.youtubePlayer").components.youtube_player;
 //             if (youtube_player != null) {
 //               youtube_player.player_status_update("ready");
 //               clearInterval(interval);
@@ -5279,12 +5279,12 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 //       // alert('video started');
 //         console.log("youtube is playing");
 //         youtubeIsPlaying = true;
-//         youtubeTime = youtubePlayer.getCurrentTime();
-//         youtubeDuration = youtubePlayer.getDuration();
+//         youtubeTime = window.youtubePlayer.getCurrentTime();
+//         youtubeDuration = window.youtubePlayer.getDuration();
 
 
 //         console.log("youtube getVideoData " + JSON.stringify(youtubeData));
-//         // youtubePlayer(youtubeIsPlaying);
+//         // window.youtubePlayer(youtubeIsPlaying);
 //         let time = 0;
 //         // let statsDiv = document.getElementById("transportStats");
         
@@ -5327,16 +5327,16 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 //   }
 
 // export function TransportPlayButton () {
-//   // console.log("TransportPlayButton clcik! " + JSON.stringify(youtubePlayer));
+//   // console.log("TransportPlayButton clcik! " + JSON.stringify(window.youtubePlayer));
 //   console.log("TransportPlayButton clcik! " + primaryAudioMangler);
-//   if (youtubePlayer != null) {
+//   if (window.youtubePlayer != null) {
 //     if (!youtubeIsPlaying) {
 //       console.log("tryna play youtube");
-//       youtubePlayer.playVideo();
+//       window.youtubePlayer.playVideo();
 //       PauseIntervals(false);
 //     } else {
 //       console.log("tryna pauze youtube");
-//       youtubePlayer.pauseVideo();
+//       window.youtubePlayer.pauseVideo();
 //       PauseIntervals(true);
 //     }
 //   } else if (primaryAudioMangler != null) {
@@ -5346,13 +5346,13 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 // }
 // function FastForwardButton () {
 //   console.log("ffwdButton Clicked");
-//   if (youtubePlayer != null) {
-//     youtubeTime = youtubePlayer.getCurrentTime();
-//     youtubeDuration = youtubePlayer.getDuration();
+//   if (window.youtubePlayer != null) {
+//     youtubeTime = window.youtubePlayer.getCurrentTime();
+//     youtubeDuration = window.youtubePlayer.getDuration();
 //     if (youtubeTime < youtubeDuration - 10) {
-//       youtubePlayer.seekTo(youtubeTime + 10);
+//       window.youtubePlayer.seekTo(youtubeTime + 10);
 //     } else {
-//       youtubePlayer.seekTo(0);
+//       window.youtubePlayer.seekTo(0);
 //     }
 //   } else if (primaryAudioMangler != null) {
 //     console.log("play button for audio");
@@ -5363,13 +5363,13 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 // function RewindButton () {
 //   console.log("rewindButton Clicked");
 
-//   if (youtubePlayer != null) {
-//     youtubeTime = youtubePlayer.getCurrentTime();
-//     youtubeDuration = youtubePlayer.getDuration();
+//   if (window.youtubePlayer != null) {
+//     youtubeTime = window.youtubePlayer.getCurrentTime();
+//     youtubeDuration = window.youtubePlayer.getDuration();
 //     if (youtubeTime > 10) {
-//       youtubePlayer.seekTo(youtubeTime - 10);
+//       window.youtubePlayer.seekTo(youtubeTime - 10);
 //     } else {
-//       youtubePlayer.seekTo(youtubeDuration - 10);
+//       window.youtubePlayer.seekTo(youtubeDuration - 10);
 //     }
 //   } else if (primaryAudioMangler != null) {
 //     console.log("play button for audio");
@@ -5382,9 +5382,9 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 // function NextButton () {
 //   console.log("NextButton Clicked " + timedEventsListenerMode);
 //   if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
-//     if (youtubePlayer != null) {
-//       let youtubeDuration = youtubePlayer.getDuration();
-//       youtubePlayer.seekTo(youtubeDuration - 2);
+//     if (window.youtubePlayer != null) {
+//       let youtubeDuration = window.youtubePlayer.getDuration();
+//       window.youtubePlayer.seekTo(youtubeDuration - 2);
 //     }
 //   } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {
 //       if (primaryAudioMangler != null) {
@@ -5397,8 +5397,8 @@ AFRAME.registerComponent('youtube_player', {  //setup and controls for the 3d pl
 // function PreviousButton () {
 //   console.log("PrevButton Clicked " + timedEventsListenerMode);
 //   if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'youtube') {
-//     if (youtubePlayer != null) {
-//     youtubePlayer.seekTo(0);
+//     if (window.youtubePlayer != null) {
+//     window.youtubePlayer.seekTo(0);
 //     timeKeysIndex = 0;
 //   }
 //   } else if (timedEventsListenerMode != null && timedEventsListenerMode.toLowerCase() == 'primary audio') {

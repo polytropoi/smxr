@@ -225,7 +225,7 @@
 			console.log("init surface!");
 			StartPopup(loadingHeader, 'Loading Instances....', false);
 			await InitSurface();
-			console.log("instantiating on surface with models " + instancedModels.length);
+			console.log("instantiating on surface with instancedModels " + instancedModels.length);
 
 			for (let i = 0; i < instancedModels.length; i++) {
 				let count = 33;
@@ -260,7 +260,7 @@
 				// if (instancedModels[i].locationData.mediaID && instancedModels[i].locationData.mediaID != "" && instancedModels[i].locationData.mediaID != "none") {
 				// 	InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 				// } else {
-				if (!instancedModels[i].locationData.locationTags.includes("dynamic") || instancedModels[i].locationData.locationTags.includes("pattern")) { //hrm, need to assign positions in InstanceWithPattern below...
+				if (!instancedModels[i].locationData.locationTags.includes("dynamic") || !instancedModels[i].locationData.locationTags.includes("pattern")) { //hrm, need to assign positions in InstanceWithPattern below...
 					console.log("InitSystems instancedModels scale " + scale);
 					InstanceOnSurface(instancedModels[i].model, count, scale, yMod, shader, instancedModels[i].locationData);
 						
@@ -424,7 +424,10 @@
 						options.type = "simple noise"
 					}  else if (settings.sceneEnvironmentSettings.floorPlaneTexture == "perlin noise") {
 						options.type = "perlin noise"
-					} 
+					}
+					options.addNavmesh = settings.sceneEnvironmentSettings.sceneDefaultNavmesh;
+					options.addSurface = settings.sceneEnvironmentSettings.sceneDefaultSurface;
+					options.addCollider = settings.sceneEnvironmentSettings.sceneDefaultCollider;	
 					
 					InitGround(options);
 				}

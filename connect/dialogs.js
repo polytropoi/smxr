@@ -1,4 +1,4 @@
-import { fancyTimeFormat, fancyTimeString, youtubePlayer, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
+import { fancyTimeFormat, fancyTimeString, youtubeIsPlaying, TransportPlayButton, sceneTextItems,  
           InitAmbientSlider, InitPrimarySlider, InitTriggerSlider, NextButton, PreviousButton, FastForwardButton, 
           RewindButton, primaryAudioHowl, PrimaryAudioPlayPauseToggle, GetCurrentPrimaryAudioTime, 
           LoadPrimaryAudioHowl, playVideo, pauseVideo} from "./media.js";
@@ -1816,15 +1816,15 @@ export function PlayPauseMedia () {
 
     } else if (timedEventsListenerMode.toLowerCase() == "youtube") {
       
-      if (youtubePlayer != null) {
+      if (window.youtubePlayer != null) {
         if (!youtubeIsPlaying) {
           console.log("tryna play youtube");
           PauseIntervals(false);
-          youtubePlayer.playVideo();
+          window.youtubePlayer.playVideo();
           return true;
         } else {
           console.log("tryna pauze youtube");
-          youtubePlayer.pauseVideo();
+          window.youtubePlayer.pauseVideo();
           PauseIntervals(true);
           return false;
         }

@@ -14,7 +14,7 @@ import { sunLight } from './wgpu_lights.js';
 
 import { tileablePictures } from './wgpu_media.js';
 
-import { SetGeneratedSurface } from './wgpu_instance.js';
+import { SetGeneratedSurface, surface } from './wgpu_instance.js';
 
 import { SetGeneratedNavmesh } from './wgpu_locations.js';
 
@@ -575,7 +575,7 @@ export async function InitGround(options) {
 			const z = positionAttr.getZ(i);
 
 			// Calculate noise value based on coordinates (scale inputs for smooth hills)
-			const y = perlin.noise(x * .05, 0, z * .05) * peakHeight;
+			const y = perlin.noise(x * .01, 0, z * .01) * peakHeight * Math.random();
 
 			// Update the Y (height) coordinate
 			positionAttr.setY(i, y);
@@ -651,11 +651,10 @@ export async function InitGround(options) {
 		}
 		// const bottomColor = color(settings.sceneColor3); // e.g., deep water / low elevation
 		const tint = color(settings.sceneColor2);    // e.g., snow / high elevation
-		// const elevationFactor = positionWorld.y; 
-
-		const navmaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
-		const material = new THREE.MeshStandardNodeMaterial();
+		// const elevationFactor = positionWorld.y; 		const material = new THREE.MeshStandardNodeMaterial();
 		// const colorMix = mix(bottomColor, topColor, elevationFactor);
+		const material = new THREE.MeshStandardNodeMaterial();
+		
 		material.roughnessNode = .9;
 		material.envMapIntensity = 2;
 
@@ -667,30 +666,41 @@ export async function InitGround(options) {
 		
 		// const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
 	// planeMat.colorNode = settings.sceneColor2;
-		let planeMesh = new THREE.Mesh(groundGeometry, material);
-		let navigationMesh = new THREE.Mesh(groundGeometry, navmaterial);
-
+		const planeMesh = new THREE.Mesh(groundGeometry, material);
 
 		planeMesh.rotateX(-Math.PI / 2);
 		planeMesh.position.set(0,0,0);
-
-		navigationMesh.rotateX(-Math.PI / 2);
-		navigationMesh.position.set(0,0,0);
-
 		scene.add(planeMesh);
-		scene.add(navigationMesh);
-		SetGeneratedNavmesh(navigationMesh);
+		const navmaterial = new THREE.MeshStandardMaterial({ color: settings.sceneColor3, wireframe: true });
+		
+		if (options.addNavmesh) {
+			
 
+			const navigationMesh = new THREE.Mesh(groundGeometry, navmaterial);
 
-		const surfaceMesh = planeMesh.clone();
-		const colliderMesh = planeMesh.clone();
-		// const navigationMesh = planeMesh.clone();
+			navigationMesh.rotateX(-Math.PI / 2);
+			navigationMesh.position.set(0,0,0);
 
-		surfaceMesh.material = navmaterial;
-		surfaceMesh.rotation.x = -Math.PI / 2;
-		SetGeneratedSurface(surfaceMesh, "primitive");
-		createStaticCollider(colliderMesh);
-		console.log("generated flat ground!");
+			scene.add(navigationMesh);
+			SetGeneratedNavmesh(navigationMesh);
+
+		} 
+		if (options.addSurface) {
+
+			// const surfacematerial = new THREE.MeshStandardMaterial({ color: settings.sceneColor4, wireframe: true });
+
+			// const navigationMesh = new THREE.Mesh(groundGeometry, navmaterial);
+			const surfaceMesh = planeMesh.clone();
+			surfaceMesh.material = navmaterial;
+			surfaceMesh.rotation.x = -Math.PI / 2;
+			SetGeneratedSurface(surfaceMesh, "primitive");
+		
+		}
+		if (options.addCollider) {
+			const colliderMesh = new THREE.Mesh(groundGeometry, material);
+			createStaticCollider(colliderMesh);
+			console.log("generated flat ground!");
+		}
 	}
 }
 
@@ -775,7 +785,7 @@ export function InitFog() {
 	let skyColor = color(settings.sceneColor1);
 	let groundColor = color(settings.sceneColor2);
 		console.log("doin some fog...");
-		const fogColor = settings.sceneColor2; // Sky blue
+		const fogColor = settings.sceneColor4; // Sky blue
 		let radius = 400;
 		if (settings.sceneSkyRadius) {
 			radius = settings.sceneSkyRadius;

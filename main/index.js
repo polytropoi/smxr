@@ -14595,7 +14595,7 @@ function getAllPeople() {
                                 "</div>" + 
                             // "</div>" +  
                             // "<div class=\x22form-row\x22>" +  
-                                "<div class=\x22col form-group col-md-3\x22>" +
+                                "<div class=\x22col form-group col-md-2\x22>" +
                                     "<label for=\x22sceneEnvironmentPreset\x22>Environment Preset</label>" +
                                     "<select class=\x22form-control\x22 id=\x22sceneEnvironmentPreset\x22 >" +
                                     // "<option value=\x22\x22 disabled selected>Select Environment : </option>" +
@@ -14620,6 +14620,19 @@ function getAllPeople() {
                                     "<option>moon</option>" +
                                     "</select>" +
                                 "</div>" +
+
+                                "<div class=\x22col form-group col-md-1\x22>" +
+                                    "<div class=\x22\x22><label for=\x22sceneDefaultNavmesh\x22>Navmesh</label><br>" +
+                                    "<input class=\x22\x22 type=\x22checkbox\x22  id=\x22sceneDefaultNavmesh\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                "</div>" + 
+                                "<div class=\x22col form-group col-md-1\x22>" +
+                                    "<div class=\x22\x22><label for=\x22sceneDefaultSurface\x22>Surface</label><br>" +
+                                    "<input class=\x22\x22 type=\x22checkbox\x22  id=\x22sceneDefaultSurface\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                "</div>" + 
+                                "<div class=\x22col form-group col-md-1\x22>" +
+                                    "<div class=\x22\x22><label for=\x22sceneDefaultCollider\x22>Collider</label><br>" +
+                                    "<input class=\x22\x22 type=\x22checkbox\x22  id=\x22sceneDefaultCollider\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
+                                "</div>" + 
                                 // "<div class=\x22col form-group col-md-1\x22>" +
                                 //     "<div class=\x22\x22><label for=\x22sceneUseDynCubeMap\x22>Dynamic CubeMap</label><br>" +
                                 //     "<input class=\x22\x22 type=\x22checkbox\x22  id=\x22sceneUseDynCubeMap\x22 data-toggle=\x22toggle\x22 data-size=\x22sm\x22 data-on=\x22<i class='fas fa-check'></i>\x22 data-off=\x22<i class='fas fa-times'></i>\x22 data-onstyle=\x22success\x22 data-offstyle=\x22danger\x22></div>" +
@@ -15219,10 +15232,18 @@ function getAllPeople() {
                 if (response.data.sceneUseFloorPlane) {
                     $('#sceneUseFloorPlane').bootstrapToggle('on');
                 }
-                // $('#sceneUseFloorPlane').bootstrapToggle();
-                // if (response.data.sceneFloorplanTexture) {
-                //     $('#sceneUseFloorPlane').bootstrapToggle('on');
-                // }
+                $('#sceneDefaultNavmesh').bootstrapToggle();
+                if (response.data.sceneDefaultNavmesh) {
+                    $('#sceneDefaultNavmesh').bootstrapToggle('on');
+                }
+                $('#sceneDefaultSurface').bootstrapToggle();
+                if (response.data.sceneDefaultSurface) {
+                    $('#sceneDefaultSurface').bootstrapToggle('on');
+                }
+                $('#sceneDefaultCollider').bootstrapToggle();
+                    if (response.data.sceneDefaultCollider) {
+                    $('#sceneDefaultCollider').bootstrapToggle('on');
+                }
                 // $('#sceneRenderFloorPlane').bootstrapToggle();
                 // if (response.data.sceneRenderFloorPlane) {
                 //     $('#sceneRenderFloorPlane').bootstrapToggle('on');
@@ -17022,6 +17043,10 @@ function getAllPeople() {
                         let sceneUseHeightmap = document.getElementById("sceneUseHeightmap").checked;
                         // let sceneUseStaticObj = document.getElementById("sceneUseStaticObj").checked;
                         let sceneUseFloorPlane = document.getElementById("sceneUseFloorPlane").checked;
+
+                        let sceneDefaultNavmesh = document.getElementById("sceneDefaultNavmesh").checked;
+                        let sceneDefaultSurface = document.getElementById("sceneDefaultSurface").checked;
+                        let sceneDefaultCollider = document.getElementById("sceneDefaultCollider").checked;
                         // let sceneRenderFloorPlane = document.getElementById("sceneRenderFloorPlane").checked;
                         let sceneScatterMeshes = document.getElementById("sceneScatterMeshes").checked;
                         let sceneScatterObjects = document.getElementById("sceneScatterObjects").checked;
@@ -17295,6 +17320,9 @@ function getAllPeople() {
                             sceneHeightmap: sceneHeightmap,
                             // sceneUseStaticObj: sceneUseStaticObj,
                             sceneUseFloorPlane: sceneUseFloorPlane,
+                            sceneDefaultCollider: sceneDefaultCollider,
+                            sceneDefaultSurface: sceneDefaultSurface,
+                            sceneDefaultNavmesh: sceneDefaultNavmesh,
                             sceneFloorplaneTexture: sceneFloorplaneTexture,
                             
                             // sceneRenderFloorPlane: sceneRenderFloorPlane,

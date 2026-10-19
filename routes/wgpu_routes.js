@@ -1020,6 +1020,9 @@ wgpu_router.get('/:_id', function (req, res) {
                 sceneEnvironmentSettings.preset = sceneResponse.sceneEnvironmentPreset;
                 sceneEnvironmentSettings.useFloorPlane = sceneResponse.sceneUseFloorPlane;
                 sceneEnvironmentSettings.floorPlaneTexture = sceneResponse.sceneFloorplaneTexture;
+                sceneEnvironmentSettings.sceneDefaultNavmesh = sceneResponse.sceneDefaultNavmesh;
+                sceneEnvironmentSettings.sceneDefaultSurface = sceneResponse.sceneDefaultSurface;
+                sceneEnvironmentSettings.sceneDefaultCollider = sceneResponse.sceneDefaultCollider;
                 // infiniteGridScript = "<script src=\x22../platforms/wgl/src/InfiniteGridHelper.js\x22></script>";
                 // if (sceneResponse.sceneTags != null && sceneResponse.sceneTags.includes('no dressing')) {
                 //      sceneEnvironmentSettings.dressing = false;
@@ -2022,7 +2025,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     "<script>\n"+
                         "var tag = document.createElement('script');\n"+
                         "tag.src = \x22//www.youtube.com/iframe_api\x22;\n"+
-                        "tag.allow = \x22compute-pressure\x22;\n"+
+                        // "tag.allow = \x22compute-pressure\x22;\n"+
                         "var firstScriptTag = document.getElementsByTagName('script')[0];\n"+
                         "firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);\n"+
                     "</script>";

@@ -326,7 +326,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             //   sampler.sample(position);
             // await new Promise(r => setTimeout(r, 1000));
             const distance = position.distanceTo(center); 
-            const skyFactor = settings.sceneSkyRadius * .01;
+            const skyFactor = settings.sceneSkyRadius * .05;
             console.log("mesh position " + JSON.stringify(position) + " distance " + distance + " skyFactor " + skyFactor + " surfaceTYpe " + surfaceType +  " yMod " + locData.y);
            
 
@@ -360,7 +360,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
           
             if (distance < skyFactor) {
                 console.log("too close to center distance " + distance +  " vs " + skyFactor);
-                dummy.position.set(position.x, -100, position.z);
+                dummy.position.set(position.x, -1000, position.z);
             }
 
             if (locData.markerType == "character") {

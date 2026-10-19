@@ -1069,7 +1069,7 @@ async function RaycastHit(type, hit, event) {
 
                             let style = "popup";
                             if (uiMode != "popup") {
-                                style = "hic_content";
+                                // style = "hic_content";
                                 // hic_content.classList.remove("hic_content");
                                 hic_content.classList.add("hic_content_trans");
                             }
