@@ -454,7 +454,7 @@ export async function InitLocations() {
                 
 
                 await InitSystems();
-                LoadLocalMods();
+                // LoadLocalMods();
                 eventEl.addEventListener('location-event', LocationEvent);
                 await LoadLocationObjex(); 
                 
@@ -482,6 +482,7 @@ function getObjectsByPartialName(parent, partialName) {
 function LocalDataReady () {
     console.log("localData is ready");
     localDataReady = true;
+    LoadLocalMods();
 }
 
 export function LoadLocalMods(event) {
@@ -508,6 +509,8 @@ export function LoadLocalMods(event) {
                 CreateDefaultLocationMarker(mods.locations[i]); //prims only
             }
         }
+    } else {
+        console.log("no localmods or not ready");
     }
 }
 // export async function LoadLocationObject (objectData) {

@@ -566,7 +566,7 @@ export async function InitGround(options) {
 		// Access the position attribute
 		const positionAttr = geometry.attributes.position;
 		const perlin = new ImprovedNoise();
-		const peakHeight = 5; // Maximum height of hills
+		const peakHeight = 8; // Maximum height of hills
 		const noiseScale = 100;
 
 		for (let i = 0; i < positionAttr.count; i++) {

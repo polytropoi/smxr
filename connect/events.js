@@ -58,7 +58,7 @@ export function SettingsLoaded() {
 }
 
 export function LocalDataLoaded() {
-   console.log("local data loaded from indexedDb!");
+   console.log("localmods data loaded from indexedDb!");
    data_event.details = "idbloaded";
    eventEl.dispatchEvent(data_event);
 }
