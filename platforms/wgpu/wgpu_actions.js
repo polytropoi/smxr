@@ -80,13 +80,23 @@ export function TriggerHit (hit1, hit2) {
     if (hit1.includes("gate")) {
         const hitsplit = hit1.split("_")[1]; //handle should be type_locationid (.timestamp)
         console.log("gatehit 1 " + hitsplit + " " + JSON.stringify(locations[hitsplit]));
-        
+        EnterSceneGate(locations[hitsplit].eventData);
+        // const event = {};
+        // event.target.dataset.type = "gate";
+        // event.target.dataset.data = locations[hitsplit].eventData;
+        // event.target.dataset.tags = locations[hitsplit].locationTags;
+        // ActionSwitch(event);
 
     }
     if (hit2.includes("gate")) {
        const hitsplit = hit2.split("_")[1]; //handle should be type_locationid (.timestamp)
         console.log("gatehit 2 " + hitsplit + " " + JSON.stringify(locations[hitsplit]));
-
+                EnterSceneGate(locations[hitsplit].eventData);
+        // const event = {};
+        // event.target.dataset.type = "gate";
+        // event.target.dataset.data = locations[hitsplit].eventData;
+        // event.target.dataset.tags = locations[hitsplit].locationTags;
+        // ActionSwitch(event);
     }
 }
 

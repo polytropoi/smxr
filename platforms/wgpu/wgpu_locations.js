@@ -61,6 +61,8 @@ export let playerPosition;
 
 export let kinematicAgentMeshes = []; //children of navagents, for physics collisions
 
+export let allSceneObjex = []; //ground and active and static
+
 export async function LoadModel(url) {
     const loader = new GLTFLoader();
     try {
@@ -457,6 +459,7 @@ export async function InitLocations() {
                 // LoadLocalMods();
                 eventEl.addEventListener('location-event', LocationEvent);
                 await LoadLocationObjex(); 
+                allSceneObjex = [...groundObjex, ...activeObjex];
                 
             }
         })();
@@ -949,6 +952,13 @@ async function LoadLocationModel (url, locationData, isActive) {
             lookAtCameraObjects.push(model);
         }
 
+        if (locationData.markerType == "gate") {
+            const triggerBody = await getTriggerBody(model, locationData);
+            staticBodies.push(triggerBody);
+            // model.material.color = "orange";
+            console.log("adding gate trigger to model " + locationData.name);
+        }
+
         model.traverse(function (child) {
            
             if (child.isMesh){
@@ -988,6 +998,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                 if ((isActive || locationData.locationTags.includes("active")) && locationData.markerType != "trigger") {
                     activeObjex.push(child);
                 }
+
             
                 if (locationData.markerType == "navmesh" ) {
                     // if (settings && settings.sceneTags && settings.sceneTags.includes("navmesh")) {

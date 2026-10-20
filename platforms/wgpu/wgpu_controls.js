@@ -11,7 +11,7 @@ import { availableScenesData, ReturnTaggedPictures, sceneTextController, trigger
 
 import { ActionSwitch, SetPlayerRigidbody, InstancedActionClick, sceneObjects } from './wgpu_actions.js';
 
-import { activeObjex, groundObjex, navmesh, LocationEvent } from './wgpu_locations.js';
+import { activeObjex, allSceneObjex, groundObjex, navmesh, LocationEvent } from './wgpu_locations.js';
 
 import { scene, cameraMode, renderer, clock, selectedObjects, sceneIsReady } from './wgpu_main.mjs';
 
@@ -1231,22 +1231,26 @@ export function mouseRaycast(e) {
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     // console.log("mouse pos " + JSON.stringify(mouse));
     mousecaster.setFromCamera(mouse, camera);
-    if (allowMods && keyIsDown == "KeyX") {
-        var locationPickerRaycastHits = mousecaster.intersectObjects(scene.children, true);
+    if (mousecaster && allowMods && keyIsDown == "KeyX") {
+        var locationPickerRaycastHits = mousecaster.intersectObjects(groundObjex, true);
         if (locationPickerRaycastHits.length) {
-        const hit = locationPickerRaycastHits[0];
-
-            pickedPosition = hit.point
-            pointerGizmo.position.set(hit.point.x, hit.point.y, hit.point.z);
-            pointerGizmo.visible = true;
-            console.log("locationPicker hit " + JSON.stringify(pickedPosition));
-            if (hit.face) {
-                const localNormal = hit.face.normal;
-                const worldNormal = localNormal.clone().transformDirection(hit.object.matrixWorld);
-                // console.log("hit worldnormal " + JSON.stringify(worldNormal));
-               
-                // pointerGizmo.lookAt(worldNormal);
-                rotateObjectToNormal(pointerGizmo, worldNormal);
+            const hit = locationPickerRaycastHits[0];
+            if (hit.object) {
+                pickedPosition = new THREE.Vector3();
+                pickedPosition.x = hit.point.x.toFixed(2);
+                pickedPosition.y = hit.point.y.toFixed(2);
+                pickedPosition.z = hit.point.z.toFixed(2);
+                pointerGizmo.position.set(pickedPosition.x, pickedPosition.y, pickedPosition.z);
+                pointerGizmo.visible = true;
+                console.log(hit.object.name + " locationPicker hit " + JSON.stringify(pickedPosition));
+                if (hit.face) {
+                    const localNormal = hit.face.normal;
+                    const worldNormal = localNormal.clone().transformDirection(hit.object.matrixWorld);
+                    // console.log("hit worldnormal " + JSON.stringify(worldNormal));
+                
+                    // pointerGizmo.lookAt(worldNormal);
+                    rotateObjectToNormal(pointerGizmo, worldNormal);
+                }
             }
         }
     } else {
