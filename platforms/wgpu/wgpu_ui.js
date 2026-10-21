@@ -959,7 +959,15 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
             return;
         }
 
-        popup.classList.add("popup");
+        if (style == "picpop") {
+            popup.className = '';
+            popup.classList.add("popup_nobg");
+        } else {
+             popup.className = '';
+            popup.classList.add("popup");
+        }
+        // popup.classList.add("popup");
+      
         if (!event) {
             let xpos = window.innerWidth / 2;
             let ypos = window.innerHeight / 2;

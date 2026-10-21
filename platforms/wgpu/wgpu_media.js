@@ -98,7 +98,7 @@ export function GetAvailableScenesData () {
         if (availableScenesDataEl) {
             const theAvailableScenesData = availableScenesDataEl.getAttribute('data-availablescenes');
             availableScenesData = JSON.parse(atob(theAvailableScenesData));
-            console.log("availablescenesdata " + JSON.stringify(availableScenesData));
+            console.log(availableScenesData.length + " availablescenes"); // + JSON.stringify(availableScenesData));
         }
     }
 }
@@ -834,7 +834,7 @@ class TriggerAudioControl {
         }
     }
     playTriggerAudioWithTags (tagstring, distance, pos) {
-        if (tagstring && distance && pos) {
+        if (tagstring) {
             let tags = tagstring.toString().split(',');
             for (let i = 0; i < tags.length; i++) {
                 // console.log("looking fo rtag " + tags[i].trim());
@@ -866,7 +866,11 @@ class TriggerAudioControl {
                         // triggerAudioHowl.play();
 
                         //umm, maybe split the diff with this.data.volume (scene setting) and the distance driven volume below?
-                        let volume = Math.min(Math.max(0, 1000 - (distance * 25)), 1000) * .001; //clamp between 0-1
+                        let volume = .5;
+                        if (distance) {
+                            volume = Math.min(Math.max(0, 1000 - (distance * 25)), 1000) * .001; //clamp between 0-1
+                        }
+                       
                         // let volume = clamp(100 - distance) * .01; //hrm..
                         if (volume < .1) {
                             volume = .1;

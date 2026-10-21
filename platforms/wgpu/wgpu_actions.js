@@ -152,7 +152,7 @@ export class SceneObject { //things that might have models and actions and fancy
             if (this.objectData.actions[a].actionType.toLowerCase() == "onload") {
                 // this.hasSelectAction = true;
                 this.loadAction = this.objectData.actions[a];
-                console.log("object has loadAction! " + JSON.stringify(this.objectData) + " isEquipped " + isEquipped + " "  + JSON.stringify(this.loadAction));
+                console.log(this.objectData.name + " object has loadAction! ")// + JSON.stringify(this.objectData) + " isEquipped " + isEquipped + " "  + JSON.stringify(this.loadAction));
             }
             if (this.objectData.actions[a].actionType.toLowerCase() == "select") {
                 this.hasSelectAction = true;

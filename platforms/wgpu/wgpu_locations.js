@@ -8,6 +8,8 @@ import { settings } from '../../../connect/settings.js';
 
 import {SceneObject, sceneObjects} from './wgpu_actions.js';
 
+import {triggerAudioController} from './wgpu_media.js';
+
 import { SetSceneLocations, userData, localData } from '../../../connect/connect.js';
 
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -92,7 +94,7 @@ export function SetGeneratedNavmesh(mesh) {
 //            scene.add(theNavmesh);
 //         //   
         // if (mesh.geometry) {
-            mesh.updateMatrixWorld(); 
+            // mesh.updateMatrixWorld(); 
         // }
                
         navmesh = mesh;
@@ -226,7 +228,12 @@ export async function LocationEvent (event) {
         localData.locations.push(locItem);
        
         console.log("new location item " + JSON.stringify(locItem));
+        CreateDefaultLocationMarker(locItem);
         SaveLocalData();
+        if (triggerAudioController) {
+            // console.log("hit with locationTags " + lastRaycastHitObject.userData.locationData.locationTags);
+            triggerAudioController.playTriggerAudioWithTags("spawn");
+        }
     } else if (event.details.eventType == "snap") {
         console.log("tryna snap to "+ event.details.filename);
     } else if (event.details.eventType == "goto") {
@@ -535,7 +542,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
             if (locationObjex[i].locationData.markerType == "none") {
                 continue;
             }
-            console.log("gotsa location object " + JSON.stringify(locationObjex[i]));
+            console.log("gotsa location object " + locationObjex[i].locationData.name); //+ JSON.stringify(locationObjex[i]));
 
             // const modelData = await LoadLocationModel(locationObjex[i].modelData.modelURL, locationObjex[i].locationData);
             const modelData = await LoadModel(locationObjex[i].modelData.modelURL);

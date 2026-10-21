@@ -1056,7 +1056,7 @@ async function RaycastHit(type, hit, event) {
                         // }
                         
                         // if (pics) {
-                            console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length); 
+                            console.log("tagged " + Object.keys(tagData).toString() + " with pics " + pics.length);
                             const rIndex = Math.floor(Math.random() * pics.length);
                             // const tIndex = Math.floor(Math.random() * Object.values(tagData)[0][0]);
                             const header = Object.keys(tagData).toString() + " : " + Object.values((Object.values(tagData)[0]));
@@ -1064,10 +1064,10 @@ async function RaycastHit(type, hit, event) {
                             lastRaycastHitObject.header = header;
                                            
                             const htmlstring = "<div><img src=\x22"+pics[rIndex].url+
-                            "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22hic_content_pill\x22> <h1>"+header+"</h1></div></div>";
+                            "\x22 class=\x22cover-img\x22 crossOrigin=\x22anonymous\x22><div class=\x22popup_content_pill\x22> <h1>"+header+"</h1></div></div>";
                           
 
-                            let style = "popup";
+                            let style = "picpop";
                             if (uiMode != "popup") {
                                 // style = "hic_content";
                                 // hic_content.classList.remove("hic_content");

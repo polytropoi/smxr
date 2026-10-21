@@ -326,7 +326,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             //   sampler.sample(position);
             // await new Promise(r => setTimeout(r, 1000));
             const distance = position.distanceTo(center); 
-            const skyFactor = settings.sceneSkyRadius * .05;
+            const skyFactor = settings.sceneSkyRadius * .06;
             console.log("mesh position " + JSON.stringify(position) + " distance " + distance + " skyFactor " + skyFactor + " surfaceTYpe " + surfaceType +  " yMod " + locData.y);
            
 
@@ -347,7 +347,8 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
         
             if (locData.locationTags && locData.locationTags.includes("no scale")) {
                 // const scale = Math.random() * scaleFactor * .75;
-                dummy.scale.set(1, 1, 1);
+                  const scale = 1 + (i % 5) * 0.2;
+                dummy.scale.set(scale, scale, scale);
 
             } else {
                 const iScale = ((Math.random()) * scaleFactor);

@@ -32,7 +32,7 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 import {
 	color, screenUV, mx_noise_float, sin, time, fog, float, positionWorld, triNoise3D, positionView, positionGeometry, abs, fwidth, smoothstep,
 	vec2, vec3, vec4, normalWorld, uniform, uv, dFdx, dFdy, fract, floor, mix, min, max, mul, cameraPosition, saturate, oneMinus, 
-	Fn, texture, equirectUV, positionLocal, rangeFogFactor, pmremTexture, normalLocal, length
+	Fn, texture, equirectUV, positionLocal, rangeFogFactor, pmremTexture, normalLocal, length, normalMap
 	
 } from 'three/tsl';
 
@@ -548,7 +548,7 @@ export async function InitGround(options) {
 				textureMap.wrapT = THREE.RepeatWrapping; // Vertical (V)
 
 				// 2. Set how many times the texture repeats across the surface
-				textureMap.repeat.set(32, 32); // Repeats 4 times in X and 4 times in Y
+				textureMap.repeat.set(64, 64); // Repeats 4 times in X and 4 times in Y
 
 				// 3. Optional: Set filtering for sharp or smooth rendering
 				textureMap.magFilter = THREE.LinearFilter;
@@ -575,7 +575,7 @@ export async function InitGround(options) {
 			const z = positionAttr.getZ(i);
 
 			// Calculate noise value based on coordinates (scale inputs for smooth hills)
-			const y = perlin.noise(x * .01, 0, z * .01) * peakHeight * Math.random();
+			const y = perlin.noise(x * .05, 0, z * .05) * peakHeight * (Math.random() / 2);
 
 			// Update the Y (height) coordinate
 			positionAttr.setY(i, y);
@@ -604,16 +604,19 @@ export async function InitGround(options) {
 
 		const material = new THREE.MeshStandardNodeMaterial();
 		const colorMix = mix(bottomColor, topColor, elevationFactor);
-		material.roughnessNode = .9;
+		material.roughnessNode = .95;
 		material.envMapIntensity = 2;
 		if (textureMap) {
-			material.colorNode = texture(textureMap).mul(colorMix);
+			material.colorNode = texture(textureMap).mul(colorMix).mul(2);
+			// material.normalNode = normalMap(texture(textureMap), vec2(1));
+
 		} else {
 			material.colorNode = colorMix;
 		}
 
 		const navmaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
 		const terrainMesh = new THREE.Mesh(geometry, material);
+		terrainMesh.receiveShadow = true;
 		// const navMesh = new THREE.Mesh(moddedGeo, navmaterial);
 
 		scene.add(terrainMesh);
@@ -663,25 +666,30 @@ export async function InitGround(options) {
 		} else {
 			material.colorNode = tint;
 		}
+		material.normalNode = normalMap(texture(textureMap), vec2(1.0));
 		
 		// const planeMat = new THREE.MeshStandardMaterial({ roughness: 1, color: settings.sceneColor2 });
 	// planeMat.colorNode = settings.sceneColor2;
 		const planeMesh = new THREE.Mesh(groundGeometry, material);
 
+		scene.add(planeMesh);
+
 		planeMesh.rotateX(-Math.PI / 2);
 		planeMesh.position.set(0,0,0);
-		scene.add(planeMesh);
-		const navmaterial = new THREE.MeshStandardMaterial({ color: settings.sceneColor3, wireframe: true });
+
+		const navmaterial = new THREE.MeshStandardMaterial({ color: 'green', wireframe: true });
+		const surfacematerial = new THREE.MeshStandardMaterial({ color: 'red', wireframe: true });
 		
 		if (options.addNavmesh) {
 			
 
 			const navigationMesh = new THREE.Mesh(groundGeometry, navmaterial);
 
-			navigationMesh.rotateX(-Math.PI / 2);
-			navigationMesh.position.set(0,0,0);
-
+			// navigationMesh.rotateX(-Math.PI / 2);
 			scene.add(navigationMesh);
+			navigationMesh.rotation.x = -Math.PI / 2;
+			navigationMesh.position.set(0,.1,0);
+
 			SetGeneratedNavmesh(navigationMesh);
 
 		} 
@@ -689,15 +697,17 @@ export async function InitGround(options) {
 
 			// const surfacematerial = new THREE.MeshStandardMaterial({ color: settings.sceneColor4, wireframe: true });
 
-			// const navigationMesh = new THREE.Mesh(groundGeometry, navmaterial);
-			const surfaceMesh = planeMesh.clone();
-			surfaceMesh.material = navmaterial;
+			const surfaceMesh = new THREE.Mesh(groundGeometry, surfacematerial);
+			// const surfaceMesh = planeMesh.clone();
+			// surfaceMesh.material = navmaterial;
 			surfaceMesh.rotation.x = -Math.PI / 2;
+			scene.add(surfaceMesh);
 			SetGeneratedSurface(surfaceMesh, "primitive");
 		
 		}
 		if (options.addCollider) {
 			const colliderMesh = new THREE.Mesh(groundGeometry, material);
+			colliderMesh.rotation.x = -Math.PI / 2;
 			createStaticCollider(colliderMesh);
 			console.log("generated flat ground!");
 		}
