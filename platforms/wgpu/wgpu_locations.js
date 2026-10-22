@@ -409,8 +409,8 @@ export async function InitLocations() {
 
                         
                     }
-                    if ((locationData[i].markerType == "object" || locationData[i].markerType == "character") && locationData[i].objectID) { // objects can have (rigged) models, and actions, which can summon other objects with models and actions.  should be object type only?
-                        
+                    // if ((locationData[i].markerType == "object" || locationData[i].markerType == "character") && locationData[i].objectID) { // objects can have (rigged) models, and actions, which can summon other objects with models and actions.  should be object type only?
+                    if (locationData[i].objectID) { //e.e
                         for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
                             if (locationData[i].objectID == objexData[o]._id) {
                                 // locationData[i].isHidden = false;
@@ -542,7 +542,7 @@ export async function LoadLocationObjex() { // wait to load these, might need na
             if (locationObjex[i].locationData.markerType == "none") {
                 continue;
             }
-            console.log("gotsa location object " + locationObjex[i].locationData.name); //+ JSON.stringify(locationObjex[i]));
+ //+ JSON.stringify(locationObjex[i]));
 
             // const modelData = await LoadLocationModel(locationObjex[i].modelData.modelURL, locationObjex[i].locationData);
             const modelData = await LoadModel(locationObjex[i].modelData.modelURL);
@@ -556,6 +556,8 @@ export async function LoadLocationObjex() { // wait to load these, might need na
             let count = 1;
             let sceneObjectID = locationObjex[i].locationData.timestamp + "_" + Date.now();
             model.userData.sceneObjectID = sceneObjectID;
+
+            console.log("gotsa location object " + locationObjex[i].locationData.name + " sceneObjectID" + sceneObjectID);
 
             if (locationObjex[i].locationData.eventData && locationObjex[i].locationData.eventData.includes("scatter")) { //scatter, not instancing, but cloning multiples
                 if (locationObjex[i].locationData.eventData.includes("~")) {
@@ -960,7 +962,7 @@ async function LoadLocationModel (url, locationData, isActive) {
         }
 
         if (locationData.markerType == "gate") {
-            const triggerBody = await getTriggerBody(model, locationData);
+            const triggerBody = getTriggerBody(model, locationData);
             staticBodies.push(triggerBody);
             // model.material.color = "orange";
             console.log("adding gate trigger to model " + locationData.name);
@@ -1137,7 +1139,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             
             
             scene.add(model.model);
-            const triggerBody = await getTriggerBody(model.model, locationData);
+            const triggerBody = getTriggerBody(model.model, locationData);
             staticBodies.push(triggerBody);
             // model.material.color = "orange";
             console.log("adding trigger! " + model);
@@ -1170,7 +1172,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             scene.add(model.model);
             GetAvailableScenesData();
             // model.material.color = "orange";
-            const triggerBody = await getTriggerBody(model.model, locationData);
+            const triggerBody = getTriggerBody(model.model, locationData);
             staticBodies.push(triggerBody);
             // model.material.color = "orange";
             // console.log("adding trigger! " + model);

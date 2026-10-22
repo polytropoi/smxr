@@ -902,10 +902,10 @@ async function RaycastHit(type, hit, event) {
     
     if (hit.instanceId !== undefined) { //if it's an element of an instancedMesh
             
-                console.log("INSTANCE HIT " + hit.instanceId );
+                
                 selectedObjects.length = 0;
         tagData = await TagsToInstances(locationData.timestamp, hit.instanceId);
-
+        console.log("INSTANCE HIT " + hit.instanceId + " tagged " + tagData);
 
         if (locationData.markerType == "synth keys") {
             if (synthKeys) {
@@ -992,8 +992,18 @@ async function RaycastHit(type, hit, event) {
 
         
         if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
-            console.log("that's equipped! " + lastRaycastHitObject.userData.name);
+            console.log("that's equipped! mediaID " + lastRaycastHitObject.userData.locationData.mediaID + " userData " + JSON.stringify(lastRaycastHitObject.userData));
             SynthHit(null, 1, 1);
+            if (lastRaycastHitObject.userData.locationData.mediaID) {
+                if (sceneTextController) {
+                    const textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+                    console.log("text item " + JSON.stringify(textData));
+                
+                    ThreeDeeText(textData,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+                
+                }
+            }
+            
         } else {
 
             if (locationData.locationTags && !locationData.locationTags.includes("no callout") && (locationData.markerType != "video")) {
@@ -1390,7 +1400,7 @@ export function onMouseDown(event) { // on threejs object
                 return;
             }
         } else {
-            console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " locationData " + JSON.stringify(locationData)); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+            console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " locationData " + JSON.stringify(lastRaycastHitObject.userData)); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
         }
     } else {
       
@@ -1596,7 +1606,8 @@ export function onMouseDown(event) { // on threejs object
                
                 if (lastRaycastHitObject.userData.locationData && lastRaycastHitObject.userData.locationData.objectData) { //instanced meshes with object references
                     lastRaycastHitObject.userData.locationData.objectData.sceneObjectID = lastRaycastHitObject.userData.locationData.timestamp;
-                    InstancedActionClick(lastRaycastHit.instanceId, lastRaycastHitObject.userData.locationData.objectData, locationData.timestamp);
+                    
+                    InstancedActionClick(lastRaycastHit.instanceId, lastRaycastHitObject.userData.locationData.objectData, lastRaycastHitObject.userData.locationData.timestamp);
                     
                 } else {
                     let groupData;

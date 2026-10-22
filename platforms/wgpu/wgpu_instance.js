@@ -327,17 +327,14 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             // await new Promise(r => setTimeout(r, 1000));
             const distance = position.distanceTo(center); 
             const skyFactor = settings.sceneSkyRadius * .06;
-            console.log("mesh position " + JSON.stringify(position) + " distance " + distance + " skyFactor " + skyFactor + " surfaceTYpe " + surfaceType +  " yMod " + locData.y);
+            // console.log("mesh position " + JSON.stringify(position) + " distance " + distance + " skyFactor " + skyFactor + " surfaceTYpe " + surfaceType +  " yMod " + locData.y);
            
-
-
-
             if (surfaceType == "primitive") {
                 // locData.y = -1;
 
                 // dummy.position.set(position.x, position.y, position.z);
                 dummy.position.set(position.x, position.z + locData.y, position.y); //fsr the primitive plane returns x,y values with z as zero //bc its 2d! need to test for other geos
-            } else {
+            } else { //i.e. 'buffer'
                 if (position.y < waterLevel)  {
                     position.y = -100;       
                 }
@@ -355,7 +352,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 // const scale = 2;
                 // const iScale = scaleFactor;
                 dummy.scale.set(iScale, iScale, iScale);
-                console.log("scaleFactor " + scaleFactor + " dummys cale is " +iScale);
+                // console.log("scaleFactor " + scaleFactor + " dummys cale is " +iScale);
             }
             dummy.rotation.y = Math.random() * Math.PI * 2;
           

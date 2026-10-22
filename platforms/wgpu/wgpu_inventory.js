@@ -88,14 +88,14 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
                     for (let i = 0; i < userInventory.inventoryItems.length; i++) {
                         if (userInventory.inventoryItems[i].objectID == event.details.objectID) {
                             // inventoryObj = userInventory[i];
-                            EquipObject(objectData);
+                            EquipObject(objectData, {});
                             ShowHideDialogPanel();
                             break;
                             }
                         }
                             
                 } else {
-                    EquipObject(objectData);
+                    EquipObject(objectData, {});
                     if (!event.onLoad) {
                         // ShowHideDialogPanel();
                     }
@@ -124,7 +124,7 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
     }
 }
 
-export async function EquipObject (objectData) { 
+export async function EquipObject (objectData, locData) { 
 
     console.log("tryna equip  " + objectData.name);//  + " : " + JSON.stringify(objectData));  
     
@@ -146,7 +146,7 @@ export async function EquipObject (objectData) {
         equippedModel.traverse(function (child) {
             if (child.isMesh) {
                 child.userData.name = objectData.name;
-                child.userData.locationData = {};
+                child.userData.locationData = locData;
                 child.userData.isEquipped = true;
                 child.userData.objectData = objectData;
                 // child.bindMode = "detached";
@@ -154,7 +154,7 @@ export async function EquipObject (objectData) {
         });
         // const worldPosition = new THREE.Vector3();
         // equippedModel.getWorldPosition(worldPosition);
-        const locationData = {};
+        const locationData = locData;
         locationData.isEquipped = true;
         activeObjex.push(equippedModel);
         const equippedSceneObject = new SceneObject(equippedModel, objectData, locationData, true, viewportPlaceholder, false);
@@ -292,7 +292,7 @@ async function DropInventoryObject (objectData, action, inventoryID) {
             // objexEl.components.mod_objex.addFetchedObject(response.objex[0]); //add to scene object collection, so don't have to fetch again
             if (equip) {
             //   objexEl.components.mod_objex.equipInventoryObject(oID, tags, eventData)
-                EquipObject(response.objex[0]);
+                EquipObject(response.objex[0], {});
             } 
         }
        

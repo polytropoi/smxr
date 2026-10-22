@@ -8,13 +8,16 @@ import { scene } from './wgpu_main.mjs';
 
 import { settings } from '../../../connect/settings.js';
 import { userData, room } from '../../../connect/connect.js';
-import { locationObjex, locations } from './wgpu_locations.js';
+import { locationData, locationObjex, locations } from './wgpu_locations.js';
 import { EquipObject } from './wgpu_inventory.js';
 import { CreateLight } from './wgpu_lights.js';
 
 import { AddDynamicBody, getPlayerBody, kinematicBodies } from './wgpu_physics.js';
 import { uiMode, ShowHTMLPopup, HideHTMLPopup, popup } from './wgpu_ui.js';
+import { triggerAudioController } from './wgpu_media.js';
 // import { equippedRigidbody } from './three_physics.js';
+import { TagsToInstances } from './wgpu_instance.js';
+import { time } from 'three/tsl';
 
 export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
 
@@ -30,7 +33,7 @@ export function ActionSwitch (event) { //input from simple html popups
     const tags = event.target.dataset.tags; //e.g. location tags (or object tags?)
     
     lastEvent = event;
-    console.log(type + " " + data + " " + tags);
+    console.log(type + " " + data + " " + JSON.stringify(tags));
 
     switch (type) {
         case "gate":
@@ -39,7 +42,14 @@ export function ActionSwitch (event) { //input from simple html popups
 
         case "equip":
             // console.log("tryna pickup " + data +" from json "+ JSON.stringify(sceneObject));
-            sceneObjects[data].confirmed("equip");
+            if (sceneObjects[data]) {
+                sceneObjects[data].confirmed("equip");
+            } else {
+                // const sceneObjectsString = JSON.stringify(sceneObjects);
+                console.log("no data " + data + " in sceneObjects " + sceneObjects);
+            }
+            
+
         break;
 
         case "pickup":
@@ -91,7 +101,7 @@ export function TriggerHit (hit1, hit2) {
     if (hit2.includes("gate")) {
        const hitsplit = hit2.split("_")[1]; //handle should be type_locationid (.timestamp)
         console.log("gatehit 2 " + hitsplit + " " + JSON.stringify(locations[hitsplit]));
-                EnterSceneGate(locations[hitsplit].eventData);
+        EnterSceneGate(locations[hitsplit].eventData);
         // const event = {};
         // event.target.dataset.type = "gate";
         // event.target.dataset.data = locations[hitsplit].eventData;
@@ -101,11 +111,12 @@ export function TriggerHit (hit1, hit2) {
 }
 
 export class SceneObject { //things that might have models and actions and fancy params, e.g. characters, magic swords, etc
-    constructor(object, objectData, locationData, isEquipped, objectParent, isNavAgent) {
+    constructor(object, objectData, locData, isEquipped, objectParent, isNavAgent) {
 
         
         this.object = object;
         this.objectData = objectData;
+        this.locData = locData;
         this.sceneObjectID = objectData.sceneObjectID;
         this.sceneInventoryID = objectData.sceneInventoryID;
                 // this.object.userData.sceneObjectInstance = this;
@@ -386,7 +397,7 @@ export class SceneObject { //things that might have models and actions and fancy
             data.userData = userData;
             data.action = this.pickupAction;
             console.log("pickupaction " + JSON.stringify(data));
-    
+            data.userData.locationData = this.locData;
             //   Pickup(data, this.el.id);
             
             this.pickupObject(data, this.object);
@@ -403,6 +414,8 @@ export class SceneObject { //things that might have models and actions and fancy
             data.fromScene = room;
             data.object_item = this.objectData;
             data.userData = userData;
+            data.userData.locationData = this.locData;
+
             
             // console.log("equip action " + JSON.stringify(data));
     
@@ -530,7 +543,8 @@ export class SceneObject { //things that might have models and actions and fancy
             } else {
                 scene.remove(thisObject);
             }
-            this.object = EquipObject(this.objectData);
+            this.object = EquipObject(this.objectData, this.locData);
+            this.isEquipped = true;
         } else {
             console.log("tryna equip from scene : " + data.sceneObjectID);
             //  EquipObject(this.objectData);
@@ -541,7 +555,8 @@ export class SceneObject { //things that might have models and actions and fancy
                 console.log("equipobject removing from scene");
                 scene.remove(thisObject);
             }
-            this.object = EquipObject(this.objectData);
+            this.object = EquipObject(this.objectData, this.locData);
+            this.isEquipped = true;
             // thisObject.parent.remove(thisObject);
         }
 
@@ -639,7 +654,7 @@ export class SceneObject { //things that might have models and actions and fancy
 
 }
 
-export function InstancedActionClick(instanceID, objectData) {//instanced meshes with associated objex assigned in locationdata
+export async function InstancedActionClick(instanceID, objectData, timestamp) {//instanced meshes with associated objex assigned in locationdata
 
     let hasActions = false;
     const actions = lastRaycastHitObject.userData.locationData.objectData.actions;
@@ -663,12 +678,16 @@ export function InstancedActionClick(instanceID, objectData) {//instanced meshes
             }
 
         }
-          
+        
+        let tagData = await TagsToInstances(timestamp, instanceID);
+        let tag = Object.keys(tagData);
+        // ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
+        console.log("cliecked instance tags " + tag + " timestamp " + timestamp + " instanceID " + instanceID);
         cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
         if (hasPickupAction) {
             
             hasActions = true;
-            pickupButton = "<button id=\x22popup_yesButton\x22 data-tags=\x22\x22 data-type=\x22pickup\x22 data-data=\x22"+
+            pickupButton = "<button id=\x22popup_yesButton\x22 data-tags=\x22"+tag+"\x22 data-type=\x22pickup\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22collectButton\x22>Collect</button>";
             // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
             
@@ -676,14 +695,14 @@ export function InstancedActionClick(instanceID, objectData) {//instanced meshes
         if (hasEquipAction) {
             
             hasActions = true;
-            equipButton = "<button id=\x22popup_yesButton1\x22 data-tags=\x22\x22 data-type=\x22equip\x22 data-data=\x22"+
+            equipButton = "<button id=\x22popup_yesButton1\x22 data-tags=\x22"+tag+"\x22 data-type=\x22equip\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22equipButton\x22>Equip</button>";
             // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22class=\x22hicCancelButton\x22>Cancel</button>";
             
         }
         if (hasConsumeAction || objectData.objtype == "Consumable") {
             
-            consumeButton = "<button id=\x22popup_yesButton2\x22 data-tags=\x22\x22 data-type=\x22consume\x22 data-data=\x22"+
+            consumeButton = "<button id=\x22popup_yesButton2\x22 data-tags=\x22"+tag+"\x22 data-type=\x22consume\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22consumeButton\x22>Consume</button>";
             hasActions = true;
             // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
@@ -780,5 +799,10 @@ function EnterSceneGate (eventData) {
             
         }
         }
+    }
+
+   if (triggerAudioController) {
+            // console.log("hit with locationTags " + lastRaycastHitObject.userData.locationData.locationTags);
+            triggerAudioController.playTriggerAudioWithTags("open");
     }
 }

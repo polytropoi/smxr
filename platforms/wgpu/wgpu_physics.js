@@ -238,7 +238,7 @@ function WaitAndInit () {
     
         // const mesh = player;
         console.log("tryna set trigger body for "+ locationData.name);
-        await new Promise(r => setTimeout(r, 1000));
+        // await new Promise(r => setTimeout(r, 1000));
         const colliderSize = locationData.xscale;
         // let rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicVelocityBased() //no, position based...
         let rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
