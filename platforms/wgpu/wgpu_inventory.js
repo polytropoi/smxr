@@ -126,7 +126,7 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
 
 export async function EquipObject (objectData, locData) { 
 
-    console.log("tryna equip  " + objectData.name);//  + " : " + JSON.stringify(objectData));  
+    console.log("tryna equip  " + objectData.name + " instanceID " + objectData.instanceID);//  + " : " + JSON.stringify(objectData));  
     
     // let objectData = ReturnObjectData(objectID);
     if (objectData) {        

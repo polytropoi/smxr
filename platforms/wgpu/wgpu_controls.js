@@ -35,7 +35,7 @@ import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 // control.attach(objectToTransform);
 
 import * as nipplejs from '../../../main/js/nipple.mjs';
-import { TagsToInstances } from './wgpu_instance.js';
+import { ReturnTagForInstance } from './wgpu_instance.js';
 import { GoToNext, localData } from '../../connect/connect.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
 import { SynthHit, synthKeys, synthTransports } from './wgpu_synths.js';
@@ -904,7 +904,7 @@ async function RaycastHit(type, hit, event) {
             
                 
                 selectedObjects.length = 0;
-        tagData = await TagsToInstances(locationData.timestamp, hit.instanceId);
+        tagData = await ReturnTagForInstance(locationData.timestamp, hit.instanceId);
         console.log("INSTANCE HIT " + hit.instanceId + " tagged " + tagData);
 
         if (locationData.markerType == "synth keys") {
@@ -992,18 +992,23 @@ async function RaycastHit(type, hit, event) {
 
         
         if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
-            console.log("that's equipped! mediaID " + lastRaycastHitObject.userData.locationData.mediaID + " userData " + JSON.stringify(lastRaycastHitObject.userData));
+            console.log("that's equipped! mediaID " + lastRaycastHitObject.userData.locationData.mediaID + " instanceID " + lastRaycastHitObject.userData.objectData.instanceID);
             SynthHit(null, 1, 1);
-            if (lastRaycastHitObject.userData.locationData.mediaID) {
-                if (sceneTextController) {
-                    const textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
-                    console.log("text item " + JSON.stringify(textData));
+            // if (lastRaycastHitObject.userData.locationData.mediaID) {
+            //     if (sceneTextController) {
+            //         const textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
+            //         console.log("text item " + JSON.stringify(textData));
+                    
+            //         ThreeDeeText(textData,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                 
-                    ThreeDeeText(textData,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-                
-                }
+            //     }
+            // }
+            if (lastRaycastHitObject.userData.instanceID) {
+                let tagData = await ReturnTagForInstance(lastRaycastHitObject.userData.locationData.timestamp, lastRaycastHitObject.userData.instanceID);
+                let tag = Object.keys(tagData);     
+                console.log("equipped instance tag " + tag);
             }
-            
+       
         } else {
 
             if (locationData.locationTags && !locationData.locationTags.includes("no callout") && (locationData.markerType != "video")) {

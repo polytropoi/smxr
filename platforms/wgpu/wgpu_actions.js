@@ -16,7 +16,7 @@ import { AddDynamicBody, getPlayerBody, kinematicBodies } from './wgpu_physics.j
 import { uiMode, ShowHTMLPopup, HideHTMLPopup, popup } from './wgpu_ui.js';
 import { triggerAudioController } from './wgpu_media.js';
 // import { equippedRigidbody } from './three_physics.js';
-import { TagsToInstances } from './wgpu_instance.js';
+import { ReturnTagForInstance } from './wgpu_instance.js';
 import { time } from 'three/tsl';
 
 export const sceneObjects = {}; //kv pairs, k = instanceID (location timestamp + index), v = sceneObject instance
@@ -31,9 +31,11 @@ export function ActionSwitch (event) { //input from simple html popups
     const type = event.target.dataset.type; //e.g. markerType
     const data = event.target.dataset.data; //e.g. eventData
     const tags = event.target.dataset.tags; //e.g. location tags (or object tags?)
+    const instanceID = event.target.dataset.instance; //if it was an element of instanced mesh
+
     
     lastEvent = event;
-    console.log(type + " " + data + " " + JSON.stringify(tags));
+    console.log(type + " " + data + " " + JSON.stringify(tags) + " " + instanceID);
 
     switch (type) {
         case "gate":
@@ -43,6 +45,7 @@ export function ActionSwitch (event) { //input from simple html popups
         case "equip":
             // console.log("tryna pickup " + data +" from json "+ JSON.stringify(sceneObject));
             if (sceneObjects[data]) {
+                sceneObjects[data].objectData.instanceID = instanceID;
                 sceneObjects[data].confirmed("equip");
             } else {
                 // const sceneObjectsString = JSON.stringify(sceneObjects);
@@ -110,7 +113,7 @@ export function TriggerHit (hit1, hit2) {
     }
 }
 
-export class SceneObject { //things that might have models and actions and fancy params, e.g. characters, magic swords, etc
+export class SceneObject { //things with Actions and fancy params, e.g. characters, magic swords, etc
     constructor(object, objectData, locData, isEquipped, objectParent, isNavAgent) {
 
         
@@ -121,12 +124,14 @@ export class SceneObject { //things that might have models and actions and fancy
         this.sceneInventoryID = objectData.sceneInventoryID;
                 // this.object.userData.sceneObjectInstance = this;
         // this.object.userData.sceneObjectIndex = sceneObjectIndex;
-        // console.log("new sceneObject " + this.objectData.sceneObjectID);
+        console.log("new sceneObject " + this.objectData.sceneObjectID + " instanceID " + this.objectData.instanceID );
 
         this.isEquipped = isEquipped;
         this.fromSceneInventory = objectData.fromSceneInventory;
 
         this.isNavAgent = isNavAgent;
+
+        // this.instanceID = objectData.instanceID;
 
         if (isEquipped) {
             
@@ -150,80 +155,78 @@ export class SceneObject { //things that might have models and actions and fancy
             CreateLight(locationData, object);
         }
 
+        this.object.userData.instanceID = this.objectData.instanceID;
+
         if (this.objectData.actions != undefined && this.objectData.actions.length > 0) {
-      
-        this.actions = {};
         
-        for (let a = 0; a < this.objectData.actions.length; a++) {
+            this.actions = {};
             
-            if (this.objectData.actions[a].objectID && this.objectData.actions[a].objectID.length > 8 ) {
-                // FetchSceneInventoryObject(this.objectData.actions[a].objectID); //different object connected to this action, should check if this is already fetched
-            }
-                // console.log("action: " + JSON.stringify(this.objectData.actions[a].actionType));
-            if (this.objectData.actions[a].actionType.toLowerCase() == "onload") {
-                // this.hasSelectAction = true;
-                this.loadAction = this.objectData.actions[a];
-                console.log(this.objectData.name + " object has loadAction! ")// + JSON.stringify(this.objectData) + " isEquipped " + isEquipped + " "  + JSON.stringify(this.loadAction));
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "select") {
-                this.hasSelectAction = true;
-                this.selectAction = this.objectData.actions[a];
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "highlight") {
-                this.hasHighlightAction = true;
-                this.highlightAction = this.objectData.actions[a];
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "collide") {
-                this.hasCollideAction = true;
-                this.collideAction = this.objectData.actions[a];
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "kill") { 
-                this.hasKillAction = true;
-                this.killAction = this.objectData.actions[a];
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "pickup") {
-                this.hasPickupAction = true;
-                this.pickupAction = this.objectData.actions[a];
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "drop") {
-                this.hasDropAction = true;
-                this.dropAction = this.objectData.actions[a];
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "throw") {
-                this.hasThrowAction = true;
-                this.throwAction = this.objectData.actions[a];
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "trigger") {
-                this.hasTriggerAction = true;
-                // this.throwAction = this.objectData.actions[a];
-                // this.el.setAttribute("equipped_object_control", {init: true});
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "shoot") {
-                this.hasShootAction = true;
-                this.shootAction = this.objectData.actions[a];
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "equip") {
-                this.hasEquipAction = true;
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "consume") {
-                this.hasConsumeAction = true;
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "return") {
-                // this.hasDropAction = true;
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "use") {
-                // this.hasDropAction = true;
-            }
-            if (this.objectData.actions[a].actionType.toLowerCase() == "find") {
-                // this.hasDropAction = true;
-                this.findAction = this.objectData.actions[a];
+            for (let a = 0; a < this.objectData.actions.length; a++) {
+                
+                if (this.objectData.actions[a].objectID && this.objectData.actions[a].objectID.length > 8 ) {
+                    // FetchSceneInventoryObject(this.objectData.actions[a].objectID); //different object connected to this action, should check if this is already fetched
+                }
+                    // console.log("action: " + JSON.stringify(this.objectData.actions[a].actionType));
+                if (this.objectData.actions[a].actionType.toLowerCase() == "onload") {
+                    // this.hasSelectAction = true;
+                    this.loadAction = this.objectData.actions[a];
+                    console.log(this.objectData.name + " object has loadAction! ")// + JSON.stringify(this.objectData) + " isEquipped " + isEquipped + " "  + JSON.stringify(this.loadAction));
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "select") {
+                    this.hasSelectAction = true;
+                    this.selectAction = this.objectData.actions[a];
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "highlight") {
+                    this.hasHighlightAction = true;
+                    this.highlightAction = this.objectData.actions[a];
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "collide") {
+                    this.hasCollideAction = true;
+                    this.collideAction = this.objectData.actions[a];
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "kill") { 
+                    this.hasKillAction = true;
+                    this.killAction = this.objectData.actions[a];
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "pickup") {
+                    this.hasPickupAction = true;
+                    this.pickupAction = this.objectData.actions[a];
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "drop") {
+                    this.hasDropAction = true;
+                    this.dropAction = this.objectData.actions[a];
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "throw") {
+                    this.hasThrowAction = true;
+                    this.throwAction = this.objectData.actions[a];
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "trigger") {
+                    this.hasTriggerAction = true;
+                    // this.throwAction = this.objectData.actions[a];
+                    // this.el.setAttribute("equipped_object_control", {init: true});
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "shoot") {
+                    this.hasShootAction = true;
+                    this.shootAction = this.objectData.actions[a];
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "equip") {
+                    this.hasEquipAction = true;
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "consume") {
+                    this.hasConsumeAction = true;
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "return") {
+                    // this.hasDropAction = true;
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "use") {
+                    // this.hasDropAction = true;
+                }
+                if (this.objectData.actions[a].actionType.toLowerCase() == "find") {
+                    // this.hasDropAction = true;
+                    this.findAction = this.objectData.actions[a];
+                }
             }
         }
-
-
-        // sceneObjectInstanceIndex++;
-        // return sceneObjectInstanceIndex;
-    }
 }
     async setEquippedRigidbody () {
         const worldPosition = new THREE.Vector3();
@@ -236,6 +239,7 @@ export class SceneObject { //things that might have models and actions and fancy
         // SetEquippedRigidbody(rbody);
     }
     dequip () {
+        this.object.userData.isEquipped = false;
         this.isEquipped = false;
         
     }
@@ -417,7 +421,7 @@ export class SceneObject { //things that might have models and actions and fancy
             data.userData.locationData = this.locData;
 
             
-            // console.log("equip action " + JSON.stringify(data));
+            console.log("equip action instanceID " + this.objectData.instanceID);
     
             //   Pickup(data, this.el.id);
             
@@ -536,7 +540,7 @@ export class SceneObject { //things that might have models and actions and fancy
         // EquipInventoryCheck(data.objectID);
         if (data.fromSceneInventory) {
             // console.log("tryna equip from sceneinventory : " +JSON.stringify(data);
-            console.log("tryna equip from sceneinventory : " + data.sceneInventoryID);
+            console.log("tryna equip from sceneinventory : " + data.sceneInventoryID + " instanceID " + this.objectData.instanceID);
             
             if (thisObject.parent) {
                 thisObject.parent.remove(thisObject);
@@ -546,7 +550,7 @@ export class SceneObject { //things that might have models and actions and fancy
             this.object = EquipObject(this.objectData, this.locData);
             this.isEquipped = true;
         } else {
-            console.log("tryna equip from scene : " + data.sceneObjectID);
+            console.log("tryna equip from scene : " + data.sceneObjectID + " instanceID " + this.objectData.instanceID);
             //  EquipObject(this.objectData);
              if (thisObject.parent) {
                 console.log("equipobject removing from parent");
@@ -679,15 +683,18 @@ export async function InstancedActionClick(instanceID, objectData, timestamp) {/
 
         }
         
-        let tagData = await TagsToInstances(timestamp, instanceID);
-        let tag = Object.keys(tagData);
+        let tag;
+        const tagData = await ReturnTagForInstance(timestamp, instanceID);
+        if (tagData) {
+            tag = Object.keys(tagData);
+        }
         // ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
         console.log("cliecked instance tags " + tag + " timestamp " + timestamp + " instanceID " + instanceID);
         cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
         if (hasPickupAction) {
             
             hasActions = true;
-            pickupButton = "<button id=\x22popup_yesButton\x22 data-tags=\x22"+tag+"\x22 data-type=\x22pickup\x22 data-data=\x22"+
+            pickupButton = "<button id=\x22popup_yesButton\x22 data-instance=\x22"+instanceID+"\x22 data-tags=\x22"+tag+"\x22 data-type=\x22pickup\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22collectButton\x22>Collect</button>";
             // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
             
@@ -695,14 +702,14 @@ export async function InstancedActionClick(instanceID, objectData, timestamp) {/
         if (hasEquipAction) {
             
             hasActions = true;
-            equipButton = "<button id=\x22popup_yesButton1\x22 data-tags=\x22"+tag+"\x22 data-type=\x22equip\x22 data-data=\x22"+
+            equipButton = "<button id=\x22popup_yesButton1\x22 data-instance=\x22"+instanceID+"\x22 data-tags=\x22"+tag+"\x22 data-type=\x22equip\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22equipButton\x22>Equip</button>";
             // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22class=\x22hicCancelButton\x22>Cancel</button>";
             
         }
         if (hasConsumeAction || objectData.objtype == "Consumable") {
             
-            consumeButton = "<button id=\x22popup_yesButton2\x22 data-tags=\x22"+tag+"\x22 data-type=\x22consume\x22 data-data=\x22"+
+            consumeButton = "<button id=\x22popup_yesButton2\x22 data-instance=\x22"+instanceID+"\x22 data-tags=\x22"+tag+"\x22 data-type=\x22consume\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22consumeButton\x22>Consume</button>";
             hasActions = true;
             // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";

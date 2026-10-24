@@ -9,7 +9,7 @@ import { videoEl } from '../../../connect/connect.js';
 import { eventEl } from '../../../connect/events.js';
 import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData, createYouTubePlayer} from "../../../connect/media.js";
 import { lookAtCameraObjects } from './wgpu_ui.js';
-import { TagsToInstances } from './wgpu_instance.js';
+import { ReturnTagForInstance } from './wgpu_instance.js';
 
 import { animatedColor } from './wgpu_environment.js';
 import { texture, color, float, uv, equirectUV, positionLocal, vec3, vec2, sin, mul, add, time, mx_noise_float } from 'three/tsl';

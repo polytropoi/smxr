@@ -155,7 +155,8 @@ export async function InitInstanceModels () {
     } 
 }
     
-export async function TagsToInstances (locID, instanceID) {
+export async function ReturnTagForInstance (locID, instanceID) { //instances can be tagged via mediaID assigned in locationdata
+    
     if (taggedInstances) { //populated when instances are created (e.g. InstanceOnSurface() below), if there's an attached mediaID
         const instanceData = taggedInstances[locID];
 
