@@ -124,7 +124,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
         this.sceneInventoryID = objectData.sceneInventoryID;
                 // this.object.userData.sceneObjectInstance = this;
         // this.object.userData.sceneObjectIndex = sceneObjectIndex;
-        console.log("new sceneObject " + this.objectData.sceneObjectID + " instanceID " + this.objectData.instanceID );
+        console.log("new sceneObject " + this.objectData.sceneObjectID + " mediaID " + this.locData.mediaID + " instanceID " + this.objectData.instanceID + " isEquipped " + isEquipped );
 
         this.isEquipped = isEquipped;
         this.fromSceneInventory = objectData.fromSceneInventory;
@@ -155,8 +155,14 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             CreateLight(locationData, object);
         }
 
-        this.object.userData.instanceID = this.objectData.instanceID;
+            // this.tags = "";
+            // if (this.objectData.instanceID && this.locData.mediaID) {
+            //     this.tags = ReturnTagForInstance(this.locData.timestamp, this.objectData.instanceID);
+            //     console.log("new sceneobject with tags " + this.tags);
+            // }
+        // this.object.userData.instanceID = this.objectData.instanceID;
 
+        
         if (this.objectData.actions != undefined && this.objectData.actions.length > 0) {
         
             this.actions = {};
@@ -241,6 +247,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
     dequip () {
         this.object.userData.isEquipped = false;
         this.isEquipped = false;
+        
         
     }
     onOver () {
@@ -385,7 +392,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
         
     }
 
-    confirmed (type) {
+    confirmed (type, instance, tags) {
         if (type == "pickup" && this.hasPickupAction) {
             console.log(JSON.stringify(this.pickupAction));
             let data = {};
@@ -419,7 +426,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             data.object_item = this.objectData;
             data.userData = userData;
             data.userData.locationData = this.locData;
-
+            data.userData.instanceID = this.objectData.instanceID;
             
             console.log("equip action instanceID " + this.objectData.instanceID);
     
@@ -560,8 +567,14 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
                 scene.remove(thisObject);
             }
             this.object = EquipObject(this.objectData, this.locData);
+            // this.object.userData.instanceID
             this.isEquipped = true;
+            
             // thisObject.parent.remove(thisObject);
+        }
+        if (this.objectData.instanceID) {
+            this.object.userData = {};
+            this.object.userData.instanceID = this.objectData.instanceID;
         }
 
     }

@@ -992,8 +992,22 @@ async function RaycastHit(type, hit, event) {
 
         
         if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
-            console.log("that's equipped! mediaID " + lastRaycastHitObject.userData.locationData.mediaID + " instanceID " + lastRaycastHitObject.userData.objectData.instanceID);
+            console.log("that's equipped! mediaID " + lastRaycastHitObject.userData.locationData.mediaID + " instanceID " + lastRaycastHitObject.userData.instanceID); //lastRaycastHitObject.userData.objectData.instanceID + " or " + lastRaycastHitObject.userData.instanceID);
             SynthHit(null, 1, 1);
+
+            const sceneObj = sceneObjects[objectData.sceneObjectID];
+           
+            if (sceneObj) {
+                 console.log("equipped " + sceneObj.objectData.name + " timestamp and instanceID " + sceneObj.locData.timestamp + " " + sceneObj.objectData.instanceID);
+                let tagData = await ReturnTagForInstance(sceneObj.locData.timestamp, sceneObj.objectData.instanceID);
+                if (tagData) {
+                    let tag = Object.keys(tagData);     
+                    console.log("equipped instance tag " + tag);
+                }
+            
+            } else {
+                console.log("sceneobj not found on equipped obj!");
+            }
             // if (lastRaycastHitObject.userData.locationData.mediaID) {
             //     if (sceneTextController) {
             //         const textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
@@ -1003,11 +1017,11 @@ async function RaycastHit(type, hit, event) {
                 
             //     }
             // }
-            if (lastRaycastHitObject.userData.instanceID) {
-                let tagData = await ReturnTagForInstance(lastRaycastHitObject.userData.locationData.timestamp, lastRaycastHitObject.userData.instanceID);
-                let tag = Object.keys(tagData);     
-                console.log("equipped instance tag " + tag);
-            }
+            // if (lastRaycastHitObject.userData.instanceID) {
+            //     let tagData = await ReturnTagForInstance(lastRaycastHitObject.userData.locationData.timestamp, lastRaycastHitObject.userData.instanceID);
+            //     let tag = Object.keys(tagData);     
+            //     console.log("equipped instance tag " + tag + "from lastRaycastHitObject.userData.locationData.timestamp + lastRaycastHitObject.userData.instanceID " + lastRaycastHitObject.userData.locationData.timestamp + " " + lastRaycastHitObject.userData.instanceID);
+            // }
        
         } else {
 

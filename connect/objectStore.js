@@ -23,18 +23,19 @@ const s3 = new S3Client({
         secretAccessKey: process.env.AWSSECRET
     }
 });
-import * as minio from 'minio'
+// import * as minio from 'minio'
+
 var minioClient = null;
-if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
+// if (process.env.MINIOKEY && process.env.MINIOKEY != "" && process.env.MINIOENDPOINT && process.env.MINIOENDPOINT != "") {
    
-        minioClient = new minio.Client({
-        endPoint: process.env.MINIOENDPOINT,
-        port: 9000,
-        useSSL: false,
-        accessKey: process.env.MINIOKEY,
-        secretKey: process.env.MINIOSECRET
-    });
-}
+//         minioClient = new minio.Client({
+//         endPoint: process.env.MINIOENDPOINT,
+//         port: 9000,
+//         useSSL: false,
+//         accessKey: process.env.MINIOKEY,
+//         secretKey: process.env.MINIOSECRET
+//     });
+// }
 
 ///////////////////////// OBJECT STORE (S3, Minio, etc) OPS BELOW - TODO - fix minio, garage maybe?
 export async function ReturnPresignedUrl(bucket, key, time) {

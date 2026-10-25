@@ -61,10 +61,32 @@ eventEl.addEventListener('drop-inventory-object-event', DropInventoryCheck);
 
 
 function Dequip (event) {
-    if (event.details.dequip == "all") {
+    // if (event.details.dequip == "all") {
+
         viewportPlaceholder.clear();
-    }
+        removeAndDisposeChildren(viewportPlaceholder);
+       
+    // }
 }
+
+function removeAndDisposeChildren(object) {
+    object.traverse((child) => {
+        if (child.isMesh) {
+            if (child.geometry) child.geometry.dispose();
+            
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.dispose());
+                } else {
+                    child.material.dispose();
+                }
+            }
+        }
+    });
+    
+    // object.removeFromParent();
+}
+
 
 
 export function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js - TODO flex if from scene or scene inventory -- no, this only for userinventory
@@ -134,10 +156,14 @@ export async function EquipObject (objectData, locData) {
         objectData.sceneObjectID = Date.now(); 
         console.log("tryna equip object " + objectData.modelURL);  
 
+        viewportPlaceholder.clear();
+        removeAndDisposeChildren(viewportPlaceholder);
+
+        // dequip
         const equippedModelData = await LoadModel(objectData.modelURL);
         const equippedModel = equippedModelData.scene;
         // scene.add(equippedModel);
-        viewportPlaceholder.clear();
+
         viewportPlaceholder.add(equippedModel);
 
         if (objectData.objScale) {
@@ -149,20 +175,24 @@ export async function EquipObject (objectData, locData) {
                 child.userData.locationData = locData;
                 child.userData.isEquipped = true;
                 child.userData.objectData = objectData;
+                child.userData.instanceID = objectData.instanceID;
                 // child.bindMode = "detached";
             }
         });
+
+        // equippedModel.userData.instanceID = objectData.instanceID;
         // const worldPosition = new THREE.Vector3();
         // equippedModel.getWorldPosition(worldPosition);
         const locationData = locData;
         locationData.isEquipped = true;
+        locationData.instanceID = objectData.instanceID;
         activeObjex.push(equippedModel);
         const equippedSceneObject = new SceneObject(equippedModel, objectData, locationData, true, viewportPlaceholder, false);
         sceneObjects[objectData.sceneObjectID.toString()] = equippedSceneObject;
 
     
         // const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name, "tags": tags, "eventData": eventData}; //saved to profile.equipment.main
-        const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name }; //saved to profile.equipment.main    
+        const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name, "instanceID": objectData.instanceID }; //saved to profile.equipment.main    
         UpdateLocalEquipment(updoc);
 
         return equippedSceneObject;

@@ -516,7 +516,7 @@ export function InitIDB() {
  
                   if (pcursor.value.equipment && pcursor.value.equipment.main) {
                      if (pcursor.value.equipment.main.equipped) {
-                        console.log("player is equipped!");
+                        console.log("player is equipped! " + JSON.stringify(pcursor.value.equipment.main));
                         
                         const modObjexEl = document.getElementById("sceneObjects"); //aframe
                         if (modObjexEl) {
@@ -734,7 +734,7 @@ export function InitIDB() {
          }
       };
       request.onsuccess = function () {
-         // console.log("updating local player equipment " + JSON.stringify(equipment));
+         console.log("updating local player equipment " + JSON.stringify(equipment));
          let profile = {};
                //   profile.userID = userData.userID; //with tilde = the local version
          // profile = userData;      
