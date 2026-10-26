@@ -155,7 +155,8 @@ export async function InitInstanceModels () {
     } 
 }
     
-export async function ReturnTagForInstance (locID, instanceID) { //instances can be tagged via mediaID assigned in locationdata
+export async function ReturnTagForInstance (locID, instanceID) { //instances can be tagged via mediaID assigned in locationdata; this function is for mouseover callouts, BEFORE they've been clicked / equipped, and turned into proper sceneObjects
+    console.log("ReturnTagForInstance " + locID + " " + instanceID);
     
     if (taggedInstances) { //populated when instances are created (e.g. InstanceOnSurface() below), if there's an attached mediaID
         const instanceData = taggedInstances[locID];

@@ -7,13 +7,13 @@ import { UpdateLocalPlayerState, UpdateLocalEquipment } from "../../../connect/i
 
 import { eventEl } from '../../../connect/events.js';
 
-import { ReturnObjectData, SceneObject, lastEvent, sceneObjects} from './wgpu_actions.js';
+import { ReturnObjectData, SceneObject, equippedRigidbody, lastEvent, sceneObjects} from './wgpu_actions.js';
 
 import { viewportPlaceholder } from './wgpu_controls.js';
 
 import { ShowHTMLPopup, HideHTMLPopup, popup } from './wgpu_ui.js';
 
-import { AddDynamicBody, SetEquippedRigidbody } from './wgpu_physics.js';
+import { AddDynamicBody, RemoveRigidbody, SetEquippedRigidbody } from './wgpu_physics.js';
 
 import { sceneIsReady } from './wgpu_main.mjs';
 // import { room } from './three_main.mjs';
@@ -21,12 +21,16 @@ import { sceneIsReady } from './wgpu_main.mjs';
 import { activeObjex, LoadAndDropSingleObject, LoadModel, locationObjex } from './wgpu_locations.js';
 
 import { userData, room } from '../../../connect/connect.js';
+
+import { ReturnTagForInstance } from './wgpu_instance.js';
 // import {  } from '../../connect/dialogs.js';
 // import { GetUserInventory } from '../../connect/dialogs.js';
 
 export let equippedObjectOnLoad = "";
 
 export let sceneInventory = [];
+
+export let equippedInstanceTags; //
 
 export async function LoadSceneInventory () { //  user inventory loaded in dialogs.js
 
@@ -65,6 +69,10 @@ function Dequip (event) {
 
         viewportPlaceholder.clear();
         removeAndDisposeChildren(viewportPlaceholder);
+        if (equippedRigidbody) {
+            RemoveRigidbody(equippedRigidbody);
+        }
+        
        
     // }
 }
@@ -96,9 +104,15 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
         equippedObjectOnLoad = event.details.objectID; //need to wait for all the objex to load before tryna equip
     } 
     const objectData = ReturnObjectData(event.details.objectID);
-    console.log("equip event for objectID " + event.details.objectID + " " +  JSON.stringify(objectData));
+    const iTags =  event.details.instanceTags;
+    console.log("equip event for objectID " + event.details.objectID + " with instanceTags " + JSON.stringify(iTags));
 
     if (objectData) {
+
+        if (iTags) {
+            objectData.instanceTags = iTags;
+
+        }
         if (objectData.actions != undefined && objectData.actions.length > 0) {
             for (let i = 0; i < objectData.actions.length; i++) {
                 if (objectData.actions[i].actionType.toLowerCase().includes("equip")) { // fromSceneInventory, fromUserInventory?
@@ -148,16 +162,27 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
 
 export async function EquipObject (objectData, locData) { 
 
-    console.log("tryna equip  " + objectData.name + " instanceID " + objectData.instanceID);//  + " : " + JSON.stringify(objectData));  
+    console.log("tryna equip  " + objectData.name + " sceneObjectID " + objectData.sceneObjectID + " instanceID " + objectData.instanceID);//  + " : " + JSON.stringify(objectData));  
     
     // let objectData = ReturnObjectData(objectID);
+    Dequip();
+    
+    await new Promise(r => setTimeout(r, 0));
+    
     if (objectData) {        
         // objectData.isEquipped = true;
-        objectData.sceneObjectID = Date.now(); 
-        console.log("tryna equip object " + objectData.modelURL);  
+        if (objectData.instanceID) {
+            // objectData.sceneObjectID = Date.now(); 
+            objectData.sceneObjectID = objectData.sceneObjectID + "_" + objectData.instanceID;
 
-        viewportPlaceholder.clear();
-        removeAndDisposeChildren(viewportPlaceholder);
+        } else {
+
+        }
+        
+        // console.log("tryna equip object " + objectData.modelURL);  
+
+        // viewportPlaceholder.clear();
+        // removeAndDisposeChildren(viewportPlaceholder);
 
         // dequip
         const equippedModelData = await LoadModel(objectData.modelURL);
@@ -165,6 +190,19 @@ export async function EquipObject (objectData, locData) {
         // scene.add(equippedModel);
 
         viewportPlaceholder.add(equippedModel);
+
+
+
+        // let tags = "";
+        let tagData = await ReturnTagForInstance(locData.timestamp, objectData.instanceID);
+       
+        if (tagData) {
+            // tags = Object.keys(tagData);     
+            console.log("equipped instanceTags " + JSON.stringify(tagData));
+             objectData.instanceTags = tagData;
+        } else {
+            console.log("no tags found for equipped obj")
+        }
 
         if (objectData.objScale) {
             equippedModel.scale.setScalar(objectData.objScale);
@@ -175,7 +213,8 @@ export async function EquipObject (objectData, locData) {
                 child.userData.locationData = locData;
                 child.userData.isEquipped = true;
                 child.userData.objectData = objectData;
-                child.userData.instanceID = objectData.instanceID;
+                // child.userData.instanceID = objectData.instanceID;
+                // child.userData.instanceTags = tags;
                 // child.bindMode = "detached";
             }
         });
@@ -185,14 +224,22 @@ export async function EquipObject (objectData, locData) {
         // equippedModel.getWorldPosition(worldPosition);
         const locationData = locData;
         locationData.isEquipped = true;
-        locationData.instanceID = objectData.instanceID;
+        // locationData.instanceID = objectData.instanceID; //don't really need this, just the tags, but...
+        // objectData.instanceTags = tagData;
+        
         activeObjex.push(equippedModel);
         const equippedSceneObject = new SceneObject(equippedModel, objectData, locationData, true, viewportPlaceholder, false);
-        sceneObjects[objectData.sceneObjectID.toString()] = equippedSceneObject;
+        // if (objectData.instanceID) {
+        console.log("new sceneObject " + objectData.sceneObjectID);
+            sceneObjects[objectData.sceneObjectID] = equippedSceneObject;
+        // } else {
+            // sceneObjects[objectData.sceneObjectID.toString()] = equippedSceneObject;
+        // }
+        
 
     
         // const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name, "tags": tags, "eventData": eventData}; //saved to profile.equipment.main
-        const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name, "instanceID": objectData.instanceID }; //saved to profile.equipment.main    
+        const updoc = {"equipped": true, "objectID": objectData._id, "objectName": objectData.name, "instanceID": objectData.instanceID, "instanceTags": objectData.instanceTags  }; //saved to profile.equipment.main    
         UpdateLocalEquipment(updoc);
 
         return equippedSceneObject;

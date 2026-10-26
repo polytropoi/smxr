@@ -519,7 +519,7 @@ export function InitIDB() {
                         console.log("player is equipped! " + JSON.stringify(pcursor.value.equipment.main));
                         
                         const modObjexEl = document.getElementById("sceneObjects"); //aframe
-                        if (modObjexEl) {
+                        if (modObjexEl) { 
                            if (modObjexEl.components.mod_objex) {
                               modObjexEl.components.mod_objex.equipInventoryObject(pcursor.value.equipment.main.objectID, pcursor.value.equipment.main.tags, pcursor.value.equipment.main.eventData);
                               const playerHudEl = document.getElementById("player_hud");
@@ -532,10 +532,11 @@ export function InitIDB() {
                                  //    pcursor.value.equipment.main.objectName + " tagged " + pcursor.value.equipment.main.tags);
                               }
                            }
-                        } else {
-                           console.log("cain't find mod_objex");
+                        } else { //e.g. three
+                           console.log("sending equip event");
                            const eventDetails = {};
                               eventDetails.objectID = pcursor.value.equipment.main.objectID;
+                              eventDetails.instanceTags = pcursor.value.equipment.main.instanceTags;
                               equip_inventory_object_event.details = eventDetails;
                               eventEl.dispatchEvent(equip_inventory_object_event);
 

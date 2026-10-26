@@ -992,18 +992,30 @@ async function RaycastHit(type, hit, event) {
 
         
         if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
-            console.log("that's equipped! mediaID " + lastRaycastHitObject.userData.locationData.mediaID + " instanceID " + lastRaycastHitObject.userData.instanceID); //lastRaycastHitObject.userData.objectData.instanceID + " or " + lastRaycastHitObject.userData.instanceID);
+            console.log("that's equipped! " +objectData.sceneObjectID + " mediaID " + lastRaycastHitObject.userData.locationData.mediaID + " instanceID " + lastRaycastHitObject.userData.instanceID); //lastRaycastHitObject.userData.objectData.instanceID + " or " + lastRaycastHitObject.userData.instanceID);
             SynthHit(null, 1, 1);
 
             const sceneObj = sceneObjects[objectData.sceneObjectID];
            
             if (sceneObj) {
                  console.log("equipped " + sceneObj.objectData.name + " timestamp and instanceID " + sceneObj.locData.timestamp + " " + sceneObj.objectData.instanceID);
-                let tagData = await ReturnTagForInstance(sceneObj.locData.timestamp, sceneObj.objectData.instanceID);
-                if (tagData) {
-                    let tag = Object.keys(tagData);     
-                    console.log("equipped instance tag " + tag);
+                // let tagData = await ReturnTagForInstance(sceneObj.locData.timestamp, sceneObj.objectData.instanceID);
+                // if (tagData) {
+                //     let tag = Object.keys(tagData);     
+                //     console.log("equipped instance tag " + tag);
+                // }
+                if (sceneObj.objectData.instanceTags) { //it's an instance with metadata
+                    console.log("equipped tag data!! " + JSON.stringify(sceneObj.objectData.instanceTags) );
+                    const instancedCalloutTag = Object.keys(sceneObj.objectData.instanceTags).toString();//the key should be unique, a name or ID, with nested key/vals as the value 
+                    // if (locationData.locationTags && !locationData.locationTags.includes("no callout")) {
+                        //  ThreeDeeText(instancedCalloutTag,1,lastRaycastHitObject.parent, lastRaycastHitPosition, .1, null, 1);
+                         ThreeDeeText(instancedCalloutTag,.25,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, 0);
+                        
+                    // }
+               
                 }
+
+                // }
             
             } else {
                 console.log("sceneobj not found on equipped obj!");

@@ -9,7 +9,7 @@ import { scene, togglePostProcessing, water, cameraMode, showDebug } from './wgp
 
 import { staticObjex, activeObjex, kinematicAgentMeshes } from './wgpu_locations.js';
 import { player, camera } from './wgpu_controls.js';
-import { playerRigidbody } from './wgpu_actions.js';
+import { equippedRigidbody, playerRigidbody } from './wgpu_actions.js';
 import { agentModels, agentParents, CreateTestAgent, randomNavmeshPoint } from './wgpu_nav.js';
 import { settings } from '../../../connect/settings.js';
 // import {scene, world} from './three_main.mjs'
@@ -110,6 +110,10 @@ export function SetEquippedRigidbody(rbody) {
   equippedRigidbody = rbody;
 }
 
+export function RemoveRigidbody(rbody) {
+  // world.removeRigidBody(rbody);
+  // equippedRigidbody = null;
+}
 export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do first
     
   if (staticObjex.length) {

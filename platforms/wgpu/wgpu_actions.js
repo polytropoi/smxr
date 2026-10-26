@@ -29,7 +29,7 @@ export let lastEvent;
 export function ActionSwitch (event) { //input from simple html popups
     console.log("ActionSwitch event " + JSON.stringify(event));
     const type = event.target.dataset.type; //e.g. markerType
-    const data = event.target.dataset.data; //e.g. eventData
+    const data = event.target.dataset.data; //e.g. eventData or sceneObjectID
     const tags = event.target.dataset.tags; //e.g. location tags (or object tags?)
     const instanceID = event.target.dataset.instance; //if it was an element of instanced mesh
 
@@ -44,12 +44,23 @@ export function ActionSwitch (event) { //input from simple html popups
 
         case "equip":
             // console.log("tryna pickup " + data +" from json "+ JSON.stringify(sceneObject));
-            if (sceneObjects[data]) {
-                sceneObjects[data].objectData.instanceID = instanceID;
-                sceneObjects[data].confirmed("equip");
+
+            if (instanceID) {
+                const dataSplit = data.split("_"); //from InstancedActionClick, should be 'plain' sceneObjectID + _ + instanceID
+                if (sceneObjects[dataSplit[0]]) { //got to equip the plain one first and add the instanced data, instanced ones don't exist as sceneObjects yet, until equipped
+                    // sceneObjects[data].objectData.instanceID = instanceID;
+                    sceneObjects[dataSplit[0]].confirmed("equip", instanceID);
+                } else {
+                    // const sceneObjectsString = JSON.stringify(sceneObjects);
+                    console.log("no data " + data + " in sceneObjects " + sceneObjects);
+                }
             } else {
-                // const sceneObjectsString = JSON.stringify(sceneObjects);
-                console.log("no data " + data + " in sceneObjects " + sceneObjects);
+                if (sceneObjects[data]) {
+                    sceneObjects[data].confirmed("equip");
+                } else {
+                    // const sceneObjectsString = JSON.stringify(sceneObjects);
+                    console.log("no data " + data + " in sceneObjects " + sceneObjects);
+                }
             }
             
 
@@ -392,7 +403,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
         
     }
 
-    confirmed (type, instance, tags) {
+    confirmed (type, instanceID, tags) {
         if (type == "pickup" && this.hasPickupAction) {
             console.log(JSON.stringify(this.pickupAction));
             let data = {};
@@ -417,7 +428,12 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             data.sceneID = settings._id;
             data.objectID = this.objectData._id;
             data.action = this.equipAction;
-            data.sceneObjectID = this.sceneObjectID;
+            if (instanceID) {
+                data.sceneObjectID = this.sceneObjectID + "_" + instanceID;
+                this.objectData.instanceID = instanceID;
+            } else {
+                data.sceneObjectID = this.sceneObjectID;
+            }
             data.sceneInventoryID = this.sceneInventoryID;
             data.sceneID = settings._id;
             data.fromSceneInventory = this.fromSceneInventory;
@@ -426,9 +442,11 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             data.object_item = this.objectData;
             data.userData = userData;
             data.userData.locationData = this.locData;
-            data.userData.instanceID = this.objectData.instanceID;
             
-            console.log("equip action instanceID " + this.objectData.instanceID);
+            data.instanceID = instanceID;
+            
+        
+            console.log("equip action instanceID " + instanceID);
     
             //   Pickup(data, this.el.id);
             
@@ -557,7 +575,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             this.object = EquipObject(this.objectData, this.locData);
             this.isEquipped = true;
         } else {
-            console.log("tryna equip from scene : " + data.sceneObjectID + " instanceID " + this.objectData.instanceID);
+            console.log("tryna equip from scene : " + data.sceneObjectID + " instanceID " + data.instanceID);
             //  EquipObject(this.objectData);
              if (thisObject.parent) {
                 console.log("equipobject removing from parent");
@@ -675,6 +693,9 @@ export async function InstancedActionClick(instanceID, objectData, timestamp) {/
 
     let hasActions = false;
     const actions = lastRaycastHitObject.userData.locationData.objectData.actions;
+
+    objectData.sceneObjectID = objectData.sceneObjectID + "_" + instanceID; //GOT TO PICK THIS UP LATER!
+    
     if (actions) {
         console.log("mouse down on instance with objectData actions " + JSON.stringify(actions));
           let pickupButton = "";
