@@ -992,6 +992,8 @@ async function RaycastHit(type, hit, event) {
 
         
         if (lastRaycastHitObject.userData.isEquipped) { //if equipped, don't show the callouts
+            popup.style.display = "none";
+            startPop.style.display = "none";
             console.log("that's equipped! " +objectData.sceneObjectID + " mediaID " + lastRaycastHitObject.userData.locationData.mediaID + " instanceID " + lastRaycastHitObject.userData.instanceID); //lastRaycastHitObject.userData.objectData.instanceID + " or " + lastRaycastHitObject.userData.instanceID);
             SynthHit(null, 1, 1);
 
@@ -1006,13 +1008,15 @@ async function RaycastHit(type, hit, event) {
                 // }
                 if (sceneObj.objectData.instanceTags) { //it's an instance with metadata
                     console.log("equipped tag data!! " + JSON.stringify(sceneObj.objectData.instanceTags) );
-                    const instancedCalloutTag = Object.keys(sceneObj.objectData.instanceTags).toString();//the key should be unique, a name or ID, with nested key/vals as the value 
+                    // const instancedCalloutTag = Object.keys(sceneObj.objectData.instanceTags).toString();//the key should be unique, a name or ID, with nested key/vals as the value 
+                    const instancedCalloutTag = "currently equipped : " + sceneObj.objectData.name + "<br>" + Object.keys(sceneObj.objectData.instanceTags).toString() + " - " + Object.values((Object.values(sceneObj.objectData.instanceTags)[0]));
+                    
                     // if (locationData.locationTags && !locationData.locationTags.includes("no callout")) {
                         //  ThreeDeeText(instancedCalloutTag,1,lastRaycastHitObject.parent, lastRaycastHitPosition, .1, null, 1);
-                         ThreeDeeText(instancedCalloutTag,.25,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, 0);
+                        //  ThreeDeeText(instancedCalloutTag,.25,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, .5);
                         
                     // }
-               
+                        ShowHTMLPopup(event, instancedCalloutTag, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
                 }
 
                 // }
@@ -1408,9 +1412,12 @@ export function centerRaycast() {
     }
 }
 
-
+export function onHicClick (event) {
+    console.log("hic click " + event.target.id);
+}
 export function onMouseDown(event) { // on threejs object
     // playerReadyToNav = true;
+    console.log("mousedown event " + event.currentTarget.id);
     event.stopPropagation();// duh!
 
     if (transformControl && transformControl.object) {
@@ -1511,6 +1518,7 @@ export function onMouseDown(event) { // on threejs object
         // if (lastRaycastHitObject.userData.objectData.actions) {
             
         // }
+
         return;
     } else if (lastRaycastHitObject && lastRaycastHitObject.userData && lastRaycastHitObject.userData.locationData) {
 

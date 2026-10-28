@@ -11,7 +11,12 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 // @ts-ignore
 import { InteractionManager } from 'three/addons/interaction/InteractionManager.js';
+    // import { installHtmlInCanvasPolyfill } from 'three-html-render/polyfill';
+    // import { HTMLTexture, InteractionManager } from 'three-html-render';
+    // import { HTMLTexture } from 'three-html-render/html-texture'
+    // import { InteractionManager } from 'three-html-render/interaction-manager'  
 
+// import { HTMLTexture } from 'three/webgpu';s
 // import { InteractionManager } from 'three.interactive';
 
 import { audioGroupsData, ReturnPictureFromGroup, ScenePicture } from './wgpu_media.js';
@@ -86,10 +91,15 @@ export function SetUIMode(mode) {
     console.log("hic is supported " + isHtmlInCanvasSupported());
     
     if (mode == "hic" && isHtmlInCanvasSupported()) {
-        canvasEl = document.getElementById('hic_canvas');
+
+        installHtmlInCanvasPolyfill();
+        // canvasEl = document.getElementById('three_canvas');
         contentEl = document.getElementById('hic_content');
+
+        // contentEl = document.createElement('div');
+        // docume
         uiMode = mode; //from controls
-        console.log("found hic els: " + canvasEl + " " + contentEl)
+        console.log("found hic els: " + contentEl);
     } else {
         uiMode == "popup";
         if (mode == "hic" && !isHtmlInCanvasSupported()) {
@@ -859,6 +869,8 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
         console.log("ui " + scaleFactor + " " + distance + " " + style);
         scaleFactor = clamp(scaleFactor, .5, 33);
         if (!hicMesh) {
+            // contentEl = document.createElement('div');
+            // document.body.appendChild(contentEl);
             contentEl.innerHTML = htmlstring;
             let yFudge = .5;
             if (!position) {
@@ -870,9 +882,11 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
 
             const geometry = new THREE.PlaneGeometry( 1,1,10,10);
 
-            material = new THREE.MeshBasicMaterial({ transparent: true});
+            const hicTexture = new THREE.HTMLTexture( contentEl );
 
-            material.map = new THREE.HTMLTexture( contentEl );
+            material = new THREE.MeshBasicMaterial({ transparent: true, map: hicTexture});
+
+            // material.map = 
           
             const ratio = window.devicePixelRatio || 1;
 
@@ -894,10 +908,12 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
             if (!interactionManager) {
                 interactionManager = new InteractionManager();
                 interactionManager.connect( renderer, camera );
+                interactionManager.add( hicMesh );
+            } else {
+                interactionManager.add( hicMesh );
             }
-            
-            interactionManager.add( hicMesh );
-            interactionManager.update();
+                        
+            // interactionManager.update();
 
             hicMesh.visible = true;
               console.log(yFudge + " yFudge hicMesh contentEL.innerHTML is "  +contentEl.innerHTML + " position " + JSON.stringify(position) );
@@ -963,7 +979,7 @@ export function ShowHTMLPopup(event, htmlstring, position, distance, style, yMod
             popup.className = '';
             popup.classList.add("popup_nobg");
         } else {
-             popup.className = '';
+            popup.className = '';
             popup.classList.add("popup");
         }
         // popup.classList.add("popup");
@@ -1076,7 +1092,7 @@ export function SynthTransportUI(parent, synthTransport, position, distance, sca
 
             synthTransportHicMesh = new THREE.Mesh( geometry, material );
             
-                        synthTransportHicMesh.visible = false;
+            synthTransportHicMesh.visible = false;
             parent.add( synthTransportHicMesh );
 
             // synthTransportHicMesh.position.set(position.x,position.y,position.z);

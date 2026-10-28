@@ -129,6 +129,16 @@
 				// renderer.toneMapping = THREE.LinearToneMapping;
 				// renderer.toneMappingExposure = 0.4;
 
+		three_canvas.setAttribute('layoutsubtree', 'true');
+
+		// three_canvas.addEventListener('click', (event) => {
+		// event.stopPropagation(); // Prevents the click from bubbling up to parent containers
+		// // Your Three.js / raycasting logic here
+		// });
+
+		// three_canvas.addEventListener('pointerdown', (event) => {
+		// event.stopPropagation(); 
+		// });
 		loadingHeader = "<h2>" +settings.sceneTitle+ "</h2>";
 		StartPopup(loadingHeader, 'Loading....', false);
 		await renderer.init(); 
@@ -647,10 +657,10 @@
 				// const startButton = document.getElementById('popup_yesButton');
 				startButton.addEventListener('pointerdown', StartButton);
 				// await new Promise(r => setTimeout(, 000)); //fudge
-				setTimeout(() => {
-					console.log("Hello! 3 seconds have passed.");
-							startPop.style.display = "none";
-				}, 3000); 
+				// setTimeout(() => {
+				// 	console.log("Hello! 3 seconds have passed.");
+				// 			startPop.style.display = "none";
+				// }, 3000); 
 					
 			} else {
 				console.log("startButton not found!");

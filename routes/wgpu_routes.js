@@ -378,31 +378,35 @@ wgpu_router.get('/:_id', function (req, res) {
 
     let  importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
          
+                    "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
+                    "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
+                
+                    "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
+                    "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
+                
 
-                            "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
-                            "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
-                        
-                            "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
-                            "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
-                        
+                    "\x22three-pathfinding\x22: \x22/platforms/wgpu/src/three-pathfinding.module.js\x22,"+
+                    "\x22tsl-textures\x22: \x22/platforms/wgpu/tsl/tsl-textures.js\x22,"+
+                        "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
+                        "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
 
-                            "\x22three-pathfinding\x22: \x22/platforms/wgpu/src/three-pathfinding.module.js\x22,"+
-                            "\x22tsl-textures\x22: \x22/platforms/wgpu/tsl/tsl-textures.js\x22,"+
-                             "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
-                             "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
+                    // "\x22@tonaljs/tonal\x22: \x22../node_modules/tonal/dist/index.js\x22,"+
 
-                            // "\x22@tonaljs/tonal\x22: \x22../node_modules/tonal/dist/index.js\x22,"+
+                    "\x22tonal\x22: \x22https://esm.sh/tonal\x22,"+
 
-                            "\x22tonal\x22: \x22https://esm.sh/tonal\x22,"+
+                    // "tonal": "https://esm.sh"
+                    
+                    
+                    "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
 
-                            // "tonal": "https://esm.sh"
-                          
-                            
-                            "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
-                          
-                          
-                            "}"+
-                        "}</script>";
+                    // "\x22three-html-render\x22: \x22../node_modules/three-html-render/\x22,"+
+                    // "\x22three-html-render/polyfill\x22: \x22../node_modules/three-html-render/polyfill.js\x22"+
+                        // "\x22three-html-render/polyfill\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/polyfill.mjs\x22," +
+                        // "\x22three-html-render/html-texture\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/html-texture.js\x22,"+
+                        // "\x22three-html-render/interaction-manager\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/interaction-manager.js\x22"+
+                    
+                    "}"+
+                "}</script>";
     
                    
     
@@ -2722,11 +2726,13 @@ wgpu_router.get('/:_id', function (req, res) {
                             // dialogButton +
                             
                                 
-
-                            "<canvas id=\x22three_canvas\x22 layoutsubtree><div id=\x22hic_content\x22 class=\x22hic_content_trans\x22></div></canvas>" + //assign to custom canvas to match positions
-
+                                     
+                            // "<canvas id=\x22three_canvas\x22 layoutsubtree><div id=\x22hic_content\x22 class=\x22hic_content_trans\x22></div></canvas>" + //assign to custom canvas to match positions
+                            "<canvas id=\x22three_canvas\x22>" +
+                                // "<div id=\x22hic_content\x22 class=\x22hic_content_trans\x22></div>" +   
+                            "</canvas>" +
                             // "<div id=\x22popup\x22 class=\x22popup\x22 style=\x22position: absolute; display: none; background: white; padding: 10px; border: 1px solid black;\x22>Some text</div>"+
-                            "<div id=\x22popup\x22 class=\x22popup\x22>Some text</div>"+
+                            "<div style=\x22display: none;\x22 id=\x22popup\x22 class=\x22popup\x22>Some text</div>"+
 
 
                             "<div id=\x22startPop\x22 class=\x22popup\x22><div id=\x22startPopHeader\x22><h1> Start Header </h1></div><br><div id=\x22startPopBody\x22><h4> Start Body </h4></div><br>" +
@@ -2765,8 +2771,8 @@ wgpu_router.get('/:_id', function (req, res) {
                             videoElements+
                             
                             
-                            // "<canvas id=\x22hic_canvas\x22 layoutsubtree class=\x22hic_canvas\x22></canvas>"
-                            // "<div style=\x22display: none;\x22 id=\x22hic_content\x22 class=\x22hic_content\x22></div>" + 
+                            "<div id=\x22hic_content\x22 class=\x22hic_content_trans\x22></div>" +
+                            
                             
                     "</body>\n" +
                 

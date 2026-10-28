@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 
-import { player, lastRaycastHitObject, mouseDowntime, hic_content, onMouseDown, lastRaycastHitPosition, lastRaycastHitDistance, worldHitPosition } from './wgpu_controls.js';
+import { player, lastRaycastHitObject, mouseDowntime, hic_content, onMouseDown, lastRaycastHitPosition, lastRaycastHitDistance, worldHitPosition, onHicClick } from './wgpu_controls.js';
 
 import { scene } from './wgpu_main.mjs';
 
@@ -135,7 +135,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
         this.sceneInventoryID = objectData.sceneInventoryID;
                 // this.object.userData.sceneObjectInstance = this;
         // this.object.userData.sceneObjectIndex = sceneObjectIndex;
-        console.log("new sceneObject " + this.objectData.sceneObjectID + " mediaID " + this.locData.mediaID + " instanceID " + this.objectData.instanceID + " isEquipped " + isEquipped );
+        console.log("new sceneObject " + this.objectData.sceneObjectID + " mediaID " + this.locData.mediaID + " instanceID " + this.objectData.instanceID + " instanceTags " + JSON.stringify(this.objectData.instanceTags) + " isEquipped " + isEquipped );
 
         this.isEquipped = isEquipped;
         this.fromSceneInventory = objectData.fromSceneInventory;
@@ -257,9 +257,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
     }
     dequip () {
         this.object.userData.isEquipped = false;
-        this.isEquipped = false;
-        
-        
+        this.isEquipped = false;        
     }
     onOver () {
 
@@ -271,7 +269,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
     onClick (event) {
         lastEvent = event;
         console.log("clicked sceneObject " + this.objectData.name + " with actions " + JSON.stringify(this.objectData.actions));
-           
+        
         // if (textData != null && textData != undefined && textData != "" && textData != "none") {
         //     popup.innerHTML = "<h1>" + lastRaycastHitObject.userData.objectData.name + "  </h1>"  + textData.text;
         //     ShowPopup(event);
@@ -373,23 +371,21 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
                 // "</div>";
                 ShowHTMLPopup(event, htmlstring, null, null, "hic_content");
                 if (uiMode == "hic") {
+
+                    console.log("HIC MODE setting listeners..");
                     // UpdateHIC(popup.innerHTML);
-                    document.getElementById("popup_cancelButton").addEventListener ('pointerdown', onMouseDown );   
+                    document.getElementById("popup_cancelButton").addEventListener ('pointerdown', onHicClick );   
                     // document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
                     if (document.getElementById("popup_yesButton")) {
-                        document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
+                        document.getElementById("popup_yesButton").addEventListener ('pointerdown', onHicClick );
                     }
                     if (document.getElementById("popup_yesButton1")) {
-                        document.getElementById("popup_yesButton1").addEventListener ('pointerdown', onMouseDown );
+                        document.getElementById("popup_yesButton1").addEventListener ('pointerdown', onHicClick );
                     }
                     if (document.getElementById("popup_yesButton2")) {
-                        document.getElementById("popup_yesButton2").addEventListener ('pointerdown', onMouseDown );
+                        document.getElementById("popup_yesButton2").addEventListener ('pointerdown', onHicClick );
                     }
-                     
 
-                     
-                     
-                    //  document.getElementById("popup_yesButton3").addEventListener ('pointerdown', onMouseDown );
                 } else {
                     // ShowPopup(event);
                     //  UpdateHIC(popup.innerHTML);
@@ -761,23 +757,37 @@ export async function InstancedActionClick(instanceID, objectData, timestamp) {/
             // "</div>";
             ShowHTMLPopup(event, htmlstring, null, null, null, -1);
             if (uiMode == "hic") {
+
+                console.log("instance click HIC MODE setting listeners..");
+                    document.getElementById("popup_cancelButton").addEventListener ('pointerdown', onMouseDown );   
+                    // document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
+                    if (document.getElementById("popup_yesButton")) {
+                        document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
+                    }
+                    if (document.getElementById("popup_yesButton1")) {
+                        document.getElementById("popup_yesButton1").addEventListener ('pointerdown', onMouseDown );
+                    }
+                    if (document.getElementById("popup_yesButton2")) {
+                        document.getElementById("popup_yesButton2").addEventListener ('pointerdown', onMouseDown );
+                    }
                 // UpdateHIC(popup.innerHTML);
-                const cancelButtonEl = document.getElementById("popup_cancelButton")
-                if (cancelButtonEl) {
-                    cancelButtonEl.addEventListener ('pointerdown', onMouseDown );
-                }
-                 const yesButtonEl = document.getElementById("popup_yesButton")
-                if (yesButtonEl) {
-                    yesButtonEl.addEventListener ('pointerdown', onMouseDown );
-                }
-                const yesButton1El = document.getElementById("popup_yesButton1")
-                if (yesButton1El) {
-                    yesButton1El.addEventListener ('pointerdown', onMouseDown );
-                }
-                const yesButton2El = document.getElementById("popup_yesButton2")
-                if (yesButton2El) {
-                    yesButton2El.addEventListener ('pointerdown', onMouseDown );
-                }
+                // const cancelButtonEl = document.getElementById("popup_cancelButton")
+                // if (cancelButtonEl) {
+                //     console.log("instance click HIC MODE setting cancelButtonEl listeners..");
+                //     cancelButtonEl.addEventListener ('pointerdown', onMouseDown );
+                // }
+                //  const yesButtonEl = document.getElementById("popup_yesButton")
+                // if (yesButtonEl) {
+                //     yesButtonEl.addEventListener ('pointerdown', onMouseDown );
+                // }
+                // const yesButton1El = document.getElementById("popup_yesButton1")
+                // if (yesButton1El) {
+                //     yesButton1El.addEventListener ('pointerdown', onMouseDown );
+                // }
+                // const yesButton2El = document.getElementById("popup_yesButton2")
+                // if (yesButton2El) {
+                //     yesButton2El.addEventListener ('pointerdown', onMouseDown );
+                // }
                 // // document.getElementById("popup_yesButton").addEventListener ('pointerdown', onMouseDown );
                 //     document.getElementById("popup_yesButton1").addEventListener ('pointerdown', onMouseDown );
                 //     document.getElementById("popup_yesButton2").addEventListener ('pointerdown', onMouseDown );
