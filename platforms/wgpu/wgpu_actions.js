@@ -404,14 +404,14 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             console.log(JSON.stringify(this.pickupAction));
             let data = {};
             data.sceneID = settings._id;
-            data.object_item = this.objectData;
-            
+            data.objectData = this.objectData;
+            data.name = this.objectData.name;
             data.action = this.pickupAction;
             data.sceneID = settings._id;
             data.fromSceneInventory = this.fromSceneInventory;
             data.timestamp = this.timestamp;
             data.fromScene = room;
-            data.object_item = this.objectData;
+            // data.object_item = this.objectData;
             data.userData = userData;
             data.action = this.pickupAction;
             console.log("pickupaction " + JSON.stringify(data));
@@ -420,10 +420,13 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             
             this.pickupObject(data, this.object);
         } else if (type == "equip" && this.hasEquipAction) {
-          let data = {};
+        //   let data = {};
+            let data = structuredClone(this.objectData);
             data.sceneID = settings._id;
             data.objectID = this.objectData._id;
             data.action = this.equipAction;
+            // data.objectData = this.objectData;
+            // data.name = this.objectData.name;
             if (instanceID) {
                 data.sceneObjectID = this.sceneObjectID + "_" + instanceID;
                 this.objectData.instanceID = instanceID;
@@ -435,14 +438,15 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             data.fromSceneInventory = this.fromSceneInventory;
             data.timestamp = this.timestamp;
             data.fromScene = room;
-            data.object_item = this.objectData;
+            // data.objectData = this.objectData;
             data.userData = userData;
             data.userData.locationData = this.locData;
-            
+
+            // data.instanceTags = this.objectData.instanceTags;
             data.instanceID = instanceID;
             
         
-            console.log("equip action instanceID " + instanceID);
+            console.log("equip action instanceID " + instanceID + " tagData " + data.instanceTags);
     
             //   Pickup(data, this.el.id);
             
@@ -568,7 +572,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             } else {
                 scene.remove(thisObject);
             }
-            this.object = EquipObject(this.objectData, this.locData);
+            this.object = EquipObject(data, this.locData);
             this.isEquipped = true;
         } else {
             console.log("tryna equip from scene : " + data.sceneObjectID + " instanceID " + data.instanceID);
@@ -580,15 +584,16 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
                 console.log("equipobject removing from scene");
                 scene.remove(thisObject);
             }
-            this.object = EquipObject(this.objectData, this.locData);
+            this.object = EquipObject(data, this.locData);
             // this.object.userData.instanceID
             this.isEquipped = true;
             
             // thisObject.parent.remove(thisObject);
         }
-        if (this.objectData.instanceID) {
+        if (data.instanceID) {
             this.object.userData = {};
-            this.object.userData.instanceID = this.objectData.instanceID;
+            this.object.userData.instanceID = data.instanceID;
+            this.object.instanceTags = data.instanceTags;
         }
 
     }

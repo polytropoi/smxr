@@ -1211,6 +1211,7 @@ export function SaveModToLocal(locationKey) { //in dialog mode, locationKey is n
          } else {
             // SaveLocalData();
             console.log("DINT FIND THEEL " + locationKey);
+            SaveLocalData();
             break;
             
          }

@@ -51,7 +51,7 @@
 	
 	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData, InitScenePictures } from './wgpu_media.js';
 	
-	import { equippedObjectOnLoad, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
+	import { equipOnLoadEvent, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 	import { splatObjex, InitSplats } from './wgpu_splats.js';
 	import { InitSuperSonic, SynthHit, synthKeys, SynthKeys, superSonicLoaded, synthTransports } from './wgpu_synths.js';
 
@@ -202,13 +202,13 @@
 
 
 		sceneIsReady = true;
-		if (equippedObjectOnLoad != "") {
+		if (equipOnLoadEvent) {
 
-			const eventDetails = {};
-			eventDetails.objectID = equippedObjectOnLoad;
-			eventDetails.onLoad = true;
-			console.log('gots something to equip on load ' + eventDetails.objectID);
-			EquipInventoryCheck(eventDetails);
+			// const eventDetails = {};
+			// eventDetails.objectID = equipOnLoadEvent;
+			// eventDetails.onLoad = true;
+			// console.log('gots something to equip on load ' + eventDetails.objectID);
+			EquipInventoryCheck(equipOnLoadEvent);
 			// equip_inventory_object_event.details = eventDetails;
 			// eventEl.dispatchEvent(equip_inventory_object_event);
 

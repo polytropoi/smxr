@@ -65,10 +65,12 @@ export function create_Light(locationData) {
 export function CreateLight(locationData, parent) {
 
     console.log("tryna create light with color data " + locationData.color);
+
+
     if (!locationData.yscale) {
         locationData.yscale = 1;
     }
-    if (locationData.locationTags.includes("fire")) {
+    if (locationData.locationTags && locationData.locationTags.includes("fire")) {
         console.log("tryna create fire size " + locationData.yscale);
         const modValue = locationData.yscale; 
         // if (modvalue > )
@@ -111,7 +113,7 @@ export function CreateLight(locationData, parent) {
             light.colorNode = vec3(0xff, 0xaa, 0x00).mul(flickerEffect()).mul(lightColor);
         }
 
-    } else if (locationData.locationTags.includes("fire2")) {
+    } else if (locationData.locationTags && locationData.locationTags.includes("fire2")) {
         // console.log("tryna create fire size " + locationData.yscale);
         
         // const light = new THREE.PointLight( settings.sceneColor1Alt, parseFloat(locationData.yscale) * 8, parseFloat(locationData.yscale) * 0);
@@ -129,7 +131,7 @@ export function CreateLight(locationData, parent) {
         // animatedSprite.position.set(locationData.x, locationData.y, locationData.z);
         // animatedSprites.push(animatedSprite);
 
-    } else if (locationData.locationTags.includes("candle")) {
+    } else if (locationData.locationTags &&  locationData.locationTags.includes("candle")) {
 
         
         console.log("tryna create candle size " + locationData.yscale);
@@ -163,7 +165,7 @@ export function CreateLight(locationData, parent) {
         }
 
 
-    } else if (locationData.locationTags.includes("point")) {
+    } else if (locationData.locationTags && locationData.locationTags.includes("point")) {
         let color1 = settings.sceneColor1Alt;
         if (locationData.color) {
             color1 = locationData.color;
@@ -181,12 +183,15 @@ export function CreateLight(locationData, parent) {
             color1 = locationData.color;
         }
         
-        const light = new THREE.PointLight( color1, parseFloat(locationData.yscale) * 8, parseFloat(locationData.yscale) * 8);
-                scene.add(light);
+        console.log("adding default light color " + color1 + " " + parseFloat(locationData.yscale) * 16 + " at location " + locationData.x + locationData.y + locationData.z );
+        const light = new THREE.PointLight( color1, parseFloat(locationData.yscale) * 4, parseFloat(locationData.yscale) * 32, 1);
+        
+        scene.add(light);
+        light.position.set(locationData.x, locationData.y, locationData.z);
          if (parent) {
             parent.attach(light);    
         }
-        light.position.set(locationData.x, locationData.y, locationData.z);
+        // light.position.set(locationData.x, locationData.y, locationData.z);
 
     }
 }

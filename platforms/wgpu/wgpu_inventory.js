@@ -26,7 +26,7 @@ import { ReturnTagForInstance } from './wgpu_instance.js';
 // import {  } from '../../connect/dialogs.js';
 // import { GetUserInventory } from '../../connect/dialogs.js';
 
-export let equippedObjectOnLoad = "";
+export let equipOnLoadEvent; //save event till safe to load
 
 export let sceneInventory = [];
 
@@ -97,15 +97,15 @@ function removeAndDisposeChildren(object) {
 
 
 
-export function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js - TODO flex if from scene or scene inventory -- no, this only for userinventory
+export function EquipInventoryCheck(event) { //equip button in modal, from dialogs.js - TODO flex if from scene or scene inventory -- no, this only for userinventory, via profile.equipment in iDB
 
 
     if (!sceneIsReady) {
-        equippedObjectOnLoad = event.details.objectID; //need to wait for all the objex to load before tryna equip
+        equipOnLoadEvent = event; //need to wait for all the objex to load before tryna equip
     } 
     const objectData = ReturnObjectData(event.details.objectID);
     const iTags =  event.details.instanceTags;
-    console.log("equip event for objectID " + event.details.objectID + " with instanceTags " + JSON.stringify(iTags));
+    console.log("equip event for objectID " + event.details.objectID + " with instanceTags " + JSON.stringify(iTags) + " instanceID " + event.details.instanceID);
 
     if (objectData) {
 
@@ -173,7 +173,7 @@ export async function EquipObject (objectData, locData) {
         // objectData.isEquipped = true;
         if (objectData.instanceID) {
             // objectData.sceneObjectID = Date.now(); 
-            objectData.sceneObjectID = objectData.sceneObjectID + "_" + objectData.instanceID;
+            // objectData.sceneObjectID = objectData.sceneObjectID + "_" + objectData.instanceID + "_" + Date.now();
 
         } else {
 
@@ -194,13 +194,16 @@ export async function EquipObject (objectData, locData) {
 
 
         // let tags = "";
-        let tagData = await ReturnTagForInstance(locData.timestamp, objectData.instanceID);
+        let tagData = objectData.instanceTags;
+        // let tagData = await ReturnTagForInstance(locData.timestamp, objectData.instanceID);
        
-        if (tagData) {
-            // tags = Object.keys(tagData);     
-            console.log("equipped instanceTags " + JSON.stringify(tagData));
-             objectData.instanceTags = tagData;
-        } else {
+        // if (tagData) {
+        //     // tags = Object.keys(tagData);     
+        //     console.log("equipped instanceTags " + JSON.stringify(tagData));
+        //      objectData.instanceTags = tagData;
+        // } else {
+        if (!tagData) {
+
             console.log("no tags found for equipped obj")
         }
 

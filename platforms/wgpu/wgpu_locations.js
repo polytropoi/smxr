@@ -357,6 +357,7 @@ export async function InitLocations() {
                                                 lookAtCameraObjects.push(model);
                                             }
                                             model.name = locationData[i].timestamp;
+                                            
                                             scene.add(model);
                                             if (locationData[i].markerType == "video") {
                                                 model.name = "videoLocationModel_" + locationData[i].timestamp;
@@ -499,23 +500,23 @@ export function LoadLocalMods(event) {
     if (localDataReady && mods && mods.locations && mods.locations.length) {
         console.log("looking for location localMods + " + mods.locations.length);
         for (let i = 0; i < mods.locations.length; i++) {
-            console.log("Looking for localmod for object3D named " + mods.locations[i].timestamp + JSON.stringify(mods));
+            console.log("Looking for localmod for object3D named " + mods.locations[i].timestamp + " markertype " + mods.locations[i].markerType);
             let foundObject = scene.getObjectByName(mods.locations[i].timestamp);
             if (!foundObject) {
                 const foundObjex = getObjectsByPartialName(scene, mods.locations[i].timestamp);
-                console.log("localMod found " + foundObjex.length + " objex with timestamp " + mods.locations[i].timestamp);
+                console.log("localMod found " + foundObjex.length + " objex with timestamp " + mods.locations[i].timestamp  + " markerType " + mods.locations[i].markerType);
                 foundObject = foundObjex[0];
             }
 
             if (foundObject) {
                 // Object was found, you can modify it here
                 // foundObject.material.color.set(0xff0000);
-                console.log("localmod object found, tryna set position " + mods.locations[i].x + " " +  mods.locations[i].y + " " +  mods.locations[i].z )
+                console.log("markerType " + mods.locations[i].markerType + " localmod found, tryna set position " + mods.locations[i].x + " " +  mods.locations[i].y + " " +  mods.locations[i].z )
                 foundObject.position.set(mods.locations[i].x, mods.locations[i].y, mods.locations[i].z );
                 foundObject.rotation.set(mods.locations[i].eulerx, mods.locations[i].eulery, mods.locations[i].eulerz );
                 foundObject.scale.set(mods.locations[i].xscale, mods.locations[i].yscale, mods.locations[i].zscale );
             } else {
-                console.log("localmod Object not found, must be new localdata");
+                console.log("localmod Object not found, must be new localdata markerType " + mods.locations[i].markerType);
                 CreateDefaultLocationMarker(mods.locations[i]); //prims only
             }
         }
@@ -970,6 +971,9 @@ async function LoadLocationModel (url, locationData, isActive) {
 
         model.traverse(function (child) {
            
+                    let worldPosition = new THREE.Vector3();
+
+
             if (child.isMesh){
 
                 child.userData = {};
@@ -989,6 +993,8 @@ async function LoadLocationModel (url, locationData, isActive) {
                 } else {
                                                                 
                     if (child.material) {
+
+                        
                         // console.log("setting scene.environment envmap " + scene.environment );
                         // child.material.roughness = 0.5;
                         // child.material.envMap = scene.environment;
@@ -1000,9 +1006,41 @@ async function LoadLocationModel (url, locationData, isActive) {
                         child.envMapIntensity = 1;
                         child.castShadow = true;	
                         child.receiveShadow = true;
+
+                        if (child.name  && child.name != undefined && typeof child.name === 'string') {
+                            const name = child.name.toString();
+                            
+                            console.log("child.name is " + name);
+                            if (name.includes("emissive")) {
+
+                                    // 3. Extract the world position into your vector
+                                child.getWorldPosition(worldPosition);
+                                let locationData = {};
+                                // locationData.locationTags = [this.objectData.light.toLowerCase()];
+                                locationData.yscale = 1;
+                                locationData.x = worldPosition.x;
+                                locationData.y = worldPosition.y;
+                                locationData.z = worldPosition.z;
+                                locationData.color = "yellow";
+                                CreateLight(locationData, null);
+                                child.material.transparent = true;
+                                child.material.opacity = .5;
+                                child.material.roughness = .2;
+                            // }
+                            // const mat = child.material;
+                            // // Check if the material has an emissive component or matches a specific name
+                            // if (mat.emissive) {
+                            //     mat.emissive.setHex(0xff0000); // Set emission color (e.g., red)
+                            //     mat.emissiveIntensity = 20.0;    // Boost brightness
+                            //     mat.needsUpdate = true;
+                            }
+                        }
                     }
+
+
                     // activeObjex.push(navmesh);
-                
+
+
                 }
                 if ((isActive || locationData.locationTags.includes("active")) && locationData.markerType != "trigger") {
                     activeObjex.push(child);
@@ -1041,6 +1079,18 @@ async function LoadLocationModel (url, locationData, isActive) {
                     // child.mesh.userData = locationData[i];	
                 }
                     
+                if (child.name  && child.name != undefined && typeof child.name === 'string') {
+                    const name = child.name.toString();
+                            
+                       
+                        if (name.includes("navmesh")) { 
+                             console.log("gotsa navmesh child of model " + model.name);
+                            navmesh = child;
+                            navmesh.visible = false;
+                                    groundObjex.push(navmesh);
+
+                        }
+                    }
                 
             } else if (child.isBone && !child.parent.isBone) { //add raycast/collision meshes to root bone(s)
                 // const geometry = new THREE.CapsuleGeometry(1, 1, 8, 8); // Base size
@@ -1185,7 +1235,11 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         if (locationData.modelID && locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);
         } else {
-            // model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+            // locationData.modelID = "primitive_sphere";
+            // model = await LoadLocationModel(null, locationData, true);
+            // model.material.wireframe = true;
+            // model.material.color = "yellow";
         }
         // if (model) {
             CreateLight(locationData);
