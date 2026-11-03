@@ -10,7 +10,7 @@ import { settings } from '../../../connect/settings.js';
 import { userData, room } from '../../../connect/connect.js';
 import { locationData, locationObjex, locations } from './wgpu_locations.js';
 import { EquipObject } from './wgpu_inventory.js';
-import { CreateLight } from './wgpu_lights.js';
+import { CreatePointLight } from './wgpu_lights.js';
 
 import { AddDynamicBody, getPlayerBody, kinematicBodies } from './wgpu_physics.js';
 import { uiMode, ShowHTMLPopup, HideHTMLPopup, popup } from './wgpu_ui.js';
@@ -46,10 +46,11 @@ export function ActionSwitch (event) { //input from simple html popups
             // console.log("tryna pickup " + data +" from json "+ JSON.stringify(sceneObject));
 
             if (instanceID) {
+                const instanceTags = JSON.parse(atob(tags));
                 const dataSplit = data.split("_"); //from InstancedActionClick, should be 'plain' sceneObjectID + _ + instanceID
                 if (sceneObjects[dataSplit[0]]) { //got to equip the plain one first and add the instanced data, instanced ones don't exist as sceneObjects yet, until equipped
                     // sceneObjects[data].objectData.instanceID = instanceID;
-                    sceneObjects[dataSplit[0]].confirmed("equip", instanceID);
+                    sceneObjects[dataSplit[0]].confirmed("equip", instanceID, instanceTags);
                 } else {
                     // const sceneObjectsString = JSON.stringify(sceneObjects);
                     console.log("no data " + data + " in sceneObjects " + sceneObjects);
@@ -153,7 +154,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
         // this.loadAction;
         // this.hasSelectAction = false;
         // this.selectAction;
-        if (this.objectData.light) {
+        if (this.objectData.light && this.objectData.light != "None") {
             console.log("this.objectData.light " + this.objectData.light)
             let locationData = {};
             locationData.locationTags = [this.objectData.light.toLowerCase()];
@@ -163,7 +164,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             locationData.z = 0;
             locationData.color = this.objectData.color1;
 
-            CreateLight(locationData, object);
+            CreatePointLight(locationData, object);
         }
 
             // this.tags = "";
@@ -416,6 +417,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             data.action = this.pickupAction;
             console.log("pickupaction " + JSON.stringify(data));
             data.userData.locationData = this.locData;
+            data.instanceTags = tags;
             //   Pickup(data, this.el.id);
             
             this.pickupObject(data, this.object);
@@ -441,7 +443,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             // data.objectData = this.objectData;
             data.userData = userData;
             data.userData.locationData = this.locData;
-
+            data.instanceTags = tags;
             // data.instanceTags = this.objectData.instanceTags;
             data.instanceID = instanceID;
             
@@ -718,18 +720,20 @@ export async function InstancedActionClick(instanceID, objectData, timestamp) {/
 
         }
         
-        let tag;
+        let tags = "";
         const tagData = await ReturnTagForInstance(timestamp, instanceID);
         if (tagData) {
-            tag = Object.keys(tagData);
+            // tags = Object.keys(tagData);
+            // tags = Buffer.from(JSON.stringify(tagData)).toString("base64");
+            tags = btoa(JSON.stringify(tagData));
         }
         // ThreeDeeText(Object.keys(tagData).toString(),1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
-        console.log("cliecked instance tags " + tag + " timestamp " + timestamp + " instanceID " + instanceID);
+        console.log("cliecked instance tags " + JSON.stringify(tagData) + " timestamp " + timestamp + " instanceID " + instanceID);
         cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
         if (hasPickupAction) {
             
             hasActions = true;
-            pickupButton = "<button id=\x22popup_yesButton\x22 data-instance=\x22"+instanceID+"\x22 data-tags=\x22"+tag+"\x22 data-type=\x22pickup\x22 data-data=\x22"+
+            pickupButton = "<button id=\x22popup_yesButton\x22 data-instance=\x22"+instanceID+"\x22 data-tags=\x22"+tags+"\x22 data-type=\x22pickup\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22collectButton\x22>Collect</button>";
             // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button>";
             
@@ -737,7 +741,7 @@ export async function InstancedActionClick(instanceID, objectData, timestamp) {/
         if (hasEquipAction) {
             
             hasActions = true;
-            equipButton = "<button id=\x22popup_yesButton1\x22 data-instance=\x22"+instanceID+"\x22 data-tags=\x22"+tag+"\x22 data-type=\x22equip\x22 data-data=\x22"+
+            equipButton = "<button id=\x22popup_yesButton1\x22 data-instance=\x22"+instanceID+"\x22 data-tags=\x22"+tags+"\x22 data-type=\x22equip\x22 data-data=\x22"+
             objectData.sceneObjectID+"\x22 class=\x22equipButton\x22>Equip</button>";
             // cancelButton = "<br><br><div><button id=\x22popup_cancelButton\x22class=\x22hicCancelButton\x22>Cancel</button>";
             

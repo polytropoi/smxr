@@ -17,6 +17,8 @@ import { texture, color, float, uv, equirectUV, positionLocal, vec3, vec2, sin, 
 
 import { UpdateEnvMap } from './wgpu_environment.js';
 import { pauseVideo, playVideo } from '../../connect/media.js';
+import { picPlaces } from './wgpu_locations.js';
+import { Quaternion } from 'three';
 
 
 export let primaryAudioGroups;
@@ -111,7 +113,7 @@ export function InitPictureGroups () {
       const thePictureGroupsData = pictureGroupsDataEl.getAttribute('data-picture-groups');
       pictureGroupsData = JSON.parse(atob(thePictureGroupsData));
    }
-//    console.log("pictureGroupsData length " + pictureGroupsData.length + " " + JSON.stringify(pictureGroupsData));
+   console.log("pictureGroupsData length " + pictureGroupsData.length + " " + JSON.stringify(pictureGroupsData));
 
 
     for (let i = 0; i < pictureGroupsData.length; i++) {
@@ -140,7 +142,13 @@ export function InitPictureGroups () {
     //         }
     //     }
     // }
-   
+   if (picPlaces.length) {
+    for (let i = 0; i < picPlaces.length; i++) {
+        const scenePic = new ScenePicture(picPlaces[i].groupID, null, picPlaces[i].instanceID, picPlaces[i].position, true, false, picPlaces[i].rotationQuaternion );
+        // scenePictures[picPlaces[i].instanceID] = scenePic;
+    }
+        
+   }
 }
 
 export function InitScenePictures () { //these are directly imported into the scene, not in a group
@@ -1086,16 +1094,19 @@ class AmbientAudioControl {
 }
 
 export class ScenePicture {
-    constructor(locationGroupID, locationMediaID, instanceId, position, visible, lookAtCamera){
+    constructor(locationGroupID, locationMediaID, instanceId, position, visible, lookAtCamera, rotationQuaternion){
    
         this.isVisible;
         this.locationGroupID = locationGroupID;
         this.locationMediaID = locationMediaID;
+        this.rotationQuaternion = rotationQuaternion;
   
             // console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
             const landscapeGeometry = new THREE.PlaneGeometry(6, 4, 4, 4);
             // const planeGeometry = new THREE.BoxGeometry(10, 10, 10); 
-            const planeMaterial = new THREE.MeshStandardMaterial({ color: 'white', side: THREE.FrontSide, metalness: 0, roughness: 1, transparent: true });
+            // const planeMaterial = new THREE.MeshStandardMaterial({ color: 'white', side: THREE.FrontSide, metalness: 0, roughness: 1, transparent: true });
+
+            const planeMaterial = new THREE.MeshBasicMaterial({ transparent: true });
             // const planeMaterial = new THREE.NodeMaterial();
 
 
@@ -1206,7 +1217,11 @@ export class ScenePicture {
 
                 map.offset.set(0, .15);
                 map.repeat.set(1, .7);
+                this.landscapePanel.material.side = THREE.DoubleSide;
                 this.landscapePanel.material.needsUpdate = true;
+                if (this.rotationQuaternion) {
+                    this.landscapePanel.quaternion.copy(this.rotationQuaternion);
+                }
             }
 
         } else if (this.pictureItem.orientation == "Portrait") {
@@ -1218,7 +1233,11 @@ export class ScenePicture {
                 map.colorSpace = THREE.LinearSRGBColorSpace;
                 map.offset.set(.15, 0);
                 map.repeat.set(.7, 1);
+                this.portraitPanel.material.side = THREE.DoubleSide;
                 this.portraitPanel.material.needsUpdate = true;
+                if (this.rotationQuaternion) {
+                    this.portraitPanel.quaternion.copy(this.rotationQuaternion);
+                }
                 
             }
         // } else if (this.pictureItem.orientation == "Square") {
@@ -1231,10 +1250,16 @@ export class ScenePicture {
 
                 // map.offset.set(0, 0);
                 // map.repeat.set(0, 1);
+                this.squarePanel.material.side = THREE.DoubleSide;
                 this.squarePanel.material.needsUpdate = true;
+                if (this.rotationQuaternion) {
+                    this.squarePanel.quaternion.copy(this.rotationQuaternion);
+                }
                 
             }
         }
+
+
         
         // else {
         //     if (this.circlePanel) {

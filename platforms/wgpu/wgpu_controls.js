@@ -25,7 +25,7 @@ import { MapControls } from 'three/addons/controls/MapControls.js';
 
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 
-import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowGroupPicture, ShowGroupAudio, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup, HideHTMLPopup, startPop, ReturnAudioInstance } from './wgpu_ui.js';
+import { uiMode, SetUIMode, InitReticle, textContainers, ThreeDeeText, HTMLText, ShowInstanceGroupPicture, ShowGroupAudio, hicMesh, SwapMaterials, UnSwapMaterials, ShowHTMLPopup, HideHTMLPopup, startPop, ReturnAudioInstance } from './wgpu_ui.js';
 
 import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
@@ -926,7 +926,7 @@ async function RaycastHit(type, hit, event) {
                 }
                 if (locationGroup) { //not a group of locations, but a group assigned to a location 
                     if (locationGroup.type == "picture") {
-                        ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );         
+                        ShowInstanceGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );         
                         console.log("gotsa picture for instanceID" + hit.instanceId);
 
                     }
@@ -1048,7 +1048,7 @@ async function RaycastHit(type, hit, event) {
             // lastRaycastHitPosition = hit.point;
             // console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
 
-            console.log(name + " hit object type " + locationData.markerType + " " + hit.object.name );//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+            console.log(name + " raycasthit object type " + locationData.markerType + " " + hit.object.name );//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
 
             if (locationData.markerType == "trigger") { //hrm, triggers are for geo intersections
@@ -1661,7 +1661,7 @@ export function onMouseDown(event) { // on threejs object
                         }
                         if (locationGroup) {
                             if (locationGroup.type == "picture") {
-                                ShowGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
+                                ShowInstanceGroupPicture(locationGroup._id, lastRaycastHit.point, lastRaycastHit.instanceId, lastRaycastHit.point, true, true );                          
                             }
                             if (locationGroup.type == "audio") {
                                 ShowGroupAudio(locationGroup, null, lastRaycastHit.instanceId, lastRaycastHit.point, lastRaycastHit.distance, lastRaycastHitObject.userData.locationData, "click");                          

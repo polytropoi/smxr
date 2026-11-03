@@ -537,6 +537,7 @@ export function InitIDB() {
                            const eventDetails = {};
                               eventDetails.objectID = pcursor.value.equipment.main.objectID;
                               eventDetails.instanceTags = pcursor.value.equipment.main.instanceTags;
+                              eventDetails.instanceID = pcursor.value.equipment.main.instanceID;
                               equip_inventory_object_event.details = eventDetails;
                               eventEl.dispatchEvent(equip_inventory_object_event);
 

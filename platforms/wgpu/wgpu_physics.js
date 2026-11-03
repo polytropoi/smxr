@@ -111,8 +111,8 @@ export function SetEquippedRigidbody(rbody) {
 }
 
 export function RemoveRigidbody(rbody) {
-  // world.removeRigidBody(rbody);
-  // equippedRigidbody = null;  
+  world.removeRigidBody(rbody);
+  equippedRigidbody = null;  
 }
 export async function InitStaticObjex () { //e.g. ground, walls, etc.. - do first
     

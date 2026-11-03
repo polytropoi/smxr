@@ -2,7 +2,8 @@
 import * as THREE from 'three';
 
 import { scene, animatedSprites } from './wgpu_main.mjs';
-import { uniform, Fn, vec3, sin, time, color } from 'three/tsl';
+import { uniform, Fn, vec3, sin, time, color, positionLocal} from 'three/tsl';
+
 import { ClusteredLighting } from 'three/addons/lighting/ClusteredLighting.js'
 
 import { CreateSprites, CreateAnimatedSprite } from './wgpu_fx.js';
@@ -20,6 +21,9 @@ export let waterAmbientLight;
 export let clusteredLighting;
 
 export const clusteredLights = [];
+export const spotLights = [];
+export const spotTargets = [];
+let spotIndex;
 
 export function InitClusteredLights () {
     clusteredLighting = new ClusteredLighting(1024, 32, 24, 64);
@@ -51,6 +55,8 @@ export function InitSceneLights () {
             scene.add( sunLight );
             scene.add( skyAmbientLight );
             scene.add( waterAmbientLight );
+            AssignSpotLightTargets();
+
 }
 
 
@@ -62,9 +68,71 @@ export function create_Light(locationData) {
     lightMods.push(light);
 }
 
-export function CreateLight(locationData, parent) {
+export function CreateSpotLight(locationData, parent, target) {
 
-    console.log("tryna create light with color data " + locationData.color);
+    console.log("tryna create spot light with color data " + locationData.color);
+     let color1 = "blue";
+        // if (locationData.color) {
+        //     color1 = locationData.color;
+        // }
+        
+        console.log("adding default light color " + color1 + " " + parseFloat(locationData.yscale) * 16 + " at location " + locationData.x + locationData.y + locationData.z );
+        const light = new THREE.SpotLight( color1, parseFloat(locationData.yscale) * 16, parseFloat(locationData.yscale) * 64);
+        // Set angle to 45 degrees (converted from degrees to radians)
+            // light.angle = (Math.PI / 4) * -1; 
+
+            // Soften the edges of the cone (0 = hard edge, 1 = very soft)
+            light.decay = .5;
+            light.penumbra = 0.5; 
+
+        if (settings && !settings.sceneTags.includes("clustered lighting")) {
+            light.castShadow = true;
+        }
+       
+        scene.add(light);
+        light.position.set(locationData.x, locationData.y, locationData.z);
+        light.target = target;
+
+
+        // 1. Calculate the sin offset over time
+        // const speed = 2.0;
+        // const amplitude = 1.5;
+        // const yOffset = sin( time.mul( speed ) ).mul( amplitude );
+
+        // // 2. Apply it to the object's local position vector
+        // const animatedPosition = vec3( positionLocal.x, positionLocal.y.add( yOffset ), positionLocal.z );
+        // target.position.set(animatedPosition.x, animatedPosition.y, animatedPosition.z);
+
+        // if (spotTargets.length && spotIndex < spotTargets.length) {
+        //     console.log("using spot target " + spotIndex + " of " + spotTargets.length);
+        //     light.target = spotTargets[spotIndex];
+        //     spotIndex++;
+        // }
+
+        
+        if (parent) {
+            parent.attach(light);    
+        }
+        spotLights.push(light);
+}
+
+export function AssignSpotLightTargets() {
+
+    // spotLights.forEach(light => {
+    //     light.target = 
+    // });
+    // for (let i = 0; i < spotLights.length; i++) {
+    //     console.log("tryna assign spotlight " + i);
+    //     if (spotTargets[i]) {
+    //         console.log("gotsa spotlight target "+ i);
+    //         spotLights[i].target = spotTargets[i];
+    //     }
+    // }
+
+}
+export function CreatePointLight(locationData, parent) {
+
+    console.log("tryna create point light with color data " + locationData.color);
 
 
     if (!locationData.yscale) {
@@ -177,18 +245,21 @@ export function CreateLight(locationData, parent) {
         }
         light.position.set(locationData.x, locationData.y, locationData.z);
 
-    } else {
+    } else { //default is point
          let color1 = settings.sceneColor1Alt;
         if (locationData.color) {
             color1 = locationData.color;
         }
         
         console.log("adding default light color " + color1 + " " + parseFloat(locationData.yscale) * 16 + " at location " + locationData.x + locationData.y + locationData.z );
-        const light = new THREE.PointLight( color1, parseFloat(locationData.yscale) * 4, parseFloat(locationData.yscale) * 32, 1);
-        
+        const light = new THREE.PointLight( color1, parseFloat(locationData.yscale) * 4, parseFloat(locationData.yscale) * 16, 1);
+        if (settings && !settings.sceneTags.includes("clustered lighting")) {
+            light.castShadow = true;
+        }
+       
         scene.add(light);
         light.position.set(locationData.x, locationData.y, locationData.z);
-         if (parent) {
+        if (parent) {
             parent.attach(light);    
         }
         // light.position.set(locationData.x, locationData.y, locationData.z);

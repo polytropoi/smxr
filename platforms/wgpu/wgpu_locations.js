@@ -8,7 +8,7 @@ import { settings } from '../../../connect/settings.js';
 
 import {SceneObject, sceneObjects} from './wgpu_actions.js';
 
-import {triggerAudioController} from './wgpu_media.js';
+import {ScenePicture, triggerAudioController} from './wgpu_media.js';
 
 import { SetSceneLocations, userData, localData } from '../../../connect/connect.js';
 
@@ -18,7 +18,7 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 import { instancedModels, createDefaultSurface, SetSurface, InstanceOnSurface } from './wgpu_instance.js';
 
-import { CreateLight } from './wgpu_lights.js';
+import { CreatePointLight, CreateSpotLight, spotTargets } from './wgpu_lights.js';
 
 import { convertGltfToNodeMaterial, GetAvailableScenesData, InitLocationModelVideo } from './wgpu_media.js';
 
@@ -56,6 +56,7 @@ export let animationMixers = [];
 export let animationData = {};
 
 // export let sceneObjects = {};
+export let picPlaces = [];
 
 export let navmesh;
 
@@ -945,7 +946,7 @@ async function LoadLocationModel (url, locationData, isActive) {
         model.scale.set(xscale,yscale,zscale);
 
             // model.scale.set(20,20,20);
-        
+
         model.name = locationData.timestamp;
         // model.layers.set(1);
         model.userData.locationData = locationData;
@@ -957,7 +958,8 @@ async function LoadLocationModel (url, locationData, isActive) {
         // if (locationData.locationTags.includes("active")) {
             // activeObjex.push(model);
         // } 
-
+        model.updateMatrixWorld(true);
+        
         if (locationData.locationTags && locationData.locationTags.includes("billboard")) {
             lookAtCameraObjects.push(model);
         }
@@ -971,16 +973,73 @@ async function LoadLocationModel (url, locationData, isActive) {
 
         model.traverse(function (child) {
            
-                    let worldPosition = new THREE.Vector3();
+            const worldPos = new THREE.Vector3();
+            if (child.name  && child.name != undefined && typeof child.name === 'string') {
+                const name = child.name.toString();
+                
+                console.log("child.name is " + name);
+                if (name.includes("point_light")) {
+                    
+                    child.getWorldPosition(worldPos);
+                    console.log("point light is " + name + " position " + JSON.stringify(worldPos));
+                    let locationData = {};
+                    
+                    locationData.yscale = 1; //hrm
+                    locationData.x = worldPos.x;
+                    locationData.y = worldPos.y;
+                    locationData.z = worldPos.z;
+                    locationData.color = "yellow";
+                    CreatePointLight(locationData, null);
+                    
+                } else if (name.includes("spot_light")) {
+                    
+                    child.getWorldPosition(worldPos);
+                    console.log("spot light is " + name + " position " + JSON.stringify(worldPos));
+                    let locationData = {};
+                    
+                    locationData.yscale = 1; //hrm
+                    locationData.x = worldPos.x;
+                    locationData.y = worldPos.y;
+                    locationData.z = worldPos.z;
+                    locationData.color = "yellow";
+                    CreateSpotLight(locationData, null, child.children[0]);
+                    
+                } else if (name.includes("picture_place")) {
+                      child.getWorldPosition(worldPos);
+                    console.log('gotsa pic place with media id ' + locationData.mediaID + " groupID " + locationData.groupID);
+                    const fInstance = locationData.groupID + "_" + Date.now();
+                    const picPlace = {};
+                    picPlace.groupID = locationData.groupID;
+                    picPlace.mediaID = locationData.mediaID;
+                    picPlace.position = worldPos;
+                    picPlace.instanceID = fInstance;
 
+                    const worldQuaternion = new THREE.Quaternion();
+
+                    // 2. Force Three.js to calculate up-to-date world matrices 
+                    // (Crucial if you are doing this outside of the main render loop)
+                    child.updateWorldMatrix(true, false);
+
+                    // 3. Extract the world rotation into your placeholder quaternion
+                    child.getWorldQuaternion(worldQuaternion);
+
+                    // 4. Assign the world rotation to your target object
+                    // picPlace.quaternion.copy(worldQuaternion);
+                    picPlace.rotationQuaternion = worldQuaternion;
+                    picPlaces.push(picPlace);
+                    // scenePictures[fInstance] = scenePic;
+                    // locationData.mediaID
+                    // spotTargets.push(child.copy());
+                }
+
+            }
 
             if (child.isMesh){
 
                 child.userData = {};
                 child.userData.locationData = locationData; //
                 
-                child.castShadow = true;
-                child.receiveShadow = true;
+
                 // console.log("loaded mesh with tags " + locationData.locationTags);
                 child.userData.locationData = locationData;
                 if (locationData.locationTags && locationData.locationTags.includes("hide") ) {
@@ -994,7 +1053,8 @@ async function LoadLocationModel (url, locationData, isActive) {
                                                                 
                     if (child.material) {
 
-                        
+                        child.castShadow = true;
+                        child.receiveShadow = true;
                         // console.log("setting scene.environment envmap " + scene.environment );
                         // child.material.roughness = 0.5;
                         // child.material.envMap = scene.environment;
@@ -1002,39 +1062,12 @@ async function LoadLocationModel (url, locationData, isActive) {
                         child.material.envMap = scene.environment;
                         // child.material 
                         // child.material.transparent = true;
-                       
+                        
                         child.envMapIntensity = 1;
                         child.castShadow = true;	
                         child.receiveShadow = true;
 
-                        if (child.name  && child.name != undefined && typeof child.name === 'string') {
-                            const name = child.name.toString();
-                            
-                            console.log("child.name is " + name);
-                            if (name.includes("emissive")) {
-
-                                    // 3. Extract the world position into your vector
-                                child.getWorldPosition(worldPosition);
-                                let locationData = {};
-                                // locationData.locationTags = [this.objectData.light.toLowerCase()];
-                                locationData.yscale = 1;
-                                locationData.x = worldPosition.x;
-                                locationData.y = worldPosition.y;
-                                locationData.z = worldPosition.z;
-                                locationData.color = "yellow";
-                                CreateLight(locationData, null);
-                                child.material.transparent = true;
-                                child.material.opacity = .5;
-                                child.material.roughness = .2;
-                            // }
-                            // const mat = child.material;
-                            // // Check if the material has an emissive component or matches a specific name
-                            // if (mat.emissive) {
-                            //     mat.emissive.setHex(0xff0000); // Set emission color (e.g., red)
-                            //     mat.emissiveIntensity = 20.0;    // Boost brightness
-                            //     mat.needsUpdate = true;
-                            }
-                        }
+                        
                     }
 
 
@@ -1082,9 +1115,9 @@ async function LoadLocationModel (url, locationData, isActive) {
                 if (child.name  && child.name != undefined && typeof child.name === 'string') {
                     const name = child.name.toString();
                             
-                       
+                        
                         if (name.includes("navmesh")) { 
-                             console.log("gotsa navmesh child of model " + model.name);
+                                console.log("gotsa navmesh child of model " + model.name);
                             navmesh = child;
                             navmesh.visible = false;
                                     groundObjex.push(navmesh);
@@ -1104,7 +1137,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                 // mesh.position.set(0, 0, 0); // Usually at the parent bone
                 
                 // // if (settings && settings.)
-               
+                
                 // // Scale mesh based on bone's position vector length
                 // const boneLength = child.position.length();
                 // if (boneLength > 1) {
@@ -1242,7 +1275,7 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             // model.material.color = "yellow";
         }
         // if (model) {
-            CreateLight(locationData);
+            CreatePointLight(locationData);
             if (model)
             scene.add(model.model);
             // model.material.color = "orange";

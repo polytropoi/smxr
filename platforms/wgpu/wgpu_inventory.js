@@ -70,7 +70,7 @@ function Dequip (event) {
         viewportPlaceholder.clear();
         removeAndDisposeChildren(viewportPlaceholder);
         if (equippedRigidbody) {
-            RemoveRigidbody(equippedRigidbody);
+            // RemoveRigidbody(equippedRigidbody);
         }
         
        
@@ -79,7 +79,9 @@ function Dequip (event) {
 
 function removeAndDisposeChildren(object) {
     object.traverse((child) => {
+        child.userData = {}; //?
         if (child.isMesh) {
+            
             if (child.geometry) child.geometry.dispose();
             
             if (child.material) {
@@ -89,6 +91,10 @@ function removeAndDisposeChildren(object) {
                     child.material.dispose();
                 }
             }
+        }
+        if (child.userData.objectData) {
+            child.userData.objectData.isEquipped = false;
+            
         }
     });
     
@@ -105,13 +111,14 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
     } 
     const objectData = ReturnObjectData(event.details.objectID);
     const iTags =  event.details.instanceTags;
+
     console.log("equip event for objectID " + event.details.objectID + " with instanceTags " + JSON.stringify(iTags) + " instanceID " + event.details.instanceID);
 
     if (objectData) {
 
         if (iTags) {
             objectData.instanceTags = iTags;
-
+            objectData.instanceID = event.details.instanceID;
         }
         if (objectData.actions != undefined && objectData.actions.length > 0) {
             for (let i = 0; i < objectData.actions.length; i++) {
@@ -155,14 +162,14 @@ export function EquipInventoryCheck(event) { //equip button in modal, from dialo
     } else {
         console.log("cain't equip that! " + event.details.objectID);
         if (event.details.objectID) {
-            FetchSceneInventoryObject(event.details.objectID, true, "", event);
+            FetchSceneInventoryObject(event.details.objectID, true, event.details.instanceTags, event);
         }
     }
 }
 
 export async function EquipObject (objectData, locData) { 
 
-    console.log("tryna equip  " + objectData.name + " sceneObjectID " + objectData.sceneObjectID + " instanceID " + objectData.instanceID);//  + " : " + JSON.stringify(objectData));  
+    console.log("tryna equip  " + objectData.name + " sceneObjectID " + objectData.sceneObjectID + " instanceID " + objectData.instanceID + " instanceTags " + JSON.stringify(objectData.instanceTags));//  + " : " + JSON.stringify(objectData));  
     
     // let objectData = ReturnObjectData(objectID);
     Dequip();
@@ -177,6 +184,9 @@ export async function EquipObject (objectData, locData) {
 
         } else {
 
+        }
+        if (!objectData.sceneObjectID) {
+            objectData.sceneObjectID = objectData._id + "_" + Date.now(); 
         }
         
         // console.log("tryna equip object " + objectData.modelURL);  
@@ -204,7 +214,9 @@ export async function EquipObject (objectData, locData) {
         // } else {
         if (!tagData) {
 
-            console.log("no tags found for equipped obj")
+            console.log("no tags found for equipped obj");
+        } else {
+            console.log("tags found for equipped obj " + JSON.stringify(tagData));
         }
 
         if (objectData.objScale) {
@@ -248,7 +260,7 @@ export async function EquipObject (objectData, locData) {
         return equippedSceneObject;
     } else {
         
-        FetchSceneInventoryObject(objectData._id, true, "", eventData);
+        await FetchSceneInventoryObject(objectData._id, true, objectData.instanceTags, eventData);
     }
 }
 
@@ -349,37 +361,67 @@ async function DropInventoryObject (objectData, action, inventoryID) {
     }
 
   
-  function FetchSceneInventoryObject(oID, equip, tags, eventData) { //add a single scene inventory object, e.g. child object spawn that isn't in initial collection, but don't init everything
+  async function FetchSceneInventoryObject(oID, equip, tags, eventData) { //add a single scene inventory object, e.g. child object spawn that isn't in initial collection, but don't init everything
     // let objexEl = document.getElementById('sceneObjects');   
 
     // if (objexEl && !objexEl.components.mod_objex.returnObjectExists(oID)) {
  
     // if (oIDs.length > 0) {
       // objexEl.components.mod_objex.dropObject(data.inventoryObj.objectID);
-      let data = {};
-      data.oIDs = [oID];
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", '/scene_inventory_objex/', true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send(JSON.stringify(data));
-      xhr.onload = function () {
-        // do something to response
+      let objdata = {};
+      objdata.oIDs = [oID];
+    //   var xhr = new XMLHttpRequest();
+    //   xhr.open("POST", '/scene_inventory_objex/', true);
+    //   xhr.setRequestHeader('Content-Type', 'application/json');
+    //   xhr.send(JSON.stringify(data));
+    //   xhr.onload = function () {
+    //     // do something to response
         
-        let response = JSON.parse(this.responseText);
-        // console.log("gotsome objex: " + response.objex.length);
-        if (response.objex.length > 0) {
-            console.log("fetched scene inventory objex : " +response.objex.length);
-            // objexEl.components.mod_objex.addFetchedObject(response.objex[0]); //add to scene object collection, so don't have to fetch again
+    //     let response = JSON.parse(this.responseText);
+    //     // console.log("gotsome objex: " + response.objex.length);
+    //     if (response.objex.length > 0) {
+    //         console.log("fetched scene inventory objex : " +response.objex.length);
+    //         // objexEl.components.mod_objex.addFetchedObject(response.objex[0]); //add to scene object collection, so don't have to fetch again
+    //         response.objex[0].instanceTags = tags;
+    //         if (equip) {
+    //         //   objexEl.components.mod_objex.equipInventoryObject(oID, tags, eventData)
+    //             EquipObject(response.objex[0], {});
+    //         } 
+    //     }
+       
+    //   }
+
+
+    try {
+        const response = await fetch('/scene_inventory_objex/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(objdata)
+        });
+
+        // Fetch fulfills on HTTP errors (404, 500) so you must check .ok manually
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("fetched a sceneinventoryobject "+ JSON.stringify(data));
+
+        if (data.objex && data.objex.length) { //should really only be one, but...
+            data.objex[0].instanceTags = tags;
             if (equip) {
-            //   objexEl.components.mod_objex.equipInventoryObject(oID, tags, eventData)
-                EquipObject(response.objex[0], {});
+                if (tags) {
+                    data.objex[0].instanceTags = tags;
+                }
+                EquipObject(data.objex[0], {});
             } 
         }
-       
-      }
-    // } else {
-    //   console.log("already have that object...");
-    // }
+    } catch (error) {
+        console.error('Network or Parsing Error:', error);
+    }
+
   }
   
   function AddUserInventoryObjects (items) {

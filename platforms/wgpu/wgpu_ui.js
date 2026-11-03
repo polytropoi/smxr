@@ -616,7 +616,7 @@ export function UpdateText (string) { //uikit, no workie (use vite, they say...)
     }
 }
 
-export function ShowGroupPicture (locationGroupId, locationMediaId, instanceId, position, visible, lookAtCamera) {
+export function ShowInstanceGroupPicture (locationGroupId, locationMediaId, instanceId, position, visible, lookAtCamera) { //pics assigned (via tags?) to instanced things
 
     let scenePictureInstance;
 

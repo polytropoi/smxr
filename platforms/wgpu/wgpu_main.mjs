@@ -356,9 +356,9 @@
 		// if (settings.audioGroups && settings.audioGroups.length) {
 			InitAudioGroups();
 		// }
-		if (settings.pictureGroups && settings.pictureGroups.length) {
+		// if (settings.pictureGroups && settings.pictureGroups.length) {
 			InitPictureGroups();
-		}
+		// }
 		InitSceneText();
 		InitScenePictures();
 		InitVideoGroups();
