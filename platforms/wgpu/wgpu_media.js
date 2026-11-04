@@ -39,6 +39,8 @@ export let videoGroupsData;
 export let sceneVideoPlayer;
 export let mediaPlayersToUpdate = [];
 
+export let pictureGroupIndexes = {};
+
 createYouTubePlayer();
 eventEl.addEventListener('sequence-event', SequenceEvent); 
 
@@ -144,9 +146,8 @@ export function InitPictureGroups () {
    if (picPlaces.length) {
     for (let i = 0; i < picPlaces.length; i++) {
         const scenePic = new ScenePicture(picPlaces[i].groupID, null, picPlaces[i].instanceID, picPlaces[i].position, true, false, picPlaces[i].rotationQuaternion );
-        scenePictures[picPlaces[i].instanceID] = scenePic;
+        // scenePictures[picPlaces[i].instanceID] = scenePic;
     }
-        
    }
 }
 
@@ -1113,6 +1114,13 @@ export class ScenePicture {
         this.locationGroupID = locationGroupID;
         this.locationMediaID = locationMediaID;
         this.rotationQuaternion = rotationQuaternion;
+        
+        if (pictureGroupIndexes[locationGroupID]) {
+            pictureGroupIndexes[locationGroupID] = pictureGroupIndexes[groupID] + 1;
+        } else {
+            pictureGroupIndexes[locationGroupID] = 0
+        }
+        this.pictureGroupIndexes = pictureGroupIndexes;
   
             // console.log("creating a landscape panel " + position.x + " " + position.y + " " + position.z);
             const landscapeGeometry = new THREE.PlaneGeometry(6, 4, 4, 4);
@@ -1217,7 +1225,7 @@ export class ScenePicture {
         console.log("tryna update picture from group " + this.locationGroupID);
 
         this.hideAllPanels();
-        this.pictureItem = ReturnPictureFromGroup(this.locationGroupID);
+        this.pictureItem = ReturnPictureFromGroup(this.locationGroupID, this.pictureGroupIndexes[this.locationGroupID]);
         console.log("pictureITem " + JSON.stringify(this.pictureItem));
 
         if (this.pictureItem.orientation == "Landscape") {
