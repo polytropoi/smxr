@@ -1091,7 +1091,7 @@ async function RaycastHit(type, hit, event) {
                         // console.log(Object.keys(tagData).toString());
                         
                         const pics = ReturnTaggedPictures(Object.keys(tagData).toString());
-                        if (!pics.length) {
+                        if (!pics || !pics.length) {
                             
                             ThreeDeeText(tagData,1,lastRaycastHitObject, lastRaycastHitPosition, lastRaycastHitDistance, null, locationData.yscale);
                         } else {
@@ -1438,7 +1438,7 @@ export function onMouseDown(event) { // on threejs object
                 return;
             }
         } else {
-            console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " locationData " + JSON.stringify(lastRaycastHitObject.userData)); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+            console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " name " + lastRaycastHitObject.name); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
         }
     } else {
       

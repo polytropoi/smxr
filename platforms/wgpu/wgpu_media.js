@@ -109,24 +109,23 @@ export function GetAvailableScenesData () {
 
 export function InitPictureGroups () {
     const pictureGroupsDataEl = document.getElementById('pictureGroupsData');
-   if (pictureGroupsDataEl) {
+    if (pictureGroupsDataEl) {
       const thePictureGroupsData = pictureGroupsDataEl.getAttribute('data-picture-groups');
       pictureGroupsData = JSON.parse(atob(thePictureGroupsData));
-   }
-   console.log("pictureGroupsData length " + pictureGroupsData.length + " " + JSON.stringify(pictureGroupsData));
-
-
-    for (let i = 0; i < pictureGroupsData.length; i++) {
-        for (let p = 0; p < pictureGroupsData[i].images.length; p++) {
-           
-            if (pictureGroupsData[i].images[p].orientation == "Equirectangular") {
-                 console.log("adding equirect: " + pictureGroupsData[i].images[p].title);
-                equirectPictures.push(pictureGroupsData[i].images[p]);
-            } else if (pictureGroupsData[i].images[p].orientation == "Tileable") {
-                 console.log("adding equirect: " + pictureGroupsData[i].images[p].title);
-                tileablePictures.push(pictureGroupsData[i].images[p]);
-            }
+      console.log("pictureGroupsData length " + pictureGroupsData.length + " " + JSON.stringify(pictureGroupsData));
+    
+        for (let i = 0; i < pictureGroupsData.length; i++) {
+            for (let p = 0; p < pictureGroupsData[i].images.length; p++) {
             
+                if (pictureGroupsData[i].images[p].orientation == "Equirectangular") {
+                    console.log("adding equirect: " + pictureGroupsData[i].images[p].title);
+                    equirectPictures.push(pictureGroupsData[i].images[p]);
+                } else if (pictureGroupsData[i].images[p].orientation == "Tileable") {
+                    console.log("adding equirect: " + pictureGroupsData[i].images[p].title);
+                    tileablePictures.push(pictureGroupsData[i].images[p]);
+                }
+                
+            }
         }
     }
     // const scenePicturesDataEl = document.getElementById('scenePicturesData');
@@ -145,7 +144,7 @@ export function InitPictureGroups () {
    if (picPlaces.length) {
     for (let i = 0; i < picPlaces.length; i++) {
         const scenePic = new ScenePicture(picPlaces[i].groupID, null, picPlaces[i].instanceID, picPlaces[i].position, true, false, picPlaces[i].rotationQuaternion );
-        // scenePictures[picPlaces[i].instanceID] = scenePic;
+        scenePictures[picPlaces[i].instanceID] = scenePic;
     }
         
    }
@@ -203,8 +202,22 @@ export function InitLocationModelVideo(model, locData) { //attached to model
 export function ReturnPictureFromGroup (groupID, tags, groupIndex) {
     for (let i = 0; i < pictureGroupsData.length; i++) {
         if (pictureGroupsData[i]._id == groupID) {
-            const imageIndex = Math.floor(Math.random() * pictureGroupsData[i].images.length);
-            return pictureGroupsData[i].images[imageIndex];
+            if (!groupIndex) {
+                const imageIndex = Math.floor(Math.random() * pictureGroupsData[i].images.length);
+                return pictureGroupsData[i].images[imageIndex];
+            } else {
+                if (groupIndex < pictureGroupsData[i].images.length) {
+                    return pictureGroupsData[i].images[groupIndex];
+                } else {
+                    groupIndex = groupIndex - pictureGroupsData[i].images.length;  //todo properly loop this 
+                    if (groupIndex < pictureGroupsData[i].images.length) {
+                        return pictureGroupsData[i].images[groupIndex];
+                    } else {
+                        const imageIndex = Math.floor(Math.random() * pictureGroupsData[i].images.length);
+                        return pictureGroupsData[i].images[imageIndex];
+                    }
+                }
+            }
         }
     }
 }
