@@ -31,7 +31,7 @@ import { SaveLocalData } from '../../connect/indexedDb.js';
 
 import { lookAtCameraObjects } from './wgpu_ui.js';
 
-import { splatObjex } from './wgpu_splats.js';
+import { splatObjex } from './wgpu_main.mjs';
 // import { sceneObjects } from '../../connect/dialogs.js';
 
 // export let localData = {};

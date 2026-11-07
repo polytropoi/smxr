@@ -52,11 +52,31 @@
 	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData, InitScenePictures } from './wgpu_media.js';
 	
 	import { equipOnLoadEvent, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
-	import { splatObjex, InitSplats } from './wgpu_splats.js';
+
+	// import { splatObjex, InitSplats } from './wgpu_splats.js'
+
+	export let splatObjex = []; //InitSplats;
+
+	// if (settings && settings.sceneTags && settings.sceneTags.includes("splat")) {
+	// 	// const splatObjex, InitSplats = await import { splatObjex, InitSplats } from './wgpu_splats.js'
+			
+	// 	// .then((mobileModule) => {
+	// 	//   mobileModule.initResponsiveMenu();
+	// 	// })
+	// 	// .catch((error) => {
+	// 	//   console.error("Failed to load the mobile module:", error);
+	// 	// });
+	// }
+		 
+	
 	import { InitSuperSonic, SynthHit, synthKeys, SynthKeys, superSonicLoaded, synthTransports } from './wgpu_synths.js';
 
 	export let scene;
 
+
+	export async function LoadConditionals() {
+		//hrm/./
+	}
 
 	// let raycastHitAgent;
 	// let isDragging = false;
@@ -639,6 +659,8 @@
 		await LoadKinematicAgentMeshes();
 		
 		if (splatObjex.length) {
+
+			const {InitSplats} = await import ('./wgpu_splats.js'); //conditional import!
 			// if (splatObjex.length) {
 				// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Spark Lib....<h4>";
 				// ShowPopup(null, loadingString);

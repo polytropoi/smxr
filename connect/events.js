@@ -18,6 +18,7 @@ export let dequip_event = new Event("dequip-event");
 export let sequence_event = new Event("sequence-event");
 export let data_event = new Event("data-event");
 export let location_event = new Event("location-event");
+export let avatar_event = new Event("avatar-event");
 
 export let sequenceInt = -1;
 
@@ -39,6 +40,17 @@ let lastTimedEvent = "";
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
 
 
+
+export function CreateAvatarEvent (avatarData) { //caught in wgpu_inventory.js
+      avatar_event.details = avatarData;
+      eventEl.dispatchEvent(avatar_event);
+}
+
+
+export function MoveAvatarEvent (avatarData) { //caught in wgpu_inventory.js
+      avatar_event.details = avatarData;
+      eventEl.dispatchEvent(avatar_event);
+}
 
 export function SetSequenceInt (int) { //called elsewhere to limit loop depending on what is using it (skyboxes, poi locations, etc.)
    sequenceInt = int;

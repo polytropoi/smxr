@@ -4,7 +4,7 @@ import { GaussianSplat } from 'three/addons/objects/GaussianSplat.js';
 
 
   // import { SplatMesh, SparkRenderer } from "sparkjsdev/spark";
-import {scene, renderer, StartButton, loadingHeader} from "./wgpu_main.mjs";
+import {scene, renderer, StartButton, loadingHeader, splatObjex} from "./wgpu_main.mjs";
 
 import {StartPopup, startPop} from "./wgpu_ui.js";
 
@@ -13,7 +13,7 @@ import { settings } from '../../../connect/settings.js';
 import { activeObjex } from "./wgpu_locations.js";
 
 export let splatsLoaded = false;
-export let splatObjex = [];
+// export let splatObjex = [];
 
 export async function InitSplats () {
     for (let i = 0; i < splatObjex.length; i++) {
@@ -44,7 +44,7 @@ export async function InitSplats () {
                 splat.rotation.set(xrot, yrot, Math.PI, 'XYZ');
                 
                 // splat.scale.set(xscale, yscale * modFlip, zscale);
-                                splat.scale.set(xscale, yscale, zscale);
+                splat.scale.set(xscale, yscale, zscale);
                 scene.add(splat);
                 splat.userData.name = "SPLAT";
                 // activeObjex.push(splat);

@@ -47,6 +47,8 @@
     // let agentIndex = 0;
 
 
+    export { NavAgent as NavAgent };
+
 
     export async function CreateTestAgent (agentIndex, pos) {
 
@@ -257,43 +259,49 @@
     export async function InitPathfinding () {
         // if (settings && settings.sceneTags && settings
         // .sceneTags.includes("navmesh") && navmesh) {
-        await navmesh;
-        console.log("tryna InitPathfinding");
-        if (navmesh) {
-            try {
+        if (settings && settings.sceneTags && settings.sceneTags.includes("navcat")) {
 
-                 
-                pathfinding = await new Pathfinding();
-                await world;
-                helper = new PathfindingHelper();
-                scene.add(helper);
-                helper.reset()
-                // const pathfinding = new Pathfinding();
-                
-                // Define a zone name
-                pathfinding.setZoneData(ZONE, Pathfinding.createZone(navmesh.geometry));
-
-                console.log("gotsa navmesh " + navmesh);
-
-
-            } catch (e) {
-                console.log("error pathfinding init " + e);
-            } finally{
-                agentsAreReady = true;
-                console.log( "navmesh done, initAgents()");
-            //    WaitAndInitAgents();
-                if (settings && settings.sceneTags && settings.sceneTags.includes("test agents")) {
-                    await InitTestAgents();
-                }
-                // await new Promise(r => setTimeout(r, 4000)); //slow the fxk down
-                // AssignModelsToAgents();
-
-                // await LoadLocationObjex(); //e.g. navagent characters
-            }
-
-            // await initRapier();
+            
         } else {
-            // await initRapier();
+
+            await navmesh;
+            console.log("tryna InitPathfinding");
+            if (navmesh) {
+                try {
+
+                    
+                    pathfinding = await new Pathfinding();
+                    await world;
+                    helper = new PathfindingHelper();
+                    scene.add(helper);
+                    helper.reset()
+                    // const pathfinding = new Pathfinding();
+                    
+                    // Define a zone name
+                    pathfinding.setZoneData(ZONE, Pathfinding.createZone(navmesh.geometry));
+
+                    console.log("gotsa navmesh " + navmesh);
+
+
+                } catch (e) {
+                    console.log("error pathfinding init " + e);
+                } finally{
+                    agentsAreReady = true;
+                    console.log( "navmesh done, initAgents()");
+                //    WaitAndInitAgents();
+                    if (settings && settings.sceneTags && settings.sceneTags.includes("test agents")) {
+                        await InitTestAgents();
+                    }
+                    // await new Promise(r => setTimeout(r, 4000)); //slow the fxk down
+                    // AssignModelsToAgents();
+
+                    // await LoadLocationObjex(); //e.g. navagent characters
+                }
+
+                // await initRapier();
+            } else {
+                // await initRapier();
+            }
         }
 
     }
@@ -1198,4 +1206,63 @@
         }
     }
 
-    export { NavAgent as NavAgent };
+/////////////////// Pathfinding above, NavCat below...
+
+/**
+ * Filters geometry arrays to exclude roofs and vertical walls for Navcat.
+ * @param {Float32Array|number[]} positions - Flat array of vertex positions [x1, y1, z1, x2, y2, z2, ...]
+ * @param {Uint16Array|Uint32Array|number[]} indices - Flat array of triangle indices [i1, i2, i3, ...]
+ * @param {number} maxFloorHeight - The maximum Y-coordinate representing walkable ground (anything above is a roof).
+ * @param {number} minSlopeCos - Minimum cosine of the angle with the up-vector (e.g., 0.7 for ~45 degrees). Default allows flat floors.
+ */
+function getWalkableGeometry(positions, indices, maxFloorHeight, minSlopeCos = 0.7) {
+    const walkableIndices = [];
+    
+    // Loop through geometry triangle by triangle
+    for (let i = 0; i < indices.length; i += 3) {
+        const idx0 = indices[i];
+        const idx1 = indices[i + 1];
+        const idx2 = indices[i + 2];
+
+        // Extract vertex coordinates
+        const ax = positions[idx0 * 3], ay = positions[idx0 * 3 + 1], az = positions[idx0 * 3 + 2];
+        const bx = positions[idx1 * 3], by = positions[idx1 * 3 + 1], bz = positions[idx1 * 3 + 2];
+        const cx = positions[idx2 * 3], cy = positions[idx2 * 3 + 1], cz = positions[idx2 * 3 + 2];
+
+        // 1. Height Filter: If any vertex exceeds your maximum floor height, classify it as a roof
+        if (ay > maxFloorHeight || by > maxFloorHeight || cy > maxFloorHeight) {
+            continue; 
+        }
+
+        // 2. Slope / Normal Filter: Calculate the face normal to filter out walls or steep slopes
+        // Vector AB
+        const abx = bx - ax, aby = by - ay, abz = bz - az;
+        // Vector AC
+        const acx = cx - ax, acy = cy - ay, acz = cz - az;
+
+        // Cross product (AB x AC) to find the face normal
+        const nx = aby * acz - abz * acy;
+        const ny = abz * acx - abx * acz;
+        const nz = abx * acy - aby * acx;
+
+        // Normalize the normal vector
+        const len = Math.sqrt(nx * nx + ny * ny + nz * nz);
+        if (len === 0) continue; // Skip degenerate triangles
+        
+        const nyNormal = ny / len; // This represents the cosine of the angle relative to the UP vector (0, 1, 0)
+
+        // If the surface face normal doesn't point upwards sharply enough, it's a wall or steep slope
+        if (nyNormal < minSlopeCos) {
+            continue;
+        }
+
+        // Triangle passed both criteria; keep it
+        walkableIndices.push(idx0, idx1, idx2);
+    }
+
+    // Return the original position array paired with the newly filtered walkable indices
+    return {
+        positions: positions, 
+        indices: walkableIndices 
+    };
+}

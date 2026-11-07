@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 
 import { scene, animatedSprites } from './wgpu_main.mjs';
-import { uniform, Fn, vec3, sin, time, color, positionLocal} from 'three/tsl';
+import { add, uniform, Fn, vec3, sin, time, color, positionLocal} from 'three/tsl';
 
 import { ClusteredLighting } from 'three/addons/lighting/ClusteredLighting.js'
 
@@ -70,7 +70,7 @@ export function create_Light(locationData) {
 
 export function CreateSpotLight(locationData, parent, target) {
 
-    console.log("tryna create spot light with color data " + locationData.color);
+    console.log("tryna create spot light with color data " + locationData.color + " target " + target.name);
      let color1 = "blue";
         // if (locationData.color) {
         //     color1 = locationData.color;
@@ -91,9 +91,17 @@ export function CreateSpotLight(locationData, parent, target) {
        
         scene.add(light);
         light.position.set(locationData.x, locationData.y, locationData.z);
+        // const theTarget = target.clone();
+        // scene.add(target);
+
         light.target = target;
 
 
+        // const tmat = new THREE.NodeMaterial();
+        // const offset = time.mul(2.0).sin().mul(0.5);
+        // theTarget.material = tmat;
+        // tmat.positionNode = add(positionLocal, vec3(0.0, offset, 0.0));
+        // scene.add(target);
         // 1. Calculate the sin offset over time
         // const speed = 2.0;
         // const amplitude = 1.5;
@@ -109,7 +117,6 @@ export function CreateSpotLight(locationData, parent, target) {
         //     spotIndex++;
         // }
 
-        
         if (parent) {
             parent.attach(light);    
         }

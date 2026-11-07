@@ -5,13 +5,15 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js';
 
+import { UpdatePlayerPosRot } from '../../../connect/connect.js';
+
 import { closestNavmeshPoint, navAgentInstances } from './wgpu_nav.js';
 
 import { availableScenesData, ReturnTaggedPictures, sceneTextController, triggerAudioController } from './wgpu_media.js';
 
 import { ActionSwitch, SetPlayerRigidbody, InstancedActionClick, sceneObjects } from './wgpu_actions.js';
 
-import { activeObjex, allSceneObjex, groundObjex, navmesh, LocationEvent } from './wgpu_locations.js';
+import { activeObjex, allSceneObjex, groundObjex, navmesh, LocationEvent, playerPosition } from './wgpu_locations.js';
 
 import { scene, cameraMode, renderer, clock, selectedObjects, sceneIsReady } from './wgpu_main.mjs';
 
@@ -36,7 +38,7 @@ import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
 import * as nipplejs from '../../../main/js/nipple.mjs';
 import { ReturnTagForInstance } from './wgpu_instance.js';
-import { GoToNext, localData } from '../../connect/connect.js';
+import { GoToNext, localData, playerRotation } from '../../connect/connect.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
 import { SynthHit, synthKeys, synthTransports } from './wgpu_synths.js';
 import { CreateNewLocation, keydown } from '../../connect/dialogs.js';
@@ -106,6 +108,10 @@ let validTarget = false;
 
 let controlObject;
 let lastPlayerPosition = new THREE.Vector3();
+
+let cameraPosition = new THREE.Vector3();
+let cameraRotation = new THREE.Vector3();
+let cameraQuaternion = new THREE.Quaternion();
 
 export let worldHitPosition = new THREE.Vector3();
 
@@ -1871,6 +1877,16 @@ export function onMouseMove(event) {
         // Constrain vertical look to prevent the camera from flipping over
          
         camera.rotation.x = Math.max( -Math.PI / 2, Math.min( Math.PI / 2, camera.rotation.x ) );
+
+        camera.updateMatrixWorld();
+        camera.getWorldPosition(cameraPosition);
+        camera.getWorldDirection(cameraRotation);
+        camera.getWorldQuaternion(cameraQuaternion);
+        const worldEuler = new THREE.Euler().setFromQuaternion(cameraQuaternion);
+        // camera.position.copy(playerPosition);
+        // camera.rotation.copy(playerRotation);
+        cameraPosition.y = cameraPosition.y - 1;
+        UpdatePlayerPosRot(cameraPosition,worldEuler);
     }
     //  if (!mouseIsDown) return; //nope, orbit is better
 

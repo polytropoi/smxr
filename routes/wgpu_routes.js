@@ -498,6 +498,13 @@ wgpu_router.get('/:_id', function (req, res) {
                     // "}</script>";
                     }
 
+                    if (sceneData.sceneTags[i].toLowerCase().includes("navcat")) {    
+
+                        
+                    
+                    }
+
+
                     // aframe-physics-system.min
 
                     if (sceneData.sceneTags[i].toLowerCase().includes("show camera")) {
@@ -2700,7 +2707,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     "<body "+bgstyle+">" +
 
                     joystickContainer+
-
+                    // "<a-asset-item id=\x22avatar_model\x22 crossorigin=\x22anonymous\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb\x22></a-asset-item>\n"+           
                         "<img hidden visible=\x22false\x22 id=\x22fireanim1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/fireanim3.png\x22 crossorigin=\x22anonymous\x22></img>"+
                     "<img hidden visible=\x22false\x22 id=\x22candle1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/candle_flame_8x8.png\x22 crossorigin=\x22anonymous\x22></img>"+
                     "<img hidden visible=\x22false\x22 id=\x22smoke1\x22 src=\x22https://servicemedia.s3.amazonaws.com/assets/pics/smokeanim2.png\x22 crossorigin=\x22anonymous\x22>"+

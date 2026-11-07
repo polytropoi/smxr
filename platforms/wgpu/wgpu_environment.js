@@ -566,7 +566,7 @@ export async function InitGround(options) {
 		// Access the position attribute
 		const positionAttr = geometry.attributes.position;
 		const perlin = new ImprovedNoise();
-		const peakHeight = 8; // Maximum height of hills
+		const peakHeight = 6; // Maximum height of hills
 		const noiseScale = 100;
 
 		for (let i = 0; i < positionAttr.count; i++) {
@@ -575,7 +575,7 @@ export async function InitGround(options) {
 			const z = positionAttr.getZ(i);
 
 			// Calculate noise value based on coordinates (scale inputs for smooth hills)
-			const y = perlin.noise(x * .05, 0, z * .05) * peakHeight * (Math.random() / 2);
+			const y = perlin.noise(x * .03, 0, z * .03) * peakHeight * (Math.random() / 3);
 
 			// Update the Y (height) coordinate
 			positionAttr.setY(i, y);

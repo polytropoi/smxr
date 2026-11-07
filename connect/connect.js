@@ -4,7 +4,7 @@ import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLo
 
 
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "./dialogs.js";
-import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition, MapUpdate, SequenceEvent } from "../connect/events.js";
+import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition, MapUpdate, SequenceEvent, CreateAvatarEvent, MoveAvatarEvent } from "../connect/events.js";
 
 
 import { settings, profile, mods } from "../connect/settings.js";
@@ -38,6 +38,7 @@ export let playerPosition;
 export let playerRotation = {x: 0, y: 0, z: 0};
 // let playerQuaternion = new THREE.Quaternion();
 
+export let avatars = {};
 
 var trimmedString = dateString.substring(dateString.length - 4, 4);
 var username;
@@ -45,7 +46,7 @@ var pics = [];
 var picsBuffer = [];
 var picArrayIndex = 0;
 var currentIndex = 0;
-let avatarNameEl = document.querySelector(".avatarName"); //make this actual uid?  
+let avatarNameEl = document.querySelector(".avatarName"); //make this actual uid?  //aframe only
 // let avatarName = "";
 let playFrames = false;
 let isConnected = false;
@@ -1104,7 +1105,7 @@ export function SaveModToLocal(locationKey) { //in dialog mode, locationKey is n
          localData.locations[i].hasLocalData = true;
   
          console.log(locItem.name + " gotsa match for localData.locations " + locationKey.toString() + " data " +JSON.stringify(localData.locations[i]));
-         let theEl = document.getElementById(locationKey.toString());
+         let theEl = document.getElementById(locationKey.toString()); 
          if (theEl) {
             if (sceneEl) {
                              
@@ -1210,7 +1211,7 @@ export function SaveModToLocal(locationKey) { //in dialog mode, locationKey is n
             }
          } else {
             // SaveLocalData();
-            console.log("DINT FIND THEEL " + locationKey);
+            console.log("saving localData " + locationKey);
             SaveLocalData();
             break;
             
@@ -2560,37 +2561,57 @@ if (settings && !socket) {
    });
 
    socket.on('playerposition', function(uname, posX, posY, posZ, rotX, rotY, rotZ, socketID, source) {
-      // console.log("player position data : " + uname + "x " + posX + " y " + posY + " z " + posZ + " rx " + rotX + " ry " + rotY + " rz " + rotZ + " sid " + socketID + " from " + source);
-      let pAvatar = document.getElementById(socketID);
-      // console.log("pAvatar is " + JSON.stringify(pAvatar));
-      // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
-      if (pAvatar != null) { //TODO Interpolation!
-         if (source == "unity") {
-            posZ = posZ * -1;
-         }
-         const posObj = {};
-         posObj.x = posX;
-         posObj.y = posY;
-         posObj.z = posZ;
-         const rotObj = {};
-         rotObj.x = rotX;
-         rotObj.y = rotY;
-         rotObj.z = rotZ;
+      console.log("player position data : " + uname + "x " + posX + " y " + posY + " z " + posZ + " rx " + rotX + " ry " + rotY + " rz " + rotZ + " sid " + socketID + " from " + source);
+
+
+      if (settings.sceneType == "aframe") {
+
+      
+         let pAvatar = document.getElementById(socketID);
+         // console.log("pAvatar is " + JSON.stringify(pAvatar));
          // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
-         // const posRotObj = {position: posX + "," + posY + "," + posZ, rotation: rotX + "," + rotY + "," + rotZ};
-               const posRotObj = {}
-               posRotObj.position = posObj;
-               posRotObj.rotation = rotObj;
-               var mover = pAvatar.components.mover; //much easier
-               // MoveElement(socketID, posRotObj);
-               // const event = new CustomEvent('update_pos_rot', {detail: posRotObj}, false);
-               // console.log("tryna dispatchEvent " + event);
-               // pAvatar.dispatchEvent(event);
-               mover.move(socketID, posObj, rotObj);
-         // pAvatar.setAttribute('position', posX + " " + posY + " " + posZ);
-         // pAvatar.setAttribute('rotation', rotX + " " + rotY + " " + rotZ);
+         if (pAvatar != null) { //TODO Interpolation!
+            if (source == "unity") {
+               posZ = posZ * -1;
+            }
+            const posObj = {};
+            posObj.x = posX;
+            posObj.y = posY;
+            posObj.z = posZ;
+            const rotObj = {};
+            rotObj.x = rotX;
+            rotObj.y = rotY;
+            rotObj.z = rotZ;
+            // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
+            // const posRotObj = {position: posX + "," + posY + "," + posZ, rotation: rotX + "," + rotY + "," + rotZ};
+                  const posRotObj = {}
+                  posRotObj.position = posObj;
+                  posRotObj.rotation = rotObj;
+                  var mover = pAvatar.components.mover; //much easier
+                  // MoveElement(socketID, posRotObj);
+                  // const event = new CustomEvent('update_pos_rot', {detail: posRotObj}, false);
+                  // console.log("tryna dispatchEvent " + event);
+                  // pAvatar.dispatchEvent(event);
+                  mover.move(socketID, posObj, rotObj);
+            // pAvatar.setAttribute('position', posX + " " + posY + " " + posZ);
+            // pAvatar.setAttribute('rotation', rotX + " " + rotY + " " + rotZ);
+         } else {
+            UpdatePlayerAvatars(roomUsers);
+         }
       } else {
-         UpdatePlayerAvatars(roomUsers);
+         const avatar = avatars[socketID];
+         if (avatar) {
+            if (socketID != socket.id) { //don't move yerself
+               console.log("gotsa avatar to move " + socketID);
+
+               const avatarData = {'type': 'move', 'posX': posX, 'posY': posY, 'posZ': posZ, 'rotX': rotX, 'rotY': rotY, 'rotZ': rotZ, 'socketID': socketID}
+
+               MoveAvatarEvent(avatarData);
+            }
+         } else {
+            UpdatePlayerAvatars(roomUsers);
+         }
+
       }
       // EmitSelfPosition();
    });
@@ -2678,7 +2699,7 @@ export function UpdatePlayerPosRot (position, rotation) { //called from navigati
    EmitSelfPosition();
    
    if (profile) {
-      UpdateLocalPlayerState(profile, room);
+      UpdateLocalPlayerState(profile, room); 
       // console.log("writing profile posrot to localdb");
    } 
 }
@@ -2946,6 +2967,7 @@ export function Disconnect() {
 function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, just make this a component function, to avoid creating a-entities outside of aframe
    console.log("tryna UpdatePlayerAvatars" + JSON.stringify(roomUsers));
    
+   //////// hrm aframe mode
    if (sceneEl != null && (settings.sceneType == "aframe" || settings.sceneType == "AFrame" || settings.sceneType == "Default") && !settings.hideAvatars && roomUsers) {
       var keys = Object.keys(roomUsers);
       var alreadyCreated = ""; //temp string to prevent doubles
@@ -2968,23 +2990,6 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
                      createAvatarComponent.createAvatar(key); //YES, it's below, but...
                   }
                }
-               // let avatar = document.createElement("a-entity"); //this make bad!
-               // // let avatar = sceneEl.createElement("a-entity");
-               // // avatar.setAttribute('avatar-pos-rot');
-               // avatar.classList.add("avatar");
-               // let userSplit = roomUsers[key].split("~"); //color appended to username after tilde on server
-               // let color = "blue";
-               // if (userSplit.length > 1) {
-               //    color = userSplit[1];
-               //    if (!color.includes("#")) {
-               //       color = "#" + color;
-               //    }
-               // }
-               // avatar.setAttribute('avatar-callout', {'calloutString': userSplit[0], 'hexColor': color});
-               // // avatar.setAttribute('lerp', {});
-               // avatar.setAttribute('mover', 'eltype', 'avatar');   
-               // avatar.id = keys[i]; //assign id for #lookups
-               // sceneEl.appendChild(avatar);
             }
          }
       }
@@ -3008,8 +3013,35 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
             roomAvatars[a].remove();
          }
       }
+   } else { //i.e. three
+      var keys = Object.keys(roomUsers);
+      var alreadyCreated = ""; //temp string to prevent doubles
+      for(var i=0; i<keys.length; i++) { //create new avatars as needed
+         
+         var key = keys[i];
+         console.log("tryna UpdatePlayerAvatars socketID " + key + " roomUser " + roomUsers[key] + " vs mysocket " + socket.id);
+            if (key != socket.id && !avatars[key]) {
+               console.log("gotsa UpdatePlayerAvatars key: " + JSON.stringify(key));
+
+               let userSplit = roomUsers[key].split("~");
+               let color = "blue";
+               if (userSplit.length > 1) {
+                  color = userSplit[1];
+                  if (!color.includes("#")) {
+                     color = "#" + color;
+                  }
+               }
+               const avatarData = {'type': 'create', 'color': color, 'name': userSplit[0], 'socketID': key}
+
+               CreateAvatarEvent(avatarData);
+               avatars[key] = avatarData;
+               
+         }
+      }
    }
 }
+
+
 
 export function AvatarClicked(sid) {
    console.log("AvatarClicked " + sid);
