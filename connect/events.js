@@ -36,17 +36,22 @@ export let tkStarttimes = [];
 export let timedEventsListenerMode;
 let isListening = false;
 let lastTimedEvent = "";
+
 // let currentPrimaryAudioTime = 0;
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
 
-
-
 export function CreateAvatarEvent (avatarData) { //caught in wgpu_inventory.js
+      
       avatar_event.details = avatarData;
       eventEl.dispatchEvent(avatar_event);
+      console.log("dispatched  createavatarevent " + JSON.stringify(avatarData));
 }
 
+export function DeleteAvatarEvent(avatarID) {
 
+      avatar_event.details = {'type': 'delete', 'avatarID': avatarID};
+      eventEl.dispatchEvent(avatar_event);
+}
 export function MoveAvatarEvent (avatarData) { //caught in wgpu_inventory.js
       avatar_event.details = avatarData;
       eventEl.dispatchEvent(avatar_event);

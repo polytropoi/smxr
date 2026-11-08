@@ -4,7 +4,8 @@ import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLo
 
 
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "./dialogs.js";
-import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, selectedPosition, MapUpdate, SequenceEvent, CreateAvatarEvent, MoveAvatarEvent } from "../connect/events.js";
+import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, 
+   selectedPosition, MapUpdate, SequenceEvent, CreateAvatarEvent, DeleteAvatarEvent, MoveAvatarEvent } from "../connect/events.js";
 
 
 import { settings, profile, mods } from "../connect/settings.js";
@@ -51,7 +52,7 @@ let avatarNameEl = document.querySelector(".avatarName"); //make this actual uid
 let playFrames = false;
 let isConnected = false;
 export let userData = {};
-let mySocketID = "";
+export let mySocketID = "";
 let emitInterval = null;
 let lastPosition = "";
 let lastRotation = "";
@@ -2599,8 +2600,9 @@ if (settings && !socket) {
             UpdatePlayerAvatars(roomUsers);
          }
       } else {
-         const avatar = avatars[socketID];
-         if (avatar) {
+         const avatarString = "avatar_" + socketID;
+         const sceneAvatar = avatars[avatarString];
+         if (sceneAvatar) {
             if (socketID != socket.id) { //don't move yerself
                console.log("gotsa avatar to move " + socketID);
 
@@ -2608,7 +2610,7 @@ if (settings && !socket) {
 
                MoveAvatarEvent(avatarData);
             }
-         } else {
+         // } else {
             UpdatePlayerAvatars(roomUsers);
          }
 
@@ -2727,83 +2729,7 @@ function EmitSelfPosition() {
          }
       }
    }
-                  
-                  
-               // }
-         // }
-   //    } else {
-   //       if (settings && (settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default")) {
-   //          console.log("caint fine no player!");
-   //          posRotReader = document.getElementById("player").components.get_pos_rot; 
-   //       } else { //for vtt maps
-
-
-
-   //       }
-   //    }
-   // }
-// }
-
-// function EmitSelfPosition() {
-
-
-//    if (!settings.hideAvatars) {   
-      
-//       if (posRotReader != null) {   //used by aframe
-//          if (!posRotRunning) {
-//             posRotRunning = true;
-//             // if (emitInterval == null) { 
-//             emitInterval = setInterval(function(){
-
-//                var posRotObj = posRotReader.returnPosRot();
-//                cameraPosition = posRotObj.pos;
-//                cameraRotation = posRotObj.rot;
-//                // console.log(cameraPosition.x.toString() + " vs " + window.playerPosition.x.toString());
-//                // if (JSON.stringify(cameraPosition) != lastPosition && JSON.stringify(cameraRotation) != lastRotation) {
-//                if (JSON.stringify(cameraPosition) != lastPosition) {
-//                      // console.log('emitting!');
-//                   // window.playerPosition = cameraPosition;
-//                   if (socket) {
-//                      socket.emit("updateplayerposition", room, avatarName, cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y, cameraRotation.z, mySocketID, "aframe"); 
-                     
-//                   }
-                  
-//                   if (writeCount > 2) {
-//                      console.log("tryna write " + writeCount);
-//                      lastPosition = JSON.stringify(cameraPosition);
-//                      // lastRotation = cameraRotation;
-//                      if (profile) {
-
-//                         // if (profile.lastPosition != lastPosition) {
-//                            profile.lastPosition = cameraPosition;
-//                            profile.lastRotation = cameraRotation;
-//                            // console.log("userData with position " + JSON.stringify(profile));
-//                            UpdateLocalPlayerState(profile);
-//                         // }
-//                      }   // lastRotation = JSON.stringify(cameraRotation);       
-//                   }              
-//                writeCount++;
-//                }
-
-//             }, 250);
-//          // } else {
-//          //    clearInterval(emitInterval);
-//          //    emitInterval = null;
-//          }
-//       } else {
-//          if (settings && (settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default")) {
-//             console.log("caint fine no player!");
-//             posRotReader = document.getElementById("player").components.get_pos_rot; 
-//          } else { //for vtt maps
-
-
-
-//          }
-//          // EmitSelfPosition();
-//       }
-//    }
-// }
-
+               
 function shallowEqual(object1, object2) {
    const keys1 = Object.keys(object1);
    const keys2 = Object.keys(object2);
@@ -2967,7 +2893,7 @@ export function Disconnect() {
 function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, just make this a component function, to avoid creating a-entities outside of aframe
    console.log("tryna UpdatePlayerAvatars" + JSON.stringify(roomUsers));
    
-   //////// hrm aframe mode
+   //////// hrm aframe mode, DEPRECATED
    if (sceneEl != null && (settings.sceneType == "aframe" || settings.sceneType == "AFrame" || settings.sceneType == "Default") && !settings.hideAvatars && roomUsers) {
       var keys = Object.keys(roomUsers);
       var alreadyCreated = ""; //temp string to prevent doubles
@@ -3018,9 +2944,10 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
       var alreadyCreated = ""; //temp string to prevent doubles
       for(var i=0; i<keys.length; i++) { //create new avatars as needed
          
-         var key = keys[i];
+         const key = keys[i];
+         var avatarString = "avatar_" + keys[i];
          console.log("tryna UpdatePlayerAvatars socketID " + key + " roomUser " + roomUsers[key] + " vs mysocket " + socket.id);
-            if (key != socket.id && !avatars[key]) {
+            if (key != socket.id && !avatars[avatarString]) {
                console.log("gotsa UpdatePlayerAvatars key: " + JSON.stringify(key));
 
                let userSplit = roomUsers[key].split("~");
@@ -3033,11 +2960,46 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
                }
                const avatarData = {'type': 'create', 'color': color, 'name': userSplit[0], 'socketID': key}
 
+              
                CreateAvatarEvent(avatarData);
-               avatars[key] = avatarData;
+
                
          }
       }
+    
+      // var dupeCheck = "";
+      let aKeys = Object.keys(avatars);
+      
+      console.log("roomUsers " + JSON.stringify(roomUsers) + " vs roomAvatars " + JSON.stringify(aKeys));
+      for (let i = 0; i < aKeys.length; i++) {
+         const keysplit = aKeys[i].split("avatar_");
+         if (keysplit.length > 1) {
+            // for (let k = 0; k < keys.length; k++) {
+            if (keys.toString().includes(keysplit[1])) {
+               console.log("avatar sposta be here " + aKeys[i]);
+            } else {
+               console.log("gotsa hangdangler... you gotta go! "  + aKeys[i]);
+               DeleteAvatarEvent(aKeys[i]);
+               // delete avatars[aKeys[i]];
+            }
+         } 
+      }
+      // for (var a=0; a<roomAvatars.length; a++) { //clean up disconnected avatars
+      //    let active = false;
+      //    for(var i=0; i<keys.length; i++) {
+      //       var key = keys[i];
+      //       // console.log("checking key, roomUsers[key]);
+      //       if (roomAvatars[a].id == key && !dupeCheck.includes(key)) {
+      //          active = true;
+      //          dupeCheck += key
+      //          console.log("room avatar active " + key);
+      //       }
+      //    }
+      //    if (!active) {
+      //       console.log("tryna remove duplicate " + roomAvatars[a].id)
+      //       roomAvatars[a].remove();
+      //    }
+      // }
    }
 }
 

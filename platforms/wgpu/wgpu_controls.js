@@ -38,7 +38,7 @@ import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
 import * as nipplejs from '../../../main/js/nipple.mjs';
 import { ReturnTagForInstance } from './wgpu_instance.js';
-import { GoToNext, localData, playerRotation } from '../../connect/connect.js';
+import { GoToNext, localData, mySocketID, playerRotation } from '../../connect/connect.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
 import { SynthHit, synthKeys, synthTransports } from './wgpu_synths.js';
 import { CreateNewLocation, keydown } from '../../connect/dialogs.js';
@@ -791,6 +791,8 @@ export function UpdateControls() {
                     velocity.x -= direction.x * .2 * (playerSpeed) * delta;
                     // console.log("sideways " + velocity.x);
                 }
+
+
             // }
             // player.position.lerp(direction, .01);
             // player.translateZ(velocity.z);
@@ -809,7 +811,7 @@ export function UpdateControls() {
                 canJump = true;
 
             }
-
+            //   console.log("velocity " + JSON.stringify(velocity));
             // player.rotation.copy(forward);
             // player.quaternion.copy(camera.quaternion);
             if (!intersections.length) {
@@ -839,8 +841,19 @@ export function UpdateControls() {
                 // } else {
                     player.position.addScaledVector(forward, -velocity.z);  
                 // }
-                
-                
+                if (mySocketID != "" && (moveForward || moveBackward || moveLeft || moveRight   )) { //if we're connected
+                  
+                    camera.updateMatrixWorld();
+                    camera.getWorldPosition(cameraPosition);
+                    camera.getWorldDirection(cameraRotation);
+                    camera.getWorldQuaternion(cameraQuaternion);
+                    const worldEuler = new THREE.Euler().setFromQuaternion(cameraQuaternion);
+                    // camera.position.copy(playerPosition);
+                    // camera.rotation.copy(playerRotation);
+                    cameraPosition.y = cameraPosition.y - 1;
+                    UpdatePlayerPosRot(cameraPosition,worldEuler);
+                }
+                        
                 
 
                 canJump = true; //hrm...
@@ -1878,15 +1891,17 @@ export function onMouseMove(event) {
          
         camera.rotation.x = Math.max( -Math.PI / 2, Math.min( Math.PI / 2, camera.rotation.x ) );
 
-        camera.updateMatrixWorld();
-        camera.getWorldPosition(cameraPosition);
-        camera.getWorldDirection(cameraRotation);
-        camera.getWorldQuaternion(cameraQuaternion);
-        const worldEuler = new THREE.Euler().setFromQuaternion(cameraQuaternion);
-        // camera.position.copy(playerPosition);
-        // camera.rotation.copy(playerRotation);
-        cameraPosition.y = cameraPosition.y - 1;
-        UpdatePlayerPosRot(cameraPosition,worldEuler);
+        if (mySocketID) { //if we're connected
+            camera.updateMatrixWorld();
+            camera.getWorldPosition(cameraPosition);
+            camera.getWorldDirection(cameraRotation);
+            camera.getWorldQuaternion(cameraQuaternion);
+            const worldEuler = new THREE.Euler().setFromQuaternion(cameraQuaternion);
+            // camera.position.copy(playerPosition);
+            // camera.rotation.copy(playerRotation);
+            cameraPosition.y = cameraPosition.y - 1;
+            UpdatePlayerPosRot(cameraPosition,worldEuler);
+        }
     }
     //  if (!mouseIsDown) return; //nope, orbit is better
 

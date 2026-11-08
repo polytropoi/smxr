@@ -11,6 +11,8 @@ import { ReturnObjectData, SceneObject, equippedRigidbody, lastEvent, sceneObjec
 
 import { viewportPlaceholder } from './wgpu_controls.js';
 
+import { AvatarEvent } from './wgpu_avatars.js';
+
 import { ShowHTMLPopup, HideHTMLPopup, popup } from './wgpu_ui.js';
 
 import { AddDynamicBody, RemoveRigidbody, SetEquippedRigidbody } from './wgpu_physics.js';
@@ -22,7 +24,7 @@ import { activeObjex, LoadAndDropSingleObject, LoadModel, locationObjex } from '
 
 import { userData, room, avatars } from '../../../connect/connect.js';
 
-import { ReturnTagForInstance } from './wgpu_instance.js';
+// import { ReturnTagForInstance } from './wgpu_instance.js';
 // import {  } from '../../connect/dialogs.js';
 // import { GetUserInventory } from '../../connect/dialogs.js';
 
