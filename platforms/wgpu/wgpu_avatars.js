@@ -1,13 +1,15 @@
 
 import * as THREE from 'three';
 
-import { userData, room, avatars } from '../../../connect/connect.js';
+import { userData, room, avatars, roomUsers } from '../../../connect/connect.js';
 
-import { LoadModel } from './wgpu_locations.js';
+import { activeObjex, LoadModel } from './wgpu_locations.js';
 
 import { scene } from './wgpu_main.mjs';
 import { eventEl } from '../../../connect/events.js';
 
+export let avatarCount = 0; //extant avatars, should be roomUsersCount - 1
+export let roomUsersCount = 0; //i.e. socket connections, from connect.js
 // export let avatars = {}
 // eventEl.addEventListener('avatar-event', AvatarEvent); //no workie from here?!?
 eventEl.addEventListener('avatar-event', AvatarEvent);
@@ -15,24 +17,24 @@ eventEl.addEventListener('avatar-event', AvatarEvent);
 
 function RemoveAvatarByName(name) {
 
-    const selectedObject = scene.getObjectByName("myObjectName");
+    const selectedObject = scene.getObjectByName(name);
     if (selectedObject) {
-    // 2. Remove it from its parent (usually the scene)
-    selectedObject.parent.remove(selectedObject);
+        // 2. Remove it from its parent (usually the scene)
+        selectedObject.parent.remove(selectedObject);
 
-    // 3. Optional but highly recommended: Free up GPU memory
-    if (selectedObject.geometry) selectedObject.geometry.dispose();
-    
-    if (selectedObject.material) {
-        if (Array.isArray(selectedObject.material)) {
-            selectedObject.material.forEach(material => material.dispose());
-        } else {
-            selectedObject.material.dispose();
+        // 3. Optional but highly recommended: Free up GPU memory
+        if (selectedObject.geometry) selectedObject.geometry.dispose();
+        
+        if (selectedObject.material) {
+            if (Array.isArray(selectedObject.material)) {
+                selectedObject.material.forEach(material => material.dispose());
+            } else {
+                selectedObject.material.dispose();
+            }
         }
     }
 }
 
-}
 export async function AvatarEvent(event) { //
     console.log("gotsa avatarEvent " + JSON.stringify(event.details));
     
@@ -40,6 +42,7 @@ export async function AvatarEvent(event) { //
         // https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb
          const avatar_id = "avatar_" + event.details.socketID;
         if (!avatars[avatar_id]) {
+            avatars[avatar_id] = event.details;
             const model = await LoadModel('https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb');
             const material = new THREE.MeshStandardMaterial( { color: event.details.color } ); //color is passed in socket handshake, and appended to username
             const avatarModel = model.scene;
@@ -47,16 +50,22 @@ export async function AvatarEvent(event) { //
             // index = 0;
             avatarModel.traverse(node => {
                 if (node.name == "head" || node.name == "body") { //not the eyes!
-                node.material = material;
+                    node.material = material;
+                    node.name = avatar_id;
+                    node.userData.name = avatar_id;
                 }
             });
             avatarModel.name = avatar_id;
+            avatarModel.userData.name = avatar_id;
             scene.add(avatarModel);
-        
-            console.log("created avatar with ID " + avatar_id);
+            activeObjex.push(avatarModel);
+
+            roomUsersCount = Object.keys(roomUsers).length;
+            avatarCount = Object.keys(avatars).length;
+            console.log("created avatar with ID " + avatar_id + " for roomUsers " + roomUsersCount + " vs avatarCount " + avatarCount);
            
-            avatars[avatar_id] = event.details;
-            avatars[avatar_id].sceneAvatar = new SceneAvatar(avatar_id);
+            
+            // avatars[avatar_id].sceneAvatar = new SceneAvatar(avatar_id);
         } else {
             console.log("alreay have an avatar with ID " + avatar_id + " : " + avatars[avatar_id])
         }
@@ -70,8 +79,8 @@ export async function AvatarEvent(event) { //
 
     } else if (event.details.type == "move") {
         //find by name
-                const avatar_id = "avatar_" + event.details.socketID;
-        console.log("tryna move avatarID " +avatar_id );
+        const avatar_id = "avatar_" + event.details.socketID;
+        console.log("tryna move avatarID " + avatar_id);
 
         const targetAvatar = avatars[avatar_id];
         if (targetAvatar) {

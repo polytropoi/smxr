@@ -363,7 +363,7 @@ io.on('connection', function(socket) {
      });
 
     socket.on('user message', function(data) {
-        socket.in(room).emit('user messages', socket.uname, data);
+        socket.in(room).emit('user messages', socket.uname, socket.color, socket.id, data);
     });
 
     socket.on('admin message', function(data) {

@@ -5,7 +5,8 @@ import { settings } from '../../../connect/settings.js';
 
 import { scene } from './wgpu_main.mjs';
 
-import { spritesheetUV, uv, texture, color, billboarding, floor, Fn, max, min, positionLocal, range, normalLocal, sub, time, add, vec2, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
+import { spritesheetUV, uv, texture, color, mx_fractal_noise_vec3, billboarding, oscSine, floor, Fn, 
+    max, min, positionLocal, range, normalLocal, sub, time, add, vec2, vec3, vec4, uniform, sin, buffer, instanceIndex, cameraPosition, mat3, positionGeometry, instancedBufferAttribute } from 'three/tsl';
 
 import { activeObjex } from './wgpu_locations.js';
 
@@ -321,3 +322,45 @@ export function CreateSprites (count, size, scale, animation) {
     }
     
         
+
+    export function PsychNoiseMaterial () {
+
+        // await new Promise(r => setTimeout(r, 1000));
+        const speed = time.mul(.05);
+        const scale = .5;
+
+        const psychedelicNoise = () => {
+            const st = uv().mul(scale);
+
+            // Using mx_fractal_noise_vec3 directly (takes: position vector, octaves)
+
+            const q1 = vec3(st, speed);
+            const q = mx_fractal_noise_vec3(q1, 3);
+            // const q = mx_fractal_noise_vec3(vec3(st, speed), 3);
+            const r1a = st.add(q.mul(4.0));
+            const r1 = vec3(r1a, speed.mul(0.15));
+            const r = mx_fractal_noise_vec3(r1, 3);
+            // const r = mx_fractal_noise_vec3(vec3(st.add(q.mul(4.0)), speed.mul(0.15)), 3);
+            const f1a = st.add(r.mul(4.0));
+            const f1 = vec3(f1a, 0.0);
+            const f = mx_fractal_noise_vec3(f1, 3);
+            // const f = mx_fractal_noise_vec3(vec3(st.add(r.mul(4.0)), 0.0), 3);
+
+            const color1 = vec3(0.1, 0.0, 0.4);
+            const color2 = vec3(0.9, 0.1, 0.5);
+            const color3 = vec3(0.0, 0.9, 0.8);
+
+            const finalColor = color1.mix(color2, f);
+            const finalSinMod = oscSine(r.x).mul(0.5).add(0.5);
+            const finalColorMod = color3.mul(finalSinMod);
+            const finalFinalColor = finalColor.add(finalColorMod);
+
+            return finalFinalColor;
+        };
+
+        // 4. Assign directly to a MeshBasicNodeMaterial output
+        const material = new THREE.MeshStandardNodeMaterial();
+        material.colorNode = psychedelicNoise();
+        material.roughness = .9;
+        return material;
+    } 

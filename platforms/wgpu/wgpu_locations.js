@@ -32,6 +32,7 @@ import { SaveLocalData } from '../../connect/indexedDb.js';
 import { lookAtCameraObjects } from './wgpu_ui.js';
 
 import { splatObjex } from './wgpu_main.mjs';
+import { PsychNoiseMaterial } from './wgpu_fx.js';
 // import { sceneObjects } from '../../connect/dialogs.js';
 
 // export let localData = {};
@@ -1030,6 +1031,8 @@ async function LoadLocationModel (url, locationData, isActive) {
                     // scenePictures[fInstance] = scenePic;
                     // locationData.mediaID
                     // spotTargets.push(child.copy());
+                } else if (name.includes("hvid")) {
+                    child.material = PsychNoiseMaterial();
                 }
 
             }

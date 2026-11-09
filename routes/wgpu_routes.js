@@ -2739,11 +2739,11 @@ wgpu_router.get('/:_id', function (req, res) {
                                 // "<div id=\x22hic_content\x22 class=\x22hic_content_trans\x22></div>" +   
                             "</canvas>" +
                             // "<div id=\x22popup\x22 class=\x22popup\x22 style=\x22position: absolute; display: none; background: white; padding: 10px; border: 1px solid black;\x22>Some text</div>"+
-                            "<div style=\x22display: none;\x22 id=\x22popup\x22 class=\x22popup\x22>Some text</div>"+
+                            "<div id=\x22popup\x22 class=\x22popup\x22>Some text</div>"+
 
 
                             "<div id=\x22startPop\x22 class=\x22popup\x22><div id=\x22startPopHeader\x22><h1> Start Header </h1></div><br><div id=\x22startPopBody\x22><h4> Start Body </h4></div><br>" +
-                            "<button style=\x22width:100px;\x22 id=\x22startButton\x22 data-type=\x22start\x22 class=\x22yesButton\x22><h3>Play<h3></button>" +
+                            "<button id=\x22startButton\x22 data-type=\x22start\x22 class=\x22yesButton\x22>Play</button>" +
                             "</div>"+
 
                             canvasOverlay +

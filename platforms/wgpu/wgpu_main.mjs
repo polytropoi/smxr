@@ -16,7 +16,7 @@
 	import { LoadPrimaryAudioHowl, PlayTriggerWithTag, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 	import { settings } from '../../../connect/settings.js';
 	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
-	import { userData } from '../../../connect/connect.js';
+	import { userData, stringRoomUsers } from '../../../connect/connect.js';
 
 	import { InitPathfinding, agents } from './wgpu_nav.js';
 
@@ -70,6 +70,7 @@
 		 
 	
 	import { InitSuperSonic, SynthHit, synthKeys, SynthKeys, superSonicLoaded, synthTransports } from './wgpu_synths.js';
+
 
 	export let scene;
 
@@ -672,7 +673,7 @@
 			// } 
 
 		} else {
-			StartPopup(loadingHeader, 'Ready!', true);	
+			StartPopup(loadingHeader, stringRoomUsers, true);	
 			const startButton = startPop.querySelector("#startButton");
 			if (startButton) {
 				console.log("startButton found!");

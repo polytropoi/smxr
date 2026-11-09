@@ -16,6 +16,7 @@ export let room = window.location.pathname.split("/").pop(); //just the string a
 // var player = document.getElementById("player");
 // export let posRotReader = document.getElementById("player").components.get_pos_rot; 
 var player = null;
+export let localRoomUser = "";  //socketData for local player
 export let posRotReader;
 export let lastLocalUpdate = "";
 export let lastCloudUpdate = "";
@@ -2373,6 +2374,10 @@ if (settings && !socket) {
          url: socketHost + "/socket.io/?EIO=4&transport=polling&t=NNjNltH",
          autoConnect: true,  //connection is opened if token checks out above
          reconnection: true,
+         reconnectionAttempts: 5,        // Limit total reconnection attempts to 5
+         reconnectionDelay: 1000,        // Start by waiting 1 second before retrying
+         reconnectionDelayMax: 5000,     // Never wait more than 5 seconds between retries
+         randomizationFactor: 0.5,
          transports: ['websocket']
          });      
       }
@@ -2386,6 +2391,21 @@ if (settings && !socket) {
       const disconnectButton = document.getElementById("disconnectButton");
       disconnectButton.removeAttribute("hidden");
    
+   });
+
+   socket.on("connect_error", (err) => {
+      console.log(`Connection error due to: ${err.message}`);
+   });
+
+      // Triggered when all reconnection attempts have failed
+   socket.io.on("reconnect_failed", () => {
+      console.log("Failed to reconnect after maximum attempts.");
+   // Example: Show a "Connection Lost. Click to retry" button to the user
+   });
+
+   // Optional: Track individual attempts as they happen
+   socket.io.on("reconnect_attempt", (attemptNumber) => {
+      console.log(`Reconnection attempt #${attemptNumber}`);
    });
 
    socket.on('user joined', function(data) {
@@ -2405,7 +2425,6 @@ if (settings && !socket) {
    socket.on('room users', function (data) {
     console.log("room users data : " + data);
       $('#users').html("");
-
 
       roomUsers = JSON.parse(data);
 
@@ -2433,6 +2452,7 @@ if (settings && !socket) {
          // console.log(key, roomUsers[key]);
          if (key === socket.id) {
             isMe = "*";
+            localRoomUser = roomUsers[key];
             // console.log("key isMe " + key);
          }
          const value = roomUsers[key];
@@ -2550,11 +2570,11 @@ if (settings && !socket) {
 
    });
 
-   socket.on('user messages', function(data1, data2) {
-         console.log("messages data : " + data1 + data2);
+   socket.on('user messages', function(data1, data2, data3, data4) { //name, color, socketID, message
+         console.log("messages data : " + data1 + " " + data2 + " " + data3);
          // $('#future').prepend($('<div class=\x22row bubble pull-left\x22 style=\x22margin: 5px 5px 5px 5px;\x22><span class=\x22smallfont_yellow\x22>').text( data1 + ": " + data2).append("</span></div>"));
          // $('#future').prepend($('<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>').text( "<"+ data1 + ": " + data2).append("</span>"));
-         $('#future').prepend("<div class=\x22messageBubbleIn\x22 style=\x22float: left;\x22>"+ data1 + ": " + data2 + "</div><br><br><br>");
+         $('#future').prepend("<div class=\x22messageBubbleIn\x22 style=\x22float: left; color: "+data2+";\x22>"+ data1 + ": " + data4 + "</div><br><br><br>");
          if ($('#future li').length > 555) {
             $('#future li').last().remove();
          }
@@ -2631,7 +2651,7 @@ if (settings && !socket) {
    });
    socket.on('user left', function(id) {
       console.log("user left with socket id " + id + " vs roomUsers " + JSON.stringify(roomUsers));
-
+      UpdatePlayerAvatars(roomUsers);
 
    });
 } //InitSocket end
@@ -2762,20 +2782,22 @@ function shallowEqual(object1, object2) {
 export function SendChatMessage() {
    if (socket) {
       var message = $('#chat_input').val();
+      const mycolor = localRoomUser.color;
       if (message.length > 0) {
-      message = $('<div>').text(message).html(); //sanitize with wierd jquery fu
-      console.log("tryna send " + message);
-      if (message.includes("https://")) {
-         message = "<a href=\x22"+message+"\x22 target=\x22_blank\x22>"+message+"</a>";
-      }
-      $('#future').prepend("<div class=\x22messageBubbleOut\x22 style=\x22float: right;\x22>you:</span> " +  message +"</div><br><br><br>");
-      // $('#future').prepend($('<div style=\x22float: right;\x22><span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightgreen\x22>').html( ">you:</span> " +  message +"</div>").append("<hr>"));
-      if (socket) {
-         socket.emit('user message', message); //but not to ourselfs
-      }
-      
-      UpdateContentBox();
-      document.getElementById("chat_input").value = "";
+         message = $('<div>').text(message).html(); //sanitize with wierd jquery fu
+         console.log("tryna send " + message);
+         if (message.includes("https://")) {
+            message = "<a href=\x22"+message+"\x22 target=\x22_blank\x22>"+message+"</a>";
+         }
+
+         $('#future').prepend("<div class=\x22messageBubbleOut\x22 style=\x22float: right; color: "+mycolor+"\x22>you:</span> " +  message +"</div><br><br><br>");
+         // $('#future').prepend($('<div style=\x22float: right;\x22><span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightgreen\x22>').html( ">you:</span> " +  message +"</div>").append("<hr>"));
+         if (socket) {
+            socket.emit('user message', message); //but not to ourselfs
+         }
+         
+         UpdateContentBox();
+         document.getElementById("chat_input").value = "";
       }
    } else {
       console.log("socket not connected..");
@@ -2970,7 +2992,7 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
       // var dupeCheck = "";
       let aKeys = Object.keys(avatars);
       
-      console.log("roomUsers " + JSON.stringify(roomUsers) + " vs roomAvatars " + JSON.stringify(aKeys));
+      console.log("roomUsers " + JSON.stringify(keys) + " vs roomAvatars " + JSON.stringify(aKeys));
       for (let i = 0; i < aKeys.length; i++) {
          const keysplit = aKeys[i].split("avatar_");
          if (keysplit.length > 1) {

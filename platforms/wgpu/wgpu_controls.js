@@ -5,7 +5,7 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js';
 
-import { UpdatePlayerPosRot } from '../../../connect/connect.js';
+import { UpdatePlayerPosRot, avatars } from '../../../connect/connect.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './wgpu_nav.js';
 
@@ -905,8 +905,18 @@ async function RaycastHit(type, hit, event) {
     // lastRaycastHitPosition = hit.point;
     lastRaycastHitDistance = hit.distance;
 
-    console.log("raycast hit " + type + " " + lastHitObjectName + " " + event.target);
+    console.log(type + " raycast hit " + lastHitObjectName + " " + event.target);
+
+
     let tagData;
+
+    if (lastHitObjectName.includes("avatar_")) {
+        tagData = avatars[lastHitObjectName];
+        console.log("avatar tags " + JSON.stringify(tagData));
+        if (tagData) {
+           ThreeDeeText(tagData.name,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, .5);
+        }
+    }
     // console.log(JSON.stringify(lastRaycastHitObject.userData));
     const locationData = lastRaycastHitObject.userData.locationData;
     if (!locationData) {
@@ -919,10 +929,10 @@ async function RaycastHit(type, hit, event) {
 
     let locationGroup;
     
-    if (hit.instanceId !== undefined) { //if it's an element of an instancedMesh
+    if (hit.instanceId !== undefined) { //if it's an element of an instancedMesh //NOTE - MUST CHECK FOR UNDEFINED, not just null, bc zeroth index equals FALSE! word to the wise...
             
                 
-                selectedObjects.length = 0;
+        selectedObjects.length = 0;
         tagData = await ReturnTagForInstance(locationData.timestamp, hit.instanceId);
         console.log("INSTANCE HIT " + hit.instanceId + " tagged " + tagData);
 
@@ -1436,14 +1446,33 @@ export function onHicClick (event) {
 }
 export function onMouseDown(event) { // on threejs object
     // playerReadyToNav = true;
-    console.log("mousedown event " + event.currentTarget.id);
+    console.log("mousedown event " + event.target.id + " " + lastHitObjectName);
     event.stopPropagation();// duh!
 
     if (transformControl && transformControl.object) {
         return;
     }
     
+    if (lastHitObjectName && lastHitObjectName.includes("avatar_")) {
+        const tagData = avatars[lastHitObjectName];
+        console.log("avatar tags " + JSON.stringify(tagData));
+        if (tagData) {
+            console.log("clicked on " + lastHitObjectName + event.clientX + " " + event.clientY);
+        //    ThreeDeeText(tagData.name,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, .5);
+            const avatarHtmlString = "<h4>Name: <span style=\x22color:"+tagData.color+"\x22>" + tagData.name + "</span></h4>" +
+            "<textarea class=\x22chat_input\x22 id=\x22chat_input\x22 type=\x22textarea\x22 style=\x22font-size:10pt;rows:4;cols:200;\x22 placeholder=\x22Message...\x22></textarea><br><br>"+
+            "<button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-tags=\x22"+
+            tagData+ "\x22 data-type=\x22singleUserChat\x22 class=\x22yesButton\x22>Send Message</button>";
+            // ShowHTMLPopup(null, avatarHtmlString, null, null, null);
+            ShowHTMLPopup(event, avatarHtmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
+            lastHitObjectName = "";
+            return;
+        }
+    }
 
+    if (event.target.id == "chat_input") {
+        return;
+    }
         // console.log("mouse down on " + event.target.id);
     if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
         if (allowMods && keyIsDown == "KeyT") {
@@ -1479,9 +1508,11 @@ export function onMouseDown(event) { // on threejs object
     let textData;
     let htmlString;
     if (showDialogPanel) {
+        console.log("showDialogPanel, returning");
         return;
     }
      if (event.clientY < 100) {
+        console.log("too low, less than 100, returning");
         return;
     }
 
@@ -1494,6 +1525,9 @@ export function onMouseDown(event) { // on threejs object
         return;
     } 
     if (event.target.id == "popup_yesButton") {
+        if (event.type == "singleUserChat") {
+            // event.
+        }
         ActionSwitch(event);
         popup.style.display = "none";
         startPop.style.display = "none";
@@ -1821,7 +1855,16 @@ export function onMouseDown(event) { // on threejs object
     if (cameraMode == "Fly") {
         controls.dragToLook = true;
     }
-
+    // if (lastHitObjectName && lastHitObjectName.includes("avatar_")) {
+    //     const tagData = avatars[lastHitObjectName];
+    //     console.log("avatar tags " + JSON.stringify(tagData));
+    //     if (tagData) {
+    //         console.log("clicked on " + lastHitObjectName + event.clientX + " " + event.clientY);
+    //     //    ThreeDeeText(tagData.name,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, .5);
+    //         const avatarHtmlString = "<h1>" + tagData.name + " socketID " + tagData.socketID + "</h1>";
+    //         ShowHTMLPopup(null, avatarHtmlString, null, null, null);
+    //     }
+    // }
     // if ()
 
 }

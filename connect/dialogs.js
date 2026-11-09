@@ -2560,18 +2560,18 @@ export function SceneManglerModal(mode, autoHide) {
       "<div "+messagesDisplay+" id=\x22Messages\x22 class=\x22modalMain tabcontent\x22>"+ /////////////////////MESSAGES
         // "<form id=\x22form\x22 id=\x22chat_form\x22>"+
         // "<span style=\x22float: left;\x22><h4>Message:</h4></span><span style=\x22float: left;\x22 id=\x22users\x22>"+stringRoomUsers+"</span>"+
-        "<div id=\x22emailContainer\x22 style=\x22display: none;\x22><input class=\x22email_input\x22 id=\x22email_input\x22  type=\x22email\x22 placeholder=\x22Email to invite\x22></input>"+
+        "<div id=\x22emailContainer\x22 style=\x22display: block;\x22><input class=\x22email_input\x22 id=\x22email_input\x22  type=\x22email\x22 placeholder=\x22Email to invite\x22></input>"+
         "<button class=\x22saveButton\x22 id=\x22sendInvitationButton\x22 >Send Invitation</button></div><br>"+
         // "<a class=\x22saveButton\x22 id=\x22requestInvitationButton\x22 onclick=\x22SendInvitation()\x22>Request Invitation</a></div><br>"+
         // "<button class=\x22infoButton\x22 id=\x22sendMessageButton\x22><a href=\x22mailto:"+room+"@servicemedia.net\x22>Send Email</a></button>"+
         "<textarea class=\x22chat_input\x22 id=\x22chat_input\x22 type=\x22textarea\x22 style=\x22font-size:10pt;rows:4;cols:200;\x22 placeholder=\x22Message...\x22></textarea><br><br>"+
-        "<br><span style=\x22float: left;\x22 id=\x22users\x22>"+stringRoomUsers+"</span>"+
+        "<div style=\x22float: left;\x22 id=\x22users\x22>"+stringRoomUsers+"</div><div>"+
         sendAdminMessageButton +
-        "<button class=\x22saveButton\x22 id=\x22sendMessageButton\x22 >Send Chat</button><br>"+
+        "<button class=\x22saveButton\x22 id=\x22sendMessageButton\x22 >Send Chat</button></div><br><br><br><hr>"+
         
 
         // "</form>"+
-        "<div class=\x22\x22 id=\x22future\x22></div><br><br><br><br>" +
+        "<div class=\x22\x22 id=\x22future\x22></div>" +
         "<p>scene mailbox: <a style=\x22color: lightblue;\x22 href=\x22mailto:"+room+"@servicemedia.net\x22>"+room+"@servicemedia.net</a></p>"+
       "</div>"+
 
