@@ -6,7 +6,7 @@ import { player, camera } from './wgpu_controls.js';
 import { scene } from './wgpu_main.mjs';
 import { settings } from '../../../connect/settings.js';
 import { videoEl } from '../../../connect/connect.js';
-import { eventEl } from '../../../connect/events.js';
+// import { eventEl } from '../../../connect/events.js';
 import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData, createYouTubePlayer} from "../../../connect/media.js";
 import { lookAtCameraObjects } from './wgpu_ui.js';
 import { ReturnTagForInstance } from './wgpu_instance.js';
@@ -41,7 +41,10 @@ export let mediaPlayersToUpdate = [];
 
 export let pictureGroupIndexes = {};
 
-createYouTubePlayer();
+
+const eventEl = document.getElementById("eventEl");
+
+
 eventEl.addEventListener('sequence-event', SequenceEvent); 
 
 export function SequenceEvent (event) {
@@ -151,7 +154,7 @@ export function InitPictureGroups () {
    }
 }
 
-export function InitScenePictures () { //these are directly imported into the scene, not in a group
+export function InitSceneMedia () { //these are directly imported into the scene, not in a group
      const scenePicturesDataEl = document.getElementById('scenePicturesData');
    if (scenePicturesDataEl) {
         const theScenePicturesData = scenePicturesDataEl.getAttribute('data-scene-pictures');
@@ -167,6 +170,8 @@ export function InitScenePictures () { //these are directly imported into the sc
             }
         }
     }
+
+    createYouTubePlayer();
 }
 
 export function InitVideoGroups () {

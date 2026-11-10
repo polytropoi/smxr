@@ -5,10 +5,11 @@ import { room, sceneLocations, locationTimestamps, localData, userData, lastClou
    playerPosition, playerRotation } from "/connect/connect.js";
 
 import { settings, UpdateUserProfile, pixelsPerMeterActual, UpdateModdedLocations } from "/connect/settings.js";
-import { SetTimeKeysData, MapUpdate, eventEl, equip_inventory_object_event, LocalDataLoaded } from "/connect/events.js";
+import { SetTimeKeysData, MapUpdate, equip_inventory_object_event, LocalDataLoaded } from "/connect/events.js";
 // import { pixelsPerMeterActual } from "../vtt/vtt_main.mjs";
 export let hasLocalData = false;
 
+const eventEl = document.getElementById("eventEl");
 
 //////////////////////indexedDB functions...
 export function InitIDB() {

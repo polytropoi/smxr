@@ -5,7 +5,7 @@ import { userInventory, ShowHideDialogPanel, GetUserInventoryAsync, uniqueItemsÂ
 
 import { UpdateLocalPlayerState, UpdateLocalEquipment } from "../../../connect/indexedDb.js";
 
-import { eventEl } from '../../../connect/events.js';
+// import { eventEl } from '../../../connect/events.js';
 
 import { ReturnObjectData, SceneObject, equippedRigidbody, lastEvent, sceneObjects} from './wgpu_actions.js';
 
@@ -33,6 +33,8 @@ export let equipOnLoadEvent; //save event till safe to load
 export let sceneInventory = [];
 
 export let equippedInstanceTags; //
+
+const eventEl = document.getElementById("eventEl");
 
 export async function LoadSceneInventory () { //  user inventory loaded in dialogs.js
 

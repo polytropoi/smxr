@@ -5,7 +5,8 @@ import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLo
 
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "./dialogs.js";
 import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, 
-   selectedPosition, MapUpdate, SequenceEvent, CreateAvatarEvent, DeleteAvatarEvent, MoveAvatarEvent } from "../connect/events.js";
+   selectedPosition, MapUpdate, SequenceEvent, CreateAvatarEvent, DeleteAvatarEvent, MoveAvatarEvent, 
+   UpdateRoomUsers} from "../connect/events.js";
 
 
 import { settings, profile, mods } from "../connect/settings.js";
@@ -33,7 +34,7 @@ export const lerp = (x, y, a) => x * (1 - a) + y * a;
 
 var dateString = Date.now().toString();
 export let roomUsers = {};
-export let stringRoomUsers = "";
+export let stringRoomUsers;
 export let userProfile;
 
 export let playerPosition;
@@ -505,7 +506,7 @@ export function InitConnect() {
 //    // profileLoaded(profile);
 // }
 
-export function SetPlayerToLastPosition () {
+export function SetPlayerToLastPosition () { //hrm, need an event for this...
    if (settings && settings.sceneTags && settings.sceneTags.includes("last position")) {
       if (player && profile.history && profile.history.init_scene && profile.history.init_scene[room] && profile.history.init_scene[room].lastPosition) {         
          player.setAttribute("position", profile.history.init_scene[room].lastPosition);
@@ -2411,7 +2412,8 @@ if (settings && !socket) {
    socket.on('user joined', function(data) {
       console.log("room user " + data + 'joined room ' + room);
       socket.emit('room users', room);
-      UpdatePlayerAvatars(roomUsers);
+      const roomUsersString = ReturnRoomUsersString(roomUsers);
+      UpdatePlayerAvatars(roomUsers, roomUsersString);
       // EmitSelfPosition();
    });
 
@@ -2428,69 +2430,52 @@ if (settings && !socket) {
 
       roomUsers = JSON.parse(data);
 
-      UpdatePlayerAvatars(roomUsers);
-      let roomUsersString = "";
+      // let roomUsersString = "";
       // console.log("room users count = " +roomUsers.length);
-      let usercount = 0;
-         // for (let value of Object.values(roomUsers)) { //key = socket.id, value= username
-      
-         // console.log(value); 
-         // usercount++;
-         // //   $('#users').prepend($('<button class=\x22btn\x22 style=\x22margin: 5px 5px 5px 5px;\x22><h4><strong>').text( value ).append("</strong></h4></button>"));
-         //    if (value.includes("~")) {
-         //       split = value.split("~"); //color is appended to username
-         //       roomUsersString += "<a href=\x22#\x22 style=\x22color:"+split[1]+"\x22>"+split[0]+"</a>, ";
-         //    } else {
-         //       roomUsersString += value + ", ";
-         //    }   
-         // }
-      var keys = Object.keys(roomUsers);
-      let simpleUsers = [];
-      for(var i=0; i<keys.length; i++){
-         var key = keys[i];
-         var isMe = "";
-         // console.log(key, roomUsers[key]);
-         if (key === socket.id) {
-            isMe = "*";
-            localRoomUser = roomUsers[key];
-            // console.log("key isMe " + key);
-         }
-         const value = roomUsers[key];
-         // console.log("roomUsers key:value: " + key + " " + value); 
-         
-      //   $('#users').prepend($('<button class=\x22btn\x22 style=\x22margin: 5px 5px 5px 5px;\x22><h4><strong>').text( value ).append("</strong></h4></button>"));
-         if (value.includes("~")) {
-            let split = value.split("~"); //color is appended to username
-            split[0] = split[0].replace("_", " ");
-            roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
-            let u = {};
-            u.name = split[0];
-            u.color = split[1];
+      // let usercount = 0;
+  
+            var keys = Object.keys(roomUsers);
+            let userCount = keys.length;
+      //       let simpleUsers = [];
+      //       for(var i=0; i<keys.length; i++){
+      //          var key = keys[i];
+      //          var isMe = "";
+      //          // console.log(key, roomUsers[key]);
+      //          if (key === socket.id) {
+      //             isMe = "*";
+      //             localRoomUser = roomUsers[key];
+      //             // console.log("key isMe " + key);
+      //          }
+      //          const value = roomUsers[key];
+               
+      //          if (value.includes("~")) {
+      //             let split = value.split("~"); //color is appended to username
+      //             split[0] = split[0].replace("_", " ");
+      //             roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
+      //             let u = {};
+      //             u.name = split[0];
+      //             u.color = split[1];
 
-            simpleUsers.push(u);
-         } else {
-            roomUsersString += value + ", ";
-         } 
+      //             simpleUsers.push(u);
+      //          } else {
+      //             roomUsersString += value + ", ";
+      //          } 
+      //          usercount++;
+      //       }
 
-         // if (usercount == 0) { 
-         //    simpleUsers = simpleUsers + value;  
-         // } else {
-         //    simpleUsers = simpleUsers + ", " + value;
-         // }
-         usercount++;
-      }
+      //       roomUsersString = roomUsersString.substring(0, roomUsersString.length - 2); //trim last comma and trailing space
+      //       roomUsersString = usercount + " users connected: " + roomUsersString;
 
-      roomUsersString = roomUsersString.substring(0, roomUsersString.length - 2); //trim last comma and trailing space
-      roomUsersString = usercount + " users connected: " + roomUsersString;
+      const roomUsersString = ReturnRoomUsersString(roomUsers);
       // console.log(roomUsersString);
       $('#users').html(roomUsersString);
       stringRoomUsers = roomUsersString;
-
-      if (usercount > 0) {
+      UpdatePlayerAvatars(roomUsers, roomUsersString);
+      if (userCount > 0) {
          const playerHudEl = document.getElementById("player_hud");
          if (playerHudEl) {
             if (playerHudEl.components.player_hud) {
-            playerHudEl.components.player_hud.ShowConnectedUsersAndHide(usercount, simpleUsers);
+            playerHudEl.components.player_hud.ShowConnectedUsersAndHide(userCount, simpleUsers);
             }
          }
       }
@@ -2617,7 +2602,8 @@ if (settings && !socket) {
             // pAvatar.setAttribute('position', posX + " " + posY + " " + posZ);
             // pAvatar.setAttribute('rotation', rotX + " " + rotY + " " + rotZ);
          } else {
-            UpdatePlayerAvatars(roomUsers);
+                  const roomUsersString = ReturnRoomUsersString(roomUsers);
+            UpdatePlayerAvatars(roomUsers, roomUsersString);
          }
       } else {
          const avatarString = "avatar_" + socketID;
@@ -2631,7 +2617,8 @@ if (settings && !socket) {
                MoveAvatarEvent(avatarData);
             }
          // } else {
-            UpdatePlayerAvatars(roomUsers);
+            const roomUsersString = ReturnRoomUsersString(roomUsers);
+            UpdatePlayerAvatars(roomUsers, roomUsersString);
          }
 
       }
@@ -2647,7 +2634,8 @@ if (settings && !socket) {
 
    socket.on('disconnect', function() {
       console.log("disconnect event! " + socket + "connected user count is now " + roomUsers.length);
-      UpdatePlayerAvatars(roomUsers);
+      const roomUsersString = ReturnRoomUsersString(roomUsers);
+      UpdatePlayerAvatars(roomUsers, roomUsersString);
    });
    socket.on('user left', function(id) {
       console.log("user left with socket id " + id + " vs roomUsers " + JSON.stringify(roomUsers));
@@ -2655,6 +2643,43 @@ if (settings && !socket) {
 
    });
 } //InitSocket end
+
+export function ReturnRoomUsersString(roomUsers) {
+      
+   let roomUsersString = "";
+   let usercount = 0;
+   var keys = Object.keys(roomUsers);
+   let simpleUsers = [];
+   for(var i=0; i<keys.length; i++){
+      var key = keys[i];
+      var isMe = "";
+      // console.log(key, roomUsers[key]);
+      if (key === socket.id) {
+         isMe = "*";
+         localRoomUser = roomUsers[key];
+         // console.log("key isMe " + key);
+      }
+      const value = roomUsers[key];
+      
+      if (value.includes("~")) {
+         let split = value.split("~"); //color is appended to username
+         split[0] = split[0].replace("_", " ");
+         roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
+         let u = {};
+         u.name = split[0];
+         u.color = split[1];
+
+         simpleUsers.push(u);
+      } else {
+         roomUsersString += value + ", ";
+      } 
+      usercount++;
+   }
+
+   roomUsersString = roomUsersString.substring(0, roomUsersString.length - 2); //trim last comma and trailing space
+   roomUsersString = usercount + " users connected: " + roomUsersString;
+   return roomUsersString;
+}
 // } //end if settings.hideAvatars
 function MoveElement(id,posRotObj) { //jesjus wweeeeped//nopr
    var element = document.getElementById(id);
@@ -2912,7 +2937,7 @@ export function Disconnect() {
    // document.querySelector("avatar").style.visibility = "hidden";
 }
 
-function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, just make this a component function, to avoid creating a-entities outside of aframe
+function UpdatePlayerAvatars(roomUsers, stringRoomUsers) { //aframe only, need to flex.. //no, just make this a component function, to avoid creating a-entities outside of aframe
    console.log("tryna UpdatePlayerAvatars" + JSON.stringify(roomUsers));
    
    //////// hrm aframe mode, DEPRECATED
@@ -2987,6 +3012,7 @@ function UpdatePlayerAvatars(roomUsers) { //aframe only, need to flex.. //no, ju
 
                
          }
+         // UpdateRoomUsers(stringRoomUsers);
       }
     
       // var dupeCheck = "";

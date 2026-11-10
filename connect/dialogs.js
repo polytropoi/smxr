@@ -5,7 +5,7 @@ import { fancyTimeFormat, fancyTimeString, youtubeIsPlaying, TransportPlayButton
 import { dequip_event, equip_inventory_object_event, drop_inventory_object_event, timedEventsListenerMode, timeKeysData, tkStarttimes, 
         PauseIntervals, SetTimedEventsListenerMode, SetTimeKeysData, SetPrimaryAudioEventsData, InitAudioViz, SendLocationEvent } from "./events.js";
 import { settings, profile } from "./settings.js";
-import { eventEl } from "./events.js";
+// import { eventEl } from "./events.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
   userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   GoToNext, GoToPrevious, CreateLocationAframe, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
@@ -16,7 +16,7 @@ import { room, lerp, sceneLocations, localData, ReturnLocationTable,
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "./indexedDb.js";
 
 
-
+let eventEl = document.getElementById("eventEl");
 export let showDialogPanel = false;
 let dialogInitialized = false;
 

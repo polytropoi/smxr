@@ -1,19 +1,22 @@
 
 import * as THREE from 'three';
 
-import { userData, room, avatars, roomUsers } from '../../../connect/connect.js';
+import { userData, room, avatars, roomUsers, ReturnRoomUsersString } from '../../../connect/connect.js';
 
 import { activeObjex, LoadModel } from './wgpu_locations.js';
 
-import { scene } from './wgpu_main.mjs';
-import { eventEl } from '../../../connect/events.js';
+import { scene, loadingHeader } from './wgpu_main.mjs';
+// import { eventEl } from '../../../connect/events.js';
 
+import { StartPopup } from './wgpu_ui.js';
 export let avatarCount = 0; //extant avatars, should be roomUsersCount - 1
 export let roomUsersCount = 0; //i.e. socket connections, from connect.js
 // export let avatars = {}
 // eventEl.addEventListener('avatar-event', AvatarEvent); //no workie from here?!?
+let eventEl = document.getElementById("eventEl");
 eventEl.addEventListener('avatar-event', AvatarEvent);
 
+let firstTime = true;
 
 function RemoveAvatarByName(name) {
 
@@ -35,7 +38,17 @@ function RemoveAvatarByName(name) {
     }
 }
 
+export function UpdateRoomUsers () {
+    // if (firstTime) {
+    //     firstTime = false;
+        const roomUserString = ReturnRoomUsersString(roomUsers);
+        StartPopup(loadingHeader, roomUserString, true);	
+    // }       
+}
+
 export async function AvatarEvent(event) { //
+
+
     console.log("gotsa avatarEvent " + JSON.stringify(event.details));
     
     if (event.details.type == "create") {
@@ -44,6 +57,7 @@ export async function AvatarEvent(event) { //
         if (!avatars[avatar_id]) {
             avatars[avatar_id] = event.details;
             const model = await LoadModel('https://servicemedia.s3.amazonaws.com/assets/models/avatar1c.glb');
+            console.log("tryna set avatar color " + event.details.color);
             const material = new THREE.MeshStandardMaterial( { color: event.details.color } ); //color is passed in socket handshake, and appended to username
             const avatarModel = model.scene;
             material.needsUpdate = true;
@@ -62,8 +76,9 @@ export async function AvatarEvent(event) { //
 
             roomUsersCount = Object.keys(roomUsers).length;
             avatarCount = Object.keys(avatars).length;
-            console.log("created avatar with ID " + avatar_id + " for roomUsers " + roomUsersCount + " vs avatarCount " + avatarCount);
+            console.log(event.details.color  + " avatar with ID " + avatar_id + " for roomUsers " + roomUsersCount + " vs avatarCount " + avatarCount);
            
+            UpdateRoomUsers(roomUsers);
             
             // avatars[avatar_id].sceneAvatar = new SceneAvatar(avatar_id);
         } else {
@@ -93,6 +108,10 @@ export async function AvatarEvent(event) { //
                 console.log("caint find no avatarModel for " +avatar_id);
             }
         }
+    } else if (event.details.type == "update room users") {
+        // StartPopup(loadingHeader, stringRoomUsers, true);
+        UpdateRoomUsers(event);
+
     }
 
 }

@@ -1,6 +1,7 @@
 
 import { sceneLocations, GoToNext, GoToPrevious, videoEl, localData } from "../../connect/connect.js";
 import { primaryAudioEl, youtubeIsPlaying, primaryAudioHowl, MediaTimeUpdate, currentAudioFileName, fancyTimeFormat, updatePrimaryTransportSlider} from "../../connect/media.js";
+import { StartPopup } from "../platforms/wgpu/wgpu_ui.js";
 import { LoadPrimaryAudioHowl } from "./media.js";
 import { settings } from "./settings.js";
 let timeKeysIndex = 0;
@@ -27,8 +28,11 @@ export let sequenceInt = -1;
  let duration, timeString, listenerInterval, seek;
  export let percentComplete;
 
-export let eventEl = document.createElement("div"); //reuse for various events above
-eventEl.id = "eventEl";
+// export let eventEl = document.createElement("div"); //reuse for various events above
+// eventEl.id = "eventEl";
+
+let eventEl = document.getElementById("eventEl");
+
 
 export let selectedPosition = {};
 export let timeKeysData = {};
@@ -55,6 +59,13 @@ export function DeleteAvatarEvent(avatarID) {
 export function MoveAvatarEvent (avatarData) { //caught in wgpu_inventory.js
       avatar_event.details = avatarData;
       eventEl.dispatchEvent(avatar_event);
+}
+
+export function UpdateRoomUsers(roomUserString) {
+   avatar_event.details = {'type': 'update room users', 'stringRoomUsers': roomUserString};
+   // avatar_event.details = roomUserString;
+   eventEl.dispatchEvent(avatar_event);
+   // console.log("roomUsersString : " + roomUserString);
 }
 
 export function SetSequenceInt (int) { //called elsewhere to limit loop depending on what is using it (skyboxes, poi locations, etc.)

@@ -2779,7 +2779,7 @@ wgpu_router.get('/:_id', function (req, res) {
                             
                             
                             "<div id=\x22hic_content\x22 class=\x22hic_content_trans\x22></div>" +
-                            
+                            "<div id=\x22eventEl\x22></div>" +
                             
                     "</body>\n" +
                 

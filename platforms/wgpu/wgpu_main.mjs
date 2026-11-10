@@ -15,8 +15,8 @@
 
 	import { LoadPrimaryAudioHowl, PlayTriggerWithTag, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 	import { settings } from '../../../connect/settings.js';
-	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
-	import { userData, stringRoomUsers } from '../../../connect/connect.js';
+	// import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
+	import { userData, stringRoomUsers, mySocketID } from '../../../connect/connect.js';
 
 	import { InitPathfinding, agents } from './wgpu_nav.js';
 
@@ -49,13 +49,13 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgpu_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData, InitScenePictures } from './wgpu_media.js';
+	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData, InitSceneMedia } from './wgpu_media.js';
 	
 	import { equipOnLoadEvent, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 
 	// import { splatObjex, InitSplats } from './wgpu_splats.js'
 
-	export let splatObjex = []; //InitSplats;
+
 
 	// if (settings && settings.sceneTags && settings.sceneTags.includes("splat")) {
 	// 	// const splatObjex, InitSplats = await import { splatObjex, InitSplats } from './wgpu_splats.js'
@@ -71,20 +71,12 @@
 	
 	import { InitSuperSonic, SynthHit, synthKeys, SynthKeys, superSonicLoaded, synthTransports } from './wgpu_synths.js';
 
-
+	const eventEl = document.getElementById("eventEl");
 	export let scene;
 
 
-	export async function LoadConditionals() {
-		//hrm/./
-	}
 
-	// let raycastHitAgent;
-	// let isDragging = false;
-	// let previousMousePosition = {
-	// 	x: 0,
-	// 	y: 0
-	// };
+
 	let stats, pivot;
 	// let mixer, objects;
 	export let water;// waterLayer0, waterLayer1;
@@ -123,6 +115,8 @@
 	export let loadingHeader = "";
 	export let sceneIsReady = false;
 	
+	export let splatObjex = []; //InitSplats;
+	
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
 
 	export function StartButton() {
@@ -144,13 +138,13 @@
 		// renderer = new THREE.WebGPURenderer({antialias:true, canvas: three_canvas});
 		renderer = new THREE.WebGPURenderer({antialias:true, canvas: three_canvas});
 		// renderer = new THREE.WebGPURenderer( { antialias: true } );
-				// renderer.setPixelRatio( window.devicePixelRatio );
-				// renderer.setSize( window.innerWidth, window.innerHeight );
-				// renderer.setAnimationLoop( animate );
-				// renderer.toneMapping = THREE.LinearToneMapping;
-				// renderer.toneMappingExposure = 0.4;
+		// renderer.setPixelRatio( window.devicePixelRatio );
+		// renderer.setSize( window.innerWidth, window.innerHeight );
+		// renderer.setAnimationLoop( animate );
+		// renderer.toneMapping = THREE.LinearToneMapping;
+		// renderer.toneMappingExposure = 0.4;
 
-		three_canvas.setAttribute('layoutsubtree', 'true');
+		three_canvas.setAttribute('layoutsubtree', 'true'); //for HIC, eventually
 
 		// three_canvas.addEventListener('click', (event) => {
 		// event.stopPropagation(); // Prevents the click from bubbling up to parent containers
@@ -224,27 +218,15 @@
 
 		sceneIsReady = true;
 		if (equipOnLoadEvent) {
-
-			// const eventDetails = {};
-			// eventDetails.objectID = equipOnLoadEvent;
-			// eventDetails.onLoad = true;
-			// console.log('gots something to equip on load ' + eventDetails.objectID);
-			EquipInventoryCheck(equipOnLoadEvent);
-			// equip_inventory_object_event.details = eventDetails;
-			// eventEl.dispatchEvent(equip_inventory_object_event);
+			
+		EquipInventoryCheck(equipOnLoadEvent);
 
 		}
-		// initSystems();
 	}
 
 
 
 	export async function InitSystems() { 
-
-		// if (navmesh) {
-		// 	await InitPathfinding(); //creates agents and scatters them on navmesh, then adds kinematic rigidbodies
-		// 	// AssignModelsToAgents();
-		// }
 
 		StartPopup(loadingHeader, 'Loading Static Objects....', false);
 
@@ -381,7 +363,7 @@
 			InitPictureGroups();
 		// }
 		InitSceneText();
-		InitScenePictures();
+		InitSceneMedia();
 		InitVideoGroups();
 		if (settings.sceneGroups) {
 			console.log("settings.sceneGroups " + settings.sceneGroups.length);
@@ -480,10 +462,7 @@
 					stats.dom.style.position = 'absolute';
 					stats.dom.style.bottom = '20px';
 					stats.dom.style.right = 'auto';
-			// document.body.appendChild(stats.domElement);
-			// stats.domElement.style.right = 'auto';
-			// statsContainer.domElement.style.left = '0px'; // Positioned at top-right
-			// statsContainer.domElement.style.bottom = '20px';
+			
 
 			}
 			if (settings && settings.sceneWater && settings.sceneWater != 0 && settings.sceneWater.name != "") {
@@ -665,15 +644,18 @@
 			// if (splatObjex.length) {
 				// loadingString = "<h1>" + loadingHeader + "</h1><br><h4>Spark Lib....<h4>";
 				// ShowPopup(null, loadingString);
-				StartPopup(loadingHeader, 'Loading SparkJS...', false);
+				// StartPopup(loadingHeader, 'Loading SparkJS...', false);
 				// await InitSpark();
 				// surface = surfaceObjex[0];
 				StartPopup(loadingHeader, 'Loading Gaussian Splats', false);
 				InitSplats();
-			// } 
+				if (mySocketID) {
+					// await stringRoomUsers;
+				}
+			// }
 
 		} else {
-			StartPopup(loadingHeader, stringRoomUsers, true);	
+			StartPopup(loadingHeader, "Ready!", true);	
 			const startButton = startPop.querySelector("#startButton");
 			if (startButton) {
 				console.log("startButton found!");

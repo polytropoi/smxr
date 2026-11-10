@@ -26,7 +26,7 @@ import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, n
 import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding, pathfinding } from './wgpu_nav.js';
 import { instance, modelViewProjection, color, float, range, modelScale } from 'three/tsl';
 import { UpdateModdedLocations, mods } from '../../connect/settings.js';
-import { eventEl, location_event } from '../../connect/events.js';
+// import { eventEl, location_event } from '../../connect/events.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
 
 import { lookAtCameraObjects } from './wgpu_ui.js';
@@ -37,6 +37,7 @@ import { PsychNoiseMaterial } from './wgpu_fx.js';
 
 // export let localData = {};
 
+const eventEl = document.getElementById("eventEl");
 
 export let locations = {};
 

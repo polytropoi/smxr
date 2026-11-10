@@ -1346,8 +1346,9 @@ export function mouseRaycast(e) {
                     // console.log("mouse raycast hit " + JSON.stringify(lastRaycastHitPosition));
             } else {
                 selectedObjects.length = 0;
-                // lastRaycastHit = null;
+                lastRaycastHit = null;
                 lastRaycastHitObject = null;
+                 lastHitObjectName = null;
                 raycastHitAgent = null;
             
             }
@@ -1362,6 +1363,8 @@ export function mouseRaycast(e) {
                 lastRaycastHit = null;
                 lastRaycastHitObject = null;
                 raycastHitAgent = null;
+                lastHitObjectName = null;
+                
             }
             pointerGizmo.visible = false;
                     
@@ -1457,6 +1460,9 @@ export function onMouseDown(event) { // on threejs object
         const tagData = avatars[lastHitObjectName];
         console.log("avatar tags " + JSON.stringify(tagData));
         if (tagData) {
+            lastHitObjectName = null;
+            lastRaycastHitObject = null;
+            lastRaycastHit = null;
             console.log("clicked on " + lastHitObjectName + event.clientX + " " + event.clientY);
         //    ThreeDeeText(tagData.name,1,lastRaycastHitObject.parent, lastRaycastHitPosition, lastRaycastHitDistance, null, .5);
             const avatarHtmlString = "<h4>Name: <span style=\x22color:"+tagData.color+"\x22>" + tagData.name + "</span></h4>" +
@@ -1465,9 +1471,12 @@ export function onMouseDown(event) { // on threejs object
             tagData+ "\x22 data-type=\x22singleUserChat\x22 class=\x22yesButton\x22>Send Message</button>";
             // ShowHTMLPopup(null, avatarHtmlString, null, null, null);
             ShowHTMLPopup(event, avatarHtmlString, lastRaycastHitPosition, lastRaycastHitObject, lastRaycastHitDistance);
-            lastHitObjectName = "";
+           
             return;
         }
+        lastHitObjectName = null;
+        lastRaycastHitObject = null;
+        lastRaycastHit = null;
     }
 
     if (event.target.id == "chat_input") {
